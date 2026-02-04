@@ -788,3 +788,24 @@
 - [/] **Documentation**
     - [ ] Update master logbooks
     - [ ] Create walkthrough
+# Task: Implement Melody Badge Logic (#60)
+
+- [x] **Planning**
+    - [x] Research `has_melody` calculation in `SongForm.tsx`
+    - [x] Create implementation plan
+    - [x] Verify existing behavior on local dev
+- [x] **Execution**
+    - [x] Update `SongForm.tsx` to dynamically set `has_melody`
+    - [x] Update any other relevant components (e.g., song list fetching)
+    - [x] Verify fix visually in library and detail views
+- [/] **Documentation**
+    - [x] Update master logbooks
+    - [x] Create walkthrough
+    - [ ] Create Pull Request
+
+# Task: Nina Urku Media Integration
+- [x] Analyze category page structure and single page extraction logic
+- [x] Create and run scraper for SoundCloud URLs (Found 34)
+- [x] Update scraper to include YouTube ID extraction (Found 21+)
+- [x] Generate and append SQL UPDATE seeds to `04_songs_nina_urku.sql`
+- [x] Verify media linking for "Abuelito Tatewari" and "Abuelo (adida, adide)"
