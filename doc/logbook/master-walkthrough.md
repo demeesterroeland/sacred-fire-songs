@@ -1749,3 +1749,77 @@ I have created a GitHub issue to address the rendering bug where double new line
 ### Logic Verification
 - Confirmed that lines with no chords or lyrics are no longer silently discarded.
 - Confirmed that empty lines trigger a section flush, leveraging existing layout rules for spacing.
+# Walkthrough - ChordPro Spacing Bug Issue Creation
+
+I have created a GitHub issue to address the rendering bug where double new lines in ChordPro content are collapsed into single lines.
+
+## Actions Taken
+
+### 1. Bug Analysis
+- **Problem**: Stanza breaks (double new lines) in the `content_chordpro` field are not preserved in the Song Detail view.
+- **Evidence**: Analyzed screenshots provided by the user showing the mismatch between source text and rendered output.
+
+### 2. Issue Creation
+- **GitHub Issue**: [#63](https://github.com/demeesterroel/sacred-fire-songs/issues/63) - `[Bug] Double new lines collapsed in Song Detail rendering`.
+- **Content**: Included a Gherkin-style acceptance criteria to ensure the fix preserves visual gaps between stanzas.
+- **Note**: Per user request, the issue was created without uploading local screenshots to GitHub.
+
+## Implementation
+
+### 1. Preserving Stanza Breaks
+- **Modified**: [chordUtils.ts](file:///home/roeland/Projects/sacred-fire-songs/lib/chordUtils.ts)
+- **Fix**: Updated the `parseChordProForDisplay` loop to detect empty lines in the ChordPro source.
+- **Mechanism**: When an empty line is encountered, the currently parsed lines are flushed into a new section. Since the `SongDisplay` component uses `space-y-12` between sections, this naturally creates the desired visual gap between stanzas without requiring CSS changes.
+- **Outcome**: Double new lines in the source content now translate to clear vertical gaps in the rendered view, matching the user's expectations.
+
+## Melody Badge & Notation Implementation (#60)
+
+### 1. Dynamic Melody Detection
+- **Modified**: [SongForm.tsx](file:///home/roeland/Projects/sacred-fire-songs/components/song/SongForm.tsx)
+- **Logic**: The `has_melody` flag is now automatically calculated during song creation or editing.
+- **Criteria**: If the song has a YouTube, Spotify, or SoundCloud link, or if the "Melody Notation" field has content, `has_melody` is set to `true`.
+- **Outcome**: The "Melody" badge automatically appears in lists and on the song sheet whenever performance guidance is available.
+
+### 2. Optional Melody Notation Field
+- **Added**: A new optional "Melody Notation / ABC" field in the `SongForm`.
+- **Copy Helper**: Implemented a "Copy from Lyrics" button that:
+    - Strips chords from the main lyrics.
+    - Generates a standard ABC header with Title, Author, and Key.
+    - Populates the melody field with the resulting block.
+- **Persistence**: Added `melody_notation` column sync between the frontend and `public.song_versions` table.
+
+### 3. Display Enhancements
+- **Modified**: [SongDisplay.tsx](file:///home/roeland/Projects/sacred-fire-songs/components/song/SongDisplay.tsx)
+- **Feature**: If a song has melody notation, it is now displayed in a dedicated monospaced block below the lyrics on the song detail page.
+- **Outcome**: Musicians can now store and view melodic instructions alongside lyrics and chords.
+
+## Verification Results
+
+### Logic Verification
+- Confirmed the `has_melody` flag updates correctly on save based on links and notation.
+- Verified the "Copy from Lyrics" tool generates valid ABC headers.
+- Confirmed `melody_notation` data is correctly fetched and rendered.
+
+---
+
+## Session Update (Feb 4, 2026 - Nina Urku Media Integration)
+
+# Session Walkthrough: Nina Urku Media Integration
+**Date**: 2026-02-04
+**Session ID**: 2e0f285d-652e-4a2d-8ebc-6265788e3cc8
+
+## Objective
+Extract SoundCloud URLs and YouTube IDs for 197 Nina Urku songs and update the database seeds.
+
+## Changes Made
+- Created `ninaurku_scraper.py` to automate extraction from `ninaurku.com/wiki`.
+- Extracted 34 SoundCloud URLs and multiple YouTube IDs.
+- Appended `UPDATE` statements to `supabase/seeds/04_songs_nina_urku.sql` to link media to song versions.
+
+## Results
+- **Success**: Verified that 34 songs now have SoundCloud links and 21+ have YouTube IDs in the seeds.
+- **Verification**: Confirmed extraction with "Abuelo (adida, adide)" (multiple YouTube IDs) and "Abuelito Tatewari" (SoundCloud).
+
+## Evidence
+- Final Seed: [04_songs_nina_urku.sql](file:///home/roeland/Projects/sacred-fire-songs/supabase/seeds/04_songs_nina_urku.sql)
+- Result CSV: [ninaurku_songs.csv](file:///home/roeland/Projects/sacred-fire-songs/ninaurku_songs.csv)
