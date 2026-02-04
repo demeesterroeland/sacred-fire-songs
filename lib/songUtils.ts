@@ -11,6 +11,7 @@ export interface Song {
     hasChords?: boolean;
     hasMelody?: boolean;
     content?: string; // ChordPro content for searching
+    melodyNotation?: string;
     createdAt: string;
     categories: {
         name: string;
@@ -74,7 +75,7 @@ export const fetchSongs = async (limit?: number) => {
         .from('compositions')
         .select(`
             *,
-            song_versions(key, content_chordpro),
+            song_versions(key, content_chordpro, melody_notation),
             song_category_map (
               categories (
                 name,
@@ -119,6 +120,7 @@ export const fetchSongs = async (limit?: number) => {
             author: item.original_author || "Unknown",
             songKey: version?.key || null,
             content: version?.content_chordpro || "",
+            melodyNotation: version?.melody_notation || "",
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             isPublic: (item as any).is_public ?? true,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any

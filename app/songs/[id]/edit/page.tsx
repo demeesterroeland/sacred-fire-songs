@@ -31,7 +31,8 @@ const fetchSongForEdit = async (id: string) => {
             tuning,
             youtube_url,
             spotify_url,
-            soundcloud_url
+            soundcloud_url,
+            melody_notation
           )
         `)
         .eq('id', id)
@@ -89,6 +90,7 @@ export default function EditSongPage() {
         youtubeLink: song.song_versions[0]?.youtube_url || '',
         spotifyLink: song.song_versions[0]?.spotify_url || '',
         soundcloudLink: song.song_versions[0]?.soundcloud_url || '',
+        melodyNotation: song.song_versions[0]?.melody_notation || '',
         isPublic: song.is_public ?? true
     };
 

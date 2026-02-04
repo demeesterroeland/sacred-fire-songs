@@ -35,7 +35,8 @@ const fetchSong = async (id: string) => {
             tuning,
             youtube_url,
             spotify_url,
-            soundcloud_url
+            soundcloud_url,
+            melody_notation
           ),
           song_category_map (
             categories (
@@ -291,7 +292,10 @@ export default function SongDetailPage() {
 
                     {/* Song Content (Lyrics/Chords) */}
                     <div className="pt-4 pb-12">
-                        <SongDisplay content={currentVersion?.content_chordpro || ''} />
+                        <SongDisplay
+                            content={currentVersion?.content_chordpro || ''}
+                            melodyNotation={currentVersion?.melody_notation || ''}
+                        />
                     </div>
 
                     {/* Player Section */}

@@ -22,6 +22,7 @@ type SongFormData = {
     youtubeLink: string;
     spotifyLink: string;
     soundcloudLink: string;
+    melodyNotation: string;
     isPublic: boolean;
 };
 
@@ -52,6 +53,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
             youtubeLink: initialData?.youtubeLink || '',
             spotifyLink: initialData?.spotifyLink || '',
             soundcloudLink: initialData?.soundcloudLink || '',
+            melodyNotation: initialData?.melodyNotation || '',
             isPublic: initialData?.isPublic ?? true,
         }
     });
@@ -162,10 +164,6 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
 
             const { title, author, key, capo, cleanContent } = parseChordPro(text);
 
-            // Only update fields if we found something, to be safe? 
-            // Actually spec says "if it contains title and author", but let's be generous.
-            // If we found specific metadata, populate it.
-
             if (title) {
                 setValue('title', title);
             }
@@ -181,25 +179,23 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
 
             if (key || capo) expandMetadata(true);
 
-            // For content, we insert the CLEANED content at the cursor position?
-            // Or replace entire content? 
-            // The user story says "populate the corresponding fields". 
-            // Usually if I paste a whole song file, I expect it to replace or fill the empty box.
-            // Let's assume standard behavior: insert clean text at cursor.
-
-            // To programmatically insert at cursor is complex with React Hook Form + Textarea.
-            // Simplest path for "Import Scenario" is usually replacing content or just appending.
-            // Given the requirement "populate the corresponding fields", let's assume specific "Import" intent.
-            // But replacing the user's existing work on a paste might be aggressive.
-            // Let's replace the pasted text with the clean text in the event loop.
-
-            // Actually, `e.preventDefault()` stops the paste. We can just set the value if it's empty, 
-            // or we have to manually insert.
-            // Let's try to just setValue for now which is safer for this specific 'import' feature.
-            // Use case: User is pasting a whole file.
-
             setValue('content', cleanContent);
         }
+    };
+
+    const handleCopyLyricsToMelody = () => {
+        const content = watch('content') || '';
+        const title = watch('title') || '';
+        const author = watch('author') || '';
+        const key = watch('key') || '';
+
+        // Strip chords [Am] from content
+        const cleanLyrics = content.replace(/\[[^\]]*\]/g, '').trim();
+
+        // Generate ABC Header
+        const abcHeader = `X:1\nT: ${title}\nM:4/4\nC: ${author || 'Traditional'}\nK: ${key || 'C'}\n\n`;
+
+        setValue('melodyNotation', abcHeader + cleanLyrics);
     };
 
 
@@ -216,7 +212,8 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                         original_author: data.author,
                         owner_id: user?.id,
                         is_public: data.isPublic,
-                        has_chords: hasChords(data.content)
+                        has_chords: hasChords(data.content),
+                        has_melody: !!(data.youtubeLink || data.spotifyLink || data.soundcloudLink || data.melodyNotation)
                     })
                     .select()
                     .single();
@@ -236,6 +233,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                         youtube_url: data.youtubeLink,
                         spotify_url: data.spotifyLink,
                         soundcloud_url: data.soundcloudLink,
+                        melody_notation: data.melodyNotation,
                         contributor_id: user?.id
                     });
 
@@ -268,6 +266,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                         original_author: data.author,
                         is_public: data.isPublic,
                         has_chords: hasChords(data.content),
+                        has_melody: !!(data.youtubeLink || data.spotifyLink || data.soundcloudLink || data.melodyNotation),
                     })
                     .eq('id', songId);
 
@@ -283,6 +282,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                         youtube_url: data.youtubeLink,
                         spotify_url: data.spotifyLink,
                         soundcloud_url: data.soundcloudLink,
+                        melody_notation: data.melodyNotation,
                     })
                     .eq('id', versionId);
 
@@ -553,6 +553,32 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                         />
                     </div>
                     {errors.content && <p className="text-red-400 text-sm">{errors.content.message}</p>}
+                </div>
+
+                {/* Melody Annotation Section */}
+                <div className="space-y-4 mt-8">
+                    <div className="flex justify-between items-end pb-2">
+                        <div>
+                            <h3 className="text-white text-lg font-bold leading-tight tracking-tight">Melody Notation (Optional)</h3>
+                            <p className="text-[#a19eb7] text-xs font-normal mt-1">Add ABC notation or melody text for performance guidance.</p>
+                        </div>
+                        <button
+                            type="button"
+                            onClick={handleCopyLyricsToMelody}
+                            className="text-primary text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 hover:text-red-400 transition-colors"
+                        >
+                            <span className="material-symbols-outlined text-sm">content_copy</span>
+                            Copy from Lyrics
+                        </button>
+                    </div>
+
+                    <div className="bg-[#1d1c26] border border-[#3f3d52] rounded-lg focus-within:ring-2 focus-within:ring-primary focus-within:border-primary transition-all">
+                        <textarea
+                            {...register('melodyNotation')}
+                            className="w-full bg-transparent p-4 min-h-[200px] text-gray-300 font-mono text-sm resize-y focus:outline-none"
+                            placeholder="X:1\nT: Song Title\n..."
+                        />
+                    </div>
                 </div>
 
                 {/* Links Section */}

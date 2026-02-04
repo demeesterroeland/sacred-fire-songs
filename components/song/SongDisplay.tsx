@@ -4,9 +4,10 @@ import { parseChordProForDisplay, ChordProSection, ChordProLine, ChordProItem } 
 
 interface SongDisplayProps {
     content: string;
+    melodyNotation?: string;
 }
 
-export default function SongDisplay({ content }: SongDisplayProps) {
+export default function SongDisplay({ content, melodyNotation }: SongDisplayProps) {
     const sections: ChordProSection[] = parseChordProForDisplay(content);
 
     return (
@@ -57,6 +58,16 @@ export default function SongDisplay({ content }: SongDisplayProps) {
                     </div>
                 </div>
             ))}
+
+            {/* Melody Notation Section */}
+            {melodyNotation && (
+                <div className="pt-8 border-t border-gray-800/30">
+                    <h3 className="text-xs font-black text-gray-600 uppercase tracking-[0.2em] mb-4">Melody Notation</h3>
+                    <div className="bg-black/20 rounded-xl p-6 border border-white/5 font-mono text-sm text-gray-400 whitespace-pre-wrap leading-relaxed">
+                        {melodyNotation}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
