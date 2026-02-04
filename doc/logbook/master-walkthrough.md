@@ -1639,3 +1639,22 @@ Executed critical database operations on the Production environment to ensure da
 
 > [!IMPORTANT]
 > The Production library now consists of over 200 high-quality songs with correct metadata, ready for the user's final review.
+
+---
+
+## Session: Feb 4, 2026 (Production Sync & Reset)
+### Production Database Reset and Synchronization
+- Fixed `uuid-ossp` and `pgcrypto` extension schema issues in migrations.
+- Provided explicit `extensions.` schema prefixes in seed files for remote compatibility.
+- Added batch markers (`-- Batch x of 11`) to `04_songs_nina_urku.sql` for manual import assistance.
+- Successfully executed `supabase db reset --linked` on production.
+- Verified final production counts: 221 compositions, 221 song versions, and 3 test profiles.
+
+---
+
+## Session: Feb 4, 2026 (Seed Refactor & Deterministic Visibility)
+### Song Visibility and Ownership Refactor
+- **Initial Songs**: Updated `03_songs_initial.sql` to set all 42 songs as private (`is_public = false`) and owned by the Member user.
+- **Nina Urku Songs**: Updated `04_songs_nina_urku.sql` to set all 179 songs as public (`is_public = true`) and owned by the Expert/Musician user.
+- **Removed Randomization**: Refactored `05_random_ownership.sql` and `06_check_chords_melody.sql` to remove all non-deterministic logic.
+- **Verification**: Executed `supabase db reset --linked` and confirmed counts: 179 public songs, 42 private songs, 221 total.

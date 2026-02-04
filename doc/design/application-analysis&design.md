@@ -108,7 +108,7 @@ The application is a **Progressive Web App (PWA)** optimized for mobile use duri
 * **Animations:** **Framer Motion** (Page transitions, micro-interactions).
 * **Backend:** **Supabase** (PostgreSQL, Auth, RLS).
 * **State Management:** **TanStack Query (React Query)** for server-state caching.
-* **Hosting:** **Vercel**.
+* **Hosting:** **Vercel**. Also investigate https://example.com  and  OVH and https://www.hostinger.com/ for VPS hosting in EU. And investigate https://coolify.io/ - opensource ALternative for vercel
 
 ### 6.2 Offline Strategy
 * **React Query:** Configured with `staleTime: 5 minutes` and `gcTime: 24 hours`.

@@ -725,3 +725,20 @@
     - [x] Apply Migration `20260201135800_add_icon_name_to_categories.sql` (Verified Already Applied)
     - [x] Execute Seed `06_random_chords_melody.sql`
     - [x] Execute Seed `05_random_ownership.sql` (Adjusted for Prod IDs)
+
+## Session Feb 4, 2026 (Production Sync & Database Reset)
+
+- [x] **Audit and Sync Production Songs**
+    - [x] Audit production songs against seed files
+    - [x] Batch `supabase/seeds/04_songs_nina_urku.sql` for easier dashboard import
+    - [x] Perform full production database reset and sync
+
+### Session Feb 4, 2026 (Seed Refactor & Deterministic Visibility)
+
+- [x] **Refactor Seed Data Visibility**
+    - [x] Identify user IDs and roles
+    - [x] Create implementation plan
+    - [x] Update `supabase/seeds/03_songs_initial.sql` (42 private songs)
+    - [x] Update `supabase/seeds/04_songs_nina_urku.sql` (179 public songs)
+    - [x] Remove randomization from `05_random_ownership.sql` and `06_check_chords_melody.sql`
+    - [x] Perform full database reset and verify counts (179 public / 42 private / 221 total)

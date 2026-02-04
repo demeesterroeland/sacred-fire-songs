@@ -1,5 +1,6 @@
 -- Enable necessary extensions
 create extension if not exists "uuid-ossp";
+create extension if not exists "pgcrypto";
 -- 1. Create ENUMs
 DO $$ BEGIN IF NOT EXISTS (
   SELECT 1
@@ -24,14 +25,14 @@ CREATE TABLE IF NOT EXISTS public.profiles (
 );
 -- CATEGORIES (Tags)
 CREATE TABLE IF NOT EXISTS public.categories (
-  id uuid default uuid_generate_v4() primary key,
+  id uuid default extensions.uuid_generate_v4() primary key,
   name text not null,
   type category_type not null,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 -- COMPOSITIONS (Parent Song)
 CREATE TABLE IF NOT EXISTS public.compositions (
-  id uuid default uuid_generate_v4() primary key,
+  id uuid default extensions.uuid_generate_v4() primary key,
   title text not null,
   original_author text,
   primary_language text default 'ES',
@@ -45,7 +46,7 @@ CREATE TABLE IF NOT EXISTS public.composition_categories (
 );
 -- SONG_VERSIONS (The actual playable content)
 CREATE TABLE IF NOT EXISTS public.song_versions (
-  id uuid default uuid_generate_v4() primary key,
+  id uuid default extensions.uuid_generate_v4() primary key,
   composition_id uuid references public.compositions(id) on delete cascade not null,
   version_name text default 'Standard',
   content_chordpro text not null,
@@ -60,7 +61,7 @@ CREATE TABLE IF NOT EXISTS public.song_versions (
 );
 -- SETLISTS
 CREATE TABLE IF NOT EXISTS public.setlists (
-  id uuid default uuid_generate_v4() primary key,
+  id uuid default extensions.uuid_generate_v4() primary key,
   owner_id uuid references public.profiles(id) on delete cascade not null,
   title text not null,
   description text,
@@ -69,7 +70,7 @@ CREATE TABLE IF NOT EXISTS public.setlists (
 );
 -- SETLIST ITEMS
 CREATE TABLE IF NOT EXISTS public.setlist_items (
-  id uuid default uuid_generate_v4() primary key,
+  id uuid default extensions.uuid_generate_v4() primary key,
   setlist_id uuid references public.setlists(id) on delete cascade not null,
   song_version_id uuid references public.song_versions(id) on delete cascade not null,
   order_index integer not null,
