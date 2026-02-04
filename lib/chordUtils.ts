@@ -96,6 +96,18 @@ export function parseChordProForDisplay(content: string): ChordProSection[] {
                 } else {
                     pendingLines.push(cleanLine);
                 }
+            } else {
+                // Empty line: treat as a section break to preserve stanza spacing
+                if (currentSection) {
+                    sections.push(currentSection);
+                    currentSection = null;
+                } else if (pendingLines.length > 0) {
+                    sections.push({
+                        type: 'none',
+                        lines: [...pendingLines]
+                    });
+                    pendingLines = [];
+                }
             }
         });
 

@@ -742,3 +742,49 @@
     - [x] Update `supabase/seeds/04_songs_nina_urku.sql` (179 public songs)
     - [x] Remove randomization from `05_random_ownership.sql` and `06_check_chords_melody.sql`
     - [x] Perform full database reset and verify counts (179 public / 42 private / 221 total)
+# Task: Refactor Seed Data Visibility
+
+- [/] **Planning**
+    - [x] Identify user IDs and roles
+    - [x] Create implementation plan
+- [x] **Execution: Initial Songs (Private/Member)**
+    - [x] Update `supabase/seeds/03_songs_initial.sql`
+- [x] **Execution: Nina Urku Songs (Public/Musician)**
+    - [x] Update `supabase/seeds/04_songs_nina_urku.sql`
+- [x] **Execution: Remove Randomization**
+    - [x] Refactor `supabase/seeds/05_random_ownership.sql`
+    - [x] Refactor `supabase/seeds/06_check_chords_melody.sql` (Melody detection enabled)
+- [x] **Verification**
+    - [x] Run local database reset
+    - [x] Verify composition counts by visibility
+    - [x] Verify owner assignments
+    - [x] Verify Library display on local dev
+- [x] **Staging & PR**
+    - [x] Resynchronize Git branches (switched to main)
+    - [x] Repair Staging Database link (ghost migrations)
+    - [x] Create GitHub PR for Seed Refactoring
+    - [x] Create GitHub Issue for Caching Problem (#62)
+# Task: Create Issue for ChordPro Spacing Bug
+
+- [x] **Planning**
+    - [x] Analyze bug report and screenshots
+    - [x] Create issue draft
+    - [x] Get user approval
+    - [x] Create issue on GitHub
+- [x] **Execution**
+    - [x] Create GitHub Issue via CLI (#63)
+    - [x] Clean up temporary files
+- [x] **Documentation**
+    - [x] Update master logbooks
+# Task: Fix ChordPro Stanza Spacing Bug
+
+- [x] **Planning**
+    - [x] Research current ChordPro rendering implementation
+    - [x] Create implementation plan
+    - [x] Verify bug with local dev server
+- [x] **Execution**
+    - [x] Implement fix for whitespace preservation
+    - [x] Verify fix visually in song detail view
+- [/] **Documentation**
+    - [ ] Update master logbooks
+    - [ ] Create walkthrough
