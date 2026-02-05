@@ -78,7 +78,7 @@ export function FinishRegistrationForm({
       <div className={cn("relative z-10 w-full max-w-[420px] bg-[#1c222d] md:border md:border-[#2d3545] md:rounded-3xl p-6 md:p-8 md:shadow-2xl transition-all duration-300", className)} {...props}>
         {/* Header */}
         <div className="flex flex-row md:flex-col items-center md:items-center gap-4 md:gap-0 mb-8 md:mb-10 mt-4 md:mt-0">
-          <div className="w-12 h-12 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-red-700 to-orange-600 flex items-center justify-center shadow-[0_0_20px_rgba(185,28,28,0.3)] ring-1 ring-white/10 md:mb-6 flex-shrink-0">
+          <div className="w-12 h-12 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-[#b91c1c] to-[#ea580c] flex items-center justify-center shadow-[0_0_20px_rgba(185,28,28,0.3)] ring-1 ring-white/10 md:mb-6 flex-shrink-0">
             <Flame className="text-white w-6 h-6 md:w-10 md:h-10 fill-current" />
           </div>
           <div className="text-left md:text-center">
@@ -88,18 +88,18 @@ export function FinishRegistrationForm({
 
         {/* Finish Registration Form */}
         <form onSubmit={handleFinishRegistration} className="space-y-6 md:space-y-8">
-          <div className="bg-[#141b24] border border-emerald-500/30 p-4 rounded-xl text-emerald-400 text-[15px] font-medium text-center mb-2 shadow-inner">
+          <div className="bg-[#141b24] border border-emerald-500/30 p-4 rounded-xl text-emerald-400 text-[15px] font-medium text-center mb-6 shadow-inner">
             Email successfully verified!
           </div>
 
           <div className="space-y-4">
-            <p className="text-[#8e99aa] text-sm text-center leading-relaxed font-medium">
+            <p className="text-[#8e99aa] text-sm text-center leading-relaxed">
               The smoke has cleared, and your invitation is now official.
               The circle awaits—tell us how we shall call you as you join us by the fire.
             </p>
           </div>
 
-          <div className="space-y-2">
+          <div className="space-y-1">
             <Label className="text-xs font-semibold text-white ml-1 tracking-wide uppercase opacity-70">What should we call you?</Label>
             <div className="relative group">
               <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5a657a] group-focus-within:text-[#d9481e] transition-colors pointer-events-none">
@@ -121,7 +121,7 @@ export function FinishRegistrationForm({
 
           <Button
             type="submit"
-            className="w-full h-auto bg-gradient-to-r from-[#d9481e] to-[#f45d1a] hover:brightness-110 active:scale-[0.98] text-white font-bold py-3.5 md:py-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-[0_4px_15px_rgba(217,72,30,0.4)] mt-2 disabled:opacity-50"
+            className="w-full h-auto bg-gradient-to-r from-[#d9481e] to-[#f45d1a] hover:brightness-110 active:scale-[0.98] text-white font-bold py-3.5 md:py-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-[0_4px_15px_rgba(217,72,30,0.4)] disabled:opacity-50"
             disabled={isLoading}
           >
             {isLoading ? "Finishing..." : "Finish Setup & Explore"}

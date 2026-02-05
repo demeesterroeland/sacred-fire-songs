@@ -108,7 +108,7 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true }: Us
             <div className="space-y-1">
               <Link href="/account/settings" className="flex items-center gap-3 p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors group">
                 <SlidersHorizontal className="w-4 h-4 group-hover:text-blue-400" />
-                <span className="text-sm font-medium">Personal Settings</span>
+                <span className="text-sm font-medium">Account Settings</span>
               </Link>
               <Link href="/songs?favorites=true" className="flex items-center gap-3 p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors group">
                 <Heart className="w-4 h-4 group-hover:text-red-400" />

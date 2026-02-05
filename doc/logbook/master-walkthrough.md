@@ -2129,3 +2129,22 @@ Migrated client-side data fetching to the server layer to eliminate skeleton loa
 - **Mockup**: Designed `screen4_settings.html` with a modern tabbed interface.
 - **Features**: Support for Avatar upload, Name changes, Email/Password management, Privacy toggles, and Data Export/Deletion.
 - **Sidebar Sync**: Integrated full site navigation into the settings mockup for UI consistency.
+
+---
+
+## Session Update (Feb 5, 2026 - Account Settings Refinements)
+
+### Account Settings Refinements
+Refined the user experience and fixed persistence issues on the Account Settings page.
+
+- **Fixed Persistence Bug**: Applied correct RLS policies to the `profiles` table to allow users to update their `full_name` and `avatar_url`.
+- **Avatar Upload**: Implemented full avatar upload functionality using Supabase Storage (new `avatars` bucket).
+- **Toast Styling**: Unified toast notifications with the Auth flow styling (centered, unstyled, emerald theme, no icons).
+
+#### Visual Verification
+
+![Final Toast Style](/home/roeland/.gemini/antigravity/brain/2e0f285d-652e-4a2d-8ebc-6265788e3cc8/toast_check_1770251971468.png)
+*The updated toast notification, centered and styled to match the Auth flow.*
+
+![Avatar Upload Recording](/home/roeland/.gemini/antigravity/brain/2e0f285d-652e-4a2d-8ebc-6265788e3cc8/final_toast_check_no_icon_top_center_1770251961913.webp)
+*Verification of the centered, icon-free toast message.*

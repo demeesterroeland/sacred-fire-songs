@@ -924,8 +924,13 @@
 - [x] Create `/auth/finish-registration` page
 - [x] Refine onboarding visuals (Embers, Alert style, Flame logo)
 - [x] Finalize onboarding copy ("Welcome at the Fire")
-- [ ] Design Account Settings mockup (`screen4_settings.html`) [/]
+- [x] Design Account Settings mockup (`screen4_settings.html`)
     - [x] Profile Tab (Removed Display Name, added Avatar controls)
     - [x] Account Tab (Email, Password, Logout)
     - [x] Privacy & Data Tab (Privacy, Data Takeout, Delete)
-- [ ] Sync `application-analysis&design.md` with new settings architecture
+- [x] **Account Settings Refinements (Feb 5, 2026)**
+    - [x] Fix Toast styling consistency (Centered, Unstyled, Emerald theme)
+    - [x] Implement Avatar upload functionality (Supabase Storage)
+    - [x] Debug Full Name persistence issue (RLS Policies)
+    - [x] Verify functionality and design matching
+- [x] Sync `application-analysis&design.md` with new settings architecture

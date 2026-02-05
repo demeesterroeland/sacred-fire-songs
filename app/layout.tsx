@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import PageTransition from "@/components/common/PageTransition";
 import { SpeedInsights } from "@vercel/speed-insights/next";
+import { Loader2 } from "lucide-react";
+import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -61,6 +62,24 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
               </div>
             </QueryProvider>
           </SidebarProvider>
+          <Toaster
+            position="top-center"
+            theme="dark"
+            icons={{
+              success: null,
+              error: null,
+              loading: <Loader2 className="w-4 h-4 animate-spin text-emerald-400" />,
+            }}
+            toastOptions={{
+              unstyled: true,
+              classNames: {
+                toast: "bg-[#141b24] border border-emerald-500/30 p-4 rounded-xl text-emerald-400 text-[15px] font-medium text-center shadow-inner min-w-[300px] flex justify-center items-center mb-2",
+                title: "text-emerald-400",
+                success: "border-emerald-500/30",
+                error: "bg-[#1a1010] border-red-500/30 text-red-400",
+              }
+            }}
+          />
           <SpeedInsights />
         </UserPreferencesProvider>
       </body>

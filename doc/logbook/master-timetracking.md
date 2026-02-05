@@ -49,12 +49,11 @@
 | Feb 3 | **Production**: Granular Nina Urku Seeding & Metadata Randomization | ~4.5 Hours | ✅ Completed |
 | **Feb 3** | **Feature**: Tag Editing, RLS Fixes, & Production Updates | ~6.75 Hours | ✅ Completed |
 | **Feb 4** | **Data**: Nina Urku SoundCloud & YouTube Scraper + Seed Update | ~1.75 Hours | ✅ Completed |
+| **Feb 5** | **UX**: Onboarding Refinement & Account Settings Refinements | ~4.75 Hours | ✅ Completed |
 | **Feb 17** | **UI**: Mobile Header Refinement & Lyrics Wrapping Fix | ~3.5 Hours | ✅ Completed |
 | **Feb 18** | **Feature**: Screen Wake Lock & Settings UI | ~3.0 Hours | ✅ Completed |
 | **Feb 23** | **UI**: Home Page Simplification & Navigation Renaming | ~0.5 Hours | ✅ Completed |
 | **Feb 23** | **Editor**: ChordPro Auto-Sizing & Layout Refinements | ~2.5 Hours | ✅ Completed |
-| **Total** | **Development + AI Collaboration** | **~108.50 Hours** | |
-
 | **Feb 26** | **Architecture**: Server Components Migration & Story Audit | ~1.5 Hours | ✅ Completed |
-| **Feb 5** | **UX**: Onboarding Refinement & Account Settings Design | ~3.0 Hours | [/] In Progress |
-| **Total** | **Development + AI Collaboration** | **~102.0 Hours** | |
+
+| **Total** | **Development + AI Collaboration** | **~114.75 Hours** | |
