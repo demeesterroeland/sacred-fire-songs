@@ -56,3 +56,5 @@
 | **Total** | **Development + AI Collaboration** | **~108.50 Hours** | |
 
 | **Feb 26** | **Architecture**: Server Components Migration & Story Audit | ~1.5 Hours | ✅ Completed |
+| **Feb 5** | **UX**: Onboarding Refinement & Account Settings Design | ~3.0 Hours | [/] In Progress |
+| **Total** | **Development + AI Collaboration** | **~102.0 Hours** | |

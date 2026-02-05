@@ -915,3 +915,17 @@
 - [x] Fix 406 Not Acceptable in `useAuth` — `.single()` → `.maybeSingle()` for profile fetch (handles missing profile row gracefully)
 - [x] Audit implementation status of stories 1.1.4, 1.1.5, 1.1.6
 - [x] Update `doc/logbook/epic&user stories.md` v1.22 — mark 1.1.4 [Partial], 1.1.5 [Not Implemented], 1.1.6 [Implemented]
+## Session: Onboarding & Account Settings (Feb 5, 2026)
+- [x] Update `app/auth/confirm/route.ts` defaults for signup/recovery
+- [x] Update `SignUpForm.tsx` success redirect
+- [x] Design "Finish Registration" mockup (`screen3f_finish_registration.html`)
+- [x] Sync `doc/design/db-schema.sql` with `full_name` and `avatar_url`
+- [x] Implement `FinishRegistrationForm.tsx` component
+- [x] Create `/auth/finish-registration` page
+- [x] Refine onboarding visuals (Embers, Alert style, Flame logo)
+- [x] Finalize onboarding copy ("Welcome at the Fire")
+- [ ] Design Account Settings mockup (`screen4_settings.html`) [/]
+    - [x] Profile Tab (Removed Display Name, added Avatar controls)
+    - [x] Account Tab (Email, Password, Logout)
+    - [x] Privacy & Data Tab (Privacy, Data Takeout, Delete)
+- [ ] Sync `application-analysis&design.md` with new settings architecture

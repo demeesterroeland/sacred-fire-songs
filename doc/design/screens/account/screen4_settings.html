@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Settings - Sacred Fire Songs</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #0f172a;
+      /* Slate 900 */
+      color: #f8fafc;
+    }
+
+    .glass-panel {
+      background: rgba(30, 41, 59, 0.7);
+      backdrop-filter: blur(12px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .tab-active {
+      background: rgba(244, 93, 26, 0.1);
+      color: #f45d1a;
+      box-shadow: 0 0 15px rgba(244, 93, 26, 0.1);
+    }
+
+    .tab-inactive {
+      color: #64748b;
+    }
+
+    .tab-inactive:hover {
+      color: #e2e8f0;
+    }
+
+    input,
+    select,
+    textarea {
+      background: rgba(15, 23, 42, 0.5) !important;
+      border: 1px solid rgba(255, 255, 255, 0.1) !important;
+    }
+
+    input:focus {
+      border-color: #f45d1a !important;
+      outline: none;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen bg-[#0f172a]">
+  <div class="flex min-h-screen">
+
+    <!-- Sidebar Placeholder (for context) -->
+    <aside class="hidden lg:flex w-[260px] bg-[#020617] border-r border-white/5 flex-col p-4">
+      <div class="flex items-center gap-3 mb-10 px-2">
+        <div
+          class="w-10 h-10 bg-gradient-to-br from-red-700 to-orange-600 rounded-full flex items-center justify-center shadow-lg ring-1 ring-white/10">
+          <i data-lucide="flame" class="text-white w-6 h-6 fill-current"></i>
+        </div>
+        <span class="font-bold text-lg tracking-tight">Sacred Fire</span>
+      </div>
+      <nav class="space-y-1">
+        <div
+          class="flex items-center gap-3 px-4 py-3 text-white/60 hover:text-white transition-colors cursor-pointer rounded-xl">
+          <i data-lucide="layout-dashboard" class="w-5 h-5"></i>
+          <span>Dashboard</span>
+        </div>
+        <div
+          class="flex items-center gap-3 px-4 py-3 text-white/60 hover:text-white transition-colors cursor-pointer rounded-xl">
+          <i data-lucide="compass" class="w-5 h-5"></i>
+          <span>Explore</span>
+        </div>
+        <div
+          class="flex items-center gap-3 px-4 py-3 text-white/60 hover:text-white transition-colors cursor-pointer rounded-xl">
+          <i data-lucide="library" class="w-5 h-5"></i>
+          <span>Library</span>
+        </div>
+        <div
+          class="flex items-center gap-3 px-4 py-3 text-white/60 hover:text-white transition-colors cursor-pointer rounded-xl">
+          <i data-lucide="list-music" class="w-5 h-5"></i>
+          <span>Playlist</span>
+        </div>
+        <div
+          class="flex items-center gap-3 px-4 py-3 text-white/60 hover:text-white transition-colors cursor-pointer rounded-xl">
+          <i data-lucide="plus-circle" class="w-5 h-5"></i>
+          <span>Add Song</span>
+        </div>
+        <div class="flex items-center gap-3 px-4 py-3 text-[#f45d1a] bg-white/5 rounded-xl font-medium mt-4">
+          <i data-lucide="settings" class="w-5 h-5"></i>
+          <span>Settings</span>
+        </div>
+      </nav>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="flex-1 p-4 md:p-8 lg:p-12 overflow-y-auto">
+      <div class="max-w-4xl mx-auto">
+
+        <header class="mb-12">
+          <h1 class="text-3xl md:text-4xl font-bold tracking-tight mb-2">Account Settings</h1>
+          <p class="text-slate-400">Manage your profile, account security, and data preferences.</p>
+        </header>
+
+        <!-- Tabs Navigation -->
+        <div class="flex p-1 bg-slate-950/40 rounded-2xl mb-8 w-fit border border-white/5">
+          <button onclick="switchTab('profile')" id="tab-profile"
+            class="px-6 py-2.5 rounded-xl font-medium transition-all tab-active whitespace-nowrap">Profile</button>
+          <button onclick="switchTab('account')" id="tab-account"
+            class="px-6 py-2.5 rounded-xl font-medium transition-all tab-inactive whitespace-nowrap">Account</button>
+          <button onclick="switchTab('privacy')" id="tab-privacy"
+            class="px-6 py-2.5 rounded-xl font-medium transition-all tab-inactive whitespace-nowrap">Privacy &
+            Data</button>
+        </div>
+
+        <!-- Profile Tab -->
+        <div id="content-profile" class="space-y-8 animate-in fade-in slide-in-from-bottom-2 duration-500">
+          <section class="glass-panel p-6 md:p-8 rounded-3xl space-y-8">
+            <div class="flex flex-col md:flex-row items-center gap-8 pb-8 border-b border-white/5">
+              <div class="relative group">
+                <div
+                  class="w-24 h-24 rounded-full overflow-hidden bg-slate-800 ring-2 ring-[#f45d1a]/50 flex items-center justify-center">
+                  <!-- User Avatar Placeholder -->
+                  <i data-lucide="user" class="w-12 h-12 text-slate-600"></i>
+                </div>
+                <div
+                  class="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-full cursor-pointer">
+                  <i data-lucide="camera" class="text-white w-6 h-6"></i>
+                </div>
+              </div>
+              <div class="text-center md:text-left">
+                <h3 class="text-lg font-semibold mb-1">Avatar</h3>
+                <p class="text-sm text-slate-400 mb-4">Recommended: 400x400px. JPG, PNG or GIF.</p>
+                <div class="flex gap-3 justify-center md:justify-start">
+                  <button
+                    class="text-sm font-semibold bg-white/5 border border-white/10 px-4 py-2 rounded-lg hover:bg-white/10 transition-colors">Change</button>
+                  <button
+                    class="text-sm font-semibold text-red-400 hover:text-red-300 transition-colors">Remove</button>
+                </div>
+              </div>
+            </div>
+
+            <div class="space-y-6">
+              <div class="space-y-2">
+                <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider ml-1">Full Name</label>
+                <input type="text" value="Roeland De Meester" class="w-full px-4 py-4 rounded-xl text-white">
+              </div>
+            </div>
+
+            <div class="flex justify-end pt-4">
+              <button
+                class="bg-[#f45d1a] text-white font-semibold px-6 py-3 rounded-xl hover:brightness-110 shadow-lg shadow-orange-900/20 transition-all">Save
+                Changes</button>
+            </div>
+          </section>
+        </div>
+
+        <!-- Account Tab -->
+        <div id="content-account" class="hidden space-y-8 animate-in fade-in duration-500">
+          <section class="glass-panel p-6 md:p-8 rounded-3xl space-y-8">
+            <div class="space-y-6">
+              <h2 class="text-xl font-bold flex items-center gap-2">
+                <i data-lucide="mail" class="w-5 h-5 text-slate-400"></i>
+                Email Address
+              </h2>
+              <div class="flex flex-col md:flex-row gap-4">
+                <input type="email" value="roel.de.meester@example.com"
+                  class="flex-1 px-4 py-3 rounded-xl text-white opacity-60" disabled>
+                <button
+                  class="bg-white/5 border border-white/10 text-white font-medium px-6 py-3 rounded-xl hover:bg-white/10 transition-colors">Change
+                  Email</button>
+              </div>
+              <p class="text-xs text-slate-500 italic">Changing your email will require re-verification.</p>
+            </div>
+
+            <hr class="border-white/5">
+
+            <div class="space-y-6">
+              <h2 class="text-xl font-bold flex items-center gap-2">
+                <i data-lucide="lock" class="w-5 h-5 text-slate-400"></i>
+                Password
+              </h2>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-2">
+                  <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">New Password</label>
+                  <input type="password" placeholder="••••••••" class="w-full px-4 py-3 rounded-xl text-white">
+                </div>
+                <div class="space-y-2">
+                  <label class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Confirm New
+                    Password</label>
+                  <input type="password" placeholder="••••••••" class="w-full px-4 py-3 rounded-xl text-white">
+                </div>
+              </div>
+              <div class="flex justify-end">
+                <button
+                  class="bg-white/5 border border-white/10 text-white font-medium px-6 py-3 rounded-xl hover:bg-white/10 transition-colors">Update
+                  Password</button>
+              </div>
+            </div>
+
+            <hr class="border-white/5">
+
+            <div class="pt-2">
+              <button
+                class="w-full md:w-auto flex items-center justify-center gap-2 text-red-400 hover:text-red-300 transition-colors px-6 py-3 border border-red-500/20 rounded-xl hover:bg-red-500/5">
+                <i data-lucide="log-out" class="w-5 h-5"></i>
+                Log Out from all devices
+              </button>
+            </div>
+          </section>
+        </div>
+
+        <!-- Privacy & Data Tab -->
+        <div id="content-privacy" class="hidden space-y-8 animate-in fade-in duration-500">
+          <section class="glass-panel p-6 md:p-8 rounded-3xl space-y-8">
+            <div class="space-y-6">
+              <h2 class="text-xl font-bold">Privacy Settings</h2>
+              <div class="space-y-4">
+                <div class="flex items-center justify-between p-4 bg-white/2 rounded-2xl">
+                  <div>
+                    <p class="font-medium">Make Profile Public</p>
+                    <p class="text-sm text-slate-400">Allow others to see your public song collections.</p>
+                  </div>
+                  <div class="relative inline-block w-12 h-6 rounded-full bg-slate-700 cursor-pointer">
+                    <div class="absolute left-1 top-1 w-4 h-4 bg-white rounded-full"></div>
+                  </div>
+                </div>
+                <div class="flex items-center justify-between p-4 bg-white/2 rounded-2xl">
+                  <div>
+                    <p class="font-medium">Show Activity</p>
+                    <p class="text-sm text-slate-400">Display when you're live-viewing a shared song.</p>
+                  </div>
+                  <div class="relative inline-block w-12 h-6 rounded-full bg-orange-600 cursor-pointer">
+                    <div class="absolute right-1 top-1 w-4 h-4 bg-white rounded-full"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <hr class="border-white/5">
+
+            <div class="space-y-4">
+              <h2 class="text-xl font-bold">Data Management</h2>
+              <p class="text-slate-400 text-sm">Download your personal song data, history, and preferences.</p>
+              <button class="flex items-center gap-2 text-[#f45d1a] hover:underline font-medium">
+                <i data-lucide="download" class="w-4 h-4"></i>
+                Request Data Take Out (.json)
+              </button>
+            </div>
+
+            <hr class="border-white/5">
+
+            <div class="bg-red-500/5 border border-red-500/20 p-6 rounded-2xl">
+              <h2 class="text-red-400 font-bold mb-2">Danger Zone</h2>
+              <p class="text-slate-400 text-sm mb-6">Deleting your account is permanent and will remove all your
+                collections and personalized settings.</p>
+              <button
+                class="bg-red-600/10 hover:bg-red-600/20 border border-red-600/30 text-red-500 font-bold px-6 py-3 rounded-xl transition-all">
+                Delete My Account
+              </button>
+            </div>
+          </section>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    function switchTab(tabId) {
+      // Hide all contents
+      ['content-profile', 'content-account', 'content-privacy'].forEach(id => {
+        document.getElementById(id).classList.add('hidden');
+      });
+      // Deactivate all tabs
+      ['tab-profile', 'tab-account', 'tab-privacy'].forEach(id => {
+        document.getElementById(id).classList.remove('tab-active');
+        document.getElementById(id).classList.add('tab-inactive');
+      });
+
+      // Show selected content
+      document.getElementById('content-' + tabId).classList.remove('hidden');
+      // Activate selected tab
+      document.getElementById('tab-' + tabId).classList.remove('tab-inactive');
+      document.getElementById('tab-' + tabId).classList.add('tab-active');
+    }
+  </script>
+</body>
+
+</html>

@@ -54,7 +54,7 @@ function SignUpFormContent({
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/songs`,
+          emailRedirectTo: `${window.location.origin}/auth/login?message=${encodeURIComponent("Registration confirmed. Please sign in to complete your account setup.")}`,
         },
       });
       if (error) throw error;
