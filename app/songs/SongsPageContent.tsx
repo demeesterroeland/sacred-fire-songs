@@ -1,9 +1,11 @@
 'use client';
 
+import SearchBar from "@/components/home/SearchBar";
 import SongCard from "@/components/home/SongCard";
 import SongCardSkeleton from "@/components/home/SongCardSkeleton";
 import { Music, Guitar, ChevronDown, Flame, Search, X, Plus } from "lucide-react";
-import { useState, useMemo } from "react";
+import { useSidebar } from "@/context/SidebarContext";
+import { useState, useMemo, useEffect } from "react";
 import { fetchSongs } from "@/lib/songUtils";
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from "@/hooks/useAuth";
@@ -19,6 +21,7 @@ export default function SongsPageContent() {
     const searchParams = useSearchParams();
     const router = useRouter(); // needed for clear all button which uses router.push
     const { user } = useAuth();
+    const { setHeaderCount } = useSidebar();
 
     // Local UI state for sorting (not part of filtering engine usually)
     const sortBy = (searchParams.get('sort') as SortByType) || 'title';
@@ -73,6 +76,13 @@ export default function SongsPageContent() {
         }
     );
 
+    // Publish count to global header for mobile view
+    useEffect(() => {
+        setHeaderCount(filteredItems.length);
+        // Clear on unmount
+        return () => setHeaderCount(undefined);
+    }, [filteredItems.length, setHeaderCount]);
+
     // --- 3. Sorting (Applied after filtering) ---
     const displaySongs = useMemo(() => {
         return [...filteredItems].sort((a, b) => {
@@ -98,21 +108,15 @@ export default function SongsPageContent() {
         <main className="flex-1 min-h-0 bg-gray-950">
             <div className="p-4 md:p-8 space-y-8 max-w-7xl mx-auto">
                 {/* Sticky Header */}
-                <div className="sticky top-0 z-20 bg-gray-950/95 backdrop-blur-md border-b border-gray-800/50 px-4 py-6 -mx-4 md:-mx-8">
+                <div className="sticky top-0 z-20 bg-gray-950/95 backdrop-blur-md border-b border-gray-800/50 px-4 pt-0 pb-6 -mx-4 md:-mx-8">
                     <div className="max-w-7xl mx-auto space-y-6">
 
                         {/* Top Row: Search & Stats */}
                         <div className="flex flex-col md:flex-row items-center justify-between gap-6 md:gap-8">
-                            <div className="flex-1 relative w-full max-w-2xl">
-                                <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
-                                <input
-                                    type="text"
-                                    placeholder="Search 500+ medicine songs..."
-                                    value={state.search}
-                                    onChange={(e) => setFilter('search', e.target.value)}
-                                    className="w-full bg-gray-900/50 border border-gray-800 rounded-2xl py-3.5 pl-12 pr-4 text-white placeholder:text-gray-500 focus:ring-2 focus:ring-red-500/30 focus:border-red-500/50 transition-all outline-none"
-                                />
-                            </div>
+                            <SearchBar
+                                value={state.search}
+                                onChange={(val) => setFilter('search', val)}
+                            />
 
                             <div className="flex items-center gap-4 self-end md:self-auto">
                                 <span className="hidden md:block text-xs text-gray-500 whitespace-nowrap">

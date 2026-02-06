@@ -30,10 +30,7 @@ export default function Home() {
       {/* Dashboard Widgets Area */}
       <div className="p-4 md:p-8 space-y-8 max-w-7xl mx-auto">
 
-        {/* Header & Search */}
-        <div className="space-y-6">
-          <SearchBar value={searchQuery} onChange={setSearchQuery} />
-        </div>
+        <SearchBar value={searchQuery} onChange={setSearchQuery} />
 
         {/* Quick Stats / Actions */}
         <div className="hidden md:grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -73,7 +70,7 @@ export default function Home() {
         {/* Song List Section */}
         <section>
           <div className="flex items-center justify-between mb-4">
-            <h3 className="font-bold text-lg text-white">Recent Additions</h3>
+            <h3 className="font-bold text-lg text-white">10 Latest Songs</h3>
             <Link href="/songs" className="text-xs font-bold text-red-500 hover:text-red-400 uppercase tracking-wider">View All</Link>
           </div>
 

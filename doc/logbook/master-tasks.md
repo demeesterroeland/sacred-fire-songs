@@ -809,3 +809,14 @@
 - [x] Update scraper to include YouTube ID extraction (Found 21+)
 - [x] Generate and append SQL UPDATE seeds to `04_songs_nina_urku.sql`
 - [x] Verify media linking for "Abuelito Tatewari" and "Abuelo (adida, adide)"
+
+# Task: Song-Circle Scraping & Searchbar Refinement
+- [x] Audit Song-Circle categories for Rainbow, Beija-flor, Condor, Halleluyah, Sufi, Bhajans
+- [x] Create and refine `scripts/scrape_song_to_sql.js` for dynamic single song scraping
+- [x] Extract Title, Author, Category, YouTube, and Lyrics from Song-Circle
+- [x] Handle image download and SQL generation for Supabase import
+- [x] Refactor `SearchBar` component to match library design
+- [x] Unify search bar across Dashboard and Library pages
+- [x] Update placeholder to "Search 200+ medicine songs..."
+- [x] Handle TypeScript type mismatches for search state
+- [x] Sync documentation to master logbooks

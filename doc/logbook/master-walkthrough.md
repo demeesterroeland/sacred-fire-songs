@@ -1823,3 +1823,32 @@ Extract SoundCloud URLs and YouTube IDs for 197 Nina Urku songs and update the d
 ## Evidence
 - Final Seed: [04_songs_nina_urku.sql](file:///home/roeland/Projects/sacred-fire-songs/supabase/seeds/04_songs_nina_urku.sql)
 - Result CSV: [ninaurku_songs.csv](file:///home/roeland/Projects/sacred-fire-songs/ninaurku_songs.csv)
+
+---
+
+## Session Walkthrough: Song-Circle Scraping & Searchbar Refinement
+**Date**: 2026-02-06
+**Session ID**: 03c1aa98-05f6-40b1-b4a4-98b301aba92d
+
+### Song-Circle Category Analysis
+I have completed the audit of the requested song categories on [Song-Circle](https://www.song-circle.com).
+- **Total Songs Counted**: 371 across Rainbow, Beija-flor, Condor, Halleluyah, Sufi, and Bhajans.
+
+### Scraping Song Details: "Cuatro Aguila"
+Successfully implemented a dynamic scraper for Song-Circle:
+- **Scraper**: [scrape_song_to_sql.js](file:///home/roeland/Projects/sacred-fire-songs/scripts/scrape_song_to_sql.js)
+- **Outputs**: Generated SQL seeds and downloaded song images.
+- **Features**: Automatic category hierarchy creation and lyrics cleaning.
+
+### Unifying Searchbar UI
+Unified the search experience across the application as shown in the library screenshot:
+- **Component**: Refactored [SearchBar.tsx](file:///home/roeland/Projects/sacred-fire-songs/components/home/SearchBar.tsx) with premium dark styling.
+- **Dashboard**: Integrated the refined component into the home page.
+- **Library**: Replaced inline search with the unified component.
+- **Count Update**: Changed the placeholder to reflect "200+ medicine songs".
+- **Technical**: Fixed TypeScript lint warnings regarding search state types.
+- **Alignment**: Adjusted the component to be left-aligned per user feedback.
+- **Vertical Alignment**: Matched the top spacing between Dashboard and Library by removing extra padding in the sticky header.
+- **Header Count**: In the Library page, the static "Library" text in the header now dynamically updates to show the number of songs found (e.g., "123 Songs") across all breakpoints.
+
+![Scraping Analysis](/home/roeland/.gemini/antigravity/brain/03c1aa98-05f6-40b1-b4a4-98b301aba92d/analyze_song_page_1770405710722.webp)

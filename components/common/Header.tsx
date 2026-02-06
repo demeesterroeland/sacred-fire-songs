@@ -8,7 +8,7 @@ import { UserProfile } from './navigation/UserProfile';
 
 export default function Header() {
     const pathname = usePathname();
-    const { setIsOpen } = useSidebar();
+    const { setIsOpen, headerCount } = useSidebar();
 
     const getSubtitle = () => {
         if (pathname === '/') return 'DASHBOARD';
@@ -21,6 +21,9 @@ export default function Header() {
     };
 
     const subtitle = getSubtitle();
+    const displaySubtitle = (pathname === '/songs' && headerCount !== undefined)
+        ? `${headerCount} Songs`
+        : subtitle;
 
     // Hide Global Header ONLY on Song Detail Page to allow custom Widescreen Design
     const isSongDetailPage = pathname?.startsWith('/songs/') &&
@@ -54,10 +57,10 @@ export default function Header() {
                     <div className="lg:hidden h-6 w-px bg-gray-800 mx-1 shrink-0" />
 
                     {/* Breadcrumb / Subtitle */}
-                    {subtitle && (
+                    {displaySubtitle && (
                         <div className="flex items-center">
                             <span className="text-[10px] lg:text-xs uppercase font-black text-red-500 tracking-[0.2em] lg:tracking-[0.3em] opacity-80">
-                                {subtitle}
+                                {displaySubtitle}
                             </span>
                         </div>
                     )}
