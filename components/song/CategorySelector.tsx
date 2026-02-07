@@ -1,6 +1,7 @@
 'use client';
 
 import { useQuery } from '@tanstack/react-query';
+import { getCategoryColor, getCategoryStyles } from '@/lib/uiUtils';
 import { getAvailableCategories, Category } from '@/lib/actions/category';
 import { useState, useMemo } from 'react';
 import { Check, Loader2 } from 'lucide-react';
@@ -56,6 +57,9 @@ export default function CategorySelector({ selectedIds, onChange }: CategorySele
           <div className="flex flex-wrap gap-2">
             {groupCats.map(cat => {
               const isSelected = selectedIds.includes(cat.id);
+              const color = getCategoryColor(cat.slug);
+              const styles = getCategoryStyles(color);
+
               return (
                 <button
                   key={cat.id}
@@ -64,8 +68,8 @@ export default function CategorySelector({ selectedIds, onChange }: CategorySele
                   className={`
                                         flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all border
                                         ${isSelected
-                      ? 'bg-primary/20 text-primary border-primary hover:bg-primary/30'
-                      : 'bg-[#2a2836] text-gray-300 border-transparent hover:border-gray-600 hover:bg-[#353342]'
+                      ? styles.pill + ' ring-1 ring-inset ring-white/10'
+                      : 'bg-[#2a2836] text-gray-400 border-transparent hover:border-gray-600 hover:bg-[#353342]'
                     }
                                     `}
                 >

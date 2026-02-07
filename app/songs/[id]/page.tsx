@@ -13,6 +13,7 @@ import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Trash2, Edit2, ArrowLeft, Lock as LockIcon, Music, Link as LinkIcon, Flame, IndentIncrease } from 'lucide-react';
 import { UserProfile } from '@/components/common/navigation/UserProfile';
+import { getCategoryColor, getCategoryStyles } from '@/lib/uiUtils';
 
 // Standalone fetch function
 const fetchSong = async (id: string) => {
@@ -107,14 +108,7 @@ export default function SongDetailPage() {
     };
 
     // Helper for badge colors (could be moved to utils or globals)
-    const getCategoryColor = (slug: string) => {
-        // Simple mapping based on slug for demo purposes if DB color is missing
-        if (slug === 'spanish') return 'text-yellow-400 bg-yellow-500/20 border-yellow-500/30';
-        if (slug === 'vocalization') return 'text-purple-400 bg-purple-500/20 border-purple-500/30';
-        if (slug === 'english') return 'text-blue-400 bg-blue-500/20 border-blue-500/30';
-        if (slug === 'portuguese') return 'text-green-400 bg-green-500/20 border-green-500/30';
-        return 'text-gray-400 bg-gray-500/20 border-gray-500/30';
-    };
+    // REMOVED: local getCategoryColor - imported from uiUtils
 
     return (
         <div className="flex flex-col min-h-screen">
@@ -184,11 +178,15 @@ export default function SongDetailPage() {
                             <div className="flex items-center gap-3">
                                 <p className="text-gray-400 text-sm font-medium">by {song.original_author || 'Traditional'}</p>
                                 {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                                {categories.map((cat: any) => (
-                                    <span key={cat.slug} className={`px-2.5 py-1 rounded-full text-xs font-bold border ${getCategoryColor(cat.slug)}`}>
-                                        {cat.name}
-                                    </span>
-                                ))}
+                                {categories.map((cat: any) => {
+                                    const color = getCategoryColor(cat.slug);
+                                    const styles = getCategoryStyles(color);
+                                    return (
+                                        <span key={cat.slug} className={`px-2.5 py-1 rounded-full text-xs font-bold border transition-colors ${styles.pill}`}>
+                                            {cat.name}
+                                        </span>
+                                    );
+                                })}
                             </div>
                         </div>
                     </div>
@@ -244,11 +242,15 @@ export default function SongDetailPage() {
                             {/* Category Tags */}
                             <div className="flex items-center gap-2">
                                 {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                                {categories.map((cat: any) => (
-                                    <span key={cat.slug} className={`px-2.5 py-1 rounded-full text-xs font-bold border ${getCategoryColor(cat.slug)}`}>
-                                        {cat.name}
-                                    </span>
-                                ))}
+                                {categories.map((cat: any) => {
+                                    const color = getCategoryColor(cat.slug);
+                                    const styles = getCategoryStyles(color);
+                                    return (
+                                        <span key={cat.slug} className={`px-2.5 py-1 rounded-full text-xs font-bold border transition-colors ${styles.pill}`}>
+                                            {cat.name}
+                                        </span>
+                                    );
+                                })}
                             </div>
                         </div>
 
