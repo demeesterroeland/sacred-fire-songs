@@ -14,6 +14,8 @@ import Link from 'next/link';
 import { getCategoryColor, getCategoryStyles } from "@/lib/uiUtils";
 import { useDeclarativeFilter } from "@/hooks/useDeclarativeFilter";
 import { songFilterConfig, SongFilterState } from "@/lib/songs/filterConfig";
+import TagSelector from "@/components/library/TagSelector";
+import { fetchCategoryTree } from "@/lib/taxonomyUtils";
 
 type SortByType = 'title' | 'newest';
 
@@ -35,6 +37,11 @@ export default function SongsPageContent() {
     const { data: songs = [], isLoading } = useQuery({
         queryKey: ['songs', 'all'],
         queryFn: () => fetchSongs(),
+    });
+
+    const { data: taxonomy = [] } = useQuery({
+        queryKey: ['taxonomy'],
+        queryFn: fetchCategoryTree,
     });
 
     // --- 2. Declarative Filter Hook ---
@@ -111,14 +118,14 @@ export default function SongsPageContent() {
                 <div className="sticky top-0 z-20 bg-gray-950/95 backdrop-blur-md border-b border-gray-800/50 px-4 pt-0 pb-6 -mx-4 md:-mx-8">
                     <div className="max-w-7xl mx-auto space-y-6">
 
-                        {/* Top Row: Search & Stats */}
+                        {/* Row 1: Brand (Mobile) & Search */}
                         <div className="flex flex-col md:flex-row items-center justify-between gap-6 md:gap-8">
                             <SearchBar
                                 value={state.search}
                                 onChange={(val) => setFilter('search', val)}
                             />
 
-                            <div className="flex items-center gap-4 self-end md:self-auto">
+                            <div className="hidden md:flex items-center gap-4 self-end md:self-auto">
                                 <span className="hidden md:block text-xs text-gray-500 whitespace-nowrap">
                                     {filteredItems.length} songs found
                                 </span>
@@ -135,51 +142,17 @@ export default function SongsPageContent() {
                             </div>
                         </div>
 
-                        {/* Active Filter Pills */}
-                        {(state.category || (state.tags && state.tags.length > 0)) && (
-                            <div className="flex flex-wrap items-center gap-2">
-                                {state.category && (() => {
-                                    const cat = state.category;
-                                    const color = getCategoryColor(cat);
-                                    const styles = getCategoryStyles(color);
-                                    return (
-                                        <div key={`cat-${cat}`} className={`flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full border ${styles.inactive}`}>
-                                            <span>CATEGORY: {cat}</span>
-                                            <button
-                                                className="hover:text-white"
-                                                onClick={() => setFilter('category', undefined)}
-                                            >
-                                                <X className="w-2.5 h-2.5" />
-                                            </button>
-                                        </div>
-                                    );
-                                })()}
-                                {state.tags?.map(tag => {
-                                    const color = getCategoryColor(tag);
-                                    const styles = getCategoryStyles(color);
-                                    return (
-                                        <div key={`tag-${tag}`} className={`flex items-center gap-1.5 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider rounded-full border ${styles.inactive}`}>
-                                            <span>TAG: {tag}</span>
-                                            <button
-                                                className="hover:text-white"
-                                                onClick={() => {
-                                                    const newTags = state.tags?.filter(t => t !== tag) || [];
-                                                    setFilter('tags', newTags);
-                                                }}
-                                            >
-                                                <X className="w-2.5 h-2.5" />
-                                            </button>
-                                        </div>
-                                    );
-                                })}
-                                <button
-                                    className="text-[9px] font-bold text-gray-600 hover:text-gray-400 uppercase tracking-widest ml-1"
-                                    onClick={resetFilters}
-                                >
-                                    Clear All
-                                </button>
-                            </div>
-                        )}
+                        {/* Row 2: Tag Selector */}
+                        <TagSelector
+                            category={state.category}
+                            tags={state.tags || []}
+                            taxonomy={taxonomy}
+                            onCategoryChange={(cat) => setFilter('category', cat)}
+                            onTagsChange={(tags) => setFilter('tags', tags)}
+                            onClearAll={resetFilters}
+                            searchValue={state.search}
+                            onSearchChange={(val) => setFilter('search', val)}
+                        />
 
                         {/* Lower Row: Controls */}
                         <div className="flex flex-wrap items-center justify-between gap-4 pt-2">

@@ -1820,10 +1820,6 @@ Extract SoundCloud URLs and YouTube IDs for 197 Nina Urku songs and update the d
 - **Success**: Verified that 34 songs now have SoundCloud links and 21+ have YouTube IDs in the seeds.
 - **Verification**: Confirmed extraction with "Abuelo (adida, adide)" (multiple YouTube IDs) and "Abuelito Tatewari" (SoundCloud).
 
-## Evidence
-- Final Seed: [04_songs_nina_urku.sql](file:///home/roeland/Projects/sacred-fire-songs/supabase/seeds/04_songs_nina_urku.sql)
-- Result CSV: [ninaurku_songs.csv](file:///home/roeland/Projects/sacred-fire-songs/ninaurku_songs.csv)
-
 ---
 
 ## Session Walkthrough: Song-Circle Scraping & Searchbar Refinement
@@ -1851,4 +1847,136 @@ Unified the search experience across the application as shown in the library scr
 - **Vertical Alignment**: Matched the top spacing between Dashboard and Library by removing extra padding in the sticky header.
 - **Header Count**: In the Library page, the static "Library" text in the header now dynamically updates to show the number of songs found (e.g., "123 Songs") across all breakpoints.
 
-![Scraping Analysis](/home/roeland/.gemini/antigravity/brain/03c1aa98-05f6-40b1-b4a4-98b301aba92d/analyze_song_page_1770405710722.webp)
+---
+
+## Session Walkthrough: Tag Filtering UI Improvements
+**Date**: 2026-02-07
+**Session ID**: 37c83c8a-8e6c-4a7c-8a98-0d38639dde01
+
+### Objective
+Improve the tag filtering UI by implementing a unified search input with pills, autocompletion, and removal functionality.
+
+### Changes Made
+- **HTML/CSS**: Implemented the `tag-input-container` with glassmorphism styling and flame accents.
+- **JavaScript**: Developed logic for:
+  - Dynamic tag pill rendering with removal animation.
+  - Autocomplete dropdown filtering based on user input.
+  - Handling Backspace for tag removal and Enter for selection.
+  - Integration with sidebar category tags.
+- **Animations**: Added micro-animations for pill entry and scale effects.
+
+### Verification Results
+- **Tag Addition**: Confirmed tags can be added via typing and selecting from the dropdown.
+- **Tag Removal**: Verified the 'x' button and Backspace key correctly remove tags.
+- **Placeholder Management**: Confirmed the placeholder disappears when tags are present.
+- **Responsiveness**: Verified the container expands gracefully as tags are added.
+
+---
+
+## Session Walkthrough: Refined Tag Filtering Layout
+**Date**: 2026-02-07
+**Session ID**: 37c83c8a-8e6c-4a7c-8a98-0d38639dde01
+
+### Objective
+Clean up the filtering UI by separating the tag-based filter from the free-text search bar and optimizing the vertical layout.
+
+### Changes Made
+- **Layout Separation**: Split the search/filter row into a 3-row hierarchy:
+  1. **Top**: Brand & Search bar.
+  2. **Middle**: Dedicated Tag field (shorter `42px` height).
+  3. **Bottom**: Sorting & Visibility tabs.
+- **Styling**: Adjusted the tag field to use a smaller height and placeholders, distinguishing it as a secondary, specialized filter.
+- **Interaction Logic**: Updated JavaScript to handle `free-search-input` and `tag-search-input` independently while maintaining shared state.
+
+### Verification Results
+- **Visuals**: Confirmed the 3-row layout balance and reduced tag field height.
+- **Functionality**: Verified that typing in the tag field triggers autocomplete correctly and pills remain interactive.
+
+---
+
+## Session Walkthrough: Ported Refined Tag Layout to Library Hub
+**Date**: 2026-02-07
+**Session ID**: 37c83c8a-8e6c-4a7c-8a98-0d38639dde01
+
+### Objective
+Port the refined tag filtering layout (separate row, reduced height) and interactive logic from the category detail screen to the main Library Hub.
+
+### Changes Made
+- **Library Hub Header Update**: Modified `screen15_library.html` to utilize the new 3-row layout:
+  1. **Top**: Brand & Search bar.
+  2. **Middle**: Dedicated Tag field (`42px` height).
+  3. **Bottom**: Sorting & Visibility tabs.
+- **Logic Sync**: Ported the full tag filtering JavaScript system, including autocomplete, dynamic pill management, and keyboard controls.
+- **Sidebar Integration**: Linked sidebar tag links to the new interactive tag field.
+
+### Verification Results
+- **Layout Consistency**: Confirmed that the Library Hub perfectly matches the aesthetics and hierarchy of the category detail screen.
+- **Interaction Flow**: Verified that typing in the tag field triggers suggestions, and sidebar clicks correctly populate the filtering pills.
+
+---
+
+## Session Walkthrough: Synced Tag UI & "Clear All" Implementation
+**Date**: 2026-02-07
+**Session ID**: 37c83c8a-8e6c-4a7c-8a98-0d38639dde01
+
+### Objective
+Synchronize the refined tag filtering layout across all library-related screens and implement a universal "Clear All" functionality.
+
+### Changes Made
+- **Universal 3-Row Header**: Ensured that , , and  all share the same layout hierarchy:
+    1. **Top**: Brand & Search.
+    2. **Middle**: Refined Tag Field (with entry animations).
+    3. **Bottom**: Sorting & Tabs.
+- **"Clear All" Feature**: Implemented a global reset button that appears dynamically when any filter is active. This button wipes both tags and free-text search in one action.
+- **Full Library Port**: Successfully migrated the advanced tag logic (autocomplete, pills, keyboard shortcuts) to .
+
+### Verification Results
+- **Cross-Screen Verification**: All three screens were cross-checked in the browser for visual consistency and interactive parity.
+- **Logic Validation**: Verified that "Clear All" functions correctly, wiping multiple filters simultaneously and hiding itself accurately.
+
+
+
+## Session Feb 7, 2026 - Tag Filtering Code Implementation
+### Overview
+Ported the refined tag filtering design from mockups to the live React application, implementing a unified tiered filtering header and a new `TagSelector` component.
+
+### Key Accomplishments
+- **New `TagSelector` Component**: Created [TagSelector.tsx](file:///home/roeland/Projects/sacred-fire-songs/components/library/TagSelector.tsx) for category and tag management with autocomplete.
+- **3-Row Header Layout**: Updated [SongsPageContent.tsx](file:///home/roeland/Projects/sacred-fire-songs/app/songs/SongsPageContent.tsx) with a tiered architecture for search, tags, and controls.
+- **Color Synchronization**: Unified the dynamic color palette between the sidebar indicators and filter pills (e.g., Nature/Emerald, Languages/Purple, Healing/Red, Elements/Blue).
+- **Sidebar & Category Logic**: Integrated [LibrarySidebar.tsx](file:///home/roeland/Projects/sacred-fire-songs/components/library/LibrarySidebar.tsx) to allow category selection via sidebar headers, populating the tag field with "Category: [Name]" pills.
+
+
+## Session Update: Mobile Refinement & Tag Cleanup (Feb 7, 2026)
+
+### UI Mobile Refinement
+- **Fixed Vertical Spacing**: Corrected the vertical gap between the search bar and tag filter rows on mobile devices. The gap is now a consistent **24px** (Tailwind `gap-6`), matching the desktop breakpoint.
+- **Header Optimization**: Modified [SongsPageContent.tsx](file:///home/roeland/Projects/sacred-fire-songs/app/songs/SongsPageContent.tsx) to hide desktop-only wrappers (`hidden md:flex`) that were creating invisible vertical space on smaller screens.
+
+### Database & Taxonomy Cleanup
+- **Migration**: Applied [20260207023000_remove_deprecated_tags.sql](file:///home/roeland/Projects/sacred-fire-songs/supabase/migrations/20260207023000_remove_deprecated_tags.sql) to remove deprecated tags from the database.
+- **Removed Slugs**: `andean`, `amazonian`, `native-american`, and `medicine-songs`.
+- **Code Sync**: Updated [uiUtils.ts](file:///home/roeland/Projects/sacred-fire-songs/lib/uiUtils.ts) to remove obsolete color mappings for these tags.
+
+### UX Improvement: Autocomplete "Enter to Select"
+- **Functional Upgrade**: Modified [TagSelector.tsx](file:///home/roeland/Projects/sacred-fire-songs/components/library/TagSelector.tsx) to allow users to select the top suggestion in the autocomplete dropdown by pressing the **Enter** key.
+- **Workflow**: This improves UX speed for filtering by categories and tags without needing to click with a mouse.
+
+### Verification Results
+I verified all changes on `http://localhost:3000/songs`:
+- **Mobile Layout**: Spacing verified at exactly 24px.
+- **Tag Removal**: Confirmed that deleted tags no longer appear in autocomplete or sidebars.
+- **Enter-to-Select**: Confirmed that typing a partial tag and hitting Enter correctly adds the first suggested pill.
+
+### UX Improvement: Backspace Deletion
+- **Feature**: Implemented logic in [TagSelector.tsx](file:///home/roeland/Projects/sacred-fire-songs/components/library/TagSelector.tsx) to handle the **Backspace** key when the input is empty.
+- **Behavior**:
+  - If tags are present, pressing Backspace removes the last tag.
+  - If no tags are present but a category is selected, pressing Backspace removes the category filter.
+- **Outcome**: Users can now quickly clear filters using only the keyboard.
+
+### Documentation Policy Update
+- **Workflow Update**: Modified [.agent/workflows/sync-artifacts.md](file:///home/roeland/Projects/sacred-fire-songs/.agent/workflows/sync-artifacts.md) to explicitly prohibit adding multimedia evidence sections.
+- **Cleanup**: Removed all existing 'Evidence' sections from [master-walkthrough.md](file:///home/roeland/Projects/sacred-fire-songs/doc/logbook/master-walkthrough.md).
+
+

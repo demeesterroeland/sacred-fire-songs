@@ -14,7 +14,10 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://unpkg.com/lucide@latest"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    @font-face {
+      font-family: 'Inter';
+      src: url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    }
 
     body {
       font-family: 'Inter', sans-serif;
@@ -26,6 +29,39 @@
 
     .song-card:hover {
       transform: translateY(-4px);
+    }
+
+    /* Tag Field Styles */
+    .tag-field-container {
+      transition: all 0.2s ease;
+      min-height: 42px;
+    }
+
+    .tag-field-container:focus-within {
+      box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.1);
+      border-color: rgba(239, 68, 68, 0.4);
+    }
+
+    .tag-pill {
+      animation: pillScale 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+
+    @keyframes pillScale {
+      from {
+        transform: scale(0.8);
+        opacity: 0;
+      }
+
+      to {
+        transform: scale(1);
+        opacity: 1;
+      }
+    }
+
+    .autocomplete-dropdown {
+      max-height: 250px;
+      scrollbar-width: thin;
+      scrollbar-color: #334155 #0f172a;
     }
 
     ::-webkit-scrollbar {
@@ -255,9 +291,9 @@
             </div>
           </a>
 
-          <div class="flex-1 relative max-w-2xl">
+          <div class="flex-1 relative max-w-2xl group">
             <i data-lucide="search" class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500"></i>
-            <input type="text" placeholder="Search 500+ medicine songs..."
+            <input type="text" id="free-search-input" placeholder="Search 500+ medicine songs..."
               class="w-full bg-gray-900/50 border border-gray-800 rounded-2xl py-3.5 pl-12 pr-4 text-white placeholder:text-gray-500 focus:ring-2 focus:ring-red-500/30 focus:border-red-500/50 transition-all outline-none">
           </div>
 
@@ -273,21 +309,35 @@
           </div>
         </div>
 
-        <!-- Active Filter Pills -->
-        <div class="flex flex-wrap items-center gap-2 empty:hidden">
-          <div
-            class="flex items-center gap-1.5 px-2.5 py-1 bg-blue-500/10 text-blue-400 text-[10px] font-bold uppercase tracking-wider rounded-full border border-blue-500/20">
-            <span>Element: Water</span>
-            <button class="hover:text-white"><i data-lucide="x" class="w-2.5 h-2.5"></i></button>
+        <!-- Middle Row: Interactive Tag Field -->
+        <div class="flex items-center gap-4 relative max-w-4xl">
+          <div id="tag-input-wrapper"
+            class="tag-field-container flex-1 flex flex-wrap items-center gap-2 bg-gray-900/40 border border-gray-800/60 rounded-xl py-1.5 px-4 focus-within:bg-gray-900/60 transition-all cursor-text ring-1 ring-white/5 shadow-inner">
+            <div id="active-pills-container" class="flex flex-wrap items-center gap-2">
+              <!-- Pills will be injected here -->
+            </div>
+            <input type="text" id="tag-search-input" placeholder="Add tags to filter..."
+              class="flex-1 bg-transparent border-none py-1 focus:ring-0 outline-none text-white placeholder:text-gray-600 text-xs min-w-[150px]">
           </div>
-          <div
-            class="flex items-center gap-1.5 px-2.5 py-1 bg-emerald-500/10 text-emerald-400 text-[10px] font-bold uppercase tracking-wider rounded-full border border-emerald-500/20">
-            <span>Nature: Plantas</span>
-            <button class="hover:text-white"><i data-lucide="x" class="w-2.5 h-2.5"></i></button>
+
+          <button id="clear-all-btn"
+            class="hidden text-[9px] font-bold text-gray-500 hover:text-red-400 uppercase tracking-widest whitespace-nowrap transition-colors py-2">
+            Clear All
+          </button>
+
+          <!-- Autocomplete Dropdown -->
+          <div id="autocomplete-dropdown"
+            class="hidden absolute top-full left-0 w-64 mt-2 bg-gray-900 border border-gray-800 rounded-xl shadow-2xl z-50 overflow-hidden autocomplete-dropdown">
+            <div
+              class="p-2 border-b border-gray-800 bg-gray-800/20 text-[9px] uppercase font-bold text-gray-500 tracking-wider">
+              Suggestions</div>
+            <ul id="suggestions-list" class="py-1">
+              <!-- Suggestions will be injected here -->
+            </ul>
           </div>
-          <button class="text-[9px] font-bold text-gray-600 hover:text-gray-400 uppercase tracking-widest ml-1">Clear
-            All</button>
         </div>
+
+        <!-- Active Filter Pills (Removed from here as they are now inside the search bar) -->
 
         <!-- Lower Row: Controls -->
         <div class="flex flex-wrap items-center justify-between gap-4 pt-2">
@@ -541,6 +591,179 @@
 
   <script>
     lucide.createIcons();
+
+    // Tag Filtering System
+    const availableTags = [
+      { name: 'The Elements', isCategory: true, color: 'blue' },
+      { name: 'Nature', isCategory: true, color: 'green' },
+      { name: 'Languages', isCategory: true, color: 'purple' },
+      { name: 'Lineage', isCategory: true, color: 'amber' },
+      { name: 'Healing', isCategory: true, color: 'red' },
+      { name: 'Spiritual Concepts', isCategory: true, color: 'yellow' },
+      { name: 'Water', category: 'The Elements', color: 'blue' },
+      { name: 'Air', category: 'The Elements', color: 'slate' },
+      { name: 'Fire', category: 'The Elements', color: 'red' },
+      { name: 'Earth', category: 'The Elements', color: 'amber' },
+      { name: 'Animales', category: 'Nature', color: 'orange' },
+      { name: 'Bird', category: 'Nature', color: 'blue' },
+      { name: 'Plantas', category: 'Nature', color: 'emerald' },
+      { name: 'Moon', category: 'Nature', color: 'indigo' },
+      { name: 'Sun', category: 'Nature', color: 'yellow' },
+      { name: 'Mountain', category: 'Nature', color: 'slate' },
+      { name: 'Selva', category: 'Nature', color: 'green' },
+      { name: 'Spanish', category: 'Languages', color: 'red' },
+      { name: 'English', category: 'Languages', color: 'blue' },
+      { name: 'Quechua', category: 'Languages', color: 'amber' },
+      { name: 'Portuguese', category: 'Languages', color: 'green' },
+      { name: 'Andean', category: 'Lineage', color: 'red' },
+      { name: 'Amazonian', category: 'Lineage', color: 'green' },
+      { name: 'Medicine Songs', category: 'Healing', color: 'teal' },
+      { name: 'Icaros', category: 'Healing', color: 'indigo' }
+    ];
+
+    let activeTags = [
+      { name: 'Water', category: 'The Elements', color: 'blue' },
+      { name: 'Plantas', category: 'Nature', color: 'emerald' }
+    ];
+
+    const input = document.getElementById('tag-search-input');
+    const freeInput = document.getElementById('free-search-input');
+    const wrapper = document.getElementById('tag-input-wrapper');
+    const pillsContainer = document.getElementById('active-pills-container');
+    const dropdown = document.getElementById('autocomplete-dropdown');
+    const suggestionsList = document.getElementById('suggestions-list');
+    const clearAllBtn = document.getElementById('clear-all-btn');
+
+    // Click wrapper to focus input
+    wrapper.addEventListener('click', () => input.focus());
+
+    function renderActiveTags() {
+      pillsContainer.innerHTML = '';
+      activeTags.forEach(tag => {
+        const pill = document.createElement('div');
+        pill.className = `tag-pill flex items-center gap-1 px-2.5 py-0.5 bg-${tag.color}-500/10 text-${tag.color}-400 text-[10px] font-bold uppercase tracking-wider rounded-full border border-${tag.color}-500/20`;
+        pill.innerHTML = `
+          <span>${tag.isCategory ? 'Category: ' : ''}${tag.name}</span>
+          <button class="hover:text-white remove-tag"><i data-lucide="x" class="w-2.5 h-2.5"></i></button>
+        `;
+        pill.querySelector('button').addEventListener('click', (e) => {
+          e.stopPropagation();
+          removeTag(tag.name);
+        });
+        pillsContainer.appendChild(pill);
+      });
+      lucide.createIcons();
+      input.placeholder = activeTags.length > 0 ? '' : 'Add tags to filter...';
+
+      // Toggle Clear All button
+      if (activeTags.length > 0 || freeInput.value.length > 0) {
+        clearAllBtn.classList.remove('hidden');
+      } else {
+        clearAllBtn.classList.add('hidden');
+      }
+    }
+
+    function removeTag(tagName) {
+      activeTags = activeTags.filter(t => t.name !== tagName);
+      renderActiveTags();
+    }
+
+    function addTag(tag) {
+      if (!activeTags.find(t => t.name === tag.name)) {
+        activeTags.push(tag);
+        renderActiveTags();
+      }
+      input.value = '';
+      hideDropdown();
+    }
+
+    function clearAllFilters() {
+      activeTags = [];
+      freeInput.value = '';
+      input.value = '';
+      renderActiveTags();
+      hideDropdown();
+    }
+
+    clearAllBtn.addEventListener('click', clearAllFilters);
+
+    function showDropdown(query) {
+      const filtered = availableTags.filter(tag =>
+        tag.name.toLowerCase().includes(query.toLowerCase()) &&
+        !activeTags.find(at => at.name === tag.name)
+      );
+
+      if (filtered.length === 0) {
+        hideDropdown();
+        return;
+      }
+
+      suggestionsList.innerHTML = '';
+      filtered.forEach(tag => {
+        const li = document.createElement('li');
+        li.className = 'px-4 py-2 hover:bg-gray-800 cursor-pointer flex items-center justify-between group';
+        li.innerHTML = `
+          <div class="flex flex-col">
+            <span class="text-white text-sm font-medium group-hover:text-red-400 transition-colors">${tag.name}</span>
+            <span class="text-[9px] text-gray-500 uppercase tracking-widest">${tag.category}</span>
+          </div>
+          <i data-lucide="plus" class="w-3 h-3 text-gray-700 group-hover:text-red-500 transition-all opacity-0 group-hover:opacity-100"></i>
+        `;
+        li.addEventListener('click', () => addTag(tag));
+        suggestionsList.appendChild(li);
+      });
+
+      dropdown.classList.remove('hidden');
+      lucide.createIcons();
+    }
+
+    function hideDropdown() {
+      dropdown.classList.add('hidden');
+    }
+
+    input.addEventListener('input', (e) => {
+      const query = e.target.value;
+      if (query.length > 0) {
+        showDropdown(query);
+      } else {
+        hideDropdown();
+      }
+      renderActiveTags(); // Update clear all button visibility
+    });
+
+    freeInput.addEventListener('input', () => {
+      renderActiveTags(); // Update clear all button visibility
+    });
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Backspace' && input.value === '' && activeTags.length > 0) {
+        activeTags.pop();
+        renderActiveTags();
+      }
+      if (e.key === 'Enter' && dropdown.classList.contains('hidden') === false) {
+        const firstSuggestion = suggestionsList.querySelector('li');
+        if (firstSuggestion) firstSuggestion.click();
+      }
+    });
+
+    // Close dropdown on outside click
+    document.addEventListener('click', (e) => {
+      if (!wrapper.contains(e.target) && !dropdown.contains(e.target)) {
+        hideDropdown();
+      }
+    });
+
+    // Sidebar integration
+    document.querySelectorAll('aside button, aside h3').forEach(el => {
+      el.addEventListener('click', () => {
+        const text = el.textContent.trim();
+        const tag = availableTags.find(t => t.name === text || t.name === text.replace(':', ''));
+        if (tag) addTag(tag);
+      });
+    });
+
+    // Initial render
+    renderActiveTags();
   </script>
 </body>
 

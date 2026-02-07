@@ -820,3 +820,40 @@
 - [x] Update placeholder to "Search 200+ medicine songs..."
 - [x] Handle TypeScript type mismatches for search state
 - [x] Sync documentation to master logbooks
+- [x] **Tag Filtering UI Improvements (Feb 7, 2026)**
+    - [x] Implement dynamic tag search field with pills
+    - [x] Implement autocompletion logic for tags
+    - [x] Implement tag addition and removal logic
+    - [x] Verify UI aesthetics and functionality in browser
+- [x] **Refine Tag Filtering Layout (Feb 7, 2026)**
+    - [x] Separate Tag Field from Search Bar
+    - [x] Adjust height and placement of Tag Field
+    - [x] Update JavaScript logic for separate fields
+    - [x] Verify refined UI in browser
+- [x] **Port Refined Tag Layout to Library Hub (Feb 7, 2026)**
+    - [x] Port CSS Styles and Logic
+    - [x] Implement 3-row header in screen15_library.html
+    - [x] Sync Sidebar and Autocomplete interactions
+    - [x] Verify in browser
+- [x] **Sync Tag UI across Library Screens (Feb 7, 2026)**
+    - [x] Port Tag UI to screen17_category_library.html
+    - [x] Implement universal "Clear All" button across all relevant screens
+    - [x] Ensure 3-row layout consistency
+    - [x] Verify total synchronization in browser
+- [x] **Implement Tag Filtering in React Code (Feb 7, 2026)**
+    - [x] Create reusable `TagSelector.tsx` component
+    - [x] Refactor `SongsPageContent.tsx` to 3-row header layout
+    - [x] Integrate `TagSelector` and `fetchCategoryTree`
+    - [x] **Granular Color Synchronization**: Mapped ALL tags (e.g. Fire, Water, Air) to a 12-color system in `uiUtils.ts`, ensuring unique colors within categories and exact parity with the sidebar indicators.
+    - [x] Verify individual tag color consistency in browser
+- [x] **Mobile Refinement & Tag Cleanup (Feb 7, 2026)**
+    - [x] Fix vertical spacing between search and tag filter on mobile.
+    - [x] Create and apply migration to remove deprecated tags (`andean`, `amazonian`, `native-american`, `medicine-songs`).
+    - [x] Update `uiUtils.ts` to remove deprecated tag mappings.
+    - [x] Implement "Enter to select top suggestion" in `TagSelector.tsx`.
+    - [x] Verify all changes in the browser (Spacing, Cleanup, UX).
+
+- [x] Implement Backspace-to-remove in `TagSelector.tsx` (Remove tags, then category)
+- [x] Update `sync-artifacts` workflow to exclude Evidence sections
+- [x] Verify Backspace behavior in browser
+- [x] Update `sync-artifacts.md` to restrict execution to PR creation or pre-merge.
