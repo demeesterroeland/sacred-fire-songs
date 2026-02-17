@@ -878,3 +878,5 @@
 - [x] Integrate with Song Detail page <!-- id: 12 -->
 - [x] Fix local network connectivity issue <!-- id: 14 -->
 - [x] Verify persistence and behavior <!-- id: 13 -->
+- [x] Refine Settings UI for mobile <!-- id: 14 -->
+    - [x] Replace manual toggle with standard `Switch` component <!-- id: 15 -->

@@ -2020,3 +2020,8 @@ Resolved an issue where the app couldn't reach Supabase from mobile devices on t
 - **Settings Toggle**: Verified that the toggle correctly updates `localStorage`.
 - **Wake Lock**: Verified activation on song detail pages and support detection logic.
 - **Network**: Verified that the app loads correctly when accessed via local IP on mobile devices.
+
+### 5. Settings UI Refinement
+Refined the settings page UI to improve mobile consistency.
+- **Component Swap**: Replaced the manual button-based toggle with the project's standard Radix-based `Switch` component.
+- **Improved Responsiveness**: The standard component handles touch targets and alignment more reliably across different mobile viewports.
