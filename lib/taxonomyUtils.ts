@@ -20,7 +20,7 @@ export async function fetchCategoryTree(): Promise<TaxonomyNode[]> {
     .order('name');
 
   if (error) {
-    console.error('Error fetching categories:', error);
+    console.error('Error fetching categories:', JSON.stringify(error, null, 2));
     return [];
   }
 

@@ -1991,3 +1991,32 @@ I verified all changes on `http://localhost:3000/songs`:
 - **Cleanup**: Removed all existing 'Evidence' sections from [master-walkthrough.md](file:///home/roeland/Projects/sacred-fire-songs/doc/logbook/master-walkthrough.md).
 
 
+
+## Session Update (Feb 18, 2026 - Screen Wake Lock & Settings)
+
+I've implemented the **Screen Wake Lock** feature and a functional **Settings** page to prevent mobile devices from sleeping while viewing songs.
+
+### 1. Functional Settings Page
+Replaced the "Under Construction" settings page with a premium UI that allows users to manage their preferences.
+- Added a **"Keep Screen Awake"** toggle using the standard UI `Switch` component.
+- Included descriptive labels and a premium look consistent with the site's dark theme.
+
+### 2. Screen Wake Lock Integration
+Implemented the Screen Wake Lock API to prevent the screen from dimming or sleeping on supported browsers.
+- **`useWakeLock` Hook**: Encapsulates the API logic, handles visibility changes (re-acquiring the lock when returning to the tab), and provides support detection.
+- **Automatic Activation**: On every Song Detail page, the wake lock is automatically requested if the user has the feature enabled.
+
+### 3. Preferences Persistence
+Created a global `UserPreferencesContext` to manage and persist settings.
+- **Local Storage**: Settings are saved to `localStorage`, so they remain consistent across browsing sessions.
+- **Default State**: Enabled by default to provide immediate value for musicians on mobile.
+
+### 4. Local Network Connectivity Fix
+Resolved an issue where the app couldn't reach Supabase from mobile devices on the local IP.
+- Updated `NEXT_PUBLIC_SUPABASE_URL` to the machine's local IP in `.env.local`.
+- Configured `next.config.ts` to allow local cross-origin requests.
+
+### Verification
+- **Settings Toggle**: Verified that the toggle correctly updates `localStorage`.
+- **Wake Lock**: Verified activation on song detail pages and support detection logic.
+- **Network**: Verified that the app loads correctly when accessed via local IP on mobile devices.

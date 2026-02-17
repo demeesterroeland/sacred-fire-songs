@@ -50,4 +50,5 @@
 | **Feb 3** | **Feature**: Tag Editing, RLS Fixes, & Production Updates | ~6.75 Hours | ✅ Completed |
 | **Feb 4** | **Data**: Nina Urku SoundCloud & YouTube Scraper + Seed Update | ~1.75 Hours | ✅ Completed |
 | **Feb 17** | **UI**: Mobile Header Refinement & Lyrics Wrapping Fix | ~3.5 Hours | ✅ Completed |
-| **Total** | **Development + AI Collaboration** | **~102.50 Hours** | |
+| **Feb 18** | **Feature**: Screen Wake Lock & Settings UI | ~2.5 Hours | ✅ Completed |
+| **Total** | **Development + AI Collaboration** | **~105.00 Hours** | |
