@@ -84,12 +84,62 @@ export function parseChordProForDisplay(content: string): ChordProSection[] {
             );
 
             if (hasContent) {
-                const cleanItems = line.items.map((item: any) => ({
+                const items = line.items.map((item: any) => ({
                     chords: item.chords || undefined,
                     lyrics: item.lyrics || undefined
                 }));
 
-                const cleanLine: ChordProLine = { items: cleanItems };
+                const atomizedItems: ChordProItem[] = [];
+
+                items.forEach((item: any) => {
+                    if (!item.lyrics || item.lyrics.trim().length === 0) {
+                        atomizedItems.push(item);
+                        return;
+                    }
+
+                    // Split lyrics by whitespace, keeping the whitespace with the word it follows
+                    const parts = item.lyrics.split(/(\s+)/);
+                    let firstPartProcessed = false;
+                    let currentCombined = '';
+
+                    parts.forEach((part: string) => {
+                        if (part === '') return;
+
+                        if (/\s+/.test(part)) {
+                            // It's a whitespace part. Join with previous word and push as atom.
+                            atomizedItems.push({
+                                chords: !firstPartProcessed ? item.chords : undefined,
+                                lyrics: currentCombined + part
+                            });
+                            currentCombined = '';
+                            firstPartProcessed = true;
+                        } else {
+                            // It's a word part.
+                            if (currentCombined !== '') {
+                                // If we have a pending word without trailing space, push it now
+                                atomizedItems.push({
+                                    chords: !firstPartProcessed ? item.chords : undefined,
+                                    lyrics: currentCombined
+                                });
+                                firstPartProcessed = true;
+                            }
+                            currentCombined = part;
+                        }
+                    });
+
+                    // Handle remaining part
+                    if (currentCombined !== '') {
+                        atomizedItems.push({
+                            chords: !firstPartProcessed ? item.chords : undefined,
+                            lyrics: currentCombined
+                        });
+                    } else if (!firstPartProcessed && item.chords) {
+                        // If no lyrics were processed but there was a chord
+                        atomizedItems.push({ chords: item.chords });
+                    }
+                });
+
+                const cleanLine: ChordProLine = { items: atomizedItems };
 
                 if (currentSection) {
                     currentSection.lines.push(cleanLine);

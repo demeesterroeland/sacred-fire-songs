@@ -798,6 +798,17 @@ I have refined the **Song Detail** mockup (`screen2_song_detail.html`) to be ful
 - **Aesthetics**:
     - Title "Caboclo" in fire red with updated font weight.
     - Premium [CHORDS] and [MELODY] badges with distinct borders and icons.
+
+## Session Update (Feb 17, 2026 - Mobile Layout Refinement)
+
+### UI Improvements
+- **Mobile Header Overflow Fix**: Implemented width constraints (`flex-1`, `min-w-0`) and truncation for long song titles to prevent buttons from being pushed off-screen.
+- **Mobile Metadata Reordering**: Reordered song details on mobile to group Title and Author together, with Chords/Melody badges and tags placed thoughtfully below.
+- **Robust Hanging Indent for Lyrics**: Implemented a flexbox-based hanging indent that visually distinguishes wrapped lyric segments without risking text overlap.
+
+### Logic & Performance
+- **Lyric Atomization**: Updated the ChordPro parser to split lyric segments into individual words. This enables natural browser-based word wrapping on small screens while maintaining precise chord alignment.
+- **Whitespace Management**: Ensured trailing spaces are preserved between atomized words using `whitespace-pre`.
     - Refined Metadata section for Key, Capo, and Tuning.
 - **Improved Readability**:
     - Verse and Chorus sections are clearly labeled with secondary vertical text on widescreen and primary labels on mobile.

@@ -114,7 +114,7 @@ export default function SongDetailPage() {
         <div className="flex flex-col min-h-screen">
             {/* Mobile Header (Visible only on mobile < lg) */}
             <header className="lg:hidden flex justify-between items-center px-4 py-3 sticky top-0 bg-gray-900/95 backdrop-blur-md z-30 border-b border-white/5 shadow-lg">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3 flex-1 min-w-0 pr-2">
                     {/* Menu Trigger */}
                     <button
                         onClick={() => setIsOpen(true)}
@@ -127,25 +127,10 @@ export default function SongDetailPage() {
                     <div className="w-8 h-8 bg-gradient-to-br from-red-700 to-orange-600 rounded-full flex items-center justify-center shadow-lg shadow-red-900/30 ring-1 ring-white/10 shrink-0">
                         <Flame className="text-white w-5 h-5 fill-current" />
                     </div>
-                    <h1 className="font-bold text-base tracking-tight text-white truncate">Sacred Fire Songs</h1>
+                    <h1 className="font-bold text-base tracking-tight text-white truncate flex-1 min-w-0">Sacred Fire Songs</h1>
                 </div>
                 {/* Action Buttons and User Profile (Mobile) */}
-                <div className="flex items-center gap-2">
-                    {(song.owner_id === user?.id || isAdmin) && (
-                        <button
-                            onClick={() => setIsDeleteModalOpen(true)}
-                            className="p-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg border border-red-500/20 transition-all"
-                        >
-                            <Trash2 className="w-5 h-5" />
-                        </button>
-                    )}
-                    {(song.owner_id === user?.id || isAdmin) && (
-                        <Link href={`/songs/${id}/edit`}>
-                            <button className="p-2 bg-gray-800 hover:bg-gray-700 text-gray-200 rounded-lg border border-gray-700 transition-all">
-                                <Edit2 className="w-5 h-5" />
-                            </button>
-                        </Link>
-                    )}
+                <div className="flex items-center gap-2 shrink-0">
                     <Link href="/" className="p-2 text-gray-400 hover:text-white transition-colors">
                         <ArrowLeft className="w-5 h-5" />
                     </Link>
@@ -218,27 +203,31 @@ export default function SongDetailPage() {
 
                 <div className="max-w-5xl p-6 md:p-10 space-y-0">
 
-                    {/* Mobile: Song Title, Badges, and Action Buttons Row (md:hidden but we use lg:hidden to match header switch) */}
+                    {/* Mobile: Song Title, Author, Badges row */}
                     <div className="lg:hidden flex flex-col gap-4 mb-6">
                         <div className="flex-1 space-y-3">
-                            {/* Title and Badges */}
-                            <div className="flex flex-wrap items-center gap-3">
-                                <h1 className="text-4xl font-black text-[#ff4400] tracking-tight">{song.title}</h1>
-                                <div className="flex items-center gap-2">
-                                    {song.has_chords && (
-                                        <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest shadow-sm bg-amber-500/5 border border-amber-500/30 text-amber-500">
-                                            <LinkIcon className="w-3 h-3" /> Chords
-                                        </span>
-                                    )}
-                                    {song.has_melody && (
-                                        <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest shadow-sm bg-emerald-500/5 border border-emerald-500/30 text-emerald-500">
-                                            <Music className="w-3 h-3" /> Melody
-                                        </span>
-                                    )}
+                            {/* Title and Author Grouping */}
+                            <div className="space-y-1">
+                                <div className="flex flex-wrap items-baseline gap-x-3">
+                                    <h1 className="text-4xl font-black text-[#ff4400] tracking-tight">{song.title}</h1>
+                                    <p className="text-gray-400 text-base font-medium">by {song.original_author || 'Traditional'}</p>
                                 </div>
                             </div>
-                            {/* Artist */}
-                            <p className="text-gray-400 text-base font-medium">by {song.original_author || 'Traditional'}</p>
+
+                            {/* Technical Badges (Chords/Melody) */}
+                            <div className="flex items-center gap-2">
+                                {song.has_chords && (
+                                    <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest shadow-sm bg-amber-500/5 border border-amber-500/30 text-amber-500">
+                                        <LinkIcon className="w-3 h-3" /> Chords
+                                    </span>
+                                )}
+                                {song.has_melody && (
+                                    <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest shadow-sm bg-emerald-500/5 border border-emerald-500/30 text-emerald-500">
+                                        <Music className="w-3 h-3" /> Melody
+                                    </span>
+                                )}
+                            </div>
+
                             {/* Category Tags */}
                             <div className="flex items-center gap-2">
                                 {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
