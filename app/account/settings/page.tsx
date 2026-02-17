@@ -2,6 +2,7 @@
 
 import { useUserPreferences } from '@/context/UserPreferencesContext';
 import { useWakeLock } from '@/hooks/useWakeLock';
+import { Switch } from '@/components/ui/switch';
 
 export default function SettingsPage() {
   const { preferences, setPreference } = useUserPreferences();
@@ -32,22 +33,12 @@ export default function SettingsPage() {
               </p>
             </div>
 
-            <button
-              onClick={() => setPreference('keepScreenAwake', !preferences.keepScreenAwake)}
+            <Switch
+              checked={preferences.keepScreenAwake && isSupported}
+              onCheckedChange={(checked: boolean) => setPreference('keepScreenAwake', checked)}
               disabled={!isSupported}
-              className={`
-                relative inline-flex h-7 w-12 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-950
-                ${preferences.keepScreenAwake && isSupported ? 'bg-red-600' : 'bg-gray-700'}
-                ${!isSupported ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
-              `}
-            >
-              <span
-                className={`
-                  inline-block h-5 w-5 transform rounded-full bg-white transition-transform
-                  ${preferences.keepScreenAwake && isSupported ? 'translate-x-6' : 'translate-x-1'}
-                `}
-              />
-            </button>
+              className="data-[state=checked]:bg-red-600"
+            />
           </div>
         </section>
 
