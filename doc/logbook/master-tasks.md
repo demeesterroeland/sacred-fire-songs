@@ -863,3 +863,18 @@
     - [x] Reorder mobile meta information (Title/Author grouping)
     - [x] Implement robust lyrics hanging indent (Flexbox approach)
     - [x] Update ChordPro parser with lyric atomization for better wrapping
+- [x] Create issue for screen wake lock <!-- id: 0 -->
+    - [x] Identify Epic and Story ID <!-- id: 1 -->
+    - [x] Draft issue content with Gherkin AC <!-- id: 2 -->
+    - [x] Review with user <!-- id: 3 -->
+    - [x] Create GitHub issue <!-- id: 4 -->
+    - [x] Sync `epic&user stories.md` <!-- id: 5 -->
+- [x] Plan Screen Wake Lock solution <!-- id: 6 -->
+    - [x] Research API and structure <!-- id: 7 -->
+    - [x] Draft implementation plan <!-- id: 8 -->
+- [x] Implement UserPreferencesContext <!-- id: 9 -->
+- [x] Implement useWakeLock hook <!-- id: 10 -->
+- [x] Implement Settings page with toggle <!-- id: 11 -->
+- [x] Integrate with Song Detail page <!-- id: 12 -->
+- [x] Fix local network connectivity issue <!-- id: 14 -->
+- [x] Verify persistence and behavior <!-- id: 13 -->

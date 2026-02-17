@@ -12,6 +12,7 @@ import MediaEmbeds from '@/components/song/MediaEmbeds';
 import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Trash2, Edit2, ArrowLeft, Lock as LockIcon, Music, Link as LinkIcon, Flame, IndentIncrease } from 'lucide-react';
+import { useWakeLock } from '@/hooks/useWakeLock';
 import { UserProfile } from '@/components/common/navigation/UserProfile';
 import { getCategoryColor, getCategoryStyles } from '@/lib/uiUtils';
 
@@ -66,6 +67,9 @@ export default function SongDetailPage() {
     const { user, loading: authLoading } = useAuth();
     const { setIsOpen } = useSidebar();
     const isAdmin = user?.role === 'admin';
+
+    // Enable Screen Wake Lock on Song Detail Page
+    useWakeLock();
 
     // The Query Hook
     const { data: song, isLoading: songLoading } = useQuery({

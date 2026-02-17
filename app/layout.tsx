@@ -28,6 +28,7 @@ import Header from "@/components/common/Header";
 import Sidebar from "@/components/common/Sidebar";
 import QueryProvider from "@/components/providers/QueryProvider";
 import { SidebarProvider } from "@/context/SidebarContext";
+import { UserPreferencesProvider } from "@/context/UserPreferencesContext";
 import EnvironmentBanner from "@/components/common/EnvironmentBanner";
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode; }>) {
@@ -41,25 +42,27 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         suppressHydrationWarning
       >
         <EnvironmentBanner />
-        <SidebarProvider>
-          <QueryProvider>
-            <div className="min-h-screen bg-black text-gray-100 font-sans flex flex-col lg:flex-row selection:bg-red-500/30">
+        <UserPreferencesProvider>
+          <SidebarProvider>
+            <QueryProvider>
+              <div className="min-h-screen bg-black text-gray-100 font-sans flex flex-col lg:flex-row selection:bg-red-500/30">
 
-              {/* Sidebar (Responsive Mini/Full) */}
-              <Sidebar />
+                {/* Sidebar (Responsive Mini/Full) */}
+                <Sidebar />
 
-              {/* Main Content Area */}
-              <div className="flex-1 flex flex-col min-w-0 bg-gray-950 relative">
-                {/* Global Header */}
-                <Header />
+                {/* Main Content Area */}
+                <div className="flex-1 flex flex-col min-w-0 bg-gray-950 relative">
+                  {/* Global Header */}
+                  <Header />
 
-                {/* Page Content */}
-                {children}
+                  {/* Page Content */}
+                  {children}
+                </div>
               </div>
-            </div>
-          </QueryProvider>
-        </SidebarProvider>
-        <SpeedInsights />
+            </QueryProvider>
+          </SidebarProvider>
+          <SpeedInsights />
+        </UserPreferencesProvider>
       </body>
     </html>
   );

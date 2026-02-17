@@ -186,6 +186,24 @@ Scenario: Navigate back to home
   Given I am on the Song Detail page
   When I click the "Back" arrow in the header
   Then I should be redirected to the Home page
+
+**Story 1.3.5:** As a Musician, I want the screen to stay awake while I am viewing a song so that I don't have to touch it to keep the lyrics and chords visible while playing.
+
+```gherkin
+Scenario: Prevent screen sleep on Song Detail page
+  Given I am on the Song Detail page of a song
+  And I am on a supported mobile browser
+  When the page load is complete
+  Then a Wake Lock should be requested automatically (using Screen Wake Lock API)
+  And the screen should remain on regardless of system timeout settings
+
+Scenario: Behavior on visibility change
+  Given I have a wake lock active on a song page
+  When I switch tabs or minimize the browser
+  Then the wake lock should be released
+  When I return to the song page tab
+  Then the wake lock should be re-acquired automatically
+```
 ```
 
 ## Phase 2: Minimal Lovable Product (MLP)
