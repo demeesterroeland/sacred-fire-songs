@@ -35,9 +35,12 @@ export default function SongDisplay({ content, melodyNotation }: SongDisplayProp
                     <div className="space-y-6">
                         {section.lines.map((line: ChordProLine, lineIdx) => (
                             <div key={lineIdx}>
-                                <div className="flex flex-wrap leading-loose">
+                                <div className="flex flex-wrap pl-6 md:pl-8 leading-loose">
                                     {line.items.map((item: ChordProItem, itemIdx) => (
-                                        <div key={itemIdx} className="flex flex-col mr-1">
+                                        <div
+                                            key={itemIdx}
+                                            className={`flex flex-col align-top shrink-0 ${itemIdx === 0 ? '-ml-6 md:-ml-8' : ''}`}
+                                        >
                                             {/* The Chord (Red and Bold) */}
                                             {item.chords ? (
                                                 <span className="text-[#ff4400] font-bold text-xs h-4 font-mono mb-1">
@@ -46,8 +49,8 @@ export default function SongDisplay({ content, melodyNotation }: SongDisplayProp
                                             ) : (
                                                 <div className="h-4 mb-1" /> // Spacer
                                             )}
-                                            {/* The Lyric (White) */}
-                                            <span className="text-gray-300 text-xl md:text-2xl font-medium tracking-tight font-sans">
+                                            {/* The Lyric (White) - using whitespace-pre to preserve atomized spaces */}
+                                            <span className="text-gray-300 text-xl md:text-2xl font-medium tracking-tight font-sans whitespace-pre">
                                                 {item.lyrics || '\u00A0'}
                                             </span>
                                         </div>

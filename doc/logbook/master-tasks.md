@@ -857,3 +857,9 @@
 - [x] Update `sync-artifacts` workflow to exclude Evidence sections
 - [x] Verify Backspace behavior in browser
 - [x] Update `sync-artifacts.md` to restrict execution to PR creation or pre-merge.
+
+- [x] **Mobile Layout Refinement (Feb 17, 2026)**
+    - [x] Fix mobile header overflow (title truncation & button spacing)
+    - [x] Reorder mobile meta information (Title/Author grouping)
+    - [x] Implement robust lyrics hanging indent (Flexbox approach)
+    - [x] Update ChordPro parser with lyric atomization for better wrapping
