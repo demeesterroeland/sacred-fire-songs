@@ -2025,3 +2025,8 @@ Resolved an issue where the app couldn't reach Supabase from mobile devices on t
 Refined the settings page UI to improve mobile consistency.
 - **Component Swap**: Replaced the manual button-based toggle with the project's standard Radix-based `Switch` component.
 - **Improved Responsiveness**: The standard component handles touch targets and alignment more reliably across different mobile viewports.
+
+### 6. Sidebar Auto-Close on Mobile
+Improved UX by ensuring the sidebar drawer closes automatically upon navigation or filter selection on mobile devices.
+- **Auto-Close Logic**: Injected `setIsOpen(false)` into all sidebar navigation links and taxonomy filters.
+- **Consistency**: Applied cross-component synchronization between `Sidebar` and `LibrarySidebar`.

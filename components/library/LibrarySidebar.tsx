@@ -6,6 +6,7 @@ import Link from 'next/link';
 import { useSearchParams, usePathname } from 'next/navigation';
 import { Loader2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { useSidebar } from '@/context/SidebarContext';
 
 // Helper to map slugs to approximate colors (mimicking the design)
 import { getCategoryColor, getCategoryStyles } from '@/lib/uiUtils';
@@ -69,6 +70,7 @@ const ColorPill = ({
 export default function LibrarySidebar() {
   const searchParams = useSearchParams();
   const pathname = usePathname();
+  const { setIsOpen } = useSidebar();
   const activeCategory = searchParams.get('category');
 
   // Parse tags: split by comma to support multi-select
@@ -124,7 +126,11 @@ export default function LibrarySidebar() {
           <div key={group.id}>
             {/* Parent Category Header (Selects Category OR Logic) */}
             {/* Clicking header usually resets tags to just the category context or toggle category */}
-            <Link href={`/songs?category=${group.slug}`} className="block">
+            <Link
+              href={`/songs?category=${group.slug}`}
+              className="block"
+              onClick={() => setIsOpen(false)}
+            >
               <ColorPill
                 slug={group.slug}
                 name={group.name}
@@ -140,7 +146,12 @@ export default function LibrarySidebar() {
               {group.children.map(child => {
                 const isTagActive = activeTags.includes(child.slug);
                 return (
-                  <Link key={child.id} href={getToggleTagUrl(child.slug)} scroll={false}>
+                  <Link
+                    key={child.id}
+                    href={getToggleTagUrl(child.slug)}
+                    scroll={false}
+                    onClick={() => setIsOpen(false)}
+                  >
                     <ColorPill
                       slug={child.slug}
                       name={child.name}

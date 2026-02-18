@@ -73,6 +73,7 @@ export default function Sidebar() {
                             exclude={'exclude' in item ? item.exclude : []}
                             layout="sidebar"
                             showText={true}
+                            onClick={() => setIsOpen(false)}
                         />
                     ))}
 

@@ -880,3 +880,7 @@
 - [x] Verify persistence and behavior <!-- id: 13 -->
 - [x] Refine Settings UI for mobile <!-- id: 14 -->
     - [x] Replace manual toggle with standard `Switch` component <!-- id: 15 -->
+- [x] Implement Sidebar Auto-Close on Mobile <!-- id: 16 -->
+    - [x] Add close handler to main NavLinks
+    - [x] Add close handler to Library browse filters
+- [x] Merge `feat/72-screen-wake-lock` into `main` <!-- id: 17 -->
