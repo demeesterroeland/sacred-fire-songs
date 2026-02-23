@@ -1,4 +1,4 @@
-import React, { forwardRef, useRef } from 'react';
+import React, { forwardRef } from 'react';
 
 interface ChordProEditorProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
   value?: string;
@@ -6,69 +6,77 @@ interface ChordProEditorProps extends React.TextareaHTMLAttributes<HTMLTextAreaE
 
 const ChordProEditor = forwardRef<HTMLTextAreaElement, ChordProEditorProps>(
   ({ className = '', style, value = '', onChange, ...props }, ref) => {
-    const backdropRef = useRef<HTMLDivElement>(null);
-
-    // Sync scroll from textarea to backdrop
-    const handleScroll = (e: React.UIEvent<HTMLTextAreaElement>) => {
-      if (backdropRef.current) {
-        backdropRef.current.scrollTop = e.currentTarget.scrollTop;
-        backdropRef.current.scrollLeft = e.currentTarget.scrollLeft;
-      }
-    };
 
     const renderHighlights = (text: string) => {
-      // Split by brackets to find chords [Am]
-      // We use a regex that captures the delimiters to include them in the parts
       const parts = text.split(/(\[.*?\])/g);
       return parts.map((part, i) => {
         if (part.startsWith('[') && part.endsWith(']')) {
-          // Highlight chords in primary color (Red)
           return <span key={i} className="text-primary font-bold">{part}</span>;
         }
         return part;
       });
     };
 
-    return (
-      <div className={`relative group ${className}`}>
-        {/* Backdrop Layer (Highlights) — MUST match textarea's white-space and overflow
-            exactly so line counts never diverge. white-space:pre ensures 1 source line
-            = 1 rendered line on both layers, regardless of font sub-pixel differences. */}
-        <div
-          ref={backdropRef}
-          className="absolute inset-0 pointer-events-none p-4 font-mono text-sm leading-relaxed text-white"
-          aria-hidden="true"
-          style={{
-            zIndex: 0,
-            whiteSpace: 'pre',      // no wrapping — mirrors textarea behaviour
-            overflowX: 'auto',      // scroll to follow textarea horizontal scroll
-            overflowY: 'scroll',    // always reserve scrollbar gutter (matches textarea)
-            scrollbarWidth: 'none', // Firefox: hide scrollbar visually
-            msOverflowStyle: 'none',
-          }}
-        >
-          {renderHighlights(value)}
-          <br />
-        </div>
+    const sharedStyles: React.CSSProperties = {
+      padding: '16px',
+      fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
+      fontSize: '14px',
+      lineHeight: '24px',
+      letterSpacing: 'normal',
+      textRendering: 'optimizeSpeed',
+      whiteSpace: 'pre',
+      border: 'none',
+      margin: '0',
+      boxSizing: 'border-box',
+      textAlign: 'left',
+    };
 
-        {/* Input Layer (Textarea) */}
-        <textarea
-          ref={ref}
-          className="relative z-10 block w-full h-full bg-transparent text-transparent caret-white p-4 font-mono text-sm leading-relaxed focus:outline-none resize-none selection:bg-blue-500/30 selection:text-transparent placeholder:text-[#a19eb7]/30"
-          style={{
-            ...style,
-            color: 'transparent',
-            whiteSpace: 'pre',   // disable textarea word-wrap
-            overflowX: 'auto',
-            overflowY: 'scroll', // always show scrollbar gutter
-          }}
-          onScroll={handleScroll}
-          onChange={onChange}
-          value={value}
-          spellCheck={false}
-          wrap="off"
-          {...props}
-        />
+    return (
+      <div
+        className={`relative group ${className}`}
+        style={{ ...style, overflow: 'auto', WebkitOverflowScrolling: 'touch' }}
+      >
+        <div style={{ position: 'relative', minWidth: '100%', minHeight: '100%', width: 'max-content', display: 'flex' }}>
+          {/* Backdrop Layer */}
+          <div
+            className="pointer-events-none text-white flex-1"
+            aria-hidden="true"
+            style={{
+              ...sharedStyles,
+              position: 'relative',
+              zIndex: 0,
+              minHeight: '100%',
+            }}
+          >
+            {renderHighlights(value)}
+            {/* Ensure a phantom newline matches textarea boundary at the bottom */}
+            {value.endsWith('\n') ? '\n\u200B' : ''}
+            {/* Ensure empty textarea has a physical height of 1 row */}
+            {value === '' ? '\u200B' : ''}
+          </div>
+
+          {/* Input Layer */}
+          <textarea
+            ref={ref}
+            className="absolute top-0 left-0 bg-transparent caret-white focus:outline-none resize-none selection:bg-blue-500/30 selection:text-transparent placeholder:text-[#a19eb7]/30"
+            style={{
+              ...sharedStyles,
+              zIndex: 1,
+              color: 'transparent',
+              WebkitTextFillColor: 'transparent',
+              overflow: 'hidden',
+              display: 'block',
+              width: '100%',
+              height: '100%',
+              outline: 'none',
+            }}
+            onChange={onChange}
+            value={value}
+            spellCheck={false}
+            wrap="off"
+            {...props}
+          />
+        </div>
       </div>
     );
   }

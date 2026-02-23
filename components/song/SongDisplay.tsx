@@ -16,30 +16,23 @@ export default function SongDisplay({ content, melodyNotation, hasChords = false
             {sections.map((section, sectionIdx) => (
                 <div
                     key={sectionIdx}
-                    className={`relative ${sectionIdx > 0 ? (hasChords ? 'mt-8' : 'mt-6') : ''} ${section.type === 'chorus' ? 'border-l-2 border-[#ff4400]/40 pl-6 md:pl-8 py-1 ml-1' : ''}`}
+                    className={`relative ${sectionIdx > 0 ? (hasChords ? 'mt-8' : 'mt-6') : ''} ${section.type === 'chorus' ? 'border-l-2 border-[#ff4400]/40 pl-3 md:pl-4 py-1 ml-1' : ''}`}
                 >
                     {/* Section Label */}
                     {section.label && (
-                        <>
-                            {/* Desktop: Vertical Label */}
-                            <span
-                                className={`absolute -left-4 top-1/2 -translate-x-full -translate-y-1/2 hidden md:block text-xs font-black uppercase tracking-widest rotate-180 ${section.type === 'chorus' ? 'text-[#ff4400]/60' : 'text-gray-600'}`}
-                                style={{ writingMode: 'vertical-rl' }}
-                            >
-                                {section.label}
-                            </span>
-                            {/* Mobile: Horizontal Label */}
-                            <span className={`md:hidden block text-xs font-black uppercase tracking-widest mb-4 ${section.type === 'chorus' ? 'text-[#ff4400]/80' : 'text-gray-600'}`}>
-                                {section.label}
-                            </span>
-                        </>
+                        <span
+                            className={`absolute -left-2 md:-left-4 top-1/2 -translate-x-full -translate-y-1/2 text-[9px] md:text-xs font-black uppercase tracking-widest rotate-180 ${section.type === 'chorus' ? 'text-[#ff4400]/60' : 'text-gray-600'}`}
+                            style={{ writingMode: 'vertical-rl' }}
+                        >
+                            {section.label}
+                        </span>
                     )}
 
                     {/* Section Content */}
-                    <div className={`${hasChords ? 'space-y-4' : 'space-y-1'} ${section.type === 'chorus' ? 'pl-4' : ''}`}>
+                    <div className={`${hasChords ? 'space-y-4' : 'space-y-1'} ${section.type === 'chorus' ? 'pl-2' : ''}`}>
                         {section.lines.map((line: ChordProLine, lineIdx) => (
                             <div key={lineIdx}>
-                                <div className={`flex flex-wrap pl-6 md:pl-8`}>
+                                <div className={`flex flex-wrap pl-4 md:pl-6`}>
                                     {line.items.map((item: ChordProItem, itemIdx) => {
                                         // Inline comment item — {c:} or {ci:}
                                         if (item.comment !== undefined) {
@@ -47,7 +40,7 @@ export default function SongDisplay({ content, melodyNotation, hasChords = false
                                                 <span
                                                     key={itemIdx}
                                                     style={{ marginBottom: hasChords ? '0.1rem' : '0.15rem' }}
-                                                    className={`self-end text-xs text-gray-500 border-l-2 border-gray-700 pl-2 ml-1 mr-2 leading-tight ${item.italic ? 'italic' : ''} ${itemIdx === 0 ? '-ml-6 md:-ml-8' : ''}`}
+                                                    className={`self-end text-xs text-gray-500 border-l-2 border-gray-700 pl-1 mr-2 leading-tight ${item.italic ? 'italic' : ''} ${itemIdx === 0 ? '-ml-4 md:-ml-6' : 'ml-1'}`}
                                                 >
                                                     {item.comment}
                                                 </span>
@@ -57,7 +50,7 @@ export default function SongDisplay({ content, melodyNotation, hasChords = false
                                         return (
                                             <div
                                                 key={itemIdx}
-                                                className={`flex flex-col align-top shrink-0 ${itemIdx === 0 ? '-ml-6 md:-ml-8' : ''}`}
+                                                className={`flex flex-col align-top shrink-0 ${itemIdx === 0 ? '-ml-4 md:-ml-6' : ''}`}
                                             >
                                                 {/* The Chord (Red and Bold) — only render if song has chords */}
                                                 {hasChords && (
