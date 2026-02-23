@@ -68,7 +68,7 @@ export function parseChordProForDisplay(content: string): ChordProSection[] {
                     label: sectionStartItem._value || (type === 'chorus' ? 'Chorus' : undefined),
                     lines: []
                 };
-                return; // Skip the tag line
+                // Don't return — fall through to process any content items on the same line as {soc}
             }
 
             // Handle Section End
@@ -77,7 +77,7 @@ export function parseChordProForDisplay(content: string): ChordProSection[] {
                     sections.push(currentSection);
                     currentSection = null;
                 }
-                return; // Skip the tag line
+                // Don't return — fall through to catch any content on the same line as {eoc}
             }
 
             // Handle Content (includes comments as content)
