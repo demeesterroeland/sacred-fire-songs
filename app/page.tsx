@@ -1,16 +1,13 @@
 'use client';
 
-import SearchBar from "@/components/home/SearchBar";
 import SongCard from "@/components/home/SongCard";
 import SongCardSkeleton from "@/components/home/SongCardSkeleton";
-import { useState } from "react";
-import { filterSongs, fetchSongs } from "@/lib/songUtils";
+import { fetchSongs } from "@/lib/songUtils";
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
 
 export default function Home() {
-  const [searchQuery, setSearchQuery] = useState("");
   const { user } = useAuth();
 
   const { data: songs = [], isLoading } = useQuery({
@@ -21,16 +18,11 @@ export default function Home() {
   // Home page only shows public songs
   let displaySongs = songs.filter(song => song.isPublic);
 
-  // Text Search Filter
-  displaySongs = filterSongs(displaySongs, searchQuery);
-
   return (
     <main className="flex-1 min-h-0 bg-gray-950">
 
       {/* Dashboard Widgets Area */}
       <div className="p-4 md:p-8 space-y-8 max-w-7xl mx-auto">
-
-        <SearchBar value={searchQuery} onChange={setSearchQuery} />
 
         {/* Quick Stats / Actions */}
         <div className="hidden md:grid grid-cols-2 md:grid-cols-4 gap-4">
@@ -38,7 +30,7 @@ export default function Home() {
             <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center mb-3 group-hover:bg-red-500/20 transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-music w-5 h-5 text-red-500"><path d="M9 18V5l12-2v13" /><circle cx="6" cy="18" r="3" /><circle cx="18" cy="16" r="3" /></svg>
             </div>
-            <h3 className="font-bold text-white">Browse Songs</h3>
+            <h3 className="font-bold text-white">Search Songs</h3>
             <p className="text-xs text-gray-500 mt-1">View all</p>
           </Link>
 

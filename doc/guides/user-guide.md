@@ -14,6 +14,7 @@
 | **1.3** | Jan 10, 2026 | Refactored "Upload" terminology to "Add Song". |
 | **2.0** | Jan 30, 2026 | Major update: Magic Link auth, .cho/.txt imports, Public/Private songs, and Advanced Filters. |
 | **2.1** | Feb 02, 2026 | Rebranded "Private" songs to "Draft" and added advanced filter combinability. |
+| **2.2** | Feb 23, 2026 | Removed Home page search box and renamed "Library" to "Search Songs". |
 
 Welcome to **Sacred Fire Songs**, a digital songbook designed for ceremonial musicians. This guide covers how to browse, learn, and manage medicine songs using our platform.
 
@@ -40,7 +41,7 @@ If you prefer, you can also sign up or log in using a tradition **Email & Passwo
 ## 2. Using the Library
 
 ### 2.1 Browsing & Searching
-The **Library** page allows you to find songs quickly:
+The **Search Songs** page allows you to find songs quickly:
 - **Search**: Search by title, author, or even words within the lyrics.
 - **Sorting**: Toggle between **Alphabetical** (Title) or **Chronological** (Newest) order.
 

@@ -13,6 +13,7 @@
 | **1.18** | Feb 1, 2026 | Standardized navigation layout across all administrative screens. Renamed "Settings" to "Playlists". Refined inter-linking between Home, Explore, and Detail screens. |
 | **1.19** | Feb 1, 2026 | Refined sidebar navigation (Dashboard, Explore, Library, Playlist, Add Song). Implemented new Library hub (screen15) and Playlists management (screen16) mockups. |
 | **1.20** | Feb 3, 2026 | Implemented Draft Auto-Save (Story 1.1.7). Updated Song Form UI (Layout, Tags). Styled Profile Pill. |
+| **1.21** | Feb 23, 2026 | Removed Home page search box and renamed "Library" to "Search Songs". |
 
 ## 1. Introduction
 
@@ -116,9 +117,9 @@ The application is a **Progressive Web App (PWA)** optimized for mobile use duri
 
 ## 7. Screen Inventory (Implemented)
 
-### 7.1 Screen 1: Home (Library)
+### 7.1 Screen 1: Home (Dashboard)
 * **Status:** Implemented (`app/page.tsx`).
-* **Features:** Search Bar, Scrollable List, Song Cards with Gradient/Colors.
+* **Features:** Quick stats / actions cards, 10 Latest Songs list. (Search moved to Dedicated Search page).
 
 ### 7.2 Screen 2: Song Detail
 * **Status:** Implemented (`app/songs/[id]/page.tsx`).
@@ -147,10 +148,10 @@ The application is a **Progressive Web App (PWA)** optimized for mobile use duri
 * **Status:** Deprecated (Merged into Screen 15).
 * **Notes:** Replaced by the enhanced Library Hub (`doc/design/screens/screen15_library.html`) which now supports full category filtering.
 
-### 7.9 Screen 15: Library
-* **Status:** Mockup Updated (`doc/design/screens/screen15_library.html`).
+### 7.10 Screen 15: Search Songs
+* **Status:** Implemented (`app/songs/SongsPageContent.tsx`).
 * **Features:** Unified search and filtering hub. Supports elements, origins, and categories. Includes active filter pills and results count.
 
-### 7.10 Screen 16: Playlists
+### 7.11 Screen 16: Playlists
 * **Status:** Mockup Created (`doc/design/screens/screen16_playlists.html`).
 * **Features:** Playlist management with creation and list view of ceremonial sets.

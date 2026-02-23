@@ -798,6 +798,7 @@
     - [x] Update `SongForm.tsx` to dynamically set `has_melody`
     - [x] Update any other relevant components (e.g., song list fetching)
     - [x] Verify fix visually in library and detail views
+
 - [/] **Documentation**
     - [x] Update master logbooks
     - [x] Create walkthrough
@@ -884,3 +885,10 @@
     - [x] Add close handler to main NavLinks
     - [x] Add close handler to Library browse filters
 - [x] Merge `feat/72-screen-wake-lock` into `main` <!-- id: 17 -->
+
+# Task: Simplify Home Page and Rename Links (Feb 23, 2026)
+- [x] Remove Search box from Home page <!-- id: 18 -->
+- [x] Rename "Browse Songs" card on Home to "Search Songs" <!-- id: 19 -->
+- [x] Rename "Library" sidebar link to "Search Songs" <!-- id: 20 -->
+- [x] Update documentation (User Guide, Analysis & Design, Stories) <!-- id: 21 -->
+- [x] Update project walkthrough <!-- id: 22 -->

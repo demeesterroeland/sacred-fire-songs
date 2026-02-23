@@ -2030,3 +2030,11 @@ Refined the settings page UI to improve mobile consistency.
 Improved UX by ensuring the sidebar drawer closes automatically upon navigation or filter selection on mobile devices.
 - **Auto-Close Logic**: Injected `setIsOpen(false)` into all sidebar navigation links and taxonomy filters.
 - **Consistency**: Applied cross-component synchronization between `Sidebar` and `LibrarySidebar`.
+
+## Session Update (Feb 23, 2026 - Home Page Simplification)
+- **Problem**: The Home page featured a redundant search box, as most searching happens in the dedicated Search/Library page.
+- **Solution**: Removed the search bar from the Home page to declutter the dashboard.
+- **Organization**: Renamed "Browse Songs" to **"Search Songs"** across the platform (Dashboard card and Sidebar navigation) to better reflect the primary user intent for that section.
+- **Artifacts**:
+    - Code: , .
+    - Docs: Updated , , and .

@@ -52,3 +52,4 @@
 | **Feb 17** | **UI**: Mobile Header Refinement & Lyrics Wrapping Fix | ~3.5 Hours | ✅ Completed |
 | **Feb 18** | **Feature**: Screen Wake Lock & Settings UI | ~3.0 Hours | ✅ Completed |
 | **Total** | **Development + AI Collaboration** | **~105.50 Hours** | |
+| **Feb 23** | **UI**: Home Page Simplification & Navigation Renaming | ~0.5 Hours | ✅ Completed |

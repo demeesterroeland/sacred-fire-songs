@@ -18,6 +18,7 @@
 | **1.7** | Jan 11, 2026 | Implemented Edit Song (Story 2.2.1), Access Control, Mock Auth, and Logout. |
 | **1.8** | Jan 17, 2026 | Added Story 1.1.6 (Auto-convert Chords) and Story 1.1.2-bis (Smart Paste). |
 | **1.20** | Feb 3, 2026 | Added Story 1.1.8 (Draft Auto-Save). |
+| **1.21** | Feb 23, 2026 | Removed Home page search box and renamed "Browse Songs" to "Search Songs". |
 
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
@@ -126,8 +127,8 @@ Scenario: Persist and Display Media Links
 Scenario: Guest views song library
   Given I am an unauthenticated Guest
   When I visit the Home page
-  Then I should see a clear Dashboard with options: "Browse Songs", "Upload Song", "Settings"
-  When I click "Browse Songs"
+  Then I should see a clear Dashboard with options: "Search Songs", "Upload Song", "Settings"
+  When I click "Search Songs"
   Then I should see a list of songs
   And each song card should display a Title and Author
   And the list should load more songs as I scroll down

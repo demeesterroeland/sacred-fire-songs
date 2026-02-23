@@ -24,6 +24,8 @@ export default function SongsPageContent() {
     const router = useRouter(); // needed for clear all button which uses router.push
     const { user } = useAuth();
     const { setHeaderCount } = useSidebar();
+    const [localSearch, setLocalSearch] = useState('');
+
 
     // Local UI state for sorting (not part of filtering engine usually)
     const sortBy = (searchParams.get('sort') as SortByType) || 'title';
@@ -83,6 +85,22 @@ export default function SongsPageContent() {
         }
     );
 
+    // Sync local search with state.search (for external resets like "Clear All")
+    useEffect(() => {
+        setLocalSearch(state.search || '');
+    }, [state.search]);
+
+    // Debounce URL update
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            if (localSearch !== state.search) {
+                setFilter('search', localSearch);
+            }
+        }, 300);
+        return () => clearTimeout(timer);
+    }, [localSearch, setFilter, state.search]);
+
+
     // Publish count to global header for mobile view
     useEffect(() => {
         setHeaderCount(filteredItems.length);
@@ -121,8 +139,8 @@ export default function SongsPageContent() {
                         {/* Row 1: Brand (Mobile) & Search */}
                         <div className="flex flex-col md:flex-row items-center justify-between gap-6 md:gap-8">
                             <SearchBar
-                                value={state.search}
-                                onChange={(val) => setFilter('search', val)}
+                                value={localSearch}
+                                onChange={setLocalSearch}
                             />
 
                             <div className="hidden md:flex items-center gap-4 self-end md:self-auto">
@@ -150,8 +168,8 @@ export default function SongsPageContent() {
                             onCategoryChange={(cat) => setFilter('category', cat)}
                             onTagsChange={(tags) => setFilter('tags', tags)}
                             onClearAll={resetFilters}
-                            searchValue={state.search}
-                            onSearchChange={(val) => setFilter('search', val)}
+                            searchValue={localSearch}
+                            onSearchChange={setLocalSearch}
                         />
 
                         {/* Lower Row: Controls */}
