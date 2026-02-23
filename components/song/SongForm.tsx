@@ -6,6 +6,7 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
+import { flushSync } from 'react-dom';
 import { parseChordPro, hasChords } from '@/lib/chordProParsing';
 import { useAuth } from '@/hooks/useAuth';
 import CategorySelector from './CategorySelector';
@@ -197,13 +198,13 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
             cursorPos = selStart + (needsLeadingNewline ? 1 : 0) + cleanContent.length;
         }
 
-        setValue('content', newContent);
-
-        // Restore focus and cursor after React re-renders the controlled textarea
-        requestAnimationFrame(() => {
-            textarea.focus();
-            textarea.setSelectionRange(cursorPos, cursorPos);
+        // Use flushSync to force a synchronous re-render, then immediately
+        // restore cursor — avoids rAF race where a keystroke between setValue
+        // and the async callback moves the cursor to the wrong position
+        flushSync(() => {
+            setValue('content', newContent);
         });
+        textarea.setSelectionRange(cursorPos, cursorPos);
     };
 
 
