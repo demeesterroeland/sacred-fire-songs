@@ -23,8 +23,14 @@ export function parseChordProForDisplay(content: string): ChordProSection[] {
     const parser = new ChordSheetJS.ChordProParser();
     const chordProContent = convertChordsOverLyricsToChordPro(content);
 
+    // ChordSheetJS doesn't support newlines inside directives ({c:}, {ci:}, etc.)
+    // Collapse any newlines within { ... } blocks into spaces before parsing
+    const sanitized = chordProContent.replace(/\{[^}]*\}/g, (match) =>
+        match.replace(/\r?\n/g, ' ').trim()
+    );
+
     try {
-        const song = parser.parse(chordProContent);
+        const song = parser.parse(sanitized);
         const sections: ChordProSection[] = [];
         let currentSection: ChordProSection | null = null;
 
