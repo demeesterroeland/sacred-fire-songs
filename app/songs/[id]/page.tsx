@@ -290,6 +290,7 @@ export default function SongDetailPage() {
                         <SongDisplay
                             content={currentVersion?.content_chordpro || ''}
                             melodyNotation={currentVersion?.melody_notation || ''}
+                            hasChords={song.has_chords}
                         />
                     </div>
 

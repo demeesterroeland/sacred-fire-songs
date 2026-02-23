@@ -5,13 +5,14 @@ import { parseChordProForDisplay, ChordProSection, ChordProLine, ChordProItem } 
 interface SongDisplayProps {
     content: string;
     melodyNotation?: string;
+    hasChords?: boolean;
 }
 
-export default function SongDisplay({ content, melodyNotation }: SongDisplayProps) {
+export default function SongDisplay({ content, melodyNotation, hasChords = false }: SongDisplayProps) {
     const sections: ChordProSection[] = parseChordProForDisplay(content);
 
     return (
-        <div className="space-y-12">
+        <div className={hasChords ? 'space-y-12' : 'space-y-8'}>
             {sections.map((section, sectionIdx) => (
                 <div key={sectionIdx} className="relative">
                     {/* Section Label */}
@@ -32,24 +33,26 @@ export default function SongDisplay({ content, melodyNotation }: SongDisplayProp
                     )}
 
                     {/* Section Content */}
-                    <div className="space-y-6">
+                    <div className={hasChords ? 'space-y-6' : 'space-y-1'}>
                         {section.lines.map((line: ChordProLine, lineIdx) => (
                             <div key={lineIdx}>
-                                <div className="flex flex-wrap pl-6 md:pl-8 leading-loose">
+                                <div className={`flex flex-wrap pl-6 md:pl-8 ${hasChords ? 'leading-loose' : 'leading-snug'}`}>
                                     {line.items.map((item: ChordProItem, itemIdx) => (
                                         <div
                                             key={itemIdx}
                                             className={`flex flex-col align-top shrink-0 ${itemIdx === 0 ? '-ml-6 md:-ml-8' : ''}`}
                                         >
-                                            {/* The Chord (Red and Bold) */}
-                                            {item.chords ? (
-                                                <span className="text-[#ff4400] font-bold text-xs h-4 font-mono mb-1">
-                                                    {item.chords}
-                                                </span>
-                                            ) : (
-                                                <div className="h-4 mb-1" /> // Spacer
+                                            {/* The Chord (Red and Bold) — only render if song has chords */}
+                                            {hasChords && (
+                                                item.chords ? (
+                                                    <span className="text-[#ff4400] font-bold text-xs h-4 font-mono mb-1">
+                                                        {item.chords}
+                                                    </span>
+                                                ) : (
+                                                    <div className="h-4 mb-1" /> // Spacer to align lines without chords
+                                                )
                                             )}
-                                            {/* The Lyric (White) - using whitespace-pre to preserve atomized spaces */}
+                                            {/* The Lyric (White) */}
                                             <span className="text-gray-300 text-xl md:text-2xl font-medium tracking-tight font-sans whitespace-pre">
                                                 {item.lyrics || '\u00A0'}
                                             </span>
