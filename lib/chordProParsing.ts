@@ -170,16 +170,16 @@ export function parseChordPro(text: string): ParsedChordPro {
         key = keyMatch[1].trim();
     }
 
-    // 4. Extract Capo
-    const capoRegex = /{(?:capo|c):\s*(.*?)}/i;
+    // 4. Extract Capo — only match {capo:}, NOT {c:} ({c:} is a comment directive)
+    const capoRegex = /{(?:capo):\s*(.*?)}/i;
     const capoMatch = convertedText.match(capoRegex);
     if (capoMatch) {
         capo = capoMatch[1].trim();
     }
 
-    // 5. Set Content (Stripped of metadata tags)
-    // Global regex to remove all title/author/key/capo tags from the body
-    const metadataRegex = /{(?:title|t|author|a|artist|key|k|capo|c):\s*.*?}\s*/gi;
+    // 5. Set Content (Stripped of metadata tags, but preserve {c:} and {ci:} comment directives)
+    // NOTE: {c:} is a comment directive, NOT capo shorthand — do not strip it
+    const metadataRegex = /{(?:title|t|author|a|artist|key|k|capo):\s*.*?}\s*/gi;
     const cleanContent = convertedText.replace(metadataRegex, '').trim();
 
     return { title, author, key, capo, cleanContent };

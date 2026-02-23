@@ -146,42 +146,67 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
     };
 
     const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
-        // Get pasted data
         const text = e.clipboardData.getData('text');
 
-        // Check if it looks like it has metadata OR is Chords over Lyrics
-        // Simple heuristic: tags OR looks like lyrics with chords?
-        // Actually, why restrict it? If user pastes text, we should probably try to parse it?
-        // But we don't want to interfere with editing a single line.
-        // However, if it's a multiline paste, it's likely a whole song or block.
-
-        // Fix: Allow if metadata present OR if it contains multiple lines (heuristic for block paste)
-        const hasMetadata = /{(?:title|t|author|a|artist):/i.test(text);
+        // Only intercept if it's a multi-line paste or has ChordPro metadata tags
+        const hasMeta = /{(?:title|t|author|a|artist):/i.test(text);
         const isMultiLine = text.trim().split('\n').length > 1;
 
-        if (hasMetadata || isMultiLine) {
-            e.preventDefault(); // Prevent default paste
+        if (!hasMeta && !isMultiLine) return; // Let single-line pastes go through normally
 
-            const { title, author, key, capo, cleanContent } = parseChordPro(text);
+        e.preventDefault();
 
-            if (title) {
-                setValue('title', title);
-            }
-            if (author) {
-                setValue('author', author);
-            }
-            if (key) {
-                setValue('key', key);
-            }
-            if (capo) {
-                setValue('capo', capo);
-            }
+        const { title, author, key, capo, cleanContent } = parseChordPro(text);
 
-            if (key || capo) expandMetadata(true);
+        // Apply metadata only if found in the pasted block
+        // (don't clobber existing form values if nothing was detected)
+        if (title) setValue('title', title);
+        if (author) setValue('author', author);
+        if (key) setValue('key', key);
+        if (capo) setValue('capo', capo);
+        if (key || capo) expandMetadata(true);
 
-            setValue('content', cleanContent);
+        // Save textarea ref NOW — e.currentTarget becomes null after async
+        const textarea = e.currentTarget;
+        const existingContent = watch('content') || '';
+        const selStart = textarea.selectionStart ?? existingContent.length;
+        const selEnd = textarea.selectionEnd ?? existingContent.length;
+
+        let newContent: string;
+        let cursorPos: number;
+
+        if (!existingContent.trim()) {
+            // Empty field: just set directly, cursor at end of pasted content
+            newContent = cleanContent;
+            cursorPos = cleanContent.length;
+        } else {
+            // Splice at cursor position
+            const before = existingContent.slice(0, selStart);
+            const after = existingContent.slice(selEnd);
+            const needsLeadingNewline = before.length > 0 && !before.endsWith('\n');
+            const needsTrailingNewline = after.length > 0 && !after.startsWith('\n');
+
+            newContent =
+                before +
+                (needsLeadingNewline ? '\n' : '') +
+                cleanContent +
+                (needsTrailingNewline ? '\n' : '') +
+                after;
+
+            // Cursor lands at the end of the inserted block
+            cursorPos = selStart + (needsLeadingNewline ? 1 : 0) + cleanContent.length;
         }
+
+        setValue('content', newContent);
+
+        // Restore focus and cursor after React re-renders the controlled textarea
+        requestAnimationFrame(() => {
+            textarea.focus();
+            textarea.setSelectionRange(cursorPos, cursorPos);
+        });
     };
+
+
 
     const handleCopyLyricsToMelody = () => {
         const content = watch('content') || '';

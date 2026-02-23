@@ -5,6 +5,8 @@ import { convertChordsOverLyricsToChordPro } from './chordProParsing';
 export interface ChordProItem {
     chords?: string;
     lyrics?: string;
+    comment?: string;  // from {c: text} or {ci: text}
+    italic?: boolean;  // true for {ci: text}
 }
 
 export interface ChordProLine {
@@ -78,20 +80,37 @@ export function parseChordProForDisplay(content: string): ChordProSection[] {
                 return; // Skip the tag line
             }
 
-            // Handle Content
+            // Handle Content (includes comments as content)
+            const isCommentTag = (item: any) =>
+                item._name && ['comment', 'comment_italic'].includes(item._name);
+
             const hasContent = line.items.some((item: any) =>
-                (item.lyrics && item.lyrics.trim().length > 0) || item.chords
+                (item.lyrics && item.lyrics.trim().length > 0) || item.chords || isCommentTag(item)
             );
 
             if (hasContent) {
-                const items = line.items.map((item: any) => ({
-                    chords: item.chords || undefined,
-                    lyrics: item.lyrics || undefined
-                }));
+                const items: ChordProItem[] = line.items.map((item: any) => {
+                    // Comment or comment_italic directive
+                    if (isCommentTag(item)) {
+                        return {
+                            comment: item._value || '',
+                            italic: item._name === 'comment_italic'
+                        };
+                    }
+                    return {
+                        chords: item.chords || undefined,
+                        lyrics: item.lyrics || undefined
+                    };
+                });
 
                 const atomizedItems: ChordProItem[] = [];
 
-                items.forEach((item: any) => {
+                items.forEach((item: ChordProItem) => {
+                    // Pass comment items through without atomization
+                    if (item.comment !== undefined) {
+                        atomizedItems.push(item);
+                        return;
+                    }
                     if (!item.lyrics || item.lyrics.trim().length === 0) {
                         atomizedItems.push(item);
                         return;
