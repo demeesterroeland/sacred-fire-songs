@@ -31,36 +31,43 @@ const ChordProEditor = forwardRef<HTMLTextAreaElement, ChordProEditorProps>(
 
     return (
       <div className={`relative group ${className}`}>
-        {/* Backdrop Layer (Highlights) — must have same overflow/scrollbar mode as the
-            textarea so line wrapping is identical and cursor positions match after scroll */}
+        {/* Backdrop Layer (Highlights) — MUST match textarea's white-space and overflow
+            exactly so line counts never diverge. white-space:pre ensures 1 source line
+            = 1 rendered line on both layers, regardless of font sub-pixel differences. */}
         <div
           ref={backdropRef}
-          className="absolute inset-0 pointer-events-none p-4 whitespace-pre-wrap break-words font-mono text-sm leading-relaxed overflow-y-scroll overflow-x-hidden text-white"
+          className="absolute inset-0 pointer-events-none p-4 font-mono text-sm leading-relaxed text-white"
           aria-hidden="true"
           style={{
             zIndex: 0,
-            scrollbarWidth: 'none',   // Firefox: hide track visually
-            msOverflowStyle: 'none',  // IE/Edge: hide track
+            whiteSpace: 'pre',      // no wrapping — mirrors textarea behaviour
+            overflowX: 'auto',      // scroll to follow textarea horizontal scroll
+            overflowY: 'scroll',    // always reserve scrollbar gutter (matches textarea)
+            scrollbarWidth: 'none', // Firefox: hide scrollbar visually
+            msOverflowStyle: 'none',
           }}
         >
           {renderHighlights(value)}
-          {/* Add a generic break to ensure last empty line visibility if needed */}
           <br />
         </div>
 
         {/* Input Layer (Textarea) */}
         <textarea
           ref={ref}
-          className="relative z-10 block w-full h-full bg-transparent text-transparent caret-white p-4 font-mono text-sm leading-relaxed focus:outline-none resize-none overflow-y-scroll overflow-x-hidden selection:bg-blue-500/30 selection:text-transparent placeholder:text-[#a19eb7]/30"
+          className="relative z-10 block w-full h-full bg-transparent text-transparent caret-white p-4 font-mono text-sm leading-relaxed focus:outline-none resize-none selection:bg-blue-500/30 selection:text-transparent placeholder:text-[#a19eb7]/30"
+          style={{
+            ...style,
+            color: 'transparent',
+            whiteSpace: 'pre',   // disable textarea word-wrap
+            overflowX: 'auto',
+            overflowY: 'scroll', // always show scrollbar gutter
+          }}
           onScroll={handleScroll}
           onChange={onChange}
           value={value}
           spellCheck={false}
+          wrap="off"
           {...props}
-          style={{
-            ...style,
-            color: 'transparent',
-          }}
         />
       </div>
     );

@@ -27,13 +27,11 @@ export function parseChordProForDisplay(content: string): ChordProSection[] {
         const song = parser.parse(chordProContent);
         const sections: ChordProSection[] = [];
         let currentSection: ChordProSection | null = null;
-
-        // Initial generic section for content before any tag
         let pendingLines: ChordProLine[] = [];
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         song.lines.forEach((line: any) => {
-            // Check for section start tags in the items
+            // Check for section tags in the items
             const sectionStartItem = line.items.find((item: any) =>
                 item._name && ['start_of_verse', 'start_of_chorus', 'start_of_bridge'].includes(item._name)
             );
@@ -42,18 +40,14 @@ export function parseChordProForDisplay(content: string): ChordProSection[] {
                 item._name && ['end_of_verse', 'end_of_chorus', 'end_of_bridge'].includes(item._name)
             );
 
-            // Handle Section Start
+            // 1. Handle Section Start
             if (sectionStartItem) {
-                // If there were pending lines, save them as a 'none' section
+                // Flush general pending lines
                 if (pendingLines.length > 0) {
-                    sections.push({
-                        type: 'none',
-                        lines: [...pendingLines]
-                    });
+                    sections.push({ type: 'none', lines: [...pendingLines] });
                     pendingLines = [];
                 }
-
-                // If we were already in a section (e.g. unclosed previous section), close it
+                // Flush existing section if unclosed
                 if (currentSection) {
                     sections.push(currentSection);
                 }
@@ -68,19 +62,9 @@ export function parseChordProForDisplay(content: string): ChordProSection[] {
                     label: sectionStartItem._value || (type === 'chorus' ? 'Chorus' : undefined),
                     lines: []
                 };
-                // Don't return — fall through to process any content items on the same line as {soc}
             }
 
-            // Handle Section End
-            if (sectionEndItem) {
-                if (currentSection) {
-                    sections.push(currentSection);
-                    currentSection = null;
-                }
-                // Don't return — fall through to catch any content on the same line as {eoc}
-            }
-
-            // Handle Content (includes comments as content)
+            // 2. Process Line Content
             const isCommentTag = (item: any) =>
                 item._name && ['comment', 'c', 'comment_italic', 'ci'].includes(item._name);
 
@@ -90,7 +74,6 @@ export function parseChordProForDisplay(content: string): ChordProSection[] {
 
             if (hasContent) {
                 const items: ChordProItem[] = line.items.map((item: any) => {
-                    // Comment {c:} or italic comment {ci:} directive
                     if (isCommentTag(item)) {
                         return {
                             comment: item._value || '',
@@ -104,28 +87,19 @@ export function parseChordProForDisplay(content: string): ChordProSection[] {
                 });
 
                 const atomizedItems: ChordProItem[] = [];
-
                 items.forEach((item: ChordProItem) => {
-                    // Pass comment items through without atomization
-                    if (item.comment !== undefined) {
-                        atomizedItems.push(item);
-                        return;
-                    }
-                    if (!item.lyrics || item.lyrics.trim().length === 0) {
+                    if (item.comment !== undefined || !item.lyrics || item.lyrics.trim().length === 0) {
                         atomizedItems.push(item);
                         return;
                     }
 
-                    // Split lyrics by whitespace, keeping the whitespace with the word it follows
                     const parts = item.lyrics.split(/(\s+)/);
                     let firstPartProcessed = false;
                     let currentCombined = '';
 
                     parts.forEach((part: string) => {
                         if (part === '') return;
-
                         if (/\s+/.test(part)) {
-                            // It's a whitespace part. Join with previous word and push as atom.
                             atomizedItems.push({
                                 chords: !firstPartProcessed ? item.chords : undefined,
                                 lyrics: currentCombined + part
@@ -133,9 +107,7 @@ export function parseChordProForDisplay(content: string): ChordProSection[] {
                             currentCombined = '';
                             firstPartProcessed = true;
                         } else {
-                            // It's a word part.
                             if (currentCombined !== '') {
-                                // If we have a pending word without trailing space, push it now
                                 atomizedItems.push({
                                     chords: !firstPartProcessed ? item.chords : undefined,
                                     lyrics: currentCombined
@@ -146,52 +118,51 @@ export function parseChordProForDisplay(content: string): ChordProSection[] {
                         }
                     });
 
-                    // Handle remaining part
                     if (currentCombined !== '') {
                         atomizedItems.push({
                             chords: !firstPartProcessed ? item.chords : undefined,
                             lyrics: currentCombined
                         });
                     } else if (!firstPartProcessed && item.chords) {
-                        // If no lyrics were processed but there was a chord
                         atomizedItems.push({ chords: item.chords });
                     }
                 });
 
                 const cleanLine: ChordProLine = { items: atomizedItems };
-
                 if (currentSection) {
                     currentSection.lines.push(cleanLine);
                 } else {
                     pendingLines.push(cleanLine);
                 }
-            } else {
-                // Empty line: treat as a section break to preserve stanza spacing
+            } else if (!sectionStartItem && !sectionEndItem) {
+                // Truly empty line (no content AND no directives): 
+                // Treat as a stanza break to preserve spacing
                 if (currentSection) {
                     sections.push(currentSection);
                     currentSection = null;
                 } else if (pendingLines.length > 0) {
-                    sections.push({
-                        type: 'none',
-                        lines: [...pendingLines]
-                    });
+                    sections.push({ type: 'none', lines: [...pendingLines] });
                     pendingLines = [];
+                }
+            }
+
+            // 3. Handle Section End (AFTER processing line content)
+            if (sectionEndItem) {
+                if (currentSection) {
+                    sections.push(currentSection);
+                    currentSection = null;
                 }
             }
         });
 
-        // Flush any remaining context
+        // Final flushes
         if (currentSection) {
             sections.push(currentSection);
         } else if (pendingLines.length > 0) {
-            sections.push({
-                type: 'none',
-                lines: pendingLines
-            });
+            sections.push({ type: 'none', lines: [...pendingLines] });
         }
 
         return sections;
-
     } catch (error) {
         console.error('Error parsing ChordPro content:', error);
         return [];

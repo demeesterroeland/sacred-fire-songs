@@ -12,38 +12,41 @@ export default function SongDisplay({ content, melodyNotation, hasChords = false
     const sections: ChordProSection[] = parseChordProForDisplay(content);
 
     return (
-        <div className={hasChords ? 'space-y-12' : 'space-y-8'}>
+        <div className={hasChords ? 'space-y-6' : 'space-y-4'}>
             {sections.map((section, sectionIdx) => (
-                <div key={sectionIdx} className="relative">
+                <div
+                    key={sectionIdx}
+                    className={`relative ${sectionIdx > 0 ? (hasChords ? 'mt-8' : 'mt-6') : ''} ${section.type === 'chorus' ? 'border-l-2 border-[#ff4400]/40 pl-6 md:pl-8 py-1 ml-1' : ''}`}
+                >
                     {/* Section Label */}
                     {section.label && (
                         <>
                             {/* Desktop: Vertical Label */}
                             <span
-                                className="absolute -left-4 top-0 -translate-x-full hidden md:block text-xs font-black text-gray-600 uppercase tracking-widest rotate-180"
+                                className={`absolute -left-4 top-1/2 -translate-x-full -translate-y-1/2 hidden md:block text-xs font-black uppercase tracking-widest rotate-180 ${section.type === 'chorus' ? 'text-[#ff4400]/60' : 'text-gray-600'}`}
                                 style={{ writingMode: 'vertical-rl' }}
                             >
                                 {section.label}
                             </span>
                             {/* Mobile: Horizontal Label */}
-                            <span className="md:hidden block text-xs font-black text-gray-600 uppercase tracking-widest mb-4">
+                            <span className={`md:hidden block text-xs font-black uppercase tracking-widest mb-4 ${section.type === 'chorus' ? 'text-[#ff4400]/80' : 'text-gray-600'}`}>
                                 {section.label}
                             </span>
                         </>
                     )}
 
                     {/* Section Content */}
-                    <div className={hasChords ? 'space-y-6' : 'space-y-1'}>
+                    <div className={`${hasChords ? 'space-y-4' : 'space-y-1'} ${section.type === 'chorus' ? 'pl-4' : ''}`}>
                         {section.lines.map((line: ChordProLine, lineIdx) => (
                             <div key={lineIdx}>
-                                <div className={`flex flex-wrap pl-6 md:pl-8 ${hasChords ? 'leading-loose' : 'leading-snug'}`}>
+                                <div className={`flex flex-wrap pl-6 md:pl-8`}>
                                     {line.items.map((item: ChordProItem, itemIdx) => {
                                         // Inline comment item — {c:} or {ci:}
                                         if (item.comment !== undefined) {
                                             return (
                                                 <span
                                                     key={itemIdx}
-                                                    style={{ marginBottom: hasChords ? '0.2rem' : '0.25rem' }}
+                                                    style={{ marginBottom: hasChords ? '0.1rem' : '0.15rem' }}
                                                     className={`self-end text-xs text-gray-500 border-l-2 border-gray-700 pl-2 ml-1 mr-2 leading-tight ${item.italic ? 'italic' : ''} ${itemIdx === 0 ? '-ml-6 md:-ml-8' : ''}`}
                                                 >
                                                     {item.comment}
@@ -59,11 +62,11 @@ export default function SongDisplay({ content, melodyNotation, hasChords = false
                                                 {/* The Chord (Red and Bold) — only render if song has chords */}
                                                 {hasChords && (
                                                     item.chords ? (
-                                                        <span className="text-[#ff4400] font-bold text-xs h-4 font-mono mb-1">
+                                                        <span className="text-[#ff4400] font-bold text-[10px] h-3 font-mono mb-0.5">
                                                             {item.chords}
                                                         </span>
                                                     ) : (
-                                                        <div className="h-4 mb-1" /> // Spacer to align lines without chords
+                                                        <div className="h-3 mb-0.5" /> // Spacer to align lines without chords
                                                     )
                                                 )}
                                                 {/* The Lyric (White) */}
