@@ -82,7 +82,7 @@ export function parseChordProForDisplay(content: string): ChordProSection[] {
 
             // Handle Content (includes comments as content)
             const isCommentTag = (item: any) =>
-                item._name && ['comment', 'comment_italic'].includes(item._name);
+                item._name && ['comment', 'ci'].includes(item._name);
 
             const hasContent = line.items.some((item: any) =>
                 (item.lyrics && item.lyrics.trim().length > 0) || item.chords || isCommentTag(item)
@@ -90,11 +90,11 @@ export function parseChordProForDisplay(content: string): ChordProSection[] {
 
             if (hasContent) {
                 const items: ChordProItem[] = line.items.map((item: any) => {
-                    // Comment or comment_italic directive
+                    // Comment {c:} or italic comment {ci:} directive
                     if (isCommentTag(item)) {
                         return {
                             comment: item._value || '',
-                            italic: item._name === 'comment_italic'
+                            italic: item._name === 'ci'
                         };
                     }
                     return {
