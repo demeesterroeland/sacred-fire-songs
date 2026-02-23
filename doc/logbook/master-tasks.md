@@ -892,3 +892,12 @@
 - [x] Rename "Library" sidebar link to "Search Songs" <!-- id: 20 -->
 - [x] Update documentation (User Guide, Analysis & Design, Stories) <!-- id: 21 -->
 - [x] Update project walkthrough <!-- id: 22 -->
+
+
+## Session: Feb 23, 2026
+- [x] Fix ChordPro Editor vertical and horizontal scrolling misalignment.
+- [x] Refactor ChordProEditor to use a unified scroll container to physically prevent scroll drift between textarea and backdrop.
+- [x] Adjust SongDisplay chorus margin/padding for premium spacing on mobile and desktop.
+- [x] Orient the 'Chorus' label vertically on mobile screens for visual consistency.
+- [x] Remove excess margin on inline comments to ensure flush left alignment.
+

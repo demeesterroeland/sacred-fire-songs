@@ -2038,3 +2038,29 @@ Improved UX by ensuring the sidebar drawer closes automatically upon navigation 
 - **Artifacts**:
     - Code: , .
     - Docs: Updated , , and .
+
+
+## Session Update (Feb 23, 2026 - ChordPro Editor & Layout)
+
+# Walkthrough - Perfecting the ChordPro Editor Sync
+
+I have resolved a complex rendering issue where the invisible textarea would drift out of sync with the colored backdrop highlights during scrolling.
+
+## The Problem
+Previously, the editor attempted to synchronize two separate scrollbars (one on the textarea, one on the background div) via Javascript `onScroll` events. However, browsers allocate sub-pixel text rendering and overflow gutters differently for textareas vs. divs. This resulted in the cursor and text completely misaligning when scrolling down or horizontally, breaking the editing experience.
+
+## The Solution
+Instead of syncing two scrollbars, I implemented a **"One Scrollbar to Rule Them All"** strategy:
+1.  **Unified Container**: Created a single parent `div` that handles overflow and scrolling natively.
+2.  **Auto-Sizing Inner Layer**: Inside the container, a `div` uses `width: max-content` to stretch to the exact dimensions of the longest line and the full number of rows.
+3.  **Absolute Textarea**: The `textarea` is absolutely positioned perfectly over the backdrop, set to `overflow: hidden`. It automatically stretches to match the container.
+4.  **Result**: Because both the textarea and the backdrop share the identical physical height/width constraint and reside within the same scrolling parent, it is mathematically impossible for them to drift out of sync vertically or horizontally.
+
+## Aesthetic Refinements (SongDisplay)
+- **Chorus Indentation**: Reduced the excessive horizontal padding around the red chorus accent line to bring the lyrics closer to the line on both desktop and mobile.
+- **Vertical Labels**: Enabled vertical text orientation (Rotate-180) for the "CHORUS" label on mobile devices, matching the premium desktop experience.
+- **Comment Spacing**: Removed negative margins that were pushing inline comments (e.g., `| Verse 2`) to the right, ensuring they sit perfectly flush with the left boundary of the lyrics.
+
+## Verification
+-   Verified the ChordProEditor with extreme overflow (long lines and many verses) dragging the scrollbar violently. Cursor tracking remains 1:1.
+-   Verified the "Chorus" vertical label renders without overlapping text on mobile viewports.
