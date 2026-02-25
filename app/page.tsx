@@ -1,22 +1,10 @@
-'use client';
-
 import SongCard from "@/components/home/SongCard";
-import SongCardSkeleton from "@/components/home/SongCardSkeleton";
-import { fetchSongs } from "@/lib/songUtils";
-import { useQuery } from '@tanstack/react-query';
-import { useAuth } from "@/hooks/useAuth";
+import { fetchSongsServer } from "@/lib/songs/serverQueries";
 import Link from "next/link";
 
-export default function Home() {
-  const { user } = useAuth();
-
-  const { data: songs = [], isLoading } = useQuery({
-    queryKey: ['songs', 'latest'],
-    queryFn: () => fetchSongs(10), // Limit to 10 latest
-  });
-
-  // Home page only shows public songs
-  let displaySongs = songs.filter(song => song.isPublic);
+export default async function Home() {
+  const songs = await fetchSongsServer(10);
+  const displaySongs = songs.filter(song => song.isPublic);
 
   return (
     <main className="flex-1 min-h-0 bg-gray-950">
@@ -67,13 +55,7 @@ export default function Home() {
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {isLoading ? (
-              <>
-                {[...Array(6)].map((_, i) => (
-                  <SongCardSkeleton key={i} />
-                ))}
-              </>
-            ) : displaySongs.length > 0 ? (
+            {displaySongs.length > 0 ? (
               displaySongs.map((song, index) => (
                 <SongCard
                   key={index}
