@@ -37,7 +37,30 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy }: Song
     const [isDeleting, setIsDeleting] = useState(false);
 
     const isAdmin = user?.role === 'admin';
-    console.log('auth state:', { user: user?.role, isAdmin });
+
+    const { data: favoriteIds = new Set<string>() } = useQuery({
+        queryKey: ['favorites', user?.id],
+        queryFn: async () => {
+            if (!user) return new Set<string>();
+            const supabase = createClient();
+            const { data: setlist } = await supabase
+                .from('setlists')
+                .select('id')
+                .eq('title', 'My Favorites')
+                .maybeSingle();
+            if (!setlist) return new Set<string>();
+            const { data: items } = await supabase
+                .from('setlist_items')
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                .select('song_versions(composition_id)')
+                .eq('setlist_id', setlist.id);
+            return new Set<string>(
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                (items ?? []).map((item: any) => item.song_versions?.composition_id).filter(Boolean)
+            );
+        },
+        enabled: !!user,
+    });
 
     const handleDelete = async () => {
         if (!deleteTarget) return;
@@ -293,7 +316,7 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy }: Song
                                         isPublic={song.isPublic}
                                         hasChords={song.hasChords}
                                         hasMelody={song.hasMelody}
-                                        isFavorite={song.isFavorite ?? false}
+                                        isFavorite={favoriteIds.has(song.id)}
                                         categories={song.categories}
                                     />
                                     {user && (isAdmin || song.ownerId === user.id) && (

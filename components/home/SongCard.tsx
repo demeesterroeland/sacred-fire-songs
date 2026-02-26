@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Music, Guitar, Heart } from 'lucide-react';
 import { getCategoryColor, getCategoryStyles } from '@/lib/uiUtils';
 import { cn } from '@/lib/utils';
@@ -36,6 +36,10 @@ export default function SongCard({
     categories = []
 }: SongCardProps) {
     const [isFav, setIsFav] = useState(isFavorite);
+
+    useEffect(() => {
+        setIsFav(isFavorite);
+    }, [isFavorite]);
 
     const handleToggleFavorite = async (e: React.MouseEvent) => {
         e.preventDefault();
