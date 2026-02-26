@@ -21,21 +21,23 @@ import {
 import ProfileSettings from "@/components/account/settings/ProfileSettings";
 import SecuritySettings from "@/components/account/settings/SecuritySettings";
 import PrivacySettings from "@/components/account/settings/PrivacySettings";
+import PreferencesSettings from "@/components/account/settings/PreferencesSettings";
 
 interface AccountSettingsProps {
   user: User;
   profile: any;
 }
 
-type TabType = "profile" | "account" | "privacy";
+type TabType = "profile" | "account" | "preferences" | "privacy";
 
 export default function AccountSettings({ user, profile }: AccountSettingsProps) {
   const [activeTab, setActiveTab] = useState<TabType>("profile");
 
   const tabs = [
-    { id: "profile" as const, label: "Profile" },
-    { id: "account" as const, label: "Account" },
-    { id: "privacy" as const, label: "Privacy & Data" },
+    { id: "profile" as const,      label: "Profile" },
+    { id: "account" as const,      label: "Account" },
+    { id: "preferences" as const,  label: "Preferences" },
+    { id: "privacy" as const,      label: "Privacy & Data" },
   ];
 
   return (
@@ -66,6 +68,7 @@ export default function AccountSettings({ user, profile }: AccountSettingsProps)
         <div className="animate-in fade-in slide-in-from-bottom-2 duration-500">
           {activeTab === "profile" && <ProfileSettings user={user} profile={profile} />}
           {activeTab === "account" && <SecuritySettings user={user} />}
+          {activeTab === "preferences" && <PreferencesSettings />}
           {activeTab === "privacy" && <PrivacySettings user={user} profile={profile} />}
         </div>
       </div>
