@@ -61,6 +61,7 @@ export async function toggleFavorite(
             .eq('id', existingItem.id);
 
         revalidatePath('/songs/favorites');
+        revalidatePath('/songs');
         revalidatePath('/');
         return { success: true, isFavorite: false };
     } else {
@@ -83,6 +84,7 @@ export async function toggleFavorite(
             });
 
         revalidatePath('/songs/favorites');
+        revalidatePath('/songs');
         revalidatePath('/');
         return { success: true, isFavorite: true };
     }
