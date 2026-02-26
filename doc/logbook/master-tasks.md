@@ -901,3 +901,17 @@
 - [x] Orient the 'Chorus' label vertically on mobile screens for visual consistency.
 - [x] Remove excess margin on inline comments to ensure flush left alignment.
 
+
+---
+
+## Session Feb 26, 2026 — Server Components Migration & Audit
+
+- [x] Discuss architecture: API routes vs Server Components vs Server Actions
+- [x] Create `lib/songs/serverQueries.ts` — `fetchSongsServer()` and `fetchCategoryTreeServer()` using cookie-aware server Supabase client
+- [x] Convert `app/page.tsx` to async Server Component — remove `useQuery`/`useAuth`/skeleton, fetch songs server-side
+- [x] Convert `app/songs/page.tsx` to async Server Component — pre-fetch songs + taxonomy with `Promise.all`, pass as props
+- [x] Update `SongsPageContent.tsx` — accept `initialSongs`/`initialTaxonomy` props, wire as `initialData` in React Query
+- [x] Open PR #74 (`feat/server-components-data-fetching`)
+- [x] Fix 406 Not Acceptable in `useAuth` — `.single()` → `.maybeSingle()` for profile fetch (handles missing profile row gracefully)
+- [x] Audit implementation status of stories 1.1.4, 1.1.5, 1.1.6
+- [x] Update `doc/logbook/epic&user stories.md` v1.22 — mark 1.1.4 [Partial], 1.1.5 [Not Implemented], 1.1.6 [Implemented]

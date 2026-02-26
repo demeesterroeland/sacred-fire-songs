@@ -1,8 +1,8 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 1.20
+**Version:** 1.22
 **Status:** Living Document
-**Date:** February 3, 2026
+**Date:** February 26, 2026
 
 ## Changelog
 
@@ -19,6 +19,7 @@
 | **1.8** | Jan 17, 2026 | Added Story 1.1.6 (Auto-convert Chords) and Story 1.1.2-bis (Smart Paste). |
 | **1.20** | Feb 3, 2026 | Added Story 1.1.8 (Draft Auto-Save). |
 | **1.21** | Feb 23, 2026 | Removed Home page search box and renamed "Browse Songs" to "Search Songs". |
+| **1.22** | Feb 26, 2026 | Codebase audit: marked 1.1.4 as [Partial] (missing card-level delete icons), 1.1.5 as [Not Implemented] (no guest upload modal), 1.1.6 as [Implemented] (full chords-over-lyrics detection and conversion). |
 
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
@@ -75,7 +76,8 @@ Scenario: Admin deletes a song
   Then the song "Pachamama" should no longer appear in the list
 ```
 
-**Story 1.1.4:** As a Member, I want to log in securely so that I can access personalized features.
+**Story 1.1.4: [Partial]** As a Member, I want to log in securely so that I can access personalized features.
+<!-- Login (magic link + password) works and redirects to Home. Edit/Delete controls visible on song detail page for owner/admin. Missing: Delete icons on song cards in the library view. -->
 
 ```
 Scenario: Successful Admin Login
@@ -86,7 +88,8 @@ Scenario: Successful Admin Login
   And I should see Admin controls (e.g., Upload button, Delete icons)
 ```
 
-**Story 1.1.5:** As a Guest, I want to be kindly prompted to create an account when I click "Upload" so that I understand this is a community feature.
+**Story 1.1.5: [Not Implemented]** As a Guest, I want to be kindly prompted to create an account when I click "Upload" so that I understand this is a community feature.
+<!-- /songs/add renders SongForm directly for all users. The only guard is a silent redirect to /auth/login on submit. No "Please join our circle" modal or Log In / Create Account prompt exists. -->
 
 ```
 Scenario: Guest clicks Upload
@@ -96,7 +99,8 @@ Scenario: Guest clicks Upload
   And I should be offered options to "Log In" or "Create Account"
 ```
 
-**Story 1.1.6:** As a Content Contributor, I want the system to automatically detect and convert songs formatted with "Chords over Lyrics" into standard ChordPro format, so that I don't have to manually reformat existing song sheets when adding them to the library.
+**Story 1.1.6: [Implemented]** As a Content Contributor, I want the system to automatically detect and convert songs formatted with "Chords over Lyrics" into standard ChordPro format, so that I don't have to manually reformat existing song sheets when adding them to the library.
+<!-- lib/chordProParsing.ts: full detection heuristic, conversion, Title/Author/Key/Capo auto-fill. Paste and file-upload handlers in SongForm. Unit tests in lib/unit-tests/chordProParsing.test.ts. -->
 
 ```
 Scenario: Paste "Chords over Lyrics" content

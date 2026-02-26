@@ -2064,3 +2064,41 @@ Instead of syncing two scrollbars, I implemented a **"One Scrollbar to Rule Them
 ## Verification
 -   Verified the ChordProEditor with extreme overflow (long lines and many verses) dragging the scrollbar violently. Cursor tracking remains 1:1.
 -   Verified the "Chorus" vertical label renders without overlapping text on mobile viewports.
+
+
+## Session Update (Feb 26, 2026 — Server Components Migration & Story Audit)
+
+### Architecture Decision: Server Components over API Routes
+Evaluated whether to add a REST API layer. Concluded that for this Supabase-backed app, **Server Components + Server Actions** is the correct Next.js App Router pattern — no API routes needed. Direct Supabase SDK calls with RLS enforcement are sufficient; API routes would add boilerplate without meaningful security or decoupling benefits.
+
+### Server Components Migration (PR #74)
+
+Migrated client-side data fetching to the server layer to eliminate skeleton loading flash and improve SEO.
+
+**New file — `lib/songs/serverQueries.ts`:**
+- `fetchSongsServer(limit?)` and `fetchCategoryTreeServer()` using `await createClient()` from `lib/supabase/server.ts`
+- Identical query logic to client-side utilities; only the Supabase client factory changes
+
+**`app/page.tsx`** — converted to `async` Server Component:
+- Removed `'use client'`, `useQuery`, `useAuth` (user was unused in JSX)
+- Data fetched before render; no skeleton flash
+
+**`app/songs/page.tsx`** — converted to `async` Server Component:
+- Removed `'use client'` (unnecessary — `<Suspense>` works in Server Components)
+- Pre-fetches songs + taxonomy in parallel via `Promise.all`
+- Passes data as `initialSongs` / `initialTaxonomy` props to `SongsPageContent`
+
+**`app/songs/SongsPageContent.tsx`** — updated:
+- Accepts `initialSongs: Song[]` and `initialTaxonomy: TaxonomyNode[]` props
+- Both `useQuery` calls receive `initialData` — grid renders immediately with no loading state
+- React Query still owns the cache and background-refetches after 5-min staleTime
+
+### Bug Fix: 406 Not Acceptable on Profile Fetch
+`useAuth.tsx` used `.single()` to fetch the `profiles` row, which sets `Accept: application/vnd.pgrst.object+json`. PostgREST returns 406 when zero rows match (e.g., first login, fresh local DB). Fixed by changing to `.maybeSingle()` — returns `null` gracefully, consistent with existing `profile?.role || 'member'` fallback.
+
+### Story Audit (1.1.4 / 1.1.5 / 1.1.6)
+- **1.1.4 [Partial]**: Login works (magic link + password, redirects to Home). Edit/Delete controls visible on song detail page. Missing: Delete icons on song cards in the library view.
+- **1.1.5 [Not Implemented]**: `/songs/add` renders `SongForm` for all users. Only guard is a silent redirect on submit. No "Please join our circle" modal exists.
+- **1.1.6 [Implemented]**: Full chords-over-lyrics detection and ChordPro conversion in `lib/chordProParsing.ts`. Auto-fills Title/Author/Key/Capo. Both paste and file-upload handlers active. Unit tests present.
+
+`doc/logbook/epic&user stories.md` updated to v1.22 with status tags and inline implementation notes.
