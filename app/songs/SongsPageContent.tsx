@@ -2,7 +2,6 @@
 
 import SearchBar from "@/components/home/SearchBar";
 import SongCard from "@/components/home/SongCard";
-import SongCardSkeleton from "@/components/home/SongCardSkeleton";
 import { Music, Guitar, ChevronDown, Flame, Search, X, Plus } from "lucide-react";
 import { useSidebar } from "@/context/SidebarContext";
 import { useState, useMemo, useEffect } from "react";
@@ -15,11 +14,17 @@ import { getCategoryColor, getCategoryStyles } from "@/lib/uiUtils";
 import { useDeclarativeFilter } from "@/hooks/useDeclarativeFilter";
 import { songFilterConfig, SongFilterState } from "@/lib/songs/filterConfig";
 import TagSelector from "@/components/library/TagSelector";
-import { fetchCategoryTree } from "@/lib/taxonomyUtils";
+import { fetchCategoryTree, type TaxonomyNode } from "@/lib/taxonomyUtils";
+import type { Song } from "@/lib/songUtils";
 
 type SortByType = 'title' | 'newest';
 
-export default function SongsPageContent() {
+interface SongsPageContentProps {
+    initialSongs: Song[];
+    initialTaxonomy: TaxonomyNode[];
+}
+
+export default function SongsPageContent({ initialSongs, initialTaxonomy }: SongsPageContentProps) {
     const searchParams = useSearchParams();
     const router = useRouter(); // needed for clear all button which uses router.push
     const { user } = useAuth();
@@ -36,14 +41,16 @@ export default function SongsPageContent() {
     };
 
     // --- 1. Fetch Data ---
-    const { data: songs = [], isLoading } = useQuery({
+    const { data: songs = [] } = useQuery({
         queryKey: ['songs', 'all'],
         queryFn: () => fetchSongs(),
+        initialData: initialSongs,
     });
 
     const { data: taxonomy = [] } = useQuery({
         queryKey: ['taxonomy'],
         queryFn: fetchCategoryTree,
+        initialData: initialTaxonomy,
     });
 
     // --- 2. Declarative Filter Hook ---
@@ -252,13 +259,7 @@ export default function SongsPageContent() {
                 {/* Song List */}
                 <section>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                        {isLoading ? (
-                            <>
-                                {[...Array(12)].map((_, i) => (
-                                    <SongCardSkeleton key={i} />
-                                ))}
-                            </>
-                        ) : displaySongs.length > 0 ? (
+                        {displaySongs.length > 0 ? (
                             displaySongs.map((song, index) => (
                                 <SongCard
                                     key={index}
