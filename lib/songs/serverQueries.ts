@@ -55,7 +55,10 @@ export async function fetchSongsServer(limit?: number): Promise<Song[]> {
         })(),
     ]);
 
-    if (songsResult.error) throw songsResult.error;
+    if (songsResult.error) {
+        console.error('fetchSongsServer query error:', songsResult.error);
+        return [];
+    }
 
     return songsResult.data.map(item => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
