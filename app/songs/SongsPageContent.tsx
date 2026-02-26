@@ -2,13 +2,15 @@
 
 import SearchBar from "@/components/home/SearchBar";
 import SongCard from "@/components/home/SongCard";
-import { Music, Guitar, ChevronDown, Flame, Search, X, Plus } from "lucide-react";
+import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
+import { Music, Guitar, ChevronDown, Flame, Search, X, Plus, Trash2 } from "lucide-react";
 import { useSidebar } from "@/context/SidebarContext";
 import { useState, useMemo, useEffect } from "react";
 import { fetchSongs } from "@/lib/songUtils";
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useAuth } from "@/hooks/useAuth";
 import { useSearchParams, useRouter } from 'next/navigation';
+import { createClient } from "@/lib/supabase/client";
 import Link from 'next/link';
 import { getCategoryColor, getCategoryStyles } from "@/lib/uiUtils";
 import { useDeclarativeFilter } from "@/hooks/useDeclarativeFilter";
@@ -29,7 +31,27 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy }: Song
     const router = useRouter(); // needed for clear all button which uses router.push
     const { user } = useAuth();
     const { setHeaderCount } = useSidebar();
+    const queryClient = useQueryClient();
     const [localSearch, setLocalSearch] = useState('');
+    const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
+
+    const isAdmin = user?.role === 'admin';
+    console.log('auth state:', { user: user?.role, isAdmin });
+
+    const handleDelete = async () => {
+        if (!deleteTarget) return;
+        setIsDeleting(true);
+        const supabase = createClient();
+        const { error } = await supabase.from('compositions').delete().eq('id', deleteTarget.id);
+        if (error) {
+            alert(`Failed to delete: ${error.message}`);
+        } else {
+            await queryClient.invalidateQueries({ queryKey: ['songs', 'all'] });
+        }
+        setIsDeleting(false);
+        setDeleteTarget(null);
+    };
 
 
     // Local UI state for sorting (not part of filtering engine usually)
@@ -260,19 +282,32 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy }: Song
                 <section>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                         {displaySongs.length > 0 ? (
-                            displaySongs.map((song, index) => (
-                                <SongCard
-                                    key={index}
-                                    id={song.id}
-                                    title={song.title}
-                                    author={song.author}
-                                    songKey={song.songKey}
-                                    accentColor={song.color}
-                                    isPublic={song.isPublic}
-                                    hasChords={song.hasChords}
-                                    hasMelody={song.hasMelody}
-                                    categories={song.categories}
-                                />
+                            displaySongs.map((song) => (
+                                <div key={song.id} className="relative group/card">
+                                    <SongCard
+                                        id={song.id}
+                                        title={song.title}
+                                        author={song.author}
+                                        songKey={song.songKey}
+                                        accentColor={song.color}
+                                        isPublic={song.isPublic}
+                                        hasChords={song.hasChords}
+                                        hasMelody={song.hasMelody}
+                                        categories={song.categories}
+                                    />
+                                    {user && (isAdmin || song.ownerId === user.id) && (
+                                        <button
+                                            onClick={(e) => {
+                                                e.preventDefault();
+                                                setDeleteTarget({ id: song.id, title: song.title });
+                                            }}
+                                            className="absolute top-2 right-2 z-10 p-1.5 rounded-lg bg-gray-900/80 border border-gray-700 text-gray-500 opacity-0 group-hover/card:opacity-100 hover:text-red-400 hover:border-red-500/50 hover:bg-red-500/10 transition-all duration-200"
+                                            title="Delete song"
+                                        >
+                                            <Trash2 className="w-3.5 h-3.5" />
+                                        </button>
+                                    )}
+                                </div>
                             ))
                         ) : (
                             <div className="col-span-full text-center py-20 px-4">
@@ -296,6 +331,15 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy }: Song
                     </div>
                 </section>
             </div>
+
+            <DeleteConfirmationModal
+                isOpen={deleteTarget !== null}
+                onClose={() => setDeleteTarget(null)}
+                onConfirm={handleDelete}
+                title="Delete Song?"
+                message={`Are you sure you want to delete "${deleteTarget?.title}"? This action cannot be undone.`}
+                isDeleting={isDeleting}
+            />
         </main>
     );
 }

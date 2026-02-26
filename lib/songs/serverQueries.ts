@@ -60,6 +60,8 @@ export async function fetchSongsServer(limit?: number): Promise<Song[]> {
             content: version?.content_chordpro || "",
             melodyNotation: version?.melody_notation || "",
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            ownerId: (item as any).owner_id ?? undefined,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             isPublic: (item as any).is_public ?? true,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             hasChords: (item as any).has_chords ?? false,
@@ -69,6 +71,98 @@ export async function fetchSongsServer(limit?: number): Promise<Song[]> {
             color: "red",
             categories: categories
         } as Song;
+    });
+}
+
+/**
+ * Fetches songs in the authenticated user's "My Favorites" setlist.
+ * Returns an empty array if the user is not authenticated or has no favorites.
+ * Only import this from Server Components or Server Actions.
+ */
+export async function fetchFavoriteSongsServer(): Promise<Song[]> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) return [];
+
+    const { data: setlist } = await supabase
+        .from('setlists')
+        .select('id')
+        .eq('owner_id', user.id)
+        .eq('title', 'My Favorites')
+        .maybeSingle();
+
+    if (!setlist) return [];
+
+    const { data, error } = await supabase
+        .from('setlist_items')
+        .select(`
+            order_index,
+            song_versions(
+                key,
+                content_chordpro,
+                melody_notation,
+                compositions(
+                    id,
+                    title,
+                    original_author,
+                    is_public,
+                    has_chords,
+                    has_melody,
+                    owner_id,
+                    created_at,
+                    song_category_map(
+                        categories(
+                            name,
+                            slug,
+                            parent:parent_id(name, slug)
+                        )
+                    )
+                )
+            )
+        `)
+        .eq('setlist_id', setlist.id)
+        .order('order_index');
+
+    if (error || !data) return [];
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (data as any[]).flatMap((item) => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const version = item.song_versions as any;
+        if (!version) return [];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const composition = version.compositions as any;
+        if (!composition) return [];
+
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const rawCategories = (composition.song_category_map as any[]) || [];
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        const categories = rawCategories.map((mapItem: any) => {
+            const cat = mapItem.categories;
+            return {
+                name: cat.name,
+                slug: cat.slug,
+                parent: cat.parent?.name || null,
+                parentSlug: cat.parent?.slug || null,
+            };
+        });
+
+        return [{
+            id: composition.id,
+            title: composition.title,
+            author: composition.original_author || 'Unknown',
+            songKey: version.key || null,
+            content: version.content_chordpro || '',
+            melodyNotation: version.melody_notation || '',
+            ownerId: composition.owner_id,
+            isPublic: composition.is_public ?? true,
+            hasChords: composition.has_chords ?? false,
+            hasMelody: composition.has_melody ?? false,
+            createdAt: composition.created_at,
+            color: 'red',
+            categories,
+        } as Song];
     });
 }
 

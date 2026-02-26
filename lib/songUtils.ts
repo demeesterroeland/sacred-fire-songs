@@ -7,6 +7,7 @@ export interface Song {
     author: string;
     songKey: string | null;
     color: string;
+    ownerId?: string;
     isPublic?: boolean;
     hasChords?: boolean;
     hasMelody?: boolean;
@@ -121,6 +122,8 @@ export const fetchSongs = async (limit?: number) => {
             songKey: version?.key || null,
             content: version?.content_chordpro || "",
             melodyNotation: version?.melody_notation || "",
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            ownerId: (item as any).owner_id ?? undefined,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             isPublic: (item as any).is_public ?? true,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
