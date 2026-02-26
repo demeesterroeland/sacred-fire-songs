@@ -1,6 +1,6 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 1.22
+**Version:** 1.25
 **Status:** Living Document
 **Date:** February 26, 2026
 
@@ -20,6 +20,9 @@
 | **1.20** | Feb 3, 2026 | Added Story 1.1.8 (Draft Auto-Save). |
 | **1.21** | Feb 23, 2026 | Removed Home page search box and renamed "Browse Songs" to "Search Songs". |
 | **1.22** | Feb 26, 2026 | Codebase audit: marked 1.1.4 as [Partial] (missing card-level delete icons), 1.1.5 as [Not Implemented] (no guest upload modal), 1.1.6 as [Implemented] (full chords-over-lyrics detection and conversion). |
+| **1.23** | Feb 26, 2026 | Marked stories 1.3.2, 1.3.4, and 1.3.5 as [Implemented] (SoundCloud embed, YouTube embed, Screen Wake Lock). |
+| **1.24** | Feb 26, 2026 | Marked 2.3.1 as [Implemented] (category filtering); removed story 3.1.1 (social login — out of scope). |
+| **1.25** | Feb 26, 2026 | GH sync: added stories 1.2.2, 2.3.3; marked 2.3.2, 3.1.2, 4.4.1 as [Implemented]; closed GH #13; fixed GH #56 label (1.1.7→1.1.8). |
 
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
@@ -138,6 +141,15 @@ Scenario: Guest views song library
   And the list should load more songs as I scroll down
 ```
 
+**Story 1.2.2: [Implemented]** As a Guest, I want to search for a song by title or lyrics so that I can quickly find a specific song.
+
+```
+Scenario: Search by title
+  Given I am on the Songs page
+  When I type "Grandmother" into the search field
+  Then only songs whose title or lyrics contain "Grandmother" should be visible
+```
+
 **Story 1.2.3: [Implemented]** As a Guest, I want to access the Explore and Playlists pages so that I can discover medicine songs without being forced to log in.
 
 ```gherkin
@@ -166,7 +178,7 @@ Scenario: Render ChordPro content
   And the chord "C" should be rendered visually above the word "Earth"
 ```
 
-**Story 1.3.2:** As a Guest, I want to listen to an audio reference so that I can learn the melody.
+**Story 1.3.2: [Implemented]** As a Guest, I want to listen to an audio reference so that I can learn the melody.
 
 ```
 Scenario: Display Audio Player
@@ -175,7 +187,7 @@ Scenario: Display Audio Player
   Then I should see an embedded SoundCloud player at the bottom of the page
 ```
 
-**Story 1.3.4:** As a Guest, I want to watch a YouTube video reference so that I can see how the song is played.
+**Story 1.3.4: [Implemented]** As a Guest, I want to watch a YouTube video reference so that I can see how the song is played.
 
 ```
 Scenario: Display YouTube Video
@@ -192,7 +204,7 @@ Scenario: Navigate back to home
   When I click the "Back" arrow in the header
   Then I should be redirected to the Home page
 
-**Story 1.3.5:** As a Musician, I want the screen to stay awake while I am viewing a song so that I don't have to touch it to keep the lyrics and chords visible while playing.
+**Story 1.3.5: [Implemented]** As a Musician, I want the screen to stay awake while I am viewing a song so that I don't have to touch it to keep the lyrics and chords visible while playing.
 
 ```gherkin
 Scenario: Prevent screen sleep on Song Detail page
@@ -264,7 +276,7 @@ Scenario: Manual Edit
 
 ### Epic 2.3: Taxonomy & Filtering
 
-**Story 2.3.1:** As a Guest, I want to filter songs by category (e.g., "Water", "Fire") so that I can find songs for specific ceremony moments.
+**Story 2.3.1: [Implemented]** As a Guest, I want to filter songs by category (e.g., "Water", "Fire") so that I can find songs for specific ceremony moments.
 
 ```
 Scenario: Filter by Category
@@ -274,7 +286,7 @@ Scenario: Filter by Category
   And songs tagged with "Fire" should be hidden
 ```
 
-**Story 2.3.2:** As a Guest & Authenticated Member, I want to open a side menu (hamburger) to access filters easily without cluttering the main view.
+**Story 2.3.2: [Implemented]** As a Guest & Authenticated Member, I want to open a side menu (hamburger) to access filters easily without cluttering the main view.
 
 ```
 Scenario: Open Filter Menu
@@ -283,8 +295,14 @@ Scenario: Open Filter Menu
   Then a side drawer should slide in
   And I should see filter options for "Theme", "Rhythm", etc.
 ```
-```
 
+**Story 2.3.3: [Implemented]** As a Guest, I want to browse songs by category page so that I can explore all songs in a specific theme.
+
+```
+Scenario: Browse by Category
+  Given I am on the Explore page
+  When I click on the "Water" category
+  Then I should be taken to a page listing all songs tagged "Water"
 ```
 
 
@@ -294,18 +312,7 @@ Scenario: Open Filter Menu
 
 ### Epic 3.1: User Accounts
 
-**Story 3.1.1:** As a Guest, I want to sign up with my Google/Facebook account so that I don't have to remember another password.
-
-```
-Scenario: Social Login
-  Given I am on the Login page
-  When I click "Continue with Google"
-  And I authenticate successfully with Google
-  Then a user profile should be created for me in the system
-  And I should be logged in
-```
-
-**Story 3.1.2:** As a Member, I want to "Heart" songs so that I can quickly access my favorites.
+**Story 3.1.2: [Implemented]** As a Member, I want to "Heart" songs so that I can quickly access my favorites.
 
 ```
 Scenario: Add to Favorites
@@ -401,7 +408,7 @@ Scenario: Offline Access
 
 ### Epic 4.4: Desktop Experience
 
-**Story 4.4.1:** As a Guest on a laptop, I want a responsive layout so that the app uses the full screen width effectively.
+**Story 4.4.1: [Implemented]** As a Guest on a laptop, I want a responsive layout so that the app uses the full screen width effectively.
 
 ```
 Scenario: Desktop Layout
