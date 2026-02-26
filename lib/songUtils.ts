@@ -11,6 +11,7 @@ export interface Song {
     isPublic?: boolean;
     hasChords?: boolean;
     hasMelody?: boolean;
+    isFavorite?: boolean;
     content?: string; // ChordPro content for searching
     melodyNotation?: string;
     createdAt: string;

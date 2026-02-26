@@ -9,33 +9,55 @@ import type { TaxonomyNode } from "@/lib/taxonomyUtils";
 export async function fetchSongsServer(limit?: number): Promise<Song[]> {
     const supabase = await createClient();
 
-    let query = supabase
-        .from('compositions')
-        .select(`
-            *,
-            song_versions(key, content_chordpro, melody_notation),
-            song_category_map (
-              categories (
-                name,
-                slug,
-                parent:parent_id (
-                  name,
-                  slug
-                )
-              )
-            )
-        `)
-        .order('created_at', { ascending: false });
+    // Fetch songs and user's favorites in parallel
+    const [songsResult, favoriteIds] = await Promise.all([
+        (() => {
+            let q = supabase
+                .from('compositions')
+                .select(`
+                    *,
+                    song_versions(key, content_chordpro, melody_notation),
+                    song_category_map (
+                      categories (
+                        name,
+                        slug,
+                        parent:parent_id (
+                          name,
+                          slug
+                        )
+                      )
+                    )
+                `)
+                .order('created_at', { ascending: false });
+            if (limit) q = q.limit(limit);
+            return q;
+        })(),
+        (async () => {
+            const { data: { user } } = await supabase.auth.getUser();
+            if (!user) return new Set<string>();
 
-    if (limit) {
-        query = query.limit(limit);
-    }
+            const { data: setlist } = await supabase
+                .from('setlists')
+                .select('id')
+                .eq('owner_id', user.id)
+                .eq('title', 'My Favorites')
+                .maybeSingle();
 
-    const { data, error } = await query;
+            if (!setlist) return new Set<string>();
 
-    if (error) throw error;
+            const { data: items } = await supabase
+                .from('setlist_items')
+                .select('song_versions(composition_id)')
+                .eq('setlist_id', setlist.id);
 
-    return data.map(item => {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            return new Set<string>((items || []).map((i: any) => i.song_versions?.composition_id).filter(Boolean));
+        })(),
+    ]);
+
+    if (songsResult.error) throw songsResult.error;
+
+    return songsResult.data.map(item => {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         const version = (item.song_versions as any[])?.[0];
 
@@ -69,7 +91,8 @@ export async function fetchSongsServer(limit?: number): Promise<Song[]> {
             hasMelody: (item as any).has_melody ?? false,
             createdAt: item.created_at,
             color: "red",
-            categories: categories
+            categories: categories,
+            isFavorite: favoriteIds.has(item.id),
         } as Song;
     });
 }
