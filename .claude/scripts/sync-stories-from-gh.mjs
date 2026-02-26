@@ -11,7 +11,7 @@
 import { spawnSync } from 'child_process';
 import { readFileSync, writeFileSync } from 'fs';
 
-const EPIC_FILE = 'doc/logbook/epic&user stories.md';
+const EPIC_FILE = 'docs/logbook/epic&user stories.md';
 
 // ── 1. Fetch all user-story issues ───────────────────────────────────────────
 const result = spawnSync('gh', [
