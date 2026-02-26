@@ -43,3 +43,6 @@ next-env.d.ts
 
 # local development info
 SUPABASE_LOCAL.md
+
+# git worktrees
+.worktrees/
