@@ -46,6 +46,12 @@ The agent does NOT retain memory across conversations. To avoid data loss:
 2. Use the `/update-schema` command if helpful.
 3. Keep `doc/db-schema.sql` valid as a single-file fresh-install setup script.
 
+## Supabase Patterns
+
+- Use `.maybeSingle()` (not `.single()`) when a row may not exist — `.single()` returns 406 if zero rows match.
+- Server-side queries belong in `lib/*/serverQueries.ts`; import `createClient` from `@/lib/supabase/server`.
+- Only import server queries from Server Components or Server Actions (never from client components).
+
 ## Available Custom Commands
 
 | Command | Description |
