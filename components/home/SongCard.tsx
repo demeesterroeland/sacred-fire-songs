@@ -147,12 +147,12 @@ export default function SongCard({
                 </div>
             </Link>
 
-            {/* Heart button — outside Link to prevent card navigation on click */}
+            {/* Heart button — bottom-right to avoid overlap with admin delete button (top-right) */}
             <button
                 onClick={handleToggleFavorite}
                 aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
                 className={cn(
-                    'absolute top-3 right-3 z-20 p-1 rounded-full transition-all duration-300',
+                    'absolute bottom-3 right-3 z-20 p-1 rounded-full transition-all duration-300',
                     isFav
                         ? 'text-amber-400 heart-glow'
                         : 'text-gray-700 hover:text-amber-400/60'
