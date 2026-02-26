@@ -1,10 +1,12 @@
 'use client';
 
 import { useAuth } from '@/hooks/useAuth';
-import { User, ShieldCheck, Music, Users } from 'lucide-react';
+import { useQueryClient } from '@tanstack/react-query';
+import { ShieldCheck, Music, Users } from 'lucide-react';
 
 export default function QuickLogin() {
   const { quickLogin, loading } = useAuth();
+  const queryClient = useQueryClient();
 
   const testUsers = [
     { email: 'roel.de.meester+admin@gmail.com', label: 'Admin', role: 'admin', icon: ShieldCheck, color: 'text-red-500' },
@@ -22,7 +24,7 @@ export default function QuickLogin() {
           <button
             key={u.email}
             disabled={loading}
-            onClick={() => quickLogin(u.email)}
+            onClick={async () => { await quickLogin(u.email); queryClient.clear(); }}
             className="flex items-center gap-2 px-2 py-1.5 text-[11px] text-gray-400 hover:text-white hover:bg-gray-800 rounded transition-all group border border-transparent hover:border-gray-700"
           >
             <u.icon className={`w-3 h-3 ${u.color}`} />
