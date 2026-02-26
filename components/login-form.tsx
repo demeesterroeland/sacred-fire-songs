@@ -154,7 +154,7 @@ function LoginFormContent({
                 className="w-full bg-transparent border-[#2d3545] rounded-xl py-3.5 md:py-4 pl-12 pr-20 text-white placeholder-[#5a657a] focus:outline-none focus:border-[#d9481e] transition-all text-[14px] md:text-[15px] h-auto"
               />
               <Link
-                href="/auth/forgot-password"
+                href={`/auth/forgot-password${email ? `?email=${encodeURIComponent(email)}` : ''}`}
                 className="absolute right-4 top-1/2 -translate-y-1/2 text-[#8e99aa] hover:text-[#d9481e] text-xs font-medium transition-colors border-l border-[#2d3545] pl-4 h-5 flex items-center"
               >
                 Forgot

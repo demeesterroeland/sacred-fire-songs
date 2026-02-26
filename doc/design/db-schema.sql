@@ -19,6 +19,8 @@ create table public.profiles (
   id uuid references auth.users on delete cascade primary key,
   email text unique not null,
   role user_role default 'member',
+  full_name text,
+  avatar_url text,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 -- CATEGORIES (Recursive Structure)

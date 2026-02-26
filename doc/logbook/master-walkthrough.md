@@ -1750,7 +1750,7 @@ I have created a GitHub issue to address the rendering bug where double new line
 ## Implementation
 
 ### 1. Preserving Stanza Breaks
-- **Modified**: [chordUtils.ts](file:///home/roeland/Projects/sacred-fire-songs/lib/chordUtils.ts)
+- **Modified**: [chordUtils.ts](file:///home/roeland/Pro jects/sacred-fire-songs/lib/chordUtils.ts)
 - **Fix**: Updated the `parseChordProForDisplay` loop to detect empty lines in the ChordPro source.
 - **Mechanism**: When an empty line is encountered, the currently parsed lines are flushed into a new section. Since the `SongDisplay` component uses `space-y-12` between sections, this naturally creates the desired visual gap between stanzas without requiring CSS changes.
 - **Outcome**: Double new lines in the source content now translate to clear vertical gaps in the rendered view, matching the user's expectations.
@@ -2102,3 +2102,49 @@ Migrated client-side data fetching to the server layer to eliminate skeleton loa
 - **1.1.6 [Implemented]**: Full chords-over-lyrics detection and ChordPro conversion in `lib/chordProParsing.ts`. Auto-fills Title/Author/Key/Capo. Both paste and file-upload handlers active. Unit tests present.
 
 `doc/logbook/epic&user stories.md` updated to v1.22 with status tags and inline implementation notes.
+## Evidence
+- Final Seed: [04_songs_nina_urku.sql](file:///home/roeland/Projects/sacred-fire-songs/supabase/seeds/04_songs_nina_urku.sql)
+- Result CSV: [ninaurku_songs.csv](file:///home/roeland/Projects/sacred-fire-songs/ninaurku_songs.csv)
+
+---
+
+## Session Update (Feb 4-5, 2026 - Media & Onboarding)
+**Session ID**: 2e0f285d-652e-4a2d-8ebc-6265788e3cc8
+
+### 1. Nina Urku Media Integration (Feb 4)
+- **Scraper**: Developed `ninaurku_scraper.py` to extract SoundCloud and YouTube links.
+- **Database Update**: Backfilled 34 SoundCloud URLs and ~50 YouTube IDs via `04_songs_nina_urku.sql`.
+
+### 2. Onboarding Flow Refinement (Feb 5)
+- **Auth Redirects**: Fixed `app/auth/confirm/route.ts` to redirect users correctly based on flow (signup -> completion, recovery -> update-password).
+- **Registration Finishing**:
+    - Created `FinishRegistrationForm.tsx` and `/auth/finish-registration` page.
+    - Implemented "Welcome at the Fire" thematic copy.
+    - Added **Fire Embers** CSS micro-interaction.
+    - Styled verification alert to match emerald-bordered dark theme.
+    - Integrated official **Flame** logo from sidebar.
+- **UX Simplification**: Removed redundant password fields and directed final CTA to `/explore`.
+
+### 3. Account Settings Design (Feb 5)
+- **Mockup**: Designed `screen4_settings.html` with a modern tabbed interface.
+- **Features**: Support for Avatar upload, Name changes, Email/Password management, Privacy toggles, and Data Export/Deletion.
+- **Sidebar Sync**: Integrated full site navigation into the settings mockup for UI consistency.
+
+---
+
+## Session Update (Feb 5, 2026 - Account Settings Refinements)
+
+### Account Settings Refinements
+Refined the user experience and fixed persistence issues on the Account Settings page.
+
+- **Fixed Persistence Bug**: Applied correct RLS policies to the `profiles` table to allow users to update their `full_name` and `avatar_url`.
+- **Avatar Upload**: Implemented full avatar upload functionality using Supabase Storage (new `avatars` bucket).
+- **Toast Styling**: Unified toast notifications with the Auth flow styling (centered, unstyled, emerald theme, no icons).
+
+#### Visual Verification
+
+![Final Toast Style](/home/roeland/.gemini/antigravity/brain/2e0f285d-652e-4a2d-8ebc-6265788e3cc8/toast_check_1770251971468.png)
+*The updated toast notification, centered and styled to match the Auth flow.*
+
+![Avatar Upload Recording](/home/roeland/.gemini/antigravity/brain/2e0f285d-652e-4a2d-8ebc-6265788e3cc8/final_toast_check_no_icon_top_center_1770251961913.webp)
+*Verification of the centered, icon-free toast message.*

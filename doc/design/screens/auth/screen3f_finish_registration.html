@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Complete Profile - Sacred Fire Songbook</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body {
+      font-family: 'Inter', sans-serif;
+      background-color: #141821;
+      margin: 0;
+      -webkit-font-smoothing: antialiased;
+      overflow: hidden;
+    }
+
+    /* Fire Embers Animation */
+    @keyframes ember-rise {
+      0% {
+        transform: translateY(0) scale(1) rotate(0deg);
+        opacity: 0;
+      }
+
+      20% {
+        opacity: 1;
+      }
+
+      100% {
+        transform: translateY(-100vh) scale(0) rotate(360deg);
+        opacity: 0;
+      }
+    }
+
+    .ember {
+      position: absolute;
+      bottom: -10px;
+      width: 4px;
+      height: 4px;
+      background: #f45d1a;
+      border-radius: 50%;
+      box-shadow: 0 0 10px #d9481e, 0 0 20px #f45d1a;
+      pointer-events: none;
+      animation: ember-rise linear forwards;
+    }
+  </style>
+</head>
+
+<body class="min-h-screen flex items-center justify-center md:p-4 overflow-hidden">
+  <div id="ember-container" class="fixed inset-0 pointer-events-none z-0"></div>
+
+  <div
+    class="relative z-10 w-full max-w-[420px] bg-[#1c222d] md:border md:border-[#2d3545] md:rounded-3xl p-6 md:p-8 md:shadow-2xl transition-all duration-300 min-h-screen md:min-h-0 flex flex-col justify-center md:block">
+
+    <!-- Header -->
+    <div class="flex flex-row md:flex-col items-center md:items-center gap-4 md:gap-0 mb-8 md:mb-10 mt-4 md:mt-0">
+      <div
+        class="w-12 h-12 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-[#b91c1c] to-[#ea580c] flex items-center justify-center shadow-[0_0_20px_rgba(185,28,28,0.3)] ring-1 ring-white/10 md:mb-6 flex-shrink-0">
+        <i data-lucide="flame" class="text-white w-6 h-6 md:w-10 md:h-10 fill-current"></i>
+      </div>
+      <div class="text-left md:text-center">
+        <h1 class="text-white text-xl md:text-3xl font-bold md:mb-2 leading-tight">Welcome at the Fire</h1>
+      </div>
+    </div>
+
+    <!-- Finish Registration Form -->
+    <form class="space-y-6 md:space-y-8">
+      <div
+        class="bg-[#141b24] border border-emerald-500/30 p-4 rounded-xl text-emerald-400 text-[15px] font-medium text-center mb-6 shadow-inner">
+        Email successfully verified!
+      </div>
+
+      <div class="space-y-4">
+        <p class="text-[#8e99aa] text-sm text-center leading-relaxed">
+          The smoke has cleared, and your invitation is now official.
+          The circle awaits—tell us how we shall call you as you join us by the fire.
+        </p>
+      </div>
+
+      <div class="space-y-1">
+        <label class="text-xs font-semibold text-white ml-1 tracking-wide uppercase opacity-70">What should we call
+          you?</label>
+        <div class="relative group">
+          <div
+            class="absolute left-4 top-1/2 -translate-y-1/2 text-[#5a657a] group-focus-within:text-[#d9481e] transition-colors">
+            <i data-lucide="user" class="w-5 h-5"></i>
+          </div>
+          <input type="text" placeholder="Your Full Name" required
+            class="w-full bg-transparent border border-[#2d3545] rounded-xl py-3.5 md:py-4 pl-12 pr-4 text-white placeholder-[#5a657a] focus:outline-none focus:border-[#d9481e] transition-all text-[14px] md:text-[15px]">
+        </div>
+      </div>
+
+      <button type="submit"
+        class="w-full bg-gradient-to-r from-[#d9481e] to-[#f45d1a] hover:brightness-110 active:scale-[0.98] text-white font-bold py-3.5 md:py-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-[0_4px_15px_rgba(217,72,30,0.4)]">
+        Finish Setup & Explore
+        <i data-lucide="compass" class="w-5 h-5"></i>
+      </button>
+    </form>
+
+    <!-- Footer -->
+    <div class="mt-8 text-center md:text-left border-t border-[#2d3545] pt-6">
+      <p class="text-[#8e99aa] text-[12px] leading-relaxed italic">
+        "May the song carry you home to the sacred fire."
+      </p>
+    </div>
+  </div>
+
+  <script>
+    lucide.createIcons();
+
+    function createEmber() {
+      const container = document.getElementById('ember-container');
+      const ember = document.createElement('div');
+      ember.classList.add('ember');
+
+      const left = Math.random() * 100;
+      const size = Math.random() * 4 + 2;
+      const duration = Math.random() * 3 + 2;
+      const delay = Math.random() * 2;
+
+      ember.style.left = left + '%';
+      ember.style.width = size + 'px';
+      ember.style.height = size + 'px';
+      ember.style.animationDuration = duration + 's';
+      ember.style.animationDelay = delay + 's';
+
+      container.appendChild(ember);
+
+      ember.addEventListener('animationend', () => {
+        ember.remove();
+      });
+    }
+
+    // Start embers
+    setInterval(createEmber, 100);
+    // Initial burst
+    for (let i = 0; i < 30; i++) createEmber();
+  </script>
+</body>
+
+</html>

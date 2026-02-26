@@ -15,7 +15,7 @@ export default function Header() {
         if (pathname === '/songs') return 'LIBRARY';
         if (pathname === '/explore') return 'EXPLORE';
         if (pathname === '/songs/add') return 'ADD SONG';
-        if (pathname === '/playlists') return 'PLAYLISTS';
+        if (pathname?.startsWith('/library')) return 'LIBRARY';
         if (pathname?.startsWith('/songs/')) return 'SONG DETAIL';
         return '';
     };

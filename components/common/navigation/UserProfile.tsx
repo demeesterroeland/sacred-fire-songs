@@ -108,7 +108,7 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true }: Us
             <div className="space-y-1">
               <Link href="/account/settings" className="flex items-center gap-3 p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors group">
                 <SlidersHorizontal className="w-4 h-4 group-hover:text-blue-400" />
-                <span className="text-sm font-medium">Personal Settings</span>
+                <span className="text-sm font-medium">Account Settings</span>
               </Link>
               <Link href="/songs?favorites=true" className="flex items-center gap-3 p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors group">
                 <Heart className="w-4 h-4 group-hover:text-red-400" />
@@ -118,7 +118,7 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true }: Us
                 <FileText className="w-4 h-4 group-hover:text-orange-400" />
                 <span className="text-sm font-medium">My Drafts</span>
               </Link>
-              <Link href="/playlists" className="flex items-center gap-3 p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors group">
+              <Link href="/library/playlists" className="flex items-center gap-3 p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors group">
                 <ListMusic className="w-4 h-4 group-hover:text-purple-400" />
                 <span className="text-sm font-medium">My Playlists</span>
               </Link>
@@ -128,9 +128,10 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true }: Us
 
             {/* Sign Out */}
             <button
-              onClick={() => {
-                logout();
+              onClick={async () => {
+                await logout();
                 onLogout?.();
+                window.location.href = '/auth/login';
               }}
               className="w-full flex items-center gap-3 p-2 rounded-lg text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-colors group"
             >
