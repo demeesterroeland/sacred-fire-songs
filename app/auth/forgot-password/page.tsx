@@ -11,13 +11,13 @@ import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 function ForgotPasswordContent() {
-    const [email, setEmail] = useState("");
-    const [error, setError] = useState<string | null>(null);
-    const [successMessage, setSuccessMessage] = useState<string | null>(null);
-    const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
     const searchParams = useSearchParams();
     const message = searchParams.get('message');
+    const [email, setEmail] = useState(searchParams.get('email') || "");
+    const [error, setError] = useState<string | null>(null);
+    const [successMessage, setSuccessMessage] = useState<string | null>(null);
+    const [isLoading, setIsLoading] = useState(false);
 
     const handleResetPassword = async (e: React.FormEvent) => {
         e.preventDefault();

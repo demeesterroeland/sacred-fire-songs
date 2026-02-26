@@ -113,43 +113,24 @@ export default function ProfileSettings({ user, profile }: ProfileSettingsProps)
         className="hidden"
       />
 
-      <div className="flex flex-col md:flex-row items-center gap-8 pb-8 border-b border-white/5">
-        <div className="relative group">
-          <div
-            onClick={() => fileInputRef.current?.click()}
-            className="w-24 h-24 rounded-full overflow-hidden bg-slate-800 ring-2 ring-[#f45d1a]/50 flex items-center justify-center cursor-pointer relative"
-          >
-            {isUploading ? (
-              <Loader2 className="w-8 h-8 text-[#f45d1a] animate-spin" />
-            ) : profile?.avatar_url ? (
+      <div className="flex flex-col md:flex-row items-center gap-8 pb-8 border-b border-white/5 opacity-50">
+        <div className="relative">
+          <div className="w-24 h-24 rounded-full overflow-hidden bg-slate-800 ring-2 ring-white/10 flex items-center justify-center">
+            {profile?.avatar_url ? (
               <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
             ) : (
               <UserIcon className="w-12 h-12 text-slate-600" />
             )}
-            <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-              <Camera className="text-white w-6 h-6" />
-            </div>
           </div>
         </div>
         <div className="text-center md:text-left">
-          <h3 className="text-lg font-semibold mb-1 text-white">Avatar</h3>
-          <p className="text-sm text-slate-400 mb-4">Recommended: 400x400px. JPG, PNG or GIF.</p>
-          <div className="flex gap-3 justify-center md:justify-start">
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              className="text-sm font-semibold bg-white/5 border border-white/10 px-4 py-2 rounded-lg hover:bg-white/10 transition-colors text-white"
-            >
-              Change
-            </button>
-            {profile?.avatar_url && (
-              <button
-                onClick={handleRemoveAvatar}
-                className="text-sm font-semibold text-red-400 hover:text-red-300 transition-colors"
-              >
-                Remove
-              </button>
-            )}
+          <div className="flex items-center gap-2 mb-1">
+            <h3 className="text-lg font-semibold text-white">Avatar</h3>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-white/5 border border-white/10 px-2 py-0.5 rounded-full">
+              Coming soon
+            </span>
           </div>
+          <p className="text-sm text-slate-500">Avatar upload will be available soon.</p>
         </div>
       </div>
 

@@ -62,7 +62,7 @@ function SignUpFormContent({
       // Notify other components like Sidebar to refresh auth state
       window.dispatchEvent(new Event("auth-role-change"));
 
-      router.push("/auth/sign-up-success");
+      router.push(`/auth/sign-up-success?email=${encodeURIComponent(email)}`);
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {

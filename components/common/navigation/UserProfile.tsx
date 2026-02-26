@@ -128,9 +128,10 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true }: Us
 
             {/* Sign Out */}
             <button
-              onClick={() => {
-                logout();
+              onClick={async () => {
+                await logout();
                 onLogout?.();
+                window.location.href = '/auth/login';
               }}
               className="w-full flex items-center gap-3 p-2 rounded-lg text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-colors group"
             >
