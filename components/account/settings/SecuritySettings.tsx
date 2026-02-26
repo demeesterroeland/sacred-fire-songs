@@ -14,8 +14,7 @@ export default function SecuritySettings({ user }: SecuritySettingsProps) {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [showPasswords, setShowPasswords] = useState(false);
   const supabase = createClient();
 
   const handleUpdatePassword = async () => {
@@ -84,7 +83,7 @@ export default function SecuritySettings({ user }: SecuritySettingsProps) {
             <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">New Password</label>
             <div className="relative">
               <input
-                type={showNewPassword ? "text" : "password"}
+                type={showPasswords ? "text" : "password"}
                 placeholder="••••••••"
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
@@ -92,10 +91,10 @@ export default function SecuritySettings({ user }: SecuritySettingsProps) {
               />
               <button
                 type="button"
-                onClick={() => setShowNewPassword(!showNewPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
+                onClick={() => setShowPasswords(prev => !prev)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 z-10 text-slate-500 hover:text-white transition-colors p-1"
               >
-                {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showPasswords ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
           </div>
@@ -103,7 +102,7 @@ export default function SecuritySettings({ user }: SecuritySettingsProps) {
             <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Confirm New Password</label>
             <div className="relative">
               <input
-                type={showConfirmPassword ? "text" : "password"}
+                type={showPasswords ? "text" : "password"}
                 placeholder="••••••••"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
@@ -111,10 +110,10 @@ export default function SecuritySettings({ user }: SecuritySettingsProps) {
               />
               <button
                 type="button"
-                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-500 hover:text-white transition-colors"
+                onClick={() => setShowPasswords(prev => !prev)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 z-10 text-slate-500 hover:text-white transition-colors p-1"
               >
-                {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                {showPasswords ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
           </div>
