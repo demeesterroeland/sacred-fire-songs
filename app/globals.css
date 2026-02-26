@@ -39,3 +39,12 @@ body {
     /* Firefox */
   }
 }
+
+@keyframes heart-glow {
+  0%, 100% { filter: drop-shadow(0 0 3px rgb(251 191 36 / 0.45)); }
+  50%       { filter: drop-shadow(0 0 9px rgb(251 191 36 / 0.9)); }
+}
+
+.heart-glow {
+  animation: heart-glow 2.5s ease-in-out infinite;
+}
