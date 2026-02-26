@@ -77,7 +77,7 @@ export const useAuth = () => {
                 .from('profiles')
                 .select('role, full_name, avatar_url')
                 .eq('id', supabaseUser.id)
-                .single();
+                .maybeSingle();
 
             setUser({
                 id: supabaseUser.id,
