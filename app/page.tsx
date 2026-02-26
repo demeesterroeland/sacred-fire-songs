@@ -1,10 +1,35 @@
 import SongCard from "@/components/home/SongCard";
 import { fetchSongsServer } from "@/lib/songs/serverQueries";
+import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
+import { Heart } from "lucide-react";
 
 export default async function Home() {
-  const songs = await fetchSongsServer(10);
+  const [songs, supabase] = await Promise.all([fetchSongsServer(10), createClient()]);
   const displaySongs = songs.filter(song => song.isPublic);
+
+  // Favorites count for dashboard card
+  const { data: { user } } = await supabase.auth.getUser();
+  let favCounts = { total: 0, public: 0, draft: 0 };
+  if (user) {
+    const { data: setlist } = await supabase
+      .from('setlists')
+      .select('id')
+      .eq('owner_id', user.id)
+      .eq('title', 'My Favorites')
+      .maybeSingle();
+    if (setlist) {
+      const { data: items } = await supabase
+        .from('setlist_items')
+        .select('song_versions(compositions(is_public))')
+        .eq('setlist_id', setlist.id);
+      for (const item of items ?? []) {
+        favCounts.total++;
+        if ((item.song_versions as any)?.compositions?.is_public === true) favCounts.public++;
+        else favCounts.draft++;
+      }
+    }
+  }
 
   return (
     <main className="flex-1 min-h-0 bg-gray-950">
@@ -27,15 +52,25 @@ export default async function Home() {
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-plus w-5 h-5 text-blue-500"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
             </div>
             <h3 className="font-bold text-white">Add Song</h3>
-            <p className="text-xs text-gray-500 mt-1">Add new</p>
+            <p className="text-xs text-gray-500 mt-1">Add new lyrics and chords</p>
           </Link>
 
-          <Link href="/songs?favorites=true" className="bg-gray-900/50 p-4 rounded-2xl border border-white/5 hover:border-white/10 transition-colors cursor-pointer group text-left">
-            <div className="w-10 h-10 rounded-full bg-amber-500/10 flex items-center justify-center mb-3 group-hover:bg-amber-500/20 transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-star w-5 h-5 text-amber-500"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+          <Link href="/songs?favorites=true" className="bg-amber-500/[0.08] border border-amber-500/20 p-4 rounded-2xl hover:bg-amber-500/15 hover:border-amber-500/35 transition-all cursor-pointer group text-left flex items-center gap-3">
+            <div className="w-10 h-10 rounded-xl bg-amber-500/15 flex items-center justify-center group-hover:bg-amber-500/25 transition-colors shrink-0">
+              <Heart className="w-5 h-5 text-amber-400 fill-amber-400" />
             </div>
-            <h3 className="font-bold text-white">Favorites</h3>
-            <p className="text-xs text-gray-500 mt-1">Your saved songs</p>
+            <div>
+              <h3 className="font-bold text-white group-hover:text-white transition-colors">My Favorites</h3>
+              {favCounts.total > 0 ? (
+                <p className="text-xs text-gray-500 mt-0.5">
+                  {favCounts.total} song{favCounts.total !== 1 ? 's' : ''}{' · '}
+                  <span className="text-emerald-500/70">{favCounts.public} public</span>{' · '}
+                  <span className="text-amber-500/70">{favCounts.draft} draft</span>
+                </p>
+              ) : (
+                <p className="text-xs text-gray-500 mt-0.5">Your saved songs</p>
+              )}
+            </div>
           </Link>
 
           <Link href="/account/settings" className="bg-gray-900/50 p-4 rounded-2xl border border-white/5 hover:border-white/10 transition-colors cursor-pointer group text-left">

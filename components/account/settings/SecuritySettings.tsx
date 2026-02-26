@@ -48,7 +48,7 @@ export default function SecuritySettings({ user }: SecuritySettingsProps) {
   };
 
   return (
-    <section className="bg-slate-800/40 backdrop-blur-xl border border-white/5 p-6 md:p-8 rounded-3xl space-y-8">
+    <section className="space-y-8">
       <div className="space-y-6">
         <h2 className="text-xl font-bold flex items-center gap-2 text-white">
           <Mail className="w-5 h-5 text-slate-400" />
@@ -63,7 +63,7 @@ export default function SecuritySettings({ user }: SecuritySettingsProps) {
           />
           <button
             onClick={() => toast.info("Email change is currently handled via support.")}
-            className="bg-white/5 border border-white/10 text-white font-medium px-6 py-3 rounded-xl hover:bg-white/10 transition-colors"
+            className="w-44 shrink-0 bg-white/5 border border-white/10 text-white font-medium px-6 py-3 rounded-xl hover:bg-white/10 transition-colors whitespace-nowrap"
           >
             Change Email
           </button>
@@ -78,8 +78,8 @@ export default function SecuritySettings({ user }: SecuritySettingsProps) {
           <Lock className="w-5 h-5 text-slate-400" />
           Password
         </h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
+        <div className="flex flex-col md:flex-row gap-4 items-end">
+          <div className="flex-1 space-y-2">
             <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">New Password</label>
             <div className="relative">
               <input
@@ -98,7 +98,7 @@ export default function SecuritySettings({ user }: SecuritySettingsProps) {
               </button>
             </div>
           </div>
-          <div className="space-y-2">
+          <div className="flex-1 space-y-2">
             <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Confirm New Password</label>
             <div className="relative">
               <input
@@ -117,12 +117,10 @@ export default function SecuritySettings({ user }: SecuritySettingsProps) {
               </button>
             </div>
           </div>
-        </div>
-        <div className="flex justify-end">
           <button
             onClick={handleUpdatePassword}
-            disabled={isUpdating}
-            className="bg-white/5 border border-white/10 text-white font-medium px-6 py-3 rounded-xl hover:bg-white/10 transition-colors disabled:opacity-50"
+            disabled={isUpdating || !newPassword}
+            className="w-44 shrink-0 bg-white/5 border border-white/10 text-white font-medium px-6 py-3 rounded-xl hover:bg-white/10 transition-colors disabled:opacity-50 whitespace-nowrap"
           >
             {isUpdating ? "Updating..." : "Update Password"}
           </button>

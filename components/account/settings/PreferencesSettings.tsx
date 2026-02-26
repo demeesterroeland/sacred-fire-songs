@@ -56,7 +56,7 @@ export default function PreferencesSettings() {
   const { isSupported } = useWakeLock();
 
   return (
-    <section className="bg-slate-800/40 backdrop-blur-xl border border-white/5 p-6 md:p-8 rounded-3xl space-y-4">
+    <section className="space-y-4">
       <h2 className="text-xl font-bold text-white mb-6">App Preferences</h2>
 
       {/* Keep Screen Awake — functional */}

@@ -53,7 +53,7 @@ export async function updateSession(request: NextRequest) {
         !request.nextUrl.pathname.startsWith("/notes") &&
         !request.nextUrl.pathname.startsWith("/songs") &&
         !request.nextUrl.pathname.startsWith("/explore") &&
-        !request.nextUrl.pathname.startsWith("/playlists")
+        !request.nextUrl.pathname.startsWith("/library")
     ) {
         // This part is for any other protected routes that might be added later
         // Currently allowed for guests: /, /auth, /login, /notes, /songs, /explore, /playlists

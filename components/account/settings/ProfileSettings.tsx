@@ -104,7 +104,7 @@ export default function ProfileSettings({ user, profile }: ProfileSettingsProps)
   };
 
   return (
-    <section className="bg-slate-800/40 backdrop-blur-xl border border-white/5 p-6 md:p-8 rounded-3xl space-y-8">
+    <section className="space-y-8">
       <input
         type="file"
         ref={fileInputRef}
@@ -134,27 +134,24 @@ export default function ProfileSettings({ user, profile }: ProfileSettingsProps)
         </div>
       </div>
 
-      <div className="space-y-6">
-        <div className="space-y-2">
-          <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider ml-1">Full Name</label>
+      <div className="space-y-2">
+        <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider ml-1">Full Name</label>
+        <div className="flex gap-4 items-center">
           <input
             type="text"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
-            className="w-full bg-slate-900/50 border border-white/10 px-4 py-4 rounded-xl text-white focus:outline-none focus:border-[#f45d1a] transition-all"
+            className="flex-1 bg-slate-900/50 border border-white/10 px-4 py-3 rounded-xl text-white focus:outline-none focus:border-[#f45d1a] transition-all"
           />
+          <button
+            onClick={handleSave}
+            disabled={isSaving || fullName === (profile?.full_name || "")}
+            className="w-44 shrink-0 bg-[#f45d1a] text-white font-semibold px-6 py-3 rounded-xl hover:brightness-110 shadow-lg shadow-orange-900/20 transition-all disabled:opacity-50 flex items-center justify-center gap-2 whitespace-nowrap"
+          >
+            {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}
+            {isSaving ? "Saving..." : "Save Changes"}
+          </button>
         </div>
-      </div>
-
-      <div className="flex justify-end pt-4">
-        <button
-          onClick={handleSave}
-          disabled={isSaving}
-          className="bg-[#f45d1a] text-white font-semibold px-6 py-3 rounded-xl hover:brightness-110 shadow-lg shadow-orange-900/20 transition-all disabled:opacity-50 flex items-center gap-2"
-        >
-          {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}
-          {isSaving ? "Saving..." : "Save Changes"}
-        </button>
       </div>
     </section>
   );

@@ -7,6 +7,7 @@ import {
   Settings,
   Lock,
   Shield,
+  SlidersHorizontal,
   Mail,
   LayoutDashboard,
   Compass,
@@ -34,10 +35,10 @@ export default function AccountSettings({ user, profile }: AccountSettingsProps)
   const [activeTab, setActiveTab] = useState<TabType>("profile");
 
   const tabs = [
-    { id: "profile" as const,      label: "Profile" },
-    { id: "account" as const,      label: "Account" },
-    { id: "preferences" as const,  label: "Preferences" },
-    { id: "privacy" as const,      label: "Privacy & Data" },
+    { id: "profile" as const,      label: "Profile",      icon: UserIcon },
+    { id: "account" as const,      label: "Account",      icon: Lock },
+    { id: "preferences" as const,  label: "Preferences",  icon: SlidersHorizontal },
+    { id: "privacy" as const,      label: "Privacy & Data", icon: Shield },
   ];
 
   return (
@@ -49,17 +50,19 @@ export default function AccountSettings({ user, profile }: AccountSettingsProps)
         </header>
 
         {/* Tabs Navigation */}
-        <div className="flex p-1 bg-slate-950/40 rounded-2xl mb-8 w-fit border border-white/5">
-          {tabs.map((tab) => (
+        <div className="flex gap-2 mb-8">
+          {tabs.map(({ id, label, icon: Icon }) => (
             <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id)}
-              className={`px-6 py-2.5 rounded-xl font-medium transition-all whitespace-nowrap ${activeTab === tab.id
-                ? "bg-[#f45d1a]/10 text-[#f45d1a] shadow-[0_0_15px_rgba(244,93,26,0.1)]"
-                : "text-slate-500 hover:text-slate-200"
-                }`}
+              key={id}
+              onClick={() => setActiveTab(id)}
+              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-bold transition-all whitespace-nowrap ${
+                activeTab === id
+                  ? "bg-white text-gray-950"
+                  : "bg-gray-800/80 text-gray-400 hover:bg-gray-700 hover:text-white border border-gray-700/50"
+              }`}
             >
-              {tab.label}
+              <Icon className="w-3.5 h-3.5" />
+              {label}
             </button>
           ))}
         </div>

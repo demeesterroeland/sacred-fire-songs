@@ -13,14 +13,14 @@ export const NAV_ITEMS = [
     icon: Compass
   },
   {
-    label: 'Library',
+    label: 'Songs',
     href: '/songs',
     icon: Library,
     exclude: ['/songs/add']
   },
   {
-    label: 'Playlist',
-    href: '/playlists',
+    label: 'Library',
+    href: '/library/playlists',
     icon: ListMusic
   },
   {

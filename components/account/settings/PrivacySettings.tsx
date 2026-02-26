@@ -17,7 +17,7 @@ export default function PrivacySettings({ user, profile }: PrivacySettingsProps)
   const supabase = createClient();
 
   return (
-    <section className="bg-slate-800/40 backdrop-blur-xl border border-white/5 p-6 md:p-8 rounded-3xl space-y-8">
+    <section className="space-y-8">
 
       {/* Coming soon banner */}
       <div className="flex items-center gap-3 p-3 bg-white/5 border border-white/10 rounded-xl">
