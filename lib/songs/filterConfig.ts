@@ -9,6 +9,7 @@ export interface SongFilterState {
   melody?: boolean;
   search?: string;
   status: 'all' | 'public' | 'draft';
+  favorites?: boolean;
 }
 
 // 2. Define the Configuration

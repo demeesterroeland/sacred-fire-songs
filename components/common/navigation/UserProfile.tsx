@@ -110,7 +110,7 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true }: Us
                 <SlidersHorizontal className="w-4 h-4 group-hover:text-blue-400" />
                 <span className="text-sm font-medium">Personal Settings</span>
               </Link>
-              <Link href="/songs/favorites" className="flex items-center gap-3 p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors group">
+              <Link href="/songs?favorites=true" className="flex items-center gap-3 p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors group">
                 <Heart className="w-4 h-4 group-hover:text-red-400" />
                 <span className="text-sm font-medium">My Favorites</span>
               </Link>

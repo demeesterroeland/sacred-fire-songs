@@ -60,7 +60,6 @@ export async function toggleFavorite(
             .delete()
             .eq('id', existingItem.id);
 
-        revalidatePath('/songs/favorites');
         revalidatePath('/songs');
         revalidatePath('/');
         return { success: true, isFavorite: false };
@@ -83,7 +82,6 @@ export async function toggleFavorite(
                 order_index: nextIndex,
             });
 
-        revalidatePath('/songs/favorites');
         revalidatePath('/songs');
         revalidatePath('/');
         return { success: true, isFavorite: true };

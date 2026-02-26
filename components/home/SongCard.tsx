@@ -1,11 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
 import { Music, Guitar, Heart } from 'lucide-react';
 import { getCategoryColor, getCategoryStyles } from '@/lib/uiUtils';
 import { cn } from '@/lib/utils';
-import { toggleFavorite } from '@/app/actions/toggleFavorite';
+import { useToggleFavorite } from '@/hooks/useToggleFavorite';
 
 interface SongCardProps {
     id: string;
@@ -35,28 +34,7 @@ export default function SongCard({
     isFavorite = false,
     categories = []
 }: SongCardProps) {
-    const [isFav, setIsFav] = useState(isFavorite);
-
-    useEffect(() => {
-        setIsFav(isFavorite);
-    }, [isFavorite]);
-
-    const handleToggleFavorite = async (e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        const optimisticState = !isFav;
-        setIsFav(optimisticState);
-
-        const result = await toggleFavorite(id);
-
-        if ('error' in result) {
-            setIsFav(isFav); // revert
-            if (result.error === 'Not authenticated') {
-                alert('Please log in to save favorites.');
-            }
-        }
-    };
+    const { isFav, handleToggle } = useToggleFavorite(id, isFavorite);
 
     // Mapping color name to Tailwind class
     const borderColors: Record<string, string> = {
@@ -83,10 +61,10 @@ export default function SongCard({
     };
 
     return (
-        <div className="relative block">
+        <div className="relative self-start w-full">
             <Link href={`/songs/${id}`} className="block">
                 <div className={cn(
-                    'relative p-5 rounded-2xl transition-all duration-300 backdrop-blur-sm group overflow-hidden h-full flex flex-col justify-between active:scale-[0.98] cursor-pointer',
+                    'relative p-5 rounded-2xl transition-all duration-300 backdrop-blur-sm group overflow-hidden flex flex-col justify-between active:scale-[0.98] cursor-pointer',
                     isPublic
                         ? 'bg-gray-900/40 border border-gray-800 hover:border-white/10 hover:bg-gray-800/60'
                         : 'bg-black/40 border border-dashed border-white/10 hover:bg-black/60 opacity-70 hover:opacity-100'
@@ -153,7 +131,7 @@ export default function SongCard({
 
             {/* Heart button — bottom-right to avoid overlap with admin delete button (top-right) */}
             <button
-                onClick={handleToggleFavorite}
+                onClick={handleToggle}
                 aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
                 className={cn(
                     'absolute bottom-3 right-3 z-20 p-1 rounded-full transition-all duration-300',

@@ -10,8 +10,11 @@ import SongDisplay from '@/components/song/SongDisplay';
 import SongDetailSkeleton from '@/components/song/SongDetailSkeleton';
 import MediaEmbeds from '@/components/song/MediaEmbeds';
 import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Trash2, Edit2, ArrowLeft, Lock as LockIcon, Music, Link as LinkIcon, Flame, IndentIncrease } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { Trash2, Edit2, ArrowLeft, Lock as LockIcon, Music, Link as LinkIcon, Flame, IndentIncrease, Heart } from 'lucide-react';
+import { useToggleFavorite } from '@/hooks/useToggleFavorite';
+import { useDeleteSong } from '@/hooks/useDeleteSong';
+import { SONG_KEYS } from '@/lib/songs/queryKeys';
 import { useWakeLock } from '@/hooks/useWakeLock';
 import { UserProfile } from '@/components/common/navigation/UserProfile';
 import { getCategoryColor, getCategoryStyles } from '@/lib/uiUtils';
@@ -56,13 +59,12 @@ const fetchSong = async (id: string) => {
 
 export default function SongDetailPage() {
     const params = useParams();
-    const queryClient = useQueryClient();
     const router = useRouter();
     const id = typeof params.id === 'string' ? params.id : params.id?.[0]; // Safe type handling
 
     const [selectedVersionIndex, setSelectedVersionIndex] = useState(0);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [isDeleting, setIsDeleting] = useState(false);
+    const { isDeleting, deleteSong } = useDeleteSong();
 
     const { user, loading: authLoading } = useAuth();
     const { setIsOpen } = useSidebar();
@@ -73,10 +75,31 @@ export default function SongDetailPage() {
 
     // The Query Hook
     const { data: song, isLoading: songLoading } = useQuery({
-        queryKey: ['song', id],
+        queryKey: SONG_KEYS.detail(id!),
         queryFn: () => fetchSong(id!),
         enabled: !!id,
     });
+
+    // Favorites — shares cache with SongsPageContent
+    const { data: favoriteIds = new Set<string>() } = useQuery({
+        queryKey: SONG_KEYS.favorites(user?.id),
+        queryFn: async () => {
+            if (!user) return new Set<string>();
+            const supabase = createClient();
+            const { data: setlist } = await supabase
+                .from('setlists').select('id')
+                .eq('title', 'My Favorites').maybeSingle();
+            if (!setlist) return new Set<string>();
+            const { data: items } = await supabase
+                .from('setlist_items')
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                .select('song_versions(composition_id)').eq('setlist_id', setlist.id);
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            return new Set<string>((items ?? []).map((i: any) => i.song_versions?.composition_id).filter(Boolean));
+        },
+        enabled: !!user,
+    });
+    const { isFav, handleToggle: handleToggleFavorite } = useToggleFavorite(id!, favoriteIds.has(id!));
 
     if (songLoading || authLoading) return <SongDetailSkeleton />;
     if (!song) return notFound();
@@ -88,27 +111,7 @@ export default function SongDetailPage() {
 
     const handleDelete = async () => {
         if (!id) return;
-        setIsDeleting(true);
-        const supabase = createClient();
-        // Direct Client-Side Delete (bypasses Server Action auth issues for Mock Users)
-        const { error } = await supabase
-            .from('compositions')
-            .delete()
-            .eq('id', id);
-
-        if (error) {
-            console.error('Delete Error:', error);
-            alert('Failed to delete song: ' + error.message);
-            setIsDeleting(false);
-            return;
-        }
-
-        // Invalidate the song list cache so it re-fetches
-        await queryClient.invalidateQueries({ queryKey: ['songs'] });
-
-        // Success: Redirect to Home
-        router.refresh(); // Refresh Server Components if any
-        router.push('/');
+        await deleteSong(id, { redirectTo: '/' });
     };
 
     // Helper for badge colors (could be moved to utils or globals)
@@ -135,6 +138,13 @@ export default function SongDetailPage() {
                 </div>
                 {/* Action Buttons and User Profile (Mobile) */}
                 <div className="flex items-center gap-2 shrink-0">
+                    <button
+                        onClick={handleToggleFavorite}
+                        aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
+                        className={`p-2 rounded-full transition-all duration-300 ${isFav ? 'text-amber-400 heart-glow' : 'text-gray-600 hover:text-amber-400/60'}`}
+                    >
+                        <Heart className={`w-5 h-5 transition-all duration-200 ${isFav ? 'fill-amber-400' : ''}`} strokeWidth={1.5} />
+                    </button>
                     <Link href="/" className="p-2 text-gray-400 hover:text-white transition-colors">
                         <ArrowLeft className="w-5 h-5" />
                     </Link>
@@ -196,6 +206,13 @@ export default function SongDetailPage() {
                                 </button>
                             </Link>
                         )}
+                        <button
+                            onClick={handleToggleFavorite}
+                            aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
+                            className={`p-2 rounded-full transition-all duration-300 ${isFav ? 'text-amber-400 heart-glow' : 'text-gray-600 hover:text-amber-400/60'}`}
+                        >
+                            <Heart className={`w-5 h-5 transition-all duration-200 ${isFav ? 'fill-amber-400' : ''}`} strokeWidth={1.5} />
+                        </button>
                         <Link href="/" className="p-2 text-gray-400 hover:text-white transition-colors">
                             <ArrowLeft className="w-5 h-5" />
                         </Link>

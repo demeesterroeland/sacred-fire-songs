@@ -2,6 +2,7 @@
 
 import { useForm } from 'react-hook-form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { SONG_KEYS } from '@/lib/songs/queryKeys';
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter } from 'next/navigation';
@@ -348,8 +349,8 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
             if (mode === 'create') {
                 localStorage.removeItem('song-form-draft');
             }
-            queryClient.invalidateQueries({ queryKey: ['songs'] });
-            queryClient.invalidateQueries({ queryKey: ['song', id] });
+            queryClient.invalidateQueries({ queryKey: SONG_KEYS.all() });
+            queryClient.invalidateQueries({ queryKey: SONG_KEYS.detail(id) });
             router.push(mode === 'create' ? '/' : `/songs/${id}`);
         },
         onError: (error: Error) => {

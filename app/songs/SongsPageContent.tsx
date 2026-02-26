@@ -3,14 +3,16 @@
 import SearchBar from "@/components/home/SearchBar";
 import SongCard from "@/components/home/SongCard";
 import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
-import { Music, Guitar, ChevronDown, Flame, Search, X, Plus, Trash2 } from "lucide-react";
+import { Music, Guitar, ChevronDown, Flame, Search, X, Plus, Trash2, Heart } from "lucide-react";
 import { useSidebar } from "@/context/SidebarContext";
 import { useState, useMemo, useEffect } from "react";
 import { fetchSongs } from "@/lib/songUtils";
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useAuth } from "@/hooks/useAuth";
 import { useSearchParams, useRouter } from 'next/navigation';
 import { createClient } from "@/lib/supabase/client";
+import { useDeleteSong } from "@/hooks/useDeleteSong";
+import { SONG_KEYS } from "@/lib/songs/queryKeys";
 import Link from 'next/link';
 import { getCategoryColor, getCategoryStyles } from "@/lib/uiUtils";
 import { useDeclarativeFilter } from "@/hooks/useDeclarativeFilter";
@@ -19,7 +21,7 @@ import TagSelector from "@/components/library/TagSelector";
 import { fetchCategoryTree, type TaxonomyNode } from "@/lib/taxonomyUtils";
 import type { Song } from "@/lib/songUtils";
 
-type SortByType = 'title' | 'newest';
+type SortByType = 'title' | 'author' | 'newest';
 
 interface SongsPageContentProps {
     initialSongs: Song[];
@@ -31,15 +33,14 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy }: Song
     const router = useRouter(); // needed for clear all button which uses router.push
     const { user } = useAuth();
     const { setHeaderCount } = useSidebar();
-    const queryClient = useQueryClient();
+    const { isDeleting, deleteSong } = useDeleteSong();
     const [localSearch, setLocalSearch] = useState('');
     const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null);
-    const [isDeleting, setIsDeleting] = useState(false);
 
     const isAdmin = user?.role === 'admin';
 
     const { data: favoriteIds = new Set<string>() } = useQuery({
-        queryKey: ['favorites', user?.id],
+        queryKey: SONG_KEYS.favorites(user?.id),
         queryFn: async () => {
             if (!user) return new Set<string>();
             const supabase = createClient();
@@ -64,16 +65,8 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy }: Song
 
     const handleDelete = async () => {
         if (!deleteTarget) return;
-        setIsDeleting(true);
-        const supabase = createClient();
-        const { error } = await supabase.from('compositions').delete().eq('id', deleteTarget.id);
-        if (error) {
-            alert(`Failed to delete: ${error.message}`);
-        } else {
-            await queryClient.invalidateQueries({ queryKey: ['songs', 'all'] });
-        }
-        setIsDeleting(false);
-        setDeleteTarget(null);
+        const success = await deleteSong(deleteTarget.id);
+        if (success) setDeleteTarget(null);
     };
 
 
@@ -87,13 +80,13 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy }: Song
 
     // --- 1. Fetch Data ---
     const { data: songs = [] } = useQuery({
-        queryKey: ['songs', 'all'],
+        queryKey: SONG_KEYS.list(),
         queryFn: () => fetchSongs(),
         initialData: initialSongs,
     });
 
     const { data: taxonomy = [] } = useQuery({
-        queryKey: ['taxonomy'],
+        queryKey: SONG_KEYS.taxonomy(),
         queryFn: fetchCategoryTree,
         initialData: initialTaxonomy,
     });
@@ -108,7 +101,8 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy }: Song
             category: undefined,
             tags: [],
             chords: false,
-            melody: false
+            melody: false,
+            favorites: false,
         },
         {
             // Custom Parse: Convert URL params to State
@@ -120,6 +114,7 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy }: Song
                     search: params.get('search') || '',
                     chords: params.get('chords') === 'true',
                     melody: params.get('melody') === 'true',
+                    favorites: params.get('favorites') === 'true',
                 };
             },
             // Custom Serialize: Convert State to URL params
@@ -131,11 +126,20 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy }: Song
                     search: state.search || '',
                     chords: state.chords ? 'true' : '',
                     melody: state.melody ? 'true' : '',
+                    favorites: state.favorites ? 'true' : '',
                     sort: sortBy // Preserve sort param
                 };
             }
         }
     );
+
+    // Apply favorites post-filter (independent of the visibility status tabs)
+    const finalFilteredItems = useMemo(() => {
+        if (state.favorites) {
+            return filteredItems.filter(s => favoriteIds.has(s.id));
+        }
+        return filteredItems;
+    }, [filteredItems, state.favorites, favoriteIds]);
 
     // Sync local search with state.search (for external resets like "Clear All")
     useEffect(() => {
@@ -155,24 +159,20 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy }: Song
 
     // Publish count to global header for mobile view
     useEffect(() => {
-        setHeaderCount(filteredItems.length);
+        setHeaderCount(finalFilteredItems.length);
         // Clear on unmount
         return () => setHeaderCount(undefined);
-    }, [filteredItems.length, setHeaderCount]);
+    }, [finalFilteredItems.length, setHeaderCount]);
 
     // --- 3. Sorting (Applied after filtering) ---
     const displaySongs = useMemo(() => {
-        return [...filteredItems].sort((a, b) => {
-            if (sortBy === 'title') {
-                return a.title.localeCompare(b.title);
-            } else {
-                // Newest: latest time at top
-                const timeA = new Date(a.createdAt).getTime();
-                const timeB = new Date(b.createdAt).getTime();
-                return timeB - timeA;
-            }
+        return [...finalFilteredItems].sort((a, b) => {
+            if (sortBy === 'title') return a.title.localeCompare(b.title);
+            if (sortBy === 'author') return a.author.localeCompare(b.author);
+            // newest: latest time at top
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
         });
-    }, [filteredItems, sortBy]);
+    }, [finalFilteredItems, sortBy]);
 
     // Derived counts from facets
     // Note: 'facets.chords.get("true")' tells us: "If we toggle Chords=ON, how many songs match?"
@@ -180,6 +180,17 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy }: Song
     // that MATCH everything else AND have chords=true.
     const chordsCount = facets.chords?.get('true') || 0;
     const melodyCount = facets.melody?.get('true') || 0;
+
+    // True when any filter beyond the defaults is active (drives Clear All visibility)
+    const hasActiveFilters = !!(
+        state.category ||
+        (state.tags?.length ?? 0) > 0 ||
+        localSearch ||
+        (user && state.status !== 'all') ||
+        state.chords ||
+        state.melody ||
+        state.favorites
+    );
 
     return (
         <main className="flex-1 min-h-0 bg-gray-950">
@@ -197,7 +208,7 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy }: Song
 
                             <div className="hidden md:flex items-center gap-4 self-end md:self-auto">
                                 <span className="hidden md:block text-xs text-gray-500 whitespace-nowrap">
-                                    {filteredItems.length} songs found
+                                    {finalFilteredItems.length} songs found
                                 </span>
 
                                 {user && (
@@ -222,6 +233,7 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy }: Song
                             onClearAll={resetFilters}
                             searchValue={localSearch}
                             onSearchChange={setLocalSearch}
+                            hasActiveFilters={hasActiveFilters}
                         />
 
                         {/* Lower Row: Controls */}
@@ -237,6 +249,7 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy }: Song
                                             className="bg-gray-900 border border-gray-800 rounded-lg px-3 py-1.5 text-sm text-gray-300 outline-none focus:border-gray-700 appearance-none pr-8 cursor-pointer"
                                         >
                                             <option value="title">Title (A-Z)</option>
+                                            <option value="author">Author (A-Z)</option>
                                             <option value="newest">Newest First</option>
                                         </select>
                                         <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
@@ -245,16 +258,29 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy }: Song
 
                                 {/* Visibility Tabs */}
                                 {user && (
-                                    <div className="bg-gray-900/80 p-1 rounded-xl border border-gray-800 inline-flex shadow-inner">
-                                        {(['all', 'public', 'draft'] as const).map((statusOption) => (
-                                            <button
-                                                key={statusOption}
-                                                onClick={() => setFilter('status', statusOption)}
-                                                className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all capitalize ${state.status === statusOption ? 'bg-gray-800 text-white shadow-sm ring-1 ring-white/5' : 'text-gray-500 hover:text-gray-300'}`}
-                                            >
-                                                {statusOption}
-                                            </button>
-                                        ))}
+                                    <div className="flex items-center gap-2">
+                                        <div className="bg-gray-900/80 p-1 rounded-xl border border-gray-800 inline-flex shadow-inner">
+                                            {(['all', 'public', 'draft'] as const).map((statusOption) => (
+                                                <button
+                                                    key={statusOption}
+                                                    onClick={() => setFilter('status', statusOption)}
+                                                    className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all capitalize ${state.status === statusOption ? 'bg-gray-800 text-white shadow-sm ring-1 ring-white/5' : 'text-gray-500 hover:text-gray-300'}`}
+                                                >
+                                                    {statusOption}
+                                                </button>
+                                            ))}
+                                        </div>
+                                        <button
+                                            onClick={() => setFilter('favorites', !state.favorites)}
+                                            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl border transition-all ${
+                                                state.favorites
+                                                    ? 'bg-amber-500/15 border-amber-500/40 text-amber-400 shadow-sm'
+                                                    : 'bg-gray-900/80 border-gray-800 text-gray-500 hover:text-amber-400/70 hover:border-amber-500/30'
+                                            }`}
+                                        >
+                                            <Heart className={`w-3 h-3 ${state.favorites ? 'fill-amber-400' : ''}`} strokeWidth={1.5} />
+                                            Favorites
+                                        </button>
                                     </div>
                                 )}
                             </div>
@@ -335,20 +361,38 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy }: Song
                             ))
                         ) : (
                             <div className="col-span-full text-center py-20 px-4">
-                                <div className="mb-4 inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-900 border border-gray-800">
-                                    <Search className="w-8 h-8 text-gray-600" />
-                                </div>
-                                <h3 className="text-xl font-medium text-white mb-2">No songs found</h3>
-                                <p className="text-gray-400 max-w-xs mx-auto">
-                                    {state.search ? `We couldn't find any songs matching "${state.search}".` : "There are no songs available for this filter."}
-                                </p>
-                                {(state.search || state.category || state.tags?.length) && (
-                                    <button
-                                        onClick={resetFilters}
-                                        className="mt-6 text-red-500 hover:text-red-400 font-medium transition-colors"
-                                    >
-                                        Clear search
-                                    </button>
+                                {state.favorites ? (
+                                    <>
+                                        <div className="mb-4 inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-500/10 border border-amber-500/20">
+                                            <Heart className="w-8 h-8 text-amber-400/50" />
+                                        </div>
+                                        <h3 className="text-xl font-medium text-white mb-2">Your sacred circle is empty</h3>
+                                        <p className="text-gray-400 max-w-xs mx-auto">Tap ♥ on any song to add it here</p>
+                                        <button
+                                            onClick={() => setFilter('status', 'all')}
+                                            className="mt-6 text-amber-400 hover:text-amber-300 font-medium transition-colors"
+                                        >
+                                            Browse all songs →
+                                        </button>
+                                    </>
+                                ) : (
+                                    <>
+                                        <div className="mb-4 inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-900 border border-gray-800">
+                                            <Search className="w-8 h-8 text-gray-600" />
+                                        </div>
+                                        <h3 className="text-xl font-medium text-white mb-2">No songs found</h3>
+                                        <p className="text-gray-400 max-w-xs mx-auto">
+                                            {state.search ? `We couldn't find any songs matching "${state.search}".` : "There are no songs available for this filter."}
+                                        </p>
+                                        {hasActiveFilters && (
+                                            <button
+                                                onClick={resetFilters}
+                                                className="mt-6 text-red-500 hover:text-red-400 font-medium transition-colors"
+                                            >
+                                                Clear filters
+                                            </button>
+                                        )}
+                                    </>
                                 )}
                             </div>
                         )}
