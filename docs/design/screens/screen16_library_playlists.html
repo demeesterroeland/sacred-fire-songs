@@ -1,5 +1,6 @@
-<!-- Screen 16: Playlists — v2.0 (2026-02-27) -->
+<!-- Screen 16: Playlists — v2.1 (2026-02-27) -->
 <!-- Changelog:
+  v2.1 (2026-02-27) — Create Playlist button moved inline with library tabs; sign-in nudge moved above Smart Playlists in guest view; My Songs & My Drafts are real links (no Coming Soon)
   v2.0 (2026-02-27) — Full rewrite: guest view + authenticated view with toggle bar
   v1.0 (initial)    — Single authenticated view with basic playlist grid
 -->
@@ -132,12 +133,6 @@
           </a>
         </div>
 
-        <!-- Auth view: Create Playlist button (hidden in guest view) -->
-        <button id="header-create-btn"
-          class="flex items-center gap-2 bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-xl font-bold text-sm transition-all shadow-lg shadow-red-900/20 active:scale-95">
-          <i data-lucide="plus" class="w-4 h-4"></i>
-          Create Playlist
-        </button>
       </div>
     </div>
 
@@ -152,10 +147,59 @@
         In</button>
     </div>
 
+    <!-- Library Page Header + Tabs Row -->
+    <div class="px-8 pt-8 pb-0 max-w-5xl mx-auto">
+      <header class="mb-8">
+        <h1 class="text-3xl font-bold tracking-tight text-white mb-1">Your Library</h1>
+        <p class="text-slate-400 text-sm">Your personal collection of playlists, albums, and artists.</p>
+      </header>
+
+      <!-- Library Tabs + Create Playlist button (button visible in auth view only) -->
+      <div class="flex items-center justify-between mb-8">
+        <div class="flex gap-2">
+          <a href="#"
+            class="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-bold bg-white text-gray-950">
+            <i data-lucide="list-music" class="w-3.5 h-3.5"></i>
+            Playlists
+          </a>
+          <a href="#"
+            class="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-bold bg-gray-800/80 text-gray-400 border border-gray-700/50 hover:bg-gray-700 hover:text-white">
+            <i data-lucide="disc-3" class="w-3.5 h-3.5"></i>
+            Albums
+          </a>
+          <a href="#"
+            class="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-bold bg-gray-800/80 text-gray-400 border border-gray-700/50 hover:bg-gray-700 hover:text-white">
+            <i data-lucide="mic-2" class="w-3.5 h-3.5"></i>
+            Artists
+          </a>
+        </div>
+        <button id="tabs-create-btn" style="display:none"
+          class="flex items-center gap-2 bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-xl font-bold text-sm transition-all shadow-lg shadow-red-900/20 active:scale-95">
+          <i data-lucide="plus" class="w-4 h-4"></i>
+          Create Playlist
+        </button>
+      </div>
+    </div>
+
     <!-- ========================================================= -->
     <!-- GUEST VIEW                                                 -->
     <!-- ========================================================= -->
-    <div id="guest-view" class="p-8 max-w-5xl mx-auto">
+    <div id="guest-view" class="px-8 pb-8 max-w-5xl mx-auto">
+
+      <!-- Sign-in nudge — above the fold -->
+      <div class="mb-8">
+        <a href="#"
+          class="flex items-center gap-3 bg-gray-800/60 border border-gray-700/60 hover:border-gray-600 hover:bg-gray-800 p-4 rounded-2xl transition-all group">
+          <div class="w-9 h-9 bg-gray-700/60 rounded-xl flex items-center justify-center shrink-0">
+            <i data-lucide="log-in" class="w-4 h-4 text-gray-300"></i>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-semibold text-gray-200">Sign in to manage your playlists</p>
+            <p class="text-xs text-gray-500 mt-0.5">Create setlists, save favorites, and more</p>
+          </div>
+          <span class="text-gray-500 text-sm">→</span>
+        </a>
+      </div>
 
       <!-- Section 1: Smart Playlists (Guest) -->
       <div class="mb-8">
@@ -282,18 +326,6 @@
 
         </div>
 
-        <!-- Sign-in nudge card -->
-        <div class="bg-gray-800/60 border border-gray-700/60 p-4 rounded-2xl flex items-center gap-3 cursor-pointer hover:bg-gray-800/80 transition-colors">
-          <div class="w-9 h-9 bg-gray-700/60 rounded-xl flex items-center justify-center shrink-0">
-            <i data-lucide="log-in" class="w-4 h-4 text-gray-400"></i>
-          </div>
-          <div class="flex-1 min-w-0">
-            <p class="text-sm font-semibold text-gray-200">Sign in to manage your playlists</p>
-            <p class="text-xs text-gray-500 mt-0.5">Create setlists, save favorites, and more</p>
-          </div>
-          <i data-lucide="arrow-right" class="w-4 h-4 text-gray-500 shrink-0"></i>
-        </div>
-
       </div>
     </div>
     <!-- end #guest-view -->
@@ -301,7 +333,7 @@
     <!-- ========================================================= -->
     <!-- AUTHENTICATED VIEW                                         -->
     <!-- ========================================================= -->
-    <div id="auth-view" class="p-8 max-w-5xl mx-auto" style="display:none">
+    <div id="auth-view" class="px-8 pb-8 max-w-5xl mx-auto" style="display:none">
 
       <!-- Section 1: Smart Playlists (Auth) -->
       <div class="mb-8">
@@ -320,35 +352,29 @@
             </div>
           </div>
 
-          <!-- My Songs -->
-          <div
+          <!-- My Songs → /songs?mine=true -->
+          <a href="#"
             class="playlist-card playlist-card-red bg-red-500/8 border border-red-500/20 p-4 rounded-2xl flex items-center gap-4 cursor-pointer group">
-            <div class="w-12 h-12 bg-red-500/15 rounded-xl flex items-center justify-center shrink-0">
+            <div class="w-12 h-12 bg-red-500/15 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-red-500/25 transition-colors">
               <i data-lucide="music" class="w-6 h-6 text-red-500"></i>
             </div>
             <div class="flex-1 min-w-0">
-              <h3 class="font-bold text-gray-100">My Songs</h3>
+              <h3 class="font-bold text-gray-100 group-hover:text-white transition-colors">My Songs</h3>
               <p class="text-xs text-gray-500 mt-0.5">Songs you've contributed to the library</p>
             </div>
-            <span
-              class="text-[9px] font-bold text-amber-500 bg-amber-500/10 border border-amber-500/20 rounded-full px-2 py-0.5 uppercase tracking-wider shrink-0">Coming
-              Soon</span>
-          </div>
+          </a>
 
-          <!-- My Drafts -->
-          <div
+          <!-- My Drafts → /songs?status=draft -->
+          <a href="#"
             class="playlist-card bg-gray-800/40 border border-gray-700/40 p-4 rounded-2xl flex items-center gap-4 cursor-pointer group">
-            <div class="w-12 h-12 bg-gray-700/40 rounded-xl flex items-center justify-center shrink-0">
-              <i data-lucide="pen-line" class="w-6 h-6 text-gray-500"></i>
+            <div class="w-12 h-12 bg-gray-700/40 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-gray-700/60 transition-colors">
+              <i data-lucide="pen-line" class="w-6 h-6 text-gray-400 group-hover:text-gray-300 transition-colors"></i>
             </div>
             <div class="flex-1 min-w-0">
-              <h3 class="font-bold text-gray-100">My Drafts</h3>
+              <h3 class="font-bold text-gray-100 group-hover:text-white transition-colors">My Drafts</h3>
               <p class="text-xs text-gray-500 mt-0.5">Your private work-in-progress songs</p>
             </div>
-            <span
-              class="text-[9px] font-bold text-amber-500 bg-amber-500/10 border border-amber-500/20 rounded-full px-2 py-0.5 uppercase tracking-wider shrink-0">Coming
-              Soon</span>
-          </div>
+          </a>
 
         </div>
       </div>
@@ -427,7 +453,7 @@
     function showView(view) {
       document.getElementById('guest-view').style.display = view === 'guest' ? '' : 'none';
       document.getElementById('auth-view').style.display = view === 'auth' ? '' : 'none';
-      document.getElementById('header-create-btn').style.display = view === 'auth' ? '' : 'none';
+      document.getElementById('tabs-create-btn').style.display = view === 'auth' ? '' : 'none';
       document.getElementById('btn-guest').className = view === 'guest'
         ? 'px-4 py-1.5 rounded-full text-sm font-bold transition-all bg-white text-gray-950'
         : 'px-4 py-1.5 rounded-full text-sm font-bold transition-all bg-gray-800/80 text-gray-400 border border-gray-700/50 hover:bg-gray-700 hover:text-white';
