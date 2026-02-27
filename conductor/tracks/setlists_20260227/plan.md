@@ -26,7 +26,7 @@
 - [x] Task: Implement SetlistEditor with reordering [4c5a111]
     - [ ] Write unit tests for setlist reordering logic
     - [ ] Implement drag-and-drop reordering with `framer-motion`
-- [ ] Task: Integrate "Your Hearth" section
+- [x] Task: Integrate "Your Hearth" section [bc6411d]
     - [ ] Write unit tests for "Your Hearth" display logic
     - [ ] Add "Your Hearth" tab/section to user profile/dashboard
 - [ ] Task: Conductor - User Manual Verification 'UI - Setlist Editing & "Your Hearth"' (Protocol in workflow.md)
