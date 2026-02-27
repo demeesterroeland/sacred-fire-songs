@@ -2,7 +2,7 @@
 
 **Track ID:** setlists_20260227
 
-## Phase 1: Foundation & Data Layer
+## Phase 1: Foundation & Data Layer [checkpoint: 88cd9de]
 - [x] Task: Create Setlist server actions [bd5ac72]
     - [ ] Write unit tests for setlist creation and retrieval
     - [ ] Implement `createSetlist` server action
@@ -11,7 +11,7 @@
     - [ ] Write unit tests for adding and removing songs from setlists
     - [ ] Implement `addSongToSetlist` server action
     - [ ] Implement `removeSongFromSetlist` server action
-- [ ] Task: Conductor - User Manual Verification 'Foundation & Data Layer' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Foundation & Data Layer' (Protocol in workflow.md) [88cd9de]
 
 ## Phase 2: UI - Setlist Management
 - [ ] Task: Implement `SetlistManager` component
