@@ -1,5 +1,4 @@
 import { createClient } from '@/lib/supabase/server';
-import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { Heart, Plus, ListMusic, Flame, Droplets } from 'lucide-react';
 
@@ -26,7 +25,7 @@ export default async function PlaylistsPage() {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
-    if (!user) redirect('/auth/login');
+    if (!user) return null;
 
     // Fetch all user setlists
     const { data: setlists } = await supabase
