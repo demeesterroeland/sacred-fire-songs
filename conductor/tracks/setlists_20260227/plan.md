@@ -31,7 +31,7 @@
     - [ ] Add "Your Hearth" tab/section to user profile/dashboard
 - [x] Task: Conductor - User Manual Verification 'UI - Setlist Editing & "Your Hearth"' (Protocol in workflow.md) [4e05d29]
 
-## Phase 4: Offline & Final Polish
+## Phase 4: Offline & Final Polish [checkpoint: 58a9347]
 - [x] Task: Ensure offline persistence [22bfed2]
     - [x] Write integration tests for offline setlist access [22bfed2]
     - [x] Configure React Query cache for setlists [22bfed2]
@@ -40,4 +40,4 @@
 - [x] Task: Documentation & Cleanup [d023f39]
     - [x] Update User Guide with setlist instructions [d023f39]
     - [x] Final code cleanup and linting [d023f39]
-- [ ] Task: Conductor - User Manual Verification 'Offline & Final Polish' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'Offline & Final Polish' (Protocol in workflow.md) [58a9347]

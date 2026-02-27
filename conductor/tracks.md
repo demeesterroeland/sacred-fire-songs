@@ -4,5 +4,5 @@ This file tracks all major tracks for the project. Each track has its own detail
 
 ---
 
-- [ ] **Track: Implement user-defined setlists and 'Your Hearth' persistence**
+- [x] **Track: Implement user-defined setlists and 'Your Hearth' persistence**
   *Link: [./tracks/setlists_20260227/](./tracks/setlists_20260227/)*
