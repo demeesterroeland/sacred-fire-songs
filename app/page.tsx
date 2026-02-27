@@ -3,48 +3,35 @@ import { fetchSongsServer } from "@/lib/songs/serverQueries";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
 import { Heart } from "lucide-react";
+import YourHearth from "@/components/playlists/YourHearth";
 
 export default async function Home() {
   const [songs, supabase] = await Promise.all([fetchSongsServer(10), createClient()]);
   const displaySongs = songs.filter(song => song.isPublic);
 
-  // Favorites count for dashboard card
   const { data: { user } } = await supabase.auth.getUser();
-  const favCounts = { total: 0, public: 0, draft: 0 };
-  if (user) {
-    const { data: setlist } = await supabase
-      .from('setlists')
-      .select('id')
-      .eq('owner_id', user.id)
-      .eq('title', 'My Favorites')
-      .maybeSingle();
-    if (setlist) {
-      const { data: items } = await supabase
-        .from('setlist_items')
-        .select('song_versions(compositions(is_public))')
-        .eq('setlist_id', setlist.id);
-      for (const item of items ?? []) {
-        favCounts.total++;
-        if ((item.song_versions as any)?.compositions?.is_public === true) favCounts.public++;
-        else favCounts.draft++;
-      }
-    }
-  }
 
   return (
     <main className="flex-1 min-h-0 bg-gray-950">
 
       {/* Dashboard Widgets Area */}
-      <div className="p-4 md:p-8 space-y-8 max-w-7xl mx-auto">
+      <div className="p-4 md:p-8 space-y-12 max-w-7xl mx-auto">
+
+        {/* User Specific Area */}
+        {user && (
+          <section className="animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <YourHearth />
+          </section>
+        )}
 
         {/* Quick Stats / Actions */}
-        <div className="hidden md:grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
           <Link href="/songs" className="bg-gray-900/50 p-4 rounded-2xl border border-white/5 hover:border-white/10 transition-colors cursor-pointer group">
             <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center mb-3 group-hover:bg-red-500/20 transition-colors">
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-music w-5 h-5 text-red-500"><path d="M9 18V5l12-2v13" /><circle cx="6" cy="18" r="3" /><circle cx="18" cy="16" r="3" /></svg>
             </div>
             <h3 className="font-bold text-white">Search Songs</h3>
-            <p className="text-xs text-gray-500 mt-1">View all</p>
+            <p className="text-xs text-gray-500 mt-1">View the entire songbook</p>
           </Link>
 
           <Link href="/songs/add" className="bg-gray-900/50 p-4 rounded-2xl border border-white/5 hover:border-white/10 transition-colors cursor-pointer group">
@@ -52,25 +39,7 @@ export default async function Home() {
               <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="lucide lucide-plus w-5 h-5 text-blue-500"><path d="M5 12h14"/><path d="M12 5v14"/></svg>
             </div>
             <h3 className="font-bold text-white">Add Song</h3>
-            <p className="text-xs text-gray-500 mt-1">Add new lyrics and chords</p>
-          </Link>
-
-          <Link href="/songs?favorites=true" className="bg-amber-500/[0.08] border border-amber-500/20 p-4 rounded-2xl hover:bg-amber-500/15 hover:border-amber-500/35 transition-all cursor-pointer group text-left flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/15 flex items-center justify-center group-hover:bg-amber-500/25 transition-colors shrink-0">
-              <Heart className="w-5 h-5 text-amber-400 fill-amber-400" />
-            </div>
-            <div>
-              <h3 className="font-bold text-white group-hover:text-white transition-colors">My Favorites</h3>
-              {favCounts.total > 0 ? (
-                <p className="text-xs text-gray-500 mt-0.5">
-                  {favCounts.total} song{favCounts.total !== 1 ? 's' : ''}{' · '}
-                  <span className="text-emerald-500/70">{favCounts.public} public</span>{' · '}
-                  <span className="text-amber-500/70">{favCounts.draft} draft</span>
-                </p>
-              ) : (
-                <p className="text-xs text-gray-500 mt-0.5">Your saved songs</p>
-              )}
-            </div>
+            <p className="text-xs text-gray-500 mt-1">Share medicine with the circle</p>
           </Link>
 
           <Link href="/account/settings" className="bg-gray-900/50 p-4 rounded-2xl border border-white/5 hover:border-white/10 transition-colors cursor-pointer group text-left">
