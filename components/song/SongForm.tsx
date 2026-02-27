@@ -12,6 +12,7 @@ import { parseChordPro, hasChords } from '@/lib/chordProParsing';
 import { useAuth } from '@/hooks/useAuth';
 import CategorySelector from './CategorySelector';
 import ChordProEditor from './ChordProEditor';
+import { JoinCircleModal } from '@/components/common/JoinCircleModal';
 
 type SongFormData = {
     title: string;
@@ -66,6 +67,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
     const router = useRouter();
     const [serverError, setServerError] = useState<string | null>(null);
     const [showUpload, setShowUpload] = useState(false);
+    const [showJoinModal, setShowJoinModal] = useState(false);
 
     // Auto-expand metadata if fields are populated (Edit Mode or after Parsing)
     const hasMetadata = !!(initialData?.key || initialData?.capo || (initialData?.tuning && initialData.tuning !== 'Standard'));
@@ -360,7 +362,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
 
     const handleFormSubmit = (data: SongFormData) => {
         if (!user) {
-            router.push('/auth/login?message=Please log in to save songs');
+            setShowJoinModal(true);
             return;
         }
         mutation.mutate(data);
@@ -689,6 +691,12 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                     )}
                 </button>
             </div>
+
+            <JoinCircleModal
+                open={showJoinModal}
+                onClose={() => setShowJoinModal(false)}
+                context="add-song"
+            />
         </form>
     );
 }

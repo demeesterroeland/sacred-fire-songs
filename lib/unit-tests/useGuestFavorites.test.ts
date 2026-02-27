@@ -1,3 +1,4 @@
+// lib/unit-tests/useGuestFavorites.test.ts
 import { describe, it, expect, beforeEach } from 'vitest';
 
 const STORAGE_KEY = 'sfs_guest_favorites';

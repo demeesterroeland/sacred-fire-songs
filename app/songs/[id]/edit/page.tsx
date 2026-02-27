@@ -73,8 +73,11 @@ export default function EditSongPage() {
         const isOwner = user?.id === song.owner_id;
         const isAdmin = user?.role === 'admin';
 
-        if (!user || (!isOwner && !isAdmin)) {
-            return <AccessDenied />;
+        if (!user) {
+            return <AccessDenied variant="guest" />;
+        }
+        if (!isOwner && !isAdmin) {
+            return <AccessDenied variant="wrong-owner" />;
         }
     }
 

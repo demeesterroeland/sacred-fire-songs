@@ -935,8 +935,19 @@
     - [x] Verify functionality and design matching
 - [x] Sync `application-analysis&design.md` with new settings architecture
 
-- [ ] **Next.js 16 & React 19 Framework Audit Fixes** <!-- id: 76 -->
-    - [ ] Refactor `lib/supabase/proxy.ts` to ensure session refresh on all routes (including public).
-    - [ ] Refactor `DeleteConfirmationModal.tsx` to remove synchronous `setState` in `useEffect` (use `framer-motion` or derived state).
-    - [ ] Refactor `useAuth.tsx` to align with React 19 state loading (avoid effect-based syncing).
-    - [ ] Address high-priority ESLint errors (`react/no-unescaped-entities`, `next/image`, `any` types).
+- [x] **Next.js 16 & React 19 Framework Audit Fixes** <!-- id: 76 -->
+    - [x] Refactor `lib/supabase/proxy.ts` to ensure session refresh on all routes (including public).
+    - [x] Refactor `DeleteConfirmationModal.tsx` to remove synchronous `setState` in `useEffect` (use `framer-motion` or derived state).
+    - [x] Refactor `useAuth.tsx` to align with React 19 state loading (avoid effect-based syncing).
+    - [x] Address high-priority ESLint errors (`react/no-unescaped-entities`, `next/image`, `any` types).
+
+- [x] **Guest Nudges & Session Favorites (Feb 27, 2026)** <!-- id: 77 -->
+    - [x] Create `useGuestFavorites` hook with localStorage persistence.
+    - [x] Update `SongCard.tsx` to handle guest favorites with nudge toasts.
+    - [x] Create `JoinCircleModal.tsx` for soft-gating guest contributions.
+    - [x] Update `SongForm.tsx` to show join modal on submit for guests.
+    - [x] Update `AccessDenied.tsx` with guest vs. wrong-owner variants.
+    - [x] Create `GuestBanner.tsx` and integrate into library pages.
+    - [x] Implement guest-accessible Playlists page with "Your Hearth" section.
+    - [x] Create `mergeGuestFavorites` server action and `PostAuthHandler` to trigger it.
+    - [x] Update documentation (Epics & User Stories).

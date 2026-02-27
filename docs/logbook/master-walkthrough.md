@@ -2151,6 +2151,29 @@ Refined the user experience and fixed persistence issues on the Account Settings
 
 ---
 
+## Session Update (Feb 27, 2026 - Onboarding, Audit & Guest Features)
+
+### 1. Onboarding & Account Settings UX
+Finalized the user onboarding flow and account management interface to ensure a premium first-time experience.
+- **Finish Registration**: Implemented `FinishRegistrationForm.tsx` and the `/auth/finish-registration` route to collect user details (Full Name, Avatar) post-signup.
+- **Account Settings**: Refactored the settings page into a tabbed interface (Profile, Account, Privacy) with **Supabase Storage** integration for avatar uploads.
+- **Notifications**: Added **Sonner** for high-quality toast notifications with a custom "Sacred Fire" theme.
+
+### 2. Framework Audit & React 19 Refactors
+Audited and refactored the codebase against Next.js 16 and React 19 standards.
+- **Middleware / Session Integrity**: Updated `lib/supabase/proxy.ts` to ensure Supabase sessions are refreshed on **all** routes, preventing premature session expiration.
+- **React 19 Best Practices**: Refactored multiple components (`DeleteConfirmationModal`, `useAuth`, `UserPreferencesContext`, etc.) to eliminate synchronous `setState` in `useEffect`, resolving cascading render warnings and hydration mismatches.
+- **Performance**: Replaced standard `<img>` tags with `next/image` for optimized avatar loading.
+
+### 3. Guest Nudges & Session Favorites (Story 1.1.5 & 1.2.4)
+Implemented a warm, contextual guest experience that communicates value before asking for commitment.
+- **localStorage Favorites**: Created `useGuestFavorites` hook to persist favorites on-device without an account.
+- **Soft Gating**: Replaced hard redirects with `JoinCircleModal` on the Add Song form and a guest-variant `AccessDenied` for editing.
+- **Guest Hearth**: Enabled guest access to the Playlists page, showing a "Your Hearth" section for their localStorage collection.
+- **Merge on Login**: Implemented a global `PostAuthHandler` and server action to automatically merge guest favorites into the user's "My Favorites" setlist upon authentication.
+
+---
+
 ## Session Update (Feb 27, 2026 - Onboarding & Framework Audit)
 
 ### 1. Onboarding & Account Settings UX
