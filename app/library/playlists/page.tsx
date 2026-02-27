@@ -141,14 +141,19 @@ function GuestView() {
                     </div>
                 </div>
 
-                {/* Single subtle sign-in nudge */}
+                {/* Sign-in nudge — card style, not a primary button */}
                 <Link
                     href="/auth/login"
-                    className="mt-4 flex items-center gap-2 text-sm text-gray-500 hover:text-gray-300 transition-colors group"
+                    className="mt-4 flex items-center gap-3 bg-gray-800/60 border border-gray-700/60 hover:border-gray-600 hover:bg-gray-800 p-4 rounded-2xl transition-all group"
                 >
-                    <LogIn className="w-4 h-4 group-hover:text-gray-300 transition-colors" />
-                    Sign in to create and manage your playlists
-                    <span className="text-gray-600 group-hover:text-gray-400 transition-colors">→</span>
+                    <div className="w-9 h-9 bg-gray-700/60 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-gray-700 transition-colors">
+                        <LogIn aria-hidden="true" className="w-4 h-4 text-gray-300" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-gray-200 group-hover:text-white transition-colors">Sign in to manage your playlists</p>
+                        <p className="text-xs text-gray-500 mt-0.5">Create setlists, save favorites, and more</p>
+                    </div>
+                    <span aria-hidden="true" className="text-gray-500 group-hover:text-gray-300 transition-colors text-sm">→</span>
                 </Link>
             </div>
 
@@ -212,20 +217,46 @@ export default async function PlaylistsPage() {
                 </button>
             </div>
 
-            {/* My Favorites — smart playlist, always shown */}
+            {/* Smart Playlists — always shown */}
             <div>
-                <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-3">Smart Playlist</p>
-                <Link href="/songs?favorites=true">
-                    <div className="bg-amber-500/8 border border-amber-500/20 p-4 rounded-2xl flex items-center gap-4 group hover:bg-amber-500/15 hover:border-amber-500/35 transition-all hover:-translate-y-0.5">
-                        <div className="w-12 h-12 bg-amber-500/15 rounded-xl flex items-center justify-center group-hover:bg-amber-500/25 transition-colors shrink-0">
-                            <Heart className="w-6 h-6 text-amber-400 fill-amber-400" />
+                <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-3">Smart Playlists</p>
+                <div className="grid grid-cols-1 gap-3">
+                    <Link href="/songs?favorites=true">
+                        <div className="bg-amber-500/8 border border-amber-500/20 p-4 rounded-2xl flex items-center gap-4 group hover:bg-amber-500/15 hover:border-amber-500/35 transition-all hover:-translate-y-0.5">
+                            <div className="w-12 h-12 bg-amber-500/15 rounded-xl flex items-center justify-center group-hover:bg-amber-500/25 transition-colors shrink-0">
+                                <Heart className="w-6 h-6 text-amber-400 fill-amber-400" />
+                            </div>
+                            <div>
+                                <h3 className="font-bold text-gray-100 group-hover:text-white transition-colors">My Favorites</h3>
+                                <SongCountSubtitle counts={favCounts} emptyLabel="No songs yet — tap ♥ on any song" />
+                            </div>
                         </div>
-                        <div>
-                            <h3 className="font-bold text-gray-100 group-hover:text-white transition-colors">My Favorites</h3>
-                            <SongCountSubtitle counts={favCounts} emptyLabel="No songs yet — tap ♥ on any song" />
+                    </Link>
+
+                    {/* My Songs — coming soon */}
+                    <div className="bg-red-500/8 border border-red-500/20 p-4 rounded-2xl flex items-center gap-4 cursor-default">
+                        <div className="w-12 h-12 bg-red-500/15 rounded-xl flex items-center justify-center shrink-0">
+                            <Music className="w-6 h-6 text-red-400" />
                         </div>
+                        <div className="flex-1 min-w-0">
+                            <h3 className="font-bold text-gray-100">My Songs</h3>
+                            <p className="text-xs text-gray-500 mt-0.5">Songs you've contributed to the library</p>
+                        </div>
+                        <span className="text-[9px] font-bold text-amber-500 bg-amber-500/10 border border-amber-500/20 rounded-full px-2 py-0.5 uppercase tracking-wider shrink-0">Coming Soon</span>
                     </div>
-                </Link>
+
+                    {/* My Drafts — coming soon */}
+                    <div className="bg-gray-800/40 border border-gray-700/40 p-4 rounded-2xl flex items-center gap-4 cursor-default">
+                        <div className="w-12 h-12 bg-gray-700/40 rounded-xl flex items-center justify-center shrink-0">
+                            <PenLine className="w-6 h-6 text-gray-400" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <h3 className="font-bold text-gray-100">My Drafts</h3>
+                            <p className="text-xs text-gray-500 mt-0.5">Your private work-in-progress songs</p>
+                        </div>
+                        <span className="text-[9px] font-bold text-amber-500 bg-amber-500/10 border border-amber-500/20 rounded-full px-2 py-0.5 uppercase tracking-wider shrink-0">Coming Soon</span>
+                    </div>
+                </div>
             </div>
 
             {/* Other user setlists (real) */}
@@ -251,29 +282,35 @@ export default async function PlaylistsPage() {
                 </div>
             )}
 
-            {/* Placeholder playlists — shown until real setlist creation is built */}
+            {/* Public Playlists — coming soon */}
             <div>
-                <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-3">Example Playlists</p>
-                <div className="grid grid-cols-1 gap-4 opacity-40 pointer-events-none select-none">
+                <div className="flex items-center gap-2 mb-3">
+                    <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Public Playlists</p>
+                    <span className="text-[9px] font-bold text-amber-500 bg-amber-500/10 border border-amber-500/20 rounded-full px-2 py-0.5 uppercase tracking-wider">Coming Soon</span>
+                </div>
+                <div className="grid grid-cols-1 gap-3 opacity-40 pointer-events-none select-none">
                     <div className="bg-gray-900/40 p-4 rounded-2xl border border-gray-800 flex items-center gap-4">
-                        <div className="w-12 h-12 bg-gray-800 rounded-xl flex items-center justify-center shrink-0">
-                            <Flame className="w-6 h-6 text-orange-500" />
+                        <div className="w-12 h-12 bg-blue-900/30 rounded-xl flex items-center justify-center shrink-0">
+                            <Globe className="w-6 h-6 text-blue-400" />
                         </div>
                         <div>
-                            <h3 className="font-bold text-gray-100">Yage Ceremony 2024</h3>
-                            <p className="text-xs text-gray-500 mt-0.5">12 Songs</p>
+                            <h3 className="font-bold text-gray-100">Ceremony Night – Agua y Fuego</h3>
+                            <p className="text-xs text-gray-500 mt-0.5">Community Playlist · 14 songs</p>
                         </div>
                     </div>
                     <div className="bg-gray-900/40 p-4 rounded-2xl border border-gray-800 flex items-center gap-4">
-                        <div className="w-12 h-12 bg-gray-800 rounded-xl flex items-center justify-center shrink-0">
-                            <Droplets className="w-6 h-6 text-blue-500" />
+                        <div className="w-12 h-12 bg-purple-900/30 rounded-xl flex items-center justify-center shrink-0">
+                            <Users className="w-6 h-6 text-purple-400" />
                         </div>
                         <div>
-                            <h3 className="font-bold text-gray-100">Temazcal — Water Songs</h3>
-                            <p className="text-xs text-gray-500 mt-0.5">8 Songs</p>
+                            <h3 className="font-bold text-gray-100">Opening Circle Icaros</h3>
+                            <p className="text-xs text-gray-500 mt-0.5">Community Playlist · 9 songs</p>
                         </div>
                     </div>
                 </div>
+                <p className="text-xs text-gray-600 italic mt-3">
+                    Public playlists shared by community members — coming soon.
+                </p>
             </div>
 
         </div>
