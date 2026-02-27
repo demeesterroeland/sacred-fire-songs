@@ -109,16 +109,22 @@ All tasks follow a strict lifecycle:
 
 **Trigger:** This protocol is executed after the final phase of a track is successfully checkpointed.
 
-1. **Merge to Main:**
+1. **Push and Create Pull Request:**
+   - Execute `git push -u origin feat/<track_id>`.
+   - Execute `gh pr create --title "feat: <track_description>" --body "Implementation of track <track_id> complete. All tests passing and verified."`.
+   - **Announce:** "Created Pull Request for track `<track_id>`."
+
+2. **Merge Pull Request:**
+   - Execute `gh pr merge --squash --delete-branch`.
+   - **Announce:** "Merged and closed Pull Request for track `<track_id>`. Feature branch deleted from remote."
+
+3. **Cleanup Local Branch:**
    - Execute `git checkout main`.
-   - Execute `git merge --no-ff feat/<track_id>`.
-   - **Announce:** "Merged feature branch `feat/<track_id>` into `main`."
-
-2. **Cleanup Branch:**
+   - Execute `git pull origin main`.
    - Execute `git branch -d feat/<track_id>`.
-   - **Announce:** "Deleted local feature branch `feat/<track_id>`."
+   - **Announce:** "Updated local `main` and deleted local feature branch."
 
-3. **Update Registry:**
+4. **Update Registry:**
    - Mark track as complete `[x]` in `conductor/tracks.md`.
    - Commit registry update on `main`.
 
