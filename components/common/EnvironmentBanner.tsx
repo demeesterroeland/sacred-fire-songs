@@ -4,19 +4,10 @@ import { useEffect, useState } from "react";
 import { Info, Code, Rocket } from "lucide-react";
 
 export default function EnvironmentBanner() {
-  const [env, setEnv] = useState<string | null>(null);
-
-  useEffect(() => {
-    // Accessing env on the client side
-    const vercelEnv = process.env.NEXT_PUBLIC_VERCEL_ENV;
-    const isLocal = process.env.NODE_ENV === "development";
-
-    if (vercelEnv === "preview") {
-      setEnv("preview");
-    } else if (isLocal) {
-      setEnv("development");
-    }
-  }, []);
+  const vercelEnv = process.env.NEXT_PUBLIC_VERCEL_ENV;
+  const isLocal = process.env.NODE_ENV === "development";
+  
+  const env = vercelEnv === "preview" ? "preview" : isLocal ? "development" : null;
 
   if (!env) return null;
 

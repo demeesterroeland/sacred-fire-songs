@@ -2,6 +2,7 @@ import { LogOut, ChevronDown, Settings, User, Heart, FileText, ListMusic, Sun, M
 import { useAuth } from '@/hooks/useAuth';
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import QuickLogin from '@/components/dev/QuickLogin';
 
 interface UserProfileProps {
@@ -48,9 +49,15 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true }: Us
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 px-3 py-2 rounded-full bg-gray-800/80 hover:bg-gray-700 transition-colors active:scale-95 group border border-transparent hover:border-gray-600"
       >
-        <div className="w-[26px] h-[26px] rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-[10px] font-bold text-white shadow-inner overflow-hidden shrink-0">
+        <div className="w-[26px] h-[26px] rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-[10px] font-bold text-white shadow-inner overflow-hidden shrink-0 relative">
           {user.avatar_url ? (
-            <img src={user.avatar_url} alt={userDisplayName} className="w-full h-full object-cover" />
+            <Image 
+              src={user.avatar_url} 
+              alt={userDisplayName} 
+              fill 
+              className="object-cover" 
+              sizes="26px"
+            />
           ) : (
             userInitials
           )}
@@ -82,9 +89,15 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true }: Us
             {/* User Identity Card */}
             <div className="relative group/card bg-gray-800/50 p-3 rounded-xl mb-3 border border-gray-700/30">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-red-900/40 flex items-center justify-center text-sm font-bold text-red-400 ring-1 ring-red-500/20 shadow-inner">
+                <div className="w-10 h-10 rounded-full bg-red-900/40 flex items-center justify-center text-sm font-bold text-red-400 ring-1 ring-red-500/20 shadow-inner relative overflow-hidden">
                   {user.avatar_url ? (
-                    <img src={user.avatar_url} alt={userDisplayName} className="w-full h-full object-cover" />
+                    <Image 
+                      src={user.avatar_url} 
+                      alt={userDisplayName} 
+                      fill 
+                      className="object-cover" 
+                      sizes="40px"
+                    />
                   ) : (
                     userInitials
                   )}

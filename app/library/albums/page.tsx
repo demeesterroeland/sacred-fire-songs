@@ -9,7 +9,7 @@ export default function AlbumsPage() {
                 </div>
                 <h2 className="text-lg font-bold text-gray-300 mb-1">Liked Albums</h2>
                 <p className="text-sm text-gray-600 max-w-xs">
-                    Save albums you love and they'll appear here.
+                    Save albums you love and they&apos;ll appear here.
                 </p>
                 <span className="mt-4 text-[10px] font-bold uppercase tracking-widest text-gray-600 bg-gray-800/60 border border-gray-700/40 px-3 py-1 rounded-full">
                     Coming soon

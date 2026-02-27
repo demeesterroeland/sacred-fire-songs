@@ -20,21 +20,22 @@ export default function DeleteConfirmationModal({
     message,
     isDeleting = false,
 }: DeleteConfirmationModalProps) {
-    const [isVisible, setIsVisible] = useState(false);
+    const [render, setRender] = useState(false);
 
-    useEffect(() => {
-        if (isOpen) {
-            setIsVisible(true);
-        } else {
-            const timer = setTimeout(() => setIsVisible(false), 200);
-            return () => clearTimeout(timer);
-        }
-    }, [isOpen]);
+    // Synchronize rendering state with isOpen prop without triggering cascading renders
+    if (isOpen && !render) {
+        setRender(true);
+    }
 
-    if (!isVisible && !isOpen) return null;
+    const onTransitionEnd = () => {
+        if (!isOpen) setRender(false);
+    };
+
+    if (!render) return null;
 
     return (
         <div
+            onTransitionEnd={onTransitionEnd}
             className={`fixed inset-0 z-50 flex items-center justify-center transition-all duration-200 ${isOpen ? 'opacity-100 backdrop-blur-sm' : 'opacity-0 backdrop-blur-none pointer-events-none'
                 }`}
         >

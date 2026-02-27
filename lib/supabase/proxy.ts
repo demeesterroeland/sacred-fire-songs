@@ -6,21 +6,17 @@ export async function updateSession(request: NextRequest) {
     const isPublicRoute =
         request.nextUrl.pathname === "/" ||
         request.nextUrl.pathname.startsWith("/auth") ||
-        request.nextUrl.pathname.startsWith("/login"); // fallback if /login is used
-
-    // If it's a public route, return immediately with NEXT response to bypass ALL overhead
-    if (isPublicRoute) {
-        return NextResponse.next({
-            request,
-        });
-    }
+        request.nextUrl.pathname.startsWith("/login") ||
+        request.nextUrl.pathname.startsWith("/notes") ||
+        request.nextUrl.pathname.startsWith("/songs") ||
+        request.nextUrl.pathname.startsWith("/explore") ||
+        request.nextUrl.pathname.startsWith("/library") ||
+        request.nextUrl.pathname.startsWith("/playlists");
 
     let supabaseResponse = NextResponse.next({
         request,
     });
 
-    // With Fluid compute, don't put this client in a global environment
-    // variable. Always create a new one on each request.
     const supabase = createServerClient(
         process.env.NEXT_PUBLIC_SUPABASE_URL!,
         process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
@@ -44,38 +40,16 @@ export async function updateSession(request: NextRequest) {
         },
     );
 
-    // IMPORTANT:
-    // This helps us update the user session if it is expiring
+    // This refreshes the session even if the route is public
     const { data: { user } } = await supabase.auth.getUser();
 
-    if (
-        !user &&
-        !request.nextUrl.pathname.startsWith("/notes") &&
-        !request.nextUrl.pathname.startsWith("/songs") &&
-        !request.nextUrl.pathname.startsWith("/explore") &&
-        !request.nextUrl.pathname.startsWith("/library")
-    ) {
-        // This part is for any other protected routes that might be added later
-        // Currently allowed for guests: /, /auth, /login, /notes, /songs, /explore, /playlists
-        // But let's keep a tight redirect for anything outside the allowed list
+    // Redirect to login if not authenticated and trying to access a protected route
+    if (!user && !isPublicRoute) {
         const url = request.nextUrl.clone();
         url.pathname = "/auth/login";
         url.searchParams.set('message', 'Please log in to access this page');
         return NextResponse.redirect(url);
     }
-
-    // IMPORTANT: You *must* return the supabaseResponse object as it is.
-    // If you're creating a new response object with NextResponse.next() make sure to:
-    // 1. Pass the request in it, like so:
-    //    const myNewResponse = NextResponse.next({ request })
-    // 2. Copy over the cookies, like so:
-    //    myNewResponse.cookies.setAll(supabaseResponse.cookies.getAll())
-    // 3. Change the myNewResponse object to fit your needs, but avoid changing
-    //    the cookies!
-    // 4. Finally:
-    //    return myNewResponse
-    // If this is not done, you may be causing the browser and server to go out
-    // of sync and terminate the user's session prematurely!
 
     return supabaseResponse;
 }

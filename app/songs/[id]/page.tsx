@@ -92,7 +92,7 @@ export default function SongDetailPage() {
             if (!setlist) return new Set<string>();
             const { data: items } = await supabase
                 .from('setlist_items')
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                 
                 .select('song_versions(composition_id)').eq('setlist_id', setlist.id);
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             return new Set<string>((items ?? []).map((i: any) => i.song_versions?.composition_id).filter(Boolean));

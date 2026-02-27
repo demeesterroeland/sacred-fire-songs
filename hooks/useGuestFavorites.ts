@@ -31,11 +31,6 @@ export interface GuestFavoritesReturn {
 export function useGuestFavorites(): GuestFavoritesReturn {
   const [ids, setIds] = useState<Set<string>>(() => readFromStorage());
 
-  // Sync from storage on mount (SSR-safe)
-  useEffect(() => {
-    setIds(readFromStorage());
-  }, []);
-
   const toggle = useCallback((id: string): { isFavorited: boolean; shouldNudge: boolean } => {
     let isFavorited = false;
     let shouldNudge = false;

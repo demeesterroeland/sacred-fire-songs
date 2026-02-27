@@ -48,7 +48,7 @@ export default function PrivacySettings({ user, profile }: PrivacySettingsProps)
           <div className="flex items-center justify-between p-4 bg-white/5 rounded-2xl border border-white/5">
             <div>
               <p className="font-medium text-white">Show Activity</p>
-              <p className="text-sm text-slate-400">Display when you're live-viewing a shared song.</p>
+              <p className="text-sm text-slate-400">Display when you&apos;re live-viewing a shared song.</p>
             </div>
             <button
               className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${showActivity ? "bg-[#f45d1a]" : "bg-slate-700"}`}

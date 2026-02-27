@@ -10,7 +10,7 @@ export default async function Home() {
 
   // Favorites count for dashboard card
   const { data: { user } } = await supabase.auth.getUser();
-  let favCounts = { total: 0, public: 0, draft: 0 };
+  const favCounts = { total: 0, public: 0, draft: 0 };
   if (user) {
     const { data: setlist } = await supabase
       .from('setlists')

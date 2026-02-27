@@ -6,18 +6,17 @@ import { useEffect, useState } from 'react';
 
 export default function AccessDenied() {
     // Client-side visual effects (embers)
-    const [embers, setEmbers] = useState<{ id: number; left: number; duration: number; delay: number }[]>([]);
-
-    useEffect(() => {
+    const [embers] = useState<{ id: number; left: number; duration: number; delay: number }[]>(() => {
+        if (typeof window === 'undefined') return [];
+        
         const emberCount = 30;
-        const newEmbers = Array.from({ length: emberCount }).map((_, i) => ({
+        return Array.from({ length: emberCount }).map((_, i) => ({
             id: i,
             left: Math.random() * 100,
             duration: Math.random() * 5 + 5,
             delay: Math.random() * 5,
         }));
-        setEmbers(newEmbers);
-    }, []);
+    });
 
     return (
         <div className="min-h-screen w-full flex items-center justify-center p-4 relative overflow-hidden bg-[radial-gradient(circle_at_center,_#111827_0%,_#030712_100%)]">

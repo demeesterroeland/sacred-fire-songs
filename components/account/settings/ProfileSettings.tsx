@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef } from "react";
+import Image from "next/image";
 import { User } from "@supabase/supabase-js";
 import { User as UserIcon, Camera, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
@@ -88,21 +89,6 @@ export default function ProfileSettings({ user, profile }: ProfileSettingsProps)
     }
   };
 
-  const handleRemoveAvatar = async () => {
-    try {
-      const { error } = await supabase
-        .from("profiles")
-        .update({ avatar_url: null })
-        .eq("id", user.id);
-
-      if (error) throw error;
-      toast.success("Avatar removed");
-      router.refresh();
-    } catch (error: any) {
-      toast.error(error.message || "Failed to remove avatar");
-    }
-  };
-
   return (
     <section className="space-y-8">
       <input
@@ -115,9 +101,15 @@ export default function ProfileSettings({ user, profile }: ProfileSettingsProps)
 
       <div className="flex flex-col md:flex-row items-center gap-8 pb-8 border-b border-white/5 opacity-50">
         <div className="relative">
-          <div className="w-24 h-24 rounded-full overflow-hidden bg-slate-800 ring-2 ring-white/10 flex items-center justify-center">
+          <div className="w-24 h-24 rounded-full overflow-hidden bg-slate-800 ring-2 ring-white/10 flex items-center justify-center relative">
             {profile?.avatar_url ? (
-              <img src={profile.avatar_url} alt="Avatar" className="w-full h-full object-cover" />
+              <Image 
+                src={profile.avatar_url} 
+                alt="Avatar" 
+                fill 
+                className="object-cover" 
+                sizes="96px"
+              />
             ) : (
               <UserIcon className="w-12 h-12 text-slate-600" />
             )}
