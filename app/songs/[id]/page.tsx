@@ -18,6 +18,7 @@ import { SONG_KEYS } from '@/lib/songs/queryKeys';
 import { useWakeLock } from '@/hooks/useWakeLock';
 import { UserProfile } from '@/components/common/navigation/UserProfile';
 import { getCategoryColor, getCategoryStyles } from '@/lib/uiUtils';
+import AddToSetlist from '@/components/playlists/AddToSetlist';
 
 // Standalone fetch function
 const fetchSong = async (id: string) => {
@@ -138,6 +139,9 @@ export default function SongDetailPage() {
                 </div>
                 {/* Action Buttons and User Profile (Mobile) */}
                 <div className="flex items-center gap-2 shrink-0">
+                    {user && currentVersion && (
+                        <AddToSetlist songVersionId={currentVersion.id} />
+                    )}
                     <button
                         onClick={handleToggleFavorite}
                         aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
@@ -205,6 +209,9 @@ export default function SongDetailPage() {
                                     <Edit2 className="w-4 h-4" /> <span className="hidden xl:inline">Edit</span>
                                 </button>
                             </Link>
+                        )}
+                        {user && currentVersion && (
+                            <AddToSetlist songVersionId={currentVersion.id} />
                         )}
                         <button
                             onClick={handleToggleFavorite}
