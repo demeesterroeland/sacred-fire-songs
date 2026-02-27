@@ -78,6 +78,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
               classNames: {
                 toast: "bg-[#141b24] border border-emerald-500/30 p-4 rounded-xl text-emerald-400 text-[15px] font-medium text-center shadow-inner min-w-[300px] flex justify-center items-center mb-2",
                 title: "text-emerald-400",
+                description: "text-gray-400 text-sm",
                 success: "border-emerald-500/30",
                 error: "bg-[#1a1010] border-red-500/30 text-red-400",
               }
