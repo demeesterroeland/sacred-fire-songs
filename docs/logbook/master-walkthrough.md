@@ -68,76 +68,6 @@
 
 
 
-## Session Update (Jan 13, 2026)
-
-### Project Walkthrough & History
-
-> [!NOTE]
-> This document provides a comprehensive history of the project's evolution, reconstructed from development logs and mapping to the "12-Day Curriculum".
-
-## 1. The Foundation (Curriculum Days 1-3)
-**Timeline:** Dec 25 - Dec 26, 2025
-**Goal:** Establish the strict typing and component architecture.
-
--   **Type System**: Defined the Core Data Contract (`types.ts`) with `Song` and `AppUser` interfaces (Day 1).
--   **UI Architecture**: Deconstructed the initial HTML mockup into React Components: `Header`, `SearchBar`, `SongCard` (Day 2).
--   **Styling**: Implemented the visual identity using **Tailwind CSS**, including Dark Mode and "Glassmorphism" aesthetics (Day 3).
-
-## 2. The Core Feature Sprint (Curriculum Days 4-10)
-**Timeline:** Dec 29, 2025
-**Goal:** Implementation of the main application logic and PWA features.
-
--   **Search Engine**: Implemented real-time filtering with `useState` logic (Day 4).
--   **Supabase Integration**: Connected to the PostgreSQL backend and created the initial schema (Day 5).
--   **Logic Layer**: Built the **ChordPro Parser** to render bracketed chords `[Am]` dynamically above lyrics (Day 6).
--   **UX Polish**: Added "Skeleton" loading states, Framer Motion animations, and a custom 404 page (Day 7).
--   **Offline Support**: Integrated **React Query** for caching and "Stale-While-Revalidate" data fetching (Day 8).
--   **Song Management**: Implemented the "Add Song" mutation logic (Day 10).
-
-## 3. Infrastructure & Roles (Curriculum Days 11-13)
-**Timeline:** Jan 04, 2026
-**Goal:** Security, Automation, and User hierarchy.
-
--   **CI/CD**: Created GitHub Actions (`deploy-db.yml`) to automate database migrations.
--   **Role Definition**: Refactored the generic 'User' to a strictly defined 'Member', and 'Moderator' to 'Musician' (now 'Expert').
--   **Categories**: Refactored song categories to be hierarchical (e.g., "Medicine Songs" -> "Water").
-
-## 4. Refinement & Security (Jan 10, 2026)
-**Goal:** Hardening the application for production.
-
--   **Project Rename**: Officially renamed "Camino Rojo" to **Sacred Fire Songs**.
--   **Security**: Enabled **Row Level Security (RLS)** on all sensitive tables (`setlists`, `setlist_items`).
--   **Performance**: Optimized SQL policies to reduce database load.
-
-## 5. Advanced Features & "Expert" Role (Jan 11-13, 2026)
-**Goal:** Fine-grained access control and developer experience.
-
--   **Edit Own Songs**:
-	-   Refactored `UploadForm` to a reusable `SongForm` (Create/Edit).
-	-   Implemented strict "Access Denied" logic for non-owners.
--   **Mock Authentication**:
-	-   Built a **Role Switcher** (Guest/Member/Expert/Admin) for rapid local testing.
-	-   Implemented functionality to Logout and switch personas instantly.
--   **Role Refactoring**:
-	-   Globally renamed the 'Musician' role to **'Expert'** to better reflect the domain domain.
--   **Code Quality**:
-	-   Refactored critical components (`Sidebar`, `SongForm`) to strictly follow Next.js Guidelines (Arrow functions, Event naming).
-
----
-
-## Current Application State
-*As of Jan 13, 2026*
-
-| Feature | Status | Notes |
-| :--- | :--- | :--- |
-| **Authentication** | ✅ Ready | Supabase Auth + Local Mock Mode |
-| **Song Viewing** | ✅ Ready | Dynamic ChordPro, Transposition, Audio |
-| **Song Editing** | ✅ Ready | Owners & Admins only |
-| **Search** | ✅ Ready | Real-time, Client-side |
-| **Database** | ✅ Ready | Schema v2.1, RLS Enabled |
-| **Deployment** | 🔄 Pending | CI/CD ready, Manual deploy needed |
-
-
 ## Session Update (Jan 13, 2026 - Part 2)
 
 
@@ -2151,24 +2081,86 @@ Refined the user experience and fixed persistence issues on the Account Settings
 
 ---
 
-## Session Update (Feb 27, 2026 - Onboarding & Framework Audit)
+## Session Update (Feb 27, 2026 - Onboarding, Framework Audit & Guest Features)
 
 ### 1. Onboarding & Account Settings UX
 Finalized the user onboarding flow and account management interface to ensure a premium first-time experience.
-- **Finish Registration**: Implemented `FinishRegistrationForm.tsx` and the `/auth/finish-registration` route to collect user details (Full Name, Avatar) after signup.
-- **Account Settings**: 
-    - Refactored the settings page into a tabbed interface (Profile, Account, Privacy).
-    - Integrated **Supabase Storage** for avatar uploads.
-    - Added **Sonner** for high-quality toast notifications with a custom "Sacred Fire" (Emerald/Amber) theme.
+- **Finish Registration**: Implemented `FinishRegistrationForm.tsx` and the `/auth/finish-registration` route to collect user details (Full Name, Avatar) post-signup.
+- **Account Settings**: Refactored the settings page into a tabbed interface (Profile, Account, Privacy) with **Supabase Storage** integration for avatar uploads.
+- **Notifications**: Added **Sonner** for high-quality toast notifications with a custom "Sacred Fire" (Emerald/Amber) theme.
 - **Visuals**: Applied consistent glassmorphism and flame aesthetics to all onboarding and settings components.
 
-### 2. Framework & Best Practice Audit
-Performed a comprehensive technical audit of the codebase against Next.js 16 and React 19 standards.
+### 2. Framework Audit & React 19 Refactors
+Audited and refactored the codebase against Next.js 16 and React 19 standards.
+- **Middleware / Session Integrity**: Updated `lib/supabase/proxy.ts` to ensure Supabase sessions are refreshed on **all** routes, preventing premature session expiration.
+- **React 19 Best Practices**: Refactored multiple components (`DeleteConfirmationModal`, `useAuth`, `UserPreferencesContext`, etc.) to eliminate synchronous `setState` in `useEffect`, resolving cascading render warnings and hydration mismatches.
+- **Performance**: Replaced standard `<img>` tags with `next/image` for optimized avatar loading.
 - **Next.js 16 Alignment**: Verified that the project correctly uses `proxy.ts` (the new convention replacing `middleware.ts`) for network-level session management.
-- **React 19 Hooks**: Identified several "set-state-in-effect" anti-patterns (e.g., in `DeleteConfirmationModal.tsx` and `useAuth.tsx`) that trigger cascading renders.
-- **Supabase SSR**: Audited the `lib/supabase/proxy.ts` logic and identified a need to ensure session refreshing even on public routes to prevent premature session expiration.
-- **Automated Checks**: Ran a full suite of linting and type-checking, identifying 266 problems (mostly unused variables and `any` types).
 
-### 3. Documentation & Task Management
-- **Master Tasks**: Appended a new "Next.js 16 & React 19 Framework Audit Fixes" section to the logbook to track architectural debt.
-- **Walkthrough**: Synchronized the project history with the latest `feat/onboarding-settings-ux` developments.
+### 3. Guest Nudges & Session Favorites (Story 1.1.5 & 1.2.4)
+Implemented a warm, contextual experience for unauthenticated guests, allowing them to participate in the community (favoriting songs) and gently nudging them to create an account at natural contribution moments.
+
+#### Guest Favorites Logic
+- **Hook**: Created `useGuestFavorites` which uses `localStorage` (key: `sfs_guest_favorites`) to store song IDs.
+- **Persistence**: Favorites persist on the device across browser restarts.
+- **Nudge Toasts**: Added automatic toasts via `Sonner` that appear after the 1st and 5th favorite, encouraging users to "Join the circle".
+
+#### UI Nudges (Soft Gates)
+- **Add Song**: Instead of a hard redirect to login, guests can now fill out the entire "Add Song" form. When they click "Publish", a `JoinCircleModal` appears, explaining the value of an account while preserving their form data.
+- **Edit Song**: Updated `AccessDenied.tsx` with a warm "This Song Has a Keeper" variant for guests, including clear Join/Login CTAs.
+- **Library Banner**: Added a dismissible, amber-toned `GuestBanner` to the `/songs` page to highlight account benefits (drafts, playlists).
+
+#### Guest-Accessible Playlists
+- **Middleware**: Ensured `/library` routes are public in `lib/supabase/proxy.ts`.
+- **"Your Hearth"**: Guests can now visit the playlists page and see their localStorage favorites in a beautiful "Your Hearth" section, rather than being blocked by a login wall.
+
+#### Account Merge on Login
+- **Server Action**: Created `mergeGuestFavorites` to take a list of IDs and upsert them into the user's "My Favorites" setlist in Supabase.
+- **Trigger**: Added a global `PostAuthHandler` provider that detects login transitions and automatically merges any guest favorites, showing a confirmation toast.
+
+## Evidence
+- **Files Created**:
+    - `hooks/useGuestFavorites.ts`
+    - `lib/unit-tests/useGuestFavorites.test.ts`
+    - `components/common/JoinCircleModal.tsx`
+    - `components/common/GuestBanner.tsx`
+    - `components/playlists/GuestHearth.tsx`
+    - `components/providers/PostAuthHandler.tsx`
+    - `app/actions/mergeGuestFavorites.ts`
+- **Files Modified**:
+    - `components/home/SongCard.tsx`
+    - `components/song/SongForm.tsx`
+    - `components/common/feedback/AccessDenied.tsx`
+    - `app/songs/[id]/edit/page.tsx`
+    - `app/songs/SongsPageContent.tsx`
+    - `app/library/playlists/page.tsx`
+    - `app/layout.tsx`
+    - `docs/logbook/epic&user stories.md`
+    - `docs/logbook/master-tasks.md`
+
+---
+# Walkthrough: DB Schema Sync & Index Fix
+
+I have synchronized the technical documentation with the actual database migrations and fixed internal inconsistencies in the latest settlement migration.
+
+## Changes Made
+
+### Technical Documentation
+#### [MODIFY] [db-schema.sql](file:///home/roeland/Projects/sacred-fire-songs/docs/design/db-schema.sql)
+- **Synchronized Tables**: Added `is_public`, `has_chords`, and `has_melody` to `public.compositions` and `icon_name` to `public.categories`.
+- **Updated RLS Policies**: Refined policies to check for `is_public = true` for public access, mirroring production migrations.
+- **Optimized Indexes**: Updated the alphabetical title index to be a partial index (`WHERE is_public = true`).
+
+### Migrations
+#### [MODIFY] [20260227000000_add_partial_public_indexes.sql](file:///home/roeland/Projects/sacred-fire-songs/supabase/migrations/20260227000000_add_partial_public_indexes.sql)
+- **Index Refinement**: Added `WHERE is_public = true` to `idx_compositions_title_alphabetical` for consistency with other partial public indexes.
+- **Documentation Fix**: Corrected the comment from "Composite index" to "Partial index".
+
+## Verification Results
+
+### Consistency Check
+- Verified that all new columns used in indexes or policies are defined in the tables *before* they are referenced.
+- Confirmed that RLS policies in `db-schema.sql` now accurately reflect the conditional access added in January/February migration cycles.
+
+### Git Branch
+- All changes committed to branch `fix/db-schema-index-sync` in worktree `.claude/worktrees/fix-db-schema-index-sync`.

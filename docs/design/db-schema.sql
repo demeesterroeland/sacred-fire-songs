@@ -30,8 +30,11 @@ create table public.categories (
   name text not null,
   slug text not null unique,
   emoji text,
+  icon_name text,
+  -- Added v2.5
   flavour_text text,
   parent_id uuid references public.categories(id),
+  icon_name text,
   created_at timestamptz default now()
 );
 -- COMPOSITIONS (Parent Song entity)
@@ -39,7 +42,16 @@ create table public.compositions (
   id uuid default uuid_generate_v4() primary key,
   title text not null,
   original_author text,
+  is_public boolean default false,
+  -- Added v2.2
+  has_chords boolean default false,
+  -- Added v2.3
+  has_melody boolean default false,
+  -- Added v2.3
   owner_id uuid references public.profiles(id),
+  is_public boolean default true,
+  has_chords boolean default false,
+  has_melody boolean default false,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 -- SONG_CATEGORY_MAP (Join Table)
@@ -92,8 +104,7 @@ create table public.setlist_items (
 -- Partial indexes for public content optimization
 CREATE INDEX IF NOT EXISTS idx_compositions_is_public_true ON public.compositions (created_at DESC) WHERE is_public = true;
 CREATE INDEX IF NOT EXISTS idx_setlists_is_public_true ON public.setlists (created_at DESC) WHERE is_public = true;
-CREATE INDEX IF NOT EXISTS idx_compositions_title_alphabetical ON public.compositions (title ASC);
-
+CREATE INDEX IF NOT EXISTS idx_compositions_title_alphabetical ON public.compositions (title ASC) WHERE is_public = true;
 -- 4. Triggers & Functions
 -- Trigger to prevent linking songs to parent groups (only subcategories allowed)
 create or replace function public.check_is_subcategory() returns trigger as $$ begin if (
@@ -200,9 +211,33 @@ alter table public.setlist_items enable row level security;
 create policy "Allow public read access" on public.categories for
 select to public using (true);
 create policy "Public compositions are viewable by everyone" on public.compositions for
-select using (true);
+select using (is_public = true);
+create policy "Owners can view their own songs" on public.compositions for
+select to authenticated using (
+    owner_id = (
+      select auth.uid()
+    )
+  );
 create policy "Public versions are viewable by everyone" on public.song_versions for
-select using (true);
+select using (
+    exists (
+      select 1
+      from public.compositions c
+      where c.id = song_versions.composition_id
+        and c.is_public = true
+    )
+  );
+create policy "Owners can view their own song versions" on public.song_versions for
+select to authenticated using (
+    exists (
+      select 1
+      from public.compositions c
+      where c.id = song_versions.composition_id
+        and c.owner_id = (
+          select auth.uid()
+        )
+    )
+  );
 -- Admin/Member Policies (Simplified for MVP)
 -- Admin/Member Policies (Optimized: Split actions, cached auth)
 create policy "Admins/Members can manage categories" on public.categories for

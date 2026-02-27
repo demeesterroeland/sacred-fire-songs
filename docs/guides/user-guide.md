@@ -1,8 +1,8 @@
 # User Guide: Sacred Fire Songs
 
-**Version:** 2.1
+**Version:** 2.3
 **Status:** Published
-**Date:** February 2, 2026
+**Date:** February 27, 2026
 
 ## Changelog
 
@@ -15,6 +15,7 @@
 | **2.0** | Jan 30, 2026 | Major update: Magic Link auth, .cho/.txt imports, Public/Private songs, and Advanced Filters. |
 | **2.1** | Feb 02, 2026 | Rebranded "Private" songs to "Draft" and added advanced filter combinability. |
 | **2.2** | Feb 23, 2026 | Removed Home page search box and renamed "Library" to "Search Songs". |
+| **2.3** | Feb 27, 2026 | Added Personal Collections (Setlists) and "Your Hearth" dashboard. |
 
 Welcome to **Sacred Fire Songs**, a digital songbook designed for ceremonial musicians. This guide covers how to browse, learn, and manage medicine songs using our platform.
 
@@ -32,8 +33,8 @@ The easiest way to sign in is via **Magic Link**.
 If you prefer, you can also sign up or log in using a tradition **Email & Password** combination. You can manage your password or reset it via the "Forgot Password" link if needed.
 
 ### 1.3 User Roles
-- **Guest**: Can browse and view all **Public** songs.
-- **Member**: Can add their own songs, save songs as **Draft**, and edit/delete songs they own.
+- **Guest**: Can browse and view all **Public** songs. Can save temporary favorites in their browser session.
+- **Member**: Can add their own songs, save songs as **Draft**, and build permanent personal collections (Setlists).
 - **Admin**: Full access to manage all songs, users, and categories.
 
 ---
@@ -57,6 +58,13 @@ Click any song to view its lyrics and musical data:
 - **Metadata**: See the **Key**, **Capo position**, and **Tuning** at a glance.
 - **Media**: Listen to YouTube, Spotify, or SoundCloud recordings directly on the page.
 
+### 2.4 Personal Collections (Setlists)
+Members can curate their own collections of songs for practice or ceremony:
+- **Add to Playlist**: Click the **List Plus** (`ListPlus`) icon in any song header to add it to one of your personal playlists.
+- **Manage Playlists**: Visit the **Library** page to see all your collections.
+- **Reorder Songs**: Within a playlist, use the **Grip** icon to drag and reorder songs. Remember to click **Save New Order** to persist your changes.
+- **Your Hearth**: Your dashboard features a "Your Hearth" section for quick access to your most recently used collections and favorites.
+
 ---
 
 ## 3. Managing Songs (Members & Admins)
@@ -79,4 +87,4 @@ If you own a song (or are an Admin), you will see icons at the top of the detail
 ---
 
 ## 4. Offline Access (PWA)
-Sacred Fire Songs is a Progressive Web App. Any song you view while online will be saved to your device automatically. This ensures you can access your music in remote ceremony locations without a data connection.
+Sacred Fire Songs is a Progressive Web App. Any song or playlist you view while online will be saved to your device automatically for up to 1 hour. This ensures you can access your music in remote ceremony locations without a data connection.

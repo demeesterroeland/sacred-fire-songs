@@ -916,7 +916,7 @@
 - [x] Audit implementation status of stories 1.1.4, 1.1.5, 1.1.6
 - [x] Update `doc/logbook/epic&user stories.md` v1.22 — mark 1.1.4 [Partial], 1.1.5 [Not Implemented], 1.1.6 [Implemented]
 ## Session: Onboarding & Account Settings (Feb 5, 2026)
-- [x] Update `app/auth/confirm/route.ts` defaults for signup/recovery
+- [x] Update `app/auth/confirm/route.ts` defaults for
 - [x] Update `SignUpForm.tsx` success redirect
 - [x] Design "Finish Registration" mockup (`screen3f_finish_registration.html`)
 - [x] Sync `doc/design/db-schema.sql` with `full_name` and `avatar_url`
@@ -935,8 +935,26 @@
     - [x] Verify functionality and design matching
 - [x] Sync `application-analysis&design.md` with new settings architecture
 
-- [ ] **Next.js 16 & React 19 Framework Audit Fixes** <!-- id: 76 -->
-    - [ ] Refactor `lib/supabase/proxy.ts` to ensure session refresh on all routes (including public).
-    - [ ] Refactor `DeleteConfirmationModal.tsx` to remove synchronous `setState` in `useEffect` (use `framer-motion` or derived state).
-    - [ ] Refactor `useAuth.tsx` to align with React 19 state loading (avoid effect-based syncing).
-    - [ ] Address high-priority ESLint errors (`react/no-unescaped-entities`, `next/image`, `any` types).
+- [x] **Next.js 16 & React 19 Framework Audit Fixes** <!-- id: 76 -->
+    - [x] Refactor `lib/supabase/proxy.ts` to ensure session refresh on all routes (including public).
+    - [x] Refactor `DeleteConfirmationModal.tsx` to remove synchronous `setState` in `useEffect` (use `framer-motion` or derived state).
+    - [x] Refactor `useAuth.tsx` to align with React 19 state loading (avoid effect-based syncing).
+    - [x] Address high-priority ESLint errors (`react/no-unescaped-entities`, `next/image`, `any` types).
+
+- [x] **Guest Nudges & Session Favorites (Feb 27, 2026)** <!-- id: 77 -->
+    - [x] Create `useGuestFavorites` hook with localStorage persistence.
+    - [x] Update `SongCard.tsx` to handle guest favorites with nudge toasts.
+    - [x] Create `JoinCircleModal.tsx` for soft-gating guest contributions.
+    - [x] Update `SongForm.tsx` to show join modal on submit for guests.
+    - [x] Update `AccessDenied.tsx` with guest vs. wrong-owner variants.
+    - [x] Create `GuestBanner.tsx` and integrate into library pages.
+    - [x] Implement guest-accessible Playlists page with "Your Hearth" section.
+    - [x] Create `mergeGuestFavorites` server action and `PostAuthHandler` to trigger it.
+    - [x] Update documentation (Epics & User Stories).
+
+- [x] **DB Schema & Index Alignment (Feb 27, 2026)**
+    - [x] Sync `docs/design/db-schema.sql` with migrations (Columns: `is_public`, `has_chords`, `has_melody`, `icon_name`).
+    - [x] Fix index consistency in migration `20260227000000_add_partial_public_indexes.sql`.
+    - [x] Update RLS policies in `db-schema.sql` to match production migrations.
+    - [x] Verify fresh-install validity of consolidated SQL script.
+    - [x] Create dedicated worktree `.claude/worktrees/fix-db-schema-index-sync` for implementation.
