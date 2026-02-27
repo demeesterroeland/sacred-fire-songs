@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useState } from 'react';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Reorder, useDragControls } from 'framer-motion';
 import { GripVertical, Trash2, Music, ChevronLeft, Save, Loader2 } from 'lucide-react';
 import Link from 'next/link';
@@ -9,9 +9,7 @@ import { Setlist, SetlistItem } from '@/types';
 import { removeSongFromSetlist, updateSetlistItemOrder, getSetlistDetail } from '@/app/actions/setlists';
 import { SONG_KEYS } from '@/lib/songs/queryKeys';
 import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 
 interface SetlistEditorProps {
     initialSetlist: Setlist;
@@ -19,27 +17,29 @@ interface SetlistEditorProps {
 
 export default function SetlistEditor({ initialSetlist }: SetlistEditorProps) {
     const queryClient = useQueryClient();
-    const router = useRouter();
 
-    const { data: setlist, isLoading } = useQuery({
+    const { data: setlist } = useQuery({
         queryKey: SONG_KEYS.setlistDetail(initialSetlist.id),
         queryFn: async () => {
             const result = await getSetlistDetail(initialSetlist.id);
             if ('error' in result) throw new Error(result.error);
-            return result.setlist as Setlist;
+            return result.setlist;
         },
         initialData: initialSetlist,
         staleTime: 60 * 60 * 1000, // 1 hour
     });
 
     const [items, setItems] = useState<SetlistItem[]>(setlist.items || []);
+    const [prevItemsFromSetlist, setPrevItemsFromSetlist] = useState<SetlistItem[] | undefined>(setlist.items);
     const [isSaving, setIsSaving] = useState(false);
     const [hasChanges, setHasChanges] = useState(false);
 
-    useEffect(() => {
+    // Reset items if setlist data from query changes
+    if (setlist.items !== prevItemsFromSetlist) {
         setItems(setlist.items || []);
+        setPrevItemsFromSetlist(setlist.items);
         setHasChanges(false);
-    }, [setlist.items]);
+    }
 
     const handleReorder = (newOrder: SetlistItem[]) => {
         setItems(newOrder);
@@ -131,9 +131,18 @@ export default function SetlistEditor({ initialSetlist }: SetlistEditorProps) {
     );
 }
 
+interface SongWithComposition {
+    version_name: string;
+    key?: string | null;
+    capo: number;
+    composition?: {
+        title: string;
+    };
+}
+
 function ReorderItem({ item, onRemove }: { item: SetlistItem; onRemove: () => void }) {
     const controls = useDragControls();
-    const song = item.song_version;
+    const song = item.song_version as unknown as SongWithComposition;
 
     return (
         <Reorder.Item
@@ -152,7 +161,7 @@ function ReorderItem({ item, onRemove }: { item: SetlistItem; onRemove: () => vo
             <div className="flex-1 min-w-0">
                 <h3 className="font-bold text-gray-100 truncate">
                     {song?.version_name === 'Standard' ? '' : `[${song?.version_name}] `}
-                    {(song as any)?.composition?.title || 'Unknown Song'}
+                    {song?.composition?.title || 'Unknown Song'}
                 </h3>
                 <p className="text-xs text-gray-500">Key: {song?.key || '-'} · Capo: {song?.capo || '0'}</p>
             </div>

@@ -3,6 +3,8 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 
+import { Setlist } from '@/types';
+
 export async function createSetlist(title: string, description?: string): Promise<{ success: true; id: string } | { error: string }> {
     if (!title) {
         return { error: 'Title is required' };
@@ -34,7 +36,7 @@ export async function createSetlist(title: string, description?: string): Promis
     return { success: true, id: data.id };
 }
 
-export async function getSetlists(): Promise<{ success: true; setlists: any[] } | { error: string }> {
+export async function getSetlists(): Promise<{ success: true; setlists: Setlist[] } | { error: string }> {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -52,10 +54,10 @@ export async function getSetlists(): Promise<{ success: true; setlists: any[] } 
         return { error: error.message };
     }
 
-    return { success: true, setlists: data };
+    return { success: true, setlists: data as Setlist[] };
 }
 
-export async function getSetlistDetail(id: string): Promise<{ success: true; setlist: any } | { error: string }> {
+export async function getSetlistDetail(id: string): Promise<{ success: true; setlist: Setlist } | { error: string }> {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -83,12 +85,14 @@ export async function getSetlistDetail(id: string): Promise<{ success: true; set
         return { error: error.message };
     }
 
+    const setlist = data as unknown as Setlist;
+
     // Sort items by order_index manually
-    if (data.items) {
-        data.items.sort((a: any, b: any) => a.order_index - b.order_index);
+    if (setlist.items) {
+        setlist.items.sort((a, b) => a.order_index - b.order_index);
     }
 
-    return { success: true, setlist: data };
+    return { success: true, setlist };
 }
 
 export async function addSongToSetlist(setlistId: string, songVersionId: string): Promise<{ success: true } | { error: string }> {

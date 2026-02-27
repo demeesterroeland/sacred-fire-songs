@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { notFound, redirect } from 'next/navigation';
 import SetlistEditor from '@/components/playlists/SetlistEditor';
-import { Setlist } from '@/types';
+import { Setlist, SetlistItem } from '@/types';
 
 export default async function SetlistPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = await params;
@@ -33,10 +33,12 @@ export default async function SetlistPage({ params }: { params: Promise<{ id: st
         return notFound();
     }
 
-    // Sort items by order_index manually if Postgres didn't (it should be handled in select but let's be safe)
+    // Sort items by order_index manually
+    const sortedItems = ((setlistData.items as unknown as SetlistItem[]) || []).sort((a, b) => a.order_index - b.order_index);
+
     const setlist = {
         ...setlistData,
-        items: (setlistData.items || []).sort((a: any, b: any) => a.order_index - b.order_index)
+        items: sortedItems
     } as unknown as Setlist;
 
     return (

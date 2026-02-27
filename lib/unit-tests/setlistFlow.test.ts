@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, Mock } from 'vitest';
 import { getSetlists, createSetlist, getSetlistDetail } from '@/app/actions/setlists';
 
 // Mock server actions
@@ -18,7 +18,7 @@ describe('Setlist Data Flow', () => {
 
     it('successfully fetches setlists', async () => {
         const mockSetlists = [{ id: '1', title: 'Test Setlist' }];
-        (getSetlists as any).mockResolvedValue({ success: true, setlists: mockSetlists });
+        (getSetlists as Mock).mockResolvedValue({ success: true, setlists: mockSetlists });
 
         const result = await getSetlists();
         expect(result).toEqual({ success: true, setlists: mockSetlists });
@@ -26,7 +26,7 @@ describe('Setlist Data Flow', () => {
     });
 
     it('successfully creates a setlist', async () => {
-        (createSetlist as any).mockResolvedValue({ success: true, id: 'new-id' });
+        (createSetlist as Mock).mockResolvedValue({ success: true, id: 'new-id' });
 
         const result = await createSetlist('New Title', 'New Description');
         expect(result).toEqual({ success: true, id: 'new-id' });
@@ -35,7 +35,7 @@ describe('Setlist Data Flow', () => {
 
     it('successfully fetches setlist detail', async () => {
         const mockDetail = { id: '1', title: 'Test', items: [] };
-        (getSetlistDetail as any).mockResolvedValue({ success: true, setlist: mockDetail });
+        (getSetlistDetail as Mock).mockResolvedValue({ success: true, setlist: mockDetail });
 
         const result = await getSetlistDetail('1');
         expect(result).toEqual({ success: true, setlist: mockDetail });

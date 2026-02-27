@@ -7,7 +7,6 @@ import Link from 'next/link';
 import { SONG_KEYS } from '@/lib/songs/queryKeys';
 import { getSetlists, createSetlist } from '@/app/actions/setlists';
 import { Setlist } from '@/types';
-import { cn } from '@/lib/utils';
 import {
     Dialog,
     DialogContent,
@@ -49,7 +48,7 @@ function SongCountSubtitle({ counts, emptyLabel }: { counts?: SongCounts; emptyL
     );
 }
 
-export default function SetlistManager({ initialSetlists = [] }: { initialSetlists?: any[] }) {
+export default function SetlistManager({ initialSetlists = [] }: { initialSetlists?: Setlist[] }) {
     const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
     const [newTitle, setNewTitle] = useState('');
     const [newDescription, setNewDescription] = useState('');
@@ -84,7 +83,6 @@ export default function SetlistManager({ initialSetlists = [] }: { initialSetlis
         },
     });
 
-    const myFavorites = setlists?.find(s => s.title === 'My Favorites');
     const otherSetlists = (setlists ?? []).filter(s => s.title !== 'My Favorites');
 
     const handleCreateSubmit = (e: React.FormEvent) => {

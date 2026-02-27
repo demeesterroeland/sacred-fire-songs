@@ -17,7 +17,6 @@ export default function YourHearth() {
         },
     });
 
-    const myFavorites = setlists?.find(s => s.title === 'My Favorites');
     const otherSetlists = (setlists ?? []).filter(s => s.title !== 'My Favorites');
 
     if (isLoading) {
