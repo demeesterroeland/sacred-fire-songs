@@ -47,3 +47,4 @@ SUPABASE_LOCAL.md
 # git worktrees
 .worktrees/
 .claude/worktrees/
+.worktrees/
