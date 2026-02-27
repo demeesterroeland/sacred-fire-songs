@@ -27,3 +27,14 @@ export const SONG_KEYS = {
     /** Taxonomy / category tree */
     taxonomy: () => ['taxonomy'] as const,
 } as const;
+
+/**
+ * React Query key definitions for playlists (setlists).
+ */
+export const PLAYLIST_KEYS = {
+    /** All user-created playlists (excludes smart playlists) for a user */
+    list: (userId: string) => ['playlists', userId] as const,
+
+    /** Playlist IDs that contain a given composition */
+    containingComposition: (compositionId: string) => ['playlists', 'containing', compositionId] as const,
+} as const;
