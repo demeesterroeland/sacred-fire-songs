@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ListMusic, Disc3, Mic2, Plus } from 'lucide-react';
+import { ListMusic, Disc3, Mic2, Plus, LogIn } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 
 const tabs = [
@@ -38,11 +38,26 @@ export default function LibraryTabs() {
                 })}
             </div>
 
-            {isPlaylists && user && (
-                <button className="flex items-center gap-2 bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-xl font-bold text-sm transition-all shadow-lg shadow-red-900/20 active:scale-95">
-                    <Plus className="w-4 h-4" />
-                    Create Playlist
-                </button>
+            {isPlaylists && (
+                <div className="flex flex-col items-end gap-1">
+                    <button
+                        disabled={!user}
+                        className={`flex items-center gap-2 px-4 py-2 rounded-xl font-bold text-sm transition-all ${
+                            user
+                                ? 'bg-red-600 hover:bg-red-500 text-white shadow-lg shadow-red-900/20 active:scale-95'
+                                : 'bg-gray-800 text-gray-500 cursor-not-allowed opacity-60'
+                        }`}
+                    >
+                        <Plus className="w-4 h-4" />
+                        Create Playlist
+                    </button>
+                    {!user && (
+                        <Link href="/auth/login" className="flex items-center gap-1 text-[10px] text-gray-500 hover:text-gray-300 transition-colors">
+                            <LogIn aria-hidden="true" className="w-2.5 h-2.5" />
+                            Sign in to create
+                        </Link>
+                    )}
+                </div>
             )}
         </div>
     );

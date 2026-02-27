@@ -1,5 +1,6 @@
-<!-- Screen 16: Playlists — v2.1 (2026-02-27) -->
+<!-- Screen 16: Playlists — v2.2 (2026-02-27) -->
 <!-- Changelog:
+  v2.2 (2026-02-27) — Guest view shows disabled Create Playlist button with Sign in hint; removed separate sign-in nudge card from guest content
   v2.1 (2026-02-27) — Create Playlist button moved inline with library tabs; sign-in nudge moved above Smart Playlists in guest view; My Songs & My Drafts are real links (no Coming Soon)
   v2.0 (2026-02-27) — Full rewrite: guest view + authenticated view with toggle bar
   v1.0 (initial)    — Single authenticated view with basic playlist grid
@@ -173,6 +174,19 @@
             Artists
           </a>
         </div>
+        <!-- Guest: disabled button + sign-in hint -->
+        <div id="tabs-create-guest" class="flex flex-col items-end gap-1">
+          <button disabled
+            class="flex items-center gap-2 bg-gray-800 text-gray-500 px-4 py-2 rounded-xl font-bold text-sm opacity-60 cursor-not-allowed">
+            <i data-lucide="plus" class="w-4 h-4"></i>
+            Create Playlist
+          </button>
+          <a href="#" class="flex items-center gap-1 text-[10px] text-gray-500 hover:text-gray-300 transition-colors">
+            <i data-lucide="log-in" class="w-2.5 h-2.5"></i>
+            Sign in to create
+          </a>
+        </div>
+        <!-- Auth: active button -->
         <button id="tabs-create-btn" style="display:none"
           class="flex items-center gap-2 bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-xl font-bold text-sm transition-all shadow-lg shadow-red-900/20 active:scale-95">
           <i data-lucide="plus" class="w-4 h-4"></i>
@@ -185,21 +199,6 @@
     <!-- GUEST VIEW                                                 -->
     <!-- ========================================================= -->
     <div id="guest-view" class="px-8 pb-8 max-w-5xl mx-auto">
-
-      <!-- Sign-in nudge — above the fold -->
-      <div class="mb-8">
-        <a href="#"
-          class="flex items-center gap-3 bg-gray-800/60 border border-gray-700/60 hover:border-gray-600 hover:bg-gray-800 p-4 rounded-2xl transition-all group">
-          <div class="w-9 h-9 bg-gray-700/60 rounded-xl flex items-center justify-center shrink-0">
-            <i data-lucide="log-in" class="w-4 h-4 text-gray-300"></i>
-          </div>
-          <div class="flex-1 min-w-0">
-            <p class="text-sm font-semibold text-gray-200">Sign in to manage your playlists</p>
-            <p class="text-xs text-gray-500 mt-0.5">Create setlists, save favorites, and more</p>
-          </div>
-          <span class="text-gray-500 text-sm">→</span>
-        </a>
-      </div>
 
       <!-- Section 1: Smart Playlists (Guest) -->
       <div class="mb-8">
@@ -453,6 +452,7 @@
     function showView(view) {
       document.getElementById('guest-view').style.display = view === 'guest' ? '' : 'none';
       document.getElementById('auth-view').style.display = view === 'auth' ? '' : 'none';
+      document.getElementById('tabs-create-guest').style.display = view === 'guest' ? '' : 'none';
       document.getElementById('tabs-create-btn').style.display = view === 'auth' ? '' : 'none';
       document.getElementById('btn-guest').className = view === 'guest'
         ? 'px-4 py-1.5 rounded-full text-sm font-bold transition-all bg-white text-gray-950'
