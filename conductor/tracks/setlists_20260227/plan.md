@@ -35,7 +35,7 @@
 - [x] Task: Ensure offline persistence [22bfed2]
     - [ ] Write integration tests for offline setlist access
     - [ ] Configure React Query cache for setlists
-- [ ] Task: Documentation & Cleanup
+- [x] Task: Documentation & Cleanup [d023f39]
     - [ ] Update User Guide with setlist instructions
     - [ ] Final code cleanup and linting
 - [ ] Task: Conductor - User Manual Verification 'Offline & Final Polish' (Protocol in workflow.md)
