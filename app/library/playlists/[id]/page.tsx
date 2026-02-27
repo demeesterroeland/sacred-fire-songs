@@ -41,7 +41,7 @@ export default async function SetlistPage({ params }: { params: Promise<{ id: st
 
     return (
         <div className="p-4 md:p-8">
-            <SetlistEditor setlist={setlist} />
+            <SetlistEditor initialSetlist={setlist} />
         </div>
     );
 }

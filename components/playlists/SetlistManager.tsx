@@ -63,6 +63,7 @@ export default function SetlistManager({ initialSetlists = [] }: { initialSetlis
             return result.setlists;
         },
         initialData: initialSetlists,
+        staleTime: 60 * 60 * 1000, // 1 hour
     });
 
     const createMutation = useMutation({

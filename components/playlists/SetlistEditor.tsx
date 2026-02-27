@@ -1,28 +1,44 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Reorder, useDragControls } from 'framer-motion';
 import { GripVertical, Trash2, Music, ChevronLeft, Save, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 import { Setlist, SetlistItem } from '@/types';
-import { removeSongFromSetlist, updateSetlistItemOrder } from '@/app/actions/setlists';
+import { removeSongFromSetlist, updateSetlistItemOrder, getSetlistDetail } from '@/app/actions/setlists';
+import { SONG_KEYS } from '@/lib/songs/queryKeys';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 interface SetlistEditorProps {
-    setlist: Setlist;
+    initialSetlist: Setlist;
 }
 
-export default function SetlistEditor({ setlist }: SetlistEditorProps) {
+export default function SetlistEditor({ initialSetlist }: SetlistEditorProps) {
+    const queryClient = useQueryClient();
+    const router = useRouter();
+
+    const { data: setlist, isLoading } = useQuery({
+        queryKey: SONG_KEYS.setlistDetail(initialSetlist.id),
+        queryFn: async () => {
+            const result = await getSetlistDetail(initialSetlist.id);
+            if ('error' in result) throw new Error(result.error);
+            return result.setlist as Setlist;
+        },
+        initialData: initialSetlist,
+        staleTime: 60 * 60 * 1000, // 1 hour
+    });
+
     const [items, setItems] = useState<SetlistItem[]>(setlist.items || []);
     const [isSaving, setIsSaving] = useState(false);
     const [hasChanges, setHasChanges] = useState(false);
-    const router = useRouter();
 
     useEffect(() => {
         setItems(setlist.items || []);
+        setHasChanges(false);
     }, [setlist.items]);
 
     const handleReorder = (newOrder: SetlistItem[]) => {
@@ -38,7 +54,7 @@ export default function SetlistEditor({ setlist }: SetlistEditorProps) {
         if ('error' in result) {
             toast.error(result.error);
         } else {
-            setItems(prev => prev.filter(i => i.id !== itemId));
+            queryClient.invalidateQueries({ queryKey: SONG_KEYS.setlistDetail(setlist.id) });
             toast.success('Removed from playlist');
         }
     };
@@ -56,9 +72,9 @@ export default function SetlistEditor({ setlist }: SetlistEditorProps) {
         if ('error' in result) {
             toast.error(result.error);
         } else {
+            queryClient.invalidateQueries({ queryKey: SONG_KEYS.setlistDetail(setlist.id) });
             toast.success('Order saved to the hearth');
             setHasChanges(false);
-            router.refresh();
         }
     };
 

@@ -55,6 +55,42 @@ export async function getSetlists(): Promise<{ success: true; setlists: any[] } 
     return { success: true, setlists: data };
 }
 
+export async function getSetlistDetail(id: string): Promise<{ success: true; setlist: any } | { error: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        return { error: 'Not authenticated' };
+    }
+
+    const { data, error } = await supabase
+        .from('setlists')
+        .select(`
+            *,
+            items:setlist_items(
+                *,
+                song_version:song_versions(
+                    *,
+                    composition:compositions(title)
+                )
+            )
+        `)
+        .eq('id', id)
+        .eq('owner_id', user.id)
+        .single();
+
+    if (error) {
+        return { error: error.message };
+    }
+
+    // Sort items by order_index manually
+    if (data.items) {
+        data.items.sort((a: any, b: any) => a.order_index - b.order_index);
+    }
+
+    return { success: true, setlist: data };
+}
+
 export async function addSongToSetlist(setlistId: string, songVersionId: string): Promise<{ success: true } | { error: string }> {
     if (!setlistId || !songVersionId) {
         return { error: 'setlistId and songVersionId are required' };
