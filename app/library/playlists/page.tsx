@@ -40,7 +40,7 @@ function GuestView() {
                             <p className="text-xs text-gray-500 mt-0.5">Your favorited songs, always with you</p>
                         </div>
                         <div className="flex items-center gap-1.5 shrink-0">
-                            <Lock className="w-3 h-3 text-gray-600" />
+                            <Lock aria-hidden="true" className="w-3 h-3 text-gray-600" />
                             <span className="text-[10px] text-gray-600 font-medium">Members only</span>
                         </div>
                     </div>
@@ -55,7 +55,7 @@ function GuestView() {
                             <p className="text-xs text-gray-500 mt-0.5">Songs you've contributed to the library</p>
                         </div>
                         <div className="flex items-center gap-1.5 shrink-0">
-                            <Lock className="w-3 h-3 text-gray-600" />
+                            <Lock aria-hidden="true" className="w-3 h-3 text-gray-600" />
                             <span className="text-[10px] text-gray-600 font-medium">Members only</span>
                         </div>
                     </div>
@@ -70,7 +70,7 @@ function GuestView() {
                             <p className="text-xs text-gray-500 mt-0.5">Your private work-in-progress songs</p>
                         </div>
                         <div className="flex items-center gap-1.5 shrink-0">
-                            <Lock className="w-3 h-3 text-gray-600" />
+                            <Lock aria-hidden="true" className="w-3 h-3 text-gray-600" />
                             <span className="text-[10px] text-gray-600 font-medium">Members only</span>
                         </div>
                     </div>
@@ -118,7 +118,8 @@ function GuestView() {
                             <div className="w-12 h-12 bg-gray-800 rounded-xl flex items-center justify-center">
                                 <Flame className="w-6 h-6 text-orange-500" />
                             </div>
-                            <Lock className="absolute -top-1 -right-1 w-3 h-3 text-gray-500" />
+                            <Lock aria-hidden="true" className="absolute -top-1 -right-1 w-3 h-3 text-gray-500" />
+                            <span className="sr-only">Members only</span>
                         </div>
                         <div>
                             <h3 className="font-bold text-gray-100">Yage Ceremony 2024</h3>
@@ -130,7 +131,8 @@ function GuestView() {
                             <div className="w-12 h-12 bg-gray-800 rounded-xl flex items-center justify-center">
                                 <Droplets className="w-6 h-6 text-blue-500" />
                             </div>
-                            <Lock className="absolute -top-1 -right-1 w-3 h-3 text-gray-500" />
+                            <Lock aria-hidden="true" className="absolute -top-1 -right-1 w-3 h-3 text-gray-500" />
+                            <span className="sr-only">Members only</span>
                         </div>
                         <div>
                             <h3 className="font-bold text-gray-100">Temazcal — Water Songs</h3>
