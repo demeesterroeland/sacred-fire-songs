@@ -2195,3 +2195,28 @@ Performed a comprehensive technical audit of the codebase against Next.js 16 and
 ### 3. Documentation & Task Management
 - **Master Tasks**: Appended a new "Next.js 16 & React 19 Framework Audit Fixes" section to the logbook to track architectural debt.
 - **Walkthrough**: Synchronized the project history with the latest `feat/onboarding-settings-ux` developments.
+# Walkthrough: DB Schema Sync & Index Fix
+
+I have synchronized the technical documentation with the actual database migrations and fixed internal inconsistencies in the latest settlement migration.
+
+## Changes Made
+
+### Technical Documentation
+#### [MODIFY] [db-schema.sql](file:///home/roeland/Projects/sacred-fire-songs/docs/design/db-schema.sql)
+- **Synchronized Tables**: Added `is_public`, `has_chords`, and `has_melody` to `public.compositions` and `icon_name` to `public.categories`.
+- **Updated RLS Policies**: Refined policies to check for `is_public = true` for public access, mirroring production migrations.
+- **Optimized Indexes**: Updated the alphabetical title index to be a partial index (`WHERE is_public = true`).
+
+### Migrations
+#### [MODIFY] [20260227000000_add_partial_public_indexes.sql](file:///home/roeland/Projects/sacred-fire-songs/supabase/migrations/20260227000000_add_partial_public_indexes.sql)
+- **Index Refinement**: Added `WHERE is_public = true` to `idx_compositions_title_alphabetical` for consistency with other partial public indexes.
+- **Documentation Fix**: Corrected the comment from "Composite index" to "Partial index".
+
+## Verification Results
+
+### Consistency Check
+- Verified that all new columns used in indexes or policies are defined in the tables *before* they are referenced.
+- Confirmed that RLS policies in `db-schema.sql` now accurately reflect the conditional access added in January/February migration cycles.
+
+### Git Branch
+- All changes committed to branch `fix/db-schema-index-sync` in worktree `.claude/worktrees/fix-db-schema-index-sync`.
