@@ -13,7 +13,7 @@ export default function NotFound() {
 
       <h1 className="text-3xl font-bold text-white mb-4">Song Not Found</h1>
       <p className="text-gray-400 max-w-[280px] mb-12 leading-relaxed">
-        The medicine you're looking for seems to have wandered into the forest.
+        The medicine you&apos;re looking for seems to have wandered into the forest.
       </p>
 
       <Link

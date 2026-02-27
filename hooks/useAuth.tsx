@@ -43,15 +43,11 @@ export const useAuth = () => {
     const [user, setUser] = useState<AuthUser | null>(null);
     const [loading, setLoading] = useState(true);
     const [mockRole, setMockRole] = useState<string | null>(() => {
-        if (typeof window !== 'undefined') {
-            return localStorage.getItem('mockUserRole');
-        }
-        return null;
+        if (typeof window === 'undefined') return null;
+        return localStorage.getItem('mockUserRole');
     });
 
     const loadUser = async (currentMockRole: string | null) => {
-        setLoading(true);
-
         // A. If Mock Role is active and valid, use it
         if (currentMockRole && MOCK_USERS[currentMockRole as keyof typeof MOCK_USERS]) {
             const mockData = MOCK_USERS[currentMockRole as keyof typeof MOCK_USERS];
@@ -92,22 +88,43 @@ export const useAuth = () => {
         setLoading(false);
     };
 
-    // Initialize state
+    // Initialize state and handle auth events
     useEffect(() => {
-        const storedMock = mockRole;
+        let mounted = true;
+        const supabase = createClient();
 
-        loadUser(storedMock);
+        // Listen for Supabase auth state changes
+        const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+            if (mounted && !localStorage.getItem('mockUserRole')) {
+                if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+                    loadUser(null);
+                } else if (event === 'SIGNED_OUT') {
+                    setUser(null);
+                    setLoading(false);
+                }
+            }
+        });
+
+        // Load user immediately on mount if not already loading/loaded
+        loadUser(mockRole);
 
         // Listen for custom event to trigger re-render on role switch
         const handleRoleChange = () => {
-            const newRole = localStorage.getItem('mockUserRole');
-            setMockRole(newRole);
-            loadUser(newRole);
+            if (mounted) {
+                const newRole = localStorage.getItem('mockUserRole');
+                setMockRole(newRole);
+                loadUser(newRole);
+            }
         };
 
         window.addEventListener('auth-role-change', handleRoleChange);
-        return () => window.removeEventListener('auth-role-change', handleRoleChange);
-    }, []);
+        
+        return () => {
+            mounted = false;
+            subscription.unsubscribe();
+            window.removeEventListener('auth-role-change', handleRoleChange);
+        };
+    }, [mockRole]);
 
 
 

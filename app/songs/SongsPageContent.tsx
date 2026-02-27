@@ -52,7 +52,7 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy }: Song
             if (!setlist) return new Set<string>();
             const { data: items } = await supabase
                 .from('setlist_items')
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                 
                 .select('song_versions(composition_id)')
                 .eq('setlist_id', setlist.id);
             return new Set<string>(

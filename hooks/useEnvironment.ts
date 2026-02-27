@@ -5,18 +5,16 @@ import { useState, useEffect } from 'react';
 export type Environment = 'development' | 'preview' | null;
 
 export function useEnvironment() {
-  const [env, setEnv] = useState<Environment>(null);
-
-  useEffect(() => {
+  const [env] = useState<Environment>(() => {
+    if (typeof window === 'undefined') return null;
+    
     const vercelEnv = process.env.NEXT_PUBLIC_VERCEL_ENV;
     const isLocal = process.env.NODE_ENV === "development";
 
-    if (vercelEnv === "preview") {
-      setEnv("preview");
-    } else if (isLocal) {
-      setEnv("development");
-    }
-  }, []);
+    if (vercelEnv === "preview") return "preview";
+    if (isLocal) return "development";
+    return null;
+  });
 
   return env;
 }

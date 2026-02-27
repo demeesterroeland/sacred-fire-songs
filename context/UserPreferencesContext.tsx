@@ -20,28 +20,24 @@ const defaultPreferences: UserPreferences = {
 const UserPreferencesContext = createContext<UserPreferencesContextType | undefined>(undefined);
 
 export function UserPreferencesProvider({ children }: { children: React.ReactNode }) {
-  const [preferences, setPreferences] = useState<UserPreferences>(defaultPreferences);
-  const [isInitialized, setIsInitialized] = useState(false);
-
-  // Load from localStorage on mount
-  useEffect(() => {
+  const [preferences, setPreferences] = useState<UserPreferences>(() => {
+    if (typeof window === 'undefined') return defaultPreferences;
+    
     const saved = localStorage.getItem(STORAGE_KEY);
     if (saved) {
       try {
-        setPreferences(JSON.parse(saved));
+        return JSON.parse(saved);
       } catch (e) {
         console.error('Failed to parse user preferences:', e);
       }
     }
-    setIsInitialized(true);
-  }, []);
+    return defaultPreferences;
+  });
 
   // Save to localStorage on change
   useEffect(() => {
-    if (isInitialized) {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(preferences));
-    }
-  }, [preferences, isInitialized]);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(preferences));
+  }, [preferences]);
 
   const setPreference = <K extends keyof UserPreferences>(key: K, value: UserPreferences[K]) => {
     setPreferences((prev) => ({

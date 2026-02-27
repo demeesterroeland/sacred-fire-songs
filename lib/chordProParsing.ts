@@ -49,7 +49,7 @@ export function hasChords(text: string): boolean {
 
 export function convertChordsOverLyricsToChordPro(text: string): string {
     const lines = text.split('\n');
-    let outputLines: string[] = [];
+    const outputLines: string[] = [];
 
     for (let i = 0; i < lines.length; i++) {
         const currentLine = lines[i];
@@ -59,9 +59,9 @@ export function convertChordsOverLyricsToChordPro(text: string): string {
         // Also ensure next line isn't metadata (starts with {)
         if (isChordLine(currentLine) && nextLine !== undefined && !isChordLine(nextLine) && !nextLine.trim().startsWith('{')) {
             // Merge strategy
-            let mergedLine = "";
-            let lyricIndex = 0;
-            let lastChordIndex = 0;
+            const mergedLine = "";
+            const lyricIndex = 0;
+            const lastChordIndex = 0;
 
             // Identify chord positions in the current line
             // We need to preserve absolute positions relative to the start of the string to map to lyrics
@@ -79,9 +79,9 @@ export function convertChordsOverLyricsToChordPro(text: string): string {
             // We go through the lyrics char by char, or rather, insert chords at specific indices.
             // Easier: Reconstruct string by slicing lyrics.
 
-            let currentLyricIdx = 0;
-            let processedLyrics = nextLine;
-            let offset = 0; // Tracks insertions into lyrics
+            const currentLyricIdx = 0;
+            const processedLyrics = nextLine;
+            const offset = 0; // Tracks insertions into lyrics
 
             // Optimization: Map chords to their indices
             // We need to handle the case where lyrics are shorter than chord line (chords extend beyond text)
