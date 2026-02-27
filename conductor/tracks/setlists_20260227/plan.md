@@ -3,7 +3,7 @@
 **Track ID:** setlists_20260227
 
 ## Phase 1: Foundation & Data Layer
-- [ ] Task: Create Setlist server actions
+- [x] Task: Create Setlist server actions [bd5ac72]
     - [ ] Write unit tests for setlist creation and retrieval
     - [ ] Implement `createSetlist` server action
     - [ ] Implement `getSetlists` server action
