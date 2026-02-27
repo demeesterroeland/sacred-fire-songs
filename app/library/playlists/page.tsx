@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
-import { Heart, Plus, ListMusic, Flame, Droplets } from 'lucide-react';
+import { Heart, Plus, ListMusic, Flame, Droplets, Lock, LogIn, Globe, Users, PenLine, Music } from 'lucide-react';
 
 interface SongCounts {
     total: number;
@@ -21,11 +21,144 @@ function SongCountSubtitle({ counts, emptyLabel }: { counts: SongCounts; emptyLa
     );
 }
 
+function GuestView() {
+    return (
+        <div className="space-y-8">
+
+            {/* Section 1: Smart Playlists — locked */}
+            <div>
+                <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-3">Smart Playlists</p>
+                <div className="grid grid-cols-1 gap-3">
+
+                    {/* My Favorites */}
+                    <div className="bg-amber-500/8 border border-amber-500/20 p-4 rounded-2xl flex items-center gap-4 cursor-default">
+                        <div className="w-12 h-12 bg-amber-500/15 rounded-xl flex items-center justify-center shrink-0">
+                            <Heart className="w-6 h-6 text-amber-400 fill-amber-400" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <h3 className="font-bold text-gray-100">My Favorites</h3>
+                            <p className="text-xs text-gray-500 mt-0.5">Your favorited songs, always with you</p>
+                        </div>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                            <Lock className="w-3 h-3 text-gray-600" />
+                            <span className="text-[10px] text-gray-600 font-medium">Members only</span>
+                        </div>
+                    </div>
+
+                    {/* My Songs */}
+                    <div className="bg-red-500/8 border border-red-500/20 p-4 rounded-2xl flex items-center gap-4 cursor-default">
+                        <div className="w-12 h-12 bg-red-500/15 rounded-xl flex items-center justify-center shrink-0">
+                            <Music className="w-6 h-6 text-red-400" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <h3 className="font-bold text-gray-100">My Songs</h3>
+                            <p className="text-xs text-gray-500 mt-0.5">Songs you've contributed to the library</p>
+                        </div>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                            <Lock className="w-3 h-3 text-gray-600" />
+                            <span className="text-[10px] text-gray-600 font-medium">Members only</span>
+                        </div>
+                    </div>
+
+                    {/* My Drafts */}
+                    <div className="bg-gray-800/40 border border-gray-700/40 p-4 rounded-2xl flex items-center gap-4 cursor-default">
+                        <div className="w-12 h-12 bg-gray-700/40 rounded-xl flex items-center justify-center shrink-0">
+                            <PenLine className="w-6 h-6 text-gray-400" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                            <h3 className="font-bold text-gray-100">My Drafts</h3>
+                            <p className="text-xs text-gray-500 mt-0.5">Your private work-in-progress songs</p>
+                        </div>
+                        <div className="flex items-center gap-1.5 shrink-0">
+                            <Lock className="w-3 h-3 text-gray-600" />
+                            <span className="text-[10px] text-gray-600 font-medium">Members only</span>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            {/* Section 2: Public Playlists — coming soon + ghost demo */}
+            <div>
+                <div className="flex items-center gap-2 mb-3">
+                    <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Public Playlists</p>
+                    <span className="text-[9px] font-bold text-amber-500 bg-amber-500/10 border border-amber-500/20 rounded-full px-2 py-0.5 uppercase tracking-wider">Coming Soon</span>
+                </div>
+                <div className="grid grid-cols-1 gap-3 opacity-40 pointer-events-none select-none">
+                    <div className="bg-gray-900/40 p-4 rounded-2xl border border-gray-800 flex items-center gap-4">
+                        <div className="w-12 h-12 bg-blue-900/30 rounded-xl flex items-center justify-center shrink-0">
+                            <Globe className="w-6 h-6 text-blue-400" />
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-gray-100">Ceremony Night – Agua y Fuego</h3>
+                            <p className="text-xs text-gray-500 mt-0.5">Community Playlist · 14 songs</p>
+                        </div>
+                    </div>
+                    <div className="bg-gray-900/40 p-4 rounded-2xl border border-gray-800 flex items-center gap-4">
+                        <div className="w-12 h-12 bg-purple-900/30 rounded-xl flex items-center justify-center shrink-0">
+                            <Users className="w-6 h-6 text-purple-400" />
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-gray-100">Opening Circle Icaros</h3>
+                            <p className="text-xs text-gray-500 mt-0.5">Community Playlist · 9 songs</p>
+                        </div>
+                    </div>
+                </div>
+                <p className="text-xs text-gray-600 italic mt-3">
+                    Public playlists shared by community members — coming soon.
+                </p>
+            </div>
+
+            {/* Section 3: My Playlists — demo ghost + sign-in nudge */}
+            <div>
+                <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-3">My Playlists</p>
+                <div className="grid grid-cols-1 gap-3 opacity-40 pointer-events-none select-none">
+                    <div className="bg-gray-900/40 p-4 rounded-2xl border border-gray-800 flex items-center gap-4">
+                        <div className="relative w-12 h-12 shrink-0">
+                            <div className="w-12 h-12 bg-gray-800 rounded-xl flex items-center justify-center">
+                                <Flame className="w-6 h-6 text-orange-500" />
+                            </div>
+                            <Lock className="absolute -top-1 -right-1 w-3 h-3 text-gray-500" />
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-gray-100">Yage Ceremony 2024</h3>
+                            <p className="text-xs text-gray-500 mt-0.5">12 songs</p>
+                        </div>
+                    </div>
+                    <div className="bg-gray-900/40 p-4 rounded-2xl border border-gray-800 flex items-center gap-4">
+                        <div className="relative w-12 h-12 shrink-0">
+                            <div className="w-12 h-12 bg-gray-800 rounded-xl flex items-center justify-center">
+                                <Droplets className="w-6 h-6 text-blue-500" />
+                            </div>
+                            <Lock className="absolute -top-1 -right-1 w-3 h-3 text-gray-500" />
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-gray-100">Temazcal — Water Songs</h3>
+                            <p className="text-xs text-gray-500 mt-0.5">8 songs</p>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Single subtle sign-in nudge */}
+                <Link
+                    href="/auth/login"
+                    className="mt-4 flex items-center gap-2 text-sm text-gray-500 hover:text-gray-300 transition-colors group"
+                >
+                    <LogIn className="w-4 h-4 group-hover:text-gray-300 transition-colors" />
+                    Sign in to create and manage your playlists
+                    <span className="text-gray-600 group-hover:text-gray-400 transition-colors">→</span>
+                </Link>
+            </div>
+
+        </div>
+    );
+}
+
 export default async function PlaylistsPage() {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
-    if (!user) return null;
+    if (!user) return <GuestView />;
 
     // Fetch all user setlists
     const { data: setlists } = await supabase
