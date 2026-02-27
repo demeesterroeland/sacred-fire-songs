@@ -17,15 +17,21 @@ function writeIds(storage: Record<string, string>, ids: Set<string>) {
   storage[STORAGE_KEY] = JSON.stringify([...ids]);
 }
 
-function toggle(storage: Record<string, string>, id: string): { isFavorited: boolean; count: number } {
+function toggle(storage: Record<string, string>, id: string): { isFavorited: boolean; count: number; shouldNudge: boolean } {
   const ids = readIds(storage);
+  const wasAdding = !ids.has(id);
   if (ids.has(id)) {
     ids.delete(id);
   } else {
     ids.add(id);
   }
   writeIds(storage, ids);
-  return { isFavorited: ids.has(id), count: ids.size };
+  const shouldNudge = wasAdding && [1, 5].includes(ids.size);
+  return { isFavorited: ids.has(id), count: ids.size, shouldNudge };
+}
+
+function clear(storage: Record<string, string>) {
+  delete storage[STORAGE_KEY];
 }
 
 describe('guest favorites logic', () => {
@@ -64,6 +70,39 @@ describe('guest favorites logic', () => {
 
   it('handles corrupt storage gracefully', () => {
     storage[STORAGE_KEY] = 'not-valid-json{{{';
+    expect(readIds(storage).size).toBe(0);
+  });
+
+  it('signals nudge on 1st favorite', () => {
+    const result = toggle(storage, 'song-1');
+    expect(result.shouldNudge).toBe(true);
+  });
+
+  it('does not signal nudge on 2nd favorite', () => {
+    toggle(storage, 'song-1');
+    const result = toggle(storage, 'song-2');
+    expect(result.shouldNudge).toBe(false);
+  });
+
+  it('signals nudge on 5th favorite', () => {
+    toggle(storage, 'song-1');
+    toggle(storage, 'song-2');
+    toggle(storage, 'song-3');
+    toggle(storage, 'song-4');
+    const result = toggle(storage, 'song-5');
+    expect(result.shouldNudge).toBe(true);
+  });
+
+  it('does not signal nudge on removal', () => {
+    toggle(storage, 'song-1'); // adds (count=1, nudge)
+    const result = toggle(storage, 'song-1'); // removes
+    expect(result.shouldNudge).toBe(false);
+  });
+
+  it('clear removes all favorites', () => {
+    toggle(storage, 'song-1');
+    toggle(storage, 'song-2');
+    clear(storage);
     expect(readIds(storage).size).toBe(0);
   });
 });
