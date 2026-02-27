@@ -15,7 +15,8 @@ CREATE INDEX IF NOT EXISTS idx_setlists_is_public_true
 ON public.setlists (created_at DESC) 
 WHERE is_public = true;
 
--- 3. Composite index for composition titles
--- Speeds up the title-based sorting frequently used in the SongsPageContent.
+-- 3. Partial index for composition titles
+-- Speeds up the title-based sorting frequently used in the SongsPageContent for public songs.
 CREATE INDEX IF NOT EXISTS idx_compositions_title_alphabetical
-ON public.compositions (title ASC);
+ON public.compositions (title ASC)
+WHERE is_public = true;
