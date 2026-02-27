@@ -25,6 +25,21 @@ function GuestView() {
     return (
         <div className="space-y-8">
 
+            {/* Sign-in nudge — above the fold */}
+            <Link
+                href="/auth/login"
+                className="flex items-center gap-3 bg-gray-800/60 border border-gray-700/60 hover:border-gray-600 hover:bg-gray-800 p-4 rounded-2xl transition-all group"
+            >
+                <div className="w-9 h-9 bg-gray-700/60 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-gray-700 transition-colors">
+                    <LogIn aria-hidden="true" className="w-4 h-4 text-gray-300" />
+                </div>
+                <div className="flex-1 min-w-0">
+                    <p className="text-sm font-semibold text-gray-200 group-hover:text-white transition-colors">Sign in to manage your playlists</p>
+                    <p className="text-xs text-gray-500 mt-0.5">Create setlists, save favorites, and more</p>
+                </div>
+                <span aria-hidden="true" className="text-gray-500 group-hover:text-gray-300 transition-colors text-sm">→</span>
+            </Link>
+
             {/* Section 1: Smart Playlists — locked */}
             <div>
                 <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-3">Smart Playlists</p>
@@ -141,20 +156,6 @@ function GuestView() {
                     </div>
                 </div>
 
-                {/* Sign-in nudge — card style, not a primary button */}
-                <Link
-                    href="/auth/login"
-                    className="mt-4 flex items-center gap-3 bg-gray-800/60 border border-gray-700/60 hover:border-gray-600 hover:bg-gray-800 p-4 rounded-2xl transition-all group"
-                >
-                    <div className="w-9 h-9 bg-gray-700/60 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-gray-700 transition-colors">
-                        <LogIn aria-hidden="true" className="w-4 h-4 text-gray-300" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                        <p className="text-sm font-semibold text-gray-200 group-hover:text-white transition-colors">Sign in to manage your playlists</p>
-                        <p className="text-xs text-gray-500 mt-0.5">Create setlists, save favorites, and more</p>
-                    </div>
-                    <span aria-hidden="true" className="text-gray-500 group-hover:text-gray-300 transition-colors text-sm">→</span>
-                </Link>
             </div>
 
         </div>
