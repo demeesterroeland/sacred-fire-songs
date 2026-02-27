@@ -112,11 +112,16 @@ All tasks follow a strict lifecycle:
 1. **Push and Create Pull Request:**
    - Execute `git push -u origin feat/<track_id>`.
    - Execute `gh pr create --title "feat: <track_description>" --body "Implementation of track <track_id> complete. All tests passing and verified."`.
-   - **Announce:** "Created Pull Request for track `<track_id>`."
+   - **Action:** Provide the PR link to the user and ask: "**The Pull Request has been created. Would you like me to merge it now, or would you prefer to review it manually?**"
+   - **PAUSE** for response.
 
-2. **Merge Pull Request:**
-   - Execute `gh pr merge --squash --delete-branch`.
-   - **Announce:** "Merged and closed Pull Request for track `<track_id>`. Feature branch deleted from remote."
+2. **Merge Pull Request (Conditional):**
+   - If the user approves the merge:
+     - Execute `gh pr merge --squash --delete-branch`.
+     - **Announce:** "Merged and closed Pull Request for track `<track_id>`. Feature branch deleted from remote."
+   - If the user prefers to review manually or merge themselves:
+     - **Announce:** "Okay, I will leave the Pull Request open for your review. Please run `/conductor:implement` again when you are ready to finalize the registry update and cleanup."
+     - **HALT** implementation.
 
 3. **Cleanup Local Branch:**
    - Execute `git checkout main`.
