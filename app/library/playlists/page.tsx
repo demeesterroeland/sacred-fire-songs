@@ -234,29 +234,31 @@ export default async function PlaylistsPage() {
                         </div>
                     </Link>
 
-                    {/* My Songs — coming soon */}
-                    <div className="bg-red-500/8 border border-red-500/20 p-4 rounded-2xl flex items-center gap-4 cursor-default">
-                        <div className="w-12 h-12 bg-red-500/15 rounded-xl flex items-center justify-center shrink-0">
-                            <Music className="w-6 h-6 text-red-400" />
+                    {/* My Songs */}
+                    <Link href="/songs?mine=true">
+                        <div className="bg-red-500/8 border border-red-500/20 p-4 rounded-2xl flex items-center gap-4 group hover:bg-red-500/15 hover:border-red-500/35 transition-all hover:-translate-y-0.5">
+                            <div className="w-12 h-12 bg-red-500/15 rounded-xl flex items-center justify-center group-hover:bg-red-500/25 transition-colors shrink-0">
+                                <Music className="w-6 h-6 text-red-400" />
+                            </div>
+                            <div>
+                                <h3 className="font-bold text-gray-100 group-hover:text-white transition-colors">My Songs</h3>
+                                <p className="text-xs text-gray-500 mt-0.5">Songs you've contributed to the library</p>
+                            </div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                            <h3 className="font-bold text-gray-100">My Songs</h3>
-                            <p className="text-xs text-gray-500 mt-0.5">Songs you've contributed to the library</p>
-                        </div>
-                        <span className="text-[9px] font-bold text-amber-500 bg-amber-500/10 border border-amber-500/20 rounded-full px-2 py-0.5 uppercase tracking-wider shrink-0">Coming Soon</span>
-                    </div>
+                    </Link>
 
-                    {/* My Drafts — coming soon */}
-                    <div className="bg-gray-800/40 border border-gray-700/40 p-4 rounded-2xl flex items-center gap-4 cursor-default">
-                        <div className="w-12 h-12 bg-gray-700/40 rounded-xl flex items-center justify-center shrink-0">
-                            <PenLine className="w-6 h-6 text-gray-400" />
+                    {/* My Drafts */}
+                    <Link href="/songs?status=draft">
+                        <div className="bg-gray-800/40 border border-gray-700/40 p-4 rounded-2xl flex items-center gap-4 group hover:bg-gray-800/70 hover:border-gray-600/60 transition-all hover:-translate-y-0.5">
+                            <div className="w-12 h-12 bg-gray-700/40 rounded-xl flex items-center justify-center group-hover:bg-gray-700/60 transition-colors shrink-0">
+                                <PenLine className="w-6 h-6 text-gray-400 group-hover:text-gray-300 transition-colors" />
+                            </div>
+                            <div>
+                                <h3 className="font-bold text-gray-100 group-hover:text-white transition-colors">My Drafts</h3>
+                                <p className="text-xs text-gray-500 mt-0.5">Your private work-in-progress songs</p>
+                            </div>
                         </div>
-                        <div className="flex-1 min-w-0">
-                            <h3 className="font-bold text-gray-100">My Drafts</h3>
-                            <p className="text-xs text-gray-500 mt-0.5">Your private work-in-progress songs</p>
-                        </div>
-                        <span className="text-[9px] font-bold text-amber-500 bg-amber-500/10 border border-amber-500/20 rounded-full px-2 py-0.5 uppercase tracking-wider shrink-0">Coming Soon</span>
-                    </div>
+                    </Link>
                 </div>
             </div>
 
