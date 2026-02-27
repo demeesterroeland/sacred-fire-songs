@@ -1,5 +1,6 @@
-<!-- Screen 16: Playlists — v2.2 (2026-02-27) -->
+<!-- Screen 16: Playlists — v2.3 (2026-02-27) -->
 <!-- Changelog:
+  v2.3 (2026-02-27) — Aligned section order across guest and auth views: Smart Playlists → My Playlists → Public Playlists
   v2.2 (2026-02-27) — Guest view shows disabled Create Playlist button with Sign in hint; removed separate sign-in nudge card from guest content
   v2.1 (2026-02-27) — Create Playlist button moved inline with library tabs; sign-in nudge moved above Smart Playlists in guest view; My Songs & My Drafts are real links (no Coming Soon)
   v2.0 (2026-02-27) — Full rewrite: guest view + authenticated view with toggle bar
@@ -253,7 +254,41 @@
         </div>
       </div>
 
-      <!-- Section 2: Public Playlists (Guest) -->
+      <!-- Section 2: My Playlists (Guest) -->
+      <div class="mb-8">
+        <p class="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-3">My Playlists</p>
+
+        <!-- Ghost demo cards -->
+        <div class="grid grid-cols-1 gap-3 opacity-40 pointer-events-none select-none">
+
+          <!-- Ghost card: Yage Ceremony 2024 -->
+          <div class="bg-gray-900/40 p-4 rounded-2xl border border-gray-800 flex items-center gap-4">
+            <div class="w-12 h-12 bg-orange-500/10 rounded-xl flex items-center justify-center shrink-0">
+              <i data-lucide="flame" class="w-6 h-6 text-orange-500"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <h3 class="font-bold text-gray-100">Yage Ceremony 2024</h3>
+              <p class="text-xs text-gray-500 mt-0.5">12 songs</p>
+            </div>
+            <i data-lucide="lock" class="w-4 h-4 text-gray-600 shrink-0"></i>
+          </div>
+
+          <!-- Ghost card: Temazcal -->
+          <div class="bg-gray-900/40 p-4 rounded-2xl border border-gray-800 flex items-center gap-4">
+            <div class="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center shrink-0">
+              <i data-lucide="droplets" class="w-6 h-6 text-blue-400"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <h3 class="font-bold text-gray-100">Temazcal — Water Songs</h3>
+              <p class="text-xs text-gray-500 mt-0.5">8 songs</p>
+            </div>
+            <i data-lucide="lock" class="w-4 h-4 text-gray-600 shrink-0"></i>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Section 3: Public Playlists (Guest) -->
       <div class="mb-8">
         <div class="flex items-center gap-3 mb-3">
           <p class="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Public Playlists</p>
@@ -290,41 +325,6 @@
         </div>
 
         <p class="text-xs text-gray-600 italic mt-3">Public playlists shared by community members — coming soon.</p>
-      </div>
-
-      <!-- Section 3: My Playlists (Guest) -->
-      <div class="mb-8">
-        <p class="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-3">My Playlists</p>
-
-        <!-- Ghost demo cards -->
-        <div class="grid grid-cols-1 gap-3 opacity-40 pointer-events-none select-none mb-3">
-
-          <!-- Ghost card: Yage Ceremony 2024 -->
-          <div class="bg-gray-900/40 p-4 rounded-2xl border border-gray-800 flex items-center gap-4">
-            <div class="w-12 h-12 bg-orange-500/10 rounded-xl flex items-center justify-center shrink-0">
-              <i data-lucide="flame" class="w-6 h-6 text-orange-500"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-              <h3 class="font-bold text-gray-100">Yage Ceremony 2024</h3>
-              <p class="text-xs text-gray-500 mt-0.5">12 songs</p>
-            </div>
-            <i data-lucide="lock" class="w-4 h-4 text-gray-600 shrink-0"></i>
-          </div>
-
-          <!-- Ghost card: Temazcal -->
-          <div class="bg-gray-900/40 p-4 rounded-2xl border border-gray-800 flex items-center gap-4">
-            <div class="w-12 h-12 bg-blue-500/10 rounded-xl flex items-center justify-center shrink-0">
-              <i data-lucide="droplets" class="w-6 h-6 text-blue-400"></i>
-            </div>
-            <div class="flex-1 min-w-0">
-              <h3 class="font-bold text-gray-100">Temazcal — Water Songs</h3>
-              <p class="text-xs text-gray-500 mt-0.5">8 songs</p>
-            </div>
-            <i data-lucide="lock" class="w-4 h-4 text-gray-600 shrink-0"></i>
-          </div>
-
-        </div>
-
       </div>
     </div>
     <!-- end #guest-view -->

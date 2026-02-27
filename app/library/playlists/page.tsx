@@ -78,38 +78,7 @@ function GuestView() {
                 </div>
             </div>
 
-            {/* Section 2: Public Playlists — coming soon + ghost demo */}
-            <div>
-                <div className="flex items-center gap-2 mb-3">
-                    <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Public Playlists</p>
-                    <span className="text-[9px] font-bold text-amber-500 bg-amber-500/10 border border-amber-500/20 rounded-full px-2 py-0.5 uppercase tracking-wider">Coming Soon</span>
-                </div>
-                <div className="grid grid-cols-1 gap-3 opacity-40 pointer-events-none select-none">
-                    <div className="bg-gray-900/40 p-4 rounded-2xl border border-gray-800 flex items-center gap-4">
-                        <div className="w-12 h-12 bg-blue-900/30 rounded-xl flex items-center justify-center shrink-0">
-                            <Globe className="w-6 h-6 text-blue-400" />
-                        </div>
-                        <div>
-                            <h3 className="font-bold text-gray-100">Ceremony Night – Agua y Fuego</h3>
-                            <p className="text-xs text-gray-500 mt-0.5">Community Playlist · 14 songs</p>
-                        </div>
-                    </div>
-                    <div className="bg-gray-900/40 p-4 rounded-2xl border border-gray-800 flex items-center gap-4">
-                        <div className="w-12 h-12 bg-purple-900/30 rounded-xl flex items-center justify-center shrink-0">
-                            <Users className="w-6 h-6 text-purple-400" />
-                        </div>
-                        <div>
-                            <h3 className="font-bold text-gray-100">Opening Circle Icaros</h3>
-                            <p className="text-xs text-gray-500 mt-0.5">Community Playlist · 9 songs</p>
-                        </div>
-                    </div>
-                </div>
-                <p className="text-xs text-gray-600 italic mt-3">
-                    Public playlists shared by community members — coming soon.
-                </p>
-            </div>
-
-            {/* Section 3: My Playlists — demo ghost + sign-in nudge */}
+            {/* Section 2: My Playlists — demo ghost */}
             <div>
                 <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-3">My Playlists</p>
                 <div className="grid grid-cols-1 gap-3 opacity-40 pointer-events-none select-none">
@@ -140,7 +109,37 @@ function GuestView() {
                         </div>
                     </div>
                 </div>
+            </div>
 
+            {/* Section 3: Public Playlists — coming soon + ghost demo */}
+            <div>
+                <div className="flex items-center gap-2 mb-3">
+                    <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Public Playlists</p>
+                    <span className="text-[9px] font-bold text-amber-500 bg-amber-500/10 border border-amber-500/20 rounded-full px-2 py-0.5 uppercase tracking-wider">Coming Soon</span>
+                </div>
+                <div className="grid grid-cols-1 gap-3 opacity-40 pointer-events-none select-none">
+                    <div className="bg-gray-900/40 p-4 rounded-2xl border border-gray-800 flex items-center gap-4">
+                        <div className="w-12 h-12 bg-blue-900/30 rounded-xl flex items-center justify-center shrink-0">
+                            <Globe className="w-6 h-6 text-blue-400" />
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-gray-100">Ceremony Night – Agua y Fuego</h3>
+                            <p className="text-xs text-gray-500 mt-0.5">Community Playlist · 14 songs</p>
+                        </div>
+                    </div>
+                    <div className="bg-gray-900/40 p-4 rounded-2xl border border-gray-800 flex items-center gap-4">
+                        <div className="w-12 h-12 bg-purple-900/30 rounded-xl flex items-center justify-center shrink-0">
+                            <Users className="w-6 h-6 text-purple-400" />
+                        </div>
+                        <div>
+                            <h3 className="font-bold text-gray-100">Opening Circle Icaros</h3>
+                            <p className="text-xs text-gray-500 mt-0.5">Community Playlist · 9 songs</p>
+                        </div>
+                    </div>
+                </div>
+                <p className="text-xs text-gray-600 italic mt-3">
+                    Public playlists shared by community members — coming soon.
+                </p>
             </div>
 
         </div>
