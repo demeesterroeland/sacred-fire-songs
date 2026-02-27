@@ -23,7 +23,7 @@
 - [x] Task: Conductor - User Manual Verification 'UI - Setlist Management' (Protocol in workflow.md) [07d1a69]
 
 ## Phase 3: UI - Setlist Editing & "Your Hearth"
-- [ ] Task: Implement `SetlistEditor` with reordering
+- [x] Task: Implement SetlistEditor with reordering [4c5a111]
     - [ ] Write unit tests for setlist reordering logic
     - [ ] Implement drag-and-drop reordering with `framer-motion`
 - [ ] Task: Integrate "Your Hearth" section
