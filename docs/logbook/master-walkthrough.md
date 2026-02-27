@@ -2148,3 +2148,27 @@ Refined the user experience and fixed persistence issues on the Account Settings
 
 ![Avatar Upload Recording](/home/roeland/.gemini/antigravity/brain/2e0f285d-652e-4a2d-8ebc-6265788e3cc8/final_toast_check_no_icon_top_center_1770251961913.webp)
 *Verification of the centered, icon-free toast message.*
+
+---
+
+## Session Update (Feb 27, 2026 - Onboarding & Framework Audit)
+
+### 1. Onboarding & Account Settings UX
+Finalized the user onboarding flow and account management interface to ensure a premium first-time experience.
+- **Finish Registration**: Implemented `FinishRegistrationForm.tsx` and the `/auth/finish-registration` route to collect user details (Full Name, Avatar) after signup.
+- **Account Settings**: 
+    - Refactored the settings page into a tabbed interface (Profile, Account, Privacy).
+    - Integrated **Supabase Storage** for avatar uploads.
+    - Added **Sonner** for high-quality toast notifications with a custom "Sacred Fire" (Emerald/Amber) theme.
+- **Visuals**: Applied consistent glassmorphism and flame aesthetics to all onboarding and settings components.
+
+### 2. Framework & Best Practice Audit
+Performed a comprehensive technical audit of the codebase against Next.js 16 and React 19 standards.
+- **Next.js 16 Alignment**: Verified that the project correctly uses `proxy.ts` (the new convention replacing `middleware.ts`) for network-level session management.
+- **React 19 Hooks**: Identified several "set-state-in-effect" anti-patterns (e.g., in `DeleteConfirmationModal.tsx` and `useAuth.tsx`) that trigger cascading renders.
+- **Supabase SSR**: Audited the `lib/supabase/proxy.ts` logic and identified a need to ensure session refreshing even on public routes to prevent premature session expiration.
+- **Automated Checks**: Ran a full suite of linting and type-checking, identifying 266 problems (mostly unused variables and `any` types).
+
+### 3. Documentation & Task Management
+- **Master Tasks**: Appended a new "Next.js 16 & React 19 Framework Audit Fixes" section to the logbook to track architectural debt.
+- **Walkthrough**: Synchronized the project history with the latest `feat/onboarding-settings-ux` developments.

@@ -1,6 +1,6 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 1.25
+**Version:** 1.26
 **Status:** Living Document
 **Date:** February 26, 2026
 
@@ -23,6 +23,9 @@
 | **1.23** | Feb 26, 2026 | Marked stories 1.3.2, 1.3.4, and 1.3.5 as [Implemented] (SoundCloud embed, YouTube embed, Screen Wake Lock). |
 | **1.24** | Feb 26, 2026 | Marked 2.3.1 as [Implemented] (category filtering); removed story 3.1.1 (social login — out of scope). |
 | **1.25** | Feb 26, 2026 | GH sync: added stories 1.2.2, 2.3.3; marked 2.3.2, 3.1.2, 4.4.1 as [Implemented]; closed GH #13; fixed GH #56 label (1.1.7→1.1.8). |
+| **1.26** | Feb 26, 2026 | Marked 1.1.4 as [Implemented]: delete icons on song cards in library view (owner/admin, hover-visible, top-right overlay) plus profiles RLS policies fix. |
+| **1.27** | Feb 26, 2026 | Marked 1.1.5 as [Implemented]: guest upload modal (Log In / Create Account) now shows when unauthenticated user clicks "Add Song". |
+| **1.28** | Feb 26, 2026 | Marked 1.1.4 as [Implemented]: delete icons on song cards in library view (owner/admin, hover-visible, top-right overlay) plus profiles RLS policies fix. |
 
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
@@ -79,8 +82,8 @@ Scenario: Admin deletes a song
   Then the song "Pachamama" should no longer appear in the list
 ```
 
-**Story 1.1.4: [Partial]** As a Member, I want to log in securely so that I can access personalized features.
-<!-- Login (magic link + password) works and redirects to Home. Edit/Delete controls visible on song detail page for owner/admin. Missing: Delete icons on song cards in the library view. -->
+**Story 1.1.4: [Implemented]** As a Member, I want to log in securely so that I can access personalized features.
+<!-- Login (magic link + password) works and redirects to Home. Edit/Delete controls visible on song detail page for owner/admin. Delete icons on song cards in the library view implemented (owner/admin, hover-visible top-right overlay). Profiles RLS policies added to fix role fetch. -->
 
 ```
 Scenario: Successful Admin Login

@@ -14,7 +14,7 @@ All project artifacts must stay 100% synchronized with the codebase.
 
 - Every code change must be reflected in `application-analysis&design.md`.
 - Before completing a task, verify the implementation against acceptance criteria in `epic&user stories.md`.
-- If a UI screen is modified, compare against the visual description in `doc/screens/screen*.html` mockups.
+- If a UI screen is modified, compare against the visual description in `docs/design/screens/screen*.html` mockups.
 - Propose specific edits to inconsistent files as soon as discrepancies are found.
 - Update version status in `application-analysis&design.md` and related docs if significant changes are made.
 - **Definition of Done**: A task is not "Done" until documentation, tests, and code are in 100% alignment.
@@ -29,28 +29,35 @@ The agent does NOT retain memory across conversations. To avoid data loss:
 | `master-tasks.md` | **READ first**, then append/merge |
 | `master-timetracking.md` | **READ first**, then update totals |
 
-- At the start of a session, **READ** files in `doc/logbook/` to initialize context.
+Implementation plans live in `docs/plans/YYYY-MM-DD-<feature>.md`.
+
+- At the start of a session, **READ** files in `docs/logbook/` to initialize context.
 - Run `/sync-artifacts` at the end of a session (before creating a PR or merging).
 - Never overwrite any of those files with an empty or partial list.
 
 ## Glob-Triggered Rules
 
-### When modifying `doc/*.{md,sql,html}`
+### When modifying `docs/**/*.{md,sql,html}`
 1. Increment the version number in the file header.
 2. Update the date to today.
 3. Add a new changelog entry.
 4. Use the `/update-doc-changelog` command for consistency.
 
 ### When modifying `supabase/migrations/*.sql`
-1. Update `doc/db-schema.sql` to reflect the changes.
+1. Update `docs/design/db-schema.sql` to reflect the changes.
 2. Use the `/update-schema` command if helpful.
-3. Keep `doc/db-schema.sql` valid as a single-file fresh-install setup script.
+3. Keep `docs/design/db-schema.sql` valid as a single-file fresh-install setup script.
 
 ## Supabase Patterns
 
 - Use `.maybeSingle()` (not `.single()`) when a row may not exist — `.single()` returns 406 if zero rows match.
 - Server-side queries belong in `lib/*/serverQueries.ts`; import `createClient` from `@/lib/supabase/server`.
 - Only import server queries from Server Components or Server Actions (never from client components).
+
+## Testing
+
+- Test runner: **vitest** — run with `npx vitest run <file>` (not Jest).
+- Unit tests live alongside source or in `lib/unit-tests/`.
 
 ## Available Custom Commands
 
@@ -62,7 +69,7 @@ The agent does NOT retain memory across conversations. To avoid data loss:
 | `/tutor` | Teaching-assistant mode (explains, doesn't code for you) |
 | `/create-issue` | Create a structured GitHub issue with Gherkin criteria |
 | `/start-story` | Start a user story: branch, UX check, and plan |
-| `/sync-artifacts` | Sync session artifacts to `/doc/logbook/` |
+| `/sync-artifacts` | Sync session artifacts to `docs/logbook/` |
 | `/audit` | Full consistency audit of all docs against the codebase |
 | `/update-doc-changelog` | Update version, date, and changelog in a doc file |
-| `/update-schema` | Sync `doc/db-schema.sql` with latest Supabase migrations |
+| `/update-schema` | Sync `docs/design/db-schema.sql` with latest Supabase migrations |

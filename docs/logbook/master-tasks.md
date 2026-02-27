@@ -934,3 +934,9 @@
     - [x] Debug Full Name persistence issue (RLS Policies)
     - [x] Verify functionality and design matching
 - [x] Sync `application-analysis&design.md` with new settings architecture
+
+- [ ] **Next.js 16 & React 19 Framework Audit Fixes** <!-- id: 76 -->
+    - [ ] Refactor `lib/supabase/proxy.ts` to ensure session refresh on all routes (including public).
+    - [ ] Refactor `DeleteConfirmationModal.tsx` to remove synchronous `setState` in `useEffect` (use `framer-motion` or derived state).
+    - [ ] Refactor `useAuth.tsx` to align with React 19 state loading (avoid effect-based syncing).
+    - [ ] Address high-priority ESLint errors (`react/no-unescaped-entities`, `next/image`, `any` types).
