@@ -28,7 +28,6 @@ export const metadata: Metadata = {
 import Header from "@/components/common/Header";
 import Sidebar from "@/components/common/Sidebar";
 import QueryProvider from "@/components/providers/QueryProvider";
-import PostAuthHandler from "@/components/providers/PostAuthHandler";
 import { SidebarProvider } from "@/context/SidebarContext";
 import { UserPreferencesProvider } from "@/context/UserPreferencesContext";
 import EnvironmentBanner from "@/components/common/EnvironmentBanner";
@@ -37,7 +36,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <link rel="manifest" href="/manifest.json" />
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
       </head>
       <body
@@ -46,7 +44,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
       >
         <EnvironmentBanner />
         <UserPreferencesProvider>
-          <PostAuthHandler />
           <SidebarProvider>
             <QueryProvider>
               <div className="min-h-screen bg-black text-gray-100 font-sans flex flex-col lg:flex-row selection:bg-red-500/30">
@@ -78,7 +75,6 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
               classNames: {
                 toast: "bg-[#141b24] border border-emerald-500/30 p-4 rounded-xl text-emerald-400 text-[15px] font-medium text-center shadow-inner min-w-[300px] flex justify-center items-center mb-2",
                 title: "text-emerald-400",
-                description: "text-gray-400 text-sm",
                 success: "border-emerald-500/30",
                 error: "bg-[#1a1010] border-red-500/30 text-red-400",
               }

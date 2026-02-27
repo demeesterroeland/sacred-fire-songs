@@ -29,11 +29,7 @@ export interface GuestFavoritesReturn {
 }
 
 export function useGuestFavorites(): GuestFavoritesReturn {
-  const [ids, setIds] = useState<Set<string>>(new Set());
-
-  useEffect(() => {
-    setIds(readFromStorage());
-  }, []);
+  const [ids, setIds] = useState<Set<string>>(() => readFromStorage());
 
   const toggle = useCallback((id: string): { isFavorited: boolean; shouldNudge: boolean } => {
     let isFavorited = false;

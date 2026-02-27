@@ -20,7 +20,6 @@ import { songFilterConfig, SongFilterState } from "@/lib/songs/filterConfig";
 import TagSelector from "@/components/library/TagSelector";
 import { fetchCategoryTree, type TaxonomyNode } from "@/lib/taxonomyUtils";
 import type { Song } from "@/lib/songUtils";
-import { GuestBanner } from '@/components/common/GuestBanner';
 
 type SortByType = 'title' | 'author' | 'newest';
 
@@ -346,14 +345,6 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy }: Song
                         </div>
                     </div>
                 </div>
-
-                {!user && (
-                    <GuestBanner
-                        message="Log in to see your drafts, save favorites, and build playlists."
-                        linkText="Log in"
-                        linkHref="/auth/login"
-                    />
-                )}
 
                 {/* Song List */}
                 <section>

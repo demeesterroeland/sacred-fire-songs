@@ -5,9 +5,6 @@ import { Music, Guitar, Heart } from 'lucide-react';
 import { getCategoryColor, getCategoryStyles } from '@/lib/uiUtils';
 import { cn } from '@/lib/utils';
 import { useToggleFavorite } from '@/hooks/useToggleFavorite';
-import { useAuth } from '@/hooks/useAuth';
-import { useGuestFavorites } from '@/hooks/useGuestFavorites';
-import { toast } from 'sonner';
 
 interface SongCardProps {
     id: string;
@@ -37,35 +34,7 @@ export default function SongCard({
     isFavorite = false,
     categories = []
 }: SongCardProps) {
-    const { user } = useAuth();
-    const guestFavorites = useGuestFavorites();
     const { isFav, handleToggle } = useToggleFavorite(id, isFavorite);
-
-    // Guest vs Auth logic
-    const isGuestFavorited = !user && guestFavorites.ids.has(id);
-    const effectiveIsFavorite = user ? isFav : isGuestFavorited;
-
-    const handleFavoriteClick = (e: React.MouseEvent) => {
-        e.preventDefault();
-        e.stopPropagation();
-
-        if (!user) {
-            const { shouldNudge } = guestFavorites.toggle(id);
-            if (shouldNudge) {
-                toast('Your circle is growing', {
-                    description: 'Create an account to carry it with you',
-                    action: {
-                        label: 'Join',
-                        onClick: () => window.location.href = '/auth/sign-up',
-                    },
-                    duration: 6000,
-                });
-            }
-            return;
-        }
-
-        handleToggle(e);
-    };
 
     // Mapping color name to Tailwind class
     const borderColors: Record<string, string> = {
@@ -162,11 +131,11 @@ export default function SongCard({
 
             {/* Heart button — bottom-right to avoid overlap with admin delete button (top-right) */}
             <button
-                onClick={handleFavoriteClick}
-                aria-label={effectiveIsFavorite ? 'Remove from favorites' : 'Add to favorites'}
+                onClick={handleToggle}
+                aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
                 className={cn(
                     'absolute bottom-3 right-3 z-20 p-1 rounded-full transition-all duration-300',
-                    effectiveIsFavorite
+                    isFav
                         ? 'text-amber-400 heart-glow'
                         : 'text-gray-700 hover:text-amber-400/60'
                 )}
@@ -174,7 +143,7 @@ export default function SongCard({
                 <Heart
                     className={cn(
                         'w-3.5 h-3.5 transition-all duration-200',
-                        effectiveIsFavorite && 'fill-amber-400 scale-110'
+                        isFav && 'fill-amber-400 scale-110'
                     )}
                     strokeWidth={1.5}
                 />

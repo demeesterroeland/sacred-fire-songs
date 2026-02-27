@@ -181,10 +181,10 @@ export default async function PlaylistsPage() {
 
     if (!user) return <GuestView />;
 
-    // Fetch all user setlists for initial data
+    // Fetch all user setlists
     const { data: setlists } = await supabase
         .from('setlists')
-        .select('id, owner_id, title, description, is_public, created_at')
+        .select('id, title, description, is_public, created_at')
         .eq('owner_id', user.id)
         .order('created_at', { ascending: false });
 
