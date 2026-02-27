@@ -7,7 +7,7 @@
     - [ ] Write unit tests for setlist creation and retrieval
     - [ ] Implement `createSetlist` server action
     - [ ] Implement `getSetlists` server action
-- [ ] Task: Create Setlist Item server actions
+- [x] Task: Create Setlist Item server actions [bd5ac72]
     - [ ] Write unit tests for adding and removing songs from setlists
     - [ ] Implement `addSongToSetlist` server action
     - [ ] Implement `removeSongFromSetlist` server action
