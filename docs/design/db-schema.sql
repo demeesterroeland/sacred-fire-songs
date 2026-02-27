@@ -30,6 +30,8 @@ create table public.categories (
   name text not null,
   slug text not null unique,
   emoji text,
+  icon_name text,
+  -- Added v2.5
   flavour_text text,
   parent_id uuid references public.categories(id),
   icon_name text,
@@ -40,6 +42,12 @@ create table public.compositions (
   id uuid default uuid_generate_v4() primary key,
   title text not null,
   original_author text,
+  is_public boolean default false,
+  -- Added v2.2
+  has_chords boolean default false,
+  -- Added v2.3
+  has_melody boolean default false,
+  -- Added v2.3
   owner_id uuid references public.profiles(id),
   is_public boolean default true,
   has_chords boolean default false,
@@ -94,12 +102,9 @@ create table public.setlist_items (
 );
 -- 3. Indexes
 -- Partial indexes for public content optimization
-CREATE INDEX IF NOT EXISTS idx_compositions_is_public_true ON public.compositions (created_at DESC)
-WHERE is_public = true;
-CREATE INDEX IF NOT EXISTS idx_setlists_is_public_true ON public.setlists (created_at DESC)
-WHERE is_public = true;
-CREATE INDEX IF NOT EXISTS idx_compositions_title_alphabetical ON public.compositions (title ASC)
-WHERE is_public = true;
+CREATE INDEX IF NOT EXISTS idx_compositions_is_public_true ON public.compositions (created_at DESC) WHERE is_public = true;
+CREATE INDEX IF NOT EXISTS idx_setlists_is_public_true ON public.setlists (created_at DESC) WHERE is_public = true;
+CREATE INDEX IF NOT EXISTS idx_compositions_title_alphabetical ON public.compositions (title ASC) WHERE is_public = true;
 -- 4. Triggers & Functions
 -- Trigger to prevent linking songs to parent groups (only subcategories allowed)
 create or replace function public.check_is_subcategory() returns trigger as $$ begin if (

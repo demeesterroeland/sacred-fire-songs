@@ -10,7 +10,9 @@ WHERE is_public = true;
 -- Speeds up public setlist discovery and related RLS checks.
 CREATE INDEX IF NOT EXISTS idx_setlists_is_public_true ON public.setlists (created_at DESC)
 WHERE is_public = true;
+
 -- 3. Partial index for composition titles
--- Speeds up the title-based sorting frequently used in the SongsPageContent.
-CREATE INDEX IF NOT EXISTS idx_compositions_title_alphabetical ON public.compositions (title ASC)
+-- Speeds up the title-based sorting frequently used in the SongsPageContent for public songs.
+CREATE INDEX IF NOT EXISTS idx_compositions_title_alphabetical
+ON public.compositions (title ASC)
 WHERE is_public = true;

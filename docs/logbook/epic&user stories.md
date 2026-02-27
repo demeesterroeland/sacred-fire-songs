@@ -1,8 +1,8 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 1.26
+**Version:** 1.29
 **Status:** Living Document
-**Date:** February 26, 2026
+**Date:** February 27, 2026
 
 ## Changelog
 
@@ -26,6 +26,7 @@
 | **1.26** | Feb 26, 2026 | Marked 1.1.4 as [Implemented]: delete icons on song cards in library view (owner/admin, hover-visible, top-right overlay) plus profiles RLS policies fix. |
 | **1.27** | Feb 26, 2026 | Marked 1.1.5 as [Implemented]: guest upload modal (Log In / Create Account) now shows when unauthenticated user clicks "Add Song". |
 | **1.28** | Feb 26, 2026 | Marked 1.1.4 as [Implemented]: delete icons on song cards in library view (owner/admin, hover-visible, top-right overlay) plus profiles RLS policies fix. |
+| **1.29** | Feb 27, 2026 | Implemented Story 1.1.5 (revised) and Story 1.2.4: Guest Nudges and Session Favorites. Added localStorage persistence for guest favorites and merge-on-login logic. |
 
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
@@ -94,8 +95,8 @@ Scenario: Successful Admin Login
   And I should see Admin controls (e.g., Upload button, Delete icons)
 ```
 
-**Story 1.1.5: [Not Implemented]** As a Guest, I want to be kindly prompted to create an account when I click "Upload" so that I understand this is a community feature.
-<!-- /songs/add renders SongForm directly for all users. The only guard is a silent redirect to /auth/login on submit. No "Please join our circle" modal or Log In / Create Account prompt exists. -->
+**Story 1.1.5: [Implemented]** As a Guest, I want to be kindly prompted to create an account when I try to contribute so that I understand this is a community feature.
+<!-- Four nudge surfaces: (A) JoinCircleModal on Add Song form submit, (B) warm AccessDenied with Join/Login CTAs on Edit Song, (C) GuestBanner on Library page, (D) guest-accessible Playlists page. -->
 
 ```
 Scenario: Guest clicks Upload
@@ -167,6 +168,17 @@ Scenario: Guest accesses Playlists page
   When I visit the "/playlists" page
   Then I should see the Playlists overview
   And I should not be redirected to the login page
+```
+
+**Story 1.2.4: [Implemented]** As a Guest, I want to save favorite songs without an account so that I can build a personal collection, and be nudged to create an account to persist it permanently.
+<!-- localStorage-based favorites via useGuestFavorites hook (key: sfs_guest_favorites). Heart icon visible to all users. Nudge toasts at 1st and 5th favorite. "Your Hearth" section on Playlists page. Guest favorites merged into "My Favorites" setlist on login. -->
+
+```gherkin
+Scenario: Guest favorites a song
+  Given I am an unauthenticated Guest
+  When I click the "Heart" icon on a song
+  Then the song should be saved to my local browser storage
+  And I should see a nudge to create an account to save it permanently
 ```
 
 ### Epic 1.3: Basic Song Viewer
@@ -429,13 +441,13 @@ Scenario: Desktop Layout
 | **View Chords & Lyrics** | ✅ | ✅ | ✅ | ✅ |
 | **Listen to Audio/Video** | ✅ | ✅ | ✅ | ✅ |
 | **Play Melody (Synth)** | ✅ | ✅ | ✅ | ✅ |
-| **Favorite Songs** | ❌ | ✅ | ✅ | ✅ |
+| **Favorite Songs** | ✅ | ✅ | ✅ | ✅ |
 | **Vote on Versions** | ❌ | ✅ | ✅ | ✅ |
 | **Transpose Chords** | ❌ | ❌ | ✅ | ✅ |
 | **Create/Edit Setlists** | ❌ | ❌ | ✅ | ✅ |
 | **Export/Print PDF** | ❌ | ❌ | ✅ | ✅ |
 | **Submit New Version** | ❌ | ❌ | ✅ | ✅ |
-| **Add/Create Songs** | ❌ | ✅ | ✅ | ✅ |
+| **Add/Create Songs** | ✅ (Soft Gate) | ✅ | ✅ | ✅ |
 | **Edit Own Songs** | ❌ | ✅ | ✅ | ✅ |
 | **Edit All Songs** | ❌ | ❌ | ❌ | ✅ |
 | **Delete Songs** | ❌ | ❌ | ❌ | ✅ |
