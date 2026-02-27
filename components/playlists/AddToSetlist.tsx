@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { ListPlus, Check, Loader2, Plus } from 'lucide-react';
+import { ListPlus, Check, Loader2 } from 'lucide-react';
 import { SONG_KEYS } from '@/lib/songs/queryKeys';
 import { getSetlists, addSongToSetlist } from '@/app/actions/setlists';
 import { toast } from 'sonner';
