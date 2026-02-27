@@ -32,7 +32,7 @@
 - [ ] Task: Conductor - User Manual Verification 'UI - Setlist Editing & "Your Hearth"' (Protocol in workflow.md)
 
 ## Phase 4: Offline & Final Polish
-- [ ] Task: Ensure offline persistence
+- [x] Task: Ensure offline persistence [22bfed2]
     - [ ] Write integration tests for offline setlist access
     - [ ] Configure React Query cache for setlists
 - [ ] Task: Documentation & Cleanup
