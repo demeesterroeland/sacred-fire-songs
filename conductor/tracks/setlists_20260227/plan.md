@@ -22,20 +22,22 @@
     - [ ] Add "Add to Setlist" dropdown/modal to `app/songs/[id]/page.tsx`
 - [x] Task: Conductor - User Manual Verification 'UI - Setlist Management' (Protocol in workflow.md) [07d1a69]
 
-## Phase 3: UI - Setlist Editing & "Your Hearth"
+## Phase 3: UI - Setlist Editing & "Your Hearth" [checkpoint: 4e05d29]
 - [x] Task: Implement SetlistEditor with reordering [4c5a111]
     - [ ] Write unit tests for setlist reordering logic
     - [ ] Implement drag-and-drop reordering with `framer-motion`
 - [x] Task: Integrate "Your Hearth" section [bc6411d]
     - [ ] Write unit tests for "Your Hearth" display logic
     - [ ] Add "Your Hearth" tab/section to user profile/dashboard
-- [ ] Task: Conductor - User Manual Verification 'UI - Setlist Editing & "Your Hearth"' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'UI - Setlist Editing & "Your Hearth"' (Protocol in workflow.md) [4e05d29]
 
 ## Phase 4: Offline & Final Polish
 - [x] Task: Ensure offline persistence [22bfed2]
-    - [ ] Write integration tests for offline setlist access
-    - [ ] Configure React Query cache for setlists
+    - [x] Write integration tests for offline setlist access [22bfed2]
+    - [x] Configure React Query cache for setlists [22bfed2]
+    - [x] Implement persistent cache with @tanstack/react-query-persist-client
+    - [x] Add PWA manifest.json for offline recognition
 - [x] Task: Documentation & Cleanup [d023f39]
-    - [ ] Update User Guide with setlist instructions
-    - [ ] Final code cleanup and linting
+    - [x] Update User Guide with setlist instructions [d023f39]
+    - [x] Final code cleanup and linting [d023f39]
 - [ ] Task: Conductor - User Manual Verification 'Offline & Final Polish' (Protocol in workflow.md)

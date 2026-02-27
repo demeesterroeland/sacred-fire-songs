@@ -16,6 +16,7 @@
 
 ## Data Management
 - **State & Fetching:** TanStack React Query v5
+- **Persistence:** @tanstack/react-query-persist-client (localStorage)
 - **Forms:** React Hook Form
 - **Caching:** Stale-While-Revalidate (SWR) patterns for offline PWA support
 
