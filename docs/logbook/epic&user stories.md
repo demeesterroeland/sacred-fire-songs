@@ -365,7 +365,7 @@ Scenario: Upvote Version
 
 ### Epic 4.1: Setlists
 
-**Story 4.1.1:** As a Musician, I want to create a named setlist so that I can prepare for a specific night.
+**Story 4.1.1: [Implemented]** As a Musician, I want to create a named setlist so that I can prepare for a specific night.
 
 ```
 Scenario: Create Setlist
@@ -375,7 +375,7 @@ Scenario: Create Setlist
   Then a new empty setlist named "Full Moon Ceremony" should exist
 ```
 
-**Story 4.1.2:** As a Musician, I want to reorder songs in my setlist so that the flow matches the ceremony intensity.
+**Story 4.1.2: [Implemented]** As a Musician, I want to reorder songs in my setlist so that the flow matches the ceremony intensity.
 
 ```
 Scenario: Reorder Setlist
