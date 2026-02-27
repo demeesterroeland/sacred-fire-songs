@@ -10,6 +10,7 @@ export interface SongFilterState {
   search?: string;
   status: 'all' | 'public' | 'draft';
   favorites?: boolean;
+  mine?: boolean;
 }
 
 // 2. Define the Configuration

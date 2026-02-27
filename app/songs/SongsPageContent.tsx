@@ -104,6 +104,7 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy }: Song
             chords: false,
             melody: false,
             favorites: false,
+            mine: false,
         },
         {
             // Custom Parse: Convert URL params to State
@@ -116,6 +117,7 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy }: Song
                     chords: params.get('chords') === 'true',
                     melody: params.get('melody') === 'true',
                     favorites: params.get('favorites') === 'true',
+                    mine: params.get('mine') === 'true',
                 };
             },
             // Custom Serialize: Convert State to URL params
@@ -128,19 +130,24 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy }: Song
                     chords: state.chords ? 'true' : '',
                     melody: state.melody ? 'true' : '',
                     favorites: state.favorites ? 'true' : '',
+                    mine: state.mine ? 'true' : '',
                     sort: sortBy // Preserve sort param
                 };
             }
         }
     );
 
-    // Apply favorites post-filter (independent of the visibility status tabs)
+    // Apply post-filters (independent of the visibility status tabs)
     const finalFilteredItems = useMemo(() => {
+        let items = filteredItems;
         if (state.favorites) {
-            return filteredItems.filter(s => favoriteIds.has(s.id));
+            items = items.filter(s => favoriteIds.has(s.id));
         }
-        return filteredItems;
-    }, [filteredItems, state.favorites, favoriteIds]);
+        if (state.mine && user) {
+            items = items.filter(s => s.ownerId === user.id);
+        }
+        return items;
+    }, [filteredItems, state.favorites, state.mine, favoriteIds, user]);
 
     // Sync local search with state.search (for external resets like "Clear All")
     useEffect(() => {
@@ -190,7 +197,8 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy }: Song
         (user && state.status !== 'all') ||
         state.chords ||
         state.melody ||
-        state.favorites
+        state.favorites ||
+        state.mine
     );
 
     return (
@@ -281,6 +289,17 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy }: Song
                                         >
                                             <Heart className={`w-3 h-3 ${state.favorites ? 'fill-amber-400' : ''}`} strokeWidth={1.5} />
                                             Favorites
+                                        </button>
+                                        <button
+                                            onClick={() => setFilter('mine', !state.mine)}
+                                            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl border transition-all ${
+                                                state.mine
+                                                    ? 'bg-violet-500/15 border-violet-500/40 text-violet-400 shadow-sm'
+                                                    : 'bg-gray-900/80 border-gray-800 text-gray-500 hover:text-violet-400/70 hover:border-violet-500/30'
+                                            }`}
+                                        >
+                                            <Music className="w-3 h-3" strokeWidth={1.5} />
+                                            My Songs
                                         </button>
                                     </div>
                                 )}
