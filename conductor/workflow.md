@@ -93,9 +93,11 @@ All tasks follow a strict lifecycle:
 3. **Cleanup Local Branch:**
    - Checkout `main`, pull, and delete the local feature branch.
 
-4. **Update Registry:**
+4. **Update Registry & Sync Logbook:**
    - Mark track as complete `[x]` in `conductor/tracks.md`.
-   - Commit registry update on `main`.
+   - **Sync Local Stories:** Execute `node .claude/scripts/sync-stories-from-gh.mjs` to pull the latest issue statuses (Closed) from GitHub into `docs/logbook/epic&user stories.md`.
+   - Stage `conductor/tracks.md` and `docs/logbook/epic&user stories.md`.
+   - Commit registry and logbook updates on `main` with message `chore(conductor): Mark track '<track_description>' as complete and sync user stories`.
 
 ### Quality Gates
 
