@@ -11,7 +11,6 @@ describe('Setlist Server Actions', () => {
         });
 
         it('returns an error if title is empty', async () => {
-            // @ts-expect-error - testing runtime validation
             const result = await createSetlist('');
             expect(result).toHaveProperty('error');
         });
@@ -29,7 +28,6 @@ describe('Setlist Server Actions', () => {
         });
 
         it('returns an error if setlistId or songVersionId is missing', async () => {
-            // @ts-expect-error - testing runtime validation
             const result = await addSongToSetlist('', '');
             expect(result).toHaveProperty('error');
         });
@@ -41,7 +39,6 @@ describe('Setlist Server Actions', () => {
         });
 
         it('returns an error if setlistItemId is missing', async () => {
-            // @ts-expect-error - testing runtime validation
             const result = await removeSongFromSetlist('');
             expect(result).toHaveProperty('error');
         });
