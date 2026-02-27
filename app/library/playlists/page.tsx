@@ -1,6 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
 import { Heart, ListMusic, Flame, Droplets, Lock, Globe, Users, PenLine, Music } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
 interface SongCounts {
     total: number;
@@ -21,64 +22,121 @@ function SongCountSubtitle({ counts, emptyLabel }: { counts: SongCounts; emptyLa
     );
 }
 
+// ─── Shared primitives ────────────────────────────────────────────────────────
+
+const accentClasses = {
+    amber: {
+        card:      'bg-amber-500/8 border-amber-500/20',
+        cardHover: 'hover:bg-amber-500/15 hover:border-amber-500/35',
+        icon:      'bg-amber-500/15',
+        iconHover: 'group-hover:bg-amber-500/25',
+        iconText:  'text-amber-400 fill-amber-400',
+    },
+    violet: {
+        card:      'bg-violet-500/8 border-violet-500/20',
+        cardHover: 'hover:bg-violet-500/15 hover:border-violet-500/35',
+        icon:      'bg-violet-500/15',
+        iconHover: 'group-hover:bg-violet-500/25',
+        iconText:  'text-violet-400',
+    },
+    gray: {
+        card:      'bg-gray-800/40 border-gray-700/40',
+        cardHover: 'hover:bg-gray-800/70 hover:border-gray-600/60',
+        icon:      'bg-gray-700/40',
+        iconHover: 'group-hover:bg-gray-700/60',
+        iconText:  'text-gray-400 group-hover:text-gray-300 transition-colors',
+    },
+} as const;
+
+interface SmartPlaylistCardProps {
+    icon: LucideIcon;
+    title: string;
+    subtitle: React.ReactNode;
+    accent: keyof typeof accentClasses;
+    href?: string; // absent = locked (guest)
+}
+
+function SmartPlaylistCard({ icon: Icon, title, subtitle, accent, href }: SmartPlaylistCardProps) {
+    const c = accentClasses[accent];
+    const locked = !href;
+
+    const inner = (
+        <div className={`border p-4 rounded-2xl flex items-center gap-4 transition-all ${c.card} ${
+            locked ? 'cursor-default' : `group ${c.cardHover} hover:-translate-y-0.5`
+        }`}>
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-colors ${c.icon} ${locked ? '' : c.iconHover}`}>
+                <Icon className={`w-6 h-6 ${c.iconText}`} />
+            </div>
+            <div className="flex-1 min-w-0">
+                <h3 className={`font-bold text-gray-100 ${locked ? '' : 'group-hover:text-white transition-colors'}`}>{title}</h3>
+                {typeof subtitle === 'string'
+                    ? <p className="text-xs text-gray-500 mt-0.5">{subtitle}</p>
+                    : subtitle}
+            </div>
+            {locked && (
+                <div className="flex items-center gap-1.5 shrink-0">
+                    <Lock aria-hidden="true" className="w-3 h-3 text-gray-600" />
+                    <span className="text-[10px] text-gray-600 font-medium">Members only</span>
+                </div>
+            )}
+        </div>
+    );
+
+    return href ? <Link href={href}>{inner}</Link> : inner;
+}
+
+/** Identical in both guest and auth views — rendered once from a shared component. */
+function PublicPlaylistsSection() {
+    return (
+        <div>
+            <div className="flex items-center gap-2 mb-3">
+                <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Public Playlists</p>
+                <span className="text-[9px] font-bold text-amber-500 bg-amber-500/10 border border-amber-500/20 rounded-full px-2 py-0.5 uppercase tracking-wider">Coming Soon</span>
+            </div>
+            <div className="grid grid-cols-1 gap-3 opacity-40 pointer-events-none select-none">
+                <div className="bg-gray-900/40 p-4 rounded-2xl border border-gray-800 flex items-center gap-4">
+                    <div className="w-12 h-12 bg-blue-900/30 rounded-xl flex items-center justify-center shrink-0">
+                        <Globe className="w-6 h-6 text-blue-400" />
+                    </div>
+                    <div>
+                        <h3 className="font-bold text-gray-100">Ceremony Night – Agua y Fuego</h3>
+                        <p className="text-xs text-gray-500 mt-0.5">Community Playlist · 14 songs</p>
+                    </div>
+                </div>
+                <div className="bg-gray-900/40 p-4 rounded-2xl border border-gray-800 flex items-center gap-4">
+                    <div className="w-12 h-12 bg-purple-900/30 rounded-xl flex items-center justify-center shrink-0">
+                        <Users className="w-6 h-6 text-purple-400" />
+                    </div>
+                    <div>
+                        <h3 className="font-bold text-gray-100">Opening Circle Icaros</h3>
+                        <p className="text-xs text-gray-500 mt-0.5">Community Playlist · 9 songs</p>
+                    </div>
+                </div>
+            </div>
+            <p className="text-xs text-gray-600 italic mt-3">
+                Public playlists shared by community members — coming soon.
+            </p>
+        </div>
+    );
+}
+
+// ─── Views ────────────────────────────────────────────────────────────────────
+
 function GuestView() {
     return (
         <div className="space-y-8">
 
-            {/* Section 1: Smart Playlists — locked */}
+            {/* Smart Playlists — locked for guests */}
             <div>
                 <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-3">Smart Playlists</p>
                 <div className="grid grid-cols-1 gap-3">
-
-                    {/* My Favorites */}
-                    <div className="bg-amber-500/8 border border-amber-500/20 p-4 rounded-2xl flex items-center gap-4 cursor-default">
-                        <div className="w-12 h-12 bg-amber-500/15 rounded-xl flex items-center justify-center shrink-0">
-                            <Heart className="w-6 h-6 text-amber-400 fill-amber-400" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <h3 className="font-bold text-gray-100">My Favorites</h3>
-                            <p className="text-xs text-gray-500 mt-0.5">Your favorited songs, always with you</p>
-                        </div>
-                        <div className="flex items-center gap-1.5 shrink-0">
-                            <Lock aria-hidden="true" className="w-3 h-3 text-gray-600" />
-                            <span className="text-[10px] text-gray-600 font-medium">Members only</span>
-                        </div>
-                    </div>
-
-                    {/* My Songs */}
-                    <div className="bg-violet-500/8 border border-violet-500/20 p-4 rounded-2xl flex items-center gap-4 cursor-default">
-                        <div className="w-12 h-12 bg-violet-500/15 rounded-xl flex items-center justify-center shrink-0">
-                            <Music className="w-6 h-6 text-violet-400" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <h3 className="font-bold text-gray-100">My Songs</h3>
-                            <p className="text-xs text-gray-500 mt-0.5">Songs you've contributed to the library</p>
-                        </div>
-                        <div className="flex items-center gap-1.5 shrink-0">
-                            <Lock aria-hidden="true" className="w-3 h-3 text-gray-600" />
-                            <span className="text-[10px] text-gray-600 font-medium">Members only</span>
-                        </div>
-                    </div>
-
-                    {/* My Drafts */}
-                    <div className="bg-gray-800/40 border border-gray-700/40 p-4 rounded-2xl flex items-center gap-4 cursor-default">
-                        <div className="w-12 h-12 bg-gray-700/40 rounded-xl flex items-center justify-center shrink-0">
-                            <PenLine className="w-6 h-6 text-gray-400" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <h3 className="font-bold text-gray-100">My Drafts</h3>
-                            <p className="text-xs text-gray-500 mt-0.5">Your private work-in-progress songs</p>
-                        </div>
-                        <div className="flex items-center gap-1.5 shrink-0">
-                            <Lock aria-hidden="true" className="w-3 h-3 text-gray-600" />
-                            <span className="text-[10px] text-gray-600 font-medium">Members only</span>
-                        </div>
-                    </div>
-
+                    <SmartPlaylistCard icon={Heart}   title="My Favorites" subtitle="Your favorited songs, always with you"      accent="amber"  />
+                    <SmartPlaylistCard icon={Music}   title="My Songs"     subtitle="Songs you've contributed to the library"    accent="violet" />
+                    <SmartPlaylistCard icon={PenLine} title="My Drafts"    subtitle="Your private work-in-progress songs"        accent="gray"   />
                 </div>
             </div>
 
-            {/* Section 2: My Playlists — demo ghost */}
+            {/* My Playlists — ghost demo */}
             <div>
                 <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-3">My Playlists</p>
                 <div className="grid grid-cols-1 gap-3 opacity-40 pointer-events-none select-none">
@@ -111,36 +169,7 @@ function GuestView() {
                 </div>
             </div>
 
-            {/* Section 3: Public Playlists — coming soon + ghost demo */}
-            <div>
-                <div className="flex items-center gap-2 mb-3">
-                    <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Public Playlists</p>
-                    <span className="text-[9px] font-bold text-amber-500 bg-amber-500/10 border border-amber-500/20 rounded-full px-2 py-0.5 uppercase tracking-wider">Coming Soon</span>
-                </div>
-                <div className="grid grid-cols-1 gap-3 opacity-40 pointer-events-none select-none">
-                    <div className="bg-gray-900/40 p-4 rounded-2xl border border-gray-800 flex items-center gap-4">
-                        <div className="w-12 h-12 bg-blue-900/30 rounded-xl flex items-center justify-center shrink-0">
-                            <Globe className="w-6 h-6 text-blue-400" />
-                        </div>
-                        <div>
-                            <h3 className="font-bold text-gray-100">Ceremony Night – Agua y Fuego</h3>
-                            <p className="text-xs text-gray-500 mt-0.5">Community Playlist · 14 songs</p>
-                        </div>
-                    </div>
-                    <div className="bg-gray-900/40 p-4 rounded-2xl border border-gray-800 flex items-center gap-4">
-                        <div className="w-12 h-12 bg-purple-900/30 rounded-xl flex items-center justify-center shrink-0">
-                            <Users className="w-6 h-6 text-purple-400" />
-                        </div>
-                        <div>
-                            <h3 className="font-bold text-gray-100">Opening Circle Icaros</h3>
-                            <p className="text-xs text-gray-500 mt-0.5">Community Playlist · 9 songs</p>
-                        </div>
-                    </div>
-                </div>
-                <p className="text-xs text-gray-600 italic mt-3">
-                    Public playlists shared by community members — coming soon.
-                </p>
-            </div>
+            <PublicPlaylistsSection />
 
         </div>
     );
@@ -194,51 +223,21 @@ export default async function PlaylistsPage() {
     return (
         <div className="space-y-8">
 
-            {/* Smart Playlists — always shown */}
+            {/* Smart Playlists */}
             <div>
                 <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-3">Smart Playlists</p>
                 <div className="grid grid-cols-1 gap-3">
-                    <Link href="/songs?favorites=true">
-                        <div className="bg-amber-500/8 border border-amber-500/20 p-4 rounded-2xl flex items-center gap-4 group hover:bg-amber-500/15 hover:border-amber-500/35 transition-all hover:-translate-y-0.5">
-                            <div className="w-12 h-12 bg-amber-500/15 rounded-xl flex items-center justify-center group-hover:bg-amber-500/25 transition-colors shrink-0">
-                                <Heart className="w-6 h-6 text-amber-400 fill-amber-400" />
-                            </div>
-                            <div>
-                                <h3 className="font-bold text-gray-100 group-hover:text-white transition-colors">My Favorites</h3>
-                                <SongCountSubtitle counts={favCounts} emptyLabel="No songs yet — tap ♥ on any song" />
-                            </div>
-                        </div>
-                    </Link>
-
-                    {/* My Songs */}
-                    <Link href="/songs?mine=true">
-                        <div className="bg-violet-500/8 border border-violet-500/20 p-4 rounded-2xl flex items-center gap-4 group hover:bg-violet-500/15 hover:border-violet-500/35 transition-all hover:-translate-y-0.5">
-                            <div className="w-12 h-12 bg-violet-500/15 rounded-xl flex items-center justify-center group-hover:bg-violet-500/25 transition-colors shrink-0">
-                                <Music className="w-6 h-6 text-violet-400" />
-                            </div>
-                            <div>
-                                <h3 className="font-bold text-gray-100 group-hover:text-white transition-colors">My Songs</h3>
-                                <p className="text-xs text-gray-500 mt-0.5">Songs you've contributed to the library</p>
-                            </div>
-                        </div>
-                    </Link>
-
-                    {/* My Drafts */}
-                    <Link href="/songs?status=draft">
-                        <div className="bg-gray-800/40 border border-gray-700/40 p-4 rounded-2xl flex items-center gap-4 group hover:bg-gray-800/70 hover:border-gray-600/60 transition-all hover:-translate-y-0.5">
-                            <div className="w-12 h-12 bg-gray-700/40 rounded-xl flex items-center justify-center group-hover:bg-gray-700/60 transition-colors shrink-0">
-                                <PenLine className="w-6 h-6 text-gray-400 group-hover:text-gray-300 transition-colors" />
-                            </div>
-                            <div>
-                                <h3 className="font-bold text-gray-100 group-hover:text-white transition-colors">My Drafts</h3>
-                                <p className="text-xs text-gray-500 mt-0.5">Your private work-in-progress songs</p>
-                            </div>
-                        </div>
-                    </Link>
+                    <SmartPlaylistCard
+                        icon={Heart}   title="My Favorites" accent="amber"
+                        href="/songs?favorites=true"
+                        subtitle={<SongCountSubtitle counts={favCounts} emptyLabel="No songs yet — tap ♥ on any song" />}
+                    />
+                    <SmartPlaylistCard icon={Music}   title="My Songs"  subtitle="Songs you've contributed to the library" accent="violet" href="/songs?mine=true" />
+                    <SmartPlaylistCard icon={PenLine} title="My Drafts" subtitle="Your private work-in-progress songs"     accent="gray"   href="/songs?status=draft" />
                 </div>
             </div>
 
-            {/* Other user setlists (real) */}
+            {/* My Playlists — real data */}
             {otherSetlists.length > 0 && (
                 <div>
                     <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-3">My Playlists</p>
@@ -261,36 +260,7 @@ export default async function PlaylistsPage() {
                 </div>
             )}
 
-            {/* Public Playlists — coming soon */}
-            <div>
-                <div className="flex items-center gap-2 mb-3">
-                    <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Public Playlists</p>
-                    <span className="text-[9px] font-bold text-amber-500 bg-amber-500/10 border border-amber-500/20 rounded-full px-2 py-0.5 uppercase tracking-wider">Coming Soon</span>
-                </div>
-                <div className="grid grid-cols-1 gap-3 opacity-40 pointer-events-none select-none">
-                    <div className="bg-gray-900/40 p-4 rounded-2xl border border-gray-800 flex items-center gap-4">
-                        <div className="w-12 h-12 bg-blue-900/30 rounded-xl flex items-center justify-center shrink-0">
-                            <Globe className="w-6 h-6 text-blue-400" />
-                        </div>
-                        <div>
-                            <h3 className="font-bold text-gray-100">Ceremony Night – Agua y Fuego</h3>
-                            <p className="text-xs text-gray-500 mt-0.5">Community Playlist · 14 songs</p>
-                        </div>
-                    </div>
-                    <div className="bg-gray-900/40 p-4 rounded-2xl border border-gray-800 flex items-center gap-4">
-                        <div className="w-12 h-12 bg-purple-900/30 rounded-xl flex items-center justify-center shrink-0">
-                            <Users className="w-6 h-6 text-purple-400" />
-                        </div>
-                        <div>
-                            <h3 className="font-bold text-gray-100">Opening Circle Icaros</h3>
-                            <p className="text-xs text-gray-500 mt-0.5">Community Playlist · 9 songs</p>
-                        </div>
-                    </div>
-                </div>
-                <p className="text-xs text-gray-600 italic mt-3">
-                    Public playlists shared by community members — coming soon.
-                </p>
-            </div>
+            <PublicPlaylistsSection />
 
         </div>
     );
