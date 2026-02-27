@@ -24,6 +24,15 @@ export const SONG_KEYS = {
     /** Prefix that matches ALL ['favorites', *] keys */
     allFavorites: () => ['favorites'] as const,
 
+    /** User's setlists */
+    setlists: (userId?: string) => ['setlists', userId] as const,
+
+    /** Prefix that matches ALL ['setlists', *] keys */
+    allSetlists: () => ['setlists'] as const,
+
+    /** Individual setlist detail */
+    setlistDetail: (id: string) => ['setlist', id] as const,
+
     /** Taxonomy / category tree */
     taxonomy: () => ['taxonomy'] as const,
 } as const;
