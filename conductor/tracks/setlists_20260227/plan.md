@@ -13,14 +13,14 @@
     - [ ] Implement `removeSongFromSetlist` server action
 - [x] Task: Conductor - User Manual Verification 'Foundation & Data Layer' (Protocol in workflow.md) [88cd9de]
 
-## Phase 2: UI - Setlist Management
+## Phase 2: UI - Setlist Management [checkpoint: 07d1a69]
 - [x] Task: Implement SetlistManager component [900a570]
     - [ ] Write unit tests for `SetlistManager`
     - [ ] Implement UI for listing and creating setlists
 - [x] Task: Implement "Add to Setlist" UI on Song Detail [fdbf700]
     - [ ] Write unit tests for "Add to Setlist" button logic
     - [ ] Add "Add to Setlist" dropdown/modal to `app/songs/[id]/page.tsx`
-- [ ] Task: Conductor - User Manual Verification 'UI - Setlist Management' (Protocol in workflow.md)
+- [x] Task: Conductor - User Manual Verification 'UI - Setlist Management' (Protocol in workflow.md) [07d1a69]
 
 ## Phase 3: UI - Setlist Editing & "Your Hearth"
 - [ ] Task: Implement `SetlistEditor` with reordering
