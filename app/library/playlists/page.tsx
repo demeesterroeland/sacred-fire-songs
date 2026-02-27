@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
-import { Heart, Plus, ListMusic, Flame, Droplets, Lock, LogIn, Globe, Users, PenLine, Music } from 'lucide-react';
+import { Heart, ListMusic, Flame, Droplets, Lock, LogIn, Globe, Users, PenLine, Music } from 'lucide-react';
 
 interface SongCounts {
     total: number;
@@ -209,14 +209,6 @@ export default async function PlaylistsPage() {
 
     return (
         <div className="space-y-8">
-
-            {/* Page Actions */}
-            <div className="flex justify-end">
-                <button className="flex items-center gap-2 bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded-xl font-bold text-sm transition-all shadow-lg shadow-red-900/20 active:scale-95">
-                    <Plus className="w-4 h-4" />
-                    Create Playlist
-                </button>
-            </div>
 
             {/* Smart Playlists — always shown */}
             <div>
