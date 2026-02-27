@@ -102,11 +102,26 @@ All tasks follow a strict lifecycle:
 ### Quality Gates
 
 Before marking any task complete, verify:
-- [ ] All tests pass
+- [ ] All tests pass (`npm test`)
 - [ ] Code coverage meets requirements (>80%)
 - [ ] Commits are linked to User Story IDs
-- [ ] Type safety is enforced
+- [ ] **Type safety is enforced (`npx tsc --noEmit` passes)**
 - [ ] Documentation updated if needed
+
+## Development Commands
+
+### Pre-Commit / Pre-Push Checks
+Execute these commands to ensure the build will succeed remotely:
+```bash
+# Run full TypeScript compiler check (simulates production build strictness)
+npx tsc --noEmit
+
+# Run linting
+npm run lint
+
+# Run all tests
+npm test
+```
 
 ## Definition of Done
 
