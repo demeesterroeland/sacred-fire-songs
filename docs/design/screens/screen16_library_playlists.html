@@ -1,5 +1,6 @@
-<!-- Screen 16: Playlists — v2.3 (2026-02-27) -->
+<!-- Screen 16: Playlists — v2.4 (2026-02-27) -->
 <!-- Changelog:
+  v2.4 (2026-02-27) — My Songs color changed from red to violet across guest/auth views and filter pill
   v2.3 (2026-02-27) — Aligned section order across guest and auth views: Smart Playlists → My Playlists → Public Playlists
   v2.2 (2026-02-27) — Guest view shows disabled Create Playlist button with Sign in hint; removed separate sign-in nudge card from guest content
   v2.1 (2026-02-27) — Create Playlist button moved inline with library tabs; sign-in nudge moved above Smart Playlists in guest view; My Songs & My Drafts are real links (no Coming Soon)
@@ -35,8 +36,8 @@
       background: rgba(245, 158, 11, 0.12);
     }
 
-    .playlist-card-red:hover {
-      background: rgba(239, 68, 68, 0.12);
+    .playlist-card-violet:hover {
+      background: rgba(139, 92, 246, 0.12);
     }
   </style>
 </head>
@@ -223,8 +224,8 @@
 
           <!-- My Songs -->
           <div class="bg-gray-900/40 p-4 rounded-2xl border border-gray-800 flex items-center gap-4">
-            <div class="w-12 h-12 bg-red-500/10 rounded-xl flex items-center justify-center shrink-0">
-              <i data-lucide="music" class="w-6 h-6 text-red-500"></i>
+            <div class="w-12 h-12 bg-violet-500/10 rounded-xl flex items-center justify-center shrink-0">
+              <i data-lucide="music" class="w-6 h-6 text-violet-400"></i>
             </div>
             <div class="flex-1 min-w-0">
               <h3 class="font-bold text-gray-100">My Songs</h3>
@@ -353,9 +354,9 @@
 
           <!-- My Songs → /songs?mine=true -->
           <a href="#"
-            class="playlist-card playlist-card-red bg-red-500/8 border border-red-500/20 p-4 rounded-2xl flex items-center gap-4 cursor-pointer group">
-            <div class="w-12 h-12 bg-red-500/15 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-red-500/25 transition-colors">
-              <i data-lucide="music" class="w-6 h-6 text-red-500"></i>
+            class="playlist-card bg-violet-500/8 border border-violet-500/20 p-4 rounded-2xl flex items-center gap-4 cursor-pointer group hover:bg-violet-500/15 hover:border-violet-500/35 transition-all">
+            <div class="w-12 h-12 bg-violet-500/15 rounded-xl flex items-center justify-center shrink-0 group-hover:bg-violet-500/25 transition-colors">
+              <i data-lucide="music" class="w-6 h-6 text-violet-400"></i>
             </div>
             <div class="flex-1 min-w-0">
               <h3 class="font-bold text-gray-100 group-hover:text-white transition-colors">My Songs</h3>

@@ -46,9 +46,9 @@ function GuestView() {
                     </div>
 
                     {/* My Songs */}
-                    <div className="bg-red-500/8 border border-red-500/20 p-4 rounded-2xl flex items-center gap-4 cursor-default">
-                        <div className="w-12 h-12 bg-red-500/15 rounded-xl flex items-center justify-center shrink-0">
-                            <Music className="w-6 h-6 text-red-400" />
+                    <div className="bg-violet-500/8 border border-violet-500/20 p-4 rounded-2xl flex items-center gap-4 cursor-default">
+                        <div className="w-12 h-12 bg-violet-500/15 rounded-xl flex items-center justify-center shrink-0">
+                            <Music className="w-6 h-6 text-violet-400" />
                         </div>
                         <div className="flex-1 min-w-0">
                             <h3 className="font-bold text-gray-100">My Songs</h3>
@@ -212,9 +212,9 @@ export default async function PlaylistsPage() {
 
                     {/* My Songs */}
                     <Link href="/songs?mine=true">
-                        <div className="bg-red-500/8 border border-red-500/20 p-4 rounded-2xl flex items-center gap-4 group hover:bg-red-500/15 hover:border-red-500/35 transition-all hover:-translate-y-0.5">
-                            <div className="w-12 h-12 bg-red-500/15 rounded-xl flex items-center justify-center group-hover:bg-red-500/25 transition-colors shrink-0">
-                                <Music className="w-6 h-6 text-red-400" />
+                        <div className="bg-violet-500/8 border border-violet-500/20 p-4 rounded-2xl flex items-center gap-4 group hover:bg-violet-500/15 hover:border-violet-500/35 transition-all hover:-translate-y-0.5">
+                            <div className="w-12 h-12 bg-violet-500/15 rounded-xl flex items-center justify-center group-hover:bg-violet-500/25 transition-colors shrink-0">
+                                <Music className="w-6 h-6 text-violet-400" />
                             </div>
                             <div>
                                 <h3 className="font-bold text-gray-100 group-hover:text-white transition-colors">My Songs</h3>
