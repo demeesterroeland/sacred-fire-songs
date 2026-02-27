@@ -37,6 +37,7 @@ function LoginFormContent({
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
+  const next = searchParams.get("next");
   const message = searchParams.get("message");
 
   const handleMagicLink = async (e: React.FormEvent) => {
@@ -50,7 +51,7 @@ function LoginFormContent({
       const { error } = await supabase.auth.signInWithOtp({
         email,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/callback`,
+          emailRedirectTo: `${window.location.origin}/auth/callback${next ? `?next=${encodeURIComponent(next)}` : ""}`,
         },
       });
       if (error) throw error;
@@ -76,7 +77,7 @@ function LoginFormContent({
       if (error) throw error;
 
       window.dispatchEvent(new Event("auth-role-change"));
-      router.push("/");
+      router.push(next || "/");
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
@@ -224,7 +225,7 @@ function LoginFormContent({
         <p className="text-[#a0aec0] text-sm">
           Don&apos;t have an account?
           <Link
-            href="/auth/sign-up"
+            href={`/auth/sign-up${next ? `?next=${encodeURIComponent(next)}` : ""}`}
             className="text-[#d9481e] hover:text-[#f45d1a] underline font-medium transition-colors ml-1"
           >
             Join the Circle

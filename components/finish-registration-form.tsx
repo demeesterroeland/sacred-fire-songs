@@ -5,11 +5,19 @@ import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { useRouter } from "next/navigation";
-import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect, Suspense } from "react";
 import { Flame, User, Compass, CheckCircle } from "lucide-react";
 
-export function FinishRegistrationForm({
+export function FinishRegistrationForm(props: React.ComponentPropsWithoutRef<"div">) {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <FinishRegistrationFormContent {...props} />
+    </Suspense>
+  );
+}
+
+function FinishRegistrationFormContent({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
@@ -17,6 +25,8 @@ export function FinishRegistrationForm({
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const next = searchParams.get("next");
 
   const handleFinishRegistration = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -39,7 +49,7 @@ export function FinishRegistrationForm({
       // Notify other components like Sidebar to refresh auth state
       window.dispatchEvent(new Event("auth-role-change"));
 
-      router.push("/explore");
+      router.push(next || "/explore");
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {

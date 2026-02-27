@@ -5,6 +5,8 @@ import Link from 'next/link';
 import Image from 'next/image';
 import QuickLogin from '@/components/dev/QuickLogin';
 
+import { usePathname, useRouter } from 'next/navigation';
+
 interface UserProfileProps {
   onLogout?: () => void;
   layout?: 'sidebar' | 'mobile' | 'header';
@@ -15,6 +17,8 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true }: Us
   const { user, logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const pathname = usePathname();
+  const router = useRouter();
 
   // Close menu when clicking outside
   useEffect(() => {
@@ -30,7 +34,7 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true }: Us
   if (!user) {
     return (
       <Link
-        href="/auth/login"
+        href={`/auth/login?next=${encodeURIComponent(pathname)}`}
         className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-sm transition-all shadow-lg shadow-red-900/20 active:scale-95 whitespace-nowrap"
       >
         Sign In
@@ -144,7 +148,7 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true }: Us
               onClick={async () => {
                 await logout();
                 onLogout?.();
-                window.location.href = '/auth/login';
+                router.refresh();
               }}
               className="w-full flex items-center gap-3 p-2 rounded-lg text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-colors group"
             >

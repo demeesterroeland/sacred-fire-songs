@@ -10,6 +10,7 @@ function SignUpSuccessContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const email = searchParams.get('email') || '';
+    const next = searchParams.get('next');
 
     const [code, setCode] = useState('');
     const [error, setError] = useState<string | null>(null);
@@ -33,7 +34,7 @@ function SignUpSuccessContent() {
         if (error) {
             setError(error.message);
         } else {
-            router.push('/auth/finish-registration');
+            router.push(`/auth/finish-registration${next ? `?next=${encodeURIComponent(next)}` : ""}`);
         }
     };
 
@@ -101,7 +102,7 @@ function SignUpSuccessContent() {
 
                 <div className="mt-8 pt-6 border-t border-[#2d3545] w-full text-center">
                     <Link
-                        href="/auth/login"
+                        href={`/auth/login${next ? `?next=${encodeURIComponent(next)}` : ""}`}
                         className="text-[#8e99aa] hover:text-white text-sm transition-colors"
                     >
                         Return to Login
