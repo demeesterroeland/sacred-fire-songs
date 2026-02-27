@@ -17,7 +17,7 @@
 - [x] Task: Implement SetlistManager component [900a570]
     - [ ] Write unit tests for `SetlistManager`
     - [ ] Implement UI for listing and creating setlists
-- [ ] Task: Implement "Add to Setlist" UI on Song Detail
+- [x] Task: Implement "Add to Setlist" UI on Song Detail [fdbf700]
     - [ ] Write unit tests for "Add to Setlist" button logic
     - [ ] Add "Add to Setlist" dropdown/modal to `app/songs/[id]/page.tsx`
 - [ ] Task: Conductor - User Manual Verification 'UI - Setlist Management' (Protocol in workflow.md)
