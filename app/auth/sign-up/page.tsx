@@ -3,10 +3,12 @@ import { redirect } from 'next/navigation';
 import { BackButton } from '@/components/common/BackButton';
 import { SignUpForm } from '@/components/sign-up-form';
 
-export default async function SignUp() {
+export default async function SignUp(props: { searchParams: Promise<{ next?: string }> }) {
+    const searchParams = await props.searchParams;
+    const next = searchParams.next || '/';
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
-    if (user) redirect('/');
+    if (user) redirect(next);
 
     return (
         <div className="flex-1 flex flex-col items-center justify-center min-h-[80vh] px-4">

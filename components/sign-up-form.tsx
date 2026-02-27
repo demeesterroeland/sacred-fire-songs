@@ -35,6 +35,7 @@ function SignUpFormContent({
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
+  const next = searchParams.get("next");
   const message = searchParams.get("message");
 
   const handleSignUp = async (e: React.FormEvent) => {
@@ -54,7 +55,7 @@ function SignUpFormContent({
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/auth/confirm?type=signup`,
+          emailRedirectTo: `${window.location.origin}/auth/confirm?type=signup${next ? `&next=${encodeURIComponent(next)}` : ""}`,
         },
       });
       if (error) throw error;
@@ -62,7 +63,7 @@ function SignUpFormContent({
       // Notify other components like Sidebar to refresh auth state
       window.dispatchEvent(new Event("auth-role-change"));
 
-      router.push(`/auth/sign-up-success?email=${encodeURIComponent(email)}`);
+      router.push(`/auth/sign-up-success?email=${encodeURIComponent(email)}${next ? `&next=${encodeURIComponent(next)}` : ""}`);
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : "An error occurred");
     } finally {
@@ -186,7 +187,7 @@ function SignUpFormContent({
         <p className="text-[#a0aec0] text-sm">
           Already have an account?
           <Link
-            href="/auth/login"
+            href={`/auth/login${next ? `?next=${encodeURIComponent(next)}` : ""}`}
             className="text-[#d9481e] hover:text-[#f45d1a] underline font-medium transition-colors ml-1"
           >
             Sign in

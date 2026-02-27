@@ -35,7 +35,7 @@ export function useToggleFavorite(id: string, initialIsFavorite: boolean = false
                 toast('Sign in to save favorites', {
                     action: {
                         label: 'Sign in →',
-                        onClick: () => { window.location.href = '/auth/login'; },
+                        onClick: () => { window.location.href = `/auth/login?next=${encodeURIComponent(window.location.pathname)}`; },
                     },
                     classNames: {
                         actionButton: 'text-amber-400 text-xs font-bold hover:text-amber-300 transition-colors ml-2',

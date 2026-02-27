@@ -52,7 +52,7 @@ export default function LibraryTabs() {
                         Create Playlist
                     </button>
                     {!user && (
-                        <Link href="/auth/login" className="flex items-center gap-1 text-[10px] text-gray-500 hover:text-gray-300 transition-colors">
+                        <Link href={`/auth/login?next=${encodeURIComponent(pathname)}`} className="flex items-center gap-1 text-[10px] text-gray-500 hover:text-gray-300 transition-colors">
                             <LogIn aria-hidden="true" className="w-2.5 h-2.5" />
                             Sign in to create
                         </Link>
