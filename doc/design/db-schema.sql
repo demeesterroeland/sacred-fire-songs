@@ -1,11 +1,12 @@
 /*
- **Version:** 2.5
+ **Version:** 2.6
  **Status:** Current
- **Date:** February 2, 2026
+ **Date:** February 27, 2026
  
  ## Usage
  This script provides a complete setup for the "Sacred Fire Songs" database. 
- It consolidates the initial schema and all subsequent migrations up to Jan 25, 2026.
+ It consolidates the initial schema and all subsequent migrations up to Feb 27, 2026.
+ (v2.6: Added partial indexes for is_public and alphabetical title index).
  (v2.4: Added tuning to song_versions).
  Run this in the Supabase SQL Editor to initialize a fresh database.
  */
@@ -87,7 +88,13 @@ create table public.setlist_items (
   transposition_override integer,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
--- 3. Triggers & Functions
+-- 3. Indexes
+-- Partial indexes for public content optimization
+CREATE INDEX IF NOT EXISTS idx_compositions_is_public_true ON public.compositions (created_at DESC) WHERE is_public = true;
+CREATE INDEX IF NOT EXISTS idx_setlists_is_public_true ON public.setlists (created_at DESC) WHERE is_public = true;
+CREATE INDEX IF NOT EXISTS idx_compositions_title_alphabetical ON public.compositions (title ASC);
+
+-- 4. Triggers & Functions
 -- Trigger to prevent linking songs to parent groups (only subcategories allowed)
 create or replace function public.check_is_subcategory() returns trigger as $$ begin if (
     select parent_id
@@ -103,7 +110,7 @@ create trigger trg_check_subcategory before
 insert
   or
 update on public.song_category_map for each row execute function public.check_is_subcategory();
--- 4. Views
+-- 5. Views
 -- View: Category Details (for UI display)
 create or replace view public.category_details as
 select child.id as subcategory_id,
@@ -145,7 +152,7 @@ from public.compositions s
   join public.category_details cd on scm.category_id = cd.subcategory_id
 group by s.id,
   s.title;
--- 5. Row Level Security (RLS) Policies
+-- 6. Row Level Security (RLS) Policies
 alter table public.profiles enable row level security;
 alter table public.categories enable row level security;
 alter table public.compositions enable row level security;
@@ -294,7 +301,7 @@ create policy "Auth users can delete setlist items" on public.setlist_items for 
     select auth.role()
   ) = 'authenticated'
 );
--- 6. SEED DATA (Categories)
+-- 7. SEED DATA (Categories)
 with groups as (
   insert into public.categories (name, slug, emoji)
   values ('The Elements', 'the-elements', '🌀'),
@@ -841,9 +848,9 @@ values -- THE ELEMENTS
       where name = 'Spiritual Concepts'
     )
   );
--- 7. TEST DATA (Mock Users & Songs) - OPTIONAL
+-- 8. TEST DATA (Mock Users & Songs) - OPTIONAL
 -- Run this section to populate the database with test users and songs for development.
--- 7.1 Insert Mock Users (Member, Musician, Admin)
+-- 8.1 Insert Mock Users (Member, Musician, Admin)
 INSERT INTO auth.users (
     id,
     instance_id,
@@ -888,7 +895,7 @@ VALUES (
     now(),
     now()
   ) ON CONFLICT (id) DO NOTHING;
--- 7.2 Insert Mock Profiles
+-- 8.2 Insert Mock Profiles
 INSERT INTO public.profiles (id, email, role)
 VALUES (
     '11111111-1111-1111-1111-111111111111',
@@ -907,7 +914,7 @@ VALUES (
   ) ON CONFLICT (id) DO
 UPDATE
 SET role = EXCLUDED.role;
--- 7.3 Update/Create Test Songs
+-- 8.3 Update/Create Test Songs
 -- Ensure 'Victory Song' exists, or create it if not present, then assign to Mock Member
 DO $$ BEGIN IF EXISTS (
   SELECT 1
