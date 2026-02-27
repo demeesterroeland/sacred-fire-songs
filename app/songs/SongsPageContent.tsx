@@ -289,6 +289,17 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy }: Song
                                             <Heart className={`w-3 h-3 ${state.favorites ? 'fill-amber-400' : ''}`} strokeWidth={1.5} />
                                             Favorites
                                         </button>
+                                        <button
+                                            onClick={() => setFilter('mine', !state.mine)}
+                                            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl border transition-all ${
+                                                state.mine
+                                                    ? 'bg-red-500/15 border-red-500/40 text-red-400 shadow-sm'
+                                                    : 'bg-gray-900/80 border-gray-800 text-gray-500 hover:text-red-400/70 hover:border-red-500/30'
+                                            }`}
+                                        >
+                                            <Music className="w-3 h-3" strokeWidth={1.5} />
+                                            My Songs
+                                        </button>
                                     </div>
                                 )}
                             </div>
