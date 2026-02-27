@@ -14,7 +14,7 @@
 - [x] Task: Conductor - User Manual Verification 'Foundation & Data Layer' (Protocol in workflow.md) [88cd9de]
 
 ## Phase 2: UI - Setlist Management
-- [ ] Task: Implement `SetlistManager` component
+- [x] Task: Implement SetlistManager component [900a570]
     - [ ] Write unit tests for `SetlistManager`
     - [ ] Implement UI for listing and creating setlists
 - [ ] Task: Implement "Add to Setlist" UI on Song Detail
