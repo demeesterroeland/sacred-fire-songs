@@ -192,15 +192,17 @@ export default function SetlistManager({ initialSetlists = [] }: { initialSetlis
                 {otherSetlists.length > 0 ? (
                     <div className="grid grid-cols-1 gap-4">
                         {otherSetlists.map(setlist => (
-                            <div key={setlist.id} className="bg-gray-900/40 p-4 rounded-2xl border border-gray-800 flex items-center gap-4 group cursor-pointer hover:bg-gray-800/60 transition-all hover:-translate-y-0.5">
-                                <div className="w-12 h-12 bg-gray-800 rounded-xl flex items-center justify-center group-hover:bg-gray-700 transition-colors shrink-0">
-                                    <ListMusic className="w-6 h-6 text-gray-400" />
+                            <Link key={setlist.id} href={`/library/playlists/${setlist.id}`}>
+                                <div className="bg-gray-900/40 p-4 rounded-2xl border border-gray-800 flex items-center gap-4 group cursor-pointer hover:bg-gray-800/60 transition-all hover:-translate-y-0.5">
+                                    <div className="w-12 h-12 bg-gray-800 rounded-xl flex items-center justify-center group-hover:bg-gray-700 transition-colors shrink-0">
+                                        <ListMusic className="w-6 h-6 text-gray-400" />
+                                    </div>
+                                    <div>
+                                        <h3 className="font-bold text-gray-100 group-hover:text-white transition-colors">{setlist.title}</h3>
+                                        <SongCountSubtitle emptyLabel={setlist.description || 'No songs yet'} />
+                                    </div>
                                 </div>
-                                <div>
-                                    <h3 className="font-bold text-gray-100 group-hover:text-white transition-colors">{setlist.title}</h3>
-                                    <SongCountSubtitle emptyLabel={setlist.description || 'No songs yet'} />
-                                </div>
-                            </div>
+                            </Link>
                         ))}
                     </div>
                 ) : (

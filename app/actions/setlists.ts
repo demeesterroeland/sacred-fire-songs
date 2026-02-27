@@ -1,6 +1,6 @@
 'use server';
 
-import { createClient } from '../../lib/supabase/server';
+import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 
 export async function createSetlist(title: string, description?: string): Promise<{ success: true; id: string } | { error: string }> {
@@ -139,5 +139,40 @@ export async function removeSongFromSetlist(setlistItemId: string): Promise<{ su
     }
 
     revalidatePath(`/library/playlists/${item.setlist_id}`);
+    return { success: true };
+}
+
+export async function updateSetlistItemOrder(setlistId: string, items: { id: string; order_index: number }[]): Promise<{ success: true } | { error: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+        return { error: 'Not authenticated' };
+    }
+
+    // Verify setlist ownership
+    const { data: setlist } = await supabase
+        .from('setlists')
+        .select('id')
+        .eq('id', setlistId)
+        .eq('owner_id', user.id)
+        .maybeSingle();
+
+    if (!setlist) {
+        return { error: 'Setlist not found or access denied' };
+    }
+
+    // Perform batch update (sequential for simplicity in server actions, or use a RPC if many items)
+    for (const item of items) {
+        const { error } = await supabase
+            .from('setlist_items')
+            .update({ order_index: item.order_index })
+            .eq('id', item.id)
+            .eq('setlist_id', setlistId);
+        
+        if (error) return { error: error.message };
+    }
+
+    revalidatePath(`/library/playlists/${setlistId}`);
     return { success: true };
 }
