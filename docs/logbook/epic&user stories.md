@@ -1,8 +1,8 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 1.26
+**Version:** 1.29
 **Status:** Living Document
-**Date:** February 26, 2026
+**Date:** February 28, 2026
 
 ## Changelog
 
@@ -26,6 +26,7 @@
 | **1.26** | Feb 26, 2026 | Marked 1.1.4 as [Implemented]: delete icons on song cards in library view (owner/admin, hover-visible, top-right overlay) plus profiles RLS policies fix. |
 | **1.27** | Feb 26, 2026 | Marked 1.1.5 as [Implemented]: guest upload modal (Log In / Create Account) now shows when unauthenticated user clicks "Add Song". |
 | **1.28** | Feb 26, 2026 | Marked 1.1.4 as [Implemented]: delete icons on song cards in library view (owner/admin, hover-visible, top-right overlay) plus profiles RLS policies fix. |
+| **1.29** | Feb 28, 2026 | Added playlist feature stories 4.1.3–4.1.10: quick-win playlist enhancements (search-and-add sheet, visibility toggle, shareable link, description) and high-value future features (presentation mode, duplicate, per-song transpose, cover color). |
 
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
@@ -371,6 +372,99 @@ Scenario: Reorder Setlist
   When I drag "Song B" to position 1
   Then "Song B" should be at position 1
   And "Song A" should be at position 2
+```
+
+**Story 4.1.3:** As a Musician, I want to search for and add songs to a playlist directly from the playlist detail page so that I don't have to navigate away to find songs.
+
+```gherkin
+Scenario: Add song via search sheet
+  Given I am on the Playlist Detail page
+  When I click the "+ Add Songs" button
+  Then a search sheet should slide up
+  And I should be able to type to filter songs
+  And clicking a song should add it to the playlist immediately
+  And the song should appear at the bottom of the list
+```
+
+**Story 4.1.4:** As a Musician, I want to toggle my playlist between public and private so that I can control who can see it.
+
+```gherkin
+Scenario: Make playlist public
+  Given I am on the Playlist Detail page of a private playlist
+  When I click the visibility toggle (Lock icon)
+  Then the playlist should become public
+  And the icon should change to a Globe
+  And a success toast should confirm the change
+
+Scenario: Make playlist private
+  Given I am on the Playlist Detail page of a public playlist
+  When I click the visibility toggle (Globe icon)
+  Then the playlist should become private
+  And the icon should change to a Lock
+```
+
+**Story 4.1.5:** As a Musician, I want to share a link to a public playlist so that ceremony co-facilitators can view it.
+
+```gherkin
+Scenario: Copy shareable link
+  Given I am on the Playlist Detail page of a public playlist
+  When I click the "Copy Link" button
+  Then the playlist URL should be copied to my clipboard
+  And a toast should confirm "Link copied"
+```
+
+**Story 4.1.6:** As a Musician, I want to add a description or note to a playlist so that I can remember its purpose (e.g. "Closing songs, slow and grounding").
+
+```gherkin
+Scenario: Add description
+  Given I am on the Playlist Detail page
+  When I click the description area (or an edit icon)
+  Then an inline text field should appear
+  And when I type and save, the description should persist
+  And it should display below the playlist title
+```
+
+**Story 4.1.7:** As a Ceremony Leader, I want to enter a full-screen presentation mode for a playlist so that I can read songs clearly during a ceremony without UI chrome.
+
+```gherkin
+Scenario: Enter presentation mode
+  Given I am on the Playlist Detail page with at least one song
+  When I click "Present" or the ceremony mode button
+  Then the screen should go full-screen showing the current song's lyrics and chords
+  And swiping or pressing arrow keys should advance to the next song
+  And the screen wake lock should be active
+```
+
+**Story 4.1.8:** As a Musician, I want to duplicate a playlist so that I can create variations without rebuilding from scratch.
+
+```gherkin
+Scenario: Duplicate playlist
+  Given I am on the Playlist Detail page
+  When I select "Duplicate" from the context menu
+  Then a new playlist named "Copy of [original name]" should be created
+  And it should contain all the same songs in the same order
+  And I should be navigated to the new playlist
+```
+
+**Story 4.1.9:** As a Musician, I want to set a transposition offset per song within a playlist so that each song is displayed in the right key for our group without modifying the original.
+
+```gherkin
+Scenario: Set per-song transpose in playlist
+  Given I am on the Playlist Detail page
+  When I tap the key indicator next to a song
+  Then I should be able to set a +/- semitone offset
+  And when I navigate to that song from the playlist, the chords should be shown transposed
+  And the original song in the library should remain unchanged
+```
+
+**Story 4.1.10:** As a Musician, I want to assign a cover color or icon to a playlist so that I can visually distinguish my playlists at a glance.
+
+```gherkin
+Scenario: Set playlist cover color
+  Given I am on the Playlist Detail page
+  When I click the playlist thumbnail/icon area
+  Then I should see a color picker or icon selector
+  And after selecting, the playlist card on the Playlists page should reflect the chosen color/icon
 ```
 
 ### Epic 4.2: Print & Export

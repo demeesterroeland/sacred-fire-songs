@@ -103,6 +103,7 @@ export default async function Home() {
                   hasChords={song.hasChords}
                   hasMelody={song.hasMelody}
                   isFavorite={song.isFavorite ?? false}
+                  userId={user?.id}
                   categories={song.categories}
                 />
               ))
