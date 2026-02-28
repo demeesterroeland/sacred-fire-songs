@@ -28,12 +28,12 @@ function SongCountSubtitle({ counts, emptyLabel }: { counts: SongCounts; emptyLa
 // ─── Shared primitives ────────────────────────────────────────────────────────
 
 const accentClasses = {
-    amber: {
-        card:      'bg-amber-500/8 border-amber-500/20',
-        cardHover: 'hover:bg-amber-500/15 hover:border-amber-500/35',
-        icon:      'bg-amber-500/15',
-        iconHover: 'group-hover:bg-amber-500/25',
-        iconText:  'text-amber-400 fill-amber-400',
+    rose: {
+        card:      'bg-rose-500/8 border-rose-500/20',
+        cardHover: 'hover:bg-rose-500/15 hover:border-rose-500/35',
+        icon:      'bg-rose-500/15',
+        iconHover: 'group-hover:bg-rose-500/25',
+        iconText:  'text-rose-400 fill-rose-400',
     },
     violet: {
         card:      'bg-violet-500/8 border-violet-500/20',
@@ -127,7 +127,7 @@ function GuestView({ publicPlaylists }: { publicPlaylists: { id: string; title: 
             <div>
                 <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-3">Smart Playlists</p>
                 <div className="grid grid-cols-1 gap-3">
-                    <SmartPlaylistCard icon={Heart}   title="My Favorites" subtitle="Your favorited songs, always with you"      accent="amber"  />
+                    <SmartPlaylistCard icon={Heart}   title="My Favorites" subtitle="Your favorited songs, always with you"      accent="rose"   />
                     <SmartPlaylistCard icon={Music}   title="My Songs"     subtitle="Songs you've contributed to the library"    accent="violet" />
                     <SmartPlaylistCard icon={PenLine} title="My Drafts"    subtitle="Your private work-in-progress songs"        accent="gray"   />
                 </div>
