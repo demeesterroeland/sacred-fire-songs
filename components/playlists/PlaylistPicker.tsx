@@ -16,6 +16,8 @@ interface PlaylistPickerProps {
     userId: string;
     /** className for the trigger button */
     triggerClassName?: string;
+    /** className for the ListPlus icon — defaults to w-3.5 h-3.5 */
+    iconClassName?: string;
 }
 
 // ─── Data fetching ────────────────────────────────────────────────────────────
@@ -42,7 +44,7 @@ async function fetchContainingPlaylists(compositionId: string) {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function PlaylistPicker({ compositionId, userId, triggerClassName }: PlaylistPickerProps) {
+export function PlaylistPicker({ compositionId, userId, triggerClassName, iconClassName }: PlaylistPickerProps) {
     const [open, setOpen] = useState(false);
     const [newTitle, setNewTitle] = useState('');
     const [isCreating, startCreateTransition] = useTransition();
@@ -129,7 +131,7 @@ export function PlaylistPicker({ compositionId, userId, triggerClassName }: Play
                         triggerClassName
                     )}
                 >
-                    <ListPlus className="w-3.5 h-3.5" />
+                    <ListPlus className={iconClassName ?? 'w-3.5 h-3.5'} />
                 </button>
             </PopoverTrigger>
             <PopoverContent align="end" className="w-64">

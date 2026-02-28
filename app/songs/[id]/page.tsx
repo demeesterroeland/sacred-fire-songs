@@ -144,6 +144,7 @@ export default function SongDetailPage() {
                             compositionId={id}
                             userId={user.id}
                             triggerClassName="p-2"
+                            iconClassName="w-[17px] h-[17px]"
                         />
                     )}
                     <button
@@ -219,6 +220,7 @@ export default function SongDetailPage() {
                                 compositionId={id}
                                 userId={user.id}
                                 triggerClassName="p-2"
+                                iconClassName="w-[17px] h-[17px]"
                             />
                         )}
                         <button

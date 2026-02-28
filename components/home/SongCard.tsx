@@ -138,6 +138,7 @@ export default function SongCard({
                     <PlaylistPicker
                         compositionId={id}
                         userId={userId}
+                        iconClassName="w-4 h-4"
                     />
                 )}
                 <button
