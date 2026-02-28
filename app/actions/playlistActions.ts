@@ -25,9 +25,10 @@ export async function createPlaylist(
         .from('setlists')
         .insert({ owner_id: user.id, title: trimmed, is_public: false })
         .select('id')
-        .single();
+        .maybeSingle();
 
     if (error) return { error: error.message };
+    if (!data) return { error: 'Insert returned no data' };
     revalidatePath('/library/playlists');
     return { id: data.id };
 }
@@ -197,11 +198,12 @@ export async function reorderPlaylistSongs(
 
     if (!playlist || playlist.owner_id !== user.id) return { error: 'Not your playlist' };
 
-    await Promise.all(
+    const results = await Promise.all(
         orderedItemIds.map((id, index) =>
             supabase.from('setlist_items').update({ order_index: index }).eq('id', id)
         )
     );
-
+    const failed = results.find(r => r.error);
+    if (failed) return { error: failed.error!.message };
     return {};
 }
