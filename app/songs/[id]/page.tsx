@@ -13,6 +13,7 @@ import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal
 import { useQuery } from '@tanstack/react-query';
 import { Trash2, Edit2, ArrowLeft, Lock as LockIcon, Music, Link as LinkIcon, Flame, IndentIncrease, Heart } from 'lucide-react';
 import { useToggleFavorite } from '@/hooks/useToggleFavorite';
+import { PlaylistPicker } from '@/components/playlists/PlaylistPicker';
 import { useDeleteSong } from '@/hooks/useDeleteSong';
 import { SONG_KEYS } from '@/lib/songs/queryKeys';
 import { useWakeLock } from '@/hooks/useWakeLock';
@@ -138,6 +139,13 @@ export default function SongDetailPage() {
                 </div>
                 {/* Action Buttons and User Profile (Mobile) */}
                 <div className="flex items-center gap-2 shrink-0">
+                    {user && id && (
+                        <PlaylistPicker
+                            compositionId={id}
+                            userId={user.id}
+                            triggerClassName="p-2"
+                        />
+                    )}
                     <button
                         onClick={handleToggleFavorite}
                         aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
@@ -205,6 +213,13 @@ export default function SongDetailPage() {
                                     <Edit2 className="w-4 h-4" /> <span className="hidden xl:inline">Edit</span>
                                 </button>
                             </Link>
+                        )}
+                        {user && id && (
+                            <PlaylistPicker
+                                compositionId={id}
+                                userId={user.id}
+                                triggerClassName="p-2"
+                            />
                         )}
                         <button
                             onClick={handleToggleFavorite}
