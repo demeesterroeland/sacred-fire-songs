@@ -2,12 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
-
-export const SMART_PLAYLISTS = ['My Favorites', 'My Songs', 'My Drafts'] as const;
-
-export function isSmartPlaylist(title: string): boolean {
-    return (SMART_PLAYLISTS as readonly string[]).includes(title);
-}
+import { isSmartPlaylist } from '@/lib/playlists/smartPlaylists';
 
 // ─── Create ───────────────────────────────────────────────────────────────────
 
