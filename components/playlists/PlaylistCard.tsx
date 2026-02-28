@@ -1,7 +1,7 @@
 // components/playlists/PlaylistCard.tsx
 'use client';
 
-import { useState, useRef, useTransition } from 'react';
+import { useState, useRef, useTransition, useEffect } from 'react';
 import Link from 'next/link';
 import { ListMusic } from 'lucide-react';
 import { PlaylistContextMenu } from './PlaylistContextMenu';
@@ -18,13 +18,17 @@ interface PlaylistCardProps {
 export function PlaylistCard({ id, title, subtitle }: PlaylistCardProps) {
     const [isRenaming, setIsRenaming] = useState(false);
     const [draftTitle, setDraftTitle] = useState(title);
+    const [optimisticTitle, setOptimisticTitle] = useState(title);
     const [isPending, startTransition] = useTransition();
     const inputRef = useRef<HTMLInputElement>(null);
     const isSavingRef = useRef(false);
     const router = useRouter();
 
+    // Sync optimistic title when the server-refreshed prop arrives
+    useEffect(() => { setOptimisticTitle(title); }, [title]);
+
     const handleRenameStart = () => {
-        setDraftTitle(title);
+        setDraftTitle(optimisticTitle);
         setIsRenaming(true);
         setTimeout(() => inputRef.current?.select(), 50);
     };
@@ -33,13 +37,15 @@ export function PlaylistCard({ id, title, subtitle }: PlaylistCardProps) {
         if (isSavingRef.current) return;
         const trimmed = draftTitle.trim();
         setIsRenaming(false);
-        if (!trimmed || trimmed === title) return;
+        if (!trimmed || trimmed === optimisticTitle) return;
 
+        setOptimisticTitle(trimmed); // show new name immediately
         isSavingRef.current = true;
         startTransition(async () => {
             const result = await renamePlaylist(id, trimmed);
             if (result.error) {
                 toast.error(result.error);
+                setOptimisticTitle(title); // revert on error
             } else {
                 toast.success('Renamed');
                 router.refresh();
@@ -76,7 +82,7 @@ export function PlaylistCard({ id, title, subtitle }: PlaylistCardProps) {
                         />
                     ) : (
                         <h3 className="font-bold text-gray-100 group-hover:text-white transition-colors truncate">
-                            {title}
+                            {optimisticTitle}
                         </h3>
                     )}
                     <div className="text-xs text-gray-500 mt-0.5">{subtitle}</div>
