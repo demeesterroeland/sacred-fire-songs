@@ -40,10 +40,10 @@ export function CreatePlaylistInput() {
         return (
             <button
                 onClick={open}
-                className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-gray-300 transition-colors group"
+                className="flex items-center gap-1 text-xs font-semibold text-amber-400 border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 hover:border-amber-500/50 rounded-full px-3 py-1 transition-all"
             >
-                <Plus className="w-3.5 h-3.5 group-hover:text-amber-400 transition-colors" />
-                New Playlist
+                <Plus className="w-3.5 h-3.5" />
+                Create
             </button>
         );
     }
