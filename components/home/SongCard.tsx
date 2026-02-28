@@ -5,6 +5,7 @@ import { Music, Guitar, Heart } from 'lucide-react';
 import { getCategoryColor, getCategoryStyles } from '@/lib/uiUtils';
 import { cn } from '@/lib/utils';
 import { useToggleFavorite } from '@/hooks/useToggleFavorite';
+import { PlaylistPicker } from '@/components/playlists/PlaylistPicker';
 
 interface SongCardProps {
     id: string;
@@ -16,6 +17,7 @@ interface SongCardProps {
     hasChords?: boolean;
     hasMelody?: boolean;
     isFavorite?: boolean;
+    userId?: string;
     categories?: {
         name: string;
         slug: string;
@@ -32,6 +34,7 @@ export default function SongCard({
     hasChords = false,
     hasMelody = false,
     isFavorite = false,
+    userId,
     categories = []
 }: SongCardProps) {
     const { isFav, handleToggle } = useToggleFavorite(id, isFavorite);
@@ -129,25 +132,33 @@ export default function SongCard({
                 </div>
             </Link>
 
-            {/* Heart button — bottom-right to avoid overlap with admin delete button (top-right) */}
-            <button
-                onClick={handleToggle}
-                aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
-                className={cn(
-                    'absolute bottom-3 right-3 z-20 p-1 rounded-full transition-all duration-300',
-                    isFav
-                        ? 'text-amber-400 heart-glow'
-                        : 'text-gray-700 hover:text-amber-400/60'
+            {/* Action buttons — bottom-right */}
+            <div className="absolute bottom-3 right-3 z-20 flex items-center gap-1">
+                {userId && (
+                    <PlaylistPicker
+                        compositionId={id}
+                        userId={userId}
+                    />
                 )}
-            >
-                <Heart
+                <button
+                    onClick={handleToggle}
+                    aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
                     className={cn(
-                        'w-3.5 h-3.5 transition-all duration-200',
-                        isFav && 'fill-amber-400 scale-110'
+                        'p-1 rounded-full transition-all duration-300',
+                        isFav
+                            ? 'text-amber-400 heart-glow'
+                            : 'text-gray-700 hover:text-amber-400/60'
                     )}
-                    strokeWidth={1.5}
-                />
-            </button>
+                >
+                    <Heart
+                        className={cn(
+                            'w-3.5 h-3.5 transition-all duration-200',
+                            isFav && 'fill-amber-400 scale-110'
+                        )}
+                        strokeWidth={1.5}
+                    />
+                </button>
+            </div>
         </div>
     );
 }

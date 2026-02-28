@@ -362,6 +362,7 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy }: Song
                                         hasChords={song.hasChords}
                                         hasMelody={song.hasMelody}
                                         isFavorite={favoriteIds.has(song.id)}
+                                        userId={user?.id}
                                         categories={song.categories}
                                     />
                                     {user && (isAdmin || song.ownerId === user.id) && (
