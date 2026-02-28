@@ -2172,3 +2172,46 @@ Performed a comprehensive technical audit of the codebase against Next.js 16 and
 ### 3. Documentation & Task Management
 - **Master Tasks**: Appended a new "Next.js 16 & React 19 Framework Audit Fixes" section to the logbook to track architectural debt.
 - **Walkthrough**: Synchronized the project history with the latest `feat/onboarding-settings-ux` developments.
+
+---
+
+## Session: Feb 28, 2026 — Planning: Gatekeeper Role, Musician Profile Setting & Tooling Fixes
+
+### 1. Homepage Favorites Card Fix
+- Corrected a `TypeError` in `app/library/playlists/page.tsx` caused by `accent="amber"` referencing a missing key in `accentClasses` — changed to `accent="rose"`.
+- Aligned the Favorites dashboard card on `app/page.tsx` with all other quick-action cards: vertical layout, rounded-full icon container, rose color scheme.
+
+### 2. Epic & User Story Roadmap Review
+- Read the full `epic&user stories.md` and presented all epics/stories in a table grouped by phase (Story, Feature, Status).
+
+### 3. PWA User Stories Added (Epic 3.3 + 4.5)
+- Added Epic 4.5 (PWA: install, branding, offline fallback), then reorganised: install (3.3.1) and branding (3.3.2) moved to new Epic 3.3 in Phase 3; offline fallback remains as 4.5.1 in Phase 4.
+
+### 4. Gatekeeper Role — Design & Stories (Epic 3.4)
+- Ran brainstorming session: role name "Gatekeeper", mixed permissions, Featured playlists, duplicate merging, "Needs Improvement" flag+queue+notify workflow, metadata & media links editing scope.
+- Added Epic 3.4 with stories 3.4.1–3.4.5 to the MD.
+- Created `docs/plans/2026-02-28-gatekeeper-role-design.md` (v1.1) including permissions table, all feature areas, data model notes, and QuickSwitch dev tooling section (rename from `MockRoleSwitcher`, 5 mock personas including Gatekeeper and Member+Musician).
+
+### 5. Musician → Profile Setting (Epic 3.5)
+- Decided `musician` should be removed as a role and replaced with `is_musician: boolean` on `profiles` (self-declared, no Admin approval needed).
+- Added Epic 3.5 with stories 3.5.1 (profile toggle) and 3.5.2 (sign-up onboarding question).
+- Created `docs/plans/2026-02-28-musician-profile-setting-design.md` design doc.
+- Created `docs/plans/2026-02-28-musician-to-profile-setting.md` — 8-task implementation plan covering: DB migration (enum rebuild, add `is_musician` column), TypeScript types, dev tools update, profile settings toggle, chord UI gating (`SongsPageContent.tsx`, `SongCard.tsx`), seed data update, full test suite, and sign-up onboarding page (`/onboarding`).
+- Updated gatekeeper design doc with corrected role hierarchy (no Musician), corrected permissions table, and QuickSwitch component spec.
+- Audited plans against user stories — added missing Story 3.5.2 (onboarding question) as Task 8 to the musician plan.
+
+### 6. sync-stories Tooling Fixes
+- Identified 5 bugs in the sync-stories script/skill:
+  1. Broken push command (`echo "...\&..."` produced literal backslash in path) → fixed to CLI arg invocation.
+  2. Missing epic labels caused silent failure → added `ensureLabel()` auto-create before issue creation.
+  3. Trailing commas in issue titles from MD format → strip in `buildIssueTitle()`.
+  4. `id.replace('.', ...)` only escaped first dot → changed to `/\./g` global.
+  5. Push step was "optional" in skill → always runs now.
+- Applied all fixes across `.claude/commands/sync-stories.md`, `sync-stories-to-gh.mjs`, `sync-stories-from-gh.mjs`, `parseStories.mjs`.
+
+### 7. GitHub Issues Audit & Cleanup
+- Ran full label audit: found 2 stories missing `user-story` label (#33, #32), 5 non-stories with `user-story` label (#80, #63, #62, #53, #36), and 55 stories missing `epic-*` labels.
+- Fixed all label issues: added missing labels, removed incorrect labels, retroactively added `epic-*` labels to all 55 old issues via script.
+- Full MD↔GH sync comparison (all 44 stories): identified 6 sync issues — 5 old-format duplicate issues for 4.1.7–4.1.10 (#89–#92), and #32 title using `1.1.2 - bis` spacing.
+- Closed #89–#92 as superseded by canonical issues; normalized #32 title to `[Story 1.1.2-bis]`.
+- MD status sync: stories 1.1.5, 4.1.1, 4.1.2 pulled from GH and marked `[Implemented]`.

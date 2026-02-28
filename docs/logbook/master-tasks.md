@@ -940,3 +940,23 @@
     - [ ] Refactor `DeleteConfirmationModal.tsx` to remove synchronous `setState` in `useEffect` (use `framer-motion` or derived state).
     - [ ] Refactor `useAuth.tsx` to align with React 19 state loading (avoid effect-based syncing).
     - [ ] Address high-priority ESLint errors (`react/no-unescaped-entities`, `next/image`, `any` types).
+
+- [x] **Planning Session — Feb 28, 2026 (Gatekeeper, Musician, PWA, Tooling)**
+    - [x] Fix TypeError on playlists page (`accent="amber"` → `accent="rose"`)
+    - [x] Fix Favorites card layout on homepage dashboard
+    - [x] Add Epic 3.3 (PWA Installability) stories 3.3.1–3.3.2
+    - [x] Add Epic 4.5 (PWA Offline Reliability) story 4.5.1
+    - [x] Brainstorm and design Gatekeeper role (Epic 3.4)
+    - [x] Add Epic 3.4 stories 3.4.1–3.4.5 to MD
+    - [x] Create `docs/plans/2026-02-28-gatekeeper-role-design.md`
+    - [x] Remove Musician as role; add `is_musician` profile setting (Epic 3.5)
+    - [x] Add Epic 3.5 stories 3.5.1–3.5.2 to MD
+    - [x] Create `docs/plans/2026-02-28-musician-profile-setting-design.md`
+    - [x] Create `docs/plans/2026-02-28-musician-to-profile-setting.md` (8-task plan)
+    - [x] Update gatekeeper design doc: role hierarchy, permissions, QuickSwitch spec
+    - [x] Add Story 3.5.2 onboarding question as Task 8 to musician plan
+    - [x] Fix 5 bugs in sync-stories script and skill
+    - [x] Audit GitHub issues: fix missing/incorrect labels, retroactively add epic-* to 55 issues
+    - [x] Full MD↔GH sync comparison — fix 6 sync issues (duplicates, title normalisation)
+    - [x] Sync MD status: mark 1.1.5, 4.1.1, 4.1.2 as [Implemented]
+    - [x] Merge PR #113 into main
