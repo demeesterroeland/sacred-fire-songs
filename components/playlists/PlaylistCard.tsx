@@ -72,7 +72,7 @@ export function PlaylistCard({ id, title, subtitle }: PlaylistCardProps) {
                             }}
                             onClick={e => e.preventDefault()}
                             autoFocus
-                            className="w-full bg-gray-800 border border-amber-500/50 rounded-lg px-2 py-1 text-sm font-bold text-gray-100 outline-none focus:border-amber-500"
+                            className="w-[95%] bg-gray-800 border border-amber-500/50 rounded-lg px-2 py-1 text-sm font-bold text-gray-100 outline-none focus:border-amber-500"
                         />
                     ) : (
                         <h3 className="font-bold text-gray-100 group-hover:text-white transition-colors truncate">
