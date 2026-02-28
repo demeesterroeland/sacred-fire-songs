@@ -16,7 +16,7 @@ export default async function PlaylistDetailPage({ params }: Props) {
 
     const { data: playlist } = await supabase
         .from('setlists')
-        .select('id, title, owner_id')
+        .select('id, title, owner_id, is_public, description')
         .eq('id', id)
         .maybeSingle();
 
@@ -51,6 +51,8 @@ export default async function PlaylistDetailPage({ params }: Props) {
             <PlaylistDetailHeader
                 playlistId={playlist.id}
                 initialTitle={playlist.title}
+                initialIsPublic={playlist.is_public ?? false}
+                initialDescription={playlist.description ?? null}
                 songCount={mappedItems.length}
             />
 

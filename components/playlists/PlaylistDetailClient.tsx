@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useEffect } from 'react';
 import {
     DndContext,
     closestCenter,
@@ -18,10 +18,11 @@ import {
     arrayMove,
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-import { GripVertical, X, Music } from 'lucide-react';
+import { GripVertical, X, Music, Plus } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { reorderPlaylistSongs, removeSongFromPlaylist } from '@/app/actions/playlistActions';
+import { AddSongsSheet } from './AddSongsSheet';
 
 export interface PlaylistItem {
     id: string;
@@ -108,6 +109,10 @@ export function PlaylistDetailClient({
 }) {
     const [items, setItems] = useState(initialItems);
     const [isPending, startTransition] = useTransition();
+    const [sheetOpen, setSheetOpen] = useState(false);
+
+    // Sync when server refreshes (e.g. after adding/removing via sheet)
+    useEffect(() => { setItems(initialItems); }, [initialItems]);
 
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -147,26 +152,61 @@ export function PlaylistDetailClient({
         });
     };
 
+    const existingCompositionIds = items.map(i => i.songId);
+
     if (items.length === 0) {
         return (
-            <div className="flex flex-col items-center justify-center py-16 text-center gap-3">
-                <Music className="w-10 h-10 text-gray-700" />
-                <p className="text-gray-500 text-sm max-w-xs">
-                    No songs yet. Add songs using the <span className="text-gray-400">+</span> icon on any song card or detail page.
-                </p>
-            </div>
+            <>
+                <div className="flex flex-col items-center justify-center py-16 text-center gap-4">
+                    <Music className="w-10 h-10 text-gray-700" />
+                    <p className="text-gray-500 text-sm max-w-xs">No songs yet.</p>
+                    <button
+                        onClick={() => setSheetOpen(true)}
+                        className="flex items-center gap-1.5 text-sm font-semibold text-amber-400 border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 rounded-full px-4 py-1.5 transition-all"
+                    >
+                        <Plus className="w-4 h-4" />
+                        Add Songs
+                    </button>
+                </div>
+                <AddSongsSheet
+                    playlistId={playlistId}
+                    existingCompositionIds={existingCompositionIds}
+                    open={sheetOpen}
+                    onClose={() => setSheetOpen(false)}
+                />
+            </>
         );
     }
 
     return (
-        <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-            <SortableContext items={items.map(i => i.id)} strategy={verticalListSortingStrategy}>
-                <div className="space-y-2">
-                    {items.map(item => (
-                        <SortableRow key={item.id} item={item} onRemove={handleRemove} disabled={isPending} />
-                    ))}
-                </div>
-            </SortableContext>
-        </DndContext>
+        <>
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                <SortableContext items={items.map(i => i.id)} strategy={verticalListSortingStrategy}>
+                    <div className="space-y-2">
+                        {items.map(item => (
+                            <SortableRow key={item.id} item={item} onRemove={handleRemove} disabled={isPending} />
+                        ))}
+                    </div>
+                </SortableContext>
+            </DndContext>
+
+            {/* Add more songs */}
+            <div className="flex justify-center pt-4">
+                <button
+                    onClick={() => setSheetOpen(true)}
+                    className="flex items-center gap-1.5 text-sm font-semibold text-amber-400 border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 rounded-full px-4 py-1.5 transition-all"
+                >
+                    <Plus className="w-4 h-4" />
+                    Add Songs
+                </button>
+            </div>
+
+            <AddSongsSheet
+                playlistId={playlistId}
+                existingCompositionIds={existingCompositionIds}
+                open={sheetOpen}
+                onClose={() => setSheetOpen(false)}
+            />
+        </>
     );
 }

@@ -91,6 +91,65 @@ export async function deletePlaylist(
     return {};
 }
 
+// ─── Visibility ───────────────────────────────────────────────────────────────
+
+export async function togglePlaylistVisibility(
+    id: string,
+    isPublic: boolean
+): Promise<{ error?: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { error: 'Not authenticated' };
+
+    const { data: playlist } = await supabase
+        .from('setlists')
+        .select('owner_id, title')
+        .eq('id', id)
+        .maybeSingle();
+
+    if (!playlist || playlist.owner_id !== user.id) return { error: 'Not your playlist' };
+    if (isSmartPlaylist(playlist.title)) return { error: 'Cannot modify smart playlists' };
+
+    const { error } = await supabase
+        .from('setlists')
+        .update({ is_public: isPublic })
+        .eq('id', id);
+
+    if (error) return { error: error.message };
+    revalidatePath('/library/playlists');
+    revalidatePath(`/library/playlists/${id}`);
+    return {};
+}
+
+// ─── Description ──────────────────────────────────────────────────────────────
+
+export async function updatePlaylistDescription(
+    id: string,
+    description: string
+): Promise<{ error?: string }> {
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return { error: 'Not authenticated' };
+
+    const { data: playlist } = await supabase
+        .from('setlists')
+        .select('owner_id, title')
+        .eq('id', id)
+        .maybeSingle();
+
+    if (!playlist || playlist.owner_id !== user.id) return { error: 'Not your playlist' };
+    if (isSmartPlaylist(playlist.title)) return { error: 'Cannot modify smart playlists' };
+
+    const { error } = await supabase
+        .from('setlists')
+        .update({ description: description.trim() || null })
+        .eq('id', id);
+
+    if (error) return { error: error.message };
+    revalidatePath(`/library/playlists/${id}`);
+    return {};
+}
+
 // ─── Add song ─────────────────────────────────────────────────────────────────
 
 export async function addSongToPlaylist(
