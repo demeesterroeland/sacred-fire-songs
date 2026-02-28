@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
-import { Heart, ListMusic, Flame, Droplets, Lock, Globe, Users, PenLine, Music, Plus } from 'lucide-react';
+import { Heart, ListMusic, Flame, Droplets, Lock, Globe, Users, PenLine, Music, Plus, LogIn } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { CreatePlaylistInput } from '@/components/playlists/CreatePlaylistInput';
 import { PlaylistCard } from '@/components/playlists/PlaylistCard';
@@ -142,8 +142,14 @@ function GuestView() {
             <div>
                 <div className="flex items-center justify-between mb-3">
                     <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">My Playlists</p>
-                    <div className="flex items-center gap-2">
-                        <span className="text-[10px] text-gray-600">Sign in to create</span>
+                    <div className="flex items-center gap-4">
+                        <Link
+                            href="/auth/login?next=/library/playlists"
+                            className="flex items-center gap-1.5 text-[10px] text-gray-500 hover:text-gray-300 transition-colors"
+                        >
+                            <LogIn className="w-3 h-3" />
+                            Sign in to create playlists
+                        </Link>
                         <Link
                             href="/auth/login?next=/library/playlists"
                             className="flex items-center gap-1 text-xs font-semibold text-amber-400/50 border border-amber-500/20 bg-amber-500/5 hover:bg-amber-500/10 hover:text-amber-400/80 rounded-full px-3 py-1 transition-all"
