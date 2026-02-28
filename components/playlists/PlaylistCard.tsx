@@ -30,7 +30,13 @@ export function PlaylistCard({ id, title, subtitle }: PlaylistCardProps) {
     const handleRenameStart = () => {
         setDraftTitle(optimisticTitle);
         setIsRenaming(true);
-        setTimeout(() => inputRef.current?.select(), 50);
+        setTimeout(() => {
+            const input = inputRef.current;
+            if (input) {
+                const len = input.value.length;
+                input.setSelectionRange(len, len);
+            }
+        }, 50);
     };
 
     const handleRenameSave = () => {
