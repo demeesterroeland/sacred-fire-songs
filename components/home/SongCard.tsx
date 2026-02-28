@@ -78,7 +78,7 @@ export default function SongCard({
                     />
 
                     <div className="relative flex justify-between items-start z-10 w-full mb-4">
-                        <div className="flex-1 min-w-0 pr-8">
+                        <div className="flex-1 min-w-0 pr-20">
                             <div className="flex items-center gap-2 mb-1">
                                 <h3 className={`text-base font-bold text-gray-100 leading-tight ${textColors[accentColor] || textColors.red} transition-colors group-hover:translate-x-1 duration-300 truncate`}>
                                     {title}
