@@ -12,9 +12,11 @@ interface PlaylistCardProps {
     title: string;
     subtitle: React.ReactNode;
     isPublic?: boolean;
+    description?: string | null;
+    songTitlePreview?: string;
 }
 
-export function PlaylistCard({ id, title, subtitle, isPublic = false }: PlaylistCardProps) {
+export function PlaylistCard({ id, title, subtitle, isPublic = false, description, songTitlePreview }: PlaylistCardProps) {
     const {
         optimisticTitle,
         isRenaming,
@@ -64,6 +66,12 @@ export function PlaylistCard({ id, title, subtitle, isPublic = false }: Playlist
                         </h3>
                     )}
                     <div className="text-xs text-gray-500 mt-0.5">{subtitle}</div>
+                    {description
+                        ? <p className="text-xs text-gray-500 mt-0.5 truncate">{description}</p>
+                        : songTitlePreview
+                            ? <p className="text-xs text-gray-600 italic mt-0.5 truncate">{songTitlePreview}</p>
+                            : null
+                    }
                 </div>
             </Link>
 
