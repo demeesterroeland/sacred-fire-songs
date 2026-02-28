@@ -1,7 +1,7 @@
 // components/playlists/PlaylistPicker.tsx
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useRef, useTransition } from 'react';
 import { Plus, Check, ListPlus, Loader2 } from 'lucide-react';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
@@ -62,7 +62,12 @@ export function PlaylistPicker({ compositionId, userId, triggerClassName }: Play
 
     const isLoading = loadingPlaylists || loadingContaining;
 
+    const pendingRef = useRef(new Set<string>());
+
     const handleToggle = async (playlistId: string, playlistTitle: string) => {
+        if (pendingRef.current.has(playlistId)) return;
+        pendingRef.current.add(playlistId);
+
         const wasIn = containingIds.has(playlistId);
 
         // Optimistic update
@@ -76,13 +81,17 @@ export function PlaylistPicker({ compositionId, userId, triggerClassName }: Play
             }
         );
 
-        const result = await addSongToPlaylist(playlistId, compositionId);
-        if (result.error) {
-            toast.error(result.error);
-            // revert
-            queryClient.invalidateQueries({ queryKey: PLAYLIST_KEYS.containingComposition(compositionId) });
-        } else {
-            toast.success(wasIn ? `Removed from "${playlistTitle}"` : `Added to "${playlistTitle}"`);
+        try {
+            const result = await addSongToPlaylist(playlistId, compositionId);
+            if (result.error) {
+                toast.error(result.error);
+                // revert
+                queryClient.invalidateQueries({ queryKey: PLAYLIST_KEYS.containingComposition(compositionId) });
+            } else {
+                toast.success(wasIn ? `Removed from "${playlistTitle}"` : `Added to "${playlistTitle}"`);
+            }
+        } finally {
+            pendingRef.current.delete(playlistId);
         }
     };
 
@@ -97,8 +106,12 @@ export function PlaylistPicker({ compositionId, userId, triggerClassName }: Play
                 return;
             }
             // Add the song to the new playlist
-            await addSongToPlaylist(result.id, compositionId);
-            toast.success(`Added to new playlist "${trimmed}"`);
+            const addResult = await addSongToPlaylist(result.id, compositionId);
+            if (addResult.error) {
+                toast.error(`Playlist created but song could not be added: ${addResult.error}`);
+            } else {
+                toast.success(`Added to new playlist "${trimmed}"`);
+            }
             setNewTitle('');
             queryClient.invalidateQueries({ queryKey: PLAYLIST_KEYS.list(userId) });
             queryClient.invalidateQueries({ queryKey: PLAYLIST_KEYS.containingComposition(compositionId) });
