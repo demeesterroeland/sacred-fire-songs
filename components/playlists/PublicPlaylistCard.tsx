@@ -57,12 +57,10 @@ export function PublicPlaylistCard({ id, title, description, isOwner }: PublicPl
                                 className="w-[95%] bg-gray-800 border border-amber-500/50 rounded-lg px-2 py-1 text-sm font-bold text-gray-100 outline-none focus:border-amber-500"
                             />
                         ) : (
-                            <h3 className="font-bold text-gray-100 group-hover:text-white transition-colors truncate">
-                                {optimisticTitle}
-                            </h3>
-                        )}
-                        {description && (
-                            <p className="text-xs text-gray-500 mt-0.5 truncate">{description}</p>
+                            <p className="truncate">
+                                <span className="font-bold text-gray-100 group-hover:text-white transition-colors">{optimisticTitle}</span>
+                                {description && <span className="ml-2 text-xs font-normal text-gray-500">· {description}</span>}
+                            </p>
                         )}
                     </div>
                 </div>

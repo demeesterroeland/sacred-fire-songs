@@ -13,10 +13,9 @@ interface PlaylistCardProps {
     subtitle: React.ReactNode;
     isPublic?: boolean;
     description?: string | null;
-    songTitlePreview?: string;
 }
 
-export function PlaylistCard({ id, title, subtitle, isPublic = false, description, songTitlePreview }: PlaylistCardProps) {
+export function PlaylistCard({ id, title, subtitle, isPublic = false, description }: PlaylistCardProps) {
     const {
         optimisticTitle,
         isRenaming,
@@ -61,17 +60,12 @@ export function PlaylistCard({ id, title, subtitle, isPublic = false, descriptio
                             className="w-[95%] bg-gray-800 border border-amber-500/50 rounded-lg px-2 py-1 text-sm font-bold text-gray-100 outline-none focus:border-amber-500"
                         />
                     ) : (
-                        <h3 className="font-bold text-gray-100 group-hover:text-white transition-colors truncate">
-                            {optimisticTitle}
-                        </h3>
+                        <p className="truncate">
+                            <span className="font-bold text-gray-100 group-hover:text-white transition-colors">{optimisticTitle}</span>
+                            {description && <span className="ml-2 text-xs font-normal text-gray-500">· {description}</span>}
+                        </p>
                     )}
-                    <div className="text-xs text-gray-500 mt-0.5">{subtitle}</div>
-                    {description
-                        ? <p className="text-xs text-gray-500 mt-0.5 truncate">{description}</p>
-                        : songTitlePreview
-                            ? <p className="text-xs text-gray-600 italic mt-0.5 truncate">{songTitlePreview}</p>
-                            : null
-                    }
+                    <p className="text-xs text-gray-500 mt-0.5 truncate">{subtitle}</p>
                 </div>
             </Link>
 

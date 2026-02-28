@@ -287,7 +287,10 @@ export default async function PlaylistsPage() {
                 {privateSetlists.length > 0 ? (
                     <div className="grid grid-cols-1 gap-3">
                         {privateSetlists.map(setlist => {
-                            const counts = songCounts[setlist.id] ?? { total: 0, public: 0, draft: 0 };
+                            const { total } = songCounts[setlist.id] ?? { total: 0, public: 0, draft: 0 };
+                            const countLabel = total === 0 ? 'No songs yet' : `${total} song${total !== 1 ? 's' : ''}`;
+                            const preview = songPreviewMap[setlist.id];
+                            const subtitle = preview ? `${countLabel} · ${preview}` : countLabel;
                             return (
                                 <PlaylistCard
                                     key={setlist.id}
@@ -295,8 +298,7 @@ export default async function PlaylistsPage() {
                                     title={setlist.title}
                                     isPublic={setlist.is_public ?? false}
                                     description={setlist.description ?? null}
-                                    songTitlePreview={songPreviewMap[setlist.id]}
-                                    subtitle={<SongCountSubtitle counts={counts} emptyLabel="No songs yet" />}
+                                    subtitle={subtitle}
                                 />
                             );
                         })}
