@@ -252,7 +252,7 @@ export default async function PlaylistsPage() {
                 <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-3">Smart Playlists</p>
                 <div className="grid grid-cols-1 gap-3">
                     <SmartPlaylistCard
-                        icon={Heart}   title="My Favorites" accent="amber"
+                        icon={Heart}   title="My Favorites" accent="rose"
                         href="/songs?favorites=true"
                         subtitle={<SongCountSubtitle counts={favCounts} emptyLabel="No songs yet — tap ♥ on any song" />}
                     />
