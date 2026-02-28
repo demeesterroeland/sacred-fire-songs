@@ -276,6 +276,7 @@ export default async function PlaylistsPage() {
                                     key={setlist.id}
                                     id={setlist.id}
                                     title={setlist.title}
+                                    isPublic={setlist.is_public ?? false}
                                     subtitle={<SongCountSubtitle counts={counts} emptyLabel={setlist.description ?? 'No songs yet'} />}
                                 />
                             );

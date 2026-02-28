@@ -146,6 +146,7 @@ export function PlaylistDetailHeader({
                         playlistId={playlistId}
                         playlistTitle={optimisticTitle}
                         isOwner={isOwner}
+                        isPublic={isOwner ? isPublic : undefined}
                         onRenameStart={isOwner ? handleRenameStart : undefined}
                         onGetLink={handleCopyLink}
                         isLinkAvailable={isPublic}

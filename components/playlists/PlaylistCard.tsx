@@ -11,9 +11,10 @@ interface PlaylistCardProps {
     id: string;
     title: string;
     subtitle: React.ReactNode;
+    isPublic?: boolean;
 }
 
-export function PlaylistCard({ id, title, subtitle }: PlaylistCardProps) {
+export function PlaylistCard({ id, title, subtitle, isPublic = false }: PlaylistCardProps) {
     const {
         optimisticTitle,
         isRenaming,
@@ -72,9 +73,10 @@ export function PlaylistCard({ id, title, subtitle }: PlaylistCardProps) {
                     playlistId={id}
                     playlistTitle={optimisticTitle}
                     isOwner
+                    isPublic={isPublic}
                     onRenameStart={handleRenameStart}
                     onGetLink={handleCopyLink}
-                    isLinkAvailable={false}
+                    isLinkAvailable={isPublic}
                 />
             </div>
         </div>

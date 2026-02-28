@@ -6,9 +6,9 @@ import {
     DropdownMenu, DropdownMenuContent, DropdownMenuItem,
     DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, Pencil, Trash2, Link2, Copy } from 'lucide-react';
+import { MoreHorizontal, Pencil, Trash2, Link2, Copy, Globe, Lock } from 'lucide-react';
 import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal';
-import { deletePlaylist } from '@/app/actions/playlistActions';
+import { deletePlaylist, togglePlaylistVisibility } from '@/app/actions/playlistActions';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 
@@ -16,17 +16,33 @@ interface PlaylistContextMenuProps {
     playlistId: string;
     playlistTitle: string;
     isOwner?: boolean;
+    /** When provided and isOwner, shows Make Public / Make Private item. */
+    isPublic?: boolean;
     onRenameStart?: () => void;
     onGetLink?: () => void;
     /** When false, Get Link is shown grayed-out with an explanation. Defaults to true. */
     isLinkAvailable?: boolean;
 }
 
-export function PlaylistContextMenu({ playlistId, playlistTitle, isOwner, onRenameStart, onGetLink, isLinkAvailable = true }: PlaylistContextMenuProps) {
+export function PlaylistContextMenu({ playlistId, playlistTitle, isOwner, isPublic, onRenameStart, onGetLink, isLinkAvailable = true }: PlaylistContextMenuProps) {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [isDeleting, startDeleteTransition] = useTransition();
+    const [, startVisibilityTransition] = useTransition();
     const router = useRouter();
     const preventFocusReturn = useRef(false);
+
+    const handleToggleVisibility = () => {
+        const next = !isPublic;
+        startVisibilityTransition(async () => {
+            const result = await togglePlaylistVisibility(playlistId, next);
+            if (result.error) {
+                toast.error(result.error);
+            } else {
+                toast.success(next ? 'Playlist is now public' : 'Playlist is now private');
+                router.refresh();
+            }
+        });
+    };
 
     const handleDelete = () => {
         startDeleteTransition(async () => {
@@ -108,6 +124,19 @@ export function PlaylistContextMenu({ playlistId, playlistTitle, isOwner, onRena
                         Duplicate Playlist
                         <span className="ml-auto text-xs text-gray-600">soon</span>
                     </DropdownMenuItem>
+
+                    {isOwner && isPublic !== undefined && (
+                        <DropdownMenuItem
+                            onSelect={handleToggleVisibility}
+                            className="gap-2 text-gray-200 focus:bg-gray-800 cursor-pointer"
+                        >
+                            {isPublic
+                                ? <Lock className="w-4 h-4" />
+                                : <Globe className="w-4 h-4" />
+                            }
+                            {isPublic ? 'Make Private' : 'Make Public'}
+                        </DropdownMenuItem>
+                    )}
 
                     {isOwner && (
                         <>

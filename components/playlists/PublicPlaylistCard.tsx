@@ -73,6 +73,7 @@ export function PublicPlaylistCard({ id, title, description, isOwner }: PublicPl
                     playlistId={id}
                     playlistTitle={optimisticTitle}
                     isOwner={isOwner}
+                    isPublic={isOwner ? true : undefined}
                     onRenameStart={isOwner ? handleRenameStart : undefined}
                     onGetLink={handleCopyLink}
                     isLinkAvailable
