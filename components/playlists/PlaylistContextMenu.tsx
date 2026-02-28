@@ -62,7 +62,7 @@ export function PlaylistContextMenu({ playlistId, playlistTitle, onRenameStart }
                     {onRenameStart && (
                         <>
                             <DropdownMenuItem
-                                onClick={e => { e.preventDefault(); preventFocusReturn.current = true; onRenameStart(); }}
+                                onSelect={() => { preventFocusReturn.current = true; onRenameStart(); }}
                                 className="gap-2 text-gray-200 focus:bg-gray-800 cursor-pointer"
                             >
                                 <Pencil className="w-4 h-4" />
@@ -91,7 +91,7 @@ export function PlaylistContextMenu({ playlistId, playlistTitle, onRenameStart }
                     <DropdownMenuSeparator className="bg-gray-800" />
 
                     <DropdownMenuItem
-                        onClick={e => { e.preventDefault(); setShowDeleteModal(true); }}
+                        onSelect={() => setShowDeleteModal(true)}
                         className="gap-2 text-red-400 focus:bg-red-950/40 focus:text-red-300 cursor-pointer"
                     >
                         <Trash2 className="w-4 h-4" />
