@@ -1,9 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { notFound, redirect } from 'next/navigation';
-import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
 import { PlaylistDetailClient } from '@/components/playlists/PlaylistDetailClient';
-import { PlaylistContextMenu } from '@/components/playlists/PlaylistContextMenu';
+import { PlaylistDetailHeader } from '@/components/playlists/PlaylistDetailHeader';
 
 interface Props {
     params: Promise<{ id: string }>;
@@ -50,24 +48,11 @@ export default async function PlaylistDetailPage({ params }: Props) {
 
     return (
         <div className="space-y-6">
-            {/* Header */}
-            <div className="flex items-center gap-3">
-                <Link
-                    href="/library/playlists"
-                    className="text-gray-500 hover:text-gray-300 transition-colors"
-                    aria-label="Back to playlists"
-                >
-                    <ArrowLeft className="w-5 h-5" />
-                </Link>
-                <div className="flex-1 min-w-0">
-                    <h1 className="text-xl font-bold text-gray-100 truncate">{playlist.title}</h1>
-                    <p className="text-xs text-gray-500">{mappedItems.length} song{mappedItems.length !== 1 ? 's' : ''}</p>
-                </div>
-                <PlaylistContextMenu
-                    playlistId={playlist.id}
-                    playlistTitle={playlist.title}
-                />
-            </div>
+            <PlaylistDetailHeader
+                playlistId={playlist.id}
+                initialTitle={playlist.title}
+                songCount={mappedItems.length}
+            />
 
             {/* Song list with DnD */}
             <PlaylistDetailClient
