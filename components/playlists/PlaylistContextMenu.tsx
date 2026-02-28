@@ -6,7 +6,7 @@ import {
     DropdownMenu, DropdownMenuContent, DropdownMenuItem,
     DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, Pencil, Trash2, ListPlus, Settings, EyeOff } from 'lucide-react';
+import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
 import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal';
 import { deletePlaylist } from '@/app/actions/playlistActions';
 import { toast } from 'sonner';
@@ -71,22 +71,6 @@ export function PlaylistContextMenu({ playlistId, playlistTitle, onRenameStart }
                             <DropdownMenuSeparator className="bg-gray-800" />
                         </>
                     )}
-
-                    {[
-                        { icon: Settings, label: 'Edit Playlist' },
-                        { icon: ListPlus, label: 'Add to this Playlist' },
-                        { icon: EyeOff, label: 'Make Private / Public' },
-                    ].map(({ icon: Icon, label }) => (
-                        <DropdownMenuItem
-                            key={label}
-                            disabled
-                            className="gap-2 text-gray-600 cursor-not-allowed"
-                        >
-                            <Icon className="w-4 h-4" />
-                            {label}
-                            <span className="ml-auto text-[10px] text-gray-700 font-medium">Soon</span>
-                        </DropdownMenuItem>
-                    ))}
 
                     <DropdownMenuSeparator className="bg-gray-800" />
 
