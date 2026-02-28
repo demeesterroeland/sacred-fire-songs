@@ -215,19 +215,17 @@ export default async function PlaylistsPage() {
     const myFavorites = setlists?.find(s => s.title === 'My Favorites');
     const privateSetlists = (setlists ?? []).filter(s => s.title !== 'My Favorites' && !s.is_public);
 
-    // Fetch all setlist items with composition data in one query
+    // Fetch all setlist items to compute song counts
     const allSetlistIds = (setlists ?? []).map(s => s.id);
     const songCounts: Record<string, SongCounts> = {};
-    const songTitlesMap: Record<string, { index: number; title: string }[]> = {};
 
     if (allSetlistIds.length > 0) {
         const { data: items } = await supabase
             .from('setlist_items')
             .select(`
                 setlist_id,
-                order_index,
                 song_versions(
-                    compositions(is_public, title)
+                    compositions(is_public)
                 )
             `)
             .in('setlist_id', allSetlistIds);
@@ -236,25 +234,10 @@ export default async function PlaylistsPage() {
             const sid = item.setlist_id;
             if (!songCounts[sid]) songCounts[sid] = { total: 0, public: 0, draft: 0 };
             songCounts[sid].total++;
-            const comp = (item.song_versions as any)?.compositions;
-            if (comp?.is_public === true) songCounts[sid].public++;
+            const isPublic = (item.song_versions as any)?.compositions?.is_public;
+            if (isPublic === true) songCounts[sid].public++;
             else songCounts[sid].draft++;
-            if (comp?.title) {
-                if (!songTitlesMap[sid]) songTitlesMap[sid] = [];
-                songTitlesMap[sid].push({ index: item.order_index ?? 0, title: comp.title });
-            }
         }
-    }
-
-    // Sort by order_index and take first 3 titles per setlist
-    const songPreviewMap: Record<string, string> = {};
-    for (const [sid, entries] of Object.entries(songTitlesMap)) {
-        const titles = entries
-            .sort((a, b) => a.index - b.index)
-            .slice(0, 3)
-            .map(e => e.title);
-        const total = songCounts[sid]?.total ?? 0;
-        songPreviewMap[sid] = titles.join(', ') + (total > titles.length ? '…' : '');
     }
 
     const favCounts: SongCounts = myFavorites
@@ -287,10 +270,7 @@ export default async function PlaylistsPage() {
                 {privateSetlists.length > 0 ? (
                     <div className="grid grid-cols-1 gap-3">
                         {privateSetlists.map(setlist => {
-                            const { total } = songCounts[setlist.id] ?? { total: 0, public: 0, draft: 0 };
-                            const countLabel = total === 0 ? 'No songs yet' : `${total} song${total !== 1 ? 's' : ''}`;
-                            const preview = songPreviewMap[setlist.id];
-                            const subtitle = preview ? `${countLabel} · ${preview}` : countLabel;
+                            const counts = songCounts[setlist.id] ?? { total: 0, public: 0, draft: 0 };
                             return (
                                 <PlaylistCard
                                     key={setlist.id}
@@ -298,7 +278,7 @@ export default async function PlaylistsPage() {
                                     title={setlist.title}
                                     isPublic={setlist.is_public ?? false}
                                     description={setlist.description ?? null}
-                                    subtitle={subtitle}
+                                    subtitle={<SongCountSubtitle counts={counts} emptyLabel="No songs yet" />}
                                 />
                             );
                         })}
