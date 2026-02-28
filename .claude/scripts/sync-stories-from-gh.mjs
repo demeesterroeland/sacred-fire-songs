@@ -44,7 +44,7 @@ for (const issue of issues) {
 
   // Pattern: **Story 1.1.1:** or **Story 1.1.1: [Something]**
   const storyRe = new RegExp(
-    `(\\*\\*Story ${id.replace('.', '\\.').replace('-', '\\-')}:?)\\s*(?:\\[[^\\]]*\\])?\\s*(\\*\\*)`,
+    `(\\*\\*Story ${id.replace(/\./g, '\\.').replace(/-/g, '\\-')}:?)\\s*(?:\\[[^\\]]*\\])?\\s*(\\*\\*)`,
     'g'
   );
 

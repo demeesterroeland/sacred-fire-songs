@@ -11,16 +11,22 @@ import { tmpdir } from 'os';
 import { join } from 'path';
 import { parseStories, buildIssueTitle, buildIssueBody } from './lib/parseStories.mjs';
 
-// ── 1. Read hook payload ──────────────────────────────────────────────────────
-let payload;
-try {
-  const stdin = readFileSync('/dev/stdin', 'utf8').trim();
-  payload = stdin ? JSON.parse(stdin) : {};
-} catch {
-  process.exit(0);
+// ── 1. Resolve file path ──────────────────────────────────────────────────────
+// Support two calling conventions:
+//   CLI:  node sync-stories-to-gh.mjs /path/to/epic&user stories.md
+//   Hook: echo '{"tool_input":{"file_path":"..."}}' | node sync-stories-to-gh.mjs
+let filePath = process.argv[2] ?? '';
+
+if (!filePath) {
+  try {
+    const stdin = readFileSync('/dev/stdin', 'utf8').trim();
+    const payload = stdin ? JSON.parse(stdin) : {};
+    filePath = payload?.tool_input?.file_path ?? '';
+  } catch {
+    process.exit(0);
+  }
 }
 
-const filePath = payload?.tool_input?.file_path ?? '';
 if (!filePath.includes('epic')) {
   process.exit(0); // Not the epic file — nothing to do
 }
@@ -45,6 +51,13 @@ console.log(
 );
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
+
+function ensureLabel(name) {
+  const result = spawnSync('gh', ['label', 'create', name, '--color', '0075ca'], { encoding: 'utf8' });
+  if (result.status !== 0 && !result.stderr.includes('already exists')) {
+    throw new Error(`Failed to create label '${name}': ${result.stderr.trim()}`);
+  }
+}
 
 function gh(...args) {
   const result = spawnSync('gh', args, { encoding: 'utf8' });
@@ -80,6 +93,7 @@ function syncStory(story) {
 
   if (!existing) {
     if (isImplemented) return; // Don't create already-completed issues
+    ensureLabel(story.epicLabel);
     withTempBody(desiredBody, tmp => {
       gh('issue', 'create',
         '--title', desiredTitle,

@@ -42,7 +42,7 @@ export function parseStories(content) {
  * Strips "so that ..." clause for brevity.
  */
 export function buildIssueTitle(story) {
-  const short = story.title.replace(/\s+so that\b.*/i, '').trim();
+  const short = story.title.replace(/\s+so that\b.*/i, '').trim().replace(/[,;]+$/, '');
   return `[Story ${story.id}] ${short}`;
 }
 

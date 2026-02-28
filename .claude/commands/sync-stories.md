@@ -12,13 +12,12 @@ node .claude/scripts/sync-stories-from-gh.mjs
 
 Report what changed.
 
-### 2. Push MD → GitHub (optional)
+### 2. Push MD → GitHub
 
-If the user also wants to push any remaining differences from the MD to GitHub, run:
+Push any differences from the MD to GitHub (creates, closes, reopens, or updates issues):
 
 ```bash
-echo "{\"tool_input\":{\"file_path\":\"$(pwd)/docs/logbook/epic\&user stories.md\"}}" \
-  | node .claude/scripts/sync-stories-to-gh.mjs
+node .claude/scripts/sync-stories-to-gh.mjs "$(pwd)/docs/logbook/epic&user stories.md"
 ```
 
 ### 3. Report summary

@@ -1,6 +1,6 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 1.29
+**Version:** 1.33
 **Status:** Living Document
 **Date:** February 28, 2026
 
@@ -27,6 +27,10 @@
 | **1.27** | Feb 26, 2026 | Marked 1.1.5 as [Implemented]: guest upload modal (Log In / Create Account) now shows when unauthenticated user clicks "Add Song". |
 | **1.28** | Feb 26, 2026 | Marked 1.1.4 as [Implemented]: delete icons on song cards in library view (owner/admin, hover-visible, top-right overlay) plus profiles RLS policies fix. |
 | **1.29** | Feb 28, 2026 | Added playlist feature stories 4.1.3–4.1.10: quick-win playlist enhancements (search-and-add sheet, visibility toggle, shareable link, description) and high-value future features (presentation mode, duplicate, per-song transpose, cover color). |
+| **1.30** | Feb 28, 2026 | Added Epic 4.5 (Progressive Web App): stories 4.5.1 (Install as App), 4.5.2 (App icons & branding), 4.5.3 (Offline shell/fallback). Updated Roles & Permissions table. |
+| **1.31** | Feb 28, 2026 | Moved PWA install (3.3.1) and branding (3.3.2) to new Epic 3.3 in Phase 3; offline fallback remains as 4.5.1 in Phase 4. |
+| **1.32** | Feb 28, 2026 | Added Epic 3.4 Gatekeeper role: stories 3.4.1 (role & permissions), 3.4.2 (flagging & queue), 3.4.3 (metadata editing), 3.4.4 (duplicate merging), 3.4.5 (featured playlists). Updated Roles & Permissions table. |
+| **1.33** | Feb 28, 2026 | Removed Musician as a role. Added Epic 3.5: Musician profile setting (self-declared). Role hierarchy is now Guest → Member → Gatekeeper → Admin. Updated Roles & Permissions table. |
 
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
@@ -95,7 +99,7 @@ Scenario: Successful Admin Login
   And I should see Admin controls (e.g., Upload button, Delete icons)
 ```
 
-**Story 1.1.5: [Not Implemented]** As a Guest, I want to be kindly prompted to create an account when I click "Upload" so that I understand this is a community feature.
+**Story 1.1.5: [Implemented]** As a Guest, I want to be kindly prompted to create an account when I click "Upload" so that I understand this is a community feature.
 <!-- /songs/add renders SongForm directly for all users. The only guard is a silent redirect to /auth/login on submit. No "Please join our circle" modal or Log In / Create Account prompt exists. -->
 
 ```
@@ -348,13 +352,199 @@ Scenario: Upvote Version
   Then the vote count for Version B should increment by 1
 ```
 
+### Epic 3.3: Progressive Web App — Installability
+
+**Story 3.3.1:** As a Musician, I want to install Sacred Fire Songs as an app on my phone or tablet so that I can launch it from my home screen like a native app, without opening a browser.
+
+```gherkin
+Scenario: Install prompt on mobile
+  Given I am visiting Sacred Fire Songs in a supported mobile browser (Chrome/Safari)
+  When the browser detects the app is installable
+  Then I should see an "Add to Home Screen" prompt or banner
+  And after installing, the app should open in standalone mode (no browser chrome)
+  And the app icon should appear on my home screen with the Sacred Fire Songs icon and name
+
+Scenario: Standalone launch
+  Given I have installed the app on my home screen
+  When I tap the Sacred Fire Songs icon
+  Then the app should open in full-screen standalone mode
+  And the browser address bar should not be visible
+  And the app should load to the home dashboard
+```
+
+**Story 3.3.2:** As a Musician, I want the installed app to display Sacred Fire Songs branding (icon, splash screen, theme color) so that it feels like a proper native app rather than a pinned website.
+
+```gherkin
+Scenario: App icon and name
+  Given the app is installed on my device
+  When I view my home screen or app drawer
+  Then the icon should display the Sacred Fire Songs logo
+  And the app name should read "Sacred Fire Songs" (or a short variant that fits)
+
+Scenario: Splash screen on launch
+  Given I open the installed app
+  When the app is loading
+  Then I should see a branded splash screen with the app icon and background color
+  Rather than a blank white screen
+
+Scenario: Status bar theme
+  Given I am using the installed app on Android
+  Then the status bar and browser toolbar (if visible) should match the app's dark theme color
+```
+
+### Epic 3.4: Gatekeeper Role
+
+**Story 3.4.1:** As an Admin, I want to assign the Gatekeeper role to trusted community members so that they can curate the library without having full Admin access.
+
+```gherkin
+Scenario: Assign Gatekeeper role
+  Given I am logged in as an Admin
+  And I am on a user's profile or the user management page
+  When I change their role to "Gatekeeper"
+  Then they should immediately gain Gatekeeper capabilities
+  And lose no capabilities they had as a Musician
+
+Scenario: Gatekeeper accesses their tools
+  Given I am logged in as a Gatekeeper
+  When I visit the library or a song detail page
+  Then I should see Gatekeeper-specific actions (Flag, Edit metadata, Merge)
+  That are not visible to Members or Musicians
+```
+
+**Story 3.4.2:** As a Gatekeeper, I want to flag songs as "Needs Improvement" or "Duplicate" so that quality issues are visible to the community and tracked in my queue, and the original contributor is informed.
+
+```gherkin
+Scenario: Flag a song as needing improvement
+  Given I am logged in as a Gatekeeper
+  And I am viewing a song detail page
+  When I select "Flag — Needs Improvement" from the song actions
+  Then a "Needs Improvement" badge should appear on the song card and detail page
+  And the song should appear in the Gatekeeper queue under "Needs Improvement"
+  And the original poster should receive a notification: "Your song '[title]' has been flagged as needing improvement"
+
+Scenario: Flag a song as a duplicate
+  Given I am logged in as a Gatekeeper
+  When I flag a song as "Duplicate"
+  Then a "Duplicate" badge appears on the song
+  And the song appears in the Gatekeeper queue under "Duplicates"
+  And the original poster is notified
+
+Scenario: Resolve a flag
+  Given a song is flagged
+  When I remove the flag (after improvements are made or the duplicate is merged)
+  Then the badge disappears from the song card and detail page
+  And the original poster receives a notification that the flag has been resolved
+  And the song is removed from the Gatekeeper queue
+```
+
+**Story 3.4.3:** As a Gatekeeper, I want to edit the metadata and media links of any song so that I can enrich the library without waiting for the original contributor.
+
+```gherkin
+Scenario: Add a YouTube link to someone else's song
+  Given I am logged in as a Gatekeeper
+  And I am on the edit page for a song I did not create
+  When I add a valid YouTube URL and save
+  Then the YouTube embed should appear on the song detail page
+  And the song detail should show "Last updated by [Gatekeeper name]"
+
+Scenario: Update song categories and key
+  Given I am logged in as a Gatekeeper
+  When I edit the key, capo, or categories of any song
+  Then the changes are saved immediately
+  And the lyrics and ChordPro content fields are not editable for me
+```
+
+**Story 3.4.4:** As a Gatekeeper, I want to merge two duplicate songs into one canonical entry with multiple versions so that the library stays clean and both contributors are acknowledged.
+
+```gherkin
+Scenario: Merge a duplicate into a canonical song
+  Given I am logged in as a Gatekeeper
+  And I am viewing a song flagged as a duplicate
+  When I select "Merge with…" and search for and select the canonical song
+  And I confirm the merge
+  Then the duplicate song becomes an alternate version of the canonical song
+  And the canonical song's detail page shows a version selector
+  And both original contributors are notified with a link to the merged entry
+  And the duplicate song's old URL redirects to the canonical song page
+
+Scenario: Merge is visible in version selector
+  Given a song has been merged from two originals
+  When any user views the canonical song
+  Then they can switch between versions using the version selector
+  And each version credits its original contributor
+```
+
+**Story 3.4.5:** As a Gatekeeper, I want to mark a public playlist as "Featured" so that it appears in a curated section at the top of the playlists page for all visitors.
+
+```gherkin
+Scenario: Feature a playlist
+  Given I am logged in as a Gatekeeper
+  And I am viewing a public playlist
+  When I select "Feature Playlist" from the context menu
+  Then the playlist should appear in a "Featured" section at the top of the /library/playlists page
+  And the Featured section should be visible to guests and all authenticated users
+
+Scenario: Unfeature a playlist
+  Given a playlist is currently featured
+  When I select "Remove from Featured" from the context menu
+  Then it should move back to the regular Public Playlists section
+
+Scenario: No featured playlists
+  Given no playlists are currently featured
+  Then the Featured section should not appear on the playlists page
+```
+
+### Epic 3.5: Musician Profile Setting
+
+> **Note:** The `musician` role has been removed from the role hierarchy. Playing an instrument and reading chords is a personal skill, not a trust level. Members self-declare this via their profile.
+>
+> Role hierarchy: **Guest → Member → Gatekeeper → Admin**
+
+**Story 3.5.1:** As a Member, I want to indicate in my profile that I play an instrument and can read chord notation, so that the app shows me musician-focused features like transpose controls and sheet music.
+
+```gherkin
+Scenario: Enable musician features from profile
+  Given I am logged in as a Member
+  And I am on the Profile / Settings page
+  When I toggle "I play an instrument and can read chord notation" to on
+  And I save my profile
+  Then transpose controls should appear on song detail pages
+  And sheet music / ABC notation should be visible (when available)
+  And a chord icon badge should appear on song cards that have chords
+  And a "Chords" filter toggle should appear on the Songs page
+
+Scenario: Disable musician features
+  Given I have the musician setting enabled
+  When I toggle it off and save
+  Then transpose controls should no longer appear on song detail pages
+  And chord badges on song cards should be hidden
+  And the Chords filter toggle should disappear from the Songs page
+
+Scenario: Default for new accounts
+  Given I create a new account
+  Then the musician setting should be off by default
+  And I can enable it at any time from my profile settings
+```
+
+**Story 3.5.2:** As a new user, I want to be asked during sign-up whether I play an instrument, so that the right features are available to me immediately without having to find the setting later.
+
+```gherkin
+Scenario: Onboarding question
+  Given I have just created an account and verified my email
+  When the onboarding flow runs
+  Then I should be asked "Do you play an instrument or read chord notation?"
+  And answering Yes should set is_musician = true on my profile
+  And answering No (or skipping) should leave it false
+  And I can always change this later in my profile settings
+```
+
 ## Phase 4: Professional Toolkit
 
 **Focus:** Tools for ceremony leaders.
 
 ### Epic 4.1: Setlists
 
-**Story 4.1.1:** As a Musician, I want to create a named setlist so that I can prepare for a specific night.
+**Story 4.1.1: [Implemented]** As a Musician, I want to create a named setlist so that I can prepare for a specific night.
 
 ```
 Scenario: Create Setlist
@@ -364,7 +554,7 @@ Scenario: Create Setlist
   Then a new empty setlist named "Full Moon Ceremony" should exist
 ```
 
-**Story 4.1.2:** As a Musician, I want to reorder songs in my setlist so that the flow matches the ceremony intensity.
+**Story 4.1.2: [Implemented]** As a Musician, I want to reorder songs in my setlist so that the flow matches the ceremony intensity.
 
 ```
 Scenario: Reorder Setlist
@@ -515,9 +705,31 @@ Scenario: Desktop Layout
   And the navigation menu should be always visible on the side (instead of a hamburger menu)
 ```
 
+### Epic 4.5: Progressive Web App — Offline Reliability
+
+**Story 4.5.1:** As a Musician, I want to see a friendly offline page when I have no internet connection, so that I understand what happened instead of seeing a browser error.
+
+```gherkin
+Scenario: Offline fallback page
+  Given the app is installed and I have no internet connection
+  When I open the app or navigate to a page that is not cached
+  Then I should see a branded offline page explaining I am not connected
+  And the page should suggest I connect to the internet or access a cached playlist
+  Rather than showing a generic browser "No internet" error
+
+Scenario: Cached pages still load offline
+  Given I have previously visited the home page and song list while online
+  When I open the app without internet
+  Then the home page shell should still load from the service worker cache
+  And cached songs and playlists should remain accessible
+```
+
 ## Roles & Permissions Summary
 
-| Feature / Action | Guest | Member | Musician | Admin |
+> **Role hierarchy:** Guest → Member → Gatekeeper → Admin
+> **Musician** is a profile setting (`is_musician`), not a role. Any Member can self-enable it.
+
+| Feature / Action | Guest | Member | Gatekeeper | Admin |
 | :--- | :---: | :---: | :---: | :---: |
 | **Browse & Search Songs** | ✅ | ✅ | ✅ | ✅ |
 | **View Chords & Lyrics** | ✅ | ✅ | ✅ | ✅ |
@@ -525,14 +737,23 @@ Scenario: Desktop Layout
 | **Play Melody (Synth)** | ✅ | ✅ | ✅ | ✅ |
 | **Favorite Songs** | ❌ | ✅ | ✅ | ✅ |
 | **Vote on Versions** | ❌ | ✅ | ✅ | ✅ |
-| **Transpose Chords** | ❌ | ❌ | ✅ | ✅ |
-| **Create/Edit Setlists** | ❌ | ❌ | ✅ | ✅ |
-| **Export/Print PDF** | ❌ | ❌ | ✅ | ✅ |
-| **Submit New Version** | ❌ | ❌ | ✅ | ✅ |
 | **Add/Create Songs** | ❌ | ✅ | ✅ | ✅ |
 | **Edit Own Songs** | ❌ | ✅ | ✅ | ✅ |
-| **Edit All Songs** | ❌ | ❌ | ❌ | ✅ |
+| **Create/Edit Setlists** | ❌ | ✅ | ✅ | ✅ |
+| **Export/Print PDF** | ❌ | ✅ | ✅ | ✅ |
+| **Submit New Version** | ❌ | ✅ | ✅ | ✅ |
+| **Transpose Chords** *(requires is_musician)* | ❌ | ✅¹ | ✅¹ | ✅ |
+| **Sheet Music / ABC Notation** *(requires is_musician)* | ❌ | ✅¹ | ✅¹ | ✅ |
+| **Edit Metadata & Links (any song)** | ❌ | ❌ | ✅ | ✅ |
+| **Flag Songs (needs improvement, duplicate)** | ❌ | ❌ | ✅ | ✅ |
+| **Merge Duplicate Songs** | ❌ | ❌ | ✅ | ✅ |
+| **Feature / Unfeature Playlists** | ❌ | ❌ | ✅ | ✅ |
+| **Edit Lyrics/Chords (any song)** | ❌ | ❌ | ❌ | ✅ |
 | **Delete Songs** | ❌ | ❌ | ❌ | ✅ |
+| **Manage Users & Roles** | ❌ | ❌ | ❌ | ✅ |
+| **Install as App (PWA)** | ✅ | ✅ | ✅ | ✅ |
+
+*¹ Only when `is_musician = true` on the user's profile (self-declared setting)*
 
 
 **Story 1.1.8: [Implemented]** As a Member, I want my new song drafts to be saved automatically to my browser's local storage so that I don't lose my work if I navigate away.
