@@ -55,22 +55,20 @@ export default async function Home() {
             <p className="text-xs text-gray-500 mt-1">Add new lyrics and chords</p>
           </Link>
 
-          <Link href="/songs?favorites=true" className="bg-amber-500/[0.08] border border-amber-500/20 p-4 rounded-2xl hover:bg-amber-500/15 hover:border-amber-500/35 transition-all cursor-pointer group text-left flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-amber-500/15 flex items-center justify-center group-hover:bg-amber-500/25 transition-colors shrink-0">
-              <Heart className="w-5 h-5 text-amber-400 fill-amber-400" />
+          <Link href="/songs?favorites=true" className="bg-gray-900/50 p-4 rounded-2xl border border-white/5 hover:border-white/10 transition-colors cursor-pointer group">
+            <div className="w-10 h-10 rounded-full bg-rose-500/10 flex items-center justify-center mb-3 group-hover:bg-rose-500/20 transition-colors">
+              <Heart className="w-5 h-5 text-rose-400 fill-rose-400" />
             </div>
-            <div>
-              <h3 className="font-bold text-white group-hover:text-white transition-colors">My Favorites</h3>
-              {favCounts.total > 0 ? (
-                <p className="text-xs text-gray-500 mt-0.5">
-                  {favCounts.total} song{favCounts.total !== 1 ? 's' : ''}{' · '}
-                  <span className="text-emerald-500/70">{favCounts.public} public</span>{' · '}
-                  <span className="text-amber-500/70">{favCounts.draft} draft</span>
-                </p>
-              ) : (
-                <p className="text-xs text-gray-500 mt-0.5">Your saved songs</p>
-              )}
-            </div>
+            <h3 className="font-bold text-white">My Favorites</h3>
+            {favCounts.total > 0 ? (
+              <p className="text-xs text-gray-500 mt-1">
+                {favCounts.total} song{favCounts.total !== 1 ? 's' : ''}{' · '}
+                <span className="text-emerald-500/70">{favCounts.public} public</span>{' · '}
+                <span className="text-amber-500/70">{favCounts.draft} draft</span>
+              </p>
+            ) : (
+              <p className="text-xs text-gray-500 mt-1">Your saved songs</p>
+            )}
           </Link>
 
           <Link href="/account/settings" className="bg-gray-900/50 p-4 rounded-2xl border border-white/5 hover:border-white/10 transition-colors cursor-pointer group text-left">
