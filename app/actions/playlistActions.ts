@@ -134,7 +134,10 @@ export async function addSongToPlaylist(
         .maybeSingle();
 
     if (existing) {
-        await supabase.from('setlist_items').delete().eq('id', existing.id);
+        const { error: deleteError } = await supabase
+            .from('setlist_items').delete().eq('id', existing.id);
+        if (deleteError) return { added: true, error: deleteError.message };
+        revalidatePath(`/library/playlists/${playlistId}`);
         return { added: false };
     }
 
@@ -154,6 +157,7 @@ export async function addSongToPlaylist(
         .insert({ setlist_id: playlistId, song_version_id: version.id, order_index: nextIndex });
 
     if (error) return { added: false, error: error.message };
+    revalidatePath(`/library/playlists/${playlistId}`);
     return { added: true };
 }
 
@@ -168,7 +172,7 @@ export async function removeSongFromPlaylist(
 
     const { data: item } = await supabase
         .from('setlist_items')
-        .select('id, setlists(owner_id)')
+        .select('id, setlist_id, setlists(owner_id)')
         .eq('id', itemId)
         .maybeSingle();
 
@@ -177,6 +181,7 @@ export async function removeSongFromPlaylist(
 
     const { error } = await supabase.from('setlist_items').delete().eq('id', itemId);
     if (error) return { error: error.message };
+    revalidatePath(`/library/playlists/${item.setlist_id}`);
     return {};
 }
 
@@ -200,7 +205,10 @@ export async function reorderPlaylistSongs(
 
     const results = await Promise.all(
         orderedItemIds.map((id, index) =>
-            supabase.from('setlist_items').update({ order_index: index }).eq('id', id)
+            supabase.from('setlist_items')
+                .update({ order_index: index })
+                .eq('id', id)
+                .eq('setlist_id', playlistId)
         )
     );
     const failed = results.find(r => r.error);
