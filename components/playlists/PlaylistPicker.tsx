@@ -88,7 +88,7 @@ export function PlaylistPicker({ compositionId, userId, triggerClassName }: Play
                 // revert
                 queryClient.invalidateQueries({ queryKey: PLAYLIST_KEYS.containingComposition(compositionId) });
             } else {
-                toast.success(wasIn ? `Removed from "${playlistTitle}"` : `Added to "${playlistTitle}"`);
+                toast.success(result.added ? `Added to "${playlistTitle}"` : `Removed from "${playlistTitle}"`);
             }
         } finally {
             pendingRef.current.delete(playlistId);
@@ -111,8 +111,8 @@ export function PlaylistPicker({ compositionId, userId, triggerClassName }: Play
                 toast.error(`Playlist created but song could not be added: ${addResult.error}`);
             } else {
                 toast.success(`Added to new playlist "${trimmed}"`);
+                setNewTitle('');
             }
-            setNewTitle('');
             queryClient.invalidateQueries({ queryKey: PLAYLIST_KEYS.list(userId) });
             queryClient.invalidateQueries({ queryKey: PLAYLIST_KEYS.containingComposition(compositionId) });
         });
