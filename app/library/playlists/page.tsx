@@ -2,6 +2,8 @@ import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
 import { Heart, ListMusic, Flame, Droplets, Lock, Globe, Users, PenLine, Music } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { CreatePlaylistInput } from '@/components/playlists/CreatePlaylistInput';
+import { PlaylistCard } from '@/components/playlists/PlaylistCard';
 
 interface SongCounts {
     total: number;
@@ -238,27 +240,29 @@ export default async function PlaylistsPage() {
             </div>
 
             {/* My Playlists — real data */}
-            {otherSetlists.length > 0 && (
-                <div>
-                    <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-3">My Playlists</p>
-                    <div className="grid grid-cols-1 gap-4">
+            <div>
+                <div className="flex items-center justify-between mb-3">
+                    <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">My Playlists</p>
+                    <CreatePlaylistInput />
+                </div>
+                {otherSetlists.length > 0 ? (
+                    <div className="grid grid-cols-1 gap-3">
                         {otherSetlists.map(setlist => {
                             const counts = songCounts[setlist.id] ?? { total: 0, public: 0, draft: 0 };
                             return (
-                                <div key={setlist.id} className="bg-gray-900/40 p-4 rounded-2xl border border-gray-800 flex items-center gap-4 group cursor-pointer hover:bg-gray-800/60 transition-all hover:-translate-y-0.5">
-                                    <div className="w-12 h-12 bg-gray-800 rounded-xl flex items-center justify-center group-hover:bg-gray-700 transition-colors shrink-0">
-                                        <ListMusic className="w-6 h-6 text-gray-400" />
-                                    </div>
-                                    <div>
-                                        <h3 className="font-bold text-gray-100 group-hover:text-white transition-colors">{setlist.title}</h3>
-                                        <SongCountSubtitle counts={counts} emptyLabel={setlist.description ?? 'No songs yet'} />
-                                    </div>
-                                </div>
+                                <PlaylistCard
+                                    key={setlist.id}
+                                    id={setlist.id}
+                                    title={setlist.title}
+                                    subtitle={<SongCountSubtitle counts={counts} emptyLabel={setlist.description ?? 'No songs yet'} />}
+                                />
                             );
                         })}
                     </div>
-                </div>
-            )}
+                ) : (
+                    <p className="text-sm text-gray-600 italic py-2">No playlists yet — create your first one above.</p>
+                )}
+            </div>
 
             <PublicPlaylistsSection />
 
