@@ -30,9 +30,9 @@ export function PlaylistContextMenu({ playlistId, playlistTitle, onRenameStart }
                 toast.error(result.error);
             } else {
                 toast.success(`"${playlistTitle}" deleted`);
+                setShowDeleteModal(false);
                 router.refresh();
             }
-            setShowDeleteModal(false);
         });
     };
 

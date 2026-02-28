@@ -20,6 +20,7 @@ export function PlaylistCard({ id, title, subtitle }: PlaylistCardProps) {
     const [draftTitle, setDraftTitle] = useState(title);
     const [isPending, startTransition] = useTransition();
     const inputRef = useRef<HTMLInputElement>(null);
+    const isSavingRef = useRef(false);
     const router = useRouter();
 
     const handleRenameStart = () => {
@@ -29,10 +30,12 @@ export function PlaylistCard({ id, title, subtitle }: PlaylistCardProps) {
     };
 
     const handleRenameSave = () => {
+        if (isSavingRef.current) return;
         const trimmed = draftTitle.trim();
         setIsRenaming(false);
         if (!trimmed || trimmed === title) return;
 
+        isSavingRef.current = true;
         startTransition(async () => {
             const result = await renamePlaylist(id, trimmed);
             if (result.error) {
@@ -41,6 +44,7 @@ export function PlaylistCard({ id, title, subtitle }: PlaylistCardProps) {
                 toast.success('Renamed');
                 router.refresh();
             }
+            isSavingRef.current = false;
         });
     };
 
