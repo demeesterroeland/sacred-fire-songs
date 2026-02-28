@@ -1,7 +1,7 @@
 // components/playlists/PlaylistContextMenu.tsx
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useState, useTransition, useRef } from 'react';
 import {
     DropdownMenu, DropdownMenuContent, DropdownMenuItem,
     DropdownMenuSeparator, DropdownMenuTrigger,
@@ -22,6 +22,7 @@ export function PlaylistContextMenu({ playlistId, playlistTitle, onRenameStart }
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [isDeleting, startDeleteTransition] = useTransition();
     const router = useRouter();
+    const preventFocusReturn = useRef(false);
 
     const handleDelete = () => {
         startDeleteTransition(async () => {
@@ -48,11 +49,20 @@ export function PlaylistContextMenu({ playlistId, playlistTitle, onRenameStart }
                         <MoreHorizontal className="w-4 h-4" />
                     </button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-52 bg-gray-900 border-gray-700">
+                <DropdownMenuContent
+                    align="end"
+                    className="w-52 bg-gray-900 border-gray-700"
+                    onCloseAutoFocus={e => {
+                        if (preventFocusReturn.current) {
+                            e.preventDefault();
+                            preventFocusReturn.current = false;
+                        }
+                    }}
+                >
                     {onRenameStart && (
                         <>
                             <DropdownMenuItem
-                                onClick={e => { e.preventDefault(); onRenameStart(); }}
+                                onClick={e => { e.preventDefault(); preventFocusReturn.current = true; onRenameStart(); }}
                                 className="gap-2 text-gray-200 focus:bg-gray-800 cursor-pointer"
                             >
                                 <Pencil className="w-4 h-4" />
