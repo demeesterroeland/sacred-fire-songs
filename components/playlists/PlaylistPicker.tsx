@@ -124,7 +124,6 @@ export function PlaylistPicker({ compositionId, userId, triggerClassName, iconCl
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
                 <button
-                    onClick={e => { e.preventDefault(); e.stopPropagation(); }}
                     aria-label="Add to playlist"
                     className={cn(
                         'p-1 rounded-full transition-all duration-300 text-gray-700 hover:text-gray-400',
