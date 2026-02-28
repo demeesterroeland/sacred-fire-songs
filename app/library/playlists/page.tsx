@@ -1,9 +1,10 @@
 import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
-import { Heart, ListMusic, Flame, Droplets, Lock, Globe, Users, PenLine, Music, Plus, LogIn } from 'lucide-react';
+import { Heart, ListMusic, Flame, Droplets, Lock, Globe, PenLine, Music, Plus, LogIn } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { CreatePlaylistInput } from '@/components/playlists/CreatePlaylistInput';
 import { PlaylistCard } from '@/components/playlists/PlaylistCard';
+import { PublicPlaylistCard } from '@/components/playlists/PublicPlaylistCard';
 
 interface SongCounts {
     total: number;
@@ -87,44 +88,38 @@ function SmartPlaylistCard({ icon: Icon, title, subtitle, accent, href }: SmartP
     return href ? <Link href={href}>{inner}</Link> : inner;
 }
 
-/** Identical in both guest and auth views — rendered once from a shared component. */
-function PublicPlaylistsSection() {
+function PublicPlaylistsSection({
+    playlists,
+    userId,
+}: {
+    playlists: { id: string; title: string; description: string | null; owner_id: string }[];
+    userId?: string;
+}) {
     return (
         <div>
-            <div className="flex items-center gap-2 mb-3">
-                <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Public Playlists</p>
-                <span className="text-[9px] font-bold text-amber-500 bg-amber-500/10 border border-amber-500/20 rounded-full px-2 py-0.5 uppercase tracking-wider">Coming Soon</span>
-            </div>
-            <div className="grid grid-cols-1 gap-3 opacity-40 pointer-events-none select-none">
-                <div className="bg-gray-900/40 p-4 rounded-2xl border border-gray-800 flex items-center gap-4">
-                    <div className="w-12 h-12 bg-blue-900/30 rounded-xl flex items-center justify-center shrink-0">
-                        <Globe className="w-6 h-6 text-blue-400" />
-                    </div>
-                    <div>
-                        <h3 className="font-bold text-gray-100">Ceremony Night – Agua y Fuego</h3>
-                        <p className="text-xs text-gray-500 mt-0.5">Community Playlist · 14 songs</p>
-                    </div>
+            <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-3">Public Playlists</p>
+            {playlists.length === 0 ? (
+                <p className="text-sm text-gray-600 italic py-2">No public playlists yet.</p>
+            ) : (
+                <div className="grid grid-cols-1 gap-3">
+                    {playlists.map(pl => (
+                        <PublicPlaylistCard
+                            key={pl.id}
+                            id={pl.id}
+                            title={pl.title}
+                            description={pl.description}
+                            isOwner={!!userId && pl.owner_id === userId}
+                        />
+                    ))}
                 </div>
-                <div className="bg-gray-900/40 p-4 rounded-2xl border border-gray-800 flex items-center gap-4">
-                    <div className="w-12 h-12 bg-purple-900/30 rounded-xl flex items-center justify-center shrink-0">
-                        <Users className="w-6 h-6 text-purple-400" />
-                    </div>
-                    <div>
-                        <h3 className="font-bold text-gray-100">Opening Circle Icaros</h3>
-                        <p className="text-xs text-gray-500 mt-0.5">Community Playlist · 9 songs</p>
-                    </div>
-                </div>
-            </div>
-            <p className="text-xs text-gray-600 italic mt-3">
-                Public playlists shared by community members — coming soon.
-            </p>
+            )}
         </div>
     );
 }
 
 // ─── Views ────────────────────────────────────────────────────────────────────
 
-function GuestView() {
+function GuestView({ publicPlaylists }: { publicPlaylists: { id: string; title: string; description: string | null; owner_id: string }[] }) {
     return (
         <div className="space-y-8">
 
@@ -138,10 +133,10 @@ function GuestView() {
                 </div>
             </div>
 
-            {/* My Playlists — ghost demo */}
+            {/* My Private Playlists — ghost demo */}
             <div>
                 <div className="flex items-center justify-between mb-3">
-                    <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">My Playlists</p>
+                    <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">My Private Playlists</p>
                     <div className="flex items-center gap-4">
                         <Link
                             href="/auth/login?next=/library/playlists"
@@ -189,7 +184,7 @@ function GuestView() {
                 </div>
             </div>
 
-            <PublicPlaylistsSection />
+            <PublicPlaylistsSection playlists={publicPlaylists} />
 
         </div>
     );
@@ -199,7 +194,16 @@ export default async function PlaylistsPage() {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
-    if (!user) return <GuestView />;
+    // Fetch public playlists for both guests and auth users
+    const { data: publicSetlists } = await supabase
+        .from('setlists')
+        .select('id, title, description, owner_id')
+        .eq('is_public', true)
+        .order('created_at', { ascending: false })
+        .limit(20);
+    const publicPlaylists = publicSetlists ?? [];
+
+    if (!user) return <GuestView publicPlaylists={publicPlaylists} />;
 
     // Fetch all user setlists
     const { data: setlists } = await supabase
@@ -209,7 +213,7 @@ export default async function PlaylistsPage() {
         .order('created_at', { ascending: false });
 
     const myFavorites = setlists?.find(s => s.title === 'My Favorites');
-    const otherSetlists = (setlists ?? []).filter(s => s.title !== 'My Favorites');
+    const privateSetlists = (setlists ?? []).filter(s => s.title !== 'My Favorites' && !s.is_public);
 
     // Fetch all setlist items with composition is_public in one query
     const allSetlistIds = (setlists ?? []).map(s => s.id);
@@ -257,15 +261,15 @@ export default async function PlaylistsPage() {
                 </div>
             </div>
 
-            {/* My Playlists — real data */}
+            {/* My Private Playlists — real data */}
             <div>
                 <div className="flex items-center justify-between mb-3">
-                    <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">My Playlists</p>
+                    <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">My Private Playlists</p>
                     <CreatePlaylistInput />
                 </div>
-                {otherSetlists.length > 0 ? (
+                {privateSetlists.length > 0 ? (
                     <div className="grid grid-cols-1 gap-3">
-                        {otherSetlists.map(setlist => {
+                        {privateSetlists.map(setlist => {
                             const counts = songCounts[setlist.id] ?? { total: 0, public: 0, draft: 0 };
                             return (
                                 <PlaylistCard
@@ -278,11 +282,11 @@ export default async function PlaylistsPage() {
                         })}
                     </div>
                 ) : (
-                    <p className="text-sm text-gray-600 italic py-2">No playlists yet — create your first one above.</p>
+                    <p className="text-sm text-gray-600 italic py-2">No private playlists yet — create your first one above.</p>
                 )}
             </div>
 
-            <PublicPlaylistsSection />
+            <PublicPlaylistsSection playlists={publicPlaylists} userId={user.id} />
 
         </div>
     );

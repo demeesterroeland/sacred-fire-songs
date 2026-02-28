@@ -6,7 +6,7 @@ import {
     DropdownMenu, DropdownMenuContent, DropdownMenuItem,
     DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, Pencil, Trash2 } from 'lucide-react';
+import { MoreHorizontal, Pencil, Trash2, Link2, Copy } from 'lucide-react';
 import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal';
 import { deletePlaylist } from '@/app/actions/playlistActions';
 import { toast } from 'sonner';
@@ -15,10 +15,14 @@ import { useRouter } from 'next/navigation';
 interface PlaylistContextMenuProps {
     playlistId: string;
     playlistTitle: string;
+    isOwner?: boolean;
     onRenameStart?: () => void;
+    onGetLink?: () => void;
+    /** When false, Get Link is shown grayed-out with an explanation. Defaults to true. */
+    isLinkAvailable?: boolean;
 }
 
-export function PlaylistContextMenu({ playlistId, playlistTitle, onRenameStart }: PlaylistContextMenuProps) {
+export function PlaylistContextMenu({ playlistId, playlistTitle, isOwner, onRenameStart, onGetLink, isLinkAvailable = true }: PlaylistContextMenuProps) {
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [isDeleting, startDeleteTransition] = useTransition();
     const router = useRouter();
@@ -59,7 +63,7 @@ export function PlaylistContextMenu({ playlistId, playlistTitle, onRenameStart }
                         }
                     }}
                 >
-                    {onRenameStart && (
+                    {isOwner && onRenameStart && (
                         <>
                             <DropdownMenuItem
                                 onSelect={() => { preventFocusReturn.current = true; onRenameStart(); }}
@@ -72,15 +76,51 @@ export function PlaylistContextMenu({ playlistId, playlistTitle, onRenameStart }
                         </>
                     )}
 
-                    <DropdownMenuSeparator className="bg-gray-800" />
+                    {onGetLink && (
+                        <DropdownMenuItem
+                            onSelect={() => {
+                                if (isLinkAvailable) {
+                                    onGetLink();
+                                } else {
+                                    toast.info('Make this playlist public to share the link');
+                                }
+                            }}
+                            title={isLinkAvailable ? undefined : 'Make this playlist public to share the link'}
+                            className={`gap-2 cursor-pointer ${
+                                isLinkAvailable
+                                    ? 'text-gray-200 focus:bg-gray-800'
+                                    : 'text-gray-500 focus:bg-gray-800/50'
+                            }`}
+                        >
+                            <Link2 className="w-4 h-4" />
+                            Get Link
+                            {!isLinkAvailable && (
+                                <span className="ml-auto text-xs text-gray-600">private</span>
+                            )}
+                        </DropdownMenuItem>
+                    )}
 
                     <DropdownMenuItem
-                        onSelect={() => setShowDeleteModal(true)}
-                        className="gap-2 text-red-400 focus:bg-red-950/40 focus:text-red-300 cursor-pointer"
+                        disabled
+                        className="gap-2 text-gray-500 cursor-not-allowed"
                     >
-                        <Trash2 className="w-4 h-4" />
-                        Delete Playlist
+                        <Copy className="w-4 h-4" />
+                        Duplicate Playlist
+                        <span className="ml-auto text-xs text-gray-600">soon</span>
                     </DropdownMenuItem>
+
+                    {isOwner && (
+                        <>
+                            <DropdownMenuSeparator className="bg-gray-800" />
+                            <DropdownMenuItem
+                                onSelect={() => setShowDeleteModal(true)}
+                                className="gap-2 text-red-400 focus:bg-red-950/40 focus:text-red-300 cursor-pointer"
+                            >
+                                <Trash2 className="w-4 h-4" />
+                                Delete Playlist
+                            </DropdownMenuItem>
+                        </>
+                    )}
                 </DropdownMenuContent>
             </DropdownMenu>
 

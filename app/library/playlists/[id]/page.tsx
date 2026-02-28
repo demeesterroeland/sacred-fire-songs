@@ -12,15 +12,21 @@ export default async function PlaylistDetailPage({ params }: Props) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
-    if (!user) redirect(`/auth/login?next=${encodeURIComponent('/library/playlists/' + id)}`);
-
     const { data: playlist } = await supabase
         .from('setlists')
         .select('id, title, owner_id, is_public, description')
         .eq('id', id)
         .maybeSingle();
 
-    if (!playlist || playlist.owner_id !== user.id) notFound();
+    if (!playlist) notFound();
+
+    // Private playlists: only owner can access
+    if (!playlist.is_public) {
+        if (!user) redirect(`/auth/login?next=${encodeURIComponent('/library/playlists/' + id)}`);
+        if (playlist.owner_id !== user.id) notFound();
+    }
+
+    const isOwner = user?.id === playlist.owner_id;
 
     const { data: items } = await supabase
         .from('setlist_items')
@@ -54,12 +60,14 @@ export default async function PlaylistDetailPage({ params }: Props) {
                 initialIsPublic={playlist.is_public ?? false}
                 initialDescription={playlist.description ?? null}
                 songCount={mappedItems.length}
+                isOwner={isOwner}
             />
 
             {/* Song list with DnD */}
             <PlaylistDetailClient
                 playlistId={id}
                 initialItems={mappedItems}
+                isOwner={isOwner}
             />
         </div>
     );

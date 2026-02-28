@@ -1,13 +1,11 @@
 // components/playlists/PlaylistCard.tsx
 'use client';
 
-import { useState, useRef, useTransition, useEffect } from 'react';
 import Link from 'next/link';
 import { ListMusic } from 'lucide-react';
 import { PlaylistContextMenu } from './PlaylistContextMenu';
-import { renamePlaylist } from '@/app/actions/playlistActions';
 import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
+import { usePlaylistRename } from '@/hooks/usePlaylistRename';
 
 interface PlaylistCardProps {
     id: string;
@@ -16,42 +14,21 @@ interface PlaylistCardProps {
 }
 
 export function PlaylistCard({ id, title, subtitle }: PlaylistCardProps) {
-    const [isRenaming, setIsRenaming] = useState(false);
-    const [draftTitle, setDraftTitle] = useState(title);
-    const [optimisticTitle, setOptimisticTitle] = useState(title);
-    const [isPending, startTransition] = useTransition();
-    const inputRef = useRef<HTMLInputElement>(null);
-    const isSavingRef = useRef(false);
-    const router = useRouter();
+    const {
+        optimisticTitle,
+        isRenaming,
+        setIsRenaming,
+        draftTitle,
+        setDraftTitle,
+        inputRef,
+        handleRenameStart,
+        handleRenameSave,
+    } = usePlaylistRename(id, title);
 
-    // Sync optimistic title when the server-refreshed prop arrives
-    useEffect(() => { setOptimisticTitle(title); }, [title]);
-
-    const handleRenameStart = () => {
-        setDraftTitle(optimisticTitle);
-        setIsRenaming(true);
-        setTimeout(() => inputRef.current?.select(), 50);
-    };
-
-    const handleRenameSave = () => {
-        if (isSavingRef.current) return;
-        const trimmed = draftTitle.trim();
-        setIsRenaming(false);
-        if (!trimmed || trimmed === optimisticTitle) return;
-
-        setOptimisticTitle(trimmed); // show new name immediately
-        isSavingRef.current = true;
-        startTransition(async () => {
-            const result = await renamePlaylist(id, trimmed);
-            if (result.error) {
-                toast.error(result.error);
-                setOptimisticTitle(title); // revert on error
-            } else {
-                toast.success('Renamed');
-                router.refresh();
-            }
-            isSavingRef.current = false;
-        });
+    const handleCopyLink = () => {
+        const origin = typeof window !== 'undefined' ? window.location.origin : '';
+        navigator.clipboard.writeText(`${origin}/library/playlists/${id}`);
+        toast.success('Link copied');
     };
 
     return (
@@ -93,8 +70,11 @@ export function PlaylistCard({ id, title, subtitle }: PlaylistCardProps) {
             <div className="absolute top-3 right-3 z-10">
                 <PlaylistContextMenu
                     playlistId={id}
-                    playlistTitle={title}
+                    playlistTitle={optimisticTitle}
+                    isOwner
                     onRenameStart={handleRenameStart}
+                    onGetLink={handleCopyLink}
+                    isLinkAvailable={false}
                 />
             </div>
         </div>

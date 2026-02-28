@@ -103,9 +103,11 @@ function SortableRow({
 export function PlaylistDetailClient({
     playlistId,
     initialItems,
+    isOwner,
 }: {
     playlistId: string;
     initialItems: PlaylistItem[];
+    isOwner: boolean;
 }) {
     const [items, setItems] = useState(initialItems);
     const [isPending, startTransition] = useTransition();
@@ -160,53 +162,65 @@ export function PlaylistDetailClient({
                 <div className="flex flex-col items-center justify-center py-16 text-center gap-4">
                     <Music className="w-10 h-10 text-gray-700" />
                     <p className="text-gray-500 text-sm max-w-xs">No songs yet.</p>
-                    <button
-                        onClick={() => setSheetOpen(true)}
-                        className="flex items-center gap-1.5 text-sm font-semibold text-amber-400 border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 rounded-full px-4 py-1.5 transition-all"
-                    >
-                        <Plus className="w-4 h-4" />
-                        Add Songs
-                    </button>
+                    {isOwner && (
+                        <button
+                            onClick={() => setSheetOpen(true)}
+                            className="flex items-center gap-1.5 text-sm font-semibold text-amber-400 border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 rounded-full px-4 py-1.5 transition-all"
+                        >
+                            <Plus className="w-4 h-4" />
+                            Add Songs
+                        </button>
+                    )}
                 </div>
-                <AddSongsSheet
-                    playlistId={playlistId}
-                    existingCompositionIds={existingCompositionIds}
-                    open={sheetOpen}
-                    onClose={() => setSheetOpen(false)}
-                />
+                {isOwner && (
+                    <AddSongsSheet
+                        playlistId={playlistId}
+                        existingCompositionIds={existingCompositionIds}
+                        open={sheetOpen}
+                        onClose={() => setSheetOpen(false)}
+                    />
+                )}
             </>
         );
     }
 
     return (
         <>
-            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={isOwner ? handleDragEnd : () => {}}>
                 <SortableContext items={items.map(i => i.id)} strategy={verticalListSortingStrategy}>
                     <div className="space-y-2">
                         {items.map(item => (
-                            <SortableRow key={item.id} item={item} onRemove={handleRemove} disabled={isPending} />
+                            <SortableRow
+                                key={item.id}
+                                item={item}
+                                onRemove={handleRemove}
+                                disabled={!isOwner || isPending}
+                            />
                         ))}
                     </div>
                 </SortableContext>
             </DndContext>
 
             {/* Add more songs */}
-            <div className="flex justify-center pt-4">
-                <button
-                    onClick={() => setSheetOpen(true)}
-                    className="flex items-center gap-1.5 text-sm font-semibold text-amber-400 border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 rounded-full px-4 py-1.5 transition-all"
-                >
-                    <Plus className="w-4 h-4" />
-                    Add Songs
-                </button>
-            </div>
-
-            <AddSongsSheet
-                playlistId={playlistId}
-                existingCompositionIds={existingCompositionIds}
-                open={sheetOpen}
-                onClose={() => setSheetOpen(false)}
-            />
+            {isOwner && (
+                <>
+                    <div className="flex justify-center pt-4">
+                        <button
+                            onClick={() => setSheetOpen(true)}
+                            className="flex items-center gap-1.5 text-sm font-semibold text-amber-400 border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 rounded-full px-4 py-1.5 transition-all"
+                        >
+                            <Plus className="w-4 h-4" />
+                            Add Songs
+                        </button>
+                    </div>
+                    <AddSongsSheet
+                        playlistId={playlistId}
+                        existingCompositionIds={existingCompositionIds}
+                        open={sheetOpen}
+                        onClose={() => setSheetOpen(false)}
+                    />
+                </>
+            )}
         </>
     );
 }

@@ -3,15 +3,15 @@
 
 import { useState, useRef, useTransition, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Globe, Lock, Link2, Check } from 'lucide-react';
+import { ArrowLeft, Globe, Lock } from 'lucide-react';
 import { PlaylistContextMenu } from './PlaylistContextMenu';
 import {
-    renamePlaylist,
     togglePlaylistVisibility,
     updatePlaylistDescription,
 } from '@/app/actions/playlistActions';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import { usePlaylistRename } from '@/hooks/usePlaylistRename';
 
 interface Props {
     playlistId: string;
@@ -19,6 +19,7 @@ interface Props {
     initialIsPublic: boolean;
     initialDescription: string | null;
     songCount: number;
+    isOwner: boolean;
 }
 
 export function PlaylistDetailHeader({
@@ -27,42 +28,19 @@ export function PlaylistDetailHeader({
     initialIsPublic,
     initialDescription,
     songCount,
+    isOwner,
 }: Props) {
     // ─── Title ────────────────────────────────────────────────────────────────
-    const [isRenaming, setIsRenaming] = useState(false);
-    const [draftTitle, setDraftTitle] = useState(initialTitle);
-    const [optimisticTitle, setOptimisticTitle] = useState(initialTitle);
-    const isSavingRef = useRef(false);
-    const inputRef = useRef<HTMLInputElement>(null);
-
-    useEffect(() => { setOptimisticTitle(initialTitle); }, [initialTitle]);
-
-    const handleRenameStart = () => {
-        setDraftTitle(optimisticTitle);
-        setIsRenaming(true);
-        setTimeout(() => inputRef.current?.select(), 50);
-    };
-
-    const handleRenameSave = () => {
-        if (isSavingRef.current) return;
-        const trimmed = draftTitle.trim();
-        setIsRenaming(false);
-        if (!trimmed || trimmed === optimisticTitle) return;
-
-        setOptimisticTitle(trimmed);
-        isSavingRef.current = true;
-        startTransition(async () => {
-            const result = await renamePlaylist(playlistId, trimmed);
-            if (result.error) {
-                toast.error(result.error);
-                setOptimisticTitle(initialTitle);
-            } else {
-                toast.success('Renamed');
-                router.refresh();
-            }
-            isSavingRef.current = false;
-        });
-    };
+    const {
+        optimisticTitle,
+        isRenaming,
+        setIsRenaming,
+        draftTitle,
+        setDraftTitle,
+        inputRef,
+        handleRenameStart,
+        handleRenameSave,
+    } = usePlaylistRename(playlistId, initialTitle);
 
     // ─── Visibility ───────────────────────────────────────────────────────────
     const [isPublic, setIsPublic] = useState(initialIsPublic);
@@ -85,13 +63,9 @@ export function PlaylistDetailHeader({
     };
 
     // ─── Copy link ────────────────────────────────────────────────────────────
-    const [copied, setCopied] = useState(false);
-
     const handleCopyLink = () => {
         navigator.clipboard.writeText(window.location.href);
-        setCopied(true);
         toast.success('Link copied');
-        setTimeout(() => setCopied(false), 2000);
     };
 
     // ─── Description ──────────────────────────────────────────────────────────
@@ -155,67 +129,66 @@ export function PlaylistDetailHeader({
 
                 {/* Action buttons */}
                 <div className="flex items-center gap-0.5 shrink-0">
-                    {isPublic && (
+                    {isOwner && (
                         <button
-                            onClick={handleCopyLink}
-                            aria-label="Copy shareable link"
+                            onClick={handleToggleVisibility}
+                            aria-label={isPublic ? 'Make private' : 'Make public'}
+                            title={isPublic ? 'Public — click to make private' : 'Private — click to make public'}
                             className="p-1.5 rounded-lg text-gray-600 hover:text-gray-300 hover:bg-gray-700/60 transition-colors"
                         >
-                            {copied
-                                ? <Check className="w-4 h-4 text-emerald-400" />
-                                : <Link2 className="w-4 h-4" />
+                            {isPublic
+                                ? <Globe className="w-4 h-4 text-emerald-400" />
+                                : <Lock className="w-4 h-4" />
                             }
                         </button>
                     )}
-                    <button
-                        onClick={handleToggleVisibility}
-                        aria-label={isPublic ? 'Make private' : 'Make public'}
-                        title={isPublic ? 'Public — click to make private' : 'Private — click to make public'}
-                        className="p-1.5 rounded-lg text-gray-600 hover:text-gray-300 hover:bg-gray-700/60 transition-colors"
-                    >
-                        {isPublic
-                            ? <Globe className="w-4 h-4 text-emerald-400" />
-                            : <Lock className="w-4 h-4" />
-                        }
-                    </button>
                     <PlaylistContextMenu
                         playlistId={playlistId}
                         playlistTitle={optimisticTitle}
-                        onRenameStart={handleRenameStart}
+                        isOwner={isOwner}
+                        onRenameStart={isOwner ? handleRenameStart : undefined}
+                        onGetLink={handleCopyLink}
+                        isLinkAvailable={isPublic}
                     />
                 </div>
             </div>
 
             {/* Description */}
-            {isEditingDesc ? (
-                <textarea
-                    ref={descRef}
-                    value={draftDesc}
-                    onChange={e => setDraftDesc(e.target.value)}
-                    onBlur={handleDescSave}
-                    onKeyDown={e => {
-                        if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleDescSave(); }
-                        if (e.key === 'Escape') { setDraftDesc(optimisticDesc); setIsEditingDesc(false); }
-                    }}
-                    autoFocus
-                    rows={2}
-                    placeholder="Add a description…"
-                    className="w-full bg-gray-800 border border-amber-500/50 rounded-lg px-3 py-2 text-sm text-gray-300 placeholder-gray-600 outline-none focus:border-amber-500 resize-none"
-                />
+            {isOwner ? (
+                isEditingDesc ? (
+                    <textarea
+                        ref={descRef}
+                        value={draftDesc}
+                        onChange={e => setDraftDesc(e.target.value)}
+                        onBlur={handleDescSave}
+                        onKeyDown={e => {
+                            if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); handleDescSave(); }
+                            if (e.key === 'Escape') { setDraftDesc(optimisticDesc); setIsEditingDesc(false); }
+                        }}
+                        autoFocus
+                        rows={2}
+                        placeholder="Add a description…"
+                        className="w-full bg-gray-800 border border-amber-500/50 rounded-lg px-3 py-2 text-sm text-gray-300 placeholder-gray-600 outline-none focus:border-amber-500 resize-none"
+                    />
+                ) : (
+                    <button
+                        onClick={() => {
+                            setDraftDesc(optimisticDesc);
+                            setIsEditingDesc(true);
+                            setTimeout(() => descRef.current?.focus(), 50);
+                        }}
+                        className="text-sm text-left w-full"
+                    >
+                        {optimisticDesc
+                            ? <span className="text-gray-400">{optimisticDesc}</span>
+                            : <span className="italic text-gray-700 hover:text-gray-600 transition-colors">Add a description…</span>
+                        }
+                    </button>
+                )
             ) : (
-                <button
-                    onClick={() => {
-                        setDraftDesc(optimisticDesc);
-                        setIsEditingDesc(true);
-                        setTimeout(() => descRef.current?.focus(), 50);
-                    }}
-                    className="text-sm text-left w-full"
-                >
-                    {optimisticDesc
-                        ? <span className="text-gray-400">{optimisticDesc}</span>
-                        : <span className="italic text-gray-700 hover:text-gray-600 transition-colors">Add a description…</span>
-                    }
-                </button>
+                optimisticDesc
+                    ? <p className="text-sm text-gray-400">{optimisticDesc}</p>
+                    : null
             )}
         </div>
     );
