@@ -14,7 +14,7 @@ export default async function PlaylistDetailPage({ params }: Props) {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
-    if (!user) redirect('/auth/login?next=/library/playlists/' + id);
+    if (!user) redirect(`/auth/login?next=${encodeURIComponent('/library/playlists/' + id)}`);
 
     const { data: playlist } = await supabase
         .from('setlists')
@@ -66,7 +66,6 @@ export default async function PlaylistDetailPage({ params }: Props) {
                 <PlaylistContextMenu
                     playlistId={playlist.id}
                     playlistTitle={playlist.title}
-                    onRenameStart={() => {}}
                 />
             </div>
 

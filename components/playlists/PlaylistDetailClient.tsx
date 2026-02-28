@@ -35,9 +35,11 @@ export interface PlaylistItem {
 function SortableRow({
     item,
     onRemove,
+    disabled,
 }: {
     item: PlaylistItem;
     onRemove: (id: string) => void;
+    disabled?: boolean;
 }) {
     const {
         attributes,
@@ -64,8 +66,9 @@ function SortableRow({
             {/* Drag handle */}
             <button
                 {...attributes}
-                {...listeners}
-                className="text-gray-700 hover:text-gray-500 cursor-grab active:cursor-grabbing touch-none shrink-0"
+                {...(disabled ? {} : listeners)}
+                disabled={disabled}
+                className="text-gray-700 hover:text-gray-500 cursor-grab active:cursor-grabbing touch-none shrink-0 disabled:opacity-30 disabled:cursor-not-allowed"
                 aria-label="Drag to reorder"
             >
                 <GripVertical className="w-4 h-4" />
@@ -84,7 +87,8 @@ function SortableRow({
             {/* Remove button */}
             <button
                 onClick={() => onRemove(item.id)}
-                className="text-gray-700 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 shrink-0"
+                disabled={disabled}
+                className="text-gray-700 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 shrink-0 disabled:pointer-events-none"
                 aria-label={`Remove ${item.songTitle} from playlist`}
             >
                 <X className="w-4 h-4" />
@@ -103,7 +107,7 @@ export function PlaylistDetailClient({
     initialItems: PlaylistItem[];
 }) {
     const [items, setItems] = useState(initialItems);
-    const [, startTransition] = useTransition();
+    const [isPending, startTransition] = useTransition();
 
     const sensors = useSensors(
         useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
@@ -159,7 +163,7 @@ export function PlaylistDetailClient({
             <SortableContext items={items.map(i => i.id)} strategy={verticalListSortingStrategy}>
                 <div className="space-y-2">
                     {items.map(item => (
-                        <SortableRow key={item.id} item={item} onRemove={handleRemove} />
+                        <SortableRow key={item.id} item={item} onRemove={handleRemove} disabled={isPending} />
                     ))}
                 </div>
             </SortableContext>

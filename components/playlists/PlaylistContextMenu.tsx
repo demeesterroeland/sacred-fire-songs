@@ -15,7 +15,7 @@ import { useRouter } from 'next/navigation';
 interface PlaylistContextMenuProps {
     playlistId: string;
     playlistTitle: string;
-    onRenameStart: () => void;
+    onRenameStart?: () => void;
 }
 
 export function PlaylistContextMenu({ playlistId, playlistTitle, onRenameStart }: PlaylistContextMenuProps) {
@@ -49,15 +49,18 @@ export function PlaylistContextMenu({ playlistId, playlistTitle, onRenameStart }
                     </button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-52 bg-gray-900 border-gray-700">
-                    <DropdownMenuItem
-                        onClick={e => { e.preventDefault(); onRenameStart(); }}
-                        className="gap-2 text-gray-200 focus:bg-gray-800 cursor-pointer"
-                    >
-                        <Pencil className="w-4 h-4" />
-                        Rename
-                    </DropdownMenuItem>
-
-                    <DropdownMenuSeparator className="bg-gray-800" />
+                    {onRenameStart && (
+                        <>
+                            <DropdownMenuItem
+                                onClick={e => { e.preventDefault(); onRenameStart(); }}
+                                className="gap-2 text-gray-200 focus:bg-gray-800 cursor-pointer"
+                            >
+                                <Pencil className="w-4 h-4" />
+                                Rename
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator className="bg-gray-800" />
+                        </>
+                    )}
 
                     {[
                         { icon: Settings, label: 'Edit Playlist' },
