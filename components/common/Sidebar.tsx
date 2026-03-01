@@ -2,21 +2,30 @@
 
 import { Suspense } from 'react';
 import Link from 'next/link';
-import { Flame, IndentDecrease } from 'lucide-react';
+import { Flame, IndentDecrease, SlidersHorizontal, Heart, FileText, ListMusic, LogOut } from 'lucide-react';
+import Image from 'next/image';
 import DevTools from '@/components/dev/DevTools';
 import LibrarySidebar from '../library/LibrarySidebar';
 import { useEnvironment } from '@/hooks/useEnvironment';
 import { useActivePath } from '@/hooks/useActivePath';
-import { UserProfile } from './navigation/UserProfile';
+import { useAuth } from '@/hooks/useAuth';
 import { NavLink } from './navigation/NavLink';
 import { NAV_ITEMS } from '@/lib/navigation';
 import { useSidebar } from '@/context/SidebarContext';
 import { getSiteTitle } from '@/lib/env';
+import { useRouter } from 'next/navigation';
+import QuickLogin from '@/components/dev/QuickLogin';
 
 export default function Sidebar() {
     const env = useEnvironment();
     const { pathname } = useActivePath();
     const { isOpen, setIsOpen } = useSidebar();
+    const { user, logout } = useAuth();
+    const router = useRouter();
+
+    const userDisplayName = user?.full_name || user?.email?.split('@')[0] || 'Member';
+    const userInitials = userDisplayName.substring(0, 1).toUpperCase();
+    const userRole = user ? user.role.charAt(0).toUpperCase() + user.role.slice(1) : '';
 
     return (
         <>
@@ -61,21 +70,98 @@ export default function Sidebar() {
                     </button>
                 </div>
 
-                {/* Navigation Links */}
-                <nav className="flex-1 space-y-1 overflow-y-auto px-2 py-6">
-                    {NAV_ITEMS.map((item) => (
-                        <NavLink
-                            key={item.href}
-                            href={item.href}
-                            label={item.label}
-                            icon={item.icon}
-                            exact={'exact' in item ? item.exact : false}
-                            exclude={'exclude' in item ? item.exclude : []}
-                            layout="sidebar"
-                            showText={true}
-                            onClick={() => setIsOpen(false)}
-                        />
-                    ))}
+                {/* Navigation Links + Personal Menu */}
+                <nav className="flex-1 overflow-y-auto px-2 py-6">
+                    <div className="space-y-1">
+                        {NAV_ITEMS.map((item) => (
+                            <NavLink
+                                key={item.href}
+                                href={item.href}
+                                label={item.label}
+                                icon={item.icon}
+                                exact={'exact' in item ? item.exact : false}
+                                exclude={'exclude' in item ? item.exclude : []}
+                                layout="sidebar"
+                                showText={true}
+                                onClick={() => setIsOpen(false)}
+                            />
+                        ))}
+                    </div>
+
+                    {/* Separator + Personal Menu (mobile only) */}
+                    <div className="lg:hidden mt-4 pt-4 border-t border-gray-800/50">
+                        {user ? (
+                            <>
+                                {/* User Identity Card */}
+                                <div className="relative group/card bg-gray-800/50 p-3 rounded-xl mx-1 mb-3 border border-gray-700/30">
+                                    <div className="flex items-center gap-3">
+                                        <div className="w-10 h-10 rounded-full bg-red-900/40 flex items-center justify-center text-sm font-bold text-red-400 ring-1 ring-red-500/20 shadow-inner relative overflow-hidden">
+                                            {user.avatar_url ? (
+                                                <Image src={user.avatar_url} alt={userDisplayName} fill className="object-cover" sizes="40px" />
+                                            ) : (
+                                                userInitials
+                                            )}
+                                        </div>
+                                        <div className="flex-1 min-w-0">
+                                            <p className="text-sm font-bold text-white truncate">{userDisplayName}</p>
+                                            <p className="text-xs text-blue-400/80 font-medium">{userRole}</p>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                {/* Personal Menu Items */}
+                                <div className="space-y-1">
+                                    <Link href="/account/settings" onClick={() => setIsOpen(false)} className="flex items-center gap-3 p-2 px-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors group">
+                                        <SlidersHorizontal className="w-4 h-4 group-hover:text-blue-400" />
+                                        <span className="text-sm font-medium">Account Settings</span>
+                                    </Link>
+                                    <Link href="/songs?favorites=true" onClick={() => setIsOpen(false)} className="flex items-center gap-3 p-2 px-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors group">
+                                        <Heart className="w-4 h-4 group-hover:text-red-400" />
+                                        <span className="text-sm font-medium">My Favorites</span>
+                                    </Link>
+                                    <Link href="/songs?status=draft" onClick={() => setIsOpen(false)} className="flex items-center gap-3 p-2 px-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors group">
+                                        <FileText className="w-4 h-4 group-hover:text-orange-400" />
+                                        <span className="text-sm font-medium">My Drafts</span>
+                                    </Link>
+                                    <Link href="/library/playlists" onClick={() => setIsOpen(false)} className="flex items-center gap-3 p-2 px-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors group">
+                                        <ListMusic className="w-4 h-4 group-hover:text-purple-400" />
+                                        <span className="text-sm font-medium">My Playlists</span>
+                                    </Link>
+                                </div>
+
+                                <div className="h-px bg-gray-800 my-2 mx-1" />
+
+                                {/* Sign Out */}
+                                <button
+                                    onClick={async () => {
+                                        await logout();
+                                        setIsOpen(false);
+                                        router.refresh();
+                                    }}
+                                    className="w-full flex items-center gap-3 p-2 px-3 rounded-lg text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-colors group"
+                                >
+                                    <LogOut className="w-4 h-4" />
+                                    <span className="text-sm font-medium">Sign Out</span>
+                                </button>
+
+                                {process.env.NODE_ENV === 'development' && (
+                                    <div className="mt-4 pt-4 border-t border-gray-800/80 px-1">
+                                        <QuickLogin />
+                                    </div>
+                                )}
+                            </>
+                        ) : (
+                            <div className="px-1">
+                                <Link
+                                    href={`/auth/login?next=${encodeURIComponent(pathname)}`}
+                                    onClick={() => setIsOpen(false)}
+                                    className="flex items-center justify-center px-4 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-sm transition-all shadow-lg shadow-red-900/20 active:scale-95"
+                                >
+                                    Sign In
+                                </Link>
+                            </div>
+                        )}
+                    </div>
 
                     {/* Filters (Dynamic Taxonomy) */}
                     {pathname === '/songs' && (

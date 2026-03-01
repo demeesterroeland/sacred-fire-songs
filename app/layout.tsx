@@ -38,6 +38,7 @@ export const metadata: Metadata = {
 
 import Header from "@/components/common/Header";
 import Sidebar from "@/components/common/Sidebar";
+import MobileBottomNav from "@/components/common/MobileBottomNav";
 import QueryProvider from "@/components/providers/QueryProvider";
 import { SidebarProvider } from "@/context/SidebarContext";
 import { UserPreferencesProvider } from "@/context/UserPreferencesContext";
@@ -71,7 +72,12 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                   <Header />
 
                   {/* Page Content */}
-                  {children}
+                  <div className="pb-16 lg:pb-0">
+                    {children}
+                  </div>
+
+                  {/* Mobile Bottom Navigation */}
+                  <MobileBottomNav />
                 </div>
               </div>
             </QueryProvider>

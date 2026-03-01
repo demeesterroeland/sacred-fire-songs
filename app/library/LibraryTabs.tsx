@@ -36,9 +36,9 @@ export default function LibraryTabs() {
     // List page — full heading + tabs
     return (
         <>
-            <header className="mb-12">
+            <header className="hidden md:block mb-12">
                 <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2 text-white">Your Library</h1>
-                <p className="hidden md:block text-slate-400">Your personal collection of playlists, albums, and artists.</p>
+                <p className="text-slate-400">Your personal collection of playlists, albums, and artists.</p>
             </header>
             <div className="flex items-center mb-8">
                 <div className="flex gap-2">

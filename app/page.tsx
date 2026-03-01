@@ -2,7 +2,7 @@ import SongCard from "@/components/home/SongCard";
 import { fetchSongsServer } from "@/lib/songs/serverQueries";
 import { createClient } from "@/lib/supabase/server";
 import Link from "next/link";
-import { Heart } from "lucide-react";
+import { Heart, Globe } from "lucide-react";
 
 export default async function Home() {
   const [songs, supabase] = await Promise.all([fetchSongsServer(10), createClient()]);
@@ -27,6 +27,36 @@ export default async function Home() {
         favCounts.total++;
         if ((item.song_versions as any)?.compositions?.is_public === true) favCounts.public++;
         else favCounts.draft++;
+      }
+    }
+  }
+
+  // Featured public playlists
+  const { data: publicSetlists } = await supabase
+    .from('setlists')
+    .select('id, title, description')
+    .eq('is_public', true)
+    .order('created_at', { ascending: false })
+    .limit(5);
+  const featuredPlaylists = publicSetlists ?? [];
+
+  // Fetch song counts for featured playlists
+  const playlistSongCounts: Record<string, number> = {};
+  const playlistSongTitles: Record<string, string[]> = {};
+  const plIds = featuredPlaylists.map(p => p.id);
+  if (plIds.length > 0) {
+    const { data: plItems } = await supabase
+      .from('setlist_items')
+      .select('setlist_id, order_index, song_versions(compositions(title))')
+      .in('setlist_id', plIds)
+      .order('order_index', { ascending: true });
+    for (const item of plItems ?? []) {
+      const sid = item.setlist_id;
+      playlistSongCounts[sid] = (playlistSongCounts[sid] ?? 0) + 1;
+      const title = (item.song_versions as any)?.compositions?.title;
+      if (title) {
+        if (!playlistSongTitles[sid]) playlistSongTitles[sid] = [];
+        playlistSongTitles[sid].push(title);
       }
     }
   }
@@ -87,29 +117,127 @@ export default async function Home() {
             <Link href="/songs" className="text-xs font-bold text-red-500 hover:text-red-400 uppercase tracking-wider">View All</Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {displaySongs.length > 0 ? (
-              displaySongs.map((song, index) => (
-                <SongCard
-                  key={index}
-                  id={song.id}
-                  title={song.title}
-                  author={song.author}
-                  songKey={song.songKey}
-                  accentColor={song.color}
-                  isPublic={song.isPublic}
-                  hasChords={song.hasChords}
-                  hasMelody={song.hasMelody}
-                  isFavorite={song.isFavorite ?? false}
-                  userId={user?.id}
-                  categories={song.categories}
-                />
-              ))
-            ) : (
-              <p className="col-span-full text-center text-gray-400 pt-10">No public songs found.</p>
-            )}
-          </div>
+          {displaySongs.length > 0 ? (
+            <>
+              {/* Mobile: horizontal swipeable carousel */}
+              <div className="md:hidden -mx-4 px-4 overflow-x-auto hide-scroll snap-x snap-mandatory flex gap-3 pb-2">
+                {displaySongs.map((song, index) => (
+                  <div key={index} className="snap-start shrink-0 w-[82%] first:ml-0">
+                    <SongCard
+                      id={song.id}
+                      title={song.title}
+                      author={song.author}
+                      songKey={song.songKey}
+                      accentColor={song.color}
+                      isPublic={song.isPublic}
+                      hasChords={song.hasChords}
+                      hasMelody={song.hasMelody}
+                      isFavorite={song.isFavorite ?? false}
+                      userId={user?.id}
+                      categories={song.categories}
+                    />
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop: grid layout */}
+              <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {displaySongs.map((song, index) => (
+                  <SongCard
+                    key={index}
+                    id={song.id}
+                    title={song.title}
+                    author={song.author}
+                    songKey={song.songKey}
+                    accentColor={song.color}
+                    isPublic={song.isPublic}
+                    hasChords={song.hasChords}
+                    hasMelody={song.hasMelody}
+                    isFavorite={song.isFavorite ?? false}
+                    userId={user?.id}
+                    categories={song.categories}
+                  />
+                ))}
+              </div>
+            </>
+          ) : (
+            <p className="text-center text-gray-400 pt-10">No public songs found.</p>
+          )}
         </section>
+
+        {/* Featured Playlists Section */}
+        {featuredPlaylists.length > 0 && (
+          <section>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold text-lg text-white">Featured Playlists</h3>
+              <Link href="/library/playlists" className="text-xs font-bold text-red-500 hover:text-red-400 uppercase tracking-wider">View All</Link>
+            </div>
+
+            {/* Mobile: horizontal swipeable carousel */}
+            <div className="md:hidden -mx-4 px-4 overflow-x-auto hide-scroll snap-x snap-mandatory flex gap-3 pb-2">
+              {featuredPlaylists.map((pl) => {
+                const count = playlistSongCounts[pl.id] ?? 0;
+                const titles = playlistSongTitles[pl.id] ?? [];
+                return (
+                  <Link key={pl.id} href={`/library/playlists/${pl.id}`} className="snap-start shrink-0 w-[82%] first:ml-0">
+                    <div className="bg-gray-900/40 p-4 rounded-2xl border border-gray-800 hover:bg-gray-800/60 hover:border-gray-700 transition-all flex items-center gap-4 group">
+                      <div className="w-12 h-12 bg-emerald-900/30 rounded-xl flex items-center justify-center shrink-0">
+                        <Globe className="w-6 h-6 text-emerald-400" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="truncate">
+                          <span className="font-bold text-gray-100 group-hover:text-white transition-colors">{pl.title}</span>
+                          {pl.description && <span className="ml-2 text-xs font-normal text-gray-500">· {pl.description}</span>}
+                        </p>
+                        <div className="flex items-center gap-0 mt-0.5 text-xs text-gray-500 truncate">
+                          <span className="whitespace-nowrap">{count} song{count !== 1 ? 's' : ''}</span>
+                          {titles.length > 0 && (
+                            <>
+                              <span className="mx-1.5 text-gray-700">|</span>
+                              <span className="truncate text-gray-600">{titles.join(', ')}</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+
+            {/* Desktop: grid layout */}
+            <div className="hidden md:grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {featuredPlaylists.map((pl) => {
+                const count = playlistSongCounts[pl.id] ?? 0;
+                const titles = playlistSongTitles[pl.id] ?? [];
+                return (
+                  <Link key={pl.id} href={`/library/playlists/${pl.id}`}>
+                    <div className="bg-gray-900/40 p-4 rounded-2xl border border-gray-800 hover:bg-gray-800/60 hover:border-gray-700 hover:-translate-y-0.5 transition-all flex items-center gap-4 group">
+                      <div className="w-12 h-12 bg-emerald-900/30 rounded-xl flex items-center justify-center shrink-0">
+                        <Globe className="w-6 h-6 text-emerald-400" />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="truncate">
+                          <span className="font-bold text-gray-100 group-hover:text-white transition-colors">{pl.title}</span>
+                          {pl.description && <span className="ml-2 text-xs font-normal text-gray-500">· {pl.description}</span>}
+                        </p>
+                        <div className="flex items-center gap-0 mt-0.5 text-xs text-gray-500 truncate">
+                          <span className="whitespace-nowrap">{count} song{count !== 1 ? 's' : ''}</span>
+                          {titles.length > 0 && (
+                            <>
+                              <span className="mx-1.5 text-gray-700">|</span>
+                              <span className="truncate text-gray-600">{titles.join(', ')}</span>
+                            </>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  </Link>
+                );
+              })}
+            </div>
+          </section>
+        )}
       </div>
     </main>
   );

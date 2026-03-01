@@ -31,6 +31,7 @@
 | **1.31** | Feb 28, 2026 | Moved PWA install (3.3.1) and branding (3.3.2) to new Epic 3.3 in Phase 3; offline fallback remains as 4.5.1 in Phase 4. |
 | **1.32** | Feb 28, 2026 | Added Epic 3.4 Gatekeeper role: stories 3.4.1 (role & permissions), 3.4.2 (flagging & queue), 3.4.3 (metadata editing), 3.4.4 (duplicate merging), 3.4.5 (featured playlists). Updated Roles & Permissions table. |
 | **1.33** | Feb 28, 2026 | Removed Musician as a role. Added Epic 3.5: Musician profile setting (self-declared). Role hierarchy is now Guest → Member → Gatekeeper → Admin. Updated Roles & Permissions table. |
+| **1.34** | Mar 1, 2026 | GH sync: marked 3.3.1, 3.3.2, 4.1.8 as [Implemented]. Added Story 1.1.9 (Spotify-style mobile bottom nav bar). |
 
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
@@ -354,7 +355,7 @@ Scenario: Upvote Version
 
 ### Epic 3.3: Progressive Web App — Installability
 
-**Story 3.3.1:** As a Musician, I want to install Sacred Fire Songs as an app on my phone or tablet so that I can launch it from my home screen like a native app, without opening a browser.
+**Story 3.3.1: [Implemented]** As a Musician, I want to install Sacred Fire Songs as an app on my phone or tablet so that I can launch it from my home screen like a native app, without opening a browser.
 
 ```gherkin
 Scenario: Install prompt on mobile
@@ -372,7 +373,7 @@ Scenario: Standalone launch
   And the app should load to the home dashboard
 ```
 
-**Story 3.3.2:** As a Musician, I want the installed app to display Sacred Fire Songs branding (icon, splash screen, theme color) so that it feels like a proper native app rather than a pinned website.
+**Story 3.3.2: [Implemented]** As a Musician, I want the installed app to display Sacred Fire Songs branding (icon, splash screen, theme color) so that it feels like a proper native app rather than a pinned website.
 
 ```gherkin
 Scenario: App icon and name
@@ -625,7 +626,7 @@ Scenario: Enter presentation mode
   And the screen wake lock should be active
 ```
 
-**Story 4.1.8:** As a Musician, I want to duplicate a playlist so that I can create variations without rebuilding from scratch.
+**Story 4.1.8: [Implemented]** As a Musician, I want to duplicate a playlist so that I can create variations without rebuilding from scratch.
 
 ```gherkin
 Scenario: Duplicate playlist
@@ -776,3 +777,45 @@ Scenario: Restore draft
         *   Returning to `/songs/add` restores the saved data.
         *   Submitting the song successfully clears the draft.
         *   Draft persistence only applies to the "Add" mode, not Edit.
+
+**Story 1.1.9: [Not Implemented]** As a User, I want a Spotify-style mobile bottom navigation bar with Home, Search, Your Library, and Create tabs so that I can navigate the app with one hand.
+
+```
+Scenario: Bottom bar visible on mobile
+  Given I am viewing any page on a mobile device (< md breakpoint)
+  Then I should see a fixed bottom navigation bar with four tabs: Home, Search, Your Library, and Create
+  And the bottom bar should not appear on tablet or desktop
+
+Scenario: Navigate via bottom bar
+  Given I see the bottom navigation bar
+  When I tap "Home"
+  Then I should navigate to the home/dashboard page
+  When I tap "Search"
+  Then I should navigate to the songs page with the search field focused
+  When I tap "Your Library"
+  Then I should navigate to the playlists/library page
+  When I tap "Create"
+  Then I should navigate to the add song page (or show a guest nudge if not authenticated)
+
+Scenario: Active tab indicator
+  Given I am on the songs page
+  Then the "Search" tab in the bottom bar should be visually highlighted
+  And the other tabs should appear in their default inactive state
+
+Scenario: Avatar replaces hamburger icon
+  Given I am logged in on a mobile device
+  Then the hamburger menu icon in the header is replaced by my avatar (or initials)
+  When I tap the avatar
+  Then the side menu slides open containing my personal menu (profile, settings, logout)
+
+Scenario: Top-right avatar hidden on mobile
+  Given I am on a mobile device
+  Then the personal avatar button in the top-right header area should not be visible
+  And it should remain visible on tablet and desktop
+
+Scenario: Guest bottom bar
+  Given I am not logged in on a mobile device
+  Then the bottom bar should still show Home, Search, and Your Library
+  And "Create" should show a sign-in nudge when tapped
+  And the hamburger icon should remain (no avatar replacement)
+```
