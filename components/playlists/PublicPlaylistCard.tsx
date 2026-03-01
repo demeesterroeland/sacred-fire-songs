@@ -11,9 +11,11 @@ interface PublicPlaylistCardProps {
     title: string;
     description: string | null;
     isOwner?: boolean;
+    songCount?: number;
+    songTitles?: string[];
 }
 
-export function PublicPlaylistCard({ id, title, description, isOwner }: PublicPlaylistCardProps) {
+export function PublicPlaylistCard({ id, title, description, isOwner, songCount = 0, songTitles = [] }: PublicPlaylistCardProps) {
     const {
         optimisticTitle,
         isRenaming,
@@ -62,6 +64,17 @@ export function PublicPlaylistCard({ id, title, description, isOwner }: PublicPl
                                 {description && <span className="ml-2 text-xs font-normal text-gray-500">· {description}</span>}
                             </p>
                         )}
+                        <div className="flex items-center gap-0 mt-0.5 text-xs text-gray-500 truncate">
+                            <span className="whitespace-nowrap">
+                                {songCount} song{songCount !== 1 ? 's' : ''}
+                            </span>
+                            {songTitles.length > 0 && (
+                                <>
+                                    <span className="mx-1.5 text-gray-700">|</span>
+                                    <span className="truncate text-gray-600">{songTitles.join(', ')}</span>
+                                </>
+                            )}
+                        </div>
                     </div>
                 </div>
             </Link>

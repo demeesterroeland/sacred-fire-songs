@@ -13,15 +13,15 @@ interface SongCounts {
 }
 
 function SongCountSubtitle({ counts, emptyLabel }: { counts: SongCounts; emptyLabel: string }) {
-    if (counts.total === 0) return <p className="text-xs text-gray-500 mt-0.5">{emptyLabel}</p>;
+    if (counts.total === 0) return <span className="text-xs text-gray-500">{emptyLabel}</span>;
     return (
-        <p className="text-xs text-gray-500 mt-0.5">
+        <span className="text-xs text-gray-500 whitespace-nowrap">
             {counts.total} song{counts.total !== 1 ? 's' : ''}
             {' · '}
             <span className="text-emerald-500/70">{counts.public} public</span>
             {' · '}
             <span className="text-amber-500/70">{counts.draft} draft</span>
-        </p>
+        </span>
     );
 }
 
@@ -91,9 +91,13 @@ function SmartPlaylistCard({ icon: Icon, title, subtitle, accent, href }: SmartP
 function PublicPlaylistsSection({
     playlists,
     userId,
+    songCounts,
+    songTitles,
 }: {
     playlists: { id: string; title: string; description: string | null; owner_id: string }[];
     userId?: string;
+    songCounts: Record<string, number>;
+    songTitles: Record<string, string[]>;
 }) {
     return (
         <div>
@@ -109,6 +113,8 @@ function PublicPlaylistsSection({
                             title={pl.title}
                             description={pl.description}
                             isOwner={!!userId && pl.owner_id === userId}
+                            songCount={songCounts[pl.id] ?? 0}
+                            songTitles={songTitles[pl.id] ?? []}
                         />
                     ))}
                 </div>
@@ -119,7 +125,11 @@ function PublicPlaylistsSection({
 
 // ─── Views ────────────────────────────────────────────────────────────────────
 
-function GuestView({ publicPlaylists }: { publicPlaylists: { id: string; title: string; description: string | null; owner_id: string }[] }) {
+function GuestView({ publicPlaylists, publicSongCounts, publicSongTitles }: {
+    publicPlaylists: { id: string; title: string; description: string | null; owner_id: string }[];
+    publicSongCounts: Record<string, number>;
+    publicSongTitles: Record<string, string[]>;
+}) {
     return (
         <div className="space-y-8">
 
@@ -184,7 +194,7 @@ function GuestView({ publicPlaylists }: { publicPlaylists: { id: string; title: 
                 </div>
             </div>
 
-            <PublicPlaylistsSection playlists={publicPlaylists} />
+            <PublicPlaylistsSection playlists={publicPlaylists} songCounts={publicSongCounts} songTitles={publicSongTitles} />
 
         </div>
     );
@@ -203,7 +213,36 @@ export default async function PlaylistsPage() {
         .limit(20);
     const publicPlaylists = publicSetlists ?? [];
 
-    if (!user) return <GuestView publicPlaylists={publicPlaylists} />;
+    // Fetch song data for public playlists (guests + auth users)
+    const publicIds = publicPlaylists.map(p => p.id);
+    const publicSongCounts: Record<string, number> = {};
+    const publicSongTitles: Record<string, string[]> = {};
+
+    if (publicIds.length > 0) {
+        const { data: pubItems } = await supabase
+            .from('setlist_items')
+            .select(`
+                setlist_id,
+                order_index,
+                song_versions(
+                    compositions(title)
+                )
+            `)
+            .in('setlist_id', publicIds)
+            .order('order_index', { ascending: true });
+
+        for (const item of pubItems ?? []) {
+            const sid = item.setlist_id;
+            publicSongCounts[sid] = (publicSongCounts[sid] ?? 0) + 1;
+            const title = (item.song_versions as any)?.compositions?.title;
+            if (title) {
+                if (!publicSongTitles[sid]) publicSongTitles[sid] = [];
+                publicSongTitles[sid].push(title);
+            }
+        }
+    }
+
+    if (!user) return <GuestView publicPlaylists={publicPlaylists} publicSongCounts={publicSongCounts} publicSongTitles={publicSongTitles} />;
 
     // Fetch all user setlists
     const { data: setlists } = await supabase
@@ -218,25 +257,32 @@ export default async function PlaylistsPage() {
     // Fetch all setlist items to compute song counts
     const allSetlistIds = (setlists ?? []).map(s => s.id);
     const songCounts: Record<string, SongCounts> = {};
+    const songTitles: Record<string, string[]> = {};
 
     if (allSetlistIds.length > 0) {
         const { data: items } = await supabase
             .from('setlist_items')
             .select(`
                 setlist_id,
+                order_index,
                 song_versions(
-                    compositions(is_public)
+                    compositions(title, is_public)
                 )
             `)
-            .in('setlist_id', allSetlistIds);
+            .in('setlist_id', allSetlistIds)
+            .order('order_index', { ascending: true });
 
         for (const item of items ?? []) {
             const sid = item.setlist_id;
             if (!songCounts[sid]) songCounts[sid] = { total: 0, public: 0, draft: 0 };
             songCounts[sid].total++;
-            const isPublic = (item.song_versions as any)?.compositions?.is_public;
-            if (isPublic === true) songCounts[sid].public++;
+            const comp = (item.song_versions as any)?.compositions;
+            if (comp?.is_public === true) songCounts[sid].public++;
             else songCounts[sid].draft++;
+            if (comp?.title) {
+                if (!songTitles[sid]) songTitles[sid] = [];
+                songTitles[sid].push(comp.title);
+            }
         }
     }
 
@@ -279,6 +325,7 @@ export default async function PlaylistsPage() {
                                     isPublic={setlist.is_public ?? false}
                                     description={setlist.description ?? null}
                                     subtitle={<SongCountSubtitle counts={counts} emptyLabel="No songs yet" />}
+                                    songTitles={songTitles[setlist.id] ?? []}
                                 />
                             );
                         })}
@@ -288,7 +335,7 @@ export default async function PlaylistsPage() {
                 )}
             </div>
 
-            <PublicPlaylistsSection playlists={publicPlaylists} userId={user.id} />
+            <PublicPlaylistsSection playlists={publicPlaylists} userId={user.id} songCounts={publicSongCounts} songTitles={publicSongTitles} />
 
         </div>
     );

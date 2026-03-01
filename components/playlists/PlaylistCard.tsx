@@ -13,9 +13,10 @@ interface PlaylistCardProps {
     subtitle: React.ReactNode;
     isPublic?: boolean;
     description?: string | null;
+    songTitles?: string[];
 }
 
-export function PlaylistCard({ id, title, subtitle, isPublic = false, description }: PlaylistCardProps) {
+export function PlaylistCard({ id, title, subtitle, isPublic = false, description, songTitles = [] }: PlaylistCardProps) {
     const {
         optimisticTitle,
         isRenaming,
@@ -65,7 +66,15 @@ export function PlaylistCard({ id, title, subtitle, isPublic = false, descriptio
                             {description && <span className="ml-2 text-xs font-normal text-gray-500">· {description}</span>}
                         </p>
                     )}
-                    <p className="text-xs text-gray-500 mt-0.5 truncate">{subtitle}</p>
+                    <div className="flex items-center gap-0 mt-0.5 text-xs text-gray-500 truncate">
+                        {subtitle}
+                        {songTitles.length > 0 && (
+                            <>
+                                <span className="mx-1.5 text-gray-700">|</span>
+                                <span className="truncate text-gray-600">{songTitles.join(', ')}</span>
+                            </>
+                        )}
+                    </div>
                 </div>
             </Link>
 
