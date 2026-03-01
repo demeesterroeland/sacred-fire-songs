@@ -1,0 +1,92 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <radialGradient id="bg" cx="50%" cy="65%" r="55%">
+      <stop offset="0%" stop-color="#3d0a0a"/>
+      <stop offset="100%" stop-color="#080000"/>
+    </radialGradient>
+    <linearGradient id="flame" x1="0.5" y1="1" x2="0.5" y2="0">
+      <stop offset="0%"   stop-color="#e83a00"/>
+      <stop offset="45%"  stop-color="#ff6a1a"/>
+      <stop offset="80%"  stop-color="#ffc040"/>
+      <stop offset="100%" stop-color="#ffe89a"/>
+    </linearGradient>
+    <linearGradient id="inner-flame" x1="0.5" y1="1" x2="0.5" y2="0">
+      <stop offset="0%"   stop-color="#ff8c00"/>
+      <stop offset="100%" stop-color="#fffbe0"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Background rounded square -->
+  <rect width="512" height="512" rx="96" fill="url(#bg)"/>
+
+  <!-- Outer flame (organic, slightly asymmetric) -->
+  <path d="
+    M256 420
+    C220 420 170 390 155 340
+    C140 290 162 248 175 215
+    C188 182 192 158 180 120
+    C195 140 200 158 205 140
+    C210 122 215 95 230 72
+    C238 58 248 46 256 38
+    C264 46 274 58 282 72
+    C297 95 302 122 307 140
+    C312 158 317 140 332 120
+    C320 158 324 182 337 215
+    C350 248 372 290 357 340
+    C342 390 292 420 256 420 Z
+  " fill="url(#flame)" opacity="0.92"/>
+
+  <!-- Inner flame highlight -->
+  <path d="
+    M256 390
+    C235 390 205 370 196 335
+    C187 300 200 272 210 248
+    C218 228 220 210 214 185
+    C224 198 228 210 232 200
+    C236 190 240 165 250 148
+    C252 143 254 138 256 134
+    C258 138 260 143 262 148
+    C272 165 276 190 280 200
+    C284 210 288 198 298 185
+    C292 210 294 228 302 248
+    C312 272 325 300 316 335
+    C307 370 277 390 256 390 Z
+  " fill="url(#inner-flame)" opacity="0.7"/>
+
+  <!-- Musical note stem (rises through flame) -->
+  <line
+    x1="268" y1="378"
+    x2="268" y2="210"
+    stroke="#ffe0a0"
+    stroke-width="14"
+    stroke-linecap="round"
+    opacity="0.95"
+  />
+
+  <!-- Note flag (curves right, organic) -->
+  <path
+    d="M268 210 C308 225 312 268 290 280"
+    stroke="#ffe0a0"
+    stroke-width="12"
+    fill="none"
+    stroke-linecap="round"
+    stroke-linejoin="round"
+    opacity="0.95"
+  />
+
+  <!-- Note head (solid oval, slightly tilted) -->
+  <ellipse
+    cx="254" cy="375"
+    rx="24" ry="18"
+    transform="rotate(-20 254 375)"
+    fill="#ffe0a0"
+    opacity="0.95"
+  />
+
+  <!-- Ember sparks -->
+  <circle cx="195" cy="155" r="5" fill="#ffc040" opacity="0.7"/>
+  <circle cx="308" cy="130" r="4" fill="#ffdb80" opacity="0.6"/>
+  <circle cx="175" cy="200" r="3" fill="#ff8c00" opacity="0.5"/>
+  <circle cx="335" cy="190" r="3.5" fill="#ffd060" opacity="0.55"/>
+  <circle cx="220" cy="90"  r="3"   fill="#ffe08a" opacity="0.5"/>
+</svg>

@@ -20,8 +20,19 @@ import { getSiteTitle } from "@/lib/env";
 export const metadata: Metadata = {
   title: getSiteTitle(),
   description: "A digital songbook for medicine music ceremonies.",
+  manifest: '/manifest.webmanifest',
   icons: {
-    icon: "/favicon.svg",
+    icon: [
+      { url: '/icons/icon-32.png', sizes: '32x32', type: 'image/png' },
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+    ],
+    apple: '/icons/icon-180.png',
+  },
+  other: {
+    'mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-capable': 'yes',
+    'apple-mobile-web-app-status-bar-style': 'black-translucent',
+    'apple-mobile-web-app-title': 'Sacred Fire',
   },
 };
 
@@ -31,17 +42,20 @@ import QueryProvider from "@/components/providers/QueryProvider";
 import { SidebarProvider } from "@/context/SidebarContext";
 import { UserPreferencesProvider } from "@/context/UserPreferencesContext";
 import EnvironmentBanner from "@/components/common/EnvironmentBanner";
+import ServiceWorkerRegistrar from "@/components/providers/ServiceWorkerRegistrar";
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode; }>) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <meta name="theme-color" content="#1a0505" />
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
       </head>
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased font-sans`}
         suppressHydrationWarning
       >
+        <ServiceWorkerRegistrar />
         <EnvironmentBanner />
         <UserPreferencesProvider>
           <SidebarProvider>

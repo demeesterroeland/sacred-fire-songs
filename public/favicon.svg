@@ -1,17 +1,30 @@
-<svg width="32" height="32" viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg">
+<svg width="32" height="32" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient id="logo-grad" x1="0" y1="0" x2="32" y2="32" gradientUnits="userSpaceOnUse">
-      <stop stop-color="#b91c1c"/> <!-- red-700 -->
-      <stop offset="1" stop-color="#ea580c"/> <!-- orange-600 -->
+    <!-- favicon variant — IDs prefixed with fav- to avoid DOM collisions when inlined -->
+    <radialGradient id="fav-bg" cx="50%" cy="65%" r="55%">
+      <stop offset="0%" stop-color="#3d0a0a"/>
+      <stop offset="100%" stop-color="#080000"/>
+    </radialGradient>
+    <linearGradient id="fav-flame" x1="0.5" y1="1" x2="0.5" y2="0">
+      <stop offset="0%"   stop-color="#e83a00"/>
+      <stop offset="45%"  stop-color="#ff6a1a"/>
+      <stop offset="80%"  stop-color="#ffc040"/>
+      <stop offset="100%" stop-color="#ffe89a"/>
+    </linearGradient>
+    <linearGradient id="fav-inner" x1="0.5" y1="1" x2="0.5" y2="0">
+      <stop offset="0%"   stop-color="#ff8c00"/>
+      <stop offset="100%" stop-color="#fffbe0"/>
     </linearGradient>
   </defs>
-  <!-- Circular Background -->
-  <circle cx="16" cy="16" r="16" fill="url(#logo-grad)"/>
-  
-  <!-- Flame Icon (White) -->
-  <path 
-    transform="translate(4, 4) scale(1)"
-    d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z" 
-    fill="white"
-  />
+  <rect width="512" height="512" rx="96" fill="url(#fav-bg)"/>
+  <path d="M256 420 C220 420 170 390 155 340 C140 290 162 248 175 215 C188 182 192 158 180 120 C195 140 200 158 205 140 C210 122 215 95 230 72 C238 58 248 46 256 38 C264 46 274 58 282 72 C297 95 302 122 307 140 C312 158 317 140 332 120 C320 158 324 182 337 215 C350 248 372 290 357 340 C342 390 292 420 256 420 Z" fill="url(#fav-flame)" opacity="0.92"/>
+  <path d="M256 390 C235 390 205 370 196 335 C187 300 200 272 210 248 C218 228 220 210 214 185 C224 198 228 210 232 200 C236 190 240 165 250 148 C252 143 254 138 256 134 C258 138 260 143 262 148 C272 165 276 190 280 200 C284 210 288 198 298 185 C292 210 294 228 302 248 C312 272 325 300 316 335 C307 370 277 390 256 390 Z" fill="url(#fav-inner)" opacity="0.7"/>
+  <line x1="268" y1="378" x2="268" y2="210" stroke="#ffe0a0" stroke-width="14" stroke-linecap="round" opacity="0.95"/>
+  <path d="M268 210 C308 225 312 268 290 280" stroke="#ffe0a0" stroke-width="12" fill="none" stroke-linecap="round" stroke-linejoin="round" opacity="0.95"/>
+  <ellipse cx="254" cy="375" rx="24" ry="18" transform="rotate(-20 254 375)" fill="#ffe0a0" opacity="0.95"/>
+  <circle cx="195" cy="155" r="5" fill="#ffc040" opacity="0.7"/>
+  <circle cx="308" cy="130" r="4" fill="#ffdb80" opacity="0.6"/>
+  <circle cx="175" cy="200" r="3" fill="#ff8c00" opacity="0.5"/>
+  <circle cx="335" cy="190" r="3.5" fill="#ffd060" opacity="0.55"/>
+  <circle cx="220" cy="90"  r="3"   fill="#ffe08a" opacity="0.5"/>
 </svg>

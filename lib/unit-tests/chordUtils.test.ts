@@ -4,14 +4,13 @@ import { parseChordProForDisplay } from '../chordUtils';
 describe('parseChordPro', () => {
     it('parses a basic ChordPro string', () => {
         const chordPro = "{title: Test Song}\n[Am]Hello [G]World";
-        const lines = parseChordProForDisplay(chordPro);
+        const sections = parseChordProForDisplay(chordPro);
 
-        // Let's verify we have lines
-        expect(lines.length).toBe(1);
+        // Should produce one section containing one line
+        expect(sections.length).toBe(1);
+        expect(sections[0].lines.length).toBe(1);
 
-        // Verify the first line contains our chords and lyrics
-        const contentLine = lines[0] as any;
-        // chordsheetjs puts chords in 'items' with property 'chords'
+        const contentLine = sections[0].lines[0];
         expect(contentLine.items[0].chords).toBe('Am');
         expect(contentLine.items[0].lyrics).toBe('Hello ');
         expect(contentLine.items[1].chords).toBe('G');

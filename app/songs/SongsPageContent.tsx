@@ -3,7 +3,7 @@
 import SearchBar from "@/components/home/SearchBar";
 import SongCard from "@/components/home/SongCard";
 import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
-import { Music, Guitar, ChevronDown, Flame, Search, X, Plus, Trash2, Heart } from "lucide-react";
+import { Music, Guitar, ChevronDown, Flame, Search, X, Plus, Trash2, Heart, SlidersHorizontal } from "lucide-react";
 import { useSidebar } from "@/context/SidebarContext";
 import { useState, useMemo, useEffect } from "react";
 import { fetchSongs } from "@/lib/songUtils";
@@ -36,6 +36,7 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy }: Song
     const { isDeleting, deleteSong } = useDeleteSong();
     const [localSearch, setLocalSearch] = useState('');
     const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null);
+    const [filtersOpen, setFiltersOpen] = useState(false);
 
     const isAdmin = user?.role === 'admin';
 
@@ -52,7 +53,7 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy }: Song
             if (!setlist) return new Set<string>();
             const { data: items } = await supabase
                 .from('setlist_items')
-                 
+
                 .select('song_versions(composition_id)')
                 .eq('setlist_id', setlist.id);
             return new Set<string>(
@@ -202,17 +203,34 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy }: Song
 
     return (
         <main className="flex-1 min-h-0 bg-gray-950">
-            <div className="p-4 md:p-8 space-y-8 max-w-7xl mx-auto">
+            <div className="p-4 md:p-8 space-y-3 md:space-y-6 max-w-7xl mx-auto">
                 {/* Sticky Header */}
-                <div className="sticky top-0 z-20 bg-gray-950/95 backdrop-blur-md border-b border-gray-800/50 px-4 pt-0 pb-6 -mx-4 md:-mx-8">
-                    <div className="max-w-7xl mx-auto space-y-6">
+                <div className="sticky top-[72px] z-20 bg-gray-950/95 backdrop-blur-md border-b border-gray-800/50 px-4 pt-2 pb-0 -mx-4 md:-mx-8 md:pt-2 md:pb-6">
+                    <div className="max-w-7xl mx-auto space-y-4 md:space-y-6">
 
-                        {/* Row 1: Brand (Mobile) & Search */}
-                        <div className="flex flex-col md:flex-row items-center justify-between gap-6 md:gap-8">
-                            <SearchBar
-                                value={localSearch}
-                                onChange={setLocalSearch}
-                            />
+                        {/* Row 1: Search + Filter Toggle (Mobile) */}
+                        <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-8">
+                            <div className="flex items-center gap-2 w-full md:w-auto">
+                                <SearchBar
+                                    value={localSearch}
+                                    onChange={setLocalSearch}
+                                />
+                                {/* Mobile filter toggle */}
+                                <button
+                                    onClick={() => setFiltersOpen(!filtersOpen)}
+                                    className={`md:hidden flex-shrink-0 relative p-2.5 rounded-xl border transition-all ${filtersOpen
+                                        ? 'bg-red-500/10 border-red-500/40 text-red-400'
+                                        : 'bg-gray-900/80 border-gray-800 text-gray-500'
+                                        }`}
+                                    aria-label="Toggle filters"
+                                    aria-expanded={filtersOpen}
+                                >
+                                    <SlidersHorizontal className="w-5 h-5" />
+                                    {hasActiveFilters && !filtersOpen && (
+                                        <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-red-500 ring-2 ring-gray-950" />
+                                    )}
+                                </button>
+                            </div>
 
                             <div className="hidden md:flex items-center gap-4 self-end md:self-auto">
                                 <span className="hidden md:block text-xs text-gray-500 whitespace-nowrap">
@@ -231,118 +249,118 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy }: Song
                             </div>
                         </div>
 
-                        {/* Row 2: Tag Selector */}
-                        <TagSelector
-                            category={state.category}
-                            tags={state.tags || []}
-                            taxonomy={taxonomy}
-                            onCategoryChange={(cat) => setFilter('category', cat)}
-                            onTagsChange={(tags) => setFilter('tags', tags)}
-                            onClearAll={resetFilters}
-                            searchValue={localSearch}
-                            onSearchChange={setLocalSearch}
-                            hasActiveFilters={hasActiveFilters}
-                        />
+                        {/* Collapsible filters: hidden on mobile unless toggled */}
+                        <div className={`space-y-3 md:space-y-6 ${filtersOpen ? '' : 'hidden'} md:block`}>
+                            {/* Row 2: Tag Selector */}
+                            <TagSelector
+                                category={state.category}
+                                tags={state.tags || []}
+                                taxonomy={taxonomy}
+                                onCategoryChange={(cat) => setFilter('category', cat)}
+                                onTagsChange={(tags) => setFilter('tags', tags)}
+                                onClearAll={resetFilters}
+                                searchValue={localSearch}
+                                onSearchChange={setLocalSearch}
+                                hasActiveFilters={hasActiveFilters}
+                            />
 
-                        {/* Lower Row: Controls */}
-                        <div className="flex flex-wrap items-center justify-between gap-4 pt-2">
-                            <div className="flex flex-wrap items-center gap-6">
-                                {/* Sort Dropdown */}
-                                <div className="flex items-center gap-2">
-                                    <span className="text-xs font-bold text-gray-500 uppercase tracking-widest">Sort:</span>
-                                    <div className="relative">
-                                        <select
-                                            value={sortBy}
-                                            onChange={(e) => setSortBy(e.target.value as SortByType)}
-                                            className="bg-gray-900 border border-gray-800 rounded-lg px-3 py-1.5 text-sm text-gray-300 outline-none focus:border-gray-700 appearance-none pr-8 cursor-pointer"
-                                        >
-                                            <option value="title">Title (A-Z)</option>
-                                            <option value="author">Author (A-Z)</option>
-                                            <option value="newest">Newest First</option>
-                                        </select>
-                                        <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
-                                    </div>
-                                </div>
-
-                                {/* Visibility Tabs */}
-                                {user && (
+                            {/* Lower Row: Controls */}
+                            <div className="flex flex-wrap items-center justify-between gap-4 pt-1 md:pt-2">
+                                <div className="flex flex-wrap items-center gap-6">
+                                    {/* Sort Dropdown */}
                                     <div className="flex items-center gap-2">
-                                        <div className="bg-gray-900/80 p-1 rounded-xl border border-gray-800 inline-flex shadow-inner">
-                                            {(['all', 'public', 'draft'] as const).map((statusOption) => (
-                                                <button
-                                                    key={statusOption}
-                                                    onClick={() => setFilter('status', statusOption)}
-                                                    className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all capitalize ${state.status === statusOption ? 'bg-gray-800 text-white shadow-sm ring-1 ring-white/5' : 'text-gray-500 hover:text-gray-300'}`}
-                                                >
-                                                    {statusOption}
-                                                </button>
-                                            ))}
+                                        <div className="relative">
+                                            <select
+                                                value={sortBy}
+                                                onChange={(e) => setSortBy(e.target.value as SortByType)}
+                                                className="bg-gray-900 border border-gray-800 rounded-lg px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-gray-300 outline-none focus:border-gray-700 appearance-none pr-8 cursor-pointer"
+                                            >
+                                                <option value="title">Title (A-Z)</option>
+                                                <option value="author">Author (A-Z)</option>
+                                                <option value="newest">Newest First</option>
+                                            </select>
+                                            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500 pointer-events-none" />
                                         </div>
-                                        <button
-                                            onClick={() => setFilter('favorites', !state.favorites)}
-                                            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl border transition-all ${
-                                                state.favorites
+                                    </div>
+
+                                    {/* Visibility Tabs */}
+                                    {user && (
+                                        <div className="flex items-center gap-2">
+                                            <div className="bg-gray-900/80 p-1 rounded-xl border border-gray-800 inline-flex shadow-inner">
+                                                {(['all', 'public', 'draft'] as const).map((statusOption) => (
+                                                    <button
+                                                        key={statusOption}
+                                                        onClick={() => setFilter('status', statusOption)}
+                                                        className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all capitalize ${state.status === statusOption ? 'bg-gray-800 text-white shadow-sm ring-1 ring-white/5' : 'text-gray-500 hover:text-gray-300'}`}
+                                                    >
+                                                        {statusOption}
+                                                    </button>
+                                                ))}
+                                            </div>
+                                            <button
+                                                onClick={() => setFilter('favorites', !state.favorites)}
+                                                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl border transition-all ${state.favorites
                                                     ? 'bg-amber-500/15 border-amber-500/40 text-amber-400 shadow-sm'
                                                     : 'bg-gray-900/80 border-gray-800 text-gray-500 hover:text-amber-400/70 hover:border-amber-500/30'
-                                            }`}
-                                        >
-                                            <Heart className={`w-3 h-3 ${state.favorites ? 'fill-amber-400' : ''}`} strokeWidth={1.5} />
-                                            Favorites
-                                        </button>
-                                        <button
-                                            onClick={() => setFilter('mine', !state.mine)}
-                                            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl border transition-all ${
-                                                state.mine
+                                                    }`}
+                                            >
+                                                <Heart className={`w-3 h-3 ${state.favorites ? 'fill-amber-400' : ''}`} strokeWidth={1.5} />
+                                                Favorites
+                                            </button>
+                                            <button
+                                                onClick={() => setFilter('mine', !state.mine)}
+                                                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl border transition-all ${state.mine
                                                     ? 'bg-violet-500/15 border-violet-500/40 text-violet-400 shadow-sm'
                                                     : 'bg-gray-900/80 border-gray-800 text-gray-500 hover:text-violet-400/70 hover:border-violet-500/30'
-                                            }`}
+                                                    }`}
+                                            >
+                                                <Music className="w-3 h-3" strokeWidth={1.5} />
+                                                My Songs
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="flex items-center gap-4">
+                                    {/* View Toggles */}
+                                    <div className="flex items-center gap-2">
+                                        {/* Chords Toggle */}
+                                        <button
+                                            onClick={() => setFilter('chords', !state.chords)}
+                                            disabled={!state.chords && chordsCount === 0}
+                                            className={`flex items-center gap-2 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all border ${state.chords
+                                                ? 'border-amber-500/50 bg-amber-500/10 text-amber-500 shadow-sm shadow-amber-900/20'
+                                                : 'border-gray-800 bg-gray-900/50 text-gray-500 hover:text-gray-300 hover:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed'
+                                                }`}
                                         >
-                                            <Music className="w-3 h-3" strokeWidth={1.5} />
-                                            My Songs
+                                            <Guitar className="w-3.5 h-3.5" />
+                                            Chords
+                                            {/* Count Badge */}
+                                            {!state.chords && chordsCount > 0 && (
+                                                <span className="ml-1 px-1.5 py-0.5 rounded-full bg-gray-800 text-gray-400 text-[9px]">{chordsCount}</span>
+                                            )}
+                                        </button>
+
+                                        {/* Melody Toggle */}
+                                        <button
+                                            onClick={() => setFilter('melody', !state.melody)}
+                                            disabled={!state.melody && melodyCount === 0}
+                                            className={`flex items-center gap-2 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all border ${state.melody
+                                                ? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-500 shadow-sm shadow-emerald-900/20'
+                                                : 'border-gray-800 bg-gray-900/50 text-gray-500 hover:text-gray-300 hover:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed'
+                                                }`}
+                                        >
+                                            <Music className="w-3.5 h-3.5" />
+                                            Melody
+                                            {/* Count Badge */}
+                                            {!state.melody && melodyCount > 0 && (
+                                                <span className="ml-1 px-1.5 py-0.5 rounded-full bg-gray-800 text-gray-400 text-[9px]">{melodyCount}</span>
+                                            )}
                                         </button>
                                     </div>
-                                )}
-                            </div>
-
-                            <div className="flex items-center gap-4">
-                                {/* View Toggles */}
-                                <div className="flex items-center gap-2">
-                                    {/* Chords Toggle */}
-                                    <button
-                                        onClick={() => setFilter('chords', !state.chords)}
-                                        disabled={!state.chords && chordsCount === 0}
-                                        className={`flex items-center gap-2 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all border ${state.chords
-                                            ? 'border-amber-500/50 bg-amber-500/10 text-amber-500 shadow-sm shadow-amber-900/20'
-                                            : 'border-gray-800 bg-gray-900/50 text-gray-500 hover:text-gray-300 hover:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed'
-                                            }`}
-                                    >
-                                        <Guitar className="w-3.5 h-3.5" />
-                                        Chords
-                                        {/* Count Badge */}
-                                        {!state.chords && chordsCount > 0 && (
-                                            <span className="ml-1 px-1.5 py-0.5 rounded-full bg-gray-800 text-gray-400 text-[9px]">{chordsCount}</span>
-                                        )}
-                                    </button>
-
-                                    {/* Melody Toggle */}
-                                    <button
-                                        onClick={() => setFilter('melody', !state.melody)}
-                                        disabled={!state.melody && melodyCount === 0}
-                                        className={`flex items-center gap-2 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all border ${state.melody
-                                            ? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-500 shadow-sm shadow-emerald-900/20'
-                                            : 'border-gray-800 bg-gray-900/50 text-gray-500 hover:text-gray-300 hover:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed'
-                                            }`}
-                                    >
-                                        <Music className="w-3.5 h-3.5" />
-                                        Melody
-                                        {/* Count Badge */}
-                                        {!state.melody && melodyCount > 0 && (
-                                            <span className="ml-1 px-1.5 py-0.5 rounded-full bg-gray-800 text-gray-400 text-[9px]">{melodyCount}</span>
-                                        )}
-                                    </button>
                                 </div>
                             </div>
-                        </div>
+                        </div>{/* end collapsible filters */}
                     </div>
                 </div>
 
