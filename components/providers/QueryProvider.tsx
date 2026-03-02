@@ -9,9 +9,9 @@ export default function QueryProvider({ children }: { children: ReactNode }) {
     const [queryClient] = useState(() => new QueryClient({
         defaultOptions: {
             queries: {
-                // Data is considered fresh for 5 minutes. 
-                // During this time, we won't even ask the server.
-                staleTime: 5 * 60 * 1000,
+                // Data is considered fresh for 1 minute.
+                // Lists refresh frequently, detail queries can override this.
+                staleTime: 60 * 1000, // 1 minute — lists refresh frequently
                 // If a request fails, retry 1 time before showing error.
                 retry: 1,
             },

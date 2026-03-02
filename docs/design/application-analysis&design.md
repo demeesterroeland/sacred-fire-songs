@@ -1,8 +1,8 @@
 # Project Analysis & Design Document: Song Sharing Application (Sacred Fire Songs)
 
-**Version:** 1.20
+**Version:** 1.22
 **Status:** Living Document
-**Date:** February 3, 2026
+**Date:** March 3, 2026
 
 ## Changelog
 
@@ -14,6 +14,7 @@
 | **1.19** | Feb 1, 2026 | Refined sidebar navigation (Dashboard, Explore, Library, Playlist, Add Song). Implemented new Library hub (screen15) and Playlists management (screen16) mockups. |
 | **1.20** | Feb 3, 2026 | Implemented Draft Auto-Save (Story 1.1.7). Updated Song Form UI (Layout, Tags). Styled Profile Pill. |
 | **1.21** | Feb 23, 2026 | Removed Home page search box and renamed "Library" to "Search Songs". |
+| **1.22** | Mar 3, 2026 | Architecture Audit: Added images remote patterns for Supabase and tuned staleTime defaults. |
 
 ## 1. Introduction
 
@@ -112,7 +113,7 @@ The application is a **Progressive Web App (PWA)** optimized for mobile use duri
 * **Hosting:** **Vercel**. Also investigate https://example.com  and  OVH and https://www.hostinger.com/ for VPS hosting in EU. And investigate https://coolify.io/ - opensource ALternative for vercel
 
 ### 6.2 Offline Strategy
-* **React Query:** Configured with `staleTime: 5 minutes` and `gcTime: 24 hours`.
+* **React Query:** Configured with `staleTime: 1 minute` (default for lists) and `gcTime: 24 hours`. Detail queries may override to 5 minutes.
 * **Browser Cache:** Assets cached via Vercel headers.
 
 ## 7. Screen Inventory (Implemented)
