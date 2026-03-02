@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { uuid, playlistTitle, playlistDescription } from '../validation/schemas';
+import { uuid, playlistTitle, playlistDescription } from '@/lib/validation/schemas';
 
 describe('uuid schema', () => {
   it('accepts a valid UUID', () => {
