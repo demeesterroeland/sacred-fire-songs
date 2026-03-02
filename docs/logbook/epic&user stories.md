@@ -565,7 +565,7 @@ Scenario: Reorder Setlist
   And "Song A" should be at position 2
 ```
 
-**Story 4.1.3:** As a Musician, I want to search for and add songs to a playlist directly from the playlist detail page so that I don't have to navigate away to find songs.
+**Story 4.1.3: [Implemented]** As a Musician, I want to search for and add songs to a playlist directly from the playlist detail page so that I don't have to navigate away to find songs.
 
 ```gherkin
 Scenario: Add song via search sheet
@@ -577,7 +577,7 @@ Scenario: Add song via search sheet
   And the song should appear at the bottom of the list
 ```
 
-**Story 4.1.4:** As a Musician, I want to toggle my playlist between public and private so that I can control who can see it.
+**Story 4.1.4: [Implemented]** As a Musician, I want to toggle my playlist between public and private so that I can control who can see it.
 
 ```gherkin
 Scenario: Make playlist public
@@ -594,7 +594,7 @@ Scenario: Make playlist private
   And the icon should change to a Lock
 ```
 
-**Story 4.1.5:** As a Musician, I want to share a link to a public playlist so that ceremony co-facilitators can view it.
+**Story 4.1.5: [Implemented]** As a Musician, I want to share a link to a public playlist so that ceremony co-facilitators can view it.
 
 ```gherkin
 Scenario: Copy shareable link
@@ -604,7 +604,7 @@ Scenario: Copy shareable link
   And a toast should confirm "Link copied"
 ```
 
-**Story 4.1.6:** As a Musician, I want to add a description or note to a playlist so that I can remember its purpose (e.g. "Closing songs, slow and grounding").
+**Story 4.1.6: [Implemented]** As a Musician, I want to add a description or note to a playlist so that I can remember its purpose (e.g. "Closing songs, slow and grounding").
 
 ```gherkin
 Scenario: Add description
@@ -778,7 +778,7 @@ Scenario: Restore draft
         *   Submitting the song successfully clears the draft.
         *   Draft persistence only applies to the "Add" mode, not Edit.
 
-**Story 1.1.9: [Not Implemented]** As a User, I want a Spotify-style mobile bottom navigation bar with Home, Search, Your Library, and Create tabs so that I can navigate the app with one hand.
+**Story 1.1.9: [Implemented]** As a User, I want a Spotify-style mobile bottom navigation bar with Home, Search, Your Library, and Create tabs so that I can navigate the app with one hand.
 
 ```
 Scenario: Bottom bar visible on mobile
