@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import type { Song } from "@/lib/songUtils";
 import type { TaxonomyNode } from "@/lib/taxonomyUtils";
+import { songsQuery, mapCompositionToSong } from './queries';
 
 /**
  * Server-side version of fetchSongs — uses the server Supabase client (cookie-aware).
@@ -9,29 +10,8 @@ import type { TaxonomyNode } from "@/lib/taxonomyUtils";
 export async function fetchSongsServer(limit?: number): Promise<Song[]> {
     const supabase = await createClient();
 
-    // Fetch songs and user's favorites in parallel
     const [songsResult, favoriteIds] = await Promise.all([
-        (() => {
-            let q = supabase
-                .from('compositions')
-                .select(`
-                    *,
-                    song_versions(key, content_chordpro, melody_notation),
-                    song_category_map (
-                      categories (
-                        name,
-                        slug,
-                        parent:parent_id (
-                          name,
-                          slug
-                        )
-                      )
-                    )
-                `)
-                .order('created_at', { ascending: false });
-            if (limit) q = q.limit(limit);
-            return q;
-        })(),
+        songsQuery(supabase, { limit: limit ?? undefined }),
         (async () => {
             const { data: { user } } = await supabase.auth.getUser();
             if (!user) return new Set<string>();
@@ -50,8 +30,10 @@ export async function fetchSongsServer(limit?: number): Promise<Song[]> {
                 .select('song_versions(composition_id)')
                 .eq('setlist_id', setlist.id);
 
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            return new Set<string>((items || []).map((i: any) => i.song_versions?.composition_id).filter(Boolean));
+            return new Set<string>(
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                (items || []).map((i: any) => i.song_versions?.composition_id).filter(Boolean)
+            );
         })(),
     ]);
 
@@ -60,44 +42,7 @@ export async function fetchSongsServer(limit?: number): Promise<Song[]> {
         return [];
     }
 
-    return songsResult.data.map(item => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const version = (item.song_versions as any[])?.[0];
-
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const rawCategories = (item.song_category_map as any[]) || [];
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const categories = rawCategories.map((mapItem: any) => {
-            const cat = mapItem.categories;
-            return {
-                name: cat.name,
-                slug: cat.slug,
-                parent: cat.parent?.name || null,
-                parentSlug: cat.parent?.slug || null
-            };
-        });
-
-        return {
-            id: item.id,
-            title: item.title,
-            author: item.original_author || "Unknown",
-            songKey: version?.key || null,
-            content: version?.content_chordpro || "",
-            melodyNotation: version?.melody_notation || "",
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            ownerId: (item as any).owner_id ?? undefined,
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            isPublic: (item as any).is_public ?? true,
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            hasChords: (item as any).has_chords ?? false,
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            hasMelody: (item as any).has_melody ?? false,
-            createdAt: item.created_at,
-            color: "red",
-            categories: categories,
-            isFavorite: favoriteIds.has(item.id),
-        } as Song;
-    });
+    return songsResult.data.map(item => mapCompositionToSong(item, favoriteIds));
 }
 
 /**
