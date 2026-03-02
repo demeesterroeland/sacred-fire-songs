@@ -3,6 +3,32 @@ import type { Song } from "@/lib/songUtils";
 import type { TaxonomyNode } from "@/lib/taxonomyUtils";
 import { songsQuery, mapCompositionToSong } from './queries';
 
+const PAGE_SIZE = 20;
+
+async function fetchFavoriteIds(supabase: any) {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) return new Set<string>();
+
+    const { data: setlist } = await supabase
+        .from('setlists')
+        .select('id')
+        .eq('owner_id', user.id)
+        .eq('title', 'My Favorites')
+        .maybeSingle();
+
+    if (!setlist) return new Set<string>();
+
+    const { data: items } = await supabase
+        .from('setlist_items')
+        .select('song_versions(composition_id)')
+        .eq('setlist_id', setlist.id);
+
+    return new Set<string>(
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        (items || []).map((i: any) => i.song_versions?.composition_id).filter(Boolean)
+    );
+}
+
 /**
  * Server-side version of fetchSongs — uses the server Supabase client (cookie-aware).
  * Only import this from Server Components or Server Actions.
@@ -12,29 +38,7 @@ export async function fetchSongsServer(limit?: number): Promise<Song[]> {
 
     const [songsResult, favoriteIds] = await Promise.all([
         songsQuery(supabase, { limit: limit ?? undefined }),
-        (async () => {
-            const { data: { user } } = await supabase.auth.getUser();
-            if (!user) return new Set<string>();
-
-            const { data: setlist } = await supabase
-                .from('setlists')
-                .select('id')
-                .eq('owner_id', user.id)
-                .eq('title', 'My Favorites')
-                .maybeSingle();
-
-            if (!setlist) return new Set<string>();
-
-            const { data: items } = await supabase
-                .from('setlist_items')
-                .select('song_versions(composition_id)')
-                .eq('setlist_id', setlist.id);
-
-            return new Set<string>(
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                (items || []).map((i: any) => i.song_versions?.composition_id).filter(Boolean)
-            );
-        })(),
+        fetchFavoriteIds(supabase),
     ]);
 
     if (songsResult.error) {
@@ -43,6 +47,33 @@ export async function fetchSongsServer(limit?: number): Promise<Song[]> {
     }
 
     return songsResult.data.map(item => mapCompositionToSong(item, favoriteIds));
+}
+
+/**
+ * Paginated server-side fetch for infinite scroll.
+ */
+export async function fetchSongsPageServer(cursor?: string): Promise<{
+    songs: Song[];
+    nextCursor: string | null;
+}> {
+    const supabase = await createClient();
+
+    const [songsResult, favoriteIds] = await Promise.all([
+        songsQuery(supabase, { limit: PAGE_SIZE, cursor }),
+        fetchFavoriteIds(supabase),
+    ]);
+
+    if (songsResult.error) {
+        console.error('fetchSongsPageServer error:', songsResult.error);
+        return { songs: [], nextCursor: null };
+    }
+
+    const songs = songsResult.data.map(item => mapCompositionToSong(item, favoriteIds));
+    const nextCursor = songs.length === PAGE_SIZE
+        ? songs[songs.length - 1].createdAt
+        : null;
+
+    return { songs, nextCursor };
 }
 
 /**

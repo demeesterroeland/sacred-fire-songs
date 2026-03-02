@@ -3,9 +3,9 @@
 import SearchBar from "@/components/home/SearchBar";
 import SongCard from "@/components/home/SongCard";
 import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
-import { Music, Guitar, ChevronDown, Search, Plus, Trash2, Heart, SlidersHorizontal } from "lucide-react";
+import { Music, Guitar, ChevronDown, Search, Plus, Trash2, Heart, SlidersHorizontal, Loader2 } from "lucide-react";
 import { useSidebar } from "@/context/SidebarContext";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useDeleteSong } from "@/hooks/useDeleteSong";
@@ -21,10 +21,11 @@ type SortByType = 'title' | 'author' | 'newest';
 
 interface SongsPageContentProps {
     initialSongs: Song[];
+    initialNextCursor: string | null;
     initialTaxonomy: TaxonomyNode[];
 }
 
-export default function SongsPageContent({ initialSongs, initialTaxonomy }: SongsPageContentProps) {
+export default function SongsPageContent({ initialSongs, initialNextCursor, initialTaxonomy }: SongsPageContentProps) {
     const searchParams = useSearchParams();
     const router = useRouter();
     const { user } = useAuth();
@@ -33,12 +34,20 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy }: Song
     const [localSearch, setLocalSearch] = useState('');
     const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null);
     const [filtersOpen, setFiltersOpen] = useState(false);
+    const sentinelRef = useRef<HTMLDivElement>(null);
 
     const isAdmin = user?.role === 'admin';
     const sortBy = (searchParams.get('sort') as SortByType) || 'title';
 
     // --- 1. Use Extracted Hooks ---
-    const { songs, taxonomy } = useSongsQuery({ initialSongs, initialTaxonomy });
+    const { 
+        songs, 
+        taxonomy, 
+        fetchNextPage, 
+        hasNextPage, 
+        isFetchingNextPage 
+    } = useSongsQuery({ initialSongs, initialNextCursor, initialTaxonomy });
+    
     const { favoriteIds } = useFavoritesQuery(user?.id);
     const {
         displaySongs,
@@ -62,6 +71,23 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy }: Song
         params.set('sort', val);
         router.push(`?${params.toString()}`, { scroll: false });
     };
+
+    // Infinite Scroll Intersection Observer
+    useEffect(() => {
+        if (!hasNextPage || !sentinelRef.current) return;
+        
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries[0].isIntersecting && !isFetchingNextPage) {
+                    fetchNextPage();
+                }
+            },
+            { threshold: 0.1 }
+        );
+        
+        observer.observe(sentinelRef.current);
+        return () => observer.disconnect();
+    }, [hasNextPage, fetchNextPage, isFetchingNextPage]);
 
     // Sync local search with state.search (for external resets like "Clear All")
     useEffect(() => {
@@ -318,6 +344,15 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy }: Song
                             </div>
                         )}
                     </div>
+                    
+                    {/* Infinite Scroll Sentinel */}
+                    {hasNextPage && (
+                        <div ref={sentinelRef} className="flex justify-center py-12">
+                            {isFetchingNextPage && (
+                                <Loader2 className="w-8 h-8 animate-spin text-gray-700" />
+                            )}
+                        </div>
+                    )}
                 </section>
             </div>
 

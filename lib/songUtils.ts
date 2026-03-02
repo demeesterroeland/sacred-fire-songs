@@ -1,6 +1,8 @@
 import { createClient } from "./supabase/client";
 import { songsQuery, mapCompositionToSong } from './songs/queries';
 
+const PAGE_SIZE = 20;
+
 // lib/songUtils.ts
 export interface Song {
     id: string;
@@ -69,4 +71,18 @@ export const fetchSongs = async (limit?: number) => {
     const { data, error } = await songsQuery(supabase, { limit: limit ?? undefined });
     if (error) throw error;
     return data.map(item => mapCompositionToSong(item));
+};
+
+/**
+ * Paginated client-side fetch for infinite scroll.
+ */
+export const fetchSongsPage = async (cursor?: string) => {
+    const supabase = createClient();
+    const { data, error } = await songsQuery(supabase, { limit: PAGE_SIZE, cursor });
+    if (error) throw error;
+    const songs = data.map(item => mapCompositionToSong(item));
+    const nextCursor = songs.length === PAGE_SIZE
+        ? songs[songs.length - 1].createdAt
+        : null;
+    return { songs, nextCursor };
 };
