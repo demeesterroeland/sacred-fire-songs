@@ -29,17 +29,10 @@ export default function Sidebar() {
 
     return (
         <>
-            {/* Mobile Overlay */}
-            {isOpen && (
-                <div
-                    className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300"
-                    onClick={() => setIsOpen(false)}
-                />
-            )}
-
             <aside
+                style={{ top: 'var(--env-banner-height, 0px)', height: `calc(100vh - var(--env-banner-height, 0px))` }}
                 className={`
-                    fixed lg:sticky top-0 left-0 h-screen z-50
+                    fixed lg:sticky left-0 z-50
                     flex flex-col bg-gray-900 border-r border-gray-800 transition-all duration-300 ease-in-out
                     ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
                     w-[260px]
@@ -47,17 +40,42 @@ export default function Sidebar() {
             >
                 {/* Header: Logo & Branding */}
                 <div className="p-4 flex items-center border-b border-gray-800/50 bg-gray-900/50 h-[72px] justify-between">
-                    <Link href="/" className="flex items-center gap-3 group/logo shrink-0" onClick={() => setIsOpen(false)}>
+                    {/* Desktop: flame logo + site title */}
+                    <Link href="/" className="hidden lg:flex items-center gap-3 group/logo shrink-0" onClick={() => setIsOpen(false)}>
                         <div className="w-10 h-10 bg-gradient-to-br from-red-700 to-orange-600 rounded-full flex items-center justify-center shadow-lg shadow-red-900/30 ring-1 ring-white/10 group-hover/logo:scale-110 transition-transform">
                             <Flame className="text-white w-6 h-6 fill-current" />
                         </div>
-                        {/* Title: Only on Desktop. Hide on Mobile Drawer as requested. */}
-                        <div className="hidden lg:flex flex-col">
+                        <div className="flex flex-col">
                             <span className="font-bold text-lg leading-tight text-white tracking-tight group-hover/logo:text-red-500 transition-colors">
                                 {getSiteTitle()}
                             </span>
                         </div>
                     </Link>
+
+                    {/* Mobile: user identity (authenticated) or flame logo (guest) */}
+                    <div className="lg:hidden flex items-center gap-3 shrink-0 min-w-0">
+                        {user ? (
+                            <>
+                                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-sm font-bold text-white ring-1 ring-white/10 shadow-inner relative overflow-hidden shrink-0">
+                                    {user.avatar_url ? (
+                                        <Image src={user.avatar_url} alt={userDisplayName} fill className="object-cover" sizes="36px" />
+                                    ) : (
+                                        userInitials
+                                    )}
+                                </div>
+                                <div className="flex flex-col min-w-0">
+                                    <p className="text-sm font-bold text-white truncate">{userDisplayName}</p>
+                                    <p className="text-xs text-blue-400/80 font-medium">{userRole}</p>
+                                </div>
+                            </>
+                        ) : (
+                            <Link href="/" className="flex items-center gap-3 group/logo" onClick={() => setIsOpen(false)}>
+                                <div className="w-10 h-10 bg-gradient-to-br from-red-700 to-orange-600 rounded-full flex items-center justify-center shadow-lg shadow-red-900/30 ring-1 ring-white/10 group-hover/logo:scale-110 transition-transform">
+                                    <Flame className="text-white w-6 h-6 fill-current" />
+                                </div>
+                            </Link>
+                        )}
+                    </div>
 
                     {/* Mobile Close Toggle - Positioned at Top Right of Sidebar */}
                     <button
@@ -72,6 +90,7 @@ export default function Sidebar() {
 
                 {/* Navigation Links + Personal Menu */}
                 <nav className="flex-1 overflow-y-auto px-2 py-6">
+                    <p className="lg:hidden text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 px-3 mb-2">Menu</p>
                     <div className="space-y-1">
                         {NAV_ITEMS.map((item) => (
                             <NavLink
@@ -92,22 +111,7 @@ export default function Sidebar() {
                     <div className="lg:hidden mt-4 pt-4 border-t border-gray-800/50">
                         {user ? (
                             <>
-                                {/* User Identity Card */}
-                                <div className="relative group/card bg-gray-800/50 p-3 rounded-xl mx-1 mb-3 border border-gray-700/30">
-                                    <div className="flex items-center gap-3">
-                                        <div className="w-10 h-10 rounded-full bg-red-900/40 flex items-center justify-center text-sm font-bold text-red-400 ring-1 ring-red-500/20 shadow-inner relative overflow-hidden">
-                                            {user.avatar_url ? (
-                                                <Image src={user.avatar_url} alt={userDisplayName} fill className="object-cover" sizes="40px" />
-                                            ) : (
-                                                userInitials
-                                            )}
-                                        </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-bold text-white truncate">{userDisplayName}</p>
-                                            <p className="text-xs text-blue-400/80 font-medium">{userRole}</p>
-                                        </div>
-                                    </div>
-                                </div>
+                                <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 px-3 mb-2">Personal</p>
 
                                 {/* Personal Menu Items */}
                                 <div className="space-y-1">

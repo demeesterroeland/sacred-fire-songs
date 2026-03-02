@@ -44,6 +44,7 @@ import { SidebarProvider } from "@/context/SidebarContext";
 import { UserPreferencesProvider } from "@/context/UserPreferencesContext";
 import EnvironmentBanner from "@/components/common/EnvironmentBanner";
 import ServiceWorkerRegistrar from "@/components/providers/ServiceWorkerRegistrar";
+import MainContent from "@/components/common/MainContent";
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode; }>) {
   return (
@@ -61,13 +62,13 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <UserPreferencesProvider>
           <SidebarProvider>
             <QueryProvider>
-              <div className="min-h-screen bg-black text-gray-100 font-sans flex flex-col lg:flex-row selection:bg-red-500/30">
+              <div className="min-h-screen bg-black text-gray-100 font-sans flex flex-col lg:flex-row selection:bg-red-500/30 overflow-x-hidden">
 
                 {/* Sidebar (Responsive Mini/Full) */}
                 <Sidebar />
 
                 {/* Main Content Area */}
-                <div className="flex-1 flex flex-col min-w-0 bg-gray-950 relative">
+                <MainContent>
                   {/* Global Header */}
                   <Header />
 
@@ -75,10 +76,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                   <div className="pb-16 lg:pb-0">
                     {children}
                   </div>
+                </MainContent>
 
-                  {/* Mobile Bottom Navigation */}
-                  <MobileBottomNav />
-                </div>
+                {/* Mobile Bottom Navigation — outside MainContent so fixed positioning works
+                    (transform on MainContent creates a new containing block, breaking fixed) */}
+                <MobileBottomNav />
               </div>
             </QueryProvider>
           </SidebarProvider>

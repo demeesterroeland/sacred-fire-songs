@@ -14,10 +14,14 @@ export default function Header() {
     const getSubtitle = () => {
         if (pathname === '/') return 'Dashboard';
         if (pathname === '/songs') return 'Songs';
-        if (pathname === '/explore') return 'Explore';
         if (pathname === '/songs/add') return 'Add Song';
-        if (pathname?.startsWith('/library')) return 'Your Library';
+        if (pathname === '/explore') return 'Explore';
+        if (pathname === '/library/playlists') return 'Your Library';
+        if (pathname === '/library/playlists/add') return 'New Playlist';
+        if (pathname?.startsWith('/library/playlists/')) return 'Playlist';
+        if (pathname?.endsWith('/edit')) return 'Edit Song';
         if (pathname?.startsWith('/songs/')) return 'Song Detail';
+        if (pathname === '/account/settings') return 'Settings';
         return '';
     };
 

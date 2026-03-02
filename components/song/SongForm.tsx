@@ -210,20 +210,6 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
 
 
 
-    const handleCopyLyricsToMelody = () => {
-        const content = watch('content') || '';
-        const title = watch('title') || '';
-        const author = watch('author') || '';
-        const key = watch('key') || '';
-
-        // Strip chords [Am] from content
-        const cleanLyrics = content.replace(/\[[^\]]*\]/g, '').trim();
-
-        // Generate ABC Header
-        const abcHeader = `X:1\nT: ${title}\nM:4/4\nC: ${author || 'Traditional'}\nK: ${key || 'C'}\n\n`;
-
-        setValue('melodyNotation', abcHeader + cleanLyrics);
-    };
 
 
 
@@ -421,147 +407,49 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                 )}
 
 
-                <div>
-                    <div className="flex justify-between items-end pb-2">
-                        <h3 className="text-white text-lg font-bold leading-tight tracking-tight">Song Details</h3>
-                        {!showUpload && (
-                            <button
-                                type="button"
-                                onClick={() => setShowUpload(true)}
-                                className="text-indigo-400 text-xs font-semibold flex items-center gap-1 opacity-80 hover:opacity-100 transition-opacity"
-                            >
-                                <span className="material-symbols-outlined text-sm">attachment</span>
-                                Or upload a file (.cho, .txt)
-                            </button>
-                        )}
+                {/* Upload file toggle (no "Song Details" heading) */}
+                {!showUpload && (
+                    <div className="flex justify-end pb-2">
+                        <button
+                            type="button"
+                            onClick={() => setShowUpload(true)}
+                            className="text-indigo-400 text-xs font-semibold flex items-center gap-1 opacity-80 hover:opacity-100 transition-opacity"
+                        >
+                            <span className="material-symbols-outlined text-sm">attachment</span>
+                            Or upload a file (.cho, .txt)
+                        </button>
                     </div>
-                    <div className="space-y-4">
-                        <div className="space-y-2">
-                            <label htmlFor="title" className="block text-sm font-medium text-gray-300 p-1">
-                                Song Title
-                            </label>
-                            <input
-                                id="title"
-                                {...register('title', { required: 'Title is required' })}
-                                className="w-full bg-[#1d1c26] border border-[#3f3d52] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all placeholder:text-[#a19eb7]/50"
-                                placeholder="e.g. Grandmother Earth"
-                            />
-                            {errors.title && <p className="text-red-400 text-sm">{errors.title.message}</p>}
-                        </div>
+                )}
 
-                        <div className="space-y-2">
-                            <label htmlFor="author" className="block text-sm font-medium text-gray-300 p-1">
-                                Author/Composer
-                            </label>
-                            <input
-                                id="author"
-                                {...register('author', { required: 'Author is required' })}
-                                className="w-full bg-[#1d1c26] border border-[#3f3d52] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all placeholder:text-[#a19eb7]/50"
-                                placeholder="e.g. Traditional or Artist Name"
-                            />
-                            {errors.author && <p className="text-red-400 text-sm">{errors.author.message}</p>}
-                        </div>
-
-                        {/* Extended Metadata Section (Collapsible) */}
-                        <div className="pt-2">
-                            <details
-                                className="group bg-[#1d1c26]/50 border border-[#3f3d52] rounded-xl overflow-hidden transition-all duration-300 open:bg-[#1d1c26]"
-                                open={isMetadataExpanded}
-                                onToggle={(e) => setIsMetadataExpanded(e.currentTarget.open)}
-                            >
-                                <summary className="w-full flex items-center justify-between p-4 hover:bg-[#3f3d52]/30 cursor-pointer select-none list-none">
-                                    <div className="flex items-center gap-2">
-                                        <h3 className="text-blue-400 font-semibold text-sm">Add Key, Capo and Tuning</h3>
-                                    </div>
-                                    <span className="material-symbols-outlined text-gray-400 transition-transform group-open:rotate-180">expand_more</span>
-                                </summary>
-
-                                <div className="p-4 pt-0 grid grid-cols-3 gap-3 border-t border-[#3f3d52]/50 mt-1 pt-4">
-                                    {/* Key */}
-                                    <div className="space-y-1.5">
-                                        <label className="block text-xs font-medium text-gray-400">Key</label>
-                                        <div className="relative">
-                                            <select
-                                                {...register('key')}
-                                                className="w-full bg-[#1d1c26] border border-[#3f3d52] rounded-lg px-2 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-blue-500 appearance-none"
-                                            >
-                                                <option value="">(Select Key)</option>
-                                                {['C', 'Cm', 'C#', 'Db', 'D', 'Dm', 'Eb', 'E', 'Em', 'F', 'Fm', 'F#', 'Gb', 'G', 'Gm', 'G#', 'Ab', 'A', 'Am', 'Bb', 'B', 'Bm'].map(k => (
-                                                    <option key={k} value={k}>{k}</option>
-                                                ))}
-                                            </select>
-                                            <span className="material-symbols-outlined absolute right-1 top-2 text-gray-500 pointer-events-none text-base">arrow_drop_down</span>
-                                        </div>
-                                    </div>
-
-                                    {/* Capo */}
-                                    <div className="space-y-1.5">
-                                        <label className="block text-xs font-medium text-gray-400">Capo</label>
-                                        <div className="relative">
-                                            <select
-                                                {...register('capo')}
-                                                className="w-full bg-[#1d1c26] border border-[#3f3d52] rounded-lg px-2 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-blue-500 appearance-none"
-                                            >
-                                                <option value="">(No Capo)</option>
-                                                {Array.from({ length: 12 }, (_, i) => i + 1).map(i => (
-                                                    <option key={i} value={i}>{i === 1 ? '1st Fret' : i === 2 ? '2nd Fret' : i === 3 ? '3rd Fret' : `${i}th Fret`}</option>
-                                                ))}
-                                            </select>
-                                            <span className="material-symbols-outlined absolute right-1 top-2 text-gray-500 pointer-events-none text-base">arrow_drop_down</span>
-                                        </div>
-                                    </div>
-
-                                    {/* Tuning */}
-                                    <div className="space-y-1.5">
-                                        <label className="block text-xs font-medium text-gray-400">Tuning</label>
-                                        <div className="relative">
-                                            <select
-                                                {...register('tuning')}
-                                                className="w-full bg-[#1d1c26] border border-[#3f3d52] rounded-lg px-2 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-blue-500 appearance-none"
-                                            >
-                                                <option value="">(Select Tuning)</option>
-                                                <option value="Standard">Standard</option>
-                                                <option value="Drop D">Drop D</option>
-                                                <option value="Open G">Open G</option>
-                                                <option value="DADGAD">DADGAD</option>
-                                                <option value="Open D">Open D</option>
-                                            </select>
-                                            <span className="material-symbols-outlined absolute right-1 top-2 text-gray-500 pointer-events-none text-base">arrow_drop_down</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </details>
-                        </div>
-
-
-
-                        {/* Categories/Tags Section (Collapsible) */}
-                        <div className="pt-2">
-                            <details
-                                className="group bg-[#1d1c26]/50 border border-[#3f3d52] rounded-xl overflow-hidden transition-all duration-300 open:bg-[#1d1c26]"
-                                open={isTagsExpanded}
-                                onToggle={(e) => setIsTagsExpanded(e.currentTarget.open)}
-                            >
-                                <summary className="w-full flex items-center justify-between p-4 hover:bg-[#3f3d52]/30 cursor-pointer select-none list-none">
-                                    <div className="flex items-center gap-2">
-                                        <h3 className="text-blue-400 font-semibold text-sm">Add Categories / Tags</h3>
-                                    </div>
-                                    <span className="material-symbols-outlined text-gray-400 transition-transform group-open:rotate-180">expand_more</span>
-                                </summary>
-
-                                <div className="p-4 border-t border-[#3f3d52]/50 mt-1">
-                                    <CategorySelector
-                                        selectedIds={currentCategoryIds}
-                                        onChange={(ids) => setValue('categoryIds', ids)}
-                                    />
-                                </div>
-                            </details>
-                        </div>
-                    </div>
+                {/* 1. Title */}
+                <div className="space-y-2">
+                    <label htmlFor="title" className="block text-sm font-medium text-gray-300 p-1">
+                        Song Title
+                    </label>
+                    <input
+                        id="title"
+                        {...register('title', { required: 'Title is required' })}
+                        className="w-full bg-[#1d1c26] border border-[#3f3d52] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all placeholder:text-[#a19eb7]/50"
+                        placeholder="e.g. Grandmother Earth"
+                    />
+                    {errors.title && <p className="text-red-400 text-sm">{errors.title.message}</p>}
                 </div>
 
-                {/* Lyrics & Chords Section */}
-                <div className="space-y-2 mt-6">
+                {/* 2. Author (optional) */}
+                <div className="space-y-2">
+                    <label htmlFor="author" className="block text-sm font-medium text-gray-300 p-1">
+                        Author/Composer <span className="text-gray-500 font-normal">(optional)</span>
+                    </label>
+                    <input
+                        id="author"
+                        {...register('author')}
+                        className="w-full bg-[#1d1c26] border border-[#3f3d52] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all placeholder:text-[#a19eb7]/50"
+                        placeholder="e.g. Traditional or Artist Name"
+                    />
+                </div>
+
+                {/* 3. Lyrics & Chords (moved up) */}
+                <div className="space-y-2 mt-2">
                     <div className="flex justify-between items-end pb-2">
                         <div>
                             <h3 className="text-white text-lg font-bold leading-tight tracking-tight">Lyrics & chords</h3>
@@ -582,73 +470,139 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                     {errors.content && <p className="text-red-400 text-sm">{errors.content.message}</p>}
                 </div>
 
-                {/* Melody Annotation Section */}
-                <div className="space-y-4 mt-8">
-                    <div className="flex justify-between items-end pb-2">
-                        <div>
-                            <h3 className="text-white text-lg font-bold leading-tight tracking-tight">Melody Notation (Optional)</h3>
-                            <p className="text-[#a19eb7] text-xs font-normal mt-1">Add ABC notation or melody text for performance guidance.</p>
+                {/* 4. Key / Capo / Tuning (collapsible, simplified) */}
+                <details className="group" open={isMetadataExpanded} onToggle={(e) => setIsMetadataExpanded(e.currentTarget.open)}>
+                    <summary className="w-full flex items-center justify-between py-3 cursor-pointer select-none list-none">
+                        <h3 className="text-gray-400 font-semibold text-sm">Key, Capo & Tuning</h3>
+                        <span className="material-symbols-outlined text-gray-400 transition-transform group-open:rotate-180">expand_more</span>
+                    </summary>
+                    <div className="grid grid-cols-3 gap-3 pb-3">
+                        {/* Key */}
+                        <div className="space-y-1.5">
+                            <label className="block text-xs font-medium text-gray-400">Key</label>
+                            <div className="relative">
+                                <select
+                                    {...register('key')}
+                                    className="w-full bg-[#1d1c26] border border-[#3f3d52] rounded-lg px-2 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-blue-500 appearance-none"
+                                >
+                                    <option value="">(Select Key)</option>
+                                    {['C', 'Cm', 'C#', 'Db', 'D', 'Dm', 'Eb', 'E', 'Em', 'F', 'Fm', 'F#', 'Gb', 'G', 'Gm', 'G#', 'Ab', 'A', 'Am', 'Bb', 'B', 'Bm'].map(k => (
+                                        <option key={k} value={k}>{k}</option>
+                                    ))}
+                                </select>
+                                <span className="material-symbols-outlined absolute right-1 top-2 text-gray-500 pointer-events-none text-base">arrow_drop_down</span>
+                            </div>
                         </div>
-                        <button
-                            type="button"
-                            onClick={handleCopyLyricsToMelody}
-                            className="text-primary text-xs font-bold uppercase tracking-wider flex items-center gap-1.5 hover:text-red-400 transition-colors"
-                        >
-                            <span className="material-symbols-outlined text-sm">content_copy</span>
-                            Copy from Lyrics
-                        </button>
-                    </div>
 
-                    <div className="bg-[#1d1c26] border border-[#3f3d52] rounded-lg focus-within:ring-2 focus-within:ring-primary focus-within:border-primary transition-all">
-                        <textarea
-                            {...register('melodyNotation')}
-                            className="w-full bg-transparent p-4 min-h-[200px] text-gray-300 font-mono text-sm resize-y focus:outline-none"
-                            placeholder="X:1\nT: Song Title\n..."
+                        {/* Capo */}
+                        <div className="space-y-1.5">
+                            <label className="block text-xs font-medium text-gray-400">Capo</label>
+                            <div className="relative">
+                                <select
+                                    {...register('capo')}
+                                    className="w-full bg-[#1d1c26] border border-[#3f3d52] rounded-lg px-2 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-blue-500 appearance-none"
+                                >
+                                    <option value="">(No Capo)</option>
+                                    {Array.from({ length: 12 }, (_, i) => i + 1).map(i => (
+                                        <option key={i} value={i}>{i === 1 ? '1st Fret' : i === 2 ? '2nd Fret' : i === 3 ? '3rd Fret' : `${i}th Fret`}</option>
+                                    ))}
+                                </select>
+                                <span className="material-symbols-outlined absolute right-1 top-2 text-gray-500 pointer-events-none text-base">arrow_drop_down</span>
+                            </div>
+                        </div>
+
+                        {/* Tuning */}
+                        <div className="space-y-1.5">
+                            <label className="block text-xs font-medium text-gray-400">Tuning</label>
+                            <div className="relative">
+                                <select
+                                    {...register('tuning')}
+                                    className="w-full bg-[#1d1c26] border border-[#3f3d52] rounded-lg px-2 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-blue-500 appearance-none"
+                                >
+                                    <option value="">(Select Tuning)</option>
+                                    <option value="Standard">Standard</option>
+                                    <option value="Drop D">Drop D</option>
+                                    <option value="Open G">Open G</option>
+                                    <option value="DADGAD">DADGAD</option>
+                                    <option value="Open D">Open D</option>
+                                </select>
+                                <span className="material-symbols-outlined absolute right-1 top-2 text-gray-500 pointer-events-none text-base">arrow_drop_down</span>
+                            </div>
+                        </div>
+                    </div>
+                </details>
+
+                {/* 5. Categories / Tags (collapsible, simplified) */}
+                <details className="group" open={isTagsExpanded} onToggle={(e) => setIsTagsExpanded(e.currentTarget.open)}>
+                    <summary className="w-full flex items-center justify-between py-3 cursor-pointer select-none list-none">
+                        <h3 className="text-gray-400 font-semibold text-sm">Categories / Tags</h3>
+                        <span className="material-symbols-outlined text-gray-400 transition-transform group-open:rotate-180">expand_more</span>
+                    </summary>
+                    <div className="pb-3">
+                        <CategorySelector
+                            selectedIds={currentCategoryIds}
+                            onChange={(ids) => setValue('categoryIds', ids)}
                         />
                     </div>
-                </div>
+                </details>
 
-                {/* Links Section */}
-                <div className="space-y-4 mt-6">
-                    <div className="pb-2 pt-4">
-                        <h3 className="text-white text-lg font-bold leading-tight tracking-tight">Links</h3>
-                    </div>
-
-                    <div className="relative w-full">
-                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <span className="material-symbols-outlined text-[#ff0000] text-xl">play_circle</span>
+                {/* 6. Links (collapsible) */}
+                <details className="group">
+                    <summary className="w-full flex items-center justify-between py-3 cursor-pointer select-none list-none">
+                        <h3 className="text-gray-400 font-semibold text-sm">Links (YouTube, Spotify, Soundcloud)</h3>
+                        <span className="material-symbols-outlined text-gray-400 transition-transform group-open:rotate-180">expand_more</span>
+                    </summary>
+                    <div className="space-y-3 pb-2">
+                        <div className="relative w-full">
+                            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                <span className="material-symbols-outlined text-[#ff0000] text-xl">play_circle</span>
+                            </div>
+                            <input
+                                {...register('youtubeLink')}
+                                className="w-full pl-11 bg-[#1d1c26] border border-[#3f3d52] rounded-lg h-12 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all placeholder:text-[#a19eb7]/50 text-sm"
+                                placeholder="Paste YouTube link"
+                            />
                         </div>
-                        <input
-                            {...register('youtubeLink')}
-                            className="w-full pl-11 bg-[#1d1c26] border border-[#3f3d52] rounded-lg h-12 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all placeholder:text-[#a19eb7]/50 text-sm"
-                            placeholder="Paste YouTube link"
-                        />
-                    </div>
 
-                    <div className="relative w-full">
-                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <span className="material-symbols-outlined text-[#1db954] text-xl">radio</span>
+                        <div className="relative w-full">
+                            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                <span className="material-symbols-outlined text-[#1db954] text-xl">radio</span>
+                            </div>
+                            <input
+                                {...register('spotifyLink')}
+                                className="w-full pl-11 bg-[#1d1c26] border border-[#3f3d52] rounded-lg h-12 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all placeholder:text-[#a19eb7]/50 text-sm"
+                                placeholder="Paste Spotify link"
+                            />
                         </div>
-                        <input
-                            {...register('spotifyLink')}
-                            className="w-full pl-11 bg-[#1d1c26] border border-[#3f3d52] rounded-lg h-12 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all placeholder:text-[#a19eb7]/50 text-sm"
-                            placeholder="Paste Spotify link"
-                        />
-                    </div>
 
-                    <div className="relative w-full">
-                        <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                            <svg role="img" viewBox="0 0 24 24" className="w-6 h-6 fill-[#ff5500]" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M23.999 14.165c-.052 1.796-1.612 3.169-3.4 3.169h-8.18a.68.68 0 0 1-.675-.683V7.862a.747.747 0 0 1 .452-.724s.75-.513 2.333-.513a5.364 5.364 0 0 1 2.763.755 5.433 5.433 0 0 1 2.57 3.54c.282-.08.574-.121.868-.12.884 0 1.73.358 2.347.992s.948 1.49.922 2.373ZM10.721 8.421c.247 2.98.427 5.697 0 8.672a.264.264 0 0 1-.53 0c-.395-2.946-.22-5.718 0-8.672a.264.264 0 0 1 .53 0ZM9.072 9.448c.285 2.659.37 4.986-.006 7.655a.277.277 0 0 1-.55 0c-.331-2.63-.256-5.02 0-7.655a.277.277 0 0 1 .556 0Zm-1.663-.257c.27 2.726.39 5.171 0 7.904a.266.266 0 0 1-.532 0c-.38-2.69-.257-5.21 0-7.904a.266.266 0 0 1 .532 0Zm-1.647.77a26.108 26.108 0 0 1-.008 7.147.272.272 0 0 1-.542 0 27.955 27.955 0 0 1 0-7.147.275.275 0 0 1 .55 0Zm-1.67 1.769c.421 1.865.228 3.5-.029 5.388a.257.257 0 0 1-.514 0c-.21-1.858-.398-3.549 0-5.389a.272.272 0 0 1 .543 0Zm-1.655-.273c.388 1.897.26 3.508-.01 5.412-.026.28-.514.283-.54 0-.244-1.878-.347-3.54-.01-5.412a.283.283 0 0 1 .56 0Zm-1.668.911c.4 1.268.257 2.292-.026 3.572a.257.257 0 0 1-.514 0c-.241-1.262-.354-2.312-.023-3.572a.283.283 0 0 1 .563 0Z" />
-                            </svg>
+                        <div className="relative w-full">
+                            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
+                                <svg role="img" viewBox="0 0 24 24" className="w-6 h-6 fill-[#ff5500]" xmlns="http://www.w3.org/2000/svg">
+                                    <path d="M23.999 14.165c-.052 1.796-1.612 3.169-3.4 3.169h-8.18a.68.68 0 0 1-.675-.683V7.862a.747.747 0 0 1 .452-.724s.75-.513 2.333-.513a5.364 5.364 0 0 1 2.763.755 5.433 5.433 0 0 1 2.57 3.54c.282-.08.574-.121.868-.12.884 0 1.73.358 2.347.992s.948 1.49.922 2.373ZM10.721 8.421c.247 2.98.427 5.697 0 8.672a.264.264 0 0 1-.53 0c-.395-2.946-.22-5.718 0-8.672a.264.264 0 0 1 .53 0ZM9.072 9.448c.285 2.659.37 4.986-.006 7.655a.277.277 0 0 1-.55 0c-.331-2.63-.256-5.02 0-7.655a.277.277 0 0 1 .556 0Zm-1.663-.257c.27 2.726.39 5.171 0 7.904a.266.266 0 0 1-.532 0c-.38-2.69-.257-5.21 0-7.904a.266.266 0 0 1 .532 0Zm-1.647.77a26.108 26.108 0 0 1-.008 7.147.272.272 0 0 1-.542 0 27.955 27.955 0 0 1 0-7.147.275.275 0 0 1 .55 0Zm-1.67 1.769c.421 1.865.228 3.5-.029 5.388a.257.257 0 0 1-.514 0c-.21-1.858-.398-3.549 0-5.389a.272.272 0 0 1 .543 0Zm-1.655-.273c.388 1.897.26 3.508-.01 5.412-.026.28-.514.283-.54 0-.244-1.878-.347-3.54-.01-5.412a.283.283 0 0 1 .56 0Zm-1.668.911c.4 1.268.257 2.292-.026 3.572a.257.257 0 0 1-.514 0c-.241-1.262-.354-2.312-.023-3.572a.283.283 0 0 1 .563 0Z" />
+                                </svg>
+                            </div>
+                            <input
+                                {...register('soundcloudLink')}
+                                className="w-full pl-11 bg-[#1d1c26] border border-[#3f3d52] rounded-lg h-12 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all placeholder:text-[#a19eb7]/50 text-sm"
+                                placeholder="Paste Soundcloud link"
+                            />
                         </div>
-                        <input
-                            {...register('soundcloudLink')}
-                            className="w-full pl-11 bg-[#1d1c26] border border-[#3f3d52] rounded-lg h-12 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all placeholder:text-[#a19eb7]/50 text-sm"
-                            placeholder="Paste Soundcloud link"
-                        />
                     </div>
-                </div>
+                </details>
+
+                {/* 7. Melody Notation — Coming Soon */}
+                <details className="group opacity-60">
+                    <summary className="w-full flex items-center justify-between py-3 cursor-pointer select-none list-none">
+                        <div className="flex items-center gap-2">
+                            <h3 className="text-gray-400 font-semibold text-sm">Melody Notation</h3>
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-500/80 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">Coming Soon</span>
+                        </div>
+                        <span className="material-symbols-outlined text-gray-400 transition-transform group-open:rotate-180">expand_more</span>
+                    </summary>
+                    <div className="py-3">
+                        <p className="text-gray-500 text-xs">ABC notation support is under development.</p>
+                    </div>
+                </details>
             </div>
 
             {serverError && (

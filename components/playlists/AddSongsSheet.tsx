@@ -12,6 +12,7 @@ interface Song {
     id: string;
     title: string;
     original_author: string | null;
+    is_public: boolean;
 }
 
 interface AddSongsSheetProps {
@@ -47,10 +48,11 @@ export function AddSongsSheet({ playlistId, existingCompositionIds, open, onClos
         setIsSearching(true);
         const timeout = setTimeout(async () => {
             const supabase = createClient();
+            // Show all songs the user can access (RLS handles visibility)
+            // No is_public filter — owner should see their own drafts too
             let q = supabase
                 .from('compositions')
-                .select('id, title, original_author')
-                .eq('is_public', true)
+                .select('id, title, original_author, is_public')
                 .order('title', { ascending: true })
                 .limit(50);
             if (query.trim()) q = q.ilike('title', `%${query.trim()}%`);
@@ -133,7 +135,7 @@ export function AddSongsSheet({ playlistId, existingCompositionIds, open, onClos
                 </div>
 
                 {/* Song list */}
-                <div className="overflow-y-auto flex-1 pb-safe">
+                <div className="overflow-y-auto flex-1 pb-6">
                     {!isSearching && songs.length === 0 && (
                         <p className="text-center text-sm text-gray-600 py-10">No songs found.</p>
                     )}
@@ -143,13 +145,20 @@ export function AddSongsSheet({ playlistId, existingCompositionIds, open, onClos
                             <button
                                 key={song.id}
                                 onClick={() => handleToggle(song.id, song.title)}
-                                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-800/60 transition-colors text-left"
+                                className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-800/60 transition-colors text-left ${!song.is_public ? 'opacity-70 hover:opacity-100' : ''}`}
                             >
                                 <div className="w-5 h-5 shrink-0 flex items-center justify-center">
                                     {inPlaylist && <Check className="w-4 h-4 text-amber-400" />}
                                 </div>
                                 <div className="flex-1 min-w-0">
-                                    <p className="text-sm font-medium text-gray-100 truncate">{song.title}</p>
+                                    <div className="flex items-center gap-2">
+                                        <p className="text-sm font-medium text-gray-100 truncate">{song.title}</p>
+                                        {!song.is_public && (
+                                            <span className="text-[9px] font-black bg-gray-800 text-gray-500 px-1.5 py-0.5 rounded border border-gray-700 uppercase tracking-tighter shrink-0">
+                                                Draft
+                                            </span>
+                                        )}
+                                    </div>
                                     {song.original_author && (
                                         <p className="text-xs text-gray-500 truncate">{song.original_author}</p>
                                     )}

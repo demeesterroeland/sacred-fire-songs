@@ -5,13 +5,12 @@ import { useParams, notFound, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
-import { useSidebar } from '@/context/SidebarContext';
 import SongDisplay from '@/components/song/SongDisplay';
 import SongDetailSkeleton from '@/components/song/SongDetailSkeleton';
 import MediaEmbeds from '@/components/song/MediaEmbeds';
 import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal';
 import { useQuery } from '@tanstack/react-query';
-import { Trash2, Edit2, ArrowLeft, Lock as LockIcon, Music, Link as LinkIcon, Flame, IndentIncrease, Heart } from 'lucide-react';
+import { Trash2, Edit2, ArrowLeft, Music, Link as LinkIcon, Heart, MoreHorizontal } from 'lucide-react';
 import { useToggleFavorite } from '@/hooks/useToggleFavorite';
 import { PlaylistPicker } from '@/components/playlists/PlaylistPicker';
 import { useDeleteSong } from '@/hooks/useDeleteSong';
@@ -65,10 +64,10 @@ export default function SongDetailPage() {
 
     const [selectedVersionIndex, setSelectedVersionIndex] = useState(0);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+    const [isOverflowOpen, setIsOverflowOpen] = useState(false);
     const { isDeleting, deleteSong } = useDeleteSong();
 
     const { user, loading: authLoading } = useAuth();
-    const { setIsOpen } = useSidebar();
     const isAdmin = user?.role === 'admin';
 
     // Enable Screen Wake Lock on Song Detail Page
@@ -121,43 +120,58 @@ export default function SongDetailPage() {
     return (
         <div className="flex flex-col min-h-screen">
             {/* Mobile Header (Visible only on mobile < lg) */}
-            <header className="lg:hidden flex justify-between items-center px-4 py-3 sticky top-0 bg-gray-900/95 backdrop-blur-md z-30 border-b border-white/5 shadow-lg">
-                <div className="flex items-center gap-3 flex-1 min-w-0 pr-2">
-                    {/* Menu Trigger */}
-                    <button
-                        onClick={() => setIsOpen(true)}
-                        className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors p-1.5 pr-3 rounded-xl hover:bg-gray-800 group shrink-0 border border-transparent hover:border-gray-700"
-                    >
-                        <IndentIncrease className="w-7 h-7" />
-                        <span className="text-[10px] font-bold uppercase tracking-widest opacity-60 group-hover:opacity-100 transition-opacity hidden sm:inline">Menu</span>
-                    </button>
-
-                    <div className="w-8 h-8 bg-gradient-to-br from-red-700 to-orange-600 rounded-full flex items-center justify-center shadow-lg shadow-red-900/30 ring-1 ring-white/10 shrink-0">
-                        <Flame className="text-white w-5 h-5 fill-current" />
-                    </div>
-                    <h1 className="font-bold text-base tracking-tight text-white truncate flex-1 min-w-0">Sacred Fire Songs</h1>
-                </div>
-                {/* Action Buttons and User Profile (Mobile) */}
-                <div className="flex items-center gap-2 shrink-0">
-                    {user && id && (
-                        <PlaylistPicker
-                            compositionId={id}
-                            userId={user.id}
-                            triggerClassName="p-2"
-                            iconClassName="w-[17px] h-[17px]"
-                        />
-                    )}
+            <header className="lg:hidden flex items-center justify-between px-4 py-3 sticky top-0 bg-gray-900/95 backdrop-blur-md z-30 border-b border-white/5 shadow-lg">
+                <Link href="/" className="p-2 -ml-2 text-gray-400 hover:text-white transition-colors">
+                    <ArrowLeft className="w-5 h-5" />
+                </Link>
+                <h1 className="font-bold text-sm tracking-tight text-white truncate mx-4 flex-1 text-center">
+                    {song.title}
+                </h1>
+                <div className="flex items-center gap-1">
                     <button
                         onClick={handleToggleFavorite}
                         aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
-                        className={`p-2 rounded-full transition-all duration-300 ${isFav ? 'text-amber-400 heart-glow' : 'text-gray-600 hover:text-amber-400/60'}`}
+                        className={`p-2 rounded-full transition-all duration-300 ${isFav ? 'text-amber-400' : 'text-gray-500 hover:text-amber-400/60'}`}
                     >
                         <Heart className={`w-5 h-5 transition-all duration-200 ${isFav ? 'fill-amber-400' : ''}`} strokeWidth={1.5} />
                     </button>
-                    <Link href="/" className="p-2 text-gray-400 hover:text-white transition-colors">
-                        <ArrowLeft className="w-5 h-5" />
-                    </Link>
-                    <UserProfile layout="header" showText={false} />
+                    {user && (
+                        <div className="relative">
+                            <button
+                                onClick={() => setIsOverflowOpen(!isOverflowOpen)}
+                                className="p-2 text-gray-400 hover:text-white transition-colors"
+                                aria-label="More actions"
+                            >
+                                <MoreHorizontal className="w-5 h-5" />
+                            </button>
+                            {isOverflowOpen && (
+                                <>
+                                    <div className="fixed inset-0 z-40" onClick={() => setIsOverflowOpen(false)} />
+                                    <div className="absolute right-0 top-full mt-1 z-50 bg-gray-900 border border-gray-700/50 rounded-xl overflow-hidden shadow-2xl shadow-black/50 min-w-[180px]">
+                                        {(song.owner_id === user?.id || isAdmin) && (
+                                            <Link
+                                                href={`/songs/${id}/edit`}
+                                                onClick={() => setIsOverflowOpen(false)}
+                                                className="flex items-center gap-3 px-4 py-3 hover:bg-gray-800/50 transition-colors text-gray-300"
+                                            >
+                                                <Edit2 className="w-4 h-4" />
+                                                <span className="text-sm font-medium">Edit</span>
+                                            </Link>
+                                        )}
+                                        {(song.owner_id === user?.id || isAdmin) && (
+                                            <button
+                                                onClick={() => { setIsOverflowOpen(false); setIsDeleteModalOpen(true); }}
+                                                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-500/10 transition-colors text-red-400"
+                                            >
+                                                <Trash2 className="w-4 h-4" />
+                                                <span className="text-sm font-medium">Delete</span>
+                                            </button>
+                                        )}
+                                    </div>
+                                </>
+                            )}
+                        </div>
+                    )}
                 </div>
             </header>
 
