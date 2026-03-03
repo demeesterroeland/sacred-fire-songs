@@ -1,5 +1,5 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
-import type { Song } from '@/lib/songUtils';
+import type { Song } from '../songUtils';
 
 /**
  * Shared select string for composition queries.
