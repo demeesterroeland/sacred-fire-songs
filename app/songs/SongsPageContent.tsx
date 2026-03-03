@@ -120,7 +120,7 @@ export default function SongsPageContent({ initialSongs, initialNextCursor, init
 
                         {/* Row 1: Search + Filter Toggle (Mobile) */}
                         <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-8">
-                            <div className="flex items-center gap-2 w-full md:w-auto">
+                            <div className="flex items-center gap-2 w-full md:flex-1">
                                 <SearchBar
                                     value={localSearch}
                                     onChange={setLocalSearch}
