@@ -234,8 +234,8 @@ export default async function PlaylistsPage() {
         for (const item of pubItems ?? []) {
             const sid = item.setlist_id;
             publicSongCounts[sid] = (publicSongCounts[sid] ?? 0) + 1;
-            const songVers = item.song_versions as unknown as { compositions: { title: string } }[] | null;
-            const title = songVers?.[0]?.compositions?.title;
+            const songVers = item.song_versions as unknown as { compositions: { title: string } } | null;
+            const title = songVers?.compositions?.title;
             if (title) {
                 if (!publicSongTitles[sid]) publicSongTitles[sid] = [];
                 publicSongTitles[sid].push(title);
@@ -277,8 +277,8 @@ export default async function PlaylistsPage() {
             const sid = item.setlist_id;
             if (!songCounts[sid]) songCounts[sid] = { total: 0, public: 0, draft: 0 };
             songCounts[sid].total++;
-            const songVers = item.song_versions as unknown as { compositions: { is_public: boolean; title: string } }[] | null;
-            const comp = songVers?.[0]?.compositions;
+            const songVers = item.song_versions as unknown as { compositions: { is_public: boolean; title: string } } | null;
+            const comp = songVers?.compositions;
             if (comp?.is_public === true) songCounts[sid].public++;
             else songCounts[sid].draft++;
             if (comp?.title) {

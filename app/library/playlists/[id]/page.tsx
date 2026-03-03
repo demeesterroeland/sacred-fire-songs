@@ -6,13 +6,12 @@ import { PlaylistDetailHeader } from '@/components/playlists/PlaylistDetailHeade
 interface SetlistItemRow {
     id: string;
     song_versions: {
-        id: string;
         compositions: {
             id: string;
             title: string;
             original_author: string;
-        }[];
-    }[];
+        };
+    };
 }
 
 interface Props {
@@ -59,9 +58,9 @@ export default async function PlaylistDetailPage({ params }: Props) {
 
     const mappedItems = (items as unknown as SetlistItemRow[] ?? []).map(item => ({
         id: item.id,
-        songTitle: item.song_versions?.[0]?.compositions?.[0]?.title ?? 'Unknown',
-        songAuthor: item.song_versions?.[0]?.compositions?.[0]?.original_author ?? '',
-        songId: item.song_versions?.[0]?.compositions?.[0]?.id ?? '',
+        songTitle: item.song_versions?.compositions?.title ?? 'Unknown',
+        songAuthor: item.song_versions?.compositions?.original_author ?? '',
+        songId: item.song_versions?.compositions?.id ?? '',
     }));
 
     return (

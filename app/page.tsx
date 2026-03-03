@@ -55,8 +55,8 @@ export default async function Home() {
     for (const item of plItems ?? []) {
       const sid = item.setlist_id;
       playlistSongCounts[sid] = (playlistSongCounts[sid] ?? 0) + 1;
-      const songVers = item.song_versions as unknown as { compositions: { title: string } }[] | null;
-      const title = songVers?.[0]?.compositions?.title;
+      const songVers = item.song_versions as unknown as { compositions: { title: string } } | null;
+      const title = songVers?.compositions?.title;
       if (title) {
         if (!playlistSongTitles[sid]) playlistSongTitles[sid] = [];
         playlistSongTitles[sid].push(title);
