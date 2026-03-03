@@ -3,66 +3,62 @@
 import SearchBar from "@/components/home/SearchBar";
 import SongCard from "@/components/home/SongCard";
 import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
-import { Music, Guitar, ChevronDown, Flame, Search, X, Plus, Trash2, Heart, SlidersHorizontal } from "lucide-react";
+import { Music, Guitar, ChevronDown, Search, Plus, Trash2, Heart, SlidersHorizontal, Loader2 } from "lucide-react";
 import { useSidebar } from "@/context/SidebarContext";
-import { useState, useMemo, useEffect } from "react";
-import { fetchSongs } from "@/lib/songUtils";
-import { useQuery } from '@tanstack/react-query';
+import { useState, useEffect, useRef } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useSearchParams, useRouter } from 'next/navigation';
-import { createClient } from "@/lib/supabase/client";
 import { useDeleteSong } from "@/hooks/useDeleteSong";
-import { SONG_KEYS } from "@/lib/songs/queryKeys";
 import Link from 'next/link';
-import { getCategoryColor, getCategoryStyles } from "@/lib/uiUtils";
-import { useDeclarativeFilter } from "@/hooks/useDeclarativeFilter";
-import { songFilterConfig, SongFilterState } from "@/lib/songs/filterConfig";
 import TagSelector from "@/components/library/TagSelector";
-import { fetchCategoryTree, type TaxonomyNode } from "@/lib/taxonomyUtils";
+import { type TaxonomyNode } from "@/lib/taxonomyUtils";
 import type { Song } from "@/lib/songUtils";
+import { useSongsQuery } from "@/hooks/useSongsQuery";
+import { useFavoritesQuery } from "@/hooks/useFavoritesQuery";
+import { useSongsFilter } from "@/hooks/useSongsFilter";
 
 type SortByType = 'title' | 'author' | 'newest';
 
 interface SongsPageContentProps {
     initialSongs: Song[];
+    initialNextCursor: string | null;
     initialTaxonomy: TaxonomyNode[];
 }
 
-export default function SongsPageContent({ initialSongs, initialTaxonomy }: SongsPageContentProps) {
+export default function SongsPageContent({ initialSongs, initialNextCursor, initialTaxonomy }: SongsPageContentProps) {
     const searchParams = useSearchParams();
-    const router = useRouter(); // needed for clear all button which uses router.push
+    const router = useRouter();
     const { user } = useAuth();
     const { setHeaderCount } = useSidebar();
     const { isDeleting, deleteSong } = useDeleteSong();
     const [localSearch, setLocalSearch] = useState('');
     const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null);
     const [filtersOpen, setFiltersOpen] = useState(false);
+    const sentinelRef = useRef<HTMLDivElement>(null);
 
     const isAdmin = user?.role === 'admin';
+    const sortBy = (searchParams.get('sort') as SortByType) || 'title';
 
-    const { data: favoriteIds = new Set<string>() } = useQuery({
-        queryKey: SONG_KEYS.favorites(user?.id),
-        queryFn: async () => {
-            if (!user) return new Set<string>();
-            const supabase = createClient();
-            const { data: setlist } = await supabase
-                .from('setlists')
-                .select('id')
-                .eq('title', 'My Favorites')
-                .maybeSingle();
-            if (!setlist) return new Set<string>();
-            const { data: items } = await supabase
-                .from('setlist_items')
-
-                .select('song_versions(composition_id)')
-                .eq('setlist_id', setlist.id);
-            return new Set<string>(
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                (items ?? []).map((item: any) => item.song_versions?.composition_id).filter(Boolean)
-            );
-        },
-        enabled: !!user,
-    });
+    // --- 1. Use Extracted Hooks ---
+    const { 
+        songs, 
+        taxonomy, 
+        fetchNextPage, 
+        hasNextPage, 
+        isFetchingNextPage 
+    } = useSongsQuery({ initialSongs, initialNextCursor, initialTaxonomy });
+    
+    const { favoriteIds } = useFavoritesQuery(user?.id);
+    const {
+        displaySongs,
+        state,
+        setFilter,
+        resetFilters,
+        chordsCount,
+        melodyCount,
+        hasActiveFilters,
+        filteredCount
+    } = useSongsFilter({ songs, userId: user?.id, favoriteIds, sortBy });
 
     const handleDelete = async () => {
         if (!deleteTarget) return;
@@ -70,84 +66,28 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy }: Song
         if (success) setDeleteTarget(null);
     };
 
-
-    // Local UI state for sorting (not part of filtering engine usually)
-    const sortBy = (searchParams.get('sort') as SortByType) || 'title';
     const setSortBy = (val: SortByType) => {
         const params = new URLSearchParams(searchParams.toString());
         params.set('sort', val);
         router.push(`?${params.toString()}`, { scroll: false });
     };
 
-    // --- 1. Fetch Data ---
-    const { data: songs = [] } = useQuery({
-        queryKey: SONG_KEYS.list(),
-        queryFn: () => fetchSongs(),
-        initialData: initialSongs,
-    });
-
-    const { data: taxonomy = [] } = useQuery({
-        queryKey: SONG_KEYS.taxonomy(),
-        queryFn: fetchCategoryTree,
-        initialData: initialTaxonomy,
-    });
-
-    // --- 2. Declarative Filter Hook ---
-    const { filteredItems, facets, state, setFilter, resetFilters } = useDeclarativeFilter(
-        songs,
-        songFilterConfig,
-        {
-            status: user ? 'all' : 'public', // Default state
-            search: '',
-            category: undefined,
-            tags: [],
-            chords: false,
-            melody: false,
-            favorites: false,
-            mine: false,
-        },
-        {
-            // Custom Parse: Convert URL params to State
-            parseUrl: (params) => {
-                return {
-                    category: params.get('category') || undefined,
-                    tags: params.get('tag') ? params.get('tag')!.split(',').filter(Boolean) : [],
-                    status: (params.get('status') as any) || (user ? 'all' : 'public'),
-                    search: params.get('search') || '',
-                    chords: params.get('chords') === 'true',
-                    melody: params.get('melody') === 'true',
-                    favorites: params.get('favorites') === 'true',
-                    mine: params.get('mine') === 'true',
-                };
+    // Infinite Scroll Intersection Observer
+    useEffect(() => {
+        if (!hasNextPage || !sentinelRef.current) return;
+        
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries[0].isIntersecting && !isFetchingNextPage) {
+                    fetchNextPage();
+                }
             },
-            // Custom Serialize: Convert State to URL params
-            serializeUrl: (state) => {
-                return {
-                    category: state.category || '',
-                    tag: state.tags?.join(',') || '',
-                    status: state.status === 'all' ? '' : state.status || '', // 'all' is default, don't show in URL
-                    search: state.search || '',
-                    chords: state.chords ? 'true' : '',
-                    melody: state.melody ? 'true' : '',
-                    favorites: state.favorites ? 'true' : '',
-                    mine: state.mine ? 'true' : '',
-                    sort: sortBy // Preserve sort param
-                };
-            }
-        }
-    );
-
-    // Apply post-filters (independent of the visibility status tabs)
-    const finalFilteredItems = useMemo(() => {
-        let items = filteredItems;
-        if (state.favorites) {
-            items = items.filter(s => favoriteIds.has(s.id));
-        }
-        if (state.mine && user) {
-            items = items.filter(s => s.ownerId === user.id);
-        }
-        return items;
-    }, [filteredItems, state.favorites, state.mine, favoriteIds, user]);
+            { threshold: 0.1 }
+        );
+        
+        observer.observe(sentinelRef.current);
+        return () => observer.disconnect();
+    }, [hasNextPage, fetchNextPage, isFetchingNextPage]);
 
     // Sync local search with state.search (for external resets like "Clear All")
     useEffect(() => {
@@ -164,42 +104,11 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy }: Song
         return () => clearTimeout(timer);
     }, [localSearch, setFilter, state.search]);
 
-
     // Publish count to global header for mobile view
     useEffect(() => {
-        setHeaderCount(finalFilteredItems.length);
-        // Clear on unmount
+        setHeaderCount(filteredCount);
         return () => setHeaderCount(undefined);
-    }, [finalFilteredItems.length, setHeaderCount]);
-
-    // --- 3. Sorting (Applied after filtering) ---
-    const displaySongs = useMemo(() => {
-        return [...finalFilteredItems].sort((a, b) => {
-            if (sortBy === 'title') return a.title.localeCompare(b.title);
-            if (sortBy === 'author') return a.author.localeCompare(b.author);
-            // newest: latest time at top
-            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-        });
-    }, [finalFilteredItems, sortBy]);
-
-    // Derived counts from facets
-    // Note: 'facets.chords.get("true")' tells us: "If we toggle Chords=ON, how many songs match?"
-    // Since Chords is a boolean filter, the facet count for "true" represents the count of songs 
-    // that MATCH everything else AND have chords=true.
-    const chordsCount = facets.chords?.get('true') || 0;
-    const melodyCount = facets.melody?.get('true') || 0;
-
-    // True when any filter beyond the defaults is active (drives Clear All visibility)
-    const hasActiveFilters = !!(
-        state.category ||
-        (state.tags?.length ?? 0) > 0 ||
-        localSearch ||
-        (user && state.status !== 'all') ||
-        state.chords ||
-        state.melody ||
-        state.favorites ||
-        state.mine
-    );
+    }, [filteredCount, setHeaderCount]);
 
     return (
         <main className="flex-1 min-h-0 bg-gray-950">
@@ -234,7 +143,7 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy }: Song
 
                             <div className="hidden md:flex items-center gap-4 self-end md:self-auto">
                                 <span className="hidden md:block text-xs text-gray-500 whitespace-nowrap">
-                                    {finalFilteredItems.length} songs found
+                                    {filteredCount} songs found
                                 </span>
 
                                 {user && (
@@ -435,6 +344,15 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy }: Song
                             </div>
                         )}
                     </div>
+                    
+                    {/* Infinite Scroll Sentinel */}
+                    {hasNextPage && (
+                        <div ref={sentinelRef} className="flex justify-center py-12">
+                            {isFetchingNextPage && (
+                                <Loader2 className="w-8 h-8 animate-spin text-gray-700" />
+                            )}
+                        </div>
+                    )}
                 </section>
             </div>
 

@@ -1,4 +1,7 @@
 import { createClient } from "./supabase/client";
+import { songsQuery, mapCompositionToSong } from './songs/queries';
+
+const PAGE_SIZE = 20;
 
 // lib/songUtils.ts
 export interface Song {
@@ -65,75 +68,21 @@ export function filterSongs(songs: Song[], query: string, activeFilter: 'all' | 
  */
 export const fetchSongs = async (limit?: number) => {
     const supabase = createClient();
-
-    // We need to fetch:
-    // 1. Composition details
-    // 2. Default version (for key/content)
-    // 3. Categories (via logic: song -> song_category_map -> categories -> parent category)
-    // Note: PostgREST syntax for nested self-referencing tables can be tricky. 
-    // We will select: song_category_map(categories(name, slug, parent:parent_id(name, slug)))
-
-    let query = supabase
-        .from('compositions')
-        .select(`
-            *,
-            song_versions(key, content_chordpro, melody_notation),
-            song_category_map (
-              categories (
-                name,
-                slug,
-                parent:parent_id (
-                  name,
-                  slug
-                )
-              )
-            )
-        `)
-        .order('created_at', { ascending: false });
-
-    if (limit) {
-        query = query.limit(limit);
-    }
-
-    const { data, error } = await query;
-
+    const { data, error } = await songsQuery(supabase, { limit: limit ?? undefined });
     if (error) throw error;
+    return data.map(item => mapCompositionToSong(item));
+};
 
-    return data.map(item => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const version = (item.song_versions as any[])?.[0];
-
-        // Map categories
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const rawCategories = (item.song_category_map as any[]) || [];
-        const categories = rawCategories.map((mapItem: any) => {
-            const cat = mapItem.categories;
-            return {
-                name: cat.name,
-                slug: cat.slug,
-                parent: cat.parent?.name || null,
-                parentSlug: cat.parent?.slug || null
-            };
-        });
-
-        return {
-            id: item.id,
-            title: item.title,
-            author: item.original_author || "Unknown",
-            songKey: version?.key || null,
-            content: version?.content_chordpro || "",
-            melodyNotation: version?.melody_notation || "",
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            ownerId: (item as any).owner_id ?? undefined,
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            isPublic: (item as any).is_public ?? true,
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            hasChords: (item as any).has_chords ?? false,
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            hasMelody: (item as any).has_melody ?? false,
-            createdAt: item.created_at,
-            color: "red",
-            categories: categories
-        } as Song;
-    });
+/**
+ * Paginated client-side fetch for infinite scroll.
+ */
+export const fetchSongsPage = async (cursor?: string) => {
+    const supabase = createClient();
+    const { data, error } = await songsQuery(supabase, { limit: PAGE_SIZE, cursor });
+    if (error) throw error;
+    const songs = data.map(item => mapCompositionToSong(item));
+    const nextCursor = songs.length === PAGE_SIZE
+        ? songs[songs.length - 1].createdAt
+        : null;
+    return { songs, nextCursor };
 };
