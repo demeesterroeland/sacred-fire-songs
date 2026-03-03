@@ -25,7 +25,9 @@ export default async function Home() {
         .eq('setlist_id', setlist.id);
       for (const item of items ?? []) {
         favCounts.total++;
-        if ((item.song_versions as any)?.compositions?.is_public === true) favCounts.public++;
+        const songVers = item.song_versions as unknown as { compositions: { is_public: boolean } }[] | null;
+        const comp = songVers?.[0]?.compositions;
+        if (comp?.is_public === true) favCounts.public++;
         else favCounts.draft++;
       }
     }
@@ -53,7 +55,8 @@ export default async function Home() {
     for (const item of plItems ?? []) {
       const sid = item.setlist_id;
       playlistSongCounts[sid] = (playlistSongCounts[sid] ?? 0) + 1;
-      const title = (item.song_versions as any)?.compositions?.title;
+      const songVers = item.song_versions as unknown as { compositions: { title: string } }[] | null;
+      const title = songVers?.[0]?.compositions?.title;
       if (title) {
         if (!playlistSongTitles[sid]) playlistSongTitles[sid] = [];
         playlistSongTitles[sid].push(title);

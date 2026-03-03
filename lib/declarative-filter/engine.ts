@@ -1,30 +1,15 @@
-import { FilterConfig, FilterResult } from "./types";
+import { FilterConfig, FilterFieldDef, FilterResult } from "./types";
 
-/**
- * Execute the declarative filter pipeline.
- * 
- * Algorithm (Single-Pass Aggregation):
- * 1. Identify active filters.
- * 2. Iterate through items once.
- * 3. For each item, check if it passes ALL active filters.
- * 4. If it passes, add to results.
- * 5. Calculate Facets:
- *    - For each filter field (e.g. "category"), we want to know:
- *      "If I were to Toggle this specific filter, how many items would match?"
- *    - To calculate this efficiently:
- *      - An item contributes to a specific filter's facet counts if it matches ALL OTHER active filters.
- *      - We check this "partially matching" state for every field during the loop.
- */
-export function executeFilter<TItem, TFilterState extends Record<string, any>>(
+export function executeFilter<TItem, TFilterState extends Record<string, unknown>>(
   items: TItem[],
   config: FilterConfig<TItem, TFilterState>,
   state: TFilterState
 ): FilterResult<TItem, TFilterState> {
-  const definitions = Object.entries(config) as [keyof TFilterState, any][];
+  const definitions = Object.entries(config) as [keyof TFilterState, FilterFieldDef<TItem, unknown>][];
 
   // 1. Identify active filters and Create Facet Maps
-  const activeFilters: Array<{ key: keyof TFilterState; def: any; value: any }> = [];
-  const facets: Record<keyof TFilterState, Map<string, number>> = {} as any;
+  const activeFilters: Array<{ key: keyof TFilterState; def: FilterFieldDef<TItem, unknown>; value: unknown }> = [];
+  const facets: Record<keyof TFilterState, Map<string, number>> = {} as Record<keyof TFilterState, Map<string, number>>;
 
   for (const [key, def] of definitions) {
     facets[key as keyof TFilterState] = new Map();

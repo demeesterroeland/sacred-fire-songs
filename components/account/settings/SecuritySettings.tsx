@@ -30,8 +30,9 @@ export default function SecuritySettings({ user }: SecuritySettingsProps) {
       toast.success("Password updated successfully");
       setNewPassword("");
       setConfirmPassword("");
-    } catch (error: any) {
-      toast.error(error.message || "Failed to update password");
+    } catch (error) {
+      const err = error as Error;
+      toast.error(err.message || "Failed to update password");
     } finally {
       setIsUpdating(false);
     }
@@ -42,7 +43,7 @@ export default function SecuritySettings({ user }: SecuritySettingsProps) {
       const { error } = await supabase.auth.signOut({ scope: 'global' });
       if (error) throw error;
       window.location.href = "/auth/login";
-    } catch (error: any) {
+    } catch (error) {
       toast.error("Failed to log out from all devices");
     }
   };

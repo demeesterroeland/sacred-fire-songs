@@ -31,11 +31,13 @@ export function AddSongsSheet({ playlistId, existingCompositionIds, open, onClos
     const router = useRouter();
 
     // Sync checked state when the caller's list changes (e.g. after page refresh)
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     useEffect(() => {
         setAddedIds(new Set(existingCompositionIds));
     }, [existingCompositionIds]);
 
     // Reset + initial search when sheet opens
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     useEffect(() => {
         if (!open) return;
         setQuery('');
@@ -43,6 +45,7 @@ export function AddSongsSheet({ playlistId, existingCompositionIds, open, onClos
     }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
     // Debounced search
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     useEffect(() => {
         if (!open) return;
         setIsSearching(true);

@@ -3,6 +3,18 @@ import { notFound, redirect } from 'next/navigation';
 import { PlaylistDetailClient } from '@/components/playlists/PlaylistDetailClient';
 import { PlaylistDetailHeader } from '@/components/playlists/PlaylistDetailHeader';
 
+interface SetlistItemRow {
+    id: string;
+    song_versions: {
+        id: string;
+        compositions: {
+            id: string;
+            title: string;
+            original_author: string;
+        }[];
+    }[];
+}
+
 interface Props {
     params: Promise<{ id: string }>;
 }
@@ -45,11 +57,11 @@ export default async function PlaylistDetailPage({ params }: Props) {
         .eq('setlist_id', id)
         .order('order_index', { ascending: true });
 
-    const mappedItems = (items ?? []).map(item => ({
+    const mappedItems = (items as unknown as SetlistItemRow[] ?? []).map(item => ({
         id: item.id,
-        songTitle: (item.song_versions as any)?.compositions?.title ?? 'Unknown',
-        songAuthor: (item.song_versions as any)?.compositions?.original_author ?? '',
-        songId: (item.song_versions as any)?.compositions?.id ?? '',
+        songTitle: item.song_versions?.[0]?.compositions?.[0]?.title ?? 'Unknown',
+        songAuthor: item.song_versions?.[0]?.compositions?.[0]?.original_author ?? '',
+        songId: item.song_versions?.[0]?.compositions?.[0]?.id ?? '',
     }));
 
     return (

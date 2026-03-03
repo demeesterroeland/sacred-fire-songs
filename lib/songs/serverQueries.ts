@@ -2,10 +2,11 @@ import { createClient } from "@/lib/supabase/server";
 import type { Song } from "@/lib/songUtils";
 import type { TaxonomyNode } from "@/lib/taxonomyUtils";
 import { songsQuery, mapCompositionToSong } from './queries';
+import type { SupabaseClient } from "@supabase/supabase-js";
 
 const PAGE_SIZE = 20;
 
-async function fetchFavoriteIds(supabase: any) {
+async function fetchFavoriteIds(supabase: SupabaseClient) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return new Set<string>();
 
