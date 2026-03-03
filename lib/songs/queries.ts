@@ -28,9 +28,13 @@ export function songsQuery(
   let q = client
     .from('compositions')
     .select(SONGS_SELECT)
-    .order('created_at', { ascending: false });
+    .order('created_at', { ascending: false })
+    .order('id', { ascending: false });
 
-  if (opts?.cursor) q = q.lt('created_at', opts.cursor);
+  if (opts?.cursor) {
+    const [cursorDate, cursorId] = opts.cursor.split('::');
+    q = q.or(`created_at.lt.${cursorDate},and(created_at.eq.${cursorDate},id.lt.${cursorId})`);
+  }
   if (opts?.limit) q = q.limit(opts.limit);
   return q;
 }

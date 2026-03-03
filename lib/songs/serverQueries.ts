@@ -73,7 +73,7 @@ export async function fetchSongsPageServer(cursor?: string): Promise<{
 
     const songs = songsResult.data.map(item => mapCompositionToSong(item, favoriteIds));
     const nextCursor = songs.length === PAGE_SIZE
-        ? songs[songs.length - 1].createdAt
+        ? `${songs[songs.length - 1].createdAt}::${songs[songs.length - 1].id}`
         : null;
 
     return { songs, nextCursor, totalCount: countResult.count ?? 0 };

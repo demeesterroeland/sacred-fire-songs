@@ -82,7 +82,7 @@ export const fetchSongsPage = async (cursor?: string) => {
     if (error) throw error;
     const songs = data.map(item => mapCompositionToSong(item));
     const nextCursor = songs.length === PAGE_SIZE
-        ? songs[songs.length - 1].createdAt
+        ? `${songs[songs.length - 1].createdAt}::${songs[songs.length - 1].id}`
         : null;
     return { songs, nextCursor };
 };
