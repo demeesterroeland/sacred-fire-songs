@@ -11,7 +11,7 @@ import { executeFilter } from '@/lib/declarative-filter/engine';
  * - Memoizes filtering operations (single-pass).
  * - Typesafe integration with config.
  */
-export function useDeclarativeFilter<TItem, TFilterState extends Record<string, unknown>>(
+export function useDeclarativeFilter<TItem, TFilterState extends Record<string, any>>(
   items: TItem[],
   config: FilterConfig<TItem, TFilterState>,
   defaultState: TFilterState,
