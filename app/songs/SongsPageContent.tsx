@@ -146,7 +146,7 @@ export default function SongsPageContent({ initialSongs, initialNextCursor, init
 
                             <div className="hidden md:flex items-center gap-4 self-end md:self-auto">
                                 <span className="hidden md:block text-xs text-gray-500 whitespace-nowrap">
-                                    {totalCount} songs found
+                                    {hasActiveFilters ? filteredCount : totalCount} songs found
                                 </span>
 
                                 {user && (
