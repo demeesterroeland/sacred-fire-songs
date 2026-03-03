@@ -3,8 +3,12 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { redirect } from 'next/navigation';
+import { uuid, safeParse } from '@/lib/validation/schemas';
 
 export async function deleteSong(id: string) {
+    const parsed = safeParse(uuid, id);
+    if ('error' in parsed) return { error: 'Invalid song ID' };
+
     const supabase = await createClient();
 
     // 1. Verify User is Admin (Double check on server side)
@@ -28,7 +32,7 @@ export async function deleteSong(id: string) {
     const { error } = await supabase
         .from('compositions')
         .delete()
-        .eq('id', id);
+        .eq('id', parsed.data);
 
     if (error) {
         console.error('Delete Error:', error);

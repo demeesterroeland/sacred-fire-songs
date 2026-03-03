@@ -3,22 +3,24 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { isSmartPlaylist } from '@/lib/playlists/smartPlaylists';
+import { uuid, playlistTitle, playlistDescription, safeParse } from '@/lib/validation/schemas';
+import { z } from 'zod';
 
 // ─── Create ───────────────────────────────────────────────────────────────────
 
 export async function createPlaylist(
     title: string
 ): Promise<{ id: string } | { error: string }> {
+    const parsed = safeParse(playlistTitle, title);
+    if ('error' in parsed) return { error: parsed.error };
+
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { error: 'Not authenticated' };
 
-    const trimmed = title.trim();
-    if (!trimmed) return { error: 'Title required' };
-
     const { data, error } = await supabase
         .from('setlists')
-        .insert({ owner_id: user.id, title: trimmed, is_public: false })
+        .insert({ owner_id: user.id, title: parsed.data, is_public: false })
         .select('id')
         .maybeSingle();
 
@@ -34,6 +36,12 @@ export async function renamePlaylist(
     id: string,
     title: string
 ): Promise<{ error?: string }> {
+    const idParsed = safeParse(uuid, id);
+    if ('error' in idParsed) return { error: 'Invalid playlist ID' };
+
+    const titleParsed = safeParse(playlistTitle, title);
+    if ('error' in titleParsed) return { error: titleParsed.error };
+
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { error: 'Not authenticated' };
@@ -41,20 +49,17 @@ export async function renamePlaylist(
     const { data: playlist } = await supabase
         .from('setlists')
         .select('title, owner_id')
-        .eq('id', id)
+        .eq('id', idParsed.data)
         .maybeSingle();
 
     if (!playlist) return { error: 'Playlist not found' };
     if (playlist.owner_id !== user.id) return { error: 'Not your playlist' };
     if (isSmartPlaylist(playlist.title)) return { error: 'Cannot rename smart playlists' };
 
-    const trimmed = title.trim();
-    if (!trimmed) return { error: 'Title required' };
-
     const { error } = await supabase
         .from('setlists')
-        .update({ title: trimmed })
-        .eq('id', id);
+        .update({ title: titleParsed.data })
+        .eq('id', idParsed.data);
 
     if (error) return { error: error.message };
     revalidatePath('/library/playlists');
@@ -67,6 +72,9 @@ export async function renamePlaylist(
 export async function deletePlaylist(
     id: string
 ): Promise<{ error?: string }> {
+    const parsed = safeParse(uuid, id);
+    if ('error' in parsed) return { error: 'Invalid playlist ID' };
+
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { error: 'Not authenticated' };
@@ -74,7 +82,7 @@ export async function deletePlaylist(
     const { data: playlist } = await supabase
         .from('setlists')
         .select('title, owner_id')
-        .eq('id', id)
+        .eq('id', parsed.data)
         .maybeSingle();
 
     if (!playlist) return { error: 'Playlist not found' };
@@ -84,7 +92,7 @@ export async function deletePlaylist(
     const { error } = await supabase
         .from('setlists')
         .delete()
-        .eq('id', id);
+        .eq('id', parsed.data);
 
     if (error) return { error: error.message };
     revalidatePath('/library/playlists');
@@ -97,6 +105,9 @@ export async function togglePlaylistVisibility(
     id: string,
     isPublic: boolean
 ): Promise<{ error?: string }> {
+    const idParsed = safeParse(uuid, id);
+    if ('error' in idParsed) return { error: 'Invalid playlist ID' };
+
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { error: 'Not authenticated' };
@@ -104,7 +115,7 @@ export async function togglePlaylistVisibility(
     const { data: playlist } = await supabase
         .from('setlists')
         .select('owner_id, title')
-        .eq('id', id)
+        .eq('id', idParsed.data)
         .maybeSingle();
 
     if (!playlist || playlist.owner_id !== user.id) return { error: 'Not your playlist' };
@@ -113,7 +124,7 @@ export async function togglePlaylistVisibility(
     const { error } = await supabase
         .from('setlists')
         .update({ is_public: isPublic })
-        .eq('id', id);
+        .eq('id', idParsed.data);
 
     if (error) return { error: error.message };
     revalidatePath('/library/playlists');
@@ -127,6 +138,12 @@ export async function updatePlaylistDescription(
     id: string,
     description: string
 ): Promise<{ error?: string }> {
+    const idParsed = safeParse(uuid, id);
+    if ('error' in idParsed) return { error: 'Invalid playlist ID' };
+
+    const descParsed = safeParse(playlistDescription, description);
+    if ('error' in descParsed) return { error: descParsed.error };
+
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { error: 'Not authenticated' };
@@ -134,7 +151,7 @@ export async function updatePlaylistDescription(
     const { data: playlist } = await supabase
         .from('setlists')
         .select('owner_id, title')
-        .eq('id', id)
+        .eq('id', idParsed.data)
         .maybeSingle();
 
     if (!playlist || playlist.owner_id !== user.id) return { error: 'Not your playlist' };
@@ -142,8 +159,8 @@ export async function updatePlaylistDescription(
 
     const { error } = await supabase
         .from('setlists')
-        .update({ description: description.trim() || null })
-        .eq('id', id);
+        .update({ description: descParsed.data?.trim() || null })
+        .eq('id', idParsed.data);
 
     if (error) return { error: error.message };
     revalidatePath(`/library/playlists/${id}`);
@@ -156,6 +173,12 @@ export async function addSongToPlaylist(
     playlistId: string,
     compositionId: string
 ): Promise<{ added: boolean; error?: string }> {
+    const playlistParsed = safeParse(uuid, playlistId);
+    if ('error' in playlistParsed) return { added: false, error: 'Invalid playlist ID' };
+
+    const compositionParsed = safeParse(uuid, compositionId);
+    if ('error' in compositionParsed) return { added: false, error: 'Invalid composition ID' };
+
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { added: false, error: 'Not authenticated' };
@@ -163,7 +186,7 @@ export async function addSongToPlaylist(
     const { data: playlist } = await supabase
         .from('setlists')
         .select('owner_id')
-        .eq('id', playlistId)
+        .eq('id', playlistParsed.data)
         .maybeSingle();
 
     if (!playlist || playlist.owner_id !== user.id) return { added: false, error: 'Not your playlist' };
@@ -172,7 +195,7 @@ export async function addSongToPlaylist(
     const { data: version } = await supabase
         .from('song_versions')
         .select('id')
-        .eq('composition_id', compositionId)
+        .eq('composition_id', compositionParsed.data)
         .order('created_at', { ascending: true })
         .limit(1)
         .maybeSingle();
@@ -183,7 +206,7 @@ export async function addSongToPlaylist(
     const { data: existing } = await supabase
         .from('setlist_items')
         .select('id')
-        .eq('setlist_id', playlistId)
+        .eq('setlist_id', playlistParsed.data)
         .eq('song_version_id', version.id)
         .maybeSingle();
 
@@ -191,7 +214,7 @@ export async function addSongToPlaylist(
         const { error: deleteError } = await supabase
             .from('setlist_items').delete().eq('id', existing.id);
         if (deleteError) return { added: true, error: deleteError.message };
-        revalidatePath(`/library/playlists/${playlistId}`);
+        revalidatePath(`/library/playlists/${playlistParsed.data}`);
         return { added: false };
     }
 
@@ -199,7 +222,7 @@ export async function addSongToPlaylist(
     const { data: last } = await supabase
         .from('setlist_items')
         .select('order_index')
-        .eq('setlist_id', playlistId)
+        .eq('setlist_id', playlistParsed.data)
         .order('order_index', { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -208,10 +231,10 @@ export async function addSongToPlaylist(
 
     const { error } = await supabase
         .from('setlist_items')
-        .insert({ setlist_id: playlistId, song_version_id: version.id, order_index: nextIndex });
+        .insert({ setlist_id: playlistParsed.data, song_version_id: version.id, order_index: nextIndex });
 
     if (error) return { added: false, error: error.message };
-    revalidatePath(`/library/playlists/${playlistId}`);
+    revalidatePath(`/library/playlists/${playlistParsed.data}`);
     return { added: true };
 }
 
@@ -220,6 +243,9 @@ export async function addSongToPlaylist(
 export async function removeSongFromPlaylist(
     itemId: string
 ): Promise<{ error?: string }> {
+    const parsed = safeParse(uuid, itemId);
+    if ('error' in parsed) return { error: 'Invalid item ID' };
+
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { error: 'Not authenticated' };
@@ -227,13 +253,13 @@ export async function removeSongFromPlaylist(
     const { data: item } = await supabase
         .from('setlist_items')
         .select('id, setlist_id, setlists(owner_id)')
-        .eq('id', itemId)
+        .eq('id', parsed.data)
         .maybeSingle();
 
     if (!item) return { error: 'Item not found' };
     if ((item.setlists as any)?.owner_id !== user.id) return { error: 'Not your playlist' };
 
-    const { error } = await supabase.from('setlist_items').delete().eq('id', itemId);
+    const { error } = await supabase.from('setlist_items').delete().eq('id', parsed.data);
     if (error) return { error: error.message };
     revalidatePath(`/library/playlists/${item.setlist_id}`);
     return {};
@@ -245,6 +271,12 @@ export async function reorderPlaylistSongs(
     playlistId: string,
     orderedItemIds: string[]
 ): Promise<{ error?: string }> {
+    const playlistParsed = safeParse(uuid, playlistId);
+    if ('error' in playlistParsed) return { error: 'Invalid playlist ID' };
+
+    const itemIdsParsed = safeParse(z.array(uuid), orderedItemIds);
+    if ('error' in itemIdsParsed) return { error: 'Invalid item IDs' };
+
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return { error: 'Not authenticated' };
@@ -252,17 +284,17 @@ export async function reorderPlaylistSongs(
     const { data: playlist } = await supabase
         .from('setlists')
         .select('owner_id')
-        .eq('id', playlistId)
+        .eq('id', playlistParsed.data)
         .maybeSingle();
 
     if (!playlist || playlist.owner_id !== user.id) return { error: 'Not your playlist' };
 
     const results = await Promise.all(
-        orderedItemIds.map((id, index) =>
+        itemIdsParsed.data.map((id, index) =>
             supabase.from('setlist_items')
                 .update({ order_index: index })
                 .eq('id', id)
-                .eq('setlist_id', playlistId)
+                .eq('setlist_id', playlistParsed.data)
         )
     );
     const failed = results.find(r => r.error);

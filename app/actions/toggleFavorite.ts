@@ -2,10 +2,14 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
+import { uuid, safeParse } from '@/lib/validation/schemas';
 
 export async function toggleFavorite(
     compositionId: string
 ): Promise<{ success: true; isFavorite: boolean } | { error: string }> {
+    const parsed = safeParse(uuid, compositionId);
+    if ('error' in parsed) return { error: 'Invalid composition ID' };
+
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -17,7 +21,7 @@ export async function toggleFavorite(
     const { data: version } = await supabase
         .from('song_versions')
         .select('id')
-        .eq('composition_id', compositionId)
+        .eq('composition_id', parsed.data)
         .order('created_at', { ascending: true })
         .limit(1)
         .maybeSingle();
