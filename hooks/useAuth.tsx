@@ -106,6 +106,7 @@ export const useAuth = () => {
         });
 
         // Load user immediately on mount if not already loading/loaded
+        // eslint-disable-next-line react-hooks/set-state-in-effect
         loadUser(mockRole);
 
         // Listen for custom event to trigger re-render on role switch

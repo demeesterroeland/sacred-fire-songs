@@ -39,15 +39,48 @@ export function songsQuery(
  * Maps a raw Supabase composition row (with joins) to a Song object.
  * Single source of truth for field mapping — used by server and client.
  */
+interface SongVersionRow {
+  key: string | null;
+  content_chordpro: string | null;
+  melody_notation: string | null;
+}
+
+interface CategoryRow {
+  name: string;
+  slug: string;
+  parent: {
+    name: string | null;
+    slug: string | null;
+  } | null;
+}
+
+interface SongCategoryMapRow {
+  categories: CategoryRow;
+}
+
+interface CompositionRow {
+  id: string;
+  title: string;
+  original_author: string | null;
+  owner_id: string | null;
+  is_public: boolean;
+  created_at: string;
+  updated_at: string;
+  content_chordpro: string | null;
+  has_chords: boolean | null;
+  has_melody: boolean | null;
+  song_versions: SongVersionRow[] | null;
+  song_category_map: SongCategoryMapRow[] | null;
+}
+
 export function mapCompositionToSong(
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  item: any,
+  item: CompositionRow,
   favoriteIds?: Set<string>
 ): Song {
-  const version = (item.song_versions as any[])?.[0];
+  const version = item.song_versions?.[0];
 
-  const rawCategories = (item.song_category_map as any[]) || [];
-  const categories = rawCategories.map((mapItem: any) => {
+  const rawCategories = item.song_category_map || [];
+  const categories = rawCategories.map((mapItem: SongCategoryMapRow) => {
     const cat = mapItem.categories;
     return {
       name: cat.name,

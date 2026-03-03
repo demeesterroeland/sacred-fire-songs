@@ -11,7 +11,7 @@ import { executeFilter } from '@/lib/declarative-filter/engine';
  * - Memoizes filtering operations (single-pass).
  * - Typesafe integration with config.
  */
-export function useDeclarativeFilter<TItem, TFilterState extends Record<string, any>>(
+export function useDeclarativeFilter<TItem, TFilterState extends Record<string, unknown>>(
   items: TItem[],
   config: FilterConfig<TItem, TFilterState>,
   defaultState: TFilterState,
@@ -39,7 +39,7 @@ export function useDeclarativeFilter<TItem, TFilterState extends Record<string, 
     searchParams.forEach((value, key) => {
       if (key in state) {
         // Very naive type conversion - prefer callbacks.parseUrl
-        (state as any)[key] = value;
+        (state as Record<string, unknown>)[key] = value;
       }
     });
 
@@ -52,7 +52,7 @@ export function useDeclarativeFilter<TItem, TFilterState extends Record<string, 
   }, [items, config, currentState]);
 
   // 3. Update URL Handler
-  const setFilter = useCallback((key: keyof TFilterState, value: any) => {
+  const setFilter = useCallback((key: keyof TFilterState, value: unknown) => {
     const newState = { ...currentState, [key]: value };
 
     // Serialize

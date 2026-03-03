@@ -83,7 +83,7 @@ export default function EditSongPage() {
         author: song.original_author || '',
         content: song.song_versions[0]?.content_chordpro || '',
 
-        categoryIds: song.song_category_map?.map((m: any) => m.category_id) || [],
+        categoryIds: song.song_category_map?.map((m: { category_id: string }) => m.category_id) || [],
         key: song.song_versions[0]?.key,
         capo: song.song_versions[0]?.capo,
         tuning: song.song_versions[0]?.tuning,

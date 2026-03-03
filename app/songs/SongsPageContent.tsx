@@ -90,6 +90,7 @@ export default function SongsPageContent({ initialSongs, initialNextCursor, init
     }, [hasNextPage, fetchNextPage, isFetchingNextPage]);
 
     // Sync local search with state.search (for external resets like "Clear All")
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     useEffect(() => {
         setLocalSearch(state.search || '');
     }, [state.search]);

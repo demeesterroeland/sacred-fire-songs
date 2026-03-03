@@ -257,7 +257,8 @@ export async function removeSongFromPlaylist(
         .maybeSingle();
 
     if (!item) return { error: 'Item not found' };
-    if ((item.setlists as any)?.owner_id !== user.id) return { error: 'Not your playlist' };
+    const setlist = item.setlists as unknown as { owner_id: string } | null;
+    if (setlist?.owner_id !== user.id) return { error: 'Not your playlist' };
 
     const { error } = await supabase.from('setlist_items').delete().eq('id', parsed.data);
     if (error) return { error: error.message };

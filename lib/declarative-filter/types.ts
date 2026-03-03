@@ -9,7 +9,7 @@
 export type Matcher<TItem, TValue> = (item: TItem, filterValue: TValue) => boolean;
 
 // Definition of a single filter field (e.g. "category" or "minPrice")
-export interface FilterFieldDef<TItem, TValue = any> {
+export interface FilterFieldDef<TItem, TValue = unknown> {
   // Is this filter active? (Usually check if filterValue is non-empty)
   isActive: (value: TValue | undefined) => boolean;
 

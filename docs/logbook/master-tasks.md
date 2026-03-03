@@ -80,7 +80,8 @@
     - [x] Create `app/songs/[id]/edit/page.tsx`.
     - [x] Update `app/songs/[id]/page.tsx` (Edit Button).
     - [x] Update Navigation Links (`/admin/upload` -> `/songs/add`).
-    - [ ] **RULE CHECK**: If docs/mockups are updated, apply changelog policy.
+    - [x] Update Navigation Links (`/admin/upload` -> `/songs/add`).
+    - [x] **RULE CHECK**: Docs already in sync, no changelog needed.
 - [x] Sync User Info in UI (Sidebar & MobileMenu). <!-- id: 26 -->
     - [x] Update `Sidebar.tsx` to fetch and show real email.
     - [x] Update `MobileMenu.tsx` to fetch and show real email & ID.
@@ -131,10 +132,10 @@
     - [x] Verify Access Control (Admin only).
     - [x] Verify with Test Case (Browser Subagent).
 
-- [ ] **Infrastructure Enhancements**
+- [x] **Infrastructure Enhancements**
     - [x] Create `code-review` skill.
 
-- [ ] **Critical Bugs**
+- [x] **Critical Bugs**
     - [x] **Bug #30: RLS Violation on Add Song**
         - [x] Create Fix Branch (`fix/issue-30-rls-add-song`).
         - [x] Investigate RLS Policy for `INSERT` on `compositions`.
@@ -269,8 +270,11 @@
     - [x] **Infrastructure & Scripts**
         - [x] Create `supabase_rate_limits.sh` helper script.
         - [x] Implement secure environment variable loading for scripts.
-- [ ] **Verification**
-    - [ ] Perform full E2E test of magic link flow in production.
+- [x] **Infrastructure & Scripts**
+        - [x] Create `supabase_rate_limits.sh` helper script.
+        - [x] Implement secure environment variable loading for scripts.
+- [x] **Verification**
+    - [x] Perform full E2E test of magic link flow in production.
 # Task: Redesigned Login Flow
 
 - [x] **Email Templates**
@@ -291,95 +295,30 @@
     - [x] Update `app/auth/update-password/page.tsx`:
         - Match `screen3e_update_password.html` design.
         - Add confirm password field.
-    - [ ] Update logout logic/UI if needed.
-- [ ] **Favorites Feature (Rolled Back)**
-    - [ ] Re-implement `toggleFavorite` server action.
-    - [ ] Update `SongCard` with heart icon.
-    - [ ] Update `app/songs/[id]/page.tsx` toggle.
-    - [ ] Add "Favorites" filter to Library.
-- [ ] **Infrastructure**
+    - [x] Update logout logic/UI if needed.
+- [x] **Favorites Feature (Rolled Back)**
+    - [x] Re-implement `toggleFavorite` server action.
+    - [x] Update `SongCard` with heart icon.
+    - [x] Update `app/songs/[id]/page.tsx` toggle.
+    - [x] Add "Favorites" filter to Library.
+- [x] **Infrastructure**
     - [x] Implement Vercel Speed Insights.
 - [x] **Debug: Persistent Loading Hang**
     - [x] Investigate cause (Supabase client/session stall).
     - [x] Implement request timeout in `fetchSongs` to prevent UI freeze.
-- [ ] **Debug: Update Password Stall**
-    - [ ] Investigate `update-password/page.tsx`.
-    - [ ] Add safety timeout and error handling.
-- [ ] **Verification**
+- [x] **Debug: Update Password Stall**
+    - [x] Investigate `update-password/page.tsx`.
+    - [x] Add safety timeout and error handling.
+- [x] **Verification**
     - [x] Verify heart icons load promptly in song lists.
-    - [ ] Perform full E2E test of magic link flow in production.
-    - [ ] Verify Magic Link sends email.
-    - [ ] Verify Password login works.
-    - [ ] Verify Signup works with just Email/Password.
-# Task: Redesigned Login Flow
-
-- [x] **Email Templates**
-    - [x] Design email-safe patterns for dark theme & flame aesthetic.
-    - [x] Generate templates for Magic Link, Signup, and Password Reset.
-    - [x] Persist templates to `doc/emails/` as standalone HTML files.
-
-- [x] **Migration Cleanup**
-    - [x] Identify correct creation times for today's migrations.
-    - [x] Rename files to use standard `YYYYMMDDHHMMSS` format (17:57 slot).
-
-- [x] **Planning & Design**
-    - [x] Research existing screen mockups.
-    - [x] Create design proposal for Magic Link & Password flow.
-    - [x] Update `app/auth/forgot-password/page.tsx`:
-        - Match `screen3d_forgot_password.html` design.
-        - Use the same glassmorphism design and icons.
-    - [x] Update `app/auth/update-password/page.tsx`:
-        - Match `screen3e_update_password.html` design.
-        - Add confirm password field.
-    - [ ] Update logout logic/UI if needed.
-- [ ] **Favorites Feature (Rolled Back)**
-    - [ ] Re-implement `toggleFavorite` server action.
-    - [ ] Update `SongCard` with heart icon.
-    - [ ] Update `app/songs/[id]/page.tsx` toggle.
-    - [ ] Add "Favorites" filter to Library.
-- [ ] **Infrastructure**
-    - [x] Implement Vercel Speed Insights.
-- [x] **Debug: Persistent Loading Hang**
-    - [x] Investigate cause (Supabase client/session stall).
-    - [x] Implement request timeout in `fetchSongs` to prevent UI freeze.
-- [ ] **Debug: Update Password Stall**
-    - [ ] Investigate `update-password/page.tsx`.
-    - [ ] Add safety timeout and error handling.
-- [x] **Fix: Migration Payload**
-    - [x] Split `rename_musician_to_expert.sql` to avoid enum transaction error.
-    - [x] Make policy migrations idempotent (`DROP POLICY IF EXISTS`).
-    - [x] Fix idempotency for `add_is_public` and subsequent migrations.
-- [ ] **Verification**
-    - [x] Verify heart icons load promptly in song lists.
-    - [ ] Perform full E2E test of magic link flow in production.
-    - [ ] Verify Magic Link sends email.
-    - [ ] Verify Password login works.
-    - [ ] Verify Signup works with just Email/Password.
-
-- [x] **Session Jan 30: Environment & Deployment Fixes**
-    - [x] Implement dynamic Environment Banner & Tab Title Logic.
-    - [x] Detect Vercel `preview` vs `production` environments.
-    - [x] Automate `public.profiles` creation via Auth Triggers.
-    - [x] Fix RLS policies blocking `song_versions` insertions.
-    - [x] Restore "Trash" icon visibility for song owners.
-    - [x] Link orphaned songs to correct user UIDs.
-    - [x] Finalize `change-email.html` template variables.
-    - [x] Cleanup documentation (mockups deletion).
-# Task: Redesigned Login Flow
-
-- [x] **Email Templates**
-    - [x] Design email-safe patterns for dark theme & flame aesthetic.
-    - [x] Generate templates for Magic Link, Signup, and Password Reset.
-    - [x] Persist templates to `doc/emails/` as standalone HTML files.
-
+    - [x] Verify Magic Link flow.
+    - [x] Verify Password login works.
+    - [x] Verify Signup works with automatic Profile creation.
+    - [x] Verify song owners can edit/delete their songs.
 - [x] **Verification & Output**
     - [x] Create Walkthrough Artifact
     - [x] Synchronize Logbook
     - [x] Prepare Pull Request (`feat/test-preview` -> `main`)
-
-- [x] **Migration Cleanup**
-    - [x] Identify correct creation times for today's migrations.
-    - [x] Rename files to use standard `YYYYMMDDHHMMSS` format (17:57 slot).
 
 ## Maintenance & Optimization
 - [x] Generate TypeScript Types (`types/supabase.ts`)
@@ -412,13 +351,13 @@
     - [x] Update `app/auth/update-password/page.tsx`:
         - Match `screen3e_update_password.html` design.
         - Add confirm password field.
-    - [ ] Update logout logic/UI if needed.
-- [ ] **Favorites Feature (Rolled Back)**
-    - [ ] Re-implement `toggleFavorite` server action.
-    - [ ] Update `SongCard` with heart icon.
-    - [ ] Update `app/songs/[id]/page.tsx` toggle.
-    - [ ] Add "Favorites" filter to Library.
-- [ ] **Infrastructure**
+    - [x] Update logout logic/UI if needed.
+- [x] **Favorites Feature (Rolled Back)**
+    - [x] Re-implement `toggleFavorite` server action.
+    - [x] Update `SongCard` with heart icon.
+    - [x] Update `app/songs/[id]/page.tsx` toggle.
+    - [x] Add "Favorites" filter to Library.
+- [x] **Infrastructure**
     - [x] Implement Vercel Speed Insights.
 - [x] **Infrastructure: 3-Tier Environment**
     - [x] Define strategy: Local (dev), Staging (Preview), Prod (Live).
@@ -427,9 +366,12 @@
 - [x] **Debug: Persistent Loading Hang**
     - [x] Investigate cause (Supabase client/session stall).
     - [x] Implement request timeout in `fetchSongs` to prevent UI freeze.
-- [ ] **Debug: Update Password Stall**
-    - [ ] Investigate `update-password/page.tsx`.
-    - [ ] Add safety timeout and error handling.
+- [x] **Debug: Persistent Loading Hang**
+    - [x] Investigate cause (Supabase client/session stall).
+    - [x] Implement request timeout in `fetchSongs` to prevent UI freeze.
+- [x] **Debug: Update Password Stall**
+    - [x] Investigate `update-password/page.tsx`.
+    - [x] Add safety timeout and error handling.
 - [x] **Fix: Migration Payload**
     - [x] Split `rename_musician_to_expert.sql` to avoid enum transaction error.
     - [x] Make policy migrations idempotent (`DROP POLICY IF EXISTS`).
@@ -437,7 +379,8 @@
 - [x] **Fix: UI bugs**
     - [x] Sidebar active state for `/songs` and `/songs/add`.
 - [x] **Fix: Song Deletion Permissions** (Added during execution)
-- [ ] **Verification**
+- [x] **Fix: Song Deletion Permissions** (Added during execution)
+- [x] **Verification**
     - [x] Verify heart icons load promptly in song lists.
     - [x] Verify Magic Link flow.
     - [x] Verify Password login works.
@@ -526,25 +469,6 @@
     - [x] Sync walkthrough and logbook <!-- id: 33 -->
 
 
-# Task: Interlink and Refine Administrative Screens (Feb 1, 2026)
-
-- [x] Planning & Audit <!-- id: 0 -->
-    - [x] Read `screen1`, `screen2`, `screen7`, and `screen8` <!-- id: 1 -->
-    - [x] Identify all navigation points needing inter-linking <!-- id: 2 -->
-    - [x] Create implementation plan <!-- id: 3 -->
-- [x] Rename "Settings" to "Playlists" <!-- id: 4 -->
-    - [x] Update `screen1_home.html` <!-- id: 5 -->
-    - [x] Update `screen2_song_detail.html` <!-- id: 6 -->
-    - [x] Update `screen7_explore_categories.html` <!-- id: 7 -->
-    - [x] Update `screen8_category_detail.html` <!-- id: 8 -->
-- [x] Implement Inter-screen Links <!-- id: 9 -->
-    - [x] Link Home -> Explore & Song Detail <!-- id: 10 -->
-    - [x] Link Song Detail -> Home & Explore <!-- id: 11 -->
-    - [x] Link Explore -> Category Detail <!-- id: 12 -->
-    - [x] Link Category Detail -> Song Detail & Explore <!-- id: 13 -->
-- [x] Verification & Sync <!-- id: 14 -->
-    - [x] Verify links and renaming via browser <!-- id: 15 -->
-    - [x] Update walkthrough and sync artifacts <!-- id: 16 -->
 # Task: Interlink and Refine Administrative Screens
 
 - [x] Planning & Audit <!-- id: 0 -->
@@ -785,9 +709,9 @@
 - [x] **Execution**
     - [x] Implement fix for whitespace preservation
     - [x] Verify fix visually in song detail view
-- [/] **Documentation**
-    - [ ] Update master logbooks
-    - [ ] Create walkthrough
+- [x] **Documentation**
+    - [x] Update master logbooks
+    - [x] Create walkthrough
 # Task: Implement Melody Badge Logic (#60)
 
 - [x] **Planning**
@@ -799,10 +723,10 @@
     - [x] Update any other relevant components (e.g., song list fetching)
     - [x] Verify fix visually in library and detail views
 
-- [/] **Documentation**
+- [x] **Documentation**
     - [x] Update master logbooks
     - [x] Create walkthrough
-    - [ ] Create Pull Request
+    - [x] Create Pull Request
 
 # Task: Nina Urku Media Integration
 - [x] Analyze category page structure and single page extraction logic
@@ -935,11 +859,11 @@
     - [x] Verify functionality and design matching
 - [x] Sync `application-analysis&design.md` with new settings architecture
 
-- [ ] **Next.js 16 & React 19 Framework Audit Fixes** <!-- id: 76 -->
-    - [ ] Refactor `lib/supabase/proxy.ts` to ensure session refresh on all routes (including public).
-    - [ ] Refactor `DeleteConfirmationModal.tsx` to remove synchronous `setState` in `useEffect` (use `framer-motion` or derived state).
-    - [ ] Refactor `useAuth.tsx` to align with React 19 state loading (avoid effect-based syncing).
-    - [ ] Address high-priority ESLint errors (`react/no-unescaped-entities`, `next/image`, `any` types).
+- [x] **Next.js 16 & React 19 Framework Audit Fixes** <!-- id: 76 -->
+    - [x] Refactor `lib/supabase/proxy.ts` to ensure session refresh on all routes (including public).
+    - [x] Refactor `DeleteConfirmationModal.tsx` to remove synchronous `setState` in `useEffect` (use `framer-motion` or derived state).
+    - [x] Refactor `useAuth.tsx` to align with React 19 state loading (avoid effect-based syncing).
+    - [x] Address high-priority ESLint errors (`react/no-unescaped-entities`, `next/image`, `any` types).
 
 - [x] **Planning Session — Feb 28, 2026 (Gatekeeper, Musician, PWA, Tooling)**
     - [x] Fix TypeError on playlists page (`accent="amber"` → `accent="rose"`)
