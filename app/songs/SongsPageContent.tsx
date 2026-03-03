@@ -22,10 +22,11 @@ type SortByType = 'title' | 'author' | 'newest';
 interface SongsPageContentProps {
     initialSongs: Song[];
     initialNextCursor: string | null;
+    initialTotalCount: number;
     initialTaxonomy: TaxonomyNode[];
 }
 
-export default function SongsPageContent({ initialSongs, initialNextCursor, initialTaxonomy }: SongsPageContentProps) {
+export default function SongsPageContent({ initialSongs, initialNextCursor, initialTotalCount, initialTaxonomy }: SongsPageContentProps) {
     const searchParams = useSearchParams();
     const router = useRouter();
     const { user } = useAuth();
@@ -33,6 +34,7 @@ export default function SongsPageContent({ initialSongs, initialNextCursor, init
     const { isDeleting, deleteSong } = useDeleteSong();
     const [localSearch, setLocalSearch] = useState('');
     const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null);
+    const [totalCount] = useState(initialTotalCount);
     const [filtersOpen, setFiltersOpen] = useState(false);
     const sentinelRef = useRef<HTMLDivElement>(null);
 
@@ -107,9 +109,9 @@ export default function SongsPageContent({ initialSongs, initialNextCursor, init
 
     // Publish count to global header for mobile view
     useEffect(() => {
-        setHeaderCount(filteredCount);
+        setHeaderCount(hasActiveFilters ? filteredCount : totalCount);
         return () => setHeaderCount(undefined);
-    }, [filteredCount, setHeaderCount]);
+    }, [filteredCount, totalCount, hasActiveFilters, setHeaderCount]);
 
     return (
         <main className="flex-1 min-h-0 bg-gray-950">
@@ -144,7 +146,7 @@ export default function SongsPageContent({ initialSongs, initialNextCursor, init
 
                             <div className="hidden md:flex items-center gap-4 self-end md:self-auto">
                                 <span className="hidden md:block text-xs text-gray-500 whitespace-nowrap">
-                                    {filteredCount} songs found
+                                    {totalCount} songs found
                                 </span>
 
                                 {user && (

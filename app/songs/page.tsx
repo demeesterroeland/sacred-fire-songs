@@ -17,6 +17,7 @@ export default async function SongsPage() {
       <SongsPageContent 
         initialSongs={songsData.songs} 
         initialNextCursor={songsData.nextCursor}
+        initialTotalCount={songsData.totalCount}
         initialTaxonomy={taxonomy} 
       />
     </Suspense>

@@ -56,17 +56,19 @@ export async function fetchSongsServer(limit?: number): Promise<Song[]> {
 export async function fetchSongsPageServer(cursor?: string): Promise<{
     songs: Song[];
     nextCursor: string | null;
+    totalCount: number;
 }> {
     const supabase = await createClient();
 
-    const [songsResult, favoriteIds] = await Promise.all([
+    const [songsResult, favoriteIds, countResult] = await Promise.all([
         songsQuery(supabase, { limit: PAGE_SIZE, cursor }),
         fetchFavoriteIds(supabase),
+        supabase.from('compositions').select('id', { count: 'exact', head: true }),
     ]);
 
     if (songsResult.error) {
         console.error('fetchSongsPageServer error:', songsResult.error);
-        return { songs: [], nextCursor: null };
+        return { songs: [], nextCursor: null, totalCount: 0 };
     }
 
     const songs = songsResult.data.map(item => mapCompositionToSong(item, favoriteIds));
@@ -74,7 +76,7 @@ export async function fetchSongsPageServer(cursor?: string): Promise<{
         ? songs[songs.length - 1].createdAt
         : null;
 
-    return { songs, nextCursor };
+    return { songs, nextCursor, totalCount: countResult.count ?? 0 };
 }
 
 /**
