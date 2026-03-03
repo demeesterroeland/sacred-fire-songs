@@ -34,9 +34,10 @@ export default function SongsPageContent({ initialSongs, initialNextCursor, init
     const { isDeleting, deleteSong } = useDeleteSong();
     const [localSearch, setLocalSearch] = useState('');
     const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null);
-    const [totalCount] = useState(initialTotalCount);
     const [filtersOpen, setFiltersOpen] = useState(false);
+    const [totalCount] = useState(initialTotalCount);
     const sentinelRef = useRef<HTMLDivElement>(null);
+    const fetchingRef = useRef(false);
 
     const isAdmin = user?.role === 'admin';
     const sortBy = (searchParams.get('sort') as SortByType) || 'title';
@@ -80,8 +81,11 @@ export default function SongsPageContent({ initialSongs, initialNextCursor, init
         
         const observer = new IntersectionObserver(
             (entries) => {
-                if (entries[0].isIntersecting && !isFetchingNextPage) {
-                    fetchNextPage();
+                if (entries[0].isIntersecting && !fetchingRef.current) {
+                    fetchingRef.current = true;
+                    fetchNextPage().finally(() => {
+                        fetchingRef.current = false;
+                    });
                 }
             },
             { threshold: 0.1 }
@@ -89,7 +93,7 @@ export default function SongsPageContent({ initialSongs, initialNextCursor, init
         
         observer.observe(sentinelRef.current);
         return () => observer.disconnect();
-    }, [hasNextPage, fetchNextPage, isFetchingNextPage]);
+    }, [hasNextPage, fetchNextPage]);
 
     // Sync local search with state.search (for external resets like "Clear All")
     // eslint-disable-next-line react-hooks/set-state-in-effect
