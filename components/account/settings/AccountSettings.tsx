@@ -68,7 +68,7 @@ export default function AccountSettings({ user, profile }: AccountSettingsProps)
             ))}
           </div>
           {/* Right-fade scroll hint — hidden on md+ where all tabs fit */}
-          <div className="pointer-events-none absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-[#0a0a0a] to-transparent md:hidden" />
+          <div className="pointer-events-none absolute inset-y-0 -right-4 md:right-0 w-12 bg-gradient-to-l from-[#0a0a0a] to-transparent md:hidden" />
         </div>
 
         {/* Tab Content */}
