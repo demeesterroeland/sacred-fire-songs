@@ -128,7 +128,7 @@ export default function ProfileSettings({ user, profile }: ProfileSettingsProps)
 
       <div className="space-y-2">
         <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider ml-1">Full Name</label>
-        <div className="flex gap-4 items-center">
+        <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
           <input
             type="text"
             value={fullName}
@@ -138,7 +138,7 @@ export default function ProfileSettings({ user, profile }: ProfileSettingsProps)
           <button
             onClick={handleSave}
             disabled={isSaving || fullName === (profile?.full_name || "")}
-            className="w-44 shrink-0 bg-[#f45d1a] text-white font-semibold px-6 py-3 rounded-xl hover:brightness-110 shadow-lg shadow-orange-900/20 transition-all disabled:opacity-50 flex items-center justify-center gap-2 whitespace-nowrap"
+            className="w-full sm:w-44 shrink-0 bg-[#f45d1a] text-white font-semibold px-6 py-3 rounded-xl hover:brightness-110 shadow-lg shadow-orange-900/20 transition-all disabled:opacity-50 flex items-center justify-center gap-2 whitespace-nowrap"
           >
             {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}
             {isSaving ? "Saving..." : "Save Changes"}

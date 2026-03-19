@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { User } from "@supabase/supabase-js";
-import { Mail, Lock, LogOut, Eye, EyeOff } from "lucide-react";
+import { Mail, Lock, LogOut, Eye, EyeOff, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 
@@ -14,8 +14,11 @@ export default function SecuritySettings({ user }: SecuritySettingsProps) {
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
-  const [showPasswords, setShowPasswords] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const supabase = createClient();
+
+  const passwordsReady = newPassword.length > 0 && confirmPassword.length > 0;
 
   const handleUpdatePassword = async () => {
     if (newPassword !== confirmPassword) {
@@ -50,82 +53,90 @@ export default function SecuritySettings({ user }: SecuritySettingsProps) {
 
   return (
     <section className="space-y-8">
-      <div className="space-y-6">
+      {/* Email Address */}
+      <div className="space-y-4">
         <h2 className="text-xl font-bold flex items-center gap-2 text-white">
           <Mail className="w-5 h-5 text-slate-400" />
           Email Address
         </h2>
-        <div className="flex flex-col md:flex-row gap-4">
-          <input
-            type="email"
-            value={user.email}
-            disabled
-            className="flex-1 bg-slate-900/50 border border-white/10 px-4 py-3 rounded-xl text-white opacity-60 cursor-not-allowed"
-          />
-          <button
-            onClick={() => toast.info("Email change is currently handled via support.")}
-            className="w-44 shrink-0 bg-white/5 border border-white/10 text-white font-medium px-6 py-3 rounded-xl hover:bg-white/10 transition-colors whitespace-nowrap"
-          >
-            Change Email
-          </button>
-        </div>
+        <input
+          type="email"
+          value={user.email}
+          disabled
+          className="w-full bg-slate-900/50 border border-white/10 px-4 py-3 rounded-xl text-white opacity-60 cursor-not-allowed"
+        />
+        <button
+          onClick={() => toast.info("Email change is currently handled via support.")}
+          className="w-full sm:w-auto bg-[#f45d1a] text-white font-semibold px-6 py-3 rounded-xl hover:brightness-110 shadow-lg shadow-orange-900/20 transition-all"
+        >
+          Change Email
+        </button>
         <p className="text-xs text-slate-500 italic">Changing your email will require re-verification.</p>
       </div>
 
       <hr className="border-white/5" />
 
-      <div className="space-y-6">
+      {/* Password */}
+      <div className="space-y-4">
         <h2 className="text-xl font-bold flex items-center gap-2 text-white">
           <Lock className="w-5 h-5 text-slate-400" />
           Password
         </h2>
-        <div className="flex flex-col md:flex-row gap-4 items-end">
-          <div className="flex-1 space-y-2">
-            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">New Password</label>
-            <div className="relative">
-              <input
-                type={showPasswords ? "text" : "password"}
-                placeholder="••••••••"
-                value={newPassword}
-                onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full bg-slate-900/50 border border-white/10 px-4 py-3 pr-10 rounded-xl text-white focus:outline-none focus:border-[#f45d1a] transition-all"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPasswords(prev => !prev)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 z-10 text-slate-500 hover:text-white transition-colors p-1"
-              >
-                {showPasswords ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
+
+        <div className="space-y-2">
+          <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">New Password</label>
+          <div className="relative">
+            <input
+              type={showNewPassword ? "text" : "password"}
+              placeholder="••••••••"
+              value={newPassword}
+              onChange={(e) => setNewPassword(e.target.value)}
+              className="w-full bg-slate-900/50 border border-white/10 px-4 py-3 pr-10 rounded-xl text-white focus:outline-none focus:border-[#f45d1a] transition-all"
+            />
+            <button
+              type="button"
+              onClick={() => setShowNewPassword(prev => !prev)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 z-10 text-slate-500 hover:text-white transition-colors p-1"
+              aria-label={showNewPassword ? "Hide password" : "Show password"}
+            >
+              {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
           </div>
-          <div className="flex-1 space-y-2">
-            <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Confirm New Password</label>
-            <div className="relative">
-              <input
-                type={showPasswords ? "text" : "password"}
-                placeholder="••••••••"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full bg-slate-900/50 border border-white/10 px-4 py-3 pr-10 rounded-xl text-white focus:outline-none focus:border-[#f45d1a] transition-all"
-              />
-              <button
-                type="button"
-                onClick={() => setShowPasswords(prev => !prev)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 z-10 text-slate-500 hover:text-white transition-colors p-1"
-              >
-                {showPasswords ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-              </button>
-            </div>
-          </div>
-          <button
-            onClick={handleUpdatePassword}
-            disabled={isUpdating || !newPassword}
-            className="w-44 shrink-0 bg-white/5 border border-white/10 text-white font-medium px-6 py-3 rounded-xl hover:bg-white/10 transition-colors disabled:opacity-50 whitespace-nowrap"
-          >
-            {isUpdating ? "Updating..." : "Update Password"}
-          </button>
         </div>
+
+        <div className="space-y-2">
+          <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Confirm New Password</label>
+          <div className="relative">
+            <input
+              type={showConfirmPassword ? "text" : "password"}
+              placeholder="••••••••"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              className="w-full bg-slate-900/50 border border-white/10 px-4 py-3 pr-10 rounded-xl text-white focus:outline-none focus:border-[#f45d1a] transition-all"
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(prev => !prev)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 z-10 text-slate-500 hover:text-white transition-colors p-1"
+              aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+            >
+              {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+            </button>
+          </div>
+        </div>
+
+        <button
+          onClick={handleUpdatePassword}
+          disabled={isUpdating || !newPassword}
+          className={`w-full sm:w-auto px-6 py-3 rounded-xl font-semibold transition-all disabled:opacity-50 flex items-center justify-center gap-2 whitespace-nowrap ${
+            newPassword.length > 0
+              ? "bg-[#f45d1a] text-white hover:brightness-110 shadow-lg shadow-orange-900/20"
+              : "bg-white/5 border border-white/10 text-white hover:bg-white/10"
+          }`}
+        >
+          {isUpdating && <Loader2 className="w-4 h-4 animate-spin" />}
+          {isUpdating ? "Updating..." : "Update Password"}
+        </button>
       </div>
 
       <hr className="border-white/5" />
