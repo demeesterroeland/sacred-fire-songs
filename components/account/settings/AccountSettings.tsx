@@ -49,22 +49,26 @@ export default function AccountSettings({ user, profile }: AccountSettingsProps)
           <p className="text-slate-400">Manage your profile, account security, and data preferences.</p>
         </header>
 
-        {/* Tabs Navigation */}
-        <div className="flex gap-2 mb-8">
-          {tabs.map(({ id, label, icon: Icon }) => (
-            <button
-              key={id}
-              onClick={() => setActiveTab(id)}
-              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-bold transition-all whitespace-nowrap ${
-                activeTab === id
-                  ? "bg-white text-gray-950"
-                  : "bg-gray-800/80 text-gray-400 hover:bg-gray-700 hover:text-white border border-gray-700/50"
-              }`}
-            >
-              <Icon className="w-3.5 h-3.5" />
-              {label}
-            </button>
-          ))}
+        {/* Tabs Navigation — horizontally scrollable on mobile */}
+        <div className="relative mb-8">
+          <div className="flex gap-2 overflow-x-auto scrollbar-none pb-1 -mx-4 px-4 md:mx-0 md:px-0">
+            {tabs.map(({ id, label, icon: Icon }) => (
+              <button
+                key={id}
+                onClick={() => setActiveTab(id)}
+                className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-bold transition-all whitespace-nowrap shrink-0 ${
+                  activeTab === id
+                    ? "bg-white text-gray-950"
+                    : "bg-gray-800/80 text-gray-400 hover:bg-gray-700 hover:text-white border border-gray-700/50"
+                }`}
+              >
+                <Icon className="w-3.5 h-3.5" />
+                {label}
+              </button>
+            ))}
+          </div>
+          {/* Right-fade scroll hint — hidden on md+ where all tabs fit */}
+          <div className="pointer-events-none absolute inset-y-0 right-0 w-12 bg-gradient-to-l from-[#0a0a0a] to-transparent md:hidden" />
         </div>
 
         {/* Tab Content */}
