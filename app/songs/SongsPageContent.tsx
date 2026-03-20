@@ -3,9 +3,9 @@
 import SearchBar from "@/components/home/SearchBar";
 import SongCard from "@/components/home/SongCard";
 import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
-import { Music, Guitar, ChevronDown, Search, Plus, Trash2, Heart, SlidersHorizontal, Loader2 } from "lucide-react";
+import { Music, Guitar, ChevronDown, Search, Plus, Trash2, Heart, SlidersHorizontal } from "lucide-react";
 import { useSidebar } from "@/context/SidebarContext";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useDeleteSong } from "@/hooks/useDeleteSong";
@@ -21,12 +21,10 @@ type SortByType = 'title' | 'author' | 'newest';
 
 interface SongsPageContentProps {
     initialSongs: Song[];
-    initialNextCursor: string | null;
-    initialTotalCount: number;
     initialTaxonomy: TaxonomyNode[];
 }
 
-export default function SongsPageContent({ initialSongs, initialNextCursor, initialTotalCount, initialTaxonomy }: SongsPageContentProps) {
+export default function SongsPageContent({ initialSongs, initialTaxonomy }: SongsPageContentProps) {
     const searchParams = useSearchParams();
     const router = useRouter();
     const { user } = useAuth();
@@ -35,21 +33,12 @@ export default function SongsPageContent({ initialSongs, initialNextCursor, init
     const [localSearch, setLocalSearch] = useState('');
     const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null);
     const [filtersOpen, setFiltersOpen] = useState(false);
-    const [totalCount] = useState(initialTotalCount);
-    const sentinelRef = useRef<HTMLDivElement>(null);
-    const fetchingRef = useRef(false);
 
     const isAdmin = user?.role === 'admin';
     const sortBy = (searchParams.get('sort') as SortByType) || 'title';
 
     // --- 1. Use Extracted Hooks ---
-    const { 
-        songs, 
-        taxonomy, 
-        fetchNextPage, 
-        hasNextPage, 
-        isFetchingNextPage 
-    } = useSongsQuery({ initialSongs, initialNextCursor, initialTaxonomy });
+    const { songs, taxonomy } = useSongsQuery({ initialSongs, initialTaxonomy });
     
     const { favoriteIds } = useFavoritesQuery(user?.id);
     const {
@@ -75,26 +64,6 @@ export default function SongsPageContent({ initialSongs, initialNextCursor, init
         router.push(`?${params.toString()}`, { scroll: false });
     };
 
-    // Infinite Scroll Intersection Observer
-    useEffect(() => {
-        if (!hasNextPage || !sentinelRef.current) return;
-        
-        const observer = new IntersectionObserver(
-            (entries) => {
-                if (entries[0].isIntersecting && !fetchingRef.current) {
-                    fetchingRef.current = true;
-                    fetchNextPage().finally(() => {
-                        fetchingRef.current = false;
-                    });
-                }
-            },
-            { threshold: 0.1 }
-        );
-        
-        observer.observe(sentinelRef.current);
-        return () => observer.disconnect();
-    }, [hasNextPage, fetchNextPage]);
-
     // Sync local search with state.search (for external resets like "Clear All")
     // eslint-disable-next-line react-hooks/set-state-in-effect
     useEffect(() => {
@@ -113,9 +82,9 @@ export default function SongsPageContent({ initialSongs, initialNextCursor, init
 
     // Publish count to global header for mobile view
     useEffect(() => {
-        setHeaderCount(hasActiveFilters ? filteredCount : totalCount);
+        setHeaderCount(hasActiveFilters ? filteredCount : songs.length);
         return () => setHeaderCount(undefined);
-    }, [filteredCount, totalCount, hasActiveFilters, setHeaderCount]);
+    }, [filteredCount, songs.length, hasActiveFilters, setHeaderCount]);
 
     return (
         <main className="flex-1 min-h-0 bg-gray-950">
@@ -150,7 +119,7 @@ export default function SongsPageContent({ initialSongs, initialNextCursor, init
 
                             <div className="hidden md:flex items-center gap-4 self-end md:self-auto">
                                 <span className="hidden md:block text-xs text-gray-500 whitespace-nowrap">
-                                    {hasActiveFilters ? filteredCount : totalCount} songs found
+                                    {hasActiveFilters ? filteredCount : songs.length} songs found
                                 </span>
 
                                 {user && (
@@ -352,14 +321,6 @@ export default function SongsPageContent({ initialSongs, initialNextCursor, init
                         )}
                     </div>
                     
-                    {/* Infinite Scroll Sentinel */}
-                    {hasNextPage && (
-                        <div ref={sentinelRef} className="flex justify-center py-12">
-                            {isFetchingNextPage && (
-                                <Loader2 className="w-8 h-8 animate-spin text-gray-700" />
-                            )}
-                        </div>
-                    )}
                 </section>
             </div>
 

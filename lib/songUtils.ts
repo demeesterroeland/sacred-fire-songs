@@ -74,15 +74,11 @@ export const fetchSongs = async (limit?: number) => {
 };
 
 /**
- * Paginated client-side fetch for infinite scroll.
+ * Fetches all songs without pagination — used for in-memory search.
  */
-export const fetchSongsPage = async (cursor?: string) => {
+export const fetchAllSongs = async (): Promise<Song[]> => {
     const supabase = createClient();
-    const { data, error } = await songsQuery(supabase, { limit: PAGE_SIZE, cursor });
+    const { data, error } = await songsQuery(supabase);
     if (error) throw error;
-    const songs = data.map(item => mapCompositionToSong(item));
-    const nextCursor = songs.length === PAGE_SIZE
-        ? `${songs[songs.length - 1].createdAt}::${songs[songs.length - 1].id}`
-        : null;
-    return { songs, nextCursor };
+    return data.map(item => mapCompositionToSong(item));
 };
