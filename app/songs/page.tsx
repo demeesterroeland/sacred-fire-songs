@@ -1,10 +1,10 @@
 import { Suspense } from 'react';
 import SongsPageContent from './SongsPageContent';
-import { fetchSongsPageServer, fetchCategoryTreeServer } from '@/lib/songs/serverQueries';
+import { fetchSongsServer, fetchCategoryTreeServer } from '@/lib/songs/serverQueries';
 
 export default async function SongsPage() {
-  const [songsData, taxonomy] = await Promise.all([
-    fetchSongsPageServer(),
+  const [songs, taxonomy] = await Promise.all([
+    fetchSongsServer(),
     fetchCategoryTreeServer(),
   ]);
 
@@ -14,11 +14,9 @@ export default async function SongsPage() {
         <div className="text-gray-500">Loading...</div>
       </div>
     }>
-      <SongsPageContent 
-        initialSongs={songsData.songs} 
-        initialNextCursor={songsData.nextCursor}
-        initialTotalCount={songsData.totalCount}
-        initialTaxonomy={taxonomy} 
+      <SongsPageContent
+        initialSongs={songs}
+        initialTaxonomy={taxonomy}
       />
     </Suspense>
   );
