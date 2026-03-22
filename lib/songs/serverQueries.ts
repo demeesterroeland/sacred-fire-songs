@@ -213,7 +213,7 @@ export async function getLibrarySummary(userId: string): Promise<LibrarySummary>
         .select('id', { count: 'exact', head: true })
         .eq('is_public', false);
 
-    // New songs: public, created in last 30 days, never viewed by this user
+    // New songs: created in last 30 days, never viewed by this user (RLS handles visibility)
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
     const { data: viewedIds } = await supabase
         .from('song_views')
