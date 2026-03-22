@@ -112,7 +112,7 @@ export default function Sidebar() {
                                         {isCreateOpen && (
                                             <div className="ml-4 mt-1 space-y-0.5 border-l border-gray-800 pl-3">
                                                 <Link
-                                                    href="/songs/add"
+                                                    href={`/songs/add?next=${encodeURIComponent(pathname)}`}
                                                     onClick={() => { setIsCreateOpen(false); setIsOpen(false); }}
                                                     className="flex items-center gap-3 p-2 px-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors group"
                                                 >
