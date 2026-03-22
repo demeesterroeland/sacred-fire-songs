@@ -1,6 +1,6 @@
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useState } from 'react';
 import Link from 'next/link';
 import { Flame, IndentDecrease, SlidersHorizontal, Heart, FileText, ListMusic, LogOut } from 'lucide-react';
 import Image from 'next/image';
@@ -15,6 +15,7 @@ import { useSidebar } from '@/context/SidebarContext';
 import { getSiteTitle } from '@/lib/env';
 import { useRouter } from 'next/navigation';
 import QuickLogin from '@/components/dev/QuickLogin';
+import CreateSheet from './CreateSheet';
 
 export default function Sidebar() {
     const env = useEnvironment();
@@ -22,6 +23,7 @@ export default function Sidebar() {
     const { isOpen, setIsOpen } = useSidebar();
     const { user, logout } = useAuth();
     const router = useRouter();
+    const [isCreateOpen, setIsCreateOpen] = useState(false);
 
     const userDisplayName = user?.full_name || user?.email?.split('@')[0] || 'Member';
     const userInitials = userDisplayName.substring(0, 1).toUpperCase();
@@ -92,19 +94,38 @@ export default function Sidebar() {
                 <nav className="flex-1 overflow-y-auto px-2 py-6">
                     <p className="lg:hidden text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 px-3 mb-2">Menu</p>
                     <div className="space-y-1">
-                        {NAV_ITEMS.map((item) => (
-                            <NavLink
-                                key={item.href}
-                                href={item.href}
-                                label={item.label}
-                                icon={item.icon}
-                                exact={'exact' in item ? item.exact : false}
-                                exclude={'exclude' in item ? item.exclude : []}
-                                layout="sidebar"
-                                showText={true}
-                                onClick={() => setIsOpen(false)}
-                            />
-                        ))}
+                        {NAV_ITEMS.map((item) => {
+                            if (item.label === 'Create') {
+                                const Icon = item.icon;
+                                return (
+                                    <button
+                                        key={item.label}
+                                        onClick={() => setIsCreateOpen(!isCreateOpen)}
+                                        className={`w-full flex items-center gap-3 p-2 px-3 rounded-lg transition-colors ${
+                                            isCreateOpen
+                                                ? 'text-red-400 bg-red-500/10'
+                                                : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                                        }`}
+                                    >
+                                        <Icon className="w-5 h-5" />
+                                        <span className="text-sm font-medium">{item.label}</span>
+                                    </button>
+                                );
+                            }
+                            return (
+                                <NavLink
+                                    key={item.href}
+                                    href={item.href}
+                                    label={item.label}
+                                    icon={item.icon}
+                                    exact={'exact' in item ? item.exact : false}
+                                    exclude={'exclude' in item ? item.exclude : []}
+                                    layout="sidebar"
+                                    showText={true}
+                                    onClick={() => setIsOpen(false)}
+                                />
+                            );
+                        })}
                     </div>
 
                     {/* Separator + Personal Menu (mobile only) */}
@@ -178,7 +199,12 @@ export default function Sidebar() {
                 </nav>
 
                 {/* Footer */}
-                <div className="p-4 border-t border-gray-800/30 bg-gray-950/20">
+                <div className="relative p-4 border-t border-gray-800/30 bg-gray-950/20">
+                    <CreateSheet
+                        isOpen={isCreateOpen}
+                        onClose={() => setIsCreateOpen(false)}
+                        variant="sidebar"
+                    />
                     <p className="text-[9px] text-center font-mono uppercase tracking-[0.2em] opacity-20 mt-2">
                         Sacred Fire v1.0
                     </p>

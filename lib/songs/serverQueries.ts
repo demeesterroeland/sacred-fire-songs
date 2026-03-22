@@ -171,6 +171,138 @@ export async function fetchFavoriteSongsServer(): Promise<Song[]> {
     });
 }
 
+export interface LibrarySummary {
+    favoritesCount: number;
+    draftsCount: number;
+    mySongsCount: number;
+    newSongsCount: number;
+}
+
+/**
+ * Fetch aggregate counts for the home page "Your Library" summary.
+ * Only import from Server Components or Server Actions.
+ */
+export async function getLibrarySummary(userId: string): Promise<LibrarySummary> {
+    const supabase = await createClient();
+
+    // Favorites count
+    let favoritesCount = 0;
+    const { data: favSetlist } = await supabase
+        .from('setlists')
+        .select('id')
+        .eq('owner_id', userId)
+        .eq('title', 'My Favorites')
+        .maybeSingle();
+    if (favSetlist) {
+        const { count } = await supabase
+            .from('setlist_items')
+            .select('id', { count: 'exact', head: true })
+            .eq('setlist_id', favSetlist.id);
+        favoritesCount = count ?? 0;
+    }
+
+    // My songs count (songs I own)
+    const { count: mySongsCount } = await supabase
+        .from('compositions')
+        .select('id', { count: 'exact', head: true })
+        .eq('owner_id', userId);
+
+    // Drafts count (my non-public songs)
+    const { count: draftsCount } = await supabase
+        .from('compositions')
+        .select('id', { count: 'exact', head: true })
+        .eq('owner_id', userId)
+        .eq('is_public', false);
+
+    // New songs since last visit
+    let newSongsCount = 0;
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('last_seen_at')
+        .eq('id', userId)
+        .maybeSingle();
+    if (profile?.last_seen_at) {
+        const { count } = await supabase
+            .from('compositions')
+            .select('id', { count: 'exact', head: true })
+            .eq('is_public', true)
+            .gt('created_at', profile.last_seen_at);
+        newSongsCount = count ?? 0;
+    }
+
+    return {
+        favoritesCount,
+        draftsCount: draftsCount ?? 0,
+        mySongsCount: mySongsCount ?? 0,
+        newSongsCount,
+    };
+}
+
+/**
+ * Fetch recently viewed songs for a user.
+ */
+export async function getRecentlyViewed(userId: string, limit = 10): Promise<Song[]> {
+    const supabase = await createClient();
+
+    const { data: views } = await supabase
+        .from('song_views')
+        .select('song_id, viewed_at')
+        .eq('user_id', userId)
+        .order('viewed_at', { ascending: false })
+        .limit(limit);
+
+    if (!views?.length) return [];
+
+    const songIds = views.map(v => v.song_id);
+    const [songsResult, favoriteIds] = await Promise.all([
+        songsQuery(supabase, { songIds }),
+        fetchFavoriteIds(supabase),
+    ]);
+
+    if (songsResult.error) return [];
+
+    // Maintain viewed_at order
+    const songMap = new Map(songsResult.data.map(s => [s.id, s]));
+    return songIds
+        .map(id => songMap.get(id))
+        .filter(Boolean)
+        .map(item => mapCompositionToSong(item!, favoriteIds));
+}
+
+/**
+ * Fetch songs added since user's last visit.
+ */
+export async function getNewSongsSinceLastVisit(userId: string, limit = 20): Promise<Song[]> {
+    const supabase = await createClient();
+
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('last_seen_at')
+        .eq('id', userId)
+        .maybeSingle();
+
+    if (!profile?.last_seen_at) return [];
+
+    const { data: newSongs, error } = await supabase
+        .from('compositions')
+        .select('id')
+        .eq('is_public', true)
+        .gt('created_at', profile.last_seen_at)
+        .order('created_at', { ascending: false })
+        .limit(limit);
+
+    if (error || !newSongs?.length) return [];
+
+    const songIds = newSongs.map(s => s.id);
+    const [songsResult, favoriteIds] = await Promise.all([
+        songsQuery(supabase, { songIds }),
+        fetchFavoriteIds(supabase),
+    ]);
+
+    if (songsResult.error) return [];
+    return songsResult.data.map(item => mapCompositionToSong(item, favoriteIds));
+}
+
 /**
  * Server-side version of fetchCategoryTree — uses the server Supabase client.
  * Only import this from Server Components or Server Actions.
