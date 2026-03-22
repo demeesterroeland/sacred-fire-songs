@@ -70,7 +70,7 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy }: Song
             if (localSearch !== state.search) {
                 setFilter('search', localSearch);
             }
-        }, 300);
+        }, 50);
         return () => clearTimeout(timer);
     }, [localSearch, setFilter, state.search]);
 
