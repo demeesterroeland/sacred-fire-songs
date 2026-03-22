@@ -1,11 +1,16 @@
 import { Suspense } from 'react';
 import SongsPageContent from './SongsPageContent';
-import { fetchSongsServer, fetchCategoryTreeServer } from '@/lib/songs/serverQueries';
+import { fetchSongsServer, fetchCategoryTreeServer, getViewedSongIds } from '@/lib/songs/serverQueries';
+import { createClient } from '@/lib/supabase/server';
 
 export default async function SongsPage() {
-  const [songs, taxonomy] = await Promise.all([
+  const supabase = await createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+
+  const [songs, taxonomy, viewedSongIds] = await Promise.all([
     fetchSongsServer(),
     fetchCategoryTreeServer(),
+    user ? getViewedSongIds(user.id) : Promise.resolve([]),
   ]);
 
   return (
@@ -17,6 +22,7 @@ export default async function SongsPage() {
       <SongsPageContent
         initialSongs={songs}
         initialTaxonomy={taxonomy}
+        initialViewedSongIds={viewedSongIds}
       />
     </Suspense>
   );

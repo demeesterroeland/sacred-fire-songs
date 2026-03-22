@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, notFound, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
@@ -18,6 +18,7 @@ import { SONG_KEYS } from '@/lib/songs/queryKeys';
 import { useWakeLock } from '@/hooks/useWakeLock';
 import { UserProfile } from '@/components/common/navigation/UserProfile';
 import { getCategoryColor, getCategoryStyles } from '@/lib/uiUtils';
+import { recordSongView } from '@/app/actions/recordSongView';
 
 // Standalone fetch function
 const fetchSong = async (id: string) => {
@@ -72,6 +73,13 @@ export default function SongDetailPage() {
 
     // Enable Screen Wake Lock on Song Detail Page
     useWakeLock();
+
+    // Record song view for "Recently Viewed" feature
+    useEffect(() => {
+        if (id && user) {
+            recordSongView(id);
+        }
+    }, [id, user]);
 
     // The Query Hook
     const { data: song, isLoading: songLoading } = useQuery({

@@ -5,6 +5,9 @@ import type { LucideIcon } from 'lucide-react';
 import { CreatePlaylistInput } from '@/components/playlists/CreatePlaylistInput';
 import { PlaylistCard } from '@/components/playlists/PlaylistCard';
 import { PublicPlaylistCard } from '@/components/playlists/PublicPlaylistCard';
+import { getRecentlyViewed, getRecentlyViewedCount, getUnviewedSongs } from '@/lib/songs/serverQueries';
+import RecentlyViewed from '@/components/library/RecentlyViewed';
+import NewSinceLastVisit from '@/components/library/NewSinceLastVisit';
 
 interface SongCounts {
     total: number;
@@ -292,6 +295,13 @@ export default async function PlaylistsPage() {
         ? (songCounts[myFavorites.id] ?? { total: 0, public: 0, draft: 0 })
         : { total: 0, public: 0, draft: 0 };
 
+    // Fetch personalized sections in parallel
+    const [recentlyViewedSongs, recentlyViewedCount, newSongs] = await Promise.all([
+        getRecentlyViewed(user.id, 5),
+        getRecentlyViewedCount(user.id),
+        getUnviewedSongs(user.id, 5),
+    ]);
+
     return (
         <div className="space-y-8">
 
@@ -308,6 +318,12 @@ export default async function PlaylistsPage() {
                     <SmartPlaylistCard icon={PenLine} title="My Drafts" subtitle="Your private work-in-progress songs"     accent="gray"   href="/songs?status=draft" />
                 </div>
             </div>
+
+            {/* Recently Viewed */}
+            <RecentlyViewed songs={recentlyViewedSongs} total={recentlyViewedCount} />
+
+            {/* New Since Last Visit */}
+            <NewSinceLastVisit songs={newSongs} />
 
             {/* My Private Playlists — real data */}
             <div>

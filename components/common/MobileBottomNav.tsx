@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Home, Search, ListMusic, PlusCircle } from 'lucide-react';
+import { Home, Library, ListMusic, PlusCircle } from 'lucide-react';
 import { useActivePath } from '@/hooks/useActivePath';
 import { usePathname } from 'next/navigation';
 import type { LucideIcon } from 'lucide-react';
@@ -19,7 +19,7 @@ type TabItem = {
 
 const BOTTOM_TABS: TabItem[] = [
     { label: 'Home', href: '/', icon: Home, exact: true },
-    { label: 'Search', href: '/songs', icon: Search, exclude: ['/songs/add'] },
+    { label: 'Songs', href: '/songs', icon: Library, exclude: ['/songs/add'] },
     { label: 'Library', href: '/library/playlists', icon: ListMusic },
     { label: 'Create', href: '/songs/add', icon: PlusCircle, isAction: true },
 ];

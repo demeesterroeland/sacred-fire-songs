@@ -12,10 +12,10 @@ export default function Header() {
     const { user } = useAuth();
 
     const getSubtitle = () => {
-        if (pathname === '/') return 'Dashboard';
+        if (pathname === '/') return 'Home';
         if (pathname === '/songs') return 'Songs';
         if (pathname === '/songs/add') return 'Add Song';
-        if (pathname === '/explore') return 'Explore';
+        if (pathname === '/library/recently-viewed') return 'Recently Viewed';
         if (pathname === '/library/playlists') return 'Your Library';
         if (pathname === '/library/playlists/add') return 'New Playlist';
         if (pathname?.startsWith('/library/playlists/')) return 'Playlist';

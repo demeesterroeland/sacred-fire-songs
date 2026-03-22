@@ -171,6 +171,196 @@ export async function fetchFavoriteSongsServer(): Promise<Song[]> {
     });
 }
 
+export interface LibrarySummary {
+    favoritesCount: number;
+    draftsCount: number;
+    mySongsCount: number;
+    newSongsCount: number;
+}
+
+/**
+ * Fetch aggregate counts for the home page "Your Library" summary.
+ * Only import from Server Components or Server Actions.
+ */
+export async function getLibrarySummary(userId: string): Promise<LibrarySummary> {
+    const supabase = await createClient();
+
+    // Favorites count
+    let favoritesCount = 0;
+    const { data: favSetlist } = await supabase
+        .from('setlists')
+        .select('id')
+        .eq('owner_id', userId)
+        .eq('title', 'My Favorites')
+        .maybeSingle();
+    if (favSetlist) {
+        const { count } = await supabase
+            .from('setlist_items')
+            .select('id', { count: 'exact', head: true })
+            .eq('setlist_id', favSetlist.id);
+        favoritesCount = count ?? 0;
+    }
+
+    // My songs count (songs I own)
+    const { count: mySongsCount } = await supabase
+        .from('compositions')
+        .select('id', { count: 'exact', head: true })
+        .eq('owner_id', userId);
+
+    // Drafts count (all non-public songs visible to user via RLS)
+    const { count: draftsCount } = await supabase
+        .from('compositions')
+        .select('id', { count: 'exact', head: true })
+        .eq('is_public', false);
+
+    // New songs: created in last 30 days, never viewed by this user (RLS handles visibility)
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    const { data: viewedIds } = await supabase
+        .from('song_views')
+        .select('song_id')
+        .eq('user_id', userId);
+    const viewedSet = new Set((viewedIds ?? []).map(v => v.song_id));
+
+    // Count unviewed songs from last 30 days (RLS handles visibility)
+    let newSongsCount = 0;
+    const { data: recentSongs } = await supabase
+        .from('compositions')
+        .select('id')
+        .gte('created_at', thirtyDaysAgo);
+    if (recentSongs) {
+        newSongsCount = recentSongs.filter(c => !viewedSet.has(c.id)).length;
+    }
+
+    return {
+        favoritesCount,
+        draftsCount: draftsCount ?? 0,
+        mySongsCount: mySongsCount ?? 0,
+        newSongsCount,
+    };
+}
+
+/**
+ * Fetch recently viewed songs for a user.
+ */
+export async function getRecentlyViewed(userId: string, limit = 10): Promise<Song[]> {
+    const supabase = await createClient();
+
+    const { data: views } = await supabase
+        .from('song_views')
+        .select('song_id, viewed_at')
+        .eq('user_id', userId)
+        .order('viewed_at', { ascending: false })
+        .limit(limit);
+
+    if (!views?.length) return [];
+
+    const songIds = views.map(v => v.song_id);
+    const [songsResult, favoriteIds] = await Promise.all([
+        songsQuery(supabase, { songIds }),
+        fetchFavoriteIds(supabase),
+    ]);
+
+    if (songsResult.error) return [];
+
+    // Maintain viewed_at order
+    const songMap = new Map(songsResult.data.map(s => [s.id, s]));
+    return songIds
+        .map(id => songMap.get(id))
+        .filter(Boolean)
+        .map(item => mapCompositionToSong(item!, favoriteIds));
+}
+
+/**
+ * Lightweight fetch of recently viewed songs — only id, title, author.
+ * Skips category joins and favorites lookup for faster page loads.
+ */
+export async function getRecentlyViewedLight(userId: string, limit = 50): Promise<Pick<Song, 'id' | 'title' | 'author'>[]> {
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
+        .from('song_views')
+        .select('compositions(id, title, original_author)')
+        .eq('user_id', userId)
+        .order('viewed_at', { ascending: false })
+        .limit(limit);
+
+    if (error || !data) return [];
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (data as any[])
+        .map(row => row.compositions)
+        .filter(Boolean)
+        .map(c => ({
+            id: c.id,
+            title: c.title,
+            author: c.original_author || 'Unknown',
+        }));
+}
+
+/**
+ * Count total recently viewed songs for a user.
+ */
+export async function getRecentlyViewedCount(userId: string): Promise<number> {
+    const supabase = await createClient();
+    const { count } = await supabase
+        .from('song_views')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', userId);
+    return count ?? 0;
+}
+
+/**
+ * Fetch public songs from the last 30 days that the user has never viewed.
+ */
+export async function getUnviewedSongs(userId: string, limit = 20): Promise<Song[]> {
+    const supabase = await createClient();
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+
+    // Get all song IDs the user has viewed
+    const { data: viewedIds } = await supabase
+        .from('song_views')
+        .select('song_id')
+        .eq('user_id', userId);
+    const viewedSet = new Set((viewedIds ?? []).map(v => v.song_id));
+
+    // Get recent songs visible to user (RLS handles visibility)
+    const { data: recentSongs, error } = await supabase
+        .from('compositions')
+        .select('id')
+        .gte('created_at', thirtyDaysAgo)
+        .order('created_at', { ascending: false });
+
+    if (error || !recentSongs?.length) return [];
+
+    // Filter out viewed songs and apply limit
+    const unviewedIds = recentSongs
+        .filter(c => !viewedSet.has(c.id))
+        .slice(0, limit)
+        .map(c => c.id);
+
+    if (unviewedIds.length === 0) return [];
+
+    const [songsResult, favoriteIds] = await Promise.all([
+        songsQuery(supabase, { songIds: unviewedIds }),
+        fetchFavoriteIds(supabase),
+    ]);
+
+    if (songsResult.error) return [];
+    return songsResult.data.map(item => mapCompositionToSong(item, favoriteIds));
+}
+
+/**
+ * Fetch all song IDs that a user has viewed (for client-side "new" filtering).
+ */
+export async function getViewedSongIds(userId: string): Promise<string[]> {
+    const supabase = await createClient();
+    const { data } = await supabase
+        .from('song_views')
+        .select('song_id')
+        .eq('user_id', userId);
+    return (data ?? []).map(v => v.song_id);
+}
+
 /**
  * Server-side version of fetchCategoryTree — uses the server Supabase client.
  * Only import this from Server Components or Server Actions.

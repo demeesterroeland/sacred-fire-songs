@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { Music, ListMusic } from 'lucide-react';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 
 interface CreateSheetProps {
     isOpen: boolean;
@@ -11,6 +11,7 @@ interface CreateSheetProps {
 
 export default function CreateSheet({ isOpen, onClose }: CreateSheetProps) {
     const router = useRouter();
+    const pathname = usePathname();
     const sheetRef = useRef<HTMLDivElement>(null);
 
     // Close on outside click
@@ -32,7 +33,7 @@ export default function CreateSheet({ isOpen, onClose }: CreateSheetProps) {
     if (!isOpen) return null;
 
     const options = [
-        { label: 'Add Song', icon: Music, href: '/songs/add', color: 'text-red-400' },
+        { label: 'Add Song', icon: Music, href: `/songs/add?next=${encodeURIComponent(pathname)}`, color: 'text-red-400' },
         { label: 'Create Playlist', icon: ListMusic, href: '/library/playlists/add', color: 'text-purple-400' },
     ];
 

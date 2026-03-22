@@ -1,16 +1,11 @@
-import { LayoutDashboard, Compass, Library, ListMusic, PlusCircle } from 'lucide-react';
+import { Home, Library, ListMusic, PlusCircle } from 'lucide-react';
 
 export const NAV_ITEMS = [
   {
-    label: 'Dashboard',
+    label: 'Home',
     href: '/',
-    icon: LayoutDashboard,
+    icon: Home,
     exact: true
-  },
-  {
-    label: 'Explore',
-    href: '/explore',
-    icon: Compass
   },
   {
     label: 'Songs',
@@ -24,7 +19,7 @@ export const NAV_ITEMS = [
     icon: ListMusic
   },
   {
-    label: 'Add Song',
+    label: 'Create',
     href: '/songs/add',
     icon: PlusCircle
   }

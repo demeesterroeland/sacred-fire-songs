@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { SONG_KEYS } from '@/lib/songs/queryKeys';
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { flushSync } from 'react-dom';
 import { parseChordPro, hasChords } from '@/lib/chordProParsing';
@@ -64,6 +64,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
 
     const queryClient = useQueryClient();
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [serverError, setServerError] = useState<string | null>(null);
     const [showUpload, setShowUpload] = useState(false);
 
@@ -337,7 +338,8 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
             }
             queryClient.invalidateQueries({ queryKey: SONG_KEYS.all() });
             queryClient.invalidateQueries({ queryKey: SONG_KEYS.detail(id) });
-            router.push(mode === 'create' ? '/' : `/songs/${id}`);
+            const returnTo = mode === 'create' ? (searchParams.get('next') || '/') : `/songs/${id}`;
+            router.push(returnTo);
         },
         onError: (error: Error) => {
             setServerError(error.message);

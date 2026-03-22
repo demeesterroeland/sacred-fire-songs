@@ -1,8 +1,8 @@
 'use client';
 
-import { Suspense } from 'react';
+import { Suspense, useState } from 'react';
 import Link from 'next/link';
-import { Flame, IndentDecrease, SlidersHorizontal, Heart, FileText, ListMusic, LogOut } from 'lucide-react';
+import { Flame, IndentDecrease, SlidersHorizontal, Heart, FileText, ListMusic, LogOut, Music, Clock } from 'lucide-react';
 import Image from 'next/image';
 import DevTools from '@/components/dev/DevTools';
 import LibrarySidebar from '../library/LibrarySidebar';
@@ -22,6 +22,7 @@ export default function Sidebar() {
     const { isOpen, setIsOpen } = useSidebar();
     const { user, logout } = useAuth();
     const router = useRouter();
+    const [isCreateOpen, setIsCreateOpen] = useState(false);
 
     const userDisplayName = user?.full_name || user?.email?.split('@')[0] || 'Member';
     const userInitials = userDisplayName.substring(0, 1).toUpperCase();
@@ -84,7 +85,7 @@ export default function Sidebar() {
                         title="Close Menu"
                     >
                         <IndentDecrease className="w-6 h-6" />
-                        <span className="text-[10px] font-bold uppercase tracking-widest opacity-60 group-hover:opacity-100 transition-opacity">Close</span>
+                        <span className="sr-only">Close</span>
                     </button>
                 </div>
 
@@ -92,19 +93,59 @@ export default function Sidebar() {
                 <nav className="flex-1 overflow-y-auto px-2 py-6">
                     <p className="lg:hidden text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 px-3 mb-2">Menu</p>
                     <div className="space-y-1">
-                        {NAV_ITEMS.map((item) => (
-                            <NavLink
-                                key={item.href}
-                                href={item.href}
-                                label={item.label}
-                                icon={item.icon}
-                                exact={'exact' in item ? item.exact : false}
-                                exclude={'exclude' in item ? item.exclude : []}
-                                layout="sidebar"
-                                showText={true}
-                                onClick={() => setIsOpen(false)}
-                            />
-                        ))}
+                        {NAV_ITEMS.map((item) => {
+                            if (item.label === 'Create') {
+                                const Icon = item.icon;
+                                return (
+                                    <div key={item.label}>
+                                        <button
+                                            onClick={() => setIsCreateOpen(!isCreateOpen)}
+                                            className={`w-full flex items-center gap-3 p-2 px-3 rounded-lg transition-colors ${
+                                                isCreateOpen
+                                                    ? 'text-red-400 bg-red-500/10'
+                                                    : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                                            }`}
+                                        >
+                                            <Icon className="w-5 h-5" />
+                                            <span className="text-sm font-medium">{item.label}</span>
+                                        </button>
+                                        {isCreateOpen && (
+                                            <div className="ml-4 mt-1 space-y-0.5 border-l border-gray-800 pl-3">
+                                                <Link
+                                                    href={`/songs/add?next=${encodeURIComponent(pathname)}`}
+                                                    onClick={() => { setIsCreateOpen(false); setIsOpen(false); }}
+                                                    className="flex items-center gap-3 p-2 px-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors group"
+                                                >
+                                                    <Music className="w-4 h-4 group-hover:text-red-400" />
+                                                    <span className="text-sm font-medium">Add Song</span>
+                                                </Link>
+                                                <Link
+                                                    href="/library/playlists/add"
+                                                    onClick={() => { setIsCreateOpen(false); setIsOpen(false); }}
+                                                    className="flex items-center gap-3 p-2 px-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors group"
+                                                >
+                                                    <ListMusic className="w-4 h-4 group-hover:text-purple-400" />
+                                                    <span className="text-sm font-medium">Create Playlist</span>
+                                                </Link>
+                                            </div>
+                                        )}
+                                    </div>
+                                );
+                            }
+                            return (
+                                <NavLink
+                                    key={item.href}
+                                    href={item.href}
+                                    label={item.label}
+                                    icon={item.icon}
+                                    exact={'exact' in item ? item.exact : false}
+                                    exclude={'exclude' in item ? item.exclude : []}
+                                    layout="sidebar"
+                                    showText={true}
+                                    onClick={() => setIsOpen(false)}
+                                />
+                            );
+                        })}
                     </div>
 
                     {/* Separator + Personal Menu (mobile only) */}
@@ -130,6 +171,10 @@ export default function Sidebar() {
                                     <Link href="/library/playlists" onClick={() => setIsOpen(false)} className="flex items-center gap-3 p-2 px-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors group">
                                         <ListMusic className="w-4 h-4 group-hover:text-purple-400" />
                                         <span className="text-sm font-medium">My Playlists</span>
+                                    </Link>
+                                    <Link href="/library/recently-viewed" onClick={() => setIsOpen(false)} className="flex items-center gap-3 p-2 px-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors group">
+                                        <Clock className="w-4 h-4 group-hover:text-amber-400" />
+                                        <span className="text-sm font-medium">Recently Viewed</span>
                                     </Link>
                                 </div>
 

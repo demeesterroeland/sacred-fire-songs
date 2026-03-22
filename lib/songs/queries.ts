@@ -23,7 +23,7 @@ export const SONGS_SELECT = `
  */
 export function songsQuery(
   client: SupabaseClient,
-  opts?: { limit?: number; cursor?: string }
+  opts?: { limit?: number; cursor?: string; songIds?: string[] }
 ) {
   let q = client
     .from('compositions')
@@ -31,6 +31,9 @@ export function songsQuery(
     .order('created_at', { ascending: false })
     .order('id', { ascending: false });
 
+  if (opts?.songIds?.length) {
+    q = q.in('id', opts.songIds);
+  }
   if (opts?.cursor) {
     const [cursorDate, cursorId] = opts.cursor.split('::');
     q = q.or(`created_at.lt.${cursorDate},and(created_at.eq.${cursorDate},id.lt.${cursorId})`);

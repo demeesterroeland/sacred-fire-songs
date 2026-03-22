@@ -5,7 +5,7 @@ import SongCard from "@/components/home/SongCard";
 import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
 import { Music, Guitar, ChevronDown, Search, Plus, Trash2, Heart, SlidersHorizontal } from "lucide-react";
 import { useSidebar } from "@/context/SidebarContext";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useDeleteSong } from "@/hooks/useDeleteSong";
@@ -22,9 +22,10 @@ type SortByType = 'title' | 'author' | 'newest';
 interface SongsPageContentProps {
     initialSongs: Song[];
     initialTaxonomy: TaxonomyNode[];
+    initialViewedSongIds?: string[];
 }
 
-export default function SongsPageContent({ initialSongs, initialTaxonomy }: SongsPageContentProps) {
+export default function SongsPageContent({ initialSongs, initialTaxonomy, initialViewedSongIds = [] }: SongsPageContentProps) {
     const searchParams = useSearchParams();
     const router = useRouter();
     const { user } = useAuth();
@@ -41,6 +42,7 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy }: Song
     const { songs, taxonomy } = useSongsQuery({ initialSongs, initialTaxonomy });
     
     const { favoriteIds } = useFavoritesQuery(user?.id);
+    const viewedSongIds = useMemo(() => new Set(initialViewedSongIds), [initialViewedSongIds]);
     const {
         displaySongs,
         state,
@@ -50,7 +52,7 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy }: Song
         melodyCount,
         hasActiveFilters,
         filteredCount
-    } = useSongsFilter({ songs, userId: user?.id, favoriteIds, sortBy });
+    } = useSongsFilter({ songs, userId: user?.id, favoriteIds, viewedSongIds, sortBy });
 
     const handleDelete = async () => {
         if (!deleteTarget) return;
@@ -124,7 +126,7 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy }: Song
 
                                 {user && (
                                     <Link
-                                        href="/songs/add"
+                                        href="/songs/add?next=/songs"
                                         className="flex items-center gap-2 px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-full font-bold text-sm transition-all shadow-lg shadow-red-900/40 active:scale-95 whitespace-nowrap"
                                     >
                                         <Plus className="w-4 h-4 text-white" strokeWidth={3} />

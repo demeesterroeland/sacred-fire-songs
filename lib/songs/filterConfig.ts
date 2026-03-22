@@ -11,6 +11,7 @@ export interface SongFilterState {
   status: 'all' | 'public' | 'draft';
   favorites?: boolean;
   mine?: boolean;
+  new?: boolean;
 }
 
 // 2. Define the Configuration
