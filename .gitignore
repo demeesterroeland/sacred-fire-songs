@@ -46,3 +46,6 @@ SUPABASE_LOCAL.md
 
 # git worktrees
 .worktrees/
+
+# opencode workflow (contains local-only API key)
+.github/workflows/opencode.yml

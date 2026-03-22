@@ -64,21 +64,21 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy }: Song
         router.push(`?${params.toString()}`, { scroll: false });
     };
 
-    // Sync local search with state.search (for external resets like "Clear All")
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    useEffect(() => {
-        setLocalSearch((state.search || '') as string);
-    }, [state.search]);
-
-    // Debounce URL update
+    // Debounce URL update - localSearch is the source of truth for input
     useEffect(() => {
         const timer = setTimeout(() => {
             if (localSearch !== state.search) {
                 setFilter('search', localSearch);
             }
-        }, 300);
+        }, 50);
         return () => clearTimeout(timer);
     }, [localSearch, setFilter, state.search]);
+
+    // Handle explicit filter reset (from TagSelector's "Clear All")
+    const handleResetFilters = () => {
+        resetFilters();
+        setLocalSearch('');
+    };
 
     // Publish count to global header for mobile view
     useEffect(() => {
@@ -143,7 +143,7 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy }: Song
                                 taxonomy={taxonomy}
                                 onCategoryChange={(cat) => setFilter('category', cat)}
                                 onTagsChange={(tags) => setFilter('tags', tags)}
-                                onClearAll={resetFilters}
+                                onClearAll={handleResetFilters}
                                 searchValue={localSearch}
                                 onSearchChange={setLocalSearch}
                                 hasActiveFilters={hasActiveFilters}
@@ -309,7 +309,7 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy }: Song
                                         </p>
                                         {hasActiveFilters && (
                                             <button
-                                                onClick={resetFilters}
+                                                onClick={handleResetFilters}
                                                 className="mt-6 text-red-500 hover:text-red-400 font-medium transition-colors"
                                             >
                                                 Clear filters
