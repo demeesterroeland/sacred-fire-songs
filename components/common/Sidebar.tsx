@@ -2,7 +2,7 @@
 
 import { Suspense, useState } from 'react';
 import Link from 'next/link';
-import { Flame, IndentDecrease, SlidersHorizontal, Heart, FileText, ListMusic, LogOut, Music } from 'lucide-react';
+import { Flame, IndentDecrease, SlidersHorizontal, Heart, FileText, ListMusic, LogOut, Music, Clock } from 'lucide-react';
 import Image from 'next/image';
 import DevTools from '@/components/dev/DevTools';
 import LibrarySidebar from '../library/LibrarySidebar';
@@ -171,6 +171,10 @@ export default function Sidebar() {
                                     <Link href="/library/playlists" onClick={() => setIsOpen(false)} className="flex items-center gap-3 p-2 px-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors group">
                                         <ListMusic className="w-4 h-4 group-hover:text-purple-400" />
                                         <span className="text-sm font-medium">My Playlists</span>
+                                    </Link>
+                                    <Link href="/library/recently-viewed" onClick={() => setIsOpen(false)} className="flex items-center gap-3 p-2 px-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors group">
+                                        <Clock className="w-4 h-4 group-hover:text-amber-400" />
+                                        <span className="text-sm font-medium">Recently Viewed</span>
                                     </Link>
                                 </div>
 

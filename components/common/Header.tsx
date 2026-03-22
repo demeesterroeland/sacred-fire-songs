@@ -15,6 +15,7 @@ export default function Header() {
         if (pathname === '/') return 'Home';
         if (pathname === '/songs') return 'Songs';
         if (pathname === '/songs/add') return 'Add Song';
+        if (pathname === '/library/recently-viewed') return 'Recently Viewed';
         if (pathname === '/library/playlists') return 'Your Library';
         if (pathname === '/library/playlists/add') return 'New Playlist';
         if (pathname?.startsWith('/library/playlists/')) return 'Playlist';

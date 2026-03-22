@@ -269,6 +269,18 @@ export async function getRecentlyViewed(userId: string, limit = 10): Promise<Son
 }
 
 /**
+ * Count total recently viewed songs for a user.
+ */
+export async function getRecentlyViewedCount(userId: string): Promise<number> {
+    const supabase = await createClient();
+    const { count } = await supabase
+        .from('song_views')
+        .select('id', { count: 'exact', head: true })
+        .eq('user_id', userId);
+    return count ?? 0;
+}
+
+/**
  * Fetch songs added since user's last visit.
  */
 export async function getNewSongsSinceLastVisit(userId: string, limit = 20): Promise<Song[]> {

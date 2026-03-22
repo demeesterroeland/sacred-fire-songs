@@ -4,9 +4,10 @@ import type { Song } from '@/lib/songUtils';
 
 interface RecentlyViewedProps {
   songs: Song[];
+  total?: number;
 }
 
-export default function RecentlyViewed({ songs }: RecentlyViewedProps) {
+export default function RecentlyViewed({ songs, total }: RecentlyViewedProps) {
   if (songs.length === 0) return null;
 
   return (
@@ -14,6 +15,14 @@ export default function RecentlyViewed({ songs }: RecentlyViewedProps) {
       <div className="flex items-center gap-2 mb-3">
         <Clock className="w-3.5 h-3.5 text-gray-500" />
         <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Recently Viewed</p>
+        {total !== undefined && total > 5 && (
+          <Link
+            href="/library/recently-viewed"
+            className="ml-auto text-[10px] font-semibold text-amber-400/70 hover:text-amber-400 transition-colors"
+          >
+            View All
+          </Link>
+        )}
       </div>
       <div className="grid grid-cols-1 gap-2">
         {songs.map((song) => (
