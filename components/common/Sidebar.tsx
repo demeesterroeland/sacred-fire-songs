@@ -85,7 +85,7 @@ export default function Sidebar() {
                         title="Close Menu"
                     >
                         <IndentDecrease className="w-6 h-6" />
-                        <span className="text-[10px] font-bold uppercase tracking-widest opacity-60 group-hover:opacity-100 transition-opacity">Close</span>
+                        <span className="sr-only">Close</span>
                     </button>
                 </div>
 
