@@ -7,11 +7,9 @@ import { useRouter } from 'next/navigation';
 interface CreateSheetProps {
     isOpen: boolean;
     onClose: () => void;
-    /** Where the sheet is rendered — affects positioning */
-    variant?: 'mobile' | 'sidebar';
 }
 
-export default function CreateSheet({ isOpen, onClose, variant = 'mobile' }: CreateSheetProps) {
+export default function CreateSheet({ isOpen, onClose }: CreateSheetProps) {
     const router = useRouter();
     const sheetRef = useRef<HTMLDivElement>(null);
 
@@ -38,14 +36,10 @@ export default function CreateSheet({ isOpen, onClose, variant = 'mobile' }: Cre
         { label: 'Create Playlist', icon: ListMusic, href: '/library/playlists/add', color: 'text-purple-400' },
     ];
 
-    const positionClass = variant === 'sidebar'
-        ? 'absolute bottom-2 left-2 right-2 z-50'
-        : 'fixed bottom-[72px] inset-x-0 z-40 px-4 pb-2 safe-area-bottom lg:hidden';
-
     return (
         <div
             ref={sheetRef}
-            className={`${positionClass} animate-in slide-in-from-bottom-4 duration-200`}
+            className="fixed bottom-[72px] inset-x-0 z-40 px-4 pb-2 safe-area-bottom animate-in slide-in-from-bottom-4 duration-200 lg:hidden"
         >
             <div className="bg-gray-900 border border-gray-700/50 rounded-2xl overflow-hidden shadow-2xl shadow-black/50">
                 {options.map((opt) => {

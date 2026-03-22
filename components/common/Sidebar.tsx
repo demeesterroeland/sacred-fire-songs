@@ -2,7 +2,7 @@
 
 import { Suspense, useState } from 'react';
 import Link from 'next/link';
-import { Flame, IndentDecrease, SlidersHorizontal, Heart, FileText, ListMusic, LogOut } from 'lucide-react';
+import { Flame, IndentDecrease, SlidersHorizontal, Heart, FileText, ListMusic, LogOut, Music } from 'lucide-react';
 import Image from 'next/image';
 import DevTools from '@/components/dev/DevTools';
 import LibrarySidebar from '../library/LibrarySidebar';
@@ -15,7 +15,6 @@ import { useSidebar } from '@/context/SidebarContext';
 import { getSiteTitle } from '@/lib/env';
 import { useRouter } from 'next/navigation';
 import QuickLogin from '@/components/dev/QuickLogin';
-import CreateSheet from './CreateSheet';
 
 export default function Sidebar() {
     const env = useEnvironment();
@@ -98,18 +97,39 @@ export default function Sidebar() {
                             if (item.label === 'Create') {
                                 const Icon = item.icon;
                                 return (
-                                    <button
-                                        key={item.label}
-                                        onClick={() => setIsCreateOpen(!isCreateOpen)}
-                                        className={`w-full flex items-center gap-3 p-2 px-3 rounded-lg transition-colors ${
-                                            isCreateOpen
-                                                ? 'text-red-400 bg-red-500/10'
-                                                : 'text-gray-400 hover:text-white hover:bg-gray-800'
-                                        }`}
-                                    >
-                                        <Icon className="w-5 h-5" />
-                                        <span className="text-sm font-medium">{item.label}</span>
-                                    </button>
+                                    <div key={item.label}>
+                                        <button
+                                            onClick={() => setIsCreateOpen(!isCreateOpen)}
+                                            className={`w-full flex items-center gap-3 p-2 px-3 rounded-lg transition-colors ${
+                                                isCreateOpen
+                                                    ? 'text-red-400 bg-red-500/10'
+                                                    : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                                            }`}
+                                        >
+                                            <Icon className="w-5 h-5" />
+                                            <span className="text-sm font-medium">{item.label}</span>
+                                        </button>
+                                        {isCreateOpen && (
+                                            <div className="ml-4 mt-1 space-y-0.5 border-l border-gray-800 pl-3">
+                                                <Link
+                                                    href="/songs/add"
+                                                    onClick={() => { setIsCreateOpen(false); setIsOpen(false); }}
+                                                    className="flex items-center gap-3 p-2 px-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors group"
+                                                >
+                                                    <Music className="w-4 h-4 group-hover:text-red-400" />
+                                                    <span className="text-sm font-medium">Add Song</span>
+                                                </Link>
+                                                <Link
+                                                    href="/library/playlists/add"
+                                                    onClick={() => { setIsCreateOpen(false); setIsOpen(false); }}
+                                                    className="flex items-center gap-3 p-2 px-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors group"
+                                                >
+                                                    <ListMusic className="w-4 h-4 group-hover:text-purple-400" />
+                                                    <span className="text-sm font-medium">Create Playlist</span>
+                                                </Link>
+                                            </div>
+                                        )}
+                                    </div>
                                 );
                             }
                             return (
@@ -199,12 +219,7 @@ export default function Sidebar() {
                 </nav>
 
                 {/* Footer */}
-                <div className="relative p-4 border-t border-gray-800/30 bg-gray-950/20">
-                    <CreateSheet
-                        isOpen={isCreateOpen}
-                        onClose={() => setIsCreateOpen(false)}
-                        variant="sidebar"
-                    />
+                <div className="p-4 border-t border-gray-800/30 bg-gray-950/20">
                     <p className="text-[9px] text-center font-mono uppercase tracking-[0.2em] opacity-20 mt-2">
                         Sacred Fire v1.0
                     </p>
