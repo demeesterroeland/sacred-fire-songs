@@ -8,13 +8,12 @@ const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 interface UseSongsFilterOptions {
   songs: Song[];
   userId?: string;
-  isAdmin?: boolean;
   favoriteIds: Set<string>;
   viewedSongIds: Set<string>;
   sortBy: string;
 }
 
-export function useSongsFilter({ songs, userId, isAdmin, favoriteIds, viewedSongIds, sortBy }: UseSongsFilterOptions) {
+export function useSongsFilter({ songs, userId, favoriteIds, viewedSongIds, sortBy }: UseSongsFilterOptions) {
   const defaultState: SongFilterState = {
     status: userId ? 'all' : 'public',
     search: '',
@@ -65,14 +64,9 @@ export function useSongsFilter({ songs, userId, isAdmin, favoriteIds, viewedSong
     if (state.mine && userId) items = items.filter(s => s.ownerId === userId);
     if (state.new) {
       const cutoff = Date.now() - THIRTY_DAYS_MS;
-      items = items.filter(s => {
-        if (viewedSongIds.has(s.id)) return false;
-        if (new Date(s.createdAt).getTime() < cutoff) return false;
-        // Public songs are always "new" for everyone
-        if (s.isPublic) return true;
-        // Admins also see unviewed drafts by other users
-        return isAdmin && !s.isPublic && s.ownerId !== userId;
-      });
+      items = items.filter(s =>
+        !viewedSongIds.has(s.id) && new Date(s.createdAt).getTime() >= cutoff
+      );
     }
     return items;
   }, [filteredItems, state.favorites, state.mine, state.new, favoriteIds, viewedSongIds, userId]);

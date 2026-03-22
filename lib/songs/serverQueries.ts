@@ -182,7 +182,7 @@ export interface LibrarySummary {
  * Fetch aggregate counts for the home page "Your Library" summary.
  * Only import from Server Components or Server Actions.
  */
-export async function getLibrarySummary(userId: string, isAdmin = false): Promise<LibrarySummary> {
+export async function getLibrarySummary(userId: string): Promise<LibrarySummary> {
     const supabase = await createClient();
 
     // Favorites count
@@ -221,28 +221,14 @@ export async function getLibrarySummary(userId: string, isAdmin = false): Promis
         .eq('user_id', userId);
     const viewedSet = new Set((viewedIds ?? []).map(v => v.song_id));
 
-    // Count unviewed public songs from last 30 days
+    // Count unviewed songs from last 30 days (RLS handles visibility)
     let newSongsCount = 0;
-    const { data: recentPublic } = await supabase
+    const { data: recentSongs } = await supabase
         .from('compositions')
         .select('id')
-        .eq('is_public', true)
         .gte('created_at', thirtyDaysAgo);
-    if (recentPublic) {
-        newSongsCount = recentPublic.filter(c => !viewedSet.has(c.id)).length;
-    }
-
-    // Admins: also count unviewed drafts by other users
-    if (isAdmin) {
-        const { data: recentDrafts } = await supabase
-            .from('compositions')
-            .select('id')
-            .eq('is_public', false)
-            .neq('owner_id', userId)
-            .gte('created_at', thirtyDaysAgo);
-        if (recentDrafts) {
-            newSongsCount += recentDrafts.filter(c => !viewedSet.has(c.id)).length;
-        }
+    if (recentSongs) {
+        newSongsCount = recentSongs.filter(c => !viewedSet.has(c.id)).length;
     }
 
     return {
@@ -337,18 +323,17 @@ export async function getUnviewedSongs(userId: string, limit = 20): Promise<Song
         .eq('user_id', userId);
     const viewedSet = new Set((viewedIds ?? []).map(v => v.song_id));
 
-    // Get recent public songs
-    const { data: recentPublic, error } = await supabase
+    // Get recent songs visible to user (RLS handles visibility)
+    const { data: recentSongs, error } = await supabase
         .from('compositions')
         .select('id')
-        .eq('is_public', true)
         .gte('created_at', thirtyDaysAgo)
         .order('created_at', { ascending: false });
 
-    if (error || !recentPublic?.length) return [];
+    if (error || !recentSongs?.length) return [];
 
     // Filter out viewed songs and apply limit
-    const unviewedIds = recentPublic
+    const unviewedIds = recentSongs
         .filter(c => !viewedSet.has(c.id))
         .slice(0, limit)
         .map(c => c.id);
