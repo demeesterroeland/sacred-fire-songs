@@ -1,4 +1,4 @@
-import { LogOut, ChevronDown, Settings, User, Heart, FileText, ListMusic, Sun, Moon, SlidersHorizontal } from 'lucide-react';
+import { LogOut, ChevronDown, Settings, User, Heart, FileText, ListMusic, Sun, Moon, SlidersHorizontal, Clock } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
@@ -138,6 +138,10 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true }: Us
               <Link href="/library/playlists" className="flex items-center gap-3 p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors group">
                 <ListMusic className="w-4 h-4 group-hover:text-purple-400" />
                 <span className="text-sm font-medium">My Playlists</span>
+              </Link>
+              <Link href="/library/recently-viewed" className="flex items-center gap-3 p-2 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors group">
+                <Clock className="w-4 h-4 group-hover:text-amber-400" />
+                <span className="text-sm font-medium">Recently Viewed</span>
               </Link>
             </div>
 
