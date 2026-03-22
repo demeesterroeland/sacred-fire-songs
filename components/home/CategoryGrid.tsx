@@ -1,5 +1,6 @@
 'use client';
 
+import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchCategoryTree } from '@/lib/taxonomyUtils';
 import { renderCategoryIcon } from '@/lib/iconUtils';
@@ -8,7 +9,8 @@ import { Loader2 } from 'lucide-react';
 
 const MOBILE_TAG_LIMIT = 4;
 
-function TagList({ tags, categorySlug }: { tags: { id: string; slug: string; emoji: string | null; name: string }[]; categorySlug: string }) {
+function TagList({ tags }: { tags: { id: string; slug: string; emoji: string | null; name: string }[] }) {
+  const [expanded, setExpanded] = useState(false);
   const overflow = tags.length - MOBILE_TAG_LIMIT;
 
   return (
@@ -18,19 +20,19 @@ function TagList({ tags, categorySlug }: { tags: { id: string; slug: string; emo
           key={tag.id}
           href={`/songs?tag=${tag.slug}`}
           className={`px-2 py-1 md:px-3 md:py-1.5 rounded-full bg-gray-800 text-gray-400 text-[10px] md:text-xs font-medium border border-gray-700 hover:bg-gray-700 hover:text-white transition-all ${
-            i >= MOBILE_TAG_LIMIT ? 'hidden md:inline-flex' : ''
+            !expanded && i >= MOBILE_TAG_LIMIT ? 'hidden md:inline-flex' : ''
           }`}
         >
           {tag.emoji} {tag.name}
         </Link>
       ))}
-      {overflow > 0 && (
-        <Link
-          href={`/songs?category=${categorySlug}`}
-          className="md:hidden px-2 py-1 rounded-full bg-gray-700/50 text-gray-300 text-[10px] font-medium border border-gray-600 hover:bg-gray-600 hover:text-white transition-all"
+      {overflow > 0 && !expanded && (
+        <button
+          onClick={() => setExpanded(true)}
+          className="md:hidden px-2 py-1 rounded-full bg-gray-700/50 text-gray-300 text-[10px] font-medium border border-gray-600 hover:bg-gray-600 hover:text-white transition-all relative z-10"
         >
           +{overflow} more
-        </Link>
+        </button>
       )}
     </div>
   );
@@ -146,7 +148,7 @@ export default function CategoryGrid() {
                 Explore songs related to {category.name.toLowerCase()}.
               </p>
 
-              <TagList tags={category.children} categorySlug={category.slug} />
+              <TagList tags={category.children} />
             </div>
           </div>
         );
