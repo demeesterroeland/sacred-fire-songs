@@ -207,11 +207,10 @@ export async function getLibrarySummary(userId: string): Promise<LibrarySummary>
         .select('id', { count: 'exact', head: true })
         .eq('owner_id', userId);
 
-    // Drafts count (my non-public songs)
+    // Drafts count (all non-public songs visible to user via RLS)
     const { count: draftsCount } = await supabase
         .from('compositions')
         .select('id', { count: 'exact', head: true })
-        .eq('owner_id', userId)
         .eq('is_public', false);
 
     // New songs since last visit
