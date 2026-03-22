@@ -12,13 +12,7 @@ export default async function Home() {
   return (
     <main className="flex-1 min-h-0 bg-gray-950 overflow-y-auto">
       <div className="p-4 md:p-8 lg:p-10 space-y-10 max-w-7xl mx-auto">
-        {/* Explore by Category */}
-        <section>
-          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">Explore by Category</p>
-          <CategoryGrid />
-        </section>
-
-        {/* Library Summary — logged-in users only */}
+        {/* Library Summary — logged-in users only, shown first */}
         {summary && (
           <section>
             <LibrarySummary
@@ -29,6 +23,12 @@ export default async function Home() {
             />
           </section>
         )}
+
+        {/* Explore by Category */}
+        <section>
+          <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">Explore by Category</p>
+          <CategoryGrid />
+        </section>
       </div>
     </main>
   );
