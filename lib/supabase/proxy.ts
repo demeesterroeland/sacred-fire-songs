@@ -43,15 +43,6 @@ export async function updateSession(request: NextRequest) {
     // This refreshes the session even if the route is public
     const { data: { user } } = await supabase.auth.getUser();
 
-    // Update last_seen_at for logged-in users (throttled to page navigations only)
-    if (user && request.nextUrl.pathname === '/') {
-        supabase
-            .from('profiles')
-            .update({ last_seen_at: new Date().toISOString() })
-            .eq('id', user.id)
-            .then(() => {});
-    }
-
     // Redirect to login if not authenticated and trying to access a protected route
     if (!user && !isPublicRoute) {
         const url = request.nextUrl.clone();
