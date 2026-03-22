@@ -3,14 +3,17 @@ import { useDeclarativeFilter } from '@/hooks/useDeclarativeFilter';
 import { songFilterConfig, type SongFilterState } from '@/lib/songs/filterConfig';
 import type { Song } from '@/lib/songUtils';
 
+const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+
 interface UseSongsFilterOptions {
   songs: Song[];
   userId?: string;
   favoriteIds: Set<string>;
+  viewedSongIds: Set<string>;
   sortBy: string;
 }
 
-export function useSongsFilter({ songs, userId, favoriteIds, sortBy }: UseSongsFilterOptions) {
+export function useSongsFilter({ songs, userId, favoriteIds, viewedSongIds, sortBy }: UseSongsFilterOptions) {
   const defaultState: SongFilterState = {
     status: userId ? 'all' : 'public',
     search: '',
@@ -20,6 +23,7 @@ export function useSongsFilter({ songs, userId, favoriteIds, sortBy }: UseSongsF
     melody: false,
     favorites: false,
     mine: false,
+    new: false,
   };
 
   const { filteredItems, facets, state, setFilter, resetFilters } = useDeclarativeFilter(
@@ -36,6 +40,7 @@ export function useSongsFilter({ songs, userId, favoriteIds, sortBy }: UseSongsF
         melody: params.get('melody') === 'true',
         favorites: params.get('favorites') === 'true',
         mine: params.get('mine') === 'true',
+        new: params.get('new') === 'true',
       }),
       serializeUrl: (state) => ({
         category: state.category || '',
@@ -46,18 +51,25 @@ export function useSongsFilter({ songs, userId, favoriteIds, sortBy }: UseSongsF
         melody: state.melody ? 'true' : '',
         favorites: state.favorites ? 'true' : '',
         mine: state.mine ? 'true' : '',
+        new: state.new ? 'true' : '',
         sort: sortBy,
       }),
     }
   );
 
-  // Apply post-filters (favorites, mine)
+  // Apply post-filters (favorites, mine, new)
   const finalFilteredItems = useMemo(() => {
     let items = filteredItems;
     if (state.favorites) items = items.filter(s => favoriteIds.has(s.id));
     if (state.mine && userId) items = items.filter(s => s.ownerId === userId);
+    if (state.new) {
+      const cutoff = Date.now() - THIRTY_DAYS_MS;
+      items = items.filter(s =>
+        !viewedSongIds.has(s.id) && new Date(s.createdAt).getTime() >= cutoff
+      );
+    }
     return items;
-  }, [filteredItems, state.favorites, state.mine, favoriteIds, userId]);
+  }, [filteredItems, state.favorites, state.mine, state.new, favoriteIds, viewedSongIds, userId]);
 
   // Sort
   const displaySongs = useMemo(() => {
@@ -79,7 +91,8 @@ export function useSongsFilter({ songs, userId, favoriteIds, sortBy }: UseSongsF
     state.chords ||
     state.melody ||
     state.favorites ||
-    state.mine
+    state.mine ||
+    state.new
   );
 
   return {

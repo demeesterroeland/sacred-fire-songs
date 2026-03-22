@@ -213,20 +213,22 @@ export async function getLibrarySummary(userId: string): Promise<LibrarySummary>
         .select('id', { count: 'exact', head: true })
         .eq('is_public', false);
 
-    // New songs since last visit
+    // New songs: public, created in last 30 days, never viewed by this user
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    const { data: viewedIds } = await supabase
+        .from('song_views')
+        .select('song_id')
+        .eq('user_id', userId);
+    const viewedSet = new Set((viewedIds ?? []).map(v => v.song_id));
+
     let newSongsCount = 0;
-    const { data: profile } = await supabase
-        .from('profiles')
-        .select('last_seen_at')
-        .eq('id', userId)
-        .maybeSingle();
-    if (profile?.last_seen_at) {
-        const { count } = await supabase
-            .from('compositions')
-            .select('id', { count: 'exact', head: true })
-            .eq('is_public', true)
-            .gt('created_at', profile.last_seen_at);
-        newSongsCount = count ?? 0;
+    const { data: recentPublic } = await supabase
+        .from('compositions')
+        .select('id')
+        .eq('is_public', true)
+        .gte('created_at', thirtyDaysAgo);
+    if (recentPublic) {
+        newSongsCount = recentPublic.filter(c => !viewedSet.has(c.id)).length;
     }
 
     return {
@@ -308,37 +310,56 @@ export async function getRecentlyViewedCount(userId: string): Promise<number> {
 }
 
 /**
- * Fetch songs added since user's last visit.
+ * Fetch public songs from the last 30 days that the user has never viewed.
  */
-export async function getNewSongsSinceLastVisit(userId: string, limit = 20): Promise<Song[]> {
+export async function getUnviewedSongs(userId: string, limit = 20): Promise<Song[]> {
     const supabase = await createClient();
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
 
-    const { data: profile } = await supabase
-        .from('profiles')
-        .select('last_seen_at')
-        .eq('id', userId)
-        .maybeSingle();
+    // Get all song IDs the user has viewed
+    const { data: viewedIds } = await supabase
+        .from('song_views')
+        .select('song_id')
+        .eq('user_id', userId);
+    const viewedSet = new Set((viewedIds ?? []).map(v => v.song_id));
 
-    if (!profile?.last_seen_at) return [];
-
-    const { data: newSongs, error } = await supabase
+    // Get recent public songs
+    const { data: recentPublic, error } = await supabase
         .from('compositions')
         .select('id')
         .eq('is_public', true)
-        .gt('created_at', profile.last_seen_at)
-        .order('created_at', { ascending: false })
-        .limit(limit);
+        .gte('created_at', thirtyDaysAgo)
+        .order('created_at', { ascending: false });
 
-    if (error || !newSongs?.length) return [];
+    if (error || !recentPublic?.length) return [];
 
-    const songIds = newSongs.map(s => s.id);
+    // Filter out viewed songs and apply limit
+    const unviewedIds = recentPublic
+        .filter(c => !viewedSet.has(c.id))
+        .slice(0, limit)
+        .map(c => c.id);
+
+    if (unviewedIds.length === 0) return [];
+
     const [songsResult, favoriteIds] = await Promise.all([
-        songsQuery(supabase, { songIds }),
+        songsQuery(supabase, { songIds: unviewedIds }),
         fetchFavoriteIds(supabase),
     ]);
 
     if (songsResult.error) return [];
     return songsResult.data.map(item => mapCompositionToSong(item, favoriteIds));
+}
+
+/**
+ * Fetch all song IDs that a user has viewed (for client-side "new" filtering).
+ */
+export async function getViewedSongIds(userId: string): Promise<string[]> {
+    const supabase = await createClient();
+    const { data } = await supabase
+        .from('song_views')
+        .select('song_id')
+        .eq('user_id', userId);
+    return (data ?? []).map(v => v.song_id);
 }
 
 /**

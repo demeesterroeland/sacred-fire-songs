@@ -5,7 +5,7 @@ import type { LucideIcon } from 'lucide-react';
 import { CreatePlaylistInput } from '@/components/playlists/CreatePlaylistInput';
 import { PlaylistCard } from '@/components/playlists/PlaylistCard';
 import { PublicPlaylistCard } from '@/components/playlists/PublicPlaylistCard';
-import { getRecentlyViewed, getRecentlyViewedCount, getNewSongsSinceLastVisit } from '@/lib/songs/serverQueries';
+import { getRecentlyViewed, getRecentlyViewedCount, getUnviewedSongs } from '@/lib/songs/serverQueries';
 import RecentlyViewed from '@/components/library/RecentlyViewed';
 import NewSinceLastVisit from '@/components/library/NewSinceLastVisit';
 
@@ -299,7 +299,7 @@ export default async function PlaylistsPage() {
     const [recentlyViewedSongs, recentlyViewedCount, newSongs] = await Promise.all([
         getRecentlyViewed(user.id, 5),
         getRecentlyViewedCount(user.id),
-        getNewSongsSinceLastVisit(user.id, 5),
+        getUnviewedSongs(user.id, 5),
     ]);
 
     return (
