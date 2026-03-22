@@ -52,7 +52,7 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
         melodyCount,
         hasActiveFilters,
         filteredCount
-    } = useSongsFilter({ songs, userId: user?.id, favoriteIds, viewedSongIds, sortBy });
+    } = useSongsFilter({ songs, userId: user?.id, isAdmin, favoriteIds, viewedSongIds, sortBy });
 
     const handleDelete = async () => {
         if (!deleteTarget) return;

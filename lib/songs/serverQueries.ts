@@ -182,7 +182,7 @@ export interface LibrarySummary {
  * Fetch aggregate counts for the home page "Your Library" summary.
  * Only import from Server Components or Server Actions.
  */
-export async function getLibrarySummary(userId: string): Promise<LibrarySummary> {
+export async function getLibrarySummary(userId: string, isAdmin = false): Promise<LibrarySummary> {
     const supabase = await createClient();
 
     // Favorites count
@@ -221,6 +221,7 @@ export async function getLibrarySummary(userId: string): Promise<LibrarySummary>
         .eq('user_id', userId);
     const viewedSet = new Set((viewedIds ?? []).map(v => v.song_id));
 
+    // Count unviewed public songs from last 30 days
     let newSongsCount = 0;
     const { data: recentPublic } = await supabase
         .from('compositions')
@@ -229,6 +230,19 @@ export async function getLibrarySummary(userId: string): Promise<LibrarySummary>
         .gte('created_at', thirtyDaysAgo);
     if (recentPublic) {
         newSongsCount = recentPublic.filter(c => !viewedSet.has(c.id)).length;
+    }
+
+    // Admins: also count unviewed drafts by other users
+    if (isAdmin) {
+        const { data: recentDrafts } = await supabase
+            .from('compositions')
+            .select('id')
+            .eq('is_public', false)
+            .neq('owner_id', userId)
+            .gte('created_at', thirtyDaysAgo);
+        if (recentDrafts) {
+            newSongsCount += recentDrafts.filter(c => !viewedSet.has(c.id)).length;
+        }
     }
 
     return {
