@@ -65,7 +65,7 @@ export function useSongsFilter({ songs, userId, favoriteIds, viewedSongIds, sort
     if (state.new) {
       const cutoff = Date.now() - THIRTY_DAYS_MS;
       items = items.filter(s =>
-        !viewedSongIds.has(s.id) && new Date(s.createdAt).getTime() >= cutoff
+        s.isPublic && !viewedSongIds.has(s.id) && new Date(s.createdAt).getTime() >= cutoff
       );
     }
     return items;
