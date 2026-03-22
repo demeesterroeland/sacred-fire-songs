@@ -269,6 +269,33 @@ export async function getRecentlyViewed(userId: string, limit = 10): Promise<Son
 }
 
 /**
+ * Lightweight fetch of recently viewed songs — only id, title, author.
+ * Skips category joins and favorites lookup for faster page loads.
+ */
+export async function getRecentlyViewedLight(userId: string, limit = 50): Promise<Pick<Song, 'id' | 'title' | 'author'>[]> {
+    const supabase = await createClient();
+
+    const { data, error } = await supabase
+        .from('song_views')
+        .select('compositions(id, title, original_author)')
+        .eq('user_id', userId)
+        .order('viewed_at', { ascending: false })
+        .limit(limit);
+
+    if (error || !data) return [];
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return (data as any[])
+        .map(row => row.compositions)
+        .filter(Boolean)
+        .map(c => ({
+            id: c.id,
+            title: c.title,
+            author: c.original_author || 'Unknown',
+        }));
+}
+
+/**
  * Count total recently viewed songs for a user.
  */
 export async function getRecentlyViewedCount(userId: string): Promise<number> {

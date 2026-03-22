@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { Clock, Music } from 'lucide-react';
-import { getRecentlyViewed } from '@/lib/songs/serverQueries';
+import { getRecentlyViewedLight } from '@/lib/songs/serverQueries';
 
 export default async function RecentlyViewedPage() {
     const supabase = await createClient();
@@ -10,7 +10,7 @@ export default async function RecentlyViewedPage() {
 
     if (!user) redirect('/auth/login?next=/library/recently-viewed');
 
-    const songs = await getRecentlyViewed(user.id, 50);
+    const songs = await getRecentlyViewedLight(user.id, 50);
 
     return (
         <div>
