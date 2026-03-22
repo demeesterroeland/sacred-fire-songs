@@ -6,6 +6,36 @@ import { renderCategoryIcon } from '@/lib/iconUtils';
 import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
 
+const MOBILE_TAG_LIMIT = 4;
+
+function TagList({ tags, categorySlug }: { tags: { id: string; slug: string; emoji: string | null; name: string }[]; categorySlug: string }) {
+  const overflow = tags.length - MOBILE_TAG_LIMIT;
+
+  return (
+    <div className="flex flex-wrap gap-1.5 md:gap-2 relative z-10 mt-auto">
+      {tags.map((tag, i) => (
+        <Link
+          key={tag.id}
+          href={`/songs?tag=${tag.slug}`}
+          className={`px-2 py-1 md:px-3 md:py-1.5 rounded-full bg-gray-800 text-gray-400 text-[10px] md:text-xs font-medium border border-gray-700 hover:bg-gray-700 hover:text-white transition-all ${
+            i >= MOBILE_TAG_LIMIT ? 'hidden md:inline-flex' : ''
+          }`}
+        >
+          {tag.emoji} {tag.name}
+        </Link>
+      ))}
+      {overflow > 0 && (
+        <Link
+          href={`/songs?category=${categorySlug}`}
+          className="md:hidden px-2 py-1 rounded-full bg-gray-700/50 text-gray-300 text-[10px] font-medium border border-gray-600 hover:bg-gray-600 hover:text-white transition-all"
+        >
+          +{overflow} more
+        </Link>
+      )}
+    </div>
+  );
+}
+
 const getColorClasses = (slug: string) => {
   switch (slug) {
     case 'the-elements':
@@ -116,17 +146,7 @@ export default function CategoryGrid() {
                 Explore songs related to {category.name.toLowerCase()}.
               </p>
 
-              <div className="flex flex-wrap gap-1.5 md:gap-2 relative z-10 mt-auto">
-                {category.children.map((tag) => (
-                  <Link
-                    key={tag.id}
-                    href={`/songs?tag=${tag.slug}`}
-                    className="px-2 py-1 md:px-3 md:py-1.5 rounded-full bg-gray-800 text-gray-400 text-[10px] md:text-xs font-medium border border-gray-700 hover:bg-gray-700 hover:text-white transition-all"
-                  >
-                    {tag.emoji} {tag.name}
-                  </Link>
-                ))}
-              </div>
+              <TagList tags={category.children} categorySlug={category.slug} />
             </div>
           </div>
         );
