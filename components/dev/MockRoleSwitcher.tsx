@@ -11,7 +11,7 @@ export default function MockRoleSwitcher() {
         Mock UI Role
       </h3>
       <select
-        className="w-full bg-gray-800 text-xs text-gray-300 rounded px-2 py-1.5 border border-gray-700 focus:outline-none focus:border-red-500 transition-colors"
+        className="w-full bg-gray-200 dark:bg-gray-800 text-xs text-gray-700 dark:text-gray-300 rounded px-2 py-1.5 border border-gray-300 dark:border-gray-700 focus:outline-none focus:border-red-500 transition-colors"
         value={mockRole || ''}
         onChange={(e) => switchMockRole(e.target.value || null)}
       >

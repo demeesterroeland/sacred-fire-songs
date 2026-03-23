@@ -27,7 +27,7 @@ export default function QuickLogin() {
             key={u.email}
             disabled={loading}
             onClick={async () => { await quickLogin(u.email); await queryClient.invalidateQueries(); router.refresh(); }}
-            className="flex items-center gap-2 px-2 py-1.5 text-[11px] text-gray-400 hover:text-white hover:bg-gray-800 rounded transition-all group border border-transparent hover:border-gray-700"
+            className="flex items-center gap-2 px-2 py-1.5 text-[11px] text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-800 rounded transition-all group border border-transparent hover:border-gray-300 dark:hover:border-gray-700"
           >
             <u.icon className={`w-3 h-3 ${u.color}`} />
             <span className="flex-1 text-left">{u.label}</span>

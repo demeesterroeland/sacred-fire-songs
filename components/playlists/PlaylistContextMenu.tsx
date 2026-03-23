@@ -63,7 +63,7 @@ export function PlaylistContextMenu({ playlistId, playlistTitle, isOwner, isPubl
                 <DropdownMenuTrigger asChild>
                     <button
                         onClick={e => e.preventDefault()}
-                        className="p-1.5 rounded-lg text-gray-600 hover:text-gray-300 hover:bg-gray-700/60 transition-colors"
+                        className="p-1.5 rounded-lg text-gray-600 hover:text-gray-800 dark:hover:text-gray-300 hover:bg-gray-200/60 dark:hover:bg-gray-700/60 transition-colors"
                         aria-label="Playlist options"
                     >
                         <MoreHorizontal className="w-4 h-4" />
@@ -71,7 +71,7 @@ export function PlaylistContextMenu({ playlistId, playlistTitle, isOwner, isPubl
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                     align="end"
-                    className="w-52 bg-gray-900 border-gray-700"
+                    className="w-52 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700"
                     onCloseAutoFocus={e => {
                         if (preventFocusReturn.current) {
                             e.preventDefault();
@@ -83,12 +83,12 @@ export function PlaylistContextMenu({ playlistId, playlistTitle, isOwner, isPubl
                         <>
                             <DropdownMenuItem
                                 onSelect={() => { preventFocusReturn.current = true; onRenameStart(); }}
-                                className="gap-2 text-gray-200 focus:bg-gray-800 cursor-pointer"
+                                className="gap-2 text-gray-700 dark:text-gray-200 focus:bg-gray-100 dark:focus:bg-gray-200 dark:bg-gray-800 cursor-pointer"
                             >
                                 <Pencil className="w-4 h-4" />
                                 Rename
                             </DropdownMenuItem>
-                            <DropdownMenuSeparator className="bg-gray-800" />
+                            <DropdownMenuSeparator className="bg-gray-200 dark:bg-gray-800" />
                         </>
                     )}
 
@@ -104,8 +104,8 @@ export function PlaylistContextMenu({ playlistId, playlistTitle, isOwner, isPubl
                             title={isLinkAvailable ? undefined : 'Make this playlist public to share the link'}
                             className={`gap-2 cursor-pointer ${
                                 isLinkAvailable
-                                    ? 'text-gray-200 focus:bg-gray-800'
-                                    : 'text-gray-500 focus:bg-gray-800/50'
+                                    ? 'text-gray-700 dark:text-gray-200 focus:bg-gray-100 dark:focus:bg-gray-200 dark:bg-gray-800'
+                                    : 'text-gray-500 focus:bg-gray-200 dark:bg-gray-800/50'
                             }`}
                         >
                             <Link2 className="w-4 h-4" />
@@ -128,7 +128,7 @@ export function PlaylistContextMenu({ playlistId, playlistTitle, isOwner, isPubl
                     {isOwner && isPublic !== undefined && (
                         <DropdownMenuItem
                             onSelect={handleToggleVisibility}
-                            className="gap-2 text-gray-200 focus:bg-gray-800 cursor-pointer"
+                            className="gap-2 text-gray-700 dark:text-gray-200 focus:bg-gray-100 dark:focus:bg-gray-200 dark:bg-gray-800 cursor-pointer"
                         >
                             {isPublic
                                 ? <Lock className="w-4 h-4" />
@@ -140,7 +140,7 @@ export function PlaylistContextMenu({ playlistId, playlistTitle, isOwner, isPubl
 
                     {isOwner && (
                         <>
-                            <DropdownMenuSeparator className="bg-gray-800" />
+                            <DropdownMenuSeparator className="bg-gray-200 dark:bg-gray-800" />
                             <DropdownMenuItem
                                 onSelect={() => setShowDeleteModal(true)}
                                 className="gap-2 text-red-400 focus:bg-red-950/40 focus:text-red-300 cursor-pointer"

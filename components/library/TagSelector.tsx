@@ -84,7 +84,7 @@ export default function TagSelector({
   return (
     <div className="flex items-center gap-4 relative w-full" ref={wrapperRef}>
       <div
-        className="flex-1 flex flex-wrap items-center gap-2 bg-gray-900/40 border border-gray-800/60 rounded-xl py-1.5 px-4 focus-within:bg-gray-900/60 transition-all cursor-text ring-1 ring-white/5 shadow-inner min-h-[42px]"
+        className="flex-1 flex flex-wrap items-center gap-2 bg-white/60 dark:bg-gray-900/40 border border-gray-200/60 dark:border-gray-800/60 rounded-xl py-1.5 px-4 focus-within:bg-white/80 dark:focus-within:bg-gray-900/60 transition-all cursor-text ring-1 ring-gray-900/5 dark:ring-white/5 shadow-inner min-h-[42px]"
         onClick={() => inputRef.current?.focus()}
       >
         {/* Category Pill */}
@@ -96,7 +96,7 @@ export default function TagSelector({
             <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border transition-all ${style.inactive} animate-in zoom-in-95 duration-200`}>
               <span className="whitespace-nowrap">CATEGORY: {catOption?.name || category}</span>
               <button
-                className="hover:text-white transition-colors"
+                className="hover:text-gray-900 dark:hover:text-white transition-colors"
                 onClick={(e) => { e.stopPropagation(); removeCategory(); }}
               >
                 <X className="w-2.5 h-2.5" />
@@ -115,7 +115,7 @@ export default function TagSelector({
             <div key={tagSlug} className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border transition-all ${style.inactive} animate-in zoom-in-95 duration-200`}>
               <span className="whitespace-nowrap">{tagOption?.name || tagSlug}</span>
               <button
-                className="hover:text-white transition-colors"
+                className="hover:text-gray-900 dark:hover:text-white transition-colors"
                 onClick={(e) => { e.stopPropagation(); removeTag(tagSlug); }}
               >
                 <X className="w-2.5 h-2.5" />
@@ -128,7 +128,7 @@ export default function TagSelector({
         <input
           ref={inputRef}
           type="text"
-          className="flex-1 min-w-[120px] bg-transparent border-none outline-none text-sm text-white placeholder:text-gray-600"
+          className="flex-1 min-w-[120px] bg-transparent border-none outline-none text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-600"
           placeholder={category || tags.length > 0 ? "" : "Add category or tags..."}
           value={inputValue}
           onChange={(e) => {
@@ -158,7 +158,7 @@ export default function TagSelector({
         {isOpen && filteredOptions.length > 0 && (
           <div
             ref={dropdownRef}
-            className="absolute top-full left-0 right-0 mt-2 bg-gray-900 border border-gray-800 rounded-xl shadow-2xl z-50 overflow-hidden max-h-[250px] overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200"
+            className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-2xl z-50 overflow-hidden max-h-[250px] overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200"
           >
             <div className="p-2">
               {filteredOptions.map(option => {
@@ -166,13 +166,13 @@ export default function TagSelector({
                 return (
                   <button
                     key={option.slug}
-                    className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-800 flex items-center justify-between group transition-colors"
+                    className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 flex items-center justify-between group transition-colors"
                     onClick={() => handleSelect(option)}
                   >
                     <div className="flex items-center gap-3">
                       <div className={`w-2 h-2 rounded-full bg-${color}-500 shadow-[0_0_8px_rgba(0,0,0,0.4)]`} />
                       <div className="flex flex-col">
-                        <span className="text-sm font-medium text-gray-200 group-hover:text-white">
+                        <span className="text-sm font-medium text-gray-800 dark:text-gray-200 group-hover:text-gray-900 dark:group-hover:text-white">
                           {option.name}
                         </span>
                         <span className="text-[10px] text-gray-500 uppercase tracking-widest">
@@ -180,7 +180,7 @@ export default function TagSelector({
                         </span>
                       </div>
                     </div>
-                    <ChevronDown className="w-4 h-4 text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity -rotate-90" />
+                    <ChevronDown className="w-4 h-4 text-gray-300 dark:text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity -rotate-90" />
                   </button>
                 );
               })}

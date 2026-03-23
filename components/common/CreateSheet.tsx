@@ -42,7 +42,7 @@ export default function CreateSheet({ isOpen, onClose }: CreateSheetProps) {
             ref={sheetRef}
             className="fixed bottom-[72px] inset-x-0 z-40 px-4 pb-2 safe-area-bottom animate-in slide-in-from-bottom-4 duration-200 lg:hidden"
         >
-            <div className="bg-gray-900 border border-gray-700/50 rounded-2xl overflow-hidden shadow-2xl shadow-black/50">
+            <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-700/50 rounded-2xl overflow-hidden shadow-2xl shadow-black/20 dark:shadow-black/50">
                 {options.map((opt) => {
                     const Icon = opt.icon;
                     return (
@@ -52,10 +52,10 @@ export default function CreateSheet({ isOpen, onClose }: CreateSheetProps) {
                                 onClose();
                                 router.push(opt.href);
                             }}
-                            className="w-full flex items-center gap-4 px-5 py-4 hover:bg-gray-800/50 transition-colors active:scale-[0.98] border-b border-gray-800/30 last:border-b-0"
+                            className="w-full flex items-center gap-4 px-5 py-4 hover:bg-gray-100/50 dark:hover:bg-gray-800/50 transition-colors active:scale-[0.98] border-b border-gray-200/30 dark:border-gray-800/30 last:border-b-0"
                         >
                             <Icon className={`w-5 h-5 ${opt.color}`} />
-                            <span className="text-sm font-semibold text-white">{opt.label}</span>
+                            <span className="text-sm font-semibold text-gray-900 dark:text-white">{opt.label}</span>
                         </button>
                     );
                 })}

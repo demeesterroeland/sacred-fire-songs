@@ -19,7 +19,7 @@ export default function AccessDenied() {
     });
 
     return (
-        <div className="min-h-screen w-full flex items-center justify-center p-4 relative overflow-hidden bg-[radial-gradient(circle_at_center,_#111827_0%,_#030712_100%)]">
+        <div className="min-h-screen w-full flex items-center justify-center p-4 relative overflow-hidden bg-[radial-gradient(circle_at_center,_#f3f4f6_0%,_#e5e7eb_100%)] dark:bg-[radial-gradient(circle_at_center,_#111827_0%,_#030712_100%)]">
 
             {/* Ambient glowing embers background */}
             <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
@@ -45,7 +45,7 @@ export default function AccessDenied() {
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-24 opacity-50">
                     <div className="flex items-center gap-2">
                         <Flame className="w-4 h-4 text-red-500" />
-                        <span className="text-xs uppercase tracking-[0.2em] text-gray-400 font-bold">Sacred Fire Songs</span>
+                        <span className="text-xs uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400 font-bold">Sacred Fire Songs</span>
                     </div>
                 </div>
 
@@ -76,7 +76,7 @@ export default function AccessDenied() {
                 </div>
 
                 {/* Text Content */}
-                <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-white to-gray-400 mb-4">
+                <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-gray-900 to-gray-500 dark:from-white dark:to-gray-400 mb-4">
                     This Medicine is <br /> Not Yours to Edit
                 </h1>
 
@@ -85,7 +85,7 @@ export default function AccessDenied() {
                 </p>
 
                 {/* Action Button */}
-                <Link href="/" className="group relative inline-flex items-center justify-center px-8 py-3.5 font-bold text-white transition-all duration-200 bg-gradient-to-r from-red-700 to-orange-600 rounded-xl hover:from-red-600 hover:to-orange-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600 focus:ring-offset-gray-900 overflow-hidden">
+                <Link href="/" className="group relative inline-flex items-center justify-center px-8 py-3.5 font-bold text-white transition-all duration-200 bg-gradient-to-r from-red-700 to-orange-600 rounded-xl hover:from-red-600 hover:to-orange-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-600 focus:ring-offset-gray-100 dark:focus:ring-offset-gray-900 overflow-hidden">
                     {/* Button inner glow/shine */}
                     <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-[100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
 

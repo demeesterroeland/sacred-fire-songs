@@ -35,8 +35,8 @@ export const NavLink = ({
       href={href}
       onClick={onClick}
       className={`flex items-center gap-3 transition-colors ${isMobile
-        ? `px-4 py-3 rounded-xl ${active ? 'bg-gray-800 text-white font-bold' : 'text-gray-400 hover:text-white hover:bg-gray-800/50'}`
-        : `px-3 py-2 rounded-lg ${active ? 'bg-gray-800 text-white font-medium' : 'text-gray-400 hover:text-white hover:bg-gray-800/50'}`
+        ? `px-4 py-3 rounded-xl ${active ? 'bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-white font-bold' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200/50 dark:hover:bg-gray-800/50'}`
+        : `px-3 py-2 rounded-lg ${active ? 'bg-gray-200 dark:bg-gray-800 text-gray-900 dark:text-white font-medium' : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200/50 dark:hover:bg-gray-800/50'}`
         }`}
     >
       <Icon className={`w-5 h-5 ${active ? 'text-red-500' : ''}`} />

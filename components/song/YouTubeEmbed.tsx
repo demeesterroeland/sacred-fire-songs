@@ -6,9 +6,9 @@ interface YouTubeEmbedProps {
 
 export default function YouTubeEmbed({ videoId }: YouTubeEmbedProps) {
     return (
-        <div className="mt-8 border-t border-gray-800 pt-6">
+        <div className="mt-8 border-t border-gray-200 dark:border-gray-800 pt-6">
             <span className="text-xs font-bold text-gray-500 uppercase tracking-widest mb-3 block">Listen on YouTube</span>
-            <div className="w-full aspect-video bg-black rounded-xl overflow-hidden relative border border-gray-700 shadow-2xl">
+            <div className="w-full aspect-video bg-black rounded-xl overflow-hidden relative border border-gray-300 dark:border-gray-700 shadow-2xl">
                 <iframe
                     width="100%"
                     height="100%"

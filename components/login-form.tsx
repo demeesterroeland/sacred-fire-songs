@@ -86,12 +86,12 @@ function LoginFormContent({
   };
 
   return (
-    <div className={cn("relative w-full max-w-[420px] bg-[#1c222d] md:border md:border-[#2d3545] md:rounded-3xl p-6 md:p-8 md:shadow-2xl transition-all duration-300", className)} {...props}>
+    <div className={cn("relative w-full max-w-[420px] bg-white dark:bg-[#1c222d] md:border md:border-gray-200 dark:md:border-[#2d3545] md:rounded-3xl p-6 md:p-8 md:shadow-2xl transition-all duration-300", className)} {...props}>
       {/* Close Button */}
       <Button
         variant="ghost"
         size="icon"
-        className="absolute right-4 top-4 md:right-6 md:top-6 text-[#5a657a] hover:text-white transition-colors h-10 w-10 p-0"
+        className="absolute right-4 top-4 md:right-6 md:top-6 text-[#5a657a] hover:text-gray-900 dark:hover:text-white transition-colors h-10 w-10 p-0"
         onClick={() => router.push('/')}
       >
         <X className="w-6 h-6" />
@@ -103,7 +103,7 @@ function LoginFormContent({
           <Flame className="text-white w-6 h-6 md:w-10 md:h-10 fill-current" />
         </div>
         <div className="text-left md:text-center">
-          <h1 className="text-white text-xl md:text-3xl font-bold md:mb-2 leading-tight">Welcome back</h1>
+          <h1 className="text-gray-900 dark:text-white text-xl md:text-3xl font-bold md:mb-2 leading-tight">Welcome back</h1>
           <p className="text-[#8e99aa] text-xs md:text-sm">
             {mode === 'magic-link'
               ? "Enter your email to receive a magic link or sign in with your password."
@@ -121,7 +121,7 @@ function LoginFormContent({
       {/* Login Form */}
       <form onSubmit={mode === 'magic-link' ? handleMagicLink : handlePasswordLogin} className="space-y-4 md:space-y-6">
         <div className="space-y-2">
-          <Label className="text-xs md:text-sm font-semibold text-white ml-1 tracking-wide uppercase opacity-70">Email address</Label>
+          <Label className="text-xs md:text-sm font-semibold text-gray-900 dark:text-white ml-1 tracking-wide uppercase opacity-70">Email address</Label>
           <div className="relative group">
             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5a657a] group-focus-within:text-[#d9481e] transition-colors pointer-events-none">
               <Mail className="w-5 h-5" />
@@ -133,14 +133,14 @@ function LoginFormContent({
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-transparent border-[#2d3545] rounded-xl py-3.5 md:py-4 pl-12 pr-4 text-white placeholder-[#5a657a] focus:outline-none focus:border-[#d9481e] transition-all text-[14px] md:text-[15px] h-auto"
+              className="w-full bg-transparent border-gray-200 dark:border-[#2d3545] rounded-xl py-3.5 md:py-4 pl-12 pr-4 text-gray-900 dark:text-white placeholder-[#5a657a] focus:outline-none focus:border-[#d9481e] transition-all text-[14px] md:text-[15px] h-auto"
             />
           </div>
         </div>
 
         {mode === 'password' && (
           <div className="space-y-2">
-            <Label className="text-xs md:text-sm font-semibold text-white ml-1 tracking-wide uppercase opacity-70">Password</Label>
+            <Label className="text-xs md:text-sm font-semibold text-gray-900 dark:text-white ml-1 tracking-wide uppercase opacity-70">Password</Label>
             <div className="relative group">
               <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5a657a] group-focus-within:text-[#d9481e] transition-colors pointer-events-none">
                 <Lock className="w-5 h-5" />
@@ -152,11 +152,11 @@ function LoginFormContent({
                 placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-transparent border-[#2d3545] rounded-xl py-3.5 md:py-4 pl-12 pr-20 text-white placeholder-[#5a657a] focus:outline-none focus:border-[#d9481e] transition-all text-[14px] md:text-[15px] h-auto"
+                className="w-full bg-transparent border-gray-200 dark:border-[#2d3545] rounded-xl py-3.5 md:py-4 pl-12 pr-20 text-gray-900 dark:text-white placeholder-[#5a657a] focus:outline-none focus:border-[#d9481e] transition-all text-[14px] md:text-[15px] h-auto"
               />
               <Link
                 href={`/auth/forgot-password${email ? `?email=${encodeURIComponent(email)}` : ''}`}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-[#8e99aa] hover:text-[#d9481e] text-xs font-medium transition-colors border-l border-[#2d3545] pl-4 h-5 flex items-center"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-[#8e99aa] hover:text-[#d9481e] text-xs font-medium transition-colors border-l border-gray-200 dark:border-[#2d3545] pl-4 h-5 flex items-center"
               >
                 Forgot
               </Link>
@@ -179,7 +179,7 @@ function LoginFormContent({
       </form>
 
       {/* Divider */}
-      <div className="flex items-center my-6 md:my-8 text-[#2d3545]">
+      <div className="flex items-center my-6 md:my-8 text-gray-200 dark:text-[#2d3545]">
         <div className="flex-1 border-t border-current"></div>
         <span className="px-4 text-[#8e99aa] text-[10px] md:text-xs uppercase tracking-widest font-semibold">Or</span>
         <div className="flex-1 border-t border-current"></div>
@@ -190,7 +190,7 @@ function LoginFormContent({
         <Button
           variant="outline"
           onClick={() => setMode(mode === 'magic-link' ? 'password' : 'magic-link')}
-          className="w-full h-auto bg-transparent border-[#2d3545] hover:bg-white/5 hover:text-white active:scale-[0.99] transition-all py-3.5 md:py-4 rounded-xl flex items-center justify-center gap-3 text-white font-semibold text-[14px]"
+          className="w-full h-auto bg-transparent border-gray-200 dark:border-[#2d3545] hover:bg-black/5 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white active:scale-[0.99] transition-all py-3.5 md:py-4 rounded-xl flex items-center justify-center gap-3 text-gray-900 dark:text-white font-semibold text-[14px]"
         >
           {mode === 'magic-link' ? (
             <>
@@ -210,18 +210,18 @@ function LoginFormContent({
       <div className="mt-8 text-center md:text-left">
         <p className="text-[#8e99aa] text-[12px] leading-relaxed">
           By signing in, you confirm that you agree to our{" "}
-          <Link href="#" className="text-white font-bold hover:underline">
+          <Link href="#" className="text-gray-900 dark:text-white font-bold hover:underline">
             Terms Of Service
           </Link>{" "}
           and have read our{" "}
-          <Link href="#" className="text-white font-bold hover:underline">
+          <Link href="#" className="text-gray-900 dark:text-white font-bold hover:underline">
             Privacy Policy
           </Link>
         </p>
       </div>
 
       {/* Toggle View Link */}
-      <div className="mt-8 text-center pb-4 md:pb-0 border-t border-[#2d3545] pt-6">
+      <div className="mt-8 text-center pb-4 md:pb-0 border-t border-gray-200 dark:border-[#2d3545] pt-6">
         <p className="text-[#a0aec0] text-sm">
           Don&apos;t have an account?
           <Link

@@ -89,10 +89,10 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
     }, [filteredCount, songs.length, hasActiveFilters, setHeaderCount]);
 
     return (
-        <main className="flex-1 min-h-0 bg-gray-950">
+        <main className="flex-1 min-h-0 bg-gray-50 dark:bg-gray-950">
             <div className="p-4 md:p-8 space-y-3 md:space-y-6 max-w-7xl mx-auto">
                 {/* Sticky Header */}
-                <div className="sticky top-[72px] z-20 bg-gray-950/95 backdrop-blur-md border-b border-gray-800/50 px-4 pt-2 pb-0 -mx-4 md:-mx-8 md:pt-2 md:pb-6">
+                <div className="sticky top-[72px] z-20 bg-gray-50/95 dark:bg-gray-950/95 backdrop-blur-md border-b border-gray-200/50 dark:border-gray-800/50 px-4 pt-2 pb-0 -mx-4 md:-mx-8 md:pt-2 md:pb-6">
                     <div className="max-w-7xl mx-auto space-y-4 md:space-y-6">
 
                         {/* Row 1: Search + Filter Toggle (Mobile) */}
@@ -107,14 +107,14 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
                                     onClick={() => setFiltersOpen(!filtersOpen)}
                                     className={`md:hidden flex-shrink-0 relative p-2.5 rounded-xl border transition-all ${filtersOpen
                                         ? 'bg-red-500/10 border-red-500/40 text-red-400'
-                                        : 'bg-gray-900/80 border-gray-800 text-gray-500'
+                                        : 'bg-gray-100/80 dark:bg-gray-900/80 border-gray-300 dark:border-gray-800 text-gray-500'
                                         }`}
                                     aria-label="Toggle filters"
                                     aria-expanded={filtersOpen}
                                 >
                                     <SlidersHorizontal className="w-5 h-5" />
                                     {hasActiveFilters && !filtersOpen && (
-                                        <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-red-500 ring-2 ring-gray-950" />
+                                        <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-red-500 ring-2 ring-gray-50 dark:ring-gray-950" />
                                     )}
                                 </button>
                             </div>
@@ -160,7 +160,7 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
                                             <select
                                                 value={sortBy}
                                                 onChange={(e) => setSortBy(e.target.value as SortByType)}
-                                                className="bg-gray-900 border border-gray-800 rounded-lg px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-gray-300 outline-none focus:border-gray-700 appearance-none pr-8 cursor-pointer"
+                                                className="bg-gray-100 dark:bg-gray-900 border border-gray-300 dark:border-gray-800 rounded-lg px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 outline-none focus:border-gray-400 dark:focus:border-gray-700 appearance-none pr-8 cursor-pointer"
                                             >
                                                 <option value="title">Title (A-Z)</option>
                                                 <option value="author">Author (A-Z)</option>
@@ -173,12 +173,12 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
                                     {/* Visibility Tabs */}
                                     {user && (
                                         <div className="flex items-center gap-2">
-                                            <div className="bg-gray-900/80 p-1 rounded-xl border border-gray-800 inline-flex shadow-inner">
+                                            <div className="bg-gray-200/80 dark:bg-gray-900/80 p-1 rounded-xl border border-gray-300 dark:border-gray-800 inline-flex shadow-inner">
                                                 {(['all', 'public', 'draft'] as const).map((statusOption) => (
                                                     <button
                                                         key={statusOption}
                                                         onClick={() => setFilter('status', statusOption)}
-                                                        className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all capitalize ${state.status === statusOption ? 'bg-gray-800 text-white shadow-sm ring-1 ring-white/5' : 'text-gray-500 hover:text-gray-300'}`}
+                                                        className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all capitalize ${state.status === statusOption ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm ring-1 ring-gray-200 dark:ring-white/5' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}
                                                     >
                                                         {statusOption}
                                                     </button>
@@ -188,7 +188,7 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
                                                 onClick={() => setFilter('favorites', !state.favorites)}
                                                 className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl border transition-all ${state.favorites
                                                     ? 'bg-amber-500/15 border-amber-500/40 text-amber-400 shadow-sm'
-                                                    : 'bg-gray-900/80 border-gray-800 text-gray-500 hover:text-amber-400/70 hover:border-amber-500/30'
+                                                    : 'bg-gray-100/80 dark:bg-gray-900/80 border-gray-300 dark:border-gray-800 text-gray-500 hover:text-amber-400/70 hover:border-amber-500/30'
                                                     }`}
                                             >
                                                 <Heart className={`w-3 h-3 ${state.favorites ? 'fill-amber-400' : ''}`} strokeWidth={1.5} />
@@ -198,7 +198,7 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
                                                 onClick={() => setFilter('mine', !state.mine)}
                                                 className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl border transition-all ${state.mine
                                                     ? 'bg-violet-500/15 border-violet-500/40 text-violet-400 shadow-sm'
-                                                    : 'bg-gray-900/80 border-gray-800 text-gray-500 hover:text-violet-400/70 hover:border-violet-500/30'
+                                                    : 'bg-gray-100/80 dark:bg-gray-900/80 border-gray-300 dark:border-gray-800 text-gray-500 hover:text-violet-400/70 hover:border-violet-500/30'
                                                     }`}
                                             >
                                                 <Music className="w-3 h-3" strokeWidth={1.5} />
@@ -217,14 +217,14 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
                                             disabled={!state.chords && chordsCount === 0}
                                             className={`flex items-center gap-2 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all border ${state.chords
                                                 ? 'border-amber-500/50 bg-amber-500/10 text-amber-500 shadow-sm shadow-amber-900/20'
-                                                : 'border-gray-800 bg-gray-900/50 text-gray-500 hover:text-gray-300 hover:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed'
+                                                : 'border-gray-300 dark:border-gray-800 bg-gray-100/50 dark:bg-gray-900/50 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-400 dark:hover:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed'
                                                 }`}
                                         >
                                             <Guitar className="w-3.5 h-3.5" />
                                             Chords
                                             {/* Count Badge */}
                                             {!state.chords && chordsCount > 0 && (
-                                                <span className="ml-1 px-1.5 py-0.5 rounded-full bg-gray-800 text-gray-400 text-[9px]">{chordsCount}</span>
+                                                <span className="ml-1 px-1.5 py-0.5 rounded-full bg-gray-200 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-[9px]">{chordsCount}</span>
                                             )}
                                         </button>
 
@@ -234,14 +234,14 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
                                             disabled={!state.melody && melodyCount === 0}
                                             className={`flex items-center gap-2 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all border ${state.melody
                                                 ? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-500 shadow-sm shadow-emerald-900/20'
-                                                : 'border-gray-800 bg-gray-900/50 text-gray-500 hover:text-gray-300 hover:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed'
+                                                : 'border-gray-300 dark:border-gray-800 bg-gray-100/50 dark:bg-gray-900/50 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-400 dark:hover:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed'
                                                 }`}
                                         >
                                             <Music className="w-3.5 h-3.5" />
                                             Melody
                                             {/* Count Badge */}
                                             {!state.melody && melodyCount > 0 && (
-                                                <span className="ml-1 px-1.5 py-0.5 rounded-full bg-gray-800 text-gray-400 text-[9px]">{melodyCount}</span>
+                                                <span className="ml-1 px-1.5 py-0.5 rounded-full bg-gray-200 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-[9px]">{melodyCount}</span>
                                             )}
                                         </button>
                                     </div>
@@ -276,7 +276,7 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
                                                 e.preventDefault();
                                                 setDeleteTarget({ id: song.id, title: song.title });
                                             }}
-                                            className="absolute top-2 right-2 z-10 p-1.5 rounded-lg bg-gray-900/80 border border-gray-700 text-gray-500 opacity-0 group-hover/card:opacity-100 hover:text-red-400 hover:border-red-500/50 hover:bg-red-500/10 transition-all duration-200"
+                                            className="absolute top-2 right-2 z-10 p-1.5 rounded-lg bg-white/80 dark:bg-gray-900/80 border border-gray-300 dark:border-gray-700 text-gray-500 opacity-0 group-hover/card:opacity-100 hover:text-red-400 hover:border-red-500/50 hover:bg-red-500/10 transition-all duration-200"
                                             title="Delete song"
                                         >
                                             <Trash2 className="w-3.5 h-3.5" />
@@ -291,7 +291,7 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
                                         <div className="mb-4 inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-500/10 border border-amber-500/20">
                                             <Heart className="w-8 h-8 text-amber-400/50" />
                                         </div>
-                                        <h3 className="text-xl font-medium text-white mb-2">Your sacred circle is empty</h3>
+                                        <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-2">Your sacred circle is empty</h3>
                                         <p className="text-gray-400 max-w-xs mx-auto">Tap ♥ on any song to add it here</p>
                                         <button
                                             onClick={() => setFilter('status', 'all')}
@@ -302,10 +302,10 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
                                     </>
                                 ) : (
                                     <>
-                                        <div className="mb-4 inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-900 border border-gray-800">
+                                        <div className="mb-4 inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
                                             <Search className="w-8 h-8 text-gray-600" />
                                         </div>
-                                        <h3 className="text-xl font-medium text-white mb-2">No songs found</h3>
+                                        <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-2">No songs found</h3>
                                         <p className="text-gray-400 max-w-xs mx-auto">
                                             {state.search ? `We couldn't find any songs matching "${state.search}".` : "There are no songs available for this filter."}
                                         </p>

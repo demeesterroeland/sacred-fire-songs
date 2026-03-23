@@ -55,15 +55,15 @@ export default function SecuritySettings({ user }: SecuritySettingsProps) {
     <section className="space-y-8">
       {/* Email Address */}
       <div className="space-y-4">
-        <h2 className="text-xl font-bold flex items-center gap-2 text-white">
-          <Mail className="w-5 h-5 text-slate-400" />
+        <h2 className="text-xl font-bold flex items-center gap-2 text-gray-900 dark:text-white">
+          <Mail className="w-5 h-5 text-gray-500 dark:text-slate-400" />
           Email Address
         </h2>
         <input
           type="email"
           value={user.email}
           disabled
-          className="w-full bg-slate-900/50 border border-white/10 px-4 py-3 rounded-xl text-white opacity-60 cursor-not-allowed"
+          className="w-full bg-slate-100/50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/10 px-4 py-3 rounded-xl text-gray-900 dark:text-white opacity-60 cursor-not-allowed"
         />
         <button
           onClick={() => toast.info("Email change is currently handled via support.")}
@@ -74,29 +74,29 @@ export default function SecuritySettings({ user }: SecuritySettingsProps) {
         <p className="text-xs text-slate-500 italic">Changing your email will require re-verification.</p>
       </div>
 
-      <hr className="border-white/5" />
+      <hr className="border-gray-200 dark:border-white/5" />
 
       {/* Password */}
       <div className="space-y-4">
-        <h2 className="text-xl font-bold flex items-center gap-2 text-white">
-          <Lock className="w-5 h-5 text-slate-400" />
+        <h2 className="text-xl font-bold flex items-center gap-2 text-gray-900 dark:text-white">
+          <Lock className="w-5 h-5 text-gray-500 dark:text-slate-400" />
           Password
         </h2>
 
         <div className="space-y-2">
-          <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">New Password</label>
+          <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">New Password</label>
           <div className="relative">
             <input
               type={showNewPassword ? "text" : "password"}
               placeholder="••••••••"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              className="w-full bg-slate-900/50 border border-white/10 px-4 py-3 pr-10 rounded-xl text-white focus:outline-none focus:border-[#f45d1a] transition-all"
+              className="w-full bg-slate-100/50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/10 px-4 py-3 pr-10 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:border-[#f45d1a] transition-all"
             />
             <button
               type="button"
               onClick={() => setShowNewPassword(prev => !prev)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 z-10 text-slate-500 hover:text-white transition-colors p-1"
+              className="absolute right-3 top-1/2 -translate-y-1/2 z-10 text-slate-500 hover:text-gray-900 dark:hover:text-white transition-colors p-1"
               aria-label={showNewPassword ? "Hide password" : "Show password"}
             >
               {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -105,19 +105,19 @@ export default function SecuritySettings({ user }: SecuritySettingsProps) {
         </div>
 
         <div className="space-y-2">
-          <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Confirm New Password</label>
+          <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Confirm New Password</label>
           <div className="relative">
             <input
               type={showConfirmPassword ? "text" : "password"}
               placeholder="••••••••"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full bg-slate-900/50 border border-white/10 px-4 py-3 pr-10 rounded-xl text-white focus:outline-none focus:border-[#f45d1a] transition-all"
+              className="w-full bg-slate-100/50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/10 px-4 py-3 pr-10 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:border-[#f45d1a] transition-all"
             />
             <button
               type="button"
               onClick={() => setShowConfirmPassword(prev => !prev)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 z-10 text-slate-500 hover:text-white transition-colors p-1"
+              className="absolute right-3 top-1/2 -translate-y-1/2 z-10 text-slate-500 hover:text-gray-900 dark:hover:text-white transition-colors p-1"
               aria-label={showConfirmPassword ? "Hide password" : "Show password"}
             >
               {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
@@ -131,7 +131,7 @@ export default function SecuritySettings({ user }: SecuritySettingsProps) {
           className={`w-full sm:w-auto px-6 py-3 rounded-xl font-semibold transition-all disabled:opacity-50 flex items-center justify-center gap-2 whitespace-nowrap ${
             newPassword.length > 0
               ? "bg-[#f45d1a] text-white hover:brightness-110 shadow-lg shadow-orange-900/20"
-              : "bg-white/5 border border-white/10 text-white hover:bg-white/10"
+              : "bg-black/5 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white hover:bg-black/10 dark:hover:bg-white/10"
           }`}
         >
           {isUpdating && <Loader2 className="w-4 h-4 animate-spin" />}
@@ -139,7 +139,7 @@ export default function SecuritySettings({ user }: SecuritySettingsProps) {
         </button>
       </div>
 
-      <hr className="border-white/5" />
+      <hr className="border-gray-200 dark:border-white/5" />
 
       <div className="pt-2">
         <button

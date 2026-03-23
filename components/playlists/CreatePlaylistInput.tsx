@@ -61,7 +61,7 @@ export function CreatePlaylistInput() {
                 onBlur={submit}
                 placeholder="Playlist name…"
                 disabled={isPending}
-                className="flex-1 bg-gray-800 border border-amber-500/50 rounded-lg px-3 py-1 text-sm text-gray-100 placeholder-gray-600 outline-none focus:border-amber-500 disabled:opacity-50 min-w-0 w-40"
+                className="flex-1 bg-gray-100 dark:bg-gray-800 border border-amber-500/50 rounded-lg px-3 py-1 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-600 outline-none focus:border-amber-500 disabled:opacity-50 min-w-0 w-40"
             />
             <button
                 onClick={submit}

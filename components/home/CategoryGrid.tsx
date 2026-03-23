@@ -19,7 +19,7 @@ function TagList({ tags }: { tags: { id: string; slug: string; emoji: string | n
         <Link
           key={tag.id}
           href={`/songs?tag=${tag.slug}`}
-          className={`px-2 py-1 md:px-3 md:py-1.5 rounded-full bg-gray-800 text-gray-400 text-[10px] md:text-xs font-medium border border-gray-700 hover:bg-gray-700 hover:text-white transition-all ${
+          className={`px-2 py-1 md:px-3 md:py-1.5 rounded-full bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-400 text-[10px] md:text-xs font-medium border border-gray-300 dark:border-gray-700 hover:bg-gray-300 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white transition-all ${
             !expanded && i >= MOBILE_TAG_LIMIT ? 'hidden md:inline-flex' : ''
           }`}
         >
@@ -29,7 +29,7 @@ function TagList({ tags }: { tags: { id: string; slug: string; emoji: string | n
       {overflow > 0 && !expanded && (
         <button
           onClick={() => setExpanded(true)}
-          className="md:hidden px-2 py-1 rounded-full bg-gray-700/50 text-gray-300 text-[10px] font-medium border border-gray-600 hover:bg-gray-600 hover:text-white transition-all relative z-10"
+          className="md:hidden px-2 py-1 rounded-full bg-gray-300/50 dark:bg-gray-700/50 text-gray-600 dark:text-gray-300 text-[10px] font-medium border border-gray-400 dark:border-gray-600 hover:bg-gray-400 dark:hover:bg-gray-600 hover:text-gray-900 dark:hover:text-white transition-all relative z-10"
         >
           +{overflow} more
         </button>
@@ -78,9 +78,9 @@ const getColorClasses = (slug: string) => {
       };
     default:
       return {
-        bg: 'hover:border-gray-700',
-        icon: 'bg-gray-800 text-gray-500',
-        text: 'group-hover:text-white',
+        bg: 'hover:border-gray-300 dark:hover:border-gray-700',
+        icon: 'bg-gray-200 dark:bg-gray-800 text-gray-500',
+        text: 'group-hover:text-gray-900 dark:group-hover:text-white',
       };
   }
 };
@@ -125,7 +125,7 @@ export default function CategoryGrid() {
         return (
           <div key={category.id} className="category-card group flex flex-col h-full">
             <div
-              className={`glass-panel relative p-4 md:p-6 rounded-2xl md:rounded-3xl border border-gray-800/50 transition-all h-full shadow-2xl ${colors.bg}`}
+              className={`glass-panel relative p-4 md:p-6 rounded-2xl md:rounded-3xl border border-gray-200/50 dark:border-gray-800/50 transition-all h-full shadow-2xl ${colors.bg}`}
             >
               <div className="flex items-start justify-center mb-4 md:mb-6">
                 <div
@@ -139,7 +139,7 @@ export default function CategoryGrid() {
                 href={`/songs?category=${category.slug}`}
                 className="before:absolute before:inset-0 z-0 block"
               >
-                <h3 className={`text-base md:text-xl font-bold text-white mb-2 md:mb-3 transition-colors ${colors.text}`}>
+                <h3 className={`text-base md:text-xl font-bold text-gray-900 dark:text-white mb-2 md:mb-3 transition-colors ${colors.text}`}>
                   {category.name}
                 </h3>
               </Link>

@@ -41,12 +41,12 @@ function ForgotPasswordContent() {
 
     return (
         <div className="flex-1 flex items-center justify-center p-4">
-            <div className="relative w-full max-w-[420px] bg-[#1c222d] md:border md:border-[#2d3545] md:rounded-3xl p-6 md:p-8 md:shadow-2xl transition-all duration-300">
+            <div className="relative w-full max-w-[420px] bg-white dark:bg-[#1c222d] md:border md:border-gray-200 dark:md:border-[#2d3545] md:rounded-3xl p-6 md:p-8 md:shadow-2xl transition-all duration-300">
                 {/* Back Button */}
                 <Button
                     variant="ghost"
                     size="sm"
-                    className="absolute left-4 top-4 md:left-8 md:top-8 text-[#5a657a] hover:text-white transition-colors flex items-center gap-2 group p-0 bg-transparent hover:bg-transparent"
+                    className="absolute left-4 top-4 md:left-8 md:top-8 text-[#5a657a] hover:text-gray-900 dark:hover:text-white transition-colors flex items-center gap-2 group p-0 bg-transparent hover:bg-transparent"
                     onClick={() => router.push('/auth/login')}
                 >
                     <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
@@ -59,7 +59,7 @@ function ForgotPasswordContent() {
                         <Key className="text-white w-6 h-6 md:w-10 md:h-10" />
                     </div>
                     <div className="text-left md:text-center">
-                        <h1 className="text-white text-xl md:text-3xl font-bold md:mb-2 leading-tight">Reset Password</h1>
+                        <h1 className="text-gray-900 dark:text-white text-xl md:text-3xl font-bold md:mb-2 leading-tight">Reset Password</h1>
                         <p className="text-[#8e99aa] text-xs md:text-sm">Enter your email to receive a reset link.</p>
                     </div>
                 </div>
@@ -75,7 +75,7 @@ function ForgotPasswordContent() {
 
                 <form className="space-y-4 md:space-y-6" onSubmit={handleResetPassword}>
                     <div className="space-y-2">
-                        <Label className="text-xs md:text-sm font-semibold text-white ml-1 tracking-wide uppercase opacity-70">Email address</Label>
+                        <Label className="text-xs md:text-sm font-semibold text-gray-900 dark:text-white ml-1 tracking-wide uppercase opacity-70">Email address</Label>
                         <div className="relative group">
                             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5a657a] group-focus-within:text-[#d9481e] transition-colors pointer-events-none">
                                 <Mail className="w-5 h-5" />
@@ -87,7 +87,7 @@ function ForgotPasswordContent() {
                                 required
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                className="w-full bg-transparent border-[#2d3545] rounded-xl py-3.5 md:py-4 pl-12 pr-4 text-white placeholder-[#5a657a] focus:outline-none focus:border-[#d9481e] transition-all text-[14px] md:text-[15px] h-auto"
+                                className="w-full bg-transparent border-gray-200 dark:border-[#2d3545] rounded-xl py-3.5 md:py-4 pl-12 pr-4 text-gray-900 dark:text-white placeholder-[#5a657a] focus:outline-none focus:border-[#d9481e] transition-all text-[14px] md:text-[15px] h-auto"
                             />
                         </div>
                     </div>
@@ -102,7 +102,7 @@ function ForgotPasswordContent() {
                     </Button>
                 </form>
 
-                <div className="mt-12 text-center border-t border-[#2d3545] pt-6">
+                <div className="mt-12 text-center border-t border-gray-200 dark:border-[#2d3545] pt-6">
                     <p className="text-[#8e99aa] text-sm">
                         Remember your password?
                         <Link

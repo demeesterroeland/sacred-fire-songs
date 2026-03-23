@@ -57,7 +57,7 @@ export default function CreatePlaylistPage() {
                 <div className="flex items-center gap-3">
                     <Link
                         href="/library/playlists"
-                        className="text-gray-500 hover:text-gray-300 transition-colors shrink-0"
+                        className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors shrink-0"
                         aria-label="Back to playlists"
                     >
                         <ArrowLeft className="w-5 h-5" />
@@ -72,7 +72,7 @@ export default function CreatePlaylistPage() {
                                 if (e.key === 'Escape') router.push('/library/playlists');
                             }}
                             placeholder="Playlist name…"
-                            className="w-full bg-transparent text-xl font-bold text-gray-100 placeholder-gray-600 outline-none border-b border-gray-700 focus:border-amber-500 pb-1 transition-colors"
+                            className="w-full bg-transparent text-xl font-bold text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-600 outline-none border-b border-gray-300 dark:border-gray-700 focus:border-amber-500 pb-1 transition-colors"
                         />
                         <p className="text-xs text-gray-500 mt-1.5 flex items-center gap-1.5">
                             <Lock className="w-3 h-3" />

@@ -69,8 +69,8 @@ export default function SongCard({
                 <div className={cn(
                     'relative p-5 rounded-2xl transition-all duration-300 backdrop-blur-sm group overflow-hidden flex flex-col justify-between active:scale-[0.98] cursor-pointer',
                     isPublic
-                        ? 'bg-gray-900/40 border border-gray-800 hover:border-white/10 hover:bg-gray-800/60'
-                        : 'bg-black/40 border border-dashed border-white/10 hover:bg-black/60 opacity-70 hover:opacity-100'
+                        ? 'bg-white/60 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-white/10 hover:bg-gray-100/60 dark:hover:bg-gray-800/60'
+                        : 'bg-gray-50/40 dark:bg-black/40 border border-dashed border-gray-300 dark:border-white/10 hover:bg-gray-100/60 dark:hover:bg-black/60 opacity-70 hover:opacity-100'
                 )}>
                     {/* Accent Border */}
                     <div
@@ -80,11 +80,11 @@ export default function SongCard({
                     <div className="relative flex justify-between items-start z-10 w-full mb-4">
                         <div className="flex-1 min-w-0 pr-20">
                             <div className="flex items-center gap-2 mb-1">
-                                <h3 className={`text-base font-bold text-gray-100 leading-tight ${textColors[accentColor] || textColors.red} transition-colors group-hover:translate-x-1 duration-300 truncate`}>
+                                <h3 className={`text-base font-bold text-gray-900 dark:text-gray-100 leading-tight ${textColors[accentColor] || textColors.red} transition-colors group-hover:translate-x-1 duration-300 truncate`}>
                                     {title}
                                 </h3>
                                 {!isPublic && (
-                                    <span className="text-[9px] font-black bg-gray-800 text-gray-500 px-1.5 py-0.5 rounded border border-gray-700 uppercase tracking-tighter shrink-0">
+                                    <span className="text-[9px] font-black bg-gray-200 dark:bg-gray-800 text-gray-500 px-1.5 py-0.5 rounded border border-gray-300 dark:border-gray-700 uppercase tracking-tighter shrink-0">
                                         Draft
                                     </span>
                                 )}
@@ -148,7 +148,7 @@ export default function SongCard({
                         'p-1 rounded-full transition-all duration-300',
                         isFav
                             ? 'text-amber-400 heart-glow'
-                            : 'text-gray-700 hover:text-amber-400/60'
+                            : 'text-gray-300 dark:text-gray-700 hover:text-amber-400/60'
                     )}
                 >
                     <Heart

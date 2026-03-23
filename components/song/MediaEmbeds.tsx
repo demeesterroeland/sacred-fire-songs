@@ -12,8 +12,8 @@ const MediaEmbeds: React.FC<MediaEmbedsProps> = ({ youtubeUrl, spotifyUrl, sound
     return (
         <div className="space-y-6 mt-8">
             {youtubeUrl && (
-                <div className="bg-black/20 rounded-xl overflow-hidden shadow-lg border border-white/5">
-                    <div className="p-3 bg-white/5 border-b border-white/5 flex items-center gap-2">
+                <div className="bg-gray-100/50 dark:bg-black/20 rounded-xl overflow-hidden shadow-lg border border-gray-200 dark:border-white/5">
+                    <div className="p-3 bg-gray-100 dark:bg-white/5 border-b border-gray-200 dark:border-white/5 flex items-center gap-2">
                         <span className="material-symbols-outlined text-red-500 text-sm">play_circle</span>
                         <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">YouTube</h3>
                     </div>
@@ -32,8 +32,8 @@ const MediaEmbeds: React.FC<MediaEmbedsProps> = ({ youtubeUrl, spotifyUrl, sound
             )}
 
             {soundcloudUrl && (
-                <div className="bg-black/20 rounded-xl overflow-hidden shadow-lg border border-white/5">
-                    <div className="p-3 bg-white/5 border-b border-white/5 flex items-center gap-2">
+                <div className="bg-gray-100/50 dark:bg-black/20 rounded-xl overflow-hidden shadow-lg border border-gray-200 dark:border-white/5">
+                    <div className="p-3 bg-gray-100 dark:bg-white/5 border-b border-gray-200 dark:border-white/5 flex items-center gap-2">
                         <span className="material-symbols-outlined text-[#ff5500] text-sm">cloud</span>
                         <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">SoundCloud</h3>
                     </div>
@@ -57,8 +57,8 @@ const MediaEmbeds: React.FC<MediaEmbedsProps> = ({ youtubeUrl, spotifyUrl, sound
             )}
 
             {spotifyUrl && (
-                <div className="bg-black/20 rounded-xl overflow-hidden shadow-lg border border-white/5">
-                    <div className="p-3 bg-white/5 border-b border-white/5 flex items-center gap-2">
+                <div className="bg-gray-100/50 dark:bg-black/20 rounded-xl overflow-hidden shadow-lg border border-gray-200 dark:border-white/5">
+                    <div className="p-3 bg-gray-100 dark:bg-white/5 border-b border-gray-200 dark:border-white/5 flex items-center gap-2">
                         <span className="material-symbols-outlined text-[#1db954] text-sm">radio</span>
                         <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Spotify</h3>
                     </div>

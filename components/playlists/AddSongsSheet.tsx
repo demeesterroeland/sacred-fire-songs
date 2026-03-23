@@ -102,15 +102,15 @@ export function AddSongsSheet({ playlistId, existingCompositionIds, open, onClos
             />
 
             {/* Sheet */}
-            <div className="fixed inset-x-0 bottom-0 z-50 flex flex-col bg-gray-950 border-t border-gray-800 rounded-t-2xl max-h-[80vh]">
+            <div className="fixed inset-x-0 bottom-0 z-50 flex flex-col bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800 rounded-t-2xl max-h-[80vh]">
                 {/* Handle */}
                 <div className="flex justify-center pt-3 pb-1 shrink-0">
-                    <div className="w-10 h-1 bg-gray-700 rounded-full" />
+                    <div className="w-10 h-1 bg-gray-300 dark:bg-gray-700 rounded-full" />
                 </div>
 
                 {/* Header */}
                 <div className="flex items-center justify-between px-4 pb-3 shrink-0">
-                    <h2 className="font-bold text-gray-100">Add Songs</h2>
+                    <h2 className="font-bold text-gray-900 dark:text-gray-100">Add Songs</h2>
                     <button
                         onClick={onClose}
                         className="p-1 text-gray-500 hover:text-gray-300 transition-colors"
@@ -122,7 +122,7 @@ export function AddSongsSheet({ playlistId, existingCompositionIds, open, onClos
 
                 {/* Search input */}
                 <div className="px-4 pb-3 shrink-0">
-                    <div className="flex items-center gap-2 bg-gray-800 rounded-xl px-3 py-2.5">
+                    <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 rounded-xl px-3 py-2.5">
                         {isSearching
                             ? <Loader2 className="w-4 h-4 text-gray-500 animate-spin shrink-0" />
                             : <Search className="w-4 h-4 text-gray-500 shrink-0" />
@@ -132,7 +132,7 @@ export function AddSongsSheet({ playlistId, existingCompositionIds, open, onClos
                             value={query}
                             onChange={e => setQuery(e.target.value)}
                             placeholder="Search songs…"
-                            className="flex-1 bg-transparent text-sm text-gray-200 placeholder-gray-600 outline-none"
+                            className="flex-1 bg-transparent text-sm text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-600 outline-none"
                         />
                     </div>
                 </div>
@@ -148,16 +148,16 @@ export function AddSongsSheet({ playlistId, existingCompositionIds, open, onClos
                             <button
                                 key={song.id}
                                 onClick={() => handleToggle(song.id, song.title)}
-                                className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-800/60 transition-colors text-left ${!song.is_public ? 'opacity-70 hover:opacity-100' : ''}`}
+                                className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100/60 dark:hover:bg-gray-800/60 transition-colors text-left ${!song.is_public ? 'opacity-70 hover:opacity-100' : ''}`}
                             >
                                 <div className="w-5 h-5 shrink-0 flex items-center justify-center">
                                     {inPlaylist && <Check className="w-4 h-4 text-amber-400" />}
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2">
-                                        <p className="text-sm font-medium text-gray-100 truncate">{song.title}</p>
+                                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{song.title}</p>
                                         {!song.is_public && (
-                                            <span className="text-[9px] font-black bg-gray-800 text-gray-500 px-1.5 py-0.5 rounded border border-gray-700 uppercase tracking-tighter shrink-0">
+                                            <span className="text-[9px] font-black bg-gray-200 dark:bg-gray-800 text-gray-500 px-1.5 py-0.5 rounded border border-gray-300 dark:border-gray-700 uppercase tracking-tighter shrink-0">
                                                 Draft
                                             </span>
                                         )}

@@ -62,7 +62,7 @@ function SortableRow({
         <div
             ref={setNodeRef}
             style={style}
-            className="flex items-center gap-3 p-3 bg-gray-900/40 border border-gray-800 rounded-xl group hover:bg-gray-800/60 hover:border-gray-700 transition-colors"
+            className="flex items-center gap-3 p-3 bg-white/60 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-800 rounded-xl group hover:bg-gray-100/60 dark:hover:bg-gray-800/60 hover:border-gray-300 dark:hover:border-gray-700 transition-colors"
         >
             {/* Drag handle */}
             <button
@@ -81,7 +81,7 @@ function SortableRow({
                 className="flex-1 min-w-0 hover:text-amber-400 transition-colors"
                 onClick={e => e.stopPropagation()}
             >
-                <p className="text-sm font-medium text-gray-100 truncate">{item.songTitle}</p>
+                <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{item.songTitle}</p>
                 <p className="text-xs text-gray-500 truncate">{item.songAuthor}</p>
             </Link>
 

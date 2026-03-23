@@ -55,7 +55,7 @@ export default function EditSongPage() {
         retry: 1
     });
 
-    if (isLoading) return <div className="p-8 text-white text-center">Loading...</div>;
+    if (isLoading) return <div className="p-8 text-gray-900 dark:text-white text-center">Loading...</div>;
     if (error || !song) {
         console.error("Fetch error:", error);
         return <div className="p-8 text-red-500 text-center">Error loading song not found or permission denied.</div>;
@@ -96,19 +96,19 @@ export default function EditSongPage() {
 
 
     return (
-        <div className="min-h-screen bg-gray-950 pb-20">
+        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-20">
             {/* Mobile Header (Standardized) */}
-            <header className="lg:hidden flex justify-between items-center px-4 py-3 sticky top-0 bg-gray-900/95 backdrop-blur-md z-30 border-b border-white/5 shadow-lg">
+            <header className="lg:hidden flex justify-between items-center px-4 py-3 sticky top-0 bg-gray-100/95 dark:bg-gray-900/95 backdrop-blur-md z-30 border-b border-gray-200 dark:border-white/5 shadow-lg">
                 <div className="flex items-center gap-3">
                     <button
                         onClick={() => setIsOpen(true)}
-                        className="flex items-center gap-2 text-gray-400 hover:text-white transition-colors p-1.5 pr-3 rounded-xl hover:bg-gray-800 group shrink-0 border border-transparent hover:border-gray-700"
+                        className="flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors p-1.5 pr-3 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-800 group shrink-0 border border-transparent hover:border-gray-300 dark:hover:border-gray-700"
                     >
                         <IndentIncrease className="w-7 h-7" />
                         <span className="text-[10px] font-bold uppercase tracking-widest opacity-60 group-hover:opacity-100 transition-opacity hidden sm:inline">Menu</span>
                     </button>
 
-                    <div className="w-8 h-8 bg-gradient-to-br from-red-700 to-orange-600 rounded-full flex items-center justify-center shadow-lg shadow-red-900/30 ring-1 ring-white/10 shrink-0">
+                    <div className="w-8 h-8 bg-gradient-to-br from-red-700 to-orange-600 rounded-full flex items-center justify-center shadow-lg shadow-red-900/30 ring-1 ring-gray-900/10 dark:ring-white/10 shrink-0">
                         <Flame className="text-white w-5 h-5 fill-current" />
                     </div>
                 </div>

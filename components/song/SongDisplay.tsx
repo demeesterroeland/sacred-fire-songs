@@ -40,7 +40,7 @@ export default function SongDisplay({ content, melodyNotation, hasChords = false
                                                 <span
                                                     key={itemIdx}
                                                     style={{ marginBottom: hasChords ? '0.1rem' : '0.15rem' }}
-                                                    className={`self-end text-xs text-gray-500 border-l-2 border-gray-700 pl-1 mr-2 leading-tight ${item.italic ? 'italic' : ''} ${itemIdx === 0 ? '-ml-4 md:-ml-6' : 'ml-1'}`}
+                                                    className={`self-end text-xs text-gray-500 border-l-2 border-gray-300 dark:border-gray-700 pl-1 mr-2 leading-tight ${item.italic ? 'italic' : ''} ${itemIdx === 0 ? '-ml-4 md:-ml-6' : 'ml-1'}`}
                                                 >
                                                     {item.comment}
                                                 </span>
@@ -63,7 +63,7 @@ export default function SongDisplay({ content, melodyNotation, hasChords = false
                                                     )
                                                 )}
                                                 {/* The Lyric (White) */}
-                                                <span className="text-gray-300 text-xl md:text-2xl font-medium tracking-tight font-sans whitespace-pre">
+                                                <span className="text-gray-700 dark:text-gray-300 text-xl md:text-2xl font-medium tracking-tight font-sans whitespace-pre">
                                                     {item.lyrics || '\u00A0'}
                                                 </span>
                                             </div>
@@ -78,9 +78,9 @@ export default function SongDisplay({ content, melodyNotation, hasChords = false
 
             {/* Melody Notation Section */}
             {melodyNotation && (
-                <div className="pt-8 border-t border-gray-800/30">
+                <div className="pt-8 border-t border-gray-200/30 dark:border-gray-800/30">
                     <h3 className="text-xs font-black text-gray-600 uppercase tracking-[0.2em] mb-4">Melody Notation</h3>
-                    <div className="bg-black/20 rounded-xl p-6 border border-white/5 font-mono text-sm text-gray-400 whitespace-pre-wrap leading-relaxed">
+                    <div className="bg-gray-100/50 dark:bg-black/20 rounded-xl p-6 border border-gray-200 dark:border-white/5 font-mono text-sm text-gray-400 whitespace-pre-wrap leading-relaxed">
                         {melodyNotation}
                     </div>
                 </div>
