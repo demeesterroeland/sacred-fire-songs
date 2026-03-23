@@ -117,10 +117,10 @@ export function PlaylistDetailHeader({
                                 if (e.key === 'Escape') setIsRenaming(false);
                             }}
                             autoFocus
-                            className="w-full bg-gray-800 border border-amber-500/50 rounded-lg px-2 py-1 text-xl font-bold text-gray-100 outline-none focus:border-amber-500"
+                            className="w-full bg-gray-100 dark:bg-gray-800 border border-amber-500/50 rounded-lg px-2 py-1 text-xl font-bold text-gray-900 dark:text-gray-100 outline-none focus:border-amber-500"
                         />
                     ) : (
-                        <h1 className="text-xl font-bold text-gray-100 truncate">{optimisticTitle}</h1>
+                        <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 truncate">{optimisticTitle}</h1>
                     )}
                     <p className="text-xs text-gray-500 mt-0.5">
                         {songCount} song{songCount !== 1 ? 's' : ''}
@@ -134,7 +134,7 @@ export function PlaylistDetailHeader({
                             onClick={handleToggleVisibility}
                             aria-label={isPublic ? 'Make private' : 'Make public'}
                             title={isPublic ? 'Public — click to make private' : 'Private — click to make public'}
-                            className="p-1.5 rounded-lg text-gray-600 hover:text-gray-300 hover:bg-gray-700/60 transition-colors"
+                            className="p-1.5 rounded-lg text-gray-600 hover:text-gray-800 dark:hover:text-gray-300 hover:bg-gray-200/60 dark:hover:bg-gray-700/60 transition-colors"
                         >
                             {isPublic
                                 ? <Globe className="w-4 h-4 text-emerald-400" />
@@ -169,7 +169,7 @@ export function PlaylistDetailHeader({
                         autoFocus
                         rows={2}
                         placeholder="Add a description…"
-                        className="w-full bg-gray-800 border border-amber-500/50 rounded-lg px-3 py-2 text-sm text-gray-300 placeholder-gray-600 outline-none focus:border-amber-500 resize-none"
+                        className="w-full bg-gray-100 dark:bg-gray-800 border border-amber-500/50 rounded-lg px-3 py-2 text-sm text-gray-600 dark:text-gray-300 placeholder-gray-400 dark:placeholder-gray-600 outline-none focus:border-amber-500 resize-none"
                     />
                 ) : (
                     <button

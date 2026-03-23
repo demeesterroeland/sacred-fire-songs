@@ -126,7 +126,7 @@ export function PlaylistPicker({ compositionId, userId, triggerClassName, iconCl
                 <button
                     aria-label="Add to playlist"
                     className={cn(
-                        'p-1 rounded-full transition-all duration-300 text-gray-700 hover:text-gray-400',
+                        'p-1 rounded-full transition-all duration-300 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300',
                         triggerClassName
                     )}
                 >
@@ -135,7 +135,7 @@ export function PlaylistPicker({ compositionId, userId, triggerClassName, iconCl
             </PopoverTrigger>
             <PopoverContent align="end" className="w-64">
                 {/* New playlist input */}
-                <div className="flex items-center gap-2 p-3 border-b border-gray-800">
+                <div className="flex items-center gap-2 p-3 border-b border-gray-200 dark:border-gray-800">
                     <input
                         value={newTitle}
                         onChange={e => setNewTitle(e.target.value)}
@@ -146,7 +146,7 @@ export function PlaylistPicker({ compositionId, userId, triggerClassName, iconCl
                         }}
                         placeholder="New playlist…"
                         disabled={isCreating}
-                        className="flex-1 bg-transparent text-sm text-gray-200 placeholder-gray-600 outline-none"
+                        className="flex-1 bg-transparent text-sm text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-600 outline-none"
                     />
                     <button
                         onClick={handleCreate}
@@ -176,7 +176,7 @@ export function PlaylistPicker({ compositionId, userId, triggerClassName, iconCl
                         <button
                             key={pl.id}
                             onClick={() => handleToggle(pl.id, pl.title)}
-                            className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-300 hover:bg-gray-800 transition-colors text-left"
+                            className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-left"
                         >
                             <div className="w-4 h-4 shrink-0 flex items-center justify-center">
                                 {containingIds.has(pl.id) && (

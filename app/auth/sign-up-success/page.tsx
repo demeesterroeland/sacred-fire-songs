@@ -40,26 +40,26 @@ function SignUpSuccessContent() {
 
     return (
         <div className="flex-1 flex flex-col items-center justify-center min-h-[80vh] px-4 text-center">
-            <div className="w-full max-w-md bg-[#1c222d] border border-[#2d3545] rounded-3xl p-8 shadow-2xl flex flex-col items-center">
+            <div className="w-full max-w-md bg-white dark:bg-[#1c222d] border border-gray-200 dark:border-[#2d3545] rounded-3xl p-8 shadow-2xl flex flex-col items-center">
 
                 {/* Icon */}
                 <div className="w-16 h-16 bg-emerald-500/15 rounded-full flex items-center justify-center mb-6 text-emerald-400">
                     <Mail className="w-8 h-8" />
                 </div>
 
-                <h1 className="text-2xl font-bold text-white mb-2">Check your email</h1>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Check your email</h1>
                 <p className="text-[#8e99aa] text-sm mb-2">
                     We sent a confirmation link and a 6-digit code to
                 </p>
                 {email && (
-                    <p className="text-white font-semibold text-sm mb-6 truncate max-w-full">{email}</p>
+                    <p className="text-gray-900 dark:text-white font-semibold text-sm mb-6 truncate max-w-full">{email}</p>
                 )}
 
                 {/* Divider */}
                 <div className="w-full flex items-center gap-3 mb-6">
-                    <div className="flex-1 h-px bg-[#2d3545]" />
+                    <div className="flex-1 h-px bg-gray-200 dark:bg-[#2d3545]" />
                     <span className="text-[10px] font-bold text-[#5a657a] uppercase tracking-widest">or enter code</span>
-                    <div className="flex-1 h-px bg-[#2d3545]" />
+                    <div className="flex-1 h-px bg-gray-200 dark:bg-[#2d3545]" />
                 </div>
 
                 {/* OTP Form */}
@@ -76,7 +76,7 @@ function SignUpSuccessContent() {
                             placeholder="6-digit code"
                             value={code}
                             onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                            className="w-full bg-transparent border border-[#2d3545] rounded-xl py-4 pl-12 pr-4 text-white text-center text-xl tracking-[0.5em] placeholder:text-[#5a657a] placeholder:text-sm placeholder:tracking-normal focus:outline-none focus:border-[#d9481e] transition-all"
+                            className="w-full bg-transparent border border-gray-200 dark:border-[#2d3545] rounded-xl py-4 pl-12 pr-4 text-gray-900 dark:text-white text-center text-xl tracking-[0.5em] placeholder:text-[#5a657a] placeholder:text-sm placeholder:tracking-normal focus:outline-none focus:border-[#d9481e] transition-all"
                             required
                         />
                     </div>
@@ -100,10 +100,10 @@ function SignUpSuccessContent() {
                     </button>
                 </form>
 
-                <div className="mt-8 pt-6 border-t border-[#2d3545] w-full text-center">
+                <div className="mt-8 pt-6 border-t border-gray-200 dark:border-[#2d3545] w-full text-center">
                     <Link
                         href={`/auth/login${next ? `?next=${encodeURIComponent(next)}` : ""}`}
-                        className="text-[#8e99aa] hover:text-white text-sm transition-colors"
+                        className="text-[#8e99aa] hover:text-gray-900 dark:hover:text-white text-sm transition-colors"
                     >
                         Return to Login
                     </Link>

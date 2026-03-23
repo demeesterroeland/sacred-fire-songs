@@ -47,7 +47,7 @@ export default function DeleteConfirmationModal({
 
             {/* Modal Card */}
             <div
-                className={`bg-slate-900 border border-red-500/20 rounded-2xl p-6 max-w-md w-full shadow-2xl shadow-red-900/20 transform transition-all duration-200 relative z-10 mx-4 ${isOpen ? 'scale-100 translate-y-0' : 'scale-95 translate-y-4'
+                className={`bg-white dark:bg-slate-900 border border-red-500/20 rounded-2xl p-6 max-w-md w-full shadow-2xl shadow-red-900/20 transform transition-all duration-200 relative z-10 mx-4 ${isOpen ? 'scale-100 translate-y-0' : 'scale-95 translate-y-4'
                     }`}
             >
                 <div className="flex items-center gap-4 mb-6 text-red-500">
@@ -55,12 +55,12 @@ export default function DeleteConfirmationModal({
                         <AlertTriangle className="w-8 h-8" />
                     </div>
                     <div>
-                        <h3 className="text-xl font-bold text-white">{title}</h3>
+                        <h3 className="text-xl font-bold text-gray-900 dark:text-white">{title}</h3>
                         <p className="text-red-400 text-sm">This action cannot be undone.</p>
                     </div>
                 </div>
 
-                <p className="text-gray-300 mb-8 leading-relaxed">
+                <p className="text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
                     {message}
                 </p>
 
@@ -68,7 +68,7 @@ export default function DeleteConfirmationModal({
                     <button
                         onClick={onClose}
                         disabled={isDeleting}
-                        className="px-4 py-3 rounded-xl font-semibold text-gray-400 hover:text-white hover:bg-white/5 border border-transparent hover:border-white/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        className="px-4 py-3 rounded-xl font-semibold text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 border border-transparent hover:border-gray-200 dark:hover:border-white/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                         Cancel
                     </button>

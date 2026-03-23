@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { SpeedInsights } from "@vercel/speed-insights/next";
-import { Loader2 } from "lucide-react";
-import { Toaster } from "sonner";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -45,12 +43,34 @@ import { UserPreferencesProvider } from "@/context/UserPreferencesContext";
 import EnvironmentBanner from "@/components/common/EnvironmentBanner";
 import ServiceWorkerRegistrar from "@/components/providers/ServiceWorkerRegistrar";
 import MainContent from "@/components/common/MainContent";
+import ThemedToaster from "@/components/providers/ThemedToaster";
+
+// Inline script to prevent flash of wrong theme on load.
+// Reads the user's preference from localStorage and applies the dark class
+// before the first paint, so there's no visible flash.
+const themeScript = `
+(function(){
+  try {
+    var p = JSON.parse(localStorage.getItem('sacred-fire-songs-preferences') || '{}');
+    var t = p.theme || 'dark';
+    var d = t === 'system'
+      ? window.matchMedia('(prefers-color-scheme: dark)').matches
+      : t === 'dark';
+    if (d) document.documentElement.classList.add('dark');
+    var m = document.querySelector('meta[name="theme-color"]');
+    if (m) m.setAttribute('content', d ? '#1a0505' : '#ffffff');
+  } catch(e) {
+    document.documentElement.classList.add('dark');
+  }
+})();
+`;
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode; }>) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
         <meta name="theme-color" content="#1a0505" />
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
       </head>
       <body
@@ -62,7 +82,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <UserPreferencesProvider>
           <SidebarProvider>
             <QueryProvider>
-              <div className="min-h-screen bg-black text-gray-100 font-sans flex flex-col lg:flex-row selection:bg-red-500/30 overflow-x-hidden">
+              <div className="min-h-screen bg-white dark:bg-black text-gray-900 dark:text-gray-100 font-sans flex flex-col lg:flex-row selection:bg-red-500/30 overflow-x-hidden">
 
                 {/* Sidebar (Responsive Mini/Full) */}
                 <Sidebar />
@@ -84,24 +104,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
               </div>
             </QueryProvider>
           </SidebarProvider>
-          <Toaster
-            position="top-center"
-            theme="dark"
-            icons={{
-              success: null,
-              error: null,
-              loading: <Loader2 className="w-4 h-4 animate-spin text-emerald-400" />,
-            }}
-            toastOptions={{
-              unstyled: true,
-              classNames: {
-                toast: "bg-[#141b24] border border-emerald-500/30 p-4 rounded-xl text-emerald-400 text-[15px] font-medium text-center shadow-inner min-w-[300px] flex justify-center items-center mb-2",
-                title: "text-emerald-400",
-                success: "border-emerald-500/30",
-                error: "bg-[#1a1010] border-red-500/30 text-red-400",
-              }
-            }}
-          />
+          <ThemedToaster />
           <SpeedInsights />
         </UserPreferencesProvider>
       </body>

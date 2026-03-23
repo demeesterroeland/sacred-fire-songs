@@ -72,12 +72,12 @@ function SignUpFormContent({
   };
 
   return (
-    <div className={cn("relative w-full max-w-[420px] bg-[#1c222d] md:border md:border-[#2d3545] md:rounded-3xl p-6 md:p-8 md:shadow-2xl transition-all duration-300", className)} {...props}>
+    <div className={cn("relative w-full max-w-[420px] bg-white dark:bg-[#1c222d] md:border md:border-gray-200 dark:md:border-[#2d3545] md:rounded-3xl p-6 md:p-8 md:shadow-2xl transition-all duration-300", className)} {...props}>
       {/* Close Button */}
       <Button
         variant="ghost"
         size="icon"
-        className="absolute right-4 top-4 md:right-6 md:top-6 text-[#5a657a] hover:text-white transition-colors h-10 w-10 p-0"
+        className="absolute right-4 top-4 md:right-6 md:top-6 text-[#5a657a] hover:text-gray-900 dark:hover:text-white transition-colors h-10 w-10 p-0"
         onClick={() => router.push('/')}
       >
         <X className="w-6 h-6" />
@@ -89,7 +89,7 @@ function SignUpFormContent({
           <Flame className="text-white w-6 h-6 md:w-10 md:h-10 fill-current" />
         </div>
         <div className="text-left md:text-center">
-          <h1 className="text-white text-xl md:text-3xl font-bold md:mb-2 leading-tight">Create Account</h1>
+          <h1 className="text-gray-900 dark:text-white text-xl md:text-3xl font-bold md:mb-2 leading-tight">Create Account</h1>
           <p className="text-[#8e99aa] text-xs md:text-sm">Join our community of songkeepers.</p>
         </div>
       </div>
@@ -103,7 +103,7 @@ function SignUpFormContent({
       {/* Signup Form */}
       <form onSubmit={handleSignUp} className="space-y-4 md:space-y-4">
         <div className="space-y-1">
-          <Label className="text-xs font-semibold text-white ml-1 tracking-wide uppercase opacity-70">Email address</Label>
+          <Label className="text-xs font-semibold text-gray-900 dark:text-white ml-1 tracking-wide uppercase opacity-70">Email address</Label>
           <div className="relative group">
             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5a657a] group-focus-within:text-[#d9481e] transition-colors pointer-events-none">
               <Mail className="w-5 h-5" />
@@ -115,13 +115,13 @@ function SignUpFormContent({
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-transparent border-[#2d3545] rounded-xl py-3.5 md:py-4 pl-12 pr-4 text-white placeholder-[#5a657a] focus:outline-none focus:border-[#d9481e] transition-all text-[14px] md:text-[15px] h-auto"
+              className="w-full bg-transparent border-gray-200 dark:border-[#2d3545] rounded-xl py-3.5 md:py-4 pl-12 pr-4 text-gray-900 dark:text-white placeholder-[#5a657a] focus:outline-none focus:border-[#d9481e] transition-all text-[14px] md:text-[15px] h-auto"
             />
           </div>
         </div>
 
         <div className="space-y-1">
-          <Label className="text-xs font-semibold text-white ml-1 tracking-wide uppercase opacity-70">Password</Label>
+          <Label className="text-xs font-semibold text-gray-900 dark:text-white ml-1 tracking-wide uppercase opacity-70">Password</Label>
           <div className="relative group">
             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5a657a] group-focus-within:text-[#d9481e] transition-colors pointer-events-none">
               <Lock className="w-5 h-5" />
@@ -133,13 +133,13 @@ function SignUpFormContent({
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-transparent border-[#2d3545] rounded-xl py-3.5 md:py-4 pl-12 pr-4 text-white placeholder-[#5a657a] focus:outline-none focus:border-[#d9481e] transition-all text-[14px] md:text-[15px] h-auto"
+              className="w-full bg-transparent border-gray-200 dark:border-[#2d3545] rounded-xl py-3.5 md:py-4 pl-12 pr-4 text-gray-900 dark:text-white placeholder-[#5a657a] focus:outline-none focus:border-[#d9481e] transition-all text-[14px] md:text-[15px] h-auto"
             />
           </div>
         </div>
 
         <div className="space-y-1">
-          <Label className="text-xs font-semibold text-white ml-1 tracking-wide uppercase opacity-70">Repeat Password</Label>
+          <Label className="text-xs font-semibold text-gray-900 dark:text-white ml-1 tracking-wide uppercase opacity-70">Repeat Password</Label>
           <div className="relative group">
             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5a657a] group-focus-within:text-[#d9481e] transition-colors pointer-events-none">
               <ShieldCheck className="w-5 h-5" />
@@ -151,7 +151,7 @@ function SignUpFormContent({
               required
               value={repeatPassword}
               onChange={(e) => setRepeatPassword(e.target.value)}
-              className="w-full bg-transparent border-[#2d3545] rounded-xl py-3.5 md:py-4 pl-12 pr-4 text-white placeholder-[#5a657a] focus:outline-none focus:border-[#d9481e] transition-all text-[14px] md:text-[15px] h-auto"
+              className="w-full bg-transparent border-gray-200 dark:border-[#2d3545] rounded-xl py-3.5 md:py-4 pl-12 pr-4 text-gray-900 dark:text-white placeholder-[#5a657a] focus:outline-none focus:border-[#d9481e] transition-all text-[14px] md:text-[15px] h-auto"
             />
           </div>
         </div>
@@ -172,18 +172,18 @@ function SignUpFormContent({
       <div className="mt-8 text-center md:text-left">
         <p className="text-[#8e99aa] text-[12px] leading-relaxed">
           By creating an account, you confirm that you agree to our{" "}
-          <Link href="#" className="text-white font-bold hover:underline">
+          <Link href="#" className="text-gray-900 dark:text-white font-bold hover:underline">
             Terms Of Service
           </Link>{" "}
           and have read our{" "}
-          <Link href="#" className="text-white font-bold hover:underline">
+          <Link href="#" className="text-gray-900 dark:text-white font-bold hover:underline">
             Privacy Policy
           </Link>
         </p>
       </div>
 
       {/* Toggle View Link */}
-      <div className="mt-8 text-center pb-4 md:pb-0 border-t border-[#2d3545] pt-6">
+      <div className="mt-8 text-center pb-4 md:pb-0 border-t border-gray-200 dark:border-[#2d3545] pt-6">
         <p className="text-[#a0aec0] text-sm">
           Already have an account?
           <Link

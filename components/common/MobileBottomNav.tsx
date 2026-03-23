@@ -47,7 +47,7 @@ export default function MobileBottomNav() {
                 {/* Top edge glow */}
                 <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-red-500/30 to-transparent" />
 
-                <div className="bg-gray-950/95 backdrop-blur-xl border-t border-gray-800/50 safe-area-bottom">
+                <div className="bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl border-t border-gray-200/50 dark:border-gray-800/50 safe-area-bottom">
                     <div className="flex items-center justify-around h-14 px-2">
                         {BOTTOM_TABS.map((tab) => {
                             const active = tab.isAction
@@ -63,7 +63,7 @@ export default function MobileBottomNav() {
                                         className={`flex flex-col items-center justify-center gap-0.5 min-w-[64px] py-1 rounded-xl transition-colors active:scale-95 ${
                                             active
                                                 ? 'text-red-400'
-                                                : 'text-gray-500 hover:text-gray-300'
+                                                : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'
                                         }`}
                                     >
                                         <div className="relative">
@@ -87,7 +87,7 @@ export default function MobileBottomNav() {
                                     className={`flex flex-col items-center justify-center gap-0.5 min-w-[64px] py-1 rounded-xl transition-colors active:scale-95 ${
                                         active
                                             ? 'text-red-400'
-                                            : 'text-gray-500 hover:text-gray-300'
+                                            : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'
                                     }`}
                                 >
                                     <div className="relative">

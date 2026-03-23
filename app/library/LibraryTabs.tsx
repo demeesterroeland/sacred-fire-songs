@@ -22,11 +22,11 @@ export default function LibraryTabs() {
         return (
             <nav className="mb-8">
                 <div className="flex items-center gap-1.5 text-sm text-gray-500">
-                    <Link href={parentTab.href} className="hover:text-gray-300 transition-colors">
+                    <Link href={parentTab.href} className="hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
                         Library
                     </Link>
                     <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-                    <Link href={parentTab.href} className="hover:text-gray-300 transition-colors">
+                    <Link href={parentTab.href} className="hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
                         {parentTab.label}
                     </Link>
                 </div>
@@ -38,8 +38,8 @@ export default function LibraryTabs() {
     return (
         <>
             <header className="hidden md:block mb-12">
-                <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2 text-white">Your Library</h1>
-                <p className="text-slate-400">Your personal collection of playlists, albums, and artists.</p>
+                <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2 text-gray-900 dark:text-white">Your Library</h1>
+                <p className="text-slate-500 dark:text-slate-400">Your personal collection of playlists, albums, and artists.</p>
             </header>
             <div className="flex items-center mb-8">
                 <div className="flex gap-2">
@@ -51,8 +51,8 @@ export default function LibraryTabs() {
                                 href={href}
                                 className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-bold transition-all ${
                                     isActive
-                                        ? 'bg-white text-gray-950'
-                                        : 'bg-gray-800/80 text-gray-400 hover:bg-gray-700 hover:text-white border border-gray-700/50'
+                                        ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-950'
+                                        : 'bg-gray-200/80 dark:bg-gray-800/80 text-gray-500 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white border border-gray-300/50 dark:border-gray-700/50'
                                 }`}
                             >
                                 <Icon className="w-3.5 h-3.5" />

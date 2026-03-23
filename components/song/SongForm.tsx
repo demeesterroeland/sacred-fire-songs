@@ -355,7 +355,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
     };
 
     return (
-        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6 bg-gray-900 border border-white/10 p-6 rounded-2xl max-w-2xl mx-auto shadow-xl">
+        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 p-6 rounded-2xl max-w-2xl mx-auto shadow-xl">
             <div className="space-y-4">
                 {/* File Upload Toggle Section */}
                 {/* File Upload Section */}
@@ -365,7 +365,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                         <button
                             type="button"
                             onClick={() => setShowUpload(false)}
-                            className="absolute top-2 right-2 text-gray-400 hover:text-white"
+                            className="absolute top-2 right-2 text-gray-400 hover:text-gray-900 dark:hover:text-white"
                         >
                             <span className="material-symbols-outlined text-sm">close</span>
                         </button>
@@ -375,18 +375,18 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                                 Upload a <span className="bg-blue-500/30 px-1 rounded font-mono">.cho</span> or <span className="bg-blue-500/30 px-1 rounded font-mono">.txt</span> file. Title and author will be detected automatically.
                             </p>
                         </div>
-                        <label className="w-full border-2 border-dashed border-gray-600 hover:border-indigo-500/50 rounded-2xl p-8 flex flex-col items-center justify-center gap-3 transition-colors cursor-pointer bg-gray-800/50 group">
+                        <label className="w-full border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-indigo-500/50 rounded-2xl p-8 flex flex-col items-center justify-center gap-3 transition-colors cursor-pointer bg-gray-100/50 dark:bg-gray-800/50 group">
                             <input
                                 type="file"
                                 accept=".cho,.txt,.pro,.chordpro"
                                 className="hidden"
                                 onChange={handleFileUpload}
                             />
-                            <div className="bg-gray-700/50 group-hover:bg-gray-700 p-4 rounded-full transition-colors">
-                                <span className="material-symbols-outlined text-3xl text-gray-400 group-hover:text-white">cloud_upload</span>
+                            <div className="bg-gray-200/50 dark:bg-gray-700/50 group-hover:bg-gray-300 dark:group-hover:bg-gray-700 p-4 rounded-full transition-colors">
+                                <span className="material-symbols-outlined text-3xl text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white">cloud_upload</span>
                             </div>
                             <div className="text-center">
-                                <p className="text-white font-semibold group-hover:text-indigo-300">Tap to select file</p>
+                                <p className="text-gray-900 dark:text-white font-semibold group-hover:text-indigo-300">Tap to select file</p>
                                 <p className="text-gray-500 text-xs mt-1">ChordPro files only</p>
                             </div>
                         </label>
@@ -425,13 +425,13 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
 
                 {/* 1. Title */}
                 <div className="space-y-2">
-                    <label htmlFor="title" className="block text-sm font-medium text-gray-300 p-1">
+                    <label htmlFor="title" className="block text-sm font-medium text-gray-600 dark:text-gray-300 p-1">
                         Song Title
                     </label>
                     <input
                         id="title"
                         {...register('title', { required: 'Title is required' })}
-                        className="w-full bg-[#1d1c26] border border-[#3f3d52] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all placeholder:text-[#a19eb7]/50"
+                        className="w-full bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all placeholder:text-gray-400 dark:placeholder:text-[#a19eb7]/50"
                         placeholder="e.g. Grandmother Earth"
                     />
                     {errors.title && <p className="text-red-400 text-sm">{errors.title.message}</p>}
@@ -439,13 +439,13 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
 
                 {/* 2. Author (optional) */}
                 <div className="space-y-2">
-                    <label htmlFor="author" className="block text-sm font-medium text-gray-300 p-1">
+                    <label htmlFor="author" className="block text-sm font-medium text-gray-600 dark:text-gray-300 p-1">
                         Author/Composer <span className="text-gray-500 font-normal">(optional)</span>
                     </label>
                     <input
                         id="author"
                         {...register('author')}
-                        className="w-full bg-[#1d1c26] border border-[#3f3d52] rounded-lg px-4 py-3 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all placeholder:text-[#a19eb7]/50"
+                        className="w-full bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all placeholder:text-gray-400 dark:placeholder:text-[#a19eb7]/50"
                         placeholder="e.g. Traditional or Artist Name"
                     />
                 </div>
@@ -454,13 +454,13 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                 <div className="space-y-2 mt-2">
                     <div className="flex justify-between items-end pb-2">
                         <div>
-                            <h3 className="text-white text-lg font-bold leading-tight tracking-tight">Lyrics & chords</h3>
+                            <h3 className="text-gray-900 dark:text-white text-lg font-bold leading-tight tracking-tight">Lyrics & chords</h3>
                             <p className="text-[#a19eb7] text-xs font-normal mt-1">Use brackets [] for chords: eg. <span className="font-mono text-primary">[Dm]</span>Abre tus alas <span className="font-mono text-primary">[A7]</span>pajaro volar <span className="font-mono text-primary">[Dm]</span></p>
                         </div>
                         <span className="material-symbols-outlined text-[#a19eb7] cursor-pointer">help_outline</span>
                     </div>
 
-                    <div className="bg-[#1d1c26] border border-[#3f3d52] rounded-lg focus-within:ring-2 focus-within:ring-primary focus-within:border-primary transition-all h-[400px]">
+                    <div className="bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg focus-within:ring-2 focus-within:ring-primary focus-within:border-primary transition-all h-[400px]">
                         <ChordProEditor
                             {...register('content', { required: 'Content is required' })}
                             value={watch('content') || ''}
@@ -485,7 +485,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                             <div className="relative">
                                 <select
                                     {...register('key')}
-                                    className="w-full bg-[#1d1c26] border border-[#3f3d52] rounded-lg px-2 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-blue-500 appearance-none"
+                                    className="w-full bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg px-2 py-2 text-xs text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500 appearance-none"
                                 >
                                     <option value="">(Select Key)</option>
                                     {['C', 'Cm', 'C#', 'Db', 'D', 'Dm', 'Eb', 'E', 'Em', 'F', 'Fm', 'F#', 'Gb', 'G', 'Gm', 'G#', 'Ab', 'A', 'Am', 'Bb', 'B', 'Bm'].map(k => (
@@ -502,7 +502,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                             <div className="relative">
                                 <select
                                     {...register('capo')}
-                                    className="w-full bg-[#1d1c26] border border-[#3f3d52] rounded-lg px-2 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-blue-500 appearance-none"
+                                    className="w-full bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg px-2 py-2 text-xs text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500 appearance-none"
                                 >
                                     <option value="">(No Capo)</option>
                                     {Array.from({ length: 12 }, (_, i) => i + 1).map(i => (
@@ -519,7 +519,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                             <div className="relative">
                                 <select
                                     {...register('tuning')}
-                                    className="w-full bg-[#1d1c26] border border-[#3f3d52] rounded-lg px-2 py-2 text-xs text-white focus:outline-none focus:ring-1 focus:ring-blue-500 appearance-none"
+                                    className="w-full bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg px-2 py-2 text-xs text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500 appearance-none"
                                 >
                                     <option value="">(Select Tuning)</option>
                                     <option value="Standard">Standard</option>
@@ -561,7 +561,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                             </div>
                             <input
                                 {...register('youtubeLink')}
-                                className="w-full pl-11 bg-[#1d1c26] border border-[#3f3d52] rounded-lg h-12 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all placeholder:text-[#a19eb7]/50 text-sm"
+                                className="w-full pl-11 bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg h-12 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all placeholder:text-gray-400 dark:placeholder:text-[#a19eb7]/50 text-sm"
                                 placeholder="Paste YouTube link"
                             />
                         </div>
@@ -572,7 +572,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                             </div>
                             <input
                                 {...register('spotifyLink')}
-                                className="w-full pl-11 bg-[#1d1c26] border border-[#3f3d52] rounded-lg h-12 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all placeholder:text-[#a19eb7]/50 text-sm"
+                                className="w-full pl-11 bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg h-12 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all placeholder:text-gray-400 dark:placeholder:text-[#a19eb7]/50 text-sm"
                                 placeholder="Paste Spotify link"
                             />
                         </div>
@@ -585,7 +585,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                             </div>
                             <input
                                 {...register('soundcloudLink')}
-                                className="w-full pl-11 bg-[#1d1c26] border border-[#3f3d52] rounded-lg h-12 text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all placeholder:text-[#a19eb7]/50 text-sm"
+                                className="w-full pl-11 bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg h-12 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all placeholder:text-gray-400 dark:placeholder:text-[#a19eb7]/50 text-sm"
                                 placeholder="Paste Soundcloud link"
                             />
                         </div>
@@ -608,7 +608,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
             </div>
 
             {serverError && (
-                <div className="p-3 bg-red-900/30 border border-red-800 rounded-lg text-red-200 text-sm">
+                <div className="p-3 bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-800 rounded-lg text-red-700 dark:text-red-200 text-sm">
                     Error: {serverError}
                 </div>
             )}
@@ -618,7 +618,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                     type="submit"
                     onClick={() => setValue('isPublic', false)}
                     disabled={mutation.isPending}
-                    className="flex-1 bg-transparent border-2 border-[#3f3d52] text-[#a19eb7] hover:text-white hover:border-white/20 font-bold py-3 rounded-xl active:scale-[0.98] transition-all disabled:opacity-50 flex justify-center items-center gap-2"
+                    className="flex-1 bg-transparent border-2 border-gray-300 dark:border-[#3f3d52] text-gray-500 dark:text-[#a19eb7] hover:text-gray-900 dark:hover:text-white hover:border-gray-400 dark:hover:border-white/20 font-bold py-3 rounded-xl active:scale-[0.98] transition-all disabled:opacity-50 flex justify-center items-center gap-2"
                 >
                     {mutation.isPending && watch('isPublic') === false ? (
                         <>

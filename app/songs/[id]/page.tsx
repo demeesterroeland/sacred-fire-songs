@@ -128,11 +128,11 @@ export default function SongDetailPage() {
     return (
         <div className="flex flex-col min-h-screen">
             {/* Mobile Header (Visible only on mobile < lg) */}
-            <header className="lg:hidden flex items-center justify-between px-4 py-3 sticky top-0 bg-gray-900/95 backdrop-blur-md z-30 border-b border-white/5 shadow-lg">
-                <Link href="/" className="p-2 -ml-2 text-gray-400 hover:text-white transition-colors">
+            <header className="lg:hidden flex items-center justify-between px-4 py-3 sticky top-0 bg-gray-100/95 dark:bg-gray-900/95 backdrop-blur-md z-30 border-b border-gray-200 dark:border-white/5 shadow-lg">
+                <Link href="/" className="p-2 -ml-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
                     <ArrowLeft className="w-5 h-5" />
                 </Link>
-                <h1 className="font-bold text-sm tracking-tight text-white truncate mx-4 flex-1 text-center">
+                <h1 className="font-bold text-sm tracking-tight text-gray-900 dark:text-white truncate mx-4 flex-1 text-center">
                     {song.title}
                 </h1>
                 <div className="flex items-center gap-1">
@@ -147,7 +147,7 @@ export default function SongDetailPage() {
                         <div className="relative">
                             <button
                                 onClick={() => setIsOverflowOpen(!isOverflowOpen)}
-                                className="p-2 text-gray-400 hover:text-white transition-colors"
+                                className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
                                 aria-label="More actions"
                             >
                                 <MoreHorizontal className="w-5 h-5" />
@@ -155,12 +155,12 @@ export default function SongDetailPage() {
                             {isOverflowOpen && (
                                 <>
                                     <div className="fixed inset-0 z-40" onClick={() => setIsOverflowOpen(false)} />
-                                    <div className="absolute right-0 top-full mt-1 z-50 bg-gray-900 border border-gray-700/50 rounded-xl overflow-hidden shadow-2xl shadow-black/50 min-w-[180px]">
+                                    <div className="absolute right-0 top-full mt-1 z-50 bg-gray-100 dark:bg-gray-900 border border-gray-300/50 dark:border-gray-700/50 rounded-xl overflow-hidden shadow-2xl shadow-black/50 min-w-[180px]">
                                         {(song.owner_id === user?.id || isAdmin) && (
                                             <Link
                                                 href={`/songs/${id}/edit`}
                                                 onClick={() => setIsOverflowOpen(false)}
-                                                className="flex items-center gap-3 px-4 py-3 hover:bg-gray-800/50 transition-colors text-gray-300"
+                                                className="flex items-center gap-3 px-4 py-3 hover:bg-gray-200/50 dark:hover:bg-gray-800/50 transition-colors text-gray-700 dark:text-gray-300"
                                             >
                                                 <Edit2 className="w-4 h-4" />
                                                 <span className="text-sm font-medium">Edit</span>
@@ -183,10 +183,10 @@ export default function SongDetailPage() {
                 </div>
             </header>
 
-            <main className="flex-1 min-w-0 overflow-y-auto bg-[#0b0f1a]">
+            <main className="flex-1 min-w-0 overflow-y-auto bg-white dark:bg-[#0b0f1a]">
 
                 {/* Desktop Page Header (Title, Actions) - Visible only on desktop >= lg */}
-                <div className="hidden lg:flex justify-between items-center px-8 py-4 border-b border-gray-800/50 bg-[#0d121f]/50 sticky top-0 backdrop-blur-md z-10 transition-all">
+                <div className="hidden lg:flex justify-between items-center px-8 py-4 border-b border-gray-200/50 dark:border-gray-800/50 bg-white/50 dark:bg-[#0d121f]/50 sticky top-0 backdrop-blur-md z-10 transition-all">
                     {/* Title and Artist */}
                     <div className="flex items-center gap-6">
                         <div className="flex flex-col gap-1">
@@ -206,7 +206,7 @@ export default function SongDetailPage() {
                                 </div>
                             </div>
                             <div className="flex items-center gap-3">
-                                <p className="text-gray-400 text-sm font-medium">by {song.original_author || 'Traditional'}</p>
+                                <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">by {song.original_author || 'Traditional'}</p>
                                 {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                                 {categories.map((cat: any) => {
                                     const color = getCategoryColor(cat.slug);
@@ -232,7 +232,7 @@ export default function SongDetailPage() {
                         )}
                         {(song.owner_id === user?.id || isAdmin) && (
                             <Link href={`/songs/${id}/edit`}>
-                                <button className="flex items-center gap-2 px-3 py-2 bg-gray-800 hover:bg-gray-700 text-gray-200 rounded-lg text-sm font-bold border border-gray-700 transition-all">
+                                <button className="flex items-center gap-2 px-3 py-2 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg text-sm font-bold border border-gray-300 dark:border-gray-700 transition-all">
                                     <Edit2 className="w-4 h-4" /> <span className="hidden xl:inline">Edit</span>
                                 </button>
                             </Link>
@@ -248,14 +248,14 @@ export default function SongDetailPage() {
                         <button
                             onClick={handleToggleFavorite}
                             aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
-                            className={`p-2 rounded-full transition-all duration-300 ${isFav ? 'text-amber-400 heart-glow' : 'text-gray-600 hover:text-amber-400/60'}`}
+                            className={`p-2 rounded-full transition-all duration-300 ${isFav ? 'text-amber-400 heart-glow' : 'text-gray-500 dark:text-gray-400 hover:text-amber-400/60'}`}
                         >
                             <Heart className={`w-5 h-5 transition-all duration-200 ${isFav ? 'fill-amber-400' : ''}`} strokeWidth={1.5} />
                         </button>
-                        <Link href="/" className="p-2 text-gray-400 hover:text-white transition-colors">
+                        <Link href="/" className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
                             <ArrowLeft className="w-5 h-5" />
                         </Link>
-                        <div className="border-l border-gray-800/50 pl-3 ml-1">
+                        <div className="border-l border-gray-200/50 dark:border-gray-800/50 pl-3 ml-1">
                             <UserProfile layout="header" showText={false} />
                         </div>
                     </div>
@@ -270,7 +270,7 @@ export default function SongDetailPage() {
                             <div className="space-y-1">
                                 <div className="flex flex-wrap items-baseline gap-x-3">
                                     <h1 className="text-4xl font-black text-[#ff4400] tracking-tight">{song.title}</h1>
-                                    <p className="text-gray-400 text-base font-medium">by {song.original_author || 'Traditional'}</p>
+                                    <p className="text-gray-500 dark:text-gray-400 text-base font-medium">by {song.original_author || 'Traditional'}</p>
                                 </div>
                             </div>
 
@@ -315,7 +315,7 @@ export default function SongDetailPage() {
                             )}
                             {(song.owner_id === user?.id || isAdmin) && (
                                 <Link href={`/songs/${id}/edit`}>
-                                    <button className="flex items-center gap-2 px-3 py-2 bg-gray-800 hover:bg-gray-700 text-gray-200 rounded-lg text-sm font-bold border border-gray-700 transition-all">
+                                    <button className="flex items-center gap-2 px-3 py-2 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg text-sm font-bold border border-gray-300 dark:border-gray-700 transition-all">
                                         <Edit2 className="w-4 h-4" /> <span className="sm:inline">Edit</span>
                                     </button>
                                 </Link>
@@ -325,18 +325,18 @@ export default function SongDetailPage() {
 
                     {/* Metadata Grid (Key, Capo, Tuning) */}
                     {(currentVersion?.key || currentVersion?.capo || (currentVersion?.tuning && currentVersion.tuning !== 'Standard')) && (
-                        <div className="grid grid-cols-3 gap-6 py-6 border-y border-gray-800/30">
+                        <div className="grid grid-cols-3 gap-6 py-6 border-y border-gray-200/30 dark:border-gray-800/30">
                             <div className="text-center space-y-2">
                                 <p className="text-[10px] uppercase font-black text-gray-500 tracking-[0.25em]">KEY</p>
                                 <p className="text-2xl font-mono font-bold text-amber-500">{currentVersion?.key || '-'}</p>
                             </div>
                             <div className="text-center space-y-2">
                                 <p className="text-[10px] uppercase font-black text-gray-500 tracking-[0.25em]">CAPO</p>
-                                <p className="text-lg font-bold text-gray-300">{currentVersion?.capo ? `${currentVersion.capo}nd fret` : '-'}</p>
+                                <p className="text-lg font-bold text-gray-700 dark:text-gray-300">{currentVersion?.capo ? `${currentVersion.capo}nd fret` : '-'}</p>
                             </div>
                             <div className="text-center space-y-2">
                                 <p className="text-[10px] uppercase font-black text-gray-500 tracking-[0.25em]">TUNING</p>
-                                <p className="text-base font-bold text-gray-300 tracking-wider">{currentVersion?.tuning || 'Standard'}</p>
+                                <p className="text-base font-bold text-gray-700 dark:text-gray-300 tracking-wider">{currentVersion?.tuning || 'Standard'}</p>
                             </div>
                         </div>
                     )}
@@ -352,9 +352,9 @@ export default function SongDetailPage() {
 
                     {/* Player Section */}
                     {(currentVersion?.youtube_url || currentVersion?.spotify_url || currentVersion?.soundcloud_url) && (
-                        <div className="pt-8 border-t border-gray-800/50">
+                        <div className="pt-8 border-t border-gray-200/50 dark:border-gray-800/50">
                             <h3 className="text-xs font-black text-gray-600 uppercase tracking-[0.2em] mb-6">Recordings</h3>
-                            <div className="w-full aspect-video bg-black/40 rounded-2xl overflow-hidden border border-gray-800 shadow-2xl">
+                            <div className="w-full aspect-video bg-black/40 rounded-2xl overflow-hidden border border-gray-200 dark:border-gray-800 shadow-2xl">
                                 <MediaEmbeds
                                     youtubeUrl={currentVersion.youtube_url}
                                     spotifyUrl={currentVersion.spotify_url}

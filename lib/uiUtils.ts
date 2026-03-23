@@ -140,8 +140,8 @@ export const getCategoryStyles = (color: string) => {
     },
     gray: {
       active: 'bg-gray-600 text-white border-gray-500',
-      inactive: 'bg-gray-700/50 text-gray-400 border-gray-700 hover:bg-gray-700',
-      pill: 'bg-gray-800 text-gray-400 border border-gray-700'
+      inactive: 'bg-gray-300/50 dark:bg-gray-700/50 text-gray-500 dark:text-gray-400 border-gray-300 dark:border-gray-700 hover:bg-gray-300 dark:hover:bg-gray-700',
+      pill: 'bg-gray-200 dark:bg-gray-800 text-gray-500 dark:text-gray-400 border border-gray-300 dark:border-gray-700'
     },
   };
   return styles[color] || styles.gray;

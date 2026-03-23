@@ -50,7 +50,7 @@ export default function CategorySelector({ selectedIds, onChange }: CategorySele
   }
 
   return (
-    <div className="space-y-4 bg-[#1d1c26] border border-[#3f3d52] rounded-lg p-4">
+    <div className="space-y-4 bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg p-4">
       {Object.entries(groupedCategories).map(([parentName, groupCats]) => (
         <div key={parentName} className="space-y-2">
           <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">{parentName}</h4>
@@ -69,7 +69,7 @@ export default function CategorySelector({ selectedIds, onChange }: CategorySele
                                         flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all border
                                         ${isSelected
                       ? styles.pill + ' ring-1 ring-inset ring-white/10'
-                      : 'bg-[#2a2836] text-gray-400 border-transparent hover:border-gray-600 hover:bg-[#353342]'
+                      : 'bg-gray-200 dark:bg-[#2a2836] text-gray-500 dark:text-gray-400 border-transparent hover:border-gray-400 dark:hover:border-gray-600 hover:bg-gray-300 dark:hover:bg-[#353342]'
                     }
                                     `}
                 >

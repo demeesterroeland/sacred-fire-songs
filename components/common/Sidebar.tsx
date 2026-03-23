@@ -34,20 +34,20 @@ export default function Sidebar() {
                 style={{ top: 'var(--env-banner-height, 0px)', height: `calc(100vh - var(--env-banner-height, 0px))` }}
                 className={`
                     fixed lg:sticky left-0 z-50
-                    flex flex-col bg-gray-900 border-r border-gray-800 transition-all duration-300 ease-in-out
+                    flex flex-col bg-gray-100 dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-all duration-300 ease-in-out
                     ${isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
                     w-[260px]
                 `}
             >
                 {/* Header: Logo & Branding */}
-                <div className="p-4 flex items-center border-b border-gray-800/50 bg-gray-900/50 h-[72px] justify-between">
+                <div className="p-4 flex items-center border-b border-gray-200/50 dark:border-gray-800/50 bg-gray-100/50 dark:bg-gray-900/50 h-[72px] justify-between">
                     {/* Desktop: flame logo + site title */}
                     <Link href="/" className="hidden lg:flex items-center gap-3 group/logo shrink-0" onClick={() => setIsOpen(false)}>
-                        <div className="w-10 h-10 bg-gradient-to-br from-red-700 to-orange-600 rounded-full flex items-center justify-center shadow-lg shadow-red-900/30 ring-1 ring-white/10 group-hover/logo:scale-110 transition-transform">
+                        <div className="w-10 h-10 bg-gradient-to-br from-red-700 to-orange-600 rounded-full flex items-center justify-center shadow-lg shadow-red-900/30 ring-1 ring-black/10 dark:ring-white/10 group-hover/logo:scale-110 transition-transform">
                             <Flame className="text-white w-6 h-6 fill-current" />
                         </div>
                         <div className="flex flex-col">
-                            <span className="font-bold text-lg leading-tight text-white tracking-tight group-hover/logo:text-red-500 transition-colors">
+                            <span className="font-bold text-lg leading-tight text-gray-900 dark:text-white tracking-tight group-hover/logo:text-red-500 transition-colors">
                                 {getSiteTitle()}
                             </span>
                         </div>
@@ -57,7 +57,7 @@ export default function Sidebar() {
                     <div className="lg:hidden flex items-center gap-3 shrink-0 min-w-0">
                         {user ? (
                             <>
-                                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-sm font-bold text-white ring-1 ring-white/10 shadow-inner relative overflow-hidden shrink-0">
+                                <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-sm font-bold text-white ring-1 ring-black/10 dark:ring-white/10 shadow-inner relative overflow-hidden shrink-0">
                                     {user.avatar_url ? (
                                         <Image src={user.avatar_url} alt={userDisplayName} fill className="object-cover" sizes="36px" />
                                     ) : (
@@ -65,13 +65,13 @@ export default function Sidebar() {
                                     )}
                                 </div>
                                 <div className="flex flex-col min-w-0">
-                                    <p className="text-sm font-bold text-white truncate">{userDisplayName}</p>
-                                    <p className="text-xs text-blue-400/80 font-medium">{userRole}</p>
+                                    <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{userDisplayName}</p>
+                                    <p className="text-xs text-blue-500 dark:text-blue-400/80 font-medium">{userRole}</p>
                                 </div>
                             </>
                         ) : (
                             <Link href="/" className="flex items-center gap-3 group/logo" onClick={() => setIsOpen(false)}>
-                                <div className="w-10 h-10 bg-gradient-to-br from-red-700 to-orange-600 rounded-full flex items-center justify-center shadow-lg shadow-red-900/30 ring-1 ring-white/10 group-hover/logo:scale-110 transition-transform">
+                                <div className="w-10 h-10 bg-gradient-to-br from-red-700 to-orange-600 rounded-full flex items-center justify-center shadow-lg shadow-red-900/30 ring-1 ring-black/10 dark:ring-white/10 group-hover/logo:scale-110 transition-transform">
                                     <Flame className="text-white w-6 h-6 fill-current" />
                                 </div>
                             </Link>
@@ -81,7 +81,7 @@ export default function Sidebar() {
                     {/* Mobile Close Toggle - Positioned at Top Right of Sidebar */}
                     <button
                         onClick={() => setIsOpen(false)}
-                        className="lg:hidden flex items-center gap-2 text-gray-400 hover:text-white transition-colors p-1.5 pr-3 rounded-xl hover:bg-gray-800 group border border-transparent hover:border-gray-700"
+                        className="lg:hidden flex items-center gap-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors p-1.5 pr-3 rounded-xl hover:bg-gray-200 dark:hover:bg-gray-800 group border border-transparent hover:border-gray-300 dark:hover:border-gray-700"
                         title="Close Menu"
                     >
                         <IndentDecrease className="w-6 h-6" />
@@ -103,18 +103,18 @@ export default function Sidebar() {
                                             className={`w-full flex items-center gap-3 p-2 px-3 rounded-lg transition-colors ${
                                                 isCreateOpen
                                                     ? 'text-red-400 bg-red-500/10'
-                                                    : 'text-gray-400 hover:text-white hover:bg-gray-800'
+                                                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-800'
                                             }`}
                                         >
                                             <Icon className="w-5 h-5" />
                                             <span className="text-sm font-medium">{item.label}</span>
                                         </button>
                                         {isCreateOpen && (
-                                            <div className="ml-4 mt-1 space-y-0.5 border-l border-gray-800 pl-3">
+                                            <div className="ml-4 mt-1 space-y-0.5 border-l border-gray-200 dark:border-gray-800 pl-3">
                                                 <Link
                                                     href={`/songs/add?next=${encodeURIComponent(pathname)}`}
                                                     onClick={() => { setIsCreateOpen(false); setIsOpen(false); }}
-                                                    className="flex items-center gap-3 p-2 px-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors group"
+                                                    className="flex items-center gap-3 p-2 px-3 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
                                                 >
                                                     <Music className="w-4 h-4 group-hover:text-red-400" />
                                                     <span className="text-sm font-medium">Add Song</span>
@@ -122,7 +122,7 @@ export default function Sidebar() {
                                                 <Link
                                                     href="/library/playlists/add"
                                                     onClick={() => { setIsCreateOpen(false); setIsOpen(false); }}
-                                                    className="flex items-center gap-3 p-2 px-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors group"
+                                                    className="flex items-center gap-3 p-2 px-3 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group"
                                                 >
                                                     <ListMusic className="w-4 h-4 group-hover:text-purple-400" />
                                                     <span className="text-sm font-medium">Create Playlist</span>
@@ -149,36 +149,36 @@ export default function Sidebar() {
                     </div>
 
                     {/* Separator + Personal Menu (mobile only) */}
-                    <div className="lg:hidden mt-4 pt-4 border-t border-gray-800/50">
+                    <div className="lg:hidden mt-4 pt-4 border-t border-gray-200/50 dark:border-gray-800/50">
                         {user ? (
                             <>
                                 <p className="text-[10px] font-bold uppercase tracking-[0.15em] text-gray-500 px-3 mb-2">Personal</p>
 
                                 {/* Personal Menu Items */}
                                 <div className="space-y-1">
-                                    <Link href="/account/settings" onClick={() => setIsOpen(false)} className="flex items-center gap-3 p-2 px-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors group">
+                                    <Link href="/account/settings" onClick={() => setIsOpen(false)} className="flex items-center gap-3 p-2 px-3 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group">
                                         <SlidersHorizontal className="w-4 h-4 group-hover:text-blue-400" />
                                         <span className="text-sm font-medium">Account Settings</span>
                                     </Link>
-                                    <Link href="/songs?favorites=true" onClick={() => setIsOpen(false)} className="flex items-center gap-3 p-2 px-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors group">
+                                    <Link href="/songs?favorites=true" onClick={() => setIsOpen(false)} className="flex items-center gap-3 p-2 px-3 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group">
                                         <Heart className="w-4 h-4 group-hover:text-red-400" />
                                         <span className="text-sm font-medium">My Favorites</span>
                                     </Link>
-                                    <Link href="/songs?status=draft" onClick={() => setIsOpen(false)} className="flex items-center gap-3 p-2 px-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors group">
+                                    <Link href="/songs?status=draft" onClick={() => setIsOpen(false)} className="flex items-center gap-3 p-2 px-3 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group">
                                         <FileText className="w-4 h-4 group-hover:text-orange-400" />
                                         <span className="text-sm font-medium">My Drafts</span>
                                     </Link>
-                                    <Link href="/library/playlists" onClick={() => setIsOpen(false)} className="flex items-center gap-3 p-2 px-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors group">
+                                    <Link href="/library/playlists" onClick={() => setIsOpen(false)} className="flex items-center gap-3 p-2 px-3 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group">
                                         <ListMusic className="w-4 h-4 group-hover:text-purple-400" />
                                         <span className="text-sm font-medium">My Playlists</span>
                                     </Link>
-                                    <Link href="/library/recently-viewed" onClick={() => setIsOpen(false)} className="flex items-center gap-3 p-2 px-3 rounded-lg text-gray-400 hover:text-white hover:bg-gray-800 transition-colors group">
+                                    <Link href="/library/recently-viewed" onClick={() => setIsOpen(false)} className="flex items-center gap-3 p-2 px-3 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group">
                                         <Clock className="w-4 h-4 group-hover:text-amber-400" />
                                         <span className="text-sm font-medium">Recently Viewed</span>
                                     </Link>
                                 </div>
 
-                                <div className="h-px bg-gray-800 my-2 mx-1" />
+                                <div className="h-px bg-gray-200 dark:bg-gray-800 my-2 mx-1" />
 
                                 {/* Sign Out */}
                                 <button
@@ -187,14 +187,14 @@ export default function Sidebar() {
                                         setIsOpen(false);
                                         router.refresh();
                                     }}
-                                    className="w-full flex items-center gap-3 p-2 px-3 rounded-lg text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-colors group"
+                                    className="w-full flex items-center gap-3 p-2 px-3 rounded-lg text-gray-500 dark:text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-colors group"
                                 >
                                     <LogOut className="w-4 h-4" />
                                     <span className="text-sm font-medium">Sign Out</span>
                                 </button>
 
                                 {process.env.NODE_ENV === 'development' && (
-                                    <div className="mt-4 pt-4 border-t border-gray-800/80 px-1">
+                                    <div className="mt-4 pt-4 border-t border-gray-200/80 dark:border-gray-800/80 px-1">
                                         <QuickLogin />
                                     </div>
                                 )}
@@ -214,7 +214,7 @@ export default function Sidebar() {
 
                     {/* Filters (Dynamic Taxonomy) */}
                     {pathname === '/songs' && (
-                        <div className="mt-6 pt-6 border-t border-gray-800/50">
+                        <div className="mt-6 pt-6 border-t border-gray-200/50 dark:border-gray-800/50">
                             <Suspense fallback={<div className="text-gray-500 text-xs px-4">Loading filters...</div>}>
                                 <LibrarySidebar />
                             </Suspense>
@@ -223,7 +223,7 @@ export default function Sidebar() {
                 </nav>
 
                 {/* Footer */}
-                <div className="p-4 border-t border-gray-800/30 bg-gray-950/20">
+                <div className="p-4 border-t border-gray-200/30 dark:border-gray-800/30 bg-gray-50/20 dark:bg-gray-950/20">
                     <p className="text-[9px] text-center font-mono uppercase tracking-[0.2em] opacity-20 mt-2">
                         Sacred Fire v1.0
                     </p>

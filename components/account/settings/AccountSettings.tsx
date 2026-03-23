@@ -45,8 +45,8 @@ export default function AccountSettings({ user, profile }: AccountSettingsProps)
     <main className="flex-1 p-4 md:p-8 lg:p-12">
       <div className="max-w-4xl mx-auto">
         <header className="mb-12">
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2 text-white">Account Settings</h1>
-          <p className="text-slate-400">Manage your profile, account security, and data preferences.</p>
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2 text-gray-900 dark:text-white">Account Settings</h1>
+          <p className="text-gray-500 dark:text-slate-400">Manage your profile, account security, and data preferences.</p>
         </header>
 
         {/* Tabs Navigation — horizontally scrollable on mobile */}
@@ -58,8 +58,8 @@ export default function AccountSettings({ user, profile }: AccountSettingsProps)
                 onClick={() => setActiveTab(id)}
                 className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-bold transition-all whitespace-nowrap shrink-0 ${
                   activeTab === id
-                    ? "bg-white text-gray-950"
-                    : "bg-gray-800/80 text-gray-400 hover:bg-gray-700 hover:text-white border border-gray-700/50"
+                    ? "bg-gray-900 text-white dark:bg-white dark:text-gray-950"
+                    : "bg-gray-200/80 text-gray-500 hover:bg-gray-300 hover:text-gray-900 border border-gray-300/50 dark:bg-gray-800/80 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white dark:border-gray-700/50"
                 }`}
               >
                 <Icon className="w-3.5 h-3.5" />
@@ -68,7 +68,7 @@ export default function AccountSettings({ user, profile }: AccountSettingsProps)
             ))}
           </div>
           {/* Right-fade scroll hint — hidden on md+ where all tabs fit */}
-          <div className="pointer-events-none absolute inset-y-0 -right-4 md:right-0 w-12 bg-gradient-to-l from-[#0a0a0a] to-transparent md:hidden" />
+          <div className="pointer-events-none absolute inset-y-0 -right-4 md:right-0 w-12 bg-gradient-to-l from-white to-transparent dark:from-[#0a0a0a] md:hidden" />
         </div>
 
         {/* Tab Content */}

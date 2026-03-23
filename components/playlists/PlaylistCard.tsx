@@ -38,10 +38,10 @@ export function PlaylistCard({ id, title, subtitle, isPublic = false, descriptio
         <div className="relative">
             <Link
                 href={`/library/playlists/${id}`}
-                className="flex items-center gap-4 p-4 bg-gray-900/40 border border-gray-800 rounded-2xl group hover:bg-gray-800/60 hover:border-gray-700 transition-all hover:-translate-y-0.5"
+                className="flex items-center gap-4 p-4 bg-white/60 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-800 rounded-2xl group hover:bg-gray-100/60 dark:hover:bg-gray-800/60 hover:border-gray-300 dark:hover:border-gray-700 transition-all hover:-translate-y-0.5"
                 onClick={e => isRenaming && e.preventDefault()}
             >
-                <div className="w-12 h-12 bg-gray-800 rounded-xl flex items-center justify-center group-hover:bg-gray-700 transition-colors shrink-0">
+                <div className="w-12 h-12 bg-gray-200 dark:bg-gray-800 rounded-xl flex items-center justify-center group-hover:bg-gray-300 dark:group-hover:bg-gray-700 transition-colors shrink-0">
                     <ListMusic className="w-6 h-6 text-gray-400" />
                 </div>
 
@@ -58,11 +58,11 @@ export function PlaylistCard({ id, title, subtitle, isPublic = false, descriptio
                             }}
                             onClick={e => e.preventDefault()}
                             autoFocus
-                            className="w-[95%] bg-gray-800 border border-amber-500/50 rounded-lg px-2 py-1 text-sm font-bold text-gray-100 outline-none focus:border-amber-500"
+                            className="w-[95%] bg-gray-100 dark:bg-gray-800 border border-amber-500/50 rounded-lg px-2 py-1 text-sm font-bold text-gray-900 dark:text-gray-100 outline-none focus:border-amber-500"
                         />
                     ) : (
                         <p className="truncate">
-                            <span className="font-bold text-gray-100 group-hover:text-white transition-colors">{optimisticTitle}</span>
+                            <span className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">{optimisticTitle}</span>
                             {description && <span className="ml-2 text-xs font-normal text-gray-500">· {description}</span>}
                         </p>
                     )}

@@ -37,17 +37,17 @@ const ColorPill = ({
 
     if (isActive) {
       return (
-        <div className={`${baseClass} text-white bg-gray-800 border-gray-700 shadow-sm`}>
+        <div className={`${baseClass} text-gray-900 dark:text-white bg-gray-200 dark:bg-gray-800 border-gray-300 dark:border-gray-700 shadow-sm`}>
           <div className="flex items-center gap-2">
             {renderCategoryIcon(icon_name, emoji, 'w-3.5 h-3.5', 'text-sm')}
             <span>{name}</span>
           </div>
-          <span className="text-[9px] font-normal normal-case bg-gray-700 text-white px-1.5 py-0.5 rounded ml-2 border border-gray-600">Match Any</span>
+          <span className="text-[9px] font-normal normal-case bg-gray-300 dark:bg-gray-700 text-gray-900 dark:text-white px-1.5 py-0.5 rounded ml-2 border border-gray-400 dark:border-gray-600">Match Any</span>
         </div>
       );
     }
     return (
-      <div className={`${baseClass} text-gray-400 border-transparent hover:text-white hover:bg-gray-800/50`}>
+      <div className={`${baseClass} text-gray-500 dark:text-gray-400 border-transparent hover:text-gray-900 dark:hover:text-white hover:bg-gray-200/50 dark:hover:bg-gray-800/50`}>
         <div className="flex items-center gap-2">
           {renderCategoryIcon(icon_name, emoji, 'w-3.5 h-3.5 opacity-50 group-hover:opacity-100', 'text-sm opacity-50 group-hover:opacity-100')}
           <span>{name}</span>

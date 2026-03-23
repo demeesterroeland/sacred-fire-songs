@@ -99,9 +99,9 @@ export default function ProfileSettings({ user, profile }: ProfileSettingsProps)
         className="hidden"
       />
 
-      <div className="flex flex-col md:flex-row items-center gap-8 pb-8 border-b border-white/5 opacity-50">
+      <div className="flex flex-col md:flex-row items-center gap-8 pb-8 border-b border-gray-200 dark:border-white/5 opacity-50">
         <div className="relative">
-          <div className="w-24 h-24 rounded-full overflow-hidden bg-slate-800 ring-2 ring-white/10 flex items-center justify-center relative">
+          <div className="w-24 h-24 rounded-full overflow-hidden bg-slate-200 dark:bg-slate-800 ring-2 ring-gray-900/10 dark:ring-white/10 flex items-center justify-center relative">
             {profile?.avatar_url ? (
               <Image 
                 src={profile.avatar_url} 
@@ -117,8 +117,8 @@ export default function ProfileSettings({ user, profile }: ProfileSettingsProps)
         </div>
         <div className="text-center md:text-left">
           <div className="flex items-center gap-2 mb-1">
-            <h3 className="text-lg font-semibold text-white">Avatar</h3>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-white/5 border border-white/10 px-2 py-0.5 rounded-full">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Avatar</h3>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-black/5 dark:bg-white/5 border border-gray-200 dark:border-white/10 px-2 py-0.5 rounded-full">
               Coming soon
             </span>
           </div>
@@ -127,13 +127,13 @@ export default function ProfileSettings({ user, profile }: ProfileSettingsProps)
       </div>
 
       <div className="space-y-2">
-        <label className="text-xs font-semibold text-slate-400 uppercase tracking-wider ml-1">Full Name</label>
+        <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">Full Name</label>
         <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
           <input
             type="text"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
-            className="flex-1 bg-slate-900/50 border border-white/10 px-4 py-3 rounded-xl text-white focus:outline-none focus:border-[#f45d1a] transition-all"
+            className="flex-1 bg-slate-100/50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/10 px-4 py-3 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:border-[#f45d1a] transition-all"
           />
           <button
             onClick={handleSave}
