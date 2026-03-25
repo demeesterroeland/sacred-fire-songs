@@ -55,7 +55,7 @@ export function AccountInfoPanel() {
             {/* Avatar trigger */}
             <button
                 onClick={() => setIsOpen(!isOpen)}
-                className="flex ps-2"
+                className="flex"
                 title={`${displayName} (${user.email})`}
             >
                 <div className={`
@@ -83,7 +83,7 @@ export function AccountInfoPanel() {
 
             {/* Dropdown panel */}
             {isOpen && (
-                <div className="absolute z-50 end-0 top-14 w-[min(360px,calc(100vw-40px))] rounded-3xl bg-gray-100 dark:bg-gray-900 shadow-2xl border border-gray-200 dark:border-gray-800 animate-in fade-in slide-in-from-top-2 duration-150">
+                <div className="fixed sm:absolute z-50 right-2 sm:end-0 top-[var(--navbar-height)] sm:top-14 w-[min(360px,calc(100vw-16px))] rounded-3xl bg-gray-100 dark:bg-gray-900 shadow-2xl border border-gray-200 dark:border-gray-800 animate-in fade-in slide-in-from-top-2 duration-150">
                     {/* User identity card */}
                     <div className="mx-4 mt-4 flex flex-col items-center justify-center gap-3 rounded-t-3xl bg-white dark:bg-gray-800/60 p-6">
                         {/* Large avatar */}

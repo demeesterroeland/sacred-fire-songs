@@ -44,6 +44,7 @@ import { UserPreferencesProvider } from "@/context/UserPreferencesContext";
 import EnvironmentBanner from "@/components/common/EnvironmentBanner";
 import ServiceWorkerRegistrar from "@/components/providers/ServiceWorkerRegistrar";
 import SidebarOverlay from "@/components/common/SidebarOverlay";
+import GlobalSearchModal from "@/components/common/GlobalSearchModal";
 import ThemedToaster from "@/components/providers/ThemedToaster";
 
 // Inline script to prevent flash of wrong theme on load.
@@ -96,10 +97,15 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                   {/* Mobile overlay when sidebar is open */}
                   <SidebarOverlay />
 
-                  <main className="relative overflow-y-auto pb-16 lg:pb-0">
+                  <main className="relative overflow-y-auto pb-16 lg:pb-0 col-start-2">
                     {children}
                   </main>
                 </div>
+
+                {/* Global search modal (non-/songs pages) */}
+                <Suspense>
+                  <GlobalSearchModal />
+                </Suspense>
 
                 {/* Mobile bottom navigation */}
                 <MobileBottomNav />

@@ -11,16 +11,17 @@ type SortByType = 'title' | 'author' | 'newest';
 interface SearchFiltersModalProps {
     isOpen: boolean;
     onClose: () => void;
+    onSubmit?: () => void;
     state: SongFilterState;
     setFilter: <K extends keyof SongFilterState>(key: K, value: SongFilterState[K]) => void;
     resetFilters: () => void;
     sortBy: SortByType;
     setSortBy: (val: SortByType) => void;
     taxonomy: TaxonomyNode[];
-    chordsCount: number;
-    melodyCount: number;
-    favoritesCount: number;
-    mineCount: number;
+    chordsCount?: number;
+    melodyCount?: number;
+    favoritesCount?: number;
+    mineCount?: number;
     hasActiveFilters: boolean;
     isAuthenticated: boolean;
     localSearch: string;
@@ -30,6 +31,7 @@ interface SearchFiltersModalProps {
 export default function SearchFiltersModal({
     isOpen,
     onClose,
+    onSubmit,
     state,
     setFilter,
     resetFilters,
@@ -204,7 +206,7 @@ export default function SearchFiltersModal({
                                     onClick={() => setFilter('favorites', !state.favorites)}
                                     icon={<Heart className={`w-4 h-4 ${state.favorites ? 'fill-amber-400' : ''}`} strokeWidth={1.5} />}
                                     label="Favorites"
-                                    count={favoritesCount > 0 ? favoritesCount : undefined}
+                                    count={favoritesCount ? favoritesCount : undefined}
                                     activeColor="amber"
                                 />
                                 <ToggleCard
@@ -212,7 +214,7 @@ export default function SearchFiltersModal({
                                     onClick={() => setFilter('mine', !state.mine)}
                                     icon={<Music className="w-4 h-4" strokeWidth={1.5} />}
                                     label="My Songs"
-                                    count={mineCount > 0 ? mineCount : undefined}
+                                    count={mineCount ? mineCount : undefined}
                                     activeColor="violet"
                                 />
                             </div>
@@ -231,7 +233,7 @@ export default function SearchFiltersModal({
                                 disabled={!state.chords && chordsCount === 0}
                                 icon={<Guitar className="w-4 h-4" />}
                                 label="Chords"
-                                count={chordsCount > 0 ? chordsCount : undefined}
+                                count={chordsCount ? chordsCount : undefined}
                                 activeColor="amber"
                             />
                             <ToggleCard
@@ -240,7 +242,7 @@ export default function SearchFiltersModal({
                                 disabled={!state.melody && melodyCount === 0}
                                 icon={<Music className="w-4 h-4" />}
                                 label="Melody"
-                                count={melodyCount > 0 ? melodyCount : undefined}
+                                count={melodyCount ? melodyCount : undefined}
                                 activeColor="emerald"
                             />
                         </div>
@@ -257,7 +259,7 @@ export default function SearchFiltersModal({
                         Clear all
                     </button>
                     <button
-                        onClick={onClose}
+                        onClick={onSubmit ?? onClose}
                         className="flex-1 px-4 py-3 rounded-xl font-bold text-sm text-white bg-red-600 hover:bg-red-500 shadow-lg shadow-red-900/20 transition-all"
                     >
                         Show results

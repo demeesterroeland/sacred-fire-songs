@@ -146,9 +146,9 @@ export default function Header() {
             id="app-navbar"
             className="h-[var(--navbar-height)] w-full text-sm sticky top-0 z-50 bg-white/95 dark:bg-gray-950/95 backdrop-blur-md"
         >
-            <div className="grid h-full grid-cols-[auto_auto] sm:grid-cols-[auto_1fr_auto] lg:grid-cols-[16rem_1fr_auto] items-center border-b border-gray-200/60 dark:border-gray-800/60">
+            <div className="grid h-full grid-cols-[1fr_auto] sm:grid-cols-[auto_1fr_auto] lg:grid-cols-[16rem_1fr_auto] items-center border-b border-gray-200/60 dark:border-gray-800/60">
                 {/* Left: Menu button + Logo */}
-                <div className="flex items-center gap-2 mx-4">
+                <div className="flex items-center gap-1.5 mx-4">
                     {/* Mobile menu toggle */}
                     <button
                         onClick={() => setSidebarOpen(true)}
@@ -184,12 +184,7 @@ export default function Header() {
                             className="w-full bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-full py-2.5 pl-10 pr-12 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500/40 transition-all relative z-10"
                         />
                         <button
-                            onClick={() => {
-                                if (!isOnSongsPage) {
-                                    router.push('/songs');
-                                }
-                                setSearchFiltersOpen(!searchFiltersOpen);
-                            }}
+                            onClick={() => setSearchFiltersOpen(!searchFiltersOpen)}
                             className={`absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-full transition-colors z-10 ${
                                 hasActiveSearchFilters
                                     ? 'text-red-500 bg-red-100 dark:bg-red-500/15'
@@ -249,9 +244,9 @@ export default function Header() {
 
                 {/* Right: Action buttons */}
                 <div className="flex items-center gap-1 md:gap-2 pe-4 lg:pe-6">
-                    {/* Mobile: search icon that focuses the search bar */}
+                    {/* Mobile: search icon opens search filters modal */}
                     <button
-                        onClick={() => inputRef.current?.focus()}
+                        onClick={() => setSearchFiltersOpen(true)}
                         className="sm:hidden p-2 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
                         aria-label="Search"
                     >
