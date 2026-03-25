@@ -247,10 +247,13 @@ export default function Header() {
                     {/* Mobile: search icon opens search filters modal */}
                     <button
                         onClick={() => setSearchFiltersOpen(true)}
-                        className="sm:hidden p-2 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
+                        className="sm:hidden relative p-2 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
                         aria-label="Search"
                     >
                         <Search className="w-5 h-5" />
+                        {hasActiveSearchFilters && (
+                            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500 ring-1.5 ring-white dark:ring-gray-950" />
+                        )}
                     </button>
 
                     {/* Create button with dropdown - desktop only */}
