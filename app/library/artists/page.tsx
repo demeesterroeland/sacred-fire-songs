@@ -2,6 +2,7 @@ import { Mic2 } from 'lucide-react';
 import { fetchArtistsServer } from '@/lib/songs/serverQueries';
 import ArtistsPageContent from './ArtistsPageContent';
 
+// Public page — no auth required (aggregates public songs only)
 export default async function ArtistsPage() {
     const artists = await fetchArtistsServer();
 

@@ -34,10 +34,10 @@ export default function ArtistsPageContent({ artists }: { artists: ArtistSummary
             {artists.map((artist) => {
                 const [from, to] = getArtistGradient(artist.name);
                 const initial = artist.name.charAt(0).toUpperCase();
-                const subtitle = [
-                    `${artist.songCount} song${artist.songCount !== 1 ? 's' : ''}`,
-                    ...artist.topCategories,
-                ].join(' · ');
+                const songLabel = `${artist.songCount} song${artist.songCount !== 1 ? 's' : ''}`;
+                const subtitle = artist.topCategories.length > 0
+                    ? `${songLabel} · ${artist.topCategories.join(', ')}`
+                    : songLabel;
 
                 return (
                     <Link
