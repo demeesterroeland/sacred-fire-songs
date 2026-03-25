@@ -397,6 +397,7 @@ export interface ArtistSummary {
     name: string;
     songCount: number;
     topCategories: string[];
+    songTitles: string[];
 }
 
 /**
@@ -406,25 +407,32 @@ export interface ArtistSummary {
 export async function fetchArtistsServer(): Promise<ArtistSummary[]> {
     const supabase = await createClient();
 
-    // Single query: authors with their categories (song counts derived in JS)
+    // Single query: authors with titles and categories (counts derived in JS)
     const { data: rows, error } = await supabase
         .from('compositions')
-        .select('original_author, song_category_map(categories(name))')
+        .select('title, original_author, song_category_map(categories(name))')
         .eq('is_public', true)
-        .not('original_author', 'is', null);
+        .not('original_author', 'is', null)
+        .limit(5000);
 
     if (error) {
         console.error('fetchArtistsServer error:', error);
         return [];
     }
 
-    // Single pass: count songs per author + tally category frequencies
+    // Single pass: count songs per author, collect titles, tally category frequencies
     const authorCounts = new Map<string, number>();
+    const authorTitles = new Map<string, string[]>();
     const authorCategories = new Map<string, Map<string, number>>();
     for (const row of rows || []) {
         const name = row.original_author as string;
         if (!name) continue;
         authorCounts.set(name, (authorCounts.get(name) || 0) + 1);
+
+        // Collect up to 5 song titles per author
+        if (!authorTitles.has(name)) authorTitles.set(name, []);
+        const titles = authorTitles.get(name)!;
+        if (titles.length < 5 && row.title) titles.push(row.title as string);
 
         if (!authorCategories.has(name)) authorCategories.set(name, new Map());
         const catMap = authorCategories.get(name)!;
@@ -435,7 +443,7 @@ export async function fetchArtistsServer(): Promise<ArtistSummary[]> {
         }
     }
 
-    // Build sorted result with top 3 categories per author
+    // Build sorted result with top 3 categories and song titles per author
     return Array.from(authorCounts.entries())
         .map(([name, songCount]) => {
             const catMap = authorCategories.get(name);
@@ -445,7 +453,7 @@ export async function fetchArtistsServer(): Promise<ArtistSummary[]> {
                     .slice(0, 3)
                     .map(([catName]) => catName)
                 : [];
-            return { name, songCount, topCategories };
+            return { name, songCount, topCategories, songTitles: authorTitles.get(name) || [] };
         })
         .sort((a, b) => a.name.localeCompare(b.name));
 }
