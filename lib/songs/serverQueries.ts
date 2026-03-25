@@ -401,17 +401,16 @@ export interface ArtistSummary {
 }
 
 /**
- * Aggregates unique authors from public compositions with song counts
- * and their top 3 most common categories.
+ * Aggregates unique authors from all compositions (public + drafts)
+ * with song counts, top 3 categories, and sample song titles.
  */
 export async function fetchArtistsServer(): Promise<ArtistSummary[]> {
     const supabase = await createClient();
 
-    // Single query: authors with titles and categories (counts derived in JS)
+    // Single query: all compositions (public + drafts) with titles and categories
     const { data: rows, error } = await supabase
         .from('compositions')
         .select('title, original_author, song_category_map(categories(name))')
-        .eq('is_public', true)
         .not('original_author', 'is', null)
         .limit(5000);
 
