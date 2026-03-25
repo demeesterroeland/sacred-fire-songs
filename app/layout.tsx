@@ -44,6 +44,7 @@ import { UserPreferencesProvider } from "@/context/UserPreferencesContext";
 import EnvironmentBanner from "@/components/common/EnvironmentBanner";
 import ServiceWorkerRegistrar from "@/components/providers/ServiceWorkerRegistrar";
 import SidebarOverlay from "@/components/common/SidebarOverlay";
+import GlobalSearchModal from "@/components/common/GlobalSearchModal";
 import ThemedToaster from "@/components/providers/ThemedToaster";
 
 // Inline script to prevent flash of wrong theme on load.
@@ -100,6 +101,11 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                     {children}
                   </main>
                 </div>
+
+                {/* Global search modal (non-/songs pages) */}
+                <Suspense>
+                  <GlobalSearchModal />
+                </Suspense>
 
                 {/* Mobile bottom navigation */}
                 <MobileBottomNav />

@@ -41,15 +41,15 @@ export default function LibraryTabs() {
                 <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2 text-gray-900 dark:text-white">Your Library</h1>
                 <p className="text-slate-500 dark:text-slate-400">Your personal collection of playlists, albums, and artists.</p>
             </header>
-            <div className="flex items-center mb-8">
-                <div className="flex gap-2">
+            <div className="relative mb-8">
+                <div className="flex gap-2 overflow-x-auto scrollbar-none pb-1 -mx-4 px-4 md:mx-0 md:px-0">
                     {tabs.map(({ label, href, icon: Icon }) => {
                         const isActive = pathname === href;
                         return (
                             <Link
                                 key={href}
                                 href={href}
-                                className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-bold transition-all ${
+                                className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-bold transition-all whitespace-nowrap shrink-0 ${
                                     isActive
                                         ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-950'
                                         : 'bg-gray-200/80 dark:bg-gray-800/80 text-gray-500 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white border border-gray-300/50 dark:border-gray-700/50'
@@ -61,6 +61,8 @@ export default function LibraryTabs() {
                         );
                     })}
                 </div>
+                {/* Right-fade scroll hint — hidden on md+ where all tabs fit */}
+                <div className="pointer-events-none absolute inset-y-0 -right-4 md:right-0 w-12 bg-gradient-to-l from-white to-transparent dark:from-gray-950 md:hidden" />
             </div>
         </>
     );
