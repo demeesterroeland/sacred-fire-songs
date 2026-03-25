@@ -5,6 +5,7 @@ import type { LucideIcon } from 'lucide-react';
 import { CreatePlaylistInput } from '@/components/playlists/CreatePlaylistInput';
 import { PlaylistCard } from '@/components/playlists/PlaylistCard';
 import { PublicPlaylistCard } from '@/components/playlists/PublicPlaylistCard';
+import { CardContent } from '@/components/common/CardContent';
 import { getRecentlyViewed, getRecentlyViewedCount, getUnviewedSongs } from '@/lib/songs/serverQueries';
 import RecentlyViewed from '@/components/library/RecentlyViewed';
 import NewSinceLastVisit from '@/components/library/NewSinceLastVisit';
@@ -57,12 +58,14 @@ const accentClasses = {
 interface SmartPlaylistCardProps {
     icon: LucideIcon;
     title: string;
+    description?: string;
     subtitle: React.ReactNode;
+    songTitles?: string[];
     accent: keyof typeof accentClasses;
     href?: string; // absent = locked (guest)
 }
 
-function SmartPlaylistCard({ icon: Icon, title, subtitle, accent, href }: SmartPlaylistCardProps) {
+function SmartPlaylistCard({ icon: Icon, title, description, subtitle, songTitles = [], accent, href }: SmartPlaylistCardProps) {
     const c = accentClasses[accent];
     const locked = !href;
 
@@ -73,12 +76,12 @@ function SmartPlaylistCard({ icon: Icon, title, subtitle, accent, href }: SmartP
             <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-colors ${c.icon} ${locked ? '' : c.iconHover}`}>
                 <Icon className={`w-6 h-6 ${c.iconText}`} />
             </div>
-            <div className="flex-1 min-w-0">
-                <h3 className={`font-bold text-gray-900 dark:text-gray-100 ${locked ? '' : 'group-hover:text-gray-950 dark:group-hover:text-white transition-colors'}`}>{title}</h3>
-                {typeof subtitle === 'string'
-                    ? <p className="text-xs text-gray-500 mt-0.5">{subtitle}</p>
-                    : subtitle}
-            </div>
+            <CardContent
+                title={title}
+                description={description}
+                subtitle={subtitle}
+                songTitles={songTitles}
+            />
             {locked && (
                 <div className="flex items-center gap-1.5 shrink-0">
                     <Lock aria-hidden="true" className="w-3 h-3 text-gray-600" />
@@ -140,9 +143,9 @@ function GuestView({ publicPlaylists, publicSongCounts, publicSongTitles }: {
             <div>
                 <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-3">Smart Playlists</p>
                 <div className="grid grid-cols-1 gap-3">
-                    <SmartPlaylistCard icon={Heart}   title="My Favorites" subtitle="Your favorited songs, always with you"      accent="rose"   />
-                    <SmartPlaylistCard icon={Music}   title="My Songs"     subtitle="Songs you've contributed to the library"    accent="violet" />
-                    <SmartPlaylistCard icon={PenLine} title="My Drafts"    subtitle="Your private work-in-progress songs"        accent="gray"   />
+                    <SmartPlaylistCard icon={Heart}   title="My Favorites" description="Your favorited songs, always with you"      subtitle={<span className="text-xs text-gray-500">No songs yet — tap ♥ on any song</span>} accent="rose"   />
+                    <SmartPlaylistCard icon={Music}   title="My Songs"     description="Songs you've contributed to the library"    subtitle={<span className="text-xs text-gray-500">Sign in to see your songs</span>} accent="violet" />
+                    <SmartPlaylistCard icon={PenLine} title="My Drafts"    description="Your private work-in-progress songs"        subtitle={<span className="text-xs text-gray-500">Sign in to see your drafts</span>} accent="gray"   />
                 </div>
             </div>
 
@@ -294,13 +297,34 @@ export default async function PlaylistsPage() {
     const favCounts: SongCounts = myFavorites
         ? (songCounts[myFavorites.id] ?? { total: 0, public: 0, draft: 0 })
         : { total: 0, public: 0, draft: 0 };
+    const favTitles: string[] = myFavorites
+        ? (songTitles[myFavorites.id] ?? []).slice(0, 5)
+        : [];
 
-    // Fetch personalized sections in parallel
-    const [recentlyViewedSongs, recentlyViewedCount, newSongs] = await Promise.all([
+    // Fetch My Songs + My Drafts counts and titles, plus personalized sections
+    const [mySongsResult, myDraftsResult, recentlyViewedSongs, recentlyViewedCount, newSongs] = await Promise.all([
+        supabase.from('compositions').select('title, is_public').eq('owner_id', user.id).limit(500),
+        supabase.from('compositions').select('title, is_public').eq('is_public', false).limit(500),
         getRecentlyViewed(user.id, 5),
         getRecentlyViewedCount(user.id),
         getUnviewedSongs(user.id, 5),
     ]);
+
+    const mySongsData = mySongsResult.data ?? [];
+    const mySongsCounts: SongCounts = {
+        total: mySongsData.length,
+        public: mySongsData.filter(s => s.is_public).length,
+        draft: mySongsData.filter(s => !s.is_public).length,
+    };
+    const mySongsTitles = mySongsData.slice(0, 5).map(s => s.title);
+
+    const myDraftsData = myDraftsResult.data ?? [];
+    const myDraftsCounts: SongCounts = {
+        total: myDraftsData.length,
+        public: 0,
+        draft: myDraftsData.length,
+    };
+    const myDraftsTitles = myDraftsData.slice(0, 5).map(s => s.title);
 
     return (
         <div className="space-y-8">
@@ -310,12 +334,23 @@ export default async function PlaylistsPage() {
                 <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-3">Smart Playlists</p>
                 <div className="grid grid-cols-1 gap-3">
                     <SmartPlaylistCard
-                        icon={Heart}   title="My Favorites" accent="rose"
+                        icon={Heart} title="My Favorites" description="Your favorited songs" accent="rose"
                         href="/songs?favorites=true"
                         subtitle={<SongCountSubtitle counts={favCounts} emptyLabel="No songs yet — tap ♥ on any song" />}
+                        songTitles={favTitles}
                     />
-                    <SmartPlaylistCard icon={Music}   title="My Songs"  subtitle="Songs you've contributed to the library" accent="violet" href="/songs?mine=true" />
-                    <SmartPlaylistCard icon={PenLine} title="My Drafts" subtitle="Your private work-in-progress songs"     accent="gray"   href="/songs?status=draft" />
+                    <SmartPlaylistCard
+                        icon={Music} title="My Songs" description="Songs you've contributed" accent="violet"
+                        href="/songs?mine=true"
+                        subtitle={<SongCountSubtitle counts={mySongsCounts} emptyLabel="No songs yet" />}
+                        songTitles={mySongsTitles}
+                    />
+                    <SmartPlaylistCard
+                        icon={PenLine} title="My Drafts" description="Your work-in-progress songs" accent="gray"
+                        href="/songs?status=draft"
+                        subtitle={<SongCountSubtitle counts={myDraftsCounts} emptyLabel="No drafts yet" />}
+                        songTitles={myDraftsTitles}
+                    />
                 </div>
             </div>
 

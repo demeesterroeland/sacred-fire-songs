@@ -2,6 +2,7 @@
 
 import Link from 'next/link';
 import { Mic2 } from 'lucide-react';
+import { CardContent } from '@/components/common/CardContent';
 import type { ArtistSummary } from '@/lib/songs/serverQueries';
 
 export default function ArtistsPageContent({ artists }: { artists: ArtistSummary[] }) {
@@ -28,22 +29,11 @@ export default function ArtistsPageContent({ artists }: { artists: ArtistSummary
                             <Mic2 className="w-6 h-6 text-gray-400" />
                         </div>
 
-                        <div className="flex-1 min-w-0">
-                            <p className="truncate">
-                                <span className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
-                                    {artist.name}
-                                </span>
-                            </p>
-                            <div className="flex items-center gap-0 mt-0.5 text-xs text-gray-500 truncate">
-                                <span>{songLabel}</span>
-                                {artist.songTitles.length > 0 && (
-                                    <>
-                                        <span className="mx-1.5 text-gray-700">|</span>
-                                        <span className="truncate text-gray-600">{artist.songTitles.join(', ')}</span>
-                                    </>
-                                )}
-                            </div>
-                        </div>
+                        <CardContent
+                            title={artist.name}
+                            subtitle={<span className="whitespace-nowrap">{songLabel}</span>}
+                            songTitles={artist.songTitles}
+                        />
                     </Link>
                 );
             })}
