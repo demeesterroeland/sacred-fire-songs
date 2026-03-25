@@ -206,7 +206,7 @@ export default function SearchFiltersModal({
                                     onClick={() => setFilter('favorites', !state.favorites)}
                                     icon={<Heart className={`w-4 h-4 ${state.favorites ? 'fill-amber-400' : ''}`} strokeWidth={1.5} />}
                                     label="Favorites"
-                                    count={favoritesCount > 0 ? favoritesCount : undefined}
+                                    count={favoritesCount ? favoritesCount : undefined}
                                     activeColor="amber"
                                 />
                                 <ToggleCard
@@ -214,7 +214,7 @@ export default function SearchFiltersModal({
                                     onClick={() => setFilter('mine', !state.mine)}
                                     icon={<Music className="w-4 h-4" strokeWidth={1.5} />}
                                     label="My Songs"
-                                    count={mineCount > 0 ? mineCount : undefined}
+                                    count={mineCount ? mineCount : undefined}
                                     activeColor="violet"
                                 />
                             </div>
