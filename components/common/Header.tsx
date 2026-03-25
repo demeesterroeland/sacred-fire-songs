@@ -249,14 +249,14 @@ export default function Header() {
 
                 {/* Right: Action buttons */}
                 <div className="flex items-center gap-1 md:gap-2 pe-4 lg:pe-6">
-                    {/* Mobile: search icon that focuses the search bar */}
-                    <button
-                        onClick={() => inputRef.current?.focus()}
+                    {/* Mobile: search icon navigates to songs page */}
+                    <Link
+                        href="/songs"
                         className="sm:hidden p-2 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
                         aria-label="Search"
                     >
                         <Search className="w-5 h-5" />
-                    </button>
+                    </Link>
 
                     {/* Create button with dropdown - desktop only */}
                     {user && (
