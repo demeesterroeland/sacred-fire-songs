@@ -11,7 +11,7 @@ export default async function Home() {
   const summary = user ? await getLibrarySummary(user.id) : null;
 
   return (
-    <main className="flex-1 min-h-0 bg-gray-50 dark:bg-gray-950 overflow-y-auto">
+    <main className="flex-1 min-h-0 bg-white dark:bg-gray-950 overflow-y-auto">
       <div className="p-4 md:p-8 lg:p-10 space-y-10 max-w-7xl mx-auto">
         {/* Update last_seen_at after render so "new songs" count uses the old value */}
         {user && <UpdateLastSeen />}

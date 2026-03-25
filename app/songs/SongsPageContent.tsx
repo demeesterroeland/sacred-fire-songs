@@ -1,16 +1,14 @@
 'use client';
 
-import SearchBar from "@/components/home/SearchBar";
 import SongCard from "@/components/home/SongCard";
 import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
-import { Music, Guitar, ChevronDown, Search, Plus, Trash2, Heart, SlidersHorizontal } from "lucide-react";
+import SearchFiltersModal from "@/components/library/SearchFiltersModal";
+import { Search, Trash2, Heart } from "lucide-react";
 import { useSidebar } from "@/context/SidebarContext";
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useSearchParams, useRouter } from 'next/navigation';
 import { useDeleteSong } from "@/hooks/useDeleteSong";
-import Link from 'next/link';
-import TagSelector from "@/components/library/TagSelector";
 import { type TaxonomyNode } from "@/lib/taxonomyUtils";
 import type { Song } from "@/lib/songUtils";
 import { useSongsQuery } from "@/hooks/useSongsQuery";
@@ -29,11 +27,10 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
     const searchParams = useSearchParams();
     const router = useRouter();
     const { user } = useAuth();
-    const { setHeaderCount } = useSidebar();
+    const { setHeaderCount, searchFiltersOpen, setSearchFiltersOpen, setHasActiveSearchFilters } = useSidebar();
     const { isDeleting, deleteSong } = useDeleteSong();
-    const [localSearch, setLocalSearch] = useState('');
+    const [localSearch, setLocalSearch] = useState(searchParams.get('search') || '');
     const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null);
-    const [filtersOpen, setFiltersOpen] = useState(false);
 
     const isAdmin = user?.role === 'admin';
     const sortBy = (searchParams.get('sort') as SortByType) || 'title';
@@ -50,6 +47,8 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
         resetFilters,
         chordsCount,
         melodyCount,
+        favoritesCount,
+        mineCount,
         hasActiveFilters,
         filteredCount
     } = useSongsFilter({ songs, userId: user?.id, favoriteIds, viewedSongIds, sortBy });
@@ -82,6 +81,21 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
         setLocalSearch('');
     };
 
+    // Sync localSearch when URL search param changes (e.g. from Header search)
+    useEffect(() => {
+        const urlSearch = searchParams.get('search') || '';
+        if (urlSearch !== localSearch) {
+            setLocalSearch(urlSearch);
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [searchParams]);
+
+    // Publish filter state to global context for Header
+    useEffect(() => {
+        setHasActiveSearchFilters(hasActiveFilters);
+        return () => setHasActiveSearchFilters(false);
+    }, [hasActiveFilters, setHasActiveSearchFilters]);
+
     // Publish count to global header for mobile view
     useEffect(() => {
         setHeaderCount(hasActiveFilters ? filteredCount : songs.length);
@@ -89,168 +103,8 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
     }, [filteredCount, songs.length, hasActiveFilters, setHeaderCount]);
 
     return (
-        <main className="flex-1 min-h-0 bg-gray-50 dark:bg-gray-950">
+        <main className="flex-1 min-h-0 bg-white dark:bg-gray-950">
             <div className="p-4 md:p-8 space-y-3 md:space-y-6 max-w-7xl mx-auto">
-                {/* Sticky Header */}
-                <div className="sticky top-[72px] z-20 bg-gray-50/95 dark:bg-gray-950/95 backdrop-blur-md border-b border-gray-200/50 dark:border-gray-800/50 px-4 pt-2 pb-0 -mx-4 md:-mx-8 md:pt-2 md:pb-6">
-                    <div className="max-w-7xl mx-auto space-y-4 md:space-y-6">
-
-                        {/* Row 1: Search + Filter Toggle (Mobile) */}
-                        <div className="flex flex-col md:flex-row items-center justify-between gap-4 md:gap-8">
-                            <div className="flex items-center gap-2 w-full md:flex-1">
-                                <SearchBar
-                                    value={localSearch}
-                                    onChange={setLocalSearch}
-                                />
-                                {/* Mobile filter toggle */}
-                                <button
-                                    onClick={() => setFiltersOpen(!filtersOpen)}
-                                    className={`md:hidden flex-shrink-0 relative p-2.5 rounded-xl border transition-all ${filtersOpen
-                                        ? 'bg-red-500/10 border-red-500/40 text-red-400'
-                                        : 'bg-gray-100/80 dark:bg-gray-900/80 border-gray-300 dark:border-gray-800 text-gray-500'
-                                        }`}
-                                    aria-label="Toggle filters"
-                                    aria-expanded={filtersOpen}
-                                >
-                                    <SlidersHorizontal className="w-5 h-5" />
-                                    {hasActiveFilters && !filtersOpen && (
-                                        <span className="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-red-500 ring-2 ring-gray-50 dark:ring-gray-950" />
-                                    )}
-                                </button>
-                            </div>
-
-                            <div className="hidden md:flex items-center gap-4 self-end md:self-auto">
-                                <span className="hidden md:block text-xs text-gray-500 whitespace-nowrap">
-                                    {hasActiveFilters ? filteredCount : songs.length} songs found
-                                </span>
-
-                                {user && (
-                                    <Link
-                                        href="/songs/add?next=/songs"
-                                        className="flex items-center gap-2 px-6 py-2.5 bg-red-600 hover:bg-red-700 text-white rounded-full font-bold text-sm transition-all shadow-lg shadow-red-900/40 active:scale-95 whitespace-nowrap"
-                                    >
-                                        <Plus className="w-4 h-4 text-white" strokeWidth={3} />
-                                        Create Song
-                                    </Link>
-                                )}
-                            </div>
-                        </div>
-
-                        {/* Collapsible filters: hidden on mobile unless toggled */}
-                        <div className={`space-y-3 md:space-y-6 ${filtersOpen ? '' : 'hidden'} md:block`}>
-                            {/* Row 2: Tag Selector */}
-                            <TagSelector
-                                category={state.category}
-                                tags={state.tags || []}
-                                taxonomy={taxonomy}
-                                onCategoryChange={(cat) => setFilter('category', cat)}
-                                onTagsChange={(tags) => setFilter('tags', tags)}
-                                onClearAll={handleResetFilters}
-                                searchValue={localSearch}
-                                onSearchChange={setLocalSearch}
-                                hasActiveFilters={hasActiveFilters}
-                            />
-
-                            {/* Lower Row: Controls */}
-                            <div className="flex flex-wrap items-center justify-between gap-4 pt-1 md:pt-2">
-                                <div className="flex flex-wrap items-center gap-6">
-                                    {/* Sort Dropdown */}
-                                    <div className="flex items-center gap-2">
-                                        <div className="relative">
-                                            <select
-                                                value={sortBy}
-                                                onChange={(e) => setSortBy(e.target.value as SortByType)}
-                                                className="bg-gray-100 dark:bg-gray-900 border border-gray-300 dark:border-gray-800 rounded-lg px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider text-gray-600 dark:text-gray-300 outline-none focus:border-gray-400 dark:focus:border-gray-700 appearance-none pr-8 cursor-pointer"
-                                            >
-                                                <option value="title">Title (A-Z)</option>
-                                                <option value="author">Author (A-Z)</option>
-                                                <option value="newest">Newest First</option>
-                                            </select>
-                                            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-500 pointer-events-none" />
-                                        </div>
-                                    </div>
-
-                                    {/* Visibility Tabs */}
-                                    {user && (
-                                        <div className="flex items-center gap-2">
-                                            <div className="bg-gray-200/80 dark:bg-gray-900/80 p-1 rounded-xl border border-gray-300 dark:border-gray-800 inline-flex shadow-inner">
-                                                {(['all', 'public', 'draft'] as const).map((statusOption) => (
-                                                    <button
-                                                        key={statusOption}
-                                                        onClick={() => setFilter('status', statusOption)}
-                                                        className={`px-4 py-1.5 text-xs font-bold rounded-lg transition-all capitalize ${state.status === statusOption ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm ring-1 ring-gray-200 dark:ring-white/5' : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'}`}
-                                                    >
-                                                        {statusOption}
-                                                    </button>
-                                                ))}
-                                            </div>
-                                            <button
-                                                onClick={() => setFilter('favorites', !state.favorites)}
-                                                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl border transition-all ${state.favorites
-                                                    ? 'bg-amber-500/15 border-amber-500/40 text-amber-400 shadow-sm'
-                                                    : 'bg-gray-100/80 dark:bg-gray-900/80 border-gray-300 dark:border-gray-800 text-gray-500 hover:text-amber-400/70 hover:border-amber-500/30'
-                                                    }`}
-                                            >
-                                                <Heart className={`w-3 h-3 ${state.favorites ? 'fill-amber-400' : ''}`} strokeWidth={1.5} />
-                                                Favorites
-                                            </button>
-                                            <button
-                                                onClick={() => setFilter('mine', !state.mine)}
-                                                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-xl border transition-all ${state.mine
-                                                    ? 'bg-violet-500/15 border-violet-500/40 text-violet-400 shadow-sm'
-                                                    : 'bg-gray-100/80 dark:bg-gray-900/80 border-gray-300 dark:border-gray-800 text-gray-500 hover:text-violet-400/70 hover:border-violet-500/30'
-                                                    }`}
-                                            >
-                                                <Music className="w-3 h-3" strokeWidth={1.5} />
-                                                My Songs
-                                            </button>
-                                        </div>
-                                    )}
-                                </div>
-
-                                <div className="flex items-center gap-4">
-                                    {/* View Toggles */}
-                                    <div className="flex items-center gap-2">
-                                        {/* Chords Toggle */}
-                                        <button
-                                            onClick={() => setFilter('chords', !state.chords)}
-                                            disabled={!state.chords && chordsCount === 0}
-                                            className={`flex items-center gap-2 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all border ${state.chords
-                                                ? 'border-amber-500/50 bg-amber-500/10 text-amber-500 shadow-sm shadow-amber-900/20'
-                                                : 'border-gray-300 dark:border-gray-800 bg-gray-100/50 dark:bg-gray-900/50 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-400 dark:hover:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed'
-                                                }`}
-                                        >
-                                            <Guitar className="w-3.5 h-3.5" />
-                                            Chords
-                                            {/* Count Badge */}
-                                            {!state.chords && chordsCount > 0 && (
-                                                <span className="ml-1 px-1.5 py-0.5 rounded-full bg-gray-200 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-[9px]">{chordsCount}</span>
-                                            )}
-                                        </button>
-
-                                        {/* Melody Toggle */}
-                                        <button
-                                            onClick={() => setFilter('melody', !state.melody)}
-                                            disabled={!state.melody && melodyCount === 0}
-                                            className={`flex items-center gap-2 px-3 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-lg transition-all border ${state.melody
-                                                ? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-500 shadow-sm shadow-emerald-900/20'
-                                                : 'border-gray-300 dark:border-gray-800 bg-gray-100/50 dark:bg-gray-900/50 text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 hover:border-gray-400 dark:hover:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed'
-                                                }`}
-                                        >
-                                            <Music className="w-3.5 h-3.5" />
-                                            Melody
-                                            {/* Count Badge */}
-                                            {!state.melody && melodyCount > 0 && (
-                                                <span className="ml-1 px-1.5 py-0.5 rounded-full bg-gray-200 dark:bg-gray-800 text-gray-500 dark:text-gray-400 text-[9px]">{melodyCount}</span>
-                                            )}
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>{/* end collapsible filters */}
-                    </div>
-                </div>
-
                 {/* Song List */}
                 <section>
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -325,6 +179,25 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
                     
                 </section>
             </div>
+
+            <SearchFiltersModal
+                isOpen={searchFiltersOpen}
+                onClose={() => setSearchFiltersOpen(false)}
+                state={state}
+                setFilter={setFilter}
+                resetFilters={resetFilters}
+                sortBy={sortBy}
+                setSortBy={setSortBy}
+                taxonomy={taxonomy}
+                chordsCount={chordsCount}
+                melodyCount={melodyCount}
+                favoritesCount={favoritesCount}
+                mineCount={mineCount}
+                hasActiveFilters={hasActiveFilters}
+                isAuthenticated={!!user}
+                localSearch={localSearch}
+                setLocalSearch={setLocalSearch}
+            />
 
             <DeleteConfirmationModal
                 isOpen={deleteTarget !== null}

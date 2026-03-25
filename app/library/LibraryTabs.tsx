@@ -7,8 +7,8 @@ import { ListMusic, Disc3, Mic2, Clock, ChevronRight } from 'lucide-react';
 const tabs = [
     { label: 'Playlists', href: '/library/playlists',       icon: ListMusic },
     { label: 'History',   href: '/library/recently-viewed',  icon: Clock },
-    { label: 'Albums',    href: '/library/albums',           icon: Disc3 },
     { label: 'Artists',   href: '/library/artists',          icon: Mic2 },
+    { label: 'Albums',    href: '/library/albums',           icon: Disc3 },
 ];
 
 export default function LibraryTabs() {

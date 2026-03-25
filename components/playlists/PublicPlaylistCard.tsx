@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { Globe } from 'lucide-react';
 import { PlaylistContextMenu } from './PlaylistContextMenu';
+import { CardContent } from '@/components/common/CardContent';
 import { toast } from 'sonner';
 import { usePlaylistRename } from '@/hooks/usePlaylistRename';
 
@@ -33,6 +34,8 @@ export function PublicPlaylistCard({ id, title, description, isOwner, songCount 
         toast.success('Link copied');
     };
 
+    const songCountLabel = `${songCount} song${songCount !== 1 ? 's' : ''}`;
+
     return (
         <div className="relative">
             <Link
@@ -43,8 +46,8 @@ export function PublicPlaylistCard({ id, title, description, isOwner, songCount 
                     <div className="w-12 h-12 bg-emerald-900/30 rounded-xl flex items-center justify-center shrink-0">
                         <Globe className="w-6 h-6 text-emerald-400" />
                     </div>
-                    <div className="flex-1 min-w-0">
-                        {isOwner && isRenaming ? (
+                    {isOwner && isRenaming ? (
+                        <div className="flex-1 min-w-0">
                             <input
                                 ref={inputRef}
                                 value={draftTitle}
@@ -58,24 +61,15 @@ export function PublicPlaylistCard({ id, title, description, isOwner, songCount 
                                 autoFocus
                                 className="w-[95%] bg-gray-100 dark:bg-gray-800 border border-amber-500/50 rounded-lg px-2 py-1 text-sm font-bold text-gray-900 dark:text-gray-100 outline-none focus:border-amber-500"
                             />
-                        ) : (
-                            <p className="truncate">
-                                <span className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">{optimisticTitle}</span>
-                                {description && <span className="ml-2 text-xs font-normal text-gray-500">· {description}</span>}
-                            </p>
-                        )}
-                        <div className="flex items-center gap-0 mt-0.5 text-xs text-gray-500 truncate">
-                            <span className="whitespace-nowrap">
-                                {songCount} song{songCount !== 1 ? 's' : ''}
-                            </span>
-                            {songTitles.length > 0 && (
-                                <>
-                                    <span className="mx-1.5 text-gray-700">|</span>
-                                    <span className="truncate text-gray-600">{songTitles.join(', ')}</span>
-                                </>
-                            )}
                         </div>
-                    </div>
+                    ) : (
+                        <CardContent
+                            title={optimisticTitle}
+                            description={description}
+                            subtitle={<span className="whitespace-nowrap">{songCountLabel}</span>}
+                            songTitles={songTitles}
+                        />
+                    )}
                 </div>
             </Link>
 

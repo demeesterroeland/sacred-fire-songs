@@ -15,6 +15,7 @@ interface TagSelectorProps {
   onSearchChange?: (query: string) => void;
   searchValue?: string;
   hasActiveFilters?: boolean;
+  clearLabel?: string;
 }
 
 export default function TagSelector({
@@ -27,6 +28,7 @@ export default function TagSelector({
   onSearchChange,
   searchValue = '',
   hasActiveFilters = false,
+  clearLabel = 'Clear All',
 }: TagSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
@@ -189,14 +191,14 @@ export default function TagSelector({
         )}
       </div>
 
-      {/* Clear All Button */}
+      {/* Clear Button */}
       {(category || tags.length > 0 || searchValue || hasActiveFilters) && (
         <button
           onClick={onClearAll}
           className="text-[10px] font-bold text-gray-600 hover:text-red-500 uppercase tracking-widest transition-colors flex items-center gap-1.5 px-2"
         >
           <X className="w-3 h-3" />
-          Clear All
+          {clearLabel}
         </button>
       )}
     </div>

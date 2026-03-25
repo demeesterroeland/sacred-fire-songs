@@ -49,3 +49,4 @@ SUPABASE_LOCAL.md
 
 # opencode workflow (contains local-only API key)
 .github/workflows/opencode.yml
+.superpowers/

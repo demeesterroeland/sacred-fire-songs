@@ -390,3 +390,50 @@ export async function fetchCategoryTreeServer(): Promise<TaxonomyNode[]> {
             .map(child => ({ ...child, children: [] }))
     }));
 }
+
+/* ── Artists aggregation ─────────────────────────────────── */
+
+export interface ArtistSummary {
+    name: string;
+    songCount: number;
+    songTitles: string[];
+}
+
+/**
+ * Aggregates unique authors from all compositions (public + drafts)
+ * with song counts and first 5 song titles.
+ */
+export async function fetchArtistsServer(): Promise<ArtistSummary[]> {
+    const supabase = await createClient();
+
+    const { data: rows, error } = await supabase
+        .from('compositions')
+        .select('title, original_author')
+        .not('original_author', 'is', null)
+        .limit(5000);
+
+    if (error) {
+        console.error('fetchArtistsServer error:', error);
+        return [];
+    }
+
+    const authorCounts = new Map<string, number>();
+    const authorTitles = new Map<string, string[]>();
+    for (const row of rows || []) {
+        const name = row.original_author as string;
+        if (!name) continue;
+        authorCounts.set(name, (authorCounts.get(name) || 0) + 1);
+
+        if (!authorTitles.has(name)) authorTitles.set(name, []);
+        const titles = authorTitles.get(name)!;
+        if (titles.length < 5 && row.title) titles.push(row.title as string);
+    }
+
+    return Array.from(authorCounts.entries())
+        .map(([name, songCount]) => ({
+            name,
+            songCount,
+            songTitles: authorTitles.get(name) || [],
+        }))
+        .sort((a, b) => a.name.localeCompare(b.name));
+}

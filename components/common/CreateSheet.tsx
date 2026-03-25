@@ -34,7 +34,7 @@ export default function CreateSheet({ isOpen, onClose }: CreateSheetProps) {
 
     const options = [
         { label: 'Add Song', icon: Music, href: `/songs/add?next=${encodeURIComponent(pathname)}`, color: 'text-red-400' },
-        { label: 'Create Playlist', icon: ListMusic, href: '/library/playlists/add', color: 'text-purple-400' },
+        { label: 'New Playlist', icon: ListMusic, href: '/library/playlists/add', color: 'text-purple-400' },
     ];
 
     return (

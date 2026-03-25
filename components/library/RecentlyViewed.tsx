@@ -18,7 +18,7 @@ export default function RecentlyViewed({ songs, total }: RecentlyViewedProps) {
         {total !== undefined && total > 5 && (
           <Link
             href="/library/recently-viewed"
-            className="ml-auto text-[10px] font-semibold text-amber-400/70 hover:text-amber-400 transition-colors"
+            className="ml-auto text-[10px] font-bold text-red-500 hover:text-red-400 uppercase tracking-wider"
           >
             View All
           </Link>

@@ -96,7 +96,7 @@ export default function EditSongPage() {
 
 
     return (
-        <div className="min-h-screen bg-gray-50 dark:bg-gray-950 pb-20">
+        <div className="min-h-screen bg-white dark:bg-gray-950 pb-20">
             {/* Mobile Header (Standardized) */}
             <header className="lg:hidden flex justify-between items-center px-4 py-3 sticky top-0 bg-gray-100/95 dark:bg-gray-900/95 backdrop-blur-md z-30 border-b border-gray-200 dark:border-white/5 shadow-lg">
                 <div className="flex items-center gap-3">
