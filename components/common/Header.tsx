@@ -249,14 +249,17 @@ export default function Header() {
 
                 {/* Right: Action buttons */}
                 <div className="flex items-center gap-1 md:gap-2 pe-4 lg:pe-6">
-                    {/* Mobile: search icon navigates to songs page */}
-                    <Link
-                        href="/songs"
+                    {/* Mobile: search icon opens search filters modal */}
+                    <button
+                        onClick={() => {
+                            if (!isOnSongsPage) router.push('/songs');
+                            setSearchFiltersOpen(true);
+                        }}
                         className="sm:hidden p-2 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
                         aria-label="Search"
                     >
                         <Search className="w-5 h-5" />
-                    </Link>
+                    </button>
 
                     {/* Create button with dropdown - desktop only */}
                     {user && (
