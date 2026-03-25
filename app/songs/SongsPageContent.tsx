@@ -3,7 +3,7 @@
 import SearchBar from "@/components/home/SearchBar";
 import SongCard from "@/components/home/SongCard";
 import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
-import { Music, Guitar, ChevronDown, Search, Plus, Trash2, Heart, SlidersHorizontal } from "lucide-react";
+import { Music, Guitar, ChevronDown, Search, Plus, Trash2, Heart, SlidersHorizontal, X } from "lucide-react";
 import { useSidebar } from "@/context/SidebarContext";
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -89,10 +89,10 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
     }, [filteredCount, songs.length, hasActiveFilters, setHeaderCount]);
 
     return (
-        <main className="flex-1 min-h-0 bg-gray-50 dark:bg-gray-950">
+        <main className="flex-1 min-h-0 bg-white dark:bg-gray-950">
             <div className="p-4 md:p-8 space-y-3 md:space-y-6 max-w-7xl mx-auto">
                 {/* Sticky Header */}
-                <div className="sticky top-[72px] z-20 bg-gray-50/95 dark:bg-gray-950/95 backdrop-blur-md border-b border-gray-200/50 dark:border-gray-800/50 px-4 pt-2 pb-0 -mx-4 md:-mx-8 md:pt-2 md:pb-6">
+                <div className="sticky top-[72px] z-20 bg-white/95 dark:bg-gray-950/95 backdrop-blur-md border-b border-gray-200/50 dark:border-gray-800/50 px-4 pt-2 pb-0 -mx-4 md:-mx-8 md:pt-2 md:pb-6">
                     <div className="max-w-7xl mx-auto space-y-4 md:space-y-6">
 
                         {/* Row 1: Search + Filter Toggle (Mobile) */}

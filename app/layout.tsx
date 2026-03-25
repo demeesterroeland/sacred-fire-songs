@@ -34,6 +34,7 @@ export const metadata: Metadata = {
   },
 };
 
+import { Suspense } from "react";
 import Header from "@/components/common/Header";
 import Sidebar from "@/components/common/Sidebar";
 import MobileBottomNav from "@/components/common/MobileBottomNav";
@@ -42,7 +43,7 @@ import { SidebarProvider } from "@/context/SidebarContext";
 import { UserPreferencesProvider } from "@/context/UserPreferencesContext";
 import EnvironmentBanner from "@/components/common/EnvironmentBanner";
 import ServiceWorkerRegistrar from "@/components/providers/ServiceWorkerRegistrar";
-import MainContent from "@/components/common/MainContent";
+import SidebarOverlay from "@/components/common/SidebarOverlay";
 import ThemedToaster from "@/components/providers/ThemedToaster";
 
 // Inline script to prevent flash of wrong theme on load.
@@ -82,24 +83,25 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <UserPreferencesProvider>
           <SidebarProvider>
             <QueryProvider>
-              <div className="min-h-screen bg-white dark:bg-black text-gray-900 dark:text-gray-100 font-sans flex flex-col lg:flex-row selection:bg-red-500/30 overflow-x-hidden">
-
-                {/* Sidebar (Responsive Mini/Full) */}
-                <Sidebar />
-
-                {/* Main Content Area */}
-                <MainContent>
-                  {/* Global Header */}
+              <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 font-sans selection:bg-red-500/30 overflow-x-hidden">
+                {/* Top navigation bar (full width, like Immich) */}
+                <Suspense>
                   <Header />
+                </Suspense>
 
-                  {/* Page Content */}
-                  <div className="pb-16 lg:pb-0">
+                {/* Grid: sidebar + main content */}
+                <div className="relative grid grid-cols-[0_1fr] lg:grid-cols-[16rem_1fr] h-[calc(100dvh-var(--navbar-height))] max-md:h-[calc(100dvh-var(--navbar-height))]">
+                  <Sidebar />
+
+                  {/* Mobile overlay when sidebar is open */}
+                  <SidebarOverlay />
+
+                  <main className="relative overflow-y-auto pb-16 lg:pb-0">
                     {children}
-                  </div>
-                </MainContent>
+                  </main>
+                </div>
 
-                {/* Mobile Bottom Navigation — outside MainContent so fixed positioning works
-                    (transform on MainContent creates a new containing block, breaking fixed) */}
+                {/* Mobile bottom navigation */}
                 <MobileBottomNav />
               </div>
             </QueryProvider>

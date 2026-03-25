@@ -8,6 +8,8 @@ interface SidebarContextType {
   toggleSidebar: () => void; // Toggles drawer on mobile
   headerCount?: number;
   setHeaderCount: (count: number | undefined) => void;
+  searchFiltersOpen: boolean;
+  setSearchFiltersOpen: (open: boolean) => void;
 }
 
 const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
@@ -15,6 +17,7 @@ const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
 export function SidebarProvider({ children }: { children: React.ReactNode }) {
   const [isOpen, setIsOpen] = useState(false);
   const [headerCount, setHeaderCount] = useState<number | undefined>(undefined);
+  const [searchFiltersOpen, setSearchFiltersOpen] = useState(false);
 
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
@@ -26,7 +29,9 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
       setIsOpen,
       toggleSidebar,
       headerCount,
-      setHeaderCount
+      setHeaderCount,
+      searchFiltersOpen,
+      setSearchFiltersOpen
     }}>
       {children}
     </SidebarContext.Provider>
