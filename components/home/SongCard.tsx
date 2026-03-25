@@ -70,7 +70,7 @@ export default function SongCard({
                     'relative p-5 rounded-2xl transition-all duration-300 backdrop-blur-sm group overflow-hidden flex flex-col justify-between active:scale-[0.98] cursor-pointer',
                     isPublic
                         ? 'bg-white/60 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-white/10 hover:bg-gray-100/60 dark:hover:bg-gray-800/60'
-                        : 'bg-gray-50/40 dark:bg-black/40 border border-dashed border-gray-300 dark:border-white/10 hover:bg-gray-100/60 dark:hover:bg-black/60 opacity-70 hover:opacity-100'
+                        : 'bg-gray-100/60 dark:bg-black/40 border border-dashed border-gray-300 dark:border-white/10 hover:bg-gray-200/60 dark:hover:bg-black/60 opacity-75 hover:opacity-100'
                 )}>
                     {/* Accent Border */}
                     <div
@@ -84,7 +84,7 @@ export default function SongCard({
                                     {title}
                                 </h3>
                                 {!isPublic && (
-                                    <span className="text-[9px] font-black bg-gray-200 dark:bg-gray-800 text-gray-500 px-1.5 py-0.5 rounded border border-gray-300 dark:border-gray-700 uppercase tracking-tighter shrink-0">
+                                    <span className="text-[9px] font-black bg-gray-200 dark:bg-gray-800 text-gray-500 dark:text-gray-400 px-1.5 py-0.5 rounded border border-gray-400/50 dark:border-gray-700 uppercase tracking-tighter shrink-0">
                                         Draft
                                     </span>
                                 )}

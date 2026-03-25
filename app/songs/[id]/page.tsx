@@ -183,10 +183,10 @@ export default function SongDetailPage() {
                 </div>
             </header>
 
-            <main className="flex-1 min-w-0 overflow-y-auto bg-white dark:bg-[#0b0f1a]">
+            <main className="flex-1 min-w-0 overflow-y-auto bg-white dark:bg-gray-950">
 
                 {/* Desktop Page Header (Title, Actions) - Visible only on desktop >= lg */}
-                <div className="hidden lg:flex justify-between items-center px-8 py-4 border-b border-gray-200/50 dark:border-gray-800/50 bg-white/50 dark:bg-[#0d121f]/50 sticky top-0 backdrop-blur-md z-10 transition-all">
+                <div className="hidden lg:flex justify-between items-center px-8 py-4 border-b border-gray-200/50 dark:border-gray-800/50 bg-white/50 dark:bg-gray-950/50 sticky top-0 backdrop-blur-md z-10 transition-all">
                     {/* Title and Artist */}
                     <div className="flex items-center gap-6">
                         <div className="flex flex-col gap-1">
@@ -194,27 +194,31 @@ export default function SongDetailPage() {
                                 <h1 className="text-3xl font-black text-[#ff4400] tracking-tight">{song.title}</h1>
                                 <div className="flex items-center gap-2">
                                     {song.has_chords && (
-                                        <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest shadow-sm bg-amber-500/5 border border-amber-500/30 text-amber-500">
+                                        <Link href="/songs?chords=true" className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest shadow-sm bg-amber-500/5 border border-amber-500/30 text-amber-500 hover:bg-amber-500/15 transition-colors">
                                             <LinkIcon className="w-3 h-3" /> Chords
-                                        </span>
+                                        </Link>
                                     )}
                                     {song.has_melody && (
-                                        <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest shadow-sm bg-emerald-500/5 border border-emerald-500/30 text-emerald-500">
+                                        <Link href="/songs?melody=true" className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest shadow-sm bg-emerald-500/5 border border-emerald-500/30 text-emerald-500 hover:bg-emerald-500/15 transition-colors">
                                             <Music className="w-3 h-3" /> Melody
-                                        </span>
+                                        </Link>
                                     )}
                                 </div>
                             </div>
                             <div className="flex items-center gap-3">
-                                <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">by {song.original_author || 'Traditional'}</p>
+                                <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">by{' '}
+                                    <Link href={`/songs?search=${encodeURIComponent(song.original_author || 'Traditional')}`} className="hover:text-gray-900 dark:hover:text-white hover:underline transition-colors">
+                                        {song.original_author || 'Traditional'}
+                                    </Link>
+                                </p>
                                 {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                                 {categories.map((cat: any) => {
                                     const color = getCategoryColor(cat.slug);
                                     const styles = getCategoryStyles(color);
                                     return (
-                                        <span key={cat.slug} className={`px-2.5 py-1 rounded-full text-xs font-bold border transition-colors ${styles.pill}`}>
+                                        <Link key={cat.slug} href={`/songs?tag=${encodeURIComponent(cat.slug)}`} className={`px-2.5 py-1 rounded-full text-xs font-bold border transition-colors hover:opacity-80 ${styles.pill}`}>
                                             {cat.name}
-                                        </span>
+                                        </Link>
                                     );
                                 })}
                             </div>
@@ -270,21 +274,25 @@ export default function SongDetailPage() {
                             <div className="space-y-1">
                                 <div className="flex flex-wrap items-baseline gap-x-3">
                                     <h1 className="text-4xl font-black text-[#ff4400] tracking-tight">{song.title}</h1>
-                                    <p className="text-gray-500 dark:text-gray-400 text-base font-medium">by {song.original_author || 'Traditional'}</p>
+                                    <p className="text-gray-500 dark:text-gray-400 text-base font-medium">by{' '}
+                                        <Link href={`/songs?search=${encodeURIComponent(song.original_author || 'Traditional')}`} className="hover:text-gray-900 dark:hover:text-white hover:underline transition-colors">
+                                            {song.original_author || 'Traditional'}
+                                        </Link>
+                                    </p>
                                 </div>
                             </div>
 
                             {/* Technical Badges (Chords/Melody) */}
                             <div className="flex items-center gap-2">
                                 {song.has_chords && (
-                                    <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest shadow-sm bg-amber-500/5 border border-amber-500/30 text-amber-500">
+                                    <Link href="/songs?chords=true" className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest shadow-sm bg-amber-500/5 border border-amber-500/30 text-amber-500 hover:bg-amber-500/15 transition-colors">
                                         <LinkIcon className="w-3 h-3" /> Chords
-                                    </span>
+                                    </Link>
                                 )}
                                 {song.has_melody && (
-                                    <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest shadow-sm bg-emerald-500/5 border border-emerald-500/30 text-emerald-500">
+                                    <Link href="/songs?melody=true" className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest shadow-sm bg-emerald-500/5 border border-emerald-500/30 text-emerald-500 hover:bg-emerald-500/15 transition-colors">
                                         <Music className="w-3 h-3" /> Melody
-                                    </span>
+                                    </Link>
                                 )}
                             </div>
 
@@ -295,9 +303,9 @@ export default function SongDetailPage() {
                                     const color = getCategoryColor(cat.slug);
                                     const styles = getCategoryStyles(color);
                                     return (
-                                        <span key={cat.slug} className={`px-2.5 py-1 rounded-full text-xs font-bold border transition-colors ${styles.pill}`}>
+                                        <Link key={cat.slug} href={`/songs?tag=${encodeURIComponent(cat.slug)}`} className={`px-2.5 py-1 rounded-full text-xs font-bold border transition-colors hover:opacity-80 ${styles.pill}`}>
                                             {cat.name}
-                                        </span>
+                                        </Link>
                                     );
                                 })}
                             </div>

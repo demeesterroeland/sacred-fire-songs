@@ -80,8 +80,27 @@ export function useSongsFilter({ songs, userId, favoriteIds, viewedSongIds, sort
     });
   }, [finalFilteredItems, sortBy]);
 
-  const chordsCount = facets.chords?.get('true') || 0;
-  const melodyCount = facets.melody?.get('true') || 0;
+  // Cross-filter-aware counts: each count applies all OTHER active post-filters
+  // but excludes its own, so users see "how many would match if I toggled this?"
+  const toggleCounts = useMemo(() => {
+    let chords = 0, melody = 0, favorites = 0, mine = 0;
+    for (const s of filteredItems) {
+      const isFav = favoriteIds.has(s.id);
+      const isMine = userId ? s.ownerId === userId : false;
+      // Apply all active post-filters EXCEPT the one we're counting
+      const matchFav = !state.favorites || isFav;
+      const matchMine = !state.mine || !userId || isMine;
+
+      // For chords/melody: must pass other post-filters
+      if (matchFav && matchMine && s.hasChords) chords++;
+      if (matchFav && matchMine && s.hasMelody) melody++;
+      // For favorites: must pass mine (skip favorites check)
+      if (matchMine && isFav) favorites++;
+      // For mine: must pass favorites (skip mine check)
+      if (matchFav && isMine) mine++;
+    }
+    return { chords, melody, favorites, mine };
+  }, [filteredItems, favoriteIds, userId, state.favorites, state.mine]);
 
   const hasActiveFilters = !!(
     state.category ||
@@ -101,8 +120,10 @@ export function useSongsFilter({ songs, userId, favoriteIds, viewedSongIds, sort
     state,
     setFilter,
     resetFilters,
-    chordsCount,
-    melodyCount,
+    chordsCount: toggleCounts.chords,
+    melodyCount: toggleCounts.melody,
+    favoritesCount: toggleCounts.favorites,
+    mineCount: toggleCounts.mine,
     hasActiveFilters,
   };
 }

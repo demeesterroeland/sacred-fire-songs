@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
 
 export type ThemePreference = 'dark' | 'light' | 'system';
 
@@ -29,8 +29,19 @@ function getSystemTheme(): 'dark' | 'light' {
   return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
 }
 
-function applyThemeClass(resolved: 'dark' | 'light') {
+function applyThemeClass(resolved: 'dark' | 'light', animate = false) {
   const doc = document.documentElement;
+
+  if (animate) {
+    // Inject temporary transition styles for a smooth theme switch
+    const style = document.createElement('style');
+    style.setAttribute('data-theme-transition', '');
+    style.textContent = '*, *::before, *::after { transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease, fill 0.3s ease, stroke 0.3s ease !important; }';
+    document.head.appendChild(style);
+    // Remove after transition completes
+    setTimeout(() => style.remove(), 350);
+  }
+
   if (resolved === 'dark') {
     doc.classList.add('dark');
   } else {
@@ -70,11 +81,17 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
     localStorage.setItem(STORAGE_KEY, JSON.stringify(preferences));
   }, [preferences]);
 
+  // Track whether this is the initial mount (skip animation) or a user toggle
+  const hasMounted = useRef(false);
+
   // Apply theme class + listen for system changes
   useEffect(() => {
+    const animate = hasMounted.current;
+    hasMounted.current = true;
+
     const resolved = preferences.theme === 'system' ? getSystemTheme() : preferences.theme;
     setResolvedTheme(resolved);
-    applyThemeClass(resolved);
+    applyThemeClass(resolved, animate);
     updateThemeColor(resolved);
 
     if (preferences.theme === 'system') {
@@ -82,7 +99,7 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
       const handler = (e: MediaQueryListEvent) => {
         const newResolved = e.matches ? 'dark' : 'light';
         setResolvedTheme(newResolved);
-        applyThemeClass(newResolved);
+        applyThemeClass(newResolved, true);
         updateThemeColor(newResolved);
       };
       mq.addEventListener('change', handler);

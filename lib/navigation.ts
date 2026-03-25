@@ -34,7 +34,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
     label: 'Create',
     items: [
       { label: 'Add Song', href: '/songs/add', icon: Music },
-      { label: 'New Playlist', href: '/library/playlists/add', icon: PlusCircle },
+      { label: 'New Playlist', href: '/library/playlists/add', icon: ListMusic },
     ],
   },
 ] as const;
