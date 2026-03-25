@@ -1,20 +1,20 @@
 import { Mic2 } from 'lucide-react';
+import { fetchArtistsServer } from '@/lib/songs/serverQueries';
+import ArtistsPageContent from './ArtistsPageContent';
 
-export default function ArtistsPage() {
+export default async function ArtistsPage() {
+    const artists = await fetchArtistsServer();
+
     return (
         <div>
-            <div className="mt-16 flex flex-col items-center text-center">
-                <div className="w-16 h-16 rounded-2xl bg-gray-200/60 dark:bg-gray-800/60 border border-gray-300/40 dark:border-gray-700/40 flex items-center justify-center mb-5">
-                    <Mic2 className="w-8 h-8 text-gray-600" />
-                </div>
-                <h2 className="text-lg font-bold text-gray-700 dark:text-gray-300 mb-1">Followed Artists</h2>
-                <p className="text-sm text-gray-600 max-w-xs">
-                    Follow artists you love and they&apos;ll appear here.
-                </p>
-                <span className="mt-4 text-[10px] font-bold uppercase tracking-widest text-gray-600 bg-gray-200/60 dark:bg-gray-800/60 border border-gray-300/40 dark:border-gray-700/40 px-3 py-1 rounded-full">
-                    Coming soon
-                </span>
+            <div className="flex items-center gap-2 mb-4">
+                <Mic2 className="w-4 h-4 text-gray-500" />
+                <h2 className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">
+                    Artists
+                </h2>
+                <span className="text-xs text-gray-600 ml-1">({artists.length})</span>
             </div>
+            <ArtistsPageContent artists={artists} />
         </div>
     );
 }
