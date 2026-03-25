@@ -396,21 +396,19 @@ export async function fetchCategoryTreeServer(): Promise<TaxonomyNode[]> {
 export interface ArtistSummary {
     name: string;
     songCount: number;
-    topCategories: string[];
     songTitles: string[];
 }
 
 /**
  * Aggregates unique authors from all compositions (public + drafts)
- * with song counts, top 3 categories, and sample song titles.
+ * with song counts and first 5 song titles.
  */
 export async function fetchArtistsServer(): Promise<ArtistSummary[]> {
     const supabase = await createClient();
 
-    // Single query: all compositions (public + drafts) with titles and categories
     const { data: rows, error } = await supabase
         .from('compositions')
-        .select('title, original_author, song_category_map(categories(name))')
+        .select('title, original_author')
         .not('original_author', 'is', null)
         .limit(5000);
 
@@ -419,40 +417,23 @@ export async function fetchArtistsServer(): Promise<ArtistSummary[]> {
         return [];
     }
 
-    // Single pass: count songs per author, collect titles, tally category frequencies
     const authorCounts = new Map<string, number>();
     const authorTitles = new Map<string, string[]>();
-    const authorCategories = new Map<string, Map<string, number>>();
     for (const row of rows || []) {
         const name = row.original_author as string;
         if (!name) continue;
         authorCounts.set(name, (authorCounts.get(name) || 0) + 1);
 
-        // Collect up to 5 song titles per author
         if (!authorTitles.has(name)) authorTitles.set(name, []);
         const titles = authorTitles.get(name)!;
         if (titles.length < 5 && row.title) titles.push(row.title as string);
-
-        if (!authorCategories.has(name)) authorCategories.set(name, new Map());
-        const catMap = authorCategories.get(name)!;
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        for (const mapItem of (row as any).song_category_map || []) {
-            const catName = mapItem.categories?.name;
-            if (catName) catMap.set(catName, (catMap.get(catName) || 0) + 1);
-        }
     }
 
-    // Build sorted result with top 3 categories and song titles per author
     return Array.from(authorCounts.entries())
-        .map(([name, songCount]) => {
-            const catMap = authorCategories.get(name);
-            const topCategories = catMap
-                ? Array.from(catMap.entries())
-                    .sort((a, b) => b[1] - a[1])
-                    .slice(0, 3)
-                    .map(([catName]) => catName)
-                : [];
-            return { name, songCount, topCategories, songTitles: authorTitles.get(name) || [] };
-        })
+        .map(([name, songCount]) => ({
+            name,
+            songCount,
+            songTitles: authorTitles.get(name) || [],
+        }))
         .sort((a, b) => a.name.localeCompare(b.name));
 }
