@@ -7,6 +7,27 @@
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4-38bdf8?logo=tailwindcss)](https://tailwindcss.com/)
 [![PWA](https://img.shields.io/badge/PWA-installable-purple)](https://web.dev/progressive-web-apps/)
 
+**Live app: [app.example.com](https://app.example.com/)**
+
+---
+
+## Screenshots
+
+<table>
+  <tr>
+    <td align="center"><img src="docs/screenshots/home.png" width="280"/><br/><sub>Home — library stats and category browser</sub></td>
+    <td align="center"><img src="docs/screenshots/search.png" width="280"/><br/><sub>Search options — filter by category, tags, visibility, and content type</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/screenshots/library.png" width="280"/><br/><sub>Library — smart playlists, recently viewed, and private playlists</sub></td>
+    <td align="center"><img src="docs/screenshots/editor.png" width="280"/><br/><sub>Song editor — ChordPro notation with live chord highlighting and category tagging</sub></td>
+  </tr>
+  <tr>
+    <td align="center"><img src="docs/screenshots/settings.png" width="280"/><br/><sub>Settings — appearance, screen wake lock, and upcoming performance features</sub></td>
+    <td></td>
+  </tr>
+</table>
+
 ---
 
 ## What it does
