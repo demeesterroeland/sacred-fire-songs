@@ -56,5 +56,15 @@ implemented.
 
 ## CI
 
-`.github/workflows/e2e.yml` runs the `@smoke` subset on PRs. See that file for
-the Supabase bootstrap + key extraction steps.
+`.github/workflows/e2e.yml` runs the `@smoke` subset against the **staging**
+Supabase project on every push to `main` / `feat|fix|chore/**`. It resolves the
+staging URL + anon key at runtime from these repo secrets:
+
+- `SUPABASE_ACCESS_TOKEN` (also used by `deploy-db.yml`)
+- `SUPABASE_PROJECT_ID_STAGING`
+- `E2E_TEST_PASSWORD` — password for the seeded E2E accounts on staging
+
+> ⚠️ Staging must contain the seeded test accounts. `deploy-db.yml` pushes
+> migrations to staging but **not** seed data (`supabase/seeds/*.sql`), so seed
+> those accounts on staging once, or `auth.setup.ts` will fail. Keep CI specs
+> read-only — branches share one staging DB.

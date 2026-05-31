@@ -1,6 +1,6 @@
 # E2E Test Overview & Matrix: Sacred Fire Songs
 
-**Version:** 1.1
+**Version:** 1.2
 **Status:** Living Document
 **Date:** May 30, 2026
 **Tracking:** GH #142
@@ -11,6 +11,7 @@
 | ----- | ----- | ----- |
 | **1.0** | May 30, 2026 | Initial creation. Full E2E test matrix covering all features and variants, derived from `docs/logbook/epic&user stories.md` and a codebase route/component inventory. Tooling recommendation (Playwright) and CI approach included. |
 | **1.1** | May 30, 2026 | Phase 0 scaffolded: added Playwright (`playwright.config.ts`, `@playwright/test`), per-role auth setup (`e2e/auth.setup.ts`), seeded-account fixtures, P0 `@smoke` specs (`e2e/tests/smoke.spec.ts`), CI workflow (`.github/workflows/e2e.yml`), and npm scripts. Flipped scaffolded smoke rows (AUTH-04, ACC-01, LIB-01, LIB-07, VIEW-01) to 🟡. |
+| **1.2** | May 30, 2026 | CI now runs `@smoke` against the **staging** Supabase on push to `main`/`feat|fix|chore/**` (resolves staging URL + anon key via the CLI) instead of a local stack. Documented the staging seed-data caveat and read-only/shared-DB constraints. |
 
 ---
 
@@ -29,7 +30,7 @@ It is a **living document**: keep it aligned with `docs/logbook/epic&user storie
 
 - **Unit tests (vitest, v4):** `lib/unit-tests/chordProParsing.test.ts`, `chordUtils.test.ts`, `queries.test.ts`, `songUtils.test.ts`, `playlistActions.test.ts`, `schemas.test.ts`, `useGuestFavorites.test.ts`. Run via `npm test` → `vitest run`.
 - **E2E tests:** **Phase 0 scaffolded** (this branch). Playwright is wired up (`playwright.config.ts`, `e2e/`), with per-role auth setup and a handful of P0 `@smoke` specs. Specs are authored but **not yet verified against a running app + seeded Supabase** — that verification happens once CI (or a dev) runs them. See `e2e/README.md`.
-- **CI:** `.github/workflows/deploy-db.yml` runs Supabase migrations; **`.github/workflows/e2e.yml`** (new) boots a seeded local Supabase and runs the `@smoke` subset on PRs.
+- **CI:** `.github/workflows/deploy-db.yml` runs Supabase migrations; **`.github/workflows/e2e.yml`** (new) runs the `@smoke` subset against the **staging** Supabase project on every push to `main` / `feat|fix|chore/**`.
 
 ---
 
@@ -60,9 +61,9 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 
 ### CI approach
 
-- Add a GitHub Actions job (e.g. `.github/workflows/e2e.yml`) that: checks out, installs deps, `npx playwright install --with-deps`, starts a local Supabase + seeds, runs `playwright test` sharded, and uploads the HTML report + traces on failure.
-- Gate on PRs to `main` / `feat|fix|chore/*`. Keep it separate from `deploy-db.yml`.
-- Start with `@smoke`-tagged critical-path specs as a required check; run the full suite nightly to keep PR latency low.
+- `.github/workflows/e2e.yml` runs on **push** to `main` / `feat|fix|chore/**` and tests against the **staging** Supabase project (reusing `SUPABASE_ACCESS_TOKEN` + `SUPABASE_PROJECT_ID_STAGING`; the staging anon key is resolved at runtime via `supabase projects api-keys`). It installs deps + Chromium, runs the `@smoke` subset, and uploads the HTML report.
+- **Staging caveat:** seed data (`supabase/seeds/*.sql`) is **not** auto-applied to staging by `deploy-db.yml` (only migrations). The seeded E2E accounts must exist on staging, or `auth.setup.ts` fails. Also, because branches share one staging DB, keep CI specs read-only/idempotent (the current `@smoke` set is) and serialize runs (the workflow uses a per-ref concurrency group).
+- For fully isolated runs, an alternative is booting a local Supabase in CI (`supabase start`) instead of staging — kept as a future option. Consider promoting `@smoke` to a required status check and adding a nightly full-suite run.
 
 ---
 
