@@ -1,6 +1,6 @@
 # E2E Test Overview & Matrix: Sacred Fire Songs
 
-**Version:** 1.0
+**Version:** 1.1
 **Status:** Living Document
 **Date:** May 30, 2026
 **Tracking:** GH #142
@@ -10,6 +10,7 @@
 | Version | Date | Description of Changes |
 | ----- | ----- | ----- |
 | **1.0** | May 30, 2026 | Initial creation. Full E2E test matrix covering all features and variants, derived from `docs/logbook/epic&user stories.md` and a codebase route/component inventory. Tooling recommendation (Playwright) and CI approach included. |
+| **1.1** | May 30, 2026 | Phase 0 scaffolded: added Playwright (`playwright.config.ts`, `@playwright/test`), per-role auth setup (`e2e/auth.setup.ts`), seeded-account fixtures, P0 `@smoke` specs (`e2e/tests/smoke.spec.ts`), CI workflow (`.github/workflows/e2e.yml`), and npm scripts. Flipped scaffolded smoke rows (AUTH-04, ACC-01, LIB-01, LIB-07, VIEW-01) to 🟡. |
 
 ---
 
@@ -27,8 +28,8 @@ It is a **living document**: keep it aligned with `docs/logbook/epic&user storie
 ### Current state of testing
 
 - **Unit tests (vitest, v4):** `lib/unit-tests/chordProParsing.test.ts`, `chordUtils.test.ts`, `queries.test.ts`, `songUtils.test.ts`, `playlistActions.test.ts`, `schemas.test.ts`, `useGuestFavorites.test.ts`. Run via `npm test` → `vitest run`.
-- **E2E tests:** **none today.** No Playwright or Cypress config or dependencies exist.
-- **CI:** `.github/workflows/deploy-db.yml` only runs Supabase migrations — there is **no test/lint/E2E job** in CI yet.
+- **E2E tests:** **Phase 0 scaffolded** (this branch). Playwright is wired up (`playwright.config.ts`, `e2e/`), with per-role auth setup and a handful of P0 `@smoke` specs. Specs are authored but **not yet verified against a running app + seeded Supabase** — that verification happens once CI (or a dev) runs them. See `e2e/README.md`.
+- **CI:** `.github/workflows/deploy-db.yml` runs Supabase migrations; **`.github/workflows/e2e.yml`** (new) boots a seeded local Supabase and runs the `@smoke` subset on PRs.
 
 ---
 
@@ -83,7 +84,7 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 | AUTH-01 | Sign up | New user registers and receives a confirmation/verification link | invalid email; weak/mismatched password; already-registered email; terms unchecked | G | ✅ | 🔲 | P0 | 1.1.4, 3.1.3 |
 | AUTH-02 | Email confirmation | Clicking the confirmation link verifies the account | expired/invalid `token_hash`; `?next` redirect honored | G | ✅ | 🔲 | P0 | `app/auth/confirm`, `callback` |
 | AUTH-03 | Finish registration | Post-signup completion (name, etc.) | skip optional fields | M | ✅ | 🔲 | P1 | `app/auth/finish-registration` |
-| AUTH-04 | Log in | Valid credentials sign in and redirect home | wrong password; unknown email; unverified email; `?next` redirect | G→M | ✅ | 🔲 | P0 | 1.1.4, `login-form.tsx` |
+| AUTH-04 | Log in | Valid credentials sign in and redirect home | wrong password; unknown email; unverified email; `?next` redirect | G→M | ✅ | 🟡 | P0 | 1.1.4, `login-form.tsx` |
 | AUTH-05 | Log out | Authenticated user logs out; protected UI disappears | session cleared; guest view restored | M/A | ✅ | 🔲 | P0 | 1.1.4 |
 | AUTH-06 | Forgot password | Request reset email for an account | unknown email (no enumeration leak) | G | ✅ | 🔲 | P1 | `forgot-password` |
 | AUTH-07 | Update / reset password | Recovery link lets user set a new password | mismatched confirm; weak password; expired recovery link | G | ✅ | 🔲 | P1 | `update-password` |
@@ -95,7 +96,7 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 
 | ID | Feature | Scenario | Variants / Edge cases | Roles | Feat | E2E | Pri | Ref |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ACC-01 | Settings access control | Unauthenticated user is redirected to login | deep-link to `/account/settings` | G | ✅ | 🔲 | P0 | `app/account/settings` |
+| ACC-01 | Settings access control | Unauthenticated user is redirected to login | deep-link to `/account/settings` | G | ✅ | 🟡 | P0 | `app/account/settings` |
 | ACC-02 | Profile settings | Update display name and save | empty name; avatar upload | M | ⚠️ | 🔲 | P1 | ProfileSettings |
 | ACC-03 | Security settings | Change password from settings | wrong current password; mismatch | M | ⚠️ | 🔲 | P1 | SecuritySettings |
 | ACC-04 | Privacy settings | Toggle privacy / data options | account deletion confirm | M | ⚠️ | 🔲 | P2 | PrivacySettings |
@@ -122,13 +123,13 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 
 | ID | Feature | Scenario | Variants / Edge cases | Roles | Feat | E2E | Pri | Ref |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| LIB-01 | Song list | Guest views the song list | empty state; pagination/infinite scroll | G | ✅ | 🔲 | P0 | 1.2.1 |
+| LIB-01 | Song list | Guest views the song list | empty state; pagination/infinite scroll | G | ✅ | 🟡 | P0 | 1.2.1 |
 | LIB-02 | Search | Search by title / author / lyrics | cross-page results (see bug #129); debounce; clear restores list | G | ✅ | 🔲 | P0 | 1.2.2 |
 | LIB-03 | Category filter | Filter songs by category (Water, Fire, …) | combine with search; no-results | G | ✅ | 🔲 | P1 | 2.3.1 |
 | LIB-04 | Filter sidebar/modal | Open hamburger/filters and apply | mobile sheet vs desktop | G/M | ✅ | 🔲 | P2 | 2.3.2 |
 | LIB-05 | Category page | Browse a single category page | unknown category slug | G | ✅ | 🔲 | P2 | 2.3.3 |
 | LIB-06 | Sort | Sort by Title / Author / Newest | stable order; combine w/ filters | G | ✅ | 🔲 | P2 | SongsPageContent |
-| LIB-07 | Auth-state refresh | Library updates after login/logout without manual refresh | private/draft appear on login; disappear on logout | G↔M | ✅ | 🔲 | P0 | bug #62 |
+| LIB-07 | Auth-state refresh | Library updates after login/logout without manual refresh | private/draft appear on login; disappear on logout | G↔M | ✅ | 🟡 | P0 | bug #62 |
 | LIB-08 | Filters: chords/melody/favorites/mine/status | Each filter narrows the list with correct counts | musician-gated Chords filter | M | ✅ | 🔲 | P1 | useSongsFilter |
 | LIB-09 | Artists tab | Browse songs aggregated by author | author with 1 vs many songs | G | ✅ | 🔲 | P2 | `library/artists` |
 | LIB-10 | Albums tab | Placeholder "coming soon" renders | — | G | ⚠️ | 🔲 | P2 | `library/albums` (stub) |
@@ -140,7 +141,7 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 
 | ID | Feature | Scenario | Variants / Edge cases | Roles | Feat | E2E | Pri | Ref |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| VIEW-01 | Chords over lyrics | Detail page renders chords aligned above lyrics | songs without chords | G | ✅ | 🔲 | P0 | 1.3.1 |
+| VIEW-01 | Chords over lyrics | Detail page renders chords aligned above lyrics | songs without chords | G | ✅ | 🟡 | P0 | 1.3.1 |
 | VIEW-02 | Stanza breaks | Double newlines render as visible stanza gaps | — | G | ✅ | 🔲 | P2 | bug #63 |
 | VIEW-03 | Audio/YouTube/SoundCloud embeds | Embeds load and play on detail page | missing/invalid embed | G | ✅ | 🔲 | P1 | 1.3.2 / 1.3.4 |
 | VIEW-04 | Back navigation | Navigate home/back from any page | deep-linked entry | G | ✅ | 🔲 | P2 | 1.3.3 |
@@ -212,10 +213,12 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 
 No E2E specs exist yet, so **every row above is a gap.** Recommended phased rollout:
 
-### Phase 0 — Foundation (enable E2E at all)
-1. Add Playwright, `playwright.config.ts` (chromium-desktop + mobile-chrome), and `webServer` against a production build.
-2. Local-Supabase seed script + per-role `storageState` global setup (Guest/Member/Gatekeeper/Admin).
-3. Wire a CI job (`e2e.yml`) running `@smoke` specs as a required PR check; full suite nightly.
+### Phase 0 — Foundation (enable E2E at all) — ✅ scaffolded (GH #142)
+1. ✅ Added Playwright + `@playwright/test`, `playwright.config.ts` (chromium-desktop + mobile-chrome), `webServer` against a production build.
+2. ✅ Per-role `storageState` setup (`e2e/auth.setup.ts`) against the existing seeded accounts (admin/musician/member). _Gatekeeper account not seeded yet — add when GK specs land._ Local Supabase already seeds via `supabase/seeds/*.sql`.
+3. ✅ CI job (`.github/workflows/e2e.yml`) runs `@smoke` specs on PRs. _Follow-up: make it a required check and add a nightly full-suite run._
+
+> **Remaining to fully "close" Phase 0:** verify the suite actually runs green in CI against a booted Supabase (the specs are authored but unverified in this environment), then mark the 🟡 rows ✅.
 
 ### Phase 1 — P0 smoke paths (critical, must stay green)
 AUTH-01/02/04/05, ACC-01, SONG-01/06/07, LIB-01/02/07, VIEW-01, FAV-01, PL-01/08. These cover "can a user sign in, browse, view, add/edit/delete a song, favorite, and create/access a playlist."
