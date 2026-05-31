@@ -57,12 +57,13 @@ implemented.
 ## CI
 
 `.github/workflows/e2e.yml` runs the `@smoke` subset against the **staging**
-Supabase project on every push to `main` / `feat|fix|chore/**`. It resolves the
-staging URL + anon key at runtime from these repo secrets:
+Supabase project on every push to `main` / `feat|fix|chore/**`. It derives the
+staging URL from the project ref and reads the (public) anon key from a secret:
 
-- `SUPABASE_ACCESS_TOKEN` (also used by `deploy-db.yml`)
-- `SUPABASE_PROJECT_ID_STAGING`
+- `SUPABASE_PROJECT_ID_STAGING` — staging project ref (URL = `https://<ref>.supabase.co`)
+- `SUPABASE_PUBLISHABLE_KEY_STAGING` — staging anon/publishable key (public; safe as a secret)
 - `E2E_TEST_PASSWORD` — password for the seeded E2E accounts on staging
+- `SUPABASE_URL_STAGING` — _optional_ full URL override
 
 > ⚠️ Staging must contain the seeded test accounts. `deploy-db.yml` pushes
 > migrations to staging but **not** seed data (`supabase/seeds/*.sql`), so seed
