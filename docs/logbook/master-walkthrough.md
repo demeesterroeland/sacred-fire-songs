@@ -2215,3 +2215,20 @@ Performed a comprehensive technical audit of the codebase against Next.js 16 and
 - Full MD↔GH sync comparison (all 44 stories): identified 6 sync issues — 5 old-format duplicate issues for 4.1.7–4.1.10 (#89–#92), and #32 title using `1.1.2 - bis` spacing.
 - Closed #89–#92 as superseded by canonical issues; normalized #32 title to `[Story 1.1.2-bis]`.
 - MD status sync: stories 1.1.5, 4.1.1, 4.1.2 pulled from GH and marked `[Implemented]`.
+
+## Session Update (Jun 9, 2026 — Beta Deployment Guide & Vercel-Migration Tracking)
+
+### 1. Beta Deployment Guide (PR #147)
+- Authored `docs/beta-deployment.md` documenting the **beta** cutover off Vercel onto the VPS (`<infra-repo>`), served at `<staging-app>.example.com` against the **staging** Supabase project (`REDACTED_STAGING_PROJECT_ID`).
+- Captured deploy/update flow (Docker + Traefik, pinned `SONGS_SHA`, rebuild-on-bump), DNS/SSL (`*.example.com` wildcard), Supabase auth-redirect setup, and known gaps vs prod.
+- Updated README deployment row: `Vercel` → `Vercel (prod) · self-hosted beta` with a link to the new guide.
+
+### 2. Vercel → EU-Sovereign Migration Tracking
+- Investigated whether a "migration impact" research doc already existed — none found; relevant pieces live in the private `<infra-repo>` repo (songbook stack README, ADR-001/002, sovereign-AI research, EU-vendor survey issue #30).
+- Established that the beta is already off Vercel; only the **prod** cutover remains (needs self-hosted/EU prod Supabase).
+- Created **<infra-repo>#84** — `chore: migrate Songbook prod off Vercel to the sovereign VPS` (scoped to prod cutover only, Gherkin AC, label `chore`).
+- Cross-linked **<infra-repo>#34** (install prod Supabase) as the blocking dependency via a comment.
+
+### 3. Repo Hygiene (PR #148)
+- Found `issue_draft.md` (a leftover create-issue scratch file) accidentally committed to `main` in 10811cb.
+- Removed it on a dedicated `chore/remove-stray-issue-draft` branch → PR #148, keeping it out of the docs PR.

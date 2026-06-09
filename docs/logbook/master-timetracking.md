@@ -60,4 +60,6 @@
 | **Feb 28** | **Planning**: PWA Stories, Gatekeeper Design, Musician→Profile Setting | ~3.0 Hours | ✅ Completed |
 | **Feb 28** | **Tooling**: sync-stories bug fixes & GitHub issues audit/cleanup | ~1.5 Hours | ✅ Completed |
 
-| **Total** | **Development + AI Collaboration** | **~122.75 Hours** | |
+| **Jun 9** | **Docs/Infra**: Beta Deployment Guide & Vercel-Migration Issue Tracking | ~1.0 Hours | ✅ Completed |
+
+| **Total** | **Development + AI Collaboration** | **~123.75 Hours** | |

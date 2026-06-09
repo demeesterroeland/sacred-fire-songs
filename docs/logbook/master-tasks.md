@@ -884,3 +884,12 @@
     - [x] Full MD↔GH sync comparison — fix 6 sync issues (duplicates, title normalisation)
     - [x] Sync MD status: mark 1.1.5, 4.1.1, 4.1.2 as [Implemented]
     - [x] Merge PR #113 into main
+
+- [x] **Session — Jun 9, 2026 (Beta Deployment Guide & Vercel-Migration Tracking)**
+    - [x] Author `docs/beta-deployment.md` (beta cutover off Vercel onto VPS + staging Supabase)
+    - [x] Update README deployment row to link the beta deployment guide
+    - [x] Open PR #147 (docs: add beta deployment guide)
+    - [x] Investigate existing Vercel-migration research (none found; context in <infra-repo>)
+    - [x] Create <infra-repo>#84 — chore: migrate Songbook prod off Vercel (prod-cutover scope)
+    - [x] Cross-link <infra-repo>#34 as blocking dependency
+    - [x] Remove stray `issue_draft.md` from main → PR #148
