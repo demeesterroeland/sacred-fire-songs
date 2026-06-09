@@ -63,7 +63,7 @@ It's designed for **use in ceremony**: large readable text, screen wake lock so 
 | Data fetching | TanStack Query v5 |
 | Animation | Framer Motion |
 | Testing | Vitest |
-| Deployment | Vercel |
+| Deployment | Vercel (prod) · self-hosted beta — see [Beta Deployment](docs/beta-deployment.md) |
 
 ---
 
