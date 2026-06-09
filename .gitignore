@@ -50,3 +50,9 @@ SUPABASE_LOCAL.md
 # opencode workflow (contains local-only API key)
 .github/workflows/opencode.yml
 .superpowers/
+
+# Supabase Studio local scratch (root-owned "Untitled query" snippets)
+supabase/snippets/
+
+# Source PDFs — the app uses .cho (ChordPro) files, not PDFs
+data/songs/**/*.pdf
