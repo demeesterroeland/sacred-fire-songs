@@ -16,12 +16,12 @@ test.describe('Guest smoke @smoke', () => {
     await page.goto('/songs');
     // The songs page renders a search field and at least one song link.
     await expect(page).toHaveURL(/\/songs/);
-    await expect(page.locator('a[href^="/songs/"]').first()).toBeVisible();
+    await expect(page.locator('a[href^="/songs/"]:not([href="/songs/add"])').first()).toBeVisible();
   });
 
   test('VIEW-01: guest can open a song detail page', async ({ page }) => {
     await page.goto('/songs');
-    await page.locator('a[href^="/songs/"]').first().click();
+    await page.locator('a[href^="/songs/"]:not([href="/songs/add"])').first().click();
     await expect(page).toHaveURL(/\/songs\/[^/]+$/);
   });
 
