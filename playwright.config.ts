@@ -22,6 +22,7 @@ const baseURL = process.env.E2E_BASE_URL ?? `http://localhost:${PORT}`;
 
 export default defineConfig({
   testDir: './e2e',
+  globalSetup: './e2e/global-setup.ts',
   // Per-file parallelism; auth setup runs first via project dependency.
   fullyParallel: true,
   forbidOnly: !!process.env.CI,

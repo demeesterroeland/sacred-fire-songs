@@ -1,6 +1,6 @@
 # Project Analysis & Design Document: Song Sharing Application (Sacred Fire Songs)
 
-**Version:** 1.23
+**Version:** 1.24
 **Status:** Living Document
 **Date:** June 23, 2026
 
@@ -16,6 +16,7 @@
 | **1.21** | Feb 23, 2026 | Removed Home page search box and renamed "Library" to "Search Songs". |
 | **1.22** | Mar 3, 2026 | Architecture Audit: Added images remote patterns for Supabase and tuned staleTime defaults. |
 | **1.23** | Jun 23, 2026 | Dedicated Artist filter parameter (?artist=) to prevent search collisions, and "No Artist" grouping at the bottom of the artists list. |
+| **1.24** | Jun 23, 2026 | Added dedicated E2E test database cleanup and seeding script (`setup-test-db.mjs`), integrated via Playwright `globalSetup` to isolate tests from the staging environment. |
 
 ## 1. Introduction
 
@@ -116,6 +117,11 @@ The application is a **Progressive Web App (PWA)** optimized for mobile use duri
 ### 6.2 Offline Strategy
 * **React Query:** Configured with `staleTime: 1 minute` (default for lists) and `gcTime: 24 hours`. Detail queries may override to 5 minutes.
 * **Browser Cache:** Assets cached via Vercel headers.
+
+### 6.3 E2E Testing Environment & Database Isolation
+* **Isolation Strategy:** Playwright E2E tests are configured to run against a separate, online staging Supabase instance (`REDACTED_STAGING_PROJECT_ID`). This preserves the integrity of the self-hosted Supabase database used to drive the `<staging-app>` staging application.
+* **Database Setup & Seeding:** E2E runs use a Playwright `globalSetup` hook (`e2e/global-setup.ts`) to execute a custom Node.js setup script (`scripts/setup-test-db.mjs`). This script connects to the target database, dynamically truncates all public tables, wipes `auth.users`, and seeds the database using the SQL scripts located in `supabase/seeds/`.
+* **Local Optimization:** For fast local test iteration, setting the environment variable `E2E_REUSE_DB=1` skips the database wipe and re-seed, reusing the existing database state.
 
 ## 7. Screen Inventory (Implemented)
 

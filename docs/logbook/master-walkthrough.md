@@ -2289,3 +2289,24 @@ Successfully implemented a dedicated `artist` filter parameter (`?artist=Name`) 
 ### 4. Merged E2E Foundation PR #163
 - Merged the Playwright Phase 0 E2E test foundation PR after verifying checks passed.
 - Switched the local repository to `main`, pulled origin updates, and deleted the local `chore/142-e2e-test-overview` branch.
+
+## Session Update (Jun 23, 2026 — Part 3 — E2E Test Database Isolation)
+
+### 1. Database Setup Script (`scripts/setup-test-db.mjs`)
+- Created a Node.js ES module script that dynamically wipes and seeds the PostgreSQL database.
+- Implemented a wakeup/ping mechanism that polls the remote Supabase REST API (up to 12 times, 2 minutes total) to automatically wake up paused cloud staging projects before E2E runs.
+- Dynamically queries all public tables and truncates them using `TRUNCATE TABLE ... CASCADE`.
+- Clears `auth.users` to purge test users and cascades cleanup to identities and profiles.
+- Sequentially executes all `supabase/seeds/*.sql` scripts in alphabetical order inside a single database transaction.
+
+### 2. Playwright Hook Integration
+- Authored `e2e/global-setup.ts` to execute the database reset script before test runs.
+- Implemented the `E2E_REUSE_DB=1` bypass parameter to skip the database wipe/re-seed for fast local test iterations.
+- Updated `playwright.config.ts` to register `globalSetup`.
+
+### 3. CI/CD Environment Sync
+- Modified `.github/workflows/e2e.yml` to retrieve `SUPABASE_DB_PASSWORD_STAGING` and export it as `SUPABASE_DB_PASSWORD` in the GITHUB_ENV, with validation checks to fail-fast if missing.
+
+### 4. Design & Testing Documentation
+- Updated `docs/design/application-analysis&design.md` to version 1.24, documenting E2E DB isolation architecture.
+- Updated `docs/testing/e2e-test-overview.md` to version 1.4, outlining the staging database split and automated E2E DB setup.

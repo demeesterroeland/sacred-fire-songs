@@ -8,6 +8,18 @@ const nextConfig: NextConfig = {
       { protocol: 'https', hostname: '*.supabase.co' },
     ],
   },
+  async rewrites() {
+    const isDev = process.env.NODE_ENV === "development";
+    const supabaseUrl = isDev 
+      ? process.env.NEXT_PUBLIC_SUPABASE_URL_DEV 
+      : process.env.NEXT_PUBLIC_SUPABASE_URL;
+    return [
+      {
+        source: '/supabase-api/:path*',
+        destination: `${supabaseUrl}/:path*`,
+      },
+    ];
+  },
 };
 
 export default nextConfig;
