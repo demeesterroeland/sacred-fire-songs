@@ -919,3 +919,11 @@
 - [x] **Phase 7: Finalization** <!-- id: 20 -->
     - [x] Create `walkthrough.md` <!-- id: 21 -->
     - [x] Document in project logs and commit changes <!-- id: 22 -->
+
+- [x] **Session — Jun 23, 2026 (Tailscale Database Setup & PR #163 Merge)**
+    - [x] Expose Kong gateway API on Tailscale IP port 8000.
+    - [x] Re-route `SITE_URL` and `API_EXTERNAL_URL` in self-hosted Supabase configuration to Tailscale.
+    - [x] Rebuild and restart the `songbook` stack against the Tailscale Supabase endpoint.
+    - [x] Fix Traefik dynamically registered routers by restarting the proxy stack.
+    - [x] Replace all `db.example.com` references in stacks and admin dashboard config.
+    - [x] Merge PR #163 and clean up local branch structures.

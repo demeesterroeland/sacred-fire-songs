@@ -62,5 +62,6 @@
 
 | **Jun 9** | **Docs/Infra**: Beta Deployment Guide & Vercel-Migration Issue Tracking | ~1.0 Hours | ✅ Completed |
 | **Jun 23** | **Feature**: Dedicated Artist filtering (#165) & "No Artist" list card aggregation | ~1.5 Hours | ✅ Completed |
+| **Jun 23** | **VPS Migration**: Database URL switch to Tailscale, Traefik fix, merge PR #163, replace db.example.com | ~1.5 Hours | ✅ Completed |
 
-| **Total** | **Development + AI Collaboration** | **~125.25 Hours** | |
+| **Total** | **Development + AI Collaboration** | **~126.75 Hours** | |

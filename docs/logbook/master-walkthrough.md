@@ -2268,3 +2268,24 @@ Successfully implemented a dedicated `artist` filter parameter (`?artist=Name`) 
 ## Verification
 * Ran `npx vitest run` and confirmed all 63 unit tests pass successfully.
 * Confirmed that files touched are free of lint errors.
+
+## Session Update (Jun 23, 2026 — Part 2 — Database Migration to Tailscale & PR #163 Merge)
+
+### 1. Exposed Supabase API on Tailscale Private IP
+- Configured Kong gateway in `<stacks-dir>/stacks/supabase/docker-compose.yaml` to publish container port 8000 on the Tailscale interface, disabling public routing.
+- Set `SITE_URL` and `API_EXTERNAL_URL` inside `<stacks-dir>/stacks/supabase/.env` to the private Tailscale database URL.
+- Cleaned up Traefik routing in the `supabase` stack by setting `traefik.enable=false` and removing all public `Host` rules for `db.example.com` on the HTTPS entrypoint. This avoids Let's Encrypt renewal warnings for unused domains.
+- Restarted `supabase` stack to apply configuration changes.
+
+### 2. Configured and Rebuilt Songbook Stack
+- Updated `NEXT_PUBLIC_SUPABASE_URL` to the private Tailscale database URL in `<stacks-dir>/stacks/songbook/.env`.
+- Rebuilt the Next.js `songbook` Docker container without cache to bake in the new private database endpoint.
+- Troubleshot Traefik's dynamic router initialization by restarting the `traefik` proxy container, restoring routing for `https://<staging-app>.example.com`.
+
+### 3. Eliminated Stale References
+- Replaced all references to `db.example.com` on the VPS to point to the private Tailscale database URL in `admin-dashboard/html/index.html` (description changed to Private API) and stack env files.
+- Staged, committed, and clean-aligned `<stacks-dir>` Git repository on the VPS.
+
+### 4. Merged E2E Foundation PR #163
+- Merged the Playwright Phase 0 E2E test foundation PR after verifying checks passed.
+- Switched the local repository to `main`, pulled origin updates, and deleted the local `chore/142-e2e-test-overview` branch.
