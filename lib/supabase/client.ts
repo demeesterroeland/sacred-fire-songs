@@ -10,5 +10,9 @@ export function createClient() {
     const anonKey = isDev
         ? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY_DEV!
         : process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!;
-    return createBrowserClient(url, anonKey);
+    return createBrowserClient(url, anonKey, {
+        cookieOptions: {
+            name: "sb-auth-token",
+        },
+    });
 }
