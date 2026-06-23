@@ -1,6 +1,6 @@
 # Project Analysis & Design Document: Song Sharing Application (Sacred Fire Songs)
 
-**Version:** 1.24
+**Version:** 1.25
 **Status:** Living Document
 **Date:** June 23, 2026
 
@@ -17,6 +17,7 @@
 | **1.22** | Mar 3, 2026 | Architecture Audit: Added images remote patterns for Supabase and tuned staleTime defaults. |
 | **1.23** | Jun 23, 2026 | Dedicated Artist filter parameter (?artist=) to prevent search collisions, and "No Artist" grouping at the bottom of the artists list. |
 | **1.24** | Jun 23, 2026 | Added dedicated E2E test database cleanup and seeding script (`setup-test-db.mjs`), integrated via Playwright `globalSetup` to isolate tests from the staging environment. |
+| **1.25** | Jun 23, 2026 | Added client-side relative Supabase API proxy (/supabase-api) rewrite in client.ts and next.config.ts to prevent Mixed Content protocol blocking on self-hosted environments. |
 
 ## 1. Introduction
 
