@@ -1,5 +1,6 @@
 import { FilterConfig } from "@/lib/declarative-filter/types";
 import { Song } from "@/lib/songUtils";
+import { normalizeWhitespace } from "@/lib/utils";
 
 // 1. Define the Filter State (URL Params map to this)
 export interface SongFilterState {
@@ -75,15 +76,19 @@ export const songFilterConfig: FilterConfig<Song, SongFilterState> = {
     isActive: (val) => !!val && val.trim().length > 0,
     match: (song, query) => {
       if (!query) return true;
-      const lower = query.toLowerCase();
+      const cleanQuery = normalizeWhitespace(query).toLowerCase();
+      const cleanTitle = normalizeWhitespace(song.title).toLowerCase();
+      const cleanAuthor = normalizeWhitespace(song.author).toLowerCase();
+      const cleanContent = song.content ? normalizeWhitespace(song.content).toLowerCase() : "";
       return (
-        song.title.toLowerCase().includes(lower) ||
-        song.author.toLowerCase().includes(lower) ||
-        (song.content && song.content.toLowerCase().includes(lower)) || false
+        cleanTitle.includes(cleanQuery) ||
+        cleanAuthor.includes(cleanQuery) ||
+        cleanContent.includes(cleanQuery)
       );
     },
     // No facets for free-text search usually
   },
+
 
   // --- STATUS ---
   status: {
