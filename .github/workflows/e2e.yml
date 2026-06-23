@@ -1,0 +1,90 @@
+name: E2E (Playwright)
+
+# Runs the @smoke E2E subset against the STAGING Supabase project on every push
+# to main or a feature branch. See docs/testing/e2e-test-overview.md.
+#
+# Required repo secrets:
+#   SUPABASE_PROJECT_ID_STAGING        - staging project ref (used to derive the URL)
+#   SUPABASE_PUBLISHABLE_KEY_STAGING   - staging anon/publishable key (public; safe as a secret/variable)
+#   E2E_TEST_PASSWORD                 - password for the seeded E2E test accounts on staging
+#
+# Optional:
+#   SUPABASE_URL_STAGING               - full staging URL; overrides the derived https://<ref>.supabase.co
+#
+# NOTE: staging must contain the seeded test accounts (roel.de.meester+{admin,
+# musician,member}@gmail.com) for the per-role auth setup to succeed. Migrations
+# are pushed to staging by deploy-db.yml, but seed data (supabase/seeds/*.sql) is
+# NOT — seed those accounts on staging once, or auth.setup will fail.
+
+on:
+  push:
+    branches:
+      - main
+      - 'feat/**'
+      - 'fix/**'
+      - 'chore/**'
+
+concurrency:
+  # One staging E2E run at a time per branch (they share the same remote DB).
+  group: e2e-staging-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      NEXT_PUBLIC_DEV_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Configure staging Supabase env
+        env:
+          REF: ${{ secrets.SUPABASE_PROJECT_ID_STAGING }}
+          URL_OVERRIDE: ${{ secrets.SUPABASE_URL_STAGING }}
+          PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY_STAGING }}
+          TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
+        run: |
+          if [ -n "$URL_OVERRIDE" ]; then
+            URL="$URL_OVERRIDE"
+          elif [ -n "$REF" ]; then
+            URL="https://${REF}.supabase.co"
+          else
+            echo "::error::Set SUPABASE_PROJECT_ID_STAGING (or SUPABASE_URL_STAGING)"
+            exit 1
+          fi
+          if [ -z "$PUBLISHABLE_KEY" ]; then
+            echo "::error::SUPABASE_PUBLISHABLE_KEY_STAGING secret is not set"
+            exit 1
+          fi
+          if [ -z "$TEST_PASSWORD" ]; then
+            echo "::error::E2E_TEST_PASSWORD secret is not set"
+            exit 1
+          fi
+          echo "NEXT_PUBLIC_SUPABASE_URL=$URL" >> "$GITHUB_ENV"
+          echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=$PUBLISHABLE_KEY" >> "$GITHUB_ENV"
+          echo "Staging URL: $URL"
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install Playwright browsers
+        run: npx playwright install --with-deps chromium
+
+      - name: Run @smoke E2E tests against staging
+        # NEXT_PUBLIC_* are inlined at build time; playwright's webServer runs
+        # `next build && next start`, so the staging env above is baked in.
+        run: npx playwright test --grep @smoke
+
+      - name: Upload Playwright report
+        if: ${{ !cancelled() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report
+          path: playwright-report/
+          retention-days: 7
