@@ -3,7 +3,7 @@ import { createBrowserClient } from "@supabase/ssr";
 export function createClient() {
     const isDev = process.env.NODE_ENV === "development";
     const url = typeof window !== 'undefined'
-        ? '/supabase-api'
+        ? `${window.location.origin}/supabase-api`
         : (isDev
             ? process.env.NEXT_PUBLIC_SUPABASE_URL_DEV!
             : process.env.NEXT_PUBLIC_SUPABASE_URL!);
