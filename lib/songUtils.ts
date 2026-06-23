@@ -1,7 +1,9 @@
 import { createClient } from "./supabase/client";
 import { songsQuery, mapCompositionToSong } from './songs/queries';
+import { normalizeWhitespace } from "./utils";
 
 const PAGE_SIZE = 20;
+
 
 // lib/songUtils.ts
 export interface Song {
@@ -30,16 +32,21 @@ export interface Song {
  * Filters a list of songs by title, author, content, tags (AND), or categories (OR).
  */
 export function filterSongs(songs: Song[], query: string, activeFilter: 'all' | 'public' | 'draft' = 'all', additionalFilters?: { tag?: string, category?: string }) {
-    const lowerQuery = query.toLowerCase();
+    const cleanQuery = normalizeWhitespace(query).toLowerCase();
 
     let filtered = songs.filter(song => {
         // 1. Text Search
-        const matchesText = song.title.toLowerCase().includes(lowerQuery) ||
-            song.author.toLowerCase().includes(lowerQuery) ||
-            (song.content && song.content.toLowerCase().includes(lowerQuery));
+        const cleanTitle = normalizeWhitespace(song.title).toLowerCase();
+        const cleanAuthor = normalizeWhitespace(song.author).toLowerCase();
+        const cleanContent = song.content ? normalizeWhitespace(song.content).toLowerCase() : "";
+
+        const matchesText = cleanTitle.includes(cleanQuery) ||
+            cleanAuthor.includes(cleanQuery) ||
+            cleanContent.includes(cleanQuery);
 
         return matchesText;
     });
+
 
     // 2. Tag Filter (AND Logic - song must have ALL these tags)
     if (additionalFilters?.tag) {

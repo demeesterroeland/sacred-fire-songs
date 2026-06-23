@@ -3,6 +3,7 @@ import type { Song } from "@/lib/songUtils";
 import type { TaxonomyNode } from "@/lib/taxonomyUtils";
 import { songsQuery, mapCompositionToSong } from './queries';
 import type { SupabaseClient } from "@supabase/supabase-js";
+import { normalizeWhitespace } from "@/lib/utils";
 
 const PAGE_SIZE = 20;
 
@@ -402,6 +403,7 @@ export interface ArtistSummary {
 /**
  * Aggregates unique authors from all compositions (public + drafts)
  * with song counts and first 5 song titles.
+ * Handles spacing variations (collapses multiple spaces) and casing variations.
  */
 export async function fetchArtistsServer(): Promise<ArtistSummary[]> {
     const supabase = await createClient();
@@ -419,21 +421,42 @@ export async function fetchArtistsServer(): Promise<ArtistSummary[]> {
 
     const authorCounts = new Map<string, number>();
     const authorTitles = new Map<string, string[]>();
-    for (const row of rows || []) {
-        const name = row.original_author as string;
-        if (!name) continue;
-        authorCounts.set(name, (authorCounts.get(name) || 0) + 1);
+    const authorCanonicalNames = new Map<string, string>(); // lowercased-normalized -> preferred casing
 
-        if (!authorTitles.has(name)) authorTitles.set(name, []);
-        const titles = authorTitles.get(name)!;
+    for (const row of rows || []) {
+        const originalName = row.original_author as string;
+        if (!originalName) continue;
+
+        const normalized = normalizeWhitespace(originalName);
+        if (!normalized) continue;
+
+        const key = normalized.toLowerCase();
+
+        authorCounts.set(key, (authorCounts.get(key) || 0) + 1);
+
+        if (!authorTitles.has(key)) authorTitles.set(key, []);
+        const titles = authorTitles.get(key)!;
         if (titles.length < 5 && row.title) titles.push(row.title as string);
+
+        // Keep casing with most uppercase letters, or fall back to the first one seen
+        const existingCanonical = authorCanonicalNames.get(key);
+        if (!existingCanonical) {
+            authorCanonicalNames.set(key, normalized);
+        } else {
+            const existingUppers = (existingCanonical.match(/[A-Z]/g) || []).length;
+            const newUppers = (normalized.match(/[A-Z]/g) || []).length;
+            if (newUppers > existingUppers) {
+                authorCanonicalNames.set(key, normalized);
+            }
+        }
     }
 
     return Array.from(authorCounts.entries())
-        .map(([name, songCount]) => ({
-            name,
+        .map(([key, songCount]) => ({
+            name: authorCanonicalNames.get(key) || key,
             songCount,
-            songTitles: authorTitles.get(name) || [],
+            songTitles: authorTitles.get(key) || [],
         }))
         .sort((a, b) => a.name.localeCompare(b.name));
 }
+

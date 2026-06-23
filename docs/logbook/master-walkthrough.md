@@ -2232,3 +2232,18 @@ Performed a comprehensive technical audit of the codebase against Next.js 16 and
 ### 3. Repo Hygiene (PR #148)
 - Found `issue_draft.md` (a leftover create-issue scratch file) accidentally committed to `main` in 10811cb.
 - Removed it on a dedicated `chore/remove-stray-issue-draft` branch → PR #148, keeping it out of the docs PR.
+
+## Session Update (Jun 23, 2026 — Artist Duplication & Search Normalization)
+
+### 1. Artist Aggregation Fix (#164)
+- Fixed an issue where spelling variations of the same artist (such as `FirstName SecondName` vs `FirstName  SecondName` with extra spaces) would result in duplicated artist list cards on the Artists library page (`/library/artists`).
+- Created a string normalization helper `normalizeWhitespace` in `lib/utils.ts` to collapse multiple consecutive whitespace characters into a single space and trim padding.
+- Refactored `fetchArtistsServer` in `lib/songs/serverQueries.ts` to aggregate artists case-insensitively and whitespace-sensitively, mapping them using a case-insensitive lookup key while preserving a preferred canonical casing (preferring the version containing more uppercase characters, or the first seen).
+
+### 2. Search Matching Normalization
+- Refactored client-side search matching in `lib/songs/filterConfig.ts` and `lib/songUtils.ts` (`filterSongs`) to perform whitespace-normalized, case-insensitive comparison, ensuring that searches for both variations (single space vs double space) correctly match all songs by that artist.
+
+### 3. Verification & Testing
+- Developed and ran comprehensive unit tests in `lib/unit-tests/artistNormalization.test.ts` to verify the whitespace helper, artist aggregation, and canonical casing heuristics. All 115 tests pass.
+- Updated project documentation in `docs/design/application-analysis&design.md` to version 1.23.
+
