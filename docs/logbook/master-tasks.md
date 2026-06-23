@@ -941,3 +941,16 @@
     - [x] Add `/supabase-api` path exceptions to isPublicRoute check in Next.js middleware `lib/supabase/proxy.ts`.
     - [x] Rebuild and redeploy `songbook` container using internal docker URL `http://supabase-beta-kong:8000` to prevent mixed content blocking.
     - [x] Update `admin-dashboard` layout card configurations to split Supabase Studio into Staging and Dev.
+
+- [x] **Session — Jun 23, 2026 (E2E Programmatic Random Seeder & DB Privileges Repair)**
+    - [x] Create programmatic random data seeder (\`scripts/random-seeder.mjs\`) generating realistic medicine songs and setlists mapped to categories.
+    - [x] Integrate random seeder in \`scripts/setup-test-db.mjs\` triggered by \`E2E_RANDOM_SEED=1\` (preserving static taxonomy categories from truncation).
+    - [x] Diagnose client-side PostgREST query failures (\`permission denied for schema public\`) on \`supabase-dev\` database.
+    - [x] Restore default Supabase privileges (USAGE and table CRUD) on the \`public\` schema for \`anon\`, \`authenticated\`, and \`service_role\` roles on \`supabase-dev\`.
+    - [x] Fix development database URL \`NEXT_PUBLIC_SUPABASE_URL_DEV\` in \`.env.local\` to point to port 5002 (API Gateway) instead of port 3002 (Studio).
+    - [x] Configure GitHub Actions workflow (\`.github/workflows/e2e.yml\`) to set \`E2E_RANDOM_SEED=1\` and \`E2E_RANDOM_SONGS_COUNT=80\` so cloud staging is dynamically seeded with random datasets on E2E CI runs.
+    - [x] Verify Playwright E2E smoke tests run successfully and result in a 100% green run (13 passed) on both desktop and mobile chrome.
+    - [x] Create GitHub issue #171 to track implementation of the multi-environment CI/CD branching and deployment strategy.
+
+
+

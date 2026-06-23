@@ -1,4 +1,27 @@
 import { defineConfig, devices } from '@playwright/test';
+import fs from 'fs';
+import path from 'path';
+
+// Load environment variables from .env.test if it exists
+try {
+  const envPath = path.resolve(__dirname, '.env.test');
+  if (fs.existsSync(envPath)) {
+    const envConfig = fs.readFileSync(envPath, 'utf-8');
+    for (const line of envConfig.split('\n')) {
+      const trimmed = line.trim();
+      if (trimmed && !trimmed.startsWith('#')) {
+        const index = trimmed.indexOf('=');
+        if (index !== -1) {
+          const key = trimmed.substring(0, index).trim();
+          const val = trimmed.substring(index + 1).trim();
+          process.env[key] = val.replace(/^["']|["']$/g, '');
+        }
+      }
+    }
+  }
+} catch (e) {
+  console.warn('[playwright.config] Warning: Failed to load .env.test:', e instanceof Error ? e.message : String(e));
+}
 
 /**
  * Playwright configuration for Sacred Fire Songs E2E tests.
@@ -41,19 +64,29 @@ export default defineConfig({
 
   projects: [
     // 1. Authenticate once per role and persist storageState to e2e/.auth/*.json
-    { name: 'setup', testMatch: /auth\.setup\.ts/ },
+    { 
+      name: 'setup', 
+      testMatch: /auth\.setup\.ts/,
+      use: { channel: 'chrome' }
+    },
 
     // 2. Desktop run (depends on setup so storage states exist)
     {
       name: 'chromium-desktop',
-      use: { ...devices['Desktop Chrome'] },
+      use: { 
+        ...devices['Desktop Chrome'],
+        channel: 'chrome'
+      },
       dependencies: ['setup'],
     },
 
     // 3. Mobile run — the app is mobile-first (bottom nav, wake lock)
     {
       name: 'mobile-chrome',
-      use: { ...devices['Pixel 5'] },
+      use: { 
+        ...devices['Pixel 5'],
+        channel: 'chrome'
+      },
       dependencies: ['setup'],
     },
   ],

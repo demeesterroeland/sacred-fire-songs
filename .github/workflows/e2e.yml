@@ -35,6 +35,8 @@ jobs:
     timeout-minutes: 30
     env:
       NEXT_PUBLIC_DEV_TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
+      E2E_RANDOM_SEED: '1'
+      E2E_RANDOM_SONGS_COUNT: '80'
     steps:
       - uses: actions/checkout@v4
 

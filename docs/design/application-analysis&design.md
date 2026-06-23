@@ -1,6 +1,6 @@
 # Project Analysis & Design Document: Song Sharing Application (Sacred Fire Songs)
 
-**Version:** 1.25
+**Version:** 1.26
 **Status:** Living Document
 **Date:** June 23, 2026
 
@@ -18,6 +18,8 @@
 | **1.23** | Jun 23, 2026 | Dedicated Artist filter parameter (?artist=) to prevent search collisions, and "No Artist" grouping at the bottom of the artists list. |
 | **1.24** | Jun 23, 2026 | Added dedicated E2E test database cleanup and seeding script (`setup-test-db.mjs`), integrated via Playwright `globalSetup` to isolate tests from the staging environment. |
 | **1.25** | Jun 23, 2026 | Added client-side relative Supabase API proxy (/supabase-api) rewrite in client.ts and next.config.ts to prevent Mixed Content protocol blocking on self-hosted environments. |
+| **1.26** | Jun 23, 2026 | Added programmatic random seeder (`random-seeder.mjs`) supporting dynamic generation of rich mock data (visibility, ownership, key/capo, and element/lineage tags) for advanced local and E2E testing, toggleable via `E2E_RANDOM_SEED=1` env variable. |
+
 
 ## 1. Introduction
 
@@ -121,7 +123,8 @@ The application is a **Progressive Web App (PWA)** optimized for mobile use duri
 
 ### 6.3 E2E Testing Environment & Database Isolation
 * **Isolation Strategy:** Playwright E2E tests are configured to run against a separate, online staging Supabase instance (`REDACTED_STAGING_PROJECT_ID`). This preserves the integrity of the self-hosted Supabase database used to drive the `<staging-app>` staging application.
-* **Database Setup & Seeding:** E2E runs use a Playwright `globalSetup` hook (`e2e/global-setup.ts`) to execute a custom Node.js setup script (`scripts/setup-test-db.mjs`). This script connects to the target database, dynamically truncates all public tables, wipes `auth.users`, and seeds the database using the SQL scripts located in `supabase/seeds/`.
+* **Database Setup & Seeding:** E2E runs use a Playwright `globalSetup` hook (`e2e/global-setup.ts`) to execute a custom Node.js setup script (`scripts/setup-test-db.mjs`). This script connects to the target database, dynamically truncates all public tables (preserving the static `categories` lookup taxonomy), wipes `auth.users`, and seeds the database using the SQL scripts located in `supabase/seeds/`.
+* **Programmatic Random Seeding:** When the environment variable `E2E_RANDOM_SEED=1` is set, `setup-test-db.mjs` triggers a dynamic seeder (`scripts/random-seeder.mjs`) that generates rich, randomized song titles, ChordPro content, media links, and elements/lineage taxonomy mappings. This exercises the system's filtering, layout, and search algorithms under diverse dataset distributions.
 * **Local Optimization:** For fast local test iteration, setting the environment variable `E2E_REUSE_DB=1` skips the database wipe and re-seed, reusing the existing database state.
 
 ## 7. Screen Inventory (Implemented)
