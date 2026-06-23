@@ -2310,3 +2310,21 @@ Successfully implemented a dedicated `artist` filter parameter (`?artist=Name`) 
 ### 4. Design & Testing Documentation
 - Updated `docs/design/application-analysis&design.md` to version 1.24, documenting E2E DB isolation architecture.
 - Updated `docs/testing/e2e-test-overview.md` to version 1.4, outlining the staging database split and automated E2E DB setup.
+
+## Session Update (Jun 23, 2026 — Part 4 — Next.js Supabase API Proxy for Beta/Staging)
+
+### 1. Client-Side Absolute URL Fallback Configuration
+- Modified `lib/supabase/client.ts` to dynamically construct the client-side Supabase URL using `window.location.origin` as a prefix (`${window.location.origin}/supabase-api`). This satisfies Supabase client's validation rule that the API endpoint must be a valid absolute HTTP/HTTPS URL, while keeping requests on the same origin and protocol.
+
+### 2. Next.js Config Rewrites Configuration
+- Added rewrite config rules in `next.config.ts` mapping `/supabase-api/:path*` dynamically to `process.env.NEXT_PUBLIC_SUPABASE_URL` (which points to `http://supabase-beta-kong:8000` internally via docker proxy network).
+
+### 3. Middleware Route Bypassing
+- Updated exception handlers in the Next.js middleware `lib/supabase/proxy.ts` to bypass `/supabase-api` paths from authentication redirect checks, allowing guests to execute public rest API queries.
+
+### 4. Admin Card Layout Update
+- Updated `stacks/admin-dashboard/html/index.html` to split the old unified Supabase Studio card into two separate Tailscale cards: Supabase Studio (Staging) pointing to `:4002` and Supabase Studio (Dev) pointing to `:3002`.
+
+### 5. VPS Configuration & Rebuild
+- Updated VPS `<stacks-dir>/stacks/songbook/.env` to configure `NEXT_PUBLIC_SUPABASE_URL` using the internal Docker hostname `http://supabase-beta-kong:8000`.
+- Checked out the repository at the absolute URL fix commit and successfully rebuilt/started the `songbook` stack, which is now fully healthy and querying staging data.

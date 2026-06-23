@@ -934,3 +934,10 @@
     - [x] Configure Playwright (`playwright.config.ts`) to use `globalSetup`.
     - [x] Sync CI/CD workflow (`.github/workflows/e2e.yml`) to pass staging DB password.
     - [x] Document database isolation in `docs/design/application-analysis&design.md` and `docs/testing/e2e-test-overview.md`.
+
+- [x] **Session — Jun 23, 2026 (Supabase API Proxy for Beta)**
+    - [x] Configure client-side relative Supabase URL fallback dynamically using `window.location.origin` in `lib/supabase/client.ts`.
+    - [x] Implement Next.js rewrites mapping `/supabase-api/:path*` to target Kong endpoint in `next.config.ts`.
+    - [x] Add `/supabase-api` path exceptions to isPublicRoute check in Next.js middleware `lib/supabase/proxy.ts`.
+    - [x] Rebuild and redeploy `songbook` container using internal docker URL `http://supabase-beta-kong:8000` to prevent mixed content blocking.
+    - [x] Update `admin-dashboard` layout card configurations to split Supabase Studio into Staging and Dev.

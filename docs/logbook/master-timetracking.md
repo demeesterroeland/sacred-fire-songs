@@ -64,5 +64,6 @@
 | **Jun 23** | **Feature**: Dedicated Artist filtering (#165) & "No Artist" list card aggregation | ~1.5 Hours | ✅ Completed |
 | **Jun 23** | **VPS Migration**: Database URL switch to Tailscale, Traefik fix, merge PR #163, replace db.example.com | ~1.5 Hours | ✅ Completed |
 | **Jun 23** | **E2E Isolation**: Create setup-test-db.mjs, global-setup.ts, config update, env variable sync | ~1.5 Hours | ✅ Completed |
+| **Jun 23** | **VPS Database Proxy**: Supabase API Proxy rewrite, admin dashboard cards, songbook config rebuild, client absolute URL fix | ~1.0 Hours | ✅ Completed |
 
-| **Total** | **Development + AI Collaboration** | **~128.25 Hours** | |
+| **Total** | **Development + AI Collaboration** | **~129.25 Hours** | |
