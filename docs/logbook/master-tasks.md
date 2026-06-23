@@ -893,3 +893,12 @@
     - [x] Create <infra-repo>#84 — chore: migrate Songbook prod off Vercel (prod-cutover scope)
     - [x] Cross-link <infra-repo>#34 as blocking dependency
     - [x] Remove stray `issue_draft.md` from main → PR #148
+
+- [x] **Session — Jun 23, 2026 (Artist Duplication & Search Normalization)**
+    - [x] Create branch and worktree `bug/issue-164-artist-multiple-times`
+    - [x] Implement whitespace normalization helper (`normalizeWhitespace`) in `lib/utils.ts`
+    - [x] Refactor `fetchArtistsServer` in `lib/songs/serverQueries.ts` to merge artists case-insensitively and collapse whitespaces
+    - [x] Refactor search matches in `lib/songs/filterConfig.ts` and `lib/songUtils.ts` to normalize whitespaces during query comparison
+    - [x] Create unit tests in `lib/unit-tests/artistNormalization.test.ts` to cover helper, grouping, and casing heuristics
+    - [x] Update design documentation (`docs/design/application-analysis&design.md`)
+
