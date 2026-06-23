@@ -1,8 +1,8 @@
 # E2E Test Overview & Matrix: Sacred Fire Songs
 
-**Version:** 1.3
+**Version:** 1.4
 **Status:** Living Document
-**Date:** May 31, 2026
+**Date:** June 23, 2026
 **Tracking:** GH #142
 
 ## Changelog
@@ -13,6 +13,7 @@
 | **1.1** | May 30, 2026 | Phase 0 scaffolded: added Playwright (`playwright.config.ts`, `@playwright/test`), per-role auth setup (`e2e/auth.setup.ts`), seeded-account fixtures, P0 `@smoke` specs (`e2e/tests/smoke.spec.ts`), CI workflow (`.github/workflows/e2e.yml`), and npm scripts. Flipped scaffolded smoke rows (AUTH-04, ACC-01, LIB-01, LIB-07, VIEW-01) to 🟡. |
 | **1.2** | May 30, 2026 | CI now runs `@smoke` against the **staging** Supabase on push to `main`/`feat|fix|chore/**` (resolves staging URL + anon key via the CLI) instead of a local stack. Documented the staging seed-data caveat and read-only/shared-DB constraints. |
 | **1.3** | May 31, 2026 | CI hardening: the staging anon key is now read from the `SUPABASE_PUBLISHABLE_KEY_STAGING` secret instead of the `supabase projects api-keys` CLI lookup (which returned no key and failed the run). Dropped the Supabase CLI step; URL derived from the project ref. Documented required secrets. |
+| **1.4** | Jun 23, 2026 | Isolated E2E database environment from staging app `<staging-app>`. Integrated automatic database wipe and seeding via Playwright `globalSetup` hook and `setup-test-db.mjs` script. |
 
 ---
 
@@ -63,8 +64,8 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 ### CI approach
 
 - `.github/workflows/e2e.yml` runs on **push** to `main` / `feat|fix|chore/**` and tests against the **staging** Supabase project. It derives the staging URL from `SUPABASE_PROJECT_ID_STAGING` and reads the (public) anon key from the `SUPABASE_PUBLISHABLE_KEY_STAGING` secret; `E2E_TEST_PASSWORD` provides the seeded-account password. It installs deps + Chromium, runs the `@smoke` subset, and uploads the HTML report.
-- **Staging caveat:** seed data (`supabase/seeds/*.sql`) is **not** auto-applied to staging by `deploy-db.yml` (only migrations). The seeded E2E accounts must exist on staging, or `auth.setup.ts` fails. Also, because branches share one staging DB, keep CI specs read-only/idempotent (the current `@smoke` set is) and serialize runs (the workflow uses a per-ref concurrency group).
-- For fully isolated runs, an alternative is booting a local Supabase in CI (`supabase start`) instead of staging — kept as a future option. Consider promoting `@smoke` to a required status check and adding a nightly full-suite run.
+- **Database Isolation:** Playwright E2E tests are configured to run against the online staging Supabase project (which acts as a dedicated E2E DB and is separate from the database driving `<staging-app>`). A global setup hook (`e2e/global-setup.ts`) executes a Node.js setup script (`scripts/setup-test-db.mjs`) to dynamically wipe and seed the database using `supabase/seeds/*.sql` before tests run, ensuring a clean and consistent baseline.
+- **Local Optimization:** For fast local test iteration, setting the environment variable `E2E_REUSE_DB=1` skips the database wipe and re-seed, reusing the existing database state.
 
 ---
 

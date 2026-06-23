@@ -11,15 +11,20 @@ export async function updateSession(request: NextRequest) {
         request.nextUrl.pathname.startsWith("/songs") ||
         request.nextUrl.pathname.startsWith("/explore") ||
         request.nextUrl.pathname.startsWith("/library") ||
-        request.nextUrl.pathname.startsWith("/playlists");
+        request.nextUrl.pathname.startsWith("/playlists") ||
+        request.nextUrl.pathname.startsWith("/supabase-api");
 
     let supabaseResponse = NextResponse.next({
         request,
     });
 
     const supabase = createServerClient(
-        process.env.NEXT_PUBLIC_SUPABASE_URL!,
-        process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!,
+        (process.env.NODE_ENV === "development"
+            ? process.env.NEXT_PUBLIC_SUPABASE_URL_DEV!
+            : process.env.NEXT_PUBLIC_SUPABASE_URL!),
+        (process.env.NODE_ENV === "development"
+            ? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY_DEV!
+            : process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY!),
         {
             cookies: {
                 getAll() {

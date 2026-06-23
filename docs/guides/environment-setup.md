@@ -1,6 +1,6 @@
 # Infrastructure & Environment Guide
 
-This guide explains our **3-Tier Architecture** and how **CI/CD** keeps everything in sync.
+This guide explains our **4-Tier Architecture** and how **CI/CD** keeps everything in sync.
 
 ## 1. The 3-Tier Strategy
 
@@ -8,17 +8,19 @@ We use three separate environments to ensure stability and safety.
 
 | Tier | Environment | URL | Database | Purpose |
 | :--- | :--- | :--- | :--- | :--- |
-| **1** | **Local** | `localhost:3000` | Local Supabase | **Development**. Where you write code. Fast, offline-capable. |
-| **2** | **Preview** | `git-feat-xyz.vercel.app` | **Staging DB** | **Testing**. Created automatically for every Pull Request. Used to verify features in the cloud. |
-| **3** | **Production** | `sacred-fire-songs.com` | **Production DB** | **Live**. The real app used by members. Only updated via `main`. |
+| **1** | **Local Frontend** | `localhost:3000` | — | **Development UI**. Fast, runs on your machine. |
+| **2** | **DEV** | `dev.songbook.example.com` | <server> DEV Supabase | **Development DB**. Isolated DB for local dev. |
+| **3** | **Preview** | `git-feat-xyz.vercel.app` | <server> Staging Supabase | **Testing**. Created for every PR. |
+| **4** | **Production** | `sacred-fire-songs.com` | Supabase.com Production | **Live**. Real app used by members. |
 
 ## 2. Setup Guide (One-Time)
 
 ### Step A: Supabase Projects
-You need two separate projects in the Supabase Dashboard:
-1.  **Sacred Fire Songs (PROD)**: The existing live database.
-2.  **Sacred Fire Songs (STAGING)**: A new project for testing.
-    *   *Note*: Copy the `Reference ID` and `DB Password` for both.
+You need three separate projects in the Supabase Dashboard:
+1.  **Sacred Fire Songs (PROD)**: The existing live database (Supabase.com).
+2.  **Sacred Fire Songs (STAGING)**: Hosted on <server> (`<staging-app>.example.com`).
+3.  **Sacred Fire Songs (DEV)**: New DEV DB on <server> (`user@server`).
+    *   *Note*: Copy the `Reference ID` and `DB Password` for each.
 
 ### Step B: GitHub Secrets
 Go to **Repo Settings -> Secrets -> Actions** and set these exact keys:
@@ -37,9 +39,14 @@ Go to **Vercel -> Settings -> Environment Variables**:
 1.  **Production Environment**:
     *   `NEXT_PUBLIC_SUPABASE_URL`: (Your **PROD** URL)
     *   `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`: (Your **PROD** Key)
+
 2.  **Preview Environment** (Uncheck Production/Development):
     *   `NEXT_PUBLIC_SUPABASE_URL`: (Your **STAGING** URL)
     *   `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`: (Your **STAGING** Key)
+
+3.  **Development Environment** (optional, for `npm run dev`):
+    *   `NEXT_PUBLIC_SUPABASE_URL_DEV`: (Your **DEV** URL)
+    *   `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY_DEV`: (Your **DEV** Key)
 
 ## 3. Automated CI/CD Pipelines
 

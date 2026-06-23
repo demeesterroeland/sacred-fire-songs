@@ -49,6 +49,7 @@ jobs:
           URL_OVERRIDE: ${{ secrets.SUPABASE_URL_STAGING }}
           PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY_STAGING }}
           TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
+          DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD_STAGING }}
         run: |
           if [ -n "$URL_OVERRIDE" ]; then
             URL="$URL_OVERRIDE"
@@ -66,8 +67,13 @@ jobs:
             echo "::error::E2E_TEST_PASSWORD secret is not set"
             exit 1
           fi
+          if [ -z "$DB_PASSWORD" ]; then
+            echo "::error::SUPABASE_DB_PASSWORD_STAGING secret is not set"
+            exit 1
+          fi
           echo "NEXT_PUBLIC_SUPABASE_URL=$URL" >> "$GITHUB_ENV"
           echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=$PUBLISHABLE_KEY" >> "$GITHUB_ENV"
+          echo "SUPABASE_DB_PASSWORD=$DB_PASSWORD" >> "$GITHUB_ENV"
           echo "Staging URL: $URL"
 
       - name: Install dependencies
