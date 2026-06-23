@@ -42,6 +42,9 @@ export async function updateSession(request: NextRequest) {
                     );
                 },
             },
+            cookieOptions: {
+                name: "sb-auth-token",
+            },
         },
     );
 
