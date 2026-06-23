@@ -90,7 +90,7 @@ export default function SongCard({
                                 )}
                             </div>
                             <p className="text-xs text-gray-500 truncate mb-3">
-                                {author}
+                                {author || 'Unknown'}
                             </p>
 
                             {/* Categories/Tags */}

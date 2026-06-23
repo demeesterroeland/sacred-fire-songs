@@ -24,9 +24,10 @@ export function useSongsFilter({ songs, userId, favoriteIds, viewedSongIds, sort
     favorites: false,
     mine: false,
     new: false,
+    artist: '',
   };
 
-  const { filteredItems, facets, state, setFilter, resetFilters } = useDeclarativeFilter(
+  const { filteredItems, state, setFilter, resetFilters } = useDeclarativeFilter(
     songs,
     songFilterConfig,
     defaultState,
@@ -41,6 +42,7 @@ export function useSongsFilter({ songs, userId, favoriteIds, viewedSongIds, sort
         favorites: params.get('favorites') === 'true',
         mine: params.get('mine') === 'true',
         new: params.get('new') === 'true',
+        artist: params.get('artist') || '',
       }),
       serializeUrl: (state) => ({
         category: state.category || '',
@@ -52,6 +54,7 @@ export function useSongsFilter({ songs, userId, favoriteIds, viewedSongIds, sort
         favorites: state.favorites ? 'true' : '',
         mine: state.mine ? 'true' : '',
         new: state.new ? 'true' : '',
+        artist: state.artist || '',
         sort: sortBy,
       }),
     }
@@ -63,6 +66,7 @@ export function useSongsFilter({ songs, userId, favoriteIds, viewedSongIds, sort
     if (state.favorites) items = items.filter(s => favoriteIds.has(s.id));
     if (state.mine && userId) items = items.filter(s => s.ownerId === userId);
     if (state.new) {
+      // eslint-disable-next-line react-hooks/purity
       const cutoff = Date.now() - THIRTY_DAYS_MS;
       items = items.filter(s =>
         !viewedSongIds.has(s.id) && new Date(s.createdAt).getTime() >= cutoff
@@ -111,7 +115,8 @@ export function useSongsFilter({ songs, userId, favoriteIds, viewedSongIds, sort
     state.melody ||
     state.favorites ||
     state.mine ||
-    state.new
+    state.new ||
+    state.artist
   );
 
   return {

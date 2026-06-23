@@ -32,7 +32,7 @@ describe('mapCompositionToSong', () => {
 
   it('handles missing author', () => {
     const song = mapCompositionToSong({ ...baseItem, original_author: null });
-    expect(song.author).toBe('Unknown');
+    expect(song.author).toBe('');
   });
 
   it('handles missing song_versions', () => {

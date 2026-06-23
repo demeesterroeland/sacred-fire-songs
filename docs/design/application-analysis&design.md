@@ -15,8 +15,7 @@
 | **1.20** | Feb 3, 2026 | Implemented Draft Auto-Save (Story 1.1.7). Updated Song Form UI (Layout, Tags). Styled Profile Pill. |
 | **1.21** | Feb 23, 2026 | Removed Home page search box and renamed "Library" to "Search Songs". |
 | **1.22** | Mar 3, 2026 | Architecture Audit: Added images remote patterns for Supabase and tuned staleTime defaults. |
-| **1.23** | Jun 23, 2026 | Resolved duplicate artists and search mismatch on Artists library page by normalizing whitespace and casing. |
-
+| **1.23** | Jun 23, 2026 | Dedicated Artist filter parameter (?artist=) to prevent search collisions, and "No Artist" grouping at the bottom of the artists list. |
 
 ## 1. Introduction
 

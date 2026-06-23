@@ -207,7 +207,7 @@ export default function SongDetailPage() {
                             </div>
                             <div className="flex items-center gap-3">
                                 <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">by{' '}
-                                    <Link href={`/songs?search=${encodeURIComponent(song.original_author || 'Traditional')}`} className="hover:text-gray-900 dark:hover:text-white hover:underline transition-colors">
+                                    <Link href={`/songs?artist=${encodeURIComponent(song.original_author || 'Traditional')}`} className="hover:text-gray-900 dark:hover:text-white hover:underline transition-colors">
                                         {song.original_author || 'Traditional'}
                                     </Link>
                                 </p>
@@ -275,7 +275,7 @@ export default function SongDetailPage() {
                                 <div className="flex flex-wrap items-baseline gap-x-3">
                                     <h1 className="text-4xl font-black text-[#ff4400] tracking-tight">{song.title}</h1>
                                     <p className="text-gray-500 dark:text-gray-400 text-base font-medium">by{' '}
-                                        <Link href={`/songs?search=${encodeURIComponent(song.original_author || 'Traditional')}`} className="hover:text-gray-900 dark:hover:text-white hover:underline transition-colors">
+                                        <Link href={`/songs?artist=${encodeURIComponent(song.original_author || 'Traditional')}`} className="hover:text-gray-900 dark:hover:text-white hover:underline transition-colors">
                                             {song.original_author || 'Traditional'}
                                         </Link>
                                     </p>

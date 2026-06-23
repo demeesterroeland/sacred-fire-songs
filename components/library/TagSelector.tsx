@@ -16,6 +16,8 @@ interface TagSelectorProps {
   searchValue?: string;
   hasActiveFilters?: boolean;
   clearLabel?: string;
+  artist?: string;
+  onArtistChange?: (artist?: string) => void;
 }
 
 export default function TagSelector({
@@ -29,6 +31,8 @@ export default function TagSelector({
   searchValue = '',
   hasActiveFilters = false,
   clearLabel = 'Clear All',
+  artist,
+  onArtistChange,
 }: TagSelectorProps) {
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
@@ -107,6 +111,23 @@ export default function TagSelector({
           );
         })()}
 
+        {/* Artist Pill */}
+        {artist && (() => {
+          const color = 'amber';
+          const style = getCategoryStyles(color);
+          return (
+            <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border transition-all ${style.inactive} animate-in zoom-in-95 duration-200`}>
+              <span className="whitespace-nowrap">ARTIST: {artist}</span>
+              <button
+                className="hover:text-gray-900 dark:hover:text-white transition-colors"
+                onClick={(e) => { e.stopPropagation(); onArtistChange?.(undefined); }}
+              >
+                <X className="w-2.5 h-2.5" />
+              </button>
+            </div>
+          );
+        })()}
+
         {/* Tag Pills */}
         {tags.map(tagSlug => {
           const tagOption = allOptions.find(o => o.slug === tagSlug);
@@ -131,7 +152,7 @@ export default function TagSelector({
           ref={inputRef}
           type="text"
           className="flex-1 min-w-[120px] bg-transparent border-none outline-none text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-600"
-          placeholder={category || tags.length > 0 ? "" : "Add category or tags..."}
+          placeholder={category || tags.length > 0 || artist ? "" : "Add category or tags..."}
           value={inputValue}
           onChange={(e) => {
             setInputValue(e.target.value);
@@ -148,6 +169,9 @@ export default function TagSelector({
                 const newTags = [...tags];
                 newTags.pop();
                 onTagsChange(newTags);
+              } else if (artist) {
+                e.preventDefault();
+                onArtistChange?.(undefined);
               } else if (category) {
                 e.preventDefault();
                 onCategoryChange(undefined);
@@ -192,7 +216,7 @@ export default function TagSelector({
       </div>
 
       {/* Clear Button */}
-      {(category || tags.length > 0 || searchValue || hasActiveFilters) && (
+      {(category || tags.length > 0 || artist || searchValue || hasActiveFilters) && (
         <button
           onClick={onClearAll}
           className="text-[10px] font-bold text-gray-600 hover:text-red-500 uppercase tracking-widest transition-colors flex items-center gap-1.5 px-2"

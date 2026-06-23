@@ -100,7 +100,7 @@ export function mapCompositionToSong(
   return {
     id: item.id,
     title: item.title,
-    author: item.original_author || 'Unknown',
+    author: item.original_author || '',
     songKey: version?.key || null,
     content: version?.content_chordpro || '',
     melodyNotation: version?.melody_notation || '',

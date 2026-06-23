@@ -61,7 +61,6 @@
 | **Feb 28** | **Tooling**: sync-stories bug fixes & GitHub issues audit/cleanup | ~1.5 Hours | ✅ Completed |
 
 | **Jun 9** | **Docs/Infra**: Beta Deployment Guide & Vercel-Migration Issue Tracking | ~1.0 Hours | ✅ Completed |
-| **Jun 23** | **Bug Fix**: Resolve duplicated artists on library overview (#164) | ~0.5 Hours | ✅ Completed |
+| **Jun 23** | **Feature**: Dedicated Artist filtering (#165) & "No Artist" list card aggregation | ~1.5 Hours | ✅ Completed |
 
-| **Total** | **Development + AI Collaboration** | **~124.25 Hours** | |
-
+| **Total** | **Development + AI Collaboration** | **~125.25 Hours** | |

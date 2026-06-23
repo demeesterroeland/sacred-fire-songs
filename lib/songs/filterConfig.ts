@@ -13,6 +13,7 @@ export interface SongFilterState {
   favorites?: boolean;
   mine?: boolean;
   new?: boolean;
+  artist?: string;
 }
 
 // 2. Define the Configuration
@@ -98,6 +99,19 @@ export const songFilterConfig: FilterConfig<Song, SongFilterState> = {
       if (status === 'public') return song.isPublic === true;
       if (status === 'draft') return song.isPublic === false;
       return true;
+    }
+  },
+
+  // --- ARTIST ---
+  artist: {
+    isActive: (val) => !!val && val.trim().length > 0,
+    match: (song, filterArtist) => {
+      if (!filterArtist) return true;
+      const normalizedFilter = normalizeWhitespace(filterArtist).toLowerCase();
+      if (normalizedFilter === "no artist" || normalizedFilter === "unspecified") {
+        return !song.author; // empty string or undefined
+      }
+      return normalizeWhitespace(song.author).toLowerCase() === normalizedFilter;
     }
   }
 };
