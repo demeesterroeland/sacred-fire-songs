@@ -2357,6 +2357,8 @@ Successfully implemented a dedicated `artist` filter parameter (`?artist=Name`) 
 - Created GitHub issue #171 to track implementation of the multi-environment CI/CD branching and deployment strategy, mapping dependencies to the automated release train issue (#168).
 - Created Pull Request #172 for branch \`chore/142-e2e-test-overview\`, and squashed/merged it into \`main\` (bypassing branch protection using admin credentials).
 - Cleaned up repository structure by deleting the local \`feat/light-mode\` branch and deleting/pruning stale remote tracking branches (\`chore/clone-prod-to-staging-script\`, \`chore/disable-local-supabase-analytics\`, \`chore/gitignore-studio-snippets-and-pdfs\`, \`claude/email-sending-system-ibC1f\`), leaving only \`main\` active.
+- Fixed Playwright webServer check URL configuration (\`playwright.config.ts\`) to target static \`favicon.svg\` instead of \`/\` page. This ensures that the server-readiness check during startup does not run server-side database queries, preventing statement timeout race conditions while \`globalSetup\` is concurrently resetting the staging database on CI.
+
 
 
 

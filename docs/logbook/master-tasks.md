@@ -953,6 +953,8 @@
     - [x] Create GitHub issue #171 to track implementation of the multi-environment CI/CD branching and deployment strategy.
     - [x] Create Pull Request #172 for branch \`chore/142-e2e-test-overview\`, squash and merge into \`main\` by bypassing branch protection policies as administrator.
     - [x] Delete and prune all obsolete local and remote tracking branches (\`feat/light-mode\`, \`chore/clone-prod-to-staging-script\`, \`chore/disable-local-supabase-analytics\`, \`chore/gitignore-studio-snippets-and-pdfs\`, \`claude/email-sending-system-ibC1f\`), leaving only \`main\` active.
+    - [x] Fix Playwright webServer startup check URL in \`playwright.config.ts\` to target static \`favicon.svg\` to prevent database query timeouts during concurrent schema resets on CI.
+
 
 
 

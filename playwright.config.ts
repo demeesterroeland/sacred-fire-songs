@@ -95,7 +95,7 @@ export default defineConfig({
   // Reuses an already-running dev/prod server locally for fast iteration.
   webServer: {
     command: 'npm run build && npm run start',
-    url: baseURL,
+    url: `${baseURL}/favicon.svg`,
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,
   },
