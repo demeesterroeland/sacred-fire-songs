@@ -411,7 +411,6 @@ export async function fetchArtistsServer(): Promise<ArtistSummary[]> {
     const { data: rows, error } = await supabase
         .from('compositions')
         .select('title, original_author')
-        .not('original_author', 'is', null)
         .limit(5000);
 
     if (error) {
@@ -422,10 +421,18 @@ export async function fetchArtistsServer(): Promise<ArtistSummary[]> {
     const authorCounts = new Map<string, number>();
     const authorTitles = new Map<string, string[]>();
     const authorCanonicalNames = new Map<string, string>(); // lowercased-normalized -> preferred casing
+    let unspecifiedCount = 0;
+    const unspecifiedTitles: string[] = [];
 
     for (const row of rows || []) {
         const originalName = row.original_author as string;
-        if (!originalName) continue;
+        if (!originalName) {
+            unspecifiedCount++;
+            if (unspecifiedTitles.length < 5 && row.title) {
+                unspecifiedTitles.push(row.title as string);
+            }
+            continue;
+        }
 
         const normalized = normalizeWhitespace(originalName);
         if (!normalized) continue;
@@ -451,12 +458,23 @@ export async function fetchArtistsServer(): Promise<ArtistSummary[]> {
         }
     }
 
-    return Array.from(authorCounts.entries())
+    const result = Array.from(authorCounts.entries())
         .map(([key, songCount]) => ({
             name: authorCanonicalNames.get(key) || key,
             songCount,
             songTitles: authorTitles.get(key) || [],
         }))
         .sort((a, b) => a.name.localeCompare(b.name));
+
+    if (unspecifiedCount > 0) {
+        result.push({
+            name: 'No Artist',
+            songCount: unspecifiedCount,
+            songTitles: unspecifiedTitles,
+        });
+    }
+
+    return result;
 }
+
 

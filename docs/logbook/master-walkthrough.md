@@ -2233,17 +2233,38 @@ Performed a comprehensive technical audit of the codebase against Next.js 16 and
 - Found `issue_draft.md` (a leftover create-issue scratch file) accidentally committed to `main` in 10811cb.
 - Removed it on a dedicated `chore/remove-stray-issue-draft` branch → PR #148, keeping it out of the docs PR.
 
-## Session Update (Jun 23, 2026 — Artist Duplication & Search Normalization)
+## Session Update (Jun 23, 2026 — Dedicated Artist Filtering & No Artist Grouping)
 
-### 1. Artist Aggregation Fix (#164)
-- Fixed an issue where spelling variations of the same artist (such as `FirstName SecondName` vs `FirstName  SecondName` with extra spaces) would result in duplicated artist list cards on the Artists library page (`/library/artists`).
-- Created a string normalization helper `normalizeWhitespace` in `lib/utils.ts` to collapse multiple consecutive whitespace characters into a single space and trim padding.
-- Refactored `fetchArtistsServer` in `lib/songs/serverQueries.ts` to aggregate artists case-insensitively and whitespace-sensitively, mapping them using a case-insensitive lookup key while preserving a preferred canonical casing (preferring the version containing more uppercase characters, or the first seen).
+# Walkthrough: Dedicated Artist Filtering & No Artist Grouping (#165)
 
-### 2. Search Matching Normalization
-- Refactored client-side search matching in `lib/songs/filterConfig.ts` and `lib/songUtils.ts` (`filterSongs`) to perform whitespace-normalized, case-insensitive comparison, ensuring that searches for both variations (single space vs double space) correctly match all songs by that artist.
+## Overview
+Successfully implemented a dedicated `artist` filter parameter (`?artist=Name`) to filter songs strictly by artist name, preventing search collisions. Also aggregated songs with unspecified authors into a "No Artist" card at the bottom of the `/library/artists` list, which links to `?artist=No%20Artist`.
 
-### 3. Verification & Testing
-- Developed and ran comprehensive unit tests in `lib/unit-tests/artistNormalization.test.ts` to verify the whitespace helper, artist aggregation, and canonical casing heuristics. All 115 tests pass.
-- Updated project documentation in `docs/design/application-analysis&design.md` to version 1.23.
+## Changes Made
+1. **Data Mapping (`lib/songs/queries.ts`)**:
+   * Modified `mapCompositionToSong` to map null or empty `original_author` field to `''` instead of `'Unknown'`. This ensures that songs without specified authors are stored as empty strings in the domain model and not hit by search terms like `"Unknown"`.
+2. **Visual Fallback (`components/home/SongCard.tsx`)**:
+   * Updated `SongCard` to display `'Unknown'` as a visual fallback in the UI when the author field is empty.
+3. **Aggregation Backend (`lib/songs/serverQueries.ts`)**:
+   * Updated `fetchArtistsServer` to not filter out null/empty authors, aggregate them under `"No Artist"`, and append them to the end of the alphabetical list.
+4. **Declarative Filter Engine (`lib/songs/filterConfig.ts`)**:
+   * Added `artist` field to `SongFilterState`.
+   * Implemented `artist` matching rule inside `songFilterConfig` using case-insensitive equality, collapsed whitespace, and special handling for `"No Artist"` or `"unspecified"` to match empty/null authors.
+5. **URL Hooks & Navigation (`hooks/useSongsFilter.ts`)**:
+   * Integrated `artist` filter parsing and serialization in URL query parameters.
+   * Updated `hasActiveFilters` check to include the `artist` parameter.
+   * Fixed lint warnings and suppressed React purity warnings.
+6. **UI Components (`components/library/TagSelector.tsx` & `components/library/SearchFiltersModal.tsx`)**:
+   * Updated `TagSelector` to accept `artist` and `onArtistChange` props, render a dedicated `ARTIST: Name` filter pill, support backspace clearing, and display the Clear button when `artist` is set.
+   * Updated `SearchFiltersModal` to pass the `artist` state and handlers to `TagSelector`.
+7. **Detail & Overview Routing (`app/library/artists/ArtistsPageContent.tsx` & `app/songs/[id]/page.tsx`)**:
+   * Converted artist card overview links to navigate to `/songs?artist=Name` instead of `/songs?search=Name`.
+   * Converted artist detail links on the song page to navigate to `/songs?artist=Name` instead of `/songs?search=Name`.
+8. **Unit Tests (`lib/unit-tests/artistNormalization.test.ts` & `lib/unit-tests/queries.test.ts`)**:
+   * Added unit tests to `artistNormalization.test.ts` verifying the "No Artist" aggregation logic and the `songFilterConfig` `artist` matching rules.
+   * Updated the queries map composition test to expect empty string instead of 'Unknown' for missing author.
+   * Added `vitest.config.ts` to support resolving `@/` path alias in unit tests.
 
+## Verification
+* Ran `npx vitest run` and confirmed all 63 unit tests pass successfully.
+* Confirmed that files touched are free of lint errors.

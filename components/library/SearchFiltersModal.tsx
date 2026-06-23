@@ -141,12 +141,15 @@ export default function SearchFiltersModal({
                         <TagSelector
                             category={state.category}
                             tags={state.tags || []}
+                            artist={state.artist}
                             taxonomy={taxonomy}
                             onCategoryChange={(cat) => setFilter('category', cat)}
                             onTagsChange={(tags) => setFilter('tags', tags)}
+                            onArtistChange={(art) => setFilter('artist', art)}
                             onClearAll={() => {
                                 setFilter('category', undefined);
                                 setFilter('tags', []);
+                                setFilter('artist', undefined);
                             }}
                             clearLabel="Clear Tags"
                         />

@@ -894,11 +894,28 @@
     - [x] Cross-link <infra-repo>#34 as blocking dependency
     - [x] Remove stray `issue_draft.md` from main → PR #148
 
-- [x] **Session — Jun 23, 2026 (Artist Duplication & Search Normalization)**
-    - [x] Create branch and worktree `bug/issue-164-artist-multiple-times`
-    - [x] Implement whitespace normalization helper (`normalizeWhitespace`) in `lib/utils.ts`
-    - [x] Refactor `fetchArtistsServer` in `lib/songs/serverQueries.ts` to merge artists case-insensitively and collapse whitespaces
-    - [x] Refactor search matches in `lib/songs/filterConfig.ts` and `lib/songUtils.ts` to normalize whitespaces during query comparison
-    - [x] Create unit tests in `lib/unit-tests/artistNormalization.test.ts` to cover helper, grouping, and casing heuristics
-    - [x] Update design documentation (`docs/design/application-analysis&design.md`)
+# Task: Implement Dedicated Artist Filtering (#165) & "No Artist" Grouping
 
+- [x] **Phase 1: Discovery** <!-- id: 0 -->
+    - [x] Analyze codebase, routing, and database queries for author/artist handling <!-- id: 1 -->
+- [x] **Phase 2: Planning** <!-- id: 2 -->
+    - [x] Create detailed implementation plan and verify requirements <!-- id: 3 -->
+- [x] **Phase 3: Context Assembly** <!-- id: 4 -->
+    - [x] List all active files needed for the changes <!-- id: 5 -->
+- [x] **Phase 4: Implementation** <!-- id: 6 -->
+    - [x] Update `mapCompositionToSong` to keep `original_author` empty/null instead of mapping to `"Unknown"` <!-- id: 7 -->
+    - [x] Update `SongCard` to render `"Unknown"` fallback visually <!-- id: 8 -->
+    - [x] Refactor `fetchArtistsServer` to aggregate unspecified authors as "No Artist" at the bottom of the list <!-- id: 9 -->
+    - [x] Add `artist` parameter to `SongFilterState` and declarative filter config <!-- id: 10 -->
+    - [x] Update `useSongsFilter` hook to support URL parsing/serialization for `artist` <!-- id: 11 -->
+    - [x] Update `ArtistsPageContent` and `SongDetail` pages to link using `?artist=` <!-- id: 12 -->
+    - [x] Update `TagSelector` and `SearchFiltersModal` to display and clear the `Artist` filter pill <!-- id: 13 -->
+- [x] **Phase 5: Verification** <!-- id: 14 -->
+    - [x] Create unit tests for query/search matching and "No Artist" grouping <!-- id: 15 -->
+    - [x] Run vitest to ensure all tests pass <!-- id: 16 -->
+    - [x] Manually verify behavior via local dev server <!-- id: 17 -->
+- [x] **Phase 6: Self-Correction** <!-- id: 18 -->
+    - [x] Fix any linting or test failures <!-- id: 19 -->
+- [x] **Phase 7: Finalization** <!-- id: 20 -->
+    - [x] Create `walkthrough.md` <!-- id: 21 -->
+    - [x] Document in project logs and commit changes <!-- id: 22 -->
