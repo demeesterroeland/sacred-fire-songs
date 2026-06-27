@@ -16,7 +16,6 @@ import { PlaylistPicker } from '@/components/playlists/PlaylistPicker';
 import { useDeleteSong } from '@/hooks/useDeleteSong';
 import { SONG_KEYS } from '@/lib/songs/queryKeys';
 import { useWakeLock } from '@/hooks/useWakeLock';
-import { UserProfile } from '@/components/common/navigation/UserProfile';
 import { getCategoryColor, getCategoryStyles } from '@/lib/uiUtils';
 import { recordSongView } from '@/app/actions/recordSongView';
 
@@ -259,9 +258,7 @@ export default function SongDetailPage() {
                         <Link href="/" className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
                             <ArrowLeft className="w-5 h-5" />
                         </Link>
-                        <div className="border-l border-gray-200/50 dark:border-gray-800/50 pl-3 ml-1">
-                            <UserProfile layout="header" showText={false} />
-                        </div>
+
                     </div>
                 </div>
 

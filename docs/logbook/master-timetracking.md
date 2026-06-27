@@ -65,5 +65,6 @@
 | **Jun 23** | **VPS Migration**: Database URL switch to Tailscale, Traefik fix, merge PR #163, replace db.example.com | ~1.5 Hours | ✅ Completed |
 | **Jun 23** | **E2E Isolation**: Create setup-test-db.mjs, global-setup.ts, config update, env variable sync | ~1.5 Hours | ✅ Completed |
 | **Jun 23** | **VPS Database Proxy**: Supabase API Proxy rewrite, admin dashboard cards, songbook config rebuild, client absolute URL fix | ~1.0 Hours | ✅ Completed |
+| **Jun 27** | **Bug Fix**: Resolve duplicate avatar widget on desktop song detail view (#173) | ~0.5 Hours | ✅ Completed |
 
-| **Total** | **Development + AI Collaboration** | **~129.25 Hours** | |
+| **Total** | **Development + AI Collaboration** | **~129.75 Hours** | |

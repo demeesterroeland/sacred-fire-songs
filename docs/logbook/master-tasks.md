@@ -954,8 +954,13 @@
     - [x] Create Pull Request #172 for branch \`chore/142-e2e-test-overview\`, squash and merge into \`main\` by bypassing branch protection policies as administrator.
     - [x] Delete and prune all obsolete local and remote tracking branches (\`feat/light-mode\`, \`chore/clone-prod-to-staging-script\`, \`chore/disable-local-supabase-analytics\`, \`chore/gitignore-studio-snippets-and-pdfs\`, \`claude/email-sending-system-ibC1f\`), leaving only \`main\` active.
     - [x] Fix Playwright webServer startup check URL in \`playwright.config.ts\` to target static \`favicon.svg\` to prevent database query timeouts during concurrent schema resets on CI.
-
-
-
-
-
+- [x] **Session — Jun 27, 2026 (Duplicate Avatar Fix)**
+    - [x] Create GitHub Issue #173 to track duplicate avatar widget.
+    - [x] Create branch and worktree `bug/issue-173-duplicate-avatar`.
+    - [x] Replace `AccountInfoPanel` with `UserProfile` inside global `Header.tsx` (first line).
+    - [x] Delete duplicate `UserProfile` inside song detail `page.tsx` (second line).
+    - [x] Delete obsolete `AccountInfoPanel.tsx` navigation component file.
+    - [x] Align detail page mockup `screen2_song_detail.html` to reflect change.
+    - [x] Update version history in `application-analysis&design.md`.
+    - [x] Validate build and TypeScript type safety locally.
+    - [x] Commit, push, and merge branch to main.

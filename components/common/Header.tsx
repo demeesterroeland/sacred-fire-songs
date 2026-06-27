@@ -8,7 +8,7 @@ import { useSidebar } from '@/context/SidebarContext';
 import { useAuth } from '@/hooks/useAuth';
 import { getSiteTitle } from '@/lib/env';
 import { ThemeToggle } from './navigation/ThemeToggle';
-import { AccountInfoPanel } from './navigation/AccountInfoPanel';
+import { UserProfile } from './navigation/UserProfile';
 
 const SEARCH_HISTORY_KEY = 'sacred-fire-songs-search-history';
 const MAX_HISTORY = 8;
@@ -303,7 +303,7 @@ export default function Header() {
                     <ThemeToggle />
 
                     {/* User avatar / Account panel */}
-                    <AccountInfoPanel />
+                    <UserProfile layout="header" showText={false} />
                 </div>
             </div>
         </nav>
