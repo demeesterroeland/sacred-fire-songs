@@ -3,11 +3,10 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { Flame, ListMusic, Menu, Music, PlusCircle, Search, SlidersHorizontal, X } from 'lucide-react';
+import { ListMusic, Menu, Music, PlusCircle, Search, SlidersHorizontal, X } from 'lucide-react';
 import { useSidebar } from '@/context/SidebarContext';
 import { useAuth } from '@/hooks/useAuth';
 import { getSiteTitle } from '@/lib/env';
-import { ThemeToggle } from './navigation/ThemeToggle';
 import { UserProfile } from './navigation/UserProfile';
 
 const SEARCH_HISTORY_KEY = 'sacred-fire-songs-search-history';
@@ -160,9 +159,6 @@ export default function Header() {
 
                     {/* Logo */}
                     <Link href="/" className="flex items-center gap-2.5 group/logo shrink-0">
-                        <div className="w-8 h-8 bg-gradient-to-br from-red-700 to-orange-600 rounded-full flex items-center justify-center shadow-md ring-1 ring-black/10 dark:ring-white/10 group-hover/logo:scale-105 transition-transform">
-                            <Flame className="text-white w-4.5 h-4.5 fill-current" />
-                        </div>
                         <span className="hidden lg:block font-bold text-base text-gray-900 dark:text-white tracking-tight group-hover/logo:text-red-600 dark:group-hover/logo:text-red-400 transition-colors">
                             {getSiteTitle()}
                         </span>
@@ -298,9 +294,6 @@ export default function Header() {
                             )}
                         </div>
                     )}
-
-                    {/* Theme toggle */}
-                    <ThemeToggle />
 
                     {/* User avatar / Account panel */}
                     <UserProfile layout="header" showText={false} />

@@ -973,3 +973,12 @@
     - [x] Update version history in `application-analysis&design.md`.
     - [x] Validate build and TypeScript type safety locally.
     - [x] Commit, push, and merge branch to main.
+- [x] **Session — Jun 27, 2026 (Header and Avatar UX Polish)**
+    - [x] Create GitHub Issue #177 to track header and avatar UX polish.
+    - [x] Create branch and worktree `ux/issue-177-header-polish`.
+    - [x] Remove the flame logo circle from the global header (`Header.tsx`) and mockups.
+    - [x] Remove the theme switcher from the global header (`Header.tsx`).
+    - [x] Sync the dropdown avatar's background with the header trigger's purple gradient (`UserProfile.tsx`).
+    - [x] Update version history in `application-analysis&design.md`.
+    - [x] Validate build and TypeScript type safety locally.
+    - [x] Commit, push, and merge branch to main.

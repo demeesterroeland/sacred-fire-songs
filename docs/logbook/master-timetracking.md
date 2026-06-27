@@ -67,5 +67,6 @@
 | **Jun 23** | **VPS Database Proxy**: Supabase API Proxy rewrite, admin dashboard cards, songbook config rebuild, client absolute URL fix | ~1.0 Hours | ✅ Completed |
 | **Jun 27** | **Bug Fix**: Resolve duplicate avatar widget on desktop song detail view (#173) | ~0.5 Hours | ✅ Completed |
 | **Jun 27** | **Bug Fix**: Resolve duplicate edit/delete buttons on mobile song detail page (#175) | ~0.5 Hours | ✅ Completed |
+| **Jun 27** | **UX Polish**: Remove Flame logo and global ThemeToggle, and sync dropdown avatar background (#177) | ~0.5 Hours | ✅ Completed |
 
-| **Total** | **Development + AI Collaboration** | **~130.25 Hours** | |
+| **Total** | **Development + AI Collaboration** | **~130.75 Hours** | |

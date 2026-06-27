@@ -116,7 +116,7 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true }: Us
             {/* User Identity Card */}
             <div className="relative group/card bg-gray-200/50 dark:bg-gray-800/50 p-3 rounded-xl mb-3 border border-gray-300/30 dark:border-gray-700/30">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-red-900/40 flex items-center justify-center text-sm font-bold text-red-400 ring-1 ring-red-500/20 shadow-inner relative overflow-hidden">
+                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-sm font-bold text-white shadow-inner relative overflow-hidden">
                   {user.avatar_url ? (
                     <Image 
                       src={user.avatar_url} 

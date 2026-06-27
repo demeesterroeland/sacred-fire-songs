@@ -2399,3 +2399,25 @@ I have resolved the bug where Edit and Delete buttons were duplicated on the mob
 - Verified that the production build completes successfully (`npm run build`).
 - Ran unit tests (`npx vitest run lib/unit-tests`) which all pass successfully.
 
+# Walkthrough - Header and Avatar UX Polish (Issue #177) - June 27, 2026
+
+I have completed the header and avatar visual polish to improve layout consistency and clean up page noise.
+
+## Actions Taken
+
+### 1. Logo and Theme Switcher Header Cleanup
+- Removed the red circle flame logo from the global header in [Header.tsx](file:///home/roeland/projects/sacred-fire-songs/components/common/Header.tsx) and updated Lucide icon imports.
+- Removed the global `<ThemeToggle />` component from the header (users can still toggle the theme via the switcher inside the profile dropdown).
+- Cleaned up the mobile header headers of [screen1_home.html](file:///home/roeland/projects/sacred-fire-songs/docs/design/screens/screen1_home.html) and [screen2_song_detail.html](file:///home/roeland/projects/sacred-fire-songs/docs/design/screens/screen2_song_detail.html) to keep them in sync.
+
+### 2. Synced Dropdown Avatar Background
+- Updated the fallback user avatar background gradient inside [UserProfile.tsx](file:///home/roeland/projects/sacred-fire-songs/components/common/navigation/UserProfile.tsx) to use the same purple/indigo gradient (`bg-gradient-to-br from-indigo-500 to-purple-600`) as the header trigger avatar, resolving the design mismatch shown in the user screenshot.
+
+### 3. Design & Documentation
+- Documented version `1.28` in the changelog of [application-analysis&design.md](file:///home/roeland/projects/sacred-fire-songs/docs/design/application-analysis%26design.md).
+
+### 4. Build & Validation
+- Verified that the production build completes successfully (`npm run build`).
+- Ran unit tests (`npx vitest run lib/unit-tests`) which all pass successfully.
+
+
