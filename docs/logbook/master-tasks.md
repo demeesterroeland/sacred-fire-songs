@@ -964,3 +964,12 @@
     - [x] Update version history in `application-analysis&design.md`.
     - [x] Validate build and TypeScript type safety locally.
     - [x] Commit, push, and merge branch to main.
+- [x] **Session — Jun 27, 2026 (Duplicate Edit/Delete Actions)**
+    - [x] Create GitHub Issue #175 for duplicate edit/delete buttons bug.
+    - [x] Create branch and worktree `bug/issue-175-duplicate-actions`.
+    - [x] Remove duplicate Edit/Delete buttons from mobile song detail page body.
+    - [x] Reduce vertical whitespace top padding on container and metadata margin.
+    - [x] Align detail page mockup `screen2_song_detail.html`.
+    - [x] Update version history in `application-analysis&design.md`.
+    - [x] Validate build and TypeScript type safety locally.
+    - [x] Commit, push, and merge branch to main.

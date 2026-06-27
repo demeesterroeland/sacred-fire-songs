@@ -2377,3 +2377,25 @@ I have resolved the bug where two user avatar widgets were displayed on the song
 ### 4. Build & Validation
 - Verified that the production build completes successfully (`npm run build`).
 - Ran unit tests (`npm run test`) which all pass successfully.
+
+# Walkthrough - Resolve Duplicate Edit/Delete Buttons (Issue #175) - June 27, 2026
+
+I have resolved the bug where Edit and Delete buttons were duplicated on the mobile song detail page body.
+
+## Actions Taken
+
+### 1. Removed Duplicate Actions on Mobile
+- Removed the duplicate mobile Edit/Delete buttons from the song detail content body in [page.tsx](file:///home/roeland/projects/sacred-fire-songs/app/songs/%5Bid%5D/page.tsx). They are now strictly accessible via the header's context menu.
+
+### 2. Reduced Vertical Whitespace
+- Reduced the main content container's (`max-w-5xl`) top padding from `p-6 md:p-10` to `pt-4 md:pt-6` in [page.tsx](file:///home/roeland/projects/sacred-fire-songs/app/songs/%5Bid%5D/page.tsx).
+- Reduced the mobile title container's margin bottom from `mb-6` to `mb-4`.
+
+### 3. Updated Design & Documentation
+- Removed the duplicate Edit/Delete buttons and reduced top padding in the mockup [screen2_song_detail.html](file:///home/roeland/projects/sacred-fire-songs/docs/design/screens/screen2_song_detail.html) while preserving the back arrow.
+- Updated the changelog in [application-analysis&design.md](file:///home/roeland/projects/sacred-fire-songs/docs/design/application-analysis%26design.md) (v1.28).
+
+### 4. Build & Validation
+- Verified that the production build completes successfully (`npm run build`).
+- Ran unit tests (`npx vitest run lib/unit-tests`) which all pass successfully.
+

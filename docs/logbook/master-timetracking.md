@@ -66,5 +66,6 @@
 | **Jun 23** | **E2E Isolation**: Create setup-test-db.mjs, global-setup.ts, config update, env variable sync | ~1.5 Hours | ✅ Completed |
 | **Jun 23** | **VPS Database Proxy**: Supabase API Proxy rewrite, admin dashboard cards, songbook config rebuild, client absolute URL fix | ~1.0 Hours | ✅ Completed |
 | **Jun 27** | **Bug Fix**: Resolve duplicate avatar widget on desktop song detail view (#173) | ~0.5 Hours | ✅ Completed |
+| **Jun 27** | **Bug Fix**: Resolve duplicate edit/delete buttons on mobile song detail page (#175) | ~0.5 Hours | ✅ Completed |
 
-| **Total** | **Development + AI Collaboration** | **~129.75 Hours** | |
+| **Total** | **Development + AI Collaboration** | **~130.25 Hours** | |

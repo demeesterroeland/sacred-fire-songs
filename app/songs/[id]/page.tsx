@@ -262,10 +262,10 @@ export default function SongDetailPage() {
                     </div>
                 </div>
 
-                <div className="max-w-5xl p-6 md:p-10 space-y-0">
+                <div className="max-w-5xl px-6 md:px-10 pb-6 md:pb-10 pt-4 md:pt-6 space-y-0">
 
                     {/* Mobile: Song Title, Author, Badges row */}
-                    <div className="lg:hidden flex flex-col gap-4 mb-6">
+                    <div className="lg:hidden flex flex-col gap-4 mb-4">
                         <div className="flex-1 space-y-3">
                             {/* Title and Author Grouping */}
                             <div className="space-y-1">
@@ -306,25 +306,6 @@ export default function SongDetailPage() {
                                     );
                                 })}
                             </div>
-                        </div>
-
-                        {/* Action Buttons (Mobile) */}
-                        <div className="flex items-center gap-2">
-                            {(song.owner_id === user?.id || isAdmin) && (
-                                <button
-                                    onClick={() => setIsDeleteModalOpen(true)}
-                                    className="flex items-center gap-2 px-3 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg text-sm font-bold border border-red-500/20 transition-all"
-                                >
-                                    <Trash2 className="w-4 h-4" /> <span className="sm:inline">Delete</span>
-                                </button>
-                            )}
-                            {(song.owner_id === user?.id || isAdmin) && (
-                                <Link href={`/songs/${id}/edit`}>
-                                    <button className="flex items-center gap-2 px-3 py-2 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg text-sm font-bold border border-gray-300 dark:border-gray-700 transition-all">
-                                        <Edit2 className="w-4 h-4" /> <span className="sm:inline">Edit</span>
-                                    </button>
-                                </Link>
-                            )}
                         </div>
                     </div>
 

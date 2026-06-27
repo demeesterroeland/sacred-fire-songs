@@ -1,6 +1,6 @@
 # Project Analysis & Design Document: Song Sharing Application (Sacred Fire Songs)
 
-**Version:** 1.27
+**Version:** 1.28
 **Status:** Living Document
 **Date:** June 27, 2026
 
@@ -20,6 +20,7 @@
 | **1.25** | Jun 23, 2026 | Added client-side relative Supabase API proxy (/supabase-api) rewrite in client.ts and next.config.ts to prevent Mixed Content protocol blocking on self-hosted environments. |
 | **1.26** | Jun 23, 2026 | Added programmatic random seeder (`random-seeder.mjs`) supporting dynamic generation of rich mock data (visibility, ownership, key/capo, and element/lineage tags) for advanced local and E2E testing, toggleable via `E2E_RANDOM_SEED=1` env variable. |
 | **1.27** | Jun 27, 2026 | Resolved duplicate avatar widget on desktop song detail page. Replaced AccountInfoPanel with UserProfile in Header.tsx, removed duplicate UserProfile from app/songs/[id]/page.tsx, and deleted the obsolete AccountInfoPanel component. |
+| **1.28** | Jun 27, 2026 | Resolved duplicate action buttons on mobile song detail page, removed duplicate Edit/Delete buttons from the main content body, and reduced vertical top/margin whitespace. |
 
 
 ## 1. Introduction
