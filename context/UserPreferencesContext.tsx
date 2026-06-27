@@ -7,6 +7,7 @@ export type ThemePreference = 'dark' | 'light' | 'system';
 interface UserPreferences {
   keepScreenAwake: boolean;
   theme: ThemePreference;
+  autoHideBottomNav: boolean;
 }
 
 interface UserPreferencesContextType {
@@ -20,6 +21,7 @@ const STORAGE_KEY = 'sacred-fire-songs-preferences';
 const defaultPreferences: UserPreferences = {
   keepScreenAwake: true, // Enabled by default as requested for mobile convenience
   theme: 'dark', // Backward compatible — existing users stay on dark
+  autoHideBottomNav: true,
 };
 
 const UserPreferencesContext = createContext<UserPreferencesContextType | undefined>(undefined);

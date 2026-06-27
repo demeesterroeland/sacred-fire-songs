@@ -1,6 +1,6 @@
 "use client";
 
-import { Monitor, FileText, Music2, Type, WifiOff, Sun, Moon } from "lucide-react";
+import { Monitor, FileText, Music2, Type, WifiOff, Sun, Moon, SlidersHorizontal } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { useWakeLock } from "@/hooks/useWakeLock";
 import { useUserPreferences, type ThemePreference } from "@/context/UserPreferencesContext";
@@ -113,6 +113,15 @@ export default function PreferencesSettings() {
         onCheckedChange={(v) => setPreference("keepScreenAwake", v)}
         disabled={!isSupported}
         notSupported={!isSupported}
+      />
+
+      {/* Auto-hide Bottom Nav — functional */}
+      <PreferenceRow
+        icon={<SlidersHorizontal className="w-5 h-5" />}
+        label="Auto-hide navigation bar"
+        description="Hide bottom navigation bar on song detail pages after a few seconds of inactivity."
+        checked={preferences.autoHideBottomNav}
+        onCheckedChange={(v) => setPreference("autoHideBottomNav", v)}
       />
 
       {/* Auto-scroll Lyrics — disabled */}

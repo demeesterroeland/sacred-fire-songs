@@ -84,20 +84,20 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
         <UserPreferencesProvider>
           <SidebarProvider>
             <QueryProvider>
-              <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 font-sans selection:bg-red-500/30 overflow-x-hidden">
+              <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 font-sans selection:bg-red-500/30 overflow-x-clip">
                 {/* Top navigation bar (full width, like Immich) */}
                 <Suspense>
                   <Header />
                 </Suspense>
 
                 {/* Grid: sidebar + main content */}
-                <div className="relative grid grid-cols-[0_1fr] lg:grid-cols-[16rem_1fr] h-[calc(100dvh-var(--navbar-height))] max-md:h-[calc(100dvh-var(--navbar-height))]">
+                <div className="relative grid grid-cols-[0_1fr] lg:grid-cols-[16rem_1fr] lg:h-[calc(100dvh-var(--navbar-height))]">
                   <Sidebar />
 
                   {/* Mobile overlay when sidebar is open */}
                   <SidebarOverlay />
 
-                  <main className="relative overflow-y-auto pb-16 lg:pb-0 col-start-2">
+                  <main className="relative overflow-y-visible lg:overflow-y-auto pb-16 lg:pb-0 col-start-2">
                     {children}
                   </main>
                 </div>

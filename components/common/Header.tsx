@@ -143,7 +143,7 @@ export default function Header() {
     return (
         <nav
             id="app-navbar"
-            className="h-[var(--navbar-height)] w-full text-sm sticky top-0 z-50 bg-white/95 dark:bg-gray-950/95 backdrop-blur-md"
+            className="h-[var(--navbar-height)] w-full text-sm relative lg:sticky lg:top-0 z-50 bg-white/95 dark:bg-gray-950/95 backdrop-blur-md"
         >
             <div className="grid h-full grid-cols-[1fr_auto] sm:grid-cols-[auto_1fr_auto] lg:grid-cols-[16rem_1fr_auto] items-center border-b border-gray-200/60 dark:border-gray-800/60">
                 {/* Left: Menu button + Logo */}

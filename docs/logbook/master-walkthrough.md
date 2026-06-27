@@ -2420,4 +2420,37 @@ I have completed the header and avatar visual polish to improve layout consisten
 - Verified that the production build completes successfully (`npm run build`).
 - Ran unit tests (`npx vitest run lib/unit-tests`) which all pass successfully.
 
+# Walkthrough - Spotify-style Mobile Drawer and Bottom Nav Auto-Hide (Issue #179) - June 27, 2026
+
+I have implemented the slide-up bottom drawer context menu on mobile and added the bottom navigation auto-hide setting and logic.
+
+## Actions Taken
+
+### 1. Spotify-style Bottom Drawer Context Menu
+- Replaced the mobile actions trigger in [page.tsx](file:///home/roeland/projects/sacred-fire-songs/app/songs/%5Bid%5D/page.tsx) with the vertical ellipsis icon (`MoreVertical`).
+- Replaced the mobile dropdown menu with a slide-up, full-width bottom sheet context menu containing:
+  - Header showing the song title and artist with a music logo.
+  - Heart toggle ("Add to Liked Songs" / "Remove from Liked Songs").
+  - Add to Playlist (re-used the existing `PlaylistPicker`).
+  - Edit Song (if owner/admin).
+  - Delete Song (if owner/admin).
+- Updated [PlaylistPicker.tsx](file:///home/roeland/projects/sacred-fire-songs/components/playlists/PlaylistPicker.tsx) to support an optional `label` prop, enabling us to render a text description next to the list plus icon in the bottom sheet.
+
+### 2. Mobile Header Pruning
+- Removed the back button and the heart button from the mobile sticky header in [page.tsx](file:///home/roeland/projects/sacred-fire-songs/app/songs/%5Bid%5D/page.tsx).
+
+### 3. Bottom Nav Auto-Hide Configuration
+- Exposed a new preference `autoHideBottomNav` (boolean, default `true`) in [UserPreferencesContext.tsx](file:///home/roeland/projects/sacred-fire-songs/context/UserPreferencesContext.tsx).
+- Added a toggle under [PreferencesSettings.tsx](file:///home/roeland/projects/sacred-fire-songs/components/account/settings/PreferencesSettings.tsx) (labeled "Auto-hide navigation bar") to control this preference.
+- Updated [MobileBottomNav.tsx](file:///home/roeland/projects/sacred-fire-songs/components/common/MobileBottomNav.tsx) to allow bottom navigation on song detail pages.
+- Implemented a 3-second auto-hide timer in [MobileBottomNav.tsx](file:///home/roeland/projects/sacred-fire-songs/components/common/MobileBottomNav.tsx) using user interactions (scroll, touch, click, mousemove, keydown) to reveal the navigation bar and reset the timer.
+
+### 4. Design & Documentation
+- Documented version `1.29` in the changelog of [application-analysis&design.md](file:///home/roeland/projects/sacred-fire-songs/docs/design/application-analysis%26design.md).
+
+### 5. Build & Validation
+- Verified that the production build completes successfully (`npm run build`).
+- Ran unit tests (`npx vitest run lib/unit-tests`) which all pass successfully.
+
+
 

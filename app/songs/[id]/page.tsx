@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, notFound, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
@@ -10,7 +10,8 @@ import SongDetailSkeleton from '@/components/song/SongDetailSkeleton';
 import MediaEmbeds from '@/components/song/MediaEmbeds';
 import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal';
 import { useQuery } from '@tanstack/react-query';
-import { Trash2, Edit2, ArrowLeft, Music, Link as LinkIcon, Heart, MoreHorizontal } from 'lucide-react';
+import { Trash2, Edit2, Music, Link as LinkIcon, Heart, MoreVertical, ListPlus } from 'lucide-react';
+import { toast } from 'sonner';
 import { useToggleFavorite } from '@/hooks/useToggleFavorite';
 import { PlaylistPicker } from '@/components/playlists/PlaylistPicker';
 import { useDeleteSong } from '@/hooks/useDeleteSong';
@@ -108,6 +109,43 @@ export default function SongDetailPage() {
     });
     const { isFav, handleToggle: handleToggleFavorite } = useToggleFavorite(id!, favoriteIds.has(id!));
 
+    const titleRef = useRef<HTMLSpanElement>(null);
+    const [scrollAmount, setScrollAmount] = useState(0);
+
+    useEffect(() => {
+        if (songLoading || authLoading || !song) return;
+
+        const calculateOverflow = () => {
+            const el = titleRef.current;
+            // Compare span width vs the flex-1 container (grandparent of the overflow wrapper)
+            const container = el?.parentElement?.parentElement;
+            if (el && container) {
+                el.style.transform = 'none';
+                const overflow = el.scrollWidth - container.clientWidth;
+                if (overflow > 0) {
+                    setScrollAmount(overflow);
+                } else {
+                    setScrollAmount(0);
+                }
+                el.style.transform = '';
+            }
+        };
+
+        const timer = setTimeout(calculateOverflow, 100);
+
+        window.addEventListener('resize', calculateOverflow);
+        return () => {
+            clearTimeout(timer);
+            window.removeEventListener('resize', calculateOverflow);
+        };
+    }, [song?.title, songLoading, authLoading]);
+
+    const marqueeStyle = scrollAmount > 0 ? {
+        '--scroll-amount': `-${scrollAmount}px`,
+        animation: 'marquee 8s ease-in-out infinite alternate',
+        textAlign: 'left' as const,
+    } as React.CSSProperties : { textAlign: 'center' as const };
+
     if (songLoading || authLoading) return <SongDetailSkeleton />;
     if (!song) return notFound();
 
@@ -127,62 +165,44 @@ export default function SongDetailPage() {
     return (
         <div className="flex flex-col min-h-screen">
             {/* Mobile Header (Visible only on mobile < lg) */}
-            <header className="lg:hidden flex items-center justify-between px-4 py-3 sticky top-0 bg-gray-100/95 dark:bg-gray-900/95 backdrop-blur-md z-30 border-b border-gray-200 dark:border-white/5 shadow-lg">
-                <Link href="/" className="p-2 -ml-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
-                    <ArrowLeft className="w-5 h-5" />
-                </Link>
-                <h1 className="font-bold text-sm tracking-tight text-gray-900 dark:text-white truncate mx-4 flex-1 text-center">
-                    {song.title}
-                </h1>
-                <div className="flex items-center gap-1">
+            <header style={{ top: 'var(--env-banner-height, 0px)', width: '100vw', maxWidth: '100vw' }} className="lg:hidden flex items-center px-4 py-2 sticky left-0 bg-gray-100/95 dark:bg-gray-900/95 backdrop-blur-md z-30 border-b border-gray-200 dark:border-white/5 shadow-lg min-h-[56px]">
+                {/* Title + Author — flex-1 min-w-0 constrains width */}
+                <div className="flex-1 min-w-0 overflow-hidden py-0.5 mx-4">
+                    {/* overflow-hidden clips; span is block so it fills the constrained width */}
+                    <div className="overflow-hidden">
+                        <span
+                            ref={titleRef}
+                            style={marqueeStyle}
+                            className="font-black text-2xl text-[#ff4400] tracking-tight whitespace-nowrap block w-full"
+                        >
+                            {song.title}
+                        </span>
+                    </div>
+                    {/* Author */}
+                    <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 truncate mt-0.5">
+                        by {song.original_author || 'Traditional'}
+                    </div>
+                </div>
+                {/* 3-dot menu — flex-none so it never shrinks */}
+                <div className="flex-none flex items-center">
                     <button
-                        onClick={handleToggleFavorite}
-                        aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
-                        className={`p-2 rounded-full transition-all duration-300 ${isFav ? 'text-amber-400' : 'text-gray-500 hover:text-amber-400/60'}`}
+                        onClick={() => setIsOverflowOpen(!isOverflowOpen)}
+                        className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                        aria-label="More actions"
                     >
-                        <Heart className={`w-5 h-5 transition-all duration-200 ${isFav ? 'fill-amber-400' : ''}`} strokeWidth={1.5} />
+                        <MoreVertical className="w-5 h-5" />
                     </button>
-                    {user && (
-                        <div className="relative">
-                            <button
-                                onClick={() => setIsOverflowOpen(!isOverflowOpen)}
-                                className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-                                aria-label="More actions"
-                            >
-                                <MoreHorizontal className="w-5 h-5" />
-                            </button>
-                            {isOverflowOpen && (
-                                <>
-                                    <div className="fixed inset-0 z-40" onClick={() => setIsOverflowOpen(false)} />
-                                    <div className="absolute right-0 top-full mt-1 z-50 bg-gray-100 dark:bg-gray-900 border border-gray-300/50 dark:border-gray-700/50 rounded-xl overflow-hidden shadow-2xl shadow-black/50 min-w-[180px]">
-                                        {(song.owner_id === user?.id || isAdmin) && (
-                                            <Link
-                                                href={`/songs/${id}/edit`}
-                                                onClick={() => setIsOverflowOpen(false)}
-                                                className="flex items-center gap-3 px-4 py-3 hover:bg-gray-200/50 dark:hover:bg-gray-800/50 transition-colors text-gray-700 dark:text-gray-300"
-                                            >
-                                                <Edit2 className="w-4 h-4" />
-                                                <span className="text-sm font-medium">Edit</span>
-                                            </Link>
-                                        )}
-                                        {(song.owner_id === user?.id || isAdmin) && (
-                                            <button
-                                                onClick={() => { setIsOverflowOpen(false); setIsDeleteModalOpen(true); }}
-                                                className="w-full flex items-center gap-3 px-4 py-3 hover:bg-red-500/10 transition-colors text-red-400"
-                                            >
-                                                <Trash2 className="w-4 h-4" />
-                                                <span className="text-sm font-medium">Delete</span>
-                                            </button>
-                                        )}
-                                    </div>
-                                </>
-                            )}
-                        </div>
-                    )}
                 </div>
             </header>
 
-            <main className="flex-1 min-w-0 overflow-y-auto bg-white dark:bg-gray-950">
+            <style dangerouslySetInnerHTML={{ __html: `
+                @keyframes marquee {
+                    0%, 15% { transform: translateX(0); }
+                    85%, 100% { transform: translateX(var(--scroll-amount)); }
+                }
+            `}} />
+
+            <main className="flex-1 min-w-0 lg:overflow-y-auto overflow-y-visible bg-white dark:bg-gray-950">
 
                 {/* Desktop Page Header (Title, Actions) - Visible only on desktop >= lg */}
                 <div className="hidden lg:flex justify-between items-center px-8 py-4 border-b border-gray-200/50 dark:border-gray-800/50 bg-white/50 dark:bg-gray-950/50 sticky top-0 backdrop-blur-md z-10 transition-all">
@@ -255,9 +275,6 @@ export default function SongDetailPage() {
                         >
                             <Heart className={`w-5 h-5 transition-all duration-200 ${isFav ? 'fill-amber-400' : ''}`} strokeWidth={1.5} />
                         </button>
-                        <Link href="/" className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors">
-                            <ArrowLeft className="w-5 h-5" />
-                        </Link>
 
                     </div>
                 </div>
@@ -265,19 +282,8 @@ export default function SongDetailPage() {
                 <div className="max-w-5xl px-6 md:px-10 pb-6 md:pb-10 pt-4 md:pt-6 space-y-0">
 
                     {/* Mobile: Song Title, Author, Badges row */}
-                    <div className="lg:hidden flex flex-col gap-4 mb-4">
+                     <div className="lg:hidden flex flex-col gap-4 mb-4">
                         <div className="flex-1 space-y-3">
-                            {/* Title and Author Grouping */}
-                            <div className="space-y-1">
-                                <div className="flex flex-wrap items-baseline gap-x-3">
-                                    <h1 className="text-4xl font-black text-[#ff4400] tracking-tight">{song.title}</h1>
-                                    <p className="text-gray-500 dark:text-gray-400 text-base font-medium">by{' '}
-                                        <Link href={`/songs?artist=${encodeURIComponent(song.original_author || 'Traditional')}`} className="hover:text-gray-900 dark:hover:text-white hover:underline transition-colors">
-                                            {song.original_author || 'Traditional'}
-                                        </Link>
-                                    </p>
-                                </div>
-                            </div>
 
                             {/* Technical Badges (Chords/Melody) */}
                             <div className="flex items-center gap-2">
@@ -362,6 +368,102 @@ export default function SongDetailPage() {
                     isDeleting={isDeleting}
                 />
             </main>
+
+            {/* Mobile Bottom Drawer Context Menu */}
+            {isOverflowOpen && (
+                <>
+                    {/* Backdrop overlay */}
+                    <div 
+                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden animate-in fade-in duration-200" 
+                        onClick={() => setIsOverflowOpen(false)} 
+                    />
+                    {/* Bottom sheet */}
+                    <div 
+                        className="fixed bottom-0 inset-x-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 rounded-t-3xl shadow-2xl z-50 pb-safe-bottom lg:hidden animate-in slide-in-from-bottom duration-300 flex flex-col"
+                    >
+                        {/* Handle bar */}
+                        <div className="w-12 h-1.5 bg-gray-300 dark:bg-gray-700 rounded-full mx-auto my-3 shrink-0" />
+                        
+                        {/* Song Info header inside sheet */}
+                        <div className="flex items-center gap-4 px-6 py-4 border-b border-gray-100 dark:border-gray-800/50">
+                            <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center text-white shrink-0 shadow-lg shadow-purple-500/10">
+                                <Music className="w-6 h-6" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                                <h2 className="text-base font-black text-gray-900 dark:text-white truncate text-left">{song.title}</h2>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 truncate text-left">by {song.original_author || 'Traditional'}</p>
+                            </div>
+                        </div>
+
+                        {/* Action options */}
+                        <div className="py-2">
+                            {/* Like / Favorite */}
+                            <button
+                                onClick={() => { handleToggleFavorite(); setIsOverflowOpen(false); }}
+                                className="w-full flex items-center gap-4 px-6 py-4 hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors text-left text-gray-700 dark:text-gray-300"
+                            >
+                                <Heart className={`w-5 h-5 ${isFav ? 'text-amber-500 fill-amber-500' : 'text-gray-400 dark:text-gray-500'}`} />
+                                <span className="text-sm font-bold">{isFav ? 'Remove from Liked Songs' : 'Add to Liked Songs'}</span>
+                            </button>
+
+                            {/* Add to Playlist */}
+                            {user ? (
+                                id && (
+                                    <PlaylistPicker
+                                        compositionId={id as string}
+                                        userId={user.id}
+                                        label="Add to Playlist"
+                                        triggerClassName="w-full flex items-center gap-4 px-6 py-4 hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors text-left rounded-none text-gray-700 dark:text-gray-300"
+                                        iconClassName="w-5 h-5"
+                                    />
+                                )
+                            ) : (
+                                <button
+                                    onClick={() => {
+                                        setIsOverflowOpen(false);
+                                        toast('Sign in to manage playlists', {
+                                            action: {
+                                                label: 'Sign in →',
+                                                onClick: () => { window.location.href = `/auth/login?next=${encodeURIComponent(window.location.pathname)}`; },
+                                            },
+                                            classNames: {
+                                                actionButton: 'text-amber-400 text-xs font-bold hover:text-amber-300 transition-colors ml-2',
+                                            },
+                                        });
+                                    }}
+                                    className="w-full flex items-center gap-4 px-6 py-4 hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors text-left text-gray-700 dark:text-gray-300"
+                                >
+                                    <ListPlus className="w-5 h-5 text-gray-400 dark:text-gray-500" />
+                                    <span className="text-sm font-bold">Add to Playlist</span>
+                                </button>
+                            )}
+
+                            {/* Edit */}
+                            {(song.owner_id === user?.id || isAdmin) && (
+                                <Link
+                                    href={`/songs/${id}/edit`}
+                                    onClick={() => setIsOverflowOpen(false)}
+                                    className="flex items-center gap-4 px-6 py-4 hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors text-gray-700 dark:text-gray-300"
+                                >
+                                    <Edit2 className="w-5 h-5 text-gray-400 dark:text-gray-500" />
+                                    <span className="text-sm font-bold">Edit Song</span>
+                                </Link>
+                            )}
+
+                            {/* Delete */}
+                            {(song.owner_id === user?.id || isAdmin) && (
+                                <button
+                                    onClick={() => { setIsOverflowOpen(false); setIsDeleteModalOpen(true); }}
+                                    className="w-full flex items-center gap-4 px-6 py-4 hover:bg-red-500/10 transition-colors text-red-500 text-left"
+                                >
+                                    <Trash2 className="w-5 h-5" />
+                                    <span className="text-sm font-bold">Delete Song</span>
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </>
+            )}
         </div>
     );
 }

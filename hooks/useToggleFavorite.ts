@@ -43,6 +43,11 @@ export function useToggleFavorite(id: string, initialIsFavorite: boolean = false
                 });
             }
         } else {
+            if (result.isFavorite) {
+                toast.success('Added to Liked Songs');
+            } else {
+                toast.success('Removed from Liked Songs');
+            }
             // Invalidate the shared favorites cache so every consumer sees fresh data
             queryClient.invalidateQueries({ queryKey: SONG_KEYS.allFavorites() });
         }

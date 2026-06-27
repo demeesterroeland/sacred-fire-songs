@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { Home, Library, ListMusic, PlusCircle } from 'lucide-react';
 import { useActivePath } from '@/hooks/useActivePath';
 import { usePathname } from 'next/navigation';
 import type { LucideIcon } from 'lucide-react';
 import CreateSheet from './CreateSheet';
+import { useUserPreferences } from '@/context/UserPreferencesContext';
 
 type TabItem = {
     label: string;
@@ -28,14 +29,49 @@ export default function MobileBottomNav() {
     const { isActive } = useActivePath();
     const pathname = usePathname();
     const [isSheetOpen, setIsSheetOpen] = useState(false);
+    const { preferences } = useUserPreferences();
+    const [isVisible, setIsVisible] = useState(true);
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-    // Hide on song detail pages (they have custom layouts)
     const isSongDetailPage = pathname?.startsWith('/songs/') &&
         pathname !== '/songs' &&
         pathname !== '/songs/add' &&
         !pathname.endsWith('/edit');
 
-    if (isSongDetailPage) return null;
+    useEffect(() => {
+        if (!isSongDetailPage || !preferences.autoHideBottomNav) {
+            setIsVisible(true);
+            return;
+        }
+
+        const showNav = () => {
+            setIsVisible(true);
+            
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+            }
+            
+            timeoutRef.current = setTimeout(() => {
+                setIsVisible(false);
+            }, 3000);
+        };
+
+        showNav();
+
+        const events = ['scroll', 'click', 'touchstart', 'touchmove', 'mousemove', 'keydown'];
+        events.forEach(event => {
+            window.addEventListener(event, showNav, { passive: true });
+        });
+
+        return () => {
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current);
+            }
+            events.forEach(event => {
+                window.removeEventListener(event, showNav);
+            });
+        };
+    }, [isSongDetailPage, preferences.autoHideBottomNav]);
 
     return (
         <>
@@ -43,7 +79,7 @@ export default function MobileBottomNav() {
                 isOpen={isSheetOpen}
                 onClose={() => setIsSheetOpen(false)}
             />
-            <nav className="fixed bottom-0 inset-x-0 z-30 lg:hidden">
+            <nav className={`fixed bottom-0 inset-x-0 z-30 lg:hidden transition-transform duration-300 ${!isVisible ? 'translate-y-full' : 'translate-y-0'}`}>
                 {/* Top edge glow */}
                 <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-red-500/30 to-transparent" />
 

@@ -982,3 +982,14 @@
     - [x] Update version history in `application-analysis&design.md`.
     - [x] Validate build and TypeScript type safety locally.
     - [x] Commit, push, and merge branch to main.
+- [x] **Session — Jun 27, 2026 (Spotify-style Bottom Drawer Context Menu and Bottom Nav Auto-Hide)**
+    - [x] Create GitHub Issue #179.
+    - [x] Create branch and worktree `feat/issue-179-spotify-menu`.
+    - [x] Implement mobile slide-up bottom drawer context menu in `page.tsx`.
+    - [x] Remove mobile back button and heart button from header in `page.tsx`.
+    - [x] Update `PlaylistPicker` to support text labels and add it to bottom drawer.
+    - [x] Add `autoHideBottomNav` preference and setting toggle.
+    - [x] Implement bottom nav auto-hide and user interaction scroll/touch reveal in `MobileBottomNav.tsx`.
+    - [x] Update version history in `application-analysis&design.md`.
+    - [x] Validate build and TypeScript type safety locally.
+    - [x] Commit, push, and merge branch to main.
