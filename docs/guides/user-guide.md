@@ -1,8 +1,8 @@
 # User Guide: Sacred Fire Songs
 
-**Version:** 2.1
+**Version:** 2.3
 **Status:** Published
-**Date:** February 2, 2026
+**Date:** June 27, 2026
 
 ## Changelog
 
@@ -15,6 +15,7 @@
 | **2.0** | Jan 30, 2026 | Major update: Magic Link auth, .cho/.txt imports, Public/Private songs, and Advanced Filters. |
 | **2.1** | Feb 02, 2026 | Rebranded "Private" songs to "Draft" and added advanced filter combinability. |
 | **2.2** | Feb 23, 2026 | Removed Home page search box and renamed "Library" to "Search Songs". |
+| **2.3** | Jun 27, 2026 | Added step-by-step PWA installation guides for iOS and Android with screenshots. |
 
 Welcome to **Sacred Fire Songs**, a digital songbook designed for ceremonial musicians. This guide covers how to browse, learn, and manage medicine songs using our platform.
 
@@ -79,4 +80,23 @@ If you own a song (or are an Admin), you will see icons at the top of the detail
 ---
 
 ## 4. Offline Access (PWA)
-Sacred Fire Songs is a Progressive Web App. Any song you view while online will be saved to your device automatically. This ensures you can access your music in remote ceremony locations without a data connection.
+
+Sacred Fire Songs is a Progressive Web App (PWA). Any song you view while online is automatically cached to your device. This ensures you can access your music in remote ceremony locations without an internet or cell connection.
+
+### 4.1 How to Install on iOS (Safari Web Browser)
+
+1. Open **Safari** on your iPhone and navigate to `https://app.example.com`.
+2. Tap the **Share** button (the square icon with an arrow pointing up) in the bottom navigation bar.
+3. Scroll down the share sheet and tap **Add to Home Screen**.
+4. Confirm the name of the app and tap **Add** in the top right corner. The app icon will now appear on your home screen.
+
+![How to install PWA on Safari (iOS)](../screenshots/pwa_install_ios.jpg)
+
+### 4.2 How to Install on Android (Google Chrome Web Browser)
+
+1. Open **Google Chrome** on your Android device and navigate to `https://app.example.com`.
+2. Tap the **Three-Dot Menu** icon in the top right corner of the screen.
+3. Select **Install app** (or **Add to Home Screen** depending on your Android version).
+4. Tap **Install** in the confirmation popup. The app will be added to your app drawer and home screen.
+
+![How to install PWA on Chrome (Android)](../screenshots/pwa_install_android.jpg)
