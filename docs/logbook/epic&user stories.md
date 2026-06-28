@@ -1,8 +1,8 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 1.33
+**Version:** 1.34
 **Status:** Living Document
-**Date:** February 28, 2026
+**Date:** June 28, 2026
 
 ## Changelog
 
@@ -32,7 +32,7 @@
 | **1.32** | Feb 28, 2026 | Added Epic 3.4 Gatekeeper role: stories 3.4.1 (role & permissions), 3.4.2 (flagging & queue), 3.4.3 (metadata editing), 3.4.4 (duplicate merging), 3.4.5 (featured playlists). Updated Roles & Permissions table. |
 | **1.33** | Feb 28, 2026 | Removed Musician as a role. Added Epic 3.5: Musician profile setting (self-declared). Role hierarchy is now Guest → Member → Gatekeeper → Admin. Updated Roles & Permissions table. |
 | **1.34** | Mar 1, 2026 | GH sync: marked 3.3.1, 3.3.2, 4.1.8 as [Implemented]. Added Story 1.1.9 (Spotify-style mobile bottom nav bar). |
-
+| **1.34** | Jun 28, 2026 | Added Epic 4.6: Private Rehearsal & Audio Storage (Story 4.6.1) for microphone recording and private Supabase storage uploads. |
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
 
@@ -725,7 +725,40 @@ Scenario: Cached pages still load offline
   And cached songs and playlists should remain accessible
 ```
 
+### Epic 4.6: Private Rehearsal & Audio Storage
+
+
+**Story 4.6.1:** As a Member, I want to record an audio reference of a song using my device's microphone and save it securely to private cloud storage so that I can practice and review my private rehearsals.
+
+```gherkin
+Scenario: Render microphone recording controls
+  Given I am logged in as a Member
+  And I am viewing the Song Detail page
+  Then I should see a "Record Rehearsal" button in the audio section
+
+Scenario: Record and play back audio locally before saving
+  Given I am logged in as a Member
+  And I have clicked "Record Rehearsal" and granted microphone permissions
+  When I record a rehearsal snippet
+  And I click "Stop"
+  Then I should be able to play back the recording locally before uploading
+
+Scenario: Save private audio reference to cloud storage
+  Given I have completed a local recording snippet
+  When I click "Upload to Private Storage"
+  Then the audio file (WebM/AAC format) should be uploaded to the Supabase Storage private bucket
+  And the recording URL should be linked to the song metadata for my profile
+  And only I (the owner) should see and play this recording on the song page
+
+Scenario: Guest cannot record or see private rehearsals
+  Given I am a Guest user
+  When I view the Song Detail page
+  Then the "Record Rehearsal" button should be hidden
+  And I should not see any private rehearsal recordings
+```
+
 ## Roles & Permissions Summary
+
 
 > **Role hierarchy:** Guest → Member → Gatekeeper → Admin
 > **Musician** is a profile setting (`is_musician`), not a role. Any Member can self-enable it.
@@ -753,6 +786,9 @@ Scenario: Cached pages still load offline
 | **Delete Songs** | ❌ | ❌ | ❌ | ✅ |
 | **Manage Users & Roles** | ❌ | ❌ | ❌ | ✅ |
 | **Install as App (PWA)** | ✅ | ✅ | ✅ | ✅ |
+| **Record & Store Private Audio** | ❌ | ✅ | ✅ | ✅ |
+
+
 
 *¹ Only when `is_musician = true` on the user's profile (self-declared setting)*
 
