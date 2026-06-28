@@ -1005,4 +1005,22 @@
     - [x] Switch marquee span to `display: block` so `overflow: hidden` on parent correctly clips without breaking flex.
     - [x] Verify layout with Playwright in mobile viewport (390×844) — confirmed `headerW: 390`, `btnRight: 374`, button fully visible.
     - [x] Run production build (`npm run build`) — no errors.
-    - [x] Squash-merge PR #180 to `main`, close issue #179, remove worktree and branch.
+- [x] **Session — Jun 28, 2026 (Infinite Skeleton Hang Fix & Seeder Optimization)**
+    - [x] Create GitHub Issue #181 to track infinite skeleton loader hang.
+    - [x] Create branch and worktree `fix/issue-181-skeleton-hang`.
+    - [x] Add 5-second timeout to `useAuth` user and profiles query via `Promise.race()` to fall back to guest mode.
+    - [x] Add cancellation token to `useAuth` hook to resolve state update race condition on mount.
+    - [x] Add 10-second skeleton timeout fallback to SongDetailPage displaying a "Taking too long..." Retry UI.
+    - [x] Handle and display React Query fetch errors with Retry buttons on detail page.
+    - [x] Implement browser console warning and error logging for timeouts and fetch issues.
+    - [x] Add timeouts E2E test suite `e2e/tests/timeouts.spec.ts` verifying auth and skeleton loading timeout fallbacks.
+    - [x] Diagnose database seeder bottleneck: identified ~480 sequential tailscale network roundtrips taking 70s.
+    - [x] Rewrite `random-seeder.mjs` to execute completely database-side inside a single PL/pgSQL `DO` block (reducing run time to under 3s, total E2E run down to 51s).
+    - [x] Solve PL/pgSQL local variable/column name collisions by prefixing table-interacting variables.
+    - [x] Fix PL/pgSQL random selection bug by querying `public.categories` table directly with `ORDER BY random()` instead of array `unnest` subquery (which was optimized away).
+    - [x] Implement database-side seeder self-recovery: seeds base taxonomy and all 23 subcategories if the categories table is empty on staging.
+    - [x] Implement normally distributed tag assignment (1 to 5 tags, centered at 3) using Box-Muller normal distribution.
+    - [x] Implement 100% taxonomy coverage: force-assign each of the 44 subcategories at least once during first loop iterations.
+    - [x] Validate build and TypeScript type safety locally.
+    - [x] Verify Playwright E2E tests run successfully locally and on staging.
+    - [x] Commit, push, and merge branch to main.

@@ -2488,3 +2488,38 @@ This session extended PR #179 with several mobile UX improvements discovered dur
 - PR #180 squash-merged to `main` via `gh pr merge --squash --admin`.
 - Issue #179 closed, worktree and feature branch cleaned up.
 - `main` pulled and confirmed at commit `2234b63`.
+
+---
+
+## Session — Jun 28, 2026 (Infinite Skeleton Hang Fix & Seeder Optimization)
+**PR**: #181 | **Branch**: `fix/issue-181-skeleton-hang`
+
+### Context
+This session addressed a critical bug where slow Supabase Auth calls (due to Tailscale or cold start latencies) caused song detail pages to hang indefinitely on a loading skeleton. It also optimized the database seeder to reduce E2E test runs from 2.1 minutes down to 51 seconds.
+
+### 1. useAuth Timeout & Race Conditions
+- Wrapped the Supabase auth `getUser()` and `profiles` calls in a 5-second `Promise.race()` timeout. If Supabase fails to respond in 5s, the auth state falls back to guest mode and logs a console warning.
+- Replaced the volatile `mounted` boolean flag with a cancellation token pattern to prevent state update race conditions when user clicks around quickly.
+
+### 2. Skeleton Loading Timeout & Error Fallbacks
+- Added a 10-second timer to the SongDetailPage skeleton view. If the composition or version query does not complete within 10s, it swaps the loader for a "Taking too long..." Retry UI.
+- Implemented robust React Query error boundaries with explicit visual summaries and retry buttons for user self-recovery.
+
+### 3. Timeouts E2E Playwright Suite
+- Created [e2e/tests/timeouts.spec.ts](file:///home/roeland/projects/sacred-fire-songs/e2e/tests/timeouts.spec.ts) covering auth delays (injected via cookie JWT auth triggers) and query stalls.
+- Verified that guest fallback, skeleton timeouts, retry buttons, and console warning logs are correctly triggered and handled.
+
+### 4. Database-Side SQL Seeder Optimization (Key Engineering Insight)
+- **Problem**: Seeding 80 mock songs sequentially from the client machine triggered ~480 separate insert queries. Over the Tailscale VPN, this took 70 seconds per database reset, bloating test suite times.
+- **Solution**: Rewrote `random-seeder.mjs` to execute completely database-side inside a single PL/pgSQL `DO` block. By running queries locally on the Postgres instance, network roundtrips were eliminated and execution dropped to **under 0.2 seconds** (total script setup ~1.9s).
+- **Scope Collision**: Avoided PL/pgSQL variable collisions with table columns by renaming variables (e.g. `var_has_chords`).
+- **Randomization Resolution**: Fixed array `unnest()` queries where `ORDER BY random()` was optimized away by the Postgres planner. Replaced with direct table queries (`SELECT id FROM categories WHERE parent_id IS NOT NULL ORDER BY random()`).
+- **Taxonomy Recovery & Coverage**:
+  - Seeds the base taxonomy (6 categories + 23 subcategories) automatically if the `categories` table is empty on staging.
+  - Generates song tags using a Box-Muller normal distribution around 3 (range 1–5 tags per song).
+  - Guarantees 100% taxonomy coverage by force-assigning each of the 44 subcategories at least once during the first loop iterations.
+
+### 5. Build & Validation
+- Verified production build compiles cleanly without errors.
+- Verified Vitest unit tests (63 tests) and Playwright E2E tests (7 tests) pass.
+- Force-pushed branch `fix/issue-181-skeleton-hang`, PR reviewed, squash-merged to `main`.

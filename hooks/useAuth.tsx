@@ -47,9 +47,10 @@ export const useAuth = () => {
         return localStorage.getItem('mockUserRole');
     });
 
-    const loadUser = async (currentMockRole: string | null) => {
+    const loadUser = async (currentMockRole: string | null, signal?: { cancelled: boolean }) => {
         // A. If Mock Role is active and valid, use it
         if (currentMockRole && MOCK_USERS[currentMockRole as keyof typeof MOCK_USERS]) {
+            if (signal?.cancelled) return;
             const mockData = MOCK_USERS[currentMockRole as keyof typeof MOCK_USERS];
             setUser(mockData as AuthUser);
             setLoading(false);
@@ -58,46 +59,72 @@ export const useAuth = () => {
 
         // B. If 'guest' is explicitly selected
         if (currentMockRole === 'guest') {
+            if (signal?.cancelled) return;
             setUser(null);
             setLoading(false);
             return;
         }
 
-        // C. Fallback to Real Supabase Auth
+        // C. Fallback to Real Supabase Auth — with a 5s timeout to prevent infinite skeleton
         const supabase = createClient();
-        const { data: { user: supabaseUser } } = await supabase.auth.getUser();
+        const AUTH_TIMEOUT_MS = 5000;
 
-        if (supabaseUser) {
-            // Fetch real profile data
-            const { data: profile } = await supabase
-                .from('profiles')
-                .select('role, full_name, avatar_url')
-                .eq('id', supabaseUser.id)
-                .maybeSingle();
+        try {
+            const authResult = await Promise.race([
+                supabase.auth.getUser(),
+                new Promise<never>((_, reject) =>
+                    setTimeout(() => reject(new Error('useAuth: getUser() timed out after 5s')), AUTH_TIMEOUT_MS)
+                ),
+            ]) as Awaited<ReturnType<typeof supabase.auth.getUser>>;
 
-            setUser({
-                id: supabaseUser.id,
-                email: supabaseUser.email,
-                role: profile?.role || 'member',
-                full_name: profile?.full_name,
-                avatar_url: profile?.avatar_url
-            });
-        } else {
+            if (signal?.cancelled) return;
+
+            const supabaseUser = authResult.data?.user ?? null;
+
+            if (supabaseUser) {
+                const profileResult = await Promise.race([
+                    supabase.from('profiles').select('role, full_name, avatar_url').eq('id', supabaseUser.id).maybeSingle(),
+                    new Promise<never>((_, reject) =>
+                        setTimeout(() => reject(new Error('useAuth: profiles query timed out after 5s')), AUTH_TIMEOUT_MS)
+                    ),
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                ]) as any;
+
+                if (signal?.cancelled) return;
+
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const profile = (profileResult as any).data;
+                setUser({
+                    id: supabaseUser.id,
+                    email: supabaseUser.email,
+                    role: profile?.role || 'member',
+                    full_name: profile?.full_name,
+                    avatar_url: profile?.avatar_url
+                });
+            } else {
+                if (signal?.cancelled) return;
+                setUser(null);
+            }
+        } catch (err) {
+            if (signal?.cancelled) return;
+            console.warn('[useAuth] Auth resolution failed — falling back to guest mode.', err);
             setUser(null);
         }
-        setLoading(false);
+
+        if (!signal?.cancelled) setLoading(false);
     };
 
     // Initialize state and handle auth events
     useEffect(() => {
-        let mounted = true;
+        // Cancellation token: prevents stale loadUser calls from updating state
+        const signal = { cancelled: false };
         const supabase = createClient();
 
         // Listen for Supabase auth state changes
         const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-            if (mounted && !localStorage.getItem('mockUserRole')) {
+            if (!signal.cancelled && !localStorage.getItem('mockUserRole')) {
                 if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
-                    loadUser(null);
+                    loadUser(null, signal);
                 } else if (event === 'SIGNED_OUT') {
                     setUser(null);
                     setLoading(false);
@@ -105,23 +132,22 @@ export const useAuth = () => {
             }
         });
 
-        // Load user immediately on mount if not already loading/loaded
-        // eslint-disable-next-line react-hooks/set-state-in-effect
-        loadUser(mockRole);
+        // Load user immediately on mount
+        loadUser(mockRole, signal);
 
         // Listen for custom event to trigger re-render on role switch
         const handleRoleChange = () => {
-            if (mounted) {
+            if (!signal.cancelled) {
                 const newRole = localStorage.getItem('mockUserRole');
                 setMockRole(newRole);
-                loadUser(newRole);
+                loadUser(newRole, signal);
             }
         };
 
         window.addEventListener('auth-role-change', handleRoleChange);
-        
+
         return () => {
-            mounted = false;
+            signal.cancelled = true; // Cancel any in-flight loadUser calls
             subscription.unsubscribe();
             window.removeEventListener('auth-role-change', handleRoleChange);
         };

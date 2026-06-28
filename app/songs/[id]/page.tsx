@@ -82,11 +82,29 @@ export default function SongDetailPage() {
     }, [id, user]);
 
     // The Query Hook
-    const { data: song, isLoading: songLoading } = useQuery({
+    const { data: song, isLoading: songLoading, error: songError } = useQuery({
         queryKey: SONG_KEYS.detail(id!),
         queryFn: () => fetchSong(id!),
         enabled: !!id,
     });
+
+    // Log song fetch errors so they're visible in DevTools
+    useEffect(() => {
+        if (songError) {
+            console.error('[SongDetailPage] Failed to load song:', songError);
+        }
+    }, [songError]);
+
+    // Skeleton timeout fallback — if still loading after 10s, unblock the UI
+    const [skeletonTimedOut, setSkeletonTimedOut] = useState(false);
+    useEffect(() => {
+        if (!songLoading && !authLoading) return;
+        const timer = setTimeout(() => {
+            console.warn('[SongDetailPage] Skeleton timed out after 10s — authLoading:', authLoading, 'songLoading:', songLoading);
+            setSkeletonTimedOut(true);
+        }, 10_000);
+        return () => clearTimeout(timer);
+    }, [songLoading, authLoading]);
 
     // Favorites — shares cache with SongsPageContent
     const { data: favoriteIds = new Set<string>() } = useQuery({
@@ -146,7 +164,43 @@ export default function SongDetailPage() {
         textAlign: 'left' as const,
     } as React.CSSProperties : { textAlign: 'center' as const };
 
-    if (songLoading || authLoading) return <SongDetailSkeleton />;
+    if (songLoading || authLoading) {
+        if (skeletonTimedOut) {
+            return (
+                <div className="flex flex-col items-center justify-center min-h-screen gap-4 text-center px-6">
+                    <p className="text-3xl">⚠️</p>
+                    <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100">Taking too long…</h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                        The page couldn&apos;t load in time. This may be a network or connectivity issue.
+                    </p>
+                    <button
+                        onClick={() => window.location.reload()}
+                        className="mt-2 px-5 py-2 rounded-lg bg-[#ff4400] text-white text-sm font-semibold hover:bg-[#e03c00] transition-colors"
+                    >
+                        Retry
+                    </button>
+                </div>
+            );
+        }
+        return <SongDetailSkeleton />;
+    }
+    if (songError) {
+        return (
+            <div className="flex flex-col items-center justify-center min-h-screen gap-4 text-center px-6">
+                <p className="text-3xl">🔥</p>
+                <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100">Couldn&apos;t load this song</h2>
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                    {(songError as Error)?.message ?? 'An unexpected error occurred.'}
+                </p>
+                <button
+                    onClick={() => window.location.reload()}
+                    className="mt-2 px-5 py-2 rounded-lg bg-[#ff4400] text-white text-sm font-semibold hover:bg-[#e03c00] transition-colors"
+                >
+                    Retry
+                </button>
+            </div>
+        );
+    }
     if (!song) return notFound();
 
     const versions = song.song_versions || [];
