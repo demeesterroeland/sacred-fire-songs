@@ -2452,5 +2452,39 @@ I have implemented the slide-up bottom drawer context menu on mobile and added t
 - Verified that the production build completes successfully (`npm run build`).
 - Ran unit tests (`npx vitest run lib/unit-tests`) which all pass successfully.
 
+---
 
+## Session — Jun 27, 2026 (Sticky Mobile Header, Env Banner Offset & Marquee Title)
+**PR**: #180 | **Branch**: `feat/issue-179-spotify-menu` (continued)
 
+### Context
+This session extended PR #179 with several mobile UX improvements discovered during user testing: a sticky second header on the song detail page, proper offset below the always-visible environment banner, and a Spotify-style auto-scrolling marquee for long song titles.
+
+### 1. Like Action Toast Notification
+- Added a toast message when a user likes a song on mobile, consistent with the existing playlist-add toast pattern in `hooks/useToggleFavorite.ts`.
+
+### 2. Sticky Mobile Header
+- Implemented a `lg:hidden` sticky header in [app/songs/[id]/page.tsx](file:///home/roeland/projects/sacred-fire-songs/app/songs/%5Bid%5D/page.tsx) that becomes visible as the user scrolls past the first (non-sticky) header.
+- The first header (with the hero image and full title) scrolls out of view normally; the slim sticky header locks to the top.
+
+### 3. Environment Banner Offset
+- The `EnvironmentBanner` component sets a `--env-banner-height` CSS variable on `:root`.
+- The sticky header reads this variable via `style={{ top: 'var(--env-banner-height, 0px)' }}`, ensuring it sticks immediately below the always-present DEV/PREVIEW banner rather than behind it.
+
+### 4. Spotify-Style Marquee for Long Titles
+- Added a `useRef` + `useEffect` to measure title overflow: compares `span.scrollWidth` against the constrained flex container width.
+- When overflow is detected, applies a CSS `@keyframes marquee` animation (`translateX`) that scrolls the title from start to end and back (ease-in-out, 8s, infinite alternate) — the Spotify-style "ping-pong" effect.
+- Short titles remain centered with no animation.
+
+### 5. Flex Overflow Root-Cause Fix (Key Engineering Insight)
+- **Problem**: The `⋮` context menu button was being pushed off-screen when song titles were long.
+- **Root cause**: In a flex container with a `sticky` element, `width: 100%` resolves to the *scroll width* of the container (which expands when `whitespace-nowrap` content overflows), not the viewport width. This caused the header to be 445px wide on a 390px viewport.
+- **Fix**: Applied `style={{ width: '100vw', maxWidth: '100vw' }}` directly on the `<header>` element to hard-constrain it to the viewport width regardless of child content.
+- The `flex-1 min-w-0 overflow-hidden` title container then has a properly bounded parent, and the marquee span's `display: block` + parent `overflow: hidden` clips the scrolling text correctly.
+- **Verified** with Playwright (390×844 mobile viewport): `headerW: 390`, `btnRight: 374` — button fully within viewport. ✅
+
+### 6. Build & Merge
+- Production build passed (`npm run build`), no type errors.
+- PR #180 squash-merged to `main` via `gh pr merge --squash --admin`.
+- Issue #179 closed, worktree and feature branch cleaned up.
+- `main` pulled and confirmed at commit `2234b63`.

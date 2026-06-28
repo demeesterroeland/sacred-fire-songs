@@ -993,3 +993,16 @@
     - [x] Update version history in `application-analysis&design.md`.
     - [x] Validate build and TypeScript type safety locally.
     - [x] Commit, push, and merge branch to main.
+- [x] **Session — Jun 27, 2026 (Sticky Mobile Header, Env Banner Offset & Marquee Title)**
+    - [x] Add "like" action toast notification on mobile (matching playlist toast pattern).
+    - [x] Implement sticky mobile header (`lg:hidden`) that scrolls the first header out of view while the title header sticks.
+    - [x] Fix sticky header not working on mobile — diagnose and resolve `position: sticky` override issues.
+    - [x] Offset sticky header below the always-visible `EnvironmentBanner` using `--env-banner-height` CSS variable.
+    - [x] Implement Spotify-style auto-scrolling marquee for long song titles in the sticky header.
+    - [x] Fix marquee layout bug: long titles pushing the ⋮ context menu button off-screen.
+    - [x] Root-cause the flex overflow bug: `w-full` resolving to scroll width (445px) instead of viewport width (390px) when child has `whitespace-nowrap`.
+    - [x] Apply `width: 100vw; max-width: 100vw` on the sticky header to enforce viewport-width constraint.
+    - [x] Switch marquee span to `display: block` so `overflow: hidden` on parent correctly clips without breaking flex.
+    - [x] Verify layout with Playwright in mobile viewport (390×844) — confirmed `headerW: 390`, `btnRight: 374`, button fully visible.
+    - [x] Run production build (`npm run build`) — no errors.
+    - [x] Squash-merge PR #180 to `main`, close issue #179, remove worktree and branch.
