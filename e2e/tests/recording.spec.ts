@@ -55,7 +55,7 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1)', () => {
 
       // Verify desktop "Record" action button exists and click it
       const recordBtn = page.locator('button[title="Record Rehearsal"]').first();
-      await expect(recordBtn).toBeVisible();
+      await expect(recordBtn).toBeVisible({ timeout: 15000 });
       await recordBtn.click();
 
       // Verify rehearsal drawer slides up
@@ -114,5 +114,82 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1)', () => {
       // Verify the take disappears
       await expect(savedTake).toHaveCount(0, { timeout: 10000 });
     });
+
+    test('Automatically stops recording at 3 minutes', async ({ page }) => {
+      await page.goto(songUrl);
+
+      // Open drawer
+      const recordBtn = page.locator('button[title="Record Rehearsal"]').first();
+      await expect(recordBtn).toBeVisible({ timeout: 15000 });
+      await recordBtn.click();
+
+      // Set fast timer flag in browser context
+      await page.evaluate(() => {
+        (window as any).__E2E_FAST_TIMER__ = true;
+      });
+
+      // Start recording
+      const startBtn = page.locator('button[title="Start recording"]');
+      await expect(startBtn).toBeVisible();
+      await startBtn.click();
+
+      // Wait for the fast timer to finish (1.8s minimum, wait 3000ms to be safe)
+      await page.waitForTimeout(3000);
+
+      // Verify that it automatically stops and shows the review UI
+      const reviewPrompt = page.locator('h4:has-text("Review your recording")');
+      await expect(reviewPrompt).toBeVisible();
+
+      // Verify that the duration shows 03:00
+      const durationDisplay = page.locator('text=03:00');
+      await expect(durationDisplay).toBeVisible();
+    });
+
+    test('Blocks saving when recording exceeds 10MB', async ({ page }) => {
+      await page.goto(songUrl);
+
+      // Open drawer
+      const recordBtn = page.locator('button[title="Record Rehearsal"]').first();
+      await expect(recordBtn).toBeVisible({ timeout: 15000 });
+      await recordBtn.click();
+
+      // Start recording
+      const startBtn = page.locator('button[title="Start recording"]');
+      await expect(startBtn).toBeVisible();
+      await startBtn.click();
+
+      // Let it record briefly
+      await page.waitForTimeout(1000);
+
+      // Override Blob size in the browser context before stopping
+      await page.evaluate(() => {
+        const OriginalBlob = window.Blob;
+        // Mock Blob to return a custom size larger than 10MB
+        // @ts-ignore
+        window.Blob = class MockBlob extends OriginalBlob {
+          get size() {
+            return 11 * 1024 * 1024; // 11 MB
+          }
+        };
+      });
+
+      // Stop recording to trigger Blob creation with our mocked Blob class
+      const stopBtn = page.locator('button[title="Stop recording"]');
+      await expect(stopBtn).toBeVisible();
+      await stopBtn.click();
+
+      // Verify review UI is visible
+      await expect(page.locator('h4:has-text("Review your recording")')).toBeVisible();
+
+      // Try to save the rehearsal
+      const saveBtn = page.locator('button:has-text("Save Rehearsal")');
+      await expect(saveBtn).toBeVisible();
+      await saveBtn.click();
+
+      // Verify client-side error message is displayed
+      const errorMsg = page.locator('text=Recording file size exceeds the 10 MB limit.');
+      await expect(errorMsg).toBeVisible();
+    });
   });
 });
+

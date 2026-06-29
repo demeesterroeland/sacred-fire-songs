@@ -76,10 +76,13 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
       setRecordingState("recording");
       setDuration(0);
 
+      const timerIntervalMs = typeof window !== "undefined" && (window as any).__E2E_FAST_TIMER__ ? 10 : 1000;
+
       // Start timer with 3-minute limit check (180 seconds)
       timerIntervalRef.current = setInterval(() => {
         setDuration((prev) => {
           if (prev + 1 >= 180) {
+            if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
             setTimeout(() => {
               stopRecording();
               toast.info("Recording automatically stopped at the 3-minute limit.");
@@ -88,7 +91,7 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
           }
           return prev + 1;
         });
-      }, 1000);
+      }, timerIntervalMs);
     } catch (err: any) {
       console.error("[recorder] Microphone access failed:", err);
       setErrorMsg("Failed to access microphone. Please check your permissions.");
@@ -110,10 +113,13 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
     if (mediaRecorderRef.current && recordingState === "paused") {
       mediaRecorderRef.current.resume();
       setRecordingState("recording");
+      const timerIntervalMs = typeof window !== "undefined" && (window as any).__E2E_FAST_TIMER__ ? 10 : 1000;
+
       // Start timer with 3-minute limit check (180 seconds)
       timerIntervalRef.current = setInterval(() => {
         setDuration((prev) => {
           if (prev + 1 >= 180) {
+            if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
             setTimeout(() => {
               stopRecording();
               toast.info("Recording automatically stopped at the 3-minute limit.");
@@ -122,13 +128,13 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
           }
           return prev + 1;
         });
-      }, 1000);
+      }, timerIntervalMs);
     }
   };
 
   // Stop recording
   const stopRecording = () => {
-    if (mediaRecorderRef.current && (recordingState === "recording" || recordingState === "paused")) {
+    if (mediaRecorderRef.current && mediaRecorderRef.current.state !== "inactive") {
       mediaRecorderRef.current.stop();
       setRecordingState("stopped");
       
