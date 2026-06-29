@@ -109,37 +109,64 @@ BEGIN
     
     -- Insert compositions & versions
     FOR i IN 1..songs_count LOOP
-        -- generate title
-        title := verbs[1 + floor(random() * array_length(verbs, 1))] || ' ' || nouns[1 + floor(random() * array_length(nouns, 1))];
-        IF random() > 0.4 THEN
-            title := title || ' ' || adjs[1 + floor(random() * array_length(adjs, 1))];
-        END IF;
-        
-        artist := authors[1 + floor(random() * array_length(authors, 1))];
-        
-        -- owner
-        rand_val := random();
-        IF rand_val < 0.25 THEN
-            owner_id := 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11';
-        ELSIF rand_val < 0.5 THEN
-            owner_id := 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12';
-        ELSIF rand_val < 0.75 THEN
+        IF i = 1 THEN
+            title := 'Danza del Cielo Curandero';
+            artist := 'Herbert Quinteros';
             owner_id := 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13';
+            is_public := true;
         ELSE
-            owner_id := null;
+            -- generate title
+            title := verbs[1 + floor(random() * array_length(verbs, 1))] || ' ' || nouns[1 + floor(random() * array_length(nouns, 1))];
+            IF random() > 0.4 THEN
+                title := title || ' ' || adjs[1 + floor(random() * array_length(adjs, 1))];
+            END IF;
+            
+            artist := authors[1 + floor(random() * array_length(authors, 1))];
+            
+            -- owner
+            rand_val := random();
+            IF rand_val < 0.25 THEN
+                owner_id := 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11';
+            ELSIF rand_val < 0.5 THEN
+                owner_id := 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12';
+            ELSIF rand_val < 0.75 THEN
+                owner_id := 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13';
+            ELSE
+                owner_id := null;
+            END IF;
+            
+            is_public := random() > 0.15;
         END IF;
-        
-        is_public := random() > 0.15;
         
         INSERT INTO public.compositions (title, original_author, is_public, owner_id)
         VALUES (title, artist, is_public, owner_id)
         RETURNING id INTO comp_id;
         
         -- version details
-        song_key := keys[1 + floor(random() * array_length(keys, 1))];
-        capo := floor(random() * 5);
-        tuning := tunings[1 + floor(random() * array_length(tunings, 1))];
-        var_has_chords := random() > 0.2;
+        IF i = 1 THEN
+            song_key := 'E';
+            capo := 3;
+            tuning := 'Standard';
+            var_has_chords := true;
+            youtube_url := 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
+            spotify_url := 'https://open.spotify.com/track/4PTG3Z6ehGkBF3zIqYQGKg';
+            soundcloud_url := 'https://soundcloud.com/octobersveryown/drake-back-to-back';
+            var_has_melody := true;
+        ELSE
+            song_key := keys[1 + floor(random() * array_length(keys, 1))];
+            capo := floor(random() * 5);
+            tuning := tunings[1 + floor(random() * array_length(tunings, 1))];
+            var_has_chords := random() > 0.2;
+            
+            has_youtube := random() > 0.6;
+            has_spotify := random() > 0.8;
+            has_soundcloud := random() > 0.8;
+            
+            IF has_youtube THEN youtube_url := 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'; ELSE youtube_url := null; END IF;
+            IF has_spotify THEN spotify_url := 'https://open.spotify.com/track/4PTG3Z6ehGkBF3zIqYQGKg'; ELSE spotify_url := null; END IF;
+            IF has_soundcloud THEN soundcloud_url := 'https://soundcloud.com/octobersveryown/drake-back-to-back'; ELSE soundcloud_url := null; END IF;
+            var_has_melody := has_youtube OR has_spotify OR has_soundcloud OR (random() > 0.9);
+        END IF;
         
         -- content
         content := '{title: ' || title || '}';
@@ -150,15 +177,6 @@ BEGIN
             content := content || chr(10) || '{key: ' || song_key || '}';
         END IF;
         content := content || chr(10) || chr(10) || '[Am]Luna, luna, [C]luna llena' || chr(10) || '[G]Brilla en la [Am]noche entera';
-        
-        has_youtube := random() > 0.6;
-        has_spotify := random() > 0.8;
-        has_soundcloud := random() > 0.8;
-        
-        IF has_youtube THEN youtube_url := 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'; ELSE youtube_url := null; END IF;
-        IF has_spotify THEN spotify_url := 'https://open.spotify.com/track/4PTG3Z6ehGkBF3zIqYQGKg'; ELSE spotify_url := null; END IF;
-        IF has_soundcloud THEN soundcloud_url := 'https://soundcloud.com/octobersveryown/drake-back-to-back'; ELSE soundcloud_url := null; END IF;
-        var_has_melody := has_youtube OR has_spotify OR has_soundcloud OR (random() > 0.9);
         
         INSERT INTO public.song_versions (
             composition_id, version_name, content_chordpro, key, capo, tuning, 
@@ -176,23 +194,31 @@ BEGIN
         WHERE id = comp_id;
         
         -- Seed private recordings
-        rand_val := random();
-        IF rand_val < 0.50 THEN
-            -- 50% of the songs: multiple recordings (2 to 5)
-            rec_count := 2 + floor(random() * 4); -- 2, 3, 4, or 5
-        ELSIF rand_val < 0.80 THEN
-            -- 30% of the songs: exactly 1 recording
-            rec_count := 1;
+        IF i = 1 THEN
+            rec_count := 5;
         ELSE
-            -- 20% of the songs: 0 recordings
-            rec_count := 0;
+            rand_val := random();
+            IF rand_val < 0.50 THEN
+                -- 50% of the songs: multiple recordings (2 to 5)
+                rec_count := 2 + floor(random() * 4); -- 2, 3, 4, or 5
+            ELSIF rand_val < 0.80 THEN
+                -- 30% of the songs: exactly 1 recording
+                rec_count := 1;
+            ELSE
+                -- 20% of the songs: 0 recordings
+                rec_count := 0;
+            END IF;
         END IF;
 
         IF rec_count > 0 THEN
             FOR rec_idx IN 1..rec_count LOOP
-                rec_name := rec_names[1 + floor(random() * array_length(rec_names, 1))];
-                IF rec_count > 1 THEN
-                    rec_name := rec_name || ' (Take ' || rec_idx || ')';
+                IF i = 1 THEN
+                    rec_name := 'Rehearsal Take ' || rec_idx;
+                ELSE
+                    rec_name := rec_names[1 + floor(random() * array_length(rec_names, 1))];
+                    IF rec_count > 1 THEN
+                        rec_name := rec_name || ' (Take ' || rec_idx || ')';
+                    END IF;
                 END IF;
                 rec_uuid := gen_random_uuid();
                 rec_path := member_id || '/' || version_id || '/' || rec_uuid || '.webm';
