@@ -10,7 +10,7 @@ const MediaEmbeds: React.FC<MediaEmbedsProps> = ({ youtubeUrl, spotifyUrl, sound
     if (!youtubeUrl && !spotifyUrl && !soundcloudUrl) return null;
 
     return (
-        <div className="space-y-6 mt-8">
+        <div className="space-y-6">
             {youtubeUrl && (
                 <div className="bg-gray-100/50 dark:bg-black/20 rounded-xl overflow-hidden shadow-lg border border-gray-200 dark:border-white/5">
                     <div className="p-3 bg-gray-100 dark:bg-white/5 border-b border-gray-200 dark:border-white/5 flex items-center gap-2">
