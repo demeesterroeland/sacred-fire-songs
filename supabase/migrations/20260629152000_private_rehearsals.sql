@@ -6,9 +6,6 @@
 INSERT INTO storage.buckets (id, name, public)
 VALUES ('rehearsals', 'rehearsals', false) ON CONFLICT (id) DO NOTHING;
 
--- Enable RLS on storage objects if not already enabled (by default it is enabled)
-ALTER TABLE storage.objects ENABLE ROW LEVEL SECURITY;
-
 -- Allow authenticated users to upload (insert) files to rehearsals inside their own folder
 DROP POLICY IF EXISTS "Allow authenticated users to upload rehearsals" ON storage.objects;
 CREATE POLICY "Allow authenticated users to upload rehearsals" ON storage.objects FOR
