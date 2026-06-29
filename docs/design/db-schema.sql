@@ -88,6 +88,15 @@ create table public.setlist_items (
   transposition_override integer,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
+-- USER RECORDINGS
+create table public.user_recordings (
+  id uuid default gen_random_uuid() primary key,
+  user_id uuid references public.profiles(id) on delete cascade not null,
+  song_version_id uuid references public.song_versions(id) on delete cascade not null,
+  recording_name text not null,
+  storage_path text not null unique,
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
 -- 3. Indexes
 -- Partial indexes for public content optimization
 CREATE INDEX IF NOT EXISTS idx_compositions_is_public_true ON public.compositions (created_at DESC) WHERE is_public = true;
@@ -196,6 +205,7 @@ create policy "Owners/Admins can delete song categories" on public.song_category
 alter table public.song_versions enable row level security;
 alter table public.setlists enable row level security;
 alter table public.setlist_items enable row level security;
+alter table public.user_recordings enable row level security;
 -- Public Read Policies
 create policy "Allow public read access" on public.categories for
 select to public using (true);
@@ -301,6 +311,12 @@ create policy "Auth users can delete setlist items" on public.setlist_items for 
     select auth.role()
   ) = 'authenticated'
 );
+-- User Recordings Policies
+create policy "Allow users to read their own recordings" on public.user_recordings for
+select to authenticated using (auth.uid() = user_id);
+create policy "Allow users to insert their own recordings" on public.user_recordings for
+insert to authenticated with check (auth.uid() = user_id);
+create policy "Allow users to delete their own recordings" on public.user_recordings for delete to authenticated using (auth.uid() = user_id);
 -- 7. SEED DATA (Categories)
 with groups as (
   insert into public.categories (name, slug, emoji)

@@ -1,8 +1,8 @@
 # Project Analysis & Design Document: Song Sharing Application (Sacred Fire Songs)
 
-**Version:** 1.30
+**Version:** 1.31
 **Status:** Living Document
-**Date:** June 28, 2026
+**Date:** June 29, 2026
 
 ## Changelog
 
@@ -23,6 +23,7 @@
 | **1.28** | Jun 27, 2026 | Resolved duplicate action buttons on mobile song detail page, removed duplicate Edit/Delete buttons from the main content body, and reduced vertical top/margin whitespace. |
 | **1.29** | Jun 27, 2026 | Implemented mobile song detail page Spotify-style slide-up bottom sheet context menu, moved Like button inside drawer, removed Back button, enabled bottom nav on details page, and added auto-hide bottom nav preference toggle. |
 | **1.30** | Jun 28, 2026 | Fixed infinite song detail skeleton loader by adding 5s auth timeout (guest fallback) and 10s page load timeout. Rewrote random seeder into an optimized PL/pgSQL database-side seeder (reducing setup time from 70s to 3s). Added e2e/tests/timeouts.spec.ts, randomized categories/tags, and normally distributed tag assignment. |
+| **1.31** | Jun 29, 2026 | Implemented Private Rehearsal Audio Recording (Story 4.6.1). Created private rehearsals storage bucket and user_recordings table. Integrated AudioRecorder and RehearsalDrawer components on song detail page. |
 
 
 ## 1. Introduction
@@ -107,6 +108,14 @@ The application is a **Progressive Web App (PWA)** optimized for mobile use duri
 * `contributor_id`: uuid
 * `created_at`: timestamptz
 
+#### **C. user_recordings** (Private Rehearsal Metadata)
+* `id`: uuid (PK)
+* `user_id`: uuid (FK -> profiles.id)
+* `song_version_id`: uuid (FK -> song_versions.id)
+* `recording_name`: text
+* `storage_path`: text (Unique path in 'rehearsals' private storage bucket)
+* `created_at`: timestamptz
+
 *(Categories and Setlists tables are designing but not yet implemented).*
 
 ## 6. System Architecture
@@ -139,7 +148,11 @@ The application is a **Progressive Web App (PWA)** optimized for mobile use duri
 
 ### 7.2 Screen 2: Song Detail
 * **Status:** Implemented (`app/songs/[id]/page.tsx`).
-* **Features:** Sticky Header with Back Button, Version Pills, ChordPro Display.
+* **Features:** Sticky Header with Back Button, Version Pills, ChordPro Display. Integrated "Record Rehearsal" trigger to launch private recording space.
+
+### 7.2b Rehearsal Space (Slide-Up Bottom Sheet Drawer)
+* **Status:** Implemented (`components/song/RehearsalDrawer.tsx`).
+* **Features:** Live microphone capture (HTML5 MediaRecorder), local playback pre-save review, private cloud storage upload (Supabase Storage 'rehearsals' private bucket), and list of past saved takes with play/delete actions.
 
 ### 7.3 Screen 3: Login
 * **Status:** Mockup Only (Doc). Implementation Pending.

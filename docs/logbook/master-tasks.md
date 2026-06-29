@@ -1024,3 +1024,17 @@
     - [x] Validate build and TypeScript type safety locally.
     - [x] Verify Playwright E2E tests run successfully locally and on staging.
     - [x] Commit, push, and merge branch to main.
+
+## Session June 29, 2026 (Private Rehearsal Audio Recording)
+
+- [x] Create branch and worktree `feat/private-rehearsal`
+- [x] Create database migration `20260629152000_private_rehearsals.sql` adding private rehearsals storage bucket and user_recordings table.
+- [x] Sync `docs/design/db-schema.sql` (added user_recordings schema and policies).
+- [x] Implement client-side API actions `lib/actions/rehearsal.ts`.
+- [x] Implement microphone audio recorder component `components/song/AudioRecorder.tsx` (using browser native MediaRecorder API).
+- [x] Implement sliding bottom drawer component `components/song/RehearsalDrawer.tsx` (using Framer Motion for smooth transitions).
+- [x] Integrate "Record Rehearsal" trigger buttons in `app/songs/[id]/page.tsx` for desktop header and mobile context menu.
+- [x] Implement Playwright E2E test suite `e2e/tests/recording.spec.ts`.
+- [x] Apply migrations to remote test database and run E2E tests successfully.
+- [x] Update documentation `docs/design/application-analysis&design.md` (Version 1.31).
+

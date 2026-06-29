@@ -2523,3 +2523,35 @@ This session addressed a critical bug where slow Supabase Auth calls (due to Tai
 - Verified production build compiles cleanly without errors.
 - Verified Vitest unit tests (63 tests) and Playwright E2E tests (7 tests) pass.
 - Force-pushed branch `fix/issue-181-skeleton-hang`, PR reviewed, squash-merged to `main`.
+
+## 7.12 Session: Private Rehearsal Audio Recording (Story 4.6.1)
+**Timeline:** Jun 29, 2026
+**Goal:** Implement client-side audio recording, secure private cloud storage, metadata integration, and mobile/desktop triggers on the song detail page.
+
+### 1. Database & Storage Schema
+- Created database migration file [supabase/migrations/20260629152000_private_rehearsals.sql](file:///home/roeland/projects/sacred-fire-songs/supabase/migrations/20260629152000_private_rehearsals.sql) to initialize the private `'rehearsals'` storage bucket (public = false).
+- Added Row Level Security (RLS) policies on the storage bucket restricting reads/inserts/updates/deletes strictly to the owner (`auth.uid() = foldername`).
+- Created metadata table `public.user_recordings` with RLS policies restricting operations strictly to the authenticated creator.
+- Updated the consolidated schema file [docs/design/db-schema.sql](file:///home/roeland/projects/sacred-fire-songs/docs/design/db-schema.sql).
+
+### 2. Client-Side API Actions
+- Created [lib/actions/rehearsal.ts](file:///home/roeland/projects/sacred-fire-songs/lib/actions/rehearsal.ts) containing:
+  - `getUserRecordings`: fetches private takes and generates temporary signed URLs (1 hour expiry) for playback from the private storage bucket.
+  - `uploadRehearsalRecording`: uploads WebM/MP4 audio blobs using the relative proxy endpoint and saves row metadata.
+  - `deleteUserRecording`: removes storage file and database row in parallel.
+
+### 3. Audio Recorder & Drawer Components
+- Created [components/song/AudioRecorder.tsx](file:///home/roeland/projects/sacred-fire-songs/components/song/AudioRecorder.tsx) utilizing browser native `MediaRecorder` API. Auto-inspects browser mimetype support (`audio/webm` -> `audio/mp4` fallbacks). Displays real-time timer, local audio preview element, customizable take name, and upload state spinner.
+- Created [components/song/RehearsalDrawer.tsx](file:///home/roeland/projects/sacred-fire-songs/components/song/RehearsalDrawer.tsx) using `framer-motion` to slide up a premium bottom sheet drawer (mobile-focused and desktop-centered). Lists past saved takes with custom play/pause status toggles and trash delete actions.
+
+### 4. Detail Page Integration
+- Integrated into [app/songs/[id]/page.tsx](file:///home/roeland/projects/sacred-fire-songs/app/songs/[id]/page.tsx):
+  - Desktop: Added `Record` action button (Microphone icon) next to other header action items.
+  - Mobile: Added `Record Rehearsal` to the Spotify-style slide-up context sheet.
+  - Visibility: Restricted triggers to authenticated users only (hidden for guests).
+
+### 5. Playwright E2E Tests
+- Created [e2e/tests/recording.spec.ts](file:///home/roeland/projects/sacred-fire-songs/e2e/tests/recording.spec.ts) mocking user microphone stream permissions via Chromium fake media launch flags.
+- Verified that guests cannot see recording controls, and authenticated users can successfully record, review, upload, view list, play, and delete a rehearsal take.
+- Verified that the full Next.js project compiles cleanly and E2E tests pass 100%.
+
