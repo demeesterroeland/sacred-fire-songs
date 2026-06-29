@@ -71,7 +71,8 @@
 | **Jun 27** | **Feature**: Spotify-style bottom drawer, mobile header cleanup, bottom nav detail page display & settings-controlled auto-hide (#179) | ~1.0 Hours | ✅ Completed |
 | **Jun 27** | **UX Polish**: Sticky mobile song header with env-banner offset, Spotify-style marquee for long titles, flex overflow root-cause fix (`100vw` constraint) | ~3.5 Hours | ✅ Completed |
 | **Jun 28** | **Performance**: Infinite skeleton timeouts, PL/pgSQL database seeder rewrite, normally distributed and fully covered tags | ~2.25 Hours | ✅ Completed |
-| **Jun 29** | **Feature**: Private Rehearsal Audio Recording (Story 4.6.1) - storage bucket, database migration, AudioRecorder, RehearsalDrawer components, page triggers, E2E tests | ~2.5 Hours | ✅ Completed |
+| **Jun 29** | **Feature**: Private Rehearsal Audio Recording (Story 4.6.1) - storage bucket, database migration, AudioRecorder, RehearsalDrawer components, page triggers, E2E tests, file size & duration limits | ~3.0 Hours | ✅ Completed |
 
-| **Total** | **Development + AI Collaboration** | **~140.0 Hours** | |
+| **Total** | **Development + AI Collaboration** | **~140.5 Hours** | |
+
 

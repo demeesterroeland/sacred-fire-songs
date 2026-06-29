@@ -2,6 +2,7 @@
 
 import React, { useState, useRef, useEffect } from "react";
 import { Mic, Square, Play, Pause, Trash2, CloudUpload, RotateCcw } from "lucide-react";
+import { toast } from "sonner";
 import { uploadRehearsalRecording, type UserRecording } from "@/lib/actions/rehearsal";
 
 interface AudioRecorderProps {
@@ -75,9 +76,18 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
       setRecordingState("recording");
       setDuration(0);
 
-      // Start timer
+      // Start timer with 3-minute limit check (180 seconds)
       timerIntervalRef.current = setInterval(() => {
-        setDuration((prev) => prev + 1);
+        setDuration((prev) => {
+          if (prev + 1 >= 180) {
+            setTimeout(() => {
+              stopRecording();
+              toast.info("Recording automatically stopped at the 3-minute limit.");
+            }, 0);
+            return 180;
+          }
+          return prev + 1;
+        });
       }, 1000);
     } catch (err: any) {
       console.error("[recorder] Microphone access failed:", err);
@@ -100,8 +110,18 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
     if (mediaRecorderRef.current && recordingState === "paused") {
       mediaRecorderRef.current.resume();
       setRecordingState("recording");
+      // Start timer with 3-minute limit check (180 seconds)
       timerIntervalRef.current = setInterval(() => {
-        setDuration((prev) => prev + 1);
+        setDuration((prev) => {
+          if (prev + 1 >= 180) {
+            setTimeout(() => {
+              stopRecording();
+              toast.info("Recording automatically stopped at the 3-minute limit.");
+            }, 0);
+            return 180;
+          }
+          return prev + 1;
+        });
       }, 1000);
     }
   };
@@ -142,6 +162,12 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
     if (!audioBlobRef.current) return;
     setIsUploading(true);
     setErrorMsg(null);
+
+    if (audioBlobRef.current.size > 10 * 1024 * 1024) {
+      setErrorMsg("Recording file size exceeds the 10 MB limit.");
+      setIsUploading(false);
+      return;
+    }
 
     try {
       const savedRecording = await uploadRehearsalRecording(

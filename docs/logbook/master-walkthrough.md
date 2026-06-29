@@ -2555,3 +2555,13 @@ This session addressed a critical bug where slow Supabase Auth calls (due to Tai
 - Verified that guests cannot see recording controls, and authenticated users can successfully record, review, upload, view list, play, and delete a rehearsal take.
 - Verified that the full Next.js project compiles cleanly and E2E tests pass 100%.
 
+### 6. Storage Limits & Recording Restrictions
+- **Duration Cap**: Set a client-side limit of **3 minutes (180 seconds)** in [components/song/AudioRecorder.tsx](file:///home/roeland/projects/sacred-fire-songs/components/song/AudioRecorder.tsx). Recording automatically stops and displays a message when the limit is reached.
+- **Client-Side File Size Protection**: Blocks saves of recordings exceeding **10 MB** (approx. 10x the size of a standard 3-minute voice recording) to prevent accidental massive uploads.
+- **Database Storage Constraints**: Created database migration [supabase/migrations/20260629154000_limit_rehearsals_bucket.sql](file:///home/roeland/projects/sacred-fire-songs/supabase/migrations/20260629154000_limit_rehearsals_bucket.sql) setting the rehearsals storage bucket's max file size constraint to exactly 10MB and restricting allowed mime types strictly to audio content (`audio/webm`, `audio/mp4`, `audio/mpeg`, etc.).
+- **Rich Randomized Seeding**: Upgraded the local and E2E database seeder script to populate private user takes for the authenticated member profile:
+  - 50% of the songs are seeded with **multiple (2 to 5) takes** (confirming multiple takes list display and deletion mechanics are fully verified).
+  - 30% of the songs are seeded with **exactly 1 take**.
+  - 20% of the songs are seeded with **0 takes**.
+
+

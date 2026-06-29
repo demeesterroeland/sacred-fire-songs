@@ -1028,7 +1028,7 @@
 ## Session June 29, 2026 (Private Rehearsal Audio Recording)
 
 - [x] Create branch and worktree `feat/private-rehearsal`
-- [x] Create database migration `20260629152000_private_rehearsals.sql` adding private rehearsals storage bucket and user_recordings table.
+- [x] Update database migration `20260629152000_private_rehearsals.sql` adding private rehearsals storage bucket and user_recordings table.
 - [x] Sync `docs/design/db-schema.sql` (added user_recordings schema and policies).
 - [x] Implement client-side API actions `lib/actions/rehearsal.ts`.
 - [x] Implement microphone audio recorder component `components/song/AudioRecorder.tsx` (using browser native MediaRecorder API).
@@ -1036,5 +1036,11 @@
 - [x] Integrate "Record Rehearsal" trigger buttons in `app/songs/[id]/page.tsx` for desktop header and mobile context menu.
 - [x] Implement Playwright E2E test suite `e2e/tests/recording.spec.ts`.
 - [x] Apply migrations to remote test database and run E2E tests successfully.
+- [x] Update seeder (`random-seeder.mjs`) to seed private recordings for 30% of songs (staggered) and multiple takes (2 to 5) for 50% of songs.
+- [x] Fix E2E delete take selector to use `div.rounded-2xl` to prevent strict mode violations when list is populated.
+- [x] Set 3-minute (180s) recording duration limit in client-side recorder and stop automatically.
+- [x] Implement client-side size check blocking uploads larger than 10MB.
+- [x] Create database migration `20260629154000_limit_rehearsals_bucket.sql` setting `max_file_size` to 10MB and restricting allowed mime types to audio formats on the rehearsals storage bucket.
 - [x] Update documentation `docs/design/application-analysis&design.md` (Version 1.31).
+
 
