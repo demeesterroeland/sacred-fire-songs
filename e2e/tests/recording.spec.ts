@@ -106,7 +106,7 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1)', () => {
       await expect(savedTake).toBeVisible({ timeout: 10000 });
 
       // Clean up/Delete the created take to keep database clean
-      const cardRow = page.locator('div.flex', { has: page.locator(`h4:has-text("${customName}")`) }).first();
+      const cardRow = page.locator('div.rounded-2xl', { has: page.locator(`h4:has-text("${customName}")`) }).first();
       const deleteBtn = cardRow.locator('button[title="Delete rehearsal"]');
       await expect(deleteBtn).toBeVisible();
       await deleteBtn.click();

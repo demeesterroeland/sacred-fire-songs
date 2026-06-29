@@ -39,6 +39,14 @@ DECLARE
     spotify_url text;
     soundcloud_url text;
     
+    -- Recordings generation variables
+    rec_count int;
+    rec_idx int;
+    rec_name text;
+    rec_path text;
+    rec_uuid uuid;
+    rec_names text[] := ARRAY['First Take', 'Practice Session', 'Late Night run', 'Slow practice', 'Full run-through', 'Tempo check', 'Acoustic draft', 'Vocal guide'];
+    
     -- Playlist generation variables
     pl_id uuid;
     pl_titles text[] := ARRAY['Forest Sweat Lodge', 'Morning Hearth', 'My Private Practice', 'Full Moon Setlist', 'Guitar Circle Favorites'];
@@ -166,6 +174,41 @@ BEGIN
         UPDATE public.compositions
         SET has_chords = var_has_chords, has_melody = var_has_melody
         WHERE id = comp_id;
+        
+        -- Seed private recordings
+        rand_val := random();
+        IF rand_val < 0.50 THEN
+            -- 50% of the songs: multiple recordings (2 to 5)
+            rec_count := 2 + floor(random() * 4); -- 2, 3, 4, or 5
+        ELSIF rand_val < 0.80 THEN
+            -- 30% of the songs: exactly 1 recording
+            rec_count := 1;
+        ELSE
+            -- 20% of the songs: 0 recordings
+            rec_count := 0;
+        END IF;
+
+        IF rec_count > 0 THEN
+            FOR rec_idx IN 1..rec_count LOOP
+                rec_name := rec_names[1 + floor(random() * array_length(rec_names, 1))];
+                IF rec_count > 1 THEN
+                    rec_name := rec_name || ' (Take ' || rec_idx || ')';
+                END IF;
+                rec_uuid := gen_random_uuid();
+                rec_path := member_id || '/' || version_id || '/' || rec_uuid || '.webm';
+                
+                INSERT INTO public.user_recordings (id, user_id, song_version_id, recording_name, storage_path, created_at)
+                VALUES (
+                    rec_uuid,
+                    member_id,
+                    version_id,
+                    rec_name,
+                    rec_path,
+                    now() - (random() * interval '7 days') - (rec_idx * interval '1 hour')
+                );
+            END LOOP;
+        END IF;
+
         
         -- Box-Muller normal distribution around 3 (range 1-5)
         u1 := random();
