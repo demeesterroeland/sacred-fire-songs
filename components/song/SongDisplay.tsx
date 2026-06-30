@@ -63,7 +63,7 @@ export default function SongDisplay({ content, melodyNotation, hasChords = false
                                                     )
                                                 )}
                                                 {/* The Lyric (White) */}
-                                                <span className="text-gray-700 dark:text-gray-300 text-xl md:text-2xl font-medium tracking-tight font-sans whitespace-pre">
+                                                <span className="text-gray-700 dark:text-gray-300 text-xl md:text-2xl font-medium tracking-tight font-sans whitespace-pre-wrap break-words">
                                                     {item.lyrics || '\u00A0'}
                                                 </span>
                                             </div>
