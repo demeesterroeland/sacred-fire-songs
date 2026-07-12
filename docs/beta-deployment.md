@@ -15,17 +15,17 @@ How to deploy Sacred Fire Songs to the **beta** environment at
 
 ---
 
-## Three environments
+## Two environments
 
-| | Production | Vercel Preview | Beta |
-| --- | --- | --- | --- |
-| URL | *(Vercel prod domain)* | `sacred-fire-songs-*.vercel.app` | `<staging-app>.example.com` |
-| App host | **Vercel** (auto-deploy on `main`) | **Vercel** (auto-deploy per branch/PR) | **VPS** via the private `<infra-repo>` repo (Docker + Traefik) |
-| Supabase | **prod** project | **staging** project (`REDACTED_STAGING_PROJECT_ID`) | **staging** project (`REDACTED_STAGING_PROJECT_ID`) |
-| App deploy trigger | push/merge to `main` | push to any branch | bump a pinned commit SHA in `<infra-repo>` + rebuild |
-| DB schema deploy | migrations pushed on `main` | migrations pushed on a `feat/**` / `fix/**` / `chore/**` branch | migrations pushed on a `feat/**` / `fix/**` / `chore/**` branch |
+| | Production | Beta |
+| --- | --- | --- |
+| URL | (Vercel domain) | `<staging-app>.example.com` |
+| App host | **Vercel** (git auto-deploy) | **VPS** via the private `<infra-repo>` repo (Docker + Traefik) |
+| Supabase | **prod** project | **staging** project (`REDACTED_STAGING_PROJECT_ID`) |
+| App deploy trigger | push/merge to `main` | bump a pinned commit SHA in `<infra-repo>` + rebuild |
+| DB schema deploy | migrations pushed on `main` | migrations pushed on a `feat/**` / `fix/**` / `chore/**` branch |
 
-Production uses the **prod** Supabase project. Both **Vercel Preview** and **Beta** run against the **staging** Supabase project and share no data with production.
+Production and beta share **no data** — beta runs against staging Supabase.
 
 ## How beta is built
 
