@@ -82,7 +82,7 @@ const MediaEmbeds: React.FC<MediaEmbedsProps> = ({ youtubeUrl, spotifyUrl, sound
 };
 
 // Helper: Convert YouTube URL to Embed URL
-function getYouTubeEmbedUrl(url: string): string {
+export function getYouTubeEmbedUrl(url: string): string {
     // If it's already an embed URL, return it
     if (url.includes('/embed/')) return url;
 
@@ -107,11 +107,11 @@ function getYouTubeEmbedUrl(url: string): string {
     // Or just default to empty if not found.
     if (!videoId && !url.includes('/')) videoId = url;
 
-    return `https://www.youtube.com/embed/${videoId}`;
+    return `https://www.youtube.com/embed/${videoId}?enablejsapi=1`;
 }
 
 // Helper: Convert Spotify URL to Embed URL
-function getSpotifyEmbedUrl(url: string): string {
+export function getSpotifyEmbedUrl(url: string): string {
     // e.g. https://open.spotify.com/track/4uLU6hMCjMI75M1A2tKUQC
     // -> https://open.spotify.com/embed/track/4uLU6hMCjMI75M1A2tKUQC
 

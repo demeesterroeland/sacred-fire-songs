@@ -43,7 +43,7 @@ export async function getUserRecordings(songVersionId: string): Promise<UserReco
           .createSignedUrl(rec.storage_path, 3600); // 1 hour expiry
 
         if (signError) {
-          console.error(`[rehearsal] Error signing URL for ${rec.storage_path}:`, signError);
+          console.warn(`[rehearsal] Error signing URL for ${rec.storage_path}:`, signError);
           return rec;
         }
 
@@ -52,7 +52,7 @@ export async function getUserRecordings(songVersionId: string): Promise<UserReco
           audioUrl: signedData.signedUrl,
         };
       } catch (e) {
-        console.error(`[rehearsal] Exception signing URL for ${rec.storage_path}:`, e);
+        console.warn(`[rehearsal] Exception signing URL for ${rec.storage_path}:`, e);
         return rec;
       }
     })

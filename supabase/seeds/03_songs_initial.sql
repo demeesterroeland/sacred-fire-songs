@@ -458,6 +458,7 @@ VALUES (
 {tag: Portuguese}
 {tag: Umbanda}
 
+https://www.song-circle.com/world-songs/bejja-flor/caboclo
 
 [Am]Caboclo nas matas Nas cachoeiras 
 Nas pedras e nas pedreiras E nas ondas do mar 
@@ -476,10 +477,7 @@ Of the stone and stony places, and the waves of the sea,
 Cabocla (female) warrior, messenger of peace & harmony,
 soldier of Oxala,
 From Aruanda, come, come, come bringing strength,
-to break the illusion, so Umbanda can be healed
-
-https://www.song-circle.com/world-songs/bejja-flor/caboclo
-'
+to break the illusion, so Umbanda can be healed'
     ,
         'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13');
 -- Tag: Portuguese
@@ -801,6 +799,7 @@ VALUES (
 {artist: Unknown}
 {tag: Spanish}
 
+https://www.facebook.com/watch/?v=2328854114060949
 
 
 Voy sembrando una semilla de paz 
@@ -823,10 +822,7 @@ Floreciendo la conciencia
 florece mi corazón (2x)
 
 Somos flores somos flores 
-En este jardín de paz.(2x)
-
-https://www.facebook.com/watch/?v=2328854114060949
-'
+En este jardín de paz.(2x)'
     ,
         'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13');
 -- Tag: Spanish
@@ -1530,6 +1526,7 @@ VALUES (
 {artist: Unknown}
 {tag: Spanish}
 
+https://www.song-circle.com/world-songs/condor/tamborcito
 Tamborcito tamborcito 
 ayúdame a cantar (x2) 
 
@@ -1565,10 +1562,7 @@ To the heart of the earth
  of this water, 
  of the wind 
 
-To the heart of the heart
-
-https://www.song-circle.com/world-songs/condor/tamborcito
-'
+To the heart of the heart'
     ,
         'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13');
 -- Tag: Spanish

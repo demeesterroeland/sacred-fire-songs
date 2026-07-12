@@ -65,9 +65,9 @@ export const useAuth = () => {
             return;
         }
 
-        // C. Fallback to Real Supabase Auth — with a 5s timeout to prevent infinite skeleton
+        // C. Fallback to Real Supabase Auth — with a 15s timeout to prevent infinite skeleton
         const supabase = createClient();
-        const AUTH_TIMEOUT_MS = 5000;
+        const AUTH_TIMEOUT_MS = 15000;
 
         try {
             const authResult = await Promise.race([

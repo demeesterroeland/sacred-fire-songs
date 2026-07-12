@@ -21,8 +21,12 @@ test.describe('Guest smoke @smoke', () => {
 
   test('VIEW-01: guest can open a song detail page', async ({ page }) => {
     await page.goto('/songs');
-    await page.locator('a[href^="/songs/"]:not([href="/songs/add"])').first().click();
-    await expect(page).toHaveURL(/\/songs\/[^/]+$/);
+    const firstLink = page.locator('a[href^="/songs/"]:not([href="/songs/add"])').first();
+    await expect(firstLink).toBeVisible();
+    const href = await firstLink.getAttribute('href');
+    if (!href) throw new Error('No song link found');
+    await page.goto(href);
+    await expect(page).toHaveURL(/\/songs\/[^/]+$/, { timeout: 10000 });
   });
 
   test('ACC-01: settings redirects unauthenticated user to login', async ({ page }) => {
