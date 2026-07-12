@@ -175,6 +175,34 @@ Scenario: Guest accesses Playlists page
   And I should not be redirected to the login page
 ```
 
+**Story 1.2.4: [Planned]** As a Guest, I want to use a unified search field at the top of the screen on mobile and open advanced filters via an inline button, so that I can search and filter songs efficiently on mobile.
+
+```gherkin
+Scenario: Unified Search Field on Mobile
+  Given I am using a mobile device
+  When I visit the Songs page
+  Then I should see the search input field directly in the header instead of just a looking glass icon
+  And the search input field should contain an inline "advanced filter" button
+
+Scenario: Open Advanced Filter Popup on Mobile
+  Given I am using a mobile device
+  And I am on the Songs page
+  When I click the inline "advanced filter" button inside the search field
+  Then the "search options" popup modal should open
+
+Scenario: Advanced Filter Action Panel Position
+  Given the "search options" popup modal is open
+  Then the action panel containing the "Clear All" and "Show results" buttons should be rendered at the top of the popup
+  And it should be located directly below the popup title "Search options"
+  And it should be located above the filter options/selections
+
+Scenario: Disable Automatic Search when Advanced Filter is Open
+  Given the "search options" popup modal is open
+  When I type a search query in the search field
+  Then the automatic debounced search should NOT execute while the popup is open
+  And the search should only execute when I click the "Show results" button
+```
+
 ### Epic 1.3: Basic Song Viewer
 
 **Story 1.3.1: [Implemented]** As a Musician, I want to see chords displayed above the lyrics so that I can play the song on my guitar.
