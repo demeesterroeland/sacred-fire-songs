@@ -31,10 +31,10 @@ test.describe('Song Detail Timeout & Fallbacks', () => {
         }
       });
 
-      // Intercept auth user call and delay by 7s (longer than 5s threshold)
+      // Intercept auth user call and delay by 20s (longer than the 15s AUTH_TIMEOUT_MS in useAuth)
       await page.route('**/supabase-api/auth/v1/user', async (route) => {
-        console.log('[Playwright Router] Intercepted user verify call, delaying by 7s...');
-        await new Promise((resolve) => setTimeout(resolve, 7000));
+        console.log('[Playwright Router] Intercepted user verify call, delaying by 20s...');
+        await new Promise((resolve) => setTimeout(resolve, 20000));
         await route.fulfill({
           status: 401,
           contentType: 'application/json',
@@ -42,10 +42,41 @@ test.describe('Song Detail Timeout & Fallbacks', () => {
         });
       });
 
+      // Provide mock response for composition data to prevent hanging
+      await page.route('**/supabase-api/rest/v1/compositions?*', async (route) => {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify([{
+            title: "Mock Song with Media",
+            original_author: "Mock Artist",
+            owner_id: "some-owner-id",
+            is_public: true,
+            has_chords: true,
+            has_melody: false,
+            song_versions: [
+              {
+                id: "mock-version-id",
+                version_name: "Standard Version",
+                content_chordpro: "{title: Mock Song with Media}\n[G]Hello [C]World",
+                key: "G",
+                capo: 0,
+                tuning: "Standard",
+                youtube_url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+                spotify_url: "https://open.spotify.com/track/4uLU6hMCjMI75M1A2tKUQC",
+                soundcloud_url: null,
+                melody_notation: null
+              }
+            ],
+            song_category_map: []
+          }])
+        });
+      });
+
       await page.goto(songUrl);
 
-      // Wait for the auth timeout to trigger (5s) plus Next.js compilation on first load
-      await page.waitForTimeout(12000);
+      // Wait for the auth timeout to trigger (15s) plus buffer for Next.js render
+      await page.waitForTimeout(22000);
 
       // Verify auth timeout warning is in console logs
       const hasAuthTimeoutLog = warnings.some(txt => txt.includes('Auth resolution failed'));

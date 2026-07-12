@@ -47,9 +47,6 @@ export default function SongDisplay({ content, melodyNotation, hasChords = false
                                             );
                                         }
 
-                                        const trimmedLyrics = item.lyrics?.trim() || '';
-                                        const isUrl = /^https?:\/\/[^\s]+$/.test(trimmedLyrics);
-
                                         return (
                                             <div
                                                 key={itemIdx}
@@ -65,21 +62,10 @@ export default function SongDisplay({ content, melodyNotation, hasChords = false
                                                         <div className="h-3 mb-0.5" /> // Spacer to align lines without chords
                                                     )
                                                 )}
-                                                {/* The Lyric (White) or Clickable URL */}
-                                                {isUrl ? (
-                                                    <a
-                                                        href={trimmedLyrics}
-                                                        target="_blank"
-                                                        rel="noopener noreferrer"
-                                                        className="text-amber-500 hover:text-amber-600 dark:hover:text-amber-400 underline text-base md:text-lg font-medium tracking-tight font-sans break-all"
-                                                    >
-                                                        {item.lyrics}
-                                                    </a>
-                                                ) : (
-                                                    <span className="text-gray-700 dark:text-gray-300 text-xl md:text-2xl font-medium tracking-tight font-sans whitespace-pre-wrap break-words">
-                                                        {item.lyrics || '\u00A0'}
-                                                    </span>
-                                                )}
+                                                {/* The Lyric (White) */}
+                                                <span className="text-gray-700 dark:text-gray-300 text-xl md:text-2xl font-medium tracking-tight font-sans whitespace-pre">
+                                                    {item.lyrics || '\u00A0'}
+                                                </span>
                                             </div>
                                         );
                                     })}

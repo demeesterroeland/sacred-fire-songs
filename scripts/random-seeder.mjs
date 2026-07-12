@@ -148,9 +148,9 @@ BEGIN
             capo := 3;
             tuning := 'Standard';
             var_has_chords := true;
-            youtube_url := 'https://www.youtube.com/watch?v=dQw4w9WgXcQ';
-            spotify_url := 'https://open.spotify.com/track/4PTG3Z6ehGkBF3zIqYQGKg';
-            soundcloud_url := 'https://soundcloud.com/octobersveryown/drake-back-to-back';
+            youtube_url := 'https://www.youtube.com/watch?v=dbbZGLR_e20';
+            spotify_url := 'https://open.spotify.com/track/2HZQQ8PriDD1z7tcvAU9KH';
+            soundcloud_url := 'https://soundcloud.com/user-778401370/la-curandera';
             var_has_melody := true;
         ELSE
             song_key := keys[1 + floor(random() * array_length(keys, 1))];

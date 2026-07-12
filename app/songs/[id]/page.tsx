@@ -10,8 +10,9 @@ import SongDetailSkeleton from '@/components/song/SongDetailSkeleton';
 import MediaEmbeds from '@/components/song/MediaEmbeds';
 import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal';
 import { useQuery } from '@tanstack/react-query';
-import { Trash2, Edit2, Music, Link as LinkIcon, Heart, MoreVertical, ListPlus } from 'lucide-react';
+import { Trash2, Edit2, Music, Link as LinkIcon, Heart, MoreVertical, ListPlus, Mic } from 'lucide-react';
 import { toast } from 'sonner';
+import RehearsalDrawer from '@/components/song/RehearsalDrawer';
 import { useToggleFavorite } from '@/hooks/useToggleFavorite';
 import { PlaylistPicker } from '@/components/playlists/PlaylistPicker';
 import { useDeleteSong } from '@/hooks/useDeleteSong';
@@ -66,6 +67,7 @@ export default function SongDetailPage() {
     const [selectedVersionIndex, setSelectedVersionIndex] = useState(0);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isOverflowOpen, setIsOverflowOpen] = useState(false);
+    const [isRehearsalDrawerOpen, setIsRehearsalDrawerOpen] = useState(false);
     const { isDeleting, deleteSong } = useDeleteSong();
 
     const { user, loading: authLoading } = useAuth();
@@ -91,7 +93,7 @@ export default function SongDetailPage() {
     // Log song fetch errors so they're visible in DevTools
     useEffect(() => {
         if (songError) {
-            console.error('[SongDetailPage] Failed to load song:', songError);
+            console.warn('[SongDetailPage] Failed to load song:', songError);
         }
     }, [songError]);
 
@@ -314,6 +316,15 @@ export default function SongDetailPage() {
                                 </button>
                             </Link>
                         )}
+                        {id && (
+                            <button
+                                onClick={() => setIsRehearsalDrawerOpen(true)}
+                                className="flex items-center gap-2 px-3 py-2 bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 rounded-lg text-sm font-bold border border-indigo-500/20 transition-all active:scale-[0.98]"
+                                title="Recordings"
+                            >
+                                <Mic className="w-4 h-4" /> <span className="hidden xl:inline">Recordings</span>
+                            </button>
+                        )}
                         {user && id && (
                             <PlaylistPicker
                                 compositionId={id}
@@ -396,17 +407,7 @@ export default function SongDetailPage() {
                         />
                     </div>
 
-                    {/* Player Section */}
-                    {(currentVersion?.youtube_url || currentVersion?.spotify_url || currentVersion?.soundcloud_url) && (
-                        <div className="pt-8 border-t border-gray-200/50 dark:border-gray-800/50">
-                            <h3 className="text-xs font-black text-gray-600 uppercase tracking-[0.2em] mb-6">Recordings</h3>
-                            <MediaEmbeds
-                                youtubeUrl={currentVersion.youtube_url}
-                                spotifyUrl={currentVersion.spotify_url}
-                                soundcloudUrl={currentVersion.soundcloud_url}
-                            />
-                        </div>
-                    )}
+
 
                     <div className="h-20"></div>
                 </div>
@@ -490,6 +491,18 @@ export default function SongDetailPage() {
                                 </button>
                             )}
 
+                            {/* Record Rehearsal */}
+                            <button
+                                onClick={() => {
+                                    setIsOverflowOpen(false);
+                                    setIsRehearsalDrawerOpen(true);
+                                }}
+                                className="w-full flex items-center gap-4 px-6 py-4 hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors text-left text-gray-700 dark:text-gray-300"
+                            >
+                                <Mic className="w-5 h-5 text-gray-400 dark:text-gray-500" />
+                                <span className="text-sm font-bold">Recordings</span>
+                            </button>
+
                             {/* Edit */}
                             {(song.owner_id === user?.id || isAdmin) && (
                                 <Link
@@ -515,6 +528,21 @@ export default function SongDetailPage() {
                         </div>
                     </div>
                 </>
+            )}
+
+            {/* Rehearsal Drawer Sheet */}
+            {currentVersion && (
+                <RehearsalDrawer
+                    isOpen={isRehearsalDrawerOpen}
+                    onClose={() => setIsRehearsalDrawerOpen(false)}
+                    onOpen={() => setIsRehearsalDrawerOpen(true)}
+                    songVersionId={currentVersion.id}
+                    songTitle={song.title}
+                    songAuthor={song.original_author || 'Traditional'}
+                    youtubeUrl={currentVersion.youtube_url}
+                    spotifyUrl={currentVersion.spotify_url}
+                    soundcloudUrl={currentVersion.soundcloud_url}
+                />
             )}
         </div>
     );
