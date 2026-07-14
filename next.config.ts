@@ -10,9 +10,9 @@ const nextConfig: NextConfig = {
   },
   async rewrites() {
     const isDev = process.env.NODE_ENV === "development";
-    const supabaseUrl = isDev 
+    const supabaseUrl = (isDev 
       ? process.env.NEXT_PUBLIC_SUPABASE_URL_DEV 
-      : process.env.NEXT_PUBLIC_SUPABASE_URL;
+      : process.env.NEXT_PUBLIC_SUPABASE_URL) || "https://placeholder-supabase.co";
     return [
       {
         source: '/supabase-api/:path*',

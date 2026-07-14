@@ -14,6 +14,7 @@ import type { Song } from "@/lib/songUtils";
 import { useSongsQuery } from "@/hooks/useSongsQuery";
 import { useFavoritesQuery } from "@/hooks/useFavoritesQuery";
 import { useSongsFilter } from "@/hooks/useSongsFilter";
+import { isDraftActive } from "@/lib/songs/filterConfig";
 
 type SortByType = 'title' | 'author' | 'newest';
 
@@ -27,13 +28,40 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
     const searchParams = useSearchParams();
     const router = useRouter();
     const { user } = useAuth();
-    const { setHeaderCount, searchFiltersOpen, setSearchFiltersOpen, setHasActiveSearchFilters } = useSidebar();
+    const { setHeaderCount, searchFiltersOpen, setSearchFiltersOpen, setHasActiveSearchFilters, isSearching } = useSidebar();
     const { isDeleting, deleteSong } = useDeleteSong();
     const [localSearch, setLocalSearch] = useState(searchParams.get('search') || '');
     const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null);
 
     const isAdmin = user?.role === 'admin';
     const sortBy = (searchParams.get('sort') as SortByType) || 'title';
+
+    // Draft state for the advanced search modal — nothing commits until "Show results"
+    const [draft, setDraft] = useState<typeof state | null>(null);
+    const [draftSortBy, setDraftSortBy] = useState<SortByType | null>(null);
+
+    // Helper: update a single field in the draft
+    const setDraftFilter = <K extends keyof typeof state>(key: K, value: (typeof state)[K]) => {
+        setDraft(prev => prev ? { ...prev, [key]: value } : prev);
+    };
+
+    // Helper: reset draft to empty/default state
+    const resetDraft = () => {
+        setDraft({
+            status: user?.id ? 'all' : 'public',
+            search: '',
+            category: undefined,
+            tags: [],
+            chords: false,
+            melody: false,
+            favorites: false,
+            mine: false,
+            new: false,
+            artist: '',
+        });
+        setLocalSearch('');
+        setDraftSortBy('title');
+    };
 
     // --- 1. Use Extracted Hooks ---
     const { songs, taxonomy } = useSongsQuery({ initialSongs, initialTaxonomy });
@@ -44,6 +72,7 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
         displaySongs,
         state,
         setFilter,
+        commitFilters,
         resetFilters,
         chordsCount,
         melodyCount,
@@ -65,15 +94,20 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
         router.push(`?${params.toString()}`, { scroll: false });
     };
 
-    // Debounce URL update - localSearch is the source of truth for input
+    // Reset localSearch to active search state when modal opens; init draft
     useEffect(() => {
-        const timer = setTimeout(() => {
-            if (localSearch !== state.search) {
-                setFilter('search', localSearch);
-            }
-        }, 50);
-        return () => clearTimeout(timer);
-    }, [localSearch, setFilter, state.search]);
+        if (searchFiltersOpen) {
+            // Snapshot committed state → draft when modal opens
+            setDraft({ ...state, search: state.search || '' });
+            setDraftSortBy(sortBy);
+            setLocalSearch(state.search || '');
+        } else {
+            // Discard draft on close without submit
+            setDraft(null);
+            setDraftSortBy(null);
+        }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [searchFiltersOpen]);
 
     // Handle explicit filter reset (from TagSelector's "Clear All")
     const handleResetFilters = () => {
@@ -102,12 +136,57 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
         return () => setHeaderCount(undefined);
     }, [filteredCount, songs.length, hasActiveFilters, setHeaderCount]);
 
+    // Derive display state for the results area
+    const showResultsBadge = hasActiveFilters || !!state.search;
+    const resultsLabel = isSearching
+        ? 'Searching…'
+        : `${filteredCount} result${filteredCount !== 1 ? 's' : ''}`;
+
     return (
         <main className="flex-1 min-h-0 bg-white dark:bg-gray-950">
             <div className="p-4 md:p-8 space-y-3 md:space-y-6 max-w-7xl mx-auto">
+                {/* Results count badge */}
+                <div
+                    className={`transition-all duration-300 ease-in-out ${
+                        showResultsBadge 
+                            ? 'opacity-100 h-7 mb-2 translate-y-0' 
+                            : 'opacity-0 h-0 mb-0 -translate-y-2 pointer-events-none overflow-hidden'
+                    }`}
+                    aria-live="polite"
+                    aria-atomic="true"
+                >
+                    <div className="flex items-center gap-2">
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold transition-colors duration-200 ${
+                            isSearching
+                                ? 'bg-gray-100 dark:bg-gray-900 text-gray-400 dark:text-gray-500'
+                                : 'bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400'
+                        }`}>
+                            {resultsLabel}
+                        </span>
+                        {hasActiveFilters && !isSearching && (
+                            <button
+                                onClick={handleResetFilters}
+                                className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                            >
+                                Clear filters
+                            </button>
+                        )}
+                    </div>
+                </div>
+
                 {/* Song List */}
-                <section>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <section className="relative">
+                    {/* Fade overlay while debounce pending */}
+                    <div
+                        className={`absolute inset-0 z-10 bg-white/50 dark:bg-gray-950/50 backdrop-blur-[1px] rounded-xl pointer-events-none transition-opacity duration-200 ${
+                            isSearching ? 'opacity-100' : 'opacity-0'
+                        }`}
+                    />
+                    <div
+                        className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 transition-opacity duration-200 ${
+                            isSearching ? 'opacity-60' : 'opacity-100'
+                        }`}
+                    >
                         {displaySongs.length > 0 ? (
                             displaySongs.map((song) => (
                                 <div key={song.id} className="relative group/card">
@@ -182,18 +261,31 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
 
             <SearchFiltersModal
                 isOpen={searchFiltersOpen}
-                onClose={() => setSearchFiltersOpen(false)}
-                state={state}
-                setFilter={setFilter}
-                resetFilters={resetFilters}
-                sortBy={sortBy}
-                setSortBy={setSortBy}
+                onClose={() => {
+                    setSearchFiltersOpen(false);
+                    // draft is cleared by the effect above
+                }}
+                onSubmit={() => {
+                    if (draft) {
+                        commitFilters(
+                            { ...draft, search: localSearch },
+                            { sort: draftSortBy ?? sortBy }
+                        );
+                    }
+                    setSearchFiltersOpen(false);
+                }}
+                // Pass draft state while modal is open; fall back to committed state otherwise
+                state={draft ?? state}
+                setFilter={draft ? setDraftFilter : setFilter}
+                resetFilters={draft ? resetDraft : resetFilters}
+                sortBy={draftSortBy ?? sortBy}
+                setSortBy={(val) => setDraftSortBy(val)}
                 taxonomy={taxonomy}
                 chordsCount={chordsCount}
                 melodyCount={melodyCount}
                 favoritesCount={favoritesCount}
                 mineCount={mineCount}
-                hasActiveFilters={hasActiveFilters}
+                hasActiveFilters={draft ? isDraftActive({ ...draft, search: localSearch }, user?.id) : hasActiveFilters}
                 isAuthenticated={!!user}
                 localSearch={localSearch}
                 setLocalSearch={setLocalSearch}

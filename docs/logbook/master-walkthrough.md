@@ -2564,4 +2564,29 @@ This session addressed a critical bug where slow Supabase Auth calls (due to Tai
   - 30% of the songs are seeded with **exactly 1 take**.
   - 20% of the songs are seeded with **0 takes**.
 
+## July 12, 2026 (Mobile Search UX, Accent Insensitivity & Share Option)
+
+### 1. Unified Mobile Search Field
+- Modified [Header.tsx](file:///home/roeland/projects/sacred-fire-songs/components/common/Header.tsx) to make the search input bar visible across all viewports (removing `hidden sm:flex`).
+- Adjusted the header grid columns structure (`grid-cols-[auto_1fr_auto]`) to keep a clean, non-overlapping design on mobile.
+- Deleted the redundant magnifying glass icon button on mobile.
+
+### 2. Relocated Action Panel in Advanced Search
+- Modified [SearchFiltersModal.tsx](file:///home/roeland/projects/sacred-fire-songs/components/library/SearchFiltersModal.tsx) to move the "Clear all" and "Show results" actions from the modal footer to a top bar directly below the header and above the filter selectors.
+- Removed the empty footer to optimize mobile screen estate.
+
+### 3. Automatic Search Deferral
+- Modified [SongsPageContent.tsx](file:///home/roeland/projects/sacred-fire-songs/app/songs/SongsPageContent.tsx) to bypass the automatic debounced search effect while the advanced search modal is open (`searchFiltersOpen === true`).
+- Configured the search query to only apply when the user explicitly clicks the "Show results" action. Reverts the query to active search state if they cancel.
+
+### 4. Accent-Insensitive Search
+- Added `removeDiacritics` utility function in [utils.ts](file:///home/roeland/projects/sacred-fire-songs/lib/utils.ts) to strip accents (NFD normalization).
+- Updated the search matching logic in [filterConfig.ts](file:///home/roeland/projects/sacred-fire-songs/lib/songs/filterConfig.ts) to utilize `removeDiacritics` on queries and song texts (title, author, content), ensuring search terms like "Colibri" match accented texts like "Colibrí" and vice-versa.
+- Allowed empty input in [TagSelector.tsx](file:///home/roeland/projects/sacred-fire-songs/components/library/TagSelector.tsx) to display all available categories and tags on focus before typing.
+- Fixed a dynamic Tailwind compilation bug for tag dot colors in the dropdown list by mapping Tailwind color names to HEX values.
+
+### 5. Native Share Feature
+- Added a native Share option in [page.tsx](file:///home/roeland/projects/sacred-fire-songs/app/songs/[id]/page.tsx) using the Web Share API (`navigator.share`) with a clipboard copy fallback if unsupported.
+- Added share buttons in the mobile bottom sheet context menu and the desktop song actions row.
+
 

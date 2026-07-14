@@ -113,6 +113,23 @@ export default function SearchFiltersModal({
                     </button>
                 </div>
 
+                {/* Action Panel (Clear All / Show Results) */}
+                <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-200 dark:border-gray-800 shrink-0 bg-gray-50/50 dark:bg-gray-900/50">
+                    <button
+                        onClick={handleClearAll}
+                        disabled={!hasActiveFilters && !localSearch}
+                        className="flex-1 px-4 py-2.5 rounded-xl font-bold text-xs text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-950 border border-gray-300 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                    >
+                        Clear all
+                    </button>
+                    <button
+                        onClick={onSubmit ?? onClose}
+                        className="flex-1 px-4 py-2.5 rounded-xl font-bold text-xs text-white bg-red-600 hover:bg-red-500 shadow-md shadow-red-900/10 transition-all"
+                    >
+                        Show results
+                    </button>
+                </div>
+
                 {/* Scrollable content */}
                 <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
 
@@ -127,6 +144,7 @@ export default function SearchFiltersModal({
                                 type="text"
                                 value={localSearch}
                                 onChange={(e) => setLocalSearch(e.target.value)}
+                                onKeyDown={(e) => { if (e.key === 'Enter') onSubmit?.(); }}
                                 placeholder="Search 200+ songs..."
                                 className="w-full bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl py-2.5 pl-10 pr-4 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500/40 transition-all"
                             />
@@ -252,22 +270,7 @@ export default function SearchFiltersModal({
                     </section>
                 </div>
 
-                {/* Footer */}
-                <div className="flex items-center gap-3 px-6 py-4 border-t border-gray-200 dark:border-gray-800 shrink-0">
-                    <button
-                        onClick={handleClearAll}
-                        disabled={!hasActiveFilters && !localSearch}
-                        className="flex-1 px-4 py-3 rounded-xl font-bold text-sm text-gray-600 dark:text-gray-400 bg-gray-100 dark:bg-gray-900 border border-gray-300 dark:border-gray-800 hover:bg-gray-200 dark:hover:bg-gray-800 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
-                    >
-                        Clear all
-                    </button>
-                    <button
-                        onClick={onSubmit ?? onClose}
-                        className="flex-1 px-4 py-3 rounded-xl font-bold text-sm text-white bg-red-600 hover:bg-red-500 shadow-lg shadow-red-900/20 transition-all"
-                    >
-                        Show results
-                    </button>
-                </div>
+
             </div>
         </div>
     );

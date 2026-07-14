@@ -175,7 +175,7 @@ Scenario: Guest accesses Playlists page
   And I should not be redirected to the login page
 ```
 
-**Story 1.2.4: [Planned]** As a Guest, I want to use a unified search field at the top of the screen on mobile and open advanced filters via an inline button, so that I can search and filter songs efficiently on mobile.
+**Story 1.2.4: [Implemented]** As a Guest, I want to use a unified search field at the top of the screen on mobile and open advanced filters via an inline button, so that I can search and filter songs efficiently on mobile.
 
 ```gherkin
 Scenario: Unified Search Field on Mobile

@@ -12,3 +12,10 @@ export function cn(...inputs: ClassValue[]) {
 export function normalizeWhitespace(str: string): string {
   return str.replace(/\s+/g, " ").trim();
 }
+
+/**
+ * Removes diacritics (accents) from a string.
+ */
+export function removeDiacritics(str: string): string {
+  return str.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+}

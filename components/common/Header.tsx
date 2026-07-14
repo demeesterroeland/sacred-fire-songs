@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { ListMusic, Menu, Music, PlusCircle, Search, SlidersHorizontal, X } from 'lucide-react';
+import { ListMusic, Loader2, Menu, Music, PlusCircle, Search, SlidersHorizontal, X } from 'lucide-react';
 import { useSidebar } from '@/context/SidebarContext';
 import { useAuth } from '@/hooks/useAuth';
 import { getSiteTitle } from '@/lib/env';
@@ -27,7 +27,7 @@ export default function Header() {
     const pathname = usePathname();
     const router = useRouter();
     const searchParams = useSearchParams();
-    const { setIsOpen: setSidebarOpen, searchFiltersOpen, setSearchFiltersOpen, hasActiveSearchFilters } = useSidebar();
+    const { setIsOpen: setSidebarOpen, searchFiltersOpen, setSearchFiltersOpen, hasActiveSearchFilters, isSearching, setIsSearching } = useSidebar();
     const { user } = useAuth();
     const inputRef = useRef<HTMLInputElement>(null);
     const searchWrapperRef = useRef<HTMLDivElement>(null);
@@ -53,7 +53,7 @@ export default function Header() {
         if (isOnSongsPage && document.activeElement !== inputRef.current) {
             setSearchValue(searchParams.get('search') || '');
         }
-    }, [isOnSongsPage, searchParams]);
+    }, [isOnSongsPage, searchParams, searchValue]);
 
     // Close dropdowns on outside click
     useEffect(() => {
@@ -88,19 +88,35 @@ export default function Header() {
         saveSearchHistory([]);
     }, []);
 
-    // Live search: debounce URL updates as user types
+    // Live search: debounce URL updates ONLY when user is actively typing (input focused)
+    // This prevents background sync changes or modal commits from scheduling stale URL overrides.
     useEffect(() => {
+        if (searchFiltersOpen) return; // modal handles its own submit
+        if (typeof window !== 'undefined' && document.activeElement !== inputRef.current) {
+            setIsSearching(false);
+            return;
+        }
+        setIsSearching(true);
         const timer = setTimeout(() => {
             const trimmed = searchValue.trim();
-            if (trimmed) {
-                router.push(`/songs?search=${encodeURIComponent(trimmed)}`, { scroll: false });
-            } else if (isOnSongsPage) {
-                router.push('/songs', { scroll: false });
+            // Only push if we're on /songs, or if there's a search term (navigates to /songs)
+            if (!isOnSongsPage && !trimmed) {
+                setIsSearching(false);
+                return;
             }
-        }, 250);
+            // Build full URL preserving all current filter params
+            const params = new URLSearchParams(searchParams.toString());
+            if (trimmed) {
+                params.set('search', trimmed);
+            } else {
+                params.delete('search');
+            }
+            router.push(`/songs?${params.toString()}`, { scroll: false });
+            setIsSearching(false);
+        }, 350);
         return () => clearTimeout(timer);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [searchValue]);
+    }, [searchValue, searchFiltersOpen]);
 
     // Submit search (Enter or history click): save to history + navigate
     const handleSearch = (term?: string) => {
@@ -145,13 +161,13 @@ export default function Header() {
             id="app-navbar"
             className="h-[var(--navbar-height)] w-full text-sm relative lg:sticky lg:top-0 z-50 bg-white/95 dark:bg-gray-950/95 backdrop-blur-md"
         >
-            <div className="grid h-full grid-cols-[1fr_auto] sm:grid-cols-[auto_1fr_auto] lg:grid-cols-[16rem_1fr_auto] items-center border-b border-gray-200/60 dark:border-gray-800/60">
+            <div className="grid h-full grid-cols-[auto_1fr_auto] lg:grid-cols-[16rem_1fr_auto] items-center border-b border-gray-200/60 dark:border-gray-800/60">
                 {/* Left: Menu button + Logo */}
-                <div className="flex items-center gap-1.5 mx-4">
+                <div className="flex items-center gap-1.5 ms-4 lg:me-4">
                     {/* Mobile menu toggle */}
                     <button
                         onClick={() => setSidebarOpen(true)}
-                        className="lg:hidden p-2 -ms-2 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
+                        className="lg:hidden p-1.5 -ms-2 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
                         aria-label="Open menu"
                     >
                         <Menu className="w-5 h-5" />
@@ -165,10 +181,15 @@ export default function Header() {
                     </Link>
                 </div>
 
-                {/* Center: Search bar (hidden on xs, visible sm+) */}
-                <div className="hidden sm:flex items-center px-2 lg:px-4">
+                {/* Center: Search bar (visible everywhere) */}
+                <div className="flex items-center px-2 lg:px-4 flex-1">
                     <div ref={searchWrapperRef} className="relative w-full max-w-3xl group">
-                        <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-gray-600 dark:group-focus-within:text-gray-300 transition-colors pointer-events-none z-10" />
+                        {/* Search icon / loading spinner */}
+                        {isSearching && isOnSongsPage && !searchFiltersOpen ? (
+                            <Loader2 className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-red-400 animate-spin pointer-events-none z-10" />
+                        ) : (
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-gray-600 dark:group-focus-within:text-gray-300 transition-colors pointer-events-none z-10" />
+                        )}
                         <input
                             ref={inputRef}
                             type="text"
@@ -240,18 +261,6 @@ export default function Header() {
 
                 {/* Right: Action buttons */}
                 <div className="flex items-center gap-1 md:gap-2 pe-4 lg:pe-6">
-                    {/* Mobile: search icon opens search filters modal */}
-                    <button
-                        onClick={() => setSearchFiltersOpen(true)}
-                        className="sm:hidden relative p-2 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
-                        aria-label="Search"
-                    >
-                        <Search className="w-5 h-5" />
-                        {hasActiveSearchFilters && (
-                            <span className="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-red-500 ring-1.5 ring-white dark:ring-gray-950" />
-                        )}
-                    </button>
-
                     {/* Create button with dropdown - desktop only */}
                     {user && (
                         <div ref={createMenuRef} className="relative hidden lg:block">
