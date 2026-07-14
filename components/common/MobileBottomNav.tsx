@@ -73,6 +73,17 @@ export default function MobileBottomNav() {
         };
     }, [isSongDetailPage, preferences.autoHideBottomNav]);
 
+    // Expose nav visibility as CSS custom property for the mini-player to use
+    useEffect(() => {
+        document.documentElement.style.setProperty(
+            '--bottom-nav-height',
+            isVisible && isSongDetailPage && preferences.autoHideBottomNav ? '3.5rem' : '0rem'
+        );
+        return () => {
+            document.documentElement.style.removeProperty('--bottom-nav-height');
+        };
+    }, [isVisible, isSongDetailPage, preferences.autoHideBottomNav]);
+
     return (
         <>
             <CreateSheet

@@ -282,18 +282,68 @@ export default function RehearsalDrawer({
     }
   };
 
+  // Hidden refs for mini-player playback (always mounted in DOM)
+  const hiddenYoutubeRef = React.useRef<HTMLIFrameElement>(null);
+  const hiddenSoundcloudRef = React.useRef<HTMLIFrameElement>(null);
+
+  const playHiddenYouTube = () => {
+    if (hiddenYoutubeRef.current?.contentWindow) {
+      hiddenYoutubeRef.current.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+    }
+  };
+
+  const playHiddenSoundCloud = () => {
+    if (hiddenSoundcloudRef.current?.contentWindow) {
+      hiddenSoundcloudRef.current.contentWindow.postMessage('{"method":"play"}', '*');
+    }
+  };
+
+  const startMediaPlayback = () => {
+    if (playingSource === "youtube") {
+      playHiddenYouTube();
+    } else if (playingSource === "soundcloud") {
+      playHiddenSoundCloud();
+    } else if (youtubeUrl) {
+      setSelectedMedia("youtube");
+      setPlayingSource("youtube");
+      setTimeout(() => {
+        bindYouTubeEvents();
+        playHiddenYouTube();
+      }, 300);
+    } else if (soundcloudUrl) {
+      setSelectedMedia("soundcloud");
+      setPlayingSource("soundcloud");
+      setTimeout(() => {
+        bindSoundCloudEvents();
+        playHiddenSoundCloud();
+      }, 300);
+    } else if (spotifyUrl) {
+      onOpen?.();
+      setSelectedMedia("spotify");
+      setPlayingSource("spotify");
+    }
+  };
+
   const handleMiniPlayerPlayPause = () => {
+    if (!playingSource) {
+      startMediaPlayback();
+      return;
+    }
     if (playingSource === "youtube") {
       if (isMediaPlaying) {
         pauseYouTube();
-      } else {
+      } else if (youtubeRef.current?.contentWindow) {
         playYouTube();
+      } else {
+        playHiddenYouTube();
       }
     } else if (playingSource === "soundcloud") {
       if (isMediaPlaying) {
         pauseSoundCloud();
-      } else {
+      } else if (soundcloudRef.current?.contentWindow) {
         playSoundCloud();
+      } else {
+        playHiddenSoundCloud();
       }
     }
   };
@@ -835,11 +885,36 @@ export default function RehearsalDrawer({
 
             </div>
           </motion.div>
+      {/* Hidden media iframes — always mounted when mini-player is visible */}
+      {!isOpen && hasMedia && (
+        <div className="absolute -left-[9999px] -top-[9999px] w-0 h-0 overflow-hidden" aria-hidden="true">
+          {youtubeUrl && selectedMedia === "youtube" && (
+            <iframe
+              ref={hiddenYoutubeRef}
+              width="100%"
+              height="100%"
+              src={typeof window !== "undefined" && (window as any).__E2E__ ? "about:blank" : getYouTubeEmbedUrl(youtubeUrl)}
+              title="YouTube video player (hidden)"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+            />
+          )}
+          {soundcloudUrl && selectedMedia === "soundcloud" && (
+            <iframe
+              ref={hiddenSoundcloudRef}
+              width="100%"
+              height="166"
+              src={typeof window !== "undefined" && (window as any).__E2E__ ? "about:blank" : `https://w.soundcloud.com/player/?url=${encodeURIComponent(soundcloudUrl)}&color=%23ff5500&auto_play=false&hide_related=false&show_comments=false&show_user=true&show_reposts=false&show_teaser=false`}
+              allow="autoplay"
+            />
+          )}
+        </div>
+      )}
+
       {/* Floating Horizontal Bottom Mini Player Widget */}
-      {!isOpen && playingSource && playingSource !== 'spotify' && (
+      {!isOpen && hasMedia && (
         <div 
           data-testid="bottom-mini-player"
-          className="fixed bottom-[calc(3.5rem+env(safe-area-inset-bottom,0px))] lg:bottom-4 left-0 right-0 lg:left-1/2 lg:-translate-x-1/2 z-30 w-full lg:max-w-xl lg:rounded-2xl shadow-2xl bg-[#FF5500]/95 backdrop-blur-md text-white h-14 flex items-center justify-between px-4 border-t lg:border border-white/10 select-none animate-in slide-in-from-bottom duration-300"
+          className="fixed bottom-[calc(var(--bottom-nav-height,3.5rem)+env(safe-area-inset-bottom,0px))] lg:bottom-4 left-0 right-0 lg:left-1/2 lg:-translate-x-1/2 z-30 w-full lg:max-w-xl lg:rounded-2xl shadow-2xl bg-[#FF5500]/95 backdrop-blur-md text-white h-14 flex items-center justify-between px-4 border-t lg:border border-white/10 select-none animate-in slide-in-from-bottom duration-300"
         >
           {/* Horizontal Progress Bar */}
           <div 
@@ -869,22 +944,24 @@ export default function RehearsalDrawer({
             <div className="flex flex-col text-left min-w-0">
               <span className="text-xs font-black truncate">{songTitle}</span>
               <span className="text-[9px] uppercase tracking-widest opacity-80 truncate">
-                {playingSource === 'youtube' ? 'YouTube Reference' : 'SoundCloud Reference'}
+                {playingSource ? (playingSource === 'youtube' ? 'YouTube Reference' : playingSource === 'soundcloud' ? 'SoundCloud Reference' : 'Spotify Reference') : 'Tap to play'}
               </span>
             </div>
           </div>
 
           {/* Controls */}
           <div className="flex items-center gap-1.5 ml-4 shrink-0">
-            {/* Seek Back */}
-            <button 
-              onClick={() => seekRelative(-15)}
-              data-testid="mini-seek-back-btn"
-              title="Seek 15s backward"
-              className="p-2 text-white/80 hover:text-white transition-colors cursor-pointer shrink-0"
-            >
-              <RotateCcw className="w-[18px] h-[18px]" />
-            </button>
+            {/* Seek Back (only when actively playing) */}
+            {playingSource && (
+              <button 
+                onClick={() => seekRelative(-15)}
+                data-testid="mini-seek-back-btn"
+                title="Seek 15s backward"
+                className="p-2 text-white/80 hover:text-white transition-colors cursor-pointer shrink-0"
+              >
+                <RotateCcw className="w-[18px] h-[18px]" />
+              </button>
+            )}
 
             {/* Play/Pause */}
             <button 
@@ -899,15 +976,17 @@ export default function RehearsalDrawer({
               )}
             </button>
 
-            {/* Seek Forward */}
-            <button 
-              onClick={() => seekRelative(15)}
-              data-testid="mini-seek-forward-btn"
-              title="Seek 15s forward"
-              className="p-2 text-white/80 hover:text-white transition-colors cursor-pointer shrink-0"
-            >
-              <RotateCw className="w-[18px] h-[18px]" />
-            </button>
+            {/* Seek Forward (only when actively playing) */}
+            {playingSource && (
+              <button 
+                onClick={() => seekRelative(15)}
+                data-testid="mini-seek-forward-btn"
+                title="Seek 15s forward"
+                className="p-2 text-white/80 hover:text-white transition-colors cursor-pointer shrink-0"
+              >
+                <RotateCw className="w-[18px] h-[18px]" />
+              </button>
+            )}
 
             <span className="w-px h-6 bg-white/10 mx-1 shrink-0" />
 
@@ -921,20 +1000,22 @@ export default function RehearsalDrawer({
               <Music className="w-4 h-4" />
             </button>
 
-            {/* Close/Stop */}
-            <button 
-              onClick={() => {
-                pauseYouTube();
-                pauseSoundCloud();
-                setPlayingSource(null);
-                setIsMediaPlaying(false);
-              }}
-              data-testid="mini-close-btn"
-              title="Stop playback & close player"
-              className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded transition-colors cursor-pointer shrink-0"
-            >
-              <X className="w-4 h-4" />
-            </button>
+            {/* Close/Stop (only when actively playing) */}
+            {playingSource && (
+              <button 
+                onClick={() => {
+                  pauseYouTube();
+                  pauseSoundCloud();
+                  setPlayingSource(null);
+                  setIsMediaPlaying(false);
+                }}
+                data-testid="mini-close-btn"
+                title="Stop playback & close player"
+                className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded transition-colors cursor-pointer shrink-0"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
           </div>
         </div>
       )}
