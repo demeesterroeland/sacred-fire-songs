@@ -1,0 +1,1 @@
+| **2026-07-14** | **UX & CI/CD**: Implement search debounce safeguards, client-side query timeout protection, Next.js build fixes, Vercel preview config, and git submodule alignment | ~3.5 Hours | ✅ Completed |
