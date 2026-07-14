@@ -1066,3 +1066,9 @@
 - [x] Resolve Next.js compilation/TypeScript errors by wrapping builders in `Promise.resolve` and adding assertions in `app/songs/[id]/page.tsx`
 - [x] Fix Vercel preview builds by adding `vercel.json` configuration in `<parent-project>`
 - [x] Align submodule branch tracking across all active branches and delete obsolete branches
+
+## Session July 14, 2026 (Media Player UX & E2E Test Lint Fixes)
+
+- [x] Fix TypeScript and ESLint type warnings in `e2e/tests/recording.spec.ts` (untyped page parameters and window assertions).
+- [x] Correct `@typescript-eslint/ban-ts-comment` error by adding explanation to `@ts-expect-error` comment.
+- [x] Align submodule references and push to remote to trigger Vercel build.
