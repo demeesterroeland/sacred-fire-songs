@@ -2642,3 +2642,16 @@ This session addressed a critical bug where slow Supabase Auth calls (due to Tai
 
 ### 2. Parent Repository Sync
 - Pinned the `engine` submodule in `<parent-project>` to the latest commit and pushed to `feat/issue-187-media-player-ux` to trigger the Vercel preview deployment.
+
+## July 14, 2026 (Mobile UI Overflow Fixes for Issue #188)
+
+### 1. Library Layout and Playlist Cards
+- Resized the playlist cards in `components/playlists/PlaylistCard.tsx` and `components/playlists/PublicPlaylistCard.tsx` using `w-full min-w-0` to restrict cards to mobile screen bounds.
+- Modified the subtitle line in `components/common/CardContent.tsx` to use block layout with the `truncate` utility class rather than a flex container with unshrinkable items, enabling the long text to truncate cleanly at the card edge.
+- Added `min-w-0` to the grid main container in `app/layout.tsx` and `w-full min-w-0` to the `LibraryLayout` wrapper in `app/library/layout.tsx` to stop flex/grid child expansion.
+- Enabled header flex wrapping `flex-wrap gap-2` on playlist lists in `app/library/playlists/page.tsx`.
+
+### 2. Song Form Layout Constraints
+- Updated `components/song/SongForm.tsx` to reduce mobile padding (`p-4 sm:p-6`) and wrap the `ChordProEditor` inside an `overflow-hidden w-full max-w-full min-w-0` container, forcing chords to scroll internally.
+- Set Key/Capo/Tuning grids to stack on mobile (`grid-cols-1 sm:grid-cols-3`) to avoid layout squishing on viewports below 400px.
+- Stacked save/publish action buttons vertically on mobile screens using `flex-col sm:flex-row`.

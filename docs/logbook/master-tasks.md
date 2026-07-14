@@ -1072,3 +1072,12 @@
 - [x] Fix TypeScript and ESLint type warnings in `e2e/tests/recording.spec.ts` (untyped page parameters and window assertions).
 - [x] Correct `@typescript-eslint/ban-ts-comment` error by adding explanation to `@ts-expect-error` comment.
 - [x] Align submodule references and push to remote to trigger Vercel build.
+
+## Session July 14, 2026 (Mobile UI Overflow Fixes for Issue #188)
+
+- [x] Configure `_DEV` environment variables in `.env.local` to resolve Tailscale Supabase DEV connection
+- [x] Fix card constraints on `PlaylistCard` and `PublicPlaylistCard` to prevent horizontal overflow on mobile
+- [x] Refactor metadata grid and action buttons in `SongForm` to stack vertically on mobile screens (<640px)
+- [x] Refactor `CardContent` subtitle container to use simple block-level `truncate` for reliable responsive sizing
+- [x] Add layout constraints (`min-w-0`) to `app/layout.tsx` main grid content and `app/library/layout.tsx` container
+- [x] Validate and build locally on port 4188
