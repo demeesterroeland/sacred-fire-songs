@@ -70,7 +70,7 @@ function SmartPlaylistCard({ icon: Icon, title, description, subtitle, songTitle
     const locked = !href;
 
     const inner = (
-        <div className={`border p-4 rounded-2xl flex items-center gap-4 transition-all ${c.card} ${
+        <div className={`border p-4 rounded-2xl flex items-center gap-4 transition-all w-full min-w-0 ${c.card} ${
             locked ? 'cursor-default' : `group ${c.cardHover} hover:-translate-y-0.5`
         }`}>
             <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-colors ${c.icon} ${locked ? '' : c.iconHover}`}>
@@ -91,7 +91,7 @@ function SmartPlaylistCard({ icon: Icon, title, description, subtitle, songTitle
         </div>
     );
 
-    return href ? <Link href={href}>{inner}</Link> : inner;
+    return href ? <Link href={href} className="block w-full min-w-0">{inner}</Link> : inner;
 }
 
 function PublicPlaylistsSection({
@@ -151,7 +151,7 @@ function GuestView({ publicPlaylists, publicSongCounts, publicSongTitles }: {
 
             {/* My Private Playlists — ghost demo */}
             <div>
-                <div className="flex items-center justify-between mb-3">
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
                     <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">My Private Playlists</p>
                     <div className="flex items-center gap-4">
                         <Link
@@ -362,7 +362,7 @@ export default async function PlaylistsPage() {
 
             {/* My Private Playlists — real data */}
             <div>
-                <div className="flex items-center justify-between mb-3">
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
                     <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">My Private Playlists</p>
                     <CreatePlaylistInput />
                 </div>

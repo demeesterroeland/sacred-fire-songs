@@ -97,7 +97,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
                   {/* Mobile overlay when sidebar is open */}
                   <SidebarOverlay />
 
-                  <main className="relative overflow-y-visible lg:overflow-y-auto pb-16 lg:pb-0 col-start-2">
+                  <main className="relative min-w-0 overflow-y-visible lg:overflow-y-auto pb-16 lg:pb-0 col-start-2">
                     {children}
                   </main>
                 </div>

@@ -21,12 +21,12 @@ export function CardContent({ title, description, subtitle, songTitles = [] }: C
                     <span className="ml-2 text-xs font-normal text-gray-500">· {description}</span>
                 )}
             </p>
-            <div className="flex items-center gap-0 mt-0.5 text-xs text-gray-500 truncate">
+            <div className="mt-0.5 text-xs text-gray-500 truncate">
                 {subtitle}
                 {songTitles.length > 0 && (
                     <>
                         <span className="mx-1.5 text-gray-700">|</span>
-                        <span className="truncate text-gray-600">{songTitles.join(', ')}</span>
+                        <span className="text-gray-600">{songTitles.join(', ')}</span>
                     </>
                 )}
             </div>

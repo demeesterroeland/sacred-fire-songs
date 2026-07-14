@@ -355,7 +355,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
     };
 
     return (
-        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 p-6 rounded-2xl max-w-2xl mx-auto shadow-xl">
+        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 p-4 sm:p-6 rounded-2xl w-full max-w-2xl mx-auto shadow-xl min-w-0">
             <div className="space-y-4">
                 {/* File Upload Toggle Section */}
                 {/* File Upload Section */}
@@ -460,7 +460,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                         <span className="material-symbols-outlined text-[#a19eb7] cursor-pointer">help_outline</span>
                     </div>
 
-                    <div className="bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg focus-within:ring-2 focus-within:ring-primary focus-within:border-primary transition-all h-[400px]">
+                    <div className="w-full min-w-0 max-w-full overflow-hidden bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg focus-within:ring-2 focus-within:ring-primary focus-within:border-primary transition-all h-[400px]">
                         <ChordProEditor
                             {...register('content', { required: 'Content is required' })}
                             value={watch('content') || ''}
@@ -478,7 +478,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                         <h3 className="text-gray-400 font-semibold text-sm">Key, Capo & Tuning</h3>
                         <span className="material-symbols-outlined text-gray-400 transition-transform group-open:rotate-180">expand_more</span>
                     </summary>
-                    <div className="grid grid-cols-3 gap-3 pb-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pb-3">
                         {/* Key */}
                         <div className="space-y-1.5">
                             <label className="block text-xs font-medium text-gray-400">Key</label>
@@ -613,7 +613,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                 </div>
             )}
 
-            <div className="flex gap-3 mt-8">
+            <div className="flex flex-col sm:flex-row gap-3 mt-8">
                 <button
                     type="submit"
                     onClick={() => setValue('isPublic', false)}

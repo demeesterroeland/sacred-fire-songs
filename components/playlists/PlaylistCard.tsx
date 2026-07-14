@@ -39,7 +39,7 @@ export function PlaylistCard({ id, title, subtitle, isPublic = false, descriptio
         <div className="relative">
             <Link
                 href={`/library/playlists/${id}`}
-                className="flex items-center gap-4 p-4 bg-white/60 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-800 rounded-2xl group hover:bg-gray-100/60 dark:hover:bg-gray-800/60 hover:border-gray-300 dark:hover:border-gray-700 transition-all hover:-translate-y-0.5"
+                className="flex items-center gap-4 p-4 pr-12 w-full min-w-0 bg-white/60 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-800 rounded-2xl group hover:bg-gray-100/60 dark:hover:bg-gray-800/60 hover:border-gray-300 dark:hover:border-gray-700 transition-all hover:-translate-y-0.5"
                 onClick={e => isRenaming && e.preventDefault()}
             >
                 <div className="w-12 h-12 bg-gray-200 dark:bg-gray-800 rounded-xl flex items-center justify-center group-hover:bg-gray-300 dark:group-hover:bg-gray-700 transition-colors shrink-0">
