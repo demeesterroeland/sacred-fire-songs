@@ -2589,4 +2589,24 @@ This session addressed a critical bug where slow Supabase Auth calls (due to Tai
 - Added a native Share option in [page.tsx](file:///home/roeland/projects/sacred-fire-songs/app/songs/[id]/page.tsx) using the Web Share API (`navigator.share`) with a clipboard copy fallback if unsupported.
 - Added share buttons in the mobile bottom sheet context menu and the desktop song actions row.
 
+## July 14, 2026 (Search UX Polish, Vercel Fix, Merge & Deploy)
+
+### 1. Vercel Preview Deployment Fix
+- Diagnosed 404 on Vercel preview deploys: `"framework": null` in `vercel.json` disabled all Next.js route/lambda generation.
+- Changed `"framework": null` to `"framework": "nextjs"` while keeping the custom `buildCommand` for submodule cloning.
+- Deployment now has proper lambdas (128 output items) instead of empty ones.
+
+### 2. Enter Key Search in Modal
+- Added `onKeyDown` handler to `SearchFiltersModal.tsx` — pressing Enter triggers `onSubmit()` (same as clicking "Show results").
+
+### 3. Header Spacing Equalization
+- Fixed asymmetric gaps between menu/search/signin on mobile (24px left vs 12px right → both 8px).
+- Reduced menu button padding from `p-2` to `p-1.5` (8px → 6px).
+
+### 4. Merge & Production Deploy
+- Merged PR #186 (sacred-fire-songs) and PR #8 (<parent-project>) to main.
+- Resolved `.gitmodules` merge conflict (kept `branch = main`).
+- Verified Vercel production deploy completed successfully.
+- Closed issue #185.
+
 

@@ -1043,4 +1043,19 @@
 - [x] Create database migration `20260629154000_limit_rehearsals_bucket.sql` setting `max_file_size` to 10MB and restricting allowed mime types to audio formats on the rehearsals storage bucket.
 - [x] Update documentation `docs/design/application-analysis&design.md` (Version 1.31).
 
+## Session July 14, 2026 (Search UX Polish, Vercel Fix, Merge & Deploy)
+
+- [x] Diagnose Vercel preview 404: `"framework": null` disables Next.js route/lambda generation
+- [x] Fix `vercel.json`: `"framework": null` → `"framework": "nextjs"` (<parent-project>)
+- [x] Add Enter key handler to search modal (`SearchFiltersModal.tsx`)
+- [x] Equalize header spacing: menu/search/signin gaps both 8px
+- [x] Reduce menu button padding `p-2` → `p-1.5`
+- [x] Create GitHub issue #188 (UI overflow on <500px screens)
+- [x] Merge PR #186 (sacred-fire-songs) to main
+- [x] Merge PR #8 (<parent-project>) to main — resolve `.gitmodules` conflict
+- [x] Verify Vercel production deploy completes successfully
+- [x] Close issue #185
+- [x] Clean up feat/issue-185-mobile-search-ux branches (both repos)
+- [x] Update logbooks (walkthrough, tasks, timetracking)
+
 
