@@ -34,7 +34,7 @@ export default function RehearsalDrawer({
   soundcloudUrl,
 }: RehearsalDrawerProps) {
   const { user } = useAuth();
-  const [activeTab, setActiveTab] = useState<"recorder" | "media">("recorder");
+  const [activeTab, setActiveTab] = useState<"recorder" | "media">("media");
   const [selectedMedia, setSelectedMedia] = useState<"youtube" | "spotify" | "soundcloud" | null>(null);
 
   // Refs for media iframe elements
@@ -97,8 +97,8 @@ export default function RehearsalDrawer({
     else if (spotifyUrl) setSelectedMedia("spotify");
     else setSelectedMedia(null);
 
-    // If guest and has media, default to the media tab
-    if (!user && (youtubeUrl || spotifyUrl || soundcloudUrl)) {
+    // Default to Reference Tracks (media) if the song has media
+    if (youtubeUrl || spotifyUrl || soundcloudUrl) {
       setActiveTab("media");
     } else {
       setActiveTab("recorder");
@@ -544,19 +544,9 @@ export default function RehearsalDrawer({
               </button>
             </div>
 
-            {/* Tabs Navigation */}
+             {/* Tabs Navigation */}
             {hasMedia && (
               <div className="flex px-6 border-b border-gray-100 dark:border-gray-800/50 shrink-0">
-                <button
-                  onClick={() => setActiveTab("recorder")}
-                  className={`flex-1 py-3 text-sm font-bold text-center border-b-2 transition-all ${
-                    activeTab === "recorder"
-                      ? "border-indigo-600 text-indigo-600 dark:text-indigo-400"
-                      : "border-transparent text-gray-500 hover:text-gray-900 dark:hover:text-white"
-                  }`}
-                >
-                  Voice Recorder
-                </button>
                 <button
                   onClick={() => setActiveTab("media")}
                   className={`flex-1 py-3 text-sm font-bold text-center border-b-2 transition-all ${
@@ -566,6 +556,16 @@ export default function RehearsalDrawer({
                   }`}
                 >
                   Reference Tracks
+                </button>
+                <button
+                  onClick={() => setActiveTab("recorder")}
+                  className={`flex-1 py-3 text-sm font-bold text-center border-b-2 transition-all ${
+                    activeTab === "recorder"
+                      ? "border-indigo-600 text-indigo-600 dark:text-indigo-400"
+                      : "border-transparent text-gray-500 hover:text-gray-900 dark:hover:text-white"
+                  }`}
+                >
+                  Voice Recorder
                 </button>
               </div>
             )}
