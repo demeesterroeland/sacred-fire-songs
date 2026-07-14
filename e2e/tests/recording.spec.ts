@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, Page } from '@playwright/test';
 import { ROLES } from '../fixtures/roles';
 
 // Set up fake media/mic devices for the chromium instances in this test file
@@ -28,6 +28,25 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1)', () => {
     await browser.close();
     console.log(`Discovered song URL for rehearsal recording E2E: ${songUrl}`);
   });
+
+  async function openRecordingsDrawer(page: Page) {
+    const recordBtn = page.locator('button[title="Recordings"]').first();
+    const moreActionsBtn = page.locator('button[aria-label="More actions"]').first();
+    
+    await Promise.race([
+      recordBtn.waitFor({ state: 'attached', timeout: 10000 }),
+      moreActionsBtn.waitFor({ state: 'attached', timeout: 10000 })
+    ]);
+    
+    if (await recordBtn.isVisible()) {
+      await recordBtn.click();
+    } else {
+      await moreActionsBtn.click();
+      const mobileRecordBtn = page.locator('button:has-text("Recordings")').filter({ visible: true }).first();
+      await expect(mobileRecordBtn).toBeVisible({ timeout: 5000 });
+      await mobileRecordBtn.click();
+    }
+  }
 
   test.describe('As Guest User with Reference Media', () => {
     test('Can view reference media embeds but is prompted to login to record', async ({ page }) => {
@@ -66,10 +85,8 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1)', () => {
 
       await page.goto(songUrl);
 
-      // Verify desktop "Recordings" action button exists and click it
-      const recordBtn = page.locator('button[title="Recordings"]').first();
-      await expect(recordBtn).toBeVisible({ timeout: 15000 });
-      await recordBtn.click();
+      // Open recordings drawer
+      await openRecordingsDrawer(page);
 
       // Verify rehearsal drawer slides up (framer-motion spring animation takes ~500ms)
       const drawerTitle = page.locator('h3:has-text("Rehearsal Space")');
@@ -121,10 +138,14 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1)', () => {
       });
       await page.goto(songUrl);
 
-      // Verify desktop "Recordings" action button exists and click it
-      const recordBtn = page.locator('button[title="Recordings"]').first();
-      await expect(recordBtn).toBeVisible({ timeout: 15000 });
-      await recordBtn.click();
+      // Open recordings drawer
+      await openRecordingsDrawer(page);
+
+      // Switch to Voice Recorder tab if tabs exist (Reference Tracks is active by default in Issue 187)
+      const voiceRecorderTab = page.locator('button:has-text("Voice Recorder")').first();
+      if (await voiceRecorderTab.isVisible()) {
+        await voiceRecorderTab.click();
+      }
 
       // Verify rehearsal drawer slides up
       const drawerTitle = page.locator('h3:has-text("Rehearsal Space")');
@@ -187,13 +208,17 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1)', () => {
       await page.goto(songUrl);
 
       // Open drawer
-      const recordBtn = page.locator('button[title="Recordings"]').first();
-      await expect(recordBtn).toBeVisible({ timeout: 15000 });
-      await recordBtn.click();
+      await openRecordingsDrawer(page);
+
+      // Switch to Voice Recorder tab if tabs exist (Reference Tracks is active by default in Issue 187)
+      const voiceRecorderTab = page.locator('button:has-text("Voice Recorder")').first();
+      if (await voiceRecorderTab.isVisible()) {
+        await voiceRecorderTab.click();
+      }
 
       // Set fast timer flag in browser context
       await page.evaluate(() => {
-        (window as any).__E2E_FAST_TIMER__ = true;
+        (window as unknown as { __E2E_FAST_TIMER__: boolean }).__E2E_FAST_TIMER__ = true;
       });
 
       // Start recording
@@ -217,9 +242,13 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1)', () => {
       await page.goto(songUrl);
 
       // Open drawer
-      const recordBtn = page.locator('button[title="Recordings"]').first();
-      await expect(recordBtn).toBeVisible({ timeout: 15000 });
-      await recordBtn.click();
+      await openRecordingsDrawer(page);
+
+      // Switch to Voice Recorder tab if tabs exist (Reference Tracks is active by default in Issue 187)
+      const voiceRecorderTab = page.locator('button:has-text("Voice Recorder")').first();
+      if (await voiceRecorderTab.isVisible()) {
+        await voiceRecorderTab.click();
+      }
 
       // Start recording
       const startBtn = page.locator('button[title="Start recording"]');
@@ -233,7 +262,7 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1)', () => {
       await page.evaluate(() => {
         const OriginalBlob = window.Blob;
         // Mock Blob to return a custom size larger than 10MB
-        // @ts-ignore
+        // @ts-expect-error - overriding window.Blob for testing
         window.Blob = class MockBlob extends OriginalBlob {
           get size() {
             return 11 * 1024 * 1024; // 11 MB
