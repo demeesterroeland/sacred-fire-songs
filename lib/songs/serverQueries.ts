@@ -3,7 +3,7 @@ import type { Song } from "@/lib/songUtils";
 import type { TaxonomyNode } from "@/lib/taxonomyUtils";
 import { songsQuery, mapCompositionToSong } from './queries';
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { normalizeWhitespace } from "@/lib/utils";
+import { normalizeWhitespace, removeDiacritics } from "@/lib/utils";
 
 const PAGE_SIZE = 20;
 
@@ -437,7 +437,7 @@ export async function fetchArtistsServer(): Promise<ArtistSummary[]> {
         const normalized = normalizeWhitespace(originalName);
         if (!normalized) continue;
 
-        const key = normalized.toLowerCase();
+        const key = removeDiacritics(normalized).toLowerCase();
 
         authorCounts.set(key, (authorCounts.get(key) || 0) + 1);
 
