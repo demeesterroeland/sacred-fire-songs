@@ -13,6 +13,11 @@
 
 - **Staging Database Activity Check**: If Vercel Preview, Beta, or any DEV environment using Supabase staging returns zero songs, **always check first if the staging Supabase project (`REDACTED_STAGING_PROJECT_ID`) is running** (as it may have been automatically paused due to inactivity).
 
+# Port Convention
+
+- **Dev server**: Port `3<issue#>` (e.g. issue #187 → port `3187`)
+- **E2E / production build test**: Build first (`next build`), then serve the built output on port `4<issue#>` (e.g. issue #187 → port `4187`)
+
 # Git Submodule Management Rule
 
 - **Submodule Branch Alignment**: The `branch` configuration key in `.gitmodules` for the `engine` submodule inside `<parent-project>` must **always match** the active branch name of the parent `<parent-project>` repository (e.g. branch `feat/xyz` tracks `feat/xyz` in `.gitmodules`, with `main` tracking `main`).
