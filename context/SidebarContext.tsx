@@ -12,6 +12,9 @@ interface SidebarContextType {
   setSearchFiltersOpen: (open: boolean) => void;
   hasActiveSearchFilters: boolean;
   setHasActiveSearchFilters: (active: boolean) => void;
+  /** True while the user has typed but the debounce hasn't fired yet */
+  isSearching: boolean;
+  setIsSearching: (searching: boolean) => void;
 }
 
 const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
@@ -21,6 +24,7 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
   const [headerCount, setHeaderCount] = useState<number | undefined>(undefined);
   const [searchFiltersOpen, setSearchFiltersOpen] = useState(false);
   const [hasActiveSearchFilters, setHasActiveSearchFilters] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
 
   const toggleSidebar = () => {
     setIsOpen(!isOpen);
@@ -36,7 +40,9 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
       searchFiltersOpen,
       setSearchFiltersOpen,
       hasActiveSearchFilters,
-      setHasActiveSearchFilters
+      setHasActiveSearchFilters,
+      isSearching,
+      setIsSearching,
     }}>
       {children}
     </SidebarContext.Provider>

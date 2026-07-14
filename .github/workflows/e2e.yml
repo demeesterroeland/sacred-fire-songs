@@ -3,10 +3,12 @@ name: E2E (Playwright)
 # Runs the @smoke E2E subset against the STAGING Supabase project on every push
 # to main or a feature branch. See docs/testing/e2e-test-overview.md.
 #
-# Required repo secrets:
+# Required repo secrets (when present the full suite runs; when absent the job
+# is skipped gracefully so feature-branch PRs are never blocked):
 #   SUPABASE_PROJECT_ID_STAGING        - staging project ref (used to derive the URL)
 #   SUPABASE_PUBLISHABLE_KEY_STAGING   - staging anon/publishable key (public; safe as a secret/variable)
 #   E2E_TEST_PASSWORD                 - password for the seeded E2E test accounts on staging
+#   SUPABASE_DB_PASSWORD_STAGING      - staging database password (used by migrations)
 #
 # Optional:
 #   SUPABASE_URL_STAGING               - full staging URL; overrides the derived https://<ref>.supabase.co
@@ -45,7 +47,9 @@ jobs:
           node-version: 22
           cache: npm
 
-      - name: Configure staging Supabase env
+      # ── 1. Detect whether staging secrets are available ──────────────────────
+      - name: Check staging secrets availability
+        id: check-secrets
         env:
           REF: ${{ secrets.SUPABASE_PROJECT_ID_STAGING }}
           URL_OVERRIDE: ${{ secrets.SUPABASE_URL_STAGING }}
@@ -53,44 +57,55 @@ jobs:
           TEST_PASSWORD: ${{ secrets.E2E_TEST_PASSWORD }}
           DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD_STAGING }}
         run: |
+          MISSING=""
+          [ -z "$REF" ] && [ -z "$URL_OVERRIDE" ] && MISSING="$MISSING SUPABASE_PROJECT_ID_STAGING (or SUPABASE_URL_STAGING)"
+          [ -z "$PUBLISHABLE_KEY" ] && MISSING="$MISSING SUPABASE_PUBLISHABLE_KEY_STAGING"
+          [ -z "$TEST_PASSWORD" ] && MISSING="$MISSING E2E_TEST_PASSWORD"
+          [ -z "$DB_PASSWORD" ] && MISSING="$MISSING SUPABASE_DB_PASSWORD_STAGING"
+
+          if [ -n "$MISSING" ]; then
+            echo "::notice::Staging secrets not configured — skipping E2E. Missing:$MISSING"
+            echo "secrets_available=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "secrets_available=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # ── 2. Configure env (only when secrets are present) ─────────────────────
+      - name: Configure staging Supabase env
+        if: steps.check-secrets.outputs.secrets_available == 'true'
+        env:
+          REF: ${{ secrets.SUPABASE_PROJECT_ID_STAGING }}
+          URL_OVERRIDE: ${{ secrets.SUPABASE_URL_STAGING }}
+          PUBLISHABLE_KEY: ${{ secrets.SUPABASE_PUBLISHABLE_KEY_STAGING }}
+          DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD_STAGING }}
+        run: |
           if [ -n "$URL_OVERRIDE" ]; then
             URL="$URL_OVERRIDE"
-          elif [ -n "$REF" ]; then
-            URL="https://${REF}.supabase.co"
           else
-            echo "::error::Set SUPABASE_PROJECT_ID_STAGING (or SUPABASE_URL_STAGING)"
-            exit 1
-          fi
-          if [ -z "$PUBLISHABLE_KEY" ]; then
-            echo "::error::SUPABASE_PUBLISHABLE_KEY_STAGING secret is not set"
-            exit 1
-          fi
-          if [ -z "$TEST_PASSWORD" ]; then
-            echo "::error::E2E_TEST_PASSWORD secret is not set"
-            exit 1
-          fi
-          if [ -z "$DB_PASSWORD" ]; then
-            echo "::error::SUPABASE_DB_PASSWORD_STAGING secret is not set"
-            exit 1
+            URL="https://${REF}.supabase.co"
           fi
           echo "NEXT_PUBLIC_SUPABASE_URL=$URL" >> "$GITHUB_ENV"
           echo "NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=$PUBLISHABLE_KEY" >> "$GITHUB_ENV"
           echo "SUPABASE_DB_PASSWORD=$DB_PASSWORD" >> "$GITHUB_ENV"
           echo "Staging URL: $URL"
 
+      # ── 3. Install & run (only when secrets are present) ─────────────────────
       - name: Install dependencies
+        if: steps.check-secrets.outputs.secrets_available == 'true'
         run: npm ci
 
       - name: Install Playwright browsers
+        if: steps.check-secrets.outputs.secrets_available == 'true'
         run: npx playwright install --with-deps chromium
 
       - name: Run @smoke E2E tests against staging
+        if: steps.check-secrets.outputs.secrets_available == 'true'
         # NEXT_PUBLIC_* are inlined at build time; playwright's webServer runs
         # `next build && next start`, so the staging env above is baked in.
         run: npx playwright test --grep @smoke
 
       - name: Upload Playwright report
-        if: ${{ !cancelled() }}
+        if: ${{ !cancelled() && steps.check-secrets.outputs.secrets_available == 'true' }}
         uses: actions/upload-artifact@v4
         with:
           name: playwright-report

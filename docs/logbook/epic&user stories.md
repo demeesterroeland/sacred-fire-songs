@@ -1,8 +1,8 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 1.34
+**Version:** 1.35
 **Status:** Living Document
-**Date:** June 28, 2026
+**Date:** July 14, 2026
 
 ## Changelog
 
@@ -33,6 +33,7 @@
 | **1.33** | Feb 28, 2026 | Removed Musician as a role. Added Epic 3.5: Musician profile setting (self-declared). Role hierarchy is now Guest → Member → Gatekeeper → Admin. Updated Roles & Permissions table. |
 | **1.34** | Mar 1, 2026 | GH sync: marked 3.3.1, 3.3.2, 4.1.8 as [Implemented]. Added Story 1.1.9 (Spotify-style mobile bottom nav bar). |
 | **1.34** | Jun 28, 2026 | Added Epic 4.6: Private Rehearsal & Audio Storage (Story 4.6.1) for microphone recording and private Supabase storage uploads. |
+| **1.35** | Jul 14, 2026 | Vercel preview deploy fix (`framework: null` → `nextjs`), Enter key submits search in modal, header spacing polish. Merged to main, closed #185. Story 1.2.4 fully deployed. |
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
 
@@ -175,7 +176,7 @@ Scenario: Guest accesses Playlists page
   And I should not be redirected to the login page
 ```
 
-**Story 1.2.4: [Planned]** As a Guest, I want to use a unified search field at the top of the screen on mobile and open advanced filters via an inline button, so that I can search and filter songs efficiently on mobile.
+**Story 1.2.4: [Implemented]** As a Guest, I want to use a unified search field at the top of the screen on mobile and open advanced filters via an inline button, so that I can search and filter songs efficiently on mobile.
 
 ```gherkin
 Scenario: Unified Search Field on Mobile

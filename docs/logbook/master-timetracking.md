@@ -73,6 +73,8 @@
 | **Jun 28** | **Performance**: Infinite skeleton timeouts, PL/pgSQL database seeder rewrite, normally distributed and fully covered tags | ~2.25 Hours | ✅ Completed |
 | **Jun 29** | **Feature**: Private Rehearsal Audio Recording (Story 4.6.1) - storage bucket, database migration, AudioRecorder, RehearsalDrawer components, page triggers, E2E tests, file size & duration limits | ~3.0 Hours | ✅ Completed |
 
-| **Total** | **Development + AI Collaboration** | **~140.5 Hours** | |
+| **Jul 14** | **Deploy Fix**: Vercel preview 404 (`framework: null` → `nextjs`), Enter key in search modal, header spacing polish, merge to main & production deploy | ~1.0 Hours | ✅ Completed |
+
+| **Total** | **Development + AI Collaboration** | **~141.5 Hours** | |
 
 

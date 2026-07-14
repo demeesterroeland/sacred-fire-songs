@@ -10,7 +10,7 @@ import SongDetailSkeleton from '@/components/song/SongDetailSkeleton';
 import MediaEmbeds from '@/components/song/MediaEmbeds';
 import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal';
 import { useQuery } from '@tanstack/react-query';
-import { Trash2, Edit2, Music, Link as LinkIcon, Heart, MoreVertical, ListPlus, Mic } from 'lucide-react';
+import { Trash2, Edit2, Music, Link as LinkIcon, Heart, MoreVertical, ListPlus, Mic, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
 import RehearsalDrawer from '@/components/song/RehearsalDrawer';
 import { useToggleFavorite } from '@/hooks/useToggleFavorite';
@@ -21,10 +21,29 @@ import { useWakeLock } from '@/hooks/useWakeLock';
 import { getCategoryColor, getCategoryStyles } from '@/lib/uiUtils';
 import { recordSongView } from '@/app/actions/recordSongView';
 
+// Enforce a timeout on any promise to prevent infinite loading skeletons
+function withTimeout<T>(promise: Promise<T>, ms: number, errorMessage = "Request timed out"): Promise<T> {
+    return new Promise<T>((resolve, reject) => {
+        const timer = setTimeout(() => {
+            reject(new Error(errorMessage));
+        }, ms);
+
+        promise
+            .then((res) => {
+                clearTimeout(timer);
+                resolve(res);
+            })
+            .catch((err) => {
+                clearTimeout(timer);
+                reject(err);
+            });
+    });
+}
+
 // Standalone fetch function
 const fetchSong = async (id: string) => {
     const supabase = createClient();
-    const { data, error } = await supabase
+    const queryPromise = supabase
         .from('compositions')
         .select(`
           title,
@@ -54,6 +73,15 @@ const fetchSong = async (id: string) => {
         `)
         .eq('id', id)
         .single();
+
+    // Wrap query with a dynamic timeout (4.5s in production, 15s in development/testing)
+    const isProd = process.env.NODE_ENV === "production";
+    const timeoutMs = isProd ? 4500 : 15000;
+    const { data, error } = (await withTimeout(
+        Promise.resolve(queryPromise), 
+        timeoutMs, 
+        "The database took too long to respond. This might be due to connection pool limits. Please try again."
+    )) as { data: any; error: any };
 
     if (error) throw error;
     return data;
@@ -114,14 +142,21 @@ export default function SongDetailPage() {
         queryFn: async () => {
             if (!user) return new Set<string>();
             const supabase = createClient();
-            const { data: setlist } = await supabase
+            const isProd = process.env.NODE_ENV === "production";
+            const timeoutMs = isProd ? 4500 : 15000;
+            
+            const setlistPromise = supabase
                 .from('setlists').select('id')
                 .eq('title', 'My Favorites').maybeSingle();
+                
+            const { data: setlist } = (await withTimeout(Promise.resolve(setlistPromise), timeoutMs, "Favorites query timed out")) as { data: any };
             if (!setlist) return new Set<string>();
-            const { data: items } = await supabase
+            
+            const itemsPromise = supabase
                 .from('setlist_items')
-                 
                 .select('song_versions(composition_id)').eq('setlist_id', setlist.id);
+                
+            const { data: items } = (await withTimeout(Promise.resolve(itemsPromise), timeoutMs, "Favorites items query timed out")) as { data: any };
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             return new Set<string>((items ?? []).map((i: any) => i.song_versions?.composition_id).filter(Boolean));
         },
@@ -213,6 +248,34 @@ export default function SongDetailPage() {
     const handleDelete = async () => {
         if (!id) return;
         await deleteSong(id, { redirectTo: '/' });
+    };
+
+    const handleShare = async () => {
+        const shareData = {
+            title: song.title,
+            text: song.original_author 
+                ? `Check out the song "${song.title}" by ${song.original_author} on Sacred Fire Songs`
+                : `Check out the song "${song.title}" on Sacred Fire Songs`,
+            url: window.location.href
+        };
+
+        if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
+            try {
+                await navigator.share(shareData);
+            } catch (err) {
+                if ((err as Error).name !== 'AbortError') {
+                    console.error('Error sharing:', err);
+                }
+            }
+        } else {
+            try {
+                await navigator.clipboard.writeText(window.location.href);
+                toast.success('Link copied to clipboard!');
+            } catch (err) {
+                console.error('Could not copy text: ', err);
+                toast.error('Failed to copy link');
+            }
+        }
     };
 
     // Helper for badge colors (could be moved to utils or globals)
@@ -340,6 +403,14 @@ export default function SongDetailPage() {
                         >
                             <Heart className={`w-5 h-5 transition-all duration-200 ${isFav ? 'fill-amber-400' : ''}`} strokeWidth={1.5} />
                         </button>
+                        <button
+                            onClick={handleShare}
+                            aria-label="Share song"
+                            title="Share song"
+                            className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                        >
+                            <Share2 className="w-5 h-5" strokeWidth={1.5} />
+                        </button>
 
                     </div>
                 </div>
@@ -457,6 +528,15 @@ export default function SongDetailPage() {
                             >
                                 <Heart className={`w-5 h-5 ${isFav ? 'text-amber-500 fill-amber-500' : 'text-gray-400 dark:text-gray-500'}`} />
                                 <span className="text-sm font-bold">{isFav ? 'Remove from Liked Songs' : 'Add to Liked Songs'}</span>
+                            </button>
+
+                            {/* Share */}
+                            <button
+                                onClick={() => { handleShare(); setIsOverflowOpen(false); }}
+                                className="w-full flex items-center gap-4 px-6 py-4 hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors text-left text-gray-700 dark:text-gray-300"
+                            >
+                                <Share2 className="w-5 h-5 text-gray-400 dark:text-gray-500" />
+                                <span className="text-sm font-bold">Share Song</span>
                             </button>
 
                             {/* Add to Playlist */}

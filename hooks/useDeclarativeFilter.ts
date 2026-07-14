@@ -51,7 +51,7 @@ export function useDeclarativeFilter<TItem, TFilterState extends Record<string, 
     return executeFilter(items, config, currentState);
   }, [items, config, currentState]);
 
-  // 3. Update URL Handler
+  // 3. Update URL Handler (single field)
   const setFilter = useCallback((key: keyof TFilterState, value: unknown) => {
     const newState = { ...currentState, [key]: value };
 
@@ -60,13 +60,11 @@ export function useDeclarativeFilter<TItem, TFilterState extends Record<string, 
     if (callbacks?.serializeUrl) {
       urlParams = callbacks.serializeUrl(newState);
     } else {
-      // Fallback serializer
       Object.entries(newState).forEach(([k, v]) => {
         if (v) urlParams[k] = String(v);
       });
     }
 
-    // Construct Query String
     const params = new URLSearchParams();
     Object.entries(urlParams).forEach(([k, v]) => {
       if (v !== undefined && v !== null && v !== '' && v !== 'false') {
@@ -76,6 +74,34 @@ export function useDeclarativeFilter<TItem, TFilterState extends Record<string, 
 
     router.push(`${pathname}?${params.toString()}`, { scroll: false });
   }, [currentState, callbacks, pathname, router]);
+
+  /**
+   * 3b. Batch-commit a full state object in a single router.push.
+   * extraParams can override or add URL keys not present in the serialized state
+   * (e.g. `sort` which lives outside TFilterState in useSongsFilter).
+   */
+  const commitFilters = useCallback((newState: TFilterState, extraParams?: Record<string, string>) => {
+    let urlParams: Record<string, string> = {};
+    if (callbacks?.serializeUrl) {
+      urlParams = callbacks.serializeUrl(newState);
+    } else {
+      Object.entries(newState).forEach(([k, v]) => {
+        if (v) urlParams[k] = String(v);
+      });
+    }
+
+    // extraParams take precedence (e.g. draftSortBy overriding the closure-captured sortBy)
+    const merged = { ...urlParams, ...(extraParams ?? {}) };
+
+    const params = new URLSearchParams();
+    Object.entries(merged).forEach(([k, v]) => {
+      if (v !== undefined && v !== null && v !== '' && v !== 'false') {
+        params.set(k, v);
+      }
+    });
+
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+  }, [callbacks, pathname, router]);
 
   // 4. Reset Handler
   const resetFilters = useCallback(() => {
@@ -87,6 +113,7 @@ export function useDeclarativeFilter<TItem, TFilterState extends Record<string, 
     facets: result.facets,
     state: currentState,
     setFilter,
+    commitFilters,
     resetFilters
   };
 }

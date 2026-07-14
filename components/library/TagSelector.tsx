@@ -5,6 +5,22 @@ import { X, Search, ChevronDown, Check } from 'lucide-react';
 import { TaxonomyNode } from '@/lib/taxonomyUtils';
 import { getCategoryColor, getCategoryStyles } from '@/lib/uiUtils';
 
+const TAILWIND_COLOR_MAP: Record<string, string> = {
+  blue: '#3b82f6',
+  red: '#ef4444',
+  amber: '#f59e0b',
+  sky: '#0ea5e9',
+  emerald: '#10b981',
+  yellow: '#eab308',
+  indigo: '#6366f1',
+  teal: '#14b8a6',
+  purple: '#a855f7',
+  orange: '#f97316',
+  lime: '#84cc16',
+  pink: '#ec4899',
+  gray: '#6b7280',
+};
+
 interface TagSelectorProps {
   category?: string;
   tags: string[];
@@ -53,13 +69,13 @@ export default function TagSelector({
   }, [taxonomy]);
 
   const filteredOptions = useMemo(() => {
-    if (!inputValue) return [];
     const lower = inputValue.toLowerCase();
-    return allOptions.filter(opt =>
-      opt.name.toLowerCase().includes(lower) &&
-      opt.slug !== category &&
-      !tags.includes(opt.slug)
-    ).slice(0, 10);
+    return allOptions.filter(opt => {
+      const matchesInput = !inputValue || opt.name.toLowerCase().includes(lower);
+      const notCurrentCategory = opt.slug !== category;
+      const notInTags = !tags.includes(opt.slug);
+      return matchesInput && notCurrentCategory && notInTags;
+    }).slice(0, 40);
   }, [allOptions, inputValue, category, tags]);
 
   const handleSelect = (option: typeof allOptions[0]) => {
@@ -196,7 +212,10 @@ export default function TagSelector({
                     onClick={() => handleSelect(option)}
                   >
                     <div className="flex items-center gap-3">
-                      <div className={`w-2 h-2 rounded-full bg-${color}-500 shadow-[0_0_8px_rgba(0,0,0,0.4)]`} />
+                      <div
+                        className="w-2 h-2 rounded-full shadow-[0_0_8px_rgba(0,0,0,0.4)]"
+                        style={{ backgroundColor: TAILWIND_COLOR_MAP[color] || TAILWIND_COLOR_MAP.gray }}
+                      />
                       <div className="flex flex-col">
                         <span className="text-sm font-medium text-gray-800 dark:text-gray-200 group-hover:text-gray-900 dark:group-hover:text-white">
                           {option.name}
