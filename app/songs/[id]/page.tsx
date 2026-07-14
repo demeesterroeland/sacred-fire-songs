@@ -396,6 +396,25 @@ export default function SongDetailPage() {
                                 iconClassName="w-[17px] h-[17px]"
                             />
                         )}
+                        {!user && (
+                            <button
+                                onClick={() => {
+                                    toast('Sign in to manage playlists', {
+                                        action: {
+                                            label: 'Sign in →',
+                                            onClick: () => { window.location.href = `/auth/login?next=${encodeURIComponent(window.location.pathname)}`; },
+                                        },
+                                        classNames: {
+                                            actionButton: 'text-amber-400 text-xs font-bold hover:text-amber-300 transition-colors ml-2',
+                                        },
+                                    });
+                                }}
+                                aria-label="Add to playlist"
+                                className="p-2 rounded-full transition-all duration-300 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                            >
+                                <ListPlus className="w-5 h-5" strokeWidth={1.5} />
+                            </button>
+                        )}
                         <button
                             onClick={handleToggleFavorite}
                             aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
