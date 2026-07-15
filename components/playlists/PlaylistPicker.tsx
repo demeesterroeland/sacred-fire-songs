@@ -25,12 +25,29 @@ interface PlaylistPickerProps {
 
 async function fetchUserPlaylists(userId: string) {
     const supabase = createClient();
-    const { data } = await supabase
+
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', userId)
+        .maybeSingle();
+
+    const isCurator = profile?.role === 'admin' || profile?.role === 'gatekeeper';
+
+    let query = supabase
         .from('setlists')
-        .select('id, title')
-        .eq('owner_id', userId)
+        .select('id, title, is_public, owner_id');
+
+    if (isCurator) {
+        query = query.or(`owner_id.eq.${userId},is_public.eq.true`);
+    } else {
+        query = query.eq('owner_id', userId);
+    }
+
+    const { data } = await query
         .not('title', 'in', '("My Favorites","My Songs","My Drafts")')
         .order('created_at', { ascending: false });
+
     return data ?? [];
 }
 

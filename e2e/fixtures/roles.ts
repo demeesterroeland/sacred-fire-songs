@@ -19,6 +19,10 @@ export const ROLES = {
     email: 'roel.de.meester+admin@gmail.com',
     storage: path.join(STORAGE_DIR, 'admin.json'),
   },
+  gatekeeper: {
+    email: 'roel.de.meester+gatekeeper@gmail.com',
+    storage: path.join(STORAGE_DIR, 'gatekeeper.json'),
+  },
   musician: {
     email: 'roel.de.meester+musician@gmail.com',
     storage: path.join(STORAGE_DIR, 'musician.json'),

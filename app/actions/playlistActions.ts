@@ -6,6 +6,25 @@ import { isSmartPlaylist } from '@/lib/playlists/smartPlaylists';
 import { uuid, playlistTitle, playlistDescription, safeParse } from '@/lib/validation/schemas';
 import { z } from 'zod';
 
+// ─── Authorization Helper ──────────────────────────────────────────────────────
+
+async function checkPlaylistModifyAccess(
+    supabase: any,
+    user: { id: string },
+    playlist: { owner_id: string; is_public: boolean }
+): Promise<boolean> {
+    if (playlist.owner_id === user.id) return true;
+    if (!playlist.is_public) return false;
+
+    const { data: profile } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', user.id)
+        .maybeSingle();
+
+    return profile?.role === 'admin' || profile?.role === 'gatekeeper';
+}
+
 // ─── Create ───────────────────────────────────────────────────────────────────
 
 export async function createPlaylist(
@@ -48,12 +67,13 @@ export async function renamePlaylist(
 
     const { data: playlist } = await supabase
         .from('setlists')
-        .select('title, owner_id')
+        .select('title, owner_id, is_public')
         .eq('id', idParsed.data)
         .maybeSingle();
 
     if (!playlist) return { error: 'Playlist not found' };
-    if (playlist.owner_id !== user.id) return { error: 'Not your playlist' };
+    const hasAccess = await checkPlaylistModifyAccess(supabase, user, playlist);
+    if (!hasAccess) return { error: 'Access denied: not your playlist or unauthorized' };
     if (isSmartPlaylist(playlist.title)) return { error: 'Cannot rename smart playlists' };
 
     const { error } = await supabase
@@ -114,11 +134,13 @@ export async function togglePlaylistVisibility(
 
     const { data: playlist } = await supabase
         .from('setlists')
-        .select('owner_id, title')
+        .select('owner_id, title, is_public')
         .eq('id', idParsed.data)
         .maybeSingle();
 
-    if (!playlist || playlist.owner_id !== user.id) return { error: 'Not your playlist' };
+    if (!playlist) return { error: 'Playlist not found' };
+    const hasAccess = await checkPlaylistModifyAccess(supabase, user, playlist);
+    if (!hasAccess) return { error: 'Access denied: not your playlist or unauthorized' };
     if (isSmartPlaylist(playlist.title)) return { error: 'Cannot modify smart playlists' };
 
     const { error } = await supabase
@@ -150,11 +172,13 @@ export async function updatePlaylistDescription(
 
     const { data: playlist } = await supabase
         .from('setlists')
-        .select('owner_id, title')
+        .select('owner_id, title, is_public')
         .eq('id', idParsed.data)
         .maybeSingle();
 
-    if (!playlist || playlist.owner_id !== user.id) return { error: 'Not your playlist' };
+    if (!playlist) return { error: 'Playlist not found' };
+    const hasAccess = await checkPlaylistModifyAccess(supabase, user, playlist);
+    if (!hasAccess) return { error: 'Access denied: not your playlist or unauthorized' };
     if (isSmartPlaylist(playlist.title)) return { error: 'Cannot modify smart playlists' };
 
     const { error } = await supabase
@@ -185,11 +209,13 @@ export async function addSongToPlaylist(
 
     const { data: playlist } = await supabase
         .from('setlists')
-        .select('owner_id')
+        .select('owner_id, is_public')
         .eq('id', playlistParsed.data)
         .maybeSingle();
 
-    if (!playlist || playlist.owner_id !== user.id) return { added: false, error: 'Not your playlist' };
+    if (!playlist) return { added: false, error: 'Playlist not found' };
+    const hasAccess = await checkPlaylistModifyAccess(supabase, user, playlist);
+    if (!hasAccess) return { added: false, error: 'Access denied: not your playlist or unauthorized' };
 
     // Get first song version for this composition
     const { data: version } = await supabase
@@ -252,13 +278,15 @@ export async function removeSongFromPlaylist(
 
     const { data: item } = await supabase
         .from('setlist_items')
-        .select('id, setlist_id, setlists(owner_id)')
+        .select('id, setlist_id, setlists(owner_id, is_public)')
         .eq('id', parsed.data)
         .maybeSingle();
 
     if (!item) return { error: 'Item not found' };
-    const setlist = item.setlists as unknown as { owner_id: string } | null;
-    if (setlist?.owner_id !== user.id) return { error: 'Not your playlist' };
+    const setlist = item.setlists as unknown as { owner_id: string; is_public: boolean } | null;
+    if (!setlist) return { error: 'Playlist not found' };
+    const hasAccess = await checkPlaylistModifyAccess(supabase, user, setlist);
+    if (!hasAccess) return { error: 'Access denied: not your playlist or unauthorized' };
 
     const { error } = await supabase.from('setlist_items').delete().eq('id', parsed.data);
     if (error) return { error: error.message };
@@ -284,11 +312,13 @@ export async function reorderPlaylistSongs(
 
     const { data: playlist } = await supabase
         .from('setlists')
-        .select('owner_id')
+        .select('owner_id, is_public')
         .eq('id', playlistParsed.data)
         .maybeSingle();
 
-    if (!playlist || playlist.owner_id !== user.id) return { error: 'Not your playlist' };
+    if (!playlist) return { error: 'Playlist not found' };
+    const hasAccess = await checkPlaylistModifyAccess(supabase, user, playlist);
+    if (!hasAccess) return { error: 'Access denied: not your playlist or unauthorized' };
 
     const results = await Promise.all(
         itemIdsParsed.data.map((id, index) =>

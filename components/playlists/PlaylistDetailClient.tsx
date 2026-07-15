@@ -104,11 +104,14 @@ export function PlaylistDetailClient({
     playlistId,
     initialItems,
     isOwner,
+    isCurator = false,
 }: {
     playlistId: string;
     initialItems: PlaylistItem[];
     isOwner: boolean;
+    isCurator?: boolean;
 }) {
+    const canEdit = isOwner || isCurator;
     const [items, setItems] = useState(initialItems);
     const [isPending, startTransition] = useTransition();
     const [sheetOpen, setSheetOpen] = useState(false);
@@ -162,7 +165,7 @@ export function PlaylistDetailClient({
                 <div className="flex flex-col items-center justify-center py-16 text-center gap-4">
                     <Music className="w-10 h-10 text-gray-700" />
                     <p className="text-gray-500 text-sm max-w-xs">No songs yet.</p>
-                    {isOwner && (
+                    {canEdit && (
                         <button
                             onClick={() => setSheetOpen(true)}
                             className="flex items-center gap-1.5 text-sm font-semibold text-amber-400 border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 rounded-full px-4 py-1.5 transition-all"
@@ -172,7 +175,7 @@ export function PlaylistDetailClient({
                         </button>
                     )}
                 </div>
-                {isOwner && (
+                {canEdit && (
                     <AddSongsSheet
                         playlistId={playlistId}
                         existingCompositionIds={existingCompositionIds}
@@ -186,7 +189,7 @@ export function PlaylistDetailClient({
 
     return (
         <>
-            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={isOwner ? handleDragEnd : () => {}}>
+            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={canEdit ? handleDragEnd : () => {}}>
                 <SortableContext items={items.map(i => i.id)} strategy={verticalListSortingStrategy}>
                     <div className="space-y-2">
                         {items.map(item => (
@@ -194,7 +197,7 @@ export function PlaylistDetailClient({
                                 key={item.id}
                                 item={item}
                                 onRemove={handleRemove}
-                                disabled={!isOwner || isPending}
+                                disabled={!canEdit || isPending}
                             />
                         ))}
                     </div>
@@ -202,7 +205,7 @@ export function PlaylistDetailClient({
             </DndContext>
 
             {/* Add more songs */}
-            {isOwner && (
+            {canEdit && (
                 <>
                     <div className="flex justify-center pt-4">
                         <button

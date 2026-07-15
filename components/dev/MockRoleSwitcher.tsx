@@ -20,6 +20,7 @@ export default function MockRoleSwitcher() {
         <option value="mock-member">Mock Member</option>
         <option value="mock-musician">Mock Musician</option>
         <option value="mock-admin">Mock Admin</option>
+        <option value="mock-gatekeeper">Mock Gatekeeper</option>
       </select>
       <p className="text-[9px] text-gray-600 px-1 leading-tight">
         Simulates UI states only. Does not affect RLS.

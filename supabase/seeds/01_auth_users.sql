@@ -85,6 +85,27 @@ VALUES (
         '',
         '',
         ''
+    ),
+    (
+        'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14',
+        '00000000-0000-0000-0000-000000000000',
+        'authenticated',
+        'authenticated',
+        'roel.de.meester+gatekeeper@gmail.com',
+        extensions.crypt('sacred-fire-dev', extensions.gen_salt('bf')),
+        now(),
+        now(),
+        now(),
+        '{"provider":"email","providers":["email"]}',
+        '{}',
+        false,
+        '',
+        '',
+        '',
+        '',
+        '',
+        '',
+        ''
     ) ON CONFLICT (id) DO
 UPDATE
 SET encrypted_password = EXCLUDED.encrypted_password;
@@ -122,6 +143,15 @@ VALUES (
         '{"sub":"a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13","email":"roel.de.meester+member@gmail.com"}',
         'email',
         'roel.de.meester+member@gmail.com',
+        now(),
+        now()
+    ),
+    (
+        extensions.gen_random_uuid(),
+        'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14',
+        '{"sub":"a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14","email":"roel.de.meester+gatekeeper@gmail.com"}',
+        'email',
+        'roel.de.meester+gatekeeper@gmail.com',
         now(),
         now()
     ) ON CONFLICT (provider_id, provider) DO NOTHING;

@@ -79,7 +79,7 @@ export function PlaylistContextMenu({ playlistId, playlistTitle, isOwner, isPubl
                         }
                     }}
                 >
-                    {isOwner && onRenameStart && (
+                    {onRenameStart && (
                         <>
                             <DropdownMenuItem
                                 onSelect={() => { preventFocusReturn.current = true; onRenameStart(); }}

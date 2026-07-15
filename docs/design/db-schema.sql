@@ -14,7 +14,7 @@
 -- Enable necessary extensions
 create extension if not exists "uuid-ossp";
 -- 1. Create ENUMs
-create type user_role as enum ('admin', 'musician', 'member');
+create type user_role as enum ('admin', 'musician', 'member', 'expert', 'gatekeeper');
 -- 2. Create Tables
 -- PROFILES (Extends Supabase Auth)
 create table public.profiles (
@@ -291,6 +291,33 @@ select to authenticated using (
     owner_id = (
       select auth.uid()
     )
+  );
+create policy "Owners can insert setlists" on public.setlists for
+insert to authenticated with check (
+    owner_id = (
+      select auth.uid()
+    )
+  );
+create policy "Owners can update setlists" on public.setlists for
+update to authenticated using (
+    owner_id = (
+      select auth.uid()
+    )
+  );
+create policy "Owners can delete setlists" on public.setlists for
+delete to authenticated using (
+    owner_id = (
+      select auth.uid()
+    )
+  );
+create policy "Admins and Gatekeepers can update public setlists" on public.setlists for
+update to authenticated using (
+    is_public = true 
+    and (
+      select role 
+      from public.profiles 
+      where id = auth.uid()
+    ) in ('admin'::public.user_role, 'gatekeeper'::public.user_role)
   );
 -- Setlist Items Policies
 create policy "Allow public read access" on public.setlist_items for

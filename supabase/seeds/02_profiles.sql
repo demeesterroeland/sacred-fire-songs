@@ -17,6 +17,12 @@ VALUES (
         'roel.de.meester+member@gmail.com',
         'member',
         'Local Member'
+    ),
+    (
+        'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14',
+        'roel.de.meester+gatekeeper@gmail.com',
+        'gatekeeper',
+        'Local Gatekeeper'
     ) ON CONFLICT (id) DO
 UPDATE
 SET role = EXCLUDED.role,

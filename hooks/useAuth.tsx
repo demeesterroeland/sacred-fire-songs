@@ -3,7 +3,7 @@
 import { createClient } from '@/lib/supabase/client';
 import { useEffect, useState } from 'react';
 
-export type UserRole = 'admin' | 'musician' | 'member' | 'guest';
+export type UserRole = 'admin' | 'gatekeeper' | 'musician' | 'member' | 'guest';
 
 // For Local Dev - Mock Users Configuration (using valid UUIDs for DB compatibility)
 export const MOCK_USERS = {
@@ -27,6 +27,13 @@ export const MOCK_USERS = {
         email: 'admin@mock.com',
         role: 'admin' as UserRole,
         full_name: 'Mock Admin',
+        avatar_url: undefined
+    },
+    'mock-gatekeeper': {
+        id: '44444444-4444-4444-4444-444444444444',
+        email: 'gatekeeper@mock.com',
+        role: 'gatekeeper' as UserRole,
+        full_name: 'Mock Gatekeeper',
         avatar_url: undefined
     },
 };

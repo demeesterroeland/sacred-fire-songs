@@ -39,6 +39,16 @@ export default async function PlaylistDetailPage({ params }: Props) {
 
     const isOwner = user?.id === playlist.owner_id;
 
+    let isCurator = false;
+    if (user && playlist.is_public) {
+        const { data: profile } = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', user.id)
+            .maybeSingle();
+        isCurator = profile?.role === 'admin' || profile?.role === 'gatekeeper';
+    }
+
     const { data: items } = await supabase
         .from('setlist_items')
         .select(`
@@ -72,6 +82,7 @@ export default async function PlaylistDetailPage({ params }: Props) {
                 initialDescription={playlist.description ?? null}
                 songCount={mappedItems.length}
                 isOwner={isOwner}
+                isCurator={isCurator}
             />
 
             {/* Song list with DnD */}
@@ -79,6 +90,7 @@ export default async function PlaylistDetailPage({ params }: Props) {
                 playlistId={id}
                 initialItems={mappedItems}
                 isOwner={isOwner}
+                isCurator={isCurator}
             />
         </div>
     );

@@ -20,6 +20,7 @@ interface Props {
     initialDescription: string | null;
     songCount: number;
     isOwner: boolean;
+    isCurator?: boolean;
 }
 
 export function PlaylistDetailHeader({
@@ -29,7 +30,9 @@ export function PlaylistDetailHeader({
     initialDescription,
     songCount,
     isOwner,
+    isCurator = false,
 }: Props) {
+    const canEdit = isOwner || isCurator;
     // ─── Title ────────────────────────────────────────────────────────────────
     const {
         optimisticTitle,
@@ -147,7 +150,7 @@ export function PlaylistDetailHeader({
                         playlistTitle={optimisticTitle}
                         isOwner={isOwner}
                         isPublic={isOwner ? isPublic : undefined}
-                        onRenameStart={isOwner ? handleRenameStart : undefined}
+                        onRenameStart={canEdit ? handleRenameStart : undefined}
                         onGetLink={handleCopyLink}
                         isLinkAvailable={isPublic}
                     />
@@ -155,7 +158,7 @@ export function PlaylistDetailHeader({
             </div>
 
             {/* Description */}
-            {isOwner ? (
+            {canEdit ? (
                 isEditingDesc ? (
                     <textarea
                         ref={descRef}
