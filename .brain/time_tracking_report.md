@@ -1,1 +1,1 @@
-| **2026-07-15** | **Database tags update**: Add Guaraní and Camino Rojo categories to production database and update setup/seed files | ~0.5 Hours | ✅ Completed |
+| **2026-07-15** | **Database tags update & Issue creation**: Add Guaraní and Camino Rojo categories to production database and update setup/seed files; Create Issue #197 / Story 3.4.6 for Public Playlist curation | ~0.75 Hours | ✅ Completed |
