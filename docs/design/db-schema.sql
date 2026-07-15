@@ -1,11 +1,12 @@
 /*
- **Version:** 2.6
+ **Version:** 2.7
  **Status:** Current
- **Date:** February 27, 2026
+ **Date:** July 15, 2026
  
  ## Usage
  This script provides a complete setup for the "Sacred Fire Songs" database. 
- It consolidates the initial schema and all subsequent migrations up to Feb 27, 2026.
+ It consolidates the initial schema and all subsequent migrations up to July 15, 2026.
+ (v2.7: Added Guaraní and Camino Rojo categories).
  (v2.6: Added partial indexes for is_public and alphabetical title index).
  (v2.4: Added tuning to song_versions).
  Run this in the Supabase SQL Editor to initialize a fresh database.
@@ -586,6 +587,17 @@ values -- THE ELEMENTS
       where name = 'Languages'
     )
   ),
+  (
+    'Guaraní',
+    'guarani',
+    '🏹',
+    null,
+    (
+      select id
+      from groups
+      where name = 'Languages'
+    )
+  ),
   -- LINEAGE & TRADITION
   (
     'Andean',
@@ -679,6 +691,17 @@ values -- THE ELEMENTS
     'Umbanda',
     'umbanda',
     '🌊',
+    null,
+    (
+      select id
+      from groups
+      where name = 'Lineage & Tradition'
+    )
+  ),
+  (
+    'Camino Rojo',
+    'camino-rojo',
+    '🔴',
     null,
     (
       select id

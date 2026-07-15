@@ -2655,3 +2655,11 @@ This session addressed a critical bug where slow Supabase Auth calls (due to Tai
 - Updated `components/song/SongForm.tsx` to reduce mobile padding (`p-4 sm:p-6`) and wrap the `ChordProEditor` inside an `overflow-hidden w-full max-w-full min-w-0` container, forcing chords to scroll internally.
 - Set Key/Capo/Tuning grids to stack on mobile (`grid-cols-1 sm:grid-cols-3`) to avoid layout squishing on viewports below 400px.
 - Stacked save/publish action buttons vertically on mobile screens using `flex-col sm:flex-row`.
+
+## July 15, 2026 (Add Guaraní and Camino Rojo categories)
+
+### 1. Database Seed Updates
+- Directly updated the production and staging databases to insert "Guaraní" (Languages category) and "Camino Rojo" (Lineage & Tradition category) subcategories.
+- Updated the consolidated database schema setup [db-schema.sql](file:///home/roeland/projects/sacred-fire-songs/docs/design/db-schema.sql) to include the new categories in the master seed block and bumped the file version to `2.7`.
+- Updated the programmatic database seeder [random-seeder.mjs](file:///home/roeland/projects/sacred-fire-songs/scripts/random-seeder.mjs) and legacy category script [categories.sql](file:///home/roeland/projects/sacred-fire-songs/data/scripts/legacy/categories.sql) to include the new category insertions.
+

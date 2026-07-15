@@ -1,5 +1,6 @@
-# Task: Media Player UX & E2E Test Lint Fixes
+# Task: Add Guaraní and Camino Rojo categories
 
-- [x] Fix TypeScript and ESLint type warnings in `e2e/tests/recording.spec.ts` (untyped page parameters and window assertions).
-- [x] Correct `@typescript-eslint/ban-ts-comment` error by adding explanation to `@ts-expect-error` comment.
-- [x] Align submodule references and push to remote to trigger Vercel build.
+- [x] Insert the Guaraní subcategory under the Languages category directly in production database
+- [x] Insert the Camino Rojo subcategory under the Lineage & Tradition category directly in production database
+- [x] Update database schema setup file `docs/design/db-schema.sql` to include the categories and bump version to v2.7
+- [x] Update existing seed/script files (`scripts/random-seeder.mjs` and legacy SQL) with the new categories

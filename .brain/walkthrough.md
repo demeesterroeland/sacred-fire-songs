@@ -1,9 +1,6 @@
-## 2026-07-14 (Media Player UX & E2E Test Lint Fixes)
+## 2026-07-15 (Add Guaraní and Camino Rojo categories)
 
-### 1. Rehearsal Recording E2E Test Fixes
-- Resolved untyped `page: any` parameter warning by importing and using the `Page` type from `@playwright/test` in [recording.spec.ts](file:///home/roeland/projects/sacred-fire-songs/e2e/tests/recording.spec.ts).
-- Fixed `Unexpected any` error on `window` object by casting it to `unknown as { __E2E_FAST_TIMER__: boolean }`.
-- Replaced `// @ts-ignore` with `// @ts-expect-error - overriding window.Blob for testing` to satisfy ESLint documentation requirements.
-
-### 2. Parent Repository Sync
-- Pinned the `engine` submodule in `<parent-project>` to the latest commit and pushed to `feat/issue-187-media-player-ux` to trigger the Vercel preview deployment.
+### 1. Database Seed Updates
+- Directly updated the production and staging databases to insert "Guaraní" (Languages category) and "Camino Rojo" (Lineage & Tradition category) subcategories.
+- Updated the consolidated database schema setup [db-schema.sql](file:///home/roeland/projects/sacred-fire-songs/docs/design/db-schema.sql) to include the new categories in the master seed block and bumped the file version to `2.7`.
+- Updated the programmatic database seeder [random-seeder.mjs](file:///home/roeland/projects/sacred-fire-songs/scripts/random-seeder.mjs) and legacy category script [categories.sql](file:///home/roeland/projects/sacred-fire-songs/data/scripts/legacy/categories.sql) to include the new category insertions.

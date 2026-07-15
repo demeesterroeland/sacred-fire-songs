@@ -68,6 +68,7 @@ values
 ('Portuguese', 'portuguese', '🇧🇷', 'Hinos and songs from the Brazilian traditions.', (select id from groups where name = 'Languages')),
 ('Nahuatl', 'nahuatl', '🏹', 'Ancient songs from the Mexica and Mesoamerican traditions.', (select id from groups where name = 'Languages')),
 ('Huni Kuin', 'huni-kuin', '🐍', 'Sacred chants in the Hatxa Kuin language.', (select id from groups where name = 'Languages')),
+('Guaraní', 'guarani', '🏹', null, (select id from groups where name = 'Languages')),
 
 -- LINEAGE & TRADITION
 ('Andean', 'andean', '🧣', 'Songs from the high mountains and Q''ero traditions.', (select id from groups where name = 'Lineage & Tradition')),
@@ -75,6 +76,7 @@ values
 ('Native American', 'native-american', '🪶', 'Songs from Northern traditions and the Red Road.', (select id from groups where name = 'Lineage & Tradition')),
 ('Santo Daime / Umbanda', 'santo-daime-umbanda', '🌟', 'Specific religious spiritual lineages from Brazil.', (select id from groups where name = 'Lineage & Tradition')),
 ('Traditional', 'traditional', '📜', 'Folk songs passed down through oral tradition.', (select id from groups where name = 'Lineage & Tradition')),
+('Camino Rojo', 'camino-rojo', '🔴', null, (select id from groups where name = 'Lineage & Tradition')),
 
 -- MEDICINE & HEALING
 ('Medicine Songs', 'medicine-songs', '🧪', 'The broad category for songs used in ceremony.', (select id from groups where name = 'Medicine & Healing')),

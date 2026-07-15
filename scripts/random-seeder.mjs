@@ -88,11 +88,13 @@ BEGIN
         SELECT 'Spanish', 'spanish', '🇪🇸', id FROM public.categories WHERE slug = 'languages' UNION ALL
         SELECT 'Portuguese', 'portuguese', '🇵🇹', id FROM public.categories WHERE slug = 'languages' UNION ALL
         SELECT 'Sanskrit', 'sanskrit', '🇮🇳', id FROM public.categories WHERE slug = 'languages' UNION ALL
+        SELECT 'Guaraní', 'guarani', '🏹', id FROM public.categories WHERE slug = 'languages' UNION ALL
         
         SELECT 'Andean', 'andean', '🏔️', id FROM public.categories WHERE slug = 'lineage-tradition' UNION ALL
         SELECT 'Lakota', 'lakota', '🪶', id FROM public.categories WHERE slug = 'lineage-tradition' UNION ALL
         SELECT 'Santo Daime', 'santo-daime', '🌟', id FROM public.categories WHERE slug = 'lineage-tradition' UNION ALL
         SELECT 'Umbanda', 'umbanda', '🌊', id FROM public.categories WHERE slug = 'lineage-tradition' UNION ALL
+        SELECT 'Camino Rojo', 'camino-rojo', '🔴', id FROM public.categories WHERE slug = 'lineage-tradition' UNION ALL
         
         SELECT 'Ayahuasca', 'ayahuasca', '🍵', id FROM public.categories WHERE slug = 'medicine-healing' UNION ALL
         SELECT 'Peyote', 'peyote', '🌵', id FROM public.categories WHERE slug = 'medicine-healing' UNION ALL
