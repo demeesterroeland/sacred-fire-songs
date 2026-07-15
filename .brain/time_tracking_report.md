@@ -1,1 +1,1 @@
-| **2026-07-15** | **Database tags update & Issue creation**: Add Guaraní and Camino Rojo categories to production database and update setup/seed files; Create Issue #197 / Story 3.4.6 for Public Playlist curation | ~0.75 Hours | ✅ Completed |
+| **July 15, 2026 (Part 2)** | **Public Playlist Curation (Story 3.4.6)** | Implement RLS policies, update server actions, adjust client-side detail page/picker visibility, seed gatekeeper role, and write E2E integration tests | ~1.5 Hours | ✅ Completed |
