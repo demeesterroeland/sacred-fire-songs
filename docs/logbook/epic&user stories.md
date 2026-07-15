@@ -524,6 +524,35 @@ Scenario: No featured playlists
   Then the Featured section should not appear on the playlists page
 ```
 
+**Story 3.4.6:** As an Admin or Gatekeeper, I want to add/remove songs from any Public Playlist, edit the playlist details, and change the song order, so that we can curate public playlists and maintain high-quality collections.
+
+```gherkin
+Scenario: Gatekeeper adds a song to another user's Public Playlist
+  Given I am logged in as a Gatekeeper
+  And there is a Public Playlist owned by a Member
+  When I attempt to add a song to this Public Playlist
+  Then the song should be successfully added to the playlist
+  And I should receive a success confirmation toast
+
+Scenario: Admin reorders songs in another user's Public Playlist
+  Given I am logged in as an Admin
+  And there is a Public Playlist owned by a Member with multiple songs
+  When I change the order of the songs in the playlist
+  Then the new song order should be saved successfully
+
+Scenario: Gatekeeper edits another user's Public Playlist details
+  Given I am logged in as a Gatekeeper
+  And there is a Public Playlist owned by a Member
+  When I update the title, description, or public status of this playlist
+  Then the changes should be saved successfully
+
+Scenario: Member attempts to edit another user's Public Playlist
+  Given I am logged in as a Member
+  And there is a Public Playlist owned by another user
+  Then I should not see options to edit, reorder, or add/remove songs from this playlist
+  And any API request to modify it should be rejected with a permission error
+```
+
 ### Epic 3.5: Musician Profile Setting
 
 > **Note:** The `musician` role has been removed from the role hierarchy. Playing an instrument and reading chords is a personal skill, not a trust level. Members self-declare this via their profile.
@@ -811,6 +840,7 @@ Scenario: Guest cannot record or see private rehearsals
 | **Flag Songs (needs improvement, duplicate)** | ❌ | ❌ | ✅ | ✅ |
 | **Merge Duplicate Songs** | ❌ | ❌ | ✅ | ✅ |
 | **Feature / Unfeature Playlists** | ❌ | ❌ | ✅ | ✅ |
+| **Edit/Reorder Any Public Playlist** | ❌ | ❌ | ✅ | ✅ |
 | **Edit Lyrics/Chords (any song)** | ❌ | ❌ | ❌ | ✅ |
 | **Delete Songs** | ❌ | ❌ | ❌ | ✅ |
 | **Manage Users & Roles** | ❌ | ❌ | ❌ | ✅ |
