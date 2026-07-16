@@ -60,6 +60,9 @@ export default defineConfig({
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
+    extraHTTPHeaders: {
+      'x-vercel-protection-bypass': process.env.VERCEL_PROTECTION_BYPASS_TOKEN ?? 'BYPASSORPLAYWRIGHTQWERTYUIOP123',
+    },
   },
 
   projects: [
