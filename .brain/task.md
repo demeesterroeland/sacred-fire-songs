@@ -1,8 +1,9 @@
-# Task: Add Guaraní and Camino Rojo categories
+# Task: Sync Production DB Songs and Move Folders
 
-- [x] Insert the Guaraní subcategory under the Languages category directly in production database
-- [x] Insert the Camino Rojo subcategory under the Lineage & Tradition category directly in production database
-- [x] Update database schema setup file `docs/design/db-schema.sql` to include the categories and bump version to v2.7
-- [x] Update existing seed/script files (`scripts/random-seeder.mjs` and legacy SQL) with the new categories
-- [x] Create GitHub issue #197 / Story 3.4.6 for Public Playlist curation by Gatekeepers/Admins
-- [x] Update roadmap documentation (`epic&user stories.md`) and Roles & Permissions table
+- [x] Move all songs from `doc/extracted_songs` to `docs/extracted_songs` using `git mv`
+- [x] Write Python database and ChordPro parser script (`scripts/prod_songs_2_pdf.py`)
+- [x] Fetch all songs from Production DB (read-only)
+- [x] Format songs to clean ChordPro `.cho` files, merging DB and text metadata
+- [x] Write files to `data/extracted_songs/production_db/`
+- [x] Update `.gitignore` to ignore the `production_db/` folder to prevent committing to Git
+- [x] Run script to sync 238 songs successfully
