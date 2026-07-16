@@ -61,7 +61,7 @@ export default defineConfig({
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
     extraHTTPHeaders: {
-      'x-vercel-protection-bypass': process.env.VERCEL_PROTECTION_BYPASS_TOKEN ?? 'BYPASSORPLAYWRIGHTQWERTYUIOP123',
+      'x-vercel-protection-bypass': process.env.VERCEL_PROTECTION_BYPASS_TOKEN ?? 'qgBhp0e5McWwZIscbbeMdhrMS3Ryzv4B',
     },
   },
 
