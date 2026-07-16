@@ -63,3 +63,9 @@ supabase/snippets/
 
 # Source PDFs — the app uses .cho (ChordPro) files, not PDFs
 data/songs/**/*.pdf
+
+# Synced Production DB songs
+/data/extracted_songs/production_db/
+
+# Generated PDF songbooks
+/*.pdf

@@ -78,7 +78,6 @@
 | **July 14, 2026** | **Mobile UI Overflow Fixes (Issue #188)**: Resolved mobile horizontal overflow on playlist cards, grid layout containers, and form inputs | ~1.5 Hours | ✅ Completed |
 | **July 15, 2026** | **Database tags update & Issue creation**: Add Guaraní and Camino Rojo categories to production database and update setup/seed files; Create Issue #197 / Story 3.4.6 for Public Playlist curation | ~0.75 Hours | ✅ Completed |
 | **July 15, 2026 (Part 2)** | **Public Playlist Curation (Story 3.4.6)** | Implement RLS policies, update server actions, adjust client-side detail page/picker visibility, seed gatekeeper role, and write E2E integration tests | ~1.5 Hours | ✅ Completed |
+| **July 16, 2026** | **Song Reorganization & Production DB Sync**: Moved extracted songbooks to `data/extracted_songs/`, created `prod_songs_2_pdf.py` to sync all Production DB songs locally as `.cho` files and compile the PDF, configured `.gitignore` to ignore the synced database directory and generated PDFs, and created `compile_songbook.py` script utilizing the local `chordpro` CLI tool to generate PDF songbooks. | ~1.25 Hours | ✅ Completed |
 
-| **Total** | **Development + AI Collaboration** | **~149.5 Hours** | |
-
-
+| **Total** | **Development + AI Collaboration** | **~150.75 Hours** | |
