@@ -10,7 +10,7 @@
       },
       "ssh": "Disabled",
       "previewLimit": 50,
-      "server": "db.REDACTED_STAGING_PROJECT_ID.supabase.co",
+      "server": "localhost",
       "port": 5432,
       "driver": "PostgreSQL",
       "name": "Sacred Fire (Staging)",

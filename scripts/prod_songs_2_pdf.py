@@ -114,7 +114,10 @@ def format_to_chordpro(song):
     return '\n'.join(header) + "\n\n" + clean_lyrics
 
 def main():
-    conn_str = "postgresql://postgres.REDACTED_PROD_PROJECT_ID:REDACTED_DB_PASSWORD@aws-1-eu-west-1.pooler.supabase.com:5432/postgres"
+    conn_str = os.environ.get("PROD_DB_URL")
+    if not conn_str:
+        print("Error: PROD_DB_URL environment variable is required.")
+        sys.exit(1)
     output_dir = "data/extracted_songs/production_db"
     os.makedirs(output_dir, exist_ok=True)
     

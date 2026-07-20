@@ -2219,15 +2219,14 @@ Performed a comprehensive technical audit of the codebase against Next.js 16 and
 ## Session Update (Jun 9, 2026 — Beta Deployment Guide & Vercel-Migration Tracking)
 
 ### 1. Beta Deployment Guide (PR #147)
-- Authored `docs/beta-deployment.md` documenting the **beta** cutover off Vercel onto the VPS (`<infra-repo>`), served at `<staging-app>.example.com` against the **staging** Supabase project (`REDACTED_STAGING_PROJECT_ID`).
-- Captured deploy/update flow (Docker + Traefik, pinned `SONGS_SHA`, rebuild-on-bump), DNS/SSL (`*.example.com` wildcard), Supabase auth-redirect setup, and known gaps vs prod.
-- Updated README deployment row: `Vercel` → `Vercel (prod) · self-hosted beta` with a link to the new guide.
+- Authored deployment documentation for beta cutover to self-hosted server against the staging Supabase project.
+- Captured deploy/update flow (Docker + Traefik, pinned build commit, rebuild-on-bump), SSL wildcard setup, Supabase auth-redirect setup, and known gaps vs prod.
+- Updated README deployment row: `Vercel (prod) · self-hosted beta`.
 
-### 2. Vercel → EU-Sovereign Migration Tracking
-- Investigated whether a "migration impact" research doc already existed — none found; relevant pieces live in the private `<infra-repo>` repo (songbook stack README, ADR-001/002, sovereign-AI research, EU-vendor survey issue #30).
-- Established that the beta is already off Vercel; only the **prod** cutover remains (needs self-hosted/EU prod Supabase).
-- Created **<infra-repo>#84** — `chore: migrate Songbook prod off Vercel to the sovereign VPS` (scoped to prod cutover only, Gherkin AC, label `chore`).
-- Cross-linked **<infra-repo>#34** (install prod Supabase) as the blocking dependency via a comment.
+### 2. Migration Tracking
+- Investigated whether a "migration impact" research doc already existed.
+- Established that the beta is already off Vercel; only the **prod** cutover remains.
+- Created infrastructure issue to track prod migration.
 
 ### 3. Repo Hygiene (PR #148)
 - Found `issue_draft.md` (a leftover create-issue scratch file) accidentally committed to `main` in 10811cb.
@@ -2274,16 +2273,16 @@ Successfully implemented a dedicated `artist` filter parameter (`?artist=Name`) 
 ### 1. Exposed Supabase API on Tailscale Private IP
 - Configured Kong gateway in `<stacks-dir>/stacks/supabase/docker-compose.yaml` to publish container port 8000 on the Tailscale interface, disabling public routing.
 - Set `SITE_URL` and `API_EXTERNAL_URL` inside `<stacks-dir>/stacks/supabase/.env` to the private Tailscale database URL.
-- Cleaned up Traefik routing in the `supabase` stack by setting `traefik.enable=false` and removing all public `Host` rules for `db.example.com` on the HTTPS entrypoint. This avoids Let's Encrypt renewal warnings for unused domains.
+- Cleaned up Traefik routing in the `supabase` stack by setting `traefik.enable=false` and removing public `Host` rules for unused domains on the HTTPS entrypoint. This avoids Let's Encrypt renewal warnings for unused domains.
 - Restarted `supabase` stack to apply configuration changes.
 
 ### 2. Configured and Rebuilt Songbook Stack
-- Updated `NEXT_PUBLIC_SUPABASE_URL` to the private Tailscale database URL in `<stacks-dir>/stacks/songbook/.env`.
+- Updated `NEXT_PUBLIC_SUPABASE_URL` to the private database URL in `<stacks-dir>/stacks/songbook/.env`.
 - Rebuilt the Next.js `songbook` Docker container without cache to bake in the new private database endpoint.
-- Troubleshot Traefik's dynamic router initialization by restarting the `traefik` proxy container, restoring routing for `https://<staging-app>.example.com`.
+- Troubleshot Traefik's dynamic router initialization by restarting the `traefik` proxy container.
 
 ### 3. Eliminated Stale References
-- Replaced all references to `db.example.com` on the VPS to point to the private Tailscale database URL in `admin-dashboard/html/index.html` (description changed to Private API) and stack env files.
+- Replaced all references to legacy domains on the server to point to the private database URL in `admin-dashboard/html/index.html` (description changed to Private API) and stack env files.
 - Staged, committed, and clean-aligned `<stacks-dir>` Git repository on the VPS.
 
 ### 4. Merged E2E Foundation PR #163
@@ -2346,7 +2345,7 @@ Successfully implemented a dedicated `artist` filter parameter (`?artist=Name`) 
 - Executed a SQL restoration script to restore standard Supabase \`USAGE\` and table SELECT/CRUD permissions on schema \`public\` for \`anon\`, \`authenticated\`, and \`service_role\` roles.
 
 ### 4. Local Development Environment Fixes
-- Corrected the invalid dashboard/Studio URL \`NEXT_PUBLIC_SUPABASE_URL_DEV\` parameter inside \`.env.local\` to point to the actual Kong gateway endpoint at port \`5002\` (\`http://tailscale-host.example:5002\`). This enables \`npm run dev\` to query database records correctly.
+- Corrected the invalid dashboard/Studio URL \`NEXT_PUBLIC_SUPABASE_URL_DEV\` parameter inside \`.env.local\` to point to the actual Kong gateway endpoint at port \`5002\`. This enables \`npm run dev\` to query database records correctly.
 
 ### 5. GitHub Actions Workflow Configuration
 - Updated \`.github/workflows/e2e.yml\` to configure \`E2E_RANDOM_SEED: '1'\` and \`E2E_RANDOM_SONGS_COUNT: '80'\` env variables. This ensures that GitHub Actions runs dynamically reset and seed the remote cloud staging database with randomized mock datasets, mirroring the local test environment's capabilities on the CI pipeline.
@@ -2708,17 +2707,17 @@ This session addressed a critical bug where slow Supabase Auth calls (due to Tai
 - Integrated `release-please` semantic versioning configuration (`release-please-config.json`, `.release-please-manifest.json`) and GitHub Actions GHCR Docker build workflow (`.github/workflows/docker.yml`).
 - Tagged and published official release **`v1.0.0`** on GitHub (`ghcr.io/demeesterroel/sacred-fire-songs:v1.0.0`).
 
-### 2. Cloud Infrastructure & Self-Hosted Supabase Realignment (`<infra-repo>`)
+### 2. Infrastructure Realignment
 - Renamed Supabase database stacks: `stacks/supabase-prod` (`_PROD` DB) and `stacks/supabase-preview` (`_PREVIEW` DB).
-- Standardized application stacks: `stacks/<prod-stack>` (`https://songbook.example.com`) and `stacks/<staging-stack>` (`https://<staging-app>.example.com`).
-- Restored full production database dataset from Supabase Cloud pooler to self-hosted `supabase-prod-db` (14 auth users, 238 compositions, 238 song versions, 11 setlists).
+- Standardized application stacks: `stacks/<prod-stack>` and `stacks/<staging-stack>`.
+- Restored database dataset from Supabase Cloud pooler to self-hosted database stack (14 auth users, 238 compositions, 238 song versions, 11 setlists).
 - Fixed Kong API Gateway credentials mapping (`kong-runtime.yml`) and Traefik router rules.
-- Secured all `songbook-*.example.com` preview subdomains with Traefik `tailscale-only@docker` middleware restricting access to Tailscale VPN (`100.64.0.0/10`).
-- Relocated deployment and environment documentation directly into `stacks/<prod-stack>/README.md` and `stacks/<staging-stack>/README.md`.
+- Secured preview subdomains with Traefik `tailscale-only@docker` middleware restricting access to private VPN.
+- Relocated deployment and environment documentation directly into stack `README.md` files.
 
 ### 3. GitHub Issue & Branch Audit
 - Closed completed GitHub Issues: #202, #197, #171, #168, #183, #141.
-- Created and transferred performance benchmark chore issue to `<infra-repo>#104`.
+- Created and transferred performance benchmark chore issue to infrastructure repository.
 - Deleted merged remote branches (`feat/issue-141`, `feat/story-3.4.6-public-playlist-curation`).
 - Audited open-source repository `sacred-fire-songs` — verified 100% clean and free of secrets or internal deployment information.
 
