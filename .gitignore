@@ -20,6 +20,11 @@
 /playwright/.cache
 /e2e/.auth
 
+# Testing artifacts
+testing/*/output/
+testing/**/output/
+testing/e2e/data/.auth/
+
 # next.js
 /.next/
 /out/

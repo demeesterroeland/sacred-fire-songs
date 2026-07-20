@@ -68,10 +68,16 @@ const themeScript = `
 `;
 
 export default function RootLayout({ children }: Readonly<{ children: React.ReactNode; }>) {
+  const supabaseKey = (process.env.NODE_ENV === "development"
+    ? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY_DEV
+    : process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) || "";
+  const envInjection = `window.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = "${supabaseKey}";`;
+
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
         <meta name="theme-color" content="#1a0505" />
+        <script dangerouslySetInnerHTML={{ __html: envInjection }} />
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
       </head>
