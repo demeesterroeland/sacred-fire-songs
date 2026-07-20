@@ -1,68 +1,53 @@
 # Infrastructure & Environment Guide
 
-This guide explains our **4-Tier Architecture** and how **CI/CD** keeps everything in sync.
+This guide explains our **3-Tier Architecture** and deployment topology for **Sacred Fire Songs**.
 
-## 1. The 3-Tier Strategy
+---
 
-We use three separate environments to ensure stability and safety.
+## 1. Environment Topology (`_DEV`, `_PREVIEW`, `_PROD`)
 
-| Tier | Environment | URL | Database | Purpose |
+We use three separate database & application environments to ensure stability and safety:
+
+| Tier | Environment | Target App Domain | Database | Purpose |
 | :--- | :--- | :--- | :--- | :--- |
-| **1** | **Local Frontend** | `localhost:3000` | — | **Development UI**. Fast, runs on your machine. |
-| **2** | **DEV** | `dev.songbook.example.com` | <server> DEV Supabase | **Development DB**. Isolated DB for local dev. |
-| **3** | **Preview** | `git-feat-xyz.vercel.app` | <server> Staging Supabase | **Testing**. Created for every PR. |
-| **4** | **Production** | `sacred-fire-songs.com` | Supabase.com Production | **Live**. Real app used by members. |
+| **1** | **`_DEV`** | `http://localhost:3000` | Local Supabase (`127.0.0.1:54321`) | **Local Development**. Fast local iterations and unit testing. |
+| **2** | **`_PREVIEW`** | `https://<staging-app>.<your-domain>.com` | Self-Hosted `_PREVIEW` Supabase | **Staging / PR Previews**. Testing feature branches and pull requests. |
+| **3** | **`_PROD`** | `https://songbook.<your-domain>.com` | Self-Hosted `_PROD` Supabase | **Production**. Real application used by members. |
 
-## 2. Setup Guide (One-Time)
+---
 
-### Step A: Supabase Projects
-You need three separate projects in the Supabase Dashboard:
-1.  **Sacred Fire Songs (PROD)**: The existing live database (Supabase.com).
-2.  **Sacred Fire Songs (STAGING)**: Hosted on <server> (`<staging-app>.example.com`).
-3.  **Sacred Fire Songs (DEV)**: New DEV DB on <server> (`user@server`).
-    *   *Note*: Copy the `Reference ID` and `DB Password` for each.
+## 2. Environment Configuration
 
-### Step B: GitHub Secrets
-Go to **Repo Settings -> Secrets -> Actions** and set these exact keys:
+### Local `.env.local` Setup for `_DEV`
 
-| Secret Name | Value |
+Create a `.env.local` file (gitignored) in the root of the project:
+
+```env
+NEXT_PUBLIC_SUPABASE_URL_DEV=http://127.0.0.1:54321
+NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY_DEV=<local_anon_key_from_supabase_status>
+```
+
+Start the local Supabase stack and reset seeds:
+```bash
+supabase start
+supabase db reset
+```
+
+---
+
+## 3. GitHub Actions & Secrets
+
+Go to **Repo Settings -> Secrets -> Actions** to configure pipeline secrets:
+
+| Secret Name | Purpose |
 | :--- | :--- |
-| `SUPABASE_ACCESS_TOKEN` | Your Personal Access Token (works for both projects) |
-| `SUPABASE_PROJECT_ID` | Reference ID for **PROD** project |
-| `SUPABASE_DB_PASSWORD` | DB Password for **PROD** project |
-| `SUPABASE_PROJECT_ID_STAGING` | Reference ID for **STAGING** project |
-| `SUPABASE_DB_PASSWORD_STAGING` | DB Password for **STAGING** project |
+| `RELEASE_PLEASE_TOKEN` | Fine-grained GitHub PAT with `contents: write` and `pull-requests: write` permissions for release automation. |
+| `GITHUB_TOKEN` | Built-in token for publishing Docker images to GitHub Container Registry (`ghcr.io`). |
 
-### Step C: Vercel Environment Variables
-Go to **Vercel -> Settings -> Environment Variables**:
+---
 
-1.  **Production Environment**:
-    *   `NEXT_PUBLIC_SUPABASE_URL`: (Your **PROD** URL)
-    *   `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`: (Your **PROD** Key)
+## 4. Docker Deployment Strategy
 
-2.  **Preview Environment** (Uncheck Production/Development):
-    *   `NEXT_PUBLIC_SUPABASE_URL`: (Your **STAGING** URL)
-    *   `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`: (Your **STAGING** Key)
-
-3.  **Development Environment** (optional, for `npm run dev`):
-    *   `NEXT_PUBLIC_SUPABASE_URL_DEV`: (Your **DEV** URL)
-    *   `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY_DEV`: (Your **DEV** Key)
-
-## 3. Automated CI/CD Pipelines
-
-We use **GitHub Actions** to manage the Database and **Vercel** to manage the App.
-
-### How it works
-1.  **Feature Push (`feat/*`)**:
-    *   **GitHub**: Deploys migrations to **Supabase STAGING**.
-    *   **Vercel**: Deploys app to **Preview URL**.
-    *   *Result*: You can test your new database changes on a live URL without breaking Production.
-
-2.  **Merge to `main`**:
-    *   **GitHub**: Deploys migrations to **Supabase PROD**.
-    *   **Vercel**: Deploys app to **Production URL**.
-    *   *Result*: The live site is updated.
-
-## 4. Troubleshooting
-*   **"Migration failed on Staging"**: Check the GitHub Action logs. Often caused by conflicting migrations or missing `DROP POLICY IF EXISTS`.
-*   **"Preview app shows old data"**: Ensure the `NEXT_PUBLIC_SUPABASE_URL` in Vercel Preview settings is actually pointing to Staging, not Prod.
+- **Standalone Output**: Next.js builds a self-contained Node server (`output: 'standalone'`).
+- **Container Registry**: Images are published automatically on `main` push or version tag to `ghcr.io/<owner>/sacred-fire-songs:latest`.
+- **Runtime Resolution**: API endpoints and publishable keys are resolved dynamically at runtime inside the container via `app/layout.tsx` and `app/supabase-api/[...path]/route.ts`.
