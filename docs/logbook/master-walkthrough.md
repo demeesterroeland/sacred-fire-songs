@@ -2700,4 +2700,27 @@ This session addressed a critical bug where slow Supabase Auth calls (due to Tai
 ### 3. PDF Compilation Utility
 - Created Python utility [compile_songbook.py](file:///home/roeland/projects/sacred-fire-songs/scripts/compile_songbook.py) that invokes the system-installed `chordpro` CLI tool to compile a folder of `.cho` files into a single, consolidated PDF songbook with a Table of Contents (`--toc`), A4 page size (`--page-size=a4`), and clean chord grid suppression (`--no-chord-grids`).
 
+## July 20, 2026 (VPS Migration, Next.js Standalone Pipelining, Release v1.0.0 & Infra Realignment)
+
+### 1. Next.js Application Standalone Pipelining & Release Automation
+- Modernized Next.js engine with `output: 'standalone'` in `next.config.ts`.
+- Implemented a dynamic runtime proxy route handler `app/supabase-api/[...path]/route.ts` to proxy requests using container environment variables dynamically at runtime, resolving Next.js build-time rewrite limitations.
+- Integrated `release-please` semantic versioning configuration (`release-please-config.json`, `.release-please-manifest.json`) and GitHub Actions GHCR Docker build workflow (`.github/workflows/docker.yml`).
+- Tagged and published official release **`v1.0.0`** on GitHub (`ghcr.io/demeesterroel/sacred-fire-songs:v1.0.0`).
+
+### 2. Cloud Infrastructure & Self-Hosted Supabase Realignment (`<infra-repo>`)
+- Renamed Supabase database stacks: `stacks/supabase-prod` (`_PROD` DB) and `stacks/supabase-preview` (`_PREVIEW` DB).
+- Standardized application stacks: `stacks/<prod-stack>` (`https://songbook.example.com`) and `stacks/<staging-stack>` (`https://<staging-app>.example.com`).
+- Restored full production database dataset from Supabase Cloud pooler to self-hosted `supabase-prod-db` (14 auth users, 238 compositions, 238 song versions, 11 setlists).
+- Fixed Kong API Gateway credentials mapping (`kong-runtime.yml`) and Traefik router rules.
+- Secured all `songbook-*.example.com` preview subdomains with Traefik `tailscale-only@docker` middleware restricting access to Tailscale VPN (`100.64.0.0/10`).
+- Relocated deployment and environment documentation directly into `stacks/<prod-stack>/README.md` and `stacks/<staging-stack>/README.md`.
+
+### 3. GitHub Issue & Branch Audit
+- Closed completed GitHub Issues: #202, #197, #171, #168, #183, #141.
+- Created and transferred performance benchmark chore issue to `<infra-repo>#104`.
+- Deleted merged remote branches (`feat/issue-141`, `feat/story-3.4.6-public-playlist-curation`).
+- Audited open-source repository `sacred-fire-songs` — verified 100% clean and free of secrets or internal deployment information.
+
+
 
