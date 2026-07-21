@@ -1,0 +1,92 @@
+name: Performance Tests (k6)
+
+# Run k6 load tests against a deployed URL (e.g. Vercel preview).
+# Trigger manually from the GitHub UI, by adding the "perf-test" label to a PR,
+# or on a schedule.
+#
+# Optional repo secrets:
+#   VERCEL_TOKEN                    - Vercel bearer token for protected deployments
+#   VERCEL_PROTECTION_BYPASS_TOKEN  - Vercel deployment protection bypass header
+
+on:
+  workflow_dispatch:
+    inputs:
+      base_url:
+        description: 'Target URL to test'
+        required: true
+        default: 'https://songbook.rocks'
+      test_script:
+        description: 'k6 test script to run'
+        required: true
+        default: 'testing/performance/tests/scripts/load-test.js'
+        type: choice
+        options:
+          - testing/performance/tests/scripts/load-test.js
+          - testing/performance/tests/scripts/simple-load-test.js
+          - testing/performance/tests/scripts/simple-test.js
+  pull_request:
+    types: [labeled]
+
+  # Uncomment to enable nightly runs:
+  # schedule:
+  #   - cron: '0 2 * * 1-5'   # Weekdays at 02:00 UTC
+
+concurrency:
+  group: perf-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  performance:
+    # Run on manual dispatch, or when the "perf-test" label is added to a PR
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'pull_request' && github.event.label.name == 'perf-test')
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - uses: actions/checkout@v4
+
+      # ── Install k6 from official Grafana APT repo ──────────────────────────
+      - name: Install k6
+        run: |
+          sudo gpg -k
+          sudo gpg --no-default-keyring --keyring /usr/share/keyrings/k6-archive-keyring.gpg \
+            --keyserver hkp://keyserver.ubuntu.com:80 --recv-keys C5AD17C747E3415A3642D57D77C6C491D6AC1D69
+          echo "deb [signed-by=/usr/share/keyrings/k6-archive-keyring.gpg] https://dl.k6.io/deb stable main" \
+            | sudo tee /etc/apt/sources.list.d/k6.list
+          sudo apt-get update
+          sudo apt-get install -y k6
+          k6 version
+
+      # ── Run k6 load test ───────────────────────────────────────────────────
+      - name: Run k6 performance test
+        env:
+          BASE_URL: ${{ github.event.inputs.base_url || 'https://songbook.rocks' }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_PROTECTION_BYPASS_TOKEN: ${{ secrets.VERCEL_PROTECTION_BYPASS_TOKEN }}
+        run: |
+          TEST_SCRIPT="${{ github.event.inputs.test_script || 'testing/performance/tests/scripts/load-test.js' }}"
+          TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
+
+          mkdir -p testing/performance/results
+
+          echo "──────────────────────────────────────────────"
+          echo "Target URL  : $BASE_URL"
+          echo "Test script : $TEST_SCRIPT"
+          echo "──────────────────────────────────────────────"
+
+          k6 run \
+            --env BASE_URL="$BASE_URL" \
+            --out json="testing/performance/results/perf-results_${TIMESTAMP}.json" \
+            --summary-trend-stats="avg,min,med,max,p(90),p(95),p(99)" \
+            "$TEST_SCRIPT"
+
+      # ── Upload results as artifact ─────────────────────────────────────────
+      - name: Upload performance results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: perf-results-${{ github.run_id }}
+          path: testing/performance/results/
+          retention-days: 14
