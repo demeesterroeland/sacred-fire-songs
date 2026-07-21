@@ -14,7 +14,7 @@ on:
       base_url:
         description: 'Target URL to test'
         required: true
-        default: 'https://songbook.rocks'
+        default: 'https://staging.example.com'
       test_script:
         description: 'k6 test script to run'
         required: true
@@ -64,8 +64,7 @@ jobs:
       # ── Run k6 load test ───────────────────────────────────────────────────
       - name: Run k6 performance test
         env:
-          # On PRs, target the Vercel preview URL if available; fall back to production
-          BASE_URL: ${{ github.event.inputs.base_url || 'https://songbook.rocks' }}
+          BASE_URL: ${{ github.event.inputs.base_url || 'https://staging.example.com' }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_PROTECTION_BYPASS_TOKEN: ${{ secrets.VERCEL_PROTECTION_BYPASS_TOKEN }}
         run: |
