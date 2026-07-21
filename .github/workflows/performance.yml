@@ -25,7 +25,12 @@ on:
           - testing/performance/tests/scripts/simple-load-test.js
           - testing/performance/tests/scripts/simple-test.js
   pull_request:
-    types: [labeled]
+    branches:
+      - main
+      - 'feat/**'
+      - 'fix/**'
+      - 'chore/**'
+    types: [opened, synchronize, reopened]
 
   # Uncomment to enable nightly runs:
   # schedule:
@@ -37,10 +42,7 @@ concurrency:
 
 jobs:
   performance:
-    # Run on manual dispatch, or when the "perf-test" label is added to a PR
-    if: >
-      github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'pull_request' && github.event.label.name == 'perf-test')
+    # Run on manual dispatch or on every PR
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -62,6 +64,7 @@ jobs:
       # ── Run k6 load test ───────────────────────────────────────────────────
       - name: Run k6 performance test
         env:
+          # On PRs, target the Vercel preview URL if available; fall back to production
           BASE_URL: ${{ github.event.inputs.base_url || 'https://songbook.rocks' }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_PROTECTION_BYPASS_TOKEN: ${{ secrets.VERCEL_PROTECTION_BYPASS_TOKEN }}
