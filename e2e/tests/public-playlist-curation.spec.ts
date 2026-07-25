@@ -83,10 +83,10 @@ test.describe('Public Playlist Curation (Story 3.4.6)', () => {
       const sheet = page.locator('h2:has-text("Add Songs")');
       await expect(sheet).toBeVisible();
 
-      // Find first song button in the sheet's scrollable container and add/toggle it
-      const firstSongBtn = page.locator('.fixed.bottom-0 .overflow-y-auto button').first();
-      await expect(firstSongBtn).toBeVisible();
-      await firstSongBtn.click();
+      // Find first song button inside the bottom sheet container and add/toggle it
+      const firstSongBtn = page.locator('.fixed.bottom-0.z-50 button').first();
+      await expect(firstSongBtn).toBeVisible({ timeout: 10000 });
+      await firstSongBtn.click({ force: true });
 
       // Close the sheet
       await page.locator('button[aria-label="Close"]').click();

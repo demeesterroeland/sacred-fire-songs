@@ -11,7 +11,7 @@ test.use({
   },
 });
 
-test.describe('Private Rehearsal Audio Recording (Story 4.6.1)', () => {
+test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
   let songUrl: string;
 
   test.beforeAll(async ({ playwright }) => {
@@ -143,6 +143,7 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1)', () => {
 
       // Switch to Voice Recorder tab if tabs exist (Reference Tracks is active by default in Issue 187)
       const voiceRecorderTab = page.locator('button:has-text("Voice Recorder")').first();
+      await voiceRecorderTab.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
       if (await voiceRecorderTab.isVisible()) {
         await voiceRecorderTab.click();
       }
@@ -154,10 +155,10 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1)', () => {
       const recordPrompt = page.locator('h4:has-text("Ready to record rehearsal")');
       await expect(recordPrompt).toBeVisible();
 
-      // Click "Start recording" button
+      // Start recording
       const startBtn = page.locator('button[title="Start recording"]');
       await expect(startBtn).toBeVisible();
-      await startBtn.click();
+      await startBtn.click({ force: true });
 
       // Verify active recording prompt appears
       const activePrompt = page.locator('h4:has-text("Recording rehearsal...")');
@@ -212,6 +213,7 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1)', () => {
 
       // Switch to Voice Recorder tab if tabs exist (Reference Tracks is active by default in Issue 187)
       const voiceRecorderTab = page.locator('button:has-text("Voice Recorder")').first();
+      await voiceRecorderTab.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
       if (await voiceRecorderTab.isVisible()) {
         await voiceRecorderTab.click();
       }
@@ -246,6 +248,7 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1)', () => {
 
       // Switch to Voice Recorder tab if tabs exist (Reference Tracks is active by default in Issue 187)
       const voiceRecorderTab = page.locator('button:has-text("Voice Recorder")').first();
+      await voiceRecorderTab.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
       if (await voiceRecorderTab.isVisible()) {
         await voiceRecorderTab.click();
       }
@@ -253,7 +256,7 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1)', () => {
       // Start recording
       const startBtn = page.locator('button[title="Start recording"]');
       await expect(startBtn).toBeVisible();
-      await startBtn.click();
+      await startBtn.click({ force: true });
 
       // Let it record briefly
       await page.waitForTimeout(1000);

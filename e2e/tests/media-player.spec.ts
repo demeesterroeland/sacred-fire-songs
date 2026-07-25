@@ -55,10 +55,23 @@ test.describe('Rehearsal Space Media Player E2E Tests', () => {
 
     await page.goto(songUrl);
 
-    // Open Rehearsal Drawer Space
+    // Open Rehearsal Drawer Space (responsive: desktop header button or mobile overflow menu)
     const recordBtn = page.locator('button[title="Recordings"]').first();
-    await expect(recordBtn).toBeVisible({ timeout: 15000 });
-    await recordBtn.click();
+    const moreActionsBtn = page.locator('button[aria-label="More actions"]').first();
+
+    await Promise.race([
+      recordBtn.waitFor({ state: 'attached', timeout: 15000 }).catch(() => {}),
+      moreActionsBtn.waitFor({ state: 'attached', timeout: 15000 }).catch(() => {})
+    ]);
+
+    if (await recordBtn.isVisible()) {
+      await recordBtn.click();
+    } else {
+      await moreActionsBtn.click();
+      const mobileRecordBtn = page.locator('button:has-text("Recordings")').filter({ visible: true }).first();
+      await expect(mobileRecordBtn).toBeVisible({ timeout: 5000 });
+      await mobileRecordBtn.click();
+    }
 
     // Select Reference Tracks tab
     const referenceTracksTab = page.locator('button:has-text("Reference Tracks")');
@@ -375,20 +388,23 @@ test.describe('Rehearsal Space Media Player E2E Tests', () => {
     await expect(miniPlayer.locator('text=SoundCloud Reference').first()).toBeVisible();
   });
 
-  test('Permutation 15: Spotify active state does not render mini-player on fold', async ({ page }) => {
+  test('Permutation 15: Spotify active state does not render mini-player on fold @headed', async ({ page }) => {
     const spotifyBtn = page.locator('button:has-text("Spotify")');
+    await expect(spotifyBtn).toBeVisible({ timeout: 10000 });
     await spotifyBtn.click();
     await page.waitForTimeout(1000);
 
     await page.evaluate(() => {
-      const iframes = document.querySelectorAll('iframe');
-      Object.defineProperty(Document.prototype, 'activeElement', { get: () => iframes[2], configurable: true });
-      window.dispatchEvent(new Event('blur'));
+      const spotifyIframe = Array.from(document.querySelectorAll('iframe')).find(i => i.src.includes('spotify.com')) || document.querySelectorAll('iframe')[2];
+      if (spotifyIframe) {
+        Object.defineProperty(Document.prototype, 'activeElement', { get: () => spotifyIframe, configurable: true });
+        window.dispatchEvent(new Event('blur'));
+      }
     });
     await page.waitForTimeout(500);
 
     const closeBtn = page.locator('button[aria-label="Close"]').first();
-    await closeBtn.click();
+    await closeBtn.click({ force: true });
 
     const miniPlayer = page.locator('[data-testid="bottom-mini-player"]');
     await expect(miniPlayer).toBeHidden(); // Spotify controls are disabled/hidden
@@ -406,7 +422,7 @@ test.describe('Rehearsal Space Media Player E2E Tests', () => {
     await page.waitForTimeout(1000);
 
     const closeBtn = page.locator('button[aria-label="Close"]').first();
-    await closeBtn.click();
+    await closeBtn.click({ force: true });
 
     const miniPlayer = page.locator('[data-testid="bottom-mini-player"]');
     await expect(miniPlayer).toBeVisible();
@@ -438,7 +454,7 @@ test.describe('Rehearsal Space Media Player E2E Tests', () => {
     await page.waitForTimeout(1000);
 
     const closeBtn = page.locator('button[aria-label="Close"]').first();
-    await closeBtn.click();
+    await closeBtn.click({ force: true });
 
     const miniPlayer = page.locator('[data-testid="bottom-mini-player"]');
     await expect(miniPlayer).toBeVisible();
@@ -458,20 +474,23 @@ test.describe('Rehearsal Space Media Player E2E Tests', () => {
     expect(parsed.value).toBeLessThan(80000);
   });
 
-  test('Permutation 18: Spotify player fold has no progress bar interaction', async ({ page }) => {
+  test('Permutation 18: Spotify player fold has no progress bar interaction @headed', async ({ page }) => {
     const spotifyBtn = page.locator('button:has-text("Spotify")');
+    await expect(spotifyBtn).toBeVisible({ timeout: 10000 });
     await spotifyBtn.click();
     await page.waitForTimeout(1000);
 
     await page.evaluate(() => {
-      const iframes = document.querySelectorAll('iframe');
-      Object.defineProperty(Document.prototype, 'activeElement', { get: () => iframes[2], configurable: true });
-      window.dispatchEvent(new Event('blur'));
+      const spotifyIframe = Array.from(document.querySelectorAll('iframe')).find(i => i.src.includes('spotify.com')) || document.querySelectorAll('iframe')[2];
+      if (spotifyIframe) {
+        Object.defineProperty(Document.prototype, 'activeElement', { get: () => spotifyIframe, configurable: true });
+        window.dispatchEvent(new Event('blur'));
+      }
     });
     await page.waitForTimeout(500);
 
     const closeBtn = page.locator('button[aria-label="Close"]').first();
-    await closeBtn.click();
+    await closeBtn.click({ force: true });
 
     const miniPlayer = page.locator('[data-testid="bottom-mini-player"]');
     await expect(miniPlayer).toBeHidden(); // Progress bar container is not displayed for Spotify

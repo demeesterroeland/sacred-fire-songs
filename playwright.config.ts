@@ -73,22 +73,50 @@ export default defineConfig({
       use: { channel: 'chrome' }
     },
 
-    // 2. Desktop run (depends on setup so storage states exist)
+    // 2. Desktop Headless (Standard DOM & Auth tests)
     {
-      name: 'chromium-desktop',
+      name: 'chromium-desktop-headless',
+      testIgnore: /.*@headed.*/,
       use: { 
         ...devices['Desktop Chrome'],
-        channel: 'chrome'
+        channel: 'chrome',
+        headless: true,
       },
       dependencies: ['setup'],
     },
 
-    // 3. Mobile run — the app is mobile-first (bottom nav, wake lock)
+    // 3. Mobile Headless (Standard DOM & Navigation tests)
     {
-      name: 'mobile-chrome',
+      name: 'mobile-chrome-headless',
+      testIgnore: /.*@headed.*/,
       use: { 
         ...devices['Pixel 5'],
-        channel: 'chrome'
+        channel: 'chrome',
+        headless: true,
+      },
+      dependencies: ['setup'],
+    },
+
+    // 4. Desktop Headed (Audio recording & media focus tests)
+    {
+      name: 'chromium-desktop-headed',
+      testMatch: /.*@headed.*/,
+      use: { 
+        ...devices['Desktop Chrome'],
+        channel: 'chrome',
+        headless: false,
+      },
+      dependencies: ['setup'],
+    },
+
+    // 5. Mobile Headed (Audio recording & mobile drawer media tests)
+    {
+      name: 'mobile-chrome-headed',
+      testMatch: /.*@headed.*/,
+      use: { 
+        ...devices['Pixel 5'],
+        channel: 'chrome',
+        headless: false,
       },
       dependencies: ['setup'],
     },
