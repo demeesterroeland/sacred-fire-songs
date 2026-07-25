@@ -128,9 +128,8 @@ export default function CategorySelector({ selectedIds, onChange }: CategorySele
       <div className="space-y-4 pt-1 max-h-[320px] overflow-y-auto pr-1">
         {filteredGrouped.map(({ parentName, categories: groupCats }) => (
           <div key={parentName} className="space-y-2">
-            <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider flex items-center justify-between">
-              <span>{parentName}</span>
-              <span className="text-[10px] text-gray-400 font-normal">{groupCats.length}</span>
+            <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+              {parentName}
             </h4>
             <div className="flex flex-wrap gap-2">
               {groupCats.map((cat) => (
