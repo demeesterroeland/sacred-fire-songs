@@ -12,6 +12,7 @@ export const SONGS_SELECT = `
     categories(
       name,
       slug,
+      emoji,
       parent:parent_id(name, slug)
     )
   )
@@ -55,6 +56,7 @@ interface SongVersionRow {
 interface CategoryRow {
   name: string;
   slug: string;
+  emoji?: string | null;
   parent: {
     name: string | null;
     slug: string | null;
@@ -92,6 +94,7 @@ export function mapCompositionToSong(
     return {
       name: cat.name,
       slug: cat.slug,
+      emoji: cat.emoji || undefined,
       parent: cat.parent?.name || null,
       parentSlug: cat.parent?.slug || null,
     };

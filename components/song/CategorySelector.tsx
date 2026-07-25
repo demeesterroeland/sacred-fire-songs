@@ -114,6 +114,7 @@ export default function CategorySelector({ selectedIds, onChange }: CategorySele
                 key={`selected-${cat.id}`}
                 label={cat.name}
                 categorySlug={cat.slug}
+                emoji={cat.emoji}
                 variant="selectable"
                 selected={true}
                 onClick={() => toggleCategory(cat.id)}
@@ -137,6 +138,7 @@ export default function CategorySelector({ selectedIds, onChange }: CategorySele
                   key={cat.id}
                   label={cat.name}
                   categorySlug={cat.slug}
+                emoji={cat.emoji}
                   variant="selectable"
                   selected={selectedIds.includes(cat.id)}
                   onClick={() => toggleCategory(cat.id)}

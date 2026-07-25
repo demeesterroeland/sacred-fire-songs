@@ -120,6 +120,7 @@ export default function TagSelector({
               key={tagSlug}
               label={tagObj?.name || tagSlug}
               categorySlug={tagObj?.slug || tagSlug}
+              emoji={tagObj?.emoji}
               variant="selectable"
               selected={true}
               onClick={() => toggleTagSlug(tagSlug)}
@@ -185,6 +186,7 @@ export default function TagSelector({
                       key={cat.id}
                       label={cat.name}
                       categorySlug={cat.slug}
+                      emoji={cat.emoji}
                       variant="selectable"
                       selected={isSelected}
                       onClick={() => toggleTagSlug(cat.slug)}

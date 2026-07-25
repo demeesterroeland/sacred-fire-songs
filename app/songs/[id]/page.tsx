@@ -356,6 +356,7 @@ export default function SongDetailPage() {
                                         key={cat.slug}
                                         label={cat.name}
                                         categorySlug={cat.slug}
+                                        emoji={cat.emoji}
                                         variant="badge"
                                         href={`/songs?tag=${encodeURIComponent(cat.slug)}`}
                                     />
@@ -463,6 +464,7 @@ export default function SongDetailPage() {
                                         key={cat.slug}
                                         label={cat.name}
                                         categorySlug={cat.slug}
+                                        emoji={cat.emoji}
                                         variant="badge"
                                         href={`/songs?tag=${encodeURIComponent(cat.slug)}`}
                                     />

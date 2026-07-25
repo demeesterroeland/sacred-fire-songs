@@ -6,6 +6,7 @@ export interface Category {
   id: string;
   name: string;
   slug: string;
+  emoji?: string;
   parent_id: string | null;
   parent_name?: string;
 }
@@ -17,6 +18,7 @@ export async function getAvailableCategories(): Promise<Category[]> {
     id: string;
     name: string;
     slug: string;
+    emoji?: string;
     parent_id: string | null;
     parent: { name: string }[] | null;
   }
@@ -27,6 +29,7 @@ export async function getAvailableCategories(): Promise<Category[]> {
             id,
             name,
             slug,
+            emoji,
             parent_id,
             parent:parent_id (
                 name
@@ -50,6 +53,7 @@ export async function getAvailableCategories(): Promise<Category[]> {
       id: item.id,
       name: item.name,
       slug: item.slug,
+      emoji: item.emoji || undefined,
       parent_id: item.parent_id,
       parent_name,
     };

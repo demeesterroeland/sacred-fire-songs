@@ -23,6 +23,7 @@ export interface Song {
     categories: {
         name: string;
         slug: string;
+        emoji?: string;
         parent: string | null;
         parentSlug: string | null;
     }[];

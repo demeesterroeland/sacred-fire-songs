@@ -8,6 +8,7 @@ import { getCategoryColor, getCategoryStyles } from '@/lib/uiUtils';
 export interface TagPillProps {
   label: string;
   categorySlug?: string;
+  emoji?: string;
   variant?: 'badge' | 'filter' | 'selectable';
   selected?: boolean;
   count?: number;
@@ -19,6 +20,7 @@ export interface TagPillProps {
 export function TagPill({
   label,
   categorySlug,
+  emoji,
   variant = 'badge',
   selected = false,
   count,
@@ -55,9 +57,11 @@ export function TagPill({
       {variant === 'selectable' && selected && (
         <Check className="w-3.5 h-3.5 shrink-0 opacity-95 stroke-[2.5]" />
       )}
-      {variant === 'badge' && (
+      {emoji ? (
+        <span className="text-xs shrink-0 leading-none">{emoji}</span>
+      ) : variant === 'badge' ? (
         <Tag className="w-3 h-3 shrink-0 opacity-80" />
-      )}
+      ) : null}
       <span>{label}</span>
       {typeof count === 'number' && (
         <span
