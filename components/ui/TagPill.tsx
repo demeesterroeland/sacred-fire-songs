@@ -44,16 +44,16 @@ export function TagPill({
     }
   } else if (variant === 'selectable') {
     if (selected) {
-      variantStyles = `${categoryStyles.pill} ring-1 ring-inset ring-white/10 cursor-pointer`;
+      variantStyles = `${categoryStyles.active} shadow-md ring-1 ring-white/20 cursor-pointer active:scale-95`;
     } else {
-      variantStyles = `${categoryStyles.inactive} cursor-pointer`;
+      variantStyles = `${categoryStyles.inactive} hover:brightness-110 cursor-pointer active:scale-95`;
     }
   }
 
   const content = (
     <>
       {variant === 'selectable' && selected && (
-        <Check className="w-3.5 h-3.5 shrink-0 opacity-90" />
+        <Check className="w-3.5 h-3.5 shrink-0 opacity-95 stroke-[2.5]" />
       )}
       {variant === 'badge' && (
         <Tag className="w-3 h-3 shrink-0 opacity-80" />
