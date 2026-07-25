@@ -19,6 +19,7 @@ import { useDeleteSong } from '@/hooks/useDeleteSong';
 import { SONG_KEYS } from '@/lib/songs/queryKeys';
 import { useWakeLock } from '@/hooks/useWakeLock';
 import { getCategoryColor, getCategoryStyles } from '@/lib/uiUtils';
+import { TagPill } from '@/components/ui/TagPill';
 import { recordSongView } from '@/app/actions/recordSongView';
 
 // Enforce a timeout on any promise to prevent infinite loading skeletons
@@ -350,15 +351,15 @@ export default function SongDetailPage() {
                                     </Link>
                                 </p>
                                 {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                                {categories.map((cat: any) => {
-                                    const color = getCategoryColor(cat.slug);
-                                    const styles = getCategoryStyles(color);
-                                    return (
-                                        <Link key={cat.slug} href={`/songs?tag=${encodeURIComponent(cat.slug)}`} className={`px-2.5 py-1 rounded-full text-xs font-bold border transition-colors hover:opacity-80 ${styles.pill}`}>
-                                            {cat.name}
-                                        </Link>
-                                    );
-                                })}
+                                {categories.map((cat: any) => (
+                                    <TagPill
+                                        key={cat.slug}
+                                        label={cat.name}
+                                        categorySlug={cat.slug}
+                                        variant="badge"
+                                        href={`/songs?tag=${encodeURIComponent(cat.slug)}`}
+                                    />
+                                ))}
                             </div>
                         </div>
                     </div>
@@ -457,15 +458,15 @@ export default function SongDetailPage() {
                             {/* Category Tags */}
                             <div className="flex items-center gap-2">
                                 {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                                {categories.map((cat: any) => {
-                                    const color = getCategoryColor(cat.slug);
-                                    const styles = getCategoryStyles(color);
-                                    return (
-                                        <Link key={cat.slug} href={`/songs?tag=${encodeURIComponent(cat.slug)}`} className={`px-2.5 py-1 rounded-full text-xs font-bold border transition-colors hover:opacity-80 ${styles.pill}`}>
-                                            {cat.name}
-                                        </Link>
-                                    );
-                                })}
+                                {categories.map((cat: any) => (
+                                    <TagPill
+                                        key={cat.slug}
+                                        label={cat.name}
+                                        categorySlug={cat.slug}
+                                        variant="badge"
+                                        href={`/songs?tag=${encodeURIComponent(cat.slug)}`}
+                                    />
+                                ))}
                             </div>
                         </div>
                     </div>

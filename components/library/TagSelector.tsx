@@ -1,30 +1,15 @@
 'use client';
 
 import { useState, useRef, useEffect, useMemo } from 'react';
-import { X, Search, ChevronDown, Check } from 'lucide-react';
+import { X, Search, ChevronDown } from 'lucide-react';
 import { TaxonomyNode } from '@/lib/taxonomyUtils';
-import { getCategoryColor, getCategoryStyles } from '@/lib/uiUtils';
-
-const TAILWIND_COLOR_MAP: Record<string, string> = {
-  blue: '#3b82f6',
-  red: '#ef4444',
-  amber: '#f59e0b',
-  sky: '#0ea5e9',
-  emerald: '#10b981',
-  yellow: '#eab308',
-  indigo: '#6366f1',
-  teal: '#14b8a6',
-  purple: '#a855f7',
-  orange: '#f97316',
-  lime: '#84cc16',
-  pink: '#ec4899',
-  gray: '#6b7280',
-};
+import { TagPill } from '@/components/ui/TagPill';
+import { useTaxonomy } from '@/lib/hooks/useTaxonomy';
 
 interface TagSelectorProps {
   category?: string;
   tags: string[];
-  taxonomy: TaxonomyNode[];
+  taxonomy?: TaxonomyNode[];
   onCategoryChange: (slug?: string) => void;
   onTagsChange: (tags: string[]) => void;
   onClearAll: () => void;
@@ -39,13 +24,9 @@ interface TagSelectorProps {
 export default function TagSelector({
   category,
   tags,
-  taxonomy,
   onCategoryChange,
   onTagsChange,
   onClearAll,
-  onSearchChange,
-  searchValue = '',
-  hasActiveFilters = false,
   clearLabel = 'Clear All',
   artist,
   onArtistChange,
@@ -53,45 +34,43 @@ export default function TagSelector({
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const wrapperRef = useRef<HTMLDivElement>(null);
-  const dropdownRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  // Flatten taxonomy for easier searching
-  const allOptions = useMemo(() => {
-    const options: { slug: string; name: string; isCategory: boolean; parentSlug?: string }[] = [];
-    taxonomy.forEach(cat => {
-      options.push({ slug: cat.slug, name: cat.name, isCategory: true });
-      cat.children.forEach(tag => {
-        options.push({ slug: tag.slug, name: tag.name, isCategory: false, parentSlug: cat.slug });
-      });
-    });
-    return options;
-  }, [taxonomy]);
+  const { categories, grouped } = useTaxonomy();
 
-  const filteredOptions = useMemo(() => {
-    const lower = inputValue.toLowerCase();
-    return allOptions.filter(opt => {
-      const matchesInput = !inputValue || opt.name.toLowerCase().includes(lower);
-      const notCurrentCategory = opt.slug !== category;
-      const notInTags = !tags.includes(opt.slug);
-      return matchesInput && notCurrentCategory && notInTags;
-    }).slice(0, 40);
-  }, [allOptions, inputValue, category, tags]);
+  // Selected category objects
+  const selectedTagObjects = useMemo(() => {
+    return categories.filter((c) => tags.includes(c.slug) || tags.includes(c.id));
+  }, [categories, tags]);
 
-  const handleSelect = (option: typeof allOptions[0]) => {
-    if (option.isCategory) {
-      onCategoryChange(option.slug);
+  const selectedCategoryObject = useMemo(() => {
+    return categories.find((c) => c.slug === category || c.id === category);
+  }, [categories, category]);
+
+  // Flattened options for search filter
+  const filteredGrouped = useMemo(() => {
+    if (!inputValue.trim()) return grouped;
+    const term = inputValue.toLowerCase();
+    return grouped
+      .map(({ parentName, categories: groupCats }) => ({
+        parentName,
+        categories: groupCats.filter(
+          (cat) =>
+            cat.name.toLowerCase().includes(term) ||
+            cat.slug.toLowerCase().includes(term) ||
+            parentName.toLowerCase().includes(term)
+        ),
+      }))
+      .filter((group) => group.categories.length > 0);
+  }, [grouped, inputValue]);
+
+  const toggleTagSlug = (slug: string) => {
+    if (tags.includes(slug)) {
+      onTagsChange(tags.filter((t) => t !== slug));
     } else {
-      if (!tags.includes(option.slug)) {
-        onTagsChange([...tags, option.slug]);
-      }
+      onTagsChange([...tags, slug]);
     }
-    setInputValue('');
-    setIsOpen(false);
   };
-
-  const removeCategory = () => onCategoryChange(undefined);
-  const removeTag = (slug: string) => onTagsChange(tags.filter(t => t !== slug));
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -104,145 +83,124 @@ export default function TagSelector({
   }, []);
 
   return (
-    <div className="flex items-center gap-4 relative w-full" ref={wrapperRef}>
+    <div className="space-y-3 relative w-full" ref={wrapperRef}>
+      {/* 1. Search Bar & Active Tag Pills */}
       <div
-        className="flex-1 flex flex-wrap items-center gap-2 bg-white/60 dark:bg-gray-900/40 border border-gray-200/60 dark:border-gray-800/60 rounded-xl py-1.5 px-4 focus-within:bg-white/80 dark:focus-within:bg-gray-900/60 transition-all cursor-text ring-1 ring-gray-900/5 dark:ring-white/5 shadow-inner min-h-[42px]"
+        className="flex flex-wrap items-center gap-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-800 rounded-xl py-2 px-3 focus-within:ring-2 focus-within:ring-red-500/50 transition-all cursor-text min-h-[44px]"
         onClick={() => inputRef.current?.focus()}
       >
-        {/* Category Pill */}
-        {category && (() => {
-          const catOption = allOptions.find(o => o.slug === category);
-          const color = getCategoryColor(category);
-          const style = getCategoryStyles(color);
-          return (
-            <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border transition-all ${style.inactive} animate-in zoom-in-95 duration-200`}>
-              <span className="whitespace-nowrap">CATEGORY: {catOption?.name || category}</span>
-              <button
-                className="hover:text-gray-900 dark:hover:text-white transition-colors"
-                onClick={(e) => { e.stopPropagation(); removeCategory(); }}
-              >
-                <X className="w-2.5 h-2.5" />
-              </button>
-            </div>
-          );
-        })()}
+        <Search className="w-4 h-4 text-gray-400 shrink-0" />
 
-        {/* Artist Pill */}
-        {artist && (() => {
-          const color = 'amber';
-          const style = getCategoryStyles(color);
-          return (
-            <div className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border transition-all ${style.inactive} animate-in zoom-in-95 duration-200`}>
-              <span className="whitespace-nowrap">ARTIST: {artist}</span>
-              <button
-                className="hover:text-gray-900 dark:hover:text-white transition-colors"
-                onClick={(e) => { e.stopPropagation(); onArtistChange?.(undefined); }}
-              >
-                <X className="w-2.5 h-2.5" />
-              </button>
-            </div>
-          );
-        })()}
+        {/* Selected Category Pill */}
+        {category && (
+          <TagPill
+            label={`Category: ${selectedCategoryObject?.name || category}`}
+            categorySlug={category}
+            variant="selectable"
+            selected={true}
+            onClick={() => onCategoryChange(undefined)}
+          />
+        )}
 
-        {/* Tag Pills */}
-        {tags.map(tagSlug => {
-          const tagOption = allOptions.find(o => o.slug === tagSlug);
-          // Use the tag's specific color mapping if it exists, otherwise fallback to parent
-          const color = getCategoryColor(tagSlug);
-          const style = getCategoryStyles(color);
+        {/* Selected Artist Pill */}
+        {artist && (
+          <TagPill
+            label={`Artist: ${artist}`}
+            variant="selectable"
+            selected={true}
+            onClick={() => onArtistChange?.(undefined)}
+          />
+        )}
+
+        {/* Selected Tag Pills */}
+        {tags.map((tagSlug) => {
+          const tagObj = categories.find((c) => c.slug === tagSlug || c.id === tagSlug);
           return (
-            <div key={tagSlug} className={`flex items-center gap-1.5 px-2 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border transition-all ${style.inactive} animate-in zoom-in-95 duration-200`}>
-              <span className="whitespace-nowrap">{tagOption?.name || tagSlug}</span>
-              <button
-                className="hover:text-gray-900 dark:hover:text-white transition-colors"
-                onClick={(e) => { e.stopPropagation(); removeTag(tagSlug); }}
-              >
-                <X className="w-2.5 h-2.5" />
-              </button>
-            </div>
+            <TagPill
+              key={tagSlug}
+              label={tagObj?.name || tagSlug}
+              categorySlug={tagObj?.slug || tagSlug}
+              variant="selectable"
+              selected={true}
+              onClick={() => toggleTagSlug(tagSlug)}
+            />
           );
         })}
 
-        {/* Input */}
+        {/* Search Input */}
         <input
           ref={inputRef}
           type="text"
-          className="flex-1 min-w-[120px] bg-transparent border-none outline-none text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-600"
-          placeholder={category || tags.length > 0 || artist ? "" : "Add category or tags..."}
+          className="flex-1 min-w-[140px] bg-transparent border-none outline-none text-xs text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
+          placeholder={
+            category || tags.length > 0 || artist
+              ? 'Add more tags...'
+              : 'Search tags or browse categories below...'
+          }
           value={inputValue}
           onChange={(e) => {
             setInputValue(e.target.value);
             setIsOpen(true);
           }}
           onFocus={() => setIsOpen(true)}
-          onKeyDown={(e) => {
-            if (e.key === 'Enter' && isOpen && filteredOptions.length > 0) {
-              e.preventDefault();
-              handleSelect(filteredOptions[0]);
-            } else if (e.key === 'Backspace' && !inputValue) {
-              if (tags.length > 0) {
-                e.preventDefault();
-                const newTags = [...tags];
-                newTags.pop();
-                onTagsChange(newTags);
-              } else if (artist) {
-                e.preventDefault();
-                onArtistChange?.(undefined);
-              } else if (category) {
-                e.preventDefault();
-                onCategoryChange(undefined);
-              }
-            }
-          }}
         />
 
-        {/* Dropdown Menu */}
-        {isOpen && filteredOptions.length > 0 && (
-          <div
-            ref={dropdownRef}
-            className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl shadow-2xl z-50 overflow-hidden max-h-[250px] overflow-y-auto animate-in fade-in slide-in-from-top-2 duration-200"
+        {(category || tags.length > 0 || artist) && (
+          <button
+            type="button"
+            onClick={onClearAll}
+            className="text-[10px] font-bold text-gray-500 hover:text-red-500 uppercase tracking-wider transition-colors shrink-0 ml-auto"
           >
-            <div className="p-2">
-              {filteredOptions.map(option => {
-                const color = getCategoryColor(option.slug);
-                return (
-                  <button
-                    key={option.slug}
-                    className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-800 flex items-center justify-between group transition-colors"
-                    onClick={() => handleSelect(option)}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div
-                        className="w-2 h-2 rounded-full shadow-[0_0_8px_rgba(0,0,0,0.4)]"
-                        style={{ backgroundColor: TAILWIND_COLOR_MAP[color] || TAILWIND_COLOR_MAP.gray }}
-                      />
-                      <div className="flex flex-col">
-                        <span className="text-sm font-medium text-gray-800 dark:text-gray-200 group-hover:text-gray-900 dark:group-hover:text-white">
-                          {option.name}
-                        </span>
-                        <span className="text-[10px] text-gray-500 uppercase tracking-widest">
-                          {option.isCategory ? 'Category' : 'Tag'}
-                        </span>
-                      </div>
-                    </div>
-                    <ChevronDown className="w-4 h-4 text-gray-300 dark:text-gray-700 opacity-0 group-hover:opacity-100 transition-opacity -rotate-90" />
-                  </button>
-                );
-              })}
-            </div>
-          </div>
+            {clearLabel}
+          </button>
         )}
       </div>
 
-      {/* Clear Button */}
-      {(category || tags.length > 0 || artist || searchValue || hasActiveFilters) && (
-        <button
-          onClick={onClearAll}
-          className="text-[10px] font-bold text-gray-600 hover:text-red-500 uppercase tracking-widest transition-colors flex items-center gap-1.5 px-2"
-        >
-          <X className="w-3 h-3" />
-          {clearLabel}
-        </button>
+      {/* 2. Visual Tag Browser Dropdown */}
+      {isOpen && (
+        <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-xl shadow-2xl z-50 p-4 max-h-[300px] overflow-y-auto space-y-4 animate-in fade-in slide-in-from-top-2 duration-150">
+          <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-2">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500">
+              Browse All Tags by Category
+            </span>
+            <button
+              type="button"
+              onClick={() => setIsOpen(false)}
+              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+            >
+              <X className="w-3.5 h-3.5" />
+            </button>
+          </div>
+
+          {filteredGrouped.map(({ parentName, categories: groupCats }) => (
+            <div key={parentName} className="space-y-1.5">
+              <h5 className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+                {parentName}
+              </h5>
+              <div className="flex flex-wrap gap-1.5">
+                {groupCats.map((cat) => {
+                  const isSelected = tags.includes(cat.slug) || tags.includes(cat.id);
+                  return (
+                    <TagPill
+                      key={cat.id}
+                      label={cat.name}
+                      categorySlug={cat.slug}
+                      variant="selectable"
+                      selected={isSelected}
+                      onClick={() => toggleTagSlug(cat.slug)}
+                    />
+                  );
+                })}
+              </div>
+            </div>
+          ))}
+
+          {filteredGrouped.length === 0 && (
+            <div className="text-center py-4 text-gray-400 text-xs">
+              No tags matching &quot;{inputValue}&quot;.
+            </div>
+          )}
+        </div>
       )}
     </div>
   );
