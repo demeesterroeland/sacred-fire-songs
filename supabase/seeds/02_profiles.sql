@@ -8,7 +8,7 @@ VALUES (
     ),
     (
         'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12',
-        'roel.de.meester+musician@gmail.com',
+        'roel.de.meester+expert@gmail.com',
         'expert',
         'Local Expert'
     ),

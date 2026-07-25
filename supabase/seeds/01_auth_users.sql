@@ -49,7 +49,7 @@ VALUES (
         '00000000-0000-0000-0000-000000000000',
         'authenticated',
         'authenticated',
-        'roel.de.meester+musician@gmail.com',
+        'roel.de.meester+expert@gmail.com',
         extensions.crypt('sacred-fire-dev', extensions.gen_salt('bf')),
         now(),
         now(),
@@ -131,9 +131,9 @@ VALUES (
     (
         gen_random_uuid(),
         'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12',
-        '{"sub":"a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12","email":"roel.de.meester+musician@gmail.com"}',
+        '{"sub":"a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12","email":"roel.de.meester+expert@gmail.com"}',
         'email',
-        'roel.de.meester+musician@gmail.com',
+        'roel.de.meester+expert@gmail.com',
         now(),
         now()
     ),
