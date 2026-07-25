@@ -68,7 +68,8 @@ const fetchSong = async (id: string) => {
           song_category_map (
             categories (
               name,
-              slug
+              slug,
+              emoji
             )
           )
         `)
