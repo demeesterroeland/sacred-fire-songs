@@ -19,6 +19,7 @@ name: E2E (Playwright)
 # NOT — seed those accounts on staging once, or auth.setup will fail.
 
 on:
+  workflow_dispatch:
   push:
     branches:
       - main
