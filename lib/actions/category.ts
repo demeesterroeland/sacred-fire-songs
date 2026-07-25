@@ -40,13 +40,20 @@ export async function getAvailableCategories(): Promise<Category[]> {
     return [];
   }
 
-  return (data as unknown as CategoryRow[]).map((item) => ({
-    id: item.id,
-    name: item.name,
-    slug: item.slug,
-    parent_id: item.parent_id,
-    parent_name: item.parent?.[0]?.name || 'Other'
-  })).sort((a, b) => {
+  return (data as unknown as CategoryRow[]).map((item) => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const rawParent = item.parent as any;
+    const parentObj = Array.isArray(rawParent) ? rawParent[0] : rawParent;
+    const parent_name = parentObj?.name || 'Other';
+
+    return {
+      id: item.id,
+      name: item.name,
+      slug: item.slug,
+      parent_id: item.parent_id,
+      parent_name,
+    };
+  }).sort((a, b) => {
     // Sort by parent name then category name
     if (a.parent_name < b.parent_name) return -1;
     if (a.parent_name > b.parent_name) return 1;

@@ -13,8 +13,8 @@ TO authenticated
 USING (
   is_public = true 
   AND (
-    SELECT role 
+    SELECT role::text 
     FROM public.profiles 
     WHERE id = auth.uid()
-  ) IN ('admin'::public.user_role, 'gatekeeper'::public.user_role)
+  ) IN ('admin', 'gatekeeper')
 );

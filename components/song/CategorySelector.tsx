@@ -3,8 +3,17 @@
 import { useQuery } from '@tanstack/react-query';
 import { getCategoryColor, getCategoryStyles } from '@/lib/uiUtils';
 import { getAvailableCategories, Category } from '@/lib/actions/category';
-import { useState, useMemo } from 'react';
+import { useMemo } from 'react';
 import { Check, Loader2 } from 'lucide-react';
+
+const CATEGORY_ORDER = [
+  'The Elements',
+  'Nature',
+  'Languages',
+  'Lineage & Tradition',
+  'Medicine & Healing',
+  'Spiritual Concepts',
+];
 
 interface CategorySelectorProps {
   selectedIds: string[];
@@ -17,15 +26,23 @@ export default function CategorySelector({ selectedIds, onChange }: CategorySele
     queryFn: getAvailableCategories
   });
 
-  // Group categories by parent
-  const groupedCategories = useMemo(() => {
+  // Group categories by parent and sort groups
+  const sortedGroupEntries = useMemo(() => {
     const groups: Record<string, Category[]> = {};
     categories.forEach(cat => {
       const parent = cat.parent_name || 'Other';
       if (!groups[parent]) groups[parent] = [];
       groups[parent].push(cat);
     });
-    return groups;
+
+    return Object.entries(groups).sort(([aName], [bName]) => {
+      const indexA = CATEGORY_ORDER.indexOf(aName);
+      const indexB = CATEGORY_ORDER.indexOf(bName);
+      if (indexA !== -1 && indexB !== -1) return indexA - indexB;
+      if (indexA !== -1) return -1;
+      if (indexB !== -1) return 1;
+      return aName.localeCompare(bName);
+    });
   }, [categories]);
 
   const toggleCategory = (id: string) => {
@@ -51,7 +68,7 @@ export default function CategorySelector({ selectedIds, onChange }: CategorySele
 
   return (
     <div className="space-y-4 bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg p-4">
-      {Object.entries(groupedCategories).map(([parentName, groupCats]) => (
+      {sortedGroupEntries.map(([parentName, groupCats]) => (
         <div key={parentName} className="space-y-2">
           <h4 className="text-xs font-semibold text-gray-500 uppercase tracking-wider">{parentName}</h4>
           <div className="flex flex-wrap gap-2">
