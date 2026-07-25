@@ -2721,5 +2721,26 @@ This session addressed a critical bug where slow Supabase Auth calls (due to Tai
 - Deleted merged remote branches (`feat/issue-141`, `feat/story-3.4.6-public-playlist-curation`).
 - Audited open-source repository `sacred-fire-songs` — verified 100% clean and free of secrets or internal deployment information.
 
+---
+
+## July 25, 2026 (Category Selector Bugfix, E2E Test Suite Optimization, Release v1.0.1 & VPS Deployment)
+
+### 1. Category Selector Fix (#205 & PR #206)
+- Fixed Supabase PostgREST foreign key join extraction in `lib/actions/category.ts` (`getAvailableCategories()`), handling both object and array representations for parent category names.
+- Added `CATEGORY_ORDER` sorting to `CategorySelector.tsx` to group tags under canonical parent headers (*The Elements*, *Nature*, *Languages*, *Lineage & Tradition*, *Medicine & Healing*, *Spiritual Concepts*).
+- Fixed Postgres enum transaction 55P04 cast error in migration `20260715173000_gatekeeper_public_playlists.sql`.
+
+### 2. E2E Test Suite Optimization (#207 & PR #208)
+- Updated `media-player.spec.ts` drawer trigger logic to support mobile 3-dot overflow menu (`button[aria-label="More actions"]`) and desktop header buttons.
+- Added explicit visibility waiting and force clicks in `recording.spec.ts` to eliminate pointer interception during drawer slide-up animations.
+- Configured project-level headed and headless suites in `playwright.config.ts` so `npm run test:e2e:smart` executes 78 tests in a single unified run with a single HTML report.
+- Disabled unused `Geist_Mono` font preloading in `app/layout.tsx` to eliminate Chrome font preload warnings.
+
+### 3. Release v1.0.1 & VPS Deployment
+- Merged Release Please PR #204, generating changelog and publishing release tag **`v1.0.1`** on GitHub.
+- Deployed latest container image `ghcr.io/demeesterroel/sacred-fire-songs:latest` (`v1.0.1`) to VPS (`<prod-stack>` stack) at `https://prod.example.com`.
+- Updated `engine` submodule pointer in `<parent-project>` repository to trigger automatic Vercel production build for `https://app.example.com`.
+
+
 
 
