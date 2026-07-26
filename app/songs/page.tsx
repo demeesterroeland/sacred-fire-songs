@@ -3,6 +3,9 @@ import SongsPageContent from './SongsPageContent';
 import { fetchSongsServer, fetchCategoryTreeServer, getViewedSongIds } from '@/lib/songs/serverQueries';
 import { createClient } from '@/lib/supabase/server';
 
+// 10-minute (600 seconds) Incremental Static Regeneration (ISR)
+export const revalidate = 600;
+
 export default async function SongsPage() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
