@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { Music, Guitar, Heart } from 'lucide-react';
 import { getCategoryColor, getCategoryStyles } from '@/lib/uiUtils';
+import { TagPill } from '@/components/ui/TagPill';
 import { cn } from '@/lib/utils';
 import { useToggleFavorite } from '@/hooks/useToggleFavorite';
 import { PlaylistPicker } from '@/components/playlists/PlaylistPicker';
@@ -94,19 +95,16 @@ export default function SongCard({
                             </p>
 
                             {/* Categories/Tags */}
-                            <div className="flex flex-wrap items-center gap-2">
-                                {categories.map((cat, idx) => {
-                                    const color = getCategoryColor(cat.slug);
-                                    const style = getCategoryStyles(color);
-                                    return (
-                                        <span
-                                            key={idx}
-                                            className={`text-[10px] px-2 py-0.5 rounded-full ${style.pill}`}
-                                        >
-                                            {cat.name}
-                                        </span>
-                                    );
-                                })}
+                            <div className="flex flex-wrap items-center gap-1.5">
+                                {categories.map((cat, idx) => (
+                                    <TagPill
+                                        key={idx}
+                                        label={cat.name}
+                                        categorySlug={cat.slug}
+                                        emoji={cat.emoji}
+                                        variant="badge"
+                                    />
+                                ))}
                             </div>
                         </div>
 

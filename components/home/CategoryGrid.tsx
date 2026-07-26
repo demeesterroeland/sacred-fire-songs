@@ -7,6 +7,8 @@ import { renderCategoryIcon } from '@/lib/iconUtils';
 import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
 
+import { TagPill } from '@/components/ui/TagPill';
+
 const MOBILE_TAG_LIMIT = 4;
 
 function TagList({ tags }: { tags: { id: string; slug: string; emoji: string | null; name: string }[] }) {
@@ -16,15 +18,15 @@ function TagList({ tags }: { tags: { id: string; slug: string; emoji: string | n
   return (
     <div className="flex flex-wrap gap-1.5 md:gap-2 relative z-10 mt-auto">
       {tags.map((tag, i) => (
-        <Link
+        <TagPill
           key={tag.id}
+          label={tag.name}
+          categorySlug={tag.slug}
+          emoji={tag.emoji || undefined}
+          variant="badge"
           href={`/songs?tag=${tag.slug}`}
-          className={`px-2 py-1 md:px-3 md:py-1.5 rounded-full bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-400 text-[10px] md:text-xs font-medium border border-gray-300 dark:border-gray-700 hover:bg-gray-300 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white transition-all ${
-            !expanded && i >= MOBILE_TAG_LIMIT ? 'hidden md:inline-flex' : ''
-          }`}
-        >
-          {tag.emoji} {tag.name}
-        </Link>
+          className={!expanded && i >= MOBILE_TAG_LIMIT ? '!hidden md:!inline-flex' : ''}
+        />
       ))}
       {overflow > 0 && !expanded && (
         <button
