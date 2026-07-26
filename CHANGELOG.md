@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.2.0](https://github.com/demeesterroel/sacred-fire-songs/compare/v1.1.0...v1.2.0) (2026-07-26)
+
+
+### ✨ New features
+
+* **cache:** configure 10-minute (600s) ISR revalidation for homepage and song library ([#210](https://github.com/demeesterroel/sacred-fire-songs/issues/210)) ([69ef02f](https://github.com/demeesterroel/sacred-fire-songs/commit/69ef02f0318778665582b0e1c83ab6dfddf716f0))
+* **perf:** add automatic HTML benchmark report generator ([#210](https://github.com/demeesterroel/sacred-fire-songs/issues/210)) ([27acaf9](https://github.com/demeesterroel/sacred-fire-songs/commit/27acaf92ad47c663229ca3c0fbc0342aca66ba7a))
+* **perf:** add persistent performance benchmark suite, fixtures, and historical reports ([#210](https://github.com/demeesterroel/sacred-fire-songs/issues/210)) ([d5e19d9](https://github.com/demeesterroel/sacred-fire-songs/commit/d5e19d9e4f950ea05c679fd68ccc3d3cf1a1bfda))
+* **perf:** automatic HTML performance benchmark report generator ([#210](https://github.com/demeesterroel/sacred-fire-songs/issues/210)) ([0fec94a](https://github.com/demeesterroel/sacred-fire-songs/commit/0fec94abdf6d99513ece5966e2758ba6483de26e))
+* **perf:** persistent multi-category performance benchmark suite & historical reporting ([#210](https://github.com/demeesterroel/sacred-fire-songs/issues/210)) ([1aa5251](https://github.com/demeesterroel/sacred-fire-songs/commit/1aa52513e66ad882053507d9f2ed9c38a225b151))
+
+
+### ⚡ Performance
+
+* **cache:** configure 10-minute (600s) ISR revalidation for homepage and song library ([#210](https://github.com/demeesterroel/sacred-fire-songs/issues/210)) ([a0e6401](https://github.com/demeesterroel/sacred-fire-songs/commit/a0e6401f8d592609d367bee81a4bad0ac67fc17b))
+
+
+### 📖 Documentation
+
+* **logbook:** update master-walkthrough.md, master-tasks.md, and master-timetracking.md ([#210](https://github.com/demeesterroel/sacred-fire-songs/issues/210)) ([2e3a1aa](https://github.com/demeesterroel/sacred-fire-songs/commit/2e3a1aa86074117a791a99323d8fffe6fd3bf27a))
+* **rules:** enforce committing logbook artifact updates on feature branch prior to PR merge ([#210](https://github.com/demeesterroel/sacred-fire-songs/issues/210)) ([237cd2d](https://github.com/demeesterroel/sacred-fire-songs/commit/237cd2d448ca69b78dfaff245bc543c63523f15f))
+
 ## [1.1.0](https://github.com/demeesterroel/sacred-fire-songs/compare/v1.0.1...v1.1.0) (2026-07-26)
 
 
