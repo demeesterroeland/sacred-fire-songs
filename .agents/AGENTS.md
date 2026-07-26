@@ -2,6 +2,10 @@
 
 - **Preview Deployment Verification**: Always ask the user to verify the finished development on the preview website before merging any branch to `main`. Do not merge automatically without explicit user confirmation of verification.
 
+# Artifact Synchronization Rule
+
+- **Feature Branch Logbook Sync**: Always commit logbook artifact updates (`master-walkthrough.md`, `master-tasks.md`, `master-timetracking.md`) directly on the feature branch **before** opening a Pull Request or merging to `main`. Never push artifact updates directly to `main`.
+
 # Database Environment Rule
 
 - **Database Separation**:

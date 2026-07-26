@@ -32,5 +32,5 @@ The agent creates/updates these files during a session. See `.brain/README.md` f
 
 ## Rules
 1.  **Initialization**: At the start of a new project workspace or conversation, the Agent should **READ** the files in `doc/logbook/` to initialize its internal state.
-2.  **Sync Trigger**: Run `/sync-artifacts` at the end of a session (before opening a PR or merging to main).
+2.  **Sync Trigger**: Run `/sync-artifacts` and commit all logbook artifact updates (`master-walkthrough.md`, `master-tasks.md`, `master-timetracking.md`) directly on the feature branch **before** opening a Pull Request or merging to `main`.
 3.  **Safety Check**: Never overwrite any of the files `master-walkthrough.md`,`master-tasks.md` or  `master-timetracking.md` with an empty or partial list. ensuring previously completed items are preserved.
