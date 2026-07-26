@@ -1,0 +1,319 @@
+{
+  "updatedAt": "2026-07-26T23:49:46.313Z",
+  "description": "Configurable benchmark target fixtures (25 Random, 10 Media, 5 Longest, 10 Latest, 1 Public Playlist + Songs)",
+  "publicPlaylist": {
+    "id": "eb9efa96-0610-4505-a319-d1279c85f7ff",
+    "title": "Water songs",
+    "description": null,
+    "urlPath": "/library/playlists/eb9efa96-0610-4505-a319-d1279c85f7ff"
+  },
+  "playlistSongs": [
+    {
+      "id": "63c1c090-e3cf-41d3-9640-1ba515598f65",
+      "title": "Agua de vida lluvia"
+    },
+    {
+      "id": "9e1933cf-ccc1-4d69-be29-c941170af906",
+      "title": "Agua Vital"
+    },
+    {
+      "id": "ff4584b7-1a65-4d58-b6a6-c12a5783c82a",
+      "title": "Agua De Estrellas"
+    },
+    {
+      "id": "0912fb3e-5550-4e49-823f-23e4ac8c537e",
+      "title": "Agua transparente"
+    },
+    {
+      "id": "3811c169-b4c0-4db3-9ce3-32a2ae006819",
+      "title": "Águas Claras"
+    },
+    {
+      "id": "8e5f5e6f-6acf-46f6-b48d-9ef5890b4a6f",
+      "title": "Agüita, lluviecita"
+    },
+    {
+      "id": "f02c6307-c9d8-4941-be0f-64e9bed419f0",
+      "title": "Agüita que Vienes"
+    },
+    {
+      "id": "f2069b80-d477-48ba-83dc-1f5da4752bb1",
+      "title": "Aquí en la montaña"
+    },
+    {
+      "id": "487dcd15-7986-4c22-80ac-3130519fa8ce",
+      "title": "El Agua Cambia"
+    },
+    {
+      "id": "2b0214e8-4436-4bdd-9950-60bc0fd35e9d",
+      "title": "Fluyendo al mar"
+    },
+    {
+      "id": "9281296f-6ca9-4a21-b8c5-7da3e4e2272a",
+      "title": "Mãe d´ água"
+    },
+    {
+      "id": "1fec5f7b-d27c-4deb-b717-409a5bb68e50",
+      "title": "Mira como cura el agua"
+    },
+    {
+      "id": "19052c13-80b5-4b65-b0df-bf8d0809f5c3",
+      "title": "Salve salve mamae Oxum"
+    },
+    {
+      "id": "b3821921-b4e6-4aa4-bbac-94997a4807f3",
+      "title": "Salve Rainha do Mar"
+    },
+    {
+      "id": "10f5511e-67e2-46cc-8fbc-a4ad7456d75b",
+      "title": "Sou Filho da Rainha Yemanja"
+    },
+    {
+      "id": "c70e5c6d-f2ca-4c5d-a961-892516400317",
+      "title": "The River Is Flowing"
+    }
+  ],
+  "latestSongs": [
+    {
+      "id": "950b3317-3f57-41f6-ba87-3c4adcbbe215",
+      "title": "Casa de mis abuelos ",
+      "created_at": "2026-07-26T20:12:34.140Z"
+    },
+    {
+      "id": "ccac824b-d6e4-4436-92c5-3a9dfd18a610",
+      "title": "Flor de aleli ",
+      "created_at": "2026-07-26T19:52:03.910Z"
+    },
+    {
+      "id": "97b044c1-2f57-4275-9013-57d2200c4fca",
+      "title": "Nueva Humanidad",
+      "created_at": "2026-07-26T19:26:10.532Z"
+    },
+    {
+      "id": "f54f4385-609b-4c4c-9b9f-e79cb2168b54",
+      "title": "O'er the Land, O'er the Sea",
+      "created_at": "2026-07-26T18:20:41.004Z"
+    },
+    {
+      "id": "cfb75bbf-ebf7-4077-8b4d-359da1d8685f",
+      "title": " O miterio ",
+      "created_at": "2026-07-26T17:00:01.400Z"
+    },
+    {
+      "id": "4dcda9cf-75f6-43c4-9586-bcacde072c45",
+      "title": "Logun Ede",
+      "created_at": "2026-07-26T16:49:41.888Z"
+    },
+    {
+      "id": "644c8e4e-2223-4d6a-817a-19b8ce555e74",
+      "title": "Fecundacion Sagrada ",
+      "created_at": "2026-07-26T15:13:38.354Z"
+    },
+    {
+      "id": "eb7beb4e-3f4c-4f7e-a13d-8cfdb0f33cc1",
+      "title": "Estrella de la manana ",
+      "created_at": "2026-07-26T14:39:52.903Z"
+    },
+    {
+      "id": "0194b320-a4c1-4db1-bb44-2c155da9ed79",
+      "title": " Ciranda de Janaína",
+      "created_at": "2026-07-26T14:22:51.914Z"
+    },
+    {
+      "id": "f3f58c1e-4e20-4076-8d68-fcc37b5fee7a",
+      "title": "Que bien me dijo mi madre",
+      "created_at": "2026-07-26T13:58:07.763Z"
+    }
+  ],
+  "randomSongs": [
+    {
+      "id": "5e951f42-1221-4397-989e-199de01d994c",
+      "title": "Abuelito Fuego"
+    },
+    {
+      "id": "c2126d2a-f027-4f8f-8fab-1a03700561a4",
+      "title": "Todo es Medicina"
+    },
+    {
+      "id": "e1e74435-c575-4bb8-a457-e231089b8319",
+      "title": "Flores en mi camino"
+    },
+    {
+      "id": "1840558e-ef2b-42cf-8aff-ae9746ad4240",
+      "title": "Inti Raymi"
+    },
+    {
+      "id": "687676c7-6ed1-45cd-bb2c-7f98d113d0a8",
+      "title": "Elevo mi canto"
+    },
+    {
+      "id": "04b4f2b7-f279-4914-aad6-1718db81aa10",
+      "title": "Taita Inti Padre Sol"
+    },
+    {
+      "id": "b3821921-b4e6-4aa4-bbac-94997a4807f3",
+      "title": "Salve Rainha do Mar"
+    },
+    {
+      "id": "14a829b9-bcf9-4b17-9824-a18404fe92b3",
+      "title": "LA CANZONE DEL GRANO"
+    },
+    {
+      "id": "f868abc7-9795-427e-9515-45265b2a3178",
+      "title": "Este fuego"
+    },
+    {
+      "id": "1fec5f7b-d27c-4deb-b717-409a5bb68e50",
+      "title": "Mira como cura el agua"
+    },
+    {
+      "id": "f1862e6a-e5b8-4ca3-b6c3-f3620fbb650a",
+      "title": "Ide were were"
+    },
+    {
+      "id": "05ffc543-df87-496e-b47a-464aa050c875",
+      "title": "Ayahuasca Cura"
+    },
+    {
+      "id": "2aaea8a2-e86d-4a4e-b68f-c80384da6c8f",
+      "title": "Sinchi Pakari"
+    },
+    {
+      "id": "18e9a2fa-a975-4666-8b4e-6e3921257bb6",
+      "title": "Mother I Honor You"
+    },
+    {
+      "id": "b74ff78c-d8d9-46e0-b046-fb6c218f8d66",
+      "title": "Te pedimos curacion"
+    },
+    {
+      "id": "ce956df8-ca94-4e5d-8a55-c4e4a8ab6284",
+      "title": "La luz del bosque"
+    },
+    {
+      "id": "cd3f3977-4f61-4795-a338-718659e61d86",
+      "title": "Libero"
+    },
+    {
+      "id": "fe01eb23-6b80-4228-b65e-49d0158b8467",
+      "title": "Mother I Feel You"
+    },
+    {
+      "id": "e55819eb-df3c-4e51-a1e5-33f9f1a0a568",
+      "title": "Core core"
+    },
+    {
+      "id": "59f18113-af3b-4da3-b057-95a3f1ba3060",
+      "title": "Mira todo lo que me encontré"
+    },
+    {
+      "id": "24f33f85-3526-4bae-b3b6-8fa56765a680",
+      "title": "Icaro Sagrado"
+    },
+    {
+      "id": "7f1c3ce6-7583-4408-8511-c6cce99563e7",
+      "title": "Ayahuasca Urcumanta"
+    },
+    {
+      "id": "3659104f-699e-480b-b1ad-f631d9cd8ee4",
+      "title": "Lobos de la tribu"
+    },
+    {
+      "id": "dd5cf62e-6143-413c-b004-3cbc7271e41b",
+      "title": "Inti Taitiku"
+    },
+    {
+      "id": "e2383aa7-4a62-47e7-883a-ca24c667fd2f",
+      "title": "Madre Ayahuasca (Mireia)"
+    }
+  ],
+  "mediaSongs": [
+    {
+      "id": "0194b320-a4c1-4db1-bb44-2c155da9ed79",
+      "title": " Ciranda de Janaína",
+      "youtube_url": "https://www.youtube.com/watch?v=tVFihhqo8jk&t=10s",
+      "soundcloud_url": ""
+    },
+    {
+      "id": "066375c3-db5e-4bf1-aa84-51eeb9bd21f6",
+      "title": "Madre Tierra Temazcal",
+      "youtube_url": null,
+      "soundcloud_url": "https://soundcloud.com/amma-nacer/madre-tierra-temazcal"
+    },
+    {
+      "id": "0cece7f9-8375-4100-a40f-c51000e076ec",
+      "title": "Flor Das Águas",
+      "youtube_url": null,
+      "soundcloud_url": "https://soundcloud.com/yakuruna/flor-das-aguas"
+    },
+    {
+      "id": "135f9feb-ddc2-428a-87e0-3dadb00cd643",
+      "title": "Kas ten po mano sodelį vaikščiojo",
+      "youtube_url": "tAUFzXym088",
+      "soundcloud_url": null
+    },
+    {
+      "id": "1840558e-ef2b-42cf-8aff-ae9746ad4240",
+      "title": "Inti Raymi",
+      "youtube_url": "p013KHSU6Jo",
+      "soundcloud_url": null
+    },
+    {
+      "id": "18aafa70-74b7-45e5-b93a-330e2812359a",
+      "title": "Cuatro Vientos",
+      "youtube_url": "https://www.youtube.com/watch?v=JZ3YP7VUPz8",
+      "soundcloud_url": ""
+    },
+    {
+      "id": "1e664f33-5d26-4ff5-812a-e74c37b98b7b",
+      "title": "Siente la medicina nai ",
+      "youtube_url": "https://www.youtube.com/watch?v=pFDF0Qd0DTU",
+      "soundcloud_url": ""
+    },
+    {
+      "id": "1e6e1109-c6ac-4962-8f82-8a288c2781cb",
+      "title": "Noku Mana",
+      "youtube_url": null,
+      "soundcloud_url": "https://soundcloud.com/curawaka_official/noku-mana"
+    },
+    {
+      "id": "222539da-0b9b-4ce3-925a-ff8ccfb84e0f",
+      "title": "Прекрасное далеко",
+      "youtube_url": "DRYzImN_bDM",
+      "soundcloud_url": null
+    },
+    {
+      "id": "24f33f85-3526-4bae-b3b6-8fa56765a680",
+      "title": "Icaro Sagrado",
+      "youtube_url": null,
+      "soundcloud_url": "https://soundcloud.com/mcabz-1/icaro-sagrado-norma-panduro"
+    }
+  ],
+  "longestSongs": [
+    {
+      "id": "e1ea9013-66b4-486d-9e25-f5962cacdcc9",
+      "title": "Indio Mensageiro",
+      "content_length": 3861
+    },
+    {
+      "id": "950b3317-3f57-41f6-ba87-3c4adcbbe215",
+      "title": "Casa de mis abuelos ",
+      "content_length": 3166
+    },
+    {
+      "id": "386d5554-b0ca-4f57-b2cd-9e7fcc89ae5b",
+      "title": "Yarin di rin din din din",
+      "content_length": 2814
+    },
+    {
+      "id": "05ffc543-df87-496e-b47a-464aa050c875",
+      "title": "Ayahuasca Cura",
+      "content_length": 2289
+    },
+    {
+      "id": "6c90362a-bc9f-4aca-8578-49faa10283ae",
+      "title": "Deusa (Curawaka)",
+      "content_length": 2215
+    }
+  ]
+}
