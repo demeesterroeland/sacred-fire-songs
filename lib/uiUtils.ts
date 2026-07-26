@@ -2,7 +2,7 @@ export const getCategoryColor = (slug: string) => {
   // --- 1. Top-level Categories (Headers) ---
   if (slug === 'the-elements') return 'blue';
   if (slug === 'nature') return 'emerald';
-  if (slug === 'languages') return 'purple';
+  if (slug === 'languages') return 'gray';
   if (slug === 'lineage-tradition') return 'amber';
   if (slug === 'medicine-healing') return 'red';
   if (slug === 'spiritual-concepts') return 'yellow';
@@ -25,19 +25,21 @@ export const getCategoryColor = (slug: string) => {
   if (slug === 'mountain') return 'sky'; // reused with Air, but different category
   if (slug === 'selva') return 'lime';
 
-  // LANGUAGES
-  if (slug === 'spanish') return 'purple';
-  if (slug === 'english') return 'blue';
-  if (slug === 'portuguese') return 'emerald';
-  if (slug === 'quechua-kichwa') return 'teal';
-  if (slug === 'nahuatl') return 'red';
-  if (slug === 'huni-kuin') return 'orange';
-  if (slug === 'german') return 'amber';
-  if (slug === 'belarusian') return 'yellow';
-  if (slug === 'croatian') return 'pink';
-  if (slug === 'italian') return 'sky';
-  if (slug === 'lithuanian') return 'lime';
-  if (slug === 'russian') return 'indigo';
+  // LANGUAGES (Always neutral gray)
+  if (
+    slug === 'spanish' ||
+    slug === 'english' ||
+    slug === 'portuguese' ||
+    slug === 'quechua-kichwa' ||
+    slug === 'nahuatl' ||
+    slug === 'huni-kuin' ||
+    slug === 'german' ||
+    slug === 'belarusian' ||
+    slug === 'croatian' ||
+    slug === 'italian' ||
+    slug === 'lithuanian' ||
+    slug === 'russian'
+  ) return 'gray';
 
   // LINEAGE & TRADITION
   if (slug === 'santo-daime') return 'purple';
