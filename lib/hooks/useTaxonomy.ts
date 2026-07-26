@@ -6,10 +6,10 @@ import { getAvailableCategories, Category } from '@/lib/actions/category';
 export const CATEGORY_ORDER = [
   'The Elements',
   'Nature',
-  'Languages',
   'Lineage & Tradition',
   'Medicine & Healing',
   'Spiritual Concepts',
+  'Languages',
 ];
 
 export interface GroupedCategory {
