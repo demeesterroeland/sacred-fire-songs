@@ -1,114 +1,114 @@
 {
-  "timestamp": "2026-07-26T23:54:12.506Z",
+  "timestamp": "2026-07-26T23:57:24.164Z",
   "fixturesLastUpdated": "2026-07-26T23:49:46.313Z",
   "results": [
     {
       "Category": "Public Playlist Page (\"Water songs\")",
       "Target": "Vercel Cloud (app.example.com)",
       "Sample Size": "1/1",
-      "TTFB Avg (ms)": 398,
-      "TTFB Min (ms)": 398,
-      "TTFB Max (ms)": 398,
-      "Total Load Avg (ms)": 1013
+      "TTFB Avg (ms)": 347,
+      "TTFB Min (ms)": 347,
+      "TTFB Max (ms)": 347,
+      "Total Load Avg (ms)": 643
     },
     {
       "Category": "Public Playlist Page (\"Water songs\")",
       "Target": "VPS (prod.example.com)",
       "Sample Size": "1/1",
-      "TTFB Avg (ms)": 598,
-      "TTFB Min (ms)": 598,
-      "TTFB Max (ms)": 598,
-      "Total Load Avg (ms)": 1488
+      "TTFB Avg (ms)": 92,
+      "TTFB Min (ms)": 92,
+      "TTFB Max (ms)": 92,
+      "Total Load Avg (ms)": 225
     },
     {
       "Category": "Playlist Songs (\"Water songs\" - 16 Songs)",
       "Target": "Vercel Cloud (app.example.com)",
       "Sample Size": "16/16",
-      "TTFB Avg (ms)": 511,
-      "TTFB Min (ms)": 186,
-      "TTFB Max (ms)": 1631,
-      "Total Load Avg (ms)": 519
+      "TTFB Avg (ms)": 321,
+      "TTFB Min (ms)": 202,
+      "TTFB Max (ms)": 1206,
+      "Total Load Avg (ms)": 335
     },
     {
       "Category": "Playlist Songs (\"Water songs\" - 16 Songs)",
       "Target": "VPS (prod.example.com)",
       "Sample Size": "16/16",
-      "TTFB Avg (ms)": 398,
-      "TTFB Min (ms)": 101,
-      "TTFB Max (ms)": 1724,
-      "Total Load Avg (ms)": 462
+      "TTFB Avg (ms)": 193,
+      "TTFB Min (ms)": 83,
+      "TTFB Max (ms)": 493,
+      "Total Load Avg (ms)": 288
     },
     {
       "Category": "Latest 10 Added Songs",
       "Target": "Vercel Cloud (app.example.com)",
       "Sample Size": "10/10",
-      "TTFB Avg (ms)": 601,
-      "TTFB Min (ms)": 241,
-      "TTFB Max (ms)": 1624,
-      "Total Load Avg (ms)": 633
+      "TTFB Avg (ms)": 430,
+      "TTFB Min (ms)": 242,
+      "TTFB Max (ms)": 905,
+      "Total Load Avg (ms)": 442
     },
     {
       "Category": "Latest 10 Added Songs",
       "Target": "VPS (prod.example.com)",
       "Sample Size": "10/10",
-      "TTFB Avg (ms)": 119,
-      "TTFB Min (ms)": 78,
-      "TTFB Max (ms)": 288,
-      "Total Load Avg (ms)": 165
-    },
-    {
-      "Category": "25 Random Songs",
-      "Target": "Vercel Cloud (app.example.com)",
-      "Sample Size": "25/25",
-      "TTFB Avg (ms)": 230,
-      "TTFB Min (ms)": 185,
-      "TTFB Max (ms)": 428,
-      "Total Load Avg (ms)": 239
-    },
-    {
-      "Category": "25 Random Songs",
-      "Target": "VPS (prod.example.com)",
-      "Sample Size": "25/25",
-      "TTFB Avg (ms)": 96,
+      "TTFB Avg (ms)": 103,
       "TTFB Min (ms)": 75,
-      "TTFB Max (ms)": 258,
-      "Total Load Avg (ms)": 124
+      "TTFB Max (ms)": 199,
+      "Total Load Avg (ms)": 166
+    },
+    {
+      "Category": "25 Random Songs",
+      "Target": "Vercel Cloud (app.example.com)",
+      "Sample Size": "25/25",
+      "TTFB Avg (ms)": 269,
+      "TTFB Min (ms)": 192,
+      "TTFB Max (ms)": 940,
+      "Total Load Avg (ms)": 279
+    },
+    {
+      "Category": "25 Random Songs",
+      "Target": "VPS (prod.example.com)",
+      "Sample Size": "25/25",
+      "TTFB Avg (ms)": 94,
+      "TTFB Min (ms)": 76,
+      "TTFB Max (ms)": 244,
+      "Total Load Avg (ms)": 130
     },
     {
       "Category": "10 Media Songs (YT/SoundCloud)",
       "Target": "Vercel Cloud (app.example.com)",
       "Sample Size": "10/10",
-      "TTFB Avg (ms)": 221,
-      "TTFB Min (ms)": 200,
-      "TTFB Max (ms)": 251,
-      "Total Load Avg (ms)": 228
+      "TTFB Avg (ms)": 238,
+      "TTFB Min (ms)": 197,
+      "TTFB Max (ms)": 306,
+      "Total Load Avg (ms)": 244
     },
     {
       "Category": "10 Media Songs (YT/SoundCloud)",
       "Target": "VPS (prod.example.com)",
       "Sample Size": "10/10",
-      "TTFB Avg (ms)": 85,
-      "TTFB Min (ms)": 71,
-      "TTFB Max (ms)": 94,
-      "Total Load Avg (ms)": 117
-    },
-    {
-      "Category": "5 Longest Lyrics Songs",
-      "Target": "Vercel Cloud (app.example.com)",
-      "Sample Size": "5/5",
-      "TTFB Avg (ms)": 258,
-      "TTFB Min (ms)": 209,
-      "TTFB Max (ms)": 356,
-      "Total Load Avg (ms)": 265
-    },
-    {
-      "Category": "5 Longest Lyrics Songs",
-      "Target": "VPS (prod.example.com)",
-      "Sample Size": "5/5",
-      "TTFB Avg (ms)": 84,
-      "TTFB Min (ms)": 79,
-      "TTFB Max (ms)": 89,
+      "TTFB Avg (ms)": 86,
+      "TTFB Min (ms)": 78,
+      "TTFB Max (ms)": 103,
       "Total Load Avg (ms)": 128
+    },
+    {
+      "Category": "5 Longest Lyrics Songs",
+      "Target": "Vercel Cloud (app.example.com)",
+      "Sample Size": "5/5",
+      "TTFB Avg (ms)": 209,
+      "TTFB Min (ms)": 192,
+      "TTFB Max (ms)": 246,
+      "Total Load Avg (ms)": 220
+    },
+    {
+      "Category": "5 Longest Lyrics Songs",
+      "Target": "VPS (prod.example.com)",
+      "Sample Size": "5/5",
+      "TTFB Avg (ms)": 78,
+      "TTFB Min (ms)": 69,
+      "TTFB Max (ms)": 96,
+      "Total Load Avg (ms)": 131
     }
   ]
 }
