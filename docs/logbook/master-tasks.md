@@ -1115,3 +1115,18 @@
     - [x] Write files to `data/extracted_songs/production_db/`
     - [x] Update `.gitignore` to ignore the `production_db/` folder to prevent committing to Git
     - [x] Create Python utility `scripts/compile_songbook.py` utilizing the local `chordpro` CLI tool to generate PDF songbooks
+
+## Session July 26, 2026 (Streamline Tag UX & Universal TagPill Architecture - Issue #210)
+
+- [x] Create universal `<TagPill />` component in `components/ui/TagPill.tsx` supporting `badge`, `filter`, and `selectable` variants with dynamic category colors (`getCategoryColor(slug)`) and database category emojis (`emoji`)
+- [x] Create `useTaxonomy()` hook in `lib/hooks/useTaxonomy.ts` returning parent-grouped categories in canonical `CATEGORY_ORDER`
+- [x] Refactor `CategorySelector.tsx` on `/songs/add` & `/songs/[id]/edit` to a Hybrid Tag Selector (search filter input, selected tags summary bar with "Clear all", clean parent headers without count numbers, real-time live filtering)
+- [x] Refactor `TagSelector.tsx` in Advanced Search Modal to use `<TagPill />` and visual grouped tag dropdown
+- [x] Update Song Detail page (`app/songs/[id]/page.tsx`) to select `emoji` in Supabase query and render dynamic `<TagPill variant="badge" />` badges under song titles
+- [x] Refactor Homepage Category Cards (`CategoryGrid.tsx`) and Song Cards (`SongCard.tsx`) to use `<TagPill />`
+- [x] Enforce neutral gray theme for all Language category headers and language tag pills across the entire application
+- [x] Reposition `Languages` to the 6th block in `CATEGORY_ORDER` for a balanced 3-column Explore grid layout
+- [x] Add 0ms cached category song count calculation (`song_count`) to `getAvailableCategories()` and `fetchCategoryTree()`, displaying song count badges on filter tag pills
+- [x] Verify Next.js production build (`next build`) and 108 unit tests pass cleanly
+- [x] Merge `feat/210-streamline-tag-ux` into `main` on both `sacred-fire-songs` and `<parent-project>` and clean up feature branches
+
