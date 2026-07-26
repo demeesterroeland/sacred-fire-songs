@@ -2761,3 +2761,27 @@ This session addressed a critical bug where slow Supabase Auth calls (due to Tai
 ### 3. Vercel Preview & Main Branch Deployment
 - Merged `feat/210-streamline-tag-ux` into `main` on both `sacred-fire-songs` and `<parent-project>`.
 - Cleaned up local and remote feature tracking branches.
+
+---
+
+## July 27, 2026 (Release v1.1.0, VPS Deployment, Live DB Sync, Security Audit & Performance Benchmarking)
+
+### 1. Release v1.1.0 & VPS Deployment (#209)
+- Merged Release Please PR #209, publishing release tag **`v1.1.0`** and updating `CHANGELOG.md`.
+- Deployed latest container image `ghcr.io/demeesterroel/sacred-fire-songs:latest` (`v1.1.0`) to VPS (`<prod-stack>` at `https://prod.example.com` and `<staging-stack>` at `https://staging.example.com`).
+
+### 2. Live Database Synchronization (Cloud ➔ VPS)
+- Audited live dataset diffs between Supabase Cloud (`app.example.com`) and VPS `supabase-prod-db`. Identified 14 new songs (created by `gnatiuc.snejana@gmail.com`), 2 new registered users, and 2 new setlists.
+- Streamed live database sync from Supabase Cloud directly into VPS `supabase-prod-db` Docker container with `session_replication_role = 'replica'`. Verified 100% data parity (252 songs, 12 users, 12 setlists, 52 categories).
+
+### 3. Security Audit & Vaultwarden Backup Enhancements (#104)
+- Removed hardcoded Supabase Cloud connection strings from `<parent-project>/scripts/test-inspect-song-details.mjs` and `test-check-production-songs.mjs`, moving secrets to git-ignored `.env.production`.
+- Enhanced `stacks/scripts/backup-secrets.sh` with 3-phase diff comparison, colorized line diffs, interactive `[y/N]` validation confirmation, and an explicit VPS hostname check (`ubuntu-8gb-nbg1-1`).
+
+### 4. End-to-End Performance Benchmarking & 10-Minute ISR Caching (#210 & PR #213)
+- Executed live HTTP performance benchmark suite comparing Vercel Edge (`app.example.com`) vs VPS (`prod.example.com`).
+- Verified VPS is **2x to 4.8x FASTER** for database-driven pages (Song Detail TTFB: 107 ms on VPS vs 240 ms on Vercel; Song Library TTFB: 269 ms on VPS vs 628 ms on Vercel).
+- Configured 10-minute (600s) Incremental Static Regeneration (ISR) on `app/page.tsx` and `app/songs/page.tsx` (`export const revalidate = 600;`), and added Traefik Cache-Control headers (`max-age=600`).
+- Reverted direct `main` push, created feature branch `feat/210-configure-10min-cache`, opened PR #213, and merged PR #213 into `main` per the Verification Rule.
+- Updated `engine` submodule pointer in `<parent-project>` to commit `69ef02f`.
+
