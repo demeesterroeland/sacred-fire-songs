@@ -9,6 +9,7 @@ export interface Category {
   emoji?: string;
   parent_id: string | null;
   parent_name?: string;
+  song_count?: number;
 }
 
 export async function getAvailableCategories(): Promise<Category[]> {
@@ -23,9 +24,10 @@ export async function getAvailableCategories(): Promise<Category[]> {
     parent: { name: string }[] | null;
   }
 
-  const { data, error } = await supabase
-    .from('categories')
-    .select(`
+  const [categoriesRes, mapRes] = await Promise.all([
+    supabase
+      .from('categories')
+      .select(`
             id,
             name,
             slug,
@@ -35,15 +37,26 @@ export async function getAvailableCategories(): Promise<Category[]> {
                 name
             )
         `)
-    .not('parent_id', 'is', null)
-    .order('name');
+      .not('parent_id', 'is', null)
+      .order('name'),
+    supabase
+      .from('song_category_map')
+      .select('category_id'),
+  ]);
 
-  if (error) {
-    console.error('Error fetching categories:', error);
+  if (categoriesRes.error) {
+    console.error('Error fetching categories:', categoriesRes.error);
     return [];
   }
 
-  return (data as unknown as CategoryRow[]).map((item) => {
+  const countMap: Record<string, number> = {};
+  if (mapRes.data) {
+    mapRes.data.forEach((row) => {
+      countMap[row.category_id] = (countMap[row.category_id] || 0) + 1;
+    });
+  }
+
+  return (categoriesRes.data as unknown as CategoryRow[]).map((item) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const rawParent = item.parent as any;
     const parentObj = Array.isArray(rawParent) ? rawParent[0] : rawParent;
@@ -56,6 +69,7 @@ export async function getAvailableCategories(): Promise<Category[]> {
       emoji: item.emoji || undefined,
       parent_id: item.parent_id,
       parent_name,
+      song_count: countMap[item.id] || 0,
     };
   }).sort((a, b) => {
     // Sort by parent name then category name

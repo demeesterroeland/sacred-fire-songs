@@ -11,7 +11,7 @@ import { TagPill } from '@/components/ui/TagPill';
 
 const MOBILE_TAG_LIMIT = 4;
 
-function TagList({ tags }: { tags: { id: string; slug: string; emoji: string | null; name: string }[] }) {
+function TagList({ tags }: { tags: { id: string; slug: string; emoji: string | null; name: string; song_count?: number }[] }) {
   const [expanded, setExpanded] = useState(false);
   const overflow = tags.length - MOBILE_TAG_LIMIT;
 
@@ -23,6 +23,7 @@ function TagList({ tags }: { tags: { id: string; slug: string; emoji: string | n
           label={tag.name}
           categorySlug={tag.slug}
           emoji={tag.emoji || undefined}
+          count={tag.song_count}
           variant="badge"
           href={`/songs?tag=${tag.slug}`}
           className={!expanded && i >= MOBILE_TAG_LIMIT ? '!hidden md:!inline-flex' : ''}

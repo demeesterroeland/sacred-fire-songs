@@ -187,6 +187,7 @@ export default function TagSelector({
                       label={cat.name}
                       categorySlug={cat.slug}
                       emoji={cat.emoji}
+                      count={cat.song_count}
                       variant="selectable"
                       selected={isSelected}
                       onClick={() => toggleTagSlug(cat.slug)}
