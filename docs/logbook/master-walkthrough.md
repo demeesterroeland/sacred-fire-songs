@@ -2741,6 +2741,23 @@ This session addressed a critical bug where slow Supabase Auth calls (due to Tai
 - Deployed latest container image `ghcr.io/demeesterroel/sacred-fire-songs:latest` (`v1.0.1`) to VPS (`<prod-stack>` stack) at `https://prod.example.com`.
 - Updated `engine` submodule pointer in `<parent-project>` repository to trigger automatic Vercel production build for `https://app.example.com`.
 
+---
 
+## July 26, 2026 (Streamline Tag UX & Universal TagPill Architecture - #210 & PR #211)
 
+### 1. Universal `<TagPill />` & Hybrid Tag Selector Component (#210)
+- Created universal [`components/ui/TagPill.tsx`](file:///home/roeland/projects/sacred-fire-songs/components/ui/TagPill.tsx) supporting `badge`, `filter`, and `selectable` variants, with dynamic category colors (`getCategoryColor(slug)`) and database category emojis (`emoji`).
+- Created [`lib/hooks/useTaxonomy.ts`](file:///home/roeland/projects/sacred-fire-songs/lib/hooks/useTaxonomy.ts) returning parent-grouped categories in canonical `CATEGORY_ORDER`.
+- Upgraded [`CategorySelector.tsx`](file:///home/roeland/projects/sacred-fire-songs/components/song/CategorySelector.tsx) on `/songs/add` & `/songs/[id]/edit` to a **Hybrid Tag Selector**: search filter input, selected tags summary bar with single-click "Clear all", clean parent headers (no tag count numbers), and real-time live tag filtering.
+- Refactored [`TagSelector.tsx`](file:///home/roeland/projects/sacred-fire-songs/components/library/TagSelector.tsx) in Advanced Search Modal to use `<TagPill />` and a visual grouped tag dropdown.
 
+### 2. Full App-Wide Tag Consistency Unification
+- Updated Song Detail page (`app/songs/[id]/page.tsx`) to select `emoji` in Supabase query and render dynamic `<TagPill variant="badge" />` badges under song titles.
+- Refactored Homepage Category Cards ([`components/home/CategoryGrid.tsx`](file:///home/roeland/projects/sacred-fire-songs/components/home/CategoryGrid.tsx)) and Song Cards ([`components/home/SongCard.tsx`](file:///home/roeland/projects/sacred-fire-songs/components/home/SongCard.tsx)) to use `<TagPill />`.
+- Enforced neutral gray theme for all Language category headers and language tag pills across the entire application.
+- Repositioned `Languages` to the 6th block in `CATEGORY_ORDER` for a balanced 3-column Explore grid layout.
+- Added 0ms cached category song count calculation (`song_count`) to `getAvailableCategories()` and `fetchCategoryTree()`, displaying song count badges on filter tag pills.
+
+### 3. Vercel Preview & Main Branch Deployment
+- Merged `feat/210-streamline-tag-ux` into `main` on both `sacred-fire-songs` and `<parent-project>`.
+- Cleaned up local and remote feature tracking branches.
