@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sacred Fire Songs — Performance Benchmark Report</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Inter', sans-serif; }
+    code, pre { font-family: 'JetBrains Mono', monospace; }
+  </style>
+</head>
+<body class="bg-gray-950 text-gray-100 min-h-screen p-6 md:p-10">
+
+  <div class="max-w-7xl mx-auto space-y-10">
+    <!-- Header -->
+    <header class="border-b border-gray-800 pb-6 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+      <div>
+        <div class="flex items-center gap-3">
+          <span class="text-3xl">⚡</span>
+          <h1 class="text-3xl font-extrabold tracking-tight text-white">Sacred Fire Songs</h1>
+          <span class="bg-amber-500/10 text-amber-400 border border-amber-500/20 text-xs font-semibold px-3 py-1 rounded-full">
+            Performance Benchmark
+          </span>
+        </div>
+        <p class="text-gray-400 text-sm mt-1">
+          Comparing Vercel Edge Cloud (<code class="text-amber-300">app.example.com</code>) vs VPS (<code class="text-amber-300">prod.example.com</code>)
+        </p>
+      </div>
+      <div class="text-left md:text-right text-xs text-gray-400 bg-gray-900 border border-gray-800 px-4 py-2 rounded-xl">
+        <div><span class="text-gray-500">Report Generated:</span> <span class="text-gray-200 font-semibold">7/27/2026, 1:57:24 AM</span></div>
+        <div><span class="text-gray-500">Total Historical Runs:</span> <span class="text-amber-400 font-semibold">2 Runs</span></div>
+      </div>
+    </header>
+
+    <!-- Winner Card Summary -->
+    <section class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div class="bg-gradient-to-br from-emerald-950/40 to-gray-900 border border-emerald-500/30 p-6 rounded-2xl relative overflow-hidden">
+        <div class="text-emerald-400 font-semibold text-xs uppercase tracking-wider mb-2">Overall Winner</div>
+        <div class="text-2xl font-bold text-white flex items-center gap-2">
+          🏆 VPS
+        </div>
+        <p class="text-xs text-gray-400 mt-2">
+          Consistently delivers 2x to 4x faster response times across all database-driven pages.
+        </p>
+      </div>
+
+      <div class="bg-gray-900 border border-gray-800 p-6 rounded-2xl">
+        <div class="text-gray-400 font-semibold text-xs uppercase tracking-wider mb-2">Fastest Song Detail TTFB</div>
+        <div class="text-3xl font-black text-amber-400">
+          78 ms
+        </div>
+        <p class="text-xs text-gray-500 mt-2">Measured on VPS (Longest Lyrics Songs)</p>
+      </div>
+
+      <div class="bg-gray-900 border border-gray-800 p-6 rounded-2xl">
+        <div class="text-gray-400 font-semibold text-xs uppercase tracking-wider mb-2">25-Song Random Avg</div>
+        <div class="text-3xl font-black text-emerald-400 flex items-baseline gap-2">
+          94 ms <span class="text-xs text-gray-400 font-normal">vs 269 ms Vercel</span>
+        </div>
+        <p class="text-xs text-gray-500 mt-2">65% faster server response on VPS</p>
+      </div>
+    </section>
+
+    <!-- Latest Run Results Table -->
+    <section class="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4">
+      <div class="flex justify-between items-center">
+        <h2 class="text-xl font-bold text-white flex items-center gap-2">
+          <span>📊</span> Latest Benchmark Results (7/27/2026)
+        </h2>
+        <span class="text-xs bg-gray-800 text-gray-300 font-mono px-3 py-1 rounded-lg border border-gray-700">
+          Sampled 67 Endpoints
+        </span>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-sm text-gray-300">
+          <thead class="bg-gray-950 text-xs text-gray-400 uppercase border-b border-gray-800">
+            <tr>
+              <th class="py-3 px-4">Benchmark Category</th>
+              <th class="py-3 px-4">Target Environment</th>
+              <th class="py-3 px-4">Sample Size</th>
+              <th class="py-3 px-4">TTFB Avg</th>
+              <th class="py-3 px-4">TTFB Min / Max</th>
+              <th class="py-3 px-4">Total Load Avg</th>
+              <th class="py-3 px-4">Status</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-800/60 font-mono">
+            
+                <tr class="hover:bg-gray-800/40 transition">
+                  <td class="py-3 px-4 font-semibold text-gray-200">Public Playlist Page ("Water songs")</td>
+                  <td class="py-3 px-4">
+                    <span class="inline-flex items-center gap-1.5 font-sans text-xs px-2.5 py-1 rounded-md border bg-sky-500/10 text-sky-400 border-sky-500/20">
+                      ☁️ Vercel Cloud
+                    </span>
+                  </td>
+                  <td class="py-3 px-4 text-gray-400">1/1</td>
+                  <td class="py-3 px-4 font-bold text-amber-300">
+                    347 ms
+                  </td>
+                  <td class="py-3 px-4 text-xs text-gray-400">
+                    347 ms / 347 ms
+                  </td>
+                  <td class="py-3 px-4 text-gray-300">643 ms</td>
+                  <td class="py-3 px-4">
+                    <span class="text-gray-500 text-xs font-sans">Baseline</span>
+                  </td>
+                </tr>
+              
+                <tr class="hover:bg-gray-800/40 transition">
+                  <td class="py-3 px-4 font-semibold text-gray-200">Public Playlist Page ("Water songs")</td>
+                  <td class="py-3 px-4">
+                    <span class="inline-flex items-center gap-1.5 font-sans text-xs px-2.5 py-1 rounded-md border bg-indigo-500/10 text-indigo-400 border-indigo-500/20">
+                      🇩🇪 VPS
+                    </span>
+                  </td>
+                  <td class="py-3 px-4 text-gray-400">1/1</td>
+                  <td class="py-3 px-4 font-bold text-emerald-400">
+                    92 ms
+                  </td>
+                  <td class="py-3 px-4 text-xs text-gray-400">
+                    92 ms / 92 ms
+                  </td>
+                  <td class="py-3 px-4 text-gray-300">225 ms</td>
+                  <td class="py-3 px-4">
+                    <span class="bg-emerald-500/10 text-emerald-400 text-xs px-2 py-0.5 rounded font-sans font-semibold border border-emerald-500/20">🏆 Winner</span>
+                  </td>
+                </tr>
+              
+                <tr class="hover:bg-gray-800/40 transition">
+                  <td class="py-3 px-4 font-semibold text-gray-200">Playlist Songs ("Water songs" - 16 Songs)</td>
+                  <td class="py-3 px-4">
+                    <span class="inline-flex items-center gap-1.5 font-sans text-xs px-2.5 py-1 rounded-md border bg-sky-500/10 text-sky-400 border-sky-500/20">
+                      ☁️ Vercel Cloud
+                    </span>
+                  </td>
+                  <td class="py-3 px-4 text-gray-400">16/16</td>
+                  <td class="py-3 px-4 font-bold text-amber-300">
+                    321 ms
+                  </td>
+                  <td class="py-3 px-4 text-xs text-gray-400">
+                    202 ms / 1206 ms
+                  </td>
+                  <td class="py-3 px-4 text-gray-300">335 ms</td>
+                  <td class="py-3 px-4">
+                    <span class="text-gray-500 text-xs font-sans">Baseline</span>
+                  </td>
+                </tr>
+              
+                <tr class="hover:bg-gray-800/40 transition">
+                  <td class="py-3 px-4 font-semibold text-gray-200">Playlist Songs ("Water songs" - 16 Songs)</td>
+                  <td class="py-3 px-4">
+                    <span class="inline-flex items-center gap-1.5 font-sans text-xs px-2.5 py-1 rounded-md border bg-indigo-500/10 text-indigo-400 border-indigo-500/20">
+                      🇩🇪 VPS
+                    </span>
+                  </td>
+                  <td class="py-3 px-4 text-gray-400">16/16</td>
+                  <td class="py-3 px-4 font-bold text-emerald-400">
+                    193 ms
+                  </td>
+                  <td class="py-3 px-4 text-xs text-gray-400">
+                    83 ms / 493 ms
+                  </td>
+                  <td class="py-3 px-4 text-gray-300">288 ms</td>
+                  <td class="py-3 px-4">
+                    <span class="bg-emerald-500/10 text-emerald-400 text-xs px-2 py-0.5 rounded font-sans font-semibold border border-emerald-500/20">🏆 Winner</span>
+                  </td>
+                </tr>
+              
+                <tr class="hover:bg-gray-800/40 transition">
+                  <td class="py-3 px-4 font-semibold text-gray-200">Latest 10 Added Songs</td>
+                  <td class="py-3 px-4">
+                    <span class="inline-flex items-center gap-1.5 font-sans text-xs px-2.5 py-1 rounded-md border bg-sky-500/10 text-sky-400 border-sky-500/20">
+                      ☁️ Vercel Cloud
+                    </span>
+                  </td>
+                  <td class="py-3 px-4 text-gray-400">10/10</td>
+                  <td class="py-3 px-4 font-bold text-amber-300">
+                    430 ms
+                  </td>
+                  <td class="py-3 px-4 text-xs text-gray-400">
+                    242 ms / 905 ms
+                  </td>
+                  <td class="py-3 px-4 text-gray-300">442 ms</td>
+                  <td class="py-3 px-4">
+                    <span class="text-gray-500 text-xs font-sans">Baseline</span>
+                  </td>
+                </tr>
+              
+                <tr class="hover:bg-gray-800/40 transition">
+                  <td class="py-3 px-4 font-semibold text-gray-200">Latest 10 Added Songs</td>
+                  <td class="py-3 px-4">
+                    <span class="inline-flex items-center gap-1.5 font-sans text-xs px-2.5 py-1 rounded-md border bg-indigo-500/10 text-indigo-400 border-indigo-500/20">
+                      🇩🇪 VPS
+                    </span>
+                  </td>
+                  <td class="py-3 px-4 text-gray-400">10/10</td>
+                  <td class="py-3 px-4 font-bold text-emerald-400">
+                    103 ms
+                  </td>
+                  <td class="py-3 px-4 text-xs text-gray-400">
+                    75 ms / 199 ms
+                  </td>
+                  <td class="py-3 px-4 text-gray-300">166 ms</td>
+                  <td class="py-3 px-4">
+                    <span class="bg-emerald-500/10 text-emerald-400 text-xs px-2 py-0.5 rounded font-sans font-semibold border border-emerald-500/20">🏆 Winner</span>
+                  </td>
+                </tr>
+              
+                <tr class="hover:bg-gray-800/40 transition">
+                  <td class="py-3 px-4 font-semibold text-gray-200">25 Random Songs</td>
+                  <td class="py-3 px-4">
+                    <span class="inline-flex items-center gap-1.5 font-sans text-xs px-2.5 py-1 rounded-md border bg-sky-500/10 text-sky-400 border-sky-500/20">
+                      ☁️ Vercel Cloud
+                    </span>
+                  </td>
+                  <td class="py-3 px-4 text-gray-400">25/25</td>
+                  <td class="py-3 px-4 font-bold text-amber-300">
+                    269 ms
+                  </td>
+                  <td class="py-3 px-4 text-xs text-gray-400">
+                    192 ms / 940 ms
+                  </td>
+                  <td class="py-3 px-4 text-gray-300">279 ms</td>
+                  <td class="py-3 px-4">
+                    <span class="text-gray-500 text-xs font-sans">Baseline</span>
+                  </td>
+                </tr>
+              
+                <tr class="hover:bg-gray-800/40 transition">
+                  <td class="py-3 px-4 font-semibold text-gray-200">25 Random Songs</td>
+                  <td class="py-3 px-4">
+                    <span class="inline-flex items-center gap-1.5 font-sans text-xs px-2.5 py-1 rounded-md border bg-indigo-500/10 text-indigo-400 border-indigo-500/20">
+                      🇩🇪 VPS
+                    </span>
+                  </td>
+                  <td class="py-3 px-4 text-gray-400">25/25</td>
+                  <td class="py-3 px-4 font-bold text-emerald-400">
+                    94 ms
+                  </td>
+                  <td class="py-3 px-4 text-xs text-gray-400">
+                    76 ms / 244 ms
+                  </td>
+                  <td class="py-3 px-4 text-gray-300">130 ms</td>
+                  <td class="py-3 px-4">
+                    <span class="bg-emerald-500/10 text-emerald-400 text-xs px-2 py-0.5 rounded font-sans font-semibold border border-emerald-500/20">🏆 Winner</span>
+                  </td>
+                </tr>
+              
+                <tr class="hover:bg-gray-800/40 transition">
+                  <td class="py-3 px-4 font-semibold text-gray-200">10 Media Songs (YT/SoundCloud)</td>
+                  <td class="py-3 px-4">
+                    <span class="inline-flex items-center gap-1.5 font-sans text-xs px-2.5 py-1 rounded-md border bg-sky-500/10 text-sky-400 border-sky-500/20">
+                      ☁️ Vercel Cloud
+                    </span>
+                  </td>
+                  <td class="py-3 px-4 text-gray-400">10/10</td>
+                  <td class="py-3 px-4 font-bold text-amber-300">
+                    238 ms
+                  </td>
+                  <td class="py-3 px-4 text-xs text-gray-400">
+                    197 ms / 306 ms
+                  </td>
+                  <td class="py-3 px-4 text-gray-300">244 ms</td>
+                  <td class="py-3 px-4">
+                    <span class="text-gray-500 text-xs font-sans">Baseline</span>
+                  </td>
+                </tr>
+              
+                <tr class="hover:bg-gray-800/40 transition">
+                  <td class="py-3 px-4 font-semibold text-gray-200">10 Media Songs (YT/SoundCloud)</td>
+                  <td class="py-3 px-4">
+                    <span class="inline-flex items-center gap-1.5 font-sans text-xs px-2.5 py-1 rounded-md border bg-indigo-500/10 text-indigo-400 border-indigo-500/20">
+                      🇩🇪 VPS
+                    </span>
+                  </td>
+                  <td class="py-3 px-4 text-gray-400">10/10</td>
+                  <td class="py-3 px-4 font-bold text-emerald-400">
+                    86 ms
+                  </td>
+                  <td class="py-3 px-4 text-xs text-gray-400">
+                    78 ms / 103 ms
+                  </td>
+                  <td class="py-3 px-4 text-gray-300">128 ms</td>
+                  <td class="py-3 px-4">
+                    <span class="bg-emerald-500/10 text-emerald-400 text-xs px-2 py-0.5 rounded font-sans font-semibold border border-emerald-500/20">🏆 Winner</span>
+                  </td>
+                </tr>
+              
+                <tr class="hover:bg-gray-800/40 transition">
+                  <td class="py-3 px-4 font-semibold text-gray-200">5 Longest Lyrics Songs</td>
+                  <td class="py-3 px-4">
+                    <span class="inline-flex items-center gap-1.5 font-sans text-xs px-2.5 py-1 rounded-md border bg-sky-500/10 text-sky-400 border-sky-500/20">
+                      ☁️ Vercel Cloud
+                    </span>
+                  </td>
+                  <td class="py-3 px-4 text-gray-400">5/5</td>
+                  <td class="py-3 px-4 font-bold text-amber-300">
+                    209 ms
+                  </td>
+                  <td class="py-3 px-4 text-xs text-gray-400">
+                    192 ms / 246 ms
+                  </td>
+                  <td class="py-3 px-4 text-gray-300">220 ms</td>
+                  <td class="py-3 px-4">
+                    <span class="text-gray-500 text-xs font-sans">Baseline</span>
+                  </td>
+                </tr>
+              
+                <tr class="hover:bg-gray-800/40 transition">
+                  <td class="py-3 px-4 font-semibold text-gray-200">5 Longest Lyrics Songs</td>
+                  <td class="py-3 px-4">
+                    <span class="inline-flex items-center gap-1.5 font-sans text-xs px-2.5 py-1 rounded-md border bg-indigo-500/10 text-indigo-400 border-indigo-500/20">
+                      🇩🇪 VPS
+                    </span>
+                  </td>
+                  <td class="py-3 px-4 text-gray-400">5/5</td>
+                  <td class="py-3 px-4 font-bold text-emerald-400">
+                    78 ms
+                  </td>
+                  <td class="py-3 px-4 text-xs text-gray-400">
+                    69 ms / 96 ms
+                  </td>
+                  <td class="py-3 px-4 text-gray-300">131 ms</td>
+                  <td class="py-3 px-4">
+                    <span class="bg-emerald-500/10 text-emerald-400 text-xs px-2 py-0.5 rounded font-sans font-semibold border border-emerald-500/20">🏆 Winner</span>
+                  </td>
+                </tr>
+              
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Historical Runs List -->
+    <section class="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4">
+      <h2 class="text-xl font-bold text-white flex items-center gap-2">
+        <span>📜</span> Historical Benchmark Run Logs
+      </h2>
+      <p class="text-xs text-gray-400">All JSON benchmark files are stored in <code class="text-amber-400">testing/performance/reports/</code></p>
+
+      <div class="space-y-3">
+        
+          <div class="flex items-center justify-between bg-gray-950 p-4 rounded-xl border border-gray-800 text-xs font-mono">
+            <div>
+              <span class="text-amber-400 font-semibold">2026-07-26T23-57-24-163Z-benchmark.json</span>
+              <span class="text-gray-500 ml-3">(7/27/2026, 1:57:24 AM)</span>
+            </div>
+            <div class="text-gray-400">
+              Fixtures: <span class="text-gray-300">7/27/2026</span>
+            </div>
+          </div>
+        
+          <div class="flex items-center justify-between bg-gray-950 p-4 rounded-xl border border-gray-800 text-xs font-mono">
+            <div>
+              <span class="text-amber-400 font-semibold">2026-07-26T23-54-12-505Z-benchmark.json</span>
+              <span class="text-gray-500 ml-3">(7/27/2026, 1:54:12 AM)</span>
+            </div>
+            <div class="text-gray-400">
+              Fixtures: <span class="text-gray-300">7/27/2026</span>
+            </div>
+          </div>
+        
+      </div>
+    </section>
+  </div>
+
+</body>
+</html>

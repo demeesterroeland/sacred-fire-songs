@@ -21,6 +21,9 @@ fi
 echo "🚀 Executing performance benchmark..."
 node testing/performance/scripts/run-benchmark.mjs
 
+echo "🌐 Generating HTML benchmark report..."
+node testing/performance/scripts/generate-html-report.mjs
+
 echo ""
 echo "✅ Performance benchmark run complete!"
 echo "📁 Historical results are saved in: testing/performance/reports/"
