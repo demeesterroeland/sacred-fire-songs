@@ -4,6 +4,9 @@ import CategoryGrid from "@/components/home/CategoryGrid";
 import LibrarySummary from "@/components/home/LibrarySummary";
 import UpdateLastSeen from "@/components/home/UpdateLastSeen";
 
+// 10-minute (600 seconds) Incremental Static Regeneration (ISR)
+export const revalidate = 600;
+
 export default async function Home() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
