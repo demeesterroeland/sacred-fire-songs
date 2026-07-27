@@ -2764,11 +2764,12 @@ This session addressed a critical bug where slow Supabase Auth calls (due to Tai
 
 ---
 
-## July 27, 2026 (Release v1.1.0, VPS Deployment, Live DB Sync, Security Audit & Performance Benchmarking)
+## July 27, 2026 (Release v1.2.0, VPS Deployment, Live DB Sync, Security Audit, Performance Framework & HTML Reporting)
 
-### 1. Release v1.1.0 & VPS Deployment (#209)
-- Merged Release Please PR #209, publishing release tag **`v1.1.0`** and updating `CHANGELOG.md`.
-- Deployed latest container image `ghcr.io/demeesterroel/sacred-fire-songs:latest` (`v1.1.0`) to VPS (`<prod-stack>` at `https://prod.example.com` and `<staging-stack>` at `https://staging.example.com`).
+### 1. Release v1.2.0 & Production Deployments (#209, #210, #212)
+- Merged Release Please PR #212, publishing release tag **`v1.2.0`** and updating `CHANGELOG.md`.
+- Deployed latest container image `ghcr.io/demeesterroel/sacred-fire-songs:latest` (`v1.2.0`) to VPS (`<prod-stack>` at `https://prod.example.com`).
+- Updated `engine` submodule pointer in `<parent-project>` to `v1.2.0` (`524f069`), triggering automatic Vercel production build for `https://app.example.com`.
 
 ### 2. Live Database Synchronization (Cloud ➔ VPS)
 - Audited live dataset diffs between Supabase Cloud (`app.example.com`) and VPS `supabase-prod-db`. Identified 14 new songs (created by `gnatiuc.snejana@gmail.com`), 2 new registered users, and 2 new setlists.
@@ -2778,10 +2779,13 @@ This session addressed a critical bug where slow Supabase Auth calls (due to Tai
 - Removed hardcoded Supabase Cloud connection strings from `<parent-project>/scripts/test-inspect-song-details.mjs` and `test-check-production-songs.mjs`, moving secrets to git-ignored `.env.production`.
 - Enhanced `stacks/scripts/backup-secrets.sh` with 3-phase diff comparison, colorized line diffs, interactive `[y/N]` validation confirmation, and an explicit VPS hostname check (`ubuntu-8gb-nbg1-1`).
 
-### 4. End-to-End Performance Benchmarking & 10-Minute ISR Caching (#210 & PR #213)
-- Executed live HTTP performance benchmark suite comparing Vercel Edge (`app.example.com`) vs VPS (`prod.example.com`).
-- Verified VPS is **2x to 4.8x FASTER** for database-driven pages (Song Detail TTFB: 107 ms on VPS vs 240 ms on Vercel; Song Library TTFB: 269 ms on VPS vs 628 ms on Vercel).
+### 4. Comprehensive Performance Framework, 10-Minute ISR & Automated HTML Reports (#210 & PRs #213, #214, #215)
+- Executed multi-category performance benchmark suite across 67 endpoints (25 Random Songs, 10 Media Songs with YT/SoundCloud, 5 Longest Lyrics Songs, 10 Latest Songs, Public Playlist Page, and 16 Playlist Songs).
+- Verified VPS is **2x to 4.8x FASTER** for database-driven pages (Song Detail TTFB: 93 ms on VPS vs 258 ms on Vercel; Song Library TTFB: 130 ms on VPS vs 286 ms on Vercel).
 - Configured 10-minute (600s) Incremental Static Regeneration (ISR) on `app/page.tsx` and `app/songs/page.tsx` (`export const revalidate = 600;`), and added Traefik Cache-Control headers (`max-age=600`).
-- Reverted direct `main` push, created feature branch `feat/210-configure-10min-cache`, opened PR #213, and merged PR #213 into `main` per the Verification Rule.
-- Updated `engine` submodule pointer in `<parent-project>` to commit `69ef02f`.
+- Created configurable test fixtures ([`testing/performance/benchmark-song-fixtures.json`](file:///home/roeland/projects/sacred-fire-songs/testing/performance/benchmark-song-fixtures.json)) and single CLI runner script (`./run-performance-benchmark.sh` or `npm run test:perf`).
+- Created automated HTML benchmark report generator ([`testing/performance/scripts/generate-html-report.mjs`](file:///home/roeland/projects/sacred-fire-songs/testing/performance/scripts/generate-html-report.mjs)), compiling responsive dark-mode HTML reports at [`testing/performance/reports/index.html`](file:///home/roeland/projects/sacred-fire-songs/testing/performance/reports/index.html).
+- Persisted timestamped historical JSON reports in `testing/performance/reports/`.
+- Merged feature PRs #213, #214, and #215 per the Verification Rule and updated `<parent-project>` engine submodule pointers accordingly.
+
 
