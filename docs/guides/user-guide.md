@@ -85,7 +85,7 @@ Sacred Fire Songs is a Progressive Web App (PWA). Any song you view while online
 
 ### 4.1 How to Install on iOS (Safari Web Browser)
 
-1. Open **Safari** on your iPhone and navigate to `https://app.example.com`.
+1. Open **Safari** on your iPhone and navigate to your deployed app domain (e.g. `https://your-songbook-app.com`).
 2. Tap the **Share** button (the square icon with an arrow pointing up) in the bottom navigation bar.
 3. Scroll down the share sheet and tap **Add to Home Screen**.
 4. Confirm the name of the app and tap **Add** in the top right corner. The app icon will now appear on your home screen.
@@ -94,7 +94,7 @@ Sacred Fire Songs is a Progressive Web App (PWA). Any song you view while online
 
 ### 4.2 How to Install on Android (Google Chrome Web Browser)
 
-1. Open **Google Chrome** on your Android device and navigate to `https://app.example.com`.
+1. Open **Google Chrome** on your Android device and navigate to your deployed app domain (e.g. `https://your-songbook-app.com`).
 2. Tap the **Three-Dot Menu** icon in the top right corner of the screen.
 3. Select **Install app** (or **Add to Home Screen** depending on your Android version).
 4. Tap **Install** in the confirmation popup. The app will be added to your app drawer and home screen.

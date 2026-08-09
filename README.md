@@ -6,9 +6,6 @@
 [![Supabase](https://img.shields.io/badge/Supabase-postgres-3FCF8E?logo=supabase)](https://supabase.com/)
 [![Tailwind CSS](https://img.shields.io/badge/Tailwind-v4-38bdf8?logo=tailwindcss)](https://tailwindcss.com/)
 [![PWA](https://img.shields.io/badge/PWA-installable-purple)](https://web.dev/progressive-web-apps/)
-
-**Live app: [app.example.com](https://app.example.com/)**
-
 ---
 
 ## Screenshots
