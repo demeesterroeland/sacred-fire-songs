@@ -2,9 +2,9 @@
 # Sacred Fire Songs — Performance Benchmark Runner
 #
 # Usage:
-#   ./run-performance-benchmark.sh                          # benchmark localhost:3000
-#   BASE_URL=https://my-app.vercel.app ./run-performance-benchmark.sh
-#   SAMPLE_SIZE=30 BASE_URL=http://localhost:3000 ./run-performance-benchmark.sh
+#   ./run-performance-benchmark.sh                              # benchmark localhost:3000
+#   ./run-performance-benchmark.sh https://my-app.vercel.app   # benchmark any URL
+#   ./run-performance-benchmark.sh http://localhost:3000 --sample 30
 #
 # To compare two previous runs:
 #   ./run-performance-benchmark.sh --compare <runId1> <runId2>
@@ -32,9 +32,19 @@ if [ "$1" == "--compare" ]; then
   exit 0
 fi
 
-echo "🚀 Running benchmark against: ${BASE_URL:-http://localhost:3000}"
+# First positional arg is the target URL (optional, defaults to localhost:3000)
+TARGET_URL="${1:-http://localhost:3000}"
+
+# Optional --sample flag: ./run-performance-benchmark.sh <url> --sample 30
+if [ "$2" == "--sample" ] && [ -n "$3" ]; then
+  export SAMPLE_SIZE="$3"
+fi
+
+export BASE_URL="$TARGET_URL"
+
+echo "🚀 Running benchmark against: $BASE_URL"
 node testing/performance/scripts/run-benchmark.mjs
 
 echo ""
 echo "✅ Done! Use the Run ID above with --compare to generate a comparison report."
-echo "   Example: ./run-performance-benchmark.sh --compare <runIdA> <runIdB>"
+echo "   Example: $0 --compare <runIdA> <runIdB>"
