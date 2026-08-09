@@ -20,6 +20,7 @@
 
 import http from 'http';
 import https from 'https';
+import crypto from 'crypto';
 import fs from 'fs';
 import path from 'path';
 import { fileURLToPath } from 'url';
@@ -249,7 +250,7 @@ async function main() {
   }
 
   const timestamp = new Date().toISOString();
-  const runId = timestamp.replace(/[:.]/g, '-');
+  const runId = crypto.randomBytes(4).toString('hex');
   const reportData = {
     runId,
     timestamp,
