@@ -3,11 +3,11 @@
 #
 # Usage:
 #   ./run-performance-benchmark.sh                              # benchmark localhost:3000 (50 songs)
-#   ./run-performance-benchmark.sh https://my-app.vercel.app   # benchmark any URL
+#   ./run-performance-benchmark.sh https://my-app.example.com   # benchmark any URL
 #   ./run-performance-benchmark.sh http://localhost:3000 --sample 30
 #
 #   # Reuse exact same song IDs from a previous run (for fair comparison):
-#   ./run-performance-benchmark.sh https://my-app.vercel.app --reuse <runId>
+#   ./run-performance-benchmark.sh https://my-app.example.com --reuse <runId>
 #
 # List saved run IDs:
 #   ./run-performance-benchmark.sh --list

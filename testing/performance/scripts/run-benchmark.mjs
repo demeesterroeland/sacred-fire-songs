@@ -10,7 +10,7 @@
  *
  * Usage:
  *   BASE_URL=http://localhost:3000 node run-benchmark.mjs
- *   BASE_URL=https://my-deployment.vercel.app node run-benchmark.mjs
+ *   BASE_URL=https://my-deployment.example.com node run-benchmark.mjs
  *
  * Options (env vars):
  *   BASE_URL      Target base URL  (default: http://localhost:3000)
