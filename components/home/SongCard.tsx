@@ -1,9 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { Music, Guitar, Heart } from 'lucide-react';
+import { Music, Guitar, Heart, Mic } from 'lucide-react';
 import { getCategoryColor, getCategoryStyles } from '@/lib/uiUtils';
 import { TagPill } from '@/components/ui/TagPill';
+import { AuthorPill } from '@/components/ui/AuthorPill';
 import { cn } from '@/lib/utils';
 import { useToggleFavorite } from '@/hooks/useToggleFavorite';
 import { PlaylistPicker } from '@/components/playlists/PlaylistPicker';
@@ -17,6 +18,7 @@ interface SongCardProps {
     isPublic?: boolean;
     hasChords?: boolean;
     hasMelody?: boolean;
+    hasPersonalRecording?: boolean;
     isFavorite?: boolean;
     userId?: string;
     categories?: {
@@ -35,6 +37,7 @@ export default function SongCard({
     isPublic = true,
     hasChords = false,
     hasMelody = false,
+    hasPersonalRecording = false,
     isFavorite = false,
     userId,
     categories = []
@@ -91,9 +94,9 @@ export default function SongCard({
                                     </span>
                                 )}
                             </div>
-                            <p className="text-xs text-gray-500 truncate mb-3">
-                                {author || 'Unknown'}
-                            </p>
+                            <div className="mb-3">
+                                <AuthorPill author={author || 'Traditional'} />
+                            </div>
 
                             {/* Categories/Tags */}
                             <div className="flex flex-wrap items-center gap-1.5">
@@ -118,6 +121,11 @@ export default function SongCard({
                             {hasMelody && (
                                 <div className="text-blue-400 mb-1" title="Has Melody">
                                     <Music className="w-3.5 h-3.5" />
+                                </div>
+                            )}
+                            {hasPersonalRecording && (
+                                <div className="text-amber-400 mb-1" title="Personal Rehearsal Recording">
+                                    <Mic className="w-3.5 h-3.5" />
                                 </div>
                             )}
                             {songKey && (

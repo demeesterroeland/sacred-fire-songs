@@ -8,6 +8,7 @@ export interface SongFilterState {
   tags?: string[];        // AND Logic
   chords?: boolean;
   melody?: boolean;
+  myRecordings?: boolean;
   search?: string;
   status: 'all' | 'public' | 'draft';
   favorites?: boolean;
@@ -29,6 +30,7 @@ export function isDraftActive(draft: SongFilterState, userId?: string): boolean 
     (userId && draft.status !== 'all') ||
     draft.chords ||
     draft.melody ||
+    draft.myRecordings ||
     draft.favorites ||
     draft.mine ||
     draft.new ||

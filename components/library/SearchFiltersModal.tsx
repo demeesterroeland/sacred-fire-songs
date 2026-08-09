@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { X, SlidersHorizontal, Guitar, Music, Heart, ChevronDown, Search } from 'lucide-react';
+import { X, SlidersHorizontal, Guitar, Music, Heart, ChevronDown, Search, Mic } from 'lucide-react';
 import TagSelector from '@/components/library/TagSelector';
 import type { TaxonomyNode } from '@/lib/taxonomyUtils';
 import type { SongFilterState } from '@/lib/songs/filterConfig';
@@ -237,6 +237,13 @@ export default function SearchFiltersModal({
                                     label="My Songs"
                                     count={mineCount ? mineCount : undefined}
                                     activeColor="violet"
+                                />
+                                <ToggleCard
+                                    active={!!state.myRecordings}
+                                    onClick={() => setFilter('myRecordings', !state.myRecordings)}
+                                    icon={<Mic className="w-4 h-4" strokeWidth={1.5} />}
+                                    label="My Recordings"
+                                    activeColor="amber"
                                 />
                             </div>
                         </section>

@@ -9,11 +9,12 @@ interface UseSongsFilterOptions {
   songs: Song[];
   userId?: string;
   favoriteIds: Set<string>;
+  userRecordingCompositionIds?: Set<string>;
   viewedSongIds: Set<string>;
   sortBy: string;
 }
 
-export function useSongsFilter({ songs, userId, favoriteIds, viewedSongIds, sortBy }: UseSongsFilterOptions) {
+export function useSongsFilter({ songs, userId, favoriteIds, userRecordingCompositionIds = new Set(), viewedSongIds, sortBy }: UseSongsFilterOptions) {
   const defaultState: SongFilterState = {
     status: userId ? 'all' : 'public',
     search: '',
@@ -21,6 +22,7 @@ export function useSongsFilter({ songs, userId, favoriteIds, viewedSongIds, sort
     tags: [],
     chords: false,
     melody: false,
+    myRecordings: false,
     favorites: false,
     mine: false,
     new: false,
@@ -39,6 +41,7 @@ export function useSongsFilter({ songs, userId, favoriteIds, viewedSongIds, sort
         search: params.get('search') || '',
         chords: params.get('chords') === 'true',
         melody: params.get('melody') === 'true',
+        myRecordings: params.get('myRecordings') === 'true',
         favorites: params.get('favorites') === 'true',
         mine: params.get('mine') === 'true',
         new: params.get('new') === 'true',
@@ -51,6 +54,7 @@ export function useSongsFilter({ songs, userId, favoriteIds, viewedSongIds, sort
         search: state.search || '',
         chords: state.chords ? 'true' : '',
         melody: state.melody ? 'true' : '',
+        myRecordings: state.myRecordings ? 'true' : '',
         favorites: state.favorites ? 'true' : '',
         mine: state.mine ? 'true' : '',
         new: state.new ? 'true' : '',
@@ -60,11 +64,12 @@ export function useSongsFilter({ songs, userId, favoriteIds, viewedSongIds, sort
     }
   );
 
-  // Apply post-filters (favorites, mine, new)
+  // Apply post-filters (favorites, mine, myRecordings, new)
   const finalFilteredItems = useMemo(() => {
     let items = filteredItems;
     if (state.favorites) items = items.filter(s => favoriteIds.has(s.id));
     if (state.mine && userId) items = items.filter(s => s.ownerId === userId);
+    if (state.myRecordings && userId) items = items.filter(s => userRecordingCompositionIds.has(s.id));
     if (state.new) {
       // eslint-disable-next-line react-hooks/purity
       const cutoff = Date.now() - THIRTY_DAYS_MS;
@@ -73,7 +78,7 @@ export function useSongsFilter({ songs, userId, favoriteIds, viewedSongIds, sort
       );
     }
     return items;
-  }, [filteredItems, state.favorites, state.mine, state.new, favoriteIds, viewedSongIds, userId]);
+  }, [filteredItems, state.favorites, state.mine, state.myRecordings, state.new, favoriteIds, userRecordingCompositionIds, viewedSongIds, userId]);
 
   // Sort
   const displaySongs = useMemo(() => {

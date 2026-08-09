@@ -20,6 +20,7 @@ import { SONG_KEYS } from '@/lib/songs/queryKeys';
 import { useWakeLock } from '@/hooks/useWakeLock';
 import { getCategoryColor, getCategoryStyles } from '@/lib/uiUtils';
 import { TagPill } from '@/components/ui/TagPill';
+import { AuthorPill } from '@/components/ui/AuthorPill';
 import { recordSongView } from '@/app/actions/recordSongView';
 
 // Enforce a timeout on any promise to prevent infinite loading skeletons
@@ -299,10 +300,6 @@ export default function SongDetailPage() {
                             {song.title}
                         </span>
                     </div>
-                    {/* Author */}
-                    <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 truncate mt-0.5">
-                        by {song.original_author || 'Traditional'}
-                    </div>
                 </div>
                 {/* 3-dot menu — flex-none so it never shrinks */}
                 <div className="flex-none flex items-center">
@@ -345,12 +342,8 @@ export default function SongDetailPage() {
                                     )}
                                 </div>
                             </div>
-                            <div className="flex items-center gap-3">
-                                <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">by{' '}
-                                    <Link href={`/songs?artist=${encodeURIComponent(song.original_author || 'Traditional')}`} className="hover:text-gray-900 dark:hover:text-white hover:underline transition-colors">
-                                        {song.original_author || 'Traditional'}
-                                    </Link>
-                                </p>
+                            <div className="flex items-center gap-3 flex-wrap">
+                                <AuthorPill author={song.original_author || 'Traditional'} />
                                 {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                                 {categories.map((cat: any) => (
                                     <TagPill
@@ -457,8 +450,9 @@ export default function SongDetailPage() {
                                 )}
                             </div>
 
-                            {/* Category Tags */}
-                            <div className="flex items-center gap-2">
+                            {/* Author & Category Tags */}
+                            <div className="flex items-center gap-2 flex-wrap">
+                                <AuthorPill author={song.original_author || 'Traditional'} />
                                 {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                                 {categories.map((cat: any) => (
                                     <TagPill
