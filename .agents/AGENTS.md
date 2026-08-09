@@ -9,8 +9,8 @@
 # Database Environment Rule
 
 - **Database Separation**:
-  - **Development (DEV)**: Use the locally installed Supabase stack for local development.
-  - **Testing (TEST/E2E)**: Use the isolated testing database (as configured in `.env.test`).
+  - **Development (DEV)**: Use the locally installed Supabase CLI stack (`npx supabase start` at `http://127.0.0.1:54321`) for local development via `.env.local` (`NEXT_PUBLIC_SUPABASE_URL_DEV` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY_DEV`).
+  - **Testing (TEST/E2E)**: Use the isolated testing database (configured in `.env.test`).
   - **Preview**: Auto-deployed per branch/PR — uses the **staging** Supabase project.
   - **Beta**: Self-hosted Docker build, pinned to a commit SHA — uses **staging** Supabase.
   - **Production**: Uses the **production** Supabase project. Never point preview/test environments at prod.
