@@ -1,0 +1,3 @@
+# Benchmark run reports — generated output, not committed
+reports/*.json
+reports/*.html
