@@ -10,7 +10,7 @@ import SongDetailSkeleton from '@/components/song/SongDetailSkeleton';
 import MediaEmbeds from '@/components/song/MediaEmbeds';
 import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal';
 import { useQuery } from '@tanstack/react-query';
-import { Trash2, Edit2, Music, Link as LinkIcon, Heart, MoreVertical, ListPlus, Mic, Share2 } from 'lucide-react';
+import { Trash2, Edit2, Music, Guitar, Heart, MoreVertical, ListPlus, Mic, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
 import RehearsalDrawer from '@/components/song/RehearsalDrawer';
 import { useToggleFavorite } from '@/hooks/useToggleFavorite';
@@ -332,7 +332,7 @@ export default function SongDetailPage() {
                                 <div className="flex items-center gap-2">
                                     {song.has_chords && (
                                         <Link href="/songs?chords=true" className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest shadow-sm bg-amber-500/5 border border-amber-500/30 text-amber-500 hover:bg-amber-500/15 transition-colors">
-                                            <LinkIcon className="w-3 h-3" /> Chords
+                                            <Guitar className="w-3 h-3" /> Chords
                                         </Link>
                                     )}
                                     {song.has_melody && (
@@ -440,7 +440,7 @@ export default function SongDetailPage() {
                             <div className="flex items-center gap-2">
                                 {song.has_chords && (
                                     <Link href="/songs?chords=true" className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest shadow-sm bg-amber-500/5 border border-amber-500/30 text-amber-500 hover:bg-amber-500/15 transition-colors">
-                                        <LinkIcon className="w-3 h-3" /> Chords
+                                        <Guitar className="w-3 h-3" /> Chords
                                     </Link>
                                 )}
                                 {song.has_melody && (
