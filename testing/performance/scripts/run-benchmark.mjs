@@ -28,8 +28,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const reportsDir = path.resolve(__dirname, '../reports');
 
 const BASE_URL = (process.env.BASE_URL || 'http://localhost:3000').replace(/\/$/, '');
-const SAMPLE_SIZE = parseInt(process.env.SAMPLE_SIZE || '20', 10);
+const SAMPLE_SIZE = parseInt(process.env.SAMPLE_SIZE || '50', 10);
 const LABEL = process.env.LABEL || BASE_URL;
+const REUSE_RUN_ID = process.env.REUSE_RUN_ID || null;
 
 // ─── HTTP helpers ─────────────────────────────────────────────────────────────
 
@@ -107,6 +108,25 @@ async function discoverSongIds() {
   return Array.from(ids);
 }
 
+function loadSongIdsFromRun(runId) {
+  const reportPath = path.join(reportsDir, `${runId}.json`);
+  if (!fs.existsSync(reportPath)) {
+    throw new Error(`Cannot reuse run — report not found: ${reportPath}`);
+  }
+  const report = JSON.parse(fs.readFileSync(reportPath, 'utf8'));
+  // Song detail pages are in the third group
+  const songGroup = report.groups.find((g) => g.label.startsWith('Random Song Detail'));
+  if (!songGroup || !songGroup.pages.length) {
+    throw new Error(`Run ${runId} has no song detail pages to reuse.`);
+  }
+  // Extract UUIDs from stored URLs (strip whatever base URL was used)
+  const ids = songGroup.pages
+    .map((p) => { const m = p.url.match(/\/songs\/([a-f0-9-]{36})/); return m ? m[1] : null; })
+    .filter(Boolean);
+  console.log(`\n♻️  Reusing ${ids.length} song IDs from run: ${runId}`);
+  return ids;
+}
+
 function shuffleAndSample(arr, n) {
   const copy = [...arr];
   for (let i = copy.length - 1; i > 0; i--) {
@@ -167,18 +187,26 @@ async function main() {
   console.log('⚡ Sacred Fire Songs — Performance Benchmark');
   console.log('='.repeat(70));
   console.log(`🎯 Target:      ${LABEL}`);
-  console.log(`📊 Sample size: ${SAMPLE_SIZE} random song pages`);
+  if (REUSE_RUN_ID) {
+    console.log(`♻️  Reusing IDs from run: ${REUSE_RUN_ID}`);
+  } else {
+    console.log(`📊 Sample size: ${SAMPLE_SIZE} random song pages`);
+  }
 
-  // Discover song IDs
-  let allIds;
+  // Discover or reuse song IDs
+  let sampledIds;
   try {
-    allIds = await discoverSongIds();
+    if (REUSE_RUN_ID) {
+      // Reuse exact song IDs from a previous run for fair comparison
+      sampledIds = loadSongIdsFromRun(REUSE_RUN_ID);
+    } else {
+      const allIds = await discoverSongIds();
+      sampledIds = shuffleAndSample(allIds, SAMPLE_SIZE);
+    }
   } catch (err) {
     console.error(`\n❌ ${err.message}`);
     process.exit(1);
   }
-
-  const sampledIds = shuffleAndSample(allIds, SAMPLE_SIZE);
 
   // Warm-up pass (uncounted)
   console.log('\n🌡️  Warming up...');
@@ -222,18 +250,18 @@ async function main() {
 
   const timestamp = new Date().toISOString();
   const runId = timestamp.replace(/[:.]/g, '-');
-  const report = {
+  const reportData = {
     runId,
     timestamp,
     label: LABEL,
     baseUrl: BASE_URL,
-    sampleSize: SAMPLE_SIZE,
-    discoveredSongs: allIds.length,
+    sampleSize: sampledIds.length,
+    reusedFromRunId: REUSE_RUN_ID || null,
     groups,
   };
 
   const reportPath = path.join(reportsDir, `${runId}.json`);
-  fs.writeFileSync(reportPath, JSON.stringify(report, null, 2));
+  fs.writeFileSync(reportPath, JSON.stringify(reportData, null, 2));
   console.log(`\n💾 Report saved: testing/performance/reports/${runId}.json`);
   console.log(`\n   Run ID: ${runId}`);
   console.log(`   (Use this ID with generate-html-report.mjs to compare runs)`);

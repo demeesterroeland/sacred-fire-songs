@@ -2,9 +2,12 @@
 # Sacred Fire Songs — Performance Benchmark Runner
 #
 # Usage:
-#   ./run-performance-benchmark.sh                              # benchmark localhost:3000
+#   ./run-performance-benchmark.sh                              # benchmark localhost:3000 (50 songs)
 #   ./run-performance-benchmark.sh https://my-app.vercel.app   # benchmark any URL
 #   ./run-performance-benchmark.sh http://localhost:3000 --sample 30
+#
+#   # Reuse exact same song IDs from a previous run (for fair comparison):
+#   ./run-performance-benchmark.sh https://my-app.vercel.app --reuse <runId>
 #
 # List saved run IDs:
 #   ./run-performance-benchmark.sh --list
@@ -55,14 +58,26 @@ fi
 # First positional arg is the target URL (optional, defaults to localhost:3000)
 TARGET_URL="${1:-http://localhost:3000}"
 
-# Optional --sample flag: ./run-performance-benchmark.sh <url> --sample 30
-if [ "$2" == "--sample" ] && [ -n "$3" ]; then
-  export SAMPLE_SIZE="$3"
-fi
+# Parse optional flags: --sample N  and/or  --reuse <runId>
+shift || true
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --sample)
+      export SAMPLE_SIZE="$2"; shift 2 ;;
+    --reuse)
+      export REUSE_RUN_ID="$2"; shift 2 ;;
+    *)
+      shift ;;
+  esac
+done
 
 export BASE_URL="$TARGET_URL"
 
-echo "🚀 Running benchmark against: $BASE_URL"
+if [ -n "$REUSE_RUN_ID" ]; then
+  echo "🚀 Running benchmark against: $BASE_URL (reusing song IDs from $REUSE_RUN_ID)"
+else
+  echo "🚀 Running benchmark against: $BASE_URL"
+fi
 node testing/performance/scripts/run-benchmark.mjs
 
 echo ""
