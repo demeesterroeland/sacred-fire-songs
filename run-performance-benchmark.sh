@@ -6,10 +6,12 @@
 #   ./run-performance-benchmark.sh https://my-app.vercel.app   # benchmark any URL
 #   ./run-performance-benchmark.sh http://localhost:3000 --sample 30
 #
-# To compare two previous runs:
+# List saved run IDs:
+#   ./run-performance-benchmark.sh --list
+#
+# Compare two previous runs:
 #   ./run-performance-benchmark.sh --compare <runId1> <runId2>
 #
-# Run IDs are printed at the end of each benchmark run.
 
 set -e
 
@@ -19,6 +21,24 @@ cd "$SCRIPT_DIR"
 echo "=========================================================================="
 echo "⚡ Sacred Fire Songs — Performance Benchmark"
 echo "=========================================================================="
+
+if [ "$1" == "--list" ]; then
+  REPORTS_DIR="testing/performance/reports"
+  if [ ! -d "$REPORTS_DIR" ] || [ -z "$(ls "$REPORTS_DIR"/*.json 2>/dev/null)" ]; then
+    echo "No benchmark reports found in $REPORTS_DIR"
+    exit 0
+  fi
+  echo "📋 Available benchmark runs:"
+  echo ""
+  for f in $(ls "$REPORTS_DIR"/*.json 2>/dev/null | sort -r); do
+    RUN_ID=$(basename "$f" .json)
+    LABEL=$(node -e "const d=JSON.parse(require('fs').readFileSync('$f','utf8')); console.log(d.label + '  (' + new Date(d.timestamp).toLocaleString() + ')')" 2>/dev/null || echo "?")
+    echo "  $RUN_ID"
+    echo "    $LABEL"
+  done
+  echo ""
+  exit 0
+fi
 
 if [ "$1" == "--compare" ]; then
   if [ -z "$2" ] || [ -z "$3" ]; then
