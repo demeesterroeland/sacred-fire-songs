@@ -17,12 +17,12 @@
 
 - **Staging Database Activity Check**: If Preview, Beta, or any DEV environment using Supabase staging returns zero songs, **always check first if the staging Supabase project is running** (as it may have been automatically paused due to inactivity).
 
-# Port Convention
+# Repository Isolation Rule
 
-- **Dev server**: Port `3<issue#>` (e.g. issue #187 → port `3187`)
-- **E2E / production build test**: Build first (`next build`), then serve the built output on port `4<issue#>` (e.g. issue #187 → port `4187`)
+`sacred-fire-songs` is a **public open-source project**. It must NEVER contain references to private deployment infrastructure. Specifically:
 
-# Git Submodule Management Rule
-
-- **Submodule Branch Alignment**: The `branch` configuration key in `.gitmodules` for the `engine` submodule inside `<parent-project>` must **always match** the active branch name of the parent `<parent-project>` repository (e.g. branch `feat/xyz` tracks `feat/xyz` in `.gitmodules`, with `main` tracking `main`).
-- **Submodule URL Mapping**: The submodule URL must always be a relative path pointing to `../sacred-fire-songs.git` to ensure compatibility across all remote and staging build environments.
+- **No private hostnames**: Do not mention `app.example.com`, `prod.example.com`, `staging.example.com`, or any VPS/<hosting-provider> domain.
+- **No parent project references**: Do not mention `<parent-project>` in issues, comments, docs, or code.
+- **No Vercel project names or URLs**: Keep all Vercel-specific deployment config out of this repo.
+- **No deployment performance scripts**: Benchmark scripts targeting live production/staging endpoints belong in `<parent-project>/testing/performance/`, not here.
+- **Allowed**: Unit tests, Playwright E2E tests, local Supabase dev setup, and generic open-source documentation.

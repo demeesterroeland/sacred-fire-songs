@@ -16,3 +16,11 @@
 - [x] Close completed GitHub Issues (#202, #197, #171, #168, #183, #141)
 - [x] Create and transfer performance benchmark chore issue to infrastructure repository
 - [x] Delete merged remote branches (`feat/issue-141`, `feat/story-3.4.6-public-playlist-curation`)
+- [x] Investigate email authentication service issue after VPS migration
+- [x] Add SMTP configuration (`smtp.gmail.com:587`) to `supabase-prod` and `supabase-preview` environment variables
+- [x] Correct `SITE_URL`, `API_EXTERNAL_URL`, and `ADDITIONAL_REDIRECT_URLS` for `supabase-prod` and `supabase-preview` GoTrue stacks
+- [x] Connect `auth` service in `supabase-prod` and `supabase-preview` docker-compose stacks to `proxy` network to allow outbound SMTP traffic
+- [x] Fix Traefik v3 `HostRegexp` rule for `<staging-stack>` to allow access on `https://staging.example.com`
+- [x] Verify PREVIEW app (`<staging-stack>`) is running latest image `ghcr.io/demeesterroel/sacred-fire-songs:latest`
+- [x] Verify PREVIEW DB (`supabase-preview-db`) is populated with 80 compositions and 4 test seed users
+- [x] Verify email authentication (magic link and password recovery) succeeds on PREVIEW and PROD environments
