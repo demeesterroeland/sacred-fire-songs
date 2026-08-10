@@ -49,11 +49,33 @@ jobs:
             type=raw,value=${{ steps.semver.outputs.value }},enable=${{ github.event_name == 'release' }}
             type=raw,value=${{ inputs.version }},enable=${{ github.event_name == 'workflow_dispatch' && inputs.version != '' }}
 
-      - name: Build and push
+      - name: Build and push app image
         uses: docker/build-push-action@v6
         with:
           context: .
           push: true
           tags: ${{ steps.meta.outputs.tags }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Extract Docker metadata for Migrator
+        id: meta-migrator
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/demeesterroel/sacred-fire-songs-migrator
+          tags: |
+            type=raw,value=latest,enable={{is_default_branch}}
+            type=sha,prefix=,format=short,enable={{is_default_branch}}
+            type=raw,value={{tag}},enable=${{ github.event_name == 'release' }}
+            type=raw,value=${{ steps.semver.outputs.value }},enable=${{ github.event_name == 'release' }}
+            type=raw,value=${{ inputs.version }},enable=${{ github.event_name == 'workflow_dispatch' && inputs.version != '' }}
+
+      - name: Build and push migrator image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile.migrator
+          push: true
+          tags: ${{ steps.meta-migrator.outputs.tags }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
