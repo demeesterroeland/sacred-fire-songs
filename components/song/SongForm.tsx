@@ -338,6 +338,8 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
             }
             queryClient.invalidateQueries({ queryKey: SONG_KEYS.all() });
             queryClient.invalidateQueries({ queryKey: SONG_KEYS.detail(id) });
+            // Bust global filter counts (chords/melody/mine may have changed)
+            queryClient.invalidateQueries({ queryKey: SONG_KEYS.globalFilterCounts() });
             const returnTo = mode === 'create' ? (searchParams.get('next') || '/') : `/songs/${id}`;
             router.push(returnTo);
         },

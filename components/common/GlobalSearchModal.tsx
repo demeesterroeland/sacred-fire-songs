@@ -10,6 +10,7 @@ import { SONG_KEYS } from '@/lib/songs/queryKeys';
 import SearchFiltersModal from '@/components/library/SearchFiltersModal';
 import type { SongFilterState } from '@/lib/songs/filterConfig';
 import { useRecordingsQuery } from '@/hooks/useRecordingsQuery';
+import { useGlobalFilterCounts } from '@/hooks/useGlobalFilterCounts';
 
 type SortByType = 'title' | 'author' | 'newest';
 
@@ -63,6 +64,9 @@ function GlobalSearchModalInner({
     // Personal recordings count — lightweight query, just the composition IDs
     const { userRecordingCompositionIds } = useRecordingsQuery(userId);
     const recordingsCount = userRecordingCompositionIds.size || undefined;
+
+    // All other filter counts — parallel COUNT queries, no full song list needed
+    const { chordsCount, melodyCount, favoritesCount, mineCount } = useGlobalFilterCounts(userId);
 
     // Local filter state (not URL-synced)
     const [localSearch, setLocalSearch] = useState('');
@@ -146,10 +150,10 @@ function GlobalSearchModalInner({
             sortBy={sortBy}
             setSortBy={setSortBy}
             taxonomy={taxonomy}
-            chordsCount={undefined}
-            melodyCount={undefined}
-            favoritesCount={undefined}
-            mineCount={undefined}
+            chordsCount={chordsCount}
+            melodyCount={melodyCount}
+            favoritesCount={favoritesCount}
+            mineCount={mineCount}
             recordingsCount={recordingsCount}
             hasActiveFilters={hasActiveFilters}
             isAuthenticated={isAuthenticated}

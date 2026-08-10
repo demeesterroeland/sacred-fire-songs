@@ -50,6 +50,8 @@ export function useToggleFavorite(id: string, initialIsFavorite: boolean = false
             }
             // Invalidate the shared favorites cache so every consumer sees fresh data
             queryClient.invalidateQueries({ queryKey: SONG_KEYS.allFavorites() });
+            // Bust the global filter counts so the favoritesCount badge refreshes
+            queryClient.invalidateQueries({ queryKey: SONG_KEYS.globalFilterCounts() });
         }
     };
 

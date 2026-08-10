@@ -26,6 +26,9 @@ export const SONG_KEYS = {
 
     /** Taxonomy / category tree */
     taxonomy: () => ['taxonomy'] as const,
+
+    /** Global filter counts (chords, melody, mine, favorites) used in GlobalSearchModal */
+    globalFilterCounts: (userId?: string) => ['global-filter-counts', userId] as const,
 } as const;
 
 /**
