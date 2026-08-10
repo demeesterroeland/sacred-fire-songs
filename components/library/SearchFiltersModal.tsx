@@ -326,15 +326,15 @@ function ToggleCard({
         <button
             onClick={onClick}
             disabled={disabled}
-            className={`flex items-center gap-3 px-4 py-3 rounded-xl border transition-all text-left ${active
+            className={`flex items-center gap-2.5 px-3.5 py-3 rounded-xl border transition-all text-left min-w-0 ${active
                 ? `${colors.active} shadow-sm`
                 : 'bg-gray-50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-700'
                 } disabled:opacity-40 disabled:cursor-not-allowed`}
         >
-            <span className={active ? colors.icon : ''}>{icon}</span>
-            <span className="text-sm font-semibold">{label}</span>
+            <span className={`shrink-0 ${active ? colors.icon : ''}`}>{icon}</span>
+            <span className="text-sm font-semibold truncate leading-tight flex-1">{label}</span>
             {count !== undefined && (
-                <span className="ml-auto px-1.5 py-0.5 rounded-full bg-gray-200 dark:bg-gray-800 text-gray-500 text-[10px] font-bold">
+                <span className="shrink-0 ml-auto px-1.5 py-0.5 rounded-full bg-gray-200 dark:bg-gray-800 text-gray-500 text-[10px] font-bold">
                     {count}
                 </span>
             )}
