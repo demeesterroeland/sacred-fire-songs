@@ -47,11 +47,17 @@ CREATE TABLE IF NOT EXISTS public.user_recordings (
     song_version_id UUID NOT NULL REFERENCES public.song_versions(id) ON DELETE CASCADE,
     recording_name TEXT NOT NULL,
     storage_path TEXT NOT NULL UNIQUE,
+    position INT NOT NULL DEFAULT 0,
     created_at TIMESTAMPTZ NOT NULL DEFAULT now()
 );
 
 -- Enable RLS on public.user_recordings
 ALTER TABLE public.user_recordings ENABLE ROW LEVEL SECURITY;
+
+-- Allow authenticated users to update their own recording metadata
+DROP POLICY IF EXISTS "Allow users to update their own recordings" ON public.user_recordings;
+CREATE POLICY "Allow users to update their own recordings" ON public.user_recordings FOR
+UPDATE TO authenticated USING (auth.uid() = user_id);
 
 -- Allow authenticated users to select/read their own recording metadata
 DROP POLICY IF EXISTS "Allow users to read their own recordings" ON public.user_recordings;

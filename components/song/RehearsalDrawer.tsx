@@ -1,15 +1,128 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useTransition } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Music, Trash2, Calendar, Play, Pause, Lock, RotateCcw, RotateCw } from "lucide-react";
+import { X, Music, Trash2, Calendar, Play, Pause, Lock, RotateCcw, RotateCw, GripVertical } from "lucide-react";
 import { toast } from "sonner";
 import AudioRecorder from "./AudioRecorder";
-import { getUserRecordings, deleteUserRecording, type UserRecording } from "@/lib/actions/rehearsal";
+import { getUserRecordings, deleteUserRecording, reorderUserRecordings, type UserRecording } from "@/lib/actions/rehearsal";
 import { getYouTubeEmbedUrl, getSpotifyEmbedUrl } from "./MediaEmbeds";
 import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+  SortableContext,
+  sortableKeyboardCoordinates,
+  useSortable,
+  verticalListSortingStrategy,
+  arrayMove,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+
+function SortableRecordingItem({
+  rec,
+  activePlaybackId,
+  deletingId,
+  handleTogglePlay,
+  handleDelete,
+  formatDate,
+  isCustomSort,
+}: {
+  rec: UserRecording;
+  activePlaybackId: string | null;
+  deletingId: string | null;
+  handleTogglePlay: (id: string, url: string | undefined) => void;
+  handleDelete: (id: string, path: string) => void;
+  formatDate: (date: string) => string;
+  isCustomSort: boolean;
+}) {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: rec.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.4 : 1,
+    zIndex: isDragging ? 10 : undefined,
+  };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="flex items-center gap-3 p-4 rounded-2xl bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700 transition-all duration-200 group"
+    >
+      {/* Drag handle (shown when custom sort is active) */}
+      {isCustomSort && (
+        <button
+          {...attributes}
+          {...listeners}
+          className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-grab active:cursor-grabbing touch-none shrink-0 p-1 -ml-1"
+          aria-label="Drag to reorder"
+          title="Drag to reorder"
+        >
+          <GripVertical className="w-4 h-4" />
+        </button>
+      )}
+
+      {/* Play/Pause Button */}
+      <button
+        onClick={() => handleTogglePlay(rec.id, rec.audioUrl)}
+        className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 active:scale-95 shadow-sm shrink-0 ${
+          activePlaybackId === rec.id
+            ? "bg-indigo-600 hover:bg-indigo-500 text-white"
+            : "bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 text-indigo-600 dark:text-indigo-400"
+        }`}
+      >
+        {activePlaybackId === rec.id ? (
+          <Pause className="w-4 h-4 fill-current" />
+        ) : (
+          <Play className="w-4 h-4 fill-current translate-x-0.5" />
+        )}
+      </button>
+
+      {/* Title and date */}
+      <div className="flex-1 min-w-0 text-left">
+        <h4 className="text-sm font-bold text-gray-900 dark:text-white truncate">
+          {rec.recording_name}
+        </h4>
+        <span className="text-[10px] text-gray-400 dark:text-gray-500 flex items-center gap-1.5 mt-0.5 font-medium">
+          <Calendar className="w-3 h-3" />
+          {formatDate(rec.created_at)}
+        </span>
+      </div>
+
+      {/* Delete Button */}
+      <button
+        onClick={() => handleDelete(rec.id, rec.storage_path)}
+        disabled={deletingId === rec.id}
+        className="p-2 rounded-xl text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-all active:scale-95 shrink-0"
+        title="Delete rehearsal"
+      >
+        {deletingId === rec.id ? (
+          <div className="w-4 h-4 border-2 border-red-500/30 border-t-red-500 rounded-full animate-spin" />
+        ) : (
+          <Trash2 className="w-4 h-4" />
+        )}
+      </button>
+    </div>
+  );
+}
 
 interface RehearsalDrawerProps {
   isOpen: boolean;
@@ -107,8 +220,33 @@ export default function RehearsalDrawer({
   }, [youtubeUrl, soundcloudUrl, spotifyUrl, user]);
 
   const [recordings, setRecordings] = useState<UserRecording[]>([]);
-  const [recordingsSort, setRecordingsSort] = useState<"newest" | "oldest" | "title">("newest");
+  const [recordingsSort, setRecordingsSort] = useState<"newest" | "oldest" | "title" | "custom">("newest");
   const [isLoading, setIsLoading] = useState(false);
+  const [isPendingOrder, startOrderTransition] = useTransition();
+
+  const dndSensors = useSensors(
+    useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
+    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = recordings.findIndex((r) => r.id === active.id);
+    const newIndex = recordings.findIndex((r) => r.id === over.id);
+    const reordered = arrayMove(recordings, oldIndex, newIndex);
+
+    setRecordings(reordered);
+    setRecordingsSort("custom");
+
+    startOrderTransition(async () => {
+      const res = await reorderUserRecordings(reordered.map((r) => r.id));
+      if (!res.success) {
+        toast.error("Failed to save recording order");
+      }
+    });
+  };
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [activePlaybackId, setActivePlaybackId] = useState<string | null>(null);
   const [audioElements, setAudioElements] = useState<Record<string, HTMLAudioElement>>({});
@@ -675,12 +813,13 @@ export default function RehearsalDrawer({
                         {recordings.length > 1 && (
                           <select
                             value={recordingsSort}
-                            onChange={(e) => setRecordingsSort(e.target.value as "newest" | "oldest" | "title")}
+                            onChange={(e) => setRecordingsSort(e.target.value as "newest" | "oldest" | "title" | "custom")}
                             className="bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-400 text-[11px] font-medium rounded-lg px-2 py-1 outline-none focus:ring-1 focus:ring-violet-500 transition-colors"
                           >
                             <option value="newest">Newest First</option>
                             <option value="oldest">Oldest First</option>
                             <option value="title">Title (A-Z)</option>
+                            <option value="custom">Custom Order (Drag & Drop)</option>
                           </select>
                         )}
                       </div>
@@ -725,59 +864,41 @@ export default function RehearsalDrawer({
                           </p>
                         </div>
                       ) : (
-                        <div className="space-y-2.5">
-                          {[...recordings].sort((a, b) => {
-                            if (recordingsSort === "oldest") return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-                            if (recordingsSort === "title") return a.recording_name.localeCompare(b.recording_name);
-                            return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-                          }).map((rec) => (
-                            <div
-                              key={rec.id}
-                              className="flex items-center gap-4 p-4 rounded-2xl bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700 transition-all duration-200"
-                            >
-                              {/* Play/Pause Button */}
-                              <button
-                                onClick={() => handleTogglePlay(rec.id, rec.audioUrl)}
-                                className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 active:scale-95 shadow-sm shrink-0 ${
-                                  activePlaybackId === rec.id
-                                    ? "bg-indigo-600 hover:bg-indigo-500 text-white"
-                                    : "bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 text-indigo-600 dark:text-indigo-400"
-                                }`}
-                              >
-                                {activePlaybackId === rec.id ? (
-                                  <Pause className="w-4 h-4 fill-current" />
-                                ) : (
-                                  <Play className="w-4 h-4 fill-current translate-x-0.5" />
-                                )}
-                              </button>
-
-                              {/* Title and date */}
-                              <div className="flex-1 min-w-0 text-left">
-                                <h4 className="text-sm font-bold text-gray-900 dark:text-white truncate">
-                                  {rec.recording_name}
-                                </h4>
-                                <span className="text-[10px] text-gray-400 dark:text-gray-500 flex items-center gap-1.5 mt-0.5 font-medium">
-                                  <Calendar className="w-3 h-3" />
-                                  {formatDate(rec.created_at)}
-                                </span>
-                              </div>
-
-                              {/* Delete Button */}
-                              <button
-                                onClick={() => handleDelete(rec.id, rec.storage_path)}
-                                disabled={deletingId === rec.id}
-                                className="p-2 rounded-xl text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-all active:scale-95 shrink-0"
-                                title="Delete rehearsal"
-                              >
-                                {deletingId === rec.id ? (
-                                  <div className="w-4 h-4 border-2 border-red-500/30 border-t-red-500 rounded-full animate-spin" />
-                                ) : (
-                                  <Trash2 className="w-4 h-4" />
-                                )}
-                              </button>
+                        <DndContext sensors={dndSensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                          <SortableContext
+                            items={(() => {
+                              if (recordingsSort === "custom") return recordings.map((r) => r.id);
+                              return [...recordings].sort((a, b) => {
+                                if (recordingsSort === "oldest") return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+                                if (recordingsSort === "title") return a.recording_name.localeCompare(b.recording_name);
+                                return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+                              }).map((r) => r.id);
+                            })()}
+                            strategy={verticalListSortingStrategy}
+                          >
+                            <div className="space-y-2.5">
+                              {(recordingsSort === "custom"
+                                ? recordings
+                                : [...recordings].sort((a, b) => {
+                                    if (recordingsSort === "oldest") return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+                                    if (recordingsSort === "title") return a.recording_name.localeCompare(b.recording_name);
+                                    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+                                  })
+                              ).map((rec) => (
+                                <SortableRecordingItem
+                                  key={rec.id}
+                                  rec={rec}
+                                  activePlaybackId={activePlaybackId}
+                                  deletingId={deletingId}
+                                  handleTogglePlay={handleTogglePlay}
+                                  handleDelete={handleDelete}
+                                  formatDate={formatDate}
+                                  isCustomSort={recordingsSort === "custom" || recordings.length > 1}
+                                />
+                              ))}
                             </div>
-                          ))}
-                        </div>
+                          </SortableContext>
+                        </DndContext>
                       )}
                     </section>
                   </div>

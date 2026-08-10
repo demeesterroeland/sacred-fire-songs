@@ -6,6 +6,7 @@ export interface UserRecording {
   song_version_id: string;
   recording_name: string;
   storage_path: string;
+  position?: number;
   created_at: string;
   audioUrl?: string; // Resolved temporary signed URL or public URL
 }
@@ -25,6 +26,7 @@ export async function getUserRecordings(songVersionId: string): Promise<UserReco
     .select("*")
     .eq("song_version_id", songVersionId)
     .eq("user_id", user.id)
+    .order("position", { ascending: true })
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -177,4 +179,34 @@ export async function deleteUserRecording(
   }
 
   return true;
+}
+
+// 4. Reorder user recordings
+export async function reorderUserRecordings(
+  orderedRecordingIds: string[]
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return { success: false, error: "Not authenticated" };
+  }
+
+  const updates = orderedRecordingIds.map((id, index) =>
+    supabase
+      .from("user_recordings")
+      .update({ position: index })
+      .eq("id", id)
+      .eq("user_id", user.id)
+  );
+
+  const results = await Promise.all(updates);
+  const hasError = results.some((r) => r.error);
+
+  if (hasError) {
+    console.error("[rehearsal] Error updating recording positions:", results.find((r) => r.error)?.error);
+    return { success: false, error: "Failed to update order" };
+  }
+
+  return { success: true };
 }
