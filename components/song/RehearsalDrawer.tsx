@@ -220,7 +220,6 @@ export default function RehearsalDrawer({
   }, [youtubeUrl, soundcloudUrl, spotifyUrl, user]);
 
   const [recordings, setRecordings] = useState<UserRecording[]>([]);
-  const [recordingsSort, setRecordingsSort] = useState<"newest" | "oldest" | "title" | "custom">("newest");
   const [isLoading, setIsLoading] = useState(false);
   const [isPendingOrder, startOrderTransition] = useTransition();
 
@@ -238,7 +237,6 @@ export default function RehearsalDrawer({
     const reordered = arrayMove(recordings, oldIndex, newIndex);
 
     setRecordings(reordered);
-    setRecordingsSort("custom");
 
     startOrderTransition(async () => {
       const res = await reorderUserRecordings(reordered.map((r) => r.id));
@@ -808,21 +806,7 @@ export default function RehearsalDrawer({
 
                     {/* Saved Practice Takes List */}
                     <section className="mt-6 space-y-3">
-                      <div className="flex items-center justify-between">
-                        <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider text-left">My Recordings</h3>
-                        {recordings.length > 1 && (
-                          <select
-                            value={recordingsSort}
-                            onChange={(e) => setRecordingsSort(e.target.value as "newest" | "oldest" | "title" | "custom")}
-                            className="bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-400 text-[11px] font-medium rounded-lg px-2 py-1 outline-none focus:ring-1 focus:ring-violet-500 transition-colors"
-                          >
-                            <option value="newest">Newest First</option>
-                            <option value="oldest">Oldest First</option>
-                            <option value="title">Title (A-Z)</option>
-                            <option value="custom">Custom Order (Drag & Drop)</option>
-                          </select>
-                        )}
-                      </div>
+                      <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider text-left">My Recordings</h3>
                       
                       {/* Fake practice takes mock list for guest demo preview */}
                       {!user ? (
@@ -866,25 +850,11 @@ export default function RehearsalDrawer({
                       ) : (
                         <DndContext sensors={dndSensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                           <SortableContext
-                            items={(() => {
-                              if (recordingsSort === "custom") return recordings.map((r) => r.id);
-                              return [...recordings].sort((a, b) => {
-                                if (recordingsSort === "oldest") return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-                                if (recordingsSort === "title") return a.recording_name.localeCompare(b.recording_name);
-                                return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-                              }).map((r) => r.id);
-                            })()}
+                            items={recordings.map((r) => r.id)}
                             strategy={verticalListSortingStrategy}
                           >
                             <div className="space-y-2.5">
-                              {(recordingsSort === "custom"
-                                ? recordings
-                                : [...recordings].sort((a, b) => {
-                                    if (recordingsSort === "oldest") return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
-                                    if (recordingsSort === "title") return a.recording_name.localeCompare(b.recording_name);
-                                    return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-                                  })
-                              ).map((rec) => (
+                              {recordings.map((rec) => (
                                 <SortableRecordingItem
                                   key={rec.id}
                                   rec={rec}
@@ -893,7 +863,7 @@ export default function RehearsalDrawer({
                                   handleTogglePlay={handleTogglePlay}
                                   handleDelete={handleDelete}
                                   formatDate={formatDate}
-                                  isCustomSort={recordingsSort === "custom" || recordings.length > 1}
+                                  isCustomSort={recordings.length > 1}
                                 />
                               ))}
                             </div>
