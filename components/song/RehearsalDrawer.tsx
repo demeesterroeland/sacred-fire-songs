@@ -9,6 +9,7 @@ import { getUserRecordings, deleteUserRecording, type UserRecording } from "@/li
 import { getYouTubeEmbedUrl, getSpotifyEmbedUrl } from "./MediaEmbeds";
 import { useAuth } from "@/hooks/useAuth";
 import Link from "next/link";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface RehearsalDrawerProps {
   isOpen: boolean;
@@ -446,10 +447,14 @@ export default function RehearsalDrawer({
     };
   }, [isOpen, songVersionId]);
 
+  const queryClient = useQueryClient();
+
   // Handle new recording saved
   const handleRecordingSaved = (newRecording: UserRecording) => {
     setRecordings((prev) => [newRecording, ...prev]);
     toast.success("Rehearsal recording saved successfully!");
+    queryClient.invalidateQueries({ queryKey: ["user-recordings-compositions"] });
+    queryClient.invalidateQueries({ queryKey: ["global-filter-counts"] });
   };
 
   // Handle delete recording
@@ -465,6 +470,8 @@ export default function RehearsalDrawer({
       if (success) {
         setRecordings((prev) => prev.filter((r) => r.id !== recordingId));
         toast.success("Recording deleted.");
+        queryClient.invalidateQueries({ queryKey: ["user-recordings-compositions"] });
+        queryClient.invalidateQueries({ queryKey: ["global-filter-counts"] });
       } else {
         toast.error("Failed to delete recording.");
       }
