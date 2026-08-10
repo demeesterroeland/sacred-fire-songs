@@ -96,6 +96,8 @@ create table public.user_recordings (
   song_version_id uuid references public.song_versions(id) on delete cascade not null,
   recording_name text not null,
   storage_path text not null unique,
+  position integer default 0,
+  file_size_bytes bigint default 0,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 -- 3. Indexes
