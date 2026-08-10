@@ -79,8 +79,17 @@ export async function uploadRehearsalRecording(
     ? window.crypto.randomUUID() 
     : Math.random().toString(36).substring(2) + Date.now().toString(36);
 
-  const fileExt = blob.type.split(";")[0].split("/")[1] || "webm";
-  const storagePath = `${user.id}/${songVersionId}/${fileId}.${fileExt}`;
+  let rawExt = "webm";
+  if (blob.type) {
+    const mainType = blob.type.split(";")[0];
+    const subType = mainType.split("/")[1];
+    if (subType) {
+      if (subType === "mpeg") rawExt = "mp3";
+      else if (subType === "x-m4a" || subType === "mp4") rawExt = "m4a";
+      else rawExt = subType;
+    }
+  }
+  const storagePath = `${user.id}/${songVersionId}/${fileId}.${rawExt}`;
 
   // Upload blob to Supabase storage rehearsals bucket
   const { error: uploadError } = await supabase.storage
