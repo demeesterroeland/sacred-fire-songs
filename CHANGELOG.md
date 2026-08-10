@@ -1,5 +1,11 @@
 # Changelog
 
+## [1.3.2](https://github.com/demeesterroel/sacred-fire-songs/compare/v1.3.1...v1.3.2) (2026-08-10)
+
+### ✨ New features
+
+* **db:** add file_size_bytes column to user_recordings and capture upload size ([#218](https://github.com/demeesterroel/sacred-fire-songs/issues/218))
+
 ## [1.3.1](https://github.com/demeesterroel/sacred-fire-songs/compare/v1.3.0...v1.3.1) (2026-08-10)
 
 
