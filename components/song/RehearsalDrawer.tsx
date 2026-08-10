@@ -107,6 +107,7 @@ export default function RehearsalDrawer({
   }, [youtubeUrl, soundcloudUrl, spotifyUrl, user]);
 
   const [recordings, setRecordings] = useState<UserRecording[]>([]);
+  const [recordingsSort, setRecordingsSort] = useState<"newest" | "oldest" | "title">("newest");
   const [isLoading, setIsLoading] = useState(false);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [activePlaybackId, setActivePlaybackId] = useState<string | null>(null);
@@ -669,7 +670,20 @@ export default function RehearsalDrawer({
 
                     {/* Saved Practice Takes List */}
                     <section className="mt-6 space-y-3">
-                      <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider text-left">My Recordings</h3>
+                      <div className="flex items-center justify-between">
+                        <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider text-left">My Recordings</h3>
+                        {recordings.length > 1 && (
+                          <select
+                            value={recordingsSort}
+                            onChange={(e) => setRecordingsSort(e.target.value as "newest" | "oldest" | "title")}
+                            className="bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-400 text-[11px] font-medium rounded-lg px-2 py-1 outline-none focus:ring-1 focus:ring-violet-500 transition-colors"
+                          >
+                            <option value="newest">Newest First</option>
+                            <option value="oldest">Oldest First</option>
+                            <option value="title">Title (A-Z)</option>
+                          </select>
+                        )}
+                      </div>
                       
                       {/* Fake practice takes mock list for guest demo preview */}
                       {!user ? (
@@ -712,7 +726,11 @@ export default function RehearsalDrawer({
                         </div>
                       ) : (
                         <div className="space-y-2.5">
-                          {recordings.map((rec) => (
+                          {[...recordings].sort((a, b) => {
+                            if (recordingsSort === "oldest") return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+                            if (recordingsSort === "title") return a.recording_name.localeCompare(b.recording_name);
+                            return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+                          }).map((rec) => (
                             <div
                               key={rec.id}
                               className="flex items-center gap-4 p-4 rounded-2xl bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700 transition-all duration-200"
