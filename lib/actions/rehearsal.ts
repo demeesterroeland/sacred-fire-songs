@@ -84,9 +84,19 @@ export async function uploadRehearsalRecording(
     const mainType = blob.type.split(";")[0];
     const subType = mainType.split("/")[1];
     if (subType) {
-      if (subType === "mpeg") rawExt = "mp3";
-      else if (subType === "x-m4a" || subType === "mp4") rawExt = "m4a";
+      if (subType === "mpeg" || subType === "mp3") rawExt = "mp3";
+      else if (subType === "x-m4a" || subType === "mp4" || subType === "m4a") rawExt = "m4a";
+      else if (subType === "opus") rawExt = "opus";
+      else if (subType === "flac" || subType === "x-flac") rawExt = "flac";
+      else if (subType === "ogg" || subType === "vorbis") rawExt = "ogg";
       else rawExt = subType;
+    }
+  }
+  // Check if blob is a File instance with name extension
+  if ('name' in blob && (blob as File).name.includes('.')) {
+    const nameExt = (blob as File).name.split('.').pop()?.toLowerCase();
+    if (nameExt && ['mp3', 'm4a', 'opus', 'flac', 'wav', 'ogg', 'webm', 'aac'].includes(nameExt)) {
+      rawExt = nameExt;
     }
   }
   const storagePath = `${user.id}/${songVersionId}/${fileId}.${rawExt}`;

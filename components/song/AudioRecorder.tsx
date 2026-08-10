@@ -288,7 +288,7 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
             type="file"
             ref={fileInputRef}
             onChange={handleFileSelect}
-            accept="audio/mp3,audio/mpeg,audio/wav,audio/ogg,audio/m4a,audio/webm,audio/aac,audio/flac"
+            accept="audio/*,.mp3,.wav,.ogg,.m4a,.webm,.opus,.flac,.aac"
             className="hidden"
           />
           <div className="p-3 rounded-full bg-violet-500/10 text-violet-500 mb-2 group-hover:scale-110 transition-transform">
@@ -298,7 +298,7 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
             Click to select an audio file
           </p>
           <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">
-            Supports MP3, WAV, OGG, M4A, WEBM, FLAC (Max 25 MB)
+            Supports MP3, M4A, OPUS, FLAC, WAV, OGG, WEBM (Max 25 MB)
           </p>
         </div>
       )}
