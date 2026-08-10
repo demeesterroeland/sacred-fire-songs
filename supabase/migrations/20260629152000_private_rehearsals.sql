@@ -3,8 +3,9 @@
 
 -- 1. Storage Setup for Private Rehearsals
 -- Create rehearsals bucket (public = false)
-INSERT INTO storage.buckets (id, name, public)
-VALUES ('rehearsals', 'rehearsals', false) ON CONFLICT (id) DO NOTHING;
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES ('rehearsals', 'rehearsals', false, 52428800, NULL)
+ON CONFLICT (id) DO UPDATE SET file_size_limit = EXCLUDED.file_size_limit, allowed_mime_types = EXCLUDED.allowed_mime_types;
 
 -- Allow authenticated users to upload (insert) files to rehearsals inside their own folder
 DROP POLICY IF EXISTS "Allow authenticated users to upload rehearsals" ON storage.objects;
