@@ -151,7 +151,8 @@ function GuestView({ publicPlaylists, publicSongCounts, publicSongTitles }: {
                     <SmartPlaylistCard icon={Heart}   title="My Favorites" description="Your favorited songs, always with you"      subtitle={<span className="text-xs text-gray-500">Sign in to save favorites</span>} accent="rose"   />
                     <SmartPlaylistCard icon={Music}   title="My Songs"     description="Songs you've contributed to the library"    subtitle={<span className="text-xs text-gray-500">Sign in to see your songs</span>} accent="violet" />
                     <SmartPlaylistCard icon={PenLine} title="My Drafts"    description="Your private work-in-progress songs"        subtitle={<span className="text-xs text-gray-500">Sign in to see your drafts</span>} accent="gray"   />
-                    <SmartPlaylistCard icon={Mic}     title="My Recordings" description="Your private rehearsal recordings"       subtitle={<span className="text-xs text-gray-500">Sign in to see your recordings</span>} accent="amber" />
+                    <SmartPlaylistCard icon={Mic} title="My Recordings" description="Your private rehearsal recordings" accent="violet"
+                        subtitle={<span className="text-xs text-gray-500">Sign in to see your recordings</span>} />
                 </div>
             </div>
 
@@ -372,7 +373,7 @@ export default async function PlaylistsPage() {
                         songTitles={myDraftsTitles}
                     />
                     <SmartPlaylistCard
-                        icon={Mic} title="My Recordings" description="Your private rehearsal recordings" accent="amber"
+                        icon={Mic} title="My Recordings" description="Your private rehearsal recordings" accent="violet"
                         href="/songs?myRecordings=true"
                         subtitle={<SongCountSubtitle counts={myRecordingsCounts} emptyLabel="No recordings yet" />}
                         songTitles={myRecordingsTitles}

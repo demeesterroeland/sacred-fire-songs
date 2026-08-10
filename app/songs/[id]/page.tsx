@@ -22,6 +22,7 @@ import { getCategoryColor, getCategoryStyles } from '@/lib/uiUtils';
 import { TagPill } from '@/components/ui/TagPill';
 import { AuthorPill } from '@/components/ui/AuthorPill';
 import { recordSongView } from '@/app/actions/recordSongView';
+import { useRecordingsQuery } from '@/hooks/useRecordingsQuery';
 
 // Enforce a timeout on any promise to prevent infinite loading skeletons
 function withTimeout<T>(promise: Promise<T>, ms: number, errorMessage = "Request timed out"): Promise<T> {
@@ -166,6 +167,10 @@ export default function SongDetailPage() {
         enabled: !!user,
     });
     const { isFav, handleToggle: handleToggleFavorite } = useToggleFavorite(id!, favoriteIds.has(id!));
+
+    // Personal recordings — check if logged-in user has any recordings for this song's composition
+    const { userRecordingCompositionIds } = useRecordingsQuery(user?.id);
+    const hasPersonalRecording = !!id && userRecordingCompositionIds.has(id);
 
     const titleRef = useRef<HTMLSpanElement>(null);
     const [scrollAmount, setScrollAmount] = useState(0);
@@ -340,6 +345,11 @@ export default function SongDetailPage() {
                                             <Music className="w-3 h-3" /> Melody
                                         </Link>
                                     )}
+                                    {hasPersonalRecording && (
+                                        <Link href="/songs?myRecordings=true" className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest shadow-sm bg-violet-500/5 border border-violet-500/30 text-violet-400 hover:bg-violet-500/15 transition-colors">
+                                            <Mic className="w-3 h-3" /> My Recording
+                                        </Link>
+                                    )}
                                 </div>
                             </div>
                             <div className="flex items-center gap-3 flex-wrap">
@@ -446,6 +456,11 @@ export default function SongDetailPage() {
                                 {song.has_melody && (
                                     <Link href="/songs?melody=true" className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest shadow-sm bg-emerald-500/5 border border-emerald-500/30 text-emerald-500 hover:bg-emerald-500/15 transition-colors">
                                         <Music className="w-3 h-3" /> Melody
+                                    </Link>
+                                )}
+                                {hasPersonalRecording && (
+                                    <Link href="/songs?myRecordings=true" className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest shadow-sm bg-violet-500/5 border border-violet-500/30 text-violet-400 hover:bg-violet-500/15 transition-colors">
+                                        <Mic className="w-3 h-3" /> My Recording
                                     </Link>
                                 )}
                             </div>

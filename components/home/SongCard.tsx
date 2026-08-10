@@ -124,7 +124,7 @@ export default function SongCard({
                                 </div>
                             )}
                             {hasPersonalRecording && (
-                                <div className="text-amber-400 mb-1" title="Personal Rehearsal Recording">
+                                <div className="text-violet-400 mb-1" title="Personal Rehearsal Recording">
                                     <Mic className="w-3.5 h-3.5" />
                                 </div>
                             )}

@@ -243,7 +243,7 @@ export default function SearchFiltersModal({
                                     onClick={() => setFilter('myRecordings', !state.myRecordings)}
                                     icon={<Mic className="w-4 h-4" strokeWidth={1.5} />}
                                     label="My Recordings"
-                                    activeColor="amber"
+                                    activeColor="violet"
                                 />
                             </div>
                         </section>
