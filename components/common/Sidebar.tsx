@@ -4,6 +4,7 @@ import { useActivePath } from '@/hooks/useActivePath';
 import { useSidebar } from '@/context/SidebarContext';
 import { NAV_SECTIONS } from '@/lib/navigation';
 import Link from 'next/link';
+import packageJson from '@/package.json';
 
 export default function Sidebar() {
     const { isActive } = useActivePath();
@@ -26,45 +27,54 @@ export default function Sidebar() {
                 }
             }}
         >
-            <div className="pe-6 flex flex-col gap-1 min-h-full">
-                {NAV_SECTIONS.map((section, sIdx) => (
-                    <div key={sIdx}>
-                        {/* Section header */}
-                        {section.label && (
-                            <p className="text-xs font-medium text-gray-400 dark:text-gray-500 ps-7 pt-5 pb-2">
-                                {section.label}
-                            </p>
-                        )}
+            <div className="pe-6 flex flex-col gap-1 min-h-full justify-between pb-6">
+                <div className="flex flex-col gap-1">
+                    {NAV_SECTIONS.map((section, sIdx) => (
+                        <div key={sIdx}>
+                            {/* Section header */}
+                            {section.label && (
+                                <p className="text-xs font-medium text-gray-400 dark:text-gray-500 ps-7 pt-5 pb-2">
+                                    {section.label}
+                                </p>
+                            )}
 
-                        {/* Nav items */}
-                        {section.items.map((item) => {
-                            const active = isActive(item.href, {
-                                exact: 'exact' in item ? item.exact : false,
-                                exclude: 'exclude' in item ? item.exclude : [],
-                            });
-                            const Icon = item.icon;
+                            {/* Nav items */}
+                            {section.items.map((item) => {
+                                const active = isActive(item.href, {
+                                    exact: 'exact' in item ? item.exact : false,
+                                    exclude: 'exclude' in item ? item.exclude : [],
+                                });
+                                const Icon = item.icon;
 
-                            return (
-                                <Link
-                                    key={item.href}
-                                    href={item.href}
-                                    className={`
-                                        flex items-center gap-4 ps-7 pe-4 py-2.5 me-2 rounded-e-full
-                                        text-sm font-medium transition-colors
-                                        ${active
-                                            ? 'bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-400'
-                                            : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 hover:text-gray-900 dark:hover:text-white'
-                                        }
-                                    `}
-                                >
-                                    <Icon className={`w-5 h-5 shrink-0 ${active ? 'text-red-600 dark:text-red-400' : ''}`} />
-                                    <span>{item.label}</span>
-                                </Link>
-                            );
-                        })}
-                    </div>
-                ))}
+                                return (
+                                    <Link
+                                        key={item.href}
+                                        href={item.href}
+                                        className={`
+                                            flex items-center gap-4 ps-7 pe-4 py-2.5 me-2 rounded-e-full
+                                            text-sm font-medium transition-colors
+                                            ${active
+                                                ? 'bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-400'
+                                                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 hover:text-gray-900 dark:hover:text-white'
+                                            }
+                                        `}
+                                    >
+                                        <Icon className={`w-5 h-5 shrink-0 ${active ? 'text-red-600 dark:text-red-400' : ''}`} />
+                                        <span>{item.label}</span>
+                                    </Link>
+                                );
+                            })}
+                        </div>
+                    ))}
+                </div>
 
+                {/* Application SemVer Version Tag */}
+                <div className="ps-7 pe-4 pt-6 border-t border-gray-100 dark:border-gray-900/60 mt-auto">
+                    <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors">
+                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/80 animate-pulse" />
+                        v{packageJson.version}
+                    </span>
+                </div>
             </div>
         </nav>
     );
