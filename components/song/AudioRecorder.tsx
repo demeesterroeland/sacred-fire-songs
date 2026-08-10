@@ -200,21 +200,21 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
     }
 
     try {
-      const savedRecording = await uploadRehearsalRecording(
+      const { recording, error } = await uploadRehearsalRecording(
         songVersionId,
         recordingName.trim(),
         audioBlobRef.current
       );
 
-      if (savedRecording) {
-        onRecordingSaved(savedRecording);
+      if (recording) {
+        onRecordingSaved(recording);
         discardRecording();
       } else {
-        setErrorMsg("Failed to save recording to storage server. Please try again.");
+        setErrorMsg(error || "Failed to save recording to storage server. Please try again.");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("[recorder] Upload error:", err);
-      setErrorMsg("An unexpected error occurred during upload.");
+      setErrorMsg(err?.message || "An unexpected error occurred during upload.");
     } finally {
       setIsUploading(false);
     }

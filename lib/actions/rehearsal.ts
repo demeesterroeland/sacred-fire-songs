@@ -66,13 +66,13 @@ export async function uploadRehearsalRecording(
   songVersionId: string,
   name: string,
   blob: Blob
-): Promise<UserRecording | null> {
+): Promise<{ recording: UserRecording | null; error: string | null }> {
   const supabase = createClient();
   const { data: { user }, error: authError } = await supabase.auth.getUser();
 
   if (authError || !user) {
     console.error("[rehearsal] User not logged in, cannot upload recording");
-    return null;
+    return { recording: null, error: "User not logged in. Please sign in again." };
   }
 
   const fileId = typeof window !== 'undefined' && window.crypto?.randomUUID 
@@ -112,7 +112,7 @@ export async function uploadRehearsalRecording(
 
   if (uploadError) {
     console.error("[rehearsal] Error uploading audio file to storage:", uploadError);
-    return null;
+    return { recording: null, error: uploadError.message || "Failed to upload file to storage bucket." };
   }
 
   // Insert database metadata row
@@ -131,7 +131,7 @@ export async function uploadRehearsalRecording(
     console.error("[rehearsal] Error inserting recording metadata:", dbError);
     // Attempt cleanup of orphaned storage file
     await supabase.storage.from("rehearsals").remove([storagePath]);
-    return null;
+    return { recording: null, error: dbError.message || "Failed to save recording metadata." };
   }
 
   // Generate signed URL for return value
@@ -140,8 +140,11 @@ export async function uploadRehearsalRecording(
     .createSignedUrl(storagePath, 3600);
 
   return {
-    ...(data as UserRecording),
-    audioUrl: signedData?.signedUrl,
+    recording: {
+      ...(data as UserRecording),
+      audioUrl: signedData?.signedUrl,
+    },
+    error: null,
   };
 }
 
