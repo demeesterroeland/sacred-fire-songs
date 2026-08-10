@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
 import { SONG_KEYS } from '@/lib/songs/queryKeys';
+import type { SupabaseClient } from '@supabase/supabase-js';
 
 interface GlobalFilterCounts {
   chordsCount: number | undefined;
@@ -9,13 +10,59 @@ interface GlobalFilterCounts {
   mineCount: number | undefined;
 }
 
+// ─── Individual count queries ─────────────────────────────────────────────────
+
+async function fetchChordsCount(supabase: SupabaseClient): Promise<number | undefined> {
+  const { count } = await supabase
+    .from('compositions')
+    .select('id', { count: 'exact', head: true })
+    .eq('has_chords', true);
+  return count ?? undefined;
+}
+
+async function fetchMelodyCount(supabase: SupabaseClient): Promise<number | undefined> {
+  const { count } = await supabase
+    .from('compositions')
+    .select('id', { count: 'exact', head: true })
+    .eq('has_melody', true);
+  return count ?? undefined;
+}
+
+async function fetchMySongsCount(supabase: SupabaseClient, userId: string): Promise<number | undefined> {
+  const { count } = await supabase
+    .from('compositions')
+    .select('id', { count: 'exact', head: true })
+    .eq('owner_id', userId);
+  return count ?? undefined;
+}
+
+async function fetchFavoritesCount(supabase: SupabaseClient): Promise<number | undefined> {
+  const { data: setlist } = await supabase
+    .from('setlists')
+    .select('id')
+    .eq('title', 'My Favorites')
+    .maybeSingle();
+  if (!setlist?.id) return undefined;
+
+  const { count } = await supabase
+    .from('setlist_items')
+    .select('id', { count: 'exact', head: true })
+    .eq('setlist_id', setlist.id);
+  return count ?? undefined;
+}
+
+// ─── Hook ─────────────────────────────────────────────────────────────────────
+
 /**
- * Fetches filter counts directly from Supabase for use on non-/songs pages
- * where the full song list isn't loaded.  Uses lightweight COUNT queries.
+ * Fetches all filter badge counts directly from Supabase for use on non-/songs
+ * pages where the full song list isn't loaded in memory.
  *
- * Note: counts are global (not cross-filter-aware like useSongsFilter).
- * That's acceptable here since the modal navigates to /songs where exact
- * cross-filter counts are recomputed from the live song list.
+ * Counts are global (not cross-filter-aware like useSongsFilter). That's
+ * acceptable here since this modal navigates to /songs where exact cross-filter
+ * counts are recomputed from the live song list.
+ *
+ * Cache: 10-minute staleTime, invalidated on song create/update/delete and
+ * favorite toggle via SONG_KEYS.globalFilterCounts().
  */
 export function useGlobalFilterCounts(userId?: string): GlobalFilterCounts {
   const { data } = useQuery({
@@ -23,63 +70,24 @@ export function useGlobalFilterCounts(userId?: string): GlobalFilterCounts {
     queryFn: async (): Promise<GlobalFilterCounts> => {
       const supabase = createClient();
 
-      // Run all queries in parallel
-      const [chordsResult, melodyResult, mineResult, favSetlistResult] = await Promise.all([
-        // Chords count — RLS filters to songs visible to this user
-        supabase
-          .from('compositions')
-          .select('id', { count: 'exact', head: true })
-          .eq('has_chords', true),
-
-        // Melody count — RLS filters to songs visible to this user
-        supabase
-          .from('compositions')
-          .select('id', { count: 'exact', head: true })
-          .eq('has_melody', true),
-
-        // Mine count — only makes sense when logged in
-        userId
-          ? supabase
-              .from('compositions')
-              .select('id', { count: 'exact', head: true })
-              .eq('owner_id', userId)
-          : Promise.resolve({ count: null, error: null }),
-
-        // Favorites — fetch setlist ID first
-        userId
-          ? supabase
-              .from('setlists')
-              .select('id')
-              .eq('title', 'My Favorites')
-              .maybeSingle()
-          : Promise.resolve({ data: null, error: null }),
+      // Chords and melody counts don't require auth — run always
+      // My Songs and Favorites are only fetched when logged in
+      const [chordsCount, melodyCount, mineCount, favoritesCount] = await Promise.all([
+        fetchChordsCount(supabase),
+        fetchMelodyCount(supabase),
+        userId ? fetchMySongsCount(supabase, userId) : Promise.resolve(undefined),
+        userId ? fetchFavoritesCount(supabase)      : Promise.resolve(undefined),
       ]);
 
-      // Favorites count: if we got a setlist, count its items
-      let favoritesCount: number | undefined = undefined;
-      if (userId && favSetlistResult && 'data' in favSetlistResult && favSetlistResult.data?.id) {
-        const { count } = await supabase
-          .from('setlist_items')
-          .select('id', { count: 'exact', head: true })
-          .eq('setlist_id', favSetlistResult.data.id);
-        favoritesCount = count ?? undefined;
-      }
-
-      return {
-        chordsCount: chordsResult.count ?? undefined,
-        melodyCount: melodyResult.count ?? undefined,
-        mineCount: userId ? (mineResult.count ?? undefined) : undefined,
-        favoritesCount,
-      };
+      return { chordsCount, melodyCount, mineCount, favoritesCount };
     },
-    enabled: true, // always fetch — chords/melody counts don't need auth
-    staleTime: 10 * 60_000, // 10 min — invalidated on song create/update/delete and favorite toggle
+    staleTime: 10 * 60_000, // 10 min — invalidated on mutations, see SONG_KEYS.globalFilterCounts
   });
 
   return {
-    chordsCount: data?.chordsCount,
-    melodyCount: data?.melodyCount,
+    chordsCount:   data?.chordsCount,
+    melodyCount:   data?.melodyCount,
+    mineCount:     data?.mineCount,
     favoritesCount: data?.favoritesCount,
-    mineCount: data?.mineCount,
   };
 }
