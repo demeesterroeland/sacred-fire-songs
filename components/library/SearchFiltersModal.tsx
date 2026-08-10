@@ -22,6 +22,7 @@ interface SearchFiltersModalProps {
     melodyCount?: number;
     favoritesCount?: number;
     mineCount?: number;
+    recordingsCount?: number;
     hasActiveFilters: boolean;
     isAuthenticated: boolean;
     localSearch: string;
@@ -42,6 +43,7 @@ export default function SearchFiltersModal({
     melodyCount,
     favoritesCount,
     mineCount,
+    recordingsCount,
     hasActiveFilters,
     isAuthenticated,
     localSearch,
@@ -241,8 +243,10 @@ export default function SearchFiltersModal({
                                 <ToggleCard
                                     active={!!state.myRecordings}
                                     onClick={() => setFilter('myRecordings', !state.myRecordings)}
+                                    disabled={!state.myRecordings && recordingsCount === 0}
                                     icon={<Mic className="w-4 h-4" strokeWidth={1.5} />}
                                     label="My Recordings"
+                                    count={recordingsCount ? recordingsCount : undefined}
                                     activeColor="violet"
                                 />
                             </div>

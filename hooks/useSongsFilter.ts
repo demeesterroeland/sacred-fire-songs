@@ -92,24 +92,28 @@ export function useSongsFilter({ songs, userId, favoriteIds, userRecordingCompos
   // Cross-filter-aware counts: each count applies all OTHER active post-filters
   // but excludes its own, so users see "how many would match if I toggled this?"
   const toggleCounts = useMemo(() => {
-    let chords = 0, melody = 0, favorites = 0, mine = 0;
+    let chords = 0, melody = 0, favorites = 0, mine = 0, recordings = 0;
     for (const s of filteredItems) {
       const isFav = favoriteIds.has(s.id);
       const isMine = userId ? s.ownerId === userId : false;
+      const hasRec = userId ? userRecordingCompositionIds.has(s.id) : false;
       // Apply all active post-filters EXCEPT the one we're counting
       const matchFav = !state.favorites || isFav;
       const matchMine = !state.mine || !userId || isMine;
+      const matchRec = !state.myRecordings || !userId || hasRec;
 
-      // For chords/melody: must pass other post-filters
-      if (matchFav && matchMine && s.hasChords) chords++;
-      if (matchFav && matchMine && s.hasMelody) melody++;
-      // For favorites: must pass mine (skip favorites check)
-      if (matchMine && isFav) favorites++;
-      // For mine: must pass favorites (skip mine check)
-      if (matchFav && isMine) mine++;
+      // For chords/melody: must pass all other post-filters
+      if (matchFav && matchMine && matchRec && s.hasChords) chords++;
+      if (matchFav && matchMine && matchRec && s.hasMelody) melody++;
+      // For favorites: must pass mine + recordings (skip favorites check)
+      if (matchMine && matchRec && isFav) favorites++;
+      // For mine: must pass favorites + recordings (skip mine check)
+      if (matchFav && matchRec && isMine) mine++;
+      // For recordings: must pass favorites + mine (skip recordings check)
+      if (matchFav && matchMine && hasRec) recordings++;
     }
-    return { chords, melody, favorites, mine };
-  }, [filteredItems, favoriteIds, userId, state.favorites, state.mine]);
+    return { chords, melody, favorites, mine, recordings };
+  }, [filteredItems, favoriteIds, userRecordingCompositionIds, userId, state.favorites, state.mine, state.myRecordings]);
 
   const hasActiveFilters = isDraftActive(state, userId);
 
@@ -124,6 +128,7 @@ export function useSongsFilter({ songs, userId, favoriteIds, userRecordingCompos
     melodyCount: toggleCounts.melody,
     favoritesCount: toggleCounts.favorites,
     mineCount: toggleCounts.mine,
+    recordingsCount: toggleCounts.recordings,
     hasActiveFilters,
   };
 }

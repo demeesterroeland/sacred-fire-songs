@@ -82,6 +82,7 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
         melodyCount,
         favoritesCount,
         mineCount,
+        recordingsCount,
         hasActiveFilters,
         filteredCount
     } = useSongsFilter({ songs, userId: user?.id, favoriteIds, userRecordingCompositionIds, viewedSongIds, sortBy });
@@ -290,6 +291,7 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
                 melodyCount={melodyCount}
                 favoritesCount={favoritesCount}
                 mineCount={mineCount}
+                recordingsCount={recordingsCount}
                 hasActiveFilters={draft ? isDraftActive({ ...draft, search: localSearch }, user?.id) : hasActiveFilters}
                 isAuthenticated={!!user}
                 localSearch={localSearch}
