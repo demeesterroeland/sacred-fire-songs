@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.3.0](https://github.com/demeesterroel/sacred-fire-songs/compare/v1.2.0...v1.3.0) (2026-08-10)
+
+
+### ✨ New features
+
+* **migration:** add 20260810042500_add_user_recordings_position.sql for production database upgrade ([#222](https://github.com/demeesterroel/sacred-fire-songs/issues/222)) ([b0634eb](https://github.com/demeesterroel/sacred-fire-songs/commit/b0634eb6932a66eeffa63762cbf4dae4a2e18d75))
+* **perf:** add --reuse flag to benchmark same song IDs across runs, default sample 50 ([853d22e](https://github.com/demeesterroel/sacred-fire-songs/commit/853d22e5a061e202bf9aab789f57c0139191d3a7))
+* **perf:** add open-source single-target performance benchmark suite ([0b8fe8f](https://github.com/demeesterroel/sacred-fire-songs/commit/0b8fe8fc325730bc7ce0fbe13b1848eb01671d8c))
+* **rehearsals:** add personal rehearsal recordings, audio file uploads, filtering, and drag-and-drop sorting ([#221](https://github.com/demeesterroel/sacred-fire-songs/issues/221)) ([9f91d60](https://github.com/demeesterroel/sacred-fire-songs/commit/9f91d608e2f770592fbb077fafe729cbfe8f8c8c))
+
+
+### 📖 Documentation
+
+* **logbook:** update master files for Release v1.2.0 ([#210](https://github.com/demeesterroel/sacred-fire-songs/issues/210)) ([cfa4779](https://github.com/demeesterroel/sacred-fire-songs/commit/cfa4779f8aef0f5cac964515cc4b677801c27956))
+* **logbook:** update master-walkthrough.md, master-tasks.md, and master-timetracking.md for Release v1.2.0 ([#210](https://github.com/demeesterroel/sacred-fire-songs/issues/210)) ([fca05da](https://github.com/demeesterroel/sacred-fire-songs/commit/fca05daf0e4c7d95c975454bbba3c8e25e401d1f))
+* **rule:** clarify local DEV Supabase CLI stack requirement in AGENTS.md ([51c695a](https://github.com/demeesterroel/sacred-fire-songs/commit/51c695a30690544dcbccb89488c802fd1131b6c0))
+
 ## [1.2.0](https://github.com/demeesterroel/sacred-fire-songs/compare/v1.1.0...v1.2.0) (2026-07-26)
 
 
