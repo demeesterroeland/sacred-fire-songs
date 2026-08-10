@@ -282,7 +282,7 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
 
       {/* Mode: Upload View (when idle) */}
       {activeTab === "upload" && recordingState === "idle" && (
-        <div className="w-full flex flex-col items-center justify-center py-4 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl hover:border-violet-500/50 dark:hover:border-violet-500/50 transition-all group cursor-pointer"
+        <div className="w-full flex flex-col items-center justify-center py-4 px-4 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl hover:border-violet-500/50 dark:hover:border-violet-500/50 transition-all group cursor-pointer text-center"
              onClick={() => fileInputRef.current?.click()}>
           <input
             type="file"
@@ -297,7 +297,7 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
           <p className="text-xs font-semibold text-gray-800 dark:text-gray-200">
             Click to select an audio file
           </p>
-          <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1">
+          <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1 max-w-[240px] leading-tight">
             Supports MP3, M4A, OPUS, FLAC, WAV, OGG, WEBM (Max 25 MB)
           </p>
         </div>
