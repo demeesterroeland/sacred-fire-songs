@@ -347,7 +347,7 @@ export default function SongDetailPage() {
                                     )}
                                     {hasPersonalRecording && (
                                         <Link href="/songs?myRecordings=true" className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest shadow-sm bg-violet-500/5 border border-violet-500/30 text-violet-400 hover:bg-violet-500/15 transition-colors">
-                                            <Mic className="w-3 h-3" /> My Recording
+                                            <Mic className="w-3 h-3" /> Recording
                                         </Link>
                                     )}
                                 </div>
@@ -460,7 +460,7 @@ export default function SongDetailPage() {
                                 )}
                                 {hasPersonalRecording && (
                                     <Link href="/songs?myRecordings=true" className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest shadow-sm bg-violet-500/5 border border-violet-500/30 text-violet-400 hover:bg-violet-500/15 transition-colors">
-                                        <Mic className="w-3 h-3" /> My Recording
+                                        <Mic className="w-3 h-3" /> Recording
                                     </Link>
                                 )}
                             </div>

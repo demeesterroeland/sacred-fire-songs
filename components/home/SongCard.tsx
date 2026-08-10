@@ -119,7 +119,7 @@ export default function SongCard({
                                 </div>
                             )}
                             {hasMelody && (
-                                <div className="text-blue-400 mb-1" title="Has Melody">
+                                <div className="text-emerald-400 mb-1" title="Has Melody">
                                     <Music className="w-3.5 h-3.5" />
                                 </div>
                             )}
