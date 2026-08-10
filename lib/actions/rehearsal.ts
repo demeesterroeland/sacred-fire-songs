@@ -7,6 +7,7 @@ export interface UserRecording {
   recording_name: string;
   storage_path: string;
   position?: number;
+  file_size_bytes?: number;
   created_at: string;
   audioUrl?: string; // Resolved temporary signed URL or public URL
 }
@@ -125,6 +126,7 @@ export async function uploadRehearsalRecording(
       song_version_id: songVersionId,
       recording_name: name || `Rehearsal - ${new Date().toLocaleDateString()}`,
       storage_path: storagePath,
+      file_size_bytes: blob.size || 0,
     })
     .select()
     .single();
