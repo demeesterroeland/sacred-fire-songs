@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.3.1](https://github.com/demeesterroel/sacred-fire-songs/compare/v1.3.0...v1.3.1) (2026-08-10)
+
+
+### 🐛 Bug fixes
+
+* **navigation:** display app version tag in sidebar footer ([#223](https://github.com/demeesterroel/sacred-fire-songs/issues/223))
+* **song:** call router.refresh() on song edit success to bust Next.js router cache ([#225](https://github.com/demeesterroel/sacred-fire-songs/issues/225))
+
+
 ## [1.3.0](https://github.com/demeesterroel/sacred-fire-songs/compare/v1.2.0...v1.3.0) (2026-08-10)
 
 
