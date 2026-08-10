@@ -214,7 +214,8 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
       }
     } catch (err: any) {
       console.error("[recorder] Upload error:", err);
-      setErrorMsg(err?.message || "An unexpected error occurred during upload.");
+      const msg = typeof err === 'string' ? err : (err?.message || err?.error_description || JSON.stringify(err));
+      setErrorMsg(msg && msg !== '{}' ? msg : "An unexpected error occurred during upload.");
     } finally {
       setIsUploading(false);
     }
