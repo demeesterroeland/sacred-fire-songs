@@ -341,6 +341,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
             // Bust global filter counts (chords/melody/mine may have changed)
             queryClient.invalidateQueries({ queryKey: SONG_KEYS.globalFilterCounts() });
             const returnTo = mode === 'create' ? (searchParams.get('next') || '/') : `/songs/${id}`;
+            router.refresh();
             router.push(returnTo);
         },
         onError: (error: Error) => {
