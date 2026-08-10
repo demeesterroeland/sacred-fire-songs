@@ -9,6 +9,8 @@ import { fetchCategoryTree } from '@/lib/taxonomyUtils';
 import { SONG_KEYS } from '@/lib/songs/queryKeys';
 import SearchFiltersModal from '@/components/library/SearchFiltersModal';
 import type { SongFilterState } from '@/lib/songs/filterConfig';
+import { useRecordingsQuery } from '@/hooks/useRecordingsQuery';
+import { useGlobalFilterCounts } from '@/hooks/useGlobalFilterCounts';
 
 type SortByType = 'title' | 'author' | 'newest';
 
@@ -59,6 +61,13 @@ function GlobalSearchModalInner({
         enabled: isOpen, // only fetch when modal is open
     });
 
+    // Personal recordings count — lightweight query, just the composition IDs
+    const { userRecordingCompositionIds } = useRecordingsQuery(userId);
+    const recordingsCount = userRecordingCompositionIds.size || undefined;
+
+    // All other filter counts — parallel COUNT queries, no full song list needed
+    const { chordsCount, melodyCount, favoritesCount, mineCount } = useGlobalFilterCounts(userId);
+
     // Local filter state (not URL-synced)
     const [localSearch, setLocalSearch] = useState('');
     const [sortBy, setSortBy] = useState<SortByType>('title');
@@ -69,9 +78,11 @@ function GlobalSearchModalInner({
         tags: [],
         chords: false,
         melody: false,
+        myRecordings: false,
         favorites: false,
         mine: false,
         new: false,
+        artist: '',
     });
 
     const setFilter = useCallback(<K extends keyof SongFilterState>(key: K, value: SongFilterState[K]) => {
@@ -86,9 +97,11 @@ function GlobalSearchModalInner({
             tags: [],
             chords: false,
             melody: false,
+            myRecordings: false,
             favorites: false,
             mine: false,
             new: false,
+            artist: '',
         });
     }, [userId]);
 
@@ -97,6 +110,7 @@ function GlobalSearchModalInner({
         (state.tags?.length ?? 0) > 0 ||
         state.chords ||
         state.melody ||
+        state.myRecordings ||
         state.favorites ||
         state.mine ||
         state.new ||
@@ -114,6 +128,7 @@ function GlobalSearchModalInner({
         }
         if (state.chords) params.set('chords', 'true');
         if (state.melody) params.set('melody', 'true');
+        if (state.myRecordings) params.set('myRecordings', 'true');
         if (state.favorites) params.set('favorites', 'true');
         if (state.mine) params.set('mine', 'true');
         if (state.new) params.set('new', 'true');
@@ -135,10 +150,11 @@ function GlobalSearchModalInner({
             sortBy={sortBy}
             setSortBy={setSortBy}
             taxonomy={taxonomy}
-            chordsCount={undefined}
-            melodyCount={undefined}
-            favoritesCount={undefined}
-            mineCount={undefined}
+            chordsCount={chordsCount}
+            melodyCount={melodyCount}
+            favoritesCount={favoritesCount}
+            mineCount={mineCount}
+            recordingsCount={recordingsCount}
             hasActiveFilters={hasActiveFilters}
             isAuthenticated={isAuthenticated}
             localSearch={localSearch}

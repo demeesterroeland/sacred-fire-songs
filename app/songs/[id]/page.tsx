@@ -10,7 +10,7 @@ import SongDetailSkeleton from '@/components/song/SongDetailSkeleton';
 import MediaEmbeds from '@/components/song/MediaEmbeds';
 import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal';
 import { useQuery } from '@tanstack/react-query';
-import { Trash2, Edit2, Music, Link as LinkIcon, Heart, MoreVertical, ListPlus, Mic, Share2 } from 'lucide-react';
+import { Trash2, Edit2, Music, Guitar, Heart, MoreVertical, ListPlus, Mic, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
 import RehearsalDrawer from '@/components/song/RehearsalDrawer';
 import { useToggleFavorite } from '@/hooks/useToggleFavorite';
@@ -20,7 +20,9 @@ import { SONG_KEYS } from '@/lib/songs/queryKeys';
 import { useWakeLock } from '@/hooks/useWakeLock';
 import { getCategoryColor, getCategoryStyles } from '@/lib/uiUtils';
 import { TagPill } from '@/components/ui/TagPill';
+import { AuthorPill } from '@/components/ui/AuthorPill';
 import { recordSongView } from '@/app/actions/recordSongView';
+import { useRecordingsQuery } from '@/hooks/useRecordingsQuery';
 
 // Enforce a timeout on any promise to prevent infinite loading skeletons
 function withTimeout<T>(promise: Promise<T>, ms: number, errorMessage = "Request timed out"): Promise<T> {
@@ -166,6 +168,10 @@ export default function SongDetailPage() {
     });
     const { isFav, handleToggle: handleToggleFavorite } = useToggleFavorite(id!, favoriteIds.has(id!));
 
+    // Personal recordings — check if logged-in user has any recordings for this song's composition
+    const { userRecordingCompositionIds } = useRecordingsQuery(user?.id);
+    const hasPersonalRecording = !!id && userRecordingCompositionIds.has(id);
+
     const titleRef = useRef<HTMLSpanElement>(null);
     const [scrollAmount, setScrollAmount] = useState(0);
 
@@ -299,10 +305,6 @@ export default function SongDetailPage() {
                             {song.title}
                         </span>
                     </div>
-                    {/* Author */}
-                    <div className="text-xs font-semibold text-gray-500 dark:text-gray-400 truncate mt-0.5">
-                        by {song.original_author || 'Traditional'}
-                    </div>
                 </div>
                 {/* 3-dot menu — flex-none so it never shrinks */}
                 <div className="flex-none flex items-center">
@@ -335,7 +337,7 @@ export default function SongDetailPage() {
                                 <div className="flex items-center gap-2">
                                     {song.has_chords && (
                                         <Link href="/songs?chords=true" className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest shadow-sm bg-amber-500/5 border border-amber-500/30 text-amber-500 hover:bg-amber-500/15 transition-colors">
-                                            <LinkIcon className="w-3 h-3" /> Chords
+                                            <Guitar className="w-3 h-3" /> Chords
                                         </Link>
                                     )}
                                     {song.has_melody && (
@@ -343,14 +345,15 @@ export default function SongDetailPage() {
                                             <Music className="w-3 h-3" /> Melody
                                         </Link>
                                     )}
+                                    {hasPersonalRecording && (
+                                        <Link href="/songs?myRecordings=true" className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest shadow-sm bg-violet-500/5 border border-violet-500/30 text-violet-400 hover:bg-violet-500/15 transition-colors">
+                                            <Mic className="w-3 h-3" /> Recording
+                                        </Link>
+                                    )}
                                 </div>
                             </div>
-                            <div className="flex items-center gap-3">
-                                <p className="text-gray-500 dark:text-gray-400 text-sm font-medium">by{' '}
-                                    <Link href={`/songs?artist=${encodeURIComponent(song.original_author || 'Traditional')}`} className="hover:text-gray-900 dark:hover:text-white hover:underline transition-colors">
-                                        {song.original_author || 'Traditional'}
-                                    </Link>
-                                </p>
+                            <div className="flex items-center gap-3 flex-wrap">
+                                <AuthorPill author={song.original_author || 'Traditional'} />
                                 {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                                 {categories.map((cat: any) => (
                                     <TagPill
@@ -447,7 +450,7 @@ export default function SongDetailPage() {
                             <div className="flex items-center gap-2">
                                 {song.has_chords && (
                                     <Link href="/songs?chords=true" className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest shadow-sm bg-amber-500/5 border border-amber-500/30 text-amber-500 hover:bg-amber-500/15 transition-colors">
-                                        <LinkIcon className="w-3 h-3" /> Chords
+                                        <Guitar className="w-3 h-3" /> Chords
                                     </Link>
                                 )}
                                 {song.has_melody && (
@@ -455,10 +458,16 @@ export default function SongDetailPage() {
                                         <Music className="w-3 h-3" /> Melody
                                     </Link>
                                 )}
+                                {hasPersonalRecording && (
+                                    <Link href="/songs?myRecordings=true" className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest shadow-sm bg-violet-500/5 border border-violet-500/30 text-violet-400 hover:bg-violet-500/15 transition-colors">
+                                        <Mic className="w-3 h-3" /> Recording
+                                    </Link>
+                                )}
                             </div>
 
-                            {/* Category Tags */}
-                            <div className="flex items-center gap-2">
+                            {/* Author & Category Tags */}
+                            <div className="flex items-center gap-2 flex-wrap">
+                                <AuthorPill author={song.original_author || 'Traditional'} />
                                 {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
                                 {categories.map((cat: any) => (
                                     <TagPill

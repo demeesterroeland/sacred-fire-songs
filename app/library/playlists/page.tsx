@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
-import { Heart, ListMusic, Flame, Droplets, Lock, Globe, PenLine, Music, Plus, LogIn } from 'lucide-react';
+import { Heart, ListMusic, Flame, Droplets, Lock, Globe, PenLine, Music, Plus, LogIn, Mic } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { CreatePlaylistInput } from '@/components/playlists/CreatePlaylistInput';
 import { PlaylistCard } from '@/components/playlists/PlaylistCard';
@@ -38,6 +38,13 @@ const accentClasses = {
         icon:      'bg-rose-500/15',
         iconHover: 'group-hover:bg-rose-500/25',
         iconText:  'text-rose-400 fill-rose-400',
+    },
+    amber: {
+        card:      'bg-amber-500/8 border-amber-500/20',
+        cardHover: 'hover:bg-amber-500/15 hover:border-amber-500/35',
+        icon:      'bg-amber-500/15',
+        iconHover: 'group-hover:bg-amber-500/25',
+        iconText:  'text-amber-400',
     },
     violet: {
         card:      'bg-violet-500/8 border-violet-500/20',
@@ -105,26 +112,24 @@ function PublicPlaylistsSection({
     songCounts: Record<string, number>;
     songTitles: Record<string, string[]>;
 }) {
+    if (playlists.length === 0) return null;
+
     return (
         <div>
             <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-3">Public Playlists</p>
-            {playlists.length === 0 ? (
-                <p className="text-sm text-gray-600 italic py-2">No public playlists yet.</p>
-            ) : (
-                <div className="grid grid-cols-1 gap-3">
-                    {playlists.map(pl => (
-                        <PublicPlaylistCard
-                            key={pl.id}
-                            id={pl.id}
-                            title={pl.title}
-                            description={pl.description}
-                            isOwner={!!userId && pl.owner_id === userId}
-                            songCount={songCounts[pl.id] ?? 0}
-                            songTitles={songTitles[pl.id] ?? []}
-                        />
-                    ))}
-                </div>
-            )}
+            <div className="grid grid-cols-1 gap-3">
+                {playlists.map(setlist => (
+                    <PublicPlaylistCard
+                        key={setlist.id}
+                        id={setlist.id}
+                        title={setlist.title}
+                        description={setlist.description}
+                        songCount={songCounts[setlist.id] ?? 0}
+                        songTitles={songTitles[setlist.id] ?? []}
+                        isOwner={userId === setlist.owner_id}
+                    />
+                ))}
+            </div>
         </div>
     );
 }
@@ -143,9 +148,11 @@ function GuestView({ publicPlaylists, publicSongCounts, publicSongTitles }: {
             <div>
                 <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-3">Smart Playlists</p>
                 <div className="grid grid-cols-1 gap-3">
-                    <SmartPlaylistCard icon={Heart}   title="My Favorites" description="Your favorited songs, always with you"      subtitle={<span className="text-xs text-gray-500">No songs yet — tap ♥ on any song</span>} accent="rose"   />
+                    <SmartPlaylistCard icon={Heart}   title="My Favorites" description="Your favorited songs, always with you"      subtitle={<span className="text-xs text-gray-500">Sign in to save favorites</span>} accent="rose"   />
                     <SmartPlaylistCard icon={Music}   title="My Songs"     description="Songs you've contributed to the library"    subtitle={<span className="text-xs text-gray-500">Sign in to see your songs</span>} accent="violet" />
                     <SmartPlaylistCard icon={PenLine} title="My Drafts"    description="Your private work-in-progress songs"        subtitle={<span className="text-xs text-gray-500">Sign in to see your drafts</span>} accent="gray"   />
+                    <SmartPlaylistCard icon={Mic} title="My Recordings" description="Your private rehearsal recordings" accent="violet"
+                        subtitle={<span className="text-xs text-gray-500">Sign in to see your recordings</span>} />
                 </div>
             </div>
 
@@ -301,10 +308,11 @@ export default async function PlaylistsPage() {
         ? (songTitles[myFavorites.id] ?? []).slice(0, 5)
         : [];
 
-    // Fetch My Songs + My Drafts counts and titles, plus personalized sections
-    const [mySongsResult, myDraftsResult, recentlyViewedSongs, recentlyViewedCount, newSongs] = await Promise.all([
+    // Fetch My Songs + My Drafts + My Recordings counts and titles, plus personalized sections
+    const [mySongsResult, myDraftsResult, myRecordingsResult, recentlyViewedSongs, recentlyViewedCount, newSongs] = await Promise.all([
         supabase.from('compositions').select('title, is_public').eq('owner_id', user.id).limit(500),
         supabase.from('compositions').select('title, is_public').eq('is_public', false).limit(500),
+        supabase.from('user_recordings').select('song_versions(compositions(title, is_public))').eq('user_id', user.id),
         getRecentlyViewed(user.id, 5),
         getRecentlyViewedCount(user.id),
         getUnviewedSongs(user.id, 5),
@@ -325,6 +333,19 @@ export default async function PlaylistsPage() {
         draft: myDraftsData.length,
     };
     const myDraftsTitles = myDraftsData.slice(0, 5).map(s => s.title);
+
+    // Compute My Recordings counts and titles
+    const myRecordingsData = (myRecordingsResult.data ?? []).map(r => {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        return (r.song_versions as any)?.compositions;
+    }).filter(Boolean);
+
+    const myRecordingsCounts: SongCounts = {
+        total: myRecordingsData.length,
+        public: myRecordingsData.filter(s => s?.is_public).length,
+        draft: myRecordingsData.filter(s => s && !s.is_public).length,
+    };
+    const myRecordingsTitles = Array.from(new Set(myRecordingsData.map(s => s?.title).filter(Boolean))).slice(0, 5) as string[];
 
     return (
         <div className="space-y-8">
@@ -350,6 +371,12 @@ export default async function PlaylistsPage() {
                         href="/songs?status=draft"
                         subtitle={<SongCountSubtitle counts={myDraftsCounts} emptyLabel="No drafts yet" />}
                         songTitles={myDraftsTitles}
+                    />
+                    <SmartPlaylistCard
+                        icon={Mic} title="My Recordings" description="Your private rehearsal recordings" accent="violet"
+                        href="/songs?myRecordings=true"
+                        subtitle={<SongCountSubtitle counts={myRecordingsCounts} emptyLabel="No recordings yet" />}
+                        songTitles={myRecordingsTitles}
                     />
                 </div>
             </div>

@@ -13,6 +13,7 @@ import { type TaxonomyNode } from "@/lib/taxonomyUtils";
 import type { Song } from "@/lib/songUtils";
 import { useSongsQuery } from "@/hooks/useSongsQuery";
 import { useFavoritesQuery } from "@/hooks/useFavoritesQuery";
+import { useRecordingsQuery } from "@/hooks/useRecordingsQuery";
 import { useSongsFilter } from "@/hooks/useSongsFilter";
 import { isDraftActive } from "@/lib/songs/filterConfig";
 
@@ -54,6 +55,7 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
             tags: [],
             chords: false,
             melody: false,
+            myRecordings: false,
             favorites: false,
             mine: false,
             new: false,
@@ -67,7 +69,9 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
     const { songs, taxonomy } = useSongsQuery({ initialSongs, initialTaxonomy });
     
     const { favoriteIds } = useFavoritesQuery(user?.id);
+    const { userRecordingCompositionIds } = useRecordingsQuery(user?.id);
     const viewedSongIds = useMemo(() => new Set(initialViewedSongIds), [initialViewedSongIds]);
+
     const {
         displaySongs,
         state,
@@ -78,9 +82,10 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
         melodyCount,
         favoritesCount,
         mineCount,
+        recordingsCount,
         hasActiveFilters,
         filteredCount
-    } = useSongsFilter({ songs, userId: user?.id, favoriteIds, viewedSongIds, sortBy });
+    } = useSongsFilter({ songs, userId: user?.id, favoriteIds, userRecordingCompositionIds, viewedSongIds, sortBy });
 
     const handleDelete = async () => {
         if (!deleteTarget) return;
@@ -199,6 +204,7 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
                                         isPublic={song.isPublic}
                                         hasChords={song.hasChords}
                                         hasMelody={song.hasMelody}
+                                        hasPersonalRecording={userRecordingCompositionIds.has(song.id)}
                                         isFavorite={favoriteIds.has(song.id)}
                                         userId={user?.id}
                                         categories={song.categories}
@@ -285,6 +291,7 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
                 melodyCount={melodyCount}
                 favoritesCount={favoritesCount}
                 mineCount={mineCount}
+                recordingsCount={recordingsCount}
                 hasActiveFilters={draft ? isDraftActive({ ...draft, search: localSearch }, user?.id) : hasActiveFilters}
                 isAuthenticated={!!user}
                 localSearch={localSearch}

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { Mic, Square, Play, Pause, Trash2, CloudUpload, RotateCcw } from "lucide-react";
+import { Mic, Square, Play, Pause, Trash2, CloudUpload, RotateCcw, Upload, FileAudio } from "lucide-react";
 import { toast } from "sonner";
 import { uploadRehearsalRecording, type UserRecording } from "@/lib/actions/rehearsal";
 
@@ -11,6 +11,7 @@ interface AudioRecorderProps {
 }
 
 export default function AudioRecorder({ songVersionId, onRecordingSaved }: AudioRecorderProps) {
+  const [activeTab, setActiveTab] = useState<"record" | "upload">("record");
   const [recordingState, setRecordingState] = useState<"idle" | "recording" | "paused" | "stopped">("idle");
   const [duration, setDuration] = useState(0);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
@@ -23,6 +24,7 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
   const audioChunksRef = useRef<Blob[]>([]);
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const audioBlobRef = useRef<Blob | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
 
   // Format seconds to mm:ss
   const formatTime = (seconds: number) => {
@@ -115,7 +117,6 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
       setRecordingState("recording");
       const timerIntervalMs = typeof window !== "undefined" && (window as any).__E2E_FAST_TIMER__ ? 10 : 1000;
 
-      // Start timer with 3-minute limit check (180 seconds)
       timerIntervalRef.current = setInterval(() => {
         setDuration((prev) => {
           if (prev + 1 >= 180) {
@@ -138,17 +139,14 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
       mediaRecorderRef.current.stop();
       setRecordingState("stopped");
       
-      // Clean up timer
       if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-      
-      // Stop all tracks in the stream
       if (streamRef.current) {
         streamRef.current.getTracks().forEach((track) => track.stop());
       }
     }
   };
 
-  // Discard recording
+  // Discard recording / uploaded file
   const discardRecording = () => {
     setRecordingState("idle");
     setDuration(0);
@@ -156,6 +154,7 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
     audioBlobRef.current = null;
     setRecordingName("");
     setErrorMsg(null);
+    if (fileInputRef.current) fileInputRef.current.value = "";
 
     if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
     if (streamRef.current) {
@@ -163,34 +162,60 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
     }
   };
 
-  // Upload/Save recording
+  // Handle local file selection
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    setErrorMsg(null);
+
+    // Limit to 25 MB for uploaded files
+    if (file.size > 25 * 1024 * 1024) {
+      setErrorMsg("Audio file size exceeds the 25 MB limit.");
+      if (fileInputRef.current) fileInputRef.current.value = "";
+      return;
+    }
+
+    audioBlobRef.current = file;
+    const localUrl = URL.createObjectURL(file);
+    setAudioUrl(localUrl);
+    setRecordingState("stopped");
+
+    // Clean up filename for default title (strip extension)
+    const defaultName = file.name.replace(/\.[^/.]+$/, "");
+    setRecordingName(defaultName || `Rehearsal - ${new Date().toLocaleDateString()}`);
+  };
+
+  // Upload/Save recording or file
   const saveRecording = async () => {
     if (!audioBlobRef.current) return;
     setIsUploading(true);
     setErrorMsg(null);
 
-    if (audioBlobRef.current.size > 10 * 1024 * 1024) {
-      setErrorMsg("Recording file size exceeds the 10 MB limit.");
+    const maxLimit = activeTab === "upload" ? 25 * 1024 * 1024 : 10 * 1024 * 1024;
+    if (audioBlobRef.current.size > maxLimit) {
+      setErrorMsg(`File size exceeds the ${activeTab === "upload" ? "25 MB" : "10 MB"} limit.`);
       setIsUploading(false);
       return;
     }
 
     try {
-      const savedRecording = await uploadRehearsalRecording(
+      const { recording, error } = await uploadRehearsalRecording(
         songVersionId,
         recordingName.trim(),
         audioBlobRef.current
       );
 
-      if (savedRecording) {
-        onRecordingSaved(savedRecording);
+      if (recording) {
+        onRecordingSaved(recording);
         discardRecording();
       } else {
-        setErrorMsg("Failed to save recording to storage server. Please try again.");
+        setErrorMsg(error || "Failed to save recording to storage server. Please try again.");
       }
-    } catch (err) {
+    } catch (err: any) {
       console.error("[recorder] Upload error:", err);
-      setErrorMsg("An unexpected error occurred during upload.");
+      const msg = typeof err === 'string' ? err : (err?.message || err?.error_description || JSON.stringify(err));
+      setErrorMsg(msg && msg !== '{}' ? msg : "An unexpected error occurred during upload.");
     } finally {
       setIsUploading(false);
     }
@@ -209,23 +234,82 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
   return (
     <div className="w-full p-6 bg-gray-50/50 dark:bg-gray-900/50 border border-gray-200 dark:border-gray-800 rounded-2xl flex flex-col items-center justify-center space-y-4 transition-all duration-300">
       
-      {/* Title */}
-      <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-2">
-        <Mic className={`w-4 h-4 ${recordingState === 'recording' ? 'text-red-500 animate-pulse' : 'text-gray-400'}`} />
-        {recordingState === "idle" && "Ready to record rehearsal"}
-        {recordingState === "recording" && "Recording rehearsal..."}
-        {recordingState === "paused" && "Recording paused"}
-        {recordingState === "stopped" && "Review your recording"}
-      </h4>
+      {/* Record / Upload Tab Toggle (only shown when idle) */}
+      {recordingState === "idle" && (
+        <div className="flex bg-gray-200/60 dark:bg-gray-800/60 p-1 rounded-xl gap-1 text-xs font-semibold">
+          <button
+            onClick={() => { setActiveTab("record"); setErrorMsg(null); }}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all ${
+              activeTab === "record"
+                ? "bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-sm"
+                : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
+            }`}
+          >
+            <Mic className="w-3.5 h-3.5" />
+            Record Audio
+          </button>
+          <button
+            onClick={() => { setActiveTab("upload"); setErrorMsg(null); }}
+            className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all ${
+              activeTab === "upload"
+                ? "bg-white dark:bg-gray-900 text-gray-900 dark:text-white shadow-sm"
+                : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
+            }`}
+          >
+            <Upload className="w-3.5 h-3.5" />
+            Upload File
+          </button>
+        </div>
+      )}
 
-      {/* Timer */}
-      <div className="text-3xl font-mono font-bold tracking-tight text-gray-900 dark:text-white">
-        {formatTime(duration)}
-      </div>
+      {/* Mode: Record View */}
+      {activeTab === "record" && (
+        <>
+          {/* Title */}
+          <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-2">
+            <Mic className={`w-4 h-4 ${recordingState === 'recording' ? 'text-red-500 animate-pulse' : 'text-gray-400'}`} />
+            {recordingState === "idle" && "Ready to record rehearsal"}
+            {recordingState === "recording" && "Recording rehearsal..."}
+            {recordingState === "paused" && "Recording paused"}
+            {recordingState === "stopped" && "Review your recording"}
+          </h4>
 
-      {/* Local preview audio player */}
+          {/* Timer */}
+          <div className="text-3xl font-mono font-bold tracking-tight text-gray-900 dark:text-white">
+            {formatTime(duration)}
+          </div>
+        </>
+      )}
+
+      {/* Mode: Upload View (when idle) */}
+      {activeTab === "upload" && recordingState === "idle" && (
+        <div className="w-full flex flex-col items-center justify-center py-4 px-4 border-2 border-dashed border-gray-300 dark:border-gray-700 rounded-xl hover:border-violet-500/50 dark:hover:border-violet-500/50 transition-all group cursor-pointer text-center"
+             onClick={() => fileInputRef.current?.click()}>
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileSelect}
+            accept="audio/*,.mp3,.wav,.ogg,.m4a,.webm,.opus,.flac,.aac"
+            className="hidden"
+          />
+          <div className="p-3 rounded-full bg-violet-500/10 text-violet-500 mb-2 group-hover:scale-110 transition-transform">
+            <FileAudio className="w-6 h-6" />
+          </div>
+          <p className="text-xs font-semibold text-gray-800 dark:text-gray-200">
+            Click to select an audio file
+          </p>
+          <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1 max-w-[240px] leading-tight">
+            Supports MP3, M4A, OPUS, FLAC, WAV, OGG, WEBM (Max 25 MB)
+          </p>
+        </div>
+      )}
+
+      {/* Local preview audio player (shown for both recorded and uploaded files once stopped/selected) */}
       {audioUrl && recordingState === "stopped" && (
-        <div className="w-full flex justify-center py-2">
+        <div className="w-full flex flex-col items-center space-y-2 py-2">
+          <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
+            <FileAudio className="w-3.5 h-3.5 text-violet-400" /> Preview Rehearsal Audio
+          </p>
           <audio src={audioUrl} controls className="w-full max-w-md h-10 accent-indigo-500 rounded-lg" />
         </div>
       )}
@@ -275,8 +359,8 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
         </div>
       )}
 
-      {/* Recording Control Buttons */}
-      {recordingState !== "stopped" && (
+      {/* Recording Control Buttons (Record tab only) */}
+      {activeTab === "record" && recordingState !== "stopped" && (
         <div className="flex items-center justify-center gap-6 py-2">
           
           {/* Discard Button (visible only when recording/paused) */}

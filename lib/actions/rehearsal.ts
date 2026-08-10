@@ -6,6 +6,7 @@ export interface UserRecording {
   song_version_id: string;
   recording_name: string;
   storage_path: string;
+  position?: number;
   created_at: string;
   audioUrl?: string; // Resolved temporary signed URL or public URL
 }
@@ -25,6 +26,7 @@ export async function getUserRecordings(songVersionId: string): Promise<UserReco
     .select("*")
     .eq("song_version_id", songVersionId)
     .eq("user_id", user.id)
+    .order("position", { ascending: true })
     .order("created_at", { ascending: false });
 
   if (error) {
@@ -66,21 +68,40 @@ export async function uploadRehearsalRecording(
   songVersionId: string,
   name: string,
   blob: Blob
-): Promise<UserRecording | null> {
+): Promise<{ recording: UserRecording | null; error: string | null }> {
   const supabase = createClient();
   const { data: { user }, error: authError } = await supabase.auth.getUser();
 
   if (authError || !user) {
     console.error("[rehearsal] User not logged in, cannot upload recording");
-    return null;
+    return { recording: null, error: "User not logged in. Please sign in again." };
   }
 
   const fileId = typeof window !== 'undefined' && window.crypto?.randomUUID 
     ? window.crypto.randomUUID() 
     : Math.random().toString(36).substring(2) + Date.now().toString(36);
 
-  const fileExt = blob.type.split(";")[0].split("/")[1] || "webm";
-  const storagePath = `${user.id}/${songVersionId}/${fileId}.${fileExt}`;
+  let rawExt = "webm";
+  if (blob.type) {
+    const mainType = blob.type.split(";")[0];
+    const subType = mainType.split("/")[1];
+    if (subType) {
+      if (subType === "mpeg" || subType === "mp3") rawExt = "mp3";
+      else if (subType === "x-m4a" || subType === "mp4" || subType === "m4a") rawExt = "m4a";
+      else if (subType === "opus") rawExt = "opus";
+      else if (subType === "flac" || subType === "x-flac") rawExt = "flac";
+      else if (subType === "ogg" || subType === "vorbis") rawExt = "ogg";
+      else rawExt = subType;
+    }
+  }
+  // Check if blob is a File instance with name extension
+  if ('name' in blob && (blob as File).name.includes('.')) {
+    const nameExt = (blob as File).name.split('.').pop()?.toLowerCase();
+    if (nameExt && ['mp3', 'm4a', 'opus', 'flac', 'wav', 'ogg', 'webm', 'aac'].includes(nameExt)) {
+      rawExt = nameExt;
+    }
+  }
+  const storagePath = `${user.id}/${songVersionId}/${fileId}.${rawExt}`;
 
   // Upload blob to Supabase storage rehearsals bucket
   const { error: uploadError } = await supabase.storage
@@ -93,7 +114,7 @@ export async function uploadRehearsalRecording(
 
   if (uploadError) {
     console.error("[rehearsal] Error uploading audio file to storage:", uploadError);
-    return null;
+    return { recording: null, error: uploadError.message || "Failed to upload file to storage bucket." };
   }
 
   // Insert database metadata row
@@ -112,7 +133,7 @@ export async function uploadRehearsalRecording(
     console.error("[rehearsal] Error inserting recording metadata:", dbError);
     // Attempt cleanup of orphaned storage file
     await supabase.storage.from("rehearsals").remove([storagePath]);
-    return null;
+    return { recording: null, error: dbError.message || "Failed to save recording metadata." };
   }
 
   // Generate signed URL for return value
@@ -121,8 +142,11 @@ export async function uploadRehearsalRecording(
     .createSignedUrl(storagePath, 3600);
 
   return {
-    ...(data as UserRecording),
-    audioUrl: signedData?.signedUrl,
+    recording: {
+      ...(data as UserRecording),
+      audioUrl: signedData?.signedUrl,
+    },
+    error: null,
   };
 }
 
@@ -155,4 +179,34 @@ export async function deleteUserRecording(
   }
 
   return true;
+}
+
+// 4. Reorder user recordings
+export async function reorderUserRecordings(
+  orderedRecordingIds: string[]
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+  const { data: { user }, error: authError } = await supabase.auth.getUser();
+
+  if (authError || !user) {
+    return { success: false, error: "Not authenticated" };
+  }
+
+  const updates = orderedRecordingIds.map((id, index) =>
+    supabase
+      .from("user_recordings")
+      .update({ position: index })
+      .eq("id", id)
+      .eq("user_id", user.id)
+  );
+
+  const results = await Promise.all(updates);
+  const hasError = results.some((r) => r.error);
+
+  if (hasError) {
+    console.error("[rehearsal] Error updating recording positions:", results.find((r) => r.error)?.error);
+    return { success: false, error: "Failed to update order" };
+  }
+
+  return { success: true };
 }

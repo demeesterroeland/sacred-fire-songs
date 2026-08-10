@@ -9,11 +9,12 @@ interface UseSongsFilterOptions {
   songs: Song[];
   userId?: string;
   favoriteIds: Set<string>;
+  userRecordingCompositionIds?: Set<string>;
   viewedSongIds: Set<string>;
   sortBy: string;
 }
 
-export function useSongsFilter({ songs, userId, favoriteIds, viewedSongIds, sortBy }: UseSongsFilterOptions) {
+export function useSongsFilter({ songs, userId, favoriteIds, userRecordingCompositionIds = new Set(), viewedSongIds, sortBy }: UseSongsFilterOptions) {
   const defaultState: SongFilterState = {
     status: userId ? 'all' : 'public',
     search: '',
@@ -21,6 +22,7 @@ export function useSongsFilter({ songs, userId, favoriteIds, viewedSongIds, sort
     tags: [],
     chords: false,
     melody: false,
+    myRecordings: false,
     favorites: false,
     mine: false,
     new: false,
@@ -39,6 +41,7 @@ export function useSongsFilter({ songs, userId, favoriteIds, viewedSongIds, sort
         search: params.get('search') || '',
         chords: params.get('chords') === 'true',
         melody: params.get('melody') === 'true',
+        myRecordings: params.get('myRecordings') === 'true',
         favorites: params.get('favorites') === 'true',
         mine: params.get('mine') === 'true',
         new: params.get('new') === 'true',
@@ -51,6 +54,7 @@ export function useSongsFilter({ songs, userId, favoriteIds, viewedSongIds, sort
         search: state.search || '',
         chords: state.chords ? 'true' : '',
         melody: state.melody ? 'true' : '',
+        myRecordings: state.myRecordings ? 'true' : '',
         favorites: state.favorites ? 'true' : '',
         mine: state.mine ? 'true' : '',
         new: state.new ? 'true' : '',
@@ -60,11 +64,12 @@ export function useSongsFilter({ songs, userId, favoriteIds, viewedSongIds, sort
     }
   );
 
-  // Apply post-filters (favorites, mine, new)
+  // Apply post-filters (favorites, mine, myRecordings, new)
   const finalFilteredItems = useMemo(() => {
     let items = filteredItems;
     if (state.favorites) items = items.filter(s => favoriteIds.has(s.id));
     if (state.mine && userId) items = items.filter(s => s.ownerId === userId);
+    if (state.myRecordings && userId) items = items.filter(s => userRecordingCompositionIds.has(s.id));
     if (state.new) {
       // eslint-disable-next-line react-hooks/purity
       const cutoff = Date.now() - THIRTY_DAYS_MS;
@@ -73,7 +78,7 @@ export function useSongsFilter({ songs, userId, favoriteIds, viewedSongIds, sort
       );
     }
     return items;
-  }, [filteredItems, state.favorites, state.mine, state.new, favoriteIds, viewedSongIds, userId]);
+  }, [filteredItems, state.favorites, state.mine, state.myRecordings, state.new, favoriteIds, userRecordingCompositionIds, viewedSongIds, userId]);
 
   // Sort
   const displaySongs = useMemo(() => {
@@ -87,24 +92,28 @@ export function useSongsFilter({ songs, userId, favoriteIds, viewedSongIds, sort
   // Cross-filter-aware counts: each count applies all OTHER active post-filters
   // but excludes its own, so users see "how many would match if I toggled this?"
   const toggleCounts = useMemo(() => {
-    let chords = 0, melody = 0, favorites = 0, mine = 0;
+    let chords = 0, melody = 0, favorites = 0, mine = 0, recordings = 0;
     for (const s of filteredItems) {
       const isFav = favoriteIds.has(s.id);
       const isMine = userId ? s.ownerId === userId : false;
+      const hasRec = userId ? userRecordingCompositionIds.has(s.id) : false;
       // Apply all active post-filters EXCEPT the one we're counting
       const matchFav = !state.favorites || isFav;
       const matchMine = !state.mine || !userId || isMine;
+      const matchRec = !state.myRecordings || !userId || hasRec;
 
-      // For chords/melody: must pass other post-filters
-      if (matchFav && matchMine && s.hasChords) chords++;
-      if (matchFav && matchMine && s.hasMelody) melody++;
-      // For favorites: must pass mine (skip favorites check)
-      if (matchMine && isFav) favorites++;
-      // For mine: must pass favorites (skip mine check)
-      if (matchFav && isMine) mine++;
+      // For chords/melody: must pass all other post-filters
+      if (matchFav && matchMine && matchRec && s.hasChords) chords++;
+      if (matchFav && matchMine && matchRec && s.hasMelody) melody++;
+      // For favorites: must pass mine + recordings (skip favorites check)
+      if (matchMine && matchRec && isFav) favorites++;
+      // For mine: must pass favorites + recordings (skip mine check)
+      if (matchFav && matchRec && isMine) mine++;
+      // For recordings: must pass favorites + mine (skip recordings check)
+      if (matchFav && matchMine && hasRec) recordings++;
     }
-    return { chords, melody, favorites, mine };
-  }, [filteredItems, favoriteIds, userId, state.favorites, state.mine]);
+    return { chords, melody, favorites, mine, recordings };
+  }, [filteredItems, favoriteIds, userRecordingCompositionIds, userId, state.favorites, state.mine, state.myRecordings]);
 
   const hasActiveFilters = isDraftActive(state, userId);
 
@@ -119,6 +128,7 @@ export function useSongsFilter({ songs, userId, favoriteIds, viewedSongIds, sort
     melodyCount: toggleCounts.melody,
     favoritesCount: toggleCounts.favorites,
     mineCount: toggleCounts.mine,
+    recordingsCount: toggleCounts.recordings,
     hasActiveFilters,
   };
 }
