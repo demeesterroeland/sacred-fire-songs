@@ -4,9 +4,9 @@ async function proxyRequest(request: NextRequest, context: { params: Promise<{ p
   const { path } = await context.params;
   const subPath = path.join('/');
   const isDev = process.env.NODE_ENV === "development";
-  const targetBase = (isDev
+  const targetBase = process.env.SUPABASE_INTERNAL_URL || (isDev
     ? process.env.NEXT_PUBLIC_SUPABASE_URL_DEV
-    : process.env.NEXT_PUBLIC_SUPABASE_URL) || "http://127.0.0.1:54321";
+    : undefined) || "http://kong:8000";
 
   const searchParams = request.nextUrl.search;
   const targetUrl = `${targetBase}/${subPath}${searchParams}`;

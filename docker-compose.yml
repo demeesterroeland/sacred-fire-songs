@@ -157,11 +157,12 @@ services:
   kong:
     image: kong:2.8.1
     restart: unless-stopped
+    entrypoint: ["/bin/sh", "-c", "sed -e \"s|\\$${SUPABASE_ANON_KEY}|$${SUPABASE_ANON_KEY}|g\" -e \"s|\\$${SUPABASE_SERVICE_KEY}|$${SUPABASE_SERVICE_KEY}|g\" /home/kong/kong.yml > /tmp/kong.yml && exec /docker-entrypoint.sh kong docker-start"]
     ports:
       - "54321:8000"
     environment:
       KONG_DATABASE: "off"
-      KONG_DECLARATIVE_CONFIG: /home/kong/kong.yml
+      KONG_DECLARATIVE_CONFIG: /tmp/kong.yml
       SUPABASE_ANON_KEY: ${ANON_KEY}
       SUPABASE_SERVICE_KEY: ${SERVICE_ROLE_KEY}
     volumes:
