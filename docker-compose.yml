@@ -83,6 +83,32 @@ services:
       PGRST_DB_ANON_ROLE: anon
       PGRST_JWT_SECRET: ${JWT_SECRET:-super-secret-jwt-token-with-at-least-32-characters-long}
 
+  realtime:
+    image: supabase/realtime:v2.124.3
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PORT: 4000
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_USER: supabase_admin
+      DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+      DB_NAME: postgres
+      DB_AFTER_CONNECT_QUERY: SET search_path TO _realtime
+      DB_ENC_KEY: supabaserealtime
+      API_JWT_SECRET: ${JWT_SECRET:-super-secret-jwt-token-with-at-least-32-characters-long}
+      METRICS_JWT_SECRET: ${JWT_SECRET:-super-secret-jwt-token-with-at-least-32-characters-long}
+      FLY_ALLOC_ID: fly123
+      FLY_APP_NAME: realtime
+      SECRET_KEY_BASE: ${REALTIME_SECRET_KEY_BASE:-at-least-64-character-secret-key-base-for-realtime-service-encryption}
+      ERL_AFLAGS: -proto_dist inet_tcp
+      ENABLE_TAILSCALE: "false"
+      DNS_NODES: "''"
+      RLIMIT_NOFILE: "65536"
+      APP_NAME: realtime
+
   storage:
     image: supabase/storage-api:v1.11.13
     restart: unless-stopped
@@ -114,6 +140,20 @@ services:
     volumes:
       - storage-data:/var/lib/storage:ro
 
+  meta:
+    image: supabase/postgres-meta:v0.96.8
+    restart: unless-stopped
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PG_META_PORT: 8080
+      PG_META_DB_HOST: db
+      PG_META_DB_PORT: 5432
+      PG_META_DB_NAME: postgres
+      PG_META_DB_USER: supabase_admin
+      PG_META_DB_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+
   kong:
     image: kong:2.8.1
     restart: unless-stopped
@@ -144,4 +184,5 @@ services:
 volumes:
   db-data:
   storage-data:
+
 
