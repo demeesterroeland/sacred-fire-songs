@@ -22,6 +22,8 @@ export async function getUserRecordings(songVersionId: string): Promise<UserReco
     return [];
   }
 
+  console.log(`[rehearsal] Fetching recordings for songVersionId=${songVersionId}, userId=${user.id}`);
+
   const { data, error } = await supabase
     .from("user_recordings")
     .select("*")
@@ -31,33 +33,47 @@ export async function getUserRecordings(songVersionId: string): Promise<UserReco
     .order("created_at", { ascending: false });
 
   if (error) {
-    console.error("[rehearsal] Error fetching user recordings:", error);
+    console.error("[rehearsal] DB ERROR: Failed to fetch user_recordings:", error);
     return [];
   }
 
   const recordings = data as UserRecording[];
+  console.log(`[rehearsal] Found ${recordings.length} recording metadata row(s) in DB for songVersionId=${songVersionId}`);
+
+  if (recordings.length === 0) {
+    console.log(`[rehearsal] INFO: No user_recordings metadata rows exist in DB for songVersionId=${songVersionId}`);
+    return [];
+  }
 
   // Create temporary signed URLs for each recording since the rehearsals bucket is private
   const recordingsWithUrls = await Promise.all(
     recordings.map(async (rec) => {
+      if (!rec.storage_path) {
+        console.warn(`[rehearsal] MISSING METADATA: Recording id=${rec.id} has no storage_path in DB`);
+        return rec;
+      }
+
+      const fileExt = rec.storage_path.split(".").pop()?.toLowerCase();
+      console.log(`[rehearsal] Processing recording id=${rec.id}, name="${rec.recording_name}", ext=.${fileExt}, path=${rec.storage_path}`);
+
       try {
         const { data: signedData, error: signError } = await supabase.storage
           .from("rehearsals")
           .createSignedUrl(rec.storage_path, 3600); // 1 hour expiry
 
         if (signError) {
-          console.warn(`[rehearsal] Error signing URL for ${rec.storage_path}:`, signError);
+          console.error(`[rehearsal] STORAGE SIGN ERROR for id=${rec.id}, path=${rec.storage_path}:`, signError);
           return rec;
         }
 
-        console.log(`[rehearsal] Generated signed URL for ${rec.storage_path}:`, signedData?.signedUrl);
+        console.log(`[rehearsal] SIGN SUCCESS: Signed URL generated for id=${rec.id}:`, signedData?.signedUrl);
 
         return {
           ...rec,
-          audioUrl: signedData.signedUrl,
+          audioUrl: signedData?.signedUrl,
         };
       } catch (e) {
-        console.warn(`[rehearsal] Exception signing URL for ${rec.storage_path}:`, e);
+        console.error(`[rehearsal] EXCEPTION signing URL for id=${rec.id}, path=${rec.storage_path}:`, e);
         return rec;
       }
     })

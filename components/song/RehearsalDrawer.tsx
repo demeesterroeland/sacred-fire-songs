@@ -622,10 +622,18 @@ export default function RehearsalDrawer({
 
   // Custom play/pause control handler
   const handleTogglePlay = (recordingId: string, audioUrl: string | undefined) => {
-    console.log("[rehearsal] handleTogglePlay called:", { recordingId, audioUrl });
+    const targetRec = recordings.find(r => r.id === recordingId);
+    console.log("[rehearsal] handleTogglePlay invoked:", {
+      recordingId,
+      audioUrl,
+      recordingName: targetRec?.recording_name,
+      storagePath: targetRec?.storage_path,
+      fileSize: targetRec?.file_size_bytes,
+      createdAt: targetRec?.created_at,
+    });
 
     if (!audioUrl) {
-      console.warn("[rehearsal] Audio URL missing for recordingId:", recordingId);
+      console.error("[rehearsal] PLAYBACK FAILED (NOT IN DB / MISSING SIGNED URL): Audio URL is undefined for recordingId:", recordingId);
       toast.error("Audio URL is not available.");
       return;
     }
@@ -643,19 +651,57 @@ export default function RehearsalDrawer({
     
     if (!audio) {
       audio = new Audio(audioUrl);
+
+      // Check browser format compatibility
+      const rawExt = targetRec?.storage_path ? targetRec.storage_path.split('.').pop()?.toLowerCase() : 'unknown';
+      let mimeCheck = 'audio/webm';
+      if (rawExt === 'm4a' || rawExt === 'mp4') mimeCheck = 'audio/mp4';
+      else if (rawExt === 'mp3') mimeCheck = 'audio/mpeg';
+      else if (rawExt === 'ogg') mimeCheck = 'audio/ogg';
+      else if (rawExt === 'wav') mimeCheck = 'audio/wav';
+
+      const canPlay = audio.canPlayType(mimeCheck);
+      console.log(`[rehearsal] FORMAT CHECK: File extension = .${rawExt}, Mime check = ${mimeCheck}, Browser canPlayType = "${canPlay || 'no'}"`);
+
+      // Lifecycle Event Listeners
+      audio.onplay = () => {
+        console.log(`[rehearsal] PLAY EVENT: Playback initiated for id=${recordingId}, src=${audio.src}`);
+      };
+
+      audio.onplaying = () => {
+        console.log(`[rehearsal] PLAYBACK SUCCESSFUL: Audio playing smoothly! id=${recordingId}, readyState=${audio.readyState}, duration=${audio.duration}s`);
+      };
+
+      audio.onpause = () => {
+        console.log(`[rehearsal] PAUSE EVENT: Playback paused for id=${recordingId}, currentTime=${audio.currentTime}s`);
+      };
+
       audio.onended = () => {
+        console.log(`[rehearsal] ENDED EVENT: Playback finished for id=${recordingId}`);
         setActivePlaybackId(null);
       };
+
       audio.onerror = (e) => {
-        console.error("[rehearsal] HTMLAudioElement error event:", e, {
+        const mediaError = audio.error;
+        let errorReason = "UNKNOWN_ERROR";
+        if (mediaError?.code === 1) errorReason = "MEDIA_ERR_ABORTED (Aborted by user)";
+        else if (mediaError?.code === 2) errorReason = "MEDIA_ERR_NETWORK (Network error downloading stream)";
+        else if (mediaError?.code === 3) errorReason = "MEDIA_ERR_DECODE (Decoding error / corrupted audio file)";
+        else if (mediaError?.code === 4) errorReason = "MEDIA_ERR_SRC_NOT_SUPPORTED (Format/codec not supported or HTTP 404/403 access denied)";
+
+        console.error(`[rehearsal] PLAYBACK UNSUCCESSFUL (HTML5 Error Event): id=${recordingId}`, {
+          event: e,
+          errorCode: mediaError?.code,
+          errorReason,
+          errorMessage: mediaError?.message,
           src: audio.src,
-          error: audio.error,
-          code: audio.error?.code,
-          message: audio.error?.message,
           networkState: audio.networkState,
-          readyState: audio.readyState
+          readyState: audio.readyState,
+          fileExt: rawExt,
+          mimeCheck,
         });
       };
+
       setAudioElements(prev => ({ ...prev, [recordingId]: audio }));
     }
 
@@ -664,15 +710,14 @@ export default function RehearsalDrawer({
       setActivePlaybackId(null);
     } else {
       audio.play().catch(err => {
-        console.error("[drawer] Audio play error:", err, {
-          name: err?.name,
-          message: err?.message,
+        console.error(`[rehearsal] PLAYBACK UNSUCCESSFUL (Promise Catch): id=${recordingId}`, {
+          errorName: err?.name,
+          errorMessage: err?.message,
           src: audio?.src,
-          mediaError: audio?.error,
-          errorCode: audio?.error?.code,
-          errorMessage: audio?.error?.message,
+          mediaErrorCode: audio?.error?.code,
+          mediaErrorMessage: audio?.error?.message,
           networkState: audio?.networkState,
-          readyState: audio?.readyState
+          readyState: audio?.readyState,
         });
         toast.error(`Failed to play recording audio (${err?.name || 'Error'}).`);
       });
