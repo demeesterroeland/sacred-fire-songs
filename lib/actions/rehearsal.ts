@@ -50,6 +50,8 @@ export async function getUserRecordings(songVersionId: string): Promise<UserReco
           return rec;
         }
 
+        console.log(`[rehearsal] Generated signed URL for ${rec.storage_path}:`, signedData?.signedUrl);
+
         return {
           ...rec,
           audioUrl: signedData.signedUrl,

@@ -622,7 +622,10 @@ export default function RehearsalDrawer({
 
   // Custom play/pause control handler
   const handleTogglePlay = (recordingId: string, audioUrl: string | undefined) => {
+    console.log("[rehearsal] handleTogglePlay called:", { recordingId, audioUrl });
+
     if (!audioUrl) {
+      console.warn("[rehearsal] Audio URL missing for recordingId:", recordingId);
       toast.error("Audio URL is not available.");
       return;
     }
@@ -643,6 +646,16 @@ export default function RehearsalDrawer({
       audio.onended = () => {
         setActivePlaybackId(null);
       };
+      audio.onerror = (e) => {
+        console.error("[rehearsal] HTMLAudioElement error event:", e, {
+          src: audio.src,
+          error: audio.error,
+          code: audio.error?.code,
+          message: audio.error?.message,
+          networkState: audio.networkState,
+          readyState: audio.readyState
+        });
+      };
       setAudioElements(prev => ({ ...prev, [recordingId]: audio }));
     }
 
@@ -651,8 +664,17 @@ export default function RehearsalDrawer({
       setActivePlaybackId(null);
     } else {
       audio.play().catch(err => {
-        console.error("[drawer] Audio play error:", err);
-        toast.error("Failed to play recording audio.");
+        console.error("[drawer] Audio play error:", err, {
+          name: err?.name,
+          message: err?.message,
+          src: audio?.src,
+          mediaError: audio?.error,
+          errorCode: audio?.error?.code,
+          errorMessage: audio?.error?.message,
+          networkState: audio?.networkState,
+          readyState: audio?.readyState
+        });
+        toast.error(`Failed to play recording audio (${err?.name || 'Error'}).`);
       });
       setActivePlaybackId(recordingId);
     }
