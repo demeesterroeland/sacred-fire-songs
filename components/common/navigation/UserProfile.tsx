@@ -3,7 +3,6 @@ import { useAuth } from '@/hooks/useAuth';
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import QuickLogin from '@/components/dev/QuickLogin';
 import { useUserPreferences, type ThemePreference } from '@/context/UserPreferencesContext';
 
 import { usePathname, useRouter } from 'next/navigation';
@@ -187,13 +186,6 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true }: Us
               <LogOut className="w-4 h-4" />
               <span className="text-sm font-medium">Sign Out</span>
             </button>
-
-            {/* Local Dev Info */}
-            {process.env.NODE_ENV === 'development' && (
-              <div className="mt-4 pt-4 border-t border-gray-200/80 dark:border-gray-800/80">
-                <QuickLogin />
-              </div>
-            )}
           </div>
         </div>
       )}
