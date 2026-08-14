@@ -177,6 +177,7 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true }: Us
             {/* Sign Out */}
             <button
               onClick={async () => {
+                setIsOpen(false);
                 await logout();
                 onLogout?.();
                 router.refresh();
