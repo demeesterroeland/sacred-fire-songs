@@ -74,44 +74,48 @@ export const useAuth = () => {
             return;
         }
 
-        // C. Fallback to Real Supabase Auth — with a 15s timeout to prevent infinite skeleton
+        // C. Fast Auth Resolution: Check session locally from storage first for instant (<10ms) hydration
         const supabase = createClient();
-        const AUTH_TIMEOUT_MS = 15000;
+        const AUTH_TIMEOUT_MS = 5000;
 
         try {
-            const authResult = await Promise.race([
-                supabase.auth.getUser(),
-                new Promise<never>((_, reject) =>
-                    setTimeout(() => reject(new Error('useAuth: getUser() timed out after 5s')), AUTH_TIMEOUT_MS)
-                ),
-            ]) as Awaited<ReturnType<typeof supabase.auth.getUser>>;
+            // 1. Instantly check local session token
+            const { data: { session } } = await supabase.auth.getSession();
+            const sessionUser = session?.user ?? null;
 
             if (signal?.cancelled) return;
 
-            const supabaseUser = authResult.data?.user ?? null;
+            if (sessionUser) {
+                // Instantly set basic user state to eliminate header flash
+                setUser((prev) => prev || {
+                    id: sessionUser.id,
+                    email: sessionUser.email,
+                    role: (sessionUser.user_metadata?.role as UserRole) || 'member',
+                    full_name: sessionUser.user_metadata?.full_name || sessionUser.email?.split('@')[0],
+                    avatar_url: sessionUser.user_metadata?.avatar_url,
+                });
+                setLoading(false);
 
-            if (supabaseUser) {
+                // 2. Fetch full DB profile non-blockingly / in parallel
                 const profileResult = await Promise.race([
-                    supabase.from('profiles').select('role, full_name, avatar_url').eq('id', supabaseUser.id).maybeSingle(),
+                    supabase.from('profiles').select('role, full_name, avatar_url').eq('id', sessionUser.id).maybeSingle(),
                     new Promise<never>((_, reject) =>
-                        setTimeout(() => reject(new Error('useAuth: profiles query timed out after 5s')), AUTH_TIMEOUT_MS)
+                        setTimeout(() => reject(new Error('useAuth: profile timeout')), AUTH_TIMEOUT_MS)
                     ),
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                ]) as any;
+                ]).catch(() => null) as any;
 
                 if (signal?.cancelled) return;
 
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                const profile = (profileResult as any).data;
+                const profile = profileResult?.data;
                 setUser({
-                    id: supabaseUser.id,
-                    email: supabaseUser.email,
-                    role: profile?.role || 'member',
-                    full_name: profile?.full_name,
-                    avatar_url: profile?.avatar_url
+                    id: sessionUser.id,
+                    email: sessionUser.email,
+                    role: profile?.role || (sessionUser.user_metadata?.role as UserRole) || 'member',
+                    full_name: profile?.full_name || sessionUser.user_metadata?.full_name || sessionUser.email?.split('@')[0],
+                    avatar_url: profile?.avatar_url || sessionUser.user_metadata?.avatar_url,
                 });
             } else {
-                if (signal?.cancelled) return;
                 setUser(null);
             }
         } catch (err) {

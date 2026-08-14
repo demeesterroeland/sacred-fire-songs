@@ -43,7 +43,7 @@ function ThemeToggle() {
 }
 
 export const UserProfile = ({ onLogout, layout = 'header', showText = true }: UserProfileProps) => {
-  const { user, logout } = useAuth();
+  const { user, loading, logout } = useAuth();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
@@ -59,6 +59,10 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true }: Us
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  if (loading) {
+    return <div className="w-9 h-9 rounded-xl bg-gray-200 dark:bg-gray-800 animate-pulse" />;
+  }
 
   if (!user) {
     return (
