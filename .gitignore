@@ -74,3 +74,6 @@ data/songs/**/*.pdf
 
 # Generated PDF songbooks
 /*.pdf
+
+# Local docker compose kong gateway configuration
+kong.yml
