@@ -1,10 +1,10 @@
 'use client';
 
 import Link from 'next/link';
-import { Music, Guitar, Heart, Mic } from 'lucide-react';
-import { getCategoryColor, getCategoryStyles } from '@/lib/uiUtils';
+import { Music, Guitar, Heart, Mic, Trash2 } from 'lucide-react';
 import { TagPill } from '@/components/ui/TagPill';
 import { AuthorPill } from '@/components/ui/AuthorPill';
+import { parseArtists } from '@/lib/songs/artistUtils';
 import { cn } from '@/lib/utils';
 import { useToggleFavorite } from '@/hooks/useToggleFavorite';
 import { PlaylistPicker } from '@/components/playlists/PlaylistPicker';
@@ -21,10 +21,13 @@ interface SongCardProps {
     hasPersonalRecording?: boolean;
     isFavorite?: boolean;
     userId?: string;
+    canDelete?: boolean;
+    onDelete?: () => void;
     categories?: {
         name: string;
         slug: string;
         emoji?: string;
+        parent?: string | null;
     }[];
 }
 
@@ -40,6 +43,8 @@ export default function SongCard({
     hasPersonalRecording = false,
     isFavorite = false,
     userId,
+    canDelete = false,
+    onDelete,
     categories = []
 }: SongCardProps) {
     const { isFav, handleToggle } = useToggleFavorite(id, isFavorite);
@@ -69,7 +74,7 @@ export default function SongCard({
     };
 
     return (
-        <div className="relative self-start w-full">
+        <div className="relative self-start w-full group">
             <Link href={`/songs/${id}`} className="block">
                 <div className={cn(
                     'relative p-5 rounded-2xl transition-all duration-300 backdrop-blur-sm group overflow-hidden flex flex-col justify-between active:scale-[0.98] cursor-pointer',
@@ -89,44 +94,69 @@ export default function SongCard({
                                     {title}
                                 </h3>
                                 {!isPublic && (
-                                    <span className="text-[9px] font-black bg-gray-200 dark:bg-gray-800 text-gray-500 dark:text-gray-400 px-1.5 py-0.5 rounded border border-gray-400/50 dark:border-gray-700 uppercase tracking-tighter shrink-0">
+                                    <Link
+                                        href="/songs?status=draft"
+                                        title="Filter Draft songs"
+                                        className="text-[9px] font-black bg-gray-200 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-500 px-1.5 py-0.5 rounded border border-gray-400/50 dark:border-gray-700 uppercase tracking-tighter shrink-0 transition-colors"
+                                    >
                                         Draft
-                                    </span>
+                                    </Link>
                                 )}
                             </div>
-                            <div className="mb-3">
-                                <AuthorPill author={author || 'Traditional'} />
+                            <div className="mb-3 flex flex-wrap items-center gap-1.5">
+                                {(parseArtists(author).length > 0 ? parseArtists(author) : ['Traditional']).map((artistName, idx) => (
+                                    <AuthorPill
+                                        key={idx}
+                                        author={artistName}
+                                        href={`/songs?artist=${encodeURIComponent(artistName)}`}
+                                    />
+                                ))}
                             </div>
 
                             {/* Categories/Tags */}
                             <div className="flex flex-wrap items-center gap-1.5">
-                                {categories.map((cat, idx) => (
-                                    <TagPill
-                                        key={idx}
-                                        label={cat.name}
-                                        categorySlug={cat.slug}
-                                        emoji={cat.emoji}
-                                        variant="badge"
-                                    />
-                                ))}
+                                {categories
+                                    .filter((cat) => cat.parent !== 'Artists' && cat.name !== 'Artists')
+                                    .map((cat, idx) => (
+                                        <TagPill
+                                            key={idx}
+                                            label={cat.name}
+                                            categorySlug={cat.slug}
+                                            emoji={cat.emoji}
+                                            variant="badge"
+                                            href={`/songs?tag=${encodeURIComponent(cat.slug)}`}
+                                        />
+                                    ))}
                             </div>
                         </div>
 
                         <div className="flex flex-col items-end gap-1.5 shrink-0 ml-4">
                             {hasChords && (
-                                <div className="text-amber-500 mb-1" title="Has Chords">
+                                <Link
+                                    href="/songs?chords=true"
+                                    className="text-amber-500 hover:text-amber-400 hover:scale-110 transition-all mb-1"
+                                    title="Filter songs with Chords"
+                                >
                                     <Guitar className="w-3.5 h-3.5" />
-                                </div>
+                                </Link>
                             )}
                             {hasMelody && (
-                                <div className="text-emerald-400 mb-1" title="Has Melody">
+                                <Link
+                                    href="/songs?melody=true"
+                                    className="text-emerald-400 hover:text-emerald-300 hover:scale-110 transition-all mb-1"
+                                    title="Filter songs with Melody"
+                                >
                                     <Music className="w-3.5 h-3.5" />
-                                </div>
+                                </Link>
                             )}
                             {hasPersonalRecording && (
-                                <div className="text-violet-400 mb-1" title="Personal Rehearsal Recording">
+                                <Link
+                                    href="/songs?myRecordings=true"
+                                    className="text-violet-400 hover:text-violet-300 hover:scale-110 transition-all mb-1"
+                                    title="Filter songs with Personal Recording"
+                                >
                                     <Mic className="w-3.5 h-3.5" />
-                                </div>
+                                </Link>
                             )}
                             {songKey && (
                                 <div className="text-[10px] font-mono text-gray-400">
@@ -141,6 +171,19 @@ export default function SongCard({
 
             {/* Action buttons — bottom-right */}
             <div className="absolute bottom-3 right-3 z-20 flex items-center gap-1">
+                {canDelete && onDelete && (
+                    <button
+                        onClick={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            onDelete();
+                        }}
+                        className="p-1 rounded-full text-gray-400 opacity-0 group-hover:opacity-100 hover:text-red-500 hover:bg-red-500/10 transition-all duration-200"
+                        title="Delete song"
+                    >
+                        <Trash2 className="w-3.5 h-3.5" />
+                    </button>
+                )}
                 {userId && (
                     <PlaylistPicker
                         compositionId={id}

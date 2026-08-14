@@ -1,8 +1,8 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
-import { User } from 'lucide-react';
+import { User, X } from 'lucide-react';
+import { BasePill } from './BasePill';
 
 export interface AuthorPillProps {
   author: string;
@@ -10,7 +10,9 @@ export interface AuthorPillProps {
   selected?: boolean;
   count?: number;
   onClick?: () => void;
+  onRemove?: () => void;
   href?: string;
+  title?: string;
   className?: string;
 }
 
@@ -20,14 +22,12 @@ export function AuthorPill({
   selected = false,
   count,
   onClick,
+  onRemove,
   href,
+  title,
   className = '',
 }: AuthorPillProps) {
   const displayAuthor = author?.trim() || 'Traditional';
-  const targetHref = href || `/songs?artist=${encodeURIComponent(displayAuthor)}`;
-
-  const baseStyles =
-    'inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full transition-all duration-200 select-none border cursor-pointer active:scale-95';
 
   let variantStyles = '';
   if (variant === 'badge') {
@@ -41,39 +41,43 @@ export function AuthorPill({
       'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700';
   }
 
-  const content = (
-    <>
-      <User className="w-3 h-3 shrink-0 opacity-80" />
-      <span>{displayAuthor}</span>
-      {typeof count === 'number' && (
-        <span
-          className={`text-[10px] px-1.5 py-0.5 rounded-full ${
-            selected
-              ? 'bg-white/20 text-white'
-              : 'bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-400'
-          }`}
-        >
-          {count}
-        </span>
-      )}
-    </>
-  );
+  const removeButton = onRemove ? (
+    <span
+      role="button"
+      tabIndex={0}
+      onClick={(e) => {
+        e.stopPropagation();
+        onRemove();
+      }}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.stopPropagation();
+          onRemove();
+        }
+      }}
+      className="ml-0.5 -mr-1 p-0.5 rounded-full hover:bg-indigo-500/20 dark:hover:bg-indigo-400/30 text-indigo-600 dark:text-indigo-300 transition-colors"
+      title={`Remove ${displayAuthor}`}
+    >
+      <X className="w-3 h-3" />
+    </span>
+  ) : undefined;
 
-  if (targetHref && !onClick) {
-    return (
-      <Link href={targetHref} className={`${baseStyles} ${variantStyles} ${className}`}>
-        {content}
-      </Link>
-    );
-  }
+  const isInteractive = Boolean(href || onClick);
+  const computedTitle =
+    title ?? (isInteractive ? `Filter songs by artist "${displayAuthor}"` : undefined);
 
   return (
-    <button
-      type="button"
+    <BasePill
+      label={displayAuthor}
+      icon={<User className="w-3 h-3 shrink-0 opacity-80" />}
+      count={count}
+      href={href}
       onClick={onClick}
-      className={`${baseStyles} ${variantStyles} ${className}`}
+      title={computedTitle}
+      variantStyles={variantStyles}
+      className={className}
     >
-      {content}
-    </button>
+      {removeButton}
+    </BasePill>
   );
 }

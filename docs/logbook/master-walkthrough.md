@@ -2788,4 +2788,38 @@ This session addressed a critical bug where slow Supabase Auth calls (due to Tai
 - Persisted timestamped historical JSON reports in `testing/performance/reports/`.
 - Merged feature PRs #213, #214, and #215 per the Verification Rule and updated `<parent-project>` engine submodule pointers accordingly.
 
+---
+
+## August 14, 2026 (Multi-Artist Tagging, UI Tooltips, Component Refactoring & Guest Flow Enhancements - Issue #195 & #228)
+
+### 1. Multi-Artist Utilities & Search Filtering (`lib/songs/artistUtils.ts` & `lib/songs/filterConfig.ts`)
+- `parseArtists(authorStr)`: Parses comma, slash, and `&`-separated author strings into an array of clean artist names.
+- `formatArtists(artistsArr)`: Formats an array of artist names into a canonical comma-separated string (`"Herbert Quinteros, Cari El"`).
+- `sortTagSuggestions(items)`: Sorts tags and autocomplete suggestions by `song_count` descending (most popular first), then alphabetically ascending.
+- **Multi-Artist Filter Fix**: Updated `filterConfig.ts` to check each parsed artist individually so filtering by artist (e.g. `"Danit"`) matches songs where that artist is one of multiple co-authors.
+
+### 2. Interactive Pill Navigation & Hover Tooltips (`components/ui/BasePill.tsx`, `AuthorPill.tsx`, `TagPill.tsx`, `SongCard.tsx`)
+- **`<BasePill>` Primitive**: Created a shared primitive handling HTML tag selection (`<Link>`, `<button>`, or `<span>`), layout styling, count badges, and accessibility.
+- **Pill Filter Links**: Added explicit `href` parameters to `TagPill`, `AuthorPill`, Draft badge, and feature icons (Guitar/Chords, Music/Melody, Mic/Recordings) on `SongCard.tsx`.
+- **Hover Tooltips**: Added native `title` attributes across all interactive pills:
+  - Author Pill: `Filter songs by artist "<Name>"`
+  - Category Tag Pill: `Filter songs tagged with "<Tag>"`
+  - Feature Icons: `Filter songs with Chords`, `Filter songs with Melody`, `Filter songs with Personal Recording`
+  - Draft Badge: `Filter Draft songs`
+
+### 3. Song Card Action Bar & Delete Button Relocation (`SongCard.tsx`)
+- Moved the hover delete button to the bottom-right action bar (to the left of Playlist `+` and Favorite `♥` buttons).
+- Added `group` to the outermost card container so hover delete displays reliably for **Draft** and **Mine** song cards without obscuring top-right feature icons.
+
+### 4. Detail Page Architecture Refactoring (`app/songs/[id]/page.tsx`)
+- Created `<SongTechnicalBadges>` and `<SongMetadataPills>` components.
+- Eliminated duplicate header JSX between mobile and desktop layouts on the song detail page.
+
+### 5. Empty State & Guest Flow Improvements (`app/songs/SongsPageContent.tsx`, `hooks/useToggleFavorite.ts`, etc.)
+- **Draft Empty State**: Added dedicated empty state for `status=draft` with a `FileText` icon, `"No draft songs yet"` heading, `"Create a song as a draft to see it here"` subtext, and an `"Add Song →"` link.
+- **Guest Filter Recognition**: Fixed `isDraftActive` and `serializeUrl` so guest filtering on `status=draft` is properly treated as an active filter deviation (displaying search bar indicator and `"0 results Clear filters"` banner).
+- **Toast Action Links**: Added interactive action buttons to toasts for Liked Songs (`View Liked Songs →`), Playlists (`Open Playlist →`), and Rehearsal Recordings (`View Recordings →`).
+- **Issue Creation**: Created GitHub Issue [#229](https://github.com/demeesterroel/sacred-fire-songs/issues/229) to track guest song draft persistence across authentication flows.
+
+
 

@@ -1,9 +1,9 @@
 'use client';
 
 import React from 'react';
-import Link from 'next/link';
 import { Tag, Check } from 'lucide-react';
 import { getCategoryColor, getCategoryStyles } from '@/lib/uiUtils';
+import { BasePill } from './BasePill';
 
 export interface TagPillProps {
   label: string;
@@ -14,6 +14,7 @@ export interface TagPillProps {
   count?: number;
   onClick?: () => void;
   href?: string;
+  title?: string;
   className?: string;
 }
 
@@ -26,33 +27,25 @@ export function TagPill({
   count,
   onClick,
   href,
+  title,
   className = '',
 }: TagPillProps) {
-  const baseStyles =
-    'inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full transition-all duration-200 select-none border';
-
   const colorKey = categorySlug ? getCategoryColor(categorySlug) : 'gray';
   const categoryStyles = getCategoryStyles(colorKey);
 
   let variantStyles = '';
 
   if (variant === 'badge') {
-    variantStyles = `${categoryStyles.pill} hover:opacity-80 cursor-pointer active:scale-95`;
+    variantStyles = `${categoryStyles.pill} hover:opacity-80`;
   } else if (variant === 'filter') {
-    if (selected) {
-      variantStyles = `${categoryStyles.active} shadow-md cursor-pointer active:scale-95`;
-    } else {
-      variantStyles = `${categoryStyles.inactive} cursor-pointer active:scale-95`;
-    }
+    variantStyles = selected ? `${categoryStyles.active} shadow-md` : `${categoryStyles.inactive}`;
   } else if (variant === 'selectable') {
-    if (selected) {
-      variantStyles = `${categoryStyles.active} shadow-md ring-1 ring-white/20 cursor-pointer active:scale-95`;
-    } else {
-      variantStyles = `${categoryStyles.inactive} hover:brightness-110 cursor-pointer active:scale-95`;
-    }
+    variantStyles = selected
+      ? `${categoryStyles.active} shadow-md ring-1 ring-white/20`
+      : `${categoryStyles.inactive} hover:brightness-110`;
   }
 
-  const content = (
+  const icon = (
     <>
       {variant === 'selectable' && selected && (
         <Check className="w-3.5 h-3.5 shrink-0 opacity-95 stroke-[2.5]" />
@@ -62,36 +55,22 @@ export function TagPill({
       ) : variant === 'badge' ? (
         <Tag className="w-3 h-3 shrink-0 opacity-80" />
       ) : null}
-      <span>{label}</span>
-      {typeof count === 'number' && (
-        <span
-          className={`text-[10px] px-1.5 py-0.5 rounded-full ${
-            selected
-              ? 'bg-white/20 text-white'
-              : 'bg-gray-200 dark:bg-gray-800 text-gray-600 dark:text-gray-400'
-          }`}
-        >
-          {count}
-        </span>
-      )}
     </>
   );
 
-  if (href) {
-    return (
-      <Link href={href} className={`${baseStyles} ${variantStyles} ${className}`}>
-        {content}
-      </Link>
-    );
-  }
+  const isInteractive = Boolean(href || onClick);
+  const computedTitle = title ?? (isInteractive ? `Filter songs tagged with "${label}"` : undefined);
 
   return (
-    <button
-      type="button"
+    <BasePill
+      label={label}
+      icon={icon}
+      count={count}
+      href={href}
       onClick={onClick}
-      className={`${baseStyles} ${variantStyles} ${className}`}
-    >
-      {content}
-    </button>
+      title={computedTitle}
+      variantStyles={variantStyles}
+      className={className}
+    />
   );
 }

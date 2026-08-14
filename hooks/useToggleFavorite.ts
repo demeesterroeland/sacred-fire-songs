@@ -44,9 +44,25 @@ export function useToggleFavorite(id: string, initialIsFavorite: boolean = false
             }
         } else {
             if (result.isFavorite) {
-                toast.success('Added to Liked Songs');
+                toast.success('Added to Liked Songs', {
+                    action: {
+                        label: 'View Liked Songs →',
+                        onClick: () => { window.location.href = '/songs?favorites=true'; },
+                    },
+                    classNames: {
+                        actionButton: 'text-amber-400 text-xs font-bold hover:text-amber-300 transition-colors ml-2',
+                    },
+                });
             } else {
-                toast.success('Removed from Liked Songs');
+                toast.success('Removed from Liked Songs', {
+                    action: {
+                        label: 'View Liked Songs →',
+                        onClick: () => { window.location.href = '/songs?favorites=true'; },
+                    },
+                    classNames: {
+                        actionButton: 'text-amber-400 text-xs font-bold hover:text-amber-300 transition-colors ml-2',
+                    },
+                });
             }
             // Invalidate the shared favorites cache so every consumer sees fresh data
             queryClient.invalidateQueries({ queryKey: SONG_KEYS.allFavorites() });

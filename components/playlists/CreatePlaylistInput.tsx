@@ -28,7 +28,15 @@ export function CreatePlaylistInput() {
             if ('error' in result) {
                 toast.error(result.error);
             } else {
-                toast.success(`"${trimmed}" created`);
+                toast.success(`"${trimmed}" created`, {
+                    action: {
+                        label: 'View Playlist →',
+                        onClick: () => { router.push(`/library/playlists/${result.id}`); },
+                    },
+                    classNames: {
+                        actionButton: 'text-amber-400 text-xs font-bold hover:text-amber-300 transition-colors ml-2',
+                    },
+                });
                 router.refresh();
             }
             setIsOpen(false);

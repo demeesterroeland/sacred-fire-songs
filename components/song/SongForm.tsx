@@ -3,7 +3,6 @@
 import { useForm } from 'react-hook-form';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { SONG_KEYS } from '@/lib/songs/queryKeys';
-import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useState, useEffect } from 'react';
@@ -12,6 +11,9 @@ import { parseChordPro, hasChords } from '@/lib/chordProParsing';
 import { useAuth } from '@/hooks/useAuth';
 import CategorySelector from './CategorySelector';
 import ChordProEditor from './ChordProEditor';
+
+import { ArtistTagInput } from './ArtistTagInput';
+import { parseArtists, formatArtists, ensureArtistCategoryIds } from '@/lib/songs/artistUtils';
 
 type SongFormData = {
     title: string;
@@ -34,9 +36,6 @@ interface SongFormProps {
     songId?: string;
     versionId?: string; // For updating the specific version
 }
-
-
-const PREDEFINED_TAGS = ['Healing', 'Mantra', 'Medicine', 'Ceremony'];
 
 const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
     const {
@@ -101,8 +100,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                 if (hasData) {
                     // Update form values
                     Object.keys(parsed).forEach((key) => {
-                        // @ts-expect-error
-                        setValue(key, parsed[key]);
+                        setValue(key as keyof SongFormData, parsed[key]);
                     });
 
                     // Restore UI states
@@ -253,9 +251,12 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
 
                 if (versionError) throw versionError;
 
-                // 3. Insert Categories
-                if (data.categoryIds && data.categoryIds.length > 0) {
-                    const categoryInserts = data.categoryIds.map(catId => ({
+                // 3. Insert Categories & Artist Categories
+                const artistCatIds = await ensureArtistCategoryIds(supabase, parseArtists(data.author));
+                const allCategoryIds = Array.from(new Set([...(data.categoryIds || []), ...artistCatIds]));
+
+                if (allCategoryIds.length > 0) {
+                    const categoryInserts = allCategoryIds.map(catId => ({
                         song_id: composition.id,
                         category_id: catId
                     }));
@@ -302,12 +303,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
 
                 if (versionError) throw versionError;
 
-                // 3. Update Categories
-                // Strategy: Delete all existing and re-insert (simplest for many-to-many)
-                // Or compare. For now, delete/insert is safe within transaction (but we aren't in one here).
-                // Supabase calls are atomic but not across calls unless RPC. 
-                // Given low volume, delete all for song and re-insert is acceptable.
-
+                // 3. Update Categories & Artist Categories
                 const { error: deleteCatError } = await supabase
                     .from('song_category_map')
                     .delete()
@@ -315,8 +311,11 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
 
                 if (deleteCatError) throw deleteCatError;
 
-                if (data.categoryIds && data.categoryIds.length > 0) {
-                    const categoryInserts = data.categoryIds.map(catId => ({
+                const artistCatIds = await ensureArtistCategoryIds(supabase, parseArtists(data.author));
+                const allCategoryIds = Array.from(new Set([...(data.categoryIds || []), ...artistCatIds]));
+
+                if (allCategoryIds.length > 0) {
+                    const categoryInserts = allCategoryIds.map(catId => ({
                         song_id: songId,
                         category_id: catId
                     }));
@@ -327,7 +326,6 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
 
                     if (insertCatError) throw insertCatError;
                 }
-
 
                 return songId;
             }
@@ -440,15 +438,14 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                     {errors.title && <p className="text-red-400 text-sm">{errors.title.message}</p>}
                 </div>
 
-                {/* 2. Author (optional) */}
+                {/* 2. Author / Artist (Multi-Artist Pill Input) */}
                 <div className="space-y-2">
                     <label htmlFor="author" className="block text-sm font-medium text-gray-600 dark:text-gray-300 p-1">
-                        Author/Composer <span className="text-gray-500 font-normal">(optional)</span>
+                        Author / Artist(s) <span className="text-gray-500 font-normal">(optional)</span>
                     </label>
-                    <input
-                        id="author"
-                        {...register('author')}
-                        className="w-full bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all placeholder:text-gray-400 dark:placeholder:text-[#a19eb7]/50"
+                    <ArtistTagInput
+                        selectedArtists={parseArtists(watch('author') || '')}
+                        onChange={(artists) => setValue('author', formatArtists(artists), { shouldDirty: true })}
                         placeholder="e.g. Traditional or Artist Name"
                     />
                 </div>

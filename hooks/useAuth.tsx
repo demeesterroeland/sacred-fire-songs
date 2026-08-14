@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/client';
 import { useEffect, useState } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 
 export type UserRole = 'admin' | 'gatekeeper' | 'musician' | 'member' | 'guest';
 
@@ -47,6 +48,7 @@ export interface AuthUser {
 }
 
 export const useAuth = () => {
+    const queryClient = useQueryClient();
     const [user, setUser] = useState<AuthUser | null>(null);
     const [loading, setLoading] = useState(true);
     const [mockRole, setMockRole] = useState<string | null>(() => {
@@ -133,6 +135,7 @@ export const useAuth = () => {
                 if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
                     loadUser(null, signal);
                 } else if (event === 'SIGNED_OUT') {
+                    queryClient.clear();
                     setUser(null);
                     setLoading(false);
                 }
@@ -215,15 +218,15 @@ export const useAuth = () => {
         const supabase = createClient();
         await supabase.auth.signOut();
 
-        // 3. Force "guest" state
+        // 3. Purge React Query cache
+        queryClient.clear();
+
+        // 4. Force "guest" state
         setUser(null);
         setMockRole(null);
 
-        // 4. Notify components
+        // 5. Notify components
         window.dispatchEvent(new Event('auth-role-change'));
-
-        // 5. Force reload to guest mode if needed, or ensure "guest" is selected in dropdown
-        // (The hook logic will reloadUser(null) effectively)
     };
 
     return { user, loading, mockRole, switchMockRole, quickLogin, logout };

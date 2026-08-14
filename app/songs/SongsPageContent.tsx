@@ -1,9 +1,10 @@
 'use client';
 
+import Link from "next/link";
 import SongCard from "@/components/home/SongCard";
 import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
 import SearchFiltersModal from "@/components/library/SearchFiltersModal";
-import { Search, Trash2, Heart } from "lucide-react";
+import { Search, Trash2, Heart, FileText } from "lucide-react";
 import { useSidebar } from "@/context/SidebarContext";
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
@@ -208,19 +209,9 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
                                         isFavorite={favoriteIds.has(song.id)}
                                         userId={user?.id}
                                         categories={song.categories}
+                                        canDelete={Boolean(user && (isAdmin || song.ownerId === user.id))}
+                                        onDelete={() => setDeleteTarget({ id: song.id, title: song.title })}
                                     />
-                                    {user && (isAdmin || song.ownerId === user.id) && (
-                                        <button
-                                            onClick={(e) => {
-                                                e.preventDefault();
-                                                setDeleteTarget({ id: song.id, title: song.title });
-                                            }}
-                                            className="absolute top-2 right-2 z-10 p-1.5 rounded-lg bg-white/80 dark:bg-gray-900/80 border border-gray-300 dark:border-gray-700 text-gray-500 opacity-0 group-hover/card:opacity-100 hover:text-red-400 hover:border-red-500/50 hover:bg-red-500/10 transition-all duration-200"
-                                            title="Delete song"
-                                        >
-                                            <Trash2 className="w-3.5 h-3.5" />
-                                        </button>
-                                    )}
                                 </div>
                             ))
                         ) : (
@@ -232,12 +223,27 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
                                         </div>
                                         <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-2">Your sacred circle is empty</h3>
                                         <p className="text-gray-400 max-w-xs mx-auto">Tap ♥ on any song to add it here</p>
-                                        <button
-                                            onClick={() => setFilter('status', 'all')}
-                                            className="mt-6 text-amber-400 hover:text-amber-300 font-medium transition-colors"
+                                        <Link
+                                            href="/songs"
+                                            onClick={handleResetFilters}
+                                            className="mt-6 inline-block text-amber-400 hover:text-amber-300 font-medium transition-colors cursor-pointer"
                                         >
                                             Browse all songs →
-                                        </button>
+                                        </Link>
+                                    </>
+                                ) : state.status === 'draft' ? (
+                                    <>
+                                        <div className="mb-4 inline-flex items-center justify-center w-16 h-16 rounded-full bg-indigo-500/10 border border-indigo-500/20">
+                                            <FileText className="w-8 h-8 text-indigo-400/50" />
+                                        </div>
+                                        <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-2">No draft songs yet</h3>
+                                        <p className="text-gray-400 max-w-xs mx-auto">Create a song as a draft to see it here</p>
+                                        <Link
+                                            href="/songs/add"
+                                            className="mt-6 inline-block text-indigo-400 hover:text-indigo-300 font-medium transition-colors cursor-pointer"
+                                        >
+                                            Add Song →
+                                        </Link>
                                     </>
                                 ) : (
                                     <>

@@ -4,6 +4,7 @@ import type { TaxonomyNode } from "@/lib/taxonomyUtils";
 import { songsQuery, mapCompositionToSong } from './queries';
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { normalizeWhitespace, removeDiacritics } from "@/lib/utils";
+import { parseArtists } from "./artistUtils";
 
 const PAGE_SIZE = 20;
 
@@ -425,8 +426,8 @@ export async function fetchArtistsServer(): Promise<ArtistSummary[]> {
     const unspecifiedTitles: string[] = [];
 
     for (const row of rows || []) {
-        const originalName = row.original_author as string;
-        if (!originalName) {
+        const parsed = parseArtists(row.original_author as string);
+        if (parsed.length === 0) {
             unspecifiedCount++;
             if (unspecifiedTitles.length < 5 && row.title) {
                 unspecifiedTitles.push(row.title as string);
@@ -434,26 +435,30 @@ export async function fetchArtistsServer(): Promise<ArtistSummary[]> {
             continue;
         }
 
-        const normalized = normalizeWhitespace(originalName);
-        if (!normalized) continue;
+        for (const artistName of parsed) {
+            const normalized = normalizeWhitespace(artistName);
+            if (!normalized) continue;
 
-        const key = removeDiacritics(normalized).toLowerCase();
+            const key = removeDiacritics(normalized).toLowerCase();
 
-        authorCounts.set(key, (authorCounts.get(key) || 0) + 1);
+            authorCounts.set(key, (authorCounts.get(key) || 0) + 1);
 
-        if (!authorTitles.has(key)) authorTitles.set(key, []);
-        const titles = authorTitles.get(key)!;
-        if (titles.length < 5 && row.title) titles.push(row.title as string);
+            if (!authorTitles.has(key)) authorTitles.set(key, []);
+            const titles = authorTitles.get(key)!;
+            if (titles.length < 5 && row.title && !titles.includes(row.title as string)) {
+                titles.push(row.title as string);
+            }
 
-        // Keep casing with most uppercase letters, or fall back to the first one seen
-        const existingCanonical = authorCanonicalNames.get(key);
-        if (!existingCanonical) {
-            authorCanonicalNames.set(key, normalized);
-        } else {
-            const existingUppers = (existingCanonical.match(/[A-Z]/g) || []).length;
-            const newUppers = (normalized.match(/[A-Z]/g) || []).length;
-            if (newUppers > existingUppers) {
+            // Keep casing with most uppercase letters, or fall back to the first one seen
+            const existingCanonical = authorCanonicalNames.get(key);
+            if (!existingCanonical) {
                 authorCanonicalNames.set(key, normalized);
+            } else {
+                const existingUppers = (existingCanonical.match(/[A-Z]/g) || []).length;
+                const newUppers = (normalized.match(/[A-Z]/g) || []).length;
+                if (newUppers > existingUppers) {
+                    authorCanonicalNames.set(key, normalized);
+                }
             }
         }
     }

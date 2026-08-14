@@ -1,6 +1,7 @@
 import { FilterConfig } from "@/lib/declarative-filter/types";
 import { Song } from "@/lib/songUtils";
 import { normalizeWhitespace, removeDiacritics } from "@/lib/utils";
+import { parseArtists } from "@/lib/songs/artistUtils";
 
 // 1. Define the Filter State (URL Params map to this)
 export interface SongFilterState {
@@ -23,11 +24,12 @@ export interface SongFilterState {
  * so the boolean logic is not duplicated.
  */
 export function isDraftActive(draft: SongFilterState, userId?: string): boolean {
+  const defaultStatus = userId ? 'all' : 'public';
   return !!(
     draft.category ||
     (draft.tags?.length ?? 0) > 0 ||
     draft.search ||
-    (userId && draft.status !== 'all') ||
+    draft.status !== defaultStatus ||
     draft.chords ||
     draft.melody ||
     draft.myRecordings ||
@@ -140,7 +142,12 @@ export const songFilterConfig: FilterConfig<Song, SongFilterState> = {
       if (normalizedFilter === "no artist" || normalizedFilter === "unspecified") {
         return !song.author;
       }
-      return removeDiacritics(normalizeWhitespace(song.author)).toLowerCase() === normalizedFilter;
+      // Parse multi-artist string and check if ANY individual artist matches
+      const artists = parseArtists(song.author);
+      if (artists.length === 0) return false;
+      return artists.some(
+        artist => removeDiacritics(normalizeWhitespace(artist)).toLowerCase() === normalizedFilter
+      );
     }
   }
 };

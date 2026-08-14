@@ -30,7 +30,7 @@ on:
       - 'feat/**'
       - 'fix/**'
       - 'chore/**'
-    types: [opened, synchronize, reopened]
+    types: [labeled]
 
   # Uncomment to enable nightly runs:
   # schedule:
@@ -42,7 +42,8 @@ concurrency:
 
 jobs:
   performance:
-    # Run on manual dispatch or on every PR
+    # Run on manual dispatch or when PR is labeled 'perf-test'
+    if: "${{ github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.label.name == 'perf-test') }}"
     runs-on: ubuntu-latest
     timeout-minutes: 15
 

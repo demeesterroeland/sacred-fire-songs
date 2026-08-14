@@ -108,7 +108,18 @@ export function PlaylistPicker({ compositionId, userId, triggerClassName, iconCl
                 // revert
                 queryClient.invalidateQueries({ queryKey: PLAYLIST_KEYS.containingComposition(compositionId) });
             } else {
-                toast.success(result.added ? `Added to "${playlistTitle}"` : `Removed from "${playlistTitle}"`);
+                toast.success(
+                    result.added ? `Added to "${playlistTitle}"` : `Removed from "${playlistTitle}"`,
+                    {
+                        action: {
+                            label: 'Open Playlist →',
+                            onClick: () => { window.location.href = `/library/playlists/${playlistId}`; },
+                        },
+                        classNames: {
+                            actionButton: 'text-amber-400 text-xs font-bold hover:text-amber-300 transition-colors ml-2',
+                        },
+                    }
+                );
             }
         } finally {
             pendingRef.current.delete(playlistId);
@@ -130,7 +141,15 @@ export function PlaylistPicker({ compositionId, userId, triggerClassName, iconCl
             if (addResult.error) {
                 toast.error(`Playlist created but song could not be added: ${addResult.error}`);
             } else {
-                toast.success(`Added to new playlist "${trimmed}"`);
+                toast.success(`Added to new playlist "${trimmed}"`, {
+                    action: {
+                        label: 'Open Playlist →',
+                        onClick: () => { window.location.href = `/library/playlists/${result.id}`; },
+                    },
+                    classNames: {
+                        actionButton: 'text-amber-400 text-xs font-bold hover:text-amber-300 transition-colors ml-2',
+                    },
+                });
                 setNewTitle('');
             }
             queryClient.invalidateQueries({ queryKey: PLAYLIST_KEYS.list(userId) });

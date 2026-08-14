@@ -12,10 +12,6 @@ on:
         description: "Version tag to apply (e.g. v1.4.0-rc.1 or preview)"
         required: false
         default: ""
-      deploy_preview:
-        description: "Deploy automatically to Preview VPS?"
-        type: boolean
-        default: false
 
 jobs:
   build:
@@ -47,6 +43,8 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ghcr.io/demeesterroel/sacred-fire-songs
+          labels: |
+            org.opencontainers.image.ref.name=${{ github.ref_name }}
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
             type=sha,prefix=,format=short,enable={{is_default_branch}}
@@ -62,6 +60,7 @@ jobs:
           context: .
           push: true
           tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
@@ -70,6 +69,8 @@ jobs:
         uses: docker/metadata-action@v5
         with:
           images: ghcr.io/demeesterroel/sacred-fire-songs-migrator
+          labels: |
+            org.opencontainers.image.ref.name=${{ github.ref_name }}
           tags: |
             type=raw,value=latest,enable={{is_default_branch}}
             type=sha,prefix=,format=short,enable={{is_default_branch}}
@@ -86,20 +87,6 @@ jobs:
           file: ./Dockerfile.migrator
           push: true
           tags: ${{ steps.meta-migrator.outputs.tags }}
+          labels: ${{ steps.meta-migrator.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
-
-      - name: Deploy Branch / Pre-release Images (App & Migrator) to Preview Stack via SSH
-        if: |
-          secrets.VPS_HOST != '' && secrets.VPS_SSH_KEY != '' && (
-            github.ref_name != 'main' ||
-            (github.event_name == 'workflow_dispatch' && inputs.deploy_preview == true)
-          )
-        uses: appleboy/ssh-action@v1.0.3
-        with:
-          host: ${{ secrets.VPS_HOST }}
-          username: root
-          key: ${{ secrets.VPS_SSH_KEY }}
-          script: |
-            update-server deploy <staging-stack> app ${{ steps.meta.outputs.version }}
-            update-server deploy <staging-stack> migrator ${{ steps.meta-migrator.outputs.version }}

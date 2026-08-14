@@ -21,6 +21,9 @@ import { useWakeLock } from '@/hooks/useWakeLock';
 import { getCategoryColor, getCategoryStyles } from '@/lib/uiUtils';
 import { TagPill } from '@/components/ui/TagPill';
 import { AuthorPill } from '@/components/ui/AuthorPill';
+import { SongTechnicalBadges } from '@/components/song/SongTechnicalBadges';
+import { SongMetadataPills } from '@/components/song/SongMetadataPills';
+import { parseArtists } from '@/lib/songs/artistUtils';
 import { recordSongView } from '@/app/actions/recordSongView';
 import { useRecordingsQuery } from '@/hooks/useRecordingsQuery';
 
@@ -71,7 +74,8 @@ const fetchSong = async (id: string) => {
             categories (
               name,
               slug,
-              emoji
+              emoji,
+              parent:parent_id(name, slug)
             )
           )
         `)
@@ -251,7 +255,11 @@ export default function SongDetailPage() {
     const versions = song.song_versions || [];
     const currentVersion = versions[selectedVersionIndex];
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const categories = song.song_category_map?.map((map: any) => map.categories) || [];
+    const categories = (song.song_category_map?.map((map: any) => ({
+        ...map.categories,
+        parent: map.categories?.parent?.name ?? null,
+    })) || [])
+        .filter((cat: any) => cat && cat.parent !== 'Artists' && cat.name !== 'Artists');
 
     const handleDelete = async () => {
         if (!id) return;
@@ -334,38 +342,16 @@ export default function SongDetailPage() {
                         <div className="flex flex-col gap-1">
                             <div className="flex items-center gap-3">
                                 <h1 className="text-3xl font-black text-[#ff4400] tracking-tight">{song.title}</h1>
-                                <div className="flex items-center gap-2">
-                                    {song.has_chords && (
-                                        <Link href="/songs?chords=true" className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest shadow-sm bg-amber-500/5 border border-amber-500/30 text-amber-500 hover:bg-amber-500/15 transition-colors">
-                                            <Guitar className="w-3 h-3" /> Chords
-                                        </Link>
-                                    )}
-                                    {song.has_melody && (
-                                        <Link href="/songs?melody=true" className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest shadow-sm bg-emerald-500/5 border border-emerald-500/30 text-emerald-500 hover:bg-emerald-500/15 transition-colors">
-                                            <Music className="w-3 h-3" /> Melody
-                                        </Link>
-                                    )}
-                                    {hasPersonalRecording && (
-                                        <Link href="/songs?myRecordings=true" className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest shadow-sm bg-violet-500/5 border border-violet-500/30 text-violet-400 hover:bg-violet-500/15 transition-colors">
-                                            <Mic className="w-3 h-3" /> Recording
-                                        </Link>
-                                    )}
-                                </div>
+                                <SongTechnicalBadges
+                                    hasChords={song.has_chords}
+                                    hasMelody={song.has_melody}
+                                    hasPersonalRecording={hasPersonalRecording}
+                                />
                             </div>
-                            <div className="flex items-center gap-3 flex-wrap">
-                                <AuthorPill author={song.original_author || 'Traditional'} />
-                                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                                {categories.map((cat: any) => (
-                                    <TagPill
-                                        key={cat.slug}
-                                        label={cat.name}
-                                        categorySlug={cat.slug}
-                                        emoji={cat.emoji}
-                                        variant="badge"
-                                        href={`/songs?tag=${encodeURIComponent(cat.slug)}`}
-                                    />
-                                ))}
-                            </div>
+                            <SongMetadataPills
+                                originalAuthor={song.original_author}
+                                categories={categories}
+                            />
                         </div>
                     </div>
                     {/* Action Buttons and User Profile */}
@@ -445,41 +431,16 @@ export default function SongDetailPage() {
                     {/* Mobile: Song Title, Author, Badges row */}
                      <div className="lg:hidden flex flex-col gap-4 mb-4">
                         <div className="flex-1 space-y-3">
+                            <SongTechnicalBadges
+                                hasChords={song.has_chords}
+                                hasMelody={song.has_melody}
+                                hasPersonalRecording={hasPersonalRecording}
+                            />
 
-                            {/* Technical Badges (Chords/Melody) */}
-                            <div className="flex items-center gap-2">
-                                {song.has_chords && (
-                                    <Link href="/songs?chords=true" className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest shadow-sm bg-amber-500/5 border border-amber-500/30 text-amber-500 hover:bg-amber-500/15 transition-colors">
-                                        <Guitar className="w-3 h-3" /> Chords
-                                    </Link>
-                                )}
-                                {song.has_melody && (
-                                    <Link href="/songs?melody=true" className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest shadow-sm bg-emerald-500/5 border border-emerald-500/30 text-emerald-500 hover:bg-emerald-500/15 transition-colors">
-                                        <Music className="w-3 h-3" /> Melody
-                                    </Link>
-                                )}
-                                {hasPersonalRecording && (
-                                    <Link href="/songs?myRecordings=true" className="flex items-center gap-1.5 px-2.5 py-1 rounded-md text-[10px] font-black uppercase tracking-widest shadow-sm bg-violet-500/5 border border-violet-500/30 text-violet-400 hover:bg-violet-500/15 transition-colors">
-                                        <Mic className="w-3 h-3" /> Recording
-                                    </Link>
-                                )}
-                            </div>
-
-                            {/* Author & Category Tags */}
-                            <div className="flex items-center gap-2 flex-wrap">
-                                <AuthorPill author={song.original_author || 'Traditional'} />
-                                {/* eslint-disable-next-line @typescript-eslint/no-explicit-any */}
-                                {categories.map((cat: any) => (
-                                    <TagPill
-                                        key={cat.slug}
-                                        label={cat.name}
-                                        categorySlug={cat.slug}
-                                        emoji={cat.emoji}
-                                        variant="badge"
-                                        href={`/songs?tag=${encodeURIComponent(cat.slug)}`}
-                                    />
-                                ))}
-                            </div>
+                            <SongMetadataPills
+                                originalAuthor={song.original_author}
+                                categories={categories}
+                            />
                         </div>
                     </div>
 

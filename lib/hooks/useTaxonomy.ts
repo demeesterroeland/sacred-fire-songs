@@ -2,6 +2,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { getAvailableCategories, Category } from '@/lib/actions/category';
+import { sortTagSuggestions } from '@/lib/songs/artistUtils';
 
 export const CATEGORY_ORDER = [
   'The Elements',
@@ -27,7 +28,9 @@ export function useTaxonomy() {
     staleTime: 1000 * 60 * 15, // Cache for 15 minutes
   });
 
-  const categories = query.data || [];
+  const categories = (query.data || []).filter(
+    (c) => c.parent_name !== 'Artists' && c.name !== 'Artists'
+  );
 
   // Group categories by parent_name
   const groupedMap = new Map<string, Category[]>();
@@ -43,7 +46,7 @@ export function useTaxonomy() {
   const grouped: GroupedCategory[] = Array.from(groupedMap.entries())
     .map(([parentName, cats]) => ({
       parentName,
-      categories: cats.sort((a, b) => a.name.localeCompare(b.name)),
+      categories: sortTagSuggestions(cats),
     }))
     .sort((a, b) => {
       const idxA = CATEGORY_ORDER.indexOf(a.parentName);

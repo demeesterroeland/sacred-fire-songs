@@ -589,7 +589,15 @@ export default function RehearsalDrawer({
   // Handle new recording saved
   const handleRecordingSaved = (newRecording: UserRecording) => {
     setRecordings((prev) => [newRecording, ...prev]);
-    toast.success("Rehearsal recording saved successfully!");
+    toast.success("Rehearsal recording saved successfully!", {
+      action: {
+        label: 'View Recordings →',
+        onClick: () => { window.location.href = '/songs?myRecordings=true'; },
+      },
+      classNames: {
+        actionButton: 'text-amber-400 text-xs font-bold hover:text-amber-300 transition-colors ml-2',
+      },
+    });
     queryClient.invalidateQueries({ queryKey: ["user-recordings-compositions"] });
     queryClient.invalidateQueries({ queryKey: ["global-filter-counts"] });
   };

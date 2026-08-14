@@ -50,7 +50,7 @@ export function useSongsFilter({ songs, userId, favoriteIds, userRecordingCompos
       serializeUrl: (state) => ({
         category: state.category || '',
         tag: state.tags?.join(',') || '',
-        status: state.status === 'all' ? '' : state.status || '',
+        status: state.status === (userId ? 'all' : 'public') ? '' : state.status || '',
         search: state.search || '',
         chords: state.chords ? 'true' : '',
         melody: state.melody ? 'true' : '',
