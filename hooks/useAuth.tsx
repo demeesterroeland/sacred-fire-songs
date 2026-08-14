@@ -99,6 +99,32 @@ export const useAuth = () => {
         };
     }, []);
 
+    const quickLogin = async (email: string) => {
+        setLoading(true);
+        const supabase = createClient();
+
+        const devPassword = process.env.NEXT_PUBLIC_DEV_TEST_PASSWORD;
+
+        if (!devPassword) {
+            console.error('Quick login failed: NEXT_PUBLIC_DEV_TEST_PASSWORD not set in environment.');
+            setLoading(false);
+            return;
+        }
+
+        const { error } = await supabase.auth.signInWithPassword({
+            email,
+            password: devPassword
+        });
+
+        if (error) {
+            console.error('Quick login failed:', error.message);
+            setLoading(false);
+            return;
+        }
+
+        await loadUser();
+    };
+
     const logout = async () => {
         const supabase = createClient();
         await supabase.auth.signOut();
@@ -107,5 +133,5 @@ export const useAuth = () => {
         setUser(null);
     };
 
-    return { user, loading, logout };
+    return { user, loading, quickLogin, logout };
 };
