@@ -34,7 +34,7 @@ jobs:
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Extract semver from release tag
-        if: github.event_name == 'release'
+        if: github.event_name == 'release' || startsWith(github.ref, 'refs/tags/v')
         id: semver
         run: echo "value=${GITHUB_REF_NAME#v}" >> $GITHUB_OUTPUT
 
@@ -42,7 +42,7 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/demeesterroel/sacred-fire-songs
+          images: ghcr.io/${{ github.repository }}
           labels: |
             org.opencontainers.image.ref.name=${{ github.ref_name }}
           tags: |
@@ -51,7 +51,7 @@ jobs:
             type=ref,event=branch,slugify=true
             type=ref,event=tag
             type=raw,value={{tag}},enable=${{ github.event_name == 'release' }}
-            type=raw,value=${{ steps.semver.outputs.value }},enable=${{ github.event_name == 'release' }}
+            type=raw,value=${{ steps.semver.outputs.value }},enable=${{ github.event_name == 'release' || startsWith(github.ref, 'refs/tags/v') }}
             type=raw,value=${{ inputs.version }},enable=${{ github.event_name == 'workflow_dispatch' && inputs.version != '' }}
 
       - name: Build and push app image
@@ -68,7 +68,7 @@ jobs:
         id: meta-migrator
         uses: docker/metadata-action@v5
         with:
-          images: ghcr.io/demeesterroel/sacred-fire-songs-migrator
+          images: ghcr.io/${{ github.repository_owner }}/sacred-fire-songs-migrator
           labels: |
             org.opencontainers.image.ref.name=${{ github.ref_name }}
           tags: |
@@ -77,7 +77,7 @@ jobs:
             type=ref,event=branch,slugify=true
             type=ref,event=tag
             type=raw,value={{tag}},enable=${{ github.event_name == 'release' }}
-            type=raw,value=${{ steps.semver.outputs.value }},enable=${{ github.event_name == 'release' }}
+            type=raw,value=${{ steps.semver.outputs.value }},enable=${{ github.event_name == 'release' || startsWith(github.ref, 'refs/tags/v') }}
             type=raw,value=${{ inputs.version }},enable=${{ github.event_name == 'workflow_dispatch' && inputs.version != '' }}
 
       - name: Build and push migrator image
