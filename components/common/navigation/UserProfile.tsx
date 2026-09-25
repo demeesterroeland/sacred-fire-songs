@@ -1,14 +1,15 @@
+import { type AuthUser } from '@/hooks/useAuth';
 import { LogOut, ChevronDown, Settings, User, Heart, FileText, ListMusic, Sun, Moon, Monitor, SlidersHorizontal, Clock } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import QuickLogin from '@/components/dev/QuickLogin';
 import { useUserPreferences, type ThemePreference } from '@/context/UserPreferencesContext';
 
 import { usePathname, useRouter } from 'next/navigation';
 
 interface UserProfileProps {
+  initialUser?: AuthUser | null;
   onLogout?: () => void;
   layout?: 'sidebar' | 'mobile' | 'header';
   showText?: boolean;
@@ -42,8 +43,8 @@ function ThemeToggle() {
   );
 }
 
-export const UserProfile = ({ onLogout, layout = 'header', showText = true }: UserProfileProps) => {
-  const { user, logout } = useAuth();
+export const UserProfile = ({ onLogout, layout = 'header', showText = true, initialUser }: UserProfileProps) => {
+  const { user, loading, logout } = useAuth(initialUser);
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
@@ -59,6 +60,10 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true }: Us
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
+
+  if (loading) {
+    return <div className="w-9 h-9 rounded-xl bg-gray-200 dark:bg-gray-800 animate-pulse" />;
+  }
 
   if (!user) {
     return (
@@ -173,6 +178,7 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true }: Us
             {/* Sign Out */}
             <button
               onClick={async () => {
+                setIsOpen(false);
                 await logout();
                 onLogout?.();
                 router.refresh();
@@ -182,13 +188,6 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true }: Us
               <LogOut className="w-4 h-4" />
               <span className="text-sm font-medium">Sign Out</span>
             </button>
-
-            {/* Local Dev Info */}
-            {process.env.NODE_ENV === 'development' && (
-              <div className="mt-4 pt-4 border-t border-gray-200/80 dark:border-gray-800/80">
-                <QuickLogin />
-              </div>
-            )}
           </div>
         </div>
       )}
