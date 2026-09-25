@@ -14,17 +14,17 @@ export interface AuthUser {
     avatar_url?: string;
 }
 
-export const useAuth = () => {
+export const useAuth = (initialUser: AuthUser | null = null) => {
     const queryClient = useQueryClient();
-    const [user, setUser] = useState<AuthUser | null>(null);
-    const [loading, setLoading] = useState(true);
+    const [user, setUser] = useState<AuthUser | null>(initialUser);
+    const [loading, setLoading] = useState(false); // Server provides authoritative initial state
 
     const loadUser = async (signal?: { cancelled: boolean }) => {
         const supabase = createClient();
         const AUTH_TIMEOUT_MS = 5000;
 
         try {
-            // 1. Instantly check local session token for fast (<10ms) hydration
+            // Get session
             const { data: { session } } = await supabase.auth.getSession();
             const sessionUser = session?.user ?? null;
 
@@ -39,9 +39,8 @@ export const useAuth = () => {
                     full_name: sessionUser.user_metadata?.full_name || sessionUser.email?.split('@')[0],
                     avatar_url: sessionUser.user_metadata?.avatar_url,
                 });
-                setLoading(false);
 
-                // 2. Fetch full DB profile non-blockingly
+                // Fetch full DB profile non-blockingly
                 const profileResult = await Promise.race([
                     supabase.from('profiles').select('role, full_name, avatar_url').eq('id', sessionUser.id).maybeSingle(),
                     new Promise<never>((_, reject) =>
@@ -81,6 +80,7 @@ export const useAuth = () => {
         const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
             if (!signal.cancelled) {
                 if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED' || event === 'USER_UPDATED') {
+                    // Only reload if the state fundamentally changed to avoid unnecessary queries
                     loadUser(signal);
                 } else if (event === 'SIGNED_OUT') {
                     queryClient.clear();
@@ -90,8 +90,11 @@ export const useAuth = () => {
             }
         });
 
-        // Load user immediately on mount
-        loadUser(signal);
+        // If we didn't get a server user, or if we want to guarantee the profile is fresh, 
+        // we can still trigger a background load, but it won't block or flash.
+        if (!initialUser) {
+            loadUser(signal);
+        }
 
         return () => {
             signal.cancelled = true;

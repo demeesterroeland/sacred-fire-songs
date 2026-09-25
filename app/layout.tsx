@@ -35,6 +35,8 @@ export const metadata: Metadata = {
   },
 };
 
+import { createClient } from "@/lib/supabase/server";
+import { type AuthUser, type UserRole } from "@/hooks/useAuth";
 import { Suspense } from "react";
 import Header from "@/components/common/Header";
 import Sidebar from "@/components/common/Sidebar";
@@ -68,11 +70,32 @@ const themeScript = `
 })();
 `;
 
-export default function RootLayout({ children }: Readonly<{ children: React.ReactNode; }>) {
+export default async function RootLayout({ children }: Readonly<{ children: React.ReactNode; }>) {
   const supabaseKey = (process.env.NODE_ENV === "development"
     ? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY_DEV
     : process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) || "";
   const envInjection = `window.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = "${supabaseKey}";`;
+
+  const supabase = await createClient();
+  const { data: { user: sessionUser } } = await supabase.auth.getUser();
+  
+  let initialUser: AuthUser | null = null;
+  if (sessionUser) {
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('role, full_name, avatar_url')
+      .eq('id', sessionUser.id)
+      .maybeSingle();
+
+    initialUser = {
+      id: sessionUser.id,
+      email: sessionUser.email,
+      role: (profile?.role || sessionUser.user_metadata?.role || 'member') as UserRole,
+      full_name: profile?.full_name || sessionUser.user_metadata?.full_name || sessionUser.email?.split('@')[0],
+      avatar_url: profile?.avatar_url || sessionUser.user_metadata?.avatar_url,
+    };
+  }
+
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -94,7 +117,7 @@ export default function RootLayout({ children }: Readonly<{ children: React.Reac
               <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 font-sans selection:bg-red-500/30 overflow-x-clip">
                 {/* Top navigation bar (full width, like Immich) */}
                 <Suspense>
-                  <Header />
+                  <Header initialUser={initialUser} />
                 </Suspense>
 
                 {/* Grid: sidebar + main content */}
