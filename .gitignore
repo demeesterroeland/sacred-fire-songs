@@ -77,3 +77,6 @@ data/songs/**/*.pdf
 
 # Local docker compose kong gateway configuration
 kong.yml
+
+# Database backups and dumps
+*.sql
