@@ -1,3 +1,4 @@
+import { type AuthUser } from '@/hooks/useAuth';
 import { LogOut, ChevronDown, Settings, User, Heart, FileText, ListMusic, Sun, Moon, Monitor, SlidersHorizontal, Clock } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useState, useRef, useEffect } from 'react';
@@ -8,6 +9,7 @@ import { useUserPreferences, type ThemePreference } from '@/context/UserPreferen
 import { usePathname, useRouter } from 'next/navigation';
 
 interface UserProfileProps {
+  initialUser?: AuthUser | null;
   onLogout?: () => void;
   layout?: 'sidebar' | 'mobile' | 'header';
   showText?: boolean;
@@ -41,8 +43,8 @@ function ThemeToggle() {
   );
 }
 
-export const UserProfile = ({ onLogout, layout = 'header', showText = true }: UserProfileProps) => {
-  const { user, loading, logout } = useAuth();
+export const UserProfile = ({ onLogout, layout = 'header', showText = true, initialUser }: UserProfileProps) => {
+  const { user, loading, logout } = useAuth(initialUser);
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();

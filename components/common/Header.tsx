@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { ListMusic, Loader2, Menu, Music, PlusCircle, Search, SlidersHorizontal, X } from 'lucide-react';
 import { useSidebar } from '@/context/SidebarContext';
-import { useAuth } from '@/hooks/useAuth';
+import { useAuth, type AuthUser } from '@/hooks/useAuth';
 import { getSiteTitle } from '@/lib/env';
 import { UserProfile } from './navigation/UserProfile';
 
@@ -23,12 +23,12 @@ function saveSearchHistory(history: string[]) {
     localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(history.slice(0, MAX_HISTORY)));
 }
 
-export default function Header() {
+export default function Header({ initialUser }: { initialUser?: AuthUser | null }) {
     const pathname = usePathname();
     const router = useRouter();
     const searchParams = useSearchParams();
     const { setIsOpen: setSidebarOpen, searchFiltersOpen, setSearchFiltersOpen, hasActiveSearchFilters, isSearching, setIsSearching } = useSidebar();
-    const { user } = useAuth();
+    const { user } = useAuth(initialUser);
     const inputRef = useRef<HTMLInputElement>(null);
     const searchWrapperRef = useRef<HTMLDivElement>(null);
     const createMenuRef = useRef<HTMLDivElement>(null);
@@ -305,7 +305,7 @@ export default function Header() {
                     )}
 
                     {/* User avatar / Account panel */}
-                    <UserProfile layout="header" showText={false} />
+                    <UserProfile layout="header" showText={false} initialUser={initialUser} />
                 </div>
             </div>
         </nav>
