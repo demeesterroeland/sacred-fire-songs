@@ -75,7 +75,8 @@ export default function SongCard({
 
     return (
         <div className="relative self-start w-full group">
-            <Link href={`/songs/${id}`} className="block">
+            <div>
+                <Link href={`/songs/${id}`} className="absolute inset-0 z-0" aria-label={`View ${title}`} />
                 <div className={cn(
                     'relative p-5 rounded-2xl transition-all duration-300 backdrop-blur-sm group overflow-hidden flex flex-col justify-between active:scale-[0.98] cursor-pointer',
                     isPublic
@@ -87,7 +88,7 @@ export default function SongCard({
                         className={`absolute left-0 top-0 bottom-0 w-1 ${borderColors[accentColor] || borderColors.red} rounded-l-2xl opacity-50 group-hover:opacity-100 transition-all duration-300 transform group-hover:scale-y-110`}
                     />
 
-                    <div className="relative flex justify-between items-start z-10 w-full mb-4">
+                    <div className="relative flex justify-between items-start z-10 w-full mb-4 pointer-events-none">
                         <div className="flex-1 min-w-0 pr-20">
                             <div className="flex items-center gap-2 mb-1">
                                 <h3 className={`text-base font-bold text-gray-900 dark:text-gray-100 leading-tight ${textColors[accentColor] || textColors.red} transition-colors group-hover:translate-x-1 duration-300 truncate`}>
@@ -97,13 +98,13 @@ export default function SongCard({
                                     <Link
                                         href="/songs?status=draft"
                                         title="Filter Draft songs"
-                                        className="text-[9px] font-black bg-gray-200 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-500 px-1.5 py-0.5 rounded border border-gray-400/50 dark:border-gray-700 uppercase tracking-tighter shrink-0 transition-colors"
+                                        className="pointer-events-auto text-[9px] font-black bg-gray-200 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-500 px-1.5 py-0.5 rounded border border-gray-400/50 dark:border-gray-700 uppercase tracking-tighter shrink-0 transition-colors"
                                     >
                                         Draft
                                     </Link>
                                 )}
                             </div>
-                            <div className="mb-3 flex flex-wrap items-center gap-1.5">
+                            <div className="mb-3 flex flex-wrap items-center gap-1.5 pointer-events-auto">
                                 {(parseArtists(author).length > 0 ? parseArtists(author) : ['Traditional']).map((artistName, idx) => (
                                     <AuthorPill
                                         key={idx}
@@ -114,7 +115,7 @@ export default function SongCard({
                             </div>
 
                             {/* Categories/Tags */}
-                            <div className="flex flex-wrap items-center gap-1.5">
+                            <div className="flex flex-wrap items-center gap-1.5 pointer-events-auto">
                                 {categories
                                     .filter((cat) => cat.parent !== 'Artists' && cat.name !== 'Artists')
                                     .map((cat, idx) => (
@@ -130,7 +131,7 @@ export default function SongCard({
                             </div>
                         </div>
 
-                        <div className="flex flex-col items-end gap-1.5 shrink-0 ml-4">
+                        <div className="flex flex-col items-end gap-1.5 shrink-0 ml-4 pointer-events-auto">
                             {hasChords && (
                                 <Link
                                     href="/songs?chords=true"
@@ -167,7 +168,7 @@ export default function SongCard({
                         </div>
                     </div>
                 </div>
-            </Link>
+            </div>
 
             {/* Action buttons — bottom-right */}
             <div className="absolute bottom-3 right-3 z-20 flex items-center gap-1">
