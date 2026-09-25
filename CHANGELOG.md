@@ -1,5 +1,30 @@
 # Changelog
 
+## [1.4.0](https://github.com/demeesterroeland/sacred-fire-songs/compare/v1.3.2...v1.4.0) (2026-09-25)
+
+
+### ✨ New features
+
+* **auth:** implement server-seeded hybrid auth to prevent FOUC ([fb03945](https://github.com/demeesterroeland/sacred-fire-songs/commit/fb03945bcbc82ef64eea2ac500486c8b57c7b91a))
+* **auth:** instant local session hydration in useAuth and pulse loading state in UserProfile ([#233](https://github.com/demeesterroeland/sacred-fire-songs/issues/233)) ([43b5d9d](https://github.com/demeesterroeland/sacred-fire-songs/commit/43b5d9daa65876a90c5ab977ce32337c4e87cd80))
+* **docker:** add realtime and meta services to complete 11-service Supabase stack ([82010b6](https://github.com/demeesterroeland/sacred-fire-songs/commit/82010b6caa21d6371728612932e1d307fe207fac))
+* **docker:** add roles init migration, storage, and studio services to docker-compose ([24c81f0](https://github.com/demeesterroeland/sacred-fire-songs/commit/24c81f0ac7eaae8aec1741cc34caa8acad3d174e))
+* **rehearsals:** add rich diagnostic logging for playback lifecycle, storage signing, DB metadata, and mime format checks ([#230](https://github.com/demeesterroeland/sacred-fire-songs/issues/230)) ([b037b37](https://github.com/demeesterroeland/sacred-fire-songs/commit/b037b373e2696de4779bb6b186dc09b072be46e0))
+* **songs:** multi-artist tagging & autocomplete UI ([#195](https://github.com/demeesterroeland/sacred-fire-songs/issues/195), [#228](https://github.com/demeesterroeland/sacred-fire-songs/issues/228)) ([#231](https://github.com/demeesterroeland/sacred-fire-songs/issues/231)) ([068c1c6](https://github.com/demeesterroeland/sacred-fire-songs/commit/068c1c68874f2503f52094698598360e14fed532))
+
+
+### 🐛 Bug fixes
+
+* **api:** fallback proxy target to http://kong:8000 in route.ts ([f276b8f](https://github.com/demeesterroeland/sacred-fire-songs/commit/f276b8fd6669ec164fb339104516da3274e73d40))
+* **auth:** immediately close user profile dropdown menu on logout to prevent visual flicker ([8ff248f](https://github.com/demeesterroeland/sacred-fire-songs/commit/8ff248f6f756171a414c9e1dd6dac15eef6b973b))
+* **auth:** preserve real quickLogin in useAuth ([d03d997](https://github.com/demeesterroeland/sacred-fire-songs/commit/d03d997450be77af1ce1a5c2ca9de7e9fa310b2c))
+* **ci:** use dynamic repository owner for GHCR image publishing ([c18fa4d](https://github.com/demeesterroeland/sacred-fire-songs/commit/c18fa4df647bf77d72b35acd29047bed9667dd40))
+
+
+### 📖 Documentation
+
+* **logbook:** sync artifacts for issue 233 auth hydration fix ([f06ef1b](https://github.com/demeesterroeland/sacred-fire-songs/commit/f06ef1b9370369d633cd806a5cfbd64abad7afac))
+
 ## [1.3.2](https://github.com/demeesterroel/sacred-fire-songs/compare/v1.3.1...v1.3.2) (2026-08-10)
 
 ### ✨ New features
