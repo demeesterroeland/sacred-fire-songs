@@ -2823,3 +2823,17 @@ This session addressed a critical bug where slow Supabase Auth calls (due to Tai
 
 
 
+
+## September 25, 2026: Fixing the Flash of Incorrect Content (Issue #233)
+
+**Objective**: Eliminate the "Sign In" button flash (FOUC) that authenticated users experience when hitting heavy pages (like `/songs`) before the client-side JavaScript has a chance to hydrate the authentication state.
+
+**Context**: The application was previously relying entirely on client-side React hooks (`useAuth` calling `@supabase/supabase-js`'s `getSession()` or `getUser()`) to determine authentication state. On heavy pages that block the main thread with hundreds of DOM nodes, this hook would become trapped in the microtask queue, leaving the default `user: null` state ("Sign In") painted on the screen for 3-4 seconds. Previous attempts (like PR #234) tried to mask this with skeleton loaders, but failed to address the root Server-Side Rendering (SSR) mismatch, leading to violent Hydration Errors that tore down the entire DOM.
+
+**Action**: We pivoted to the modern Next.js 16 **Server-Seeded Hybrid Auth** pattern.
+1. Updated `app/layout.tsx` to securely invoke `createClient()` and `supabase.auth.getUser()` on the Next.js server itself.
+2. Formatted the resulting server session and profile into an `initialUser` payload.
+3. Passed `initialUser` directly down the tree to the `<Header />` and `<UserProfile />` Client Components.
+4. Rewrote `hooks/useAuth.tsx` to accept this `initialUser` as its initial `useState` value.
+
+**Result**: The Next.js server now reads the authentication cookie directly during SSR. The very first HTML byte sent to the browser already contains the user's Avatar. Zero layout shifts, zero FOUC, and zero hydration errors. We created custom Playwright E2E test scripts with network throttling to perfectly isolate and verify this behavior locally before and after the fix.

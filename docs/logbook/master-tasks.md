@@ -1147,3 +1147,13 @@
 
 
 
+
+## Session September 25, 2026 (Server-Seeded Hybrid Auth Fix for Issue #233)
+
+- [x] Analyze Flash of Incorrect Content (FOIC) bug during initial page load for authenticated users
+- [x] Investigate and reject client-side only `getSession()` fixes (PR #234) due to CSR traps and Hydration errors
+- [x] Write E2E Playwright test `auth-hydration.spec.ts` reproducing the FOUC on authenticated navigation
+- [x] Implement Next.js 16 Server-Seeded Hybrid Auth pattern in `app/layout.tsx` to read secure cookies (`supabase.auth.getUser()`)
+- [x] Patch `hooks/useAuth.tsx`, `Header.tsx`, and `UserProfile.tsx` to accept and hydrate `initialUser` directly from server
+- [x] Record multiple Playwright test recordings demonstrating the before/after behavior
+- [x] Push `feat/233-auth-hydration-fix` branch to resolve FOUC entirely natively
