@@ -83,11 +83,15 @@ function SortableRecordingItem({
       {/* Play/Pause Button */}
       <button
         onClick={() => handleTogglePlay(rec.id, rec.audioUrl)}
-        className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 active:scale-95 shadow-sm shrink-0 ${
-          activePlaybackId === rec.id
-            ? "bg-indigo-600 hover:bg-indigo-500 text-white"
-            : "bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 text-indigo-600 dark:text-indigo-400"
+        disabled={!rec.audioUrl}
+        className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 shadow-sm shrink-0 ${
+          !rec.audioUrl
+            ? "bg-gray-100 dark:bg-gray-800 text-gray-400 opacity-50 cursor-not-allowed"
+            : activePlaybackId === rec.id
+            ? "bg-indigo-600 hover:bg-indigo-500 text-white active:scale-95"
+            : "bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 text-indigo-600 dark:text-indigo-400 active:scale-95"
         }`}
+        title={!rec.audioUrl ? "Audio file missing or corrupted" : "Play"}
       >
         {activePlaybackId === rec.id ? (
           <Pause className="w-4 h-4 fill-current" />
@@ -98,8 +102,9 @@ function SortableRecordingItem({
 
       {/* Title and date */}
       <div className="flex-1 min-w-0 text-left">
-        <h4 className="text-sm font-bold text-gray-900 dark:text-white truncate">
+        <h4 className={`text-sm font-bold truncate ${!rec.audioUrl ? "text-red-500/80 dark:text-red-400/80" : "text-gray-900 dark:text-white"}`}>
           {rec.recording_name}
+          {!rec.audioUrl && <span className="ml-2 text-[10px] uppercase font-bold text-red-500 bg-red-500/10 px-1.5 py-0.5 rounded">Missing File</span>}
         </h4>
         <span className="text-[10px] text-gray-400 dark:text-gray-500 flex items-center gap-1.5 mt-0.5 font-medium">
           <Calendar className="w-3 h-3" />
