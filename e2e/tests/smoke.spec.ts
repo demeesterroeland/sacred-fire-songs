@@ -48,4 +48,15 @@ test.describe('Member smoke @smoke', () => {
     await page.goto('/');
     await expect(page).toHaveURL((url) => url.pathname === '/');
   });
+
+  test('PLAYLIST-01: authenticated user can create a playlist', async ({ page }) => {
+    await page.goto('/library/playlists/add');
+    
+    const playlistName = `Smoke Test Playlist ${Date.now()}`;
+    await page.getByPlaceholder('Playlist name…').fill(playlistName);
+    await page.getByRole('button', { name: 'Create Playlist' }).click();
+    
+    await expect(page).toHaveURL(/\/library\/playlists\/[a-f0-9-]+$/);
+    await expect(page.getByRole('heading', { name: playlistName })).toBeVisible({ timeout: 10000 });
+  });
 });

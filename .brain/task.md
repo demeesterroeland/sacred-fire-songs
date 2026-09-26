@@ -1,26 +1,8 @@
-# Task: Server Migration, App Standalone Pipelining, and Release v1.0.0
+# Task: Fix Kong API Gateway 401 Missing API Key Error for Rehearsal Audio Proxy
 
-- [x] Modernize Next.js app with `output: 'standalone'` in `next.config.ts`
-- [x] Implement dynamic runtime proxy route handler `app/supabase-api/[...path]/route.ts`
-- [x] Add `release-please-config.json`, `.release-please-manifest.json`, and GitHub Actions workflows (`release-please.yml` & `docker.yml`)
-- [x] Rename Supabase stacks in infrastructure repository
-- [x] Rename app stacks in infrastructure repository
-- [x] Configure `.env` files for application and database stacks
-- [x] Fix Kong API Gateway credential mapping (`kong-runtime.yml`)
-- [x] Migrate full production database dataset from Supabase Cloud to self-hosted database stack
-- [x] Fix SSL certificate domain rules in Traefik
-- [x] Restrict preview subdomains to private VPN using `tailscale-only@docker` middleware
-- [x] Move deployment and environment documentation directly into stack `README.md` files in infrastructure repository
-- [x] Audit open-source repository `sacred-fire-songs` for secrets / internal server information — 100% clean
-- [x] Tag and publish release `v1.0.0` on GitHub
-- [x] Close completed GitHub Issues (#202, #197, #171, #168, #183, #141)
-- [x] Create and transfer performance benchmark chore issue to infrastructure repository
-- [x] Delete merged remote branches (`feat/issue-141`, `feat/story-3.4.6-public-playlist-curation`)
-- [x] Investigate email authentication service issue after VPS migration
-- [x] Add SMTP configuration (`smtp.gmail.com:587`) to `supabase-prod` and `supabase-preview` environment variables
-- [x] Correct `SITE_URL`, `API_EXTERNAL_URL`, and `ADDITIONAL_REDIRECT_URLS` for `supabase-prod` and `supabase-preview` GoTrue stacks
-- [x] Connect `auth` service in `supabase-prod` and `supabase-preview` docker-compose stacks to `proxy` network to allow outbound SMTP traffic
-- [x] Fix Traefik v3 `HostRegexp` rule for `songbook-preview` to allow access on `https://songbook-beta.bluette.be`
-- [x] Verify PREVIEW app (`songbook-preview`) is running latest image `ghcr.io/demeesterroel/sacred-fire-songs:latest`
-- [x] Verify PREVIEW DB (`supabase-preview-db`) is populated with 80 compositions and 4 test seed users
-- [x] Verify email authentication (magic link and password recovery) succeeds on PREVIEW and PROD environments
+- [x] Investigate preview server Kong API Gateway (`songbook-preview-kong-1`) rejecting rehearsal proxy requests with "No API key found in request".
+- [x] SSH to `root@bluette` and verify the `apikey` enforcement on Kong.
+- [x] Modify Next.js proxy route handler (`app/supabase-api/[...path]/route.ts`) to inject the `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` into `apikey` and `Authorization: Bearer` headers if missing.
+- [ ] Push to GitHub to trigger a build for `ghcr.io/demeesterroeland/sacred-fire-songs:fix-239-rehearsal-proxy-apikey`.
+- [ ] Deploy new preview docker container (`docker compose pull app && docker compose up -d`) on preview server.
+- [ ] Verify fix by listening to/downloading rehearsal audio on preview environment.
