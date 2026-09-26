@@ -10,6 +10,7 @@ import { useSongRecordings } from "@/hooks/useSongRecordings";
 import { getUserRecordings, deleteUserRecording, reorderUserRecordings, type UserRecording } from "@/lib/actions/rehearsal";
 import { getYouTubeEmbedUrl, getSpotifyEmbedUrl } from "./MediaEmbeds";
 import { useAuth } from "@/hooks/useAuth";
+import { useAudio } from "./AudioProvider";
 import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -295,6 +296,9 @@ export default function RehearsalDrawer({
       }
     });
   };
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const { activePlaybackId, activeRecording, audioElements, isRecordingPlaying, recordingCurrentTime, recordingDuration, handleTogglePlay: contextHandleTogglePlay, pauseActiveRecording, stopActiveRecording, seekActiveRecording, seekRelativeActiveRecording, clearAudioElements } = useAudio();
 
 
 
@@ -402,7 +406,12 @@ export default function RehearsalDrawer({
     const rect = e.currentTarget.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
     const percentage = clickX / rect.width;
-    const targetTime = percentage * mediaDuration;
+    const targetTime = percentage * (activePlaybackId ? recordingDuration : mediaDuration);
+
+    if (activePlaybackId) {
+      seekActiveRecording(targetTime);
+      return;
+    }
 
     if (activePlaybackId) {
       const activeAudio = audioElements[activePlaybackId];
@@ -456,11 +465,10 @@ export default function RehearsalDrawer({
   
   const seekRelative = (seconds: number) => {
     if (activePlaybackId) {
-      const activeAudio = audioElements[activePlaybackId];
-      if (activeAudio) {
-        activeAudio.currentTime = Math.max(0, Math.min(activeAudio.duration, activeAudio.currentTime + seconds));
-      }
-    } else if (playingSource === "youtube") {
+      seekRelativeActiveRecording(seconds);
+      return;
+    }
+    if (playingSource === "youtube") {
       seekYouTube(seconds);
     } else if (playingSource === "soundcloud") {
       seekSoundCloud(seconds);
@@ -510,6 +518,10 @@ export default function RehearsalDrawer({
   };
 
   const handleMiniPlayerPlayPause = () => {
+    if (activePlaybackId && activeRecording) {
+      contextHandleTogglePlay(activeRecording, activeRecording.audioUrl);
+      return;
+    }
     if (!playingSource) {
       startMediaPlayback();
       return;
@@ -620,15 +632,6 @@ export default function RehearsalDrawer({
   }, [selectedMedia]);
 
   useEffect(() => {
-    // Clean up audio elements on unmount
-    return () => {
-      Object.values(audioElements).forEach(audio => {
-        audio.pause();
-      });
-    };
-  }, [songVersionId]); // intentionally omitting audioElements to avoid re-triggering cleanup
-
-  
   // Sync progress for User Recordings
   useEffect(() => {
     let animationFrameId: number;
@@ -673,12 +676,7 @@ export default function RehearsalDrawer({
     try {
       // Pause if currently playing
       if (activePlaybackId === recordingId) {
-        const activeAudio = audioElements[recordingId];
-        if (activeAudio) {
-          activeAudio.pause();
-          activeAudio.currentTime = 0;
-        }
-        setActivePlaybackId(null);
+        stopActiveRecording();
       }
 
       const success = await deleteUserRecording(recordingId, storagePath);
@@ -745,109 +743,6 @@ export default function RehearsalDrawer({
   };
 
   // Custom play/pause control handler
-  const handleTogglePlay = (recordingId: string, audioUrl: string | undefined) => {
-    const targetRec = recordings.find(r => r.id === recordingId);
-    console.log("[rehearsal] handleTogglePlay invoked:", {
-      recordingId,
-      audioUrl,
-      recordingName: targetRec?.recording_name,
-      storagePath: targetRec?.storage_path,
-      fileSize: targetRec?.file_size_bytes,
-      createdAt: targetRec?.created_at,
-    });
-
-    if (!audioUrl) {
-      console.error("[rehearsal] PLAYBACK FAILED (NOT IN DB / MISSING SIGNED URL): Audio URL is undefined for recordingId:", recordingId);
-      toast.error("Audio URL is not available.");
-      return;
-    }
-
-    // Stop current active playing audio if it's different
-    if (activePlaybackId && activePlaybackId !== recordingId) {
-      const activeAudio = audioElements[activePlaybackId];
-      if (activeAudio) {
-        activeAudio.pause();
-        activeAudio.currentTime = 0;
-      }
-    }
-
-    let audio = audioElements[recordingId];
-    
-    if (!audio) {
-      audio = new Audio(audioUrl);
-
-      // Check browser format compatibility
-      const rawExt = targetRec?.storage_path ? targetRec.storage_path.split('.').pop()?.toLowerCase() : 'unknown';
-      let mimeCheck = 'audio/webm';
-      if (rawExt === 'm4a' || rawExt === 'mp4') mimeCheck = 'audio/mp4';
-      else if (rawExt === 'mp3') mimeCheck = 'audio/mpeg';
-      else if (rawExt === 'ogg') mimeCheck = 'audio/ogg';
-      else if (rawExt === 'wav') mimeCheck = 'audio/wav';
-
-      const canPlay = audio.canPlayType(mimeCheck);
-      console.log(`[rehearsal] FORMAT CHECK: File extension = .${rawExt}, Mime check = ${mimeCheck}, Browser canPlayType = "${canPlay || 'no'}"`);
-
-      // Lifecycle Event Listeners
-      audio.onplay = () => {
-        console.log(`[rehearsal] PLAY EVENT: Playback initiated for id=${recordingId}, src=${audio.src}`);
-      };
-
-      audio.onplaying = () => {
-        console.log(`[rehearsal] PLAYBACK SUCCESSFUL: Audio playing smoothly! id=${recordingId}, readyState=${audio.readyState}, duration=${audio.duration}s`);
-      };
-
-      audio.onpause = () => {
-        console.log(`[rehearsal] PAUSE EVENT: Playback paused for id=${recordingId}, currentTime=${audio.currentTime}s`);
-      };
-
-      audio.onended = () => {
-        console.log(`[rehearsal] ENDED EVENT: Playback finished for id=${recordingId}`);
-        setActivePlaybackId(null);
-      };
-
-      audio.onerror = (e) => {
-        const mediaError = audio.error;
-        let errorReason = "UNKNOWN_ERROR";
-        if (mediaError?.code === 1) errorReason = "MEDIA_ERR_ABORTED (Aborted by user)";
-        else if (mediaError?.code === 2) errorReason = "MEDIA_ERR_NETWORK (Network error downloading stream)";
-        else if (mediaError?.code === 3) errorReason = "MEDIA_ERR_DECODE (Decoding error / corrupted audio file)";
-        else if (mediaError?.code === 4) errorReason = "MEDIA_ERR_SRC_NOT_SUPPORTED (Format/codec not supported or HTTP 404/403 access denied)";
-
-        console.error(`[rehearsal] PLAYBACK UNSUCCESSFUL (HTML5 Error Event): id=${recordingId}`, {
-          event: e,
-          errorCode: mediaError?.code,
-          errorReason,
-          errorMessage: mediaError?.message,
-          src: audio.src,
-          networkState: audio.networkState,
-          readyState: audio.readyState,
-          fileExt: rawExt,
-          mimeCheck,
-        });
-      };
-
-      setAudioElements(prev => ({ ...prev, [recordingId]: audio }));
-    }
-
-    if (activePlaybackId === recordingId) {
-      audio.pause();
-      setActivePlaybackId(null);
-    } else {
-      audio.play().catch(err => {
-        console.error(`[rehearsal] PLAYBACK UNSUCCESSFUL (Promise Catch): id=${recordingId}`, {
-          errorName: err?.name,
-          errorMessage: err?.message,
-          src: audio?.src,
-          mediaErrorCode: audio?.error?.code,
-          mediaErrorMessage: audio?.error?.message,
-          networkState: audio?.networkState,
-          readyState: audio?.readyState,
-        });
-        toast.error(`Failed to play recording audio (${err?.name || 'Error'}).`);
-      });
-      setActivePlaybackId(recordingId);
-    }
-  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString([], {
@@ -1052,7 +947,7 @@ export default function RehearsalDrawer({
                                   activePlaybackId={activePlaybackId}
                                   deletingId={deletingId}
                                   downloadingId={downloadingId}
-                                  handleTogglePlay={handleTogglePlay}
+                                  handleTogglePlay={(id, url) => { const rec = recordings.find(r => r.id === id); if (rec) contextHandleTogglePlay(rec, url); }}
                                   handleDelete={handleDelete}
                                   handleDownload={handleDownload}
                                   formatDate={formatDate}
@@ -1221,6 +1116,7 @@ export default function RehearsalDrawer({
 
       {/* Floating Horizontal Bottom Mini Player Widget */}
       {!isOpen && hasAnyAudioSource && (
+
         <div 
           data-testid="bottom-mini-player"
           className={`fixed bottom-[calc(var(--bottom-nav-height,3.5rem)+env(safe-area-inset-bottom,0px))] lg:bottom-4 left-0 right-0 lg:left-1/2 lg:-translate-x-1/2 z-30 w-full lg:max-w-xl lg:rounded-2xl shadow-2xl backdrop-blur-md text-white h-14 flex items-center justify-between px-4 border-t lg:border border-white/10 select-none animate-in slide-in-from-bottom duration-300 ${activePlaybackId ? 'bg-indigo-600/95' : 'bg-[#FF5500]/95'}`}
@@ -1249,6 +1145,7 @@ export default function RehearsalDrawer({
               <span className={`w-[2px] bg-white rounded-full transition-all duration-300 ${isMediaPlaying || activePlaybackId ? 'animate-eq-bar-1' : 'h-1.5'}`} />
               <span className={`w-[2px] bg-white rounded-full transition-all duration-300 ${isMediaPlaying || activePlaybackId ? 'animate-eq-bar-2' : 'h-3'}`} />
               <span className={`w-[2px] bg-white rounded-full transition-all duration-300 ${isMediaPlaying || activePlaybackId ? 'animate-eq-bar-3' : 'h-2'}`} />
+
             </div>
             
             <DropdownMenu>
@@ -1380,7 +1277,7 @@ export default function RehearsalDrawer({
               data-testid="mini-play-pause-btn"
               className="w-8 h-8 rounded-full bg-black/20 hover:bg-black/35 flex items-center justify-center text-white cursor-pointer transition-transform hover:scale-105 shrink-0"
             >
-              {(isMediaPlaying || (activePlaybackId && audioElements[activePlaybackId] && !audioElements[activePlaybackId].paused)) ? (
+              {(activePlaybackId ? isRecordingPlaying : isMediaPlaying) ? (
                 <Pause className="w-3.5 h-3.5 fill-white" />
               ) : (
                 <Play className="w-3.5 h-3.5 fill-white ml-0.5" />
@@ -1416,14 +1313,13 @@ export default function RehearsalDrawer({
               <button 
                 onClick={() => {
                   if (activePlaybackId) {
-                    const audio = audioElements[activePlaybackId];
-                    if (audio) { audio.pause(); audio.currentTime = 0; }
-                    setActivePlaybackId(null);
+                    stopActiveRecording();
+                  } else {
+                    pauseYouTube();
+                    pauseSoundCloud();
+                    setPlayingSource(null);
+                    setIsMediaPlaying(false);
                   }
-                  pauseYouTube();
-                  pauseSoundCloud();
-                  setPlayingSource(null);
-                  setIsMediaPlaying(false);
                 }}
                 data-testid="mini-close-btn"
                 title="Stop playback & close player"
