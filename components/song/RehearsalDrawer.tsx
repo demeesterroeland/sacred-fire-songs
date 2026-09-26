@@ -1116,7 +1116,7 @@ export default function RehearsalDrawer({
           <div className="absolute inset-0 pointer-events-none lg:rounded-2xl overflow-hidden z-0">
             <div className="absolute top-0 inset-x-0 h-1 bg-white/20">
               <div 
-                className="h-full bg-white transition-all duration-100"
+                className="h-full bg-white"
                 style={{ width: `${Math.min(100, (mediaCurrentTime / (mediaDuration || 1)) * 100)}%` }}
               />
             </div>
