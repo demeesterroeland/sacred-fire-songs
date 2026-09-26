@@ -613,7 +613,12 @@ export default function RehearsalDrawer({
     try {
       // Pause if currently playing
       if (activePlaybackId === recordingId) {
-        handleTogglePlay(recordingId, "");
+        const activeAudio = audioElements[recordingId];
+        if (activeAudio) {
+          activeAudio.pause();
+          activeAudio.currentTime = 0;
+        }
+        setActivePlaybackId(null);
       }
 
       const success = await deleteUserRecording(recordingId, storagePath);

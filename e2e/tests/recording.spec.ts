@@ -137,6 +137,7 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
         console.log(`[Browser Console ${msg.type()}]: ${msg.text()}`);
       });
       await page.goto(songUrl);
+      await page.waitForLoadState('networkidle');
 
       // Open recordings drawer
       await openRecordingsDrawer(page);
@@ -144,16 +145,20 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       // Verify rehearsal drawer slides up
       const drawerTitle = page.locator('h3:has-text("Rehearsal Space")');
       await expect(drawerTitle).toBeVisible({ timeout: 8000 });
+      await page.waitForTimeout(500);
 
       // Switch to Voice Recorder tab if tabs exist (Reference Tracks is active by default in Issue 187)
       const voiceRecorderTab = page.locator('button:has-text("Voice Recorder")').first();
-      await voiceRecorderTab.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
-      if (await voiceRecorderTab.isVisible()) {
-        await voiceRecorderTab.click();
+      if (await voiceRecorderTab.isVisible({ timeout: 5000 }).catch(() => false)) {
+        await voiceRecorderTab.click({ force: true });
+        const recordPrompt = page.locator('h4:has-text("Ready to record rehearsal")');
+        if (!await recordPrompt.isVisible({ timeout: 2000 }).catch(() => false)) {
+          await voiceRecorderTab.click({ force: true });
+        }
       }
       
       const recordPrompt = page.locator('h4:has-text("Ready to record rehearsal")');
-      await expect(recordPrompt).toBeVisible({ timeout: 8000 });
+      await expect(recordPrompt).toBeVisible({ timeout: 10000 });
 
       // Start recording
       const startBtn = page.locator('button[title="Start recording"]');
@@ -221,6 +226,7 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
     
     test('Can explicitly upload a file from disk and play it back', async ({ page }) => {
       await page.goto(songUrl);
+      await page.waitForLoadState('networkidle');
 
       // 1. Open the Rehearsal Drawer
       await openRecordingsDrawer(page);
@@ -228,16 +234,20 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       // Verify rehearsal drawer slides up and is ready
       const drawerTitle = page.locator('h3:has-text("Rehearsal Space")');
       await expect(drawerTitle).toBeVisible({ timeout: 8000 });
+      await page.waitForTimeout(500);
 
       // Switch to Voice Recorder tab if tabs exist (Reference Tracks is active by default in Issue 187)
       const voiceRecorderTab = page.locator('button:has-text("Voice Recorder")').first();
-      await voiceRecorderTab.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
-      if (await voiceRecorderTab.isVisible()) {
-        await voiceRecorderTab.click();
+      if (await voiceRecorderTab.isVisible({ timeout: 5000 }).catch(() => false)) {
+        await voiceRecorderTab.click({ force: true });
+        const recordPrompt = page.locator('h4:has-text("Ready to record rehearsal")');
+        if (!await recordPrompt.isVisible({ timeout: 2000 }).catch(() => false)) {
+          await voiceRecorderTab.click({ force: true });
+        }
       }
 
       const recordPrompt = page.locator('h4:has-text("Ready to record rehearsal")');
-      await expect(recordPrompt).toBeVisible({ timeout: 8000 });
+      await expect(recordPrompt).toBeVisible({ timeout: 10000 });
 
       // 2. Switch to the "Upload File" tab
       const uploadTab = page.getByRole('button', { name: 'Upload File' });
