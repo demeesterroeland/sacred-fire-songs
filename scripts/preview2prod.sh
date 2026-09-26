@@ -212,7 +212,7 @@ fi
 
 # 12. Merge Release Please PR to cut the official release
 echo "🚀 Merging Release Please PR #$RP_PR_NUMBER to cut the release..."
-gh pr merge "$RP_PR_NUMBER" --merge
+gh pr merge "$RP_PR_NUMBER" --merge --admin
 echo "✅ Release Please PR merged!"
 
 # 13. Wait for GitHub release to be created
