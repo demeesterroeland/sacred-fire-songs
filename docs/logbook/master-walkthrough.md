@@ -2857,3 +2857,25 @@ This session addressed a critical bug where slow Supabase Auth calls (due to Tai
    - Updated E2E tests (`recording.spec.ts`) to verify both audio playback for 2 seconds and downloading the audio file via the download button across desktop and mobile browsers.
    - Verified both the microphone recording flow and the file upload flow execute cleanly against a production build, capturing video recordings of both user interactions.
 
+
+## September 27, 2026: Unified Audio Experience (Issue #237)
+
+**Objective**: Merge the external reference tracks (YouTube, SoundCloud, Spotify) and the user's personal Rehearsal Recordings into a single, unified bottom mini-player to create a seamless playback UX.
+
+**Action**:
+1. **Parallel Subagent Architecture**: Bootstrapped 3 subagents (UI/UX, Audio State, Data & Navigation) working in parallel on isolated feature branches (`feat/237/mini-player`, `feat/237/audio-continuity`, `feat/237/data-header`).
+2. **Global Audio Continuity**: 
+   - Refactored `useAudio()` context to house all HTML5 `<audio>` element management.
+   - Detached the `<audio>` element from the `RehearsalDrawer` component, ensuring playback continues seamlessly while navigating the app, opening/closing the drawer, or browsing the song list.
+3. **Data Hoisting & Header State**:
+   - Hoisted the `useSongRecordings` fetch logic to the top of `app/songs/[id]/page.tsx` to pre-load recordings data before opening the drawer.
+   - Enhanced the header `<Mic /> Recordings` button to display a dynamic count pill (`[ 2 ]`) if recordings exist, and swap to an animated equalizer icon when a recording is actively playing.
+4. **UI/UX Enhancements**:
+   - Built a custom "Source Switcher" dropdown menu inside the `MiniPlayer` leveraging Shadcn's `<DropdownMenu>` with custom frosted dark-glassmorphism styling (`bg-[#1a1a1e]/95 backdrop-blur-xl`).
+   - Re-designed the top-edge progress bar to perfectly hug the rounded corners of the mini-player using an `inset-0 lg:rounded-2xl overflow-hidden` visual clipping mask, ensuring the interactive scrubber thumb floats unclipped above the track.
+   - Fixed a deeply rooted double-scrollbar layout issue (`min-h-screen` and duplicate `lg:overflow-y-auto` classes on `app/songs/[id]/page.tsx`).
+   - Cleaned up duplicate/conflicting terminology globally by replacing references to "Rehearsal Space" generated filenames and placeholders with standard "Recording".
+5. **E2E Testing & Integration**:
+   - Resolved merge conflicts and successfully integrated the subagent branches back into `feat/237-unified-audio-experience`.
+   - Adapted the Playwright E2E suite (`recording.spec.ts` & `media-player.spec.ts`) to fully cover the new Source Switcher interactions, audio continuity states, and updated terminology placeholders.
+   - All tests run and pass against a full Next.js production build (`npm run test:e2e`).
