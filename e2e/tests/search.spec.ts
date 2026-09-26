@@ -41,7 +41,7 @@ test.describe('Search Functionality E2E Tests', () => {
     await expect(overlay).toHaveClass(/opacity-0/);
   });
 
-  test('Real-time: accent/diacritic-insensitive matching across fields', async ({ page }) => {
+  test('Real-time: accent/diacritic-insensitive matching across fields @smoke', async ({ page }) => {
     // 1. Discover a song, author, and category name dynamically from the DOM
     const firstTitleElement = page.locator('h3').first();
     await expect(firstTitleElement).toBeVisible();

@@ -137,7 +137,7 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
   test.describe('As Authenticated Member', () => {
     test.use({ storageState: ROLES.member.storage });
 
-    test('Can open record drawer, capture fake mic stream, play back, upload, and delete', async ({ page }) => {
+    test('Can open record drawer, capture fake mic stream, play back, upload, and delete @smoke', async ({ page }) => {
       page.on('console', (msg) => {
         console.log(`[Browser Console ${msg.type()}]: ${msg.text()}`);
       });
