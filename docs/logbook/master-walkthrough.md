@@ -2837,3 +2837,20 @@ This session addressed a critical bug where slow Supabase Auth calls (due to Tai
 4. Rewrote `hooks/useAuth.tsx` to accept this `initialUser` as its initial `useState` value.
 
 **Result**: The Next.js server now reads the authentication cookie directly during SSR. The very first HTML byte sent to the browser already contains the user's Avatar. Zero layout shifts, zero FOUC, and zero hydration errors. We created custom Playwright E2E test scripts with network throttling to perfectly isolate and verify this behavior locally before and after the fix.
+
+## September 26, 2026: Rehearsal Playback Graceful Handling & SongCard Hydration Fix (Issue #230)
+
+**Objective**: Resolve the playback failure and crash on orphaned/missing rehearsal recordings (Issue #230), fix the root cause of E2E test failures caused by `<SongCard>` React hydration mismatches, and add comprehensive E2E test coverage for manual rehearsal audio file uploads.
+
+**Action**:
+1. **Rehearsal Graceful Degradation (`components/song/RehearsalDrawer.tsx`)**:
+   - When rehearsal recording files are missing from storage or fail URL signing, `audioUrl` is undefined.
+   - Disabled the Play/Pause button for recordings lacking an `audioUrl`, adding a clear tooltip (`"Audio file missing or corrupted"`).
+   - Displayed an explicit `"Missing File"` badge next to corrupted entries.
+   - Preserved full Delete functionality so users can self-serve cleanup of orphaned database records without crashes.
+2. **SongCard Hydration Architecture (`components/home/SongCard.tsx`)**:
+   - Diagnosed severe React hydration errors occurring because `<SongCard>` wrapped the entire card in a `<Link>` (`<a>` tag) while containing nested `<a>` tags for Authors, Categories, and Draft badges.
+   - Refactored the card wrapper to a `<div>`, replaced the card-level anchor with an invisible CSS overlay (`absolute inset-0 z-0 Link`), and partitioned `pointer-events-none` on content with `pointer-events-auto` on inner links.
+3. **E2E Testing & Headed Recording (`e2e/tests/recording.spec.ts`)**:
+   - Added `Can explicitly upload a file from disk and play it back` covering the manual "Upload File" tab with a valid dummy `.wav` fixture.
+   - Verified both the microphone recording flow and the file upload flow execute cleanly against a production build, capturing video recordings of both user interactions.
