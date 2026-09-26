@@ -186,8 +186,8 @@ export default function RehearsalDrawer({
   const [selectedMedia, setSelectedMedia] = useState<"youtube" | "spotify" | "soundcloud" | null>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [activePlaybackId, setActivePlaybackId] = useState<string | null>(null);
-  const [audioElements, setAudioElements] = useState<Record<string, HTMLAudioElement>>({});
+  const { activePlaybackId, activeRecording, audioElements, isRecordingPlaying, recordingCurrentTime, recordingDuration, handleTogglePlay: contextHandleTogglePlay, pauseActiveRecording, stopActiveRecording, seekActiveRecording, seekRelativeActiveRecording, clearAudioElements } = useAudio();
+
 
   // Refs for media iframe elements
   const youtubeRef = React.useRef<HTMLIFrameElement>(null);
@@ -296,11 +296,6 @@ export default function RehearsalDrawer({
       }
     });
   };
-  const [downloadingId, setDownloadingId] = useState<string | null>(null);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-  const { activePlaybackId, activeRecording, audioElements, isRecordingPlaying, recordingCurrentTime, recordingDuration, handleTogglePlay: contextHandleTogglePlay, pauseActiveRecording, stopActiveRecording, seekActiveRecording, seekRelativeActiveRecording, clearAudioElements } = useAudio();
-
-
 
   const pauseYouTube = () => {
     if (youtubeRef.current?.contentWindow) {
@@ -631,7 +626,6 @@ export default function RehearsalDrawer({
     };
   }, [selectedMedia]);
 
-  useEffect(() => {
   // Sync progress for User Recordings
   useEffect(() => {
     let animationFrameId: number;
