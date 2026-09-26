@@ -871,8 +871,7 @@ export default function RehearsalDrawer({
 
                     {/* Audio Recorder Area */}
                     <section className="space-y-2">
-                      <div className="flex items-baseline justify-between">
-                        <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider text-left">Record New Practice Take</h3>
+                      <div className="flex items-baseline justify-end">
                         {hasMedia && (
                           <span className="text-[10px] text-indigo-500/80 dark:text-indigo-400/80 font-medium">
                             🎧 Wear headphones to prevent bleed
