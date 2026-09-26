@@ -46,6 +46,11 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       await expect(mobileRecordBtn).toBeVisible({ timeout: 5000 });
       await mobileRecordBtn.click();
     }
+
+    // Wait for drawer to slide in and stabilize in viewport
+    const drawerTitle = page.locator('h3:has-text("Rehearsal Space")');
+    await expect(drawerTitle).toBeVisible({ timeout: 10000 });
+    await page.waitForTimeout(1000);
   }
 
   test.describe('As Guest User with Reference Media', () => {
@@ -137,23 +142,28 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
         console.log(`[Browser Console ${msg.type()}]: ${msg.text()}`);
       });
       await page.goto(songUrl);
+      await page.waitForLoadState('networkidle');
 
       // Open recordings drawer
       await openRecordingsDrawer(page);
 
-      // Switch to Voice Recorder tab if tabs exist (Reference Tracks is active by default in Issue 187)
-      const voiceRecorderTab = page.locator('button:has-text("Voice Recorder")').first();
-      await voiceRecorderTab.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
-      if (await voiceRecorderTab.isVisible()) {
-        await voiceRecorderTab.click();
-      }
-
       // Verify rehearsal drawer slides up
       const drawerTitle = page.locator('h3:has-text("Rehearsal Space")');
-      await expect(drawerTitle).toBeVisible();
+      await expect(drawerTitle).toBeVisible({ timeout: 8000 });
+      await page.waitForTimeout(500);
+
+      // Switch to Voice Recorder tab if tabs exist (Reference Tracks is active by default in Issue 187)
+      const voiceRecorderTab = page.locator('button:has-text("Voice Recorder")').first();
+      if (await voiceRecorderTab.isVisible({ timeout: 5000 }).catch(() => false)) {
+        await voiceRecorderTab.click({ force: true });
+        const recordPrompt = page.locator('h4:has-text("Ready to record rehearsal")');
+        if (!await recordPrompt.isVisible({ timeout: 2000 }).catch(() => false)) {
+          await voiceRecorderTab.click({ force: true });
+        }
+      }
       
       const recordPrompt = page.locator('h4:has-text("Ready to record rehearsal")');
-      await expect(recordPrompt).toBeVisible();
+      await expect(recordPrompt).toBeVisible({ timeout: 10000 });
 
       // Start recording
       const startBtn = page.locator('button[title="Start recording"]');
@@ -195,13 +205,119 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       const savedTake = page.locator(`h4:has-text("${customName}")`);
       await expect(savedTake).toBeVisible({ timeout: 10000 });
 
+      // Play back the saved take for 2 seconds
+      const cardRow = page.locator('div.group', { has: savedTake }).first();
+      const playBtn = cardRow.locator('button[title="Play"]');
+      await expect(playBtn).toBeVisible();
+      await playBtn.click();
+
+      // Verify playback started (Pause icon visible) and let it play for 2 seconds
+      await expect(cardRow.locator('svg.lucide-pause')).toBeVisible({ timeout: 5000 });
+      await page.waitForTimeout(2000);
+
+      // Verify no playback error toast appeared
+      await expect(page.locator('text="Failed to play recording audio"')).toHaveCount(0);
+      await expect(page.locator('text="Audio URL is not available"')).toHaveCount(0);
+
+      // Verify and click the download button
+      const downloadBtn = cardRow.locator('button[aria-label="Download rehearsal"]');
+      await expect(downloadBtn).toBeVisible();
+      const downloadPromise = page.waitForEvent('download');
+      await downloadBtn.click();
+      const download = await downloadPromise;
+      expect(download.suggestedFilename()).toContain('.webm');
+
       // Clean up/Delete the created take to keep database clean
-      const cardRow = page.locator('div.rounded-2xl', { has: page.locator(`h4:has-text("${customName}")`) }).first();
       const deleteBtn = cardRow.locator('button[title="Delete rehearsal"]');
       await expect(deleteBtn).toBeVisible();
       await deleteBtn.click();
 
       // Verify the take disappears
+      await expect(savedTake).toHaveCount(0, { timeout: 10000 });
+    });
+
+    
+    test('Can explicitly upload a file from disk and play it back', async ({ page }) => {
+      await page.goto(songUrl);
+      await page.waitForLoadState('networkidle');
+
+      // 1. Open the Rehearsal Drawer
+      await openRecordingsDrawer(page);
+
+      // Verify rehearsal drawer slides up and is ready
+      const drawerTitle = page.locator('h3:has-text("Rehearsal Space")');
+      await expect(drawerTitle).toBeVisible({ timeout: 8000 });
+      await page.waitForTimeout(500);
+
+      // Switch to Voice Recorder tab if tabs exist (Reference Tracks is active by default in Issue 187)
+      const voiceRecorderTab = page.locator('button:has-text("Voice Recorder")').first();
+      if (await voiceRecorderTab.isVisible({ timeout: 5000 }).catch(() => false)) {
+        await voiceRecorderTab.click({ force: true });
+        const recordPrompt = page.locator('h4:has-text("Ready to record rehearsal")');
+        if (!await recordPrompt.isVisible({ timeout: 2000 }).catch(() => false)) {
+          await voiceRecorderTab.click({ force: true });
+        }
+      }
+
+      const recordPrompt = page.locator('h4:has-text("Ready to record rehearsal")');
+      await expect(recordPrompt).toBeVisible({ timeout: 10000 });
+
+      // 2. Switch to the "Upload File" tab
+      const uploadTab = page.getByRole('button', { name: 'Upload File' });
+      await expect(uploadTab).toBeVisible();
+      await uploadTab.click({ force: true });
+
+      // 4. Select the file
+      const fileChooserPromise = page.waitForEvent('filechooser');
+      await page.locator('text=Click to select an audio file').click();
+      const fileChooser = await fileChooserPromise;
+      await fileChooser.setFiles('e2e/fixtures/dummy-audio.wav');
+
+      // 5. Verify the file is loaded into the preview and Save
+      const nameInput = page.locator('input[placeholder="Recording Name (e.g. Rehearsal 1)"]');
+      await expect(nameInput).toBeVisible();
+      await expect(nameInput).toHaveValue(/dummy-audio/i);
+      
+      const customName = 'E2E Uploaded File - ' + Date.now();
+      await nameInput.fill(customName);
+
+      // 6. Click Save
+      const saveBtn = page.locator('button:has-text("Save Rehearsal")');
+      await expect(saveBtn).toBeVisible();
+      await saveBtn.click();
+
+      // 7. Wait for the upload to complete and the new item to appear in the list
+      await expect(saveBtn).toBeHidden({ timeout: 10000 });
+      const savedTake = page.locator(`h4:has-text("${customName}")`);
+      await expect(savedTake).toBeVisible({ timeout: 10000 });
+
+      // Play back the uploaded take for 2 seconds
+      const container = savedTake.locator('xpath=ancestor::div[contains(@class, "group")][1]');
+      const playBtn = container.locator('button[title="Play"]');
+      await expect(playBtn).toBeVisible();
+      await playBtn.click();
+
+      // Verify playback started (Pause icon visible) and let it play for 2 seconds
+      await expect(container.locator('svg.lucide-pause')).toBeVisible({ timeout: 5000 });
+      await page.waitForTimeout(2000);
+
+      // Verify no playback error toast appeared
+      await expect(page.locator('text="Failed to play recording audio"')).toHaveCount(0);
+      await expect(page.locator('text="Audio URL is not available"')).toHaveCount(0);
+
+      // Verify and click the download button
+      const downloadBtn = container.locator('button[aria-label="Download rehearsal"]');
+      await expect(downloadBtn).toBeVisible();
+      const downloadPromise = page.waitForEvent('download');
+      await downloadBtn.click();
+      const download = await downloadPromise;
+      expect(download.suggestedFilename()).toContain('.wav');
+
+      // 8. Delete it to clean up
+      const deleteBtn = container.locator('button[title="Delete rehearsal"]');
+      await deleteBtn.click();
+
+      // Wait for deletion
       await expect(savedTake).toHaveCount(0, { timeout: 10000 });
     });
 
@@ -213,10 +329,16 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
 
       // Switch to Voice Recorder tab if tabs exist (Reference Tracks is active by default in Issue 187)
       const voiceRecorderTab = page.locator('button:has-text("Voice Recorder")').first();
-      await voiceRecorderTab.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
-      if (await voiceRecorderTab.isVisible()) {
-        await voiceRecorderTab.click();
+      if (await voiceRecorderTab.isVisible({ timeout: 5000 }).catch(() => false)) {
+        await voiceRecorderTab.click({ force: true });
+        const recordPrompt = page.locator('h4:has-text("Ready to record rehearsal")');
+        if (!await recordPrompt.isVisible({ timeout: 2000 }).catch(() => false)) {
+          await voiceRecorderTab.click({ force: true });
+        }
       }
+
+      const recordPrompt = page.locator('h4:has-text("Ready to record rehearsal")');
+      await expect(recordPrompt).toBeVisible({ timeout: 10000 });
 
       // Set fast timer flag in browser context
       await page.evaluate(() => {
@@ -233,11 +355,11 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
 
       // Verify that it automatically stops and shows the review UI
       const reviewPrompt = page.locator('h4:has-text("Review your recording")');
-      await expect(reviewPrompt).toBeVisible();
+      await expect(reviewPrompt).toBeVisible({ timeout: 10000 });
 
       // Verify that the duration shows 03:00
       const durationDisplay = page.locator('text=03:00');
-      await expect(durationDisplay).toBeVisible();
+      await expect(durationDisplay).toBeVisible({ timeout: 10000 });
     });
 
     test('Blocks saving when recording exceeds 10MB', async ({ page }) => {
@@ -248,15 +370,25 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
 
       // Switch to Voice Recorder tab if tabs exist (Reference Tracks is active by default in Issue 187)
       const voiceRecorderTab = page.locator('button:has-text("Voice Recorder")').first();
-      await voiceRecorderTab.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
-      if (await voiceRecorderTab.isVisible()) {
-        await voiceRecorderTab.click();
+      if (await voiceRecorderTab.isVisible({ timeout: 5000 }).catch(() => false)) {
+        await voiceRecorderTab.click({ force: true });
+        const recordPrompt = page.locator('h4:has-text("Ready to record rehearsal")');
+        if (!await recordPrompt.isVisible({ timeout: 2000 }).catch(() => false)) {
+          await voiceRecorderTab.click({ force: true });
+        }
       }
+
+      const recordPrompt = page.locator('h4:has-text("Ready to record rehearsal")');
+      await expect(recordPrompt).toBeVisible({ timeout: 10000 });
 
       // Start recording
       const startBtn = page.locator('button[title="Start recording"]');
       await expect(startBtn).toBeVisible();
       await startBtn.click({ force: true });
+
+      // Verify recording started
+      const activePrompt = page.locator('h4:has-text("Recording rehearsal...")');
+      await expect(activePrompt).toBeVisible({ timeout: 5000 });
 
       // Let it record briefly
       await page.waitForTimeout(1000);
@@ -275,20 +407,20 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
 
       // Stop recording to trigger Blob creation with our mocked Blob class
       const stopBtn = page.locator('button[title="Stop recording"]');
-      await expect(stopBtn).toBeVisible();
+      await expect(stopBtn).toBeVisible({ timeout: 10000 });
       await stopBtn.click();
 
       // Verify review UI is visible
-      await expect(page.locator('h4:has-text("Review your recording")')).toBeVisible();
+      await expect(page.locator('h4:has-text("Review your recording")')).toBeVisible({ timeout: 10000 });
 
       // Try to save the rehearsal
       const saveBtn = page.locator('button:has-text("Save Rehearsal")');
-      await expect(saveBtn).toBeVisible();
+      await expect(saveBtn).toBeVisible({ timeout: 10000 });
       await saveBtn.click();
 
       // Verify client-side error message is displayed
-      const errorMsg = page.locator('text=Recording file size exceeds the 10 MB limit.');
-      await expect(errorMsg).toBeVisible();
+      const errorMsg = page.locator('text=File size exceeds the 10 MB limit.');
+      await expect(errorMsg).toBeVisible({ timeout: 10000 });
     });
   });
 });

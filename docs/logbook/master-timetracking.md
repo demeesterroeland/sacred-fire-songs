@@ -82,5 +82,6 @@
 | **July 26, 2026** | **UX/Architecture**: Streamline Tag UX & Universal TagPill Architecture (#210) — Created universal `<TagPill />` and `useTaxonomy()`, refactored `/edit`, `/add`, search popup, Song Detail, and Homepage category cards, enforced gray language theme, repositioned `Languages` block, and added cached tag song counts. | ~3.0 Hours | ✅ Completed |
 | **July 27, 2026** | **Release/Ops**: Release v1.2.0 (#209, #212), Hetzner VPS Deployment (`songbook.bluette.be`), Cloud ➔ VPS Live DB Sync (252 songs & 12 users 100% parity), Security Audit (`.env.production`), `backup-secrets.sh` Vaultwarden Guard (`ubuntu-8gb-nbg1-1`), 67-Endpoint Performance Framework, 10-Min ISR Caching (#210, PRs #213, #214), and Automated HTML Benchmark Reporting (#215). | ~3.5 Hours | ✅ Completed |
 | **August 14, 2026** | **Feature/UX**: Multi-Artist Tagging (#195, #228), `<BasePill>` Architecture Refactoring, Interactive Filter Links & Tooltips, Delete Button Relocation, Draft Empty State & Guest Flow Improvements, Toast Action Links, and Issue #229 Creation. | ~2.5 Hours | ✅ Completed |
+| **September 26, 2026** | **Bug Fix/UX**: Rehearsal Playback & SongCard Hydration Fix (#230, PR #236) — Fixed SongCard nested link hydration error, handled missing storage audio gracefully with badges/tooltips, added download recording button, and expanded E2E suite coverage | ~3.0 Hours | ✅ Completed |
 
-| **Total** | **Development + AI Collaboration** | **~159.75 Hours** | |
+| **Total** | **Development + AI Collaboration** | **~162.75 Hours** | |
