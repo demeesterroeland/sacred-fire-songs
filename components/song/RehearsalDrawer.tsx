@@ -409,12 +409,10 @@ export default function RehearsalDrawer({
     }
 
     if (activePlaybackId) {
-      stopActiveRecording();
-      if (activeAudio) {
-        activeAudio.currentTime = targetTime;
-        setMediaCurrentTime(targetTime);
-      }
-    } else if (playingSource === "youtube") {
+      seekActiveRecording(targetTime);
+      return;
+    }
+    if (playingSource === "youtube") {
       if (youtubeRef.current?.contentWindow) {
         if (typeof window !== "undefined" && (window as any).__E2E__) {
           (window as any).lastYtMessage = JSON.stringify({
@@ -1223,7 +1221,7 @@ export default function RehearsalDrawer({
                     {recordings.map(rec => (
                       <DropdownMenuItem key={rec.id} onClick={() => {
                         if (!rec.audioUrl) return;
-                        handleTogglePlay(rec.id, rec.audioUrl);
+                        contextHandleTogglePlay(rec, rec.audioUrl);
                       }}>
                         <div className="flex items-center justify-between w-full">
                           <span className="truncate">{rec.recording_name}</span>
@@ -1253,21 +1251,7 @@ export default function RehearsalDrawer({
 
             {/* Play/Pause */}
             <button 
-              onClick={() => {
-                if (activePlaybackId) {
-                  const audio = audioElements[activePlaybackId];
-                  if (audio) {
-                    if (!audio.paused) {
-                      audio.pause();
-                      // We don't unset activePlaybackId here to allow resuming, but we need isMediaPlaying to reflect paused state?
-                      // Actually, our handleTogglePlay pauses and unsets activePlaybackId entirely.
-                    }
-                  }
-                  handleTogglePlay(activePlaybackId, recordings.find(r => r.id === activePlaybackId)?.audioUrl);
-                } else {
-                  handleMiniPlayerPlayPause();
-                }
-              }}
+              onClick={handleMiniPlayerPlayPause}
               data-testid="mini-play-pause-btn"
               className="w-8 h-8 rounded-full bg-black/20 hover:bg-black/35 flex items-center justify-center text-white cursor-pointer transition-transform hover:scale-105 shrink-0"
             >

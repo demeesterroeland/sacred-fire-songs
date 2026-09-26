@@ -316,7 +316,7 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
 
       // Verify playback started (Pause icon visible) and let it play for 2 seconds
       await expect(container.locator('svg.lucide-pause')).toBeVisible({ timeout: 5000 });
-      const audioCurrentTime = await page.evaluate(() => {
+      const secondAudioCurrentTime = await page.evaluate(() => {
         const audio = document.querySelector("audio");
         return audio ? audio.currentTime : 0;
       });
@@ -486,7 +486,7 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
 
       // Wait for playback to start
       await expect(container.locator('svg.lucide-pause')).toBeVisible({ timeout: 5000 });
-      const audioCurrentTime = await page.evaluate(() => {
+      const secondAudioCurrentTime = await page.evaluate(() => {
         const audio = document.querySelector("audio");
         return audio ? audio.currentTime : 0;
       });
@@ -513,11 +513,11 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
 
       // Check if the pause button is still showing (still playing)
       await expect(container.locator('svg.lucide-pause')).toBeVisible({ timeout: 5000 });
-      const audioCurrentTime = await page.evaluate(() => {
+      const thirdAudioCurrentTime = await page.evaluate(() => {
         const audio = document.querySelector("audio");
         return audio ? audio.currentTime : 0;
       });
-      expect(audioCurrentTime).toBeGreaterThan(0);
+      expect(thirdAudioCurrentTime).toBeGreaterThan(0);
       
       // Clean up
       const deleteBtn = container.locator('button[title="Delete rehearsal"]');
