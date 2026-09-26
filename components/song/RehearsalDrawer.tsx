@@ -1159,12 +1159,12 @@ export default function RehearsalDrawer({
                   </span>
                 </div>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-56" data-testid="mini-source-dropdown">
+              <DropdownMenuContent align="start" className="w-56 bg-[#1a1a1e]/95 backdrop-blur-xl border border-white/10 text-white rounded-xl shadow-2xl p-2 z-[60]" data-testid="mini-source-dropdown">
                 {hasMedia && (
                   <>
-                    <DropdownMenuLabel>Reference Tracks</DropdownMenuLabel>
+                    <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-gray-400 font-bold px-2 pb-1">Reference Tracks</DropdownMenuLabel>
                     {youtubeUrl && (
-                      <DropdownMenuItem onClick={() => {
+                      <DropdownMenuItem className="cursor-pointer focus:bg-white/10 focus:text-white rounded-md transition-colors my-0.5" onClick={() => {
                         if (activePlaybackId) {
                           stopActiveRecording();
                           
@@ -1184,7 +1184,7 @@ export default function RehearsalDrawer({
                       </DropdownMenuItem>
                     )}
                     {soundcloudUrl && (
-                      <DropdownMenuItem onClick={() => {
+                      <DropdownMenuItem className="cursor-pointer focus:bg-white/10 focus:text-white rounded-md transition-colors my-0.5" onClick={() => {
                         if (activePlaybackId) {
                           stopActiveRecording();
                           
@@ -1204,7 +1204,7 @@ export default function RehearsalDrawer({
                       </DropdownMenuItem>
                     )}
                     {spotifyUrl && (
-                      <DropdownMenuItem onClick={() => {
+                      <DropdownMenuItem className="cursor-pointer focus:bg-white/10 focus:text-white rounded-md transition-colors my-0.5" onClick={() => {
                         onOpen?.();
                         setSelectedMedia("spotify");
                         setPlayingSource("spotify");
@@ -1219,7 +1219,7 @@ export default function RehearsalDrawer({
                 )}
                 {recordings.length > 0 && (
                   <>
-                    {hasMedia && <DropdownMenuSeparator />}
+                    {hasMedia && <DropdownMenuSeparator className="bg-white/10 my-2" />}
                     <DropdownMenuLabel>User Recordings</DropdownMenuLabel>
                     {recordings.map(rec => (
                       <DropdownMenuItem key={rec.id} onClick={() => {
