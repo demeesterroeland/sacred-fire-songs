@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.5.1](https://github.com/demeesterroeland/sacred-fire-songs/compare/v1.5.0...v1.5.1) (2026-09-26)
+
+
+### 🐛 Bug fixes
+
+* update run-migrations.sh path in Dockerfile.migrator ([8fa50ed](https://github.com/demeesterroeland/sacred-fire-songs/commit/8fa50edccc9e9df2ae26aa70dbbf9013d2af748b))
+
 ## [1.5.0](https://github.com/demeesterroeland/sacred-fire-songs/compare/v1.4.1...v1.5.0) (2026-09-26)
 
 
