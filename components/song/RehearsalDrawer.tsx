@@ -409,7 +409,7 @@ export default function RehearsalDrawer({
     }
 
     if (activePlaybackId) {
-      const activeAudio = audioElements[activePlaybackId];
+      stopActiveRecording();
       if (activeAudio) {
         activeAudio.currentTime = targetTime;
         setMediaCurrentTime(targetTime);
@@ -1165,9 +1165,9 @@ export default function RehearsalDrawer({
                     {youtubeUrl && (
                       <DropdownMenuItem onClick={() => {
                         if (activePlaybackId) {
-                          const activeAudio = audioElements[activePlaybackId];
-                          if (activeAudio) activeAudio.pause();
-                          setActivePlaybackId(null);
+                          stopActiveRecording();
+                          
+                          
                         }
                         if (playingSource !== "youtube") {
                            pauseSoundCloud();
@@ -1185,9 +1185,9 @@ export default function RehearsalDrawer({
                     {soundcloudUrl && (
                       <DropdownMenuItem onClick={() => {
                         if (activePlaybackId) {
-                          const activeAudio = audioElements[activePlaybackId];
-                          if (activeAudio) activeAudio.pause();
-                          setActivePlaybackId(null);
+                          stopActiveRecording();
+                          
+                          
                         }
                         if (playingSource !== "soundcloud") {
                            pauseYouTube();
