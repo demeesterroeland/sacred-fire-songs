@@ -1,5 +1,25 @@
 # Changelog
 
+## [1.5.0](https://github.com/demeesterroeland/sacred-fire-songs/compare/v1.4.1...v1.5.0) (2026-09-26)
+
+
+### ✨ New features
+
+* add download button to rehearsal recordings list and verify in e2e ([7cb02c4](https://github.com/demeesterroeland/sacred-fire-songs/commit/7cb02c4ced75ec0d8a8db58081832521d00906cb))
+
+
+### 🐛 Bug fixes
+
+* **rehearsal:** eliminate spurious audio url error toast on delete and provide valid 3s audio fixture ([7d5e340](https://github.com/demeesterroeland/sacred-fire-songs/commit/7d5e3407a902de1eb87aec76e18e4e522d1ddfce))
+* **rehearsal:** gracefully handle orphaned recordings and disable playback ([efd46e5](https://github.com/demeesterroeland/sacred-fire-songs/commit/efd46e590589310fd04b3d5803adb3f9aead5fef))
+* **songs:** ensure stretched link covers full card and receives click events ([58b324b](https://github.com/demeesterroeland/sacred-fire-songs/commit/58b324bc0d96a4c1c1ff9728b41c7d3c6b4581e3))
+* **ui:** resolve SongCard hydration error by removing nested anchor tags ([1c37281](https://github.com/demeesterroeland/sacred-fire-songs/commit/1c3728156f8772606e0bb70cf406b5c921fb400b))
+
+
+### 📖 Documentation
+
+* sync logbook artifacts on feature branch for issue [#230](https://github.com/demeesterroeland/sacred-fire-songs/issues/230) ([16fd0be](https://github.com/demeesterroeland/sacred-fire-songs/commit/16fd0bed72b62d4eaec4b7fdc7a77fed1d2e7649))
+
 ## [1.4.1](https://github.com/demeesterroeland/sacred-fire-songs/compare/v1.4.0...v1.4.1) (2026-09-25)
 
 ### ✨ New features
