@@ -75,99 +75,100 @@ export default function SongCard({
 
     return (
         <div className="relative self-start w-full group">
-            <Link href={`/songs/${id}`} className="block">
-                <div className={cn(
-                    'relative p-5 rounded-2xl transition-all duration-300 backdrop-blur-sm group overflow-hidden flex flex-col justify-between active:scale-[0.98] cursor-pointer',
-                    isPublic
-                        ? 'bg-white/60 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-white/10 hover:bg-gray-100/60 dark:hover:bg-gray-800/60'
-                        : 'bg-gray-100/60 dark:bg-black/40 border border-dashed border-gray-300 dark:border-white/10 hover:bg-gray-200/60 dark:hover:bg-black/60 opacity-75 hover:opacity-100'
-                )}>
-                    {/* Accent Border */}
-                    <div
-                        className={`absolute left-0 top-0 bottom-0 w-1 ${borderColors[accentColor] || borderColors.red} rounded-l-2xl opacity-50 group-hover:opacity-100 transition-all duration-300 transform group-hover:scale-y-110`}
-                    />
+            <div className={cn(
+                'relative p-5 rounded-2xl transition-all duration-300 backdrop-blur-sm group overflow-hidden flex flex-col justify-between active:scale-[0.98] cursor-pointer',
+                isPublic
+                    ? 'bg-white/60 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-white/10 hover:bg-gray-100/60 dark:hover:bg-gray-800/60'
+                    : 'bg-gray-100/60 dark:bg-black/40 border border-dashed border-gray-300 dark:border-white/10 hover:bg-gray-200/60 dark:hover:bg-black/60 opacity-75 hover:opacity-100'
+            )}>
+                {/* Accent Border */}
+                <div
+                    className={`absolute left-0 top-0 bottom-0 w-1 ${borderColors[accentColor] || borderColors.red} rounded-l-2xl opacity-50 group-hover:opacity-100 transition-all duration-300 transform group-hover:scale-y-110`}
+                />
 
-                    <div className="relative flex justify-between items-start z-10 w-full mb-4">
-                        <div className="flex-1 min-w-0 pr-20">
-                            <div className="flex items-center gap-2 mb-1">
-                                <h3 className={`text-base font-bold text-gray-900 dark:text-gray-100 leading-tight ${textColors[accentColor] || textColors.red} transition-colors group-hover:translate-x-1 duration-300 truncate`}>
-                                    {title}
-                                </h3>
-                                {!isPublic && (
-                                    <Link
-                                        href="/songs?status=draft"
-                                        title="Filter Draft songs"
-                                        className="text-[9px] font-black bg-gray-200 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-500 px-1.5 py-0.5 rounded border border-gray-400/50 dark:border-gray-700 uppercase tracking-tighter shrink-0 transition-colors"
-                                    >
-                                        Draft
-                                    </Link>
-                                )}
-                            </div>
-                            <div className="mb-3 flex flex-wrap items-center gap-1.5">
-                                {(parseArtists(author).length > 0 ? parseArtists(author) : ['Traditional']).map((artistName, idx) => (
-                                    <AuthorPill
+                {/* Stretched Link: covers the whole card without nesting tags */}
+                <Link href={`/songs/${id}`} className="absolute inset-0 z-10" aria-label={`View ${title}`} />
+
+                <div className="relative flex justify-between items-start z-20 w-full mb-4 pointer-events-none">
+                    <div className="flex-1 min-w-0 pr-20">
+                        <div className="flex items-center gap-2 mb-1">
+                            <h3 className={`text-base font-bold text-gray-900 dark:text-gray-100 leading-tight ${textColors[accentColor] || textColors.red} transition-colors group-hover:translate-x-1 duration-300 truncate`}>
+                                {title}
+                            </h3>
+                            {!isPublic && (
+                                <Link
+                                    href="/songs?status=draft"
+                                    title="Filter Draft songs"
+                                    className="pointer-events-auto text-[9px] font-black bg-gray-200 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-500 px-1.5 py-0.5 rounded border border-gray-400/50 dark:border-gray-700 uppercase tracking-tighter shrink-0 transition-colors"
+                                >
+                                    Draft
+                                </Link>
+                            )}
+                        </div>
+                        <div className="mb-3 flex flex-wrap items-center gap-1.5 pointer-events-auto">
+                            {(parseArtists(author).length > 0 ? parseArtists(author) : ['Traditional']).map((artistName, idx) => (
+                                <AuthorPill
+                                    key={idx}
+                                    author={artistName}
+                                    href={`/songs?artist=${encodeURIComponent(artistName)}`}
+                                />
+                            ))}
+                        </div>
+
+                        {/* Categories/Tags */}
+                        <div className="flex flex-wrap items-center gap-1.5 pointer-events-auto">
+                            {categories
+                                .filter((cat) => cat.parent !== 'Artists' && cat.name !== 'Artists')
+                                .map((cat, idx) => (
+                                    <TagPill
                                         key={idx}
-                                        author={artistName}
-                                        href={`/songs?artist=${encodeURIComponent(artistName)}`}
+                                        label={cat.name}
+                                        categorySlug={cat.slug}
+                                        emoji={cat.emoji}
+                                        variant="badge"
+                                        href={`/songs?tag=${encodeURIComponent(cat.slug)}`}
                                     />
                                 ))}
-                            </div>
-
-                            {/* Categories/Tags */}
-                            <div className="flex flex-wrap items-center gap-1.5">
-                                {categories
-                                    .filter((cat) => cat.parent !== 'Artists' && cat.name !== 'Artists')
-                                    .map((cat, idx) => (
-                                        <TagPill
-                                            key={idx}
-                                            label={cat.name}
-                                            categorySlug={cat.slug}
-                                            emoji={cat.emoji}
-                                            variant="badge"
-                                            href={`/songs?tag=${encodeURIComponent(cat.slug)}`}
-                                        />
-                                    ))}
-                            </div>
-                        </div>
-
-                        <div className="flex flex-col items-end gap-1.5 shrink-0 ml-4">
-                            {hasChords && (
-                                <Link
-                                    href="/songs?chords=true"
-                                    className="text-amber-500 hover:text-amber-400 hover:scale-110 transition-all mb-1"
-                                    title="Filter songs with Chords"
-                                >
-                                    <Guitar className="w-3.5 h-3.5" />
-                                </Link>
-                            )}
-                            {hasMelody && (
-                                <Link
-                                    href="/songs?melody=true"
-                                    className="text-emerald-400 hover:text-emerald-300 hover:scale-110 transition-all mb-1"
-                                    title="Filter songs with Melody"
-                                >
-                                    <Music className="w-3.5 h-3.5" />
-                                </Link>
-                            )}
-                            {hasPersonalRecording && (
-                                <Link
-                                    href="/songs?myRecordings=true"
-                                    className="text-violet-400 hover:text-violet-300 hover:scale-110 transition-all mb-1"
-                                    title="Filter songs with Personal Recording"
-                                >
-                                    <Mic className="w-3.5 h-3.5" />
-                                </Link>
-                            )}
-                            {songKey && (
-                                <div className="text-[10px] font-mono text-gray-400">
-                                    <span className="text-gray-600 uppercase text-[8px] tracking-wider mr-1">Key</span>
-                                    {songKey}
-                                </div>
-                            )}
                         </div>
                     </div>
+
+                    <div className="flex flex-col items-end gap-1.5 shrink-0 ml-4 pointer-events-auto">
+                        {hasChords && (
+                            <Link
+                                href="/songs?chords=true"
+                                className="text-amber-500 hover:text-amber-400 hover:scale-110 transition-all mb-1"
+                                title="Filter songs with Chords"
+                            >
+                                <Guitar className="w-3.5 h-3.5" />
+                            </Link>
+                        )}
+                        {hasMelody && (
+                            <Link
+                                href="/songs?melody=true"
+                                className="text-emerald-400 hover:text-emerald-300 hover:scale-110 transition-all mb-1"
+                                title="Filter songs with Melody"
+                            >
+                                <Music className="w-3.5 h-3.5" />
+                            </Link>
+                        )}
+                        {hasPersonalRecording && (
+                            <Link
+                                href="/songs?myRecordings=true"
+                                className="text-violet-400 hover:text-violet-300 hover:scale-110 transition-all mb-1"
+                                title="Filter songs with Personal Recording"
+                            >
+                                <Mic className="w-3.5 h-3.5" />
+                            </Link>
+                        )}
+                        {songKey && (
+                            <div className="text-[10px] font-mono text-gray-400">
+                                <span className="text-gray-600 uppercase text-[8px] tracking-wider mr-1">Key</span>
+                                {songKey}
+                            </div>
+                        )}
+                    </div>
                 </div>
-            </Link>
+            </div>
 
             {/* Action buttons — bottom-right */}
             <div className="absolute bottom-3 right-3 z-20 flex items-center gap-1">
