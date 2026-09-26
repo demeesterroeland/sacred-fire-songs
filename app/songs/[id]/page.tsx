@@ -208,6 +208,10 @@ export default function SongDetailPage() {
             window.removeEventListener('resize', calculateOverflow);
         };
     }, [song?.title, songLoading, authLoading]);
+    const versions = song?.song_versions || [];
+    const currentVersion = versions[selectedVersionIndex];
+    const { data: recordings } = useSongRecordings(currentVersion?.id);
+
 
     const marqueeStyle = scrollAmount > 0 ? {
         '--scroll-amount': `-${scrollAmount}px`,
@@ -255,9 +259,6 @@ export default function SongDetailPage() {
     if (!song) return notFound();
 
     const versions = song.song_versions || [];
-    const currentVersion = versions[selectedVersionIndex];
-    const { data: recordings } = useSongRecordings(currentVersion?.id);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const categories = (song.song_category_map?.map((map: any) => ({
         ...map.categories,
         parent: map.categories?.parent?.name ?? null,
