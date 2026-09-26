@@ -649,7 +649,7 @@ export default function RehearsalDrawer({
   // Handle new recording saved
   const handleRecordingSaved = (newRecording: UserRecording) => {
     setRecordings((prev) => [newRecording, ...prev]);
-    toast.success("Rehearsal recording saved successfully!", {
+    toast.success("Recording saved successfully!", {
       action: {
         label: 'View Recordings →',
         onClick: () => { window.location.href = '/songs?myRecordings=true'; },
@@ -961,7 +961,7 @@ export default function RehearsalDrawer({
                           <Lock className="w-5 h-5" />
                         </div>
                         <div>
-                          <h4 className="text-sm font-bold text-gray-900 dark:text-white">Personal Rehearsal Recorder</h4>
+                          <h4 className="text-sm font-bold text-gray-900 dark:text-white">Personal Audio Recorder</h4>
                           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
                             Sign in to record your own practice takes, save them securely, and listen back anytime.
                           </p>

@@ -71,7 +71,7 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
         // Pre-fill default recording name with timestamp
         const timeString = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         const dateString = new Date().toLocaleDateString([], { month: 'short', day: 'numeric' });
-        setRecordingName(`Rehearsal - ${dateString} ${timeString}`);
+        setRecordingName(`Recording - ${dateString} ${timeString}`);
       };
 
       mediaRecorder.start(200); // chunk chunks every 200ms
@@ -183,7 +183,7 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
 
     // Clean up filename for default title (strip extension)
     const defaultName = file.name.replace(/\.[^/.]+$/, "");
-    setRecordingName(defaultName || `Rehearsal - ${new Date().toLocaleDateString()}`);
+    setRecordingName(defaultName || `Recording - ${new Date().toLocaleDateString()}`);
   };
 
   // Upload/Save recording or file
@@ -326,7 +326,7 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
         <div className="w-full space-y-3">
           <input
             type="text"
-            placeholder="Recording Name (e.g. Rehearsal 1)"
+            placeholder="Recording Name (e.g. Recording 1)"
             value={recordingName}
             onChange={(e) => setRecordingName(e.target.value)}
             disabled={isUploading}
