@@ -2,7 +2,8 @@
 
 import React, { useState, useEffect, useTransition } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Music, Trash2, Calendar, Play, Pause, Lock, RotateCcw, RotateCw, GripVertical, Download } from "lucide-react";
+import { X, Music, Trash2, Calendar, Play, Pause, Lock, RotateCcw, RotateCw, GripVertical, Download, ChevronUp, ChevronDown, Check } from "lucide-react";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import AudioRecorder from "./AudioRecorder";
 import { useSongRecordings } from "@/hooks/useSongRecordings";
@@ -263,12 +264,13 @@ export default function RehearsalDrawer({
 
   const { data: fetchedRecordings, isLoading } = useSongRecordings(songVersionId);
   const [recordings, setRecordings] = useState<UserRecording[]>([]);
-
   useEffect(() => {
     if (fetchedRecordings) {
       setRecordings(fetchedRecordings);
     }
   }, [fetchedRecordings]);
+
+  const hasAnyAudioSource = hasMedia || recordings.length > 0;
   const [isPendingOrder, startOrderTransition] = useTransition();
 
   const dndSensors = useSensors(
@@ -402,7 +404,13 @@ export default function RehearsalDrawer({
     const percentage = clickX / rect.width;
     const targetTime = percentage * mediaDuration;
 
-    if (playingSource === "youtube") {
+    if (activePlaybackId) {
+      const activeAudio = audioElements[activePlaybackId];
+      if (activeAudio) {
+        activeAudio.currentTime = targetTime;
+        setMediaCurrentTime(targetTime);
+      }
+    } else if (playingSource === "youtube") {
       if (youtubeRef.current?.contentWindow) {
         if (typeof window !== "undefined" && (window as any).__E2E__) {
           (window as any).lastYtMessage = JSON.stringify({
@@ -445,8 +453,14 @@ export default function RehearsalDrawer({
     }
   };
 
+  
   const seekRelative = (seconds: number) => {
-    if (playingSource === "youtube") {
+    if (activePlaybackId) {
+      const activeAudio = audioElements[activePlaybackId];
+      if (activeAudio) {
+        activeAudio.currentTime = Math.max(0, Math.min(activeAudio.duration, activeAudio.currentTime + seconds));
+      }
+    } else if (playingSource === "youtube") {
       seekYouTube(seconds);
     } else if (playingSource === "soundcloud") {
       seekSoundCloud(seconds);
@@ -613,6 +627,27 @@ export default function RehearsalDrawer({
       });
     };
   }, [songVersionId]); // intentionally omitting audioElements to avoid re-triggering cleanup
+
+  
+  // Sync progress for User Recordings
+  useEffect(() => {
+    let animationFrameId: number;
+    const activeAudio = activePlaybackId ? audioElements[activePlaybackId] : null;
+
+    if (activeAudio) {
+      const updateProgress = () => {
+        if (activePlaybackId) {
+          setMediaCurrentTime(activeAudio.currentTime);
+          setMediaDuration(activeAudio.duration || 1);
+        }
+        animationFrameId = requestAnimationFrame(updateProgress);
+      };
+      updateProgress();
+    }
+    return () => {
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
+    };
+  }, [activePlaybackId, audioElements]);
 
   const queryClient = useQueryClient();
 
@@ -1160,7 +1195,7 @@ export default function RehearsalDrawer({
             </div>
           </motion.div>
       {/* Hidden media iframes — always mounted when mini-player is visible */}
-      {!isOpen && hasMedia && (
+      {!isOpen && hasAnyAudioSource && (
         <div className="absolute -left-[9999px] -top-[9999px] w-0 h-0 overflow-hidden" aria-hidden="true">
           {youtubeUrl && selectedMedia === "youtube" && (
             <iframe
@@ -1185,48 +1220,136 @@ export default function RehearsalDrawer({
       )}
 
       {/* Floating Horizontal Bottom Mini Player Widget */}
-      {!isOpen && hasMedia && (
+      {!isOpen && hasAnyAudioSource && (
         <div 
           data-testid="bottom-mini-player"
-          className="fixed bottom-[calc(var(--bottom-nav-height,3.5rem)+env(safe-area-inset-bottom,0px))] lg:bottom-4 left-0 right-0 lg:left-1/2 lg:-translate-x-1/2 z-30 w-full lg:max-w-xl lg:rounded-2xl shadow-2xl bg-[#FF5500]/95 backdrop-blur-md text-white h-14 flex items-center justify-between px-4 border-t lg:border border-white/10 select-none animate-in slide-in-from-bottom duration-300"
+          className={`fixed bottom-[calc(var(--bottom-nav-height,3.5rem)+env(safe-area-inset-bottom,0px))] lg:bottom-4 left-0 right-0 lg:left-1/2 lg:-translate-x-1/2 z-30 w-full lg:max-w-xl lg:rounded-2xl shadow-2xl backdrop-blur-md text-white h-14 flex items-center justify-between px-4 border-t lg:border border-white/10 select-none animate-in slide-in-from-bottom duration-300 ${activePlaybackId ? 'bg-indigo-600/95' : 'bg-[#FF5500]/95'}`}
         >
           {/* Horizontal Progress Bar */}
           <div 
             onClick={handleSliderClickHorizontal}
-            className="absolute top-0 inset-x-0 h-1 bg-white/20 cursor-pointer group lg:rounded-t-2xl overflow-hidden"
+            data-testid="mini-progress-bar"
+            className="absolute top-0 inset-x-0 h-1 cursor-pointer group lg:rounded-t-2xl z-40"
           >
-            <div 
-              className="h-full bg-white transition-all duration-100"
-              style={{ width: `${Math.min(100, (mediaCurrentTime / mediaDuration) * 100)}%` }}
-            />
+            <div className="absolute inset-0 bg-white/20 overflow-hidden lg:rounded-t-2xl">
+              <div 
+                className="h-full bg-white transition-all duration-100"
+                style={{ width: `${Math.min(100, (mediaCurrentTime / (mediaDuration || 1)) * 100)}%` }}
+              />
+            </div>
             <div 
               className="w-3 h-3 bg-white rounded-full absolute top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity"
-              style={{ left: `calc(${Math.min(100, (mediaCurrentTime / mediaDuration) * 100)}% - 6px)` }}
+              style={{ left: `calc(${Math.min(100, (mediaCurrentTime / (mediaDuration || 1)) * 100)}% - 6px)` }}
             />
           </div>
 
-          {/* Equalizer & Song Details (Clicking here expands the drawer) */}
-          <div 
-            onClick={onOpen}
-            className="flex items-center gap-3 cursor-pointer flex-1 min-w-0 h-full py-2"
-          >
-            <div className="flex gap-0.5 items-end h-4 w-4 shrink-0 justify-center">
-              <span className={`w-[2px] bg-white rounded-full transition-all duration-300 ${isMediaPlaying ? 'animate-eq-bar-1' : 'h-1.5'}`} />
-              <span className={`w-[2px] bg-white rounded-full transition-all duration-300 ${isMediaPlaying ? 'animate-eq-bar-2' : 'h-3'}`} />
-              <span className={`w-[2px] bg-white rounded-full transition-all duration-300 ${isMediaPlaying ? 'animate-eq-bar-3' : 'h-2'}`} />
+          {/* Equalizer & Source Switcher Dropdown */}
+          <div className="flex items-center gap-3 flex-1 min-w-0 h-full py-2">
+            <div className="flex gap-0.5 items-end h-4 w-4 shrink-0 justify-center cursor-pointer" onClick={onOpen}>
+              <span className={`w-[2px] bg-white rounded-full transition-all duration-300 ${isMediaPlaying || activePlaybackId ? 'animate-eq-bar-1' : 'h-1.5'}`} />
+              <span className={`w-[2px] bg-white rounded-full transition-all duration-300 ${isMediaPlaying || activePlaybackId ? 'animate-eq-bar-2' : 'h-3'}`} />
+              <span className={`w-[2px] bg-white rounded-full transition-all duration-300 ${isMediaPlaying || activePlaybackId ? 'animate-eq-bar-3' : 'h-2'}`} />
             </div>
-            <div className="flex flex-col text-left min-w-0">
-              <span className="text-xs font-black truncate">{songTitle}</span>
-              <span className="text-[9px] uppercase tracking-widest opacity-80 truncate">
-                {playingSource ? (playingSource === 'youtube' ? 'YouTube Reference' : playingSource === 'soundcloud' ? 'SoundCloud Reference' : 'Spotify Reference') : 'Tap to play'}
-              </span>
-            </div>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <div data-testid="mini-source-switcher" className="flex flex-col text-left min-w-0 cursor-pointer hover:bg-white/10 rounded px-2 -mx-2 transition-colors">
+                  <div className="flex items-center gap-1">
+                    <span className="text-xs font-black truncate">{songTitle}</span>
+                    <ChevronDown className="w-3 h-3 opacity-70 shrink-0" />
+                  </div>
+                  <span className="text-[9px] uppercase tracking-widest opacity-80 truncate">
+                    {activePlaybackId 
+                      ? recordings.find(r => r.id === activePlaybackId)?.recording_name || 'User Recording'
+                      : playingSource 
+                        ? (playingSource === 'youtube' ? 'YouTube Reference' : playingSource === 'soundcloud' ? 'SoundCloud Reference' : 'Spotify Reference') 
+                        : 'Select Source'}
+                  </span>
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56" data-testid="mini-source-dropdown">
+                {hasMedia && (
+                  <>
+                    <DropdownMenuLabel>Reference Tracks</DropdownMenuLabel>
+                    {youtubeUrl && (
+                      <DropdownMenuItem onClick={() => {
+                        if (activePlaybackId) {
+                          const activeAudio = audioElements[activePlaybackId];
+                          if (activeAudio) activeAudio.pause();
+                          setActivePlaybackId(null);
+                        }
+                        if (playingSource !== "youtube") {
+                           pauseSoundCloud();
+                           setSelectedMedia("youtube");
+                           setPlayingSource("youtube");
+                           setTimeout(() => { bindYouTubeEvents(); playHiddenYouTube(); }, 300);
+                        }
+                      }}>
+                        <div className="flex items-center justify-between w-full">
+                          <span>YouTube</span>
+                          {(!activePlaybackId && playingSource === 'youtube') && <Check className="w-4 h-4 ml-2" />}
+                        </div>
+                      </DropdownMenuItem>
+                    )}
+                    {soundcloudUrl && (
+                      <DropdownMenuItem onClick={() => {
+                        if (activePlaybackId) {
+                          const activeAudio = audioElements[activePlaybackId];
+                          if (activeAudio) activeAudio.pause();
+                          setActivePlaybackId(null);
+                        }
+                        if (playingSource !== "soundcloud") {
+                           pauseYouTube();
+                           setSelectedMedia("soundcloud");
+                           setPlayingSource("soundcloud");
+                           setTimeout(() => { bindSoundCloudEvents(); playHiddenSoundCloud(); }, 300);
+                        }
+                      }}>
+                        <div className="flex items-center justify-between w-full">
+                          <span>SoundCloud</span>
+                          {(!activePlaybackId && playingSource === 'soundcloud') && <Check className="w-4 h-4 ml-2" />}
+                        </div>
+                      </DropdownMenuItem>
+                    )}
+                    {spotifyUrl && (
+                      <DropdownMenuItem onClick={() => {
+                        onOpen?.();
+                        setSelectedMedia("spotify");
+                        setPlayingSource("spotify");
+                      }}>
+                        <div className="flex items-center justify-between w-full">
+                          <span>Spotify</span>
+                          {(!activePlaybackId && playingSource === 'spotify') && <Check className="w-4 h-4 ml-2" />}
+                        </div>
+                      </DropdownMenuItem>
+                    )}
+                  </>
+                )}
+                {recordings.length > 0 && (
+                  <>
+                    {hasMedia && <DropdownMenuSeparator />}
+                    <DropdownMenuLabel>User Recordings</DropdownMenuLabel>
+                    {recordings.map(rec => (
+                      <DropdownMenuItem key={rec.id} onClick={() => {
+                        if (!rec.audioUrl) return;
+                        handleTogglePlay(rec.id, rec.audioUrl);
+                      }}>
+                        <div className="flex items-center justify-between w-full">
+                          <span className="truncate">{rec.recording_name}</span>
+                          {activePlaybackId === rec.id && <Check className="w-4 h-4 ml-2" />}
+                        </div>
+                      </DropdownMenuItem>
+                    ))}
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           {/* Controls */}
           <div className="flex items-center gap-1.5 ml-4 shrink-0">
-            {/* Seek Back (only when actively playing) */}
-            {playingSource && (
+            {/* Seek Back */}
+            {(playingSource || activePlaybackId) && (
               <button 
                 onClick={() => seekRelative(-15)}
                 data-testid="mini-seek-back-btn"
@@ -1239,19 +1362,33 @@ export default function RehearsalDrawer({
 
             {/* Play/Pause */}
             <button 
-              onClick={handleMiniPlayerPlayPause}
+              onClick={() => {
+                if (activePlaybackId) {
+                  const audio = audioElements[activePlaybackId];
+                  if (audio) {
+                    if (!audio.paused) {
+                      audio.pause();
+                      // We don't unset activePlaybackId here to allow resuming, but we need isMediaPlaying to reflect paused state?
+                      // Actually, our handleTogglePlay pauses and unsets activePlaybackId entirely.
+                    }
+                  }
+                  handleTogglePlay(activePlaybackId, recordings.find(r => r.id === activePlaybackId)?.audioUrl);
+                } else {
+                  handleMiniPlayerPlayPause();
+                }
+              }}
               data-testid="mini-play-pause-btn"
               className="w-8 h-8 rounded-full bg-black/20 hover:bg-black/35 flex items-center justify-center text-white cursor-pointer transition-transform hover:scale-105 shrink-0"
             >
-              {isMediaPlaying ? (
+              {(isMediaPlaying || (activePlaybackId && audioElements[activePlaybackId] && !audioElements[activePlaybackId].paused)) ? (
                 <Pause className="w-3.5 h-3.5 fill-white" />
               ) : (
                 <Play className="w-3.5 h-3.5 fill-white ml-0.5" />
               )}
             </button>
 
-            {/* Seek Forward (only when actively playing) */}
-            {playingSource && (
+            {/* Seek Forward */}
+            {(playingSource || activePlaybackId) && (
               <button 
                 onClick={() => seekRelative(15)}
                 data-testid="mini-seek-forward-btn"
@@ -1274,10 +1411,15 @@ export default function RehearsalDrawer({
               <Music className="w-4 h-4" />
             </button>
 
-            {/* Close/Stop (only when actively playing) */}
-            {playingSource && (
+            {/* Close/Stop */}
+            {(playingSource || activePlaybackId) && (
               <button 
                 onClick={() => {
+                  if (activePlaybackId) {
+                    const audio = audioElements[activePlaybackId];
+                    if (audio) { audio.pause(); audio.currentTime = 0; }
+                    setActivePlaybackId(null);
+                  }
                   pauseYouTube();
                   pauseSoundCloud();
                   setPlayingSource(null);
