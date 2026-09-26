@@ -177,10 +177,9 @@ echo "🔀 Merging PR #$PR_NUMBER into main..."
 gh pr merge "$PR_NUMBER" --squash --delete-branch --admin
 echo "✅ PR #$PR_NUMBER merged into main!"
 
-# 10. Switch to main & pull
+# 10. Update local main branch
 echo "🔄 Updating local main branch..."
-git checkout main
-git pull origin main
+git fetch origin main:main || true
 
 # 11. Wait for Release Please action to trigger and create/update release PR
 echo "⏳ Waiting for Release Please workflow on main..."
@@ -218,9 +217,8 @@ echo "✅ Release Please PR merged!"
 # 13. Wait for GitHub release to be created
 echo "⏳ Waiting for GitHub Release to be published by Release Please..."
 sleep 15
-git fetch --tags origin
-
-LATEST_TAG="$(git describe --tags --abbrev=0)"
+# We use gh instead of git describe so it works regardless of which branch is currently checked out
+LATEST_TAG="$(gh release view --json tagName -q .tagName)"
 echo "🏷️  Detected release tag: $LATEST_TAG"
 
 # 14. Inject Hybrid AI Release Notes
