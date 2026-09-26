@@ -258,7 +258,6 @@ export default function SongDetailPage() {
     }
     if (!song) return notFound();
 
-    const versions = song.song_versions || [];
     const categories = (song.song_category_map?.map((map: any) => ({
         ...map.categories,
         parent: map.categories?.parent?.name ?? null,
