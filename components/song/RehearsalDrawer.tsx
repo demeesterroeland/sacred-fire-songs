@@ -125,8 +125,8 @@ function SortableRecordingItem({
             ? "text-gray-300 dark:text-gray-700 opacity-40 cursor-not-allowed"
             : "text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40"
         }`}
-        title={!rec.audioUrl ? "Audio file missing or corrupted" : "Download rehearsal"}
-        aria-label="Download rehearsal"
+        title={!rec.audioUrl ? "Audio file missing or corrupted" : "Download recording"}
+        aria-label="Download recording"
       >
         {downloadingId === rec.id ? (
           <div className="w-4 h-4 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
@@ -140,8 +140,8 @@ function SortableRecordingItem({
         onClick={() => handleDelete(rec.id, rec.storage_path)}
         disabled={deletingId === rec.id}
         className="p-2 rounded-xl text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-all active:scale-95 shrink-0"
-        title="Delete rehearsal"
-        aria-label="Delete rehearsal"
+        title="Delete recording"
+        aria-label="Delete recording"
       >
         {deletingId === rec.id ? (
           <div className="w-4 h-4 border-2 border-red-500/30 border-t-red-500 rounded-full animate-spin" />
