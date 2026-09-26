@@ -17,6 +17,18 @@ async function proxyRequest(request: NextRequest, context: { params: Promise<{ p
   // Avoid compression issues when proxying
   headers.delete('accept-encoding');
 
+  // Issue 239: Inject API key for native browser requests (e.g. <audio src="...">)
+  // that don't automatically include the apikey header.
+  const apiKey = isDev ? process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY_DEV : process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
+  if (apiKey) {
+    if (!headers.has('apikey')) {
+      headers.set('apikey', apiKey);
+    }
+    if (!headers.has('authorization')) {
+      headers.set('authorization', `Bearer ${apiKey}`);
+    }
+  }
+
   try {
     const body = ['GET', 'HEAD'].includes(request.method) ? undefined : await request.arrayBuffer();
 
