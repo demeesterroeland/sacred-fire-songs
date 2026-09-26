@@ -191,7 +191,7 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       await expect(audioPreview).toBeVisible();
 
       // Fill in a custom name
-      const nameInput = page.locator('input[placeholder="Recording Name (e.g. Rehearsal 1)"]');
+      const nameInput = page.locator('input[placeholder="Recording Name (e.g. Recording 1)"]');
       await expect(nameInput).toBeVisible();
       const customName = `E2E Practice - ${Date.now()}`;
       await nameInput.fill(customName);
@@ -291,7 +291,7 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       await fileChooser.setFiles('e2e/fixtures/dummy-audio.wav');
 
       // 5. Verify the file is loaded into the preview and Save
-      const nameInput = page.locator('input[placeholder="Recording Name (e.g. Rehearsal 1)"]');
+      const nameInput = page.locator('input[placeholder="Recording Name (e.g. Recording 1)"]');
       await expect(nameInput).toBeVisible();
       await expect(nameInput).toHaveValue(/dummy-audio/i);
       
@@ -470,7 +470,7 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       await fileChooser.setFiles('e2e/fixtures/dummy-audio.wav');
       
       const customName = 'E2E Continuity Test';
-      const nameInput = page.locator('input[placeholder="Recording Name (e.g. Rehearsal 1)"]');
+      const nameInput = page.locator('input[placeholder="Recording Name (e.g. Recording 1)"]');
       await nameInput.fill(customName);
 
       const saveBtn = page.locator('button:has-text("Save Rehearsal")');
