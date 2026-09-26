@@ -203,9 +203,9 @@ export default function RehearsalDrawer({
 
   // Notify parent of play state change
   useEffect(() => {
-    const isPlaying = isMediaPlaying || activePlaybackId !== null;
+    const isPlaying = isMediaPlaying || (activePlaybackId !== null && isRecordingPlaying);
     onPlayStateChange?.(isPlaying);
-  }, [isMediaPlaying, activePlaybackId, onPlayStateChange]);
+  }, [isMediaPlaying, activePlaybackId, isRecordingPlaying, onPlayStateChange]);
 
   // Auto-set playingSource when selectedMedia changes (only if it is controllable, and don't pause the others!)
   useEffect(() => {
@@ -1137,9 +1137,9 @@ export default function RehearsalDrawer({
           {/* Equalizer & Source Switcher Dropdown */}
           <div className="flex items-center gap-3 flex-1 min-w-0 h-full py-2">
             <div className="flex gap-0.5 items-end h-4 w-4 shrink-0 justify-center cursor-pointer" onClick={onOpen}>
-              <span className={`w-[2px] bg-white rounded-full transition-all duration-300 ${isMediaPlaying || activePlaybackId ? 'animate-eq-bar-1' : 'h-1.5'}`} />
-              <span className={`w-[2px] bg-white rounded-full transition-all duration-300 ${isMediaPlaying || activePlaybackId ? 'animate-eq-bar-2' : 'h-3'}`} />
-              <span className={`w-[2px] bg-white rounded-full transition-all duration-300 ${isMediaPlaying || activePlaybackId ? 'animate-eq-bar-3' : 'h-2'}`} />
+              <span className={`w-[2px] bg-white rounded-full transition-all duration-300 ${isMediaPlaying || (activePlaybackId && isRecordingPlaying) ? 'animate-eq-bar-1' : 'h-1.5'}`} />
+              <span className={`w-[2px] bg-white rounded-full transition-all duration-300 ${isMediaPlaying || (activePlaybackId && isRecordingPlaying) ? 'animate-eq-bar-2' : 'h-3'}`} />
+              <span className={`w-[2px] bg-white rounded-full transition-all duration-300 ${isMediaPlaying || (activePlaybackId && isRecordingPlaying) ? 'animate-eq-bar-3' : 'h-2'}`} />
 
             </div>
             
