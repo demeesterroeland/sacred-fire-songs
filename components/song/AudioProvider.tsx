@@ -94,8 +94,6 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
 
       audio.onended = () => {
         setIsRecordingPlaying(false);
-        setActivePlaybackId(null);
-        setActiveRecording(null);
       };
 
       audio.ontimeupdate = () => {
@@ -134,8 +132,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
         activeAudioRef.current = audio;
       } else {
         audio.pause();
-        setActivePlaybackId(null);
-        activeAudioRef.current = null;
+        // We do NOT clear activePlaybackId here so the MiniPlayer stays on the recording
       }
     } else {
       audio.play().catch(console.error);
