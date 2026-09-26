@@ -301,7 +301,7 @@ export default function SongDetailPage() {
     // REMOVED: local getCategoryColor - imported from uiUtils
 
     return (
-        <div className="flex flex-col min-h-screen">
+        <div className="flex flex-col h-full">
             {/* Mobile Header (Visible only on mobile < lg) */}
             <header style={{ top: 'var(--env-banner-height, 0px)', width: '100vw', maxWidth: '100vw' }} className="lg:hidden flex items-center px-4 py-2 sticky left-0 bg-gray-100/95 dark:bg-gray-900/95 backdrop-blur-md z-30 border-b border-gray-200 dark:border-white/5 shadow-lg min-h-[56px]">
                 {/* Title + Author — flex-1 min-w-0 constrains width */}
@@ -336,7 +336,7 @@ export default function SongDetailPage() {
                 }
             `}} />
 
-            <main className="flex-1 min-w-0 lg:overflow-y-auto overflow-y-visible bg-white dark:bg-gray-950">
+            <main className="flex-1 min-w-0 bg-white dark:bg-gray-950">
 
                 {/* Desktop Page Header (Title, Actions) - Visible only on desktop >= lg */}
                 <div className="hidden lg:flex justify-between items-center px-8 py-4 border-b border-gray-200/50 dark:border-gray-800/50 bg-white/50 dark:bg-gray-950/50 sticky top-0 backdrop-blur-md z-10 transition-all">

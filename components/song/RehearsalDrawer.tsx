@@ -1112,20 +1112,24 @@ export default function RehearsalDrawer({
           data-testid="bottom-mini-player"
           className={`fixed bottom-[calc(var(--bottom-nav-height,3.5rem)+env(safe-area-inset-bottom,0px))] lg:bottom-4 left-0 right-0 lg:left-1/2 lg:-translate-x-1/2 z-30 w-full lg:max-w-xl lg:rounded-2xl shadow-2xl backdrop-blur-md text-white h-14 flex items-center justify-between px-4 border-t lg:border border-white/10 select-none animate-in slide-in-from-bottom duration-300 ${activePlaybackId ? 'bg-indigo-600/95' : 'bg-[#FF5500]/95'}`}
         >
-          {/* Horizontal Progress Bar */}
-          <div 
-            onClick={handleSliderClickHorizontal}
-            data-testid="mini-progress-bar"
-            className="absolute top-0 inset-x-0 h-1 cursor-pointer group lg:rounded-t-2xl z-40"
-          >
-            <div className="absolute inset-0 bg-white/20 overflow-hidden lg:rounded-t-2xl">
+          {/* Visual Progress Bar (Clipped to container corners) */}
+          <div className="absolute inset-0 pointer-events-none lg:rounded-2xl overflow-hidden z-0">
+            <div className="absolute top-0 inset-x-0 h-1 bg-white/20">
               <div 
                 className="h-full bg-white transition-all duration-100"
                 style={{ width: `${Math.min(100, (mediaCurrentTime / (mediaDuration || 1)) * 100)}%` }}
               />
             </div>
+          </div>
+
+          {/* Interactive Hit Area & Hover Thumb (Unclipped so thumb can extend above container) */}
+          <div 
+            onClick={handleSliderClickHorizontal}
+            data-testid="mini-progress-bar"
+            className="absolute top-0 inset-x-0 h-2 -mt-1 cursor-pointer group z-40 flex items-center"
+          >
             <div 
-              className="w-3 h-3 bg-white rounded-full absolute top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity"
+              className="w-3 h-3 bg-white rounded-full absolute opacity-0 group-hover:opacity-100 transition-opacity"
               style={{ left: `calc(${Math.min(100, (mediaCurrentTime / (mediaDuration || 1)) * 100)}% - 6px)` }}
             />
           </div>
