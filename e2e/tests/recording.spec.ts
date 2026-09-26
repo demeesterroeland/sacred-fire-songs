@@ -210,19 +210,26 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       await page.goto(songUrl);
 
       // 1. Open the Rehearsal Drawer
-      const openDrawerBtn = page.getByRole('button', { name: 'Rehearsals' });
-      await expect(openDrawerBtn).toBeVisible();
-      await openDrawerBtn.click();
+      await openRecordingsDrawer(page);
 
-      // 2. Open the "Record / Upload" UI
-      const recordNewBtn = page.getByRole('button', { name: 'Record / Upload' });
-      await expect(recordNewBtn).toBeVisible();
-      await recordNewBtn.click();
+      // Switch to Voice Recorder tab if tabs exist (Reference Tracks is active by default in Issue 187)
+      const voiceRecorderTab = page.locator('button:has-text("Voice Recorder")').first();
+      await voiceRecorderTab.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
+      if (await voiceRecorderTab.isVisible()) {
+        await voiceRecorderTab.click();
+      }
 
-      // 3. Switch to the "Upload File" tab
+      // Verify rehearsal drawer slides up and is ready
+      const drawerTitle = page.locator('h3:has-text("Rehearsal Space")');
+      await expect(drawerTitle).toBeVisible({ timeout: 8000 });
+
+      const recordPrompt = page.locator('h4:has-text("Ready to record rehearsal")');
+      await expect(recordPrompt).toBeVisible({ timeout: 8000 });
+
+      // 2. Switch to the "Upload File" tab
       const uploadTab = page.getByRole('button', { name: 'Upload File' });
       await expect(uploadTab).toBeVisible();
-      await uploadTab.click();
+      await uploadTab.click({ force: true });
 
       // 4. Select the file
       const fileChooserPromise = page.waitForEvent('filechooser');
@@ -231,12 +238,11 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       await fileChooser.setFiles('e2e/fixtures/dummy-audio.wav');
 
       // 5. Verify the file is loaded into the preview and Save
-      const nameInput = page.getByPlaceholder('Name this recording');
+      const nameInput = page.locator('input[placeholder="Recording Name (e.g. Rehearsal 1)"]');
       await expect(nameInput).toBeVisible();
-      // Wait for it to have a value automatically inferred from the filename
       await expect(nameInput).toHaveValue(/dummy-audio/i);
       
-      const customName = 'E2E Uploaded File ' + Date.now();
+      const customName = 'E2E Uploaded File - ' + Date.now();
       await nameInput.fill(customName);
 
       // 6. Click Save
@@ -246,15 +252,16 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
 
       // 7. Wait for the upload to complete and the new item to appear in the list
       await expect(saveBtn).toBeHidden({ timeout: 10000 });
-      const uploadedItem = page.locator('div[role="button"]', { hasText: customName });
-      await expect(uploadedItem).toBeVisible({ timeout: 10000 });
+      const savedTake = page.locator(`h4:has-text("${customName}")`);
+      await expect(savedTake).toBeVisible({ timeout: 10000 });
 
       // 8. Delete it to clean up
-      const deleteBtn = uploadedItem.locator('button[title="Delete rehearsal"]');
+      const container = savedTake.locator('xpath=ancestor::div[contains(@class, "group")][1]');
+      const deleteBtn = container.locator('button[title="Delete rehearsal"]');
       await deleteBtn.click();
 
       // Wait for deletion
-      await expect(uploadedItem).toBeHidden({ timeout: 10000 });
+      await expect(savedTake).toHaveCount(0, { timeout: 10000 });
     });
 
     test('Automatically stops recording at 3 minutes', async ({ page }) => {

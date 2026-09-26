@@ -1157,3 +1157,15 @@
 - [x] Patch `hooks/useAuth.tsx`, `Header.tsx`, and `UserProfile.tsx` to accept and hydrate `initialUser` directly from server
 - [x] Record multiple Playwright test recordings demonstrating the before/after behavior
 - [x] Push `feat/233-auth-hydration-fix` branch to resolve FOUC entirely natively
+
+## Session September 26, 2026 (Rehearsal Playback & SongCard Hydration Fix for Issue #230)
+
+- [x] Investigate Rehearsal playback issue (#230) and identify unhandled missing signed URLs / orphaned metadata rows
+- [x] Create isolated worktree `.worktrees/issue-230` on branch `fix/230-rehearsal-playback`
+- [x] Patch `components/song/RehearsalDrawer.tsx` to gracefully handle missing `audioUrl`: disable playback button with tooltip, render "Missing File" badge, and retain delete functionality
+- [x] Diagnose Playwright E2E suite failures and identify `<SongCard>` nested `<a>` hydration error
+- [x] Refactor `components/home/SongCard.tsx` using modern clickable card pattern with stretched link (`absolute inset-0 z-0`) and pointer event partitioning
+- [x] Write new explicit file upload E2E test `Can explicitly upload a file from disk and play it back` in `e2e/tests/recording.spec.ts`
+- [x] Generate mock audio fixture `e2e/fixtures/dummy-audio.wav`
+- [x] Run both Rehearsal E2E tests (mic recording & disk file upload) against production build and capture video recordings
+- [x] Open Pull Request #236 to merge `fix/230-rehearsal-playback` into `main`
