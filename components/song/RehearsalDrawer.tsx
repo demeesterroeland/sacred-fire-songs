@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { X, Music, Trash2, Calendar, Play, Pause, Lock, RotateCcw, RotateCw, GripVertical, Download } from "lucide-react";
 import { toast } from "sonner";
 import AudioRecorder from "./AudioRecorder";
+import { useSongRecordings } from "@/hooks/useSongRecordings";
 import { getUserRecordings, deleteUserRecording, reorderUserRecordings, type UserRecording } from "@/lib/actions/rehearsal";
 import { getYouTubeEmbedUrl, getSpotifyEmbedUrl } from "./MediaEmbeds";
 import { useAuth } from "@/hooks/useAuth";
@@ -163,6 +164,7 @@ interface RehearsalDrawerProps {
   youtubeUrl?: string | null;
   spotifyUrl?: string | null;
   soundcloudUrl?: string | null;
+  onPlayStateChange?: (isPlaying: boolean) => void;
 }
 
 export default function RehearsalDrawer({
@@ -175,10 +177,15 @@ export default function RehearsalDrawer({
   youtubeUrl,
   spotifyUrl,
   soundcloudUrl,
+  onPlayStateChange,
 }: RehearsalDrawerProps) {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<"recorder" | "media">("media");
   const [selectedMedia, setSelectedMedia] = useState<"youtube" | "spotify" | "soundcloud" | null>(null);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [activePlaybackId, setActivePlaybackId] = useState<string | null>(null);
+  const [audioElements, setAudioElements] = useState<Record<string, HTMLAudioElement>>({});
 
   // Refs for media iframe elements
   const youtubeRef = React.useRef<HTMLIFrameElement>(null);
@@ -191,6 +198,12 @@ export default function RehearsalDrawer({
   const [mediaDuration, setMediaDuration] = useState(1);
 
   const hasMedia = !!(youtubeUrl || spotifyUrl || soundcloudUrl);
+
+  // Notify parent of play state change
+  useEffect(() => {
+    const isPlaying = isMediaPlaying || activePlaybackId !== null;
+    onPlayStateChange?.(isPlaying);
+  }, [isMediaPlaying, activePlaybackId, onPlayStateChange]);
 
   // Auto-set playingSource when selectedMedia changes (only if it is controllable, and don't pause the others!)
   useEffect(() => {
@@ -248,8 +261,14 @@ export default function RehearsalDrawer({
     }
   }, [youtubeUrl, soundcloudUrl, spotifyUrl, user]);
 
+  const { data: fetchedRecordings, isLoading } = useSongRecordings(songVersionId);
   const [recordings, setRecordings] = useState<UserRecording[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (fetchedRecordings) {
+      setRecordings(fetchedRecordings);
+    }
+  }, [fetchedRecordings]);
   const [isPendingOrder, startOrderTransition] = useTransition();
 
   const dndSensors = useSensors(
@@ -274,24 +293,8 @@ export default function RehearsalDrawer({
       }
     });
   };
-  const [downloadingId, setDownloadingId] = useState<string | null>(null);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [activePlaybackId, setActivePlaybackId] = useState<string | null>(null);
-  const [audioElements, setAudioElements] = useState<Record<string, HTMLAudioElement>>({});
 
-  // Fetch recordings
-  const fetchRecordings = async () => {
-    setIsLoading(true);
-    try {
-      const data = await getUserRecordings(songVersionId);
-      setRecordings(data);
-    } catch (err) {
-      console.error("[drawer] Failed to fetch recordings:", err);
-      toast.error("Failed to load your rehearsal recordings.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
+
 
   const pauseYouTube = () => {
     if (youtubeRef.current?.contentWindow) {
@@ -603,16 +606,13 @@ export default function RehearsalDrawer({
   }, [selectedMedia]);
 
   useEffect(() => {
-    if (isOpen && songVersionId) {
-      fetchRecordings();
-    }
-    // Clean up audio elements on unmount or close
+    // Clean up audio elements on unmount
     return () => {
       Object.values(audioElements).forEach(audio => {
         audio.pause();
       });
     };
-  }, [isOpen, songVersionId]);
+  }, [songVersionId]); // intentionally omitting audioElements to avoid re-triggering cleanup
 
   const queryClient = useQueryClient();
 

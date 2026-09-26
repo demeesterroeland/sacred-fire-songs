@@ -205,11 +205,28 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       const savedTake = page.locator(`h4:has-text("${customName}")`);
       await expect(savedTake).toBeVisible({ timeout: 10000 });
 
+      // Close the drawer to verify the header pill count displays "1"
+      await page.locator('button[aria-label="Close"]').click(); // Better to rely on close buttons
+      const recordingsBtn = page.locator('button[title="Recordings"]');
+      await expect(recordingsBtn).toContainText('1', { timeout: 10000 });
+
+      // Re-open drawer
+      await recordingsBtn.click();
+      await expect(savedTake).toBeVisible({ timeout: 5000 });
+
       // Play back the saved take for 2 seconds
       const cardRow = page.locator('div.group', { has: savedTake }).first();
       const playBtn = cardRow.locator('button[title="Play"]');
       await expect(playBtn).toBeVisible();
       await playBtn.click();
+
+      // Close the drawer while playing to check equalizer icon
+      await page.locator('button[aria-label="Close"]').click();
+      await expect(page.locator('div[title="Playing"]')).toBeVisible({ timeout: 5000 });
+
+      // Re-open drawer
+      await recordingsBtn.click();
+      await expect(savedTake).toBeVisible({ timeout: 5000 });
 
       // Verify playback started (Pause icon visible) and let it play for 2 seconds
       await expect(cardRow.locator('svg.lucide-pause')).toBeVisible({ timeout: 5000 });

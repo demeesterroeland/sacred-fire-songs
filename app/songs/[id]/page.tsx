@@ -25,6 +25,7 @@ import { SongTechnicalBadges } from '@/components/song/SongTechnicalBadges';
 import { SongMetadataPills } from '@/components/song/SongMetadataPills';
 import { parseArtists } from '@/lib/songs/artistUtils';
 import { recordSongView } from '@/app/actions/recordSongView';
+import { useSongRecordings } from '@/hooks/useSongRecordings';
 import { useRecordingsQuery } from '@/hooks/useRecordingsQuery';
 
 // Enforce a timeout on any promise to prevent infinite loading skeletons
@@ -104,6 +105,7 @@ export default function SongDetailPage() {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isOverflowOpen, setIsOverflowOpen] = useState(false);
     const [isRehearsalDrawerOpen, setIsRehearsalDrawerOpen] = useState(false);
+    const [isAudioPlaying, setIsAudioPlaying] = useState(false);
     const { isDeleting, deleteSong } = useDeleteSong();
 
     const { user, loading: authLoading } = useAuth();
@@ -254,6 +256,7 @@ export default function SongDetailPage() {
 
     const versions = song.song_versions || [];
     const currentVersion = versions[selectedVersionIndex];
+    const { data: recordings } = useSongRecordings(currentVersion?.id);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const categories = (song.song_category_map?.map((map: any) => ({
         ...map.categories,
@@ -377,7 +380,22 @@ export default function SongDetailPage() {
                                 className="flex items-center gap-2 px-3 py-2 bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 rounded-lg text-sm font-bold border border-indigo-500/20 transition-all active:scale-[0.98]"
                                 title="Recordings"
                             >
-                                <Mic className="w-4 h-4" /> <span className="hidden xl:inline">Recordings</span>
+                                {isAudioPlaying ? (
+                                    <div className="flex items-end gap-[2px] h-4 w-4 overflow-hidden" title="Playing">
+                                        <div className="w-[3px] bg-indigo-600 dark:bg-indigo-400 animate-[equalizer_1s_ease-in-out_infinite]" />
+                                        <div className="w-[3px] bg-indigo-600 dark:bg-indigo-400 animate-[equalizer_1.2s_ease-in-out_infinite_0.2s]" />
+                                        <div className="w-[3px] bg-indigo-600 dark:bg-indigo-400 animate-[equalizer_0.9s_ease-in-out_infinite_0.4s]" />
+                                        <div className="w-[3px] bg-indigo-600 dark:bg-indigo-400 animate-[equalizer_1.1s_ease-in-out_infinite_0.1s]" />
+                                    </div>
+                                ) : (
+                                    <Mic className="w-4 h-4" />
+                                )}
+                                <span className="hidden xl:inline">Recordings</span>
+                                {recordings && recordings.length > 0 && (
+                                    <span className="ml-1 px-1.5 py-0.5 rounded-md bg-indigo-600/20 text-[10px] font-black">
+                                        {recordings.length}
+                                    </span>
+                                )}
                             </button>
                         )}
                         {user && id && (
@@ -610,6 +628,7 @@ export default function SongDetailPage() {
                     onClose={() => setIsRehearsalDrawerOpen(false)}
                     onOpen={() => setIsRehearsalDrawerOpen(true)}
                     songVersionId={currentVersion.id}
+                    onPlayStateChange={setIsAudioPlaying}
                     songTitle={song.title}
                     songAuthor={song.original_author || 'Traditional'}
                     youtubeUrl={currentVersion.youtube_url}
