@@ -141,19 +141,19 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       // Open recordings drawer
       await openRecordingsDrawer(page);
 
+      // Verify rehearsal drawer slides up
+      const drawerTitle = page.locator('h3:has-text("Rehearsal Space")');
+      await expect(drawerTitle).toBeVisible({ timeout: 8000 });
+
       // Switch to Voice Recorder tab if tabs exist (Reference Tracks is active by default in Issue 187)
       const voiceRecorderTab = page.locator('button:has-text("Voice Recorder")').first();
       await voiceRecorderTab.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
       if (await voiceRecorderTab.isVisible()) {
         await voiceRecorderTab.click();
       }
-
-      // Verify rehearsal drawer slides up
-      const drawerTitle = page.locator('h3:has-text("Rehearsal Space")');
-      await expect(drawerTitle).toBeVisible();
       
       const recordPrompt = page.locator('h4:has-text("Ready to record rehearsal")');
-      await expect(recordPrompt).toBeVisible();
+      await expect(recordPrompt).toBeVisible({ timeout: 8000 });
 
       // Start recording
       const startBtn = page.locator('button[title="Start recording"]');
@@ -195,8 +195,21 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       const savedTake = page.locator(`h4:has-text("${customName}")`);
       await expect(savedTake).toBeVisible({ timeout: 10000 });
 
+      // Play back the saved take for 2 seconds
+      const cardRow = page.locator('div.group', { has: savedTake }).first();
+      const playBtn = cardRow.locator('button[title="Play"]');
+      await expect(playBtn).toBeVisible();
+      await playBtn.click();
+
+      // Verify playback started (Pause icon visible) and let it play for 2 seconds
+      await expect(cardRow.locator('svg.lucide-pause')).toBeVisible({ timeout: 5000 });
+      await page.waitForTimeout(2000);
+
+      // Verify no playback error toast appeared
+      await expect(page.locator('text="Failed to play recording audio"')).toHaveCount(0);
+      await expect(page.locator('text="Audio URL is not available"')).toHaveCount(0);
+
       // Clean up/Delete the created take to keep database clean
-      const cardRow = page.locator('div.rounded-2xl', { has: page.locator(`h4:has-text("${customName}")`) }).first();
       const deleteBtn = cardRow.locator('button[title="Delete rehearsal"]');
       await expect(deleteBtn).toBeVisible();
       await deleteBtn.click();
@@ -212,16 +225,16 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       // 1. Open the Rehearsal Drawer
       await openRecordingsDrawer(page);
 
+      // Verify rehearsal drawer slides up and is ready
+      const drawerTitle = page.locator('h3:has-text("Rehearsal Space")');
+      await expect(drawerTitle).toBeVisible({ timeout: 8000 });
+
       // Switch to Voice Recorder tab if tabs exist (Reference Tracks is active by default in Issue 187)
       const voiceRecorderTab = page.locator('button:has-text("Voice Recorder")').first();
       await voiceRecorderTab.waitFor({ state: 'visible', timeout: 5000 }).catch(() => {});
       if (await voiceRecorderTab.isVisible()) {
         await voiceRecorderTab.click();
       }
-
-      // Verify rehearsal drawer slides up and is ready
-      const drawerTitle = page.locator('h3:has-text("Rehearsal Space")');
-      await expect(drawerTitle).toBeVisible({ timeout: 8000 });
 
       const recordPrompt = page.locator('h4:has-text("Ready to record rehearsal")');
       await expect(recordPrompt).toBeVisible({ timeout: 8000 });
@@ -255,8 +268,21 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       const savedTake = page.locator(`h4:has-text("${customName}")`);
       await expect(savedTake).toBeVisible({ timeout: 10000 });
 
-      // 8. Delete it to clean up
+      // Play back the uploaded take for 2 seconds
       const container = savedTake.locator('xpath=ancestor::div[contains(@class, "group")][1]');
+      const playBtn = container.locator('button[title="Play"]');
+      await expect(playBtn).toBeVisible();
+      await playBtn.click();
+
+      // Verify playback started (Pause icon visible) and let it play for 2 seconds
+      await expect(container.locator('svg.lucide-pause')).toBeVisible({ timeout: 5000 });
+      await page.waitForTimeout(2000);
+
+      // Verify no playback error toast appeared
+      await expect(page.locator('text="Failed to play recording audio"')).toHaveCount(0);
+      await expect(page.locator('text="Audio URL is not available"')).toHaveCount(0);
+
+      // 8. Delete it to clean up
       const deleteBtn = container.locator('button[title="Delete rehearsal"]');
       await deleteBtn.click();
 
