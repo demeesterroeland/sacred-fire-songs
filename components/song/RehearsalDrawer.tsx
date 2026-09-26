@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useTransition } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Music, Trash2, Calendar, Play, Pause, Lock, RotateCcw, RotateCw, GripVertical } from "lucide-react";
+import { X, Music, Trash2, Calendar, Play, Pause, Lock, RotateCcw, RotateCw, GripVertical, Download } from "lucide-react";
 import { toast } from "sonner";
 import AudioRecorder from "./AudioRecorder";
 import { getUserRecordings, deleteUserRecording, reorderUserRecordings, type UserRecording } from "@/lib/actions/rehearsal";
@@ -32,16 +32,20 @@ function SortableRecordingItem({
   rec,
   activePlaybackId,
   deletingId,
+  downloadingId,
   handleTogglePlay,
   handleDelete,
+  handleDownload,
   formatDate,
   isCustomSort,
 }: {
   rec: UserRecording;
   activePlaybackId: string | null;
   deletingId: string | null;
+  downloadingId: string | null;
   handleTogglePlay: (id: string, url: string | undefined) => void;
   handleDelete: (id: string, path: string) => void;
+  handleDownload: (recording: UserRecording) => void;
   formatDate: (date: string) => string;
   isCustomSort: boolean;
 }) {
@@ -112,12 +116,32 @@ function SortableRecordingItem({
         </span>
       </div>
 
+      {/* Download Button */}
+      <button
+        onClick={() => handleDownload(rec)}
+        disabled={!rec.audioUrl || downloadingId === rec.id}
+        className={`p-2 rounded-xl transition-all active:scale-95 shrink-0 ${
+          !rec.audioUrl
+            ? "text-gray-300 dark:text-gray-700 opacity-40 cursor-not-allowed"
+            : "text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40"
+        }`}
+        title={!rec.audioUrl ? "Audio file missing or corrupted" : "Download rehearsal"}
+        aria-label="Download rehearsal"
+      >
+        {downloadingId === rec.id ? (
+          <div className="w-4 h-4 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
+        ) : (
+          <Download className="w-4 h-4" />
+        )}
+      </button>
+
       {/* Delete Button */}
       <button
         onClick={() => handleDelete(rec.id, rec.storage_path)}
         disabled={deletingId === rec.id}
         className="p-2 rounded-xl text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-all active:scale-95 shrink-0"
         title="Delete rehearsal"
+        aria-label="Delete rehearsal"
       >
         {deletingId === rec.id ? (
           <div className="w-4 h-4 border-2 border-red-500/30 border-t-red-500 rounded-full animate-spin" />
@@ -250,6 +274,7 @@ export default function RehearsalDrawer({
       }
     });
   };
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [activePlaybackId, setActivePlaybackId] = useState<string | null>(null);
   const [audioElements, setAudioElements] = useState<Record<string, HTMLAudioElement>>({});
@@ -638,6 +663,52 @@ export default function RehearsalDrawer({
     }
   };
 
+  // Handle download recording
+  const handleDownload = async (rec: UserRecording) => {
+    if (!rec.audioUrl) {
+      toast.error("Audio file is missing or not available for download.");
+      return;
+    }
+    setDownloadingId(rec.id);
+    try {
+      const rawExt = rec.storage_path ? rec.storage_path.split('.').pop()?.toLowerCase() || 'webm' : 'webm';
+      let filename = rec.recording_name.trim();
+      if (!filename.toLowerCase().endsWith(`.${rawExt}`)) {
+        filename = `${filename}.${rawExt}`;
+      }
+      filename = filename.replace(/[<>:"/\\|?*]/g, '_');
+
+      const res = await fetch(rec.audioUrl);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      const blob = await res.blob();
+      const blobUrl = URL.createObjectURL(blob);
+
+      const a = document.createElement("a");
+      a.href = blobUrl;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(blobUrl);
+      toast.success("Download started.");
+    } catch (err) {
+      console.error("[drawer] Download error:", err);
+      try {
+        const a = document.createElement("a");
+        a.href = rec.audioUrl;
+        a.target = "_blank";
+        a.download = rec.recording_name || "recording";
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+      } catch {
+        toast.error("Failed to download recording.");
+      }
+    } finally {
+      setDownloadingId(null);
+    }
+  };
+
   // Custom play/pause control handler
   const handleTogglePlay = (recordingId: string, audioUrl: string | undefined) => {
     const targetRec = recordings.find(r => r.id === recordingId);
@@ -945,8 +1016,10 @@ export default function RehearsalDrawer({
                                   rec={rec}
                                   activePlaybackId={activePlaybackId}
                                   deletingId={deletingId}
+                                  downloadingId={downloadingId}
                                   handleTogglePlay={handleTogglePlay}
                                   handleDelete={handleDelete}
+                                  handleDownload={handleDownload}
                                   formatDate={formatDate}
                                   isCustomSort={recordings.length > 1}
                                 />
