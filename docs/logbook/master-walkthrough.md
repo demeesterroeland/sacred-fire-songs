@@ -2851,6 +2851,9 @@ This session addressed a critical bug where slow Supabase Auth calls (due to Tai
 2. **SongCard Hydration Architecture (`components/home/SongCard.tsx`)**:
    - Diagnosed severe React hydration errors occurring because `<SongCard>` wrapped the entire card in a `<Link>` (`<a>` tag) while containing nested `<a>` tags for Authors, Categories, and Draft badges.
    - Refactored the card wrapper to a `<div>`, replaced the card-level anchor with an invisible CSS overlay (`absolute inset-0 z-0 Link`), and partitioned `pointer-events-none` on content with `pointer-events-auto` on inner links.
-3. **E2E Testing & Headed Recording (`e2e/tests/recording.spec.ts`)**:
-   - Added `Can explicitly upload a file from disk and play it back` covering the manual "Upload File" tab with a valid dummy `.wav` fixture.
+3. **Rehearsal Download Feature & E2E Testing (`components/song/RehearsalDrawer.tsx`, `e2e/tests/recording.spec.ts`)**:
+   - Added a dedicated Download button with a spinner state and disabled fallback directly to the left of the Delete button in each recording item.
+   - Handled cross-origin and blob conversion so browsers trigger file download with a clean, sanitized filename.
+   - Updated E2E tests (`recording.spec.ts`) to verify both audio playback for 2 seconds and downloading the audio file via the download button across desktop and mobile browsers.
    - Verified both the microphone recording flow and the file upload flow execute cleanly against a production build, capturing video recordings of both user interactions.
+
