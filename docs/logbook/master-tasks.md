@@ -1168,4 +1168,5 @@
 - [x] Write new explicit file upload E2E test `Can explicitly upload a file from disk and play it back` in `e2e/tests/recording.spec.ts`
 - [x] Generate mock audio fixture `e2e/fixtures/dummy-audio.wav`
 - [x] Run both Rehearsal E2E tests (mic recording & disk file upload) against production build and capture video recordings
+- [x] Add download button to rehearsal recordings list with cross-origin blob fetch and verify in Playwright E2E suite
 - [x] Open Pull Request #236 to merge `fix/230-rehearsal-playback` into `main`
