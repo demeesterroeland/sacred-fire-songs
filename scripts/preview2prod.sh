@@ -174,7 +174,7 @@ gh pr checks "$PR_NUMBER" --watch || {
 # 9. Merge PR into main
 echo "🔀 Merging PR #$PR_NUMBER into main..."
 # Squash merge to keep clean conventional commit title
-gh pr merge "$PR_NUMBER" --squash --delete-branch --admin
+gh pr merge "$PR_NUMBER" --squash --delete-branch
 echo "✅ PR #$PR_NUMBER merged into main!"
 
 # 10. Switch to main & pull
