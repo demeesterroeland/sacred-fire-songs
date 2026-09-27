@@ -1184,3 +1184,13 @@
 - [x] Merge subagent branches, resolve React hook order bugs, and adapt Playwright E2E suite to the new UX flow.
 - [x] Fix audio pop
 - [x] UI recording metadata
+
+## Session September 27, 2026 (Finalizing v1.6.0 Release)
+- [x] Fix Audio Hardware Pop (Issue #242) with a 3-second visual countdown
+- [x] Implement Recording Metadata UI (Issue #251) for duration and file sizes
+- [x] Debug and fix Preview database migrator failing to run on server
+- [x] Remove `build:` context blocks from `docker-compose.yml` to enforce GHCR pulling (Issue #253)
+- [x] Rename root app Docker image to `sacred-fire-songs-app` to prevent naming collisions (Issue #254)
+- [x] Patch `.gitignore` bug swallowing new Supabase `.sql` migration files
+- [x] Fix local `scripts/restart.sh` port conflict errors using `fuser`
+- [x] Deploy and verify Preview environment
