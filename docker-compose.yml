@@ -3,9 +3,6 @@
 
 services:
   app:
-    build:
-      context: .
-      dockerfile: Dockerfile
     image: ghcr.io/demeesterroeland/sacred-fire-songs:${IMAGE_TAG:-preview}
     ports:
       - "3000:3000"
@@ -21,9 +18,6 @@ services:
       - NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY}
 
   migrator:
-    build:
-      context: .
-      dockerfile: Dockerfile.migrator
     image: ghcr.io/demeesterroeland/sacred-fire-songs-migrator:${IMAGE_TAG:-preview}
     restart: "no"
     depends_on:
