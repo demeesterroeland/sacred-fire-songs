@@ -944,7 +944,7 @@ export default function RehearsalDrawer({
 
                     {/* Saved Practice Takes List */}
                     <section className="mt-6 space-y-3">
-                      <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider text-left">My Recordings</h3>
+                      <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider text-left">Your Recordings</h3>
                       
                       {/* Fake practice takes mock list for guest demo preview */}
                       {!user ? (
