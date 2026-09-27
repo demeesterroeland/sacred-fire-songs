@@ -2892,3 +2892,5 @@ Refactored the Rehearsal Drawer and Mini-Player to create a seamless, unified pl
 - **Header Indicators**: The top navigation microphone icon now actively tracks global audio state, transforming into a live equalizer when playing audio.
 - **DevOps Improvements**: Overhauled preview deployments by dual-tagging Docker images (`branch-slug` and `preview`) via GitHub Actions. Documented the SDLC in `docs/guides/development-workflow.md`.
 - Created Issue #254 to rename Docker image to sacred-fire-songs-app to prevent migrator confusion.
+- Completed Issue #242 (fix audio pop with countdown) and merged to main.
+- Completed Issue #251 (add min:sec and MB to recording UI) and opened PR.

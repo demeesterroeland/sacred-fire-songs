@@ -205,6 +205,14 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
     setAudioUrl(localUrl);
     setRecordingState("stopped");
 
+    // Extract duration from uploaded file
+    const tempAudio = new Audio(localUrl);
+    tempAudio.onloadedmetadata = () => {
+      if (tempAudio.duration && tempAudio.duration !== Infinity) {
+        setDuration(Math.round(tempAudio.duration));
+      }
+    };
+
     // Clean up filename for default title (strip extension)
     const defaultName = file.name.replace(/\.[^/.]+$/, "");
     setRecordingName(defaultName || `Recording - ${new Date().toLocaleDateString()}`);
@@ -227,7 +235,8 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
       const { recording, error } = await uploadRehearsalRecording(
         songVersionId,
         recordingName.trim(),
-        audioBlobRef.current
+        audioBlobRef.current,
+        duration
       );
 
       if (recording) {

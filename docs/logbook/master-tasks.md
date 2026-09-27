@@ -1182,3 +1182,5 @@
 - [x] Fix double vertical scrollbar layout issue on `SongDetailPage` by removing duplicate `min-h-screen` and `overflow-y-auto`.
 - [x] Sanitize terminology: replaced auto-generated "Rehearsal" filenames and placeholders with "Recording".
 - [x] Merge subagent branches, resolve React hook order bugs, and adapt Playwright E2E suite to the new UX flow.
+- [x] Fix audio pop
+- [x] UI recording metadata
