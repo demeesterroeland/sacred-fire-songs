@@ -101,6 +101,12 @@ docs/
 
 ---
 
+## Developer Workflow
+
+For a comprehensive guide on how we develop, test, and deploy features (including our GitHub Actions CI/CD Docker setup, preview environments, and QA testing rules), please read the [Software Development Life Cycle (SDLC) Guide](docs/guides/development-workflow.md).
+
+---
+
 ## Contributing
 
 1. Check [`docs/logbook/epic&user stories.md`](docs/logbook/epic%26user%20stories.md) for open stories
