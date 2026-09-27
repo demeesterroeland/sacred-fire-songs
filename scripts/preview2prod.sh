@@ -183,9 +183,13 @@ if [ "$CURRENT_BRANCH" != "main" ] && [ "$CURRENT_BRANCH" != "HEAD" ]; then
 fi
 
 # Squash merge to keep clean conventional commit title
-gh pr merge "$PR_NUMBER" --squash --delete-branch --admin
+if ! gh pr merge "$PR_NUMBER" --squash --delete-branch --admin; then
+    PR_URL=$(gh pr view "$PR_NUMBER" --json url -q .url 2>/dev/null || echo "https://github.com/demeesterroeland/sacred-fire-songs/pull/$PR_NUMBER")
+    echo "❌ Automated merge failed!"
+    echo "🔗 Please resolve any issues and merge it manually: $PR_URL"
+    exit 1
+fi
 echo "✅ PR #$PR_NUMBER merged into main!"
-
 # 10. Update local main branch
 echo "🔄 Updating local main branch..."
 git fetch origin main:main || true
@@ -220,7 +224,13 @@ fi
 
 # 12. Merge Release Please PR to cut the official release
 echo "🚀 Merging Release Please PR #$RP_PR_NUMBER to cut the release..."
-gh pr merge "$RP_PR_NUMBER" --merge --admin
+if ! gh pr merge "$RP_PR_NUMBER" --merge --admin; then
+    PR_URL=$(gh pr view "$RP_PR_NUMBER" --json url -q .url 2>/dev/null || echo "https://github.com/demeesterroeland/sacred-fire-songs/pull/$RP_PR_NUMBER")
+    echo "❌ Automated merge of Release Please PR failed!"
+    echo "🔗 Please review and merge it manually: $PR_URL"
+    echo "After merging, the GitHub Action will publish the release."
+    exit 1
+fi
 echo "✅ Release Please PR merged!"
 
 # 13. Wait for GitHub release to be created
