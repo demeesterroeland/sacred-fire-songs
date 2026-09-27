@@ -583,6 +583,26 @@ export default function RehearsalDrawer({
     }
   };
 
+  // ----------------------------------------------------------------------
+  // ARCHITECTURAL FIX: Global Audio Synchronization
+  // Ensures that starting a personal recording pauses external iframes,
+  // and starting an external iframe pauses the personal recording.
+  // ----------------------------------------------------------------------
+  useEffect(() => {
+    // If personal recording is playing, pause any active iframe media
+    if (isRecordingPlaying && isMediaPlaying) {
+      if (playingSource === "youtube") {
+        pauseYouTube();
+      } else if (playingSource === "soundcloud") {
+        pauseSoundCloud();
+      }
+    }
+    // If iframe media is playing, pause any active personal recording
+    if (isMediaPlaying && isRecordingPlaying) {
+      pauseActiveRecording();
+    }
+  }, [isRecordingPlaying, isMediaPlaying, playingSource, pauseActiveRecording]);
+
   // postMessage event listener for YouTube / SoundCloud state syncing
   useEffect(() => {
     const handleMessage = (event: MessageEvent) => {
