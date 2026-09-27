@@ -197,6 +197,17 @@ else
     exit 1
 fi
 echo "✅ PR #$PR_NUMBER merged into main!"
+
+# Extract issue number from branch (e.g. feat/251-something -> 251)
+ISSUE_NUM=$(echo "$BRANCH" | grep -o -E '[0-9]+' | head -n 1 || true)
+if [ -n "$ISSUE_NUM" ]; then
+    DEV_PORT="3${ISSUE_NUM}"
+    PROD_PORT="4${ISSUE_NUM}"
+    echo "🧹 Cleaning up local development servers for Issue #$ISSUE_NUM (Ports $DEV_PORT & $PROD_PORT)..."
+    fuser -k "${DEV_PORT}/tcp" >/dev/null 2>&1 || true
+    fuser -k "${PROD_PORT}/tcp" >/dev/null 2>&1 || true
+fi
+
 # 10. Update local main branch
 echo "🔄 Updating local main branch..."
 git fetch origin main:main || true
