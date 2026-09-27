@@ -1106,7 +1106,7 @@ export default function RehearsalDrawer({
       )}
 
       {/* Floating Horizontal Bottom Mini Player Widget */}
-      {!isOpen && hasAnyAudioSource && (
+      {hasAnyAudioSource && (
 
         <div 
           data-testid="bottom-mini-player"
