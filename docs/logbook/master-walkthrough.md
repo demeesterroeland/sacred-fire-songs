@@ -2891,7 +2891,9 @@ Refactored the Rehearsal Drawer and Mini-Player to create a seamless, unified pl
 - **Continuous Playback (#248)**: Switched Rehearsal Drawer tabs from conditional mounting to CSS visibility (`visibility: hidden`). Switching tabs no longer kills YouTube or SoundCloud playback, and fixes the YouTube "black screen" bug.
 - **Header Indicators**: The top navigation microphone icon now actively tracks global audio state, transforming into a live equalizer when playing audio.
 - **DevOps Improvements**: Overhauled preview deployments by dual-tagging Docker images (`branch-slug` and `preview`) via GitHub Actions. Documented the SDLC in `docs/guides/development-workflow.md`.
-- Completed Issue #253 (removed build blocks from docker-compose.yml to enforce GHCR pulling)
-- Created Issue #254 to rename Docker image to sacred-fire-songs-app to prevent migrator confusion.
-- Completed Issue #242 (fix audio pop with countdown) and merged to main.
-- Completed Issue #251 (add min:sec and MB to recording UI) and opened PR.
+
+**Final Touches for v1.6.0 Release**
+- **Recording Metadata (#251)**: Enhanced the Rehearsal Drawer to precisely extract and display `duration_seconds` (formatted as `mm:ss`) and file size (`MB`) for user recordings.
+- **Hardware Pop Fix (#242)**: Eliminated the loud initial static crackle in the Web Audio API by rendering a 3-second visual countdown (`3... 2... 1...`) to warm up the microphone stream before recording actually begins.
+- **Preview & Pipeline Stability (#253 & #254)**: Resolved deployment pipeline issues for the Preview environment. Renamed the frontend container image to `sacred-fire-songs-app` to prevent naming collisions with the `sacred-fire-songs-migrator` on the Dockge host. Stripped `build:` contexts from `docker-compose.yml` to force strict registry pulling.
+- **Gitignore Migration Bug (#251)**: Investigated and fixed a silent bug where `.gitignore` was swallowing new Supabase `.sql` migration files due to a wildcard `*.sql` rule, breaking the database migrator workflow.

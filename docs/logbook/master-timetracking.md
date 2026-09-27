@@ -86,4 +86,6 @@
 
 | **September 27, 2026** | **Feature/Architecture**: Unified Audio Experience (#237) — Implemented global audio context, Source Switcher dropdown with dark glassmorphism, hoisted data fetching, fixed CSS progress bar clipping, resolved double scrollbars, and consolidated Playwright E2E test suites via multi-agent sub-branches. | ~4.0 Hours | ✅ Completed |
 
-| **Total** | **Development + AI Collaboration** | **~166.75 Hours** | |
+| **September 27, 2026 (Part 2)** | **Release/Ops**: Finalizing v1.6.0 Release (#242, #251, #253, #254) — Fixed hardware pop, added metadata UI, repaired staging migrator pipeline and .gitignore bugs, and cleared deployment pipeline bottlenecks. | ~2.5 Hours | ✅ Completed |
+
+| **Total** | **Development + AI Collaboration** | **~169.25 Hours** | |
