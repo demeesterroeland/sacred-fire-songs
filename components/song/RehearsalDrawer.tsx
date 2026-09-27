@@ -2,12 +2,12 @@
 
 import React, { useState, useEffect, useTransition } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Music, Trash2, Calendar, Play, Pause, Lock, RotateCcw, RotateCw, GripVertical, Download, ChevronUp, ChevronDown, Check } from "lucide-react";
+import { X, Music, Trash2, Pencil, Calendar, Play, Pause, Lock, RotateCcw, RotateCw, GripVertical, Download, ChevronUp, ChevronDown, Check } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import AudioRecorder from "./AudioRecorder";
 import { useSongRecordings } from "@/hooks/useSongRecordings";
-import { getUserRecordings, deleteUserRecording, reorderUserRecordings, type UserRecording } from "@/lib/actions/rehearsal";
+import { getUserRecordings, deleteUserRecording, renameUserRecording, reorderUserRecordings, type UserRecording } from "@/lib/actions/rehearsal";
 import { getYouTubeEmbedUrl, getSpotifyEmbedUrl } from "./MediaEmbeds";
 import { useAuth } from "@/hooks/useAuth";
 import { useAudio } from "./AudioProvider";
@@ -51,9 +51,25 @@ function SortableRecordingItem({
   handleTogglePlay: (id: string, url: string | undefined) => void;
   handleDelete: (id: string, path: string) => void;
   handleDownload: (recording: UserRecording) => void;
+  handleRename: (id: string, newName: string) => void;
   formatDate: (date: string) => string;
   isCustomSort: boolean;
 }) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState(rec.recording_name);
+
+  const handleSaveRename = () => {
+    if (editValue.trim() && editValue !== rec.recording_name) {
+      handleRename(rec.id, editValue.trim());
+    }
+    setIsEditing(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") handleSaveRename();
+    if (e.key === "Escape") { setEditValue(rec.recording_name); setIsEditing(false); }
+  };
+
   const {
     attributes,
     listeners,
@@ -111,15 +127,40 @@ function SortableRecordingItem({
 
       {/* Title and date */}
       <div className="flex-1 min-w-0 text-left">
-        <h4 className={`text-sm font-bold truncate ${!rec.audioUrl ? "text-red-500/80 dark:text-red-400/80" : "text-gray-900 dark:text-white"}`}>
-          {rec.recording_name}
-          {!rec.audioUrl && <span className="ml-2 text-[10px] uppercase font-bold text-red-500 bg-red-500/10 px-1.5 py-0.5 rounded">Missing File</span>}
-        </h4>
+        {isEditing ? (
+          <input
+            autoFocus
+            type="text"
+            value={editValue}
+            onChange={(e) => setEditValue(e.target.value)}
+            onBlur={handleSaveRename}
+            onKeyDown={handleKeyDown}
+            className="w-full text-sm font-bold bg-white dark:bg-gray-900 border border-indigo-500 rounded px-2 py-0.5 outline-none text-gray-900 dark:text-white"
+          />
+        ) : (
+          <h4 
+            className={`text-sm font-bold truncate ${!rec.audioUrl ? "text-red-500/80 dark:text-red-400/80" : "text-gray-900 dark:text-white"}`}
+            onDoubleClick={() => setIsEditing(true)}
+          >
+            {rec.recording_name}
+            {!rec.audioUrl && <span className="ml-2 text-[10px] uppercase font-bold text-red-500 bg-red-500/10 px-1.5 py-0.5 rounded">Missing File</span>}
+          </h4>
+        )}
         <span className="text-[10px] text-gray-400 dark:text-gray-500 flex items-center gap-1.5 mt-0.5 font-medium">
           <Calendar className="w-3 h-3" />
           {formatDate(rec.created_at)}
         </span>
       </div>
+
+      {/* Edit Button */}
+      <button
+        onClick={() => setIsEditing(true)}
+        className="p-2 rounded-xl text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition-all active:scale-95 shrink-0"
+        title="Edit recording name"
+        aria-label="Edit recording name"
+      >
+        <Pencil className="w-4 h-4" />
+      </button>
 
       {/* Download Button */}
       <button
@@ -670,6 +711,18 @@ export default function RehearsalDrawer({
   };
 
   // Handle delete recording
+  const handleRename = async (recordingId: string, newName: string) => {
+    const originalName = recordings.find((r) => r.id === recordingId)?.recording_name;
+    setRecordings((prev) => prev.map((r) => (r.id === recordingId ? { ...r, recording_name: newName } : r)));
+    const { success } = await renameUserRecording(recordingId, newName);
+    if (!success) {
+      toast.error("Failed to rename recording.");
+      setRecordings((prev) => prev.map((r) => (r.id === recordingId ? { ...r, recording_name: originalName || "" } : r)));
+    } else {
+      queryClient.invalidateQueries({ queryKey: ["song-recordings", songVersionId] });
+    }
+  };
+
   const handleDelete = async (recordingId: string, storagePath: string) => {
     setDeletingId(recordingId);
     try {
@@ -948,6 +1001,7 @@ export default function RehearsalDrawer({
                                   downloadingId={downloadingId}
                                   handleTogglePlay={(id, url) => { const rec = recordings.find(r => r.id === id); if (rec) contextHandleTogglePlay(rec, url); }}
                                   handleDelete={handleDelete}
+                                  handleRename={handleRename}
                                   handleDownload={handleDownload}
                                   formatDate={formatDate}
                                   isCustomSort={recordings.length > 1}
