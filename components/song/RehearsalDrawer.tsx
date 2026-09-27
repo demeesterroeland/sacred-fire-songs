@@ -516,7 +516,12 @@ export default function RehearsalDrawer({
       return;
     }
     if (!playingSource) {
-      startMediaPlayback();
+      if (recordings && recordings.length > 0) {
+        const first = recordings[0];
+        if (first.audioUrl) contextHandleTogglePlay(first, first.audioUrl);
+      } else {
+        startMediaPlayback();
+      }
       return;
     }
     if (playingSource === "youtube") {
@@ -843,7 +848,7 @@ export default function RehearsalDrawer({
             )}
 
             {/* Content Body */}
-            <div className={`flex-1 overflow-y-auto p-6 space-y-6 ${(activePlaybackId || playingSource) ? 'pb-24' : ''}`}>
+            <div className={`flex-1 overflow-y-auto p-6 space-y-6 ${hasAnyAudioSource ? 'pb-24' : ''}`}>
               
               {activeTab === "recorder" ? (
                 <div className="relative">
@@ -1110,7 +1115,7 @@ export default function RehearsalDrawer({
 
         <div 
           data-testid="bottom-mini-player"
-          className={`fixed bottom-[calc(var(--bottom-nav-height,3.5rem)+env(safe-area-inset-bottom,0px))] lg:bottom-4 left-0 right-0 lg:left-1/2 lg:-translate-x-1/2 z-[60] w-full lg:max-w-xl lg:rounded-2xl shadow-2xl backdrop-blur-md text-white h-14 flex items-center justify-between px-4 border-t lg:border border-white/10 select-none animate-in slide-in-from-bottom duration-300 ${activePlaybackId ? 'bg-indigo-600/95' : 'bg-[#FF5500]/95'}`}
+          className={`fixed bottom-[calc(var(--bottom-nav-height,3.5rem)+env(safe-area-inset-bottom,0px))] lg:bottom-4 left-0 right-0 lg:left-1/2 lg:-translate-x-1/2 z-[60] w-full lg:max-w-xl lg:rounded-2xl shadow-2xl backdrop-blur-md text-white h-14 flex items-center justify-between px-4 border-t lg:border border-white/10 select-none animate-in slide-in-from-bottom duration-300 ${activePlaybackId || (!hasMedia && recordings.length > 0) ? 'bg-indigo-600/95' : 'bg-[#FF5500]/95'}`}
         >
           {/* Visual Progress Bar (Clipped to container corners) */}
           <div className="absolute inset-0 pointer-events-none lg:rounded-2xl overflow-hidden z-0">
@@ -1155,7 +1160,7 @@ export default function RehearsalDrawer({
                       ? recordings.find(r => r.id === activePlaybackId)?.recording_name || 'User Recording'
                       : playingSource 
                         ? (playingSource === 'youtube' ? 'YouTube Reference' : playingSource === 'soundcloud' ? 'SoundCloud Reference' : 'Spotify Reference') 
-                        : 'Select Source'}
+                        : (recordings.length > 0 ? 'Select a recording to play' : 'Select Source')}
                   </span>
                 </div>
               </DropdownMenuTrigger>
