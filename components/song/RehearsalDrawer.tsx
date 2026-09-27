@@ -1160,7 +1160,7 @@ export default function RehearsalDrawer({
                       ? recordings.find(r => r.id === activePlaybackId)?.recording_name || 'User Recording'
                       : playingSource 
                         ? (playingSource === 'youtube' ? 'YouTube Reference' : playingSource === 'soundcloud' ? 'SoundCloud Reference' : 'Spotify Reference') 
-                        : (recordings.length > 0 ? 'Select a recording to play' : 'Select Source')}
+                        : 'Select Source'}
                   </span>
                 </div>
               </DropdownMenuTrigger>
