@@ -183,7 +183,14 @@ if [ "$CURRENT_BRANCH" != "main" ] && [ "$CURRENT_BRANCH" != "HEAD" ]; then
 fi
 
 # Squash merge to keep clean conventional commit title
-if ! gh pr merge "$PR_NUMBER" --squash --delete-branch --admin; then
+# Note: We capture the output because `gh pr merge --delete-branch` crashes with 
+# "not on any branch" if HEAD is detached (which it is in our worktree). We just 
+# grep for success to determine if the merge worked regardless of local cleanup errors.
+MERGE_OUT=$(gh pr merge "$PR_NUMBER" --squash --delete-branch --admin 2>&1 || true)
+if echo "$MERGE_OUT" | grep -q "Squashed and merged pull request"; then
+    echo "$MERGE_OUT"
+else
+    echo "$MERGE_OUT"
     PR_URL=$(gh pr view "$PR_NUMBER" --json url -q .url 2>/dev/null || echo "https://github.com/demeesterroeland/sacred-fire-songs/pull/$PR_NUMBER")
     echo "❌ Automated merge failed!"
     echo "🔗 Please resolve any issues and merge it manually: $PR_URL"
