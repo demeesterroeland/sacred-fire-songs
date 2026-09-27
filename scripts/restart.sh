@@ -33,7 +33,7 @@ npm run build
 PORT="4${ISSUE}"
 
 echo "🧹 Killing any existing process on port ${PORT}..."
-lsof -ti :${PORT} | xargs -r kill -9 || true
+fuser -k "${PORT}/tcp" 2>/dev/null || true
 
 echo "🚀 Starting production test server on http://localhost:${PORT}..."
 PORT=$PORT npm run start
