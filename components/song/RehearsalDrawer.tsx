@@ -211,6 +211,7 @@ interface RehearsalDrawerProps {
   spotifyUrl?: string | null;
   soundcloudUrl?: string | null;
   onPlayStateChange?: (isPlaying: boolean) => void;
+  requestedTab?: "recorder" | "media" | "auto";
 }
 
 export default function RehearsalDrawer({
@@ -224,6 +225,7 @@ export default function RehearsalDrawer({
   spotifyUrl,
   soundcloudUrl,
   onPlayStateChange,
+  requestedTab = "auto",
 }: RehearsalDrawerProps) {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<"recorder" | "media">("media");
@@ -298,14 +300,20 @@ export default function RehearsalDrawer({
     else if (soundcloudUrl) setSelectedMedia("soundcloud");
     else if (spotifyUrl) setSelectedMedia("spotify");
     else setSelectedMedia(null);
-
-    // Default to Reference Tracks (media) if the song has media
-    if (youtubeUrl || spotifyUrl || soundcloudUrl) {
-      setActiveTab("media");
-    } else {
-      setActiveTab("recorder");
-    }
   }, [youtubeUrl, soundcloudUrl, spotifyUrl, user]);
+
+  useEffect(() => {
+    if (isOpen) {
+      if (requestedTab !== "auto") {
+        setActiveTab(requestedTab);
+      } else {
+        if (activePlaybackId) setActiveTab("recorder");
+        else if (isMediaPlaying) setActiveTab("media");
+        else if (youtubeUrl || spotifyUrl || soundcloudUrl) setActiveTab("media");
+        else setActiveTab("recorder");
+      }
+    }
+  }, [isOpen, requestedTab, activePlaybackId, isMediaPlaying, youtubeUrl, spotifyUrl, soundcloudUrl]);
 
   const { data: fetchedRecordings, isLoading } = useSongRecordings(songVersionId);
   const [recordings, setRecordings] = useState<UserRecording[]>([]);

@@ -105,6 +105,7 @@ export default function SongDetailPage() {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isOverflowOpen, setIsOverflowOpen] = useState(false);
     const [isRehearsalDrawerOpen, setIsRehearsalDrawerOpen] = useState(false);
+    const [drawerRequestedTab, setDrawerRequestedTab] = useState<"media" | "recorder" | "auto">("auto");
     const [isAudioPlaying, setIsAudioPlaying] = useState(false);
     const { isDeleting, deleteSong } = useDeleteSong();
 
@@ -376,7 +377,10 @@ export default function SongDetailPage() {
                         )}
                         {id && (
                             <button
-                                onClick={() => setIsRehearsalDrawerOpen(true)}
+                                onClick={() => {
+                                    setDrawerRequestedTab("recorder");
+                                    setIsRehearsalDrawerOpen(true);
+                                }}
                                 className="flex items-center gap-2 px-3 py-2 bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 rounded-lg text-sm font-bold border border-indigo-500/20 transition-all active:scale-[0.98]"
                                 title="Recordings"
                             >
@@ -586,6 +590,7 @@ export default function SongDetailPage() {
                             <button
                                 onClick={() => {
                                     setIsOverflowOpen(false);
+                                    setDrawerRequestedTab("recorder");
                                     setIsRehearsalDrawerOpen(true);
                                 }}
                                 className="w-full flex items-center gap-4 px-6 py-4 hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors text-left text-gray-700 dark:text-gray-300"
@@ -626,7 +631,11 @@ export default function SongDetailPage() {
                 <RehearsalDrawer
                     isOpen={isRehearsalDrawerOpen}
                     onClose={() => setIsRehearsalDrawerOpen(false)}
-                    onOpen={() => setIsRehearsalDrawerOpen(true)}
+                    onOpen={() => {
+                        setDrawerRequestedTab("auto");
+                        setIsRehearsalDrawerOpen(true);
+                    }}
+                    requestedTab={drawerRequestedTab}
                     songVersionId={currentVersion.id}
                     onPlayStateChange={setIsAudioPlaying}
                     songTitle={song.title}
