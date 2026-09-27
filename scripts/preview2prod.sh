@@ -173,6 +173,15 @@ gh pr checks "$PR_NUMBER" --watch || {
 
 # 9. Merge PR into main
 echo "🔀 Merging PR #$PR_NUMBER into main..."
+
+# To prevent GitHub CLI from crashing when trying to delete the branch
+# while it's checked out in a Git Worktree, we detach HEAD safely.
+CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+if [ "$CURRENT_BRANCH" != "main" ] && [ "$CURRENT_BRANCH" != "HEAD" ]; then
+    echo "Detaching HEAD to safely allow branch deletion in worktree..."
+    git checkout --detach HEAD >/dev/null 2>&1 || true
+fi
+
 # Squash merge to keep clean conventional commit title
 gh pr merge "$PR_NUMBER" --squash --delete-branch --admin
 echo "✅ PR #$PR_NUMBER merged into main!"
