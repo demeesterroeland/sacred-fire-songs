@@ -302,18 +302,27 @@ export default function RehearsalDrawer({
     else setSelectedMedia(null);
   }, [youtubeUrl, soundcloudUrl, spotifyUrl, user]);
 
+  // Only set the tab when the drawer opens or when an explicit tab is requested.
+  // Do NOT react to isMediaPlaying / activePlaybackId changes — those are play-state
+  // updates that must never override the tab the user is currently looking at.
+  const prevIsOpen = React.useRef(false);
   useEffect(() => {
-    if (isOpen) {
+    const justOpened = isOpen && !prevIsOpen.current;
+    prevIsOpen.current = isOpen;
+
+    if (isOpen && (justOpened || requestedTab !== "auto")) {
       if (requestedTab !== "auto") {
         setActiveTab(requestedTab);
       } else {
+        // Contextual default only on first open
         if (activePlaybackId) setActiveTab("recorder");
         else if (isMediaPlaying) setActiveTab("media");
         else if (youtubeUrl || spotifyUrl || soundcloudUrl) setActiveTab("media");
         else setActiveTab("recorder");
       }
     }
-  }, [isOpen, requestedTab, activePlaybackId, isMediaPlaying, youtubeUrl, spotifyUrl, soundcloudUrl]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, requestedTab]);
 
   const { data: fetchedRecordings, isLoading } = useSongRecordings(songVersionId);
   const [recordings, setRecordings] = useState<UserRecording[]>([]);
@@ -584,23 +593,32 @@ export default function RehearsalDrawer({
   };
 
   // ----------------------------------------------------------------------
-  // ARCHITECTURAL FIX: Global Audio Synchronization
-  // Ensures that starting a personal recording pauses external iframes,
-  // and starting an external iframe pauses the personal recording.
+  // ARCHITECTURAL FIX: Global Audio Mutual Exclusivity (last-in-wins)
+  // We track what CHANGED to determine which source just became active
+  // and pause the OTHER one — never pausing what just started.
   // ----------------------------------------------------------------------
+  const prevIsRecordingPlaying = React.useRef(false);
+  const prevIsMediaPlaying = React.useRef(false);
+
   useEffect(() => {
-    // If personal recording is playing, pause any active iframe media
-    if (isRecordingPlaying && isMediaPlaying) {
-      if (playingSource === "youtube") {
-        pauseYouTube();
-      } else if (playingSource === "soundcloud") {
-        pauseSoundCloud();
-      }
+    const recordingJustStarted = isRecordingPlaying && !prevIsRecordingPlaying.current;
+    const mediaJustStarted = isMediaPlaying && !prevIsMediaPlaying.current;
+
+    if (recordingJustStarted && isMediaPlaying) {
+      // Recording just started → pause any active iframe and clear its state
+      if (playingSource === "youtube") pauseYouTube();
+      else if (playingSource === "soundcloud") pauseSoundCloud();
+      setIsMediaPlaying(false);
+      setPlayingSource(null);
     }
-    // If iframe media is playing, pause any active personal recording
-    if (isMediaPlaying && isRecordingPlaying) {
+
+    if (mediaJustStarted && isRecordingPlaying) {
+      // Iframe media just started → pause any active recording
       pauseActiveRecording();
     }
+
+    prevIsRecordingPlaying.current = isRecordingPlaying;
+    prevIsMediaPlaying.current = isMediaPlaying;
   }, [isRecordingPlaying, isMediaPlaying, playingSource, pauseActiveRecording]);
 
   // postMessage event listener for YouTube / SoundCloud state syncing
@@ -1053,7 +1071,7 @@ export default function RehearsalDrawer({
                   )}
                 </div>
 
-              <div className="space-y-6 text-left" style={{ display: activeTab === "media" ? "block" : "none" }}>
+              <div className="space-y-6 text-left" style={activeTab !== "media" ? { visibility: "hidden", height: 0, overflow: "hidden", margin: 0, padding: 0 } : undefined}>
                   {/* Media Selector Buttons (only if more than 1 media type exists) */}
                   {((youtubeUrl ? 1 : 0) + (spotifyUrl ? 1 : 0) + (soundcloudUrl ? 1 : 0)) > 1 && (
                     <div className="flex gap-2 p-1 bg-gray-100 dark:bg-gray-950 rounded-xl">
