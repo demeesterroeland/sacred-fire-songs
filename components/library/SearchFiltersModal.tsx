@@ -194,6 +194,33 @@ export default function SearchFiltersModal({
                         </div>
                     </section>
 
+                    {/* Content type */}
+                    <section>
+                        <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3 block">
+                            Content type
+                        </label>
+                        <div className="grid grid-cols-2 gap-3">
+                            <ToggleCard
+                                active={!!state.chords}
+                                onClick={() => setFilter('chords', !state.chords)}
+                                disabled={!state.chords && chordsCount === 0}
+                                icon={<Guitar className="w-4 h-4" />}
+                                label="Chords"
+                                count={chordsCount ? chordsCount : undefined}
+                                activeColor="amber"
+                            />
+                            <ToggleCard
+                                active={!!state.melody}
+                                onClick={() => setFilter('melody', !state.melody)}
+                                disabled={!state.melody && melodyCount === 0}
+                                icon={<Music className="w-4 h-4" />}
+                                label="Melody"
+                                count={melodyCount ? melodyCount : undefined}
+                                activeColor="emerald"
+                            />
+                        </div>
+                    </section>
+
                     {/* Visibility */}
                     {isAuthenticated && (
                         <section>
@@ -253,32 +280,6 @@ export default function SearchFiltersModal({
                         </section>
                     )}
 
-                    {/* Content type */}
-                    <section>
-                        <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3 block">
-                            Content type
-                        </label>
-                        <div className="grid grid-cols-2 gap-3">
-                            <ToggleCard
-                                active={!!state.chords}
-                                onClick={() => setFilter('chords', !state.chords)}
-                                disabled={!state.chords && chordsCount === 0}
-                                icon={<Guitar className="w-4 h-4" />}
-                                label="Chords"
-                                count={chordsCount ? chordsCount : undefined}
-                                activeColor="amber"
-                            />
-                            <ToggleCard
-                                active={!!state.melody}
-                                onClick={() => setFilter('melody', !state.melody)}
-                                disabled={!state.melody && melodyCount === 0}
-                                icon={<Music className="w-4 h-4" />}
-                                label="Melody"
-                                count={melodyCount ? melodyCount : undefined}
-                                activeColor="emerald"
-                            />
-                        </div>
-                    </section>
                 </div>
 
 
