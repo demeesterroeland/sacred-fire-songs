@@ -7,7 +7,8 @@ SET
     allowed_mime_types = ARRAY[
         'audio/webm', 
         'audio/mp4', 
-        'audio/mpeg', 
+        'audio/mpeg',
+        'audio/mp3', 
         'audio/ogg', 
         'audio/wav',
         'audio/x-m4a',
