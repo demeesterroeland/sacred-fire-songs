@@ -1,0 +1,19 @@
+Resolves #237. Resolves #243. Resolves #244. Resolves #248.
+
+## Unified Audio Experience
+Merges the external reference tracks (YouTube, SoundCloud, Spotify) and the user's personal Rehearsal Recordings into a single, unified bottom mini-player to create a seamless playback UX.
+
+### 🎵 UI / UX Improvements
+- **Unified Mini-Player**: The floating player dynamically themes itself (Indigo for your recordings, Orange for reference tracks) and features a seamless Source Switcher dropdown.
+- **Header Indicators**: The top navigation microphone icon proactively displays your saved recordings count and animates into a live equalizer when practicing.
+- **Continuous Playback (#248)**: Switched the Rehearsal Drawer tabs from conditional mounting to CSS visibility. Switching tabs no longer kills your YouTube or SoundCloud playback.
+- **Filter UX**: Fixed a bug where the visibility filter wrongly defaulted to "Public" for logged-out users, and transitioned UI terminology globally from "My" to "Your" (e.g., Your Library).
+
+### 🧠 Architectural Upgrades
+- **Smart Audio Sync**: Implemented a global Mutual Exclusivity layer using a "Derived State" pattern. Playing a reference track automatically pauses your personal recording (and vice-versa). The UI correctly tracks your last interacted domain so play buttons and mini-player states never fall out of sync.
+- **Data Hoisting**: Re-architected `useAudio()` context and proactively hoisted `useSongRecordings` fetch logic to ensure audio state is globally available before the drawer opens.
+- **Audio Storage**: Expanded Supabase storage limits (25MB) and whitelisted diverse MIME types (MP3, WAV, M4A, FLAC, OGG). Added inline renaming for recordings.
+
+### 🛠️ DevOps & CI/CD
+- **Dockerized Preview Pipelines**: Overhauled `docker-compose.yml` and `dev2preview.sh` to leverage GitHub Actions (`workflow_dispatch`). Branches are now dual-tagged with their branch slug and a rolling `:preview` tag for seamless zero-config test deployments.
+- **SDLC Documentation**: Established industry-standard DevOps guides inside `docs/guides/development-workflow.md`.

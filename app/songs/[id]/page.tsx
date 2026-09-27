@@ -25,6 +25,7 @@ import { SongTechnicalBadges } from '@/components/song/SongTechnicalBadges';
 import { SongMetadataPills } from '@/components/song/SongMetadataPills';
 import { parseArtists } from '@/lib/songs/artistUtils';
 import { recordSongView } from '@/app/actions/recordSongView';
+import { useSongRecordings } from '@/hooks/useSongRecordings';
 import { useRecordingsQuery } from '@/hooks/useRecordingsQuery';
 
 // Enforce a timeout on any promise to prevent infinite loading skeletons
@@ -104,6 +105,8 @@ export default function SongDetailPage() {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isOverflowOpen, setIsOverflowOpen] = useState(false);
     const [isRehearsalDrawerOpen, setIsRehearsalDrawerOpen] = useState(false);
+    const [drawerRequestedTab, setDrawerRequestedTab] = useState<"media" | "recorder" | "auto">("auto");
+    const [isAudioPlaying, setIsAudioPlaying] = useState(false);
     const { isDeleting, deleteSong } = useDeleteSong();
 
     const { user, loading: authLoading } = useAuth();
@@ -206,6 +209,10 @@ export default function SongDetailPage() {
             window.removeEventListener('resize', calculateOverflow);
         };
     }, [song?.title, songLoading, authLoading]);
+    const versions = song?.song_versions || [];
+    const currentVersion = versions[selectedVersionIndex];
+    const { data: recordings } = useSongRecordings(currentVersion?.id);
+
 
     const marqueeStyle = scrollAmount > 0 ? {
         '--scroll-amount': `-${scrollAmount}px`,
@@ -252,9 +259,6 @@ export default function SongDetailPage() {
     }
     if (!song) return notFound();
 
-    const versions = song.song_versions || [];
-    const currentVersion = versions[selectedVersionIndex];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const categories = (song.song_category_map?.map((map: any) => ({
         ...map.categories,
         parent: map.categories?.parent?.name ?? null,
@@ -298,7 +302,7 @@ export default function SongDetailPage() {
     // REMOVED: local getCategoryColor - imported from uiUtils
 
     return (
-        <div className="flex flex-col min-h-screen">
+        <div className="flex flex-col h-full">
             {/* Mobile Header (Visible only on mobile < lg) */}
             <header style={{ top: 'var(--env-banner-height, 0px)', width: '100vw', maxWidth: '100vw' }} className="lg:hidden flex items-center px-4 py-2 sticky left-0 bg-gray-100/95 dark:bg-gray-900/95 backdrop-blur-md z-30 border-b border-gray-200 dark:border-white/5 shadow-lg min-h-[56px]">
                 {/* Title + Author — flex-1 min-w-0 constrains width */}
@@ -333,7 +337,7 @@ export default function SongDetailPage() {
                 }
             `}} />
 
-            <main className="flex-1 min-w-0 lg:overflow-y-auto overflow-y-visible bg-white dark:bg-gray-950">
+            <main className="flex-1 min-w-0 bg-white dark:bg-gray-950">
 
                 {/* Desktop Page Header (Title, Actions) - Visible only on desktop >= lg */}
                 <div className="hidden lg:flex justify-between items-center px-8 py-4 border-b border-gray-200/50 dark:border-gray-800/50 bg-white/50 dark:bg-gray-950/50 sticky top-0 backdrop-blur-md z-10 transition-all">
@@ -373,11 +377,29 @@ export default function SongDetailPage() {
                         )}
                         {id && (
                             <button
-                                onClick={() => setIsRehearsalDrawerOpen(true)}
+                                onClick={() => {
+                                    setDrawerRequestedTab("recorder");
+                                    setIsRehearsalDrawerOpen(true);
+                                }}
                                 className="flex items-center gap-2 px-3 py-2 bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 rounded-lg text-sm font-bold border border-indigo-500/20 transition-all active:scale-[0.98]"
                                 title="Recordings"
                             >
-                                <Mic className="w-4 h-4" /> <span className="hidden xl:inline">Recordings</span>
+                                {isAudioPlaying ? (
+                                    <div className="flex items-end gap-[2px] h-4 w-4 overflow-hidden" title="Playing">
+                                        <div className="w-[3px] bg-indigo-600 dark:bg-indigo-400 animate-[equalizer_1s_ease-in-out_infinite]" />
+                                        <div className="w-[3px] bg-indigo-600 dark:bg-indigo-400 animate-[equalizer_1.2s_ease-in-out_infinite_0.2s]" />
+                                        <div className="w-[3px] bg-indigo-600 dark:bg-indigo-400 animate-[equalizer_0.9s_ease-in-out_infinite_0.4s]" />
+                                        <div className="w-[3px] bg-indigo-600 dark:bg-indigo-400 animate-[equalizer_1.1s_ease-in-out_infinite_0.1s]" />
+                                    </div>
+                                ) : (
+                                    <Mic className="w-4 h-4" />
+                                )}
+                                <span className="hidden xl:inline">Recordings</span>
+                                {recordings && recordings.length > 0 && (
+                                    <span className="ml-1 px-1.5 py-0.5 rounded-md bg-indigo-600/20 text-[10px] font-black">
+                                        {recordings.length}
+                                    </span>
+                                )}
                             </button>
                         )}
                         {user && id && (
@@ -568,6 +590,7 @@ export default function SongDetailPage() {
                             <button
                                 onClick={() => {
                                     setIsOverflowOpen(false);
+                                    setDrawerRequestedTab("recorder");
                                     setIsRehearsalDrawerOpen(true);
                                 }}
                                 className="w-full flex items-center gap-4 px-6 py-4 hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors text-left text-gray-700 dark:text-gray-300"
@@ -608,8 +631,13 @@ export default function SongDetailPage() {
                 <RehearsalDrawer
                     isOpen={isRehearsalDrawerOpen}
                     onClose={() => setIsRehearsalDrawerOpen(false)}
-                    onOpen={() => setIsRehearsalDrawerOpen(true)}
+                    onOpen={() => {
+                        setDrawerRequestedTab("auto");
+                        setIsRehearsalDrawerOpen(true);
+                    }}
+                    requestedTab={drawerRequestedTab}
                     songVersionId={currentVersion.id}
+                    onPlayStateChange={setIsAudioPlaying}
                     songTitle={song.title}
                     songAuthor={song.original_author || 'Traditional'}
                     youtubeUrl={currentVersion.youtube_url}

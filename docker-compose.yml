@@ -6,7 +6,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: ghcr.io/demeesterroeland/sacred-fire-songs:latest
+    image: ghcr.io/demeesterroeland/sacred-fire-songs:${IMAGE_TAG:-preview}
     ports:
       - "3000:3000"
     restart: unless-stopped
@@ -24,7 +24,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.migrator
-    image: ghcr.io/demeesterroeland/sacred-fire-songs-migrator:latest
+    image: ghcr.io/demeesterroeland/sacred-fire-songs-migrator:${IMAGE_TAG:-preview}
     restart: "no"
     depends_on:
       db:

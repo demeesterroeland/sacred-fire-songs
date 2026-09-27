@@ -157,7 +157,7 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true, init
               </Link>
               <Link href="/songs?favorites=true" className="flex items-center gap-3 p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group">
                 <Heart className="w-4 h-4 group-hover:text-red-400" />
-                <span className="text-sm font-medium">My Favorites</span>
+                <span className="text-sm font-medium">Your Favorites</span>
               </Link>
               <Link href="/songs?status=draft" className="flex items-center gap-3 p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group">
                 <FileText className="w-4 h-4 group-hover:text-orange-400" />

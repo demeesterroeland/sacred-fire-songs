@@ -230,3 +230,24 @@ export async function reorderUserRecordings(
 
   return { success: true };
 }
+
+export async function renameUserRecording(recordingId: string, newName: string) {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return { success: false, error: "Unauthorized" };
+  }
+
+  const { error } = await supabase
+    .from("user_recordings")
+    .update({ recording_name: newName })
+    .eq("id", recordingId)
+    .eq("user_id", user.id);
+
+  if (error) {
+    console.error("[rehearsal] Error renaming recording:", error);
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
+}

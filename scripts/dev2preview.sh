@@ -7,8 +7,7 @@
 # to deploy on the preview environment.
 #
 # Usage:
-#   scripts/deploy-to-preview.sh [--wait] [--force]
-#     --wait   Wait for the GitHub Actions Docker build workflow to finish
+#   scripts/deploy-to-preview.sh [--force]
 #     --force  Allow uncommitted changes (git stash will NOT be used)
 #
 set -euo pipefail
@@ -16,18 +15,16 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 
-WAIT=0
+
 FORCE=0
 
 for arg in "$@"; do
   case "$arg" in
-    --wait) WAIT=1 ;;
     --force) FORCE=1 ;;
     -h|--help)
-      echo "Usage: scripts/deploy-to-preview.sh [--wait] [--force]"
+      echo "Usage: scripts/deploy-to-preview.sh [--force]"
       echo ""
       echo "Options:"
-      echo "  --wait   Wait for the GitHub Actions Docker build workflow to finish"
       echo "  --force  Allow uncommitted changes (continues with committed changes only)"
       echo "  -h, --help  Show this help message"
       exit 0
@@ -71,7 +68,11 @@ fi
 
 # 4. Push branch to remote
 echo "📤 Pushing branch '$BRANCH' to origin..."
+
 git push -u origin "$BRANCH"
+echo "🚀 Triggering Docker build explicitly via GitHub Actions..."
+
+gh workflow run docker.yml --ref "$BRANCH" -f version="preview" || { echo "❌ Failed to trigger workflow."; exit 1; }
 
 # 5. Compute Docker image tag based on GitHub Actions slugify logic
 # (docker/metadata-action slugifies branch refs by replacing non-alphanumeric chars with '-' and lowercasing)
@@ -87,24 +88,19 @@ echo "   Migrator: ${MIGRATOR_NAME}"
 echo "======================================================================"
 echo ""
 
-# 6. Monitor workflow if --wait or gh CLI available
+# 6. Monitor workflow if gh CLI available
 if command -v gh >/dev/null 2>&1; then
   echo "🔍 Looking up GitHub Actions Docker build workflow..."
-  sleep 3 # Give GitHub a moment to register the push event
+  sleep 5 # Give GitHub a moment to queue the workflow run
   RUN_ID="$(gh run list --workflow=docker.yml --branch "$BRANCH" --limit 1 --json databaseId -q '.[0].databaseId' 2>/dev/null || true)"
 
   if [[ -n "$RUN_ID" && "$RUN_ID" != "null" ]]; then
     RUN_URL="$(gh run view "$RUN_ID" --json url -q .url 2>/dev/null || true)"
     echo "🔗 GitHub Actions Run: ${RUN_URL:-#$RUN_ID}"
 
-    if [[ "$WAIT" -eq 1 ]]; then
       echo "⏳ Waiting for Docker build to complete..."
       gh run watch "$RUN_ID"
       echo "✅ Docker image build complete!"
-    else
-      echo "💡 Tip: Run 'scripts/deploy-to-preview.sh --wait' to watch the build until completion,"
-      echo "   or run 'gh run watch $RUN_ID'."
-    fi
   else
     echo "ℹ️  Docker build run not detected yet. Check: https://github.com/demeesterroeland/sacred-fire-songs/actions"
   fi
@@ -116,8 +112,8 @@ fi
 echo ""
 echo "📋 Preview Server Deployment Steps:"
 echo "----------------------------------------------------------------------"
-echo "1. On the preview server, update your image tag to:"
-echo "   ${IMAGE_TAG}"
+echo "1. Your preview server can simply use the rolling ':preview' tag!"
+echo "   (Make sure your .env has IMAGE_TAG=preview)"
 echo ""
 echo "2. Pull and start containers:"
 echo "   docker compose pull"

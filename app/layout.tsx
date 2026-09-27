@@ -44,6 +44,7 @@ import MobileBottomNav from "@/components/common/MobileBottomNav";
 import QueryProvider from "@/components/providers/QueryProvider";
 import { SidebarProvider } from "@/context/SidebarContext";
 import { UserPreferencesProvider } from "@/context/UserPreferencesContext";
+import { AudioProvider } from "@/components/song/AudioProvider";
 import EnvironmentBanner from "@/components/common/EnvironmentBanner";
 import ServiceWorkerRegistrar from "@/components/providers/ServiceWorkerRegistrar";
 import SidebarOverlay from "@/components/common/SidebarOverlay";
@@ -112,36 +113,38 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <ServiceWorkerRegistrar />
         <EnvironmentBanner />
         <UserPreferencesProvider>
-          <SidebarProvider>
-            <QueryProvider>
-              <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 font-sans selection:bg-red-500/30 overflow-x-clip">
-                {/* Top navigation bar (full width, like Immich) */}
-                <Suspense>
-                  <Header initialUser={initialUser} />
-                </Suspense>
+          <AudioProvider>
+            <SidebarProvider>
+              <QueryProvider>
+                <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 font-sans selection:bg-red-500/30 overflow-x-clip">
+                  {/* Top navigation bar (full width, like Immich) */}
+                  <Suspense>
+                    <Header initialUser={initialUser} />
+                  </Suspense>
 
-                {/* Grid: sidebar + main content */}
-                <div className="relative grid grid-cols-[0_1fr] lg:grid-cols-[16rem_1fr] lg:h-[calc(100dvh-var(--navbar-height))]">
-                  <Sidebar />
+                  {/* Grid: sidebar + main content */}
+                  <div className="relative grid grid-cols-[0_1fr] lg:grid-cols-[16rem_1fr] lg:h-[calc(100dvh-var(--navbar-height))]">
+                    <Sidebar />
 
-                  {/* Mobile overlay when sidebar is open */}
-                  <SidebarOverlay />
+                    {/* Mobile overlay when sidebar is open */}
+                    <SidebarOverlay />
 
-                  <main className="relative min-w-0 overflow-y-visible lg:overflow-y-auto pb-16 lg:pb-0 col-start-2">
-                    {children}
-                  </main>
+                    <main className="relative min-w-0 overflow-y-visible lg:overflow-y-auto pb-16 lg:pb-0 col-start-2">
+                      {children}
+                    </main>
+                  </div>
+
+                  {/* Global search modal (non-/songs pages) */}
+                  <Suspense>
+                    <GlobalSearchModal />
+                  </Suspense>
+
+                  {/* Mobile bottom navigation */}
+                  <MobileBottomNav />
                 </div>
-
-                {/* Global search modal (non-/songs pages) */}
-                <Suspense>
-                  <GlobalSearchModal />
-                </Suspense>
-
-                {/* Mobile bottom navigation */}
-                <MobileBottomNav />
-              </div>
-            </QueryProvider>
-          </SidebarProvider>
+              </QueryProvider>
+            </SidebarProvider>
+          </AudioProvider>
           <ThemedToaster />
           <SpeedInsights />
         </UserPreferencesProvider>

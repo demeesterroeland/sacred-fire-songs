@@ -16,7 +16,7 @@ interface UseSongsFilterOptions {
 
 export function useSongsFilter({ songs, userId, favoriteIds, userRecordingCompositionIds = new Set(), viewedSongIds, sortBy }: UseSongsFilterOptions) {
   const defaultState: SongFilterState = {
-    status: userId ? 'all' : 'public',
+    status: 'all',
     search: '',
     category: undefined,
     tags: [],
@@ -37,7 +37,7 @@ export function useSongsFilter({ songs, userId, favoriteIds, userRecordingCompos
       parseUrl: (params) => ({
         category: params.get('category') || undefined,
         tags: params.get('tag') ? params.get('tag')!.split(',').filter(Boolean) : [],
-        status: (params.get('status') as SongFilterState['status']) || (userId ? 'all' : 'public'),
+        status: (params.get('status') as SongFilterState['status']) || ('all'),
         search: params.get('search') || '',
         chords: params.get('chords') === 'true',
         melody: params.get('melody') === 'true',
@@ -50,7 +50,7 @@ export function useSongsFilter({ songs, userId, favoriteIds, userRecordingCompos
       serializeUrl: (state) => ({
         category: state.category || '',
         tag: state.tags?.join(',') || '',
-        status: state.status === (userId ? 'all' : 'public') ? '' : state.status || '',
+        status: state.status === ('all') ? '' : state.status || '',
         search: state.search || '',
         chords: state.chords ? 'true' : '',
         melody: state.melody ? 'true' : '',

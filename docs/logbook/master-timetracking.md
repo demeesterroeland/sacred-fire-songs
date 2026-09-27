@@ -84,4 +84,6 @@
 | **August 14, 2026** | **Feature/UX**: Multi-Artist Tagging (#195, #228), `<BasePill>` Architecture Refactoring, Interactive Filter Links & Tooltips, Delete Button Relocation, Draft Empty State & Guest Flow Improvements, Toast Action Links, and Issue #229 Creation. | ~2.5 Hours | ✅ Completed |
 | **September 26, 2026** | **Bug Fix/UX**: Rehearsal Playback & SongCard Hydration Fix (#230, PR #236) — Fixed SongCard nested link hydration error, handled missing storage audio gracefully with badges/tooltips, added download recording button, and expanded E2E suite coverage | ~3.0 Hours | ✅ Completed |
 
-| **Total** | **Development + AI Collaboration** | **~162.75 Hours** | |
+| **September 27, 2026** | **Feature/Architecture**: Unified Audio Experience (#237) — Implemented global audio context, Source Switcher dropdown with dark glassmorphism, hoisted data fetching, fixed CSS progress bar clipping, resolved double scrollbars, and consolidated Playwright E2E test suites via multi-agent sub-branches. | ~4.0 Hours | ✅ Completed |
+
+| **Total** | **Development + AI Collaboration** | **~166.75 Hours** | |

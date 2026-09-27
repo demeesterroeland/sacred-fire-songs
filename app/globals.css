@@ -52,3 +52,7 @@ body {
 .heart-glow {
   animation: heart-glow 2.5s ease-in-out infinite;
 }
+@keyframes equalizer {
+  0%, 100% { height: 20%; }
+  50% { height: 100%; }
+}

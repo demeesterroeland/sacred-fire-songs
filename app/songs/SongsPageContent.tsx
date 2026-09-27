@@ -50,7 +50,7 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
     // Helper: reset draft to empty/default state
     const resetDraft = () => {
         setDraft({
-            status: user?.id ? 'all' : 'public',
+            status: 'all',
             search: '',
             category: undefined,
             tags: [],
