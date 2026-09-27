@@ -68,7 +68,11 @@ fi
 
 # 4. Push branch to remote
 echo "📤 Pushing branch '$BRANCH' to origin..."
+
 git push -u origin "$BRANCH"
+echo "🚀 Triggering Docker build explicitly via GitHub Actions..."
+
+gh workflow run docker.yml --ref "$BRANCH" || { echo "❌ Failed to trigger workflow."; exit 1; }
 
 # 5. Compute Docker image tag based on GitHub Actions slugify logic
 # (docker/metadata-action slugifies branch refs by replacing non-alphanumeric chars with '-' and lowercasing)
@@ -87,7 +91,7 @@ echo ""
 # 6. Monitor workflow if gh CLI available
 if command -v gh >/dev/null 2>&1; then
   echo "🔍 Looking up GitHub Actions Docker build workflow..."
-  sleep 3 # Give GitHub a moment to register the push event
+  sleep 5 # Give GitHub a moment to queue the workflow run
   RUN_ID="$(gh run list --workflow=docker.yml --branch "$BRANCH" --limit 1 --json databaseId -q '.[0].databaseId' 2>/dev/null || true)"
 
   if [[ -n "$RUN_ID" && "$RUN_ID" != "null" ]]; then
