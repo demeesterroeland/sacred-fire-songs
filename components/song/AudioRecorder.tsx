@@ -13,6 +13,7 @@ interface AudioRecorderProps {
 export default function AudioRecorder({ songVersionId, onRecordingSaved }: AudioRecorderProps) {
   const [activeTab, setActiveTab] = useState<"record" | "upload">("record");
   const [recordingState, setRecordingState] = useState<"idle" | "recording" | "paused" | "stopped">("idle");
+  const [countdown, setCountdown] = useState<number | null>(null);
   const [duration, setDuration] = useState(0);
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [recordingName, setRecordingName] = useState("");
@@ -23,6 +24,7 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
   const streamRef = useRef<MediaStream | null>(null);
   const audioChunksRef = useRef<Blob[]>([]);
   const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const audioBlobRef = useRef<Blob | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
 
@@ -41,63 +43,83 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
     audioBlobRef.current = null;
 
     try {
+      // 1. Instantly ask for microphone and power it up. (This causes the hardware pop)
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
 
-      let options = {};
-      if (MediaRecorder.isTypeSupported("audio/webm")) {
-        options = { mimeType: "audio/webm" };
-      } else if (MediaRecorder.isTypeSupported("audio/mp4")) {
-        options = { mimeType: "audio/mp4" };
-      }
+      // 2. Start the visual countdown
+      setCountdown(3);
+      let currentCount = 3;
 
-      const mediaRecorder = new MediaRecorder(stream, options);
-      mediaRecorderRef.current = mediaRecorder;
-
-      mediaRecorder.ondataavailable = (event) => {
-        if (event.data && event.data.size > 0) {
-          audioChunksRef.current.push(event.data);
-        }
-      };
-
-      mediaRecorder.onstop = () => {
-        const mimeType = mediaRecorder.mimeType || "audio/webm";
-        const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
-        audioBlobRef.current = audioBlob;
-        
-        const localUrl = URL.createObjectURL(audioBlob);
-        setAudioUrl(localUrl);
-
-        // Pre-fill default recording name with timestamp
-        const timeString = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        const dateString = new Date().toLocaleDateString([], { month: 'short', day: 'numeric' });
-        setRecordingName(`Recording - ${dateString} ${timeString}`);
-      };
-
-      mediaRecorder.start(200); // chunk chunks every 200ms
-      setRecordingState("recording");
-      setDuration(0);
-
-      const timerIntervalMs = typeof window !== "undefined" && (window as any).__E2E_FAST_TIMER__ ? 10 : 1000;
-
-      // Start timer with 3-minute limit check (180 seconds)
-      timerIntervalRef.current = setInterval(() => {
-        setDuration((prev) => {
-          if (prev + 1 >= 180) {
-            if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
-            setTimeout(() => {
-              stopRecording();
-              toast.info("Recording automatically stopped at the 3-minute limit.");
-            }, 0);
-            return 180;
+      countdownIntervalRef.current = setInterval(() => {
+        currentCount -= 1;
+        if (currentCount > 0) {
+          setCountdown(currentCount);
+        } else {
+          // 3. Countdown finished. Mic has been warm for 3 seconds. Start capturing!
+          if (countdownIntervalRef.current) {
+            clearInterval(countdownIntervalRef.current);
+            countdownIntervalRef.current = null;
           }
-          return prev + 1;
-        });
-      }, timerIntervalMs);
+          setCountdown(null);
+
+          let options = {};
+          if (MediaRecorder.isTypeSupported("audio/webm")) {
+            options = { mimeType: "audio/webm" };
+          } else if (MediaRecorder.isTypeSupported("audio/mp4")) {
+            options = { mimeType: "audio/mp4" };
+          }
+
+          const mediaRecorder = new MediaRecorder(stream, options);
+          mediaRecorderRef.current = mediaRecorder;
+
+          mediaRecorder.ondataavailable = (event) => {
+            if (event.data && event.data.size > 0) {
+              audioChunksRef.current.push(event.data);
+            }
+          };
+
+          mediaRecorder.onstop = () => {
+            const mimeType = mediaRecorder.mimeType || "audio/webm";
+            const audioBlob = new Blob(audioChunksRef.current, { type: mimeType });
+            audioBlobRef.current = audioBlob;
+            
+            const localUrl = URL.createObjectURL(audioBlob);
+            setAudioUrl(localUrl);
+
+            // Pre-fill default recording name with timestamp
+            const timeString = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const dateString = new Date().toLocaleDateString([], { month: 'short', day: 'numeric' });
+            setRecordingName(`Recording - ${dateString} ${timeString}`);
+          };
+
+          mediaRecorder.start(200); // chunk chunks every 200ms
+          setRecordingState("recording");
+          setDuration(0);
+
+          const timerIntervalMs = typeof window !== "undefined" && (window as any).__E2E_FAST_TIMER__ ? 10 : 1000;
+
+          // Start timer with 3-minute limit check (180 seconds)
+          timerIntervalRef.current = setInterval(() => {
+            setDuration((prev) => {
+              if (prev + 1 >= 180) {
+                if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+                setTimeout(() => {
+                  stopRecording();
+                  toast.info("Recording automatically stopped at the 3-minute limit.");
+                }, 0);
+                return 180;
+              }
+              return prev + 1;
+            });
+          }, timerIntervalMs);
+        }
+      }, 1000);
     } catch (err: any) {
       console.error("[recorder] Microphone access failed:", err);
       setErrorMsg("Failed to access microphone. Please check your permissions.");
       setRecordingState("idle");
+      setCountdown(null);
     }
   };
 
@@ -149,6 +171,7 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
   // Discard recording / uploaded file
   const discardRecording = () => {
     setRecordingState("idle");
+    setCountdown(null);
     setDuration(0);
     setAudioUrl(null);
     audioBlobRef.current = null;
@@ -157,6 +180,7 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
     if (fileInputRef.current) fileInputRef.current.value = "";
 
     if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
+    if (countdownIntervalRef.current) clearInterval(countdownIntervalRef.current);
     if (streamRef.current) {
       streamRef.current.getTracks().forEach((track) => track.stop());
     }
@@ -377,12 +401,21 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
           {/* Core Action Button (Record / Pause / Play) */}
           {recordingState === "idle" && (
             <button
-              onClick={startRecording}
-              className="relative p-5 rounded-full bg-red-500 hover:bg-red-400 text-white shadow-lg shadow-red-500/25 transition-all duration-300 active:scale-95 group"
+              onClick={countdown !== null ? undefined : startRecording}
+              disabled={countdown !== null}
+              className={`relative p-5 rounded-full text-white shadow-lg shadow-red-500/25 transition-all duration-300 ${countdown !== null ? 'bg-red-400 cursor-default scale-110' : 'bg-red-500 hover:bg-red-400 active:scale-95 group'}`}
               title="Start recording"
             >
-              <div className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-20 group-hover:scale-105 duration-1000" />
-              <Mic className="w-6 h-6 relative z-10" />
+              {countdown === null && (
+                <div className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-20 group-hover:scale-105 duration-1000" />
+              )}
+              {countdown !== null ? (
+                <span className="w-6 h-6 flex items-center justify-center font-bold text-xl relative z-10 animate-pulse">
+                  {countdown}
+                </span>
+              ) : (
+                <Mic className="w-6 h-6 relative z-10" />
+              )}
             </button>
           )}
 
