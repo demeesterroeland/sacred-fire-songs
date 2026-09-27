@@ -244,6 +244,7 @@ export default function RehearsalDrawer({
   const [isMediaPlaying, setIsMediaPlaying] = useState(false);
   const [mediaCurrentTime, setMediaCurrentTime] = useState(0);
   const [mediaDuration, setMediaDuration] = useState(1);
+  const [activeDomain, setActiveDomain] = useState<'recording' | 'media' | null>(null);
 
   const hasMedia = !!(youtubeUrl || spotifyUrl || soundcloudUrl);
 
@@ -342,33 +343,35 @@ export default function RehearsalDrawer({
   // Pattern: Derived State — computed deterministically from authoritative state.
   // ─────────────────────────────────────────────────────────────────────────
   const nowPlaying = useMemo(() => {
-    if (activePlaybackId) {
-      const rec = recordings.find(r => r.id === activePlaybackId);
-      return {
-        type: 'recording' as const,
-        isPlaying: isRecordingPlaying,
-        label: rec?.recording_name ?? 'User Recording',
-        recordingId: activePlaybackId,
-        source: null as null,
-        currentTime: recordingCurrentTime,
-        duration: recordingDuration,
-      };
-    }
-    if (playingSource) {
-      const label =
-        playingSource === 'youtube' ? 'YouTube Reference' :
-        playingSource === 'soundcloud' ? 'SoundCloud Reference' :
-        'Spotify Reference';
-      return {
-        type: 'media' as const,
-        isPlaying: isMediaPlaying,
-        label,
-        recordingId: null as null,
-        source: playingSource,
-        currentTime: mediaCurrentTime,
-        duration: mediaDuration,
-      };
-    }
+    // Build the potential objects for both domains if they exist
+    const recordingInfo = activePlaybackId ? {
+      type: 'recording' as const,
+      isPlaying: isRecordingPlaying,
+      label: recordings.find(r => r.id === activePlaybackId)?.recording_name ?? 'User Recording',
+      recordingId: activePlaybackId,
+      source: null as null,
+      currentTime: recordingCurrentTime,
+      duration: recordingDuration,
+    } : null;
+
+    const mediaInfo = playingSource ? {
+      type: 'media' as const,
+      isPlaying: isMediaPlaying,
+      label: playingSource === 'youtube' ? 'YouTube Reference' : playingSource === 'soundcloud' ? 'SoundCloud Reference' : 'Spotify Reference',
+      recordingId: null as null,
+      source: playingSource,
+      currentTime: mediaCurrentTime,
+      duration: mediaDuration,
+    } : null;
+
+    // Use activeDomain to decide which one wins if BOTH exist
+    if (activeDomain === 'media' && mediaInfo) return mediaInfo;
+    if (activeDomain === 'recording' && recordingInfo) return recordingInfo;
+    
+    // Fallbacks if one exists but it wasn't the active domain (e.g. initial load)
+    if (recordingInfo) return recordingInfo;
+    if (mediaInfo) return mediaInfo;
+
     const firstRec = recordings[0];
     return {
       type: 'idle' as const,
@@ -382,7 +385,7 @@ export default function RehearsalDrawer({
   }, [
     activePlaybackId, isRecordingPlaying, recordingCurrentTime, recordingDuration,
     playingSource, isMediaPlaying, mediaCurrentTime, mediaDuration,
-    recordings, hasMedia,
+    recordings, hasMedia, activeDomain,
   ]);
   const [isPendingOrder, startOrderTransition] = useTransition();
 
@@ -655,17 +658,23 @@ export default function RehearsalDrawer({
     const recordingJustStarted = isRecordingPlaying && !prevIsRecordingPlaying.current;
     const mediaJustStarted = isMediaPlaying && !prevIsMediaPlaying.current;
 
-    if (recordingJustStarted && isMediaPlaying) {
-      // Recording just started → pause any active iframe and clear its state
-      if (playingSource === "youtube") pauseYouTube();
-      else if (playingSource === "soundcloud") pauseSoundCloud();
-      setIsMediaPlaying(false);
-      setPlayingSource(null);
+    if (recordingJustStarted) {
+      setActiveDomain('recording');
+      if (isMediaPlaying) {
+        // Recording just started → pause any active iframe and clear its state
+        if (playingSource === "youtube") pauseYouTube();
+        else if (playingSource === "soundcloud") pauseSoundCloud();
+        setIsMediaPlaying(false);
+        setPlayingSource(null);
+      }
     }
 
-    if (mediaJustStarted && isRecordingPlaying) {
-      // Iframe media just started → pause any active recording
-      pauseActiveRecording();
+    if (mediaJustStarted) {
+      setActiveDomain('media');
+      if (isRecordingPlaying) {
+        // Iframe media just started → pause any active recording
+        pauseActiveRecording();
+      }
     }
 
     prevIsRecordingPlaying.current = isRecordingPlaying;
