@@ -8,6 +8,7 @@ export interface UserRecording {
   storage_path: string;
   position?: number;
   file_size_bytes?: number;
+  duration_seconds?: number;
   created_at: string;
   audioUrl?: string; // Resolved temporary signed URL or public URL
 }
@@ -86,7 +87,8 @@ export async function getUserRecordings(songVersionId: string): Promise<UserReco
 export async function uploadRehearsalRecording(
   songVersionId: string,
   name: string,
-  blob: Blob
+  blob: Blob,
+  durationSeconds?: number
 ): Promise<{ recording: UserRecording | null; error: string | null }> {
   const supabase = createClient();
   const { data: { user }, error: authError } = await supabase.auth.getUser();
@@ -145,6 +147,7 @@ export async function uploadRehearsalRecording(
       recording_name: name || `Rehearsal - ${new Date().toLocaleDateString()}`,
       storage_path: storagePath,
       file_size_bytes: blob.size || 0,
+      duration_seconds: durationSeconds || 0,
     })
     .select()
     .single();

@@ -147,10 +147,27 @@ function SortableRecordingItem({
             {!rec.audioUrl && <span className="ml-2 text-[10px] uppercase font-bold text-red-500 bg-red-500/10 px-1.5 py-0.5 rounded">Missing File</span>}
           </h4>
         )}
-        <span className="text-[10px] text-gray-400 dark:text-gray-500 flex items-center gap-1.5 mt-0.5 font-medium">
-          <Calendar className="w-3 h-3" />
-          {formatDate(rec.created_at)}
-        </span>
+        <div className="text-[10px] text-gray-400 dark:text-gray-500 flex items-center gap-1.5 mt-0.5 font-medium flex-wrap">
+          <div className="flex items-center gap-1">
+            <Calendar className="w-3 h-3" />
+            {formatDate(rec.created_at)}
+          </div>
+          {(rec.duration_seconds || rec.file_size_bytes) && (
+            <span className="opacity-50 mx-0.5">•</span>
+          )}
+          {rec.duration_seconds ? (
+            <span>
+              {Math.floor(rec.duration_seconds / 60).toString().padStart(2, '0')}:
+              {(rec.duration_seconds % 60).toString().padStart(2, '0')}
+            </span>
+          ) : null}
+          {rec.duration_seconds && rec.file_size_bytes ? (
+            <span className="opacity-50 mx-0.5">•</span>
+          ) : null}
+          {rec.file_size_bytes ? (
+            <span>{(rec.file_size_bytes / (1024 * 1024)).toFixed(1)} MB</span>
+          ) : null}
+        </div>
       </div>
 
       {/* Edit Button */}

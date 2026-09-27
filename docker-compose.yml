@@ -3,7 +3,7 @@
 
 services:
   app:
-    image: ghcr.io/demeesterroeland/sacred-fire-songs:${IMAGE_TAG:-preview}
+    image: ghcr.io/demeesterroeland/sacred-fire-songs-app:${IMAGE_TAG:-preview}
     ports:
       - "3000:3000"
     restart: unless-stopped
