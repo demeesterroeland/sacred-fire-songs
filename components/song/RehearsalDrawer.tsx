@@ -34,6 +34,7 @@ import { CSS } from "@dnd-kit/utilities";
 function SortableRecordingItem({
   rec,
   activePlaybackId,
+  isRecordingPlaying,
   deletingId,
   downloadingId,
   handleTogglePlay,
@@ -44,6 +45,7 @@ function SortableRecordingItem({
 }: {
   rec: UserRecording;
   activePlaybackId: string | null;
+  isRecordingPlaying: boolean;
   deletingId: string | null;
   downloadingId: string | null;
   handleTogglePlay: (id: string, url: string | undefined) => void;
@@ -94,13 +96,13 @@ function SortableRecordingItem({
         className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 shadow-sm shrink-0 ${
           !rec.audioUrl
             ? "bg-gray-100 dark:bg-gray-800 text-gray-400 opacity-50 cursor-not-allowed"
-            : activePlaybackId === rec.id
+            : activePlaybackId === rec.id && isRecordingPlaying
             ? "bg-indigo-600 hover:bg-indigo-500 text-white active:scale-95"
             : "bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 text-indigo-600 dark:text-indigo-400 active:scale-95"
         }`}
         title={!rec.audioUrl ? "Audio file missing or corrupted" : "Play"}
       >
-        {activePlaybackId === rec.id ? (
+        {activePlaybackId === rec.id && isRecordingPlaying ? (
           <Pause className="w-4 h-4 fill-current" />
         ) : (
           <Play className="w-4 h-4 fill-current translate-x-0.5" />
@@ -941,6 +943,7 @@ export default function RehearsalDrawer({
                                   key={rec.id}
                                   rec={rec}
                                   activePlaybackId={activePlaybackId}
+                                  isRecordingPlaying={isRecordingPlaying}
                                   deletingId={deletingId}
                                   downloadingId={downloadingId}
                                   handleTogglePlay={(id, url) => { const rec = recordings.find(r => r.id === id); if (rec) contextHandleTogglePlay(rec, url); }}
