@@ -2879,3 +2879,15 @@ This session addressed a critical bug where slow Supabase Auth calls (due to Tai
    - Resolved merge conflicts and successfully integrated the subagent branches back into `feat/237-unified-audio-experience`.
    - Adapted the Playwright E2E suite (`recording.spec.ts` & `media-player.spec.ts`) to fully cover the new Source Switcher interactions, audio continuity states, and updated terminology placeholders.
    - All tests run and pass against a full Next.js production build (`npm run test:e2e`).
+
+## September 27, 2026 - Issue #237: Unified Audio Experience
+
+**Task Overview**
+Refactored the Rehearsal Drawer and Mini-Player to create a seamless, unified playback experience. Merged the external reference tracks (YouTube, SoundCloud, Spotify) and the user's personal Rehearsal Recordings into a single global audio context, preventing overlapping audio.
+
+**Technical Details**
+- **Smart Audio Sync (Derived State)**: Implemented a global Mutual Exclusivity layer. We introduced a `nowPlaying` object using the Derived State pattern that computes the Single Source of Truth from `activePlaybackId` and `playingSource`. It uses `activeDomain` to track the last-interacted source, ensuring that playing a reference track automatically pauses your personal recording (and vice-versa).
+- **Mini-Player Enhancements**: Added dynamic color theming (Orange for reference tracks, Indigo for user recordings) and a seamless Source Switcher dropdown to hop between YouTube, SoundCloud, Spotify, and personal recordings.
+- **Continuous Playback (#248)**: Switched Rehearsal Drawer tabs from conditional mounting to CSS visibility (`visibility: hidden`). Switching tabs no longer kills YouTube or SoundCloud playback, and fixes the YouTube "black screen" bug.
+- **Header Indicators**: The top navigation microphone icon now actively tracks global audio state, transforming into a live equalizer when playing audio.
+- **DevOps Improvements**: Overhauled preview deployments by dual-tagging Docker images (`branch-slug` and `preview`) via GitHub Actions. Documented the SDLC in `docs/guides/development-workflow.md`.
