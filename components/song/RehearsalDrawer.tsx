@@ -40,6 +40,7 @@ function SortableRecordingItem({
   handleTogglePlay,
   handleDelete,
   handleDownload,
+  handleRename,
   formatDate,
   isCustomSort,
 }: {
