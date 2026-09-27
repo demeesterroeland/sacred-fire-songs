@@ -1140,17 +1140,20 @@ export default function RehearsalDrawer({
           </div>
 
           {/* Equalizer & Source Switcher Dropdown */}
-          <div className="flex items-center gap-3 flex-1 min-w-0 h-full py-2">
-            <div className="flex gap-0.5 items-end h-4 w-4 shrink-0 justify-center cursor-pointer" onClick={onOpen}>
+          <div className="flex items-center gap-3 flex-1 min-w-0 h-full py-2 cursor-pointer" onClick={onOpen}>
+            <div className="flex gap-0.5 items-end h-4 w-4 shrink-0 justify-center cursor-pointer">
               <span className={`w-[2px] bg-white rounded-full transition-all duration-300 ${isMediaPlaying || (activePlaybackId && isRecordingPlaying) ? 'animate-eq-bar-1' : 'h-1.5'}`} />
               <span className={`w-[2px] bg-white rounded-full transition-all duration-300 ${isMediaPlaying || (activePlaybackId && isRecordingPlaying) ? 'animate-eq-bar-2' : 'h-3'}`} />
               <span className={`w-[2px] bg-white rounded-full transition-all duration-300 ${isMediaPlaying || (activePlaybackId && isRecordingPlaying) ? 'animate-eq-bar-3' : 'h-2'}`} />
-
             </div>
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <div data-testid="mini-source-switcher" className="flex flex-col text-left min-w-0 cursor-pointer hover:bg-white/10 rounded px-2 -mx-2 transition-colors">
+                <div 
+                  data-testid="mini-source-switcher" 
+                  className="flex flex-col text-left min-w-0 cursor-pointer hover:bg-white/10 rounded px-2 -mx-2 transition-colors"
+                  onClick={(e) => e.stopPropagation()}
+                >
                   <div className="flex items-center gap-1">
                     <span className="text-xs font-black truncate">{songTitle}</span>
                     <ChevronDown className="w-3 h-3 opacity-70 shrink-0" />
