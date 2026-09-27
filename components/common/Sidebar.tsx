@@ -72,7 +72,13 @@ export default function Sidebar() {
                 <div className="ps-7 pe-4 pt-6 border-t border-gray-100 dark:border-gray-900/60 mt-auto">
                     <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors">
                         <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/80 animate-pulse" />
-                        v{packageJson.version}
+                        {process.env.NEXT_PUBLIC_APP_VERSION ? (
+                            <span>
+                                {process.env.NEXT_PUBLIC_APP_VERSION.replace(/-([a-f0-9]{40})$/, (match, p1) => `-${p1.substring(0, 7)}`)}
+                            </span>
+                        ) : (
+                            <span>v{packageJson.version}</span>
+                        )}
                     </span>
                 </div>
             </div>
