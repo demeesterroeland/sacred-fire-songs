@@ -254,23 +254,21 @@ export default function SearchFiltersModal({
                                     count={recordingsCount ? recordingsCount : undefined}
                                     activeColor="violet"
                                 />
-                            </div>
-
-                            <div className="flex items-center gap-3">
-                                <span className="text-[11px] font-semibold text-gray-400 uppercase tracking-wider">Song Status:</span>
-                                <div className="bg-gray-200/80 dark:bg-gray-900/80 p-1 rounded-xl border border-gray-300 dark:border-gray-800 inline-flex shadow-inner">
-                                    {(['all', 'public', 'draft'] as const).map((statusOption) => (
-                                        <button
-                                            key={statusOption}
-                                            onClick={() => setFilter('status', statusOption)}
-                                            className={`px-4 py-1.5 text-[11px] font-bold rounded-lg transition-all capitalize ${state.status === statusOption
-                                                ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm ring-1 ring-gray-200 dark:ring-white/5'
-                                                : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
-                                                }`}
-                                        >
-                                            {statusOption}
-                                        </button>
-                                    ))}
+                                <div className="flex items-center justify-end">
+                                    <div className="w-full bg-gray-200/80 dark:bg-gray-900/80 p-1 rounded-xl border border-gray-300 dark:border-gray-800 flex justify-between shadow-inner h-full items-center">
+                                        {(['all', 'public', 'draft'] as const).map((statusOption) => (
+                                            <button
+                                                key={statusOption}
+                                                onClick={() => setFilter('status', statusOption)}
+                                                className={`flex-1 px-2 py-1.5 text-[11px] font-bold rounded-lg transition-all capitalize ${state.status === statusOption
+                                                    ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm ring-1 ring-gray-200 dark:ring-white/5'
+                                                    : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                                                    }`}
+                                            >
+                                                {statusOption}
+                                            </button>
+                                        ))}
+                                    </div>
                                 </div>
                             </div>
                         </section>
