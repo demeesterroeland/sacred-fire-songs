@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useTransition } from "react";
+import React, { useState, useEffect, useTransition, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { X, Music, Trash2, Pencil, Calendar, Play, Pause, Lock, RotateCcw, RotateCw, GripVertical, Download, ChevronUp, ChevronDown, Check } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
@@ -333,6 +333,57 @@ export default function RehearsalDrawer({
   }, [fetchedRecordings]);
 
   const hasAnyAudioSource = hasMedia || recordings.length > 0;
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // SINGLE SOURCE OF TRUTH — nowPlaying
+  // Every consumer (mini-player color, equalizer, subtitle, play button,
+  // progress bar, checkmark in dropdown) MUST read from this one object.
+  // This eliminates all desync between the iframe state and recording state.
+  // Pattern: Derived State — computed deterministically from authoritative state.
+  // ─────────────────────────────────────────────────────────────────────────
+  const nowPlaying = useMemo(() => {
+    if (activePlaybackId) {
+      const rec = recordings.find(r => r.id === activePlaybackId);
+      return {
+        type: 'recording' as const,
+        isPlaying: isRecordingPlaying,
+        label: rec?.recording_name ?? 'User Recording',
+        recordingId: activePlaybackId,
+        source: null as null,
+        currentTime: recordingCurrentTime,
+        duration: recordingDuration,
+      };
+    }
+    if (playingSource) {
+      const label =
+        playingSource === 'youtube' ? 'YouTube Reference' :
+        playingSource === 'soundcloud' ? 'SoundCloud Reference' :
+        'Spotify Reference';
+      return {
+        type: 'media' as const,
+        isPlaying: isMediaPlaying,
+        label,
+        recordingId: null as null,
+        source: playingSource,
+        currentTime: mediaCurrentTime,
+        duration: mediaDuration,
+      };
+    }
+    const firstRec = recordings[0];
+    return {
+      type: 'idle' as const,
+      isPlaying: false,
+      label: hasMedia ? 'Select Source' : (firstRec?.recording_name ?? 'Select Source'),
+      recordingId: null as null,
+      source: null as null,
+      currentTime: 0,
+      duration: 1,
+    };
+  }, [
+    activePlaybackId, isRecordingPlaying, recordingCurrentTime, recordingDuration,
+    playingSource, isMediaPlaying, mediaCurrentTime, mediaDuration,
+    recordings, hasMedia,
+  ]);
   const [isPendingOrder, startOrderTransition] = useTransition();
 
   const dndSensors = useSensors(
@@ -1180,14 +1231,14 @@ export default function RehearsalDrawer({
 
         <div 
           data-testid="bottom-mini-player"
-          className={`fixed bottom-[calc(var(--bottom-nav-height,3.5rem)+env(safe-area-inset-bottom,0px))] lg:bottom-4 left-0 right-0 lg:left-1/2 lg:-translate-x-1/2 z-[60] w-full lg:max-w-xl lg:rounded-2xl shadow-2xl backdrop-blur-md text-white h-14 flex items-center justify-between px-4 border-t lg:border border-white/10 select-none animate-in slide-in-from-bottom duration-300 ${activePlaybackId || (!hasMedia && recordings.length > 0) ? 'bg-indigo-600/95' : 'bg-[#FF5500]/95'}`}
+          className={`fixed bottom-[calc(var(--bottom-nav-height,3.5rem)+env(safe-area-inset-bottom,0px))] lg:bottom-4 left-0 right-0 lg:left-1/2 lg:-translate-x-1/2 z-[60] w-full lg:max-w-xl lg:rounded-2xl shadow-2xl backdrop-blur-md text-white h-14 flex items-center justify-between px-4 border-t lg:border border-white/10 select-none animate-in slide-in-from-bottom duration-300 ${nowPlaying.type === 'recording' ? 'bg-indigo-600/95' : 'bg-[#FF5500]/95'}`}
         >
           {/* Visual Progress Bar (Clipped to container corners) */}
           <div className="absolute inset-0 pointer-events-none lg:rounded-2xl overflow-hidden z-0">
             <div className="absolute top-0 inset-x-0 h-1 bg-white/20">
               <div 
                 className="h-full bg-white"
-                style={{ width: `${Math.min(100, (mediaCurrentTime / (mediaDuration || 1)) * 100)}%` }}
+                style={{ width: `${Math.min(100, (nowPlaying.currentTime / (nowPlaying.duration || 1)) * 100)}%` }}
               />
             </div>
           </div>
@@ -1200,16 +1251,16 @@ export default function RehearsalDrawer({
           >
             <div 
               className="w-3 h-3 bg-white rounded-full absolute opacity-0 group-hover:opacity-100 transition-opacity"
-              style={{ left: `calc(${Math.min(100, (mediaCurrentTime / (mediaDuration || 1)) * 100)}% - 6px)` }}
+              style={{ left: `calc(${Math.min(100, (nowPlaying.currentTime / (nowPlaying.duration || 1)) * 100)}% - 6px)` }}
             />
           </div>
 
           {/* Equalizer & Source Switcher Dropdown */}
           <div className="flex items-center gap-3 flex-1 min-w-0 h-full py-2 cursor-pointer" onClick={onOpen}>
             <div className="flex gap-0.5 items-end h-4 w-4 shrink-0 justify-center cursor-pointer">
-              <span className={`w-[2px] bg-white rounded-full transition-all duration-300 ${isMediaPlaying || (activePlaybackId && isRecordingPlaying) ? 'animate-eq-bar-1' : 'h-1.5'}`} />
-              <span className={`w-[2px] bg-white rounded-full transition-all duration-300 ${isMediaPlaying || (activePlaybackId && isRecordingPlaying) ? 'animate-eq-bar-2' : 'h-3'}`} />
-              <span className={`w-[2px] bg-white rounded-full transition-all duration-300 ${isMediaPlaying || (activePlaybackId && isRecordingPlaying) ? 'animate-eq-bar-3' : 'h-2'}`} />
+              <span className={`w-[2px] bg-white rounded-full transition-all duration-300 ${nowPlaying.isPlaying ? 'animate-eq-bar-1' : 'h-1.5'}`} />
+              <span className={`w-[2px] bg-white rounded-full transition-all duration-300 ${nowPlaying.isPlaying ? 'animate-eq-bar-2' : 'h-3'}`} />
+              <span className={`w-[2px] bg-white rounded-full transition-all duration-300 ${nowPlaying.isPlaying ? 'animate-eq-bar-3' : 'h-2'}`} />
             </div>
             
             <DropdownMenu>
@@ -1224,11 +1275,7 @@ export default function RehearsalDrawer({
                     <ChevronDown className="w-3 h-3 opacity-70 shrink-0" />
                   </div>
                   <span className="text-[9px] uppercase tracking-widest opacity-80 truncate">
-                    {activePlaybackId 
-                      ? recordings.find(r => r.id === activePlaybackId)?.recording_name || 'User Recording'
-                      : playingSource 
-                        ? (playingSource === 'youtube' ? 'YouTube Reference' : playingSource === 'soundcloud' ? 'SoundCloud Reference' : 'Spotify Reference') 
-                        : (!hasMedia && recordings.length > 0 ? recordings[0].recording_name : 'Select Source')}
+                    {nowPlaying.label}
                   </span>
                 </div>
               </DropdownMenuTrigger>
@@ -1238,53 +1285,42 @@ export default function RehearsalDrawer({
                     <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-gray-400 font-bold px-2 pb-1">Reference Tracks</DropdownMenuLabel>
                     {youtubeUrl && (
                       <DropdownMenuItem className="cursor-pointer focus:bg-white/10 focus:text-white rounded-md transition-colors my-0.5" onClick={() => {
-                        if (activePlaybackId) {
-                          stopActiveRecording();
-                          
-                          
-                        }
-                        if (playingSource !== "youtube") {
-                           pauseSoundCloud();
-                           setSelectedMedia("youtube");
-                           setPlayingSource("youtube");
-                           setTimeout(() => { bindYouTubeEvents(); playYouTube(); }, 300);
-                        }
+                        stopActiveRecording();
+                        pauseSoundCloud();
+                        setSelectedMedia("youtube");
+                        setPlayingSource("youtube");
+                        setTimeout(() => { bindYouTubeEvents(); playYouTube(); }, 300);
                       }}>
                         <div className="flex items-center justify-between w-full">
                           <span>YouTube</span>
-                          {(!activePlaybackId && playingSource === 'youtube') && <Check className="w-4 h-4 ml-2" />}
+                          {nowPlaying.type === 'media' && nowPlaying.source === 'youtube' && <Check className="w-4 h-4 ml-2" />}
                         </div>
                       </DropdownMenuItem>
                     )}
                     {soundcloudUrl && (
                       <DropdownMenuItem className="cursor-pointer focus:bg-white/10 focus:text-white rounded-md transition-colors my-0.5" onClick={() => {
-                        if (activePlaybackId) {
-                          stopActiveRecording();
-                          
-                          
-                        }
-                        if (playingSource !== "soundcloud") {
-                           pauseYouTube();
-                           setSelectedMedia("soundcloud");
-                           setPlayingSource("soundcloud");
-                           setTimeout(() => { bindSoundCloudEvents(); playSoundCloud(); }, 300);
-                        }
+                        stopActiveRecording();
+                        pauseYouTube();
+                        setSelectedMedia("soundcloud");
+                        setPlayingSource("soundcloud");
+                        setTimeout(() => { bindSoundCloudEvents(); playSoundCloud(); }, 300);
                       }}>
                         <div className="flex items-center justify-between w-full">
                           <span>SoundCloud</span>
-                          {(!activePlaybackId && playingSource === 'soundcloud') && <Check className="w-4 h-4 ml-2" />}
+                          {nowPlaying.type === 'media' && nowPlaying.source === 'soundcloud' && <Check className="w-4 h-4 ml-2" />}
                         </div>
                       </DropdownMenuItem>
                     )}
                     {spotifyUrl && (
                       <DropdownMenuItem className="cursor-pointer focus:bg-white/10 focus:text-white rounded-md transition-colors my-0.5" onClick={() => {
+                        stopActiveRecording();
                         onOpen?.();
                         setSelectedMedia("spotify");
                         setPlayingSource("spotify");
                       }}>
                         <div className="flex items-center justify-between w-full">
                           <span>Spotify</span>
-                          {(!activePlaybackId && playingSource === 'spotify') && <Check className="w-4 h-4 ml-2" />}
+                          {nowPlaying.type === 'media' && nowPlaying.source === 'spotify' && <Check className="w-4 h-4 ml-2" />}
                         </div>
                       </DropdownMenuItem>
                     )}
@@ -1301,7 +1337,7 @@ export default function RehearsalDrawer({
                       }}>
                         <div className="flex items-center justify-between w-full">
                           <span className="truncate">{rec.recording_name}</span>
-                          {activePlaybackId === rec.id && <Check className="w-4 h-4 ml-2" />}
+                          {nowPlaying.type === 'recording' && nowPlaying.recordingId === rec.id && <Check className="w-4 h-4 ml-2" />}
                         </div>
                       </DropdownMenuItem>
                     ))}
@@ -1314,7 +1350,7 @@ export default function RehearsalDrawer({
           {/* Controls */}
           <div className="flex items-center gap-1.5 ml-4 shrink-0">
             {/* Seek Back */}
-            {(playingSource || activePlaybackId) && (
+            {(nowPlaying.source || nowPlaying.recordingId) && (
               <button 
                 onClick={() => seekRelative(-15)}
                 data-testid="mini-seek-back-btn"
@@ -1331,7 +1367,7 @@ export default function RehearsalDrawer({
               data-testid="mini-play-pause-btn"
               className="w-8 h-8 rounded-full bg-black/20 hover:bg-black/35 flex items-center justify-center text-white cursor-pointer transition-transform hover:scale-105 shrink-0"
             >
-              {(activePlaybackId ? isRecordingPlaying : isMediaPlaying) ? (
+              {nowPlaying.isPlaying ? (
                 <Pause className="w-3.5 h-3.5 fill-white" />
               ) : (
                 <Play className="w-3.5 h-3.5 fill-white ml-0.5" />
