@@ -2891,3 +2891,4 @@ Refactored the Rehearsal Drawer and Mini-Player to create a seamless, unified pl
 - **Continuous Playback (#248)**: Switched Rehearsal Drawer tabs from conditional mounting to CSS visibility (`visibility: hidden`). Switching tabs no longer kills YouTube or SoundCloud playback, and fixes the YouTube "black screen" bug.
 - **Header Indicators**: The top navigation microphone icon now actively tracks global audio state, transforming into a live equalizer when playing audio.
 - **DevOps Improvements**: Overhauled preview deployments by dual-tagging Docker images (`branch-slug` and `preview`) via GitHub Actions. Documented the SDLC in `docs/guides/development-workflow.md`.
+- Created Issue #254 to rename Docker image to sacred-fire-songs-app to prevent migrator confusion.
