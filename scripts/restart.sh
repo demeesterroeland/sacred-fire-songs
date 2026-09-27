@@ -32,5 +32,8 @@ npm run build
 # Calculate the conventional test port (4xxx)
 PORT="4${ISSUE}"
 
+echo "🧹 Killing any existing process on port ${PORT}..."
+lsof -ti :${PORT} | xargs -r kill -9 || true
+
 echo "🚀 Starting production test server on http://localhost:${PORT}..."
 PORT=$PORT npm run start
