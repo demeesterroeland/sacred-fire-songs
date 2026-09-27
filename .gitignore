@@ -80,4 +80,5 @@ data/songs/**/*.pdf
 kong.yml
 
 # Database backups and dumps
-*.sql
+/*.sql
+!supabase/migrations/*.sql
