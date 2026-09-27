@@ -521,39 +521,27 @@ export default function RehearsalDrawer({
   };
 
   // Hidden refs for mini-player playback (always mounted in DOM)
-  const hiddenYoutubeRef = React.useRef<HTMLIFrameElement>(null);
-  const hiddenSoundcloudRef = React.useRef<HTMLIFrameElement>(null);
 
-  const playHiddenYouTube = () => {
-    if (hiddenYoutubeRef.current?.contentWindow) {
-      hiddenYoutubeRef.current.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
-    }
-  };
 
-  const playHiddenSoundCloud = () => {
-    if (hiddenSoundcloudRef.current?.contentWindow) {
-      hiddenSoundcloudRef.current.contentWindow.postMessage('{"method":"play"}', '*');
-    }
-  };
 
   const startMediaPlayback = () => {
     if (playingSource === "youtube") {
-      playHiddenYouTube();
+      playYouTube();
     } else if (playingSource === "soundcloud") {
-      playHiddenSoundCloud();
+      playSoundCloud();
     } else if (youtubeUrl) {
       setSelectedMedia("youtube");
       setPlayingSource("youtube");
       setTimeout(() => {
         bindYouTubeEvents();
-        playHiddenYouTube();
+        playYouTube();
       }, 300);
     } else if (soundcloudUrl) {
       setSelectedMedia("soundcloud");
       setPlayingSource("soundcloud");
       setTimeout(() => {
         bindSoundCloudEvents();
-        playHiddenSoundCloud();
+        playSoundCloud();
       }, 300);
     } else if (spotifyUrl) {
       onOpen?.();
@@ -582,7 +570,7 @@ export default function RehearsalDrawer({
       } else if (youtubeRef.current?.contentWindow) {
         playYouTube();
       } else {
-        playHiddenYouTube();
+        playYouTube();
       }
     } else if (playingSource === "soundcloud") {
       if (isMediaPlaying) {
@@ -590,7 +578,7 @@ export default function RehearsalDrawer({
       } else if (soundcloudRef.current?.contentWindow) {
         playSoundCloud();
       } else {
-        playHiddenSoundCloud();
+        playSoundCloud();
       }
     }
   };
@@ -914,8 +902,7 @@ export default function RehearsalDrawer({
             {/* Content Body */}
             <div className={`flex-1 overflow-y-auto p-6 space-y-6 ${hasAnyAudioSource ? 'pb-24' : ''}`}>
               
-              {activeTab === "recorder" ? (
-                <div className="relative">
+              <div className="relative" style={{ display: activeTab === "recorder" ? "block" : "none" }}>
                   {/* Blurred overlay wrapper if guest */}
                   <div className={!user ? "blur-[4px] pointer-events-none select-none" : ""}>
                     {/* Sticky Mini-Player Status Bar */}
@@ -1045,9 +1032,8 @@ export default function RehearsalDrawer({
                     </div>
                   )}
                 </div>
-              ) : (
-                /* Media Embed Tab View */
-                <div className="space-y-6 text-left">
+
+              <div className="space-y-6 text-left" style={{ display: activeTab === "media" ? "block" : "none" }}>
                   {/* Media Selector Buttons (only if more than 1 media type exists) */}
                   {((youtubeUrl ? 1 : 0) + (spotifyUrl ? 1 : 0) + (soundcloudUrl ? 1 : 0)) > 1 && (
                     <div className="flex gap-2 p-1 bg-gray-100 dark:bg-gray-950 rounded-xl">
@@ -1147,34 +1133,9 @@ export default function RehearsalDrawer({
                   )}
 
                 </div>
-              )}
 
             </div>
           </motion.div>
-      {/* Hidden media iframes — always mounted when mini-player is visible */}
-      {!isOpen && hasAnyAudioSource && (
-        <div className="absolute -left-[9999px] -top-[9999px] w-0 h-0 overflow-hidden" aria-hidden="true">
-          {youtubeUrl && selectedMedia === "youtube" && (
-            <iframe
-              ref={hiddenYoutubeRef}
-              width="100%"
-              height="100%"
-              src={typeof window !== "undefined" && (window as any).__E2E__ ? "about:blank" : getYouTubeEmbedUrl(youtubeUrl)}
-              title="YouTube video player (hidden)"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            />
-          )}
-          {soundcloudUrl && selectedMedia === "soundcloud" && (
-            <iframe
-              ref={hiddenSoundcloudRef}
-              width="100%"
-              height="166"
-              src={typeof window !== "undefined" && (window as any).__E2E__ ? "about:blank" : `https://w.soundcloud.com/player/?url=${encodeURIComponent(soundcloudUrl)}&color=%23ff5500&auto_play=false&hide_related=false&show_comments=false&show_user=true&show_reposts=false&show_teaser=false`}
-              allow="autoplay"
-            />
-          )}
-        </div>
-      )}
 
       {/* Floating Horizontal Bottom Mini Player Widget */}
       {hasAnyAudioSource && (
@@ -1248,7 +1209,7 @@ export default function RehearsalDrawer({
                            pauseSoundCloud();
                            setSelectedMedia("youtube");
                            setPlayingSource("youtube");
-                           setTimeout(() => { bindYouTubeEvents(); playHiddenYouTube(); }, 300);
+                           setTimeout(() => { bindYouTubeEvents(); playYouTube(); }, 300);
                         }
                       }}>
                         <div className="flex items-center justify-between w-full">
@@ -1268,7 +1229,7 @@ export default function RehearsalDrawer({
                            pauseYouTube();
                            setSelectedMedia("soundcloud");
                            setPlayingSource("soundcloud");
-                           setTimeout(() => { bindSoundCloudEvents(); playHiddenSoundCloud(); }, 300);
+                           setTimeout(() => { bindSoundCloudEvents(); playSoundCloud(); }, 300);
                         }
                       }}>
                         <div className="flex items-center justify-between w-full">
