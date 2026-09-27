@@ -72,7 +72,7 @@ echo "📤 Pushing branch '$BRANCH' to origin..."
 git push -u origin "$BRANCH"
 echo "🚀 Triggering Docker build explicitly via GitHub Actions..."
 
-gh workflow run docker.yml --ref "$BRANCH" || { echo "❌ Failed to trigger workflow."; exit 1; }
+gh workflow run docker.yml --ref "$BRANCH" -f version="preview" || { echo "❌ Failed to trigger workflow."; exit 1; }
 
 # 5. Compute Docker image tag based on GitHub Actions slugify logic
 # (docker/metadata-action slugifies branch refs by replacing non-alphanumeric chars with '-' and lowercasing)
@@ -112,8 +112,8 @@ fi
 echo ""
 echo "📋 Preview Server Deployment Steps:"
 echo "----------------------------------------------------------------------"
-echo "1. On the preview server, update your .env file with the new tag:"
-echo "   IMAGE_TAG=${IMAGE_TAG}"
+echo "1. Your preview server can simply use the rolling ':preview' tag!"
+echo "   (Make sure your .env has IMAGE_TAG=preview)"
 echo ""
 echo "2. Pull and start containers:"
 echo "   docker compose pull"
