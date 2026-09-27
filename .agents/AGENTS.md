@@ -1,6 +1,8 @@
 # Verification Rule
 
 - **Preview Deployment Verification**: Always ask the user to verify the finished development on the preview website before merging any branch to `main`. Do not merge automatically without explicit user confirmation of verification.
+- **NEVER Auto-Merge**: NEVER merge a Pull Request to `main` without explicit, unambiguous permission from the user.
+- **NEVER Auto-Close Issues**: NEVER use the GitHub CLI or APIs to close issues without explicit instruction from the user. Only the user should decide when an issue is fully verified and ready to be closed.
 
 # Artifact Synchronization Rule
 
