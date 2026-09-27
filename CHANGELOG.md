@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.6.0](https://github.com/demeesterroeland/sacred-fire-songs/compare/v1.5.1...v1.6.0) (2026-09-27)
+
+
+### ✨ New features
+
+* **scripts:** print PR url on merge failure for easier manual recovery ([5a4671e](https://github.com/demeesterroeland/sacred-fire-songs/commit/5a4671e0406fcdd8a138d7b8820efe4c663d8f97))
+* Unified Audio Experience ([#237](https://github.com/demeesterroeland/sacred-fire-songs/issues/237)) ([#247](https://github.com/demeesterroeland/sacred-fire-songs/issues/247)) ([d43226e](https://github.com/demeesterroeland/sacred-fire-songs/commit/d43226ee6ec6c975f424d99c58d4ee1745196d6c))
+* unified audio experience ([#237](https://github.com/demeesterroeland/sacred-fire-songs/issues/237)) ([#256](https://github.com/demeesterroeland/sacred-fire-songs/issues/256)) ([e772b1f](https://github.com/demeesterroeland/sacred-fire-songs/commit/e772b1f1309e8e06b4ef5d957099ef8a43f6ed24))
+
+
+### 🐛 Bug fixes
+
+* **scripts:** automatically kill existing processes on port in restart.sh ([6fb6d1a](https://github.com/demeesterroeland/sacred-fire-songs/commit/6fb6d1aa525476aa0803ff1661db8b3d9763a7be))
+* **scripts:** gracefully handle detached HEAD during gh pr merge in preview2prod script ([f1b906e](https://github.com/demeesterroeland/sacred-fire-songs/commit/f1b906efefadf0655b274581d51a98ea80e421df))
+* **scripts:** use fuser instead of lsof for reliable port killing in restart script ([3b6bc4d](https://github.com/demeesterroeland/sacred-fire-songs/commit/3b6bc4d02629858619caaf09ee3019dcc3f5f9cc))
+
 ## [1.5.1](https://github.com/demeesterroeland/sacred-fire-songs/compare/v1.5.0...v1.5.1) (2026-09-26)
 
 
