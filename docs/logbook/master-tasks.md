@@ -1170,3 +1170,15 @@
 - [x] Run both Rehearsal E2E tests (mic recording & disk file upload) against production build and capture video recordings
 - [x] Add download button to rehearsal recordings list with cross-origin blob fetch and verify in Playwright E2E suite
 - [x] Open Pull Request #236 to merge `fix/230-rehearsal-playback` into `main`
+
+## Session September 27, 2026 (Unified Audio Experience for Issue #237)
+
+- [x] Bootstrapped multi-agent parallel development architecture (UI/UX, Audio State, Data & Navigation subagents).
+- [x] Refactor `useAudio()` context to house and persist HTML5 `<audio>` element management globally.
+- [x] Hoist `useSongRecordings` fetch logic in `SongDetailPage` to proactively load data.
+- [x] Implement dynamic count pill and animated equalizer state on header `Recordings` button.
+- [x] Build unified "Source Switcher" Shadcn DropdownMenu with custom dark glassmorphism styling in MiniPlayer.
+- [x] Fix top-edge progress bar CSS clipping by implementing a separate visual clipping mask and unclipped interactive hit area.
+- [x] Fix double vertical scrollbar layout issue on `SongDetailPage` by removing duplicate `min-h-screen` and `overflow-y-auto`.
+- [x] Sanitize terminology: replaced auto-generated "Rehearsal" filenames and placeholders with "Recording".
+- [x] Merge subagent branches, resolve React hook order bugs, and adapt Playwright E2E suite to the new UX flow.

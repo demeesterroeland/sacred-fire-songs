@@ -191,7 +191,7 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       await expect(audioPreview).toBeVisible();
 
       // Fill in a custom name
-      const nameInput = page.locator('input[placeholder="Recording Name (e.g. Rehearsal 1)"]');
+      const nameInput = page.locator('input[placeholder="Recording Name (e.g. Recording 1)"]');
       await expect(nameInput).toBeVisible();
       const customName = `E2E Practice - ${Date.now()}`;
       await nameInput.fill(customName);
@@ -205,11 +205,28 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       const savedTake = page.locator(`h4:has-text("${customName}")`);
       await expect(savedTake).toBeVisible({ timeout: 10000 });
 
+      // Close the drawer to verify the header pill count displays "1"
+      await page.locator('button[aria-label="Close"]').click(); // Better to rely on close buttons
+      const recordingsBtn = page.locator('button[title="Recordings"]');
+      await expect(recordingsBtn).toContainText('1', { timeout: 10000 });
+
+      // Re-open drawer
+      await recordingsBtn.click();
+      await expect(savedTake).toBeVisible({ timeout: 5000 });
+
       // Play back the saved take for 2 seconds
       const cardRow = page.locator('div.group', { has: savedTake }).first();
       const playBtn = cardRow.locator('button[title="Play"]');
       await expect(playBtn).toBeVisible();
       await playBtn.click();
+
+      // Close the drawer while playing to check equalizer icon
+      await page.locator('button[aria-label="Close"]').click();
+      await expect(page.locator('div[title="Playing"]')).toBeVisible({ timeout: 5000 });
+
+      // Re-open drawer
+      await recordingsBtn.click();
+      await expect(savedTake).toBeVisible({ timeout: 5000 });
 
       // Verify playback started (Pause icon visible) and let it play for 2 seconds
       await expect(cardRow.locator('svg.lucide-pause')).toBeVisible({ timeout: 5000 });
@@ -274,7 +291,7 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       await fileChooser.setFiles('e2e/fixtures/dummy-audio.wav');
 
       // 5. Verify the file is loaded into the preview and Save
-      const nameInput = page.locator('input[placeholder="Recording Name (e.g. Rehearsal 1)"]');
+      const nameInput = page.locator('input[placeholder="Recording Name (e.g. Recording 1)"]');
       await expect(nameInput).toBeVisible();
       await expect(nameInput).toHaveValue(/dummy-audio/i);
       
@@ -299,6 +316,11 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
 
       // Verify playback started (Pause icon visible) and let it play for 2 seconds
       await expect(container.locator('svg.lucide-pause')).toBeVisible({ timeout: 5000 });
+      const secondAudioCurrentTime = await page.evaluate(() => {
+        const audio = document.querySelector("audio");
+        return audio ? audio.currentTime : 0;
+      });
+      expect(audioCurrentTime).toBeGreaterThan(0);
       await page.waitForTimeout(2000);
 
       // Verify no playback error toast appeared
@@ -422,6 +444,85 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       const errorMsg = page.locator('text=File size exceeds the 10 MB limit.');
       await expect(errorMsg).toBeVisible({ timeout: 10000 });
     });
+    test('Playback continues when drawer toggles', async ({ page }) => {
+      await page.goto(songUrl);
+
+      // Open drawer
+      await openRecordingsDrawer(page);
+
+      // Switch to Voice Recorder tab if tabs exist (Reference Tracks is active by default in Issue 187)
+      const voiceRecorderTab = page.locator('button:has-text("Voice Recorder")').first();
+      if (await voiceRecorderTab.isVisible({ timeout: 5000 }).catch(() => false)) {
+        await voiceRecorderTab.click({ force: true });
+        const recordPrompt = page.locator('h4:has-text("Ready to record rehearsal")');
+        if (!await recordPrompt.isVisible({ timeout: 2000 }).catch(() => false)) {
+          await voiceRecorderTab.click({ force: true });
+        }
+      }
+
+      const uploadTab = page.getByRole('button', { name: 'Upload File' });
+      await expect(uploadTab).toBeVisible();
+      await uploadTab.click({ force: true });
+
+      const fileChooserPromise = page.waitForEvent('filechooser');
+      await page.locator('text=Click to select an audio file').click();
+      const fileChooser = await fileChooserPromise;
+      await fileChooser.setFiles('e2e/fixtures/dummy-audio.wav');
+      
+      const customName = 'E2E Continuity Test';
+      const nameInput = page.locator('input[placeholder="Recording Name (e.g. Recording 1)"]');
+      await nameInput.fill(customName);
+
+      const saveBtn = page.locator('button:has-text("Save Rehearsal")');
+      await saveBtn.click();
+
+      const savedTake = page.locator(`h4:has-text("${customName}")`);
+      await expect(savedTake).toBeVisible({ timeout: 10000 });
+
+      // Play back the uploaded take
+      const container = savedTake.locator('xpath=ancestor::div[contains(@class, "group")][1]');
+      const playBtn = container.locator('button[title="Play"]');
+      await playBtn.click();
+
+      // Wait for playback to start
+      await expect(container.locator('svg.lucide-pause')).toBeVisible({ timeout: 5000 });
+      const secondAudioCurrentTime = await page.evaluate(() => {
+        const audio = document.querySelector("audio");
+        return audio ? audio.currentTime : 0;
+      });
+      expect(audioCurrentTime).toBeGreaterThan(0);
+      await page.waitForTimeout(1000);
+
+      // Close the drawer
+      const closeBtn = page.locator('button[aria-label="Close Rehearsal Drawer"], [data-testid="close-drawer-btn"]');
+      if (await closeBtn.isVisible().catch(() => false)) {
+        await closeBtn.click();
+      } else {
+        await page.mouse.click(10, 10); // click outside to close
+      }
+
+      await page.waitForTimeout(500);
+
+      // Mini player should be visible
+      const miniPlayer = page.locator('[data-testid="bottom-mini-player"]');
+      await expect(miniPlayer).toBeVisible({ timeout: 5000 });
+
+      // Click mini player to reopen drawer
+      await miniPlayer.click();
+      await page.waitForTimeout(500);
+
+      // Check if the pause button is still showing (still playing)
+      await expect(container.locator('svg.lucide-pause')).toBeVisible({ timeout: 5000 });
+      const thirdAudioCurrentTime = await page.evaluate(() => {
+        const audio = document.querySelector("audio");
+        return audio ? audio.currentTime : 0;
+      });
+      expect(thirdAudioCurrentTime).toBeGreaterThan(0);
+      
+      // Clean up
+      const deleteBtn = container.locator('button[title="Delete rehearsal"]');
+      await deleteBtn.click();
+      await expect(savedTake).toHaveCount(0, { timeout: 10000 });
+    });
   });
 });
-

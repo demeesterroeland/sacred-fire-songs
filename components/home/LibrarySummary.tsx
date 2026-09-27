@@ -32,7 +32,7 @@ const stats = [
   {
     key: 'mySongs',
     icon: Music,
-    label: 'My Songs',
+    label: 'Your Songs',
     href: '/songs?mine=true',
     color: 'text-violet-400',
     iconFill: '',

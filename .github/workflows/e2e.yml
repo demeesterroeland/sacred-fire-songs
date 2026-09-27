@@ -23,9 +23,9 @@ on:
   push:
     branches:
       - main
-      - 'feat/**'
-      - 'fix/**'
-      - 'chore/**'
+  pull_request:
+    branches:
+      - main
 
 concurrency:
   # One staging E2E run at a time per branch (they share the same remote DB).

@@ -410,6 +410,38 @@ test.describe('Rehearsal Space Media Player E2E Tests', () => {
     await expect(miniPlayer).toBeHidden(); // Spotify controls are disabled/hidden
   });
 
+
+  test('Permutation 15a: Source Switcher dropdown interacts and switches tracks', async ({ page }) => {
+    // Open Rehearsal Space
+    const rehearsalBtn = page.locator('button:has-text("Rehearsal Space")').first();
+    await expect(rehearsalBtn).toBeVisible({ timeout: 15000 });
+    await rehearsalBtn.click();
+    await page.waitForTimeout(1000);
+    
+    // Close it to show mini-player
+    const closeBtn = page.locator('button[aria-label="Close"]').first();
+    await closeBtn.click();
+    
+    const miniPlayer = page.locator('[data-testid="bottom-mini-player"]');
+    await expect(miniPlayer).toBeVisible();
+
+    // Open Dropdown
+    const switcher = miniPlayer.locator('[data-testid="mini-source-switcher"]');
+    await switcher.click();
+    
+    const dropdown = page.locator('[data-testid="mini-source-dropdown"]');
+    await expect(dropdown).toBeVisible();
+    await expect(dropdown.locator('text=YouTube')).toBeVisible();
+    await expect(dropdown.locator('text=SoundCloud')).toBeVisible();
+
+    // Switch to SoundCloud
+    await dropdown.locator('text=SoundCloud').click();
+    await expect(dropdown).toBeHidden();
+    
+    // Verify track switched
+    await expect(miniPlayer.locator('text=SoundCloud Reference').first()).toBeVisible();
+  });
+
   // =========================================================================
   // CATEGORY 4: PROGRESS BAR CLICK-TO-SEEK (3 Permutations)
   // =========================================================================

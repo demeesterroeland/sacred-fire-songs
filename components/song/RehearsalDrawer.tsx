@@ -1,13 +1,16 @@
 "use client";
 
-import React, { useState, useEffect, useTransition } from "react";
+import React, { useState, useEffect, useTransition, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Music, Trash2, Calendar, Play, Pause, Lock, RotateCcw, RotateCw, GripVertical, Download } from "lucide-react";
+import { X, Music, Trash2, Pencil, Calendar, Play, Pause, Lock, RotateCcw, RotateCw, GripVertical, Download, ChevronUp, ChevronDown, Check } from "lucide-react";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import AudioRecorder from "./AudioRecorder";
-import { getUserRecordings, deleteUserRecording, reorderUserRecordings, type UserRecording } from "@/lib/actions/rehearsal";
+import { useSongRecordings } from "@/hooks/useSongRecordings";
+import { getUserRecordings, deleteUserRecording, renameUserRecording, reorderUserRecordings, type UserRecording } from "@/lib/actions/rehearsal";
 import { getYouTubeEmbedUrl, getSpotifyEmbedUrl } from "./MediaEmbeds";
 import { useAuth } from "@/hooks/useAuth";
+import { useAudio } from "./AudioProvider";
 import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
 import {
@@ -31,24 +34,43 @@ import { CSS } from "@dnd-kit/utilities";
 function SortableRecordingItem({
   rec,
   activePlaybackId,
+  isRecordingPlaying,
   deletingId,
   downloadingId,
   handleTogglePlay,
   handleDelete,
   handleDownload,
+  handleRename,
   formatDate,
   isCustomSort,
 }: {
   rec: UserRecording;
   activePlaybackId: string | null;
+  isRecordingPlaying: boolean;
   deletingId: string | null;
   downloadingId: string | null;
   handleTogglePlay: (id: string, url: string | undefined) => void;
   handleDelete: (id: string, path: string) => void;
   handleDownload: (recording: UserRecording) => void;
+  handleRename: (id: string, newName: string) => void;
   formatDate: (date: string) => string;
   isCustomSort: boolean;
 }) {
+  const [isEditing, setIsEditing] = useState(false);
+  const [editValue, setEditValue] = useState(rec.recording_name);
+
+  const handleSaveRename = () => {
+    if (editValue.trim() && editValue !== rec.recording_name) {
+      handleRename(rec.id, editValue.trim());
+    }
+    setIsEditing(false);
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") handleSaveRename();
+    if (e.key === "Escape") { setEditValue(rec.recording_name); setIsEditing(false); }
+  };
+
   const {
     attributes,
     listeners,
@@ -91,13 +113,13 @@ function SortableRecordingItem({
         className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 shadow-sm shrink-0 ${
           !rec.audioUrl
             ? "bg-gray-100 dark:bg-gray-800 text-gray-400 opacity-50 cursor-not-allowed"
-            : activePlaybackId === rec.id
+            : activePlaybackId === rec.id && isRecordingPlaying
             ? "bg-indigo-600 hover:bg-indigo-500 text-white active:scale-95"
             : "bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 text-indigo-600 dark:text-indigo-400 active:scale-95"
         }`}
         title={!rec.audioUrl ? "Audio file missing or corrupted" : "Play"}
       >
-        {activePlaybackId === rec.id ? (
+        {activePlaybackId === rec.id && isRecordingPlaying ? (
           <Pause className="w-4 h-4 fill-current" />
         ) : (
           <Play className="w-4 h-4 fill-current translate-x-0.5" />
@@ -106,15 +128,40 @@ function SortableRecordingItem({
 
       {/* Title and date */}
       <div className="flex-1 min-w-0 text-left">
-        <h4 className={`text-sm font-bold truncate ${!rec.audioUrl ? "text-red-500/80 dark:text-red-400/80" : "text-gray-900 dark:text-white"}`}>
-          {rec.recording_name}
-          {!rec.audioUrl && <span className="ml-2 text-[10px] uppercase font-bold text-red-500 bg-red-500/10 px-1.5 py-0.5 rounded">Missing File</span>}
-        </h4>
+        {isEditing ? (
+          <input
+            autoFocus
+            type="text"
+            value={editValue}
+            onChange={(e) => setEditValue(e.target.value)}
+            onBlur={handleSaveRename}
+            onKeyDown={handleKeyDown}
+            className="w-full text-sm font-bold bg-white dark:bg-gray-900 border border-indigo-500 rounded px-2 py-0.5 outline-none text-gray-900 dark:text-white"
+          />
+        ) : (
+          <h4 
+            className={`text-sm font-bold truncate ${!rec.audioUrl ? "text-red-500/80 dark:text-red-400/80" : "text-gray-900 dark:text-white"}`}
+            onDoubleClick={() => setIsEditing(true)}
+          >
+            {rec.recording_name}
+            {!rec.audioUrl && <span className="ml-2 text-[10px] uppercase font-bold text-red-500 bg-red-500/10 px-1.5 py-0.5 rounded">Missing File</span>}
+          </h4>
+        )}
         <span className="text-[10px] text-gray-400 dark:text-gray-500 flex items-center gap-1.5 mt-0.5 font-medium">
           <Calendar className="w-3 h-3" />
           {formatDate(rec.created_at)}
         </span>
       </div>
+
+      {/* Edit Button */}
+      <button
+        onClick={() => setIsEditing(true)}
+        className="p-2 rounded-xl text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition-all active:scale-95 shrink-0"
+        title="Edit recording name"
+        aria-label="Edit recording name"
+      >
+        <Pencil className="w-4 h-4" />
+      </button>
 
       {/* Download Button */}
       <button
@@ -125,8 +172,8 @@ function SortableRecordingItem({
             ? "text-gray-300 dark:text-gray-700 opacity-40 cursor-not-allowed"
             : "text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40"
         }`}
-        title={!rec.audioUrl ? "Audio file missing or corrupted" : "Download rehearsal"}
-        aria-label="Download rehearsal"
+        title={!rec.audioUrl ? "Audio file missing or corrupted" : "Download recording"}
+        aria-label="Download recording"
       >
         {downloadingId === rec.id ? (
           <div className="w-4 h-4 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
@@ -140,8 +187,8 @@ function SortableRecordingItem({
         onClick={() => handleDelete(rec.id, rec.storage_path)}
         disabled={deletingId === rec.id}
         className="p-2 rounded-xl text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-all active:scale-95 shrink-0"
-        title="Delete rehearsal"
-        aria-label="Delete rehearsal"
+        title="Delete recording"
+        aria-label="Delete recording"
       >
         {deletingId === rec.id ? (
           <div className="w-4 h-4 border-2 border-red-500/30 border-t-red-500 rounded-full animate-spin" />
@@ -163,6 +210,8 @@ interface RehearsalDrawerProps {
   youtubeUrl?: string | null;
   spotifyUrl?: string | null;
   soundcloudUrl?: string | null;
+  onPlayStateChange?: (isPlaying: boolean) => void;
+  requestedTab?: "recorder" | "media" | "auto";
 }
 
 export default function RehearsalDrawer({
@@ -175,10 +224,16 @@ export default function RehearsalDrawer({
   youtubeUrl,
   spotifyUrl,
   soundcloudUrl,
+  onPlayStateChange,
+  requestedTab = "auto",
 }: RehearsalDrawerProps) {
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<"recorder" | "media">("media");
   const [selectedMedia, setSelectedMedia] = useState<"youtube" | "spotify" | "soundcloud" | null>(null);
+  const [downloadingId, setDownloadingId] = useState<string | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const { activePlaybackId, activeRecording, audioElements, isRecordingPlaying, recordingCurrentTime, recordingDuration, handleTogglePlay: contextHandleTogglePlay, pauseActiveRecording, stopActiveRecording, seekActiveRecording, seekRelativeActiveRecording, clearAudioElements } = useAudio();
+
 
   // Refs for media iframe elements
   const youtubeRef = React.useRef<HTMLIFrameElement>(null);
@@ -189,8 +244,15 @@ export default function RehearsalDrawer({
   const [isMediaPlaying, setIsMediaPlaying] = useState(false);
   const [mediaCurrentTime, setMediaCurrentTime] = useState(0);
   const [mediaDuration, setMediaDuration] = useState(1);
+  const [activeDomain, setActiveDomain] = useState<'recording' | 'media' | null>(null);
 
   const hasMedia = !!(youtubeUrl || spotifyUrl || soundcloudUrl);
+
+  // Notify parent of play state change
+  useEffect(() => {
+    const isPlaying = isMediaPlaying || (activePlaybackId !== null && isRecordingPlaying);
+    onPlayStateChange?.(isPlaying);
+  }, [isMediaPlaying, activePlaybackId, isRecordingPlaying, onPlayStateChange]);
 
   // Auto-set playingSource when selectedMedia changes (only if it is controllable, and don't pause the others!)
   useEffect(() => {
@@ -239,17 +301,92 @@ export default function RehearsalDrawer({
     else if (soundcloudUrl) setSelectedMedia("soundcloud");
     else if (spotifyUrl) setSelectedMedia("spotify");
     else setSelectedMedia(null);
-
-    // Default to Reference Tracks (media) if the song has media
-    if (youtubeUrl || spotifyUrl || soundcloudUrl) {
-      setActiveTab("media");
-    } else {
-      setActiveTab("recorder");
-    }
   }, [youtubeUrl, soundcloudUrl, spotifyUrl, user]);
 
+  // Only set the tab when the drawer opens or when an explicit tab is requested.
+  // Do NOT react to isMediaPlaying / activePlaybackId changes — those are play-state
+  // updates that must never override the tab the user is currently looking at.
+  const prevIsOpen = React.useRef(false);
+  useEffect(() => {
+    const justOpened = isOpen && !prevIsOpen.current;
+    prevIsOpen.current = isOpen;
+
+    if (isOpen && (justOpened || requestedTab !== "auto")) {
+      if (requestedTab !== "auto") {
+        setActiveTab(requestedTab);
+      } else {
+        // Contextual default only on first open
+        if (activePlaybackId) setActiveTab("recorder");
+        else if (isMediaPlaying) setActiveTab("media");
+        else if (youtubeUrl || spotifyUrl || soundcloudUrl) setActiveTab("media");
+        else setActiveTab("recorder");
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen, requestedTab]);
+
+  const { data: fetchedRecordings, isLoading } = useSongRecordings(songVersionId);
   const [recordings, setRecordings] = useState<UserRecording[]>([]);
-  const [isLoading, setIsLoading] = useState(false);
+  useEffect(() => {
+    if (fetchedRecordings) {
+      setRecordings(fetchedRecordings);
+    }
+  }, [fetchedRecordings]);
+
+  const hasAnyAudioSource = hasMedia || recordings.length > 0;
+
+  // ─────────────────────────────────────────────────────────────────────────
+  // SINGLE SOURCE OF TRUTH — nowPlaying
+  // Every consumer (mini-player color, equalizer, subtitle, play button,
+  // progress bar, checkmark in dropdown) MUST read from this one object.
+  // This eliminates all desync between the iframe state and recording state.
+  // Pattern: Derived State — computed deterministically from authoritative state.
+  // ─────────────────────────────────────────────────────────────────────────
+  const nowPlaying = useMemo(() => {
+    // Build the potential objects for both domains if they exist
+    const recordingInfo = activePlaybackId ? {
+      type: 'recording' as const,
+      isPlaying: isRecordingPlaying,
+      label: recordings.find(r => r.id === activePlaybackId)?.recording_name ?? 'User Recording',
+      recordingId: activePlaybackId,
+      source: null as null,
+      currentTime: recordingCurrentTime,
+      duration: recordingDuration,
+    } : null;
+
+    const mediaInfo = playingSource ? {
+      type: 'media' as const,
+      isPlaying: isMediaPlaying,
+      label: playingSource === 'youtube' ? 'YouTube Reference' : playingSource === 'soundcloud' ? 'SoundCloud Reference' : 'Spotify Reference',
+      recordingId: null as null,
+      source: playingSource,
+      currentTime: mediaCurrentTime,
+      duration: mediaDuration,
+    } : null;
+
+    // Use activeDomain to decide which one wins if BOTH exist
+    if (activeDomain === 'media' && mediaInfo) return mediaInfo;
+    if (activeDomain === 'recording' && recordingInfo) return recordingInfo;
+    
+    // Fallbacks if one exists but it wasn't the active domain (e.g. initial load)
+    if (recordingInfo) return recordingInfo;
+    if (mediaInfo) return mediaInfo;
+
+    const firstRec = recordings[0];
+    return {
+      type: 'idle' as const,
+      isPlaying: false,
+      label: hasMedia ? 'Select Source' : (firstRec?.recording_name ?? 'Select Source'),
+      recordingId: null as null,
+      source: null as null,
+      currentTime: 0,
+      duration: 1,
+    };
+  }, [
+    activePlaybackId, isRecordingPlaying, recordingCurrentTime, recordingDuration,
+    playingSource, isMediaPlaying, mediaCurrentTime, mediaDuration,
+    recordings, hasMedia, activeDomain,
+  ]);
   const [isPendingOrder, startOrderTransition] = useTransition();
 
   const dndSensors = useSensors(
@@ -273,24 +410,6 @@ export default function RehearsalDrawer({
         toast.error("Failed to save recording order");
       }
     });
-  };
-  const [downloadingId, setDownloadingId] = useState<string | null>(null);
-  const [deletingId, setDeletingId] = useState<string | null>(null);
-  const [activePlaybackId, setActivePlaybackId] = useState<string | null>(null);
-  const [audioElements, setAudioElements] = useState<Record<string, HTMLAudioElement>>({});
-
-  // Fetch recordings
-  const fetchRecordings = async () => {
-    setIsLoading(true);
-    try {
-      const data = await getUserRecordings(songVersionId);
-      setRecordings(data);
-    } catch (err) {
-      console.error("[drawer] Failed to fetch recordings:", err);
-      toast.error("Failed to load your rehearsal recordings.");
-    } finally {
-      setIsLoading(false);
-    }
   };
 
   const pauseYouTube = () => {
@@ -397,8 +516,17 @@ export default function RehearsalDrawer({
     const rect = e.currentTarget.getBoundingClientRect();
     const clickX = e.clientX - rect.left;
     const percentage = clickX / rect.width;
-    const targetTime = percentage * mediaDuration;
+    const targetTime = percentage * (activePlaybackId ? recordingDuration : mediaDuration);
 
+    if (activePlaybackId) {
+      seekActiveRecording(targetTime);
+      return;
+    }
+
+    if (activePlaybackId) {
+      seekActiveRecording(targetTime);
+      return;
+    }
     if (playingSource === "youtube") {
       if (youtubeRef.current?.contentWindow) {
         if (typeof window !== "undefined" && (window as any).__E2E__) {
@@ -442,7 +570,12 @@ export default function RehearsalDrawer({
     }
   };
 
+  
   const seekRelative = (seconds: number) => {
+    if (activePlaybackId) {
+      seekRelativeActiveRecording(seconds);
+      return;
+    }
     if (playingSource === "youtube") {
       seekYouTube(seconds);
     } else if (playingSource === "soundcloud") {
@@ -451,39 +584,27 @@ export default function RehearsalDrawer({
   };
 
   // Hidden refs for mini-player playback (always mounted in DOM)
-  const hiddenYoutubeRef = React.useRef<HTMLIFrameElement>(null);
-  const hiddenSoundcloudRef = React.useRef<HTMLIFrameElement>(null);
 
-  const playHiddenYouTube = () => {
-    if (hiddenYoutubeRef.current?.contentWindow) {
-      hiddenYoutubeRef.current.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
-    }
-  };
 
-  const playHiddenSoundCloud = () => {
-    if (hiddenSoundcloudRef.current?.contentWindow) {
-      hiddenSoundcloudRef.current.contentWindow.postMessage('{"method":"play"}', '*');
-    }
-  };
 
   const startMediaPlayback = () => {
     if (playingSource === "youtube") {
-      playHiddenYouTube();
+      playYouTube();
     } else if (playingSource === "soundcloud") {
-      playHiddenSoundCloud();
+      playSoundCloud();
     } else if (youtubeUrl) {
       setSelectedMedia("youtube");
       setPlayingSource("youtube");
       setTimeout(() => {
         bindYouTubeEvents();
-        playHiddenYouTube();
+        playYouTube();
       }, 300);
     } else if (soundcloudUrl) {
       setSelectedMedia("soundcloud");
       setPlayingSource("soundcloud");
       setTimeout(() => {
         bindSoundCloudEvents();
-        playHiddenSoundCloud();
+        playSoundCloud();
       }, 300);
     } else if (spotifyUrl) {
       onOpen?.();
@@ -493,8 +614,17 @@ export default function RehearsalDrawer({
   };
 
   const handleMiniPlayerPlayPause = () => {
+    if (activePlaybackId && activeRecording) {
+      contextHandleTogglePlay(activeRecording, activeRecording.audioUrl);
+      return;
+    }
     if (!playingSource) {
-      startMediaPlayback();
+      if (recordings && recordings.length > 0) {
+        const first = recordings[0];
+        if (first.audioUrl) contextHandleTogglePlay(first, first.audioUrl);
+      } else {
+        startMediaPlayback();
+      }
       return;
     }
     if (playingSource === "youtube") {
@@ -503,7 +633,7 @@ export default function RehearsalDrawer({
       } else if (youtubeRef.current?.contentWindow) {
         playYouTube();
       } else {
-        playHiddenYouTube();
+        playYouTube();
       }
     } else if (playingSource === "soundcloud") {
       if (isMediaPlaying) {
@@ -511,10 +641,45 @@ export default function RehearsalDrawer({
       } else if (soundcloudRef.current?.contentWindow) {
         playSoundCloud();
       } else {
-        playHiddenSoundCloud();
+        playSoundCloud();
       }
     }
   };
+
+  // ----------------------------------------------------------------------
+  // ARCHITECTURAL FIX: Global Audio Mutual Exclusivity (last-in-wins)
+  // We track what CHANGED to determine which source just became active
+  // and pause the OTHER one — never pausing what just started.
+  // ----------------------------------------------------------------------
+  const prevIsRecordingPlaying = React.useRef(false);
+  const prevIsMediaPlaying = React.useRef(false);
+
+  useEffect(() => {
+    const recordingJustStarted = isRecordingPlaying && !prevIsRecordingPlaying.current;
+    const mediaJustStarted = isMediaPlaying && !prevIsMediaPlaying.current;
+
+    if (recordingJustStarted) {
+      setActiveDomain('recording');
+      if (isMediaPlaying) {
+        // Recording just started → pause any active iframe and clear its state
+        if (playingSource === "youtube") pauseYouTube();
+        else if (playingSource === "soundcloud") pauseSoundCloud();
+        setIsMediaPlaying(false);
+        setPlayingSource(null);
+      }
+    }
+
+    if (mediaJustStarted) {
+      setActiveDomain('media');
+      if (isRecordingPlaying) {
+        // Iframe media just started → pause any active recording
+        pauseActiveRecording();
+      }
+    }
+
+    prevIsRecordingPlaying.current = isRecordingPlaying;
+    prevIsMediaPlaying.current = isMediaPlaying;
+  }, [isRecordingPlaying, isMediaPlaying, playingSource, pauseActiveRecording]);
 
   // postMessage event listener for YouTube / SoundCloud state syncing
   useEffect(() => {
@@ -602,24 +767,32 @@ export default function RehearsalDrawer({
     };
   }, [selectedMedia]);
 
+  // Sync progress for User Recordings
   useEffect(() => {
-    if (isOpen && songVersionId) {
-      fetchRecordings();
+    let animationFrameId: number;
+    const activeAudio = activePlaybackId ? audioElements[activePlaybackId] : null;
+
+    if (activeAudio) {
+      const updateProgress = () => {
+        if (activePlaybackId) {
+          setMediaCurrentTime(activeAudio.currentTime);
+          setMediaDuration(activeAudio.duration || 1);
+        }
+        animationFrameId = requestAnimationFrame(updateProgress);
+      };
+      updateProgress();
     }
-    // Clean up audio elements on unmount or close
     return () => {
-      Object.values(audioElements).forEach(audio => {
-        audio.pause();
-      });
+      if (animationFrameId) cancelAnimationFrame(animationFrameId);
     };
-  }, [isOpen, songVersionId]);
+  }, [activePlaybackId, audioElements]);
 
   const queryClient = useQueryClient();
 
   // Handle new recording saved
   const handleRecordingSaved = (newRecording: UserRecording) => {
     setRecordings((prev) => [newRecording, ...prev]);
-    toast.success("Rehearsal recording saved successfully!", {
+    toast.success("Recording saved successfully!", {
       action: {
         label: 'View Recordings →',
         onClick: () => { window.location.href = '/songs?myRecordings=true'; },
@@ -633,17 +806,24 @@ export default function RehearsalDrawer({
   };
 
   // Handle delete recording
+  const handleRename = async (recordingId: string, newName: string) => {
+    const originalName = recordings.find((r) => r.id === recordingId)?.recording_name;
+    setRecordings((prev) => prev.map((r) => (r.id === recordingId ? { ...r, recording_name: newName } : r)));
+    const { success } = await renameUserRecording(recordingId, newName);
+    if (!success) {
+      toast.error("Failed to rename recording.");
+      setRecordings((prev) => prev.map((r) => (r.id === recordingId ? { ...r, recording_name: originalName || "" } : r)));
+    } else {
+      queryClient.invalidateQueries({ queryKey: ["song-recordings", songVersionId] });
+    }
+  };
+
   const handleDelete = async (recordingId: string, storagePath: string) => {
     setDeletingId(recordingId);
     try {
       // Pause if currently playing
       if (activePlaybackId === recordingId) {
-        const activeAudio = audioElements[recordingId];
-        if (activeAudio) {
-          activeAudio.pause();
-          activeAudio.currentTime = 0;
-        }
-        setActivePlaybackId(null);
+        stopActiveRecording();
       }
 
       const success = await deleteUserRecording(recordingId, storagePath);
@@ -710,109 +890,6 @@ export default function RehearsalDrawer({
   };
 
   // Custom play/pause control handler
-  const handleTogglePlay = (recordingId: string, audioUrl: string | undefined) => {
-    const targetRec = recordings.find(r => r.id === recordingId);
-    console.log("[rehearsal] handleTogglePlay invoked:", {
-      recordingId,
-      audioUrl,
-      recordingName: targetRec?.recording_name,
-      storagePath: targetRec?.storage_path,
-      fileSize: targetRec?.file_size_bytes,
-      createdAt: targetRec?.created_at,
-    });
-
-    if (!audioUrl) {
-      console.error("[rehearsal] PLAYBACK FAILED (NOT IN DB / MISSING SIGNED URL): Audio URL is undefined for recordingId:", recordingId);
-      toast.error("Audio URL is not available.");
-      return;
-    }
-
-    // Stop current active playing audio if it's different
-    if (activePlaybackId && activePlaybackId !== recordingId) {
-      const activeAudio = audioElements[activePlaybackId];
-      if (activeAudio) {
-        activeAudio.pause();
-        activeAudio.currentTime = 0;
-      }
-    }
-
-    let audio = audioElements[recordingId];
-    
-    if (!audio) {
-      audio = new Audio(audioUrl);
-
-      // Check browser format compatibility
-      const rawExt = targetRec?.storage_path ? targetRec.storage_path.split('.').pop()?.toLowerCase() : 'unknown';
-      let mimeCheck = 'audio/webm';
-      if (rawExt === 'm4a' || rawExt === 'mp4') mimeCheck = 'audio/mp4';
-      else if (rawExt === 'mp3') mimeCheck = 'audio/mpeg';
-      else if (rawExt === 'ogg') mimeCheck = 'audio/ogg';
-      else if (rawExt === 'wav') mimeCheck = 'audio/wav';
-
-      const canPlay = audio.canPlayType(mimeCheck);
-      console.log(`[rehearsal] FORMAT CHECK: File extension = .${rawExt}, Mime check = ${mimeCheck}, Browser canPlayType = "${canPlay || 'no'}"`);
-
-      // Lifecycle Event Listeners
-      audio.onplay = () => {
-        console.log(`[rehearsal] PLAY EVENT: Playback initiated for id=${recordingId}, src=${audio.src}`);
-      };
-
-      audio.onplaying = () => {
-        console.log(`[rehearsal] PLAYBACK SUCCESSFUL: Audio playing smoothly! id=${recordingId}, readyState=${audio.readyState}, duration=${audio.duration}s`);
-      };
-
-      audio.onpause = () => {
-        console.log(`[rehearsal] PAUSE EVENT: Playback paused for id=${recordingId}, currentTime=${audio.currentTime}s`);
-      };
-
-      audio.onended = () => {
-        console.log(`[rehearsal] ENDED EVENT: Playback finished for id=${recordingId}`);
-        setActivePlaybackId(null);
-      };
-
-      audio.onerror = (e) => {
-        const mediaError = audio.error;
-        let errorReason = "UNKNOWN_ERROR";
-        if (mediaError?.code === 1) errorReason = "MEDIA_ERR_ABORTED (Aborted by user)";
-        else if (mediaError?.code === 2) errorReason = "MEDIA_ERR_NETWORK (Network error downloading stream)";
-        else if (mediaError?.code === 3) errorReason = "MEDIA_ERR_DECODE (Decoding error / corrupted audio file)";
-        else if (mediaError?.code === 4) errorReason = "MEDIA_ERR_SRC_NOT_SUPPORTED (Format/codec not supported or HTTP 404/403 access denied)";
-
-        console.error(`[rehearsal] PLAYBACK UNSUCCESSFUL (HTML5 Error Event): id=${recordingId}`, {
-          event: e,
-          errorCode: mediaError?.code,
-          errorReason,
-          errorMessage: mediaError?.message,
-          src: audio.src,
-          networkState: audio.networkState,
-          readyState: audio.readyState,
-          fileExt: rawExt,
-          mimeCheck,
-        });
-      };
-
-      setAudioElements(prev => ({ ...prev, [recordingId]: audio }));
-    }
-
-    if (activePlaybackId === recordingId) {
-      audio.pause();
-      setActivePlaybackId(null);
-    } else {
-      audio.play().catch(err => {
-        console.error(`[rehearsal] PLAYBACK UNSUCCESSFUL (Promise Catch): id=${recordingId}`, {
-          errorName: err?.name,
-          errorMessage: err?.message,
-          src: audio?.src,
-          mediaErrorCode: audio?.error?.code,
-          mediaErrorMessage: audio?.error?.message,
-          networkState: audio?.networkState,
-          readyState: audio?.readyState,
-        });
-        toast.error(`Failed to play recording audio (${err?.name || 'Error'}).`);
-      });
-      setActivePlaybackId(recordingId);
-    }
-  };
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString([], {
@@ -921,10 +998,9 @@ export default function RehearsalDrawer({
             )}
 
             {/* Content Body */}
-            <div className="flex-1 overflow-y-auto p-6 space-y-6">
+            <div className={`flex-1 overflow-y-auto p-6 space-y-6 ${hasAnyAudioSource ? 'pb-24' : ''}`}>
               
-              {activeTab === "recorder" ? (
-                <div className="relative">
+              <div className="relative" style={{ display: activeTab === "recorder" ? "block" : "none" }}>
                   {/* Blurred overlay wrapper if guest */}
                   <div className={!user ? "blur-[4px] pointer-events-none select-none" : ""}>
                     {/* Sticky Mini-Player Status Bar */}
@@ -949,8 +1025,7 @@ export default function RehearsalDrawer({
 
                     {/* Audio Recorder Area */}
                     <section className="space-y-2">
-                      <div className="flex items-baseline justify-between">
-                        <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider text-left">Record New Practice Take</h3>
+                      <div className="flex items-baseline justify-end">
                         {hasMedia && (
                           <span className="text-[10px] text-indigo-500/80 dark:text-indigo-400/80 font-medium">
                             🎧 Wear headphones to prevent bleed
@@ -962,7 +1037,7 @@ export default function RehearsalDrawer({
 
                     {/* Saved Practice Takes List */}
                     <section className="mt-6 space-y-3">
-                      <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider text-left">My Recordings</h3>
+                      <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider text-left">Your Recordings</h3>
                       
                       {/* Fake practice takes mock list for guest demo preview */}
                       {!user ? (
@@ -1015,10 +1090,12 @@ export default function RehearsalDrawer({
                                   key={rec.id}
                                   rec={rec}
                                   activePlaybackId={activePlaybackId}
+                                  isRecordingPlaying={isRecordingPlaying}
                                   deletingId={deletingId}
                                   downloadingId={downloadingId}
-                                  handleTogglePlay={handleTogglePlay}
+                                  handleTogglePlay={(id, url) => { const rec = recordings.find(r => r.id === id); if (rec) contextHandleTogglePlay(rec, url); }}
                                   handleDelete={handleDelete}
+                                  handleRename={handleRename}
                                   handleDownload={handleDownload}
                                   formatDate={formatDate}
                                   isCustomSort={recordings.length > 1}
@@ -1039,7 +1116,7 @@ export default function RehearsalDrawer({
                           <Lock className="w-5 h-5" />
                         </div>
                         <div>
-                          <h4 className="text-sm font-bold text-gray-900 dark:text-white">Personal Rehearsal Recorder</h4>
+                          <h4 className="text-sm font-bold text-gray-900 dark:text-white">Personal Audio Recorder</h4>
                           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
                             Sign in to record your own practice takes, save them securely, and listen back anytime.
                           </p>
@@ -1053,9 +1130,8 @@ export default function RehearsalDrawer({
                     </div>
                   )}
                 </div>
-              ) : (
-                /* Media Embed Tab View */
-                <div className="space-y-6 text-left">
+
+              <div className="space-y-6 text-left" style={activeTab !== "media" ? { visibility: "hidden", height: 0, overflow: "hidden", margin: 0, padding: 0 } : undefined}>
                   {/* Media Selector Buttons (only if more than 1 media type exists) */}
                   {((youtubeUrl ? 1 : 0) + (spotifyUrl ? 1 : 0) + (soundcloudUrl ? 1 : 0)) > 1 && (
                     <div className="flex gap-2 p-1 bg-gray-100 dark:bg-gray-950 rounded-xl">
@@ -1155,78 +1231,135 @@ export default function RehearsalDrawer({
                   )}
 
                 </div>
-              )}
 
             </div>
           </motion.div>
-      {/* Hidden media iframes — always mounted when mini-player is visible */}
-      {!isOpen && hasMedia && (
-        <div className="absolute -left-[9999px] -top-[9999px] w-0 h-0 overflow-hidden" aria-hidden="true">
-          {youtubeUrl && selectedMedia === "youtube" && (
-            <iframe
-              ref={hiddenYoutubeRef}
-              width="100%"
-              height="100%"
-              src={typeof window !== "undefined" && (window as any).__E2E__ ? "about:blank" : getYouTubeEmbedUrl(youtubeUrl)}
-              title="YouTube video player (hidden)"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-            />
-          )}
-          {soundcloudUrl && selectedMedia === "soundcloud" && (
-            <iframe
-              ref={hiddenSoundcloudRef}
-              width="100%"
-              height="166"
-              src={typeof window !== "undefined" && (window as any).__E2E__ ? "about:blank" : `https://w.soundcloud.com/player/?url=${encodeURIComponent(soundcloudUrl)}&color=%23ff5500&auto_play=false&hide_related=false&show_comments=false&show_user=true&show_reposts=false&show_teaser=false`}
-              allow="autoplay"
-            />
-          )}
-        </div>
-      )}
 
       {/* Floating Horizontal Bottom Mini Player Widget */}
-      {!isOpen && hasMedia && (
+      {hasAnyAudioSource && (
+
         <div 
           data-testid="bottom-mini-player"
-          className="fixed bottom-[calc(var(--bottom-nav-height,3.5rem)+env(safe-area-inset-bottom,0px))] lg:bottom-4 left-0 right-0 lg:left-1/2 lg:-translate-x-1/2 z-30 w-full lg:max-w-xl lg:rounded-2xl shadow-2xl bg-[#FF5500]/95 backdrop-blur-md text-white h-14 flex items-center justify-between px-4 border-t lg:border border-white/10 select-none animate-in slide-in-from-bottom duration-300"
+          className={`fixed bottom-[calc(var(--bottom-nav-height,3.5rem)+env(safe-area-inset-bottom,0px))] lg:bottom-4 left-0 right-0 lg:left-1/2 lg:-translate-x-1/2 z-[60] w-full lg:max-w-xl lg:rounded-2xl shadow-2xl backdrop-blur-md text-white h-14 flex items-center justify-between px-4 border-t lg:border border-white/10 select-none animate-in slide-in-from-bottom duration-300 ${nowPlaying.type === 'recording' ? 'bg-indigo-600/95' : 'bg-[#FF5500]/95'}`}
         >
-          {/* Horizontal Progress Bar */}
+          {/* Visual Progress Bar (Clipped to container corners) */}
+          <div className="absolute inset-0 pointer-events-none lg:rounded-2xl overflow-hidden z-0">
+            <div className="absolute top-0 inset-x-0 h-1 bg-white/20">
+              <div 
+                className="h-full bg-white"
+                style={{ width: `${Math.min(100, (nowPlaying.currentTime / (nowPlaying.duration || 1)) * 100)}%` }}
+              />
+            </div>
+          </div>
+
+          {/* Interactive Hit Area & Hover Thumb (Unclipped so thumb can extend above container) */}
           <div 
             onClick={handleSliderClickHorizontal}
-            className="absolute top-0 inset-x-0 h-1 bg-white/20 cursor-pointer group lg:rounded-t-2xl overflow-hidden"
+            data-testid="mini-progress-bar"
+            className="absolute top-0 inset-x-0 h-2 -mt-1 cursor-pointer group z-40 flex items-center"
           >
             <div 
-              className="h-full bg-white transition-all duration-100"
-              style={{ width: `${Math.min(100, (mediaCurrentTime / mediaDuration) * 100)}%` }}
-            />
-            <div 
-              className="w-3 h-3 bg-white rounded-full absolute top-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity"
-              style={{ left: `calc(${Math.min(100, (mediaCurrentTime / mediaDuration) * 100)}% - 6px)` }}
+              className="w-3 h-3 bg-white rounded-full absolute opacity-0 group-hover:opacity-100 transition-opacity"
+              style={{ left: `calc(${Math.min(100, (nowPlaying.currentTime / (nowPlaying.duration || 1)) * 100)}% - 6px)` }}
             />
           </div>
 
-          {/* Equalizer & Song Details (Clicking here expands the drawer) */}
-          <div 
-            onClick={onOpen}
-            className="flex items-center gap-3 cursor-pointer flex-1 min-w-0 h-full py-2"
-          >
-            <div className="flex gap-0.5 items-end h-4 w-4 shrink-0 justify-center">
-              <span className={`w-[2px] bg-white rounded-full transition-all duration-300 ${isMediaPlaying ? 'animate-eq-bar-1' : 'h-1.5'}`} />
-              <span className={`w-[2px] bg-white rounded-full transition-all duration-300 ${isMediaPlaying ? 'animate-eq-bar-2' : 'h-3'}`} />
-              <span className={`w-[2px] bg-white rounded-full transition-all duration-300 ${isMediaPlaying ? 'animate-eq-bar-3' : 'h-2'}`} />
+          {/* Equalizer & Source Switcher Dropdown */}
+          <div className="flex items-center gap-3 flex-1 min-w-0 h-full py-2 cursor-pointer" onClick={onOpen}>
+            <div className="flex gap-0.5 items-end h-4 w-4 shrink-0 justify-center cursor-pointer">
+              <span className={`w-[2px] bg-white rounded-full transition-all duration-300 ${nowPlaying.isPlaying ? 'animate-eq-bar-1' : 'h-1.5'}`} />
+              <span className={`w-[2px] bg-white rounded-full transition-all duration-300 ${nowPlaying.isPlaying ? 'animate-eq-bar-2' : 'h-3'}`} />
+              <span className={`w-[2px] bg-white rounded-full transition-all duration-300 ${nowPlaying.isPlaying ? 'animate-eq-bar-3' : 'h-2'}`} />
             </div>
-            <div className="flex flex-col text-left min-w-0">
-              <span className="text-xs font-black truncate">{songTitle}</span>
-              <span className="text-[9px] uppercase tracking-widest opacity-80 truncate">
-                {playingSource ? (playingSource === 'youtube' ? 'YouTube Reference' : playingSource === 'soundcloud' ? 'SoundCloud Reference' : 'Spotify Reference') : 'Tap to play'}
-              </span>
-            </div>
+            
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <div 
+                  data-testid="mini-source-switcher" 
+                  className="flex flex-col text-left min-w-0 cursor-pointer hover:bg-white/10 rounded px-2 -mx-2 transition-colors"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="flex items-center gap-1">
+                    <span className="text-xs font-black truncate">{songTitle}</span>
+                    <ChevronDown className="w-3 h-3 opacity-70 shrink-0" />
+                  </div>
+                  <span className="text-[9px] uppercase tracking-widest opacity-80 truncate">
+                    {nowPlaying.label}
+                  </span>
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="start" className="w-56 bg-[#1a1a1e]/95 backdrop-blur-xl border border-white/10 text-white rounded-xl shadow-2xl p-2 z-[60]" data-testid="mini-source-dropdown">
+                {hasMedia && (
+                  <>
+                    <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-gray-400 font-bold px-2 pb-1">Reference Tracks</DropdownMenuLabel>
+                    {youtubeUrl && (
+                      <DropdownMenuItem className="cursor-pointer focus:bg-white/10 focus:text-white rounded-md transition-colors my-0.5" onClick={() => {
+                        stopActiveRecording();
+                        pauseSoundCloud();
+                        setSelectedMedia("youtube");
+                        setPlayingSource("youtube");
+                        setTimeout(() => { bindYouTubeEvents(); playYouTube(); }, 300);
+                      }}>
+                        <div className="flex items-center justify-between w-full">
+                          <span>YouTube</span>
+                          {nowPlaying.type === 'media' && nowPlaying.source === 'youtube' && <Check className="w-4 h-4 ml-2" />}
+                        </div>
+                      </DropdownMenuItem>
+                    )}
+                    {soundcloudUrl && (
+                      <DropdownMenuItem className="cursor-pointer focus:bg-white/10 focus:text-white rounded-md transition-colors my-0.5" onClick={() => {
+                        stopActiveRecording();
+                        pauseYouTube();
+                        setSelectedMedia("soundcloud");
+                        setPlayingSource("soundcloud");
+                        setTimeout(() => { bindSoundCloudEvents(); playSoundCloud(); }, 300);
+                      }}>
+                        <div className="flex items-center justify-between w-full">
+                          <span>SoundCloud</span>
+                          {nowPlaying.type === 'media' && nowPlaying.source === 'soundcloud' && <Check className="w-4 h-4 ml-2" />}
+                        </div>
+                      </DropdownMenuItem>
+                    )}
+                    {spotifyUrl && (
+                      <DropdownMenuItem className="cursor-pointer focus:bg-white/10 focus:text-white rounded-md transition-colors my-0.5" onClick={() => {
+                        stopActiveRecording();
+                        onOpen?.();
+                        setSelectedMedia("spotify");
+                        setPlayingSource("spotify");
+                      }}>
+                        <div className="flex items-center justify-between w-full">
+                          <span>Spotify</span>
+                          {nowPlaying.type === 'media' && nowPlaying.source === 'spotify' && <Check className="w-4 h-4 ml-2" />}
+                        </div>
+                      </DropdownMenuItem>
+                    )}
+                  </>
+                )}
+                {recordings.length > 0 && (
+                  <>
+                    {hasMedia && <DropdownMenuSeparator className="bg-white/10 my-2" />}
+                    <DropdownMenuLabel>User Recordings</DropdownMenuLabel>
+                    {recordings.map(rec => (
+                      <DropdownMenuItem key={rec.id} onClick={() => {
+                        if (!rec.audioUrl) return;
+                        contextHandleTogglePlay(rec, rec.audioUrl);
+                      }}>
+                        <div className="flex items-center justify-between w-full">
+                          <span className="truncate">{rec.recording_name}</span>
+                          {nowPlaying.type === 'recording' && nowPlaying.recordingId === rec.id && <Check className="w-4 h-4 ml-2" />}
+                        </div>
+                      </DropdownMenuItem>
+                    ))}
+                  </>
+                )}
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
 
           {/* Controls */}
           <div className="flex items-center gap-1.5 ml-4 shrink-0">
-            {/* Seek Back (only when actively playing) */}
-            {playingSource && (
+            {/* Seek Back */}
+            {(nowPlaying.source || nowPlaying.recordingId) && (
               <button 
                 onClick={() => seekRelative(-15)}
                 data-testid="mini-seek-back-btn"
@@ -1243,15 +1376,15 @@ export default function RehearsalDrawer({
               data-testid="mini-play-pause-btn"
               className="w-8 h-8 rounded-full bg-black/20 hover:bg-black/35 flex items-center justify-center text-white cursor-pointer transition-transform hover:scale-105 shrink-0"
             >
-              {isMediaPlaying ? (
+              {nowPlaying.isPlaying ? (
                 <Pause className="w-3.5 h-3.5 fill-white" />
               ) : (
                 <Play className="w-3.5 h-3.5 fill-white ml-0.5" />
               )}
             </button>
 
-            {/* Seek Forward (only when actively playing) */}
-            {playingSource && (
+            {/* Seek Forward */}
+            {(playingSource || activePlaybackId) && (
               <button 
                 onClick={() => seekRelative(15)}
                 data-testid="mini-seek-forward-btn"
@@ -1274,14 +1407,18 @@ export default function RehearsalDrawer({
               <Music className="w-4 h-4" />
             </button>
 
-            {/* Close/Stop (only when actively playing) */}
-            {playingSource && (
+            {/* Close/Stop */}
+            {(playingSource || activePlaybackId) && (
               <button 
                 onClick={() => {
-                  pauseYouTube();
-                  pauseSoundCloud();
-                  setPlayingSource(null);
-                  setIsMediaPlaying(false);
+                  if (activePlaybackId) {
+                    stopActiveRecording();
+                  } else {
+                    pauseYouTube();
+                    pauseSoundCloud();
+                    setPlayingSource(null);
+                    setIsMediaPlaying(false);
+                  }
                 }}
                 data-testid="mini-close-btn"
                 title="Stop playback & close player"

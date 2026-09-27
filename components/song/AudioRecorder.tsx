@@ -71,7 +71,7 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
         // Pre-fill default recording name with timestamp
         const timeString = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
         const dateString = new Date().toLocaleDateString([], { month: 'short', day: 'numeric' });
-        setRecordingName(`Rehearsal - ${dateString} ${timeString}`);
+        setRecordingName(`Recording - ${dateString} ${timeString}`);
       };
 
       mediaRecorder.start(200); // chunk chunks every 200ms
@@ -183,7 +183,7 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
 
     // Clean up filename for default title (strip extension)
     const defaultName = file.name.replace(/\.[^/.]+$/, "");
-    setRecordingName(defaultName || `Rehearsal - ${new Date().toLocaleDateString()}`);
+    setRecordingName(defaultName || `Recording - ${new Date().toLocaleDateString()}`);
   };
 
   // Upload/Save recording or file
@@ -268,8 +268,8 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
           {/* Title */}
           <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-2">
             <Mic className={`w-4 h-4 ${recordingState === 'recording' ? 'text-red-500 animate-pulse' : 'text-gray-400'}`} />
-            {recordingState === "idle" && "Ready to record rehearsal"}
-            {recordingState === "recording" && "Recording rehearsal..."}
+            {recordingState === "idle" && "Ready to record"}
+            {recordingState === "recording" && "Recording..."}
             {recordingState === "paused" && "Recording paused"}
             {recordingState === "stopped" && "Review your recording"}
           </h4>
@@ -308,7 +308,7 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
       {audioUrl && recordingState === "stopped" && (
         <div className="w-full flex flex-col items-center space-y-2 py-2">
           <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
-            <FileAudio className="w-3.5 h-3.5 text-violet-400" /> Preview Rehearsal Audio
+            <FileAudio className="w-3.5 h-3.5 text-violet-400" /> Preview Recording
           </p>
           <audio src={audioUrl} controls className="w-full max-w-md h-10 accent-indigo-500 rounded-lg" />
         </div>
@@ -326,7 +326,7 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
         <div className="w-full space-y-3">
           <input
             type="text"
-            placeholder="Recording Name (e.g. Rehearsal 1)"
+            placeholder="Recording Name (e.g. Recording 1)"
             value={recordingName}
             onChange={(e) => setRecordingName(e.target.value)}
             disabled={isUploading}
@@ -353,7 +353,7 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
               ) : (
                 <CloudUpload className="w-4 h-4" />
               )}
-              Save Rehearsal
+              Save Recording
             </button>
           </div>
         </div>

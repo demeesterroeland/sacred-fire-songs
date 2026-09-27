@@ -194,65 +194,6 @@ export default function SearchFiltersModal({
                         </div>
                     </section>
 
-                    {/* Visibility */}
-                    {isAuthenticated && (
-                        <section>
-                            <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2 block">
-                                Visibility
-                            </label>
-                            <div className="bg-gray-200/80 dark:bg-gray-900/80 p-1 rounded-xl border border-gray-300 dark:border-gray-800 inline-flex shadow-inner">
-                                {(['all', 'public', 'draft'] as const).map((statusOption) => (
-                                    <button
-                                        key={statusOption}
-                                        onClick={() => setFilter('status', statusOption)}
-                                        className={`px-5 py-2 text-xs font-bold rounded-lg transition-all capitalize ${state.status === statusOption
-                                            ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm ring-1 ring-gray-200 dark:ring-white/5'
-                                            : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
-                                            }`}
-                                    >
-                                        {statusOption}
-                                    </button>
-                                ))}
-                            </div>
-                        </section>
-                    )}
-
-                    {/* Display options */}
-                    {isAuthenticated && (
-                        <section>
-                            <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3 block">
-                                Display options
-                            </label>
-                            <div className="grid grid-cols-2 gap-3">
-                                <ToggleCard
-                                    active={!!state.favorites}
-                                    onClick={() => setFilter('favorites', !state.favorites)}
-                                    icon={<Heart className={`w-4 h-4 ${state.favorites ? 'fill-amber-400' : ''}`} strokeWidth={1.5} />}
-                                    label="Favorites"
-                                    count={favoritesCount ? favoritesCount : undefined}
-                                    activeColor="amber"
-                                />
-                                <ToggleCard
-                                    active={!!state.mine}
-                                    onClick={() => setFilter('mine', !state.mine)}
-                                    icon={<Music className="w-4 h-4" strokeWidth={1.5} />}
-                                    label="My Songs"
-                                    count={mineCount ? mineCount : undefined}
-                                    activeColor="violet"
-                                />
-                                <ToggleCard
-                                    active={!!state.myRecordings}
-                                    onClick={() => setFilter('myRecordings', !state.myRecordings)}
-                                    disabled={!state.myRecordings && recordingsCount === 0}
-                                    icon={<Mic className="w-4 h-4" strokeWidth={1.5} />}
-                                    label="My Recordings"
-                                    count={recordingsCount ? recordingsCount : undefined}
-                                    activeColor="violet"
-                                />
-                            </div>
-                        </section>
-                    )}
-
                     {/* Content type */}
                     <section>
                         <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3 block">
@@ -279,6 +220,60 @@ export default function SearchFiltersModal({
                             />
                         </div>
                     </section>
+
+                    {/* Personalized Options */}
+                    {isAuthenticated && (
+                        <section className="pt-4 border-t border-gray-200 dark:border-gray-800/60">
+                            <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3 block">
+                                Your Library
+                            </label>
+                            
+                            <div className="grid grid-cols-2 gap-3 mb-4">
+                                <ToggleCard
+                                    active={!!state.favorites}
+                                    onClick={() => setFilter('favorites', !state.favorites)}
+                                    icon={<Heart className={`w-4 h-4 ${state.favorites ? 'fill-amber-400' : ''}`} strokeWidth={1.5} />}
+                                    label="Your Favorites"
+                                    count={favoritesCount ? favoritesCount : undefined}
+                                    activeColor="amber"
+                                />
+                                <ToggleCard
+                                    active={!!state.mine}
+                                    onClick={() => setFilter('mine', !state.mine)}
+                                    icon={<Music className="w-4 h-4" strokeWidth={1.5} />}
+                                    label="Your Songs"
+                                    count={mineCount ? mineCount : undefined}
+                                    activeColor="violet"
+                                />
+                                <ToggleCard
+                                    active={!!state.myRecordings}
+                                    onClick={() => setFilter('myRecordings', !state.myRecordings)}
+                                    disabled={!state.myRecordings && recordingsCount === 0}
+                                    icon={<Mic className="w-4 h-4" strokeWidth={1.5} />}
+                                    label="Your Recordings"
+                                    count={recordingsCount ? recordingsCount : undefined}
+                                    activeColor="violet"
+                                />
+                                <div className="flex items-center justify-end">
+                                    <div className="w-full bg-gray-200/80 dark:bg-gray-900/80 p-1 rounded-xl border border-gray-300 dark:border-gray-800 flex justify-between shadow-inner h-full items-center">
+                                        {(['all', 'public', 'draft'] as const).map((statusOption) => (
+                                            <button
+                                                key={statusOption}
+                                                onClick={() => setFilter('status', statusOption)}
+                                                className={`flex-1 px-2 py-1.5 text-[11px] font-bold rounded-lg transition-all capitalize ${state.status === statusOption
+                                                    ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm ring-1 ring-gray-200 dark:ring-white/5'
+                                                    : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                                                    }`}
+                                            >
+                                                {statusOption}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </section>
+                    )}
+
                 </div>
 
 
