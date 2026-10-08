@@ -1,13 +1,14 @@
 # Project Analysis & Design Document: Song Sharing Application (Sacred Fire Songs)
 
-**Version:** 1.32
+**Version:** 1.33
 **Status:** Living Document
-**Date:** July 16, 2026
+**Date:** October 8, 2026
 
 ## Changelog
 
 | Version | Date | Description of Changes | 
 | ----- | ----- | ----- | 
+| **1.33** | Oct 8, 2026 | Added Epic 3.6 (Administrative Management) and Story 3.6.1 (Admin User Overview & Contributions) to roadmap. | 
 | **1.0** | Oct 26, 2023 | Initial Document Creation. Defined User Personas, Core Requirements, Domain Model, and Tech Stack. | 
 | **...** | ... | (Previous versions 1.1 - 1.17 retained in history) |
 | **1.18** | Feb 1, 2026 | Standardized navigation layout across all administrative screens. Renamed "Settings" to "Playlists". Refined inter-linking between Home, Explore, and Detail screens. |
@@ -80,7 +81,7 @@ The application is a **Progressive Web App (PWA)** optimized for mobile use duri
 * **[x]** Rich Editing: Create/Edit Songs (Owner/Admin).
 
 ### Phase 3 & 4 (Future)
-* User Accounts, Favorites, Setlists, PDF Export.
+* User Accounts, Favorites, Gatekeeper Role, Musician Setting, Administrative Management (Epic 3.6), Setlists, PDF Export.
 
 ## 5. Domain & Data Model (Implemented Codebase)
 

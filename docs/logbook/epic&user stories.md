@@ -1,13 +1,14 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 1.35
+**Version:** 1.36
 **Status:** Living Document
-**Date:** July 14, 2026
+**Date:** October 8, 2026
 
 ## Changelog
 
 | Version | Date | Description of Changes |
 | ----- | ----- | ----- |
+| **1.36** | Oct 08, 2026 | Added Epic 3.6 (Administrative Management) and Story 3.6.1 (User Overview, Details & Contributions) as placeholder for administrative user stories. |
 | **1.0** | Dec 25, 2025 | Initial Document Creation. Defined Epics and User Stories for Phases 1-4. |
 | **1.1** | Dec 29, 2025 | Added Story 1.3.3 (Navigation) and aligned UI mockups. |
 | **1.2** | Jan 04, 2026 | Added stories for Dashboard, Category Filtering, Desktop View, and YouTube links based on user feedback. |
@@ -595,6 +596,33 @@ Scenario: Onboarding question
   And answering Yes should set is_musician = true on my profile
   And answering No (or skipping) should leave it false
   And I can always change this later in my profile settings
+```
+
+### Epic 3.6: Administrative Management
+
+> **Placeholder & umbrella for administrative user stories.**
+> As an administrator, I want to be able to administer configuration, users, settings, and songs in such a way that I can ensure that I have up-to-date info and can act accordingly.
+
+**Story 3.6.1:** As an Admin, I want to have an overview of all users, view their details, and see their contributions, so that I can monitor community activity and ensure account information is accurate and up to date.
+
+```gherkin
+Scenario: View user list overview
+  Given I am logged in as an Admin
+  When I navigate to the Admin Users overview page
+  Then I should see a list of all registered users
+  And for each user I should see summary details (e.g., name/email, role, join date, status)
+
+Scenario: View user detail and contributions
+  Given I am logged in as an Admin
+  And I am viewing the users overview list
+  When I select a user to view their details
+  Then I should see their profile details (e.g., email, role, musician status, last active)
+  And I should see an overview of their contributions (e.g., songs added, versions submitted, public playlists created, comments/flags)
+
+Scenario: Non-admin access restricted
+  Given I am logged in as a Member or Gatekeeper
+  When I attempt to access the Admin Users overview page
+  Then I should be denied access with an unauthorized notice
 ```
 
 ## Phase 4: Professional Toolkit
