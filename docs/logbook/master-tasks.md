@@ -1194,3 +1194,21 @@
 - [x] Patch `.gitignore` bug swallowing new Supabase `.sql` migration files
 - [x] Fix local `scripts/restart.sh` port conflict errors using `fuser`
 - [x] Deploy and verify Preview environment
+
+## Session October 8-9, 2026 (Epic 3.6: Administrative Management & Story 3.6.1: User Overview & Contributions)
+
+- [x] Create GitHub Epic #257 (`[Epic 3.6] Administrative Management`) and Story #258 (`[Story 3.6.1] User Overview, Details & Contributions`)
+- [x] Create branch `feat/userstory-3.6` and isolated worktree `.worktrees/feat-userstory-3.6`
+- [x] Update documentation roadmap: `docs/logbook/epic&user stories.md` (v1.36) and `docs/design/application-analysis&design.md` (v1.33)
+- [x] Create Supabase migration `20261009194500_admin_profiles_policy.sql` introducing `public.fn_is_admin()` security definer function and admin read RLS policies on `profiles` and `setlists`
+- [x] Update `docs/design/db-schema.sql` to keep single-file setup script in sync
+- [x] Define TypeScript data contracts in `lib/admin/types.ts`
+- [x] Implement backend queries in `lib/admin/serverQueries.ts` (`checkAdminAccess`, `getAdminUsersList`, `getAdminUserDetails`) with aggregated contribution counts
+- [x] Create `components/admin/AccessDeniedNotice.tsx` and `components/admin/AdminHeader.tsx`
+- [x] Implement server layout `app/admin/layout.tsx` with server-side role check and access-denied fallback
+- [x] Implement Admin Users Overview page `app/admin/users/page.tsx` with client table `AdminUsersTable.tsx` (real-time search, role filter, multi-criteria sorting, stats counters)
+- [x] Implement Admin User Detail page `app/admin/users/[id]/page.tsx` and `AdminUserDetailView.tsx` with tabs for created songs, contributed versions, and playlists
+- [x] Add Admin Portal navigation entry in `components/common/navigation/UserProfile.tsx` and `components/common/Sidebar.tsx` (only visible when `role === 'admin'`)
+- [x] Add comprehensive vitest suite `lib/unit-tests/adminQueries.test.ts` (7 tests covering role verification, list aggregation, and detail mapping)
+- [x] Validate TypeScript compilation (`npx tsc --noEmit`) with zero errors
+- [x] Verify production build (`npm run build`) compiles all `/admin` routes successfully
