@@ -2897,3 +2897,40 @@ Refactored the Rehearsal Drawer and Mini-Player to create a seamless, unified pl
 - **Hardware Pop Fix (#242)**: Eliminated the loud initial static crackle in the Web Audio API by rendering a 3-second visual countdown (`3... 2... 1...`) to warm up the microphone stream before recording actually begins.
 - **Preview & Pipeline Stability (#253 & #254)**: Resolved deployment pipeline issues for the Preview environment. Renamed the frontend container image to `sacred-fire-songs-app` to prevent naming collisions with the `sacred-fire-songs-migrator` on the Dockge host. Stripped `build:` contexts from `docker-compose.yml` to force strict registry pulling.
 - **Gitignore Migration Bug (#251)**: Investigated and fixed a silent bug where `.gitignore` was swallowing new Supabase `.sql` migration files due to a wildcard `*.sql` rule, breaking the database migrator workflow.
+
+## October 8-9, 2026: Epic 3.6 Administrative Management & Story 3.6.1 (User Overview & Contributions)
+
+**Issues**: Epic #257, Story #258 | **Branch**: `feat/userstory-3.6` | **Worktree**: `.worktrees/feat-userstory-3.6`
+
+### Objective
+Provide administrators with an administrative portal to monitor and manage all users, inspect user details, and review community contributions (songs created, arrangements contributed, and playlists built).
+
+### 1. Database & Security Definer Architecture
+- Addressed PostgreSQL RLS recursion challenges on the `profiles` table by defining a security definer helper function `public.fn_is_admin()`.
+- Created migration `20261009194500_admin_profiles_policy.sql` introducing:
+  - `public.fn_is_admin()`: securely checks if `auth.uid()` has `role = 'admin'` in `public.profiles` without infinite policy recursion.
+  - Policy `"Admins can read all profiles"` on `public.profiles` for `SELECT`.
+  - Policy `"Admins can view all setlists"` on `public.setlists` for `SELECT`.
+- Updated `docs/design/db-schema.sql` to maintain a single-file fresh install setup script.
+
+### 2. Backend & Server Queries (`lib/admin/serverQueries.ts`)
+- Implemented `checkAdminAccess()` for strict session and role verification (`role === 'admin'`).
+- Implemented `getAdminUsersList()` returning all registered users combined with aggregated contribution metrics (`songs_count`, `versions_count`, `playlists_count`) fetched concurrently.
+- Implemented `getAdminUserDetails(userId)` returning complete user profile metadata alongside their created compositions, submitted song versions, and public/private playlists.
+
+### 3. Admin Routing & Access Control
+- `app/admin/layout.tsx`: server-side guard verifying caller's role. Unauthenticated requests are redirected to `/auth/login?next=/admin/users`, while non-admin authenticated users receive a clean `AccessDeniedNotice` view.
+- `app/admin/page.tsx`: auto-redirects to `/admin/users`.
+- `components/admin/AdminHeader.tsx`: sticky administrative navigation with status badges and tabs.
+
+### 4. User Experience & Navigation Integration
+- `components/admin/AdminUsersTable.tsx`: responsive users overview with real-time text search (name/email), role filtering, multi-criteria sorting, quick contribution counters, and high-level platform metric cards.
+- `components/admin/AdminUserDetailView.tsx`: user inspection view displaying avatar, contact/identity information, activity timestamps, and interactive tabs for contributed songs, song versions, and playlists with direct links.
+- `components/common/navigation/UserProfile.tsx`: added "Admin Portal" link with a shield icon (`ShieldCheck`) in the user account dropdown, visible strictly when `user.role === 'admin'`.
+- `components/common/Sidebar.tsx`: added dedicated "Administration" navigation section for admin users.
+
+### 5. Verification & Testing
+- Authored unit test suite in `lib/unit-tests/adminQueries.test.ts` (7 tests covering unauthorized rejection, admin verification, list aggregation, and detail mapping).
+- All 11 test suites and 79 unit tests in `lib/unit-tests/` pass with 100% success.
+- TypeScript compilation (`npx tsc --noEmit`) passes with zero errors.
+- Production build (`npm run build`) generates all dynamic `/admin` routes cleanly.

@@ -87,5 +87,6 @@
 | **September 27, 2026** | **Feature/Architecture**: Unified Audio Experience (#237) — Implemented global audio context, Source Switcher dropdown with dark glassmorphism, hoisted data fetching, fixed CSS progress bar clipping, resolved double scrollbars, and consolidated Playwright E2E test suites via multi-agent sub-branches. | ~4.0 Hours | ✅ Completed |
 
 | **September 27, 2026 (Part 2)** | **Release/Ops**: Finalizing v1.6.0 Release (#242, #251, #253, #254) — Fixed hardware pop, added metadata UI, repaired staging migrator pipeline and .gitignore bugs, and cleared deployment pipeline bottlenecks. | ~2.5 Hours | ✅ Completed |
+| **October 9, 2026** | **Feature/Admin**: Administrative Management & User Overview (#257, #258) — Added Epic 3.6 & Story 3.6.1, PostgreSQL security definer RLS policies on profiles & setlists, admin server queries, Admin Portal layout with role guard, responsive users overview table with search/filters, user detail view with contribution breakdown, and unit test suite. | ~3.0 Hours | ✅ Completed |
 
-| **Total** | **Development + AI Collaboration** | **~169.25 Hours** | |
+| **Total** | **Development + AI Collaboration** | **~172.25 Hours** | |

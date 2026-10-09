@@ -2,13 +2,16 @@
 
 import { useActivePath } from '@/hooks/useActivePath';
 import { useSidebar } from '@/context/SidebarContext';
+import { useAuth } from '@/hooks/useAuth';
 import { NAV_SECTIONS } from '@/lib/navigation';
+import { ShieldCheck } from 'lucide-react';
 import Link from 'next/link';
 import packageJson from '@/package.json';
 
 export default function Sidebar() {
     const { isActive } = useActivePath();
     const { isOpen, setIsOpen } = useSidebar();
+    const { user } = useAuth();
 
     return (
         <nav
@@ -66,6 +69,29 @@ export default function Sidebar() {
                             })}
                         </div>
                     ))}
+
+                    {/* Admin Section */}
+                    {user?.role === 'admin' && (
+                        <div>
+                            <p className="text-xs font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400 ps-7 pt-5 pb-2">
+                                Administration
+                            </p>
+                            <Link
+                                href="/admin/users"
+                                className={`
+                                    flex items-center gap-4 ps-7 pe-4 py-2.5 me-2 rounded-e-full
+                                    text-sm font-medium transition-colors
+                                    ${isActive('/admin/users')
+                                        ? 'bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-400 font-bold'
+                                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 hover:text-gray-900 dark:hover:text-white'
+                                    }
+                                `}
+                            >
+                                <ShieldCheck className={`w-5 h-5 shrink-0 ${isActive('/admin/users') ? 'text-purple-600 dark:text-purple-400' : ''}`} />
+                                <span>Users Overview</span>
+                            </Link>
+                        </div>
+                    )}
                 </div>
 
                 {/* Application SemVer Version Tag */}
