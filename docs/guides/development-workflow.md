@@ -21,7 +21,7 @@ When your feature is functionally complete and you are ready to test it on the a
 
 1. Run the deployment script: 
    ```bash
-   scripts/dev2preview.sh
+   scripts/cicd/dev2preview.sh
    ```
 2. **What happens under the hood?**
    * The script pushes your branch to origin.

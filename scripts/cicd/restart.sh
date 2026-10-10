@@ -3,10 +3,13 @@
 # Exit on any error
 set -e
 
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+cd "$ROOT"
+
 # Check if issue number is provided
 if [ -z "$1" ]; then
   echo "❌ Error: Please provide an issue number."
-  echo "Usage: ./scripts/restart.sh <issue-number>"
+  echo "Usage: ./scripts/cicd/restart.sh <issue-number>"
   exit 1
 fi
 
@@ -17,7 +20,7 @@ WORKTREE_DIR=".worktrees/issue-${ISSUE}"
 # Check if worktree exists
 if [ ! -d "$WORKTREE_DIR" ]; then
   echo "❌ Error: Worktree directory '$WORKTREE_DIR' does not exist."
-  echo "Did you mean to run: ./scripts/start-issue.sh $ISSUE <description> ?"
+  echo "Did you mean to run: ./scripts/cicd/start-issue.sh $ISSUE <description> ?"
   exit 1
 fi
 

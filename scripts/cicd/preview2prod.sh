@@ -25,7 +25,7 @@
 #
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT"
 
 BRANCH=""
@@ -57,7 +57,7 @@ while [[ $# -gt 0 ]]; do
       shift
       ;;
     -h|--help)
-      echo "Usage: scripts/promote-to-production.sh [options]"
+      echo "Usage: scripts/cicd/preview2prod.sh [options]"
       echo ""
       echo "Options:"
       echo "  --notes-file <file>   Path to file with AI-generated release summary"

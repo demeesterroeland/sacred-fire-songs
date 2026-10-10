@@ -64,7 +64,7 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 ### CI approach
 
 - `.github/workflows/e2e.yml` runs on **push** to `main` / `feat|fix|chore/**` and tests against the **staging** Supabase project. It derives the staging URL from `SUPABASE_PROJECT_ID_STAGING` and reads the (public) anon key from the `SUPABASE_PUBLISHABLE_KEY_STAGING` secret; `E2E_TEST_PASSWORD` provides the seeded-account password. It installs deps + Chromium, runs the `@smoke` subset, and uploads the HTML report.
-- **Database Isolation:** Playwright E2E tests are configured to run against the online staging Supabase project (which acts as a dedicated E2E DB and is separate from the database driving `songbook-beta`). A global setup hook (`e2e/global-setup.ts`) executes a Node.js setup script (`scripts/setup-test-db.mjs`) to dynamically wipe and seed the database using `supabase/seeds/*.sql` before tests run, ensuring a clean and consistent baseline.
+- **Database Isolation:** Playwright E2E tests are configured to run against the online staging Supabase project (which acts as a dedicated E2E DB and is separate from the database driving `songbook-beta`). A global setup hook (`e2e/global-setup.ts`) executes a Node.js setup script (`scripts/db/setup-test-db.mjs`) to dynamically wipe and seed the database using `supabase/seeds/*.sql` before tests run, ensuring a clean and consistent baseline.
 - **Local Optimization:** For fast local test iteration, setting the environment variable `E2E_REUSE_DB=1` skips the database wipe and re-seed, reusing the existing database state.
 
 ---
