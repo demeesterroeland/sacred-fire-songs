@@ -10,7 +10,7 @@ export default async function globalSetup(): Promise<void> {
   const root = path.resolve(__dirname, '..');
   console.log('[e2e globalSetup] Running setup-test-db.mjs...');
   
-  execSync('node scripts/setup-test-db.mjs', {
+  execSync('node scripts/db/setup-test-db.mjs', {
     cwd: root,
     stdio: 'inherit',
     env: { ...process.env },

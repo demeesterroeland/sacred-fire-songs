@@ -30,13 +30,13 @@
 #   STAGING_PROJECT_ID, STAGING_DB_PASSWORD, STAGING_HOST
 #
 # Usage:
-#   scripts/clone-prod-to-staging.sh [--yes] [--delete-backup]
+#   scripts/db/clone-prod-to-staging.sh [--yes] [--delete-backup]
 #     --yes             skip the interactive confirmation
 #     --delete-backup   remove the dump dir on success (default: keep it; PII inside)
 #
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT"
 
 ENV_FILE="$ROOT/.env.infrastructure"

@@ -1,17 +1,20 @@
 #!/usr/bin/env bash
 set -e
 
-# Usage: scripts/start-issue.sh <issue-number> <type> <description...>
-# Example: scripts/start-issue.sh 239 fix rehearsal proxy apikey
+# Usage: scripts/cicd/start-issue.sh <issue-number> <type> <description...>
+# Example: scripts/cicd/start-issue.sh 239 fix rehearsal proxy apikey
+
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+cd "$ROOT"
 
 if [ "$#" -lt 3 ]; then
-  echo "Usage: scripts/start-issue.sh <issue-number> <type> <description...>"
+  echo "Usage: scripts/cicd/start-issue.sh <issue-number> <type> <description...>"
   echo "  <issue-number> : The GitHub issue number (e.g. 239)"
   echo "  <type>         : The Conventional Commit type (e.g. fix, feat, docs, chore)"
   echo "  <description>  : A short description of the issue (spaces allowed)"
   echo ""
-  echo "Example: scripts/start-issue.sh 239 fix rehearsal proxy apikey"
-  echo "         scripts/start-issue.sh 179 feat new spotify menu"
+  echo "Example: scripts/cicd/start-issue.sh 239 fix rehearsal proxy apikey"
+  echo "         scripts/cicd/start-issue.sh 179 feat new spotify menu"
   exit 1
 fi
 
