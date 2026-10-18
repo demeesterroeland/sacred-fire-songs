@@ -114,7 +114,7 @@ describe('Artist Normalization & Aggregation', () => {
 import { Song } from '../songUtils';
 
 describe('songFilterConfig artist matching', () => {
-  const matchingRule = songFilterConfig.artist;
+  const matchingRule = songFilterConfig.artist!;
 
   it('is active only for non-empty trimmed values', () => {
     expect(matchingRule.isActive(undefined)).toBe(false);

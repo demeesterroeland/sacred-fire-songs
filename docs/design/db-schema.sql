@@ -169,6 +169,33 @@ alter table public.profiles enable row level security;
 alter table public.categories enable row level security;
 alter table public.compositions enable row level security;
 alter table public.song_category_map enable row level security;
+
+-- Admin Helper Function (Security Definer avoids RLS recursion)
+create or replace function public.fn_is_admin() returns boolean as $$
+begin
+  return exists (
+    select 1
+    from public.profiles
+    where id = auth.uid()
+      and role = 'admin'
+  );
+end;
+$$ language plpgsql security definer
+set search_path = public;
+
+grant execute on function public.fn_is_admin to authenticated;
+grant execute on function public.fn_is_admin to service_role;
+
+-- Profiles Policies
+create policy "Users can read own profile" on public.profiles for
+select to authenticated using (id = auth.uid());
+
+create policy "Admins can read all profiles" on public.profiles for
+select to authenticated using (public.fn_is_admin());
+
+create policy "Users can update own profile" on public.profiles for
+update to authenticated using (id = auth.uid()) with check (id = auth.uid());
+
 -- Song Category Map Policies
 create policy "Public read access for song_category_map" on public.song_category_map for
 select to public using (true);
@@ -312,6 +339,8 @@ delete to authenticated using (
       select auth.uid()
     )
   );
+create policy "Admins can view all setlists" on public.setlists for
+select to authenticated using (public.fn_is_admin());
 create policy "Admins and Gatekeepers can update public setlists" on public.setlists for
 update to authenticated using (
     is_public = true 

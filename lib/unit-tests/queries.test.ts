@@ -18,7 +18,7 @@ describe('mapCompositionToSong', () => {
   };
 
   it('maps a complete row correctly', () => {
-    const song = mapCompositionToSong(baseItem);
+    const song = mapCompositionToSong(baseItem as any);
     expect(song.id).toBe('abc-123');
     expect(song.title).toBe('Test Song');
     expect(song.author).toBe('Test Author');
@@ -31,30 +31,30 @@ describe('mapCompositionToSong', () => {
   });
 
   it('handles missing author', () => {
-    const song = mapCompositionToSong({ ...baseItem, original_author: null });
+    const song = mapCompositionToSong({ ...baseItem, original_author: null } as any);
     expect(song.author).toBe('');
   });
 
   it('handles missing song_versions', () => {
-    const song = mapCompositionToSong({ ...baseItem, song_versions: [] });
+    const song = mapCompositionToSong({ ...baseItem, song_versions: [] } as any);
     expect(song.songKey).toBeNull();
     expect(song.content).toBe('');
   });
 
   it('handles empty categories', () => {
-    const song = mapCompositionToSong({ ...baseItem, song_category_map: [] });
+    const song = mapCompositionToSong({ ...baseItem, song_category_map: [] } as any);
     expect(song.categories).toEqual([]);
   });
 
   it('marks favorite when in favoriteIds set', () => {
     const favs = new Set(['abc-123']);
-    const song = mapCompositionToSong(baseItem, favs);
+    const song = mapCompositionToSong(baseItem as any, favs);
     expect(song.isFavorite).toBe(true);
   });
 
   it('marks not favorite when not in set', () => {
     const favs = new Set(['other-id']);
-    const song = mapCompositionToSong(baseItem, favs);
+    const song = mapCompositionToSong(baseItem as any, favs);
     expect(song.isFavorite).toBe(false);
   });
 });
