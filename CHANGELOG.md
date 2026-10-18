@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.1](https://github.com/demeesterroeland/sacred-fire-songs/compare/v1.6.0...v1.6.1) (2026-10-18)
+
+
+### 📖 Documentation
+
+* add git workflow guide ([#260](https://github.com/demeesterroeland/sacred-fire-songs/issues/260)) ([fc55898](https://github.com/demeesterroeland/sacred-fire-songs/commit/fc55898bf84a7dbb1989764469089192616c1dcd))
+
 ## [1.6.0](https://github.com/demeesterroeland/sacred-fire-songs/compare/v1.5.1...v1.6.0) (2026-09-27)
 
 
