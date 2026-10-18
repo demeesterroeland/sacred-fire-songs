@@ -1,8 +1,30 @@
-# Task: Fix Kong API Gateway 401 Missing API Key Error for Rehearsal Audio Proxy
+# Task: Implement Epic 3.6 - Administrative Management (#257) & Story 3.6.1 (#258)
 
-- [x] Investigate preview server Kong API Gateway (`songbook-preview-kong-1`) rejecting rehearsal proxy requests with "No API key found in request".
-- [x] SSH to `root@bluette` and verify the `apikey` enforcement on Kong.
-- [x] Modify Next.js proxy route handler (`app/supabase-api/[...path]/route.ts`) to inject the `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` into `apikey` and `Authorization: Bearer` headers if missing.
-- [ ] Push to GitHub to trigger a build for `ghcr.io/demeesterroeland/sacred-fire-songs:fix-239-rehearsal-proxy-apikey`.
-- [ ] Deploy new preview docker container (`docker compose pull app && docker compose up -d`) on preview server.
-- [ ] Verify fix by listening to/downloading rehearsal audio on preview environment.
+- [x] **Step 1: Discovery & Environment Setup**
+  - [x] Analyze codebase, schema, auth, and navigation
+  - [x] Create branch `feat/userstory-3.6` and worktree `.worktrees/feat-userstory-3.6`
+  - [x] Symlink `node_modules` into worktree
+  - [x] Commit documentation updates (`epic&user stories.md`, `application-analysis&design.md`)
+- [x] **Step 2: Step-by-Step Planning**
+  - [x] Draft implementation plan (`docs/plans/2026-10-08-epic-3.6-admin-users.md`)
+  - [x] Align with user on implementation plan (User approved)
+- [x] **Step 3: Context Assembly**
+  - [x] Gather DB schema, RLS policies, existing queries, and layout structures
+- [x] **Step 4: Implementation**
+  - [x] **Database / RLS**: Add migration `20261009194500_admin_profiles_policy.sql` (`fn_is_admin()`, policies on profiles & setlists)
+  - [x] **Single-File Setup**: Update `docs/design/db-schema.sql` with new functions and policies
+  - [x] **Backend Queries & Types**: Implement `lib/admin/types.ts` and `lib/admin/serverQueries.ts` (`checkAdminAccess`, `getAdminUsersList`, `getAdminUserDetails`)
+  - [x] **Admin Routing & Layout**: Create `app/admin/layout.tsx` (server-side role guard, `AccessDeniedNotice` fallback) and `app/admin/page.tsx`
+  - [x] **Admin Users Overview**: Create `app/admin/users/page.tsx` and `AdminUsersTable.tsx` with search, role filters, sorting, and metrics
+  - [x] **User Details & Contributions**: Create `app/admin/users/[id]/page.tsx` and `AdminUserDetailView.tsx` with tabs for created songs, versions, and playlists
+  - [x] **Navigation Integration**: Add Admin link in `UserProfile` dropdown (visible only to `role === 'admin'`) and `Sidebar.tsx`
+- [x] **Step 5: Verification**
+  - [x] Unit tests for admin queries / logic (`lib/unit-tests/adminQueries.test.ts` — 7 tests pass)
+  - [x] All test suites pass (11 files, 79 tests)
+  - [x] TypeScript check passes (`npx tsc --noEmit` — 0 errors)
+  - [x] Build check passes (`npm run build` — compiles all `/admin` routes)
+- [x] **Step 6: Self-Correction**
+  - [x] Fixed non-null assertion in `artistNormalization.test.ts` and type casting in `queries.test.ts`
+- [x] **Step 7: Finalization**
+  - [x] Update logbook artifacts (`master-tasks.md`, `master-walkthrough.md`, `master-timetracking.md`) directly on feature branch
+  - [x] Prepare completion summary for user
