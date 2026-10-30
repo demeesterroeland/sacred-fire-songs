@@ -1,6 +1,6 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 1.37
+**Version:** 1.38
 **Status:** Living Document
 **Date:** Oct 30, 2026
 
@@ -36,6 +36,7 @@
 | **1.35** | Jul 14, 2026 | Vercel preview deploy fix (`framework: null` → `nextjs`), Enter key submits search in modal, header spacing polish. Merged to main, closed #185. Story 1.2.4 fully deployed. |
 | **1.36** | Oct 30, 2026 | Marked Story 4.2.1 as [Implemented] (Issue #18 / PR #220: PDF Setlist export for ceremony musicians using ChordSheetJS & jsPDF). |
 | **1.37** | Oct 30, 2026 | Added Phase 5 (Engineering Excellence) with Epic 5.1: Gitflow CI/CD Migration, stories 5.1.1–5.1.14 [Planned]. Plan: `docs/plans/2026-10-30-gitflow-cicd-migration.md`; executable spec: `docs/testing/gitflow-cicd.feature`. |
+| **1.38** | Oct 30, 2026 | Epic 5.1 created on GitHub: master epic #280, phase epics #281–#286, Task 5.1.0 #287, stories #288–#301 (sub-issues, `model:tier-1/2` labels, blocked-by dependencies). Linked issue numbers in the story table. |
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
 
@@ -835,28 +836,28 @@ Scenario: Guest cannot record or see private rehearsals
 
 ## Phase 5: Engineering Excellence
 
-Delivery-pipeline work. Personas: **Maintainer** (project owner) and **Contributor** (human or AI agent). Full acceptance spec: `docs/testing/gitflow-cicd.feature` (tag `@story-5.1.x`). Plan: `docs/plans/2026-10-30-gitflow-cicd-migration.md`.
+Delivery-pipeline work. Personas: **Maintainer** (project owner) and **Contributor** (human or AI agent). GitHub master epic: #280 (phases #281–#286, Task 5.1.0 #287). Full acceptance spec: `docs/testing/gitflow-cicd.feature` (tag `@story-5.1.x`). Plan: `docs/plans/2026-10-30-gitflow-cicd-migration.md`.
 
 ### Epic 5.1: Gitflow CI/CD Migration
 
 Move from GitHub Flow to a lightweight Gitflow: `main` = production, `develop` = integration + staging, `feat|fix|chore|docs/*` = work branches (squash into `develop`), `hotfix/*` = urgent fixes from `main`. Quality gates follow the test pyramid; the pipeline is built test-first (contract/bats tests → workflow change → Gherkin acceptance).
 
-| Story | Title | Plan phase | Status |
-|---|---|---|---|
-| 5.1.1 | PR quality gate (`ci.yml`) | 1 | [Planned] |
-| 5.1.2 | No false-green E2E / fail-closed Docker | 1 | [Planned] |
-| 5.1.3 | Single unit-test tree, strict BDD | 1 | [Planned] |
-| 5.1.4 | Protected `main` + `develop` (rulesets), default branch `develop` | 2 | [Planned] |
-| 5.1.5 | Branch & PR-title policy (`pr-lint.yml`) | 2 | [Planned] |
-| 5.1.6 | Scripts follow Gitflow (no `--admin`, correct image names) | 2 | [Planned] |
-| 5.1.7 | Staging CD from `develop` (images, migrations, deploy) | 3 | [Planned] |
-| 5.1.8 | Production promotion `develop` → `main` with approval | 4 | [Planned] |
-| 5.1.9 | Automatic back-merge `main` → `develop` | 4 | [Planned] |
-| 5.1.10 | Hotfix flow | 4 | [Planned] |
-| 5.1.11 | Test-pyramid schedule (nightly full E2E + perf) | 3 | [Planned] |
-| 5.1.12 | Supply-chain hardening (pinned actions, Dependabot, permissions) | 1 | [Planned] |
-| 5.1.13 | Documentation & agent tooling aligned to Gitflow | 5 | [Planned] |
-| 5.1.14 | Dress rehearsal & cut-over of open branches | 5 | [Planned] |
+| Story | Issue | Title | Plan phase | Status |
+|---|---|---|---|---|
+| 5.1.1 | #288 | PR quality gate (`ci.yml`) | 1 | [Planned] |
+| 5.1.2 | #289 | No false-green E2E / fail-closed Docker | 1 | [Planned] |
+| 5.1.3 | #290 | Single unit-test tree, strict BDD | 1 | [Planned] |
+| 5.1.4 | #292 | Protected `main` + `develop` (rulesets), default branch `develop` | 2 | [Planned] |
+| 5.1.5 | #293 | Branch & PR-title policy (`pr-lint.yml`) | 2 | [Planned] |
+| 5.1.6 | #294 | Scripts follow Gitflow (no `--admin`, correct image names) | 2 | [Planned] |
+| 5.1.7 | #295 | Staging CD from `develop` (images, migrations, deploy) | 3 | [Planned] |
+| 5.1.8 | #297 | Production promotion `develop` → `main` with approval | 4 | [Planned] |
+| 5.1.9 | #298 | Automatic back-merge `main` → `develop` | 4 | [Planned] |
+| 5.1.10 | #299 | Hotfix flow | 4 | [Planned] |
+| 5.1.11 | #296 | Test-pyramid schedule (nightly full E2E + perf) | 3 | [Planned] |
+| 5.1.12 | #291 | Supply-chain hardening (pinned actions, Dependabot, permissions) | 1 | [Planned] |
+| 5.1.13 | #300 | Documentation & agent tooling aligned to Gitflow | 5 | [Planned] |
+| 5.1.14 | #301 | Dress rehearsal & cut-over of open branches | 5 | [Planned] |
 
 **Story 5.1.1:** As a Maintainer, I want every pull request to run lint, typecheck, unit, BDD, build and a local-Supabase integration/smoke job so that broken code cannot be merged.
 

@@ -1,16 +1,17 @@
 # Gitflow CI/CD Migration — Plan & Orchestration
 
-**Version:** 1.0
+**Version:** 1.1
 **Status:** Draft (planning only — no implementation yet)
 **Date:** Oct 30, 2026
 **Branch:** `docs/gitflow-migration-plan`
-**Tracking:** Epic 5.1 in `docs/logbook/epic&user stories.md` · BDD spec `docs/testing/gitflow-cicd.feature`
+**Tracking:** GitHub master epic #280 (phases #281–#286, Task 5.1.0 #287, stories #288–#301) · Epic 5.1 in `docs/logbook/epic&user stories.md` · BDD spec `docs/testing/gitflow-cicd.feature`
 
 ## Changelog
 
 | Version | Date | Description of Changes |
 | ----- | ----- | ----- |
 | **1.0** | Oct 30, 2026 | Initial plan. Online research on Gitflow CI/CD, gap analysis against the current GitHub Flow setup (workflows, scripts, docs, branch protection), target design (`main` / `develop` / `feat|fix|chore|docs/*` / `hotfix/*`), Epic 5.1 with 6 phases, test-pyramid / TDD / BDD strategy for the pipeline itself, and open decisions. |
+| **1.1** | Oct 30, 2026 | GitHub issue tree created via `scripts/setup_github_roadmap.py` (masterplan-orchestrator skill): #280 master, #281–#286 phases, #287–#301 task/stories; #267 re-parented under #288; #274 set as blocker of #294. Task 0.1 done. |
 
 > **For Claude:** REQUIRED SUB-SKILL: Use `superpowers:executing-plans` (or `superpowers:subagent-driven-development`) to implement this plan phase by phase. One story = one issue = one branch = one PR into `develop` (after Phase 1 exists; before that, into `main`).
 
@@ -189,7 +190,7 @@ Each phase ends with a green gate before the next starts. Story IDs map to `docs
 ### Phase 0 — Specification & test harness (no behaviour change)
 **Exit:** BDD feature + contract test harness exist and run (red where expected), GitHub issues created.
 
-- [ ] 0.1 Create GitHub issues for Epic 5.1 + stories 5.1.1–5.1.14 via `/create-issue` (Gherkin from epic doc).
+- [x] 0.1 Create GitHub issues for Epic 5.1 + stories 5.1.1–5.1.14 via `/create-issue` (Gherkin from epic doc).
 - [ ] 0.2 Add `docs/testing/gitflow-cicd.feature` to `cucumber.json` as profile `ci` (`@ci-contract`).
 - [ ] 0.3 Add `yaml` devDependency; scaffold `testing/unit/tests/ci/workflowContract.test.ts` with helper `loadWorkflow(name)`.
 - [ ] 0.4 Add `bats-core` (devDependency `bats`) + `testing/scripts/*.bats` scaffold; `npm run test:scripts`.

@@ -1242,5 +1242,5 @@
 - [x] Write executable acceptance spec `docs/testing/gitflow-cicd.feature` (test-first, `@ci-contract` / `@script` / `@manual`)
 - [x] Add Phase 5 / Epic 5.1 with stories 5.1.1–5.1.14 to `docs/logbook/epic&user stories.md` (v1.37)
 - [ ] Owner: decide D1–D7 in the plan
-- [ ] Create GitHub issues for Epic 5.1 and its stories (`/create-issue`, Phase 0.1)
+- [x] Create GitHub issues for Epic 5.1 via `scripts/setup_github_roadmap.py` (masterplan-orchestrator): #280 master, #281–#286 phases, #287 Task 5.1.0, #288–#301 stories; #267 moved under #288; #274 blocks #294
 - [ ] Phase 0 onwards: implementation (not started — planning only)
