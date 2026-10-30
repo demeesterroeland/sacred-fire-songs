@@ -98,6 +98,7 @@ Implementation of lightweight custom i18n across the application without heavy e
 
 ### Task 12: Docs & PR
 - [x] **FINISHED**: `application-analysis&design.md` §6.4, `e2e-test-overview.md` ACC-07, `docs/plans/2026-10-30-i18n.md`, `testing/README.md`
+- [x] **FINISHED**: Merge origin/main #220 and translate PDF export (I18N-11)
 - [ ] **WAITING**: User manual validation, then "klaar" / "merge"
 
 ---

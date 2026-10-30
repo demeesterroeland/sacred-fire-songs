@@ -1,6 +1,6 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 1.36
+**Version:** 1.37
 **Status:** Living Document
 **Date:** Oct 30, 2026
 
@@ -34,7 +34,8 @@
 | **1.34** | Mar 1, 2026 | GH sync: marked 3.3.1, 3.3.2, 4.1.8 as [Implemented]. Added Story 1.1.9 (Spotify-style mobile bottom nav bar). |
 | **1.34** | Jun 28, 2026 | Added Epic 4.6: Private Rehearsal & Audio Storage (Story 4.6.1) for microphone recording and private Supabase storage uploads. |
 | **1.35** | Jul 14, 2026 | Vercel preview deploy fix (`framework: null` → `nextjs`), Enter key submits search in modal, header spacing polish. Merged to main, closed #185. Story 1.2.4 fully deployed. |
-| **1.36** | Oct 30, 2026 | Added Epic 3.7: Multi-Language Support (Story 3.7.1, issue #246) with acceptance criteria I18N-01…I18N-10, executable in `docs/testing/i18n.feature`. |
+| **1.36** | Oct 30, 2026 | Marked Story 4.2.1 as [Implemented] (Issue #18 / PR #220: PDF Setlist export for ceremony musicians using ChordSheetJS & jsPDF). |
+| **1.37** | Oct 30, 2026 | Added Epic 3.7: Multi-Language Support (Story 3.7.1, issue #246) with acceptance criteria I18N-01…I18N-11 (I18N-11: PDF export from #220), executable in `docs/testing/i18n.feature`. |
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
 
@@ -662,6 +663,13 @@ Scenario: I18N-10 – Song content is never translated
   Given Dutch is active
   When I open a song
   Then its title, lyrics, chords and artist names are shown exactly as entered
+
+Scenario: I18N-11 – Playlist PDF export follows the interface language
+  Given Dutch is active
+  When I export a playlist as PDF
+  Then the export button, messages and login prompt are in Dutch
+  And the PDF labels (page footer, "Toonsoort", "Door", date) are in Dutch
+  And the song titles, lyrics and chords in the PDF are unchanged
 ```
 
 ## Phase 4: Professional Toolkit
@@ -785,14 +793,30 @@ Scenario: Set playlist cover color
 
 ### Epic 4.2: Print & Export
 
-**Story 4.2.1:** As a Musician, I want to generate a PDF of my setlist so that I can print it for the ceremony.
+**Story 4.2.1:** As a Member or Musician, I want to generate a PDF of my setlist so that I can print it for the ceremony. **[Implemented - PR #220]**
 
 ```
-Scenario: Export PDF
-  Given I am viewing a setlist
-  When I click "Export PDF"
+Scenario: Export PDF (Authenticated Member)
+  Given I am logged in as a Member or Musician
+  And I am viewing a setlist with between 1 and 200 songs
+  When I click "Export PDF" or the Printer button
   Then a PDF file should download
   And the PDF should contain the lyrics and chords for all songs in the setlist
+  And every page should display a 3-part footer:
+    | Song URL (bottom left) | Playlist: <name> (bottom middle) | Page X of Y (bottom right) |
+
+Scenario: Guest clicks Export PDF
+  Given I am an unauthenticated Guest viewing a public setlist
+  When I click "Export PDF" or the Printer button
+  Then the export button should be visible
+  And clicking it should display a popup modal with a link to log in
+  And no PDF download should be initiated
+
+Scenario: Exporting setlist exceeding maximum songs limit
+  Given I am viewing a setlist containing more than 200 songs
+  When I click "Export PDF" or the Printer button
+  Then an alert or toast should inform me that maximum 200 songs can be exported per PDF (upgrade to Premium for 1000 songs)
+  And no PDF file should be generated
 ```
 
 **Story 4.2.2:** As a Musician, I want to group songs by category in the PDF so that I can keep "Water" songs together on paper.

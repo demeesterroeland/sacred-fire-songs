@@ -6,7 +6,7 @@ import {
     DropdownMenu, DropdownMenuContent, DropdownMenuItem,
     DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, Pencil, Trash2, Link2, Copy, Globe, Lock } from 'lucide-react';
+import { MoreHorizontal, Pencil, Trash2, Link2, Copy, Globe, Lock, FileText } from 'lucide-react';
 import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal';
 import { deletePlaylist, togglePlaylistVisibility } from '@/app/actions/playlistActions';
 import { toast } from 'sonner';
@@ -23,9 +23,21 @@ interface PlaylistContextMenuProps {
     onGetLink?: () => void;
     /** When false, Get Link is shown grayed-out with an explanation. Defaults to true. */
     isLinkAvailable?: boolean;
+    onExportPdf?: () => void;
+    isExportingPdf?: boolean;
 }
 
-export function PlaylistContextMenu({ playlistId, playlistTitle, isOwner, isPublic, onRenameStart, onGetLink, isLinkAvailable = true }: PlaylistContextMenuProps) {
+export function PlaylistContextMenu({
+    playlistId,
+    playlistTitle,
+    isOwner,
+    isPublic,
+    onRenameStart,
+    onGetLink,
+    isLinkAvailable = true,
+    onExportPdf,
+    isExportingPdf = false,
+}: PlaylistContextMenuProps) {
     const { t } = useLocale();
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [isDeleting, startDeleteTransition] = useTransition();
@@ -64,7 +76,7 @@ export function PlaylistContextMenu({ playlistId, playlistTitle, isOwner, isPubl
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <button
-                        onClick={e => e.preventDefault()}
+                        onClick={e => e.stopPropagation()}
                         className="p-1.5 rounded-lg text-gray-600 hover:text-gray-800 dark:hover:text-gray-300 hover:bg-gray-200/60 dark:hover:bg-gray-700/60 transition-colors"
                         aria-label={t('playlists.optionsAria')}
                     >
@@ -115,6 +127,17 @@ export function PlaylistContextMenu({ playlistId, playlistTitle, isOwner, isPubl
                             {!isLinkAvailable && (
                                 <span className="ml-auto text-xs text-gray-600">{t('playlists.context.privateBadge')}</span>
                             )}
+                        </DropdownMenuItem>
+                    )}
+
+                    {onExportPdf && (
+                        <DropdownMenuItem
+                            onSelect={onExportPdf}
+                            disabled={isExportingPdf}
+                            className="gap-2 text-gray-700 dark:text-gray-200 focus:bg-gray-100 dark:focus:bg-gray-200 dark:bg-gray-800 cursor-pointer disabled:opacity-50"
+                        >
+                            <FileText className="w-4 h-4" />
+                            {isExportingPdf ? t('playlists.export.exporting') : t('playlists.export.menu')}
                         </DropdownMenuItem>
                     )}
 

@@ -20,6 +20,7 @@ import {
   type Locale,
   type TranslationKey,
 } from '@/lib/i18n';
+import { getPdfLabels } from '@/lib/export/pdfExport';
 import { persistLocale, readPersistedLocale, syncLocaleOnMount } from '@/lib/i18n/persistence';
 import {
   fakeLocaleEnvironment,
@@ -261,4 +262,33 @@ Then('no translation in any dictionary is empty', function () {
       assert.ok(typeof value === 'string' && value.trim() !== '', `${locale}:${key} is empty`);
     }
   }
+});
+
+// ---------------------------------------------------------------------------
+// Rule: the playlist PDF export follows the interface language
+// ---------------------------------------------------------------------------
+
+let pdfLabels: ReturnType<typeof getPdfLabels>;
+
+When('the PDF labels are built for the language {string}', function (locale: Locale) {
+  pdfLabels = getPdfLabels(locale);
+});
+
+Then('the page footer for page {int} of {int} reads {string}', function (page: number, total: number, expected: string) {
+  assert.equal(pdfLabels.page(page, total), expected);
+});
+
+Then('the key label for {string} reads {string}', function (key: string, expected: string) {
+  assert.equal(pdfLabels.key(key), expected);
+});
+
+Then(
+  'the subtitle for {int} songs generated on {string} reads {string}',
+  function (count: number, date: string, expected: string) {
+    assert.equal(pdfLabels.subtitle(count, date), expected);
+  }
+);
+
+Then('dates are formatted with {string}', function (dateLocale: string) {
+  assert.equal(pdfLabels.dateLocale, dateLocale);
 });

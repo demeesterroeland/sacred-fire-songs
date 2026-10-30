@@ -1,8 +1,8 @@
 # Sacred Fire Songs – Interface language (i18n) behaviour catalogue
-# Version: 1.0 | Date: Oct 30, 2026
+# Version: 1.1 | Date: Oct 30, 2026
 #
 # Living Gherkin description of Story 3.7.1 (issue #246) – acceptance criteria
-# I18N-01 … I18N-10 in docs/logbook/epic&user stories.md. Each scenario names
+# I18N-01 … I18N-11 in docs/logbook/epic&user stories.md. Each scenario names
 # the test that covers it, following the testing pyramid of docs/testing/song.feature:
 #   @unit   – Cucumber steps in testing/bdd/steps/i18n.steps.ts (npm run test:bdd)
 #             mirrored by vitest in testing/unit/tests/i18n.test.ts and
@@ -14,6 +14,7 @@
 #
 # Changelog
 #   1.0 – Oct 30, 2026 – Initial catalogue for Story 3.7.1 (#246).
+#   1.1 – Oct 30, 2026 – I18N-11: playlist PDF export (#220) labels and messages.
 
 Feature: Interface language
   The interface (navigation, pages, buttons, messages) is available in English
@@ -190,6 +191,30 @@ Feature: Interface language
       When the project is type-checked
       Then the type checker reports the key as not assignable to TranslationKey
       # covered by npx tsc --noEmit – TranslationKey = keyof typeof en
+
+  # ---------------------------------------------------------------------------
+  Rule: The playlist PDF export follows the interface language
+
+    @unit @i18n @pdfExport
+    Scenario Outline: I18N-11 PDF document labels are translated
+      When the PDF labels are built for the language "<locale>"
+      Then the page footer for page 1 of 3 reads "<page>"
+      And the key label for "Am" reads "<key>"
+      And the subtitle for 2 songs generated on "<date>" reads "<subtitle>"
+      And dates are formatted with "<dateLocale>"
+      # vitest: testing/unit/tests/pdfExport.test.ts › document labels follow the interface language
+
+      Examples:
+        | locale | page           | key           | date         | subtitle                                | dateLocale |
+        | en     | Page 1 of 3    | Key: Am       | Oct 30, 2026 | 2 songs   •   Generated Oct 30, 2026    | en-US      |
+        | nl     | Pagina 1 van 3 | Toonsoort: Am | 30 okt 2026  | 2 liederen   •   Gemaakt op 30 okt 2026 | nl-NL      |
+
+    @unit @i18n @pdfExport
+    Scenario: I18N-11 Export messages and the login prompt are translated
+      Given the interface language is set to "nl"
+      Then the key "playlists.export.menu" translates to "PDF exporteren"
+      And the key "playlists.export.login.title" translates to "Meld je aan om een PDF te exporteren"
+      And the key "playlists.export.empty" translates to "Een lege afspeellijst kan niet worden geëxporteerd. Voeg eerst liederen toe."
 
   # ---------------------------------------------------------------------------
   Rule: The interface follows the choice in the browser

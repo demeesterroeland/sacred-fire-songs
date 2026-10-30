@@ -94,6 +94,8 @@
 
 | **October 30, 2026 (Part 3)** | **Testing/BDD Infra (#263)**: Configured `@cucumber/cucumber` with `tsx` TypeScript loader, `cucumber.json` profiles targeting `docs/testing/song.feature` (`@unit` and `@seed`), `testing/bdd/` support & smoke step definitions, and `npm run test:bdd` scripts. | ~0.5 Hours | ✅ Completed |
 
-| **October 30, 2026 (Part 4)** | **Feature/i18n (#246)**: Merged main, request-scoped server locale, LocaleProvider hydration fix, LanguageSwitcher (sidebar/user menu/preferences), finished string migration, Story 3.7.1, `i18n.feature`, vitest + Cucumber + Playwright coverage, main-vs-branch e2e baseline comparison. | ~3.5 Hours | ✅ Completed |
+| **October 30, 2026 (Part 4)** | **Feature/Print & Export**: Musician Setlist PDF Export (Story 4.2.1 / Issue #18) — Implemented ChordSheetJS + jsPDF client-side PDF export, high-contrast firelight typography, BDD feature specification (`setlist-pdf-export.feature`), 12 unit tests, and quick-action export buttons on playlist header & menu. | ~2.0 Hours | ✅ Completed |
 
-| **Total** | **Development + AI Collaboration** | **~175.25 Hours** | |
+| **October 30, 2026 (Part 5)** | **Feature/i18n (#246)**: Merged main twice (#220 PDF export strings + PDF labels localized), request-scoped server locale, LocaleProvider hydration fix, LanguageSwitcher (sidebar/user menu/preferences), finished string migration, Story 3.7.1, `i18n.feature`, vitest + Cucumber + Playwright coverage, main-vs-branch e2e baseline comparison. | ~4.0 Hours | ✅ Completed |
+
+| **Total** | **Development + AI Collaboration** | **~177.75 Hours** | |
