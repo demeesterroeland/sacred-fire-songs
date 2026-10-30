@@ -1,28 +1,37 @@
-# Walkthrough: Server Migration, App Standalone Pipelining, and Release v1.0.0
+# Walkthrough: Epic 3.6 Administrative Management & Story 3.6.1 (User Overview & Contributions)
 
-## Accomplishments
+## Context & Objectives
+Implemented **Epic 3.6 (Administrative Management)** and **Story 3.6.1 (User Overview, Details & Contributions)** in an isolated worktree `.worktrees/feat-userstory-3.6` and branch `feat/userstory-3.6`.
 
-1. **Application Modernization & Build Pipeline**:
-   - Configured `output: 'standalone'` in `next.config.ts`.
-   - Created dynamic runtime route handler `app/supabase-api/[...path]/route.ts` to proxy requests to container environment variables dynamically at runtime.
-   - Configured `release-please` and GitHub Actions GHCR Docker build pipeline (`docker.yml`).
-   - Tagged and published official **`v1.0.0`** release on GitHub.
+## Summary of Changes
 
-2. **Infrastructure Realignment & Data Migration**:
-   - Renamed Supabase stacks: `stacks/supabase-prod` (`_PROD` DB) and `stacks/supabase-preview` (`_PREVIEW` DB).
-   - Standardized application stacks: `stacks/songbook-prod` and `stacks/songbook-preview`.
-   - Restored complete production database dataset from Supabase Cloud to self-hosted database stack (14 auth users, 238 songs, 11 playlists).
-   - Fixed Kong API Gateway credential mapping (`kong-runtime.yml`).
-   - Secured preview subdomains with Traefik `tailscale-only@docker` middleware restricting access to private VPN.
-   - Placed complete stack documentation directly inside `stacks/songbook-prod/README.md` and `stacks/songbook-preview/README.md`.
+### 1. Database & Security
+- **Migration `20261009194500_admin_profiles_policy.sql`**:
+  - `public.fn_is_admin()`: `SECURITY DEFINER` function to check if the caller is an admin in `public.profiles` without triggering recursive RLS evaluation.
+  - Policy `"Admins can read all profiles"` on `public.profiles`.
+  - Policy `"Admins can view all setlists"` on `public.setlists`.
+- **`docs/design/db-schema.sql`**: Updated in sync with the migration.
 
-3. **Issue & Branch Cleanup**:
-   - Closed completed GitHub Issues: #202, #197, #171, #168, #183, #141.
-   - Created & transferred performance benchmark issue to infrastructure repository.
-   - Deleted merged remote branches (`feat/issue-141`, `feat/story-3.4.6-public-playlist-curation`).
-4. **Email Service & Authentication Migration Fix**:
-   - **Root Cause Identified**: GoTrue Auth containers in `supabase-prod` and `supabase-preview` were missing SMTP credentials (`SMTP_HOST=`, `SMTP_USER=`) and were isolated on bridge networks with `internal: true`, preventing outbound DNS resolution and TCP traffic to external SMTP servers (`smtp.gmail.com:587`).
-   - **Network & Gateway Fix**: Added the `proxy` network to `auth` service definitions in `stacks/supabase-prod/docker-compose.yaml` and `stacks/supabase-preview/docker-compose.yaml`.
-   - **Environment Configuration**: Configured Gmail SMTP settings (`smtp.gmail.com:587`), `SITE_URL`, `API_EXTERNAL_URL`, and `ADDITIONAL_REDIRECT_URLS` in `.env` files for both `supabase-prod` and `supabase-preview`.
-   - **Traefik v3 Routing**: Updated `songbook-preview` Traefik routing rule to support `Host(`songbook-beta.bluette.be`) || HostRegexp(`songbook-[a-z0-9-]+\\.bluette\\.be`)`.
-   - **Preview Verification**: Verified that `songbook-preview` runs the latest release container (`ghcr.io/demeesterroel/sacred-fire-songs:latest`), `supabase-preview-db` is loaded with the 80-song randomized preview/beta dataset and 4 seed users (`roel.de.meester+admin@gmail.com`, etc.), and both magic link and password recovery emails execute cleanly with HTTP 200 responses.
+### 2. Backend & Server Queries
+- **`lib/admin/types.ts`**: Types for user overview records, contribution songs, versions, playlists, and user details.
+- **`lib/admin/serverQueries.ts`**:
+  - `checkAdminAccess()`: Validates current session and checks `profile.role === 'admin'`.
+  - `getAdminUsersList()`: Fetches all profiles with aggregated counts of owned songs, contributed versions, and playlists.
+  - `getAdminUserDetails(userId)`: Fetches a single user's profile and lists of created compositions, song versions, and playlists.
+
+### 3. Admin Pages & Access Control
+- **`app/admin/layout.tsx`**: Server component role guard. Unauthenticated visitors are redirected to `/auth/login?next=/admin/users`; non-admin authenticated users see `AccessDeniedNotice`. Admins see the sticky `AdminHeader` sub-nav and content.
+- **`app/admin/page.tsx`**: Redirects to `/admin/users`.
+- **`app/admin/users/page.tsx` & `components/admin/AdminUsersTable.tsx`**: Users list with search bar, role dropdown, sort selector (recent, top contributors, name), platform summary metrics cards, and user rows with badges and contribution counts.
+- **`app/admin/users/[id]/page.tsx` & `components/admin/AdminUserDetailView.tsx`**: User detail page showing identity details, activity timestamps, and interactive tabs for contributed songs, versions, and playlists.
+- **`components/admin/AccessDeniedNotice.tsx`**: Clean unauthorized page with a return home button.
+
+### 4. Navigation
+- **`components/common/navigation/UserProfile.tsx`**: Shows "Admin Portal" link with `ShieldCheck` icon in the user dropdown for `role === 'admin'`.
+- **`components/common/Sidebar.tsx`**: Adds "Administration" navigation section with a link to `/admin/users` for admin users.
+
+### 5. Verification
+- **Unit Tests**: `lib/unit-tests/adminQueries.test.ts` (7 tests covering role verification, list aggregation, and detail mapping). All 79 tests pass.
+- **TypeScript**: `npx tsc --noEmit` passes with 0 errors.
+- **Next.js Build**: `npm run build` compiles all `/admin` routes successfully.
+- **Artifacts**: Logbook artifacts (`master-tasks.md`, `master-walkthrough.md`, `master-timetracking.md`) updated directly on the feature branch.

@@ -1,19 +1,30 @@
-# Tasks: Move Song Collection Out & Establish Testing Pyramid
+# Task: Implement Epic 3.6 - Administrative Management (#257) & Story 3.6.1 (#258)
 
-## Move Song Collection Out of App Repo
-- [x] **FINISHED**: Extract ChordPro song collection (`data/songs`, `data/extracted_songs`, `data/scripts`) and songbook generation scripts to `../sacred-fire-songs-collection` with full git history.
-- [x] **FINISHED**: Remove `data/` and Python songbook scripts from app repository.
-- [x] **FINISHED**: Extract SQL seed songs 03 through 10 to collection repo under `seeds/`.
-- [x] **FINISHED**: Retire `E2E_RANDOM_SEED` and hardcoded demo counts from workflows and specs.
-
-## Test Seeder & Living Specification
-- [x] **FINISHED**: Rewrite `scripts/random-seeder.mjs` with 20 deterministic anchor songs covering every tested shape across unit, e2e, and manual tests.
-- [x] **FINISHED**: Write living Gherkin catalogue `docs/testing/song.feature` documenting all tested song shapes.
-- [x] **FINISHED**: Generate static 200-song snapshot `supabase/seeds/03_songs_random_generated.sql` via `npm run seed:generate`.
-- [x] **FINISHED**: Verify unit test suite (`npm run test:unit`: 162/162 passing).
-- [x] **FINISHED**: Verify Next.js production build (`npm run build`: 0 errors).
-
-## Testing Pyramid & Orchestrator
-- [x] **FINISHED**: Create Master Orchestrator Epic #262: `[Epic] Introduce Cucumber Tests Driven by docs/testing/song.feature (Testing Pyramid)`.
-- [x] **FINISHED**: Create sub-issues #263, #264, #265, #266, #267, #268 with Gherkin acceptance criteria and Model Tier assignments.
-- [x] **FINISHED**: Document Multi-Agent SOP and Handoff Protocol on Epic #262.
+- [x] **Step 1: Discovery & Environment Setup**
+  - [x] Analyze codebase, schema, auth, and navigation
+  - [x] Create branch `feat/userstory-3.6` and worktree `.worktrees/feat-userstory-3.6`
+  - [x] Symlink `node_modules` into worktree
+  - [x] Commit documentation updates (`epic&user stories.md`, `application-analysis&design.md`)
+- [x] **Step 2: Step-by-Step Planning**
+  - [x] Draft implementation plan (`docs/plans/2026-10-08-epic-3.6-admin-users.md`)
+  - [x] Align with user on implementation plan (User approved)
+- [x] **Step 3: Context Assembly**
+  - [x] Gather DB schema, RLS policies, existing queries, and layout structures
+- [x] **Step 4: Implementation**
+  - [x] **Database / RLS**: Add migration `20261009194500_admin_profiles_policy.sql` (`fn_is_admin()`, policies on profiles & setlists)
+  - [x] **Single-File Setup**: Update `docs/design/db-schema.sql` with new functions and policies
+  - [x] **Backend Queries & Types**: Implement `lib/admin/types.ts` and `lib/admin/serverQueries.ts` (`checkAdminAccess`, `getAdminUsersList`, `getAdminUserDetails`)
+  - [x] **Admin Routing & Layout**: Create `app/admin/layout.tsx` (server-side role guard, `AccessDeniedNotice` fallback) and `app/admin/page.tsx`
+  - [x] **Admin Users Overview**: Create `app/admin/users/page.tsx` and `AdminUsersTable.tsx` with search, role filters, sorting, and metrics
+  - [x] **User Details & Contributions**: Create `app/admin/users/[id]/page.tsx` and `AdminUserDetailView.tsx` with tabs for created songs, versions, and playlists
+  - [x] **Navigation Integration**: Add Admin link in `UserProfile` dropdown (visible only to `role === 'admin'`) and `Sidebar.tsx`
+- [x] **Step 5: Verification**
+  - [x] Unit tests for admin queries / logic (`lib/unit-tests/adminQueries.test.ts` — 7 tests pass)
+  - [x] All test suites pass (11 files, 79 tests)
+  - [x] TypeScript check passes (`npx tsc --noEmit` — 0 errors)
+  - [x] Build check passes (`npm run build` — compiles all `/admin` routes)
+- [x] **Step 6: Self-Correction**
+  - [x] Fixed non-null assertion in `artistNormalization.test.ts` and type casting in `queries.test.ts`
+- [x] **Step 7: Finalization**
+  - [x] Update logbook artifacts (`master-tasks.md`, `master-walkthrough.md`, `master-timetracking.md`) directly on feature branch
+  - [x] Prepare completion summary for user
