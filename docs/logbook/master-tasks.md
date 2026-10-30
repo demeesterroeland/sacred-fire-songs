@@ -1268,3 +1268,12 @@
 ## Session October 30, 2026 (Part 6: Multi-Language Support i18n - Issue #246)
 
 - [x] Add es, it, ru, qu, fr, pt dictionaries + select-based LanguageSwitcher (I18N-12)
+
+## Session October 30, 2026 (Part 7: Admin UI polish, Stories 3.6.5 / 3.6.6 - #278, #279, PR #259)
+- [x] Fix the sticky admin header overlapping the summary cards; move admin pages onto the Library layout (scroll container, title + pill tabs, breadcrumb, LibrarySummary-style cards)
+- [x] Stop clipping the focus ring on the filter pickers
+- [x] Create issues #275 (invite/create), #276 (suspend), #277 (change role), #278 (sort), #279 (clickable rows) under #257
+- [x] Add `components/common/ui/WickSelect.tsx` + `lib/ui/listbox.ts` (listbox picker in the style of the i18n language picker), 6 unit tests
+- [x] #278: sort by name Z-A, most/fewest songs, persisted in localStorage (`useSyncExternalStore`), unit + BDD + e2e
+- [x] #279: whole user row opens the details (stretched link), e2e
+- [x] Doc sync: design doc v1.43, epic & user stories v1.39, e2e overview v1.8, admin-users.feature v1.1

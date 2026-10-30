@@ -3008,3 +3008,15 @@ Finished the English/Dutch i18n started on Sep 27 (WIP secured as a commit), mer
 - **PDF export (#220)**: second `origin/main` merge; export button, toasts, login prompt and context-menu item translated; PDF labels localized via `getPdfLabels(locale)`; I18N-11 added to story, feature and steps.
 - **More languages**: Spanish, Italian, Russian, Southern Quechua (machine-assisted, needs native review), French and Brazilian Portuguese dictionaries (582 keys each, parity + placeholder + "not a copy of English" tests); `quz`/`quy` → `qu`; PDF dates per locale; LanguageSwitcher became a native select; I18N-12 in story, feature, steps and e2e.
 - **Merge #259 (admin)**: resolved Sidebar/UserProfile/cucumber.json conflicts, translated the admin area (76 keys) into all eight languages.
+
+## October 30, 2026 (Part 7) - Admin UI polish, sort and clickable rows (#278, #279, PR #259)
+
+**Task Overview**
+Acted on manual validation feedback for the admin users overview: layout bug, consistency with the rest of the app, select styling, and two follow-up stories implemented on the same branch.
+
+**Technical Details**
+- **Header overlap**: the app shell scrolls inside each section's `<main>`; the admin header was `sticky top-[var(--navbar-height)]` inside that container, so it stuck 3.5rem down and the cards scrolled under it. Admin pages now follow `app/library/layout.tsx` / `LibraryTabs.tsx` (own scroll container, title + pill tabs, breadcrumb on detail pages) and `LibrarySummary` cards.
+- **Pickers**: `components/common/ui/WickSelect.tsx` ports the i18n language picker (uncommitted on `feat/246-implement-multi-language-i18n`) into a generic listbox: portalled, arrow/Home/End/type-ahead keys, ember marker with the `ember-ignite` animation (identical CSS hunk to the i18n branch so the merge stays clean). Keyboard logic in `lib/ui/listbox.ts` is unit-tested.
+- **#278**: new sorts `name_desc`, `songs_desc`, `songs_asc` (ties by name) in `filterAndSortUsers`; `parseAdminUserSort` validates the value stored in `localStorage` (`admin-users-sort`), read through `useSyncExternalStore` to stay hydration-safe.
+- **#279**: the "Details" link is a stretched link (`after:absolute after:inset-0`). Its `active:scale-95` had to move to an inner span: a transform makes the link the containing block of its `::after`, collapsing the overlay on mousedown so row clicks never completed.
+- **Tests**: unit 131 passed, BDD 25 passed (+4 sort scenarios), Playwright admin spec 28 passed / 2 skipped against the production build on port 4258.
