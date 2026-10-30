@@ -57,7 +57,10 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true, init
   // Close menu when clicking outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+      const target = event.target as Element;
+      // The language list is portalled to <body>; picking from it must not close the menu.
+      if (target.closest?.('[data-language-listbox]')) return;
+      if (menuRef.current && !menuRef.current.contains(target)) {
         setIsOpen(false);
       }
     };
@@ -117,7 +120,7 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true, init
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div className="absolute top-full right-0 mt-2 w-72 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in zoom-in duration-200 origin-top-right">
+        <div data-testid="user-menu" className="absolute top-full right-0 mt-2 w-72 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in zoom-in duration-200 origin-top-right">
           {/* Account Title */}
           <div className="flex justify-between items-center px-4 py-3 border-b border-gray-200 dark:border-gray-800">
             <span className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">{t('userMenu.account')}</span>

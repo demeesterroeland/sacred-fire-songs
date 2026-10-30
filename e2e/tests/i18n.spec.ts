@@ -1,4 +1,4 @@
-import { test, expect, type Page, type BrowserContext } from '@playwright/test';
+import { test, expect, type Page, type BrowserContext, type Locator } from '@playwright/test';
 import en from '../../messages/en';
 import nl from '../../messages/nl';
 import es from '../../messages/es';
@@ -18,6 +18,26 @@ const LOCALE_KEY = 'sacred-fire-songs-locale'; // localStorage key and cookie na
 type Dict = Partial<Record<keyof typeof en, string>>;
 
 const sidebar = (page: Page) => page.locator('nav').filter({ has: page.getByTestId('language-switcher') });
+
+const LABELS = { en: 'English', nl: 'Nederlands', es: 'Español', it: 'Italiano', ru: 'Русский', qu: 'Runasimi', fr: 'Français', pt: 'Português' } as const;
+
+/** Opens the language picker inside `scope` and picks a language by its own name. */
+async function chooseLanguage(page: Page, scope: Locator, code: keyof typeof LABELS) {
+  await scope.getByTestId('language-switcher').click();
+  await page.getByRole('listbox').getByRole('option', { name: LABELS[code] }).click();
+  await expect(page.getByRole('listbox')).toHaveCount(0);
+}
+
+/** Sidebar variant: on mobile the drawer can close again right after hydration, so retry open + list. */
+async function chooseInSidebar(page: Page, dict: Dict, code: keyof typeof LABELS) {
+  await expect(async () => {
+    await openSidebar(page, dict);
+    await sidebar(page).getByTestId('language-switcher').click({ timeout: 2_000 });
+    await expect(page.getByRole('listbox')).toBeVisible({ timeout: 1_000 });
+  }).toPass({ timeout: 15_000 });
+  await page.getByRole('listbox').getByRole('option', { name: LABELS[code] }).click();
+  await expect(page.getByRole('listbox')).toHaveCount(0);
+}
 
 /**
  * On mobile the sidebar is collapsed behind the header menu button. Retry the
@@ -86,12 +106,16 @@ test.describe('Interface language @i18n', () => {
       await page.evaluate(() => ((window as unknown as { __noReload: boolean }).__noReload = true));
 
       const switcher = sidebar(page).getByTestId('language-switcher');
-      await switcher.selectOption('nl');
+      await chooseInSidebar(page, en, 'nl');
 
       await expect(sidebar(page).getByRole('link', { name: nl['nav.recentlyViewed'] })).toBeVisible();
       await expect(page.locator('html')).toHaveAttribute('lang', 'nl');
-      await expect(switcher).toHaveValue('nl');
-      await expect(switcher.locator('option:checked')).toHaveText('Nederlands');
+      await expect(switcher).toContainText('Nederlands');
+      await switcher.click();
+      await expect(page.getByRole('option', { name: 'Nederlands' })).toHaveAttribute('aria-selected', 'true');
+      await expect(page.getByRole('option', { name: 'English' })).toHaveAttribute('aria-selected', 'false');
+      await page.keyboard.press('Escape');
+      await expect(switcher).toBeFocused();
       expect(await page.evaluate(() => (window as unknown as { __noReload?: boolean }).__noReload)).toBe(true);
 
       expect(await page.evaluate((key) => window.localStorage.getItem(key), LOCALE_KEY)).toBe('nl');
@@ -108,7 +132,7 @@ test.describe('Interface language @i18n', () => {
 
       // ...and back to English
       await openSidebar(page, nl);
-      await sidebar(page).getByTestId('language-switcher').selectOption('en');
+      await chooseInSidebar(page, nl, 'en');
       await expect(page.getByText(en['playlists.smartPlaylists'], { exact: true })).toBeVisible();
       await expect(page.locator('html')).toHaveAttribute('lang', 'en');
     });
@@ -137,7 +161,7 @@ test.describe('Interface language @i18n', () => {
       await page.goto('/account/settings');
       await page.getByRole('button', { name: en['settings.tab.preferences'] }).click();
       await expect(page.getByText(en['settings.prefs.language.description'])).toBeVisible();
-      await page.getByRole('main').getByTestId('language-switcher').selectOption('nl');
+      await chooseLanguage(page, page.getByRole('main'), 'nl');
       await expect(page.getByRole('heading', { name: nl['settings.prefs.heading'] })).toBeVisible();
 
       // Sign out via the user menu (now in Dutch)
@@ -196,8 +220,7 @@ test.describe('Interface language @i18n', () => {
     for (const [code, dict] of Object.entries(LANGS)) {
       test(`switches to ${code} and keeps it after reload`, async ({ page }) => {
         await page.goto('/songs');
-        await openSidebar(page, en);
-        await sidebar(page).getByTestId('language-switcher').selectOption(code);
+        await chooseInSidebar(page, en, code as keyof typeof LABELS);
         await expect(page.locator('html')).toHaveAttribute('lang', code);
         await expect(sidebar(page).getByRole('link', { name: dict['nav.recentlyViewed'] })).toBeVisible();
         await page.reload();
@@ -214,6 +237,35 @@ test.describe('Interface language @i18n', () => {
       await page.goto('/songs');
       await expect(page.locator('html')).toHaveAttribute('lang', 'pt');
       await expectSidebarLanguage(page, pt);
+    });
+  });
+
+  test.describe('I18N-03: keyboard and user menu', () => {
+    test.use({ locale: 'en-US' });
+
+    test('picks a language with the keyboard (type-ahead + Enter)', async ({ page, isMobile }) => {
+      test.skip(isMobile, 'keyboard flow is a desktop concern');
+      await page.goto('/songs');
+      const switcher = sidebar(page).getByTestId('language-switcher');
+      await switcher.focus();
+      await page.keyboard.press('Enter');
+      await expect(page.getByRole('listbox')).toBeVisible();
+      await page.keyboard.press('n'); // → Nederlands
+      await page.keyboard.press('Enter');
+      await expect(page.locator('html')).toHaveAttribute('lang', 'nl');
+      await expect(switcher).toBeFocused();
+      await expect(sidebar(page).getByRole('link', { name: nl['nav.recentlyViewed'] })).toBeVisible();
+    });
+
+    test.describe('signed in', () => {
+      test.use({ storageState: ROLES.member.storage });
+
+      test('picking from the user menu keeps the menu working', async ({ page }) => {
+        await page.goto('/');
+        await page.getByRole('button', { name: en['userMenu.account'] }).click();
+        await chooseLanguage(page, page.getByTestId('user-menu'), 'es');
+        await expect(page.locator('html')).toHaveAttribute('lang', 'es');
+      });
     });
   });
 });

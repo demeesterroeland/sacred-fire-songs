@@ -5,7 +5,6 @@ import { useSidebar } from '@/context/SidebarContext';
 import { NAV_SECTIONS } from '@/lib/navigation';
 import { useLocale } from '@/context/LocaleContext';
 import Link from 'next/link';
-import { Globe } from 'lucide-react';
 import { LanguageSwitcher } from '@/components/common/navigation/LanguageSwitcher';
 import packageJson from '@/package.json';
 
@@ -78,11 +77,7 @@ export default function Sidebar() {
 
                 <div className="ps-7 pe-4 pt-6 border-t border-gray-100 dark:border-gray-900/60 mt-auto flex flex-col gap-3">
                     {/* Language switcher — also reachable for guests */}
-                    <div className="flex items-center gap-2 text-xs font-medium text-gray-400 dark:text-gray-500">
-                        <Globe className="w-4 h-4" aria-hidden="true" />
-                        <span className="flex-1">{t('userMenu.language')}</span>
-                        <LanguageSwitcher />
-                    </div>
+                    <LanguageSwitcher variant="full" className="-ms-2.5" />
 
                     {/* Application SemVer Version Tag */}
                     <div>
