@@ -16,10 +16,10 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, Suspense } from "react";
 import { Mail, Lock, ShieldCheck, Flame, X, ArrowRight } from "lucide-react";
-import { t } from "@/lib/i18n";
 import { useLocale } from "@/context/LocaleContext";
 
 export function SignUpForm(props: React.ComponentPropsWithoutRef<"div">) {
+  const { t } = useLocale();
   return (
     <Suspense fallback={<div>{t('common.loading')}</div>}>
       <SignUpFormContent {...props} />
@@ -30,7 +30,7 @@ function SignUpFormContent({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
-  const { locale } = useLocale();
+  const { t } = useLocale();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
@@ -68,7 +68,7 @@ function SignUpFormContent({
 
       router.push(`/auth/sign-up-success?email=${encodeURIComponent(email)}${next ? `&next=${encodeURIComponent(next)}` : ""}`);
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred");
+      setError(error instanceof Error ? error.message : t('common.errorOccurred'));
     } finally {
       setIsLoading(false);
     }

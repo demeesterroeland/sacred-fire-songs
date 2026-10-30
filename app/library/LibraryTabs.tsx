@@ -3,9 +3,10 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ListMusic, Disc3, Mic2, Clock, ChevronRight } from 'lucide-react';
-import { t } from '@/lib/i18n';
+import { useLocale } from '@/context/LocaleContext';
 
 export default function LibraryTabs() {
+    const { t } = useLocale();
     const pathname = usePathname();
 
     const tabs = [

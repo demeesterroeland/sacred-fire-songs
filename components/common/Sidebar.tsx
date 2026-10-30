@@ -3,13 +3,14 @@
 import { useActivePath } from '@/hooks/useActivePath';
 import { useSidebar } from '@/context/SidebarContext';
 import { NAV_SECTIONS } from '@/lib/navigation';
-import { t } from '@/lib/i18n';
 import { useLocale } from '@/context/LocaleContext';
 import Link from 'next/link';
+import { Globe } from 'lucide-react';
+import { LanguageSwitcher } from '@/components/common/navigation/LanguageSwitcher';
 import packageJson from '@/package.json';
 
 export default function Sidebar() {
-    const { locale } = useLocale();
+    const { t } = useLocale();
     const { isActive } = useActivePath();
     const { isOpen, setIsOpen } = useSidebar();
 
@@ -75,18 +76,27 @@ export default function Sidebar() {
                     })}
                 </div>
 
-                {/* Application SemVer Version Tag */}
-                <div className="ps-7 pe-4 pt-6 border-t border-gray-100 dark:border-gray-900/60 mt-auto">
-                    <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors">
-                        <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/80 animate-pulse" />
-                        {process.env.NEXT_PUBLIC_APP_VERSION ? (
-                            <span>
-                                {process.env.NEXT_PUBLIC_APP_VERSION.replace(/-([a-f0-9]{40})$/, (match, p1) => `-${p1.substring(0, 7)}`)}
-                            </span>
-                        ) : (
-                            <span>v{packageJson.version}</span>
-                        )}
-                    </span>
+                <div className="ps-7 pe-4 pt-6 border-t border-gray-100 dark:border-gray-900/60 mt-auto flex flex-col gap-3">
+                    {/* Language switcher — also reachable for guests */}
+                    <div className="flex items-center gap-2 text-xs font-medium text-gray-400 dark:text-gray-500">
+                        <Globe className="w-4 h-4" aria-hidden="true" />
+                        <span className="flex-1">{t('userMenu.language')}</span>
+                        <LanguageSwitcher />
+                    </div>
+
+                    {/* Application SemVer Version Tag */}
+                    <div>
+                        <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors">
+                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/80 animate-pulse" />
+                            {process.env.NEXT_PUBLIC_APP_VERSION ? (
+                                <span>
+                                    {process.env.NEXT_PUBLIC_APP_VERSION.replace(/-([a-f0-9]{40})$/, (match, p1) => `-${p1.substring(0, 7)}`)}
+                                </span>
+                            ) : (
+                                <span>v{packageJson.version}</span>
+                            )}
+                        </span>
+                    </div>
                 </div>
             </div>
         </nav>

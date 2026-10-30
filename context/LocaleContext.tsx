@@ -5,85 +5,91 @@
  *
  * Client-side locale provider.
  *
- * - Reads locale from localStorage on mount (post-hydration).
- * - Calls setLocale() to update the module-level state in lib/i18n/index.ts.
- * - Exposes useLocale() hook for components that need to react to locale changes.
- * - Does NOT use URL rewrites or server-side locale negotiation.
- * - suppressHydrationWarning is required on <html lang> to avoid mismatch
- *   (server always renders 'en', client switches after hydration).
+ * - Starts with the locale the server rendered (`serverLocale`, resolved from
+ *   the locale cookie / Accept-Language), so hydration always matches the SSR
+ *   markup — no hydration mismatch and no English flash for Dutch users.
+ * - After mount it reads the persisted choice (localStorage > cookie >
+ *   navigator.languages > English) and switches if it differs, re-syncing the
+ *   cookie and refreshing Server Components so they follow.
+ * - setLocaleAndPersist() saves to localStorage + cookie, updates <html lang>,
+ *   keeps the module-level t() in sync and refreshes Server Components.
+ * - Client Components translate with `const { t } = useLocale()`, which
+ *   re-renders them whenever the language changes.
  */
 
-import React, { createContext, useCallback, useContext, useEffect, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   DEFAULT_LOCALE,
   LOCALE_LABELS,
-  LOCALE_STORAGE_KEY,
   SUPPORTED_LOCALES,
-  getLocale,
+  isLocale,
   setLocale,
+  tWithLocale,
   type Locale,
+  type TranslateFn,
 } from '@/lib/i18n';
+import { browserLocaleEnvironment, persistLocale, syncLocaleOnMount } from '@/lib/i18n/persistence';
 
 interface LocaleContextType {
   locale: Locale;
+  t: TranslateFn;
   setLocaleAndPersist: (locale: Locale) => void;
-  supportedLocales: Locale[];
+  supportedLocales: readonly Locale[];
   localeLabels: typeof LOCALE_LABELS;
 }
 
 const LocaleContext = createContext<LocaleContextType | undefined>(undefined);
 
-export function LocaleProvider({ children }: { children: React.ReactNode }) {
-  // Start with the default (English) to match SSR.
-  // The useEffect below switches to the stored preference after hydration.
-  const [locale, setLocaleState] = useState<Locale>(DEFAULT_LOCALE);
+export function LocaleProvider({
+  children,
+  serverLocale = DEFAULT_LOCALE,
+}: {
+  children: React.ReactNode;
+  serverLocale?: Locale;
+}) {
+  const router = useRouter();
+  const [locale, setLocaleState] = useState<Locale>(serverLocale);
 
   useEffect(() => {
-    // Read stored locale from localStorage post-hydration
-    const stored = localStorage.getItem(LOCALE_STORAGE_KEY) as Locale | null;
-    const resolved =
-      stored && SUPPORTED_LOCALES.includes(stored) ? stored : DEFAULT_LOCALE;
+    const resolved = syncLocaleOnMount(browserLocaleEnvironment());
+    setLocale(resolved);
+    if (resolved !== serverLocale) {
+      setLocaleState(resolved);
+      router.refresh();
+    }
+    // Only on mount: later changes go through setLocaleAndPersist.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-    if (resolved !== getLocale()) {
+  const setLocaleAndPersist = useCallback(
+    (next: Locale) => {
+      const resolved = isLocale(next) ? next : DEFAULT_LOCALE;
+      persistLocale(browserLocaleEnvironment(), resolved);
       setLocale(resolved);
       setLocaleState(resolved);
-    }
-
-    // Update <html lang> attribute dynamically
-    document.documentElement.lang = resolved;
-  }, []);
-
-  const setLocaleAndPersist = useCallback((next: Locale) => {
-    const resolved = SUPPORTED_LOCALES.includes(next) ? next : DEFAULT_LOCALE;
-    setLocale(resolved);
-    setLocaleState(resolved);
-    localStorage.setItem(LOCALE_STORAGE_KEY, resolved);
-    document.documentElement.lang = resolved;
-  }, []);
-
-  return (
-    <LocaleContext.Provider
-      value={{
-        locale,
-        setLocaleAndPersist,
-        supportedLocales: SUPPORTED_LOCALES,
-        localeLabels: LOCALE_LABELS,
-      }}
-    >
-      {children}
-    </LocaleContext.Provider>
+      router.refresh();
+    },
+    [router]
   );
+
+  const value = useMemo<LocaleContextType>(
+    () => ({
+      locale,
+      t: (key, params) => tWithLocale(locale, key, params),
+      setLocaleAndPersist,
+      supportedLocales: SUPPORTED_LOCALES,
+      localeLabels: LOCALE_LABELS,
+    }),
+    [locale, setLocaleAndPersist]
+  );
+
+  return <LocaleContext.Provider value={value}>{children}</LocaleContext.Provider>;
 }
 
 /**
- * useLocale() — access the current locale and the setter from any Client Component.
- *
- * For simple translation calls inside Client Components, you can also just
- * import `t` directly from `@/lib/i18n` — no hook needed.
- *
- * Use `useLocale()` only when you need to:
- * - Render the current locale label in a language switcher
- * - Reactively re-render when the locale changes
+ * useLocale() — current locale, a bound `t`, and the setter.
+ * Use `const { t } = useLocale()` in every Client Component that shows text.
  */
 export function useLocale(): LocaleContextType {
   const ctx = useContext(LocaleContext);

@@ -1,11 +1,12 @@
 "use client";
 
-import { Monitor, FileText, Music2, Type, WifiOff, Sun, Moon, SlidersHorizontal } from "lucide-react";
+import { Globe, Monitor, FileText, Music2, Type, WifiOff, Sun, Moon, SlidersHorizontal } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { useWakeLock } from "@/hooks/useWakeLock";
 import { useUserPreferences, type ThemePreference } from "@/context/UserPreferencesContext";
-import { t } from "@/lib/i18n";
 import { useLocale } from "@/context/LocaleContext";
+import type { TranslationKey } from "@/lib/i18n";
+import { LanguageSwitcher } from "@/components/common/navigation/LanguageSwitcher";
 
 interface PreferenceRowProps {
   icon: React.ReactNode;
@@ -22,6 +23,7 @@ function PreferenceRow({
   icon, label, description, checked, onCheckedChange,
   disabled, comingSoon, notSupported,
 }: PreferenceRowProps) {
+  const { t } = useLocale();
   return (
     <div className={`flex items-center justify-between p-4 bg-black/5 dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/5 transition-opacity ${disabled ? "opacity-50" : ""}`}>
       <div className="flex items-start gap-3 pr-4">
@@ -38,7 +40,7 @@ function PreferenceRow({
           <p className="text-sm text-gray-500 dark:text-slate-400 mt-0.5">
             {description}
             {notSupported && (
-              <span className="text-amber-500 block mt-1">Not supported by your browser</span>
+              <span className="text-amber-500 block mt-1">{t('settings.prefs.notSupported')}</span>
             )}
           </p>
         </div>
@@ -53,14 +55,14 @@ function PreferenceRow({
   );
 }
 
-const THEME_OPTIONS: { value: ThemePreference; label: string; icon: React.ReactNode }[] = [
-  { value: 'light', label: t('theme.light'), icon: <Sun className="w-4 h-4" /> },
-  { value: 'dark', label: t('theme.dark'), icon: <Moon className="w-4 h-4" /> },
-  { value: 'system', label: t('theme.system'), icon: <Monitor className="w-4 h-4" /> },
+const THEME_OPTIONS: { value: ThemePreference; labelKey: TranslationKey; icon: React.ReactNode }[] = [
+  { value: 'light', labelKey: 'theme.light', icon: <Sun className="w-4 h-4" /> },
+  { value: 'dark', labelKey: 'theme.dark', icon: <Moon className="w-4 h-4" /> },
+  { value: 'system', labelKey: 'theme.system', icon: <Monitor className="w-4 h-4" /> },
 ];
 
 function ThemeSelector() {
-  const { locale } = useLocale();
+  const { t } = useLocale();
   const { preferences, setPreference } = useUserPreferences();
 
   return (
@@ -88,7 +90,7 @@ function ThemeSelector() {
             }`}
           >
             {option.icon}
-            <span className="hidden sm:inline">{option.label}</span>
+            <span className="hidden sm:inline">{t(option.labelKey)}</span>
           </button>
         ))}
       </div>
@@ -96,8 +98,29 @@ function ThemeSelector() {
   );
 }
 
+function LanguageSelector() {
+  const { t } = useLocale();
+
+  return (
+    <div className="flex items-center justify-between p-4 bg-black/5 dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/5">
+      <div className="flex items-start gap-3 pr-4">
+        <div className="mt-0.5 text-gray-500 dark:text-slate-400">
+          <Globe className="w-5 h-5" />
+        </div>
+        <div>
+          <p className="font-medium text-gray-900 dark:text-white">{t("settings.prefs.language")}</p>
+          <p className="text-sm text-gray-500 dark:text-slate-400 mt-0.5">
+            {t("settings.prefs.language.description")}
+          </p>
+        </div>
+      </div>
+      <LanguageSwitcher className="shrink-0" />
+    </div>
+  );
+}
+
 export default function PreferencesSettings() {
-  const { locale } = useLocale();
+  const { t } = useLocale();
   const { preferences, setPreference } = useUserPreferences();
   const { isSupported } = useWakeLock();
 
@@ -107,6 +130,9 @@ export default function PreferencesSettings() {
 
       {/* Theme Selector — functional */}
       <ThemeSelector />
+
+      {/* Language — functional */}
+      <LanguageSelector />
 
       {/* Keep Screen Awake — functional */}
       <PreferenceRow

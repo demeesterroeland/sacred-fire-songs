@@ -5,7 +5,6 @@ import { User } from "@supabase/supabase-js";
 import { Download, Trash2, Shield, Eye } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
-import { t } from "@/lib/i18n";
 import { useLocale } from "@/context/LocaleContext";
 
 interface PrivacySettingsProps {
@@ -14,7 +13,7 @@ interface PrivacySettingsProps {
 }
 
 export default function PrivacySettings({ user, profile }: PrivacySettingsProps) {
-  const { locale } = useLocale();
+  const { t } = useLocale();
   const [isPublic] = useState(profile?.is_public ?? false);
   const [showActivity] = useState(profile?.show_activity ?? true);
   const supabase = createClient();

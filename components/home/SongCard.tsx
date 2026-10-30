@@ -9,6 +9,7 @@ import { cn } from '@/lib/utils';
 import { useToggleFavorite } from '@/hooks/useToggleFavorite';
 import { PlaylistPicker } from '@/components/playlists/PlaylistPicker';
 
+import { useLocale } from '@/context/LocaleContext';
 interface SongCardProps {
     id: string;
     title: string;
@@ -47,6 +48,7 @@ export default function SongCard({
     onDelete,
     categories = []
 }: SongCardProps) {
+    const { t } = useLocale();
     const { isFav, handleToggle } = useToggleFavorite(id, isFavorite);
 
     // Mapping color name to Tailwind class
@@ -87,7 +89,7 @@ export default function SongCard({
                 />
 
                 {/* Stretched Link: covers the whole card without nesting tags */}
-                <Link href={`/songs/${id}`} className="absolute inset-0 z-10" aria-label={`View ${title}`} />
+                <Link href={`/songs/${id}`} className="absolute inset-0 z-10" aria-label={t('songCard.view', { title })} />
 
                 <div className="relative flex justify-between items-start z-20 w-full mb-4 pointer-events-none">
                     <div className="flex-1 min-w-0 pr-20">
@@ -98,7 +100,7 @@ export default function SongCard({
                             {!isPublic && (
                                 <Link
                                     href="/songs?status=draft"
-                                    title="Filter Draft songs"
+                                    title={t('songs.filter.drafts.title')}
                                     className="pointer-events-auto text-[9px] font-black bg-gray-200 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-500 px-1.5 py-0.5 rounded border border-gray-400/50 dark:border-gray-700 uppercase tracking-tighter shrink-0 transition-colors"
                                 >
                                     Draft
@@ -137,7 +139,7 @@ export default function SongCard({
                             <Link
                                 href="/songs?chords=true"
                                 className="text-amber-500 hover:text-amber-400 hover:scale-110 transition-all mb-1"
-                                title="Filter songs with Chords"
+                                title={t('songs.filter.chords.title')}
                             >
                                 <Guitar className="w-3.5 h-3.5" />
                             </Link>
@@ -146,7 +148,7 @@ export default function SongCard({
                             <Link
                                 href="/songs?melody=true"
                                 className="text-emerald-400 hover:text-emerald-300 hover:scale-110 transition-all mb-1"
-                                title="Filter songs with Melody"
+                                title={t('songs.filter.melody.title')}
                             >
                                 <Music className="w-3.5 h-3.5" />
                             </Link>
@@ -155,14 +157,14 @@ export default function SongCard({
                             <Link
                                 href="/songs?myRecordings=true"
                                 className="text-violet-400 hover:text-violet-300 hover:scale-110 transition-all mb-1"
-                                title="Filter songs with Personal Recording"
+                                title={t('songs.filter.recordings.title')}
                             >
                                 <Mic className="w-3.5 h-3.5" />
                             </Link>
                         )}
                         {songKey && (
                             <div className="text-[10px] font-mono text-gray-400">
-                                <span className="text-gray-600 uppercase text-[8px] tracking-wider mr-1">Key</span>
+                                <span className="text-gray-600 uppercase text-[8px] tracking-wider mr-1">{t('songForm.field.key')}</span>
                                 {songKey}
                             </div>
                         )}
@@ -180,7 +182,7 @@ export default function SongCard({
                             onDelete();
                         }}
                         className="p-1 rounded-full text-gray-400 opacity-0 group-hover:opacity-100 hover:text-red-500 hover:bg-red-500/10 transition-all duration-200"
-                        title="Delete song"
+                        title={t('songCard.delete')}
                     >
                         <Trash2 className="w-3.5 h-3.5" />
                     </button>
@@ -194,7 +196,7 @@ export default function SongCard({
                 )}
                 <button
                     onClick={handleToggle}
-                    aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
+                    aria-label={isFav ? t('songCard.removeFavorite') : t('songCard.addFavorite')}
                     className={cn(
                         'p-1 rounded-full transition-all duration-300',
                         isFav

@@ -8,7 +8,6 @@ import { usePathname } from 'next/navigation';
 import type { LucideIcon } from 'lucide-react';
 import CreateSheet from './CreateSheet';
 import { useUserPreferences } from '@/context/UserPreferencesContext';
-import { t } from '@/lib/i18n';
 import { useLocale } from '@/context/LocaleContext';
 
 type TabItem = {
@@ -21,7 +20,7 @@ type TabItem = {
 };
 
 export default function MobileBottomNav() {
-    const { locale } = useLocale();
+    const { t } = useLocale();
     const { isActive } = useActivePath();
     const pathname = usePathname();
     const [isSheetOpen, setIsSheetOpen] = useState(false);

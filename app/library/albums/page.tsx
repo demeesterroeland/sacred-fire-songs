@@ -1,7 +1,8 @@
 import { Disc3 } from 'lucide-react';
-import { t } from '@/lib/i18n';
+import { getServerT } from '@/lib/i18n/server';
 
-export default function AlbumsPage() {
+export default async function AlbumsPage() {
+    const t = await getServerT();
     return (
         <div>
             <div className="mt-16 flex flex-col items-center text-center">

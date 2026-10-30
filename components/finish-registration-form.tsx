@@ -8,11 +8,10 @@ import { Label } from "@/components/ui/label";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, Suspense } from "react";
 import { Flame, User, Compass, CheckCircle } from "lucide-react";
-import { t } from "@/lib/i18n";
 import { useLocale } from "@/context/LocaleContext";
 
 export function FinishRegistrationForm(props: React.ComponentPropsWithoutRef<"div">) {
-  const { locale } = useLocale();
+  const { t } = useLocale();
   return (
     <Suspense fallback={<div>{t('common.loading')}</div>}>
       <FinishRegistrationFormContent {...props} />
@@ -24,7 +23,7 @@ function FinishRegistrationFormContent({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
-  const { locale } = useLocale();
+  const { t } = useLocale();
   const [fullName, setFullName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);

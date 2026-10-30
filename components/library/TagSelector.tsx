@@ -5,7 +5,7 @@ import { X, Search, ChevronDown } from 'lucide-react';
 import { TaxonomyNode } from '@/lib/taxonomyUtils';
 import { TagPill } from '@/components/ui/TagPill';
 import { useTaxonomy } from '@/lib/hooks/useTaxonomy';
-import { t } from '@/lib/i18n';
+import { useLocale } from '@/context/LocaleContext';
 
 interface TagSelectorProps {
   category?: string;
@@ -32,6 +32,7 @@ export default function TagSelector({
   artist,
   onArtistChange,
 }: TagSelectorProps) {
+  const { t } = useLocale();
   const resolvedClearLabel = clearLabel ?? t('search.clearAll');
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');

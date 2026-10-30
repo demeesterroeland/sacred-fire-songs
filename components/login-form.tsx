@@ -16,7 +16,6 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, Suspense } from "react";
 import { Mail, Lock, Sparkles, Flame, X, ArrowRight } from "lucide-react";
-import { t } from "@/lib/i18n";
 import { useLocale } from "@/context/LocaleContext";
 
 export function LoginForm(props: React.ComponentPropsWithoutRef<"div">) {
@@ -31,7 +30,7 @@ function LoginFormContent({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
-  const { locale } = useLocale();
+  const { t } = useLocale();
   const [mode, setMode] = useState<'magic-link' | 'password'>('magic-link');
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -60,7 +59,7 @@ function LoginFormContent({
       if (error) throw error;
       setSuccess(t('auth.login.magicLinkSent'));
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred");
+      setError(error instanceof Error ? error.message : t('common.errorOccurred'));
     } finally {
       setIsLoading(false);
     }
@@ -82,7 +81,7 @@ function LoginFormContent({
       window.dispatchEvent(new Event("auth-role-change"));
       router.push(next || "/");
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred");
+      setError(error instanceof Error ? error.message : t('common.errorOccurred'));
     } finally {
       setIsLoading(false);
     }

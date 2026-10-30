@@ -14,7 +14,6 @@ import ChordProEditor from './ChordProEditor';
 
 import { ArtistTagInput } from './ArtistTagInput';
 import { parseArtists, formatArtists, ensureArtistCategoryIds } from '@/lib/songs/artistUtils';
-import { t } from '@/lib/i18n';
 import { useLocale } from '@/context/LocaleContext';
 
 type SongFormData = {
@@ -40,7 +39,7 @@ interface SongFormProps {
 }
 
 const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
-    const { locale } = useLocale();
+    const { t } = useLocale();
     const {
         register,
         handleSubmit,

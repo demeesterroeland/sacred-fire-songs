@@ -2,9 +2,10 @@
 
 import Link from 'next/link';
 import { Home, Music2 } from 'lucide-react';
-import { t } from '@/lib/i18n';
+import { useLocale } from '@/context/LocaleContext';
 
 export default function NotFound() {
+  const { t } = useLocale();
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-gray-100 dark:bg-gray-900 h-full min-h-[60vh]">
       <div className="relative mb-8">

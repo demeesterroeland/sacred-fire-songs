@@ -3,9 +3,10 @@
 import Link from 'next/link';
 import { ArrowLeft, Flame, Hand } from 'lucide-react';
 import { useEffect, useState } from 'react';
-import { t } from '@/lib/i18n';
+import { useLocale } from '@/context/LocaleContext';
 
 export default function AccessDenied() {
+    const { t } = useLocale();
     // Client-side visual effects (embers)
     const [embers] = useState<{ id: number; left: number; duration: number; delay: number }[]>(() => {
         if (typeof window === 'undefined') return [];

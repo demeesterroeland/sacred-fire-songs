@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Home, Sparkles } from 'lucide-react';
-import { t } from '@/lib/i18n';
+import { useLocale } from '@/context/LocaleContext';
 
 interface UnderConstructionProps {
   title?: string;
@@ -14,6 +14,7 @@ export default function UnderConstruction({
   title,
   description,
 }: UnderConstructionProps) {
+  const { t } = useLocale();
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-gray-50 dark:bg-gray-950 min-h-[70vh] relative overflow-hidden">
       {/* Background Gradients */}

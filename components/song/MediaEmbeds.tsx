@@ -1,5 +1,5 @@
 import React from 'react';
-import { t } from '@/lib/i18n';
+import { useLocale } from '@/context/LocaleContext';
 
 interface MediaEmbedsProps {
     youtubeUrl?: string | null;
@@ -8,6 +8,7 @@ interface MediaEmbedsProps {
 }
 
 const MediaEmbeds: React.FC<MediaEmbedsProps> = ({ youtubeUrl, spotifyUrl, soundcloudUrl }) => {
+    const { t } = useLocale();
     if (!youtubeUrl && !spotifyUrl && !soundcloudUrl) return null;
 
     return (

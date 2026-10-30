@@ -13,7 +13,6 @@ import { useAuth } from "@/hooks/useAuth";
 import { useAudio } from "./AudioProvider";
 import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
-import { t } from "@/lib/i18n";
 import { useLocale } from "@/context/LocaleContext";
 import {
   DndContext,
@@ -58,7 +57,7 @@ function SortableRecordingItem({
   formatDate: (date: string) => string;
   isCustomSort: boolean;
 }) {
-  const { locale } = useLocale();
+  const { t } = useLocale();
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(rec.recording_name);
 
@@ -247,7 +246,7 @@ export default function RehearsalDrawer({
   onPlayStateChange,
   requestedTab = "auto",
 }: RehearsalDrawerProps) {
-  const { locale } = useLocale();
+  const { t } = useLocale();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<"recorder" | "media">("media");
   const [selectedMedia, setSelectedMedia] = useState<"youtube" | "spotify" | "soundcloud" | null>(null);
@@ -406,7 +405,7 @@ export default function RehearsalDrawer({
   }, [
     activePlaybackId, isRecordingPlaying, recordingCurrentTime, recordingDuration,
     playingSource, isMediaPlaying, mediaCurrentTime, mediaDuration,
-    recordings, hasMedia, activeDomain, locale,
+    recordings, hasMedia, activeDomain, t,
   ]);
   const [isPendingOrder, startOrderTransition] = useTransition();
 

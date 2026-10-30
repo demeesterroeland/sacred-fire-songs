@@ -5,7 +5,7 @@ import { X, SlidersHorizontal, Guitar, Music, Heart, ChevronDown, Search, Mic } 
 import TagSelector from '@/components/library/TagSelector';
 import type { TaxonomyNode } from '@/lib/taxonomyUtils';
 import type { SongFilterState } from '@/lib/songs/filterConfig';
-import { t } from '@/lib/i18n';
+import { useLocale } from '@/context/LocaleContext';
 
 type SortByType = 'title' | 'author' | 'newest';
 
@@ -50,6 +50,7 @@ export default function SearchFiltersModal({
     localSearch,
     setLocalSearch,
 }: SearchFiltersModalProps) {
+    const { t } = useLocale();
     const [render, setRender] = useState(false);
 
     if (isOpen && !render) {

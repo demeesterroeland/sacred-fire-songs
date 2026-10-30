@@ -5,11 +5,10 @@ import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Mail, KeyRound, ArrowRight, Loader2 } from 'lucide-react';
-import { t } from '@/lib/i18n';
 import { useLocale } from '@/context/LocaleContext';
 
 function SignUpSuccessContent() {
-    const { locale } = useLocale();
+    const { t } = useLocale();
     const router = useRouter();
     const searchParams = useSearchParams();
     const email = searchParams.get('email') || '';

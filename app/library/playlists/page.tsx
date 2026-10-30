@@ -9,7 +9,7 @@ import { CardContent } from '@/components/common/CardContent';
 import { getRecentlyViewed, getRecentlyViewedCount, getUnviewedSongs } from '@/lib/songs/serverQueries';
 import RecentlyViewed from '@/components/library/RecentlyViewed';
 import NewSinceLastVisit from '@/components/library/NewSinceLastVisit';
-import { t } from '@/lib/i18n';
+import { getServerT } from '@/lib/i18n/server';
 
 interface SongCounts {
     total: number;
@@ -17,7 +17,8 @@ interface SongCounts {
     draft: number;
 }
 
-function SongCountSubtitle({ counts, emptyLabel }: { counts: SongCounts; emptyLabel: string }) {
+async function SongCountSubtitle({ counts, emptyLabel }: { counts: SongCounts; emptyLabel: string }) {
+    const t = await getServerT();
     if (counts.total === 0) return <span className="text-xs text-gray-500">{emptyLabel}</span>;
     return (
         <span className="text-xs text-gray-500 whitespace-nowrap">
@@ -73,7 +74,8 @@ interface SmartPlaylistCardProps {
     href?: string; // absent = locked (guest)
 }
 
-function SmartPlaylistCard({ icon: Icon, title, description, subtitle, songTitles = [], accent, href }: SmartPlaylistCardProps) {
+async function SmartPlaylistCard({ icon: Icon, title, description, subtitle, songTitles = [], accent, href }: SmartPlaylistCardProps) {
+    const t = await getServerT();
     const c = accentClasses[accent];
     const locked = !href;
 
@@ -102,7 +104,7 @@ function SmartPlaylistCard({ icon: Icon, title, description, subtitle, songTitle
     return href ? <Link href={href} className="block w-full min-w-0">{inner}</Link> : inner;
 }
 
-function PublicPlaylistsSection({
+async function PublicPlaylistsSection({
     playlists,
     userId,
     songCounts,
@@ -113,6 +115,7 @@ function PublicPlaylistsSection({
     songCounts: Record<string, number>;
     songTitles: Record<string, string[]>;
 }) {
+    const t = await getServerT();
     if (playlists.length === 0) return null;
 
     return (
@@ -137,11 +140,12 @@ function PublicPlaylistsSection({
 
 // ─── Views ────────────────────────────────────────────────────────────────────
 
-function GuestView({ publicPlaylists, publicSongCounts, publicSongTitles }: {
+async function GuestView({ publicPlaylists, publicSongCounts, publicSongTitles }: {
     publicPlaylists: { id: string; title: string; description: string | null; owner_id: string }[];
     publicSongCounts: Record<string, number>;
     publicSongTitles: Record<string, string[]>;
 }) {
+    const t = await getServerT();
     return (
         <div className="space-y-8">
 
@@ -215,6 +219,7 @@ function GuestView({ publicPlaylists, publicSongCounts, publicSongTitles }: {
 }
 
 export default async function PlaylistsPage() {
+    const t = await getServerT();
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 

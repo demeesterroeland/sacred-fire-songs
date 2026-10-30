@@ -2,12 +2,13 @@ import { Suspense } from 'react';
 import SongsPageContent from './SongsPageContent';
 import { fetchSongsServer, fetchCategoryTreeServer, getViewedSongIds } from '@/lib/songs/serverQueries';
 import { createClient } from '@/lib/supabase/server';
-import { t } from '@/lib/i18n';
+import { getServerT } from '@/lib/i18n/server';
 
 // 10-minute (600 seconds) Incremental Static Regeneration (ISR)
 export const revalidate = 600;
 
 export default async function SongsPage() {
+  const t = await getServerT();
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
