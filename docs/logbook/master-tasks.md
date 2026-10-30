@@ -1278,3 +1278,15 @@
 - [x] #279: whole user row opens the details (stretched link), e2e
 - [x] Doc sync: design doc v1.43, epic & user stories v1.39, e2e overview v1.8, admin-users.feature v1.1
 - [x] PR #259 had already been merged into `main` before these commits; moved them to `feat/278-admin-sort-pickers` from `origin/develop` (Gitflow), translated the new sort options into all eight languages (`admin.sort.nameDesc/songsDesc/songsAsc`), and shared the listbox key logic with the i18n `LanguageSwitcher`
+
+## Session October 30, 2026 (Part 8: Gitflow CI/CD Migration — Planning, Epic 5.1)
+- [x] Create worktree branch `docs/gitflow-migration-plan`
+- [x] Online research: Gitflow (nvie + 2020 note), env mapping, merge strategies, Release Please multi-branch/prerelease, protection & action pinning
+- [x] Gap analysis of workflows, repo settings, scripts, tests and docs (found: no PR CI, E2E false green due to missing staging secrets, `deploy-db.yml` deleted but still referenced, `main` allows force-push / no required checks, `--admin` merge in `preview2prod.sh`, wrong image names in `dev2preview.sh`, duplicate unit-test dirs)
+- [x] Write plan `docs/plans/2026-10-30-gitflow-cicd-migration.md` (6 phases, pipeline matrix, test pyramid / TDD / BDD strategy, orchestration, open decisions D1–D7)
+- [x] Write executable acceptance spec `docs/testing/gitflow-cicd.feature` (test-first, `@ci-contract` / `@script` / `@manual`)
+- [x] Add Phase 5 / Epic 5.1 with stories 5.1.1–5.1.14 to `docs/logbook/epic&user stories.md` (v1.37)
+- [x] Owner decisions D1–D7 recorded in the plan (v1.2); tick work already done (develop + default branch, main ruleset, #302, #305, #273)
+- [x] Create GitHub issues for Epic 5.1 via `scripts/setup_github_roadmap.py` (masterplan-orchestrator): #280 master, #281–#286 phases, #287 Task 5.1.0, #288–#301 stories; #267 moved under #288; #274 blocks #294
+- [x] Plan PR #308 into `develop`
+- [ ] Phase 0 onwards: implementation, one PR into `develop` per phase
