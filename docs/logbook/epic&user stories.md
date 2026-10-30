@@ -719,14 +719,30 @@ Scenario: Set playlist cover color
 
 ### Epic 4.2: Print & Export
 
-**Story 4.2.1:** As a Musician, I want to generate a PDF of my setlist so that I can print it for the ceremony. **[Implemented - PR #220]**
+**Story 4.2.1:** As a Member or Musician, I want to generate a PDF of my setlist so that I can print it for the ceremony. **[Implemented - PR #220]**
 
 ```
-Scenario: Export PDF
-  Given I am viewing a setlist
-  When I click "Export PDF"
+Scenario: Export PDF (Authenticated Member)
+  Given I am logged in as a Member or Musician
+  And I am viewing a setlist with between 1 and 200 songs
+  When I click "Export PDF" or the Printer button
   Then a PDF file should download
   And the PDF should contain the lyrics and chords for all songs in the setlist
+  And every page should display a 3-part footer:
+    | Song URL (bottom left) | Playlist: <name> (bottom middle) | Page X of Y (bottom right) |
+
+Scenario: Guest clicks Export PDF
+  Given I am an unauthenticated Guest viewing a public setlist
+  When I click "Export PDF" or the Printer button
+  Then the export button should be visible
+  And clicking it should display a popup modal with a link to log in
+  And no PDF download should be initiated
+
+Scenario: Exporting setlist exceeding maximum songs limit
+  Given I am viewing a setlist containing more than 200 songs
+  When I click "Export PDF" or the Printer button
+  Then an alert or toast should inform me that maximum 200 songs can be exported per PDF (upgrade to Premium for 1000 songs)
+  And no PDF file should be generated
 ```
 
 **Story 4.2.2:** As a Musician, I want to group songs by category in the PDF so that I can keep "Water" songs together on paper.

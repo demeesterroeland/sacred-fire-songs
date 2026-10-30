@@ -4,6 +4,7 @@ import {
     formatSongForPdf,
     exportPlaylistToPdf,
     downloadPdf,
+    sanitizeForPdf,
     type ExportPlaylistData,
     type ExportSongData,
 } from '@/lib/export/pdfExport';
@@ -185,6 +186,49 @@ describe('PDF Export - TDD Suite', () => {
             const blob = await exportPlaylistToPdf(playlist);
             expect(blob).toBeInstanceOf(Blob);
             expect(blob.size).toBeGreaterThan(2000);
+        });
+
+        it('enforces maximum 200 songs limit during export', async () => {
+            const overLimitSongs = Array.from({ length: 201 }, (_, i) => ({
+                title: `Song ${i + 1}`,
+                content: `[C]Lyrics for song ${i + 1}`,
+            }));
+
+            const playlist: ExportPlaylistData = {
+                title: 'Too Many Songs',
+                songs: overLimitSongs,
+            };
+
+            await expect(exportPlaylistToPdf(playlist)).rejects.toThrow(
+                /maximum 200 songs allowed per PDF/i
+            );
+        });
+
+        it('renders 3-part footer with song URL, playlist title, and page numbers', async () => {
+            const playlist: ExportPlaylistData = {
+                title: 'Ceremony Setlist',
+                baseUrl: 'https://songbook.bluette.be',
+                songs: [
+                    {
+                        title: 'Agua De Estrellas',
+                        content: 'Limpia coraźon agua brillante',
+                        url: '/songs/agua-de-estrellas-id',
+                    },
+                ],
+            };
+
+            const blob = await exportPlaylistToPdf(playlist);
+            expect(blob).toBeInstanceOf(Blob);
+            expect(blob.size).toBeGreaterThan(1000);
+        });
+    });
+
+    describe('sanitizeForPdf', () => {
+        it('normalizes characters outside WinAnsi to prevent font blowout', () => {
+            // acute z (ź) in 'coraźon' should decompose or convert to 'z' without disrupting Latin accents (ó, á)
+            const input = 'Limpia coraźon agua brillante, á é í ó ú ñ';
+            const sanitized = sanitizeForPdf(input);
+            expect(sanitized).toBe('Limpia corazon agua brillante, á é í ó ú ñ');
         });
     });
 

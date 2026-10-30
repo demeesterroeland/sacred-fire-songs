@@ -336,12 +336,14 @@ export async function reorderPlaylistSongs(
 // ─── Export PDF Data ──────────────────────────────────────────────────────────
 
 export interface ExportPlaylistSong {
+    id?: string;
     title: string;
     author?: string;
     key?: string;
     capo?: number;
     transposition?: number;
     content: string;
+    url?: string;
 }
 
 export async function getPlaylistSongsForExport(
@@ -397,14 +399,19 @@ export async function getPlaylistSongsForExport(
     if (itemsError) return { title: playlist.title, songs: [], error: itemsError.message };
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const songs: ExportPlaylistSong[] = (items || []).map((item: any) => ({
-        title: item.song_versions?.compositions?.title || 'Unknown',
-        author: item.song_versions?.compositions?.original_author || undefined,
-        key: item.song_versions?.key || undefined,
-        capo: item.song_versions?.capo ?? undefined,
-        transposition: item.transposition_override ?? undefined,
-        content: item.song_versions?.content_chordpro || '',
-    }));
+    const songs: ExportPlaylistSong[] = (items || []).map((item: any) => {
+        const compId = item.song_versions?.compositions?.id;
+        return {
+            id: compId || item.song_versions?.id || undefined,
+            title: item.song_versions?.compositions?.title || 'Unknown',
+            author: item.song_versions?.compositions?.original_author || undefined,
+            key: item.song_versions?.key || undefined,
+            capo: item.song_versions?.capo ?? undefined,
+            transposition: item.transposition_override ?? undefined,
+            content: item.song_versions?.content_chordpro || '',
+            url: compId ? `/songs/${compId}` : undefined,
+        };
+    });
 
     return {
         title: playlist.title,
