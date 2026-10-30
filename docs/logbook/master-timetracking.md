@@ -88,4 +88,6 @@
 
 | **September 27, 2026 (Part 2)** | **Release/Ops**: Finalizing v1.6.0 Release (#242, #251, #253, #254) — Fixed hardware pop, added metadata UI, repaired staging migrator pipeline and .gitignore bugs, and cleared deployment pipeline bottlenecks. | ~2.5 Hours | ✅ Completed |
 
-| **Total** | **Development + AI Collaboration** | **~169.25 Hours** | |
+| **October 30, 2026** | **Chore/Repo Hygiene**: Moved the ChordPro song collection and songbook scripts out of the app repository into `sacred-fire-songs-collection` with full git history (`git filter-repo`), kept only test fixtures, cleaned `.gitignore`, bumped design doc to v1.33. | ~0.5 Hours | ✅ Completed |
+
+| **Total** | **Development + AI Collaboration** | **~169.75 Hours** | |

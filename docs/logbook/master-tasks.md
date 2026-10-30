@@ -1194,3 +1194,12 @@
 - [x] Patch `.gitignore` bug swallowing new Supabase `.sql` migration files
 - [x] Fix local `scripts/restart.sh` port conflict errors using `fuser`
 - [x] Deploy and verify Preview environment
+
+## Session October 30, 2026 (Move Song Collection Out of the App Repository)
+- [x] Audit references to `data/songs`, `data/extracted_songs`, `data/scripts` and the songbook scripts in code, tests, CI, Docker and docs (none outside `data/` itself)
+- [x] Export the collection with full history via `git filter-repo` (18 commits, 357 files) and import it into `../sacred-fire-songs-collection`
+- [x] Fix script paths for the new layout, add `README.md` and `.gitignore` in the collection repo
+- [x] Remove `data/`, `scripts/prod_songs_2_pdf.py` and `scripts/compile_songbook.py` on branch `chore/move-song-collection-out`
+- [x] Drop the collection-specific `.gitignore` rules; keep test fixtures (`supabase/seeds`, `lib/unit-tests`, `testing/unit/tests`, `e2e/fixtures`)
+- [x] Bump `application-analysis&design.md` to v1.33 and run the unit suite (385 passed)
+- [ ] Push `sacred-fire-songs-collection` to its GitHub origin and merge the branch (awaiting user)
