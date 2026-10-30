@@ -1,6 +1,6 @@
 # E2E Test Overview & Matrix: Sacred Fire Songs
 
-**Version:** 1.9
+**Version:** 1.10
 **Status:** Living Document
 **Date:** Oct 31, 2026
 **Tracking:** GH #142
@@ -19,6 +19,7 @@
 | **1.7** | Oct 30, 2026 | ACC-07 extended to eight languages (I18N-12). |
 | **1.8** | Oct 30, 2026 | Added ADMIN-08 (remembered sort, #278) and ADMIN-09 (clickable user rows, #279); ADMIN-05 now drives the listbox-style role picker. |
 | **1.9** | Oct 31, 2026 | Unit tests now live only in `testing/unit/tests/` (`lib/unit-tests/` removed, Epic 5.1 Story 5.1.3); stale Playwright copies in `testing/e2e/tests/` removed — specs live in `e2e/`. |
+| **1.10** | Oct 31, 2026 | Database setup and seeder paths moved to `scripts/db/` (`scripts/db/setup-test-db.mjs`, `scripts/db/random-seeder.mjs`, #274). |
 
 ---
 
@@ -63,13 +64,13 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 - **Location:** `e2e/` at repo root, specs as `e2e/<feature>.spec.ts`. Shared fixtures/helpers in `e2e/fixtures/`.
 - **Config:** `playwright.config.ts` with projects for `chromium-desktop` and `mobile-chrome` (Pixel 5 descriptor); `webServer` boots `next build && next start` (test against a production build, not `next dev`).
 - **Auth:** a global-setup that logs in one user per role and saves `storageState` per role (leverage the existing dev quick-login / `NEXT_PUBLIC_DEV_TEST_PASSWORD` and mock-role mechanism noted in `hooks/useAuth.tsx`). Guest = no storage state.
-- **Data:** run against a **local Supabase** stack seeded by `scripts/setup-test-db.mjs`: one account per role from `supabase/seeds/01_auth_users.sql` + `02_profiles.sql`, then randomly generated songs, playlists and recordings from `scripts/random-seeder.mjs` (one deterministic anchor song, `Danza del Cielo Curandero`, is always present). The real song collection lives in the sibling repository `sacred-fire-songs-collection`. Reset/seed between runs so assertions on counts/titles are stable.
+- **Data:** run against a **local Supabase** stack seeded by `scripts/db/setup-test-db.mjs`: one account per role from `supabase/seeds/01_auth_users.sql` + `02_profiles.sql`, then randomly generated songs, playlists and recordings from `scripts/db/random-seeder.mjs` (one deterministic anchor song, `Danza del Cielo Curandero`, is always present). The real song collection lives in the sibling repository `sacred-fire-songs-collection`. Reset/seed between runs so assertions on counts/titles are stable.
 - **Scripts:** add `"test:e2e": "playwright test"` and `"test:e2e:ui": "playwright test --ui"` to `package.json`.
 
 ### CI approach
 
 - `.github/workflows/e2e.yml` runs on **push** to `main` / `feat|fix|chore/**` and tests against the **staging** Supabase project. It derives the staging URL from `SUPABASE_PROJECT_ID_STAGING` and reads the (public) anon key from the `SUPABASE_PUBLISHABLE_KEY_STAGING` secret; `E2E_TEST_PASSWORD` provides the seeded-account password. It installs deps + Chromium, runs the `@smoke` subset, and uploads the HTML report.
-- **Database Isolation:** Playwright E2E tests are configured to run against the online staging Supabase project (which acts as a dedicated E2E DB and is separate from the database driving `songbook-beta`). A global setup hook (`e2e/global-setup.ts`) executes a Node.js setup script (`scripts/setup-test-db.mjs`) to dynamically wipe and seed the database using `supabase/seeds/*.sql` before tests run, ensuring a clean and consistent baseline.
+- **Database Isolation:** Playwright E2E tests are configured to run against the online staging Supabase project (which acts as a dedicated E2E DB and is separate from the database driving `songbook-beta`). A global setup hook (`e2e/global-setup.ts`) executes a Node.js setup script (`scripts/db/setup-test-db.mjs`) to dynamically wipe and seed the database using `supabase/seeds/*.sql` before tests run, ensuring a clean and consistent baseline.
 - **Local Optimization:** For fast local test iteration, setting the environment variable `E2E_REUSE_DB=1` skips the database wipe and re-seed, reusing the existing database state.
 
 ---

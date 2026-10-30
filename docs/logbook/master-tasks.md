@@ -1319,3 +1319,12 @@
 - [x] Docs: CLAUDE.md, git-workflow v1.2, e2e overview v1.9, design doc §6.6, plan v1.4, epic stories; issue #288 body aligned with D4
 - [x] Required checks on the `main` ruleset + classic protection removed (applied by the owner; agent was blocked by the permission classifier)
 - [ ] Deferred: Story 5.1.2 (E2E fail-closed, secrets, docker gating), cloud-infra #106 rollout, Tailscale `tag:ci`
+
+## Session October 31, 2026 (Part 2: Reorganize scripts/ into cicd/, db/, dev/, #274)
+- [x] Branch `chore/274-reorganize-scripts` from `chore/282-gitflow-quality-gate` (PR #310)
+- [x] TDD: `testing/scripts/scripts-layout.bats` written red (4/6 failing), green after the move
+- [x] `git mv` into `scripts/cicd/` (start-issue, restart, dev2preview, preview2prod, run-performance-benchmark, setup_github_roadmap.py, story-sync scripts + `lib/parseStories.mjs` from `.claude/scripts/`), `scripts/db/` (run-migrations, setup-test-db, random-seeder, export-random-seed, clone-prod-to-staging, supabase_rate_limits), `scripts/dev/` (generate-icons, debug_chordpro, test_chord_parsing)
+- [x] Fix root resolution inside moved scripts (`../..`, `parents[2]`), usage strings and misnamed headers; `restart.sh` and `run-performance-benchmark.sh` now cd to the repo root (`npm run test:perf` pointed at a missing root file)
+- [x] Update references: `package.json`, `Dockerfile.migrator`, `e2e/global-setup.ts`, `.claude/settings.json`, `.claude/commands/sync-stories.md`, `parseStories.test.mjs`, `start-issue.bats`, `ci.yml` shellcheck glob (`scripts/*/*.sh`), e2e README/perf spec, BDD db support, seed SQL header, `gitflow-cicd.feature`
+- [x] `scripts/README.md`; docs: design doc v1.48, git-workflow v1.3, development-workflow v1.1 (header added), e2e overview v1.10, song.feature v1.1, plan v1.5
+- [x] Verified: lint (182 warnings, cap unchanged), typecheck, unit 286, BDD unit, bats 13 (1 skip), ci-gate 6/6, build, shellcheck, actionlint, `npm run seed:generate`
