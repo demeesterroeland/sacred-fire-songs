@@ -332,3 +332,84 @@ export async function reorderPlaylistSongs(
     if (failed) return { error: failed.error!.message };
     return {};
 }
+
+// ─── Export PDF Data ──────────────────────────────────────────────────────────
+
+export interface ExportPlaylistSong {
+    title: string;
+    author?: string;
+    key?: string;
+    capo?: number;
+    transposition?: number;
+    content: string;
+}
+
+export async function getPlaylistSongsForExport(
+    playlistId: string
+): Promise<{
+    title: string;
+    description?: string | null;
+    songs: ExportPlaylistSong[];
+    error?: string;
+}> {
+    const idParsed = safeParse(uuid, playlistId);
+    if ('error' in idParsed) return { title: '', songs: [], error: 'Invalid playlist ID' };
+
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    const { data: playlist, error: playlistError } = await supabase
+        .from('setlists')
+        .select('id, title, owner_id, is_public, description')
+        .eq('id', idParsed.data)
+        .maybeSingle();
+
+    if (playlistError || !playlist) return { title: '', songs: [], error: 'Playlist not found' };
+
+    // Private playlists: only owner can access
+    if (!playlist.is_public) {
+        if (!user || playlist.owner_id !== user.id) {
+            return { title: '', songs: [], error: 'Access denied' };
+        }
+    }
+
+    const { data: items, error: itemsError } = await supabase
+        .from('setlist_items')
+        .select(`
+            id,
+            order_index,
+            transposition_override,
+            song_versions (
+                id,
+                key,
+                capo,
+                content_chordpro,
+                compositions (
+                    id,
+                    title,
+                    original_author
+                )
+            )
+        `)
+        .eq('setlist_id', idParsed.data)
+        .order('order_index', { ascending: true });
+
+    if (itemsError) return { title: playlist.title, songs: [], error: itemsError.message };
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const songs: ExportPlaylistSong[] = (items || []).map((item: any) => ({
+        title: item.song_versions?.compositions?.title || 'Unknown',
+        author: item.song_versions?.compositions?.original_author || undefined,
+        key: item.song_versions?.key || undefined,
+        capo: item.song_versions?.capo ?? undefined,
+        transposition: item.transposition_override ?? undefined,
+        content: item.song_versions?.content_chordpro || '',
+    }));
+
+    return {
+        title: playlist.title,
+        description: playlist.description,
+        songs,
+    };
+}
+

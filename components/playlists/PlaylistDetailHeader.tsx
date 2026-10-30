@@ -3,12 +3,14 @@
 
 import { useState, useRef, useTransition, useEffect } from 'react';
 import Link from 'next/link';
-import { ArrowLeft, Globe, Lock } from 'lucide-react';
+import { ArrowLeft, Globe, Lock, Printer } from 'lucide-react';
 import { PlaylistContextMenu } from './PlaylistContextMenu';
 import {
     togglePlaylistVisibility,
     updatePlaylistDescription,
+    getPlaylistSongsForExport,
 } from '@/app/actions/playlistActions';
+import { exportPlaylistToPdf, downloadPdf } from '@/lib/export/pdfExport';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { usePlaylistRename } from '@/hooks/usePlaylistRename';
@@ -96,6 +98,46 @@ export function PlaylistDetailHeader({
     const [, startTransition] = useTransition();
     const router = useRouter();
 
+    // ─── Export PDF ───────────────────────────────────────────────────────────
+    const [isExportingPdf, setIsExportingPdf] = useState(false);
+
+    const handleExportPdf = async () => {
+        if (songCount === 0) {
+            toast.info('Cannot export an empty playlist. Add songs first.');
+            return;
+        }
+
+        setIsExportingPdf(true);
+        const toastId = toast.loading('Generating PDF...');
+
+        try {
+            const result = await getPlaylistSongsForExport(playlistId);
+            if (result.error) {
+                toast.error(result.error, { id: toastId });
+                return;
+            }
+
+            if (!result.songs || result.songs.length === 0) {
+                toast.info('Cannot export an empty playlist. Add songs first.', { id: toastId });
+                return;
+            }
+
+            const blob = await exportPlaylistToPdf({
+                title: result.title || optimisticTitle,
+                description: optimisticDesc || result.description,
+                songs: result.songs,
+            });
+
+            downloadPdf(blob, result.title || optimisticTitle);
+            toast.success('PDF downloaded', { id: toastId });
+        } catch (error) {
+            console.error('Failed to export PDF:', error);
+            toast.error('Failed to generate PDF', { id: toastId });
+        } finally {
+            setIsExportingPdf(false);
+        }
+    };
+
     return (
         <div className="space-y-2">
             {/* Title row */}
@@ -145,6 +187,15 @@ export function PlaylistDetailHeader({
                             }
                         </button>
                     )}
+                    <button
+                        onClick={handleExportPdf}
+                        disabled={isExportingPdf}
+                        aria-label="Export PDF"
+                        title={songCount === 0 ? 'Add songs to export PDF' : 'Export PDF'}
+                        className="p-1.5 rounded-lg text-gray-600 hover:text-gray-800 dark:hover:text-gray-300 hover:bg-gray-200/60 dark:hover:bg-gray-700/60 transition-colors disabled:opacity-40"
+                    >
+                        <Printer className="w-4 h-4" />
+                    </button>
                     <PlaylistContextMenu
                         playlistId={playlistId}
                         playlistTitle={optimisticTitle}
@@ -153,6 +204,8 @@ export function PlaylistDetailHeader({
                         onRenameStart={canEdit ? handleRenameStart : undefined}
                         onGetLink={handleCopyLink}
                         isLinkAvailable={isPublic}
+                        onExportPdf={handleExportPdf}
+                        isExportingPdf={isExportingPdf}
                     />
                 </div>
             </div>
