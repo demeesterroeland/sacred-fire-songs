@@ -58,7 +58,7 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 - **Location:** `e2e/` at repo root, specs as `e2e/<feature>.spec.ts`. Shared fixtures/helpers in `e2e/fixtures/`.
 - **Config:** `playwright.config.ts` with projects for `chromium-desktop` and `mobile-chrome` (Pixel 5 descriptor); `webServer` boots `next build && next start` (test against a production build, not `next dev`).
 - **Auth:** a global-setup that logs in one user per role and saves `storageState` per role (leverage the existing dev quick-login / `NEXT_PUBLIC_DEV_TEST_PASSWORD` and mock-role mechanism noted in `hooks/useAuth.tsx`). Guest = no storage state.
-- **Data:** run against a **local Supabase** stack seeded with deterministic fixtures (seed script that creates known songs, playlists, and one account per role). Reset/seed between runs so assertions on counts/titles are stable.
+- **Data:** run against a **local Supabase** stack seeded by `scripts/setup-test-db.mjs`: one account per role from `supabase/seeds/01_auth_users.sql` + `02_profiles.sql`, then randomly generated songs, playlists and recordings from `scripts/random-seeder.mjs` (one deterministic anchor song, `Danza del Cielo Curandero`, is always present). The real song collection lives in the sibling repository `sacred-fire-songs-collection`. Reset/seed between runs so assertions on counts/titles are stable.
 - **Scripts:** add `"test:e2e": "playwright test"` and `"test:e2e:ui": "playwright test --ui"` to `package.json`.
 
 ### CI approach
