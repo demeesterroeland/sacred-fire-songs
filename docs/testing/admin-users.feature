@@ -1,5 +1,5 @@
 # Sacred Fire Songs – Admin user overview catalogue (Story 3.6.1, issue #258)
-# Version: 1.0 | Date: Oct 30, 2026
+# Version: 1.1 | Date: Oct 30, 2026
 #
 # Living Gherkin description of the admin users overview, user details and
 # contributions (Epic 3.6 #257 / Story 3.6.1 #258). Same layering as
@@ -23,6 +23,8 @@
 #
 # Changelog
 #   1.0 – Oct 30, 2026 – Initial catalogue for Story 3.6.1 acceptance criteria.
+#   1.1 – Oct 30, 2026 – Sort by name Z-A and by number of songs, remembered sort (#278),
+#                        clickable user rows (#279), listbox-style role/sort pickers.
 
 @adminUsers
 Feature: Admin users overview, details and contributions
@@ -174,6 +176,27 @@ Feature: Admin users overview, details and contributions
       When the admin sorts by "name"
       Then the first listed users are "admin@test.com, expert@test.com, gk@test.com"
 
+    @unit @adminUsersList @adminUsersSort
+    Scenario Outline: Sorting by name and by number of songs (#278)
+      Given the registered users
+        | email           | name       | role       | joined     | last seen |
+        | admin@test.com  | Ada Admin  | admin      | 2026-01-01 |           |
+        | gk@test.com     | Gus Keeper | gatekeeper | 2026-02-01 |           |
+        | expert@test.com | Eve Expert | expert     | 2026-03-01 |           |
+        | member@test.com |            | member     | 2026-05-01 |           |
+      And "expert@test.com" created 3 songs, submitted 0 versions and created 0 playlists of which 0 is public
+      And "gk@test.com" created 1 songs, submitted 0 versions and created 0 playlists of which 0 is public
+      When the admin loads the users overview
+      And the admin sorts by "<sort>"
+      Then the first listed users are "<order>"
+
+      Examples:
+        | sort       | order                                                       |
+        | name       | admin@test.com, expert@test.com, gk@test.com, member@test.com |
+        | name_desc  | member@test.com, gk@test.com, expert@test.com, admin@test.com |
+        | songs_desc | expert@test.com, gk@test.com, admin@test.com, member@test.com |
+        | songs_asc  | admin@test.com, member@test.com, gk@test.com, expert@test.com |
+
     @unit @adminUsersList
     Scenario: A search without matches shows the empty state
       Given the registered users
@@ -205,6 +228,20 @@ Feature: Admin users overview, details and contributions
       Then I see "No users found"
       When I clear the search and filter on "Musician / Expert"
       Then only the musician row is listed
+
+    @e2e @adminUsersSort
+    Scenario: The chosen sort is remembered (#278)
+      Given I am logged in as the admin
+      When I open /admin/users and pick "Most songs" in the sort picker
+      Then the rows are ordered by number of songs, most first
+      When I reload the page
+      Then the sort picker still shows "Most songs"
+
+    @e2e @adminUsersList
+    Scenario: Clicking anywhere on a row opens the user's details (#279)
+      Given I am logged in as the admin
+      When I open /admin/users and click the gatekeeper row outside the "Details" button
+      Then I am on the gatekeeper's detail page
 
   # ---------------------------------------------------------------------------
   # AC 2 – View user detail and contributions
