@@ -11,12 +11,14 @@ export interface ExportSongData {
     transposition?: number;
     tuning?: string;
     content: string;
+    url?: string;
 }
 
 export interface ExportPlaylistData {
     title: string;
     description?: string | null;
     songs: ExportSongData[];
+    baseUrl?: string;
 }
 
 export interface FormattedSongForPdf {
@@ -26,6 +28,36 @@ export interface FormattedSongForPdf {
     capo?: number;
     tuning?: string;
     sections: ChordProSection[];
+    url?: string;
+}
+
+// Windows-1252 character codes supported natively in standard PDF Type 1 Helvetica fonts
+const winAnsiAllowedCodes = new Set<number>();
+for (let i = 32; i <= 255; i++) {
+    winAnsiAllowedCodes.add(i);
+}
+// Remove unmapped Windows-1252 code points
+[129, 141, 143, 144, 157].forEach(c => winAnsiAllowedCodes.delete(c));
+
+/**
+ * Normalizes unicode text to prevent jsPDF Helvetica font from dropping into
+ * double-byte UCS-2 BE encoding, which causes severe letter spacing distortion
+ * when encountering characters outside WinAnsi (such as acute consonants like 'ź').
+ */
+export function sanitizeForPdf(str: string): string {
+    if (!str) return '';
+    let result = '';
+    for (const char of str) {
+        const code = char.charCodeAt(0);
+        if (code < 256 && winAnsiAllowedCodes.has(code)) {
+            result += char;
+        } else {
+            // Decompose and strip non-ASCII combining marks
+            const decomposed = char.normalize('NFKD').replace(/[^\x00-\x7F]/g, '');
+            result += decomposed || '?';
+        }
+    }
+    return result;
 }
 
 /**
@@ -99,8 +131,8 @@ export function formatSongForPdf(song: ExportSongData): FormattedSongForPdf {
     // 2. Parse embedded metadata directives
     const embedded = parseChordPro(contentToProcess);
 
-    const title = embedded.title || song.title || 'Untitled Song';
-    const author = song.author || embedded.author;
+    const title = sanitizeForPdf(embedded.title || song.title || 'Untitled Song');
+    const author = sanitizeForPdf(song.author || embedded.author || '');
     const key = songKey || embedded.key;
     const capo = song.capo !== undefined
         ? song.capo
@@ -109,13 +141,31 @@ export function formatSongForPdf(song: ExportSongData): FormattedSongForPdf {
     // 3. Parse ChordPro content into structured sections
     const sections = parseChordProForDisplay(contentToProcess);
 
+    // Sanitize lyrics and comments in sections to avoid WinAnsi encoding blowout
+    sections.forEach(section => {
+        if (section.label) {
+            section.label = sanitizeForPdf(section.label);
+        }
+        section.lines.forEach(line => {
+            line.items.forEach(item => {
+                if (item.lyrics) {
+                    item.lyrics = sanitizeForPdf(item.lyrics);
+                }
+                if (item.comment) {
+                    item.comment = sanitizeForPdf(item.comment);
+                }
+            });
+        });
+    });
+
     return {
         title,
-        author,
+        author: author || undefined,
         key,
         capo,
-        tuning: song.tuning,
+        tuning: song.tuning ? sanitizeForPdf(song.tuning) : undefined,
         sections,
+        url: song.url,
     };
 }
 
@@ -126,6 +176,11 @@ export function formatSongForPdf(song: ExportSongData): FormattedSongForPdf {
 export async function exportPlaylistToPdf(playlist: ExportPlaylistData): Promise<Blob> {
     if (!playlist.songs || playlist.songs.length === 0) {
         throw new Error('Playlist has no songs to export');
+    }
+
+    const MAX_EXPORT_SONGS = 200;
+    if (playlist.songs.length > MAX_EXPORT_SONGS) {
+        throw new Error(`Export limit exceeded: maximum ${MAX_EXPORT_SONGS} songs allowed per PDF.`);
     }
 
     const doc = new jsPDF({
@@ -144,9 +199,15 @@ export async function exportPlaylistToPdf(playlist: ExportPlaylistData): Promise
 
     let y = topMargin;
 
+    // Track which song is active on each page (pageNumber -> { title, url })
+    const pageSongMap = new Map<number, { title: string; url?: string }>();
+
     // Helper: add page and running header if continuing a song
-    const addContinuationPage = (songTitle: string) => {
+    const addContinuationPage = (songTitle: string, songUrl?: string) => {
         doc.addPage();
+        const newPageNum = doc.getNumberOfPages();
+        pageSongMap.set(newPageNum, { title: songTitle, url: songUrl });
+
         y = topMargin;
         doc.setFont('helvetica', 'italic');
         doc.setFontSize(8.5);
@@ -156,10 +217,12 @@ export async function exportPlaylistToPdf(playlist: ExportPlaylistData): Promise
     };
 
     // ─── Setlist Header on Page 1 ─────────────────────────────────────────────
+    pageSongMap.set(1, { title: playlist.title || 'Setlist' });
+
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(22);
     doc.setTextColor(17, 24, 39); // deep charcoal
-    doc.text(playlist.title || 'Setlist', leftMargin, y);
+    doc.text(sanitizeForPdf(playlist.title || 'Setlist'), leftMargin, y);
     y += 20;
 
     // Date & Song Count Sub-header
@@ -181,7 +244,7 @@ export async function exportPlaylistToPdf(playlist: ExportPlaylistData): Promise
         doc.setFont('helvetica', 'italic');
         doc.setFontSize(9);
         doc.setTextColor(75, 85, 99);
-        const descLines = doc.splitTextToSize(playlist.description, usableWidth);
+        const descLines = doc.splitTextToSize(sanitizeForPdf(playlist.description), usableWidth);
         doc.text(descLines, leftMargin, y);
         y += descLines.length * 11 + 4;
     }
@@ -201,6 +264,9 @@ export async function exportPlaylistToPdf(playlist: ExportPlaylistData): Promise
             doc.addPage();
             y = topMargin;
         }
+
+        const currentSongPage = doc.getNumberOfPages();
+        pageSongMap.set(currentSongPage, { title: formattedSong.title, url: formattedSong.url });
 
         // Song Title
         doc.setFont('helvetica', 'bold');
@@ -352,15 +418,43 @@ export async function exportPlaylistToPdf(playlist: ExportPlaylistData): Promise
         y += 8;
     });
 
-    // ─── Global Pagination Footer ─────────────────────────────────────────────
+    // ─── Global 3-Part Footer on Every Page ──────────────────────────────────
+    // Bottom Left: Song URL
+    // Bottom Middle: Playlist: <playlist>
+    // Bottom Right: Page X of Y
     const totalPages = doc.getNumberOfPages();
+    const baseDomain = playlist.baseUrl || '';
+
     for (let i = 1; i <= totalPages; i++) {
         doc.setPage(i);
         doc.setFont('helvetica', 'normal');
         doc.setFontSize(8);
         doc.setTextColor(156, 163, 175);
-        const footerText = `${playlist.title || 'Setlist'}   •   Page ${i} of ${totalPages}`;
-        doc.text(footerText, pageWidth / 2, pageHeight - 20, { align: 'center' });
+
+        const pageSong = pageSongMap.get(i);
+        let leftFooter = '';
+        if (pageSong?.url) {
+            leftFooter = baseDomain ? `${baseDomain}${pageSong.url}` : pageSong.url;
+        }
+
+        const midFooter = `Playlist: ${sanitizeForPdf(playlist.title || 'Setlist')}`;
+        const rightFooter = `Page ${i} of ${totalPages}`;
+
+        // Bottom Left: Song URL (truncated with ellipsis if very long)
+        if (leftFooter) {
+            const maxUrlWidth = 200;
+            let displayUrl = leftFooter;
+            while (doc.getTextWidth(displayUrl) > maxUrlWidth && displayUrl.length > 10) {
+                displayUrl = displayUrl.slice(0, -4) + '...';
+            }
+            doc.text(displayUrl, leftMargin, pageHeight - 20, { align: 'left' });
+        }
+
+        // Bottom Middle: Playlist: <name>
+        doc.text(midFooter, pageWidth / 2, pageHeight - 20, { align: 'center' });
+
+        // Bottom Right: Page X of Y
+        doc.text(rightFooter, pageWidth - rightMargin, pageHeight - 20, { align: 'right' });
     }
 
     return doc.output('blob');

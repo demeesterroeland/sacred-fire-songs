@@ -122,10 +122,12 @@ export function PlaylistDetailHeader({
                 return;
             }
 
+            const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
             const blob = await exportPlaylistToPdf({
                 title: result.title || optimisticTitle,
                 description: optimisticDesc || result.description,
                 songs: result.songs,
+                baseUrl,
             });
 
             downloadPdf(blob, result.title || optimisticTitle);

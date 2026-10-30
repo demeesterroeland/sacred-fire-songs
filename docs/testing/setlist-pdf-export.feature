@@ -16,7 +16,10 @@ Feature: Setlist PDF Export for Ceremony Printing
     And the PDF should include a header with "Ceremony Fire Circle" and song count
     And each song should display its title, author, key, and capo
     And chords should be rendered above their corresponding lyrics
-    And the generated document should contain page numbers
+    And the footer on each page should display:
+      | Song URL          | bottom left   |
+      | Playlist: <title> | bottom middle |
+      | Page X of Y       | bottom right  |
 
   Scenario: Handling transposition override in PDF export
     Given the setlist contains a song "Down to the River" with content "[C]Down to the [G]river to [C]pray"
@@ -45,3 +48,17 @@ Feature: Setlist PDF Export for Ceremony Printing
     When I view the setlist details or options menu
     Then the PDF export action should be disabled or alert the musician that songs are required
     And no empty PDF file should be generated
+
+  Scenario: Guest user attempts to export PDF
+    Given I am an unauthenticated guest viewing a public setlist
+    When I click the PDF export action or printer button
+    Then the button should be visible
+    And a login prompt modal should open with a link to log in
+    And no PDF file should be generated
+
+  Scenario: Attempting to export a setlist exceeding the 200 songs maximum limit
+    Given the setlist contains 201 songs
+    When I export the setlist to PDF
+    Then the export should be blocked
+    And an alert or message should inform me that maximum 200 songs can be exported
+    And no PDF file should be generated
