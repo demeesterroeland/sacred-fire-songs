@@ -8,6 +8,7 @@ if [ "$#" -lt 3 ]; then
   echo "Usage: scripts/start-issue.sh <issue-number> <type> <description...>"
   echo "  <issue-number> : The GitHub issue number (e.g. 239)"
   echo "  <type>         : The Conventional Commit type (e.g. fix, feat, docs, chore)"
+  echo "                   or 'hotfix' for an urgent production fix (branches from main)"
   echo "  <description>  : A short description of the issue (spaces allowed)"
   echo ""
   echo "Example: scripts/start-issue.sh 239 fix rehearsal proxy apikey"
@@ -27,11 +28,21 @@ BRANCH_NAME="${TYPE}/${ISSUE_NUM}-${KEBAB_DESC}"
 WORKTREE_DIR=".worktrees/issue-${ISSUE_NUM}"
 PR_TITLE="${TYPE}: ${DESC} (#${ISSUE_NUM})"
 
+# Gitflow: work branches start from develop; hotfixes start from main
+# (production) and are back-merged into develop after release.
+if [ "$TYPE" = "hotfix" ]; then
+  BASE_BRANCH="main"
+  PR_TITLE="fix: ${DESC} (#${ISSUE_NUM})"
+else
+  BASE_BRANCH="develop"
+fi
+
 echo "🚀 Starting Issue #$ISSUE_NUM"
 echo "----------------------------------------"
 echo "Type:        $TYPE"
 echo "Description: $DESC"
 echo "Branch:      $BRANCH_NAME"
+echo "Base:        origin/$BASE_BRANCH"
 echo "Worktree:    $WORKTREE_DIR"
 echo "PR Title:    $PR_TITLE"
 echo "----------------------------------------"
@@ -42,8 +53,9 @@ if [ -d "$WORKTREE_DIR" ]; then
   exit 1
 fi
 
-echo "🌳 Creating git worktree and branch..."
-git worktree add -b "$BRANCH_NAME" "$WORKTREE_DIR" main
+echo "🌳 Creating git worktree and branch from origin/$BASE_BRANCH..."
+git fetch origin "$BASE_BRANCH"
+git worktree add --no-track -b "$BRANCH_NAME" "$WORKTREE_DIR" "origin/$BASE_BRANCH"
 
 # 2. Symlink .env.local
 echo "🔗 Symlinking .env.local..."
@@ -67,6 +79,6 @@ echo "To get started:"
 echo "  cd $WORKTREE_DIR"
 echo ""
 echo "💡 Tip: Because we created an empty initial commit with the title '$PR_TITLE',"
-echo "   when you run 'gh pr create --fill-first' to open a PR, GitHub will use that"
+echo "   when you run 'gh pr create --base $BASE_BRANCH --fill-first' to open a PR, GitHub will use that"
 echo "   exact Conventional Commit string for the PR Title!"
 echo "   (Plain '--fill' falls back to the branch name once the branch has multiple commits.)"
