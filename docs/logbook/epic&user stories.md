@@ -1,14 +1,15 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 1.36
+**Version:** 1.37
 **Status:** Living Document
-**Date:** October 8, 2026
+**Date:** October 30, 2026
 
 ## Changelog
 
 | Version | Date | Description of Changes |
 | ----- | ----- | ----- |
 | **1.36** | Oct 08, 2026 | Added Epic 3.6 (Administrative Management) and Story 3.6.1 (User Overview, Details & Contributions) as placeholder for administrative user stories. |
+| **1.37** | Oct 30, 2026 | Marked Story 3.6.1 as implemented; noted that comments/flags are not modelled yet and linked the executable spec `docs/testing/admin-users.feature`. |
 | **1.0** | Dec 25, 2025 | Initial Document Creation. Defined Epics and User Stories for Phases 1-4. |
 | **1.1** | Dec 29, 2025 | Added Story 1.3.3 (Navigation) and aligned UI mockups. |
 | **1.2** | Jan 04, 2026 | Added stories for Dashboard, Category Filtering, Desktop View, and YouTube links based on user feedback. |
@@ -603,7 +604,7 @@ Scenario: Onboarding question
 > **Placeholder & umbrella for administrative user stories.**
 > As an administrator, I want to be able to administer configuration, users, settings, and songs in such a way that I can ensure that I have up-to-date info and can act accordingly.
 
-**Story 3.6.1:** As an Admin, I want to have an overview of all users, view their details, and see their contributions, so that I can monitor community activity and ensure account information is accurate and up to date.
+**Story 3.6.1: [Implemented]** As an Admin, I want to have an overview of all users, view their details, and see their contributions, so that I can monitor community activity and ensure account information is accurate and up to date.
 
 ```gherkin
 Scenario: View user list overview
@@ -624,6 +625,8 @@ Scenario: Non-admin access restricted
   When I attempt to access the Admin Users overview page
   Then I should be denied access with an unauthorized notice
 ```
+
+> **Implementation notes:** "Status" is derived from `last_seen_at` (active within 30 days / inactive / never active). "Musician status" means role `musician` or `expert`. Comments and flags are not modelled in the database yet, so they are not shown. Executable spec: `docs/testing/admin-users.feature` (`@unit`, `@seed`, `@e2e`).
 
 ## Phase 4: Professional Toolkit
 

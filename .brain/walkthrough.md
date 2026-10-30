@@ -1,48 +1,12 @@
-# Walkthrough: Epic 3.6 Administrative Management & Story 3.6.1 (User Overview & Contributions)
+## October 30, 2026 (Part 4) - Story 3.6.1 Review, Bug Fix & Test Pyramid (#258, PR #259)
 
-## Context & Objectives
-Implemented **Epic 3.6 (Administrative Management)** and **Story 3.6.1 (User Overview, Details & Contributions)** in an isolated worktree `.worktrees/feat-userstory-3.6` and branch `feat/userstory-3.6`.
+**Task Overview**
+Reviewed the admin users overview against the Story 3.6.1 acceptance criteria after merging `origin/main` (Cucumber runner #271), fixed a data bug, closed the AC gaps and covered every criterion at the unit, BDD (@unit/@seed) and e2e layers.
 
-## Summary of Changes
-
-### 1. Database & Security
-- **Migration `20261009194500_admin_profiles_policy.sql`**:
-  - `public.fn_is_admin()`: `SECURITY DEFINER` function to check if the caller is an admin in `public.profiles` without triggering recursive RLS evaluation.
-  - Policy `"Admins can read all profiles"` on `public.profiles`.
-  - Policy `"Admins can view all setlists"` on `public.setlists`.
-- **`docs/design/db-schema.sql`**: Updated in sync with the migration.
-
-### 2. Backend & Server Queries
-- **`lib/admin/types.ts`**: Types for user overview records, contribution songs, versions, playlists, and user details.
-- **`lib/admin/serverQueries.ts`**:
-  - `checkAdminAccess()`: Validates current session and checks `profile.role === 'admin'`.
-  - `getAdminUsersList()`: Fetches all profiles with aggregated counts of owned songs, contributed versions, and playlists.
-  - `getAdminUserDetails(userId)`: Fetches a single user's profile and lists of created compositions, song versions, and playlists.
-
-### 3. Admin Pages & Access Control
-- **`app/admin/layout.tsx`**: Server component role guard. Unauthenticated visitors are redirected to `/auth/login?next=/admin/users`; non-admin authenticated users see `AccessDeniedNotice`. Admins see the sticky `AdminHeader` sub-nav and content.
-- **`app/admin/page.tsx`**: Redirects to `/admin/users`.
-- **`app/admin/users/page.tsx` & `components/admin/AdminUsersTable.tsx`**: Users list with search bar, role dropdown, sort selector (recent, top contributors, name), platform summary metrics cards, and user rows with badges and contribution counts.
-- **`app/admin/users/[id]/page.tsx` & `components/admin/AdminUserDetailView.tsx`**: User detail page showing identity details, activity timestamps, and interactive tabs for contributed songs, versions, and playlists.
-- **`components/admin/AccessDeniedNotice.tsx`**: Clean unauthorized page with a return home button.
-
-### 4. Navigation
-- **`components/common/navigation/UserProfile.tsx`**: Shows "Admin Portal" link with `ShieldCheck` icon in the user dropdown for `role === 'admin'`.
-- **`components/common/Sidebar.tsx`**: Adds "Administration" navigation section with a link to `/admin/users` for admin users.
-
-### 5. Verification
-- **Unit Tests**: `lib/unit-tests/adminQueries.test.ts` (7 tests covering role verification, list aggregation, and detail mapping). All 79 tests pass.
-- **TypeScript**: `npx tsc --noEmit` passes with 0 errors.
-- **Next.js Build**: `npm run build` compiles all `/admin` routes successfully.
-- **Artifacts**: Logbook artifacts (`master-tasks.md`, `master-walkthrough.md`, `master-timetracking.md`) updated directly on the feature branch.
-
-## October 30, 2026 (Cucumber Runner Setup for BDD - Issue #263)
-
-### 1. Cucumber & TypeScript Runner Configuration
-- Installed `@cucumber/cucumber` and `tsx` in `package.json` to execute TypeScript step definitions and resolve `@/*` path aliases directly against `tsconfig.json` without browser dependencies.
-- Created `cucumber.json` targeting `docs/testing/song.feature` with `default` (`@unit or @seed`), `unit` (`@unit`), and `seed` (`@seed`) profiles using `strict: false` so pending scenarios in downstream sub-issues (#264, #265) do not fail the runner.
-- Added `test:bdd`, `test:bdd:unit`, and `test:bdd:seed` scripts to `package.json`.
-
-### 2. Support Code & Initial Smoke Step Definitions
-- Created `testing/bdd/support/world.ts` defining `SongBddWorld` for scenario state across BDD steps.
-- Created `testing/bdd/steps/smoke.steps.ts` implementing the Background steps (offline no-op for unit runs), the full step definitions for the first `@unit @chordProParsing` scenario (`Inline chords in square brackets`), and explicit pending stubs for the remaining `@unit` and `@seed` scenarios.
+**Technical Details**
+- **Bug**: `getAdminUserDetails` selected `compositions.artist` and `song_versions.song_id`/`name`, which do not exist (`original_author`, `composition_id`, `version_name`). PostgREST errors were swallowed, so the songs and versions tabs were always empty. The old vi.fn() mocks returned whatever shape the code expected and hid it. Fixed, and errors are now logged.
+- **Refactor**: `lib/admin/userQueries.ts` takes the Supabase client as a parameter (used by vitest, Cucumber and `serverQueries.ts`); `lib/admin/userOverview.ts` holds activity status (30-day window), role labels, musician status (`musician`/`expert`), search/filter/sort and totals.
+- **AC gaps closed**: per-user status in the list, `expert` role badge + "Musician / Expert" filter, musician status and activity status on the detail page, public playlist counts, "No registered users yet" vs "No users found" empty states, `app/admin/users/[id]/not-found.tsx`.
+- **Test double**: `testing/support/fakeSupabase.ts` validates selected columns against the real table shapes (PostgREST 42703 on unknown columns); a @seed scenario checks those shapes against `information_schema` so the fake cannot drift.
+- **Tests**: 48 vitest tests (`testing/unit/tests/admin*.test.ts`), 20 Cucumber scenarios (`docs/testing/admin-users.feature`: access by role, no session, `fn_is_admin()`, RLS on private playlists in a rolled-back transaction, overview, status, counts, search/filter/sort, details, contributions, unknown id), Playwright `e2e/tests/admin-users.spec.ts` (24 passed, 2 skipped on mobile).
+- **Findings outside scope**: guests are redirected by `proxy.ts` to `/auth/login?message=…` (no `next`), so the layout's `next=/admin/users` redirect is unreachable; `notFound()` renders with HTTP 200 because `app/loading.tsx` streams; bare `vitest run` (`npm test`) also collects Playwright specs; `@types/pg` is missing.

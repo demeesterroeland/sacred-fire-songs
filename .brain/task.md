@@ -1,40 +1,13 @@
-# Task: Implement Epic 3.6 - Administrative Management (#257) & Story 3.6.1 (#258)
+# Task: Story 3.6.1 review + test pyramid alignment (#258, PR #259)
 
-- [x] **Step 1: Discovery & Environment Setup**
-  - [x] Analyze codebase, schema, auth, and navigation
-  - [x] Create branch `feat/userstory-3.6` and worktree `.worktrees/feat-userstory-3.6`
-  - [x] Symlink `node_modules` into worktree
-  - [x] Commit documentation updates (`epic&user stories.md`, `application-analysis&design.md`)
-- [x] **Step 2: Step-by-Step Planning**
-  - [x] Draft implementation plan (`docs/plans/2026-10-08-epic-3.6-admin-users.md`)
-  - [x] Align with user on implementation plan (User approved)
-- [x] **Step 3: Context Assembly**
-  - [x] Gather DB schema, RLS policies, existing queries, and layout structures
-- [x] **Step 4: Implementation**
-  - [x] **Database / RLS**: Add migration `20261009194500_admin_profiles_policy.sql` (`fn_is_admin()`, policies on profiles & setlists)
-  - [x] **Single-File Setup**: Update `docs/design/db-schema.sql` with new functions and policies
-  - [x] **Backend Queries & Types**: Implement `lib/admin/types.ts` and `lib/admin/serverQueries.ts` (`checkAdminAccess`, `getAdminUsersList`, `getAdminUserDetails`)
-  - [x] **Admin Routing & Layout**: Create `app/admin/layout.tsx` (server-side role guard, `AccessDeniedNotice` fallback) and `app/admin/page.tsx`
-  - [x] **Admin Users Overview**: Create `app/admin/users/page.tsx` and `AdminUsersTable.tsx` with search, role filters, sorting, and metrics
-  - [x] **User Details & Contributions**: Create `app/admin/users/[id]/page.tsx` and `AdminUserDetailView.tsx` with tabs for created songs, versions, and playlists
-  - [x] **Navigation Integration**: Add Admin link in `UserProfile` dropdown (visible only to `role === 'admin'`) and `Sidebar.tsx`
-- [x] **Step 5: Verification**
-  - [x] Unit tests for admin queries / logic (`lib/unit-tests/adminQueries.test.ts` — 7 tests pass)
-  - [x] All test suites pass (11 files, 79 tests)
-  - [x] TypeScript check passes (`npx tsc --noEmit` — 0 errors)
-  - [x] Build check passes (`npm run build` — compiles all `/admin` routes)
-- [x] **Step 6: Self-Correction**
-  - [x] Fixed non-null assertion in `artistNormalization.test.ts` and type casting in `queries.test.ts`
-- [x] **Step 7: Finalization**
-  - [x] Update logbook artifacts (`master-tasks.md`, `master-walkthrough.md`, `master-timetracking.md`) directly on feature branch
-  - [x] Prepare completion summary for user
-
-# Task: Set up Cucumber runner and TypeScript test execution for BDD (#263)
-
-- [x] Create isolated git worktree `.worktrees/issue-263` on branch `chore/263-cucumber-runner` from `chore/move-song-collection-out`.
-- [x] Install `@cucumber/cucumber` and `tsx` as devDependencies in `package.json`.
-- [x] Create `cucumber.json` targeting `docs/testing/song.feature` with `default` (`@unit or @seed`), `unit` (`@unit`), and `seed` (`@seed`) profiles.
-- [x] Configure Cucumber support code and custom World in `testing/bdd/support/world.ts`.
-- [x] Wire smoke step definitions for the initial `@unit @chordProParsing` scenario ("Inline chords in square brackets") and pending stubs for remaining `@unit` (#264) and `@seed` (#265) scenarios in `testing/bdd/steps/smoke.steps.ts`.
-- [x] Add `test:bdd`, `test:bdd:unit`, and `test:bdd:seed` npm scripts in `package.json`.
-- [x] Verify `npm run test:unit`, `npm run test:bdd`, and `npm run build` succeed cleanly in under 10 seconds (BDD runner executes in ~0.15s).
+- [x] Merge `origin/main` (song collection move #269, git guide #260, Cucumber runner #271) into `feat/userstory-3.6`; resolve logbook/.brain/design-doc conflicts by combining both sides
+- [x] Review the implementation against the Story 3.6.1 acceptance criteria
+- [x] Fix the user detail query: `compositions.artist` → `original_author`, `song_versions.song_id`/`name` → `composition_id`/`version_name` (contribution tabs were always empty); log query errors
+- [x] Add per-user activity status, `expert` role (musician status), public playlist counts, "Musician / Expert" filter, separate empty states, `User Not Found` page, accessible tabs/list/account-menu labels
+- [x] Extract `lib/admin/userOverview.ts` (pure helpers) and `lib/admin/userQueries.ts` (client-injected queries); `serverQueries.ts` becomes a thin wrapper
+- [x] TDD: `testing/unit/tests/adminUserOverview.test.ts` + `adminQueries.test.ts` (moved from `lib/unit-tests`), 48 tests, against the schema-checking `testing/support/fakeSupabase.ts`
+- [x] Gherkin `docs/testing/admin-users.feature` (@unit/@seed/@e2e, @adminUsers) registered in `cucumber.json`
+- [x] Cucumber steps `testing/bdd/steps/admin-users.steps.ts` + `testing/bdd/support/db.ts` (20 scenarios pass)
+- [x] Playwright `e2e/tests/admin-users.spec.ts` (24 passed, 2 skipped on mobile)
+- [x] Apply migration `20261009194500` to the local Supabase stack
+- [x] Doc sync: design doc v1.36, epic & user stories v1.37, e2e overview v1.5
