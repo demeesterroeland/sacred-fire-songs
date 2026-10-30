@@ -1,0 +1,53 @@
+{
+  "default": {
+    "paths": [
+      "docs/testing/song.feature"
+    ],
+    "import": [
+      "testing/bdd/support/**/*.ts",
+      "testing/bdd/steps/**/*.ts"
+    ],
+    "tags": "@unit or @seed",
+    "format": [
+      "summary"
+    ],
+    "formatOptions": {
+      "snippetInterface": "async-await"
+    },
+    "strict": false
+  },
+  "unit": {
+    "paths": [
+      "docs/testing/song.feature"
+    ],
+    "import": [
+      "testing/bdd/support/**/*.ts",
+      "testing/bdd/steps/**/*.ts"
+    ],
+    "tags": "@unit",
+    "format": [
+      "summary"
+    ],
+    "formatOptions": {
+      "snippetInterface": "async-await"
+    },
+    "strict": false
+  },
+  "seed": {
+    "paths": [
+      "docs/testing/song.feature"
+    ],
+    "import": [
+      "testing/bdd/support/**/*.ts",
+      "testing/bdd/steps/**/*.ts"
+    ],
+    "tags": "@seed",
+    "format": [
+      "summary"
+    ],
+    "formatOptions": {
+      "snippetInterface": "async-await"
+    },
+    "strict": false
+  }
+}
