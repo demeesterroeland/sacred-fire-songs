@@ -1,4 +1,5 @@
-export type UserRole = 'admin' | 'gatekeeper' | 'musician' | 'member' | 'guest';
+/** Mirrors the `user_role` enum in the database. `expert` is the seeded musician account role. */
+export type UserRole = 'admin' | 'gatekeeper' | 'expert' | 'musician' | 'member';
 
 export interface AdminUserSummary {
   id: string;
@@ -11,6 +12,7 @@ export interface AdminUserSummary {
   songs_count: number;
   versions_count: number;
   playlists_count: number;
+  public_playlists_count: number;
 }
 
 export interface AdminUserContributionSong {
@@ -24,7 +26,7 @@ export interface AdminUserContributionVersion {
   id: string;
   song_id: string;
   song_title: string;
-  name: string;
+  name: string | null;
   created_at: string;
 }
 

@@ -3,20 +3,17 @@
 import { useState, useMemo } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { Search, Users, Music, ListMusic, FileText, ChevronRight, Shield } from 'lucide-react';
+import type { AdminUserSummary } from '@/lib/admin/types';
 import {
-  Search,
-  Users,
-  Music,
-  ListMusic,
-  FileText,
-  ChevronRight,
-  Shield,
-  ArrowUpDown,
-  UserCheck,
-  Calendar,
-  Clock,
-} from 'lucide-react';
-import type { AdminUserSummary, UserRole } from '@/lib/admin/types';
+  ACTIVE_WINDOW_DAYS,
+  filterAndSortUsers,
+  getActivityStatus,
+  summarizeUsers,
+  type AdminRoleFilter,
+  type AdminUserSort,
+} from '@/lib/admin/userOverview';
+import { ActivityStatusBadge, RoleBadge } from './AdminBadges';
 
 interface AdminUsersTableProps {
   initialUsers: AdminUserSummary[];
@@ -24,87 +21,15 @@ interface AdminUsersTableProps {
 
 export default function AdminUsersTable({ initialUsers }: AdminUsersTableProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedRole, setSelectedRole] = useState<string>('all');
-  const [sortBy, setSortBy] = useState<'joined' | 'contributions' | 'name'>('joined');
+  const [selectedRole, setSelectedRole] = useState<AdminRoleFilter>('all');
+  const [sortBy, setSortBy] = useState<AdminUserSort>('joined');
 
-  // Compute summary stats
-  const stats = useMemo(() => {
-    const totalUsers = initialUsers.length;
-    const totalSongs = initialUsers.reduce((acc, u) => acc + u.songs_count, 0);
-    const totalPlaylists = initialUsers.reduce((acc, u) => acc + u.playlists_count, 0);
-    const privilegedUsers = initialUsers.filter(
-      (u) => u.role === 'admin' || u.role === 'gatekeeper'
-    ).length;
+  const stats = useMemo(() => summarizeUsers(initialUsers), [initialUsers]);
 
-    return { totalUsers, totalSongs, totalPlaylists, privilegedUsers };
-  }, [initialUsers]);
-
-  // Filter and sort users
-  const filteredUsers = useMemo(() => {
-    return initialUsers
-      .filter((user) => {
-        const matchesQuery =
-          searchQuery.trim() === '' ||
-          user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          (user.full_name && user.full_name.toLowerCase().includes(searchQuery.toLowerCase()));
-
-        const matchesRole =
-          selectedRole === 'all' || user.role.toLowerCase() === selectedRole.toLowerCase();
-
-        return matchesQuery && matchesRole;
-      })
-      .sort((a, b) => {
-        if (sortBy === 'joined') {
-          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
-        }
-        if (sortBy === 'contributions') {
-          const totalA = a.songs_count + a.versions_count + a.playlists_count;
-          const totalB = b.songs_count + b.versions_count + b.playlists_count;
-          return totalB - totalA;
-        }
-        if (sortBy === 'name') {
-          const nameA = a.full_name || a.email;
-          const nameB = b.full_name || b.email;
-          return nameA.localeCompare(nameB);
-        }
-        return 0;
-      });
-  }, [initialUsers, searchQuery, selectedRole, sortBy]);
-
-  const getRoleBadge = (role: UserRole) => {
-    switch (role) {
-      case 'admin':
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-purple-100 text-purple-700 dark:bg-purple-950/80 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
-            <Shield className="w-3 h-3" /> Admin
-          </span>
-        );
-      case 'gatekeeper':
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-700 dark:bg-amber-950/80 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
-            <UserCheck className="w-3 h-3" /> Gatekeeper
-          </span>
-        );
-      case 'musician':
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-            Musician
-          </span>
-        );
-      case 'member':
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-950/80 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
-            Member
-          </span>
-        );
-      default:
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
-            {role}
-          </span>
-        );
-    }
-  };
+  const filteredUsers = useMemo(
+    () => filterAndSortUsers(initialUsers, { query: searchQuery, role: selectedRole, sortBy }),
+    [initialUsers, searchQuery, selectedRole, sortBy]
+  );
 
   const formatDate = (isoString?: string | null) => {
     if (!isoString) return 'Never';
@@ -126,6 +51,9 @@ export default function AdminUsersTable({ initialUsers }: AdminUsersTableProps) 
           </div>
           <div className="text-2xl font-black text-gray-900 dark:text-white">
             {stats.totalUsers}
+          </div>
+          <div className="text-[11px] text-gray-400 mt-0.5">
+            {stats.activeUsers} active in last {ACTIVE_WINDOW_DAYS} days
           </div>
         </div>
 
@@ -168,6 +96,7 @@ export default function AdminUsersTable({ initialUsers }: AdminUsersTableProps) 
           <input
             type="text"
             placeholder="Search users by name or email..."
+            aria-label="Search users"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
@@ -178,19 +107,21 @@ export default function AdminUsersTable({ initialUsers }: AdminUsersTableProps) 
         <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0">
           <select
             value={selectedRole}
-            onChange={(e) => setSelectedRole(e.target.value)}
+            onChange={(e) => setSelectedRole(e.target.value as AdminRoleFilter)}
+            aria-label="Filter by role"
             className="px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500"
           >
             <option value="all">All Roles</option>
             <option value="admin">Admin</option>
             <option value="gatekeeper">Gatekeeper</option>
             <option value="member">Member</option>
-            <option value="musician">Musician</option>
+            <option value="musician">Musician / Expert</option>
           </select>
 
           <select
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as 'joined' | 'contributions' | 'name')}
+            onChange={(e) => setSortBy(e.target.value as AdminUserSort)}
+            aria-label="Sort users"
             className="px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500"
           >
             <option value="joined">Sort: Recently Joined</option>
@@ -211,17 +142,23 @@ export default function AdminUsersTable({ initialUsers }: AdminUsersTableProps) 
         {filteredUsers.length === 0 ? (
           <div className="p-12 text-center text-gray-500 dark:text-gray-400">
             <Users className="w-12 h-12 mx-auto mb-3 opacity-30" />
-            <p className="text-base font-semibold">No users found</p>
-            <p className="text-xs mt-1">Try adjusting your search query or role filter.</p>
+            {initialUsers.length === 0 ? (
+              <p className="text-base font-semibold">No registered users yet</p>
+            ) : (
+              <>
+                <p className="text-base font-semibold">No users found</p>
+                <p className="text-xs mt-1">Try adjusting your search query or role filter.</p>
+              </>
+            )}
           </div>
         ) : (
-          <div className="divide-y divide-gray-100 dark:divide-gray-800">
+          <ul aria-label="Registered users" className="divide-y divide-gray-100 dark:divide-gray-800">
             {filteredUsers.map((user) => {
               const displayName = user.full_name || user.email.split('@')[0];
               const initials = displayName.substring(0, 2).toUpperCase();
 
               return (
-                <div
+                <li
                   key={user.id}
                   className="p-4 md:px-6 hover:bg-gray-50/70 dark:hover:bg-gray-800/40 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-4"
                 >
@@ -246,7 +183,7 @@ export default function AdminUsersTable({ initialUsers }: AdminUsersTableProps) 
                         <span className="font-bold text-sm text-gray-900 dark:text-white truncate">
                           {displayName}
                         </span>
-                        {getRoleBadge(user.role)}
+                        <RoleBadge role={user.role} />
                       </div>
                       <div className="text-xs text-gray-500 dark:text-gray-400 truncate">
                         {user.email}
@@ -287,26 +224,25 @@ export default function AdminUsersTable({ initialUsers }: AdminUsersTableProps) 
                     </div>
 
                     {/* Join Date */}
-                    <div className="hidden lg:flex flex-col text-right text-[11px] text-gray-400">
+                    <div className="flex flex-col items-end text-right text-[11px] text-gray-400">
+                      <ActivityStatusBadge status={getActivityStatus(user.last_seen_at)} />
                       <span>Joined {formatDate(user.created_at)}</span>
-                      {user.last_seen_at && (
-                        <span>Active {formatDate(user.last_seen_at)}</span>
-                      )}
                     </div>
 
                     {/* View Details Link */}
                     <Link
                       href={`/admin/users/${user.id}`}
+                      aria-label={`View details for ${displayName}`}
                       className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-purple-100 dark:hover:bg-purple-950/60 text-gray-700 dark:text-gray-300 hover:text-purple-700 dark:hover:text-purple-300 font-semibold transition-all active:scale-95"
                     >
                       <span>Details</span>
                       <ChevronRight className="w-3.5 h-3.5" />
                     </Link>
                   </div>
-                </div>
+                </li>
               );
             })}
-          </div>
+          </ul>
         )}
       </div>
     </div>

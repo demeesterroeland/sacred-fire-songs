@@ -1,7 +1,8 @@
 {
   "default": {
     "paths": [
-      "docs/testing/song.feature"
+      "docs/testing/song.feature",
+      "docs/testing/admin-users.feature"
     ],
     "import": [
       "testing/bdd/support/**/*.ts",
@@ -18,7 +19,8 @@
   },
   "unit": {
     "paths": [
-      "docs/testing/song.feature"
+      "docs/testing/song.feature",
+      "docs/testing/admin-users.feature"
     ],
     "import": [
       "testing/bdd/support/**/*.ts",
@@ -35,7 +37,8 @@
   },
   "seed": {
     "paths": [
-      "docs/testing/song.feature"
+      "docs/testing/song.feature",
+      "docs/testing/admin-users.feature"
     ],
     "import": [
       "testing/bdd/support/**/*.ts",

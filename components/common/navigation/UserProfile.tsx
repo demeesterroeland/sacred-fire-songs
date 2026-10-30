@@ -85,6 +85,8 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true, init
       {/* Trigger */}
       <button
         onClick={() => setIsOpen(!isOpen)}
+        aria-label="Account menu"
+        aria-expanded={isOpen}
         className="flex items-center gap-2 px-3 py-2 rounded-full bg-gray-200/80 dark:bg-gray-800/80 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors active:scale-95 group border border-transparent hover:border-gray-400 dark:hover:border-gray-600"
       >
         <div className="w-[26px] h-[26px] rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-[10px] font-bold text-white shadow-inner overflow-hidden shrink-0 relative">
