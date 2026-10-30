@@ -2908,3 +2908,15 @@ Moved the ChordPro song collection out of the app repository into the sibling re
 - **History-preserving export**: Ran `git filter-repo` on a fresh clone with `--path data --path doc/extracted_songs --path scripts/prod_songs_2_pdf.py --path scripts/compile_songbook.py` and renamed `data/` to the root. Result: 18 commits, 357 files, laid out as `songs/`, `extracted_songs/` and `scripts/` (import scripts, legacy SQL and both Python songbook tools together).
 - **Collection repo**: Pulled the export into the empty `main` of `../sacred-fire-songs-collection`, fixed `import_my_songs.js` (`../songs`) and `prod_songs_2_pdf.py` (`extracted_songs/production_db`), and added a `README.md` and `.gitignore`. Committed locally, not pushed.
 - **App repo**: On `chore/move-song-collection-out`, removed `data/` and the two Python scripts (359 files, 11,620 lines), dropped the three collection-specific `.gitignore` blocks, and bumped the design doc to v1.33. `npx vitest run testing/unit lib` passes (55 files, 385 tests).
+
+## October 30, 2026 (Part 2) - Seeded Songs Out, Seeder Coverage, song.feature
+
+**Task Overview**
+Removed the last real song content from the app repository (the 221 songs in the SQL seeds), made the random seeder the only seeding path, extended it to produce every song shape the tests exercise, and documented those shapes as a Gherkin feature file.
+
+**Technical Details**
+- **Seeds**: `03_songs_initial.sql` (42 songs) and `04_songs_nina_urku.sql` (179 songs) plus the title-bound follow-up seeds 05–10 were exported with `git filter-repo` (27 commits, including the old `supabase/seed.sql`) and merged into the collection repo as `seeds/`. Only `01_auth_users.sql` and `02_profiles.sql` remain here.
+- **setup-test-db.mjs**: the `E2E_RANDOM_SEED` branch is gone; the script always loads the two account seeds and then `seedRandomData()`. The e2e workflow and both copies of `performance.spec.ts` were cleaned of the flag and of the hard-coded 179/221 demo counts.
+- **random-seeder.mjs**: anchors are defined as JS objects and passed to PL/pgSQL as JSONB; helper functions in `pg_temp` mirror `parseArtists`/`ensureArtistCategoryIds`, add recordings, tags, favorites and `song_views`. The newest song (`Morning Sunrise`) has no recordings so the member recording flow yields a pill count of 1; `Danza del Cielo Curandero` keeps the media URLs the specs mock. Random songs draw from seven weighted ChordPro templates, multi-artist/messy/empty/null authors, all four owner roles, varied media URLs, ABC notation, second versions, `.webm`/`.wav` recordings for every user, and `created_at` spread over 400 days.
+- **Validation**: dry runs inside `BEGIN … ROLLBACK` against the local Supabase stack: 80 songs → 86 versions, 1 composition without version, 0 `has_chords` mismatches, 25 artist categories, 10 playlists, recordings for all four users; 1000 songs in 332 ms. Unit suite: 385 tests pass. Playwright was not run (it truncates the local DB).
+- **Docs**: `docs/testing/song.feature` v1.0, design doc v1.34, `docs/testing/e2e-test-overview.md`, `e2e/README.md`.

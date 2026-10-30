@@ -1203,3 +1203,13 @@
 - [x] Drop the collection-specific `.gitignore` rules; keep test fixtures (`supabase/seeds`, `lib/unit-tests`, `testing/unit/tests`, `e2e/fixtures`)
 - [x] Bump `application-analysis&design.md` to v1.33 and run the unit suite (385 passed)
 - [ ] Push `sacred-fire-songs-collection` to its GitHub origin and merge the branch (awaiting user)
+
+## Session October 30, 2026 (Part 2: Seeded Songs Out, Seeder Coverage, song.feature)
+- [x] Move `supabase/seeds/03_*.sql` … `10_*.sql` (221 songs + dependent tags/playlists/recordings seeds) to `sacred-fire-songs-collection/seeds/` with history
+- [x] `setup-test-db.mjs`: always seed accounts + random songs; retire `E2E_RANDOM_SEED` (workflow, performance specs)
+- [x] Catalogue every song situation in unit, e2e and manual tests
+- [x] Rewrite `scripts/random-seeder.mjs`: 20 anchor songs + weighted random templates, artists, versions, recordings per user, favorites, song_views, fixed playlist ids
+- [x] Validate seeder in a rolled-back transaction at 10 / 80 / 1000 songs (54 ms for 80, 332 ms for 1000)
+- [x] Write `docs/testing/song.feature` (Gherkin catalogue)
+- [x] Update design doc (v1.34), e2e overview, e2e README
+- [ ] Run the Playwright suite against the new seeder (not run in this session: it wipes the local database)
