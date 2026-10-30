@@ -11,6 +11,7 @@ import {
     getPlaylistSongsForExport,
 } from '@/app/actions/playlistActions';
 import { exportPlaylistToPdf, downloadPdf } from '@/lib/export/pdfExport';
+import { browserPdfStore, exportFingerprint, getOrCreatePdf, pdfCacheKey } from '@/lib/export/pdfCache';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { usePlaylistRename } from '@/hooks/usePlaylistRename';
@@ -146,12 +147,21 @@ export function PlaylistDetailHeader({
             }
 
             const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
-            const blob = await exportPlaylistToPdf({
+            const exportData = {
                 title: result.title || optimisticTitle,
                 description: optimisticDesc || result.description,
                 songs: result.songs,
                 baseUrl,
                 locale,
+            };
+
+            // Reuse the last PDF while the playlist is unchanged (#304).
+            const userId = result.userId ?? 'anonymous';
+            const { blob } = await getOrCreatePdf({
+                store: browserPdfStore(),
+                key: pdfCacheKey(userId, playlistId),
+                fingerprint: await exportFingerprint({ ...exportData, userId, playlistId }),
+                generate: () => exportPlaylistToPdf(exportData),
             });
 
             downloadPdf(blob, result.title || optimisticTitle);
