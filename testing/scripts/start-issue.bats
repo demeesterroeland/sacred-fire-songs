@@ -14,7 +14,7 @@ setup() {
   git init -q --bare -b main "$TMP/origin.git"
   git clone -q "$TMP/origin.git" "$TMP/seed" 2>/dev/null
   (
-    cd "$TMP/seed"
+    cd "$TMP/seed" || exit 1
     git commit -q --allow-empty -m "chore: initial"
     git push -q origin HEAD:main
     git switch -q -c develop
@@ -25,7 +25,7 @@ setup() {
   DEVELOP_SHA="$(git -C "$TMP/origin.git" rev-parse develop)"
 
   git clone -q "$TMP/origin.git" "$TMP/repo" 2>/dev/null
-  cd "$TMP/repo"
+  cd "$TMP/repo" || return 1
 }
 
 teardown() {

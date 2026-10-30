@@ -109,4 +109,6 @@
 
 | **October 30, 2026 (Part 10)** | **CI-CD/Testing (#287)**: Gitflow Phase 0 harness — workflow contract helper, Vitest contract tests, Cucumber `ci` profile, bats tests for `start-issue.sh`, lint/typecheck scripts and baseline. | ~1.0 Hours | ✅ Completed |
 
-| **Total** | **Development + AI Collaboration** | **~190.75 Hours** | |
+| **October 31, 2026** | **CI-CD (#282)**: Gitflow Phase 1 — `ci.yml` quality gate, lint ratchet, single unit-test tree, SHA-pinned actions, Dependabot; E2E Supabase stack drafted in cloud-infra #106 (deferred). | ~2.5 Hours | ✅ Completed |
+
+| **Total** | **Development + AI Collaboration** | **~193.25 Hours** | |

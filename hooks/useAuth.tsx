@@ -94,6 +94,7 @@ export const useAuth = (initialUser: AuthUser | null = null) => {
         // If we didn't get a server user, or if we want to guarantee the profile is fresh, 
         // we can still trigger a background load, but it won't block or flash.
         if (!initialUser) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional sync of local state with props/route; refactor tracked separately (Epic 5.1 lint ratchet)
             loadUser(signal);
         }
 

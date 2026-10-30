@@ -1,8 +1,8 @@
 # E2E Test Overview & Matrix: Sacred Fire Songs
 
-**Version:** 1.8
+**Version:** 1.9
 **Status:** Living Document
-**Date:** Oct 30, 2026
+**Date:** Oct 31, 2026
 **Tracking:** GH #142
 
 ## Changelog
@@ -18,6 +18,7 @@
 | **1.6** | Oct 30, 2026 | Added ACC-07 (interface language, Story 3.7.1 / #246) covered by `e2e/tests/i18n.spec.ts`; scenarios catalogued in `docs/testing/i18n.feature`. |
 | **1.7** | Oct 30, 2026 | ACC-07 extended to eight languages (I18N-12). |
 | **1.8** | Oct 30, 2026 | Added ADMIN-08 (remembered sort, #278) and ADMIN-09 (clickable user rows, #279); ADMIN-05 now drives the listbox-style role picker. |
+| **1.9** | Oct 31, 2026 | Unit tests now live only in `testing/unit/tests/` (`lib/unit-tests/` removed, Epic 5.1 Story 5.1.3); stale Playwright copies in `testing/e2e/tests/` removed — specs live in `e2e/`. |
 
 ---
 
@@ -30,11 +31,11 @@ It is a **living document**: keep it aligned with `docs/logbook/epic&user storie
 ### Scope
 
 - **In scope:** browser-level user workflows across all features (auth, song management, library/discovery, viewer, playlists, favorites, gatekeeper tools, account/settings, navigation, PWA), including role variants and edge cases.
-- **Out of scope (covered elsewhere):** pure unit logic already tested by **vitest** in `lib/unit-tests/` (ChordPro parsing, chord utils, query mappers, Zod schemas, guest-favorites logic, playlist action logic). E2E should not duplicate these; it should exercise the *integrated* flow through the UI.
+- **Out of scope (covered elsewhere):** pure unit logic already tested by **vitest** in `testing/unit/tests/` (ChordPro parsing, chord utils, query mappers, Zod schemas, guest-favorites logic, playlist action logic). E2E should not duplicate these; it should exercise the *integrated* flow through the UI.
 
 ### Current state of testing
 
-- **Unit tests (vitest, v4):** `lib/unit-tests/chordProParsing.test.ts`, `chordUtils.test.ts`, `queries.test.ts`, `songUtils.test.ts`, `playlistActions.test.ts`, `schemas.test.ts`, `useGuestFavorites.test.ts`. Run via `npm test` → `vitest run`.
+- **Unit tests (vitest, v4):** `testing/unit/tests/chordProParsing.test.ts`, `chordUtils.test.ts`, `queries.test.ts`, `songUtils.test.ts`, `playlistActions.test.ts`, `schemas.test.ts`, `useGuestFavorites.test.ts`. Run via `npm test` → `vitest run`.
 - **E2E tests:** **Phase 0 scaffolded** (this branch). Playwright is wired up (`playwright.config.ts`, `e2e/`), with per-role auth setup and a handful of P0 `@smoke` specs. Specs are authored but **not yet verified against a running app + seeded Supabase** — that verification happens once CI (or a dev) runs them. See `e2e/README.md`.
 - **CI:** `.github/workflows/deploy-db.yml` runs Supabase migrations; **`.github/workflows/e2e.yml`** (new) runs the `@smoke` subset against the **staging** Supabase project on every push to `main` / `feat|fix|chore/**`.
 

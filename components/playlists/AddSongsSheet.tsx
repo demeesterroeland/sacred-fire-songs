@@ -35,6 +35,7 @@ export function AddSongsSheet({ playlistId, existingCompositionIds, open, onClos
     // Sync checked state when the caller's list changes (e.g. after page refresh)
     // eslint-disable-next-line react-hooks/set-state-in-effect
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional sync of local state with props/route; refactor tracked separately (Epic 5.1 lint ratchet)
         setAddedIds(new Set(existingCompositionIds));
     }, [existingCompositionIds]);
 
@@ -42,6 +43,7 @@ export function AddSongsSheet({ playlistId, existingCompositionIds, open, onClos
     // eslint-disable-next-line react-hooks/set-state-in-effect
     useEffect(() => {
         if (!open) return;
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional sync of local state with props/route; refactor tracked separately (Epic 5.1 lint ratchet)
         setQuery('');
         setAddedIds(new Set(existingCompositionIds));
     }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -50,6 +52,7 @@ export function AddSongsSheet({ playlistId, existingCompositionIds, open, onClos
     // eslint-disable-next-line react-hooks/set-state-in-effect
     useEffect(() => {
         if (!open) return;
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional sync of local state with props/route; refactor tracked separately (Epic 5.1 lint ratchet)
         setIsSearching(true);
         const timeout = setTimeout(async () => {
             const supabase = createClient();

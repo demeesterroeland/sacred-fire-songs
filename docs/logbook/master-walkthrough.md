@@ -3052,3 +3052,16 @@ Built the harness that lets every later Gitflow story start with a failing test.
 - **bats**: `testing/scripts/start-issue.bats` runs `start-issue.sh` in a throw-away clone with a bare local origin (6 pass, type validation skipped until 2.4).
 - **Static**: `npm run typecheck` clean; `npm run lint` baseline 118 errors (108 `no-explicit-any`) / 128 warnings.
 - **Finding**: `vitest run` also collects the Playwright specs in `e2e/` and `testing/e2e/` (17 files fail to load) → task 1.4.
+
+## October 31, 2026 - Gitflow Phase 1: CI quality gate (#282, PR #310)
+
+**Task Overview**
+Added the fast layers of the test pyramid as required-check candidates and cleaned up the test tree and supply chain. E2E work (Story 5.1.2) was deferred by the owner.
+
+**Technical Details**
+- **`ci.yml`**: jobs `lint`, `typecheck`, `unit`, `bdd`, `build`, `pipeline` on every push and on PRs into `develop`/`main`; all green on both events in PR #310.
+- **Lint ratchet**: `no-explicit-any` → warning, `eslint . --max-warnings 182`; nine intentional patterns (sync `setState` in effects, mutated `<audio>` state, CommonJS `require`) got targeted `eslint-disable-next-line … -- reason` instead of behaviour-changing refactors.
+- **Tests**: `lib/unit-tests/` duplicates differed only in import paths → one tree `testing/unit/tests/`; Vitest `include` stops it from loading Playwright specs; PDF feature wired with pending stubs (undefined steps fail even when non-strict).
+- **Supply chain**: SHA-pinned actions, top-level `permissions`, Dependabot; actionlint/shellcheck run from digest-pinned images.
+- **E2E investigation**: both cloud Supabase projects are paused (why `e2e` was a false green). Owner chose a self-hosted E2E stack: cloud-infra PR #106 (`stacks/songbook-e2e`, Tailscale-only Kong :5003 / Postgres :54324, `init-env.sh` generates secrets on the VPS). Tailscale policy advice: the default `* → *` grant must be narrowed or `tag:ci` gets full tailnet access. Then deferred.
+- **Findings**: `tsconfig.json` excludes `testing/`/`e2e/`; preview server compose drifted from cloud-infra git (`…-app:preview`).

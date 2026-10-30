@@ -62,6 +62,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
       const activeAudio = audioElements[activePlaybackId];
       if (activeAudio) {
         activeAudio.pause();
+        // eslint-disable-next-line react-hooks/immutability -- HTMLAudioElement instances held in state are mutated on purpose to stop playback
         activeAudio.currentTime = 0;
       }
     }

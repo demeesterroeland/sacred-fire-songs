@@ -41,6 +41,7 @@ const clearBrowserCache = async (page: any) => {
 // Get git commit hash
 const getGitCommit = (): string => {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports -- CommonJS-only usage in a dev/test script
     const commit = require('child_process').execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim();
     return commit;
   } catch (error) {
