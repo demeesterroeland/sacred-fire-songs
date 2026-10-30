@@ -1307,3 +1307,15 @@
 - [x] `npm run lint` / `npm run typecheck`; baseline recorded (tsc clean, eslint 118 errors / 128 warnings)
 - [x] Doc sync: plan v1.3, design doc v1.46 (§6.6), testing README
 - [ ] Finding for Phase 1 (task 1.4): `vitest run` also collects Playwright specs in `e2e/` + `testing/e2e/` (17 files fail to load)
+
+## Session October 31, 2026 (Gitflow Phase 1 — CI Quality Gate, #282, PR #310)
+- [x] Merge Phase 0 PR #309 into `develop`
+- [x] Investigate E2E target: cloud staging/prod Supabase projects are paused; owner chose a self-hosted E2E Supabase on bluette → cloud-infra PR #106 (`stacks/songbook-e2e`, Tailscale-only, `init-env.sh`); then owner deferred all E2E work (Story 5.1.2)
+- [x] `ci.yml`: lint (ratchet `--max-warnings 182`), typecheck, unit, bdd, build, pipeline (actionlint, shellcheck, bats, strict `test:bdd:ci-gate`)
+- [x] One unit-test tree `testing/unit/tests/` (removed `lib/unit-tests/`, stale `testing/e2e/tests/`); Vitest `include` restricted (286 tests)
+- [x] Wire `setlist-pdf-export.feature` with pending stubs; `ci-gate` profile (6/6)
+- [x] SHA-pin all actions, top-level permissions, Dependabot → `develop`
+- [x] Fix shellcheck/actionlint findings; ESLint ignores `.worktrees/**`
+- [x] Docs: CLAUDE.md, git-workflow v1.2, e2e overview v1.9, design doc §6.6, plan v1.4, epic stories; issue #288 body aligned with D4
+- [ ] Owner: apply required checks to the `main` ruleset + remove classic protection (blocked for the agent by the permission classifier)
+- [ ] Deferred: Story 5.1.2 (E2E fail-closed, secrets, docker gating), cloud-infra #106 rollout, Tailscale `tag:ci`
