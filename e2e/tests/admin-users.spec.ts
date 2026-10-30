@@ -171,7 +171,7 @@ test.describe('Admin users – details and contributions (AC 2)', () => {
     await expect(page.getByText(PLAYLIST_TITLE, { exact: true })).toBeVisible();
     await expect(page.getByText('Public', { exact: true }).first()).toBeVisible();
 
-    await page.getByRole('link', { name: 'Back to All Users' }).click();
+    await page.getByRole('navigation', { name: 'Breadcrumb' }).getByRole('link', { name: 'Users' }).click();
     await page.waitForURL((url) => url.pathname === '/admin/users');
   });
 

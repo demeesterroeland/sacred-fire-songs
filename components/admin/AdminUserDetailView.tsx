@@ -4,7 +4,6 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import {
-  ArrowLeft,
   Music,
   ListMusic,
   FileText,
@@ -49,20 +48,9 @@ export default function AdminUserDetailView({ user }: AdminUserDetailViewProps) 
   const isMusician = isMusicianRole(user.role);
 
   return (
-    <div className="space-y-6">
-      {/* Top Bar with Back Navigation */}
-      <div>
-        <Link
-          href="/admin/users"
-          className="inline-flex items-center gap-2 text-xs md:text-sm font-semibold text-gray-500 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white transition-colors"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          <span>Back to All Users</span>
-        </Link>
-      </div>
-
+    <div className="space-y-8">
       {/* User Header Profile Card */}
-      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-3xl p-6 md:p-8 shadow-sm">
+      <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white/50 dark:bg-gray-900/30 p-5 md:p-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-5">
             <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-xl md:text-2xl font-bold text-white shadow-lg relative overflow-hidden shrink-0">
@@ -122,117 +110,45 @@ export default function AdminUserDetailView({ user }: AdminUserDetailViewProps) 
         </div>
       </div>
 
-      {/* Contribution Metric Stat Cards */}
-      <div className="grid grid-cols-3 gap-3 md:gap-4">
-        <button
-          type="button"
-          aria-pressed={activeTab === 'songs'}
-          onClick={() => setActiveTab('songs')}
-          className={`p-4 md:p-5 rounded-2xl border text-left transition-all ${
-            activeTab === 'songs'
-              ? 'bg-red-50/50 dark:bg-red-950/30 border-red-200 dark:border-red-900/60 shadow-sm'
-              : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700'
-          }`}
-        >
-          <div className="flex items-center justify-between text-gray-500 dark:text-gray-400 mb-1">
-            <span className="text-xs font-bold uppercase tracking-wider">Songs Created</span>
-            <Music className="w-4 h-4 text-red-500" />
-          </div>
-          <div className="text-2xl md:text-3xl font-black text-gray-900 dark:text-white">
-            {songs.length}
-          </div>
-        </button>
-
-        <button
-          type="button"
-          aria-pressed={activeTab === 'versions'}
-          onClick={() => setActiveTab('versions')}
-          className={`p-4 md:p-5 rounded-2xl border text-left transition-all ${
-            activeTab === 'versions'
-              ? 'bg-amber-50/50 dark:bg-amber-950/30 border-amber-200 dark:border-amber-900/60 shadow-sm'
-              : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700'
-          }`}
-        >
-          <div className="flex items-center justify-between text-gray-500 dark:text-gray-400 mb-1">
-            <span className="text-xs font-bold uppercase tracking-wider">Versions Contributed</span>
-            <FileText className="w-4 h-4 text-amber-500" />
-          </div>
-          <div className="text-2xl md:text-3xl font-black text-gray-900 dark:text-white">
-            {versions.length}
-          </div>
-        </button>
-
-        <button
-          type="button"
-          aria-pressed={activeTab === 'playlists'}
-          onClick={() => setActiveTab('playlists')}
-          className={`p-4 md:p-5 rounded-2xl border text-left transition-all ${
-            activeTab === 'playlists'
-              ? 'bg-blue-50/50 dark:bg-blue-950/30 border-blue-200 dark:border-blue-900/60 shadow-sm'
-              : 'bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700'
-          }`}
-        >
-          <div className="flex items-center justify-between text-gray-500 dark:text-gray-400 mb-1">
-            <span className="text-xs font-bold uppercase tracking-wider">Playlists Created</span>
-            <ListMusic className="w-4 h-4 text-blue-500" />
-          </div>
-          <div className="text-2xl md:text-3xl font-black text-gray-900 dark:text-white">
-            {playlists.length}
-          </div>
-          <div className="text-[11px] text-gray-400 mt-0.5">{publicPlaylistsCount} public</div>
-        </button>
-      </div>
-
       {/* Contribution Details Tab Content */}
-      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-3xl shadow-sm overflow-hidden">
-        {/* Tab Headers */}
-        <div role="tablist" aria-label="Contributions" className="flex border-b border-gray-200 dark:border-gray-800 px-6 pt-4 gap-6">
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === 'songs'}
-            onClick={() => setActiveTab('songs')}
-            className={`pb-3 text-sm font-bold border-b-2 transition-all flex items-center gap-2 ${
-              activeTab === 'songs'
-                ? 'border-red-500 text-red-600 dark:text-red-400'
-                : 'border-transparent text-gray-500 hover:text-gray-900 dark:hover:text-white'
-            }`}
-          >
-            <Music className="w-4 h-4" />
-            <span>Songs ({songs.length})</span>
-          </button>
-
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === 'versions'}
-            onClick={() => setActiveTab('versions')}
-            className={`pb-3 text-sm font-bold border-b-2 transition-all flex items-center gap-2 ${
-              activeTab === 'versions'
-                ? 'border-amber-500 text-amber-600 dark:text-amber-400'
-                : 'border-transparent text-gray-500 hover:text-gray-900 dark:hover:text-white'
-            }`}
-          >
-            <FileText className="w-4 h-4" />
-            <span>Versions ({versions.length})</span>
-          </button>
-
-          <button
-            type="button"
-            role="tab"
-            aria-selected={activeTab === 'playlists'}
-            onClick={() => setActiveTab('playlists')}
-            className={`pb-3 text-sm font-bold border-b-2 transition-all flex items-center gap-2 ${
-              activeTab === 'playlists'
-                ? 'border-blue-500 text-blue-600 dark:text-blue-400'
-                : 'border-transparent text-gray-500 hover:text-gray-900 dark:hover:text-white'
-            }`}
-          >
-            <ListMusic className="w-4 h-4" />
-            <span>Playlists ({playlists.length})</span>
-          </button>
+      <section>
+        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">Contributions</p>
+        {/* Pill tabs, same style as app/library/LibraryTabs.tsx */}
+        <div
+          role="tablist"
+          aria-label="Contributions"
+          className="flex gap-2 overflow-x-auto scrollbar-none pb-1 mb-4 -mx-4 px-4 md:mx-0 md:px-0"
+        >
+          {(
+            [
+              { key: 'songs', label: `Songs (${songs.length})`, icon: Music },
+              { key: 'versions', label: `Versions (${versions.length})`, icon: FileText },
+              {
+                key: 'playlists',
+                label: `Playlists (${playlists.length} · ${publicPlaylistsCount} public)`,
+                icon: ListMusic,
+              },
+            ] as const
+          ).map(({ key, label, icon: Icon }) => (
+            <button
+              key={key}
+              type="button"
+              role="tab"
+              aria-selected={activeTab === key}
+              onClick={() => setActiveTab(key)}
+              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-bold transition-all whitespace-nowrap shrink-0 ${
+                activeTab === key
+                  ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-950'
+                  : 'bg-gray-200/80 dark:bg-gray-800/80 text-gray-500 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white border border-gray-300/50 dark:border-gray-700/50'
+              }`}
+            >
+              <Icon className="w-3.5 h-3.5" />
+              {label}
+            </button>
+          ))}
         </div>
 
+        <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white/50 dark:bg-gray-900/30 overflow-hidden">
         {/* Tab Panel: Songs */}
         {activeTab === 'songs' && (
           <div className="p-6">
@@ -365,7 +281,8 @@ export default function AdminUserDetailView({ user }: AdminUserDetailViewProps) 
             )}
           </div>
         )}
-      </div>
+        </div>
+      </section>
     </div>
   );
 }

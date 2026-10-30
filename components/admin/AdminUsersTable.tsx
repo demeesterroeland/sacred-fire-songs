@@ -41,55 +41,69 @@ export default function AdminUsersTable({ initialUsers }: AdminUsersTableProps) 
   };
 
   return (
-    <div className="space-y-6">
-      {/* Metric Stat Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 shadow-sm">
-          <div className="flex items-center justify-between text-gray-500 dark:text-gray-400 mb-2">
-            <span className="text-xs font-bold uppercase tracking-wider">Total Users</span>
-            <Users className="w-4 h-4 text-purple-500" />
-          </div>
-          <div className="text-2xl font-black text-gray-900 dark:text-white">
-            {stats.totalUsers}
-          </div>
-          <div className="text-[11px] text-gray-400 mt-0.5">
-            {stats.activeUsers} active in last {ACTIVE_WINDOW_DAYS} days
-          </div>
+    <div className="space-y-8">
+      {/* Summary cards (same style as components/home/LibrarySummary.tsx) */}
+      <section>
+        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">Overview</p>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          {[
+            {
+              label: `Users · ${stats.activeUsers} active`,
+              title: `${stats.activeUsers} active in the last ${ACTIVE_WINDOW_DAYS} days`,
+              value: stats.totalUsers,
+              icon: Users,
+              color: 'text-violet-400',
+              bg: 'bg-violet-500/10',
+              border: 'border-violet-500/20',
+            },
+            {
+              label: 'Songs created',
+              title: 'Songs created',
+              value: stats.totalSongs,
+              icon: Music,
+              color: 'text-rose-400',
+              bg: 'bg-rose-500/10',
+              border: 'border-rose-500/20',
+            },
+            {
+              label: 'Playlists created',
+              title: 'Playlists created',
+              value: stats.totalPlaylists,
+              icon: ListMusic,
+              color: 'text-sky-400',
+              bg: 'bg-sky-500/10',
+              border: 'border-sky-500/20',
+            },
+            {
+              label: 'Admins & gatekeepers',
+              title: 'Admins & gatekeepers',
+              value: stats.privilegedUsers,
+              icon: Shield,
+              color: 'text-amber-400',
+              bg: 'bg-amber-500/10',
+              border: 'border-amber-500/20',
+            },
+          ].map(({ label, title, value, icon: Icon, color, bg, border }) => (
+            <div
+              key={label}
+              className={`flex items-center gap-3 p-3 md:p-4 rounded-2xl border ${border} bg-white/50 dark:bg-gray-900/30`}
+            >
+              <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${bg}`}>
+                <Icon className={`w-4 h-4 ${color}`} />
+              </div>
+              <div className="min-w-0">
+                <p className="text-lg font-bold text-gray-900 dark:text-white leading-tight">{value}</p>
+                <p className="text-[10px] md:text-xs text-gray-500 truncate" title={title}>
+                  {label}
+                </p>
+              </div>
+            </div>
+          ))}
         </div>
-
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 shadow-sm">
-          <div className="flex items-center justify-between text-gray-500 dark:text-gray-400 mb-2">
-            <span className="text-xs font-bold uppercase tracking-wider">Songs Created</span>
-            <Music className="w-4 h-4 text-red-500" />
-          </div>
-          <div className="text-2xl font-black text-gray-900 dark:text-white">
-            {stats.totalSongs}
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 shadow-sm">
-          <div className="flex items-center justify-between text-gray-500 dark:text-gray-400 mb-2">
-            <span className="text-xs font-bold uppercase tracking-wider">Playlists Created</span>
-            <ListMusic className="w-4 h-4 text-blue-500" />
-          </div>
-          <div className="text-2xl font-black text-gray-900 dark:text-white">
-            {stats.totalPlaylists}
-          </div>
-        </div>
-
-        <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 shadow-sm">
-          <div className="flex items-center justify-between text-gray-500 dark:text-gray-400 mb-2">
-            <span className="text-xs font-bold uppercase tracking-wider">Staff / Curators</span>
-            <Shield className="w-4 h-4 text-amber-500" />
-          </div>
-          <div className="text-2xl font-black text-gray-900 dark:text-white">
-            {stats.privilegedUsers}
-          </div>
-        </div>
-      </div>
+      </section>
 
       {/* Filter and Search Bar */}
-      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl p-4 shadow-sm flex flex-col md:flex-row gap-3 md:items-center justify-between">
+      <div className="flex flex-col md:flex-row gap-3 md:items-center justify-between">
         {/* Search */}
         <div className="relative flex-1">
           <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
@@ -99,7 +113,7 @@ export default function AdminUsersTable({ initialUsers }: AdminUsersTableProps) 
             aria-label="Search users"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="w-full pl-10 pr-4 py-2.5 bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-full text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
           />
         </div>
 
@@ -109,7 +123,7 @@ export default function AdminUsersTable({ initialUsers }: AdminUsersTableProps) 
             value={selectedRole}
             onChange={(e) => setSelectedRole(e.target.value as AdminRoleFilter)}
             aria-label="Filter by role"
-            className="px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="px-4 py-2.5 bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-full text-xs font-semibold text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500"
           >
             <option value="all">All Roles</option>
             <option value="admin">Admin</option>
@@ -122,7 +136,7 @@ export default function AdminUsersTable({ initialUsers }: AdminUsersTableProps) 
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as AdminUserSort)}
             aria-label="Sort users"
-            className="px-3 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl text-xs font-semibold text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="px-4 py-2.5 bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-full text-xs font-semibold text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500"
           >
             <option value="joined">Sort: Recently Joined</option>
             <option value="contributions">Sort: Top Contributors</option>
@@ -132,12 +146,11 @@ export default function AdminUsersTable({ initialUsers }: AdminUsersTableProps) 
       </div>
 
       {/* Users List / Table */}
-      <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-sm overflow-hidden">
-        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-800 flex items-center justify-between">
-          <h2 className="text-sm font-black uppercase tracking-wider text-gray-900 dark:text-white">
-            Registered Users ({filteredUsers.length})
-          </h2>
-        </div>
+      <section>
+        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">
+          Registered users ({filteredUsers.length})
+        </p>
+        <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white/50 dark:bg-gray-900/30 overflow-hidden">
 
         {filteredUsers.length === 0 ? (
           <div className="p-12 text-center text-gray-500 dark:text-gray-400">
@@ -244,7 +257,8 @@ export default function AdminUsersTable({ initialUsers }: AdminUsersTableProps) 
             })}
           </ul>
         )}
-      </div>
+        </div>
+      </section>
     </div>
   );
 }

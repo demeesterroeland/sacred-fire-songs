@@ -5,6 +5,8 @@ import AccessDeniedNotice from '@/components/admin/AccessDeniedNotice';
 
 export const dynamic = 'force-dynamic';
 
+// Same scroll container as app/library/layout.tsx: the app shell has a fixed
+// height, so each section scrolls inside its own <main>.
 export default async function AdminLayout({
   children,
 }: {
@@ -16,20 +18,18 @@ export default async function AdminLayout({
     redirect('/auth/login?next=/admin/users');
   }
 
-  if (!authorized) {
-    return (
-      <div className="flex-1 bg-gray-50/50 dark:bg-gray-950 flex flex-col min-h-screen">
-        <AccessDeniedNotice />
-      </div>
-    );
-  }
-
   return (
-    <div className="flex-1 bg-gray-50/50 dark:bg-gray-950 flex flex-col min-h-screen pb-16">
-      <AdminHeader />
-      <div className="flex-1 max-w-6xl w-full mx-auto px-4 md:px-8 py-6">
-        {children}
+    <main className="flex-1 min-w-0 overflow-y-auto bg-white dark:bg-gray-950 p-4 md:p-8 lg:p-12">
+      <div className="max-w-5xl mx-auto w-full min-w-0">
+        {authorized ? (
+          <>
+            <AdminHeader />
+            {children}
+          </>
+        ) : (
+          <AccessDeniedNotice />
+        )}
       </div>
-    </div>
+    </main>
   );
 }
