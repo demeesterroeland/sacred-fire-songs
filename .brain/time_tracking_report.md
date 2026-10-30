@@ -1,1 +1,1 @@
-| **July 15, 2026 (Part 2)** | **Public Playlist Curation (Story 3.4.6)** | Implement RLS policies, update server actions, adjust client-side detail page/picker visibility, seed gatekeeper role, and write E2E integration tests | ~1.5 Hours | ✅ Completed |
+| **October 30, 2026 (Part 3)** | **Testing/BDD Infra (#263)**: Configured `@cucumber/cucumber` with `tsx` TypeScript loader, `cucumber.json` profiles targeting `docs/testing/song.feature` (`@unit` and `@seed`), `testing/bdd/` support & smoke step definitions, and `npm run test:bdd` scripts. | ~0.5 Hours | ✅ Completed |
