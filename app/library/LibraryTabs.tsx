@@ -3,16 +3,17 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ListMusic, Disc3, Mic2, Clock, ChevronRight } from 'lucide-react';
-
-const tabs = [
-    { label: 'Playlists', href: '/library/playlists',       icon: ListMusic },
-    { label: 'History',   href: '/library/recently-viewed',  icon: Clock },
-    { label: 'Artists',   href: '/library/artists',          icon: Mic2 },
-    { label: 'Albums',    href: '/library/albums',           icon: Disc3 },
-];
+import { t } from '@/lib/i18n';
 
 export default function LibraryTabs() {
     const pathname = usePathname();
+
+    const tabs = [
+        { label: t('library.tabs.playlists'), href: '/library/playlists',       icon: ListMusic },
+        { label: t('library.tabs.history'),   href: '/library/recently-viewed',  icon: Clock },
+        { label: t('library.tabs.artists'),   href: '/library/artists',          icon: Mic2 },
+        { label: t('library.tabs.albums'),    href: '/library/albums',           icon: Disc3 },
+    ];
 
     // Detail page = a tab's href + at least one more path segment
     const parentTab = tabs.find(t => pathname?.startsWith(t.href + '/'));
@@ -23,7 +24,7 @@ export default function LibraryTabs() {
             <nav className="mb-8">
                 <div className="flex items-center gap-1.5 text-sm text-gray-500">
                     <Link href={parentTab.href} className="hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
-                        Library
+                        {t('nav.library')}
                     </Link>
                     <ChevronRight className="w-3.5 h-3.5 shrink-0" />
                     <Link href={parentTab.href} className="hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
@@ -38,8 +39,8 @@ export default function LibraryTabs() {
     return (
         <>
             <header className="hidden md:block mb-12">
-                <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2 text-gray-900 dark:text-white">Your Library</h1>
-                <p className="text-slate-500 dark:text-slate-400">Your personal collection of playlists, albums, and artists.</p>
+                <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2 text-gray-900 dark:text-white">{t('library.heading')}</h1>
+                <p className="text-slate-500 dark:text-slate-400">{t('library.subtitle')}</p>
             </header>
             <div className="relative mb-8">
                 <div className="flex gap-2 overflow-x-auto scrollbar-none pb-1 -mx-4 px-4 md:mx-0 md:px-0">

@@ -4,6 +4,8 @@ import React, { useState, useRef, useEffect } from "react";
 import { Mic, Square, Play, Pause, Trash2, CloudUpload, RotateCcw, Upload, FileAudio } from "lucide-react";
 import { toast } from "sonner";
 import { uploadRehearsalRecording, type UserRecording } from "@/lib/actions/rehearsal";
+import { t } from "@/lib/i18n";
+import { useLocale } from "@/context/LocaleContext";
 
 interface AudioRecorderProps {
   songVersionId: string;
@@ -11,6 +13,7 @@ interface AudioRecorderProps {
 }
 
 export default function AudioRecorder({ songVersionId, onRecordingSaved }: AudioRecorderProps) {
+  const { locale } = useLocale();
   const [activeTab, setActiveTab] = useState<"record" | "upload">("record");
   const [recordingState, setRecordingState] = useState<"idle" | "recording" | "paused" | "stopped">("idle");
   const [countdown, setCountdown] = useState<number | null>(null);
@@ -90,7 +93,7 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
             // Pre-fill default recording name with timestamp
             const timeString = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
             const dateString = new Date().toLocaleDateString([], { month: 'short', day: 'numeric' });
-            setRecordingName(`Recording - ${dateString} ${timeString}`);
+            setRecordingName(t('recorder.defaultName', { date: dateString, time: timeString }));
           };
 
           mediaRecorder.start(200); // chunk chunks every 200ms
@@ -106,7 +109,7 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
                 if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
                 setTimeout(() => {
                   stopRecording();
-                  toast.info("Recording automatically stopped at the 3-minute limit.");
+                  toast.info(t('rehearsal.recording.autoStopped'));
                 }, 0);
                 return 180;
               }
@@ -117,7 +120,7 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
       }, 1000);
     } catch (err: any) {
       console.error("[recorder] Microphone access failed:", err);
-      setErrorMsg("Failed to access microphone. Please check your permissions.");
+      setErrorMsg(t('recorder.error.micAccess'));
       setRecordingState("idle");
       setCountdown(null);
     }
@@ -145,7 +148,7 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
             if (timerIntervalRef.current) clearInterval(timerIntervalRef.current);
             setTimeout(() => {
               stopRecording();
-              toast.info("Recording automatically stopped at the 3-minute limit.");
+              toast.info(t('rehearsal.recording.autoStopped'));
             }, 0);
             return 180;
           }
@@ -195,7 +198,7 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
 
     // Limit to 25 MB for uploaded files
     if (file.size > 25 * 1024 * 1024) {
-      setErrorMsg("Audio file size exceeds the 25 MB limit.");
+      setErrorMsg(t('recorder.error.size25mb'));
       if (fileInputRef.current) fileInputRef.current.value = "";
       return;
     }
@@ -215,7 +218,7 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
 
     // Clean up filename for default title (strip extension)
     const defaultName = file.name.replace(/\.[^/.]+$/, "");
-    setRecordingName(defaultName || `Recording - ${new Date().toLocaleDateString()}`);
+    setRecordingName(defaultName || t('recorder.defaultUploadName', { date: new Date().toLocaleDateString() }));
   };
 
   // Upload/Save recording or file
@@ -226,7 +229,7 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
 
     const maxLimit = activeTab === "upload" ? 25 * 1024 * 1024 : 10 * 1024 * 1024;
     if (audioBlobRef.current.size > maxLimit) {
-      setErrorMsg(`File size exceeds the ${activeTab === "upload" ? "25 MB" : "10 MB"} limit.`);
+      setErrorMsg(t('recorder.error.fileSizeLimit', { limit: activeTab === "upload" ? "25 MB" : "10 MB" }));
       setIsUploading(false);
       return;
     }
@@ -243,12 +246,12 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
         onRecordingSaved(recording);
         discardRecording();
       } else {
-        setErrorMsg(error || "Failed to save recording to storage server. Please try again.");
+        setErrorMsg(error || t('recorder.error.saveFailed'));
       }
     } catch (err: any) {
       console.error("[recorder] Upload error:", err);
       const msg = typeof err === 'string' ? err : (err?.message || err?.error_description || JSON.stringify(err));
-      setErrorMsg(msg && msg !== '{}' ? msg : "An unexpected error occurred during upload.");
+      setErrorMsg(msg && msg !== '{}' ? msg : t('recorder.error.unexpected'));
     } finally {
       setIsUploading(false);
     }
@@ -279,7 +282,7 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
             }`}
           >
             <Mic className="w-3.5 h-3.5" />
-            Record Audio
+            {t('recorder.tab.recordAudio')}
           </button>
           <button
             onClick={() => { setActiveTab("upload"); setErrorMsg(null); }}
@@ -290,7 +293,7 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
             }`}
           >
             <Upload className="w-3.5 h-3.5" />
-            Upload File
+            {t('recorder.tab.upload')}
           </button>
         </div>
       )}
@@ -301,10 +304,10 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
           {/* Title */}
           <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200 flex items-center gap-2">
             <Mic className={`w-4 h-4 ${recordingState === 'recording' ? 'text-red-500 animate-pulse' : 'text-gray-400'}`} />
-            {recordingState === "idle" && "Ready to record"}
-            {recordingState === "recording" && "Recording..."}
-            {recordingState === "paused" && "Recording paused"}
-            {recordingState === "stopped" && "Review your recording"}
+            {recordingState === "idle" && t('recorder.state.idle')}
+            {recordingState === "recording" && t('recorder.state.recording')}
+            {recordingState === "paused" && t('recorder.state.paused')}
+            {recordingState === "stopped" && t('recorder.state.stopped')}
           </h4>
 
           {/* Timer */}
@@ -329,10 +332,10 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
             <FileAudio className="w-6 h-6" />
           </div>
           <p className="text-xs font-semibold text-gray-800 dark:text-gray-200">
-            Click to select an audio file
+            {t('recorder.upload.heading')}
           </p>
           <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1 max-w-[240px] leading-tight">
-            Supports MP3, M4A, OPUS, FLAC, WAV, OGG, WEBM (Max 25 MB)
+            {t('recorder.upload.formats')}
           </p>
         </div>
       )}
@@ -341,7 +344,7 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
       {audioUrl && recordingState === "stopped" && (
         <div className="w-full flex flex-col items-center space-y-2 py-2">
           <p className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5">
-            <FileAudio className="w-3.5 h-3.5 text-violet-400" /> Preview Recording
+            <FileAudio className="w-3.5 h-3.5 text-violet-400" /> {t('recorder.preview')}
           </p>
           <audio src={audioUrl} controls className="w-full max-w-md h-10 accent-indigo-500 rounded-lg" />
         </div>
@@ -359,7 +362,7 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
         <div className="w-full space-y-3">
           <input
             type="text"
-            placeholder="Recording Name (e.g. Recording 1)"
+            placeholder={t('recorder.name.placeholder')}
             value={recordingName}
             onChange={(e) => setRecordingName(e.target.value)}
             disabled={isUploading}
@@ -373,7 +376,7 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
               className="flex-1 flex items-center justify-center gap-1.5 py-2.5 px-4 rounded-xl border border-gray-300 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-300 transition-all active:scale-[0.98]"
             >
               <RotateCcw className="w-4 h-4" />
-              Discard
+              {t('recorder.btn.discard')}
             </button>
             
             <button
@@ -386,7 +389,7 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
               ) : (
                 <CloudUpload className="w-4 h-4" />
               )}
-              Save Recording
+              {t('recorder.btn.save')}
             </button>
           </div>
         </div>
@@ -401,7 +404,7 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
             <button
               onClick={discardRecording}
               className="p-3 rounded-full border border-gray-300 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-500 dark:text-gray-400 transition-all duration-200 active:scale-95"
-              title="Cancel and discard"
+              title={t('recorder.btn.cancel')}
             >
               <Trash2 className="w-5 h-5" />
             </button>
@@ -413,7 +416,7 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
               onClick={countdown !== null ? undefined : startRecording}
               disabled={countdown !== null}
               className={`relative p-5 rounded-full text-white shadow-lg shadow-red-500/25 transition-all duration-300 ${countdown !== null ? 'bg-red-400 cursor-default scale-110' : 'bg-red-500 hover:bg-red-400 active:scale-95 group'}`}
-              title="Start recording"
+              title={t('recorder.btn.start')}
             >
               {countdown === null && (
                 <div className="absolute inset-0 rounded-full bg-red-500 animate-ping opacity-20 group-hover:scale-105 duration-1000" />
@@ -432,7 +435,7 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
             <button
               onClick={pauseRecording}
               className="p-5 rounded-full bg-amber-500 hover:bg-amber-400 text-white shadow-lg shadow-amber-500/25 transition-all duration-300 active:scale-95"
-              title="Pause recording"
+              title={t('recorder.btn.pause')}
             >
               <Pause className="w-6 h-6" />
             </button>
@@ -442,7 +445,7 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
             <button
               onClick={resumeRecording}
               className="p-5 rounded-full bg-indigo-500 hover:bg-indigo-400 text-white shadow-lg shadow-indigo-500/25 transition-all duration-300 active:scale-95"
-              title="Resume recording"
+              title={t('recorder.btn.resume')}
             >
               <Play className="w-6 h-6" />
             </button>
@@ -453,7 +456,7 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
             <button
               onClick={stopRecording}
               className="p-4 rounded-full bg-gray-900 dark:bg-white text-white dark:text-black hover:bg-gray-800 dark:hover:bg-gray-100 shadow-md transition-all duration-300 active:scale-95"
-              title="Stop recording"
+              title={t('recorder.btn.stop')}
             >
               <Square className="w-5 h-5 fill-current" />
             </button>

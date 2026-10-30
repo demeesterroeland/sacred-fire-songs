@@ -23,6 +23,7 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 import { reorderPlaylistSongs, removeSongFromPlaylist } from '@/app/actions/playlistActions';
 import { AddSongsSheet } from './AddSongsSheet';
+import { t } from '@/lib/i18n';
 
 export interface PlaylistItem {
     id: string;
@@ -139,7 +140,7 @@ export function PlaylistDetailClient({
             const result = await reorderPlaylistSongs(playlistId, reordered.map(i => i.id));
             if (result.error) {
                 setItems(prev); // revert
-                toast.error('Could not save order');
+                toast.error(t('playlists.toast.couldNotSaveOrder'));
             }
         });
     };
@@ -164,14 +165,14 @@ export function PlaylistDetailClient({
             <>
                 <div className="flex flex-col items-center justify-center py-16 text-center gap-4">
                     <Music className="w-10 h-10 text-gray-700" />
-                    <p className="text-gray-500 text-sm max-w-xs">No songs yet.</p>
+                    <p className="text-gray-500 text-sm max-w-xs">{t('playlists.detail.noSongs')}</p>
                     {canEdit && (
                         <button
                             onClick={() => setSheetOpen(true)}
                             className="flex items-center gap-1.5 text-sm font-semibold text-amber-400 border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 rounded-full px-4 py-1.5 transition-all"
                         >
                             <Plus className="w-4 h-4" />
-                            Add Songs
+                            {t('playlists.detail.addSongs')}
                         </button>
                     )}
                 </div>
@@ -213,7 +214,7 @@ export function PlaylistDetailClient({
                             className="flex items-center gap-1.5 text-sm font-semibold text-amber-400 border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 rounded-full px-4 py-1.5 transition-all"
                         >
                             <Plus className="w-4 h-4" />
-                            Add Songs
+                            {t('playlists.detail.addSongs')}
                         </button>
                     </div>
                     <AddSongsSheet

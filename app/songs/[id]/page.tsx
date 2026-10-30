@@ -27,6 +27,8 @@ import { parseArtists } from '@/lib/songs/artistUtils';
 import { recordSongView } from '@/app/actions/recordSongView';
 import { useSongRecordings } from '@/hooks/useSongRecordings';
 import { useRecordingsQuery } from '@/hooks/useRecordingsQuery';
+import { t } from '@/lib/i18n';
+import { useLocale } from '@/context/LocaleContext';
 
 // Enforce a timeout on any promise to prevent infinite loading skeletons
 function withTimeout<T>(promise: Promise<T>, ms: number, errorMessage = "Request timed out"): Promise<T> {
@@ -97,6 +99,7 @@ const fetchSong = async (id: string) => {
 };
 
 export default function SongDetailPage() {
+    const { locale } = useLocale();
     const params = useParams();
     const router = useRouter();
     const id = typeof params.id === 'string' ? params.id : params.id?.[0]; // Safe type handling
@@ -225,15 +228,15 @@ export default function SongDetailPage() {
             return (
                 <div className="flex flex-col items-center justify-center min-h-screen gap-4 text-center px-6">
                     <p className="text-3xl">⚠️</p>
-                    <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100">Taking too long…</h2>
+                    <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100">{t('song.error.timeout')}</h2>
                     <p className="text-sm text-gray-500 dark:text-gray-400">
-                        The page couldn&apos;t load in time. This may be a network or connectivity issue.
+                        {t('song.error.timeoutDescription')}
                     </p>
                     <button
                         onClick={() => window.location.reload()}
                         className="mt-2 px-5 py-2 rounded-lg bg-[#ff4400] text-white text-sm font-semibold hover:bg-[#e03c00] transition-colors"
                     >
-                        Retry
+                        {t('song.error.retry')}
                     </button>
                 </div>
             );
@@ -244,15 +247,15 @@ export default function SongDetailPage() {
         return (
             <div className="flex flex-col items-center justify-center min-h-screen gap-4 text-center px-6">
                 <p className="text-3xl">🔥</p>
-                <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100">Couldn&apos;t load this song</h2>
+                <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100">{t('song.error.loadFailed')}</h2>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {(songError as Error)?.message ?? 'An unexpected error occurred.'}
+                    {(songError as Error)?.message ?? t('song.error.unexpected')}
                 </p>
                 <button
                     onClick={() => window.location.reload()}
                     className="mt-2 px-5 py-2 rounded-lg bg-[#ff4400] text-white text-sm font-semibold hover:bg-[#e03c00] transition-colors"
                 >
-                    Retry
+                    {t('song.error.retry')}
                 </button>
             </div>
         );
@@ -274,8 +277,8 @@ export default function SongDetailPage() {
         const shareData = {
             title: song.title,
             text: song.original_author 
-                ? `Check out the song "${song.title}" by ${song.original_author} on Sacred Fire Songs`
-                : `Check out the song "${song.title}" on Sacred Fire Songs`,
+                ? t('song.share.textWithAuthor', { title: song.title, author: song.original_author })
+                : t('song.share.text', { title: song.title }),
             url: window.location.href
         };
 
@@ -290,10 +293,10 @@ export default function SongDetailPage() {
         } else {
             try {
                 await navigator.clipboard.writeText(window.location.href);
-                toast.success('Link copied to clipboard!');
+                toast.success(t('song.share.copied'));
             } catch (err) {
                 console.error('Could not copy text: ', err);
-                toast.error('Failed to copy link');
+                toast.error(t('song.share.copyError'));
             }
         }
     };
@@ -323,7 +326,7 @@ export default function SongDetailPage() {
                     <button
                         onClick={() => setIsOverflowOpen(!isOverflowOpen)}
                         className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-                        aria-label="More actions"
+                        aria-label={t('common.moreActions')}
                     >
                         <MoreVertical className="w-5 h-5" />
                     </button>
@@ -365,13 +368,13 @@ export default function SongDetailPage() {
                                 onClick={() => setIsDeleteModalOpen(true)}
                                 className="flex items-center gap-2 px-3 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg text-sm font-bold border border-red-500/20 transition-all"
                             >
-                                <Trash2 className="w-4 h-4" /> <span className="hidden xl:inline">Delete</span>
+                                <Trash2 className="w-4 h-4" /> <span className="hidden xl:inline">{t('common.delete')}</span>
                             </button>
                         )}
                         {(song.owner_id === user?.id || isAdmin) && (
                             <Link href={`/songs/${id}/edit`}>
                                 <button className="flex items-center gap-2 px-3 py-2 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg text-sm font-bold border border-gray-300 dark:border-gray-700 transition-all">
-                                    <Edit2 className="w-4 h-4" /> <span className="hidden xl:inline">Edit</span>
+                                    <Edit2 className="w-4 h-4" /> <span className="hidden xl:inline">{t('common.edit')}</span>
                                 </button>
                             </Link>
                         )}
@@ -382,10 +385,10 @@ export default function SongDetailPage() {
                                     setIsRehearsalDrawerOpen(true);
                                 }}
                                 className="flex items-center gap-2 px-3 py-2 bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 rounded-lg text-sm font-bold border border-indigo-500/20 transition-all active:scale-[0.98]"
-                                title="Recordings"
+                                title={t('song.recordings')}
                             >
                                 {isAudioPlaying ? (
-                                    <div className="flex items-end gap-[2px] h-4 w-4 overflow-hidden" title="Playing">
+                                    <div className="flex items-end gap-[2px] h-4 w-4 overflow-hidden" title={t('miniPlayer.playing')}>
                                         <div className="w-[3px] bg-indigo-600 dark:bg-indigo-400 animate-[equalizer_1s_ease-in-out_infinite]" />
                                         <div className="w-[3px] bg-indigo-600 dark:bg-indigo-400 animate-[equalizer_1.2s_ease-in-out_infinite_0.2s]" />
                                         <div className="w-[3px] bg-indigo-600 dark:bg-indigo-400 animate-[equalizer_0.9s_ease-in-out_infinite_0.4s]" />
@@ -394,7 +397,7 @@ export default function SongDetailPage() {
                                 ) : (
                                     <Mic className="w-4 h-4" />
                                 )}
-                                <span className="hidden xl:inline">Recordings</span>
+                                <span className="hidden xl:inline">{t('song.recordings')}</span>
                                 {recordings && recordings.length > 0 && (
                                     <span className="ml-1 px-1.5 py-0.5 rounded-md bg-indigo-600/20 text-[10px] font-black">
                                         {recordings.length}
@@ -413,9 +416,9 @@ export default function SongDetailPage() {
                         {!user && (
                             <button
                                 onClick={() => {
-                                    toast('Sign in to manage playlists', {
+                                    toast(t('song.signInForPlaylists'), {
                                         action: {
-                                            label: 'Sign in →',
+                                            label: t('song.signInAction'),
                                             onClick: () => { window.location.href = `/auth/login?next=${encodeURIComponent(window.location.pathname)}`; },
                                         },
                                         classNames: {
@@ -423,7 +426,7 @@ export default function SongDetailPage() {
                                         },
                                     });
                                 }}
-                                aria-label="Add to playlist"
+                                aria-label={t('song.addToPlaylist')}
                                 className="p-2 rounded-full transition-all duration-300 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
                             >
                                 <ListPlus className="w-5 h-5" strokeWidth={1.5} />
@@ -431,15 +434,15 @@ export default function SongDetailPage() {
                         )}
                         <button
                             onClick={handleToggleFavorite}
-                            aria-label={isFav ? 'Remove from favorites' : 'Add to favorites'}
+                            aria-label={isFav ? t('song.removeFromFavorites') : t('song.addToFavorites')}
                             className={`p-2 rounded-full transition-all duration-300 ${isFav ? 'text-amber-400 heart-glow' : 'text-gray-500 dark:text-gray-400 hover:text-amber-400/60'}`}
                         >
                             <Heart className={`w-5 h-5 transition-all duration-200 ${isFav ? 'fill-amber-400' : ''}`} strokeWidth={1.5} />
                         </button>
                         <button
                             onClick={handleShare}
-                            aria-label="Share song"
-                            title="Share song"
+                            aria-label={t('song.share.ariaLabel')}
+                            title={t('song.share.ariaLabel')}
                             className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
                         >
                             <Share2 className="w-5 h-5" strokeWidth={1.5} />
@@ -470,16 +473,16 @@ export default function SongDetailPage() {
                     {(currentVersion?.key || currentVersion?.capo || (currentVersion?.tuning && currentVersion.tuning !== 'Standard')) && (
                         <div className="grid grid-cols-3 gap-6 py-6 border-y border-gray-200/30 dark:border-gray-800/30">
                             <div className="text-center space-y-2">
-                                <p className="text-[10px] uppercase font-black text-gray-500 tracking-[0.25em]">KEY</p>
+                                <p className="text-[10px] uppercase font-black text-gray-500 tracking-[0.25em]">{t('song.metadata.key')}</p>
                                 <p className="text-2xl font-mono font-bold text-amber-500">{currentVersion?.key || '-'}</p>
                             </div>
                             <div className="text-center space-y-2">
-                                <p className="text-[10px] uppercase font-black text-gray-500 tracking-[0.25em]">CAPO</p>
-                                <p className="text-lg font-bold text-gray-700 dark:text-gray-300">{currentVersion?.capo ? `${currentVersion.capo}nd fret` : '-'}</p>
+                                <p className="text-[10px] uppercase font-black text-gray-500 tracking-[0.25em]">{t('song.metadata.capo')}</p>
+                                <p className="text-lg font-bold text-gray-700 dark:text-gray-300">{currentVersion?.capo ? t('song.metadata.fret', { capo: currentVersion.capo }) : '-'}</p>
                             </div>
                             <div className="text-center space-y-2">
-                                <p className="text-[10px] uppercase font-black text-gray-500 tracking-[0.25em]">TUNING</p>
-                                <p className="text-base font-bold text-gray-700 dark:text-gray-300 tracking-wider">{currentVersion?.tuning || 'Standard'}</p>
+                                <p className="text-[10px] uppercase font-black text-gray-500 tracking-[0.25em]">{t('song.metadata.tuning')}</p>
+                                <p className="text-base font-bold text-gray-700 dark:text-gray-300 tracking-wider">{currentVersion?.tuning || t('song.metadata.standard')}</p>
                             </div>
                         </div>
                     )}
@@ -502,8 +505,8 @@ export default function SongDetailPage() {
                     isOpen={isDeleteModalOpen}
                     onClose={() => setIsDeleteModalOpen(false)}
                     onConfirm={handleDelete}
-                    title="Delete Song?"
-                    message={`Are you sure you want to delete "${song.title}"? This action cannot be undone.`}
+                    title={t('song.delete.confirm.modalTitle')}
+                    message={t('song.delete.confirm.message', { title: song.title })}
                     isDeleting={isDeleting}
                 />
             </main>
@@ -530,7 +533,7 @@ export default function SongDetailPage() {
                             </div>
                             <div className="flex-1 min-w-0">
                                 <h2 className="text-base font-black text-gray-900 dark:text-white truncate text-left">{song.title}</h2>
-                                <p className="text-xs text-gray-500 dark:text-gray-400 truncate text-left">by {song.original_author || 'Traditional'}</p>
+                                <p className="text-xs text-gray-500 dark:text-gray-400 truncate text-left">{t('song.by', { author: song.original_author || t('song.traditional') })}</p>
                             </div>
                         </div>
 
@@ -542,7 +545,7 @@ export default function SongDetailPage() {
                                 className="w-full flex items-center gap-4 px-6 py-4 hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors text-left text-gray-700 dark:text-gray-300"
                             >
                                 <Heart className={`w-5 h-5 ${isFav ? 'text-amber-500 fill-amber-500' : 'text-gray-400 dark:text-gray-500'}`} />
-                                <span className="text-sm font-bold">{isFav ? 'Remove from Liked Songs' : 'Add to Liked Songs'}</span>
+                                <span className="text-sm font-bold">{isFav ? t('song.removeFromFavorites') : t('song.addToFavorites')}</span>
                             </button>
 
                             {/* Share */}
@@ -551,7 +554,7 @@ export default function SongDetailPage() {
                                 className="w-full flex items-center gap-4 px-6 py-4 hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors text-left text-gray-700 dark:text-gray-300"
                             >
                                 <Share2 className="w-5 h-5 text-gray-400 dark:text-gray-500" />
-                                <span className="text-sm font-bold">Share Song</span>
+                                <span className="text-sm font-bold">{t('song.share')}</span>
                             </button>
 
                             {/* Add to Playlist */}
@@ -560,7 +563,7 @@ export default function SongDetailPage() {
                                     <PlaylistPicker
                                         compositionId={id as string}
                                         userId={user.id}
-                                        label="Add to Playlist"
+                                        label={t('song.addToPlaylist')}
                                         triggerClassName="w-full flex items-center gap-4 px-6 py-4 hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors text-left rounded-none text-gray-700 dark:text-gray-300"
                                         iconClassName="w-5 h-5"
                                     />
@@ -569,9 +572,9 @@ export default function SongDetailPage() {
                                 <button
                                     onClick={() => {
                                         setIsOverflowOpen(false);
-                                        toast('Sign in to manage playlists', {
+                                        toast(t('song.signInForPlaylists'), {
                                             action: {
-                                                label: 'Sign in →',
+                                                label: t('song.signInAction'),
                                                 onClick: () => { window.location.href = `/auth/login?next=${encodeURIComponent(window.location.pathname)}`; },
                                             },
                                             classNames: {
@@ -582,7 +585,7 @@ export default function SongDetailPage() {
                                     className="w-full flex items-center gap-4 px-6 py-4 hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors text-left text-gray-700 dark:text-gray-300"
                                 >
                                     <ListPlus className="w-5 h-5 text-gray-400 dark:text-gray-500" />
-                                    <span className="text-sm font-bold">Add to Playlist</span>
+                                    <span className="text-sm font-bold">{t('song.addToPlaylist')}</span>
                                 </button>
                             )}
 
@@ -596,7 +599,7 @@ export default function SongDetailPage() {
                                 className="w-full flex items-center gap-4 px-6 py-4 hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors text-left text-gray-700 dark:text-gray-300"
                             >
                                 <Mic className="w-5 h-5 text-gray-400 dark:text-gray-500" />
-                                <span className="text-sm font-bold">Recordings</span>
+                                <span className="text-sm font-bold">{t('song.recordings')}</span>
                             </button>
 
                             {/* Edit */}
@@ -607,7 +610,7 @@ export default function SongDetailPage() {
                                     className="flex items-center gap-4 px-6 py-4 hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors text-gray-700 dark:text-gray-300"
                                 >
                                     <Edit2 className="w-5 h-5 text-gray-400 dark:text-gray-500" />
-                                    <span className="text-sm font-bold">Edit Song</span>
+                                    <span className="text-sm font-bold">{t('song.edit')}</span>
                                 </Link>
                             )}
 
@@ -618,7 +621,7 @@ export default function SongDetailPage() {
                                     className="w-full flex items-center gap-4 px-6 py-4 hover:bg-red-500/10 transition-colors text-red-500 text-left"
                                 >
                                     <Trash2 className="w-5 h-5" />
-                                    <span className="text-sm font-bold">Delete Song</span>
+                                    <span className="text-sm font-bold">{t('song.delete')}</span>
                                 </button>
                             )}
                         </div>
@@ -639,7 +642,7 @@ export default function SongDetailPage() {
                     songVersionId={currentVersion.id}
                     onPlayStateChange={setIsAudioPlaying}
                     songTitle={song.title}
-                    songAuthor={song.original_author || 'Traditional'}
+                    songAuthor={song.original_author || t('song.traditional')}
                     youtubeUrl={currentVersion.youtube_url}
                     spotifyUrl={currentVersion.spotify_url}
                     soundcloudUrl={currentVersion.soundcloud_url}

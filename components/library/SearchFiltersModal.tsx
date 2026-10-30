@@ -5,6 +5,7 @@ import { X, SlidersHorizontal, Guitar, Music, Heart, ChevronDown, Search, Mic } 
 import TagSelector from '@/components/library/TagSelector';
 import type { TaxonomyNode } from '@/lib/taxonomyUtils';
 import type { SongFilterState } from '@/lib/songs/filterConfig';
+import { t } from '@/lib/i18n';
 
 type SortByType = 'title' | 'author' | 'newest';
 
@@ -105,7 +106,7 @@ export default function SearchFiltersModal({
                 <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800 shrink-0">
                     <div className="flex items-center gap-3">
                         <SlidersHorizontal className="w-5 h-5 text-gray-500" />
-                        <h2 className="text-lg font-bold text-gray-900 dark:text-white">Search options</h2>
+                        <h2 className="text-lg font-bold text-gray-900 dark:text-white">{t('search.title')}</h2>
                     </div>
                     <button
                         onClick={onClose}
@@ -122,13 +123,13 @@ export default function SearchFiltersModal({
                         disabled={!hasActiveFilters && !localSearch}
                         className="flex-1 px-4 py-2.5 rounded-xl font-bold text-xs text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-950 border border-gray-300 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
                     >
-                        Clear all
+                        {t('search.clearAll')}
                     </button>
                     <button
                         onClick={onSubmit ?? onClose}
                         className="flex-1 px-4 py-2.5 rounded-xl font-bold text-xs text-white bg-red-600 hover:bg-red-500 shadow-md shadow-red-900/10 transition-all"
                     >
-                        Show results
+                        {t('search.showResults')}
                     </button>
                 </div>
 
@@ -138,7 +139,7 @@ export default function SearchFiltersModal({
                     {/* Search text */}
                     <section>
                         <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2 block">
-                            Search
+                            {t('search.label')}
                         </label>
                         <div className="relative">
                             <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
@@ -147,7 +148,7 @@ export default function SearchFiltersModal({
                                 value={localSearch}
                                 onChange={(e) => setLocalSearch(e.target.value)}
                                 onKeyDown={(e) => { if (e.key === 'Enter') onSubmit?.(); }}
-                                placeholder="Search 200+ songs..."
+                                placeholder={t('search.placeholder')}
                                 className="w-full bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl py-2.5 pl-10 pr-4 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500/40 transition-all"
                             />
                         </div>
@@ -156,7 +157,7 @@ export default function SearchFiltersModal({
                     {/* Tags */}
                     <section>
                         <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2 block">
-                            Category & Tags
+                            {t('search.categoryAndTags')}
                         </label>
                         <TagSelector
                             category={state.category}
@@ -171,14 +172,14 @@ export default function SearchFiltersModal({
                                 setFilter('tags', []);
                                 setFilter('artist', undefined);
                             }}
-                            clearLabel="Clear Tags"
+                            clearLabel={t('search.clearTags')}
                         />
                     </section>
 
                     {/* Sort */}
                     <section>
                         <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2 block">
-                            Sort by
+                            {t('search.sortBy')}
                         </label>
                         <div className="relative">
                             <select
@@ -186,9 +187,9 @@ export default function SearchFiltersModal({
                                 onChange={(e) => setSortBy(e.target.value as SortByType)}
                                 className="w-full bg-gray-100 dark:bg-gray-900 border border-gray-300 dark:border-gray-800 rounded-xl px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 outline-none focus:border-gray-400 dark:focus:border-gray-700 appearance-none pr-10 cursor-pointer"
                             >
-                                <option value="title">Title (A-Z)</option>
-                                <option value="author">Author (A-Z)</option>
-                                <option value="newest">Newest First</option>
+                                <option value="title">{t('search.sort.titleAZ')}</option>
+                                <option value="author">{t('search.sort.authorAZ')}</option>
+                                <option value="newest">{t('search.sort.newestFirst')}</option>
                             </select>
                             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
                         </div>
@@ -197,7 +198,7 @@ export default function SearchFiltersModal({
                     {/* Content type */}
                     <section>
                         <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3 block">
-                            Content type
+                            {t('search.contentType')}
                         </label>
                         <div className="grid grid-cols-2 gap-3">
                             <ToggleCard
@@ -205,7 +206,7 @@ export default function SearchFiltersModal({
                                 onClick={() => setFilter('chords', !state.chords)}
                                 disabled={!state.chords && chordsCount === 0}
                                 icon={<Guitar className="w-4 h-4" />}
-                                label="Chords"
+                                label={t('search.filter.chords')}
                                 count={chordsCount ? chordsCount : undefined}
                                 activeColor="amber"
                             />
@@ -214,7 +215,7 @@ export default function SearchFiltersModal({
                                 onClick={() => setFilter('melody', !state.melody)}
                                 disabled={!state.melody && melodyCount === 0}
                                 icon={<Music className="w-4 h-4" />}
-                                label="Melody"
+                                label={t('search.filter.melody')}
                                 count={melodyCount ? melodyCount : undefined}
                                 activeColor="emerald"
                             />
@@ -225,7 +226,7 @@ export default function SearchFiltersModal({
                     {isAuthenticated && (
                         <section className="pt-4 border-t border-gray-200 dark:border-gray-800/60">
                             <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3 block">
-                                Your Library
+                                {t('search.yourLibrary')}
                             </label>
                             
                             <div className="grid grid-cols-2 gap-3 mb-4">
@@ -233,7 +234,7 @@ export default function SearchFiltersModal({
                                     active={!!state.favorites}
                                     onClick={() => setFilter('favorites', !state.favorites)}
                                     icon={<Heart className={`w-4 h-4 ${state.favorites ? 'fill-amber-400' : ''}`} strokeWidth={1.5} />}
-                                    label="Your Favorites"
+                                    label={t('userMenu.favorites')}
                                     count={favoritesCount ? favoritesCount : undefined}
                                     activeColor="amber"
                                 />
@@ -241,7 +242,7 @@ export default function SearchFiltersModal({
                                     active={!!state.mine}
                                     onClick={() => setFilter('mine', !state.mine)}
                                     icon={<Music className="w-4 h-4" strokeWidth={1.5} />}
-                                    label="Your Songs"
+                                    label={t('librarySummary.mySongs.title')}
                                     count={mineCount ? mineCount : undefined}
                                     activeColor="violet"
                                 />
@@ -250,24 +251,31 @@ export default function SearchFiltersModal({
                                     onClick={() => setFilter('myRecordings', !state.myRecordings)}
                                     disabled={!state.myRecordings && recordingsCount === 0}
                                     icon={<Mic className="w-4 h-4" strokeWidth={1.5} />}
-                                    label="Your Recordings"
+                                    label={t('rehearsal.recordings.yourRecordings')}
                                     count={recordingsCount ? recordingsCount : undefined}
                                     activeColor="violet"
                                 />
                                 <div className="flex items-center justify-end">
                                     <div className="w-full bg-gray-200/80 dark:bg-gray-900/80 p-1 rounded-xl border border-gray-300 dark:border-gray-800 flex justify-between shadow-inner h-full items-center">
-                                        {(['all', 'public', 'draft'] as const).map((statusOption) => (
-                                            <button
-                                                key={statusOption}
-                                                onClick={() => setFilter('status', statusOption)}
-                                                className={`flex-1 px-2 py-1.5 text-[11px] font-bold rounded-lg transition-all capitalize ${state.status === statusOption
-                                                    ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm ring-1 ring-gray-200 dark:ring-white/5'
-                                                    : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
-                                                    }`}
-                                            >
-                                                {statusOption}
-                                            </button>
-                                        ))}
+                                        {(['all', 'public', 'draft'] as const).map((statusOption) => {
+                                            const statusLabels = {
+                                                all: t('search.status.all'),
+                                                public: t('search.status.public'),
+                                                draft: t('search.status.draft'),
+                                            };
+                                            return (
+                                                <button
+                                                    key={statusOption}
+                                                    onClick={() => setFilter('status', statusOption)}
+                                                    className={`flex-1 px-2 py-1.5 text-[11px] font-bold rounded-lg transition-all capitalize ${state.status === statusOption
+                                                        ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm ring-1 ring-gray-200 dark:ring-white/5'
+                                                        : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
+                                                        }`}
+                                                >
+                                                    {statusLabels[statusOption]}
+                                                </button>
+                                            );
+                                        })}
                                     </div>
                                 </div>
                             </div>

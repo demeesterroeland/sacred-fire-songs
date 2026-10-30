@@ -13,6 +13,8 @@ import { useAuth } from "@/hooks/useAuth";
 import { useAudio } from "./AudioProvider";
 import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
+import { t } from "@/lib/i18n";
+import { useLocale } from "@/context/LocaleContext";
 import {
   DndContext,
   closestCenter,
@@ -56,6 +58,7 @@ function SortableRecordingItem({
   formatDate: (date: string) => string;
   isCustomSort: boolean;
 }) {
+  const { locale } = useLocale();
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(rec.recording_name);
 
@@ -99,8 +102,8 @@ function SortableRecordingItem({
           {...attributes}
           {...listeners}
           className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-grab active:cursor-grabbing touch-none shrink-0 p-1 -ml-1"
-          aria-label="Drag to reorder"
-          title="Drag to reorder"
+          aria-label={t('rehearsal.recording.drag.ariaLabel')}
+          title={t('rehearsal.recording.drag.ariaLabel')}
         >
           <GripVertical className="w-4 h-4" />
         </button>
@@ -117,7 +120,7 @@ function SortableRecordingItem({
             ? "bg-indigo-600 hover:bg-indigo-500 text-white active:scale-95"
             : "bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 text-indigo-600 dark:text-indigo-400 active:scale-95"
         }`}
-        title={!rec.audioUrl ? "Audio file missing or corrupted" : "Play"}
+        title={!rec.audioUrl ? t('rehearsal.recording.missingTitle') : activePlaybackId === rec.id && isRecordingPlaying ? t('rehearsal.recording.pause') : t('rehearsal.recording.play')}
       >
         {activePlaybackId === rec.id && isRecordingPlaying ? (
           <Pause className="w-4 h-4 fill-current" />
@@ -144,7 +147,7 @@ function SortableRecordingItem({
             onDoubleClick={() => setIsEditing(true)}
           >
             {rec.recording_name}
-            {!rec.audioUrl && <span className="ml-2 text-[10px] uppercase font-bold text-red-500 bg-red-500/10 px-1.5 py-0.5 rounded">Missing File</span>}
+            {!rec.audioUrl && <span className="ml-2 text-[10px] uppercase font-bold text-red-500 bg-red-500/10 px-1.5 py-0.5 rounded">{t('rehearsal.recording.missingBadge')}</span>}
           </h4>
         )}
         <div className="text-[10px] text-gray-400 dark:text-gray-500 flex items-center gap-1.5 mt-0.5 font-medium flex-wrap">
@@ -174,8 +177,8 @@ function SortableRecordingItem({
       <button
         onClick={() => setIsEditing(true)}
         className="p-2 rounded-xl text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition-all active:scale-95 shrink-0"
-        title="Edit recording name"
-        aria-label="Edit recording name"
+        title={t('rehearsal.recording.edit.ariaLabel')}
+        aria-label={t('rehearsal.recording.edit.ariaLabel')}
       >
         <Pencil className="w-4 h-4" />
       </button>
@@ -189,8 +192,8 @@ function SortableRecordingItem({
             ? "text-gray-300 dark:text-gray-700 opacity-40 cursor-not-allowed"
             : "text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40"
         }`}
-        title={!rec.audioUrl ? "Audio file missing or corrupted" : "Download recording"}
-        aria-label="Download recording"
+        title={!rec.audioUrl ? t('rehearsal.recording.missingTitle') : t('rehearsal.recording.download.ariaLabel')}
+        aria-label={t('rehearsal.recording.download.ariaLabel')}
       >
         {downloadingId === rec.id ? (
           <div className="w-4 h-4 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
@@ -204,8 +207,8 @@ function SortableRecordingItem({
         onClick={() => handleDelete(rec.id, rec.storage_path)}
         disabled={deletingId === rec.id}
         className="p-2 rounded-xl text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-all active:scale-95 shrink-0"
-        title="Delete recording"
-        aria-label="Delete recording"
+        title={t('rehearsal.recording.delete.ariaLabel')}
+        aria-label={t('rehearsal.recording.delete.ariaLabel')}
       >
         {deletingId === rec.id ? (
           <div className="w-4 h-4 border-2 border-red-500/30 border-t-red-500 rounded-full animate-spin" />
@@ -244,6 +247,7 @@ export default function RehearsalDrawer({
   onPlayStateChange,
   requestedTab = "auto",
 }: RehearsalDrawerProps) {
+  const { locale } = useLocale();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<"recorder" | "media">("media");
   const [selectedMedia, setSelectedMedia] = useState<"youtube" | "spotify" | "soundcloud" | null>(null);
@@ -364,7 +368,7 @@ export default function RehearsalDrawer({
     const recordingInfo = activePlaybackId ? {
       type: 'recording' as const,
       isPlaying: isRecordingPlaying,
-      label: recordings.find(r => r.id === activePlaybackId)?.recording_name ?? 'User Recording',
+      label: recordings.find(r => r.id === activePlaybackId)?.recording_name ?? t('miniPlayer.source.userRecording'),
       recordingId: activePlaybackId,
       source: null as null,
       currentTime: recordingCurrentTime,
@@ -374,7 +378,7 @@ export default function RehearsalDrawer({
     const mediaInfo = playingSource ? {
       type: 'media' as const,
       isPlaying: isMediaPlaying,
-      label: playingSource === 'youtube' ? 'YouTube Reference' : playingSource === 'soundcloud' ? 'SoundCloud Reference' : 'Spotify Reference',
+      label: playingSource === 'youtube' ? t('miniPlayer.source.youtube') : playingSource === 'soundcloud' ? t('miniPlayer.source.soundcloud') : t('miniPlayer.source.spotify'),
       recordingId: null as null,
       source: playingSource,
       currentTime: mediaCurrentTime,
@@ -393,7 +397,7 @@ export default function RehearsalDrawer({
     return {
       type: 'idle' as const,
       isPlaying: false,
-      label: hasMedia ? 'Select Source' : (firstRec?.recording_name ?? 'Select Source'),
+      label: hasMedia ? t('miniPlayer.source.select') : (firstRec?.recording_name ?? t('miniPlayer.source.select')),
       recordingId: null as null,
       source: null as null,
       currentTime: 0,
@@ -402,7 +406,7 @@ export default function RehearsalDrawer({
   }, [
     activePlaybackId, isRecordingPlaying, recordingCurrentTime, recordingDuration,
     playingSource, isMediaPlaying, mediaCurrentTime, mediaDuration,
-    recordings, hasMedia, activeDomain,
+    recordings, hasMedia, activeDomain, locale,
   ]);
   const [isPendingOrder, startOrderTransition] = useTransition();
 
@@ -424,7 +428,7 @@ export default function RehearsalDrawer({
     startOrderTransition(async () => {
       const res = await reorderUserRecordings(reordered.map((r) => r.id));
       if (!res.success) {
-        toast.error("Failed to save recording order");
+        toast.error(t('rehearsal.sort.error'));
       }
     });
   };
@@ -809,9 +813,9 @@ export default function RehearsalDrawer({
   // Handle new recording saved
   const handleRecordingSaved = (newRecording: UserRecording) => {
     setRecordings((prev) => [newRecording, ...prev]);
-    toast.success("Recording saved successfully!", {
+    toast.success(t('recorder.save.success'), {
       action: {
-        label: 'View Recordings →',
+        label: t('recorder.viewRecordings'),
         onClick: () => { window.location.href = '/songs?myRecordings=true'; },
       },
       classNames: {
@@ -828,7 +832,7 @@ export default function RehearsalDrawer({
     setRecordings((prev) => prev.map((r) => (r.id === recordingId ? { ...r, recording_name: newName } : r)));
     const { success } = await renameUserRecording(recordingId, newName);
     if (!success) {
-      toast.error("Failed to rename recording.");
+      toast.error(t('rehearsal.recording.rename.error'));
       setRecordings((prev) => prev.map((r) => (r.id === recordingId ? { ...r, recording_name: originalName || "" } : r)));
     } else {
       queryClient.invalidateQueries({ queryKey: ["song-recordings", songVersionId] });
@@ -846,15 +850,15 @@ export default function RehearsalDrawer({
       const success = await deleteUserRecording(recordingId, storagePath);
       if (success) {
         setRecordings((prev) => prev.filter((r) => r.id !== recordingId));
-        toast.success("Recording deleted.");
+        toast.success(t('rehearsal.recording.delete.success'));
         queryClient.invalidateQueries({ queryKey: ["user-recordings-compositions"] });
         queryClient.invalidateQueries({ queryKey: ["global-filter-counts"] });
       } else {
-        toast.error("Failed to delete recording.");
+        toast.error(t('rehearsal.recording.delete.error'));
       }
     } catch (err) {
       console.error("[drawer] Delete error:", err);
-      toast.error("Failed to delete recording.");
+      toast.error(t('rehearsal.recording.delete.error'));
     } finally {
       setDeletingId(null);
     }
@@ -863,7 +867,7 @@ export default function RehearsalDrawer({
   // Handle download recording
   const handleDownload = async (rec: UserRecording) => {
     if (!rec.audioUrl) {
-      toast.error("Audio file is missing or not available for download.");
+      toast.error(t('recorder.audio.missing'));
       return;
     }
     setDownloadingId(rec.id);
@@ -887,7 +891,7 @@ export default function RehearsalDrawer({
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(blobUrl);
-      toast.success("Download started.");
+      toast.success(t('recorder.download.success'));
     } catch (err) {
       console.error("[drawer] Download error:", err);
       try {
@@ -899,7 +903,7 @@ export default function RehearsalDrawer({
         a.click();
         document.body.removeChild(a);
       } catch {
-        toast.error("Failed to download recording.");
+        toast.error(t('recorder.download.error'));
       }
     } finally {
       setDownloadingId(null);
@@ -973,7 +977,7 @@ export default function RehearsalDrawer({
                   <Music className="w-5 h-5" />
                 </div>
                 <div className="text-left">
-                  <h3 className="text-sm font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">Rehearsal Space</h3>
+                  <h3 className="text-sm font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">{t('rehearsal.title')}</h3>
                   <h2 className="text-base font-extrabold text-gray-900 dark:text-white truncate max-w-[250px] md:max-w-[320px]">
                     {songTitle}
                   </h2>
@@ -982,7 +986,7 @@ export default function RehearsalDrawer({
               <button
                 onClick={onClose}
                 className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
-                aria-label="Close"
+                aria-label={t('common.close')}
               >
                 <X className="w-5 h-5" />
               </button>
@@ -999,7 +1003,7 @@ export default function RehearsalDrawer({
                       : "border-transparent text-gray-500 hover:text-gray-900 dark:hover:text-white"
                   }`}
                 >
-                  Reference Tracks
+                  {t('rehearsal.tab.reference')}
                 </button>
                 <button
                   onClick={() => setActiveTab("recorder")}
@@ -1009,7 +1013,7 @@ export default function RehearsalDrawer({
                       : "border-transparent text-gray-500 hover:text-gray-900 dark:hover:text-white"
                   }`}
                 >
-                  Voice Recorder
+                  {t('rehearsal.tab.voiceRecorder')}
                 </button>
               </div>
             )}
@@ -1026,16 +1030,16 @@ export default function RehearsalDrawer({
                         <div className="flex items-center gap-2.5 min-w-0">
                           <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse shrink-0" />
                           <span className="text-xs font-semibold text-gray-600 dark:text-gray-300 truncate">
-                            Reference: {selectedMedia === "youtube" && "YouTube video loaded"}
-                            {selectedMedia === "soundcloud" && "SoundCloud track loaded"}
-                            {selectedMedia === "spotify" && "Spotify player loaded"}
+                            {selectedMedia === "youtube" && t('rehearsal.reference.loaded.youtube')}
+                            {selectedMedia === "soundcloud" && t('rehearsal.reference.loaded.soundcloud')}
+                            {selectedMedia === "spotify" && t('rehearsal.reference.loaded.spotify')}
                           </span>
                         </div>
                         <button
                           onClick={() => setActiveTab("media")}
                           className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline shrink-0"
                         >
-                          Control Track
+                          {t('rehearsal.controlTrack')}
                         </button>
                       </div>
                     )}
@@ -1045,7 +1049,7 @@ export default function RehearsalDrawer({
                       <div className="flex items-baseline justify-end">
                         {hasMedia && (
                           <span className="text-[10px] text-indigo-500/80 dark:text-indigo-400/80 font-medium">
-                            🎧 Wear headphones to prevent bleed
+                            {t('rehearsal.headphonesHint')}
                           </span>
                         )}
                       </div>
@@ -1054,7 +1058,7 @@ export default function RehearsalDrawer({
 
                     {/* Saved Practice Takes List */}
                     <section className="mt-6 space-y-3">
-                      <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider text-left">Your Recordings</h3>
+                      <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider text-left">{t('rehearsal.recordings.yourRecordings')}</h3>
                       
                       {/* Fake practice takes mock list for guest demo preview */}
                       {!user ? (
@@ -1064,7 +1068,7 @@ export default function RehearsalDrawer({
                               <Play className="w-4 h-4 fill-current translate-x-0.5" />
                             </div>
                             <div className="flex-1 text-left">
-                              <h4 className="text-sm font-bold text-gray-900 dark:text-white">Vocal Practice - Guide Take 1</h4>
+                              <h4 className="text-sm font-bold text-gray-900 dark:text-white">{t('rehearsal.demo.take1')}</h4>
                               <span className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5 font-medium flex items-center gap-1.5">
                                 <Calendar className="w-3 h-3" /> Jul 1, 2026
                               </span>
@@ -1075,7 +1079,7 @@ export default function RehearsalDrawer({
                               <Play className="w-4 h-4 fill-current translate-x-0.5" />
                             </div>
                             <div className="flex-1 text-left">
-                              <h4 className="text-sm font-bold text-gray-900 dark:text-white">Guitar Chords - Run 2</h4>
+                              <h4 className="text-sm font-bold text-gray-900 dark:text-white">{t('rehearsal.demo.take2')}</h4>
                               <span className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5 font-medium flex items-center gap-1.5">
                                 <Calendar className="w-3 h-3" /> Jul 1, 2026
                               </span>
@@ -1085,14 +1089,14 @@ export default function RehearsalDrawer({
                       ) : isLoading ? (
                         <div className="flex flex-col items-center justify-center py-8 space-y-2">
                           <div className="w-6 h-6 border-2 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin" />
-                          <span className="text-xs text-gray-400">Loading takes...</span>
+                          <span className="text-xs text-gray-400">{t('rehearsal.loadingRecordings')}</span>
                         </div>
                       ) : recordings.length === 0 ? (
                         <div className="text-center py-10 border border-dashed border-gray-200 dark:border-gray-800 rounded-2xl p-4">
                           <p className="text-2xl mb-1">🎤</p>
-                          <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200">No recordings yet</h4>
+                          <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200">{t('rehearsal.recordings.empty')}</h4>
                           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 max-w-[280px] mx-auto">
-                            Use the recorder above to capture your chords practice and review it later.
+                            {t('rehearsal.recordings.emptyPracticeHint')}
                           </p>
                         </div>
                       ) : (
@@ -1133,14 +1137,14 @@ export default function RehearsalDrawer({
                           <Lock className="w-5 h-5" />
                         </div>
                         <div>
-                          <h4 className="text-sm font-bold text-gray-900 dark:text-white">Personal Audio Recorder</h4>
+                          <h4 className="text-sm font-bold text-gray-900 dark:text-white">{t('rehearsal.guest.title')}</h4>
                           <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
-                            Sign in to record your own practice takes, save them securely, and listen back anytime.
+                            {t('rehearsal.guest.description')}
                           </p>
                         </div>
                         <Link href="/auth/login">
                           <button className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer">
-                            Sign In to Record
+                            {t('rehearsal.guest.signIn')}
                           </button>
                         </Link>
                       </div>
@@ -1203,7 +1207,7 @@ export default function RehearsalDrawer({
                         width="100%"
                         height="100%"
                         src={typeof window !== "undefined" && (window as any).__E2E__ ? "about:blank" : getYouTubeEmbedUrl(youtubeUrl)}
-                        title="YouTube video player"
+                        title={t('mediaEmbeds.youtubeTitle')}
                         frameBorder="0"
                         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowFullScreen
@@ -1308,7 +1312,7 @@ export default function RehearsalDrawer({
               <DropdownMenuContent align="start" className="w-56 bg-[#1a1a1e]/95 backdrop-blur-xl border border-white/10 text-white rounded-xl shadow-2xl p-2 z-[60]" data-testid="mini-source-dropdown">
                 {hasMedia && (
                   <>
-                    <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-gray-400 font-bold px-2 pb-1">Reference Tracks</DropdownMenuLabel>
+                    <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-gray-400 font-bold px-2 pb-1">{t('rehearsal.tab.reference')}</DropdownMenuLabel>
                     {youtubeUrl && (
                       <DropdownMenuItem className="cursor-pointer focus:bg-white/10 focus:text-white rounded-md transition-colors my-0.5" onClick={() => {
                         stopActiveRecording();
@@ -1355,7 +1359,7 @@ export default function RehearsalDrawer({
                 {recordings.length > 0 && (
                   <>
                     {hasMedia && <DropdownMenuSeparator className="bg-white/10 my-2" />}
-                    <DropdownMenuLabel>User Recordings</DropdownMenuLabel>
+                    <DropdownMenuLabel>{t('miniPlayer.source.userRecordings')}</DropdownMenuLabel>
                     {recordings.map(rec => (
                       <DropdownMenuItem key={rec.id} onClick={() => {
                         if (!rec.audioUrl) return;
@@ -1380,7 +1384,7 @@ export default function RehearsalDrawer({
               <button 
                 onClick={() => seekRelative(-15)}
                 data-testid="mini-seek-back-btn"
-                title="Seek 15s backward"
+                title={t('miniPlayer.seekBack')}
                 className="p-2 text-white/80 hover:text-white transition-colors cursor-pointer shrink-0"
               >
                 <RotateCcw className="w-[18px] h-[18px]" />
@@ -1405,7 +1409,7 @@ export default function RehearsalDrawer({
               <button 
                 onClick={() => seekRelative(15)}
                 data-testid="mini-seek-forward-btn"
-                title="Seek 15s forward"
+                title={t('miniPlayer.seekForward')}
                 className="p-2 text-white/80 hover:text-white transition-colors cursor-pointer shrink-0"
               >
                 <RotateCw className="w-[18px] h-[18px]" />
@@ -1418,7 +1422,7 @@ export default function RehearsalDrawer({
             <button 
               onClick={onOpen}
               data-testid="mini-expand-btn"
-              title="Expand Rehearsal Space"
+              title={t('miniPlayer.expand')}
               className="p-2 text-white/85 hover:text-white hover:bg-white/10 rounded transition-colors cursor-pointer shrink-0"
             >
               <Music className="w-4 h-4" />
@@ -1438,7 +1442,7 @@ export default function RehearsalDrawer({
                   }
                 }}
                 data-testid="mini-close-btn"
-                title="Stop playback & close player"
+                title={t('miniPlayer.stop')}
                 className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded transition-colors cursor-pointer shrink-0"
               >
                 <X className="w-4 h-4" />

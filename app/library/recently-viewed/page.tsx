@@ -3,6 +3,7 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { Clock, Music } from 'lucide-react';
 import { getRecentlyViewedLight } from '@/lib/songs/serverQueries';
+import { t } from '@/lib/i18n';
 
 export default async function RecentlyViewedPage() {
     const supabase = await createClient();
@@ -16,13 +17,13 @@ export default async function RecentlyViewedPage() {
         <div>
             <div className="flex items-center gap-2 mb-4">
                 <Clock className="w-4 h-4 text-gray-500" />
-                <h2 className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">Recently Viewed</h2>
+                <h2 className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">{t('recentlyViewed.section')}</h2>
                 <span className="text-xs text-gray-600 ml-1">({songs.length})</span>
             </div>
 
             {songs.length === 0 ? (
                 <p className="text-sm text-gray-600 italic py-8 text-center">
-                    No recently viewed songs yet. Start exploring to see your history here.
+                    {t('recentlyViewed.emptyWithAction')}
                 </p>
             ) : (
                 <div className="grid grid-cols-1 gap-2">

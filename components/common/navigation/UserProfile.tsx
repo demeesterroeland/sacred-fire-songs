@@ -1,10 +1,12 @@
 import { type AuthUser } from '@/hooks/useAuth';
-import { LogOut, ChevronDown, Settings, User, Heart, FileText, ListMusic, Sun, Moon, Monitor, SlidersHorizontal, Clock } from 'lucide-react';
+import { LogOut, ChevronDown, Settings, User, Heart, FileText, ListMusic, Sun, Moon, Monitor, SlidersHorizontal, Clock, Globe } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useUserPreferences, type ThemePreference } from '@/context/UserPreferencesContext';
+import { t } from '@/lib/i18n';
+import { useLocale } from '@/context/LocaleContext';
 
 import { usePathname, useRouter } from 'next/navigation';
 
@@ -45,6 +47,7 @@ function ThemeToggle() {
 
 export const UserProfile = ({ onLogout, layout = 'header', showText = true, initialUser }: UserProfileProps) => {
   const { user, loading, logout } = useAuth(initialUser);
+  const { locale, setLocaleAndPersist, supportedLocales, localeLabels } = useLocale();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
@@ -71,12 +74,12 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true, init
         href={`/auth/login?next=${encodeURIComponent(pathname)}`}
         className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-sm transition-all shadow-lg shadow-red-900/20 active:scale-95 whitespace-nowrap"
       >
-        Sign In
+        {t('auth.login.submit')}
       </Link>
     );
   }
 
-  const userDisplayName = user.full_name || user.email?.split('@')[0] || 'Member';
+  const userDisplayName = user.full_name || user.email?.split('@')[0] || t('userMenu.defaultName');
   const userInitials = userDisplayName.substring(0, 1).toUpperCase();
   const userRole = user.role.charAt(0).toUpperCase() + user.role.slice(1);
 
@@ -113,7 +116,7 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true, init
         <div className="absolute top-full right-0 mt-2 w-72 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in zoom-in duration-200 origin-top-right">
           {/* Account Title */}
           <div className="flex justify-between items-center px-4 py-3 border-b border-gray-200 dark:border-gray-800">
-            <span className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">Account</span>
+            <span className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">{t('userMenu.account')}</span>
             <ThemeToggle />
           </div>
 
@@ -153,24 +156,46 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true, init
             <div className="space-y-1">
               <Link href="/account/settings" className="flex items-center gap-3 p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group">
                 <SlidersHorizontal className="w-4 h-4 group-hover:text-blue-400" />
-                <span className="text-sm font-medium">Account Settings</span>
+                <span className="text-sm font-medium">{t('userMenu.settings')}</span>
               </Link>
               <Link href="/songs?favorites=true" className="flex items-center gap-3 p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group">
                 <Heart className="w-4 h-4 group-hover:text-red-400" />
-                <span className="text-sm font-medium">Your Favorites</span>
+                <span className="text-sm font-medium">{t('userMenu.favorites')}</span>
               </Link>
               <Link href="/songs?status=draft" className="flex items-center gap-3 p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group">
                 <FileText className="w-4 h-4 group-hover:text-orange-400" />
-                <span className="text-sm font-medium">My Drafts</span>
+                <span className="text-sm font-medium">{t('userMenu.drafts')}</span>
               </Link>
               <Link href="/library/playlists" className="flex items-center gap-3 p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group">
                 <ListMusic className="w-4 h-4 group-hover:text-purple-400" />
-                <span className="text-sm font-medium">My Playlists</span>
+                <span className="text-sm font-medium">{t('userMenu.playlists')}</span>
               </Link>
               <Link href="/library/recently-viewed" className="flex items-center gap-3 p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group">
                 <Clock className="w-4 h-4 group-hover:text-amber-400" />
-                <span className="text-sm font-medium">Recently Viewed</span>
+                <span className="text-sm font-medium">{t('userMenu.recentlyViewed')}</span>
               </Link>
+            </div>
+
+            {/* Language switcher */}
+            <div className="h-px bg-gray-200 dark:bg-gray-800 my-2" />
+            <div className="flex items-center gap-2 px-2 py-1.5">
+              <Globe className="w-4 h-4 text-gray-400" />
+              <span className="text-sm font-medium text-gray-500 dark:text-gray-400 flex-1">{t('userMenu.language')}</span>
+              <div className="flex gap-1">
+                {supportedLocales.map((loc) => (
+                  <button
+                    key={loc}
+                    onClick={() => { setLocaleAndPersist(loc); }}
+                    className={`px-2 py-0.5 text-xs font-bold rounded transition-colors ${
+                      locale === loc
+                        ? 'bg-red-500 text-white'
+                        : 'text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'
+                    }`}
+                  >
+                    {loc.toUpperCase()}
+                  </button>
+                ))}
+              </div>
             </div>
 
             <div className="h-px bg-gray-200 dark:bg-gray-800 my-2" />
@@ -186,7 +211,7 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true, init
               className="w-full flex items-center gap-3 p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-colors group"
             >
               <LogOut className="w-4 h-4" />
-              <span className="text-sm font-medium">Sign Out</span>
+              <span className="text-sm font-medium">{t('userMenu.signOut')}</span>
             </button>
           </div>
         </div>

@@ -11,6 +11,7 @@ import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal
 import { deletePlaylist, togglePlaylistVisibility } from '@/app/actions/playlistActions';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import { t } from '@/lib/i18n';
 
 interface PlaylistContextMenuProps {
     playlistId: string;
@@ -38,7 +39,7 @@ export function PlaylistContextMenu({ playlistId, playlistTitle, isOwner, isPubl
             if (result.error) {
                 toast.error(result.error);
             } else {
-                toast.success(next ? 'Playlist is now public' : 'Playlist is now private');
+                toast.success(next ? t('playlists.toast.nowPublic') : t('playlists.toast.nowPrivate'));
                 router.refresh();
             }
         });
@@ -50,7 +51,7 @@ export function PlaylistContextMenu({ playlistId, playlistTitle, isOwner, isPubl
             if (result.error) {
                 toast.error(result.error);
             } else {
-                toast.success(`"${playlistTitle}" deleted`);
+                toast.success(t('playlists.toast.deleted', { title: playlistTitle }));
                 setShowDeleteModal(false);
                 router.refresh();
             }
@@ -64,7 +65,7 @@ export function PlaylistContextMenu({ playlistId, playlistTitle, isOwner, isPubl
                     <button
                         onClick={e => e.preventDefault()}
                         className="p-1.5 rounded-lg text-gray-600 hover:text-gray-800 dark:hover:text-gray-300 hover:bg-gray-200/60 dark:hover:bg-gray-700/60 transition-colors"
-                        aria-label="Playlist options"
+                        aria-label={t('playlists.optionsAria')}
                     >
                         <MoreHorizontal className="w-4 h-4" />
                     </button>
@@ -86,7 +87,7 @@ export function PlaylistContextMenu({ playlistId, playlistTitle, isOwner, isPubl
                                 className="gap-2 text-gray-700 dark:text-gray-200 focus:bg-gray-100 dark:focus:bg-gray-200 dark:bg-gray-800 cursor-pointer"
                             >
                                 <Pencil className="w-4 h-4" />
-                                Rename
+                                {t('playlists.context.rename')}
                             </DropdownMenuItem>
                             <DropdownMenuSeparator className="bg-gray-200 dark:bg-gray-800" />
                         </>
@@ -98,10 +99,10 @@ export function PlaylistContextMenu({ playlistId, playlistTitle, isOwner, isPubl
                                 if (isLinkAvailable) {
                                     onGetLink();
                                 } else {
-                                    toast.info('Make this playlist public to share the link');
+                                    toast.info(t('playlists.context.sharePrivateHint'));
                                 }
                             }}
-                            title={isLinkAvailable ? undefined : 'Make this playlist public to share the link'}
+                            title={isLinkAvailable ? undefined : t('playlists.context.sharePrivateHint')}
                             className={`gap-2 cursor-pointer ${
                                 isLinkAvailable
                                     ? 'text-gray-700 dark:text-gray-200 focus:bg-gray-100 dark:focus:bg-gray-200 dark:bg-gray-800'
@@ -109,9 +110,9 @@ export function PlaylistContextMenu({ playlistId, playlistTitle, isOwner, isPubl
                             }`}
                         >
                             <Link2 className="w-4 h-4" />
-                            Get Link
+                            {t('playlists.context.getLink')}
                             {!isLinkAvailable && (
-                                <span className="ml-auto text-xs text-gray-600">private</span>
+                                <span className="ml-auto text-xs text-gray-600">{t('playlists.context.privateBadge')}</span>
                             )}
                         </DropdownMenuItem>
                     )}
@@ -121,8 +122,8 @@ export function PlaylistContextMenu({ playlistId, playlistTitle, isOwner, isPubl
                         className="gap-2 text-gray-500 cursor-not-allowed"
                     >
                         <Copy className="w-4 h-4" />
-                        Duplicate Playlist
-                        <span className="ml-auto text-xs text-gray-600">soon</span>
+                        {t('playlists.context.duplicate')}
+                        <span className="ml-auto text-xs text-gray-600">{t('playlists.context.soonBadge')}</span>
                     </DropdownMenuItem>
 
                     {isOwner && isPublic !== undefined && (
@@ -134,7 +135,7 @@ export function PlaylistContextMenu({ playlistId, playlistTitle, isOwner, isPubl
                                 ? <Lock className="w-4 h-4" />
                                 : <Globe className="w-4 h-4" />
                             }
-                            {isPublic ? 'Make Private' : 'Make Public'}
+                            {isPublic ? t('playlists.context.makePrivate') : t('playlists.context.makePublic')}
                         </DropdownMenuItem>
                     )}
 
@@ -146,7 +147,7 @@ export function PlaylistContextMenu({ playlistId, playlistTitle, isOwner, isPubl
                                 className="gap-2 text-red-400 focus:bg-red-950/40 focus:text-red-300 cursor-pointer"
                             >
                                 <Trash2 className="w-4 h-4" />
-                                Delete Playlist
+                                {t('playlists.context.delete')}
                             </DropdownMenuItem>
                         </>
                     )}
@@ -157,8 +158,8 @@ export function PlaylistContextMenu({ playlistId, playlistTitle, isOwner, isPubl
                 isOpen={showDeleteModal}
                 onClose={() => setShowDeleteModal(false)}
                 onConfirm={handleDelete}
-                title="Delete Playlist"
-                message={`Delete "${playlistTitle}"? All songs will be removed from this playlist. This cannot be undone.`}
+                title={t('playlists.deleteModal.title')}
+                message={t('playlists.deleteModal.message', { title: playlistTitle })}
                 isDeleting={isDeleting}
             />
         </>

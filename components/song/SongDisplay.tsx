@@ -1,6 +1,8 @@
 'use client';
 
 import { parseChordProForDisplay, ChordProSection, ChordProLine, ChordProItem } from '@/lib/chordUtils';
+import { t } from '@/lib/i18n';
+import { useLocale } from '@/context/LocaleContext';
 
 interface SongDisplayProps {
     content: string;
@@ -9,6 +11,7 @@ interface SongDisplayProps {
 }
 
 export default function SongDisplay({ content, melodyNotation, hasChords = false }: SongDisplayProps) {
+    const { locale } = useLocale();
     const sections: ChordProSection[] = parseChordProForDisplay(content);
 
     return (
@@ -79,7 +82,7 @@ export default function SongDisplay({ content, melodyNotation, hasChords = false
             {/* Melody Notation Section */}
             {melodyNotation && (
                 <div className="pt-8 border-t border-gray-200/30 dark:border-gray-800/30">
-                    <h3 className="text-xs font-black text-gray-600 uppercase tracking-[0.2em] mb-4">Melody Notation</h3>
+                    <h3 className="text-xs font-black text-gray-600 uppercase tracking-[0.2em] mb-4">{t('song.melodyNotation')}</h3>
                     <div className="bg-gray-100/50 dark:bg-black/20 rounded-xl p-6 border border-gray-200 dark:border-white/5 font-mono text-sm text-gray-400 whitespace-pre-wrap leading-relaxed">
                         {melodyNotation}
                     </div>

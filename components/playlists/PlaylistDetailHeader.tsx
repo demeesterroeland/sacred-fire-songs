@@ -12,6 +12,7 @@ import {
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { usePlaylistRename } from '@/hooks/usePlaylistRename';
+import { t } from '@/lib/i18n';
 
 interface Props {
     playlistId: string;
@@ -59,7 +60,7 @@ export function PlaylistDetailHeader({
                 toast.error(result.error);
                 setIsPublic(!next);
             } else {
-                toast.success(next ? 'Playlist is now public' : 'Playlist is now private');
+                toast.success(next ? t('playlists.toast.nowPublic') : t('playlists.toast.nowPrivate'));
                 router.refresh();
             }
         });
@@ -68,7 +69,7 @@ export function PlaylistDetailHeader({
     // ─── Copy link ────────────────────────────────────────────────────────────
     const handleCopyLink = () => {
         navigator.clipboard.writeText(window.location.href);
-        toast.success('Link copied');
+        toast.success(t('playlists.toast.linkCopied'));
     };
 
     // ─── Description ──────────────────────────────────────────────────────────
@@ -103,7 +104,7 @@ export function PlaylistDetailHeader({
                 <Link
                     href="/library/playlists"
                     className="text-gray-500 hover:text-gray-300 transition-colors shrink-0"
-                    aria-label="Back to playlists"
+                    aria-label={t('playlists.detail.back')}
                 >
                     <ArrowLeft className="w-5 h-5" />
                 </Link>
@@ -126,7 +127,7 @@ export function PlaylistDetailHeader({
                         <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 truncate">{optimisticTitle}</h1>
                     )}
                     <p className="text-xs text-gray-500 mt-0.5">
-                        {songCount} song{songCount !== 1 ? 's' : ''}
+                        {songCount === 1 ? t('playlists.songCountSingle') : t('playlists.songCount', { count: songCount })}
                     </p>
                 </div>
 
@@ -135,7 +136,7 @@ export function PlaylistDetailHeader({
                     {isOwner && (
                         <button
                             onClick={handleToggleVisibility}
-                            aria-label={isPublic ? 'Make private' : 'Make public'}
+                            aria-label={isPublic ? t('playlists.context.makePrivate') : t('playlists.context.makePublic')}
                             title={isPublic ? 'Public — click to make private' : 'Private — click to make public'}
                             className="p-1.5 rounded-lg text-gray-600 hover:text-gray-800 dark:hover:text-gray-300 hover:bg-gray-200/60 dark:hover:bg-gray-700/60 transition-colors"
                         >
@@ -171,7 +172,7 @@ export function PlaylistDetailHeader({
                         }}
                         autoFocus
                         rows={2}
-                        placeholder="Add a description…"
+                        placeholder={t('playlists.detail.addDescription')}
                         className="w-full bg-gray-100 dark:bg-gray-800 border border-amber-500/50 rounded-lg px-3 py-2 text-sm text-gray-600 dark:text-gray-300 placeholder-gray-400 dark:placeholder-gray-600 outline-none focus:border-amber-500 resize-none"
                     />
                 ) : (
@@ -185,7 +186,7 @@ export function PlaylistDetailHeader({
                     >
                         {optimisticDesc
                             ? <span className="text-gray-400">{optimisticDesc}</span>
-                            : <span className="italic text-gray-700 hover:text-gray-600 transition-colors">Add a description…</span>
+                            : <span className="italic text-gray-700 hover:text-gray-600 transition-colors">{t('playlists.detail.addDescription')}</span>
                         }
                     </button>
                 )
