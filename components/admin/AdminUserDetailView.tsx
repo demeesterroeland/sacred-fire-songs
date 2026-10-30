@@ -8,8 +8,7 @@ import {
   Music,
   ListMusic,
   FileText,
-  Shield,
-  UserCheck,
+  Guitar,
   Calendar,
   Clock,
   ExternalLink,
@@ -18,7 +17,9 @@ import {
   Mail,
   Fingerprint,
 } from 'lucide-react';
-import type { AdminUserDetails, UserRole } from '@/lib/admin/types';
+import type { AdminUserDetails } from '@/lib/admin/types';
+import { getActivityStatus, isMusicianRole } from '@/lib/admin/userOverview';
+import { ActivityStatusBadge, RoleBadge } from './AdminBadges';
 
 interface AdminUserDetailViewProps {
   user: AdminUserDetails;
@@ -41,44 +42,11 @@ export default function AdminUserDetailView({ user }: AdminUserDetailViewProps) 
     });
   };
 
-  const getRoleBadge = (role: UserRole) => {
-    switch (role) {
-      case 'admin':
-        return (
-          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-purple-100 text-purple-700 dark:bg-purple-950/80 dark:text-purple-300 border border-purple-200 dark:border-purple-800">
-            <Shield className="w-3.5 h-3.5" /> Admin
-          </span>
-        );
-      case 'gatekeeper':
-        return (
-          <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold bg-amber-100 text-amber-700 dark:bg-amber-950/80 dark:text-amber-300 border border-amber-200 dark:border-amber-800">
-            <UserCheck className="w-3.5 h-3.5" /> Gatekeeper
-          </span>
-        );
-      case 'musician':
-        return (
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300 border border-emerald-200 dark:border-emerald-800">
-            Musician
-          </span>
-        );
-      case 'member':
-        return (
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-700 dark:bg-blue-950/80 dark:text-blue-300 border border-blue-200 dark:border-blue-800">
-            Member
-          </span>
-        );
-      default:
-        return (
-          <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 border border-gray-200 dark:border-gray-700">
-            {role}
-          </span>
-        );
-    }
-  };
-
   const songs = user.contributions.songs;
   const versions = user.contributions.versions;
   const playlists = user.contributions.playlists;
+  const publicPlaylistsCount = playlists.filter((p) => p.is_public).length;
+  const isMusician = isMusicianRole(user.role);
 
   return (
     <div className="space-y-6">
@@ -116,7 +84,7 @@ export default function AdminUserDetailView({ user }: AdminUserDetailViewProps) 
                 <h1 className="text-xl md:text-2xl font-black text-gray-900 dark:text-white tracking-tight">
                   {displayName}
                 </h1>
-                {getRoleBadge(user.role)}
+                <RoleBadge role={user.role} size="md" />
               </div>
 
               <div className="flex items-center gap-2 text-xs md:text-sm text-gray-500 dark:text-gray-400">
@@ -132,7 +100,7 @@ export default function AdminUserDetailView({ user }: AdminUserDetailViewProps) 
           </div>
 
           {/* Dates Metadata */}
-          <div className="flex flex-row md:flex-col justify-start md:items-end gap-4 md:gap-1 text-xs text-gray-500 dark:text-gray-400 border-t md:border-t-0 pt-4 md:pt-0 border-gray-100 dark:border-gray-800">
+          <div className="flex flex-row flex-wrap md:flex-col justify-start md:items-end gap-4 md:gap-1 text-xs text-gray-500 dark:text-gray-400 border-t md:border-t-0 pt-4 md:pt-0 border-gray-100 dark:border-gray-800">
             <div className="flex items-center gap-1.5">
               <Calendar className="w-3.5 h-3.5 text-gray-400" />
               <span>Joined: <strong>{formatDate(user.created_at)}</strong></span>
@@ -141,6 +109,15 @@ export default function AdminUserDetailView({ user }: AdminUserDetailViewProps) 
               <Clock className="w-3.5 h-3.5 text-gray-400" />
               <span>Last Active: <strong>{formatDate(user.last_seen_at)}</strong></span>
             </div>
+            <div className="flex items-center gap-1.5">
+              <ActivityStatusBadge status={getActivityStatus(user.last_seen_at)} />
+            </div>
+            <div className="flex items-center gap-1.5">
+              <Guitar className="w-3.5 h-3.5 text-gray-400" />
+              <span>
+                Musician: <strong>{isMusician ? 'Yes' : 'No'}</strong>
+              </span>
+            </div>
           </div>
         </div>
       </div>
@@ -148,6 +125,8 @@ export default function AdminUserDetailView({ user }: AdminUserDetailViewProps) 
       {/* Contribution Metric Stat Cards */}
       <div className="grid grid-cols-3 gap-3 md:gap-4">
         <button
+          type="button"
+          aria-pressed={activeTab === 'songs'}
           onClick={() => setActiveTab('songs')}
           className={`p-4 md:p-5 rounded-2xl border text-left transition-all ${
             activeTab === 'songs'
@@ -165,6 +144,8 @@ export default function AdminUserDetailView({ user }: AdminUserDetailViewProps) 
         </button>
 
         <button
+          type="button"
+          aria-pressed={activeTab === 'versions'}
           onClick={() => setActiveTab('versions')}
           className={`p-4 md:p-5 rounded-2xl border text-left transition-all ${
             activeTab === 'versions'
@@ -182,6 +163,8 @@ export default function AdminUserDetailView({ user }: AdminUserDetailViewProps) 
         </button>
 
         <button
+          type="button"
+          aria-pressed={activeTab === 'playlists'}
           onClick={() => setActiveTab('playlists')}
           className={`p-4 md:p-5 rounded-2xl border text-left transition-all ${
             activeTab === 'playlists'
@@ -196,14 +179,18 @@ export default function AdminUserDetailView({ user }: AdminUserDetailViewProps) 
           <div className="text-2xl md:text-3xl font-black text-gray-900 dark:text-white">
             {playlists.length}
           </div>
+          <div className="text-[11px] text-gray-400 mt-0.5">{publicPlaylistsCount} public</div>
         </button>
       </div>
 
       {/* Contribution Details Tab Content */}
       <div className="bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-3xl shadow-sm overflow-hidden">
         {/* Tab Headers */}
-        <div className="flex border-b border-gray-200 dark:border-gray-800 px-6 pt-4 gap-6">
+        <div role="tablist" aria-label="Contributions" className="flex border-b border-gray-200 dark:border-gray-800 px-6 pt-4 gap-6">
           <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'songs'}
             onClick={() => setActiveTab('songs')}
             className={`pb-3 text-sm font-bold border-b-2 transition-all flex items-center gap-2 ${
               activeTab === 'songs'
@@ -216,6 +203,9 @@ export default function AdminUserDetailView({ user }: AdminUserDetailViewProps) 
           </button>
 
           <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'versions'}
             onClick={() => setActiveTab('versions')}
             className={`pb-3 text-sm font-bold border-b-2 transition-all flex items-center gap-2 ${
               activeTab === 'versions'
@@ -228,6 +218,9 @@ export default function AdminUserDetailView({ user }: AdminUserDetailViewProps) 
           </button>
 
           <button
+            type="button"
+            role="tab"
+            aria-selected={activeTab === 'playlists'}
             onClick={() => setActiveTab('playlists')}
             className={`pb-3 text-sm font-bold border-b-2 transition-all flex items-center gap-2 ${
               activeTab === 'playlists'
