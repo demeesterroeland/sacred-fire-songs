@@ -1,6 +1,6 @@
 # Project Analysis & Design Document: Song Sharing Application (Sacred Fire Songs)
 
-**Version:** 1.39
+**Version:** 1.42
 **Status:** Living Document
 **Date:** Oct 30, 2026
 
@@ -29,9 +29,12 @@
 | **1.34** | Oct 30, 2026 | Moved the 221 seeded songs (`supabase/seeds/03_*.sql` … `10_*.sql`) to `sacred-fire-songs-collection`; `setup-test-db.mjs` now always seeds test accounts plus randomly generated songs (`E2E_RANDOM_SEED` flag retired). Extended `random-seeder.mjs` to generate every song shape exercised by the unit and E2E tests, and added `docs/testing/song.feature` describing those situations in Gherkin. |
 | **1.35** | Oct 30, 2026 | Added `scripts/export-random-seed.mjs` (`npm run seed:generate`) which runs the random seeder and writes `supabase/seeds/03_songs_random_generated.sql` (200 generated songs) so `supabase db reset` / `supabase start` still seed a realistic local database. |
 | **1.36** | Oct 30, 2026 | Implemented Story 4.2.1 (Issue #18) for musician setlist PDF export using ChordSheetJS and jsPDF with firelight-optimized typography, pagination, section headers, transposition overrides, and UI quick action buttons. |
-| **1.37** | Oct 30, 2026 | Added §6.4 Internationalization (Story 3.7.1, #246): English + Dutch UI via a lightweight typed `t()` (`lib/i18n`), request-scoped server locale (`lib/i18n/server.ts`, cookie → Accept-Language → English), `LocaleProvider` hydrating in the server locale, `LanguageSwitcher` (sidebar, user menu, Account → Preferences). Playlist PDF export (#220) UI strings translated and PDF labels localized via `getPdfLabels(locale)`. Tests: `docs/testing/i18n.feature`, `testing/bdd/steps/i18n.steps.ts`, `e2e/tests/i18n.spec.ts`. |
-| **1.38** | Oct 30, 2026 | §6.4: added Spanish, Italian, Russian, Southern Quechua, French and Brazilian Portuguese (Story 3.7.1, I18N-12); language switcher is now a select. |
-| **1.39** | Oct 30, 2026 | §6.4: language picker redesigned as an accessible listbox with ember "wick" markers (full variant in the sidebar, compact in user menu and Preferences). |
+| **1.37** | Oct 30, 2026 | Epic 3.6 / Story 3.6.1 (Admin User Overview & Contributions, #257/#258): admin area `/admin/users` and `/admin/users/[id]` with server-side role guard, `public.fn_is_admin()` and admin read policies on `profiles`/`setlists`, per-user status (active/inactive/never), musician status, contribution counts and lists. Fixed the user detail query to use `compositions.original_author` and `song_versions.composition_id`/`version_name`. Added sections 5.2 (admin access), 6.4 (testing pyramid for Story 3.6.1), 7.12–7.13 (admin screens). |
+| **1.38** | Oct 30, 2026 | Admin screens now use the app layout of the Library section: own scroll container (fixes the sticky admin header overlapping the summary cards), page title + pill tabs, breadcrumb on the user detail page, summary cards in the `LibrarySummary` style and pill tabs for contributions. |
+| **1.39** | Oct 30, 2026 | Added §6.5 Internationalization (Story 3.7.1, #246): English + Dutch UI via a lightweight typed `t()` (`lib/i18n`), request-scoped server locale (`lib/i18n/server.ts`, cookie → Accept-Language → English), `LocaleProvider` hydrating in the server locale, `LanguageSwitcher` (sidebar, user menu, Account → Preferences). Playlist PDF export (#220) UI strings translated and PDF labels localized via `getPdfLabels(locale)`. Tests: `docs/testing/i18n.feature`, `testing/bdd/steps/i18n.steps.ts`, `e2e/tests/i18n.spec.ts`. |
+| **1.40** | Oct 30, 2026 | §6.5: added Spanish, Italian, Russian, Southern Quechua, French and Brazilian Portuguese (Story 3.7.1, I18N-12); language switcher is now a select. |
+| **1.41** | Oct 30, 2026 | §6.5: language picker redesigned as an accessible listbox with ember "wick" markers (full variant in the sidebar, compact in user menu and Preferences). |
+| **1.42** | Oct 30, 2026 | §6.5: admin area (Story 3.6.1, #259) translated into all eight languages (`admin.*` keys); admin dates follow `LOCALE_DATE_TAGS`; account-menu trigger label `userMenu.trigger`. |
 
 
 ## 1. Introduction
@@ -87,7 +90,8 @@ The application is a **Progressive Web App (PWA)** optimized for mobile use duri
 * **[x]** Rich Editing: Create/Edit Songs (Owner/Admin).
 
 ### Phase 3 & 4 (Future)
-* User Accounts, Favorites, Setlists, PDF Export.
+* User Accounts, Favorites, Gatekeeper Role, Musician Setting, Setlists, PDF Export.
+* **[~]** Administrative Management (Epic 3.6): **[x]** Story 3.6.1 Admin user overview, details & contributions; further admin stories (configuration, settings, songs) pending.
 
 ## 5. Domain & Data Model (Implemented Codebase)
 
@@ -126,6 +130,14 @@ The application is a **Progressive Web App (PWA)** optimized for mobile use duri
 
 *(Categories and Setlists tables are designing but not yet implemented).*
 
+### 5.2 Admin Access (Epic 3.6)
+* **Role source:** `profiles.role` (`user_role` enum: `admin`, `gatekeeper`, `expert`, `musician`, `member`). Only `admin` may open `/admin/*`. "Musician status" in the admin UI means role `musician` or `expert`.
+* **`public.fn_is_admin()`** (migration `20261009194500_admin_profiles_policy.sql`): `SECURITY DEFINER` helper returning whether `auth.uid()` has role `admin`, used in RLS without recursing into `profiles` policies.
+* **Policies:** "Admins can read all profiles" (`profiles`, SELECT) and "Admins can view all setlists" (`setlists`, SELECT, so private playlists are counted and listed). Admins already read all `compositions` / `song_versions` via the existing admin-aware SELECT policies.
+* **Queries:** `lib/admin/userQueries.ts` holds the queries with the Supabase client injected (`fetchAdminAccess`, `fetchAdminUsersList`, `fetchAdminUserDetails`); `lib/admin/serverQueries.ts` wraps them with the server client (`checkAdminAccess`, `getAdminUsersList`, `getAdminUserDetails`). Both list and detail queries return `null` for non-admin callers. Pure presentation logic (activity status, role labels, search/filter/sort, totals) lives in `lib/admin/userOverview.ts`.
+* **Activity status:** `active` when `profiles.last_seen_at` is within 30 days, `inactive` when older, `never` when null.
+* **Not modelled yet:** comments and flags (named as example contributions in Story 3.6.1) have no tables, so they are not shown.
+
 ## 6. System Architecture
 
 ### 6.1 Technology Stack
@@ -149,7 +161,13 @@ The application is a **Progressive Web App (PWA)** optimized for mobile use duri
 * **Programmatic Random Seeding:** `scripts/random-seeder.mjs` (PL/pgSQL, executed by `setup-test-db.mjs`; song count via `E2E_RANDOM_SONGS_COUNT`, default 80) generates randomized song titles, ChordPro content, media links, elements/lineage taxonomy mappings, playlists and private user rehearsal recordings (staggered takes for 30% of songs, and multiple 2-5 takes for 50% of songs). The generated songs deliberately cover every song shape the unit and E2E tests exercise; see `docs/testing/song.feature` for the catalogue of situations. This exercises the system's parsing, filtering, layout, search, and private recording drawer list views.
 * **Local Optimization:** For fast local test iteration, setting the environment variable `E2E_REUSE_DB=1` skips the database wipe and re-seed, reusing the existing database state.
 
-### 6.4 Internationalization (i18n)
+### 6.4 Testing Pyramid for Story 3.6.1 (Admin Users)
+* **Living spec:** `docs/testing/admin-users.feature` (tags `@unit`, `@seed`, `@e2e`, domain tag `@adminUsers`), registered in `cucumber.json` next to `docs/testing/song.feature`.
+* **@unit (Cucumber + vitest):** `testing/bdd/steps/admin-users.steps.ts` and `testing/unit/tests/adminUserOverview.test.ts` / `adminQueries.test.ts` run the real query code against `testing/support/fakeSupabase.ts`, an in-memory client that rejects columns missing from the real tables (PostgREST error `42703`).
+* **@seed (Cucumber + Postgres):** `testing/bdd/support/db.ts` connects to `DATABASE_URL` (default local Supabase on port 54322), runs each scenario in a rolled-back transaction and impersonates seeded users (`SET LOCAL ROLE authenticated` + `request.jwt.claims`) to check `fn_is_admin()`, RLS on private playlists, and that the fake's column list matches the database.
+* **@e2e (Playwright):** `e2e/tests/admin-users.spec.ts` (role-based access, account menu link, overview, search/filter/empty state, detail tabs, unknown user). It upserts one song, version and public playlist for the gatekeeper with fixed ids.
+
+### 6.5 Internationalization (i18n)
 * **Languages:** English (default, source of truth), Dutch, Spanish, Italian, Russian, Southern Quechua (Runasimi), French and Brazilian Portuguese. Codes `en nl es it ru qu fr pt`; browser tags `quz`/`quy` map to `qu`, `pt-BR`/`pt-PT` to `pt`; dates use `LOCALE_DATE_TAGS`. Quechua is machine-assisted and needs native review. Only the interface is translated; song content (titles, lyrics, chords, artists, tags) never is. Story 3.7.1 / issue #246; behaviour catalogue in `docs/testing/i18n.feature` (I18N-01 … I18N-10).
 * **Dictionaries:** `messages/en.ts` (`as const`, `TranslationKey = keyof typeof en`) and one `Partial<Record<TranslationKey, string>>` file per language (`messages/nl.ts`, `es`, `it`, `ru`, `qu`, `fr`, `pt`), registered in `DICTIONARIES`. Count strings in Russian/Quechua use count-neutral phrasing because the engine only knows one/other. Keys are dot-namespaced per feature; placeholders use `{name}`. Unit tests enforce identical key sets, identical placeholders and no empty values.
 * **Engine (`lib/i18n/index.ts`):** no third-party library, no middleware or locale URLs. `tWithLocale(locale, key, params)` interpolates and falls back active dictionary → English → the key itself (never blank). `resolveLocale()` picks the explicit choice (localStorage, then cookie) → first supported browser language (`navigator.languages` / `Accept-Language`, `nl-BE` → `nl`) → English; unknown values are ignored.
@@ -203,3 +221,12 @@ The application is a **Progressive Web App (PWA)** optimized for mobile use duri
 ### 7.11 Screen 16: Playlists
 * **Status:** Mockup Created (`doc/design/screens/screen16_playlists.html`).
 * **Features:** Playlist management with creation and list view of ceremonial sets.
+
+### 7.12 Admin Users Overview
+* **Status:** Implemented (`app/admin/users/page.tsx`, `components/admin/AdminUsersTable.tsx`). No mockup in `docs/design/screens/`; the layout mirrors the Library section (`app/library/layout.tsx`, `LibraryTabs.tsx`): `<main>` scroll container, "Administration" title with pill tabs (Users, Configuration – planned), and summary cards styled like `components/home/LibrarySummary.tsx`.
+* **Access:** `app/admin/layout.tsx` checks the role server-side; non-admins get `components/admin/AccessDeniedNotice.tsx`, guests are redirected to `/auth/login` by `proxy.ts`. Entry points: "Admin Portal" in the account menu and "Administration" in the sidebar (admins only).
+* **Features:** Totals (users, active in last 30 days, songs, playlists, staff), search by name/e-mail, role filter (the "Musician / Expert" option matches both roles), sort (recently joined, top contributors, name), and one row per user with role badge, e-mail, songs/versions/playlists counts, activity status and join date. Separate empty states for "no users" and "no matches".
+
+### 7.13 Admin User Detail
+* **Status:** Implemented (`app/admin/users/[id]/page.tsx`, `components/admin/AdminUserDetailView.tsx`, `app/admin/users/[id]/not-found.tsx`).
+* **Features:** Breadcrumb (Administration › Users), profile card (name, e-mail, id, role, join date, last active, activity status, musician status), and pill tabs with counts listing songs added, versions submitted and playlists (with public count, public/private badges). An unknown id shows "User Not Found" with a link back to the list.

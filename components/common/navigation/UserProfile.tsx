@@ -1,5 +1,5 @@
 import { type AuthUser } from '@/hooks/useAuth';
-import { LogOut, ChevronDown, Settings, User, Heart, FileText, ListMusic, Sun, Moon, Monitor, SlidersHorizontal, Clock, Globe } from 'lucide-react';
+import { LogOut, ChevronDown, Settings, User, Heart, FileText, ListMusic, Sun, Moon, Monitor, SlidersHorizontal, Clock, Globe, ShieldCheck } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
@@ -92,7 +92,7 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true, init
       {/* Trigger */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        aria-label={t('userMenu.account')}
+        aria-label={t('userMenu.trigger')}
         aria-haspopup="menu"
         aria-expanded={isOpen}
         className="flex items-center gap-2 px-3 py-2 rounded-full bg-gray-200/80 dark:bg-gray-800/80 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors active:scale-95 group border border-transparent hover:border-gray-400 dark:hover:border-gray-600"
@@ -161,6 +161,16 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true, init
 
             {/* Menu Items */}
             <div className="space-y-1">
+              {user.role === 'admin' && (
+                <Link
+                  href="/admin/users"
+                  onClick={() => setIsOpen(false)}
+                  className="flex items-center gap-3 p-2 rounded-lg text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/40 transition-colors group font-semibold"
+                >
+                  <ShieldCheck className="w-4 h-4 text-purple-600 dark:text-purple-400" />
+                  <span className="text-sm">{t('userMenu.adminPortal')}</span>
+                </Link>
+              )}
               <Link href="/account/settings" className="flex items-center gap-3 p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group">
                 <SlidersHorizontal className="w-4 h-4 group-hover:text-blue-400" />
                 <span className="text-sm font-medium">{t('userMenu.settings')}</span>
