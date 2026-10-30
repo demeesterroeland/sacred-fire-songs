@@ -360,6 +360,11 @@ export async function getPlaylistSongsForExport(
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
+    // Export PDF is a member-only feature
+    if (!user) {
+        return { title: '', songs: [], error: 'Please log in to export a PDF songbook' };
+    }
+
     const { data: playlist, error: playlistError } = await supabase
         .from('setlists')
         .select('id, title, owner_id, is_public, description')
@@ -369,10 +374,8 @@ export async function getPlaylistSongsForExport(
     if (playlistError || !playlist) return { title: '', songs: [], error: 'Playlist not found' };
 
     // Private playlists: only owner can access
-    if (!playlist.is_public) {
-        if (!user || playlist.owner_id !== user.id) {
-            return { title: '', songs: [], error: 'Access denied' };
-        }
+    if (!playlist.is_public && playlist.owner_id !== user.id) {
+        return { title: '', songs: [], error: 'Access denied' };
     }
 
     const { data: items, error: itemsError } = await supabase
@@ -397,6 +400,14 @@ export async function getPlaylistSongsForExport(
         .order('order_index', { ascending: true });
 
     if (itemsError) return { title: playlist.title, songs: [], error: itemsError.message };
+
+    if (items && items.length > 200) {
+        return {
+            title: playlist.title,
+            songs: [],
+            error: 'Export limit exceeded: maximum 200 songs allowed per PDF export',
+        };
+    }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const songs: ExportPlaylistSong[] = (items || []).map((item: any) => {

@@ -14,6 +14,14 @@ import { exportPlaylistToPdf, downloadPdf } from '@/lib/export/pdfExport';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { usePlaylistRename } from '@/hooks/usePlaylistRename';
+import {
+    Dialog,
+    DialogContent,
+    DialogHeader,
+    DialogTitle,
+    DialogDescription,
+    DialogFooter,
+} from '@/components/ui/dialog';
 
 interface Props {
     playlistId: string;
@@ -23,6 +31,7 @@ interface Props {
     songCount: number;
     isOwner: boolean;
     isCurator?: boolean;
+    isLoggedIn?: boolean;
 }
 
 export function PlaylistDetailHeader({
@@ -33,6 +42,7 @@ export function PlaylistDetailHeader({
     songCount,
     isOwner,
     isCurator = false,
+    isLoggedIn = false,
 }: Props) {
     const canEdit = isOwner || isCurator;
     // ─── Title ────────────────────────────────────────────────────────────────
@@ -100,8 +110,19 @@ export function PlaylistDetailHeader({
 
     // ─── Export PDF ───────────────────────────────────────────────────────────
     const [isExportingPdf, setIsExportingPdf] = useState(false);
+    const [showLoginModal, setShowLoginModal] = useState(false);
 
     const handleExportPdf = async () => {
+        if (!isLoggedIn) {
+            setShowLoginModal(true);
+            return;
+        }
+
+        if (songCount > 200) {
+            toast.error('Export limit exceeded: maximum 200 songs can be exported.');
+            return;
+        }
+
         if (songCount === 0) {
             toast.info('Cannot export an empty playlist. Add songs first.');
             return;
@@ -249,6 +270,34 @@ export function PlaylistDetailHeader({
                     ? <p className="text-sm text-gray-400">{optimisticDesc}</p>
                     : null
             )}
+
+            {/* Login Prompt Modal for PDF Export */}
+            <Dialog open={showLoginModal} onOpenChange={setShowLoginModal}>
+                <DialogContent className="sm:max-w-md bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 text-gray-900 dark:text-gray-100">
+                    <DialogHeader>
+                        <DialogTitle className="text-xl font-bold">Log in to export PDF</DialogTitle>
+                        <DialogDescription className="text-gray-600 dark:text-gray-400 mt-2">
+                            PDF songbook export is a member-only feature. Please log in or create an account to download this ceremony songbook.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter className="mt-4 flex gap-2 sm:justify-end">
+                        <button
+                            type="button"
+                            onClick={() => setShowLoginModal(false)}
+                            className="px-4 py-2 text-sm font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                        >
+                            Cancel
+                        </button>
+                        <Link
+                            href={`/auth/login?next=${encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname : `/library/playlists/${playlistId}`)}`}
+                            className="px-4 py-2 text-sm font-semibold rounded-lg bg-amber-500 hover:bg-amber-600 text-white transition-colors text-center"
+                            onClick={() => setShowLoginModal(false)}
+                        >
+                            Log In
+                        </Link>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </div>
     );
 }

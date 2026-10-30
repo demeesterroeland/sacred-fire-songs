@@ -2,6 +2,7 @@ import ChordSheetJS from 'chordsheetjs';
 import { jsPDF } from 'jspdf';
 import { parseChordProForDisplay, ChordProSection } from '@/lib/chordUtils';
 import { parseChordPro, convertChordsOverLyricsToChordPro } from '@/lib/chordProParsing';
+import { DEJAVU_SANS_REGULAR_B64, DEJAVU_SANS_BOLD_B64 } from './dejavuFonts';
 
 export interface ExportSongData {
     title: string;
@@ -31,33 +32,12 @@ export interface FormattedSongForPdf {
     url?: string;
 }
 
-// Windows-1252 character codes supported natively in standard PDF Type 1 Helvetica fonts
-const winAnsiAllowedCodes = new Set<number>();
-for (let i = 32; i <= 255; i++) {
-    winAnsiAllowedCodes.add(i);
-}
-// Remove unmapped Windows-1252 code points
-[129, 141, 143, 144, 157].forEach(c => winAnsiAllowedCodes.delete(c));
-
 /**
- * Normalizes unicode text to prevent jsPDF Helvetica font from dropping into
- * double-byte UCS-2 BE encoding, which causes severe letter spacing distortion
- * when encountering characters outside WinAnsi (such as acute consonants like 'ź').
+ * Cleans string for PDF rendering, trimming whitespace while preserving all
+ * Unicode characters (such as acute accents on ź, ñ, ā, ī, ū, etc.).
  */
 export function sanitizeForPdf(str: string): string {
-    if (!str) return '';
-    let result = '';
-    for (const char of str) {
-        const code = char.charCodeAt(0);
-        if (code < 256 && winAnsiAllowedCodes.has(code)) {
-            result += char;
-        } else {
-            // Decompose and strip non-ASCII combining marks
-            const decomposed = char.normalize('NFKD').replace(/[^\x00-\x7F]/g, '');
-            result += decomposed || '?';
-        }
-    }
-    return result;
+    return str || '';
 }
 
 /**
@@ -189,6 +169,12 @@ export async function exportPlaylistToPdf(playlist: ExportPlaylistData): Promise
         format: 'a4',
     });
 
+    // Register Unicode DejaVu Sans font for complete diacritics support (e.g. ź, ñ, ā, ī, etc.)
+    doc.addFileToVFS('DejaVuSans.ttf', DEJAVU_SANS_REGULAR_B64);
+    doc.addFont('DejaVuSans.ttf', 'DejaVuSans', 'normal');
+    doc.addFileToVFS('DejaVuSans-Bold.ttf', DEJAVU_SANS_BOLD_B64);
+    doc.addFont('DejaVuSans-Bold.ttf', 'DejaVuSans', 'bold');
+
     const pageWidth = doc.internal.pageSize.getWidth();
     const pageHeight = doc.internal.pageSize.getHeight();
     const leftMargin = 40;
@@ -209,7 +195,7 @@ export async function exportPlaylistToPdf(playlist: ExportPlaylistData): Promise
         pageSongMap.set(newPageNum, { title: songTitle, url: songUrl });
 
         y = topMargin;
-        doc.setFont('helvetica', 'italic');
+        doc.setFont('DejaVuSans', 'normal');
         doc.setFontSize(8.5);
         doc.setTextColor(156, 163, 175);
         doc.text(`${songTitle} (continued)`, leftMargin, y);
@@ -219,7 +205,7 @@ export async function exportPlaylistToPdf(playlist: ExportPlaylistData): Promise
     // ─── Setlist Header on Page 1 ─────────────────────────────────────────────
     pageSongMap.set(1, { title: playlist.title || 'Setlist' });
 
-    doc.setFont('helvetica', 'bold');
+    doc.setFont('DejaVuSans', 'bold');
     doc.setFontSize(22);
     doc.setTextColor(17, 24, 39); // deep charcoal
     doc.text(sanitizeForPdf(playlist.title || 'Setlist'), leftMargin, y);
@@ -234,14 +220,14 @@ export async function exportPlaylistToPdf(playlist: ExportPlaylistData): Promise
     const songCount = playlist.songs.length;
     const subtitle = `${songCount} song${songCount === 1 ? '' : 's'}   •   Generated ${dateStr}`;
 
-    doc.setFont('helvetica', 'normal');
+    doc.setFont('DejaVuSans', 'normal');
     doc.setFontSize(9.5);
     doc.setTextColor(107, 114, 128); // medium gray
     doc.text(subtitle, leftMargin, y);
     y += 14;
 
     if (playlist.description) {
-        doc.setFont('helvetica', 'italic');
+        doc.setFont('DejaVuSans', 'normal');
         doc.setFontSize(9);
         doc.setTextColor(75, 85, 99);
         const descLines = doc.splitTextToSize(sanitizeForPdf(playlist.description), usableWidth);
@@ -269,7 +255,7 @@ export async function exportPlaylistToPdf(playlist: ExportPlaylistData): Promise
         pageSongMap.set(currentSongPage, { title: formattedSong.title, url: formattedSong.url });
 
         // Song Title
-        doc.setFont('helvetica', 'bold');
+        doc.setFont('DejaVuSans', 'bold');
         doc.setFontSize(16);
         doc.setTextColor(17, 24, 39);
         doc.text(formattedSong.title, leftMargin, y);
@@ -285,7 +271,7 @@ export async function exportPlaylistToPdf(playlist: ExportPlaylistData): Promise
         if (formattedSong.tuning) metaPills.push(`Tuning: ${formattedSong.tuning}`);
 
         if (metaPills.length > 0) {
-            doc.setFont('helvetica', 'normal');
+            doc.setFont('DejaVuSans', 'normal');
             doc.setFontSize(9);
             doc.setTextColor(107, 114, 128);
             const metaLine = metaPills.join('   |   ');
@@ -309,7 +295,7 @@ export async function exportPlaylistToPdf(playlist: ExportPlaylistData): Promise
                     addContinuationPage(formattedSong.title);
                 }
 
-                doc.setFont('helvetica', 'bold');
+                doc.setFont('DejaVuSans', 'bold');
                 doc.setFontSize(8.5);
                 if (isChorus) {
                     doc.setTextColor(194, 65, 12); // terracotta
@@ -340,7 +326,7 @@ export async function exportPlaylistToPdf(playlist: ExportPlaylistData): Promise
 
                 // Pure comment line
                 if (hasComments && line.items.every(it => it.comment !== undefined || (!it.lyrics && !it.chords))) {
-                    doc.setFont('helvetica', 'italic');
+                    doc.setFont('DejaVuSans', 'normal');
                     doc.setFontSize(9);
                     doc.setTextColor(107, 114, 128);
                     const commentText = line.items.map(it => it.comment || '').join(' ').trim();
@@ -356,7 +342,7 @@ export async function exportPlaylistToPdf(playlist: ExportPlaylistData): Promise
 
                 for (const item of line.items) {
                     if (item.comment !== undefined) {
-                        doc.setFont('helvetica', 'italic');
+                        doc.setFont('DejaVuSans', 'normal');
                         doc.setFontSize(8.5);
                         doc.setTextColor(120, 120, 120);
                         const cText = item.comment;
@@ -368,11 +354,11 @@ export async function exportPlaylistToPdf(playlist: ExportPlaylistData): Promise
                     const chordText = item.chords || '';
                     const lyricText = item.lyrics || '';
 
-                    doc.setFont('helvetica', 'bold');
+                    doc.setFont('DejaVuSans', 'bold');
                     doc.setFontSize(8.5);
                     const chordWidth = chordText ? doc.getTextWidth(chordText) : 0;
 
-                    doc.setFont('helvetica', 'normal');
+                    doc.setFont('DejaVuSans', 'normal');
                     doc.setFontSize(9.5);
                     const lyricWidth = lyricText ? doc.getTextWidth(lyricText) : 0;
 
@@ -385,7 +371,7 @@ export async function exportPlaylistToPdf(playlist: ExportPlaylistData): Promise
 
                     // Draw Chord
                     if (chordText) {
-                        doc.setFont('helvetica', 'bold');
+                        doc.setFont('DejaVuSans', 'bold');
                         doc.setFontSize(8.5);
                         doc.setTextColor(194, 65, 12); // Terracotta / Ceremony amber
                         doc.text(chordText, currentX, chordY);
@@ -393,7 +379,7 @@ export async function exportPlaylistToPdf(playlist: ExportPlaylistData): Promise
 
                     // Draw Lyric
                     if (lyricText) {
-                        doc.setFont('helvetica', 'normal');
+                        doc.setFont('DejaVuSans', 'normal');
                         doc.setFontSize(9.5);
                         doc.setTextColor(31, 41, 55); // Deep charcoal
                         doc.text(lyricText, currentX, lyricY);
@@ -418,7 +404,7 @@ export async function exportPlaylistToPdf(playlist: ExportPlaylistData): Promise
         y += 8;
     });
 
-    // ─── Global 3-Part Footer on Every Page ──────────────────────────────────
+    // ─── Global 3-Part Footer on Every Page ─────────────────────────────────
     // Bottom Left: Song URL
     // Bottom Middle: Playlist: <playlist>
     // Bottom Right: Page X of Y
@@ -427,7 +413,7 @@ export async function exportPlaylistToPdf(playlist: ExportPlaylistData): Promise
 
     for (let i = 1; i <= totalPages; i++) {
         doc.setPage(i);
-        doc.setFont('helvetica', 'normal');
+        doc.setFont('DejaVuSans', 'normal');
         doc.setFontSize(8);
         doc.setTextColor(156, 163, 175);
 

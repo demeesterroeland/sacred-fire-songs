@@ -224,11 +224,11 @@ describe('PDF Export - TDD Suite', () => {
     });
 
     describe('sanitizeForPdf', () => {
-        it('normalizes characters outside WinAnsi to prevent font blowout', () => {
-            // acute z (ź) in 'coraźon' should decompose or convert to 'z' without disrupting Latin accents (ó, á)
+        it('preserves Unicode characters and diacritics for DejaVu Sans rendering', () => {
+            // acute z (ź) in 'coraźon' and Latin accents (á, é, í, ó, ú, ñ) are preserved
             const input = 'Limpia coraźon agua brillante, á é í ó ú ñ';
             const sanitized = sanitizeForPdf(input);
-            expect(sanitized).toBe('Limpia corazon agua brillante, á é í ó ú ñ');
+            expect(sanitized).toBe('Limpia coraźon agua brillante, á é í ó ú ñ');
         });
     });
 
