@@ -1290,3 +1290,13 @@
 - [x] Create GitHub issues for Epic 5.1 via `scripts/setup_github_roadmap.py` (masterplan-orchestrator): #280 master, #281–#286 phases, #287 Task 5.1.0, #288–#301 stories; #267 moved under #288; #274 blocks #294
 - [x] Plan PR #308 into `develop`
 - [ ] Phase 0 onwards: implementation, one PR into `develop` per phase
+
+## Session October 30, 2026 (Part 9: Gitflow Phase 0 — Spec & Test Harness, #287)
+- [x] Record owner decisions D1–D7 in the plan (v1.2), tick work done in the orchestrator session; merge plan PR #308 into `develop`
+- [x] Branch `chore/287-gitflow-ci-harness` from `origin/develop`
+- [x] `testing/support/workflowContract.ts` + Vitest `testing/unit/tests/ci/workflowContract.test.ts` (9 tests green)
+- [x] Cucumber profile `ci` + `testing/bdd/steps/gitflow-cicd.steps.ts` (`npm run test:bdd:ci`: 1 passed, 11 pending, 11 failed — expected red)
+- [x] bats `testing/scripts/start-issue.bats` (`npm run test:scripts`: 6 pass, 1 skip)
+- [x] `npm run lint` / `npm run typecheck`; baseline recorded (tsc clean, eslint 118 errors / 128 warnings)
+- [x] Doc sync: plan v1.3, design doc v1.45 (§6.6), testing README
+- [ ] Finding for Phase 1 (task 1.4): `vitest run` also collects Playwright specs in `e2e/` + `testing/e2e/` (17 files fail to load)

@@ -103,4 +103,8 @@
 
 | **October 30, 2026 (Part 7)** | **Feature/UI (#278, #279)**: Admin layout aligned with the Library section (fixed header overlap), listbox-style role/sort pickers modelled on the i18n language picker, sort by name and number of songs (persisted), clickable user rows; issues #275–#279 created. | ~1.5 Hours | ✅ |
 
-| **Total** | **Development + AI Collaboration** | **~186.75 Hours** | |
+| **October 30, 2026 (Part 8)** | **Planning/CI-CD (Epic 5.1)**: Gitflow research, gap analysis, migration plan, BDD spec, Epic 5.1 stories and GitHub issue tree (#280–#301), owner decisions recorded, plan PR #308. | ~2.0 Hours | ✅ Completed |
+
+| **October 30, 2026 (Part 9)** | **CI-CD/Testing (#287)**: Gitflow Phase 0 harness — workflow contract helper, Vitest contract tests, Cucumber `ci` profile, bats tests for `start-issue.sh`, lint/typecheck scripts and baseline. | ~1.0 Hours | ✅ Completed |
+
+| **Total** | **Development + AI Collaboration** | **~189.75 Hours** | |

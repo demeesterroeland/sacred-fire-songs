@@ -48,6 +48,15 @@ npm run test:e2e:smoke    # Smoke tests only
 npm run test:e2e:ui       # Interactive UI mode
 ```
 
+### Pipeline Contract Tests (Epic 5.1, Gitflow CI/CD)
+```bash
+npx vitest run testing/unit/tests/ci   # workflow contract helper + current invariants
+npm run test:bdd:ci                    # @ci-contract scenarios of docs/testing/gitflow-cicd.feature (red until each story lands)
+npm run test:scripts                   # bats tests for scripts/ (testing/scripts/*.bats)
+npm run typecheck                      # tsc --noEmit
+npm run lint                           # eslint . (baseline: 118 errors, see plan task 0.5)
+```
+
 ### Performance Tests
 ```bash
 npm run test:perf          # Run all performance tests

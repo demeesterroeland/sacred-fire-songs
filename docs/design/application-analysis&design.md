@@ -1,6 +1,6 @@
 # Project Analysis & Design Document: Song Sharing Application (Sacred Fire Songs)
 
-**Version:** 1.44
+**Version:** 1.45
 **Status:** Living Document
 **Date:** Oct 30, 2026
 
@@ -37,6 +37,7 @@
 | **1.42** | Oct 30, 2026 | §6.5: admin area (Story 3.6.1, #259) translated into all eight languages (`admin.*` keys); admin dates follow `LOCALE_DATE_TAGS`; account-menu trigger label `userMenu.trigger`. |
 | **1.43** | Oct 30, 2026 | Admin users overview: role and sort pickers use the new listbox component `components/common/ui/WickSelect.tsx` (same design as the language picker on the i18n branch, keyboard logic in `lib/ui/listbox.ts`); sort by name A-Z/Z-A and most/fewest songs, remembered in `localStorage` (#278); whole user row opens the details (#279). |
 | **1.44** | Oct 30, 2026 | Role colors have one source (`lib/admin/roleColors.ts`): role badges and the role filter picker use the same color per role (admin purple, gatekeeper amber, musician/expert emerald, member blue). `WickSelect` options accept an `accent` color (`wick-ignite` animation in `app/globals.css`). |
+| **1.45** | Oct 30, 2026 | Added §6.6 Delivery Pipeline Contract Tests (Epic 5.1 Phase 0, #287): `testing/support/workflowContract.ts`, Vitest `testing/unit/tests/ci/`, Cucumber profile `ci` for `docs/testing/gitflow-cicd.feature`, bats `testing/scripts/`, npm scripts `test:bdd:ci`, `test:scripts`, `lint`, `typecheck`. |
 
 
 ## 1. Introduction
@@ -178,6 +179,14 @@ The application is a **Progressive Web App (PWA)** optimized for mobile use duri
 * **Language switcher:** `components/common/navigation/LanguageSwitcher.tsx` (WAI-ARIA listbox: trigger button + list portalled to `<body>` so it is never clipped; each language in its own name and script, sorted by that name; the active language marked by a lit ember "wick" that ignites once on selection, skipped under reduced motion; keyboard: arrows, Home/End, type-ahead, Enter, Esc; pure logic in `components/common/navigation/languageListbox.ts`) in the sidebar footer (also for guests), the user menu and Account → Preferences → Language. The choice is per device/browser (not stored in the profile) and survives reloads and sign-out.
 * **PDF export:** `exportPlaylistToPdf({ …, locale })` uses `getPdfLabels(locale)` (`lib/export/pdfExport.ts`) for page footer, song metadata, subtitle and date format; the UI passes the active locale. Song content in the PDF is untranslated; server-action error messages are shown as the toast description under a translated title.
 * **Not translated:** `app/manifest.ts` and `<title>`/meta description (static, English); server action error codes; unused starter components (`auth-button`, `logout-button`, `LibrarySidebar`, `home/SearchBar`, `YouTubeEmbed`).
+
+### 6.6 Delivery Pipeline Contract Tests (Epic 5.1, Gitflow CI/CD)
+* **Branching:** lightweight Gitflow — `main` (production), `develop` (integration + staging, GitHub default branch), work branches `feat|fix|chore|docs/*` squash-merged into `develop`, `hotfix/*` from `main`. Plan: `docs/plans/2026-10-30-gitflow-cicd-migration.md`.
+* **Contract helper:** `testing/support/workflowContract.ts` parses `.github/workflows/*.yml` (via `yaml`) and repo files so the pipeline is tested as data: triggers and branch globs, jobs, environments, step order, SHA-pinned actions.
+* **Unit (Vitest):** `testing/unit/tests/ci/workflowContract.test.ts` tests the helper on fixtures plus invariants that already hold (Release Please only on `main`, E2E smoke on PRs into `develop` and `main`).
+* **Acceptance (Cucumber, profile `ci`):** `npm run test:bdd:ci` runs the `@ci-contract` scenarios of `docs/testing/gitflow-cicd.feature` with `testing/bdd/steps/gitflow-cicd.steps.ts`. Written test-first: scenarios of unimplemented stories fail or are `pending` until their story lands. Not part of the default profile.
+* **Scripts (bats):** `npm run test:scripts` runs `testing/scripts/*.bats`; `start-issue.bats` runs `scripts/start-issue.sh` in a throw-away clone with a local bare `origin` (diverged `main`/`develop`).
+* **Static checks:** `npm run typecheck` (`tsc --noEmit`, clean) and `npm run lint` (`eslint .`, baseline 118 errors / 128 warnings, 108 of them `no-explicit-any`; to be handled before `lint` becomes a required check).
 
 ## 7. Screen Inventory (Implemented)
 
