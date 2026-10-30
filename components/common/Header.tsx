@@ -8,6 +8,8 @@ import { useSidebar } from '@/context/SidebarContext';
 import { useAuth, type AuthUser } from '@/hooks/useAuth';
 import { getSiteTitle } from '@/lib/env';
 import { UserProfile } from './navigation/UserProfile';
+import { t } from '@/lib/i18n';
+import { useLocale } from '@/context/LocaleContext';
 
 const SEARCH_HISTORY_KEY = 'sacred-fire-songs-search-history';
 const MAX_HISTORY = 8;
@@ -24,6 +26,7 @@ function saveSearchHistory(history: string[]) {
 }
 
 export default function Header({ initialUser }: { initialUser?: AuthUser | null }) {
+    const { locale } = useLocale();
     const pathname = usePathname();
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -168,7 +171,7 @@ export default function Header({ initialUser }: { initialUser?: AuthUser | null 
                     <button
                         onClick={() => setSidebarOpen(true)}
                         className="lg:hidden p-1.5 -ms-2 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
-                        aria-label="Open menu"
+                        aria-label={t('header.openMenu')}
                     >
                         <Menu className="w-5 h-5" />
                     </button>
@@ -197,7 +200,7 @@ export default function Header({ initialUser }: { initialUser?: AuthUser | null 
                             onChange={(e) => setSearchValue(e.target.value)}
                             onKeyDown={handleKeyDown}
                             onFocus={() => setHistoryOpen(true)}
-                            placeholder="Search 200+ songs"
+                            placeholder={t('songs.searchPlaceholder', { count: 200 })}
                             className="w-full bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-full py-2.5 pl-10 pr-12 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500/40 transition-all relative z-10"
                         />
                         <button
@@ -207,8 +210,8 @@ export default function Header({ initialUser }: { initialUser?: AuthUser | null 
                                     ? 'text-red-500 bg-red-100 dark:bg-red-500/15'
                                     : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800'
                             }`}
-                            aria-label="Search options"
-                            title="Show search options"
+                            aria-label={t('header.searchOptions')}
+                            title={t('nav.showSearch')}
                         >
                             <SlidersHorizontal className="w-4 h-4" />
                             {hasActiveSearchFilters && (
@@ -220,12 +223,12 @@ export default function Header({ initialUser }: { initialUser?: AuthUser | null 
                         {historyOpen && searchHistory.length > 0 && !searchValue && (
                             <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-2xl shadow-black/10 dark:shadow-black/40 z-50 overflow-hidden">
                                 <div className="flex items-center justify-between px-4 pt-3 pb-2">
-                                    <span className="text-xs font-semibold text-gray-400 dark:text-gray-500">Recent searches</span>
+                                    <span className="text-xs font-semibold text-gray-400 dark:text-gray-500">{t('header.recentSearches')}</span>
                                     <button
                                         onClick={clearHistory}
                                         className="text-xs font-semibold text-red-500 hover:text-red-400 transition-colors"
                                     >
-                                        Clear all
+                                        {t('header.clearAll')}
                                     </button>
                                 </div>
                                 <div className="pb-1">
@@ -246,8 +249,8 @@ export default function Header({ initialUser }: { initialUser?: AuthUser | null 
                                                     removeFromHistory(term);
                                                 }}
                                                 className="p-1.5 rounded-full text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all shrink-0"
-                                                aria-label={`Remove "${term}" from history`}
-                                                title="Remove"
+                                                aria-label={`${t('common.remove')} "${term}"`}
+                                                title={t('common.remove')}
                                             >
                                                 <X className="w-3.5 h-3.5" />
                                             </button>
@@ -273,7 +276,7 @@ export default function Header({ initialUser }: { initialUser?: AuthUser | null 
                                 }`}
                             >
                                 <PlusCircle className="w-4 h-4" />
-                                <span>Create</span>
+                                <span>{t('nav.create')}</span>
                             </button>
                             {createMenuOpen && (
                                 <div className="absolute right-0 top-full mt-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-2xl shadow-black/10 dark:shadow-black/40 z-50 overflow-hidden w-52 animate-in fade-in slide-in-from-top-2 duration-150">
@@ -286,7 +289,7 @@ export default function Header({ initialUser }: { initialUser?: AuthUser | null 
                                             className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-800/70 transition-colors"
                                         >
                                             <Music className="w-4.5 h-4.5 text-red-400" />
-                                            <span className="text-sm font-semibold text-gray-900 dark:text-white">Add Song</span>
+                                            <span className="text-sm font-semibold text-gray-900 dark:text-white">{t('header.addSong')}</span>
                                         </button>
                                         <button
                                             onClick={() => {
@@ -296,7 +299,7 @@ export default function Header({ initialUser }: { initialUser?: AuthUser | null 
                                             className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-800/70 transition-colors"
                                         >
                                             <ListMusic className="w-4.5 h-4.5 text-purple-400" />
-                                            <span className="text-sm font-semibold text-gray-900 dark:text-white">New Playlist</span>
+                                            <span className="text-sm font-semibold text-gray-900 dark:text-white">{t('header.newPlaylist')}</span>
                                         </button>
                                     </div>
                                 </div>

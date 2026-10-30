@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import { ArrowLeft, Flame, Hand } from 'lucide-react';
 import { useEffect, useState } from 'react';
+import { t } from '@/lib/i18n';
 
 export default function AccessDenied() {
     // Client-side visual effects (embers)
@@ -45,7 +46,7 @@ export default function AccessDenied() {
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-24 opacity-50">
                     <div className="flex items-center gap-2">
                         <Flame className="w-4 h-4 text-red-500" />
-                        <span className="text-xs uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400 font-bold">Sacred Fire Songs</span>
+                        <span className="text-xs uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400 font-bold">{t('app.name')}</span>
                     </div>
                 </div>
 
@@ -77,11 +78,11 @@ export default function AccessDenied() {
 
                 {/* Text Content */}
                 <h1 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-b from-gray-900 to-gray-500 dark:from-white dark:to-gray-400 mb-4">
-                    This Medicine is <br /> Not Yours to Edit
+                    <>{t('feedback.accessDenied.title')}</>
                 </h1>
 
                 <p className="text-gray-500 text-lg mb-10 font-light">
-                    Only the song keeper may change its form.
+                    {t('feedback.accessDenied.description')}
                 </p>
 
                 {/* Action Button */}
@@ -90,7 +91,7 @@ export default function AccessDenied() {
                     <div className="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-[100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
 
                     <ArrowLeft className="w-4 h-4 mr-2 group-hover:-translate-x-1 transition-transform" />
-                    <span>Return to the Circle</span>
+                    <span>{t('feedback.accessDenied.returnToCircle')}</span>
                 </Link>
 
             </div>

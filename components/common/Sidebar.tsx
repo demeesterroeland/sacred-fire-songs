@@ -3,16 +3,19 @@
 import { useActivePath } from '@/hooks/useActivePath';
 import { useSidebar } from '@/context/SidebarContext';
 import { NAV_SECTIONS } from '@/lib/navigation';
+import { t } from '@/lib/i18n';
+import { useLocale } from '@/context/LocaleContext';
 import Link from 'next/link';
 import packageJson from '@/package.json';
 
 export default function Sidebar() {
+    const { locale } = useLocale();
     const { isActive } = useActivePath();
     const { isOpen, setIsOpen } = useSidebar();
 
     return (
         <nav
-            aria-label="Main navigation"
+            aria-label={t('nav.mainNavigation')}
             className={`
                 fixed lg:sticky top-[var(--navbar-height)] left-0 z-40
                 h-[calc(100dvh-var(--navbar-height))]
@@ -29,43 +32,47 @@ export default function Sidebar() {
         >
             <div className="pe-6 flex flex-col gap-1 min-h-full justify-between pb-6">
                 <div className="flex flex-col gap-1">
-                    {NAV_SECTIONS.map((section, sIdx) => (
-                        <div key={sIdx}>
-                            {/* Section header */}
-                            {section.label && (
-                                <p className="text-xs font-medium text-gray-400 dark:text-gray-500 ps-7 pt-5 pb-2">
-                                    {section.label}
-                                </p>
-                            )}
+                    {NAV_SECTIONS.map((section, sIdx) => {
+                        const sectionLabel = section.labelKey ? t(section.labelKey) : section.label;
+                        return (
+                            <div key={sIdx}>
+                                {/* Section header */}
+                                {sectionLabel && (
+                                    <p className="text-xs font-medium text-gray-400 dark:text-gray-500 ps-7 pt-5 pb-2">
+                                        {sectionLabel}
+                                    </p>
+                                )}
 
-                            {/* Nav items */}
-                            {section.items.map((item) => {
-                                const active = isActive(item.href, {
-                                    exact: 'exact' in item ? item.exact : false,
-                                    exclude: 'exclude' in item ? item.exclude : [],
-                                });
-                                const Icon = item.icon;
+                                {/* Nav items */}
+                                {section.items.map((item) => {
+                                    const active = isActive(item.href, {
+                                        exact: 'exact' in item ? item.exact : false,
+                                        exclude: 'exclude' in item ? item.exclude : [],
+                                    });
+                                    const Icon = item.icon;
+                                    const itemLabel = item.labelKey ? t(item.labelKey) : item.label;
 
-                                return (
-                                    <Link
-                                        key={item.href}
-                                        href={item.href}
-                                        className={`
-                                            flex items-center gap-4 ps-7 pe-4 py-2.5 me-2 rounded-e-full
-                                            text-sm font-medium transition-colors
-                                            ${active
-                                                ? 'bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-400'
-                                                : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 hover:text-gray-900 dark:hover:text-white'
-                                            }
-                                        `}
-                                    >
-                                        <Icon className={`w-5 h-5 shrink-0 ${active ? 'text-red-600 dark:text-red-400' : ''}`} />
-                                        <span>{item.label}</span>
-                                    </Link>
-                                );
-                            })}
-                        </div>
-                    ))}
+                                    return (
+                                        <Link
+                                            key={item.href}
+                                            href={item.href}
+                                            className={`
+                                                flex items-center gap-4 ps-7 pe-4 py-2.5 me-2 rounded-e-full
+                                                text-sm font-medium transition-colors
+                                                ${active
+                                                    ? 'bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-400'
+                                                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 hover:text-gray-900 dark:hover:text-white'
+                                                }
+                                            `}
+                                        >
+                                            <Icon className={`w-5 h-5 shrink-0 ${active ? 'text-red-600 dark:text-red-400' : ''}`} />
+                                            <span>{itemLabel}</span>
+                                        </Link>
+                                    );
+                                })}
+                            </div>
+                        );
+                    })}
                 </div>
 
                 {/* Application SemVer Version Tag */}

@@ -17,6 +17,8 @@ import { useFavoritesQuery } from "@/hooks/useFavoritesQuery";
 import { useRecordingsQuery } from "@/hooks/useRecordingsQuery";
 import { useSongsFilter } from "@/hooks/useSongsFilter";
 import { isDraftActive } from "@/lib/songs/filterConfig";
+import { t } from "@/lib/i18n";
+import { useLocale } from "@/context/LocaleContext";
 
 type SortByType = 'title' | 'author' | 'newest';
 
@@ -27,6 +29,7 @@ interface SongsPageContentProps {
 }
 
 export default function SongsPageContent({ initialSongs, initialTaxonomy, initialViewedSongIds = [] }: SongsPageContentProps) {
+    const { locale } = useLocale();
     const searchParams = useSearchParams();
     const router = useRouter();
     const { user } = useAuth();
@@ -145,8 +148,10 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
     // Derive display state for the results area
     const showResultsBadge = hasActiveFilters || !!state.search;
     const resultsLabel = isSearching
-        ? 'Searching…'
-        : `${filteredCount} result${filteredCount !== 1 ? 's' : ''}`;
+        ? t('songs.searching')
+        : filteredCount === 1
+            ? t('songs.resultCount', { count: filteredCount })
+            : t('songs.resultsCount', { count: filteredCount });
 
     return (
         <main className="flex-1 min-h-0 bg-white dark:bg-gray-950">
@@ -174,7 +179,7 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
                                 onClick={handleResetFilters}
                                 className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                             >
-                                Clear filters
+                                {t('songs.clearFilters')}
                             </button>
                         )}
                     </div>
@@ -221,14 +226,14 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
                                         <div className="mb-4 inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-500/10 border border-amber-500/20">
                                             <Heart className="w-8 h-8 text-amber-400/50" />
                                         </div>
-                                        <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-2">Your sacred circle is empty</h3>
-                                        <p className="text-gray-400 max-w-xs mx-auto">Tap ♥ on any song to add it here</p>
+                                        <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-2">{t('songs.emptyFavorites.title')}</h3>
+                                        <p className="text-gray-400 max-w-xs mx-auto">{t('songs.emptyFavorites.hint')}</p>
                                         <Link
                                             href="/songs"
                                             onClick={handleResetFilters}
                                             className="mt-6 inline-block text-amber-400 hover:text-amber-300 font-medium transition-colors cursor-pointer"
                                         >
-                                            Browse all songs →
+                                            {t('songs.emptyFavorites.browse')}
                                         </Link>
                                     </>
                                 ) : state.status === 'draft' ? (
@@ -236,13 +241,13 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
                                         <div className="mb-4 inline-flex items-center justify-center w-16 h-16 rounded-full bg-indigo-500/10 border border-indigo-500/20">
                                             <FileText className="w-8 h-8 text-indigo-400/50" />
                                         </div>
-                                        <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-2">No draft songs yet</h3>
-                                        <p className="text-gray-400 max-w-xs mx-auto">Create a song as a draft to see it here</p>
+                                        <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-2">{t('songs.emptyDrafts.title')}</h3>
+                                        <p className="text-gray-400 max-w-xs mx-auto">{t('songs.emptyDrafts.hint')}</p>
                                         <Link
                                             href="/songs/add"
                                             className="mt-6 inline-block text-indigo-400 hover:text-indigo-300 font-medium transition-colors cursor-pointer"
                                         >
-                                            Add Song →
+                                            {t('songs.emptyDrafts.action')}
                                         </Link>
                                     </>
                                 ) : (
@@ -250,16 +255,18 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
                                         <div className="mb-4 inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
                                             <Search className="w-8 h-8 text-gray-600" />
                                         </div>
-                                        <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-2">No songs found</h3>
+                                        <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-2">{t('songs.noResults')}</h3>
                                         <p className="text-gray-400 max-w-xs mx-auto">
-                                            {state.search ? `We couldn't find any songs matching "${state.search}".` : "There are no songs available for this filter."}
+                                            {state.search
+                                                ? t('songs.noResultsSearch', { search: state.search })
+                                                : t('songs.noResultsFilter')}
                                         </p>
                                         {hasActiveFilters && (
                                             <button
                                                 onClick={handleResetFilters}
                                                 className="mt-6 text-red-500 hover:text-red-400 font-medium transition-colors"
                                             >
-                                                Clear filters
+                                                {t('songs.clearFilters')}
                                             </button>
                                         )}
                                     </>
@@ -308,8 +315,8 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
                 isOpen={deleteTarget !== null}
                 onClose={() => setDeleteTarget(null)}
                 onConfirm={handleDelete}
-                title="Delete Song?"
-                message={`Are you sure you want to delete "${deleteTarget?.title}"? This action cannot be undone.`}
+                title={t('song.delete.confirm.modalTitle')}
+                message={t('song.delete.confirm.message', { title: deleteTarget?.title || '' })}
                 isDeleting={isDeleting}
             />
         </main>

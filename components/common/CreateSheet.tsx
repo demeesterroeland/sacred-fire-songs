@@ -3,6 +3,8 @@
 import { useEffect, useRef } from 'react';
 import { Music, ListMusic } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
+import { t } from '@/lib/i18n';
+import { useLocale } from '@/context/LocaleContext';
 
 interface CreateSheetProps {
     isOpen: boolean;
@@ -10,6 +12,7 @@ interface CreateSheetProps {
 }
 
 export default function CreateSheet({ isOpen, onClose }: CreateSheetProps) {
+    const { locale } = useLocale();
     const router = useRouter();
     const pathname = usePathname();
     const sheetRef = useRef<HTMLDivElement>(null);
@@ -33,8 +36,8 @@ export default function CreateSheet({ isOpen, onClose }: CreateSheetProps) {
     if (!isOpen) return null;
 
     const options = [
-        { label: 'Add Song', icon: Music, href: `/songs/add?next=${encodeURIComponent(pathname)}`, color: 'text-red-400' },
-        { label: 'New Playlist', icon: ListMusic, href: '/library/playlists/add', color: 'text-purple-400' },
+        { label: t('header.addSong'), icon: Music, href: `/songs/add?next=${encodeURIComponent(pathname)}`, color: 'text-red-400' },
+        { label: t('header.newPlaylist'), icon: ListMusic, href: '/library/playlists/add', color: 'text-purple-400' },
     ];
 
     return (

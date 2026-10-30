@@ -44,6 +44,7 @@ import MobileBottomNav from "@/components/common/MobileBottomNav";
 import QueryProvider from "@/components/providers/QueryProvider";
 import { SidebarProvider } from "@/context/SidebarContext";
 import { UserPreferencesProvider } from "@/context/UserPreferencesContext";
+import { LocaleProvider } from "@/context/LocaleContext";
 import { AudioProvider } from "@/components/song/AudioProvider";
 import EnvironmentBanner from "@/components/common/EnvironmentBanner";
 import ServiceWorkerRegistrar from "@/components/providers/ServiceWorkerRegistrar";
@@ -112,6 +113,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
       >
         <ServiceWorkerRegistrar />
         <EnvironmentBanner />
+        <LocaleProvider>
         <UserPreferencesProvider>
           <AudioProvider>
             <SidebarProvider>
@@ -148,6 +150,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
           <ThemedToaster />
           <SpeedInsights />
         </UserPreferencesProvider>
+        </LocaleProvider>
       </body>
     </html>
   );

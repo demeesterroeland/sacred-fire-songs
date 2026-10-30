@@ -7,6 +7,8 @@ import SongForm from '@/components/song/SongForm';
 import AccessDenied from '@/components/common/feedback/AccessDenied';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
+import { t } from '@/lib/i18n';
+import { useLocale } from '@/context/LocaleContext';
 
 // Similar fetch to detail page, but we just need basic data
 const fetchSongForEdit = async (id: string) => {
@@ -42,6 +44,7 @@ const fetchSongForEdit = async (id: string) => {
 };
 
 export default function EditSongPage() {
+    const { locale } = useLocale();
     const params = useParams();
     const id = typeof params.id === 'string' ? params.id : params.id?.[0];
     const { user, loading: authLoading } = useAuth();
@@ -54,10 +57,10 @@ export default function EditSongPage() {
         retry: 1
     });
 
-    if (isLoading) return <div className="p-8 text-gray-900 dark:text-white text-center">Loading...</div>;
+    if (isLoading) return <div className="p-8 text-gray-900 dark:text-white text-center">{t('common.loading')}</div>;
     if (error || !song) {
         console.error("Fetch error:", error);
-        return <div className="p-8 text-red-500 text-center">Error loading song not found or permission denied.</div>;
+        return <div className="p-8 text-red-500 text-center">{t('song.edit.loadError')}</div>;
     }
 
     // Permission Check (Client-side visual check, RLS enforces actual security)
