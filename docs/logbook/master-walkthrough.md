@@ -2921,3 +2921,15 @@ Removed the last real song content from the app repository (the 221 songs in the
 - **Validation**: dry runs inside `BEGIN … ROLLBACK` against the local Supabase stack: 80 songs → 86 versions, 1 composition without version, 0 `has_chords` mismatches, 25 artist categories, 10 playlists, recordings for all four users; 1000 songs in 332 ms. Unit suite: 385 tests pass. Playwright was not run (it truncates the local DB).
 - **Docs**: `docs/testing/song.feature` v1.0, design doc v1.34, `docs/testing/e2e-test-overview.md`, `e2e/README.md`.
 - **Static seed**: `scripts/export-random-seed.mjs` runs the generator for 200 songs inside a rolled-back transaction and dumps compositions, versions, artist categories, slug-based tag links, playlists, recordings and `song_views` as `supabase/seeds/03_songs_random_generated.sql` (329 KB, timestamps relative to `now()`). Load-tested with `psql -v ON_ERROR_STOP=1` in a transaction: 200 compositions, 219 versions, 757 tag links, 10 playlists, 418 recordings.
+
+## October 30, 2026 (Part 3) - Story 4.2.1 (Issue #18): Musician Setlist PDF Export
+
+**Task Overview**
+Implemented Story 4.2.1: *"As a Musician, I want to generate a PDF of my setlist so that I can print it for the ceremony"* following BDD and TDD. Enabled musicians to export ceremony setlists directly into printable, firelight-optimized PDFs.
+
+**Technical Details**
+- **BDD Living Documentation**: Created `docs/testing/setlist-pdf-export.feature` covering multi-song compilation, key transpositions, capo directives, section header extraction, and empty state guards.
+- **TDD Test Suite**: Added `testing/unit/tests/pdfExport.test.ts` (12 unit tests) testing ChordSheetJS AST parsing, semitone transposition arithmetic, word-level chord-over-lyric layout, A4 pagination, and filename sanitization.
+- **PDF Engine (`lib/export/pdfExport.ts`)**: Built using `chordsheetjs` and `jspdf`. Features high-contrast firelight styling (charcoal lyrics `#111827`, terracotta chords `#c2410c`), cover/header block with metadata divider, running `(continued)` headers on page breaks, and centered `"Page X of Y"` footers.
+- **UI & Server Action**: Implemented secure `getPlaylistSongsForExport` in `app/actions/playlistActions.ts`. Added quick-action `Printer` button to `PlaylistDetailHeader.tsx` and "Export PDF" with toast notifications to `PlaylistContextMenu.tsx`.
+- **Validation**: All 66 unit tests passing (`npm run test:unit`), Next.js production build passing with 0 errors across 23 routes (`npm run build`), and Playwright E2E smoke tests passing on GitHub Actions.
