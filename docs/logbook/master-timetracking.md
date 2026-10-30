@@ -95,4 +95,6 @@
 
 | **October 30, 2026 (Part 3)** | **Testing/BDD Infra (#263)**: Configured `@cucumber/cucumber` with `tsx` TypeScript loader, `cucumber.json` profiles targeting `docs/testing/song.feature` (`@unit` and `@seed`), `testing/bdd/` support & smoke step definitions, and `npm run test:bdd` scripts. | ~0.5 Hours | ✅ Completed |
 
-| **Total** | **Development + AI Collaboration** | **~174.75 Hours** | |
+| **October 30, 2026 (Part 4)** | **Feature/Testing (#258)**: Reviewed Story 3.6.1 against its ACs, fixed the admin user detail query (non-existent columns left the contribution tabs empty), added activity/musician status and public playlist counts, and covered the story with 48 vitest tests, 20 Cucumber @unit/@seed scenarios (`docs/testing/admin-users.feature`) and a Playwright spec. | ~2.5 Hours | ✅ |
+
+| **Total** | **Development + AI Collaboration** | **~177.25 Hours** | |
