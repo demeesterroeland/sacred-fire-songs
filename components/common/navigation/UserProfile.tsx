@@ -5,8 +5,8 @@ import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useUserPreferences, type ThemePreference } from '@/context/UserPreferencesContext';
-import { t } from '@/lib/i18n';
 import { useLocale } from '@/context/LocaleContext';
+import { LanguageSwitcher } from './LanguageSwitcher';
 
 import { usePathname, useRouter } from 'next/navigation';
 
@@ -24,6 +24,7 @@ const themeOptions: { value: ThemePreference; icon: typeof Sun }[] = [
 ];
 
 function ThemeToggle() {
+  const { t } = useLocale();
   const { preferences, setPreference } = useUserPreferences();
 
   return (
@@ -34,7 +35,7 @@ function ThemeToggle() {
           <button
             key={value}
             onClick={() => setPreference('theme', value)}
-            aria-label={`${value} theme`}
+            aria-label={t(`theme.${value}`)}
             className={`p-1 rounded-full transition-colors ${active ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'}`}
           >
             <Icon className="w-3.5 h-3.5" />
@@ -47,7 +48,7 @@ function ThemeToggle() {
 
 export const UserProfile = ({ onLogout, layout = 'header', showText = true, initialUser }: UserProfileProps) => {
   const { user, loading, logout } = useAuth(initialUser);
-  const { locale, setLocaleAndPersist, supportedLocales, localeLabels } = useLocale();
+  const { t } = useLocale();
   const [isOpen, setIsOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
   const pathname = usePathname();
@@ -181,21 +182,7 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true, init
             <div className="flex items-center gap-2 px-2 py-1.5">
               <Globe className="w-4 h-4 text-gray-400" />
               <span className="text-sm font-medium text-gray-500 dark:text-gray-400 flex-1">{t('userMenu.language')}</span>
-              <div className="flex gap-1">
-                {supportedLocales.map((loc) => (
-                  <button
-                    key={loc}
-                    onClick={() => { setLocaleAndPersist(loc); }}
-                    className={`px-2 py-0.5 text-xs font-bold rounded transition-colors ${
-                      locale === loc
-                        ? 'bg-red-500 text-white'
-                        : 'text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'
-                    }`}
-                  >
-                    {loc.toUpperCase()}
-                  </button>
-                ))}
-              </div>
+              <LanguageSwitcher />
             </div>
 
             <div className="h-px bg-gray-200 dark:bg-gray-800 my-2" />

@@ -3,9 +3,10 @@ import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { Clock, Music } from 'lucide-react';
 import { getRecentlyViewedLight } from '@/lib/songs/serverQueries';
-import { t } from '@/lib/i18n';
+import { getServerT } from '@/lib/i18n/server';
 
 export default async function RecentlyViewedPage() {
+    const t = await getServerT();
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 

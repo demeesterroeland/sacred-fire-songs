@@ -17,7 +17,6 @@ import { useFavoritesQuery } from "@/hooks/useFavoritesQuery";
 import { useRecordingsQuery } from "@/hooks/useRecordingsQuery";
 import { useSongsFilter } from "@/hooks/useSongsFilter";
 import { isDraftActive } from "@/lib/songs/filterConfig";
-import { t } from "@/lib/i18n";
 import { useLocale } from "@/context/LocaleContext";
 
 type SortByType = 'title' | 'author' | 'newest';
@@ -29,7 +28,7 @@ interface SongsPageContentProps {
 }
 
 export default function SongsPageContent({ initialSongs, initialTaxonomy, initialViewedSongIds = [] }: SongsPageContentProps) {
-    const { locale } = useLocale();
+    const { t } = useLocale();
     const searchParams = useSearchParams();
     const router = useRouter();
     const { user } = useAuth();

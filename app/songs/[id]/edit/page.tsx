@@ -7,7 +7,6 @@ import SongForm from '@/components/song/SongForm';
 import AccessDenied from '@/components/common/feedback/AccessDenied';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
-import { t } from '@/lib/i18n';
 import { useLocale } from '@/context/LocaleContext';
 
 // Similar fetch to detail page, but we just need basic data
@@ -44,7 +43,7 @@ const fetchSongForEdit = async (id: string) => {
 };
 
 export default function EditSongPage() {
-    const { locale } = useLocale();
+    const { t } = useLocale();
     const params = useParams();
     const id = typeof params.id === 'string' ? params.id : params.id?.[0];
     const { user, loading: authLoading } = useAuth();

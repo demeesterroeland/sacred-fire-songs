@@ -4,7 +4,6 @@ import React, { useState, useRef, useEffect } from "react";
 import { Mic, Square, Play, Pause, Trash2, CloudUpload, RotateCcw, Upload, FileAudio } from "lucide-react";
 import { toast } from "sonner";
 import { uploadRehearsalRecording, type UserRecording } from "@/lib/actions/rehearsal";
-import { t } from "@/lib/i18n";
 import { useLocale } from "@/context/LocaleContext";
 
 interface AudioRecorderProps {
@@ -13,7 +12,7 @@ interface AudioRecorderProps {
 }
 
 export default function AudioRecorder({ songVersionId, onRecordingSaved }: AudioRecorderProps) {
-  const { locale } = useLocale();
+  const { t } = useLocale();
   const [activeTab, setActiveTab] = useState<"record" | "upload">("record");
   const [recordingState, setRecordingState] = useState<"idle" | "recording" | "paused" | "stopped">("idle");
   const [countdown, setCountdown] = useState<number | null>(null);

@@ -3,11 +3,10 @@
 import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
-import { t } from '@/lib/i18n';
 import { useLocale } from '@/context/LocaleContext';
 
 function ErrorContent() {
-    const { locale } = useLocale();
+    const { t } = useLocale();
     const searchParams = useSearchParams();
     const error = searchParams.get('error') || t('auth.error.default');
 
@@ -33,6 +32,7 @@ function ErrorContent() {
 }
 
 export default function Error() {
+    const { t } = useLocale();
     return (
         <Suspense fallback={<div>{t('common.loading')}</div>}>
             <ErrorContent />

@@ -7,7 +7,6 @@ import { User as UserIcon, Camera, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { t } from "@/lib/i18n";
 import { useLocale } from "@/context/LocaleContext";
 
 interface ProfileSettingsProps {
@@ -16,7 +15,7 @@ interface ProfileSettingsProps {
 }
 
 export default function ProfileSettings({ user, profile }: ProfileSettingsProps) {
-  const { locale } = useLocale();
+  const { t } = useLocale();
   const [fullName, setFullName] = useState(profile?.full_name || "");
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -108,7 +107,7 @@ export default function ProfileSettings({ user, profile }: ProfileSettingsProps)
             {profile?.avatar_url ? (
               <Image 
                 src={profile.avatar_url} 
-                alt="Avatar" 
+                alt={t('settings.profile.avatar')} 
                 fill 
                 className="object-cover" 
                 sizes="96px"
@@ -125,7 +124,7 @@ export default function ProfileSettings({ user, profile }: ProfileSettingsProps)
               {t("settings.comingSoon")}
             </span>
           </div>
-          <p className="text-sm text-slate-500">Avatar upload will be available soon.</p>
+          <p className="text-sm text-slate-500">{t('settings.profile.avatar.comingSoon')}</p>
         </div>
       </div>
 

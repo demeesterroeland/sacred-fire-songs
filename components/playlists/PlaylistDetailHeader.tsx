@@ -12,7 +12,7 @@ import {
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { usePlaylistRename } from '@/hooks/usePlaylistRename';
-import { t } from '@/lib/i18n';
+import { useLocale } from '@/context/LocaleContext';
 
 interface Props {
     playlistId: string;
@@ -33,6 +33,7 @@ export function PlaylistDetailHeader({
     isOwner,
     isCurator = false,
 }: Props) {
+    const { t } = useLocale();
     const canEdit = isOwner || isCurator;
     // ─── Title ────────────────────────────────────────────────────────────────
     const {

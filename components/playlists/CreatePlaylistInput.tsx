@@ -5,9 +5,10 @@ import { Plus } from 'lucide-react';
 import { createPlaylist } from '@/app/actions/playlistActions';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
-import { t } from '@/lib/i18n';
+import { useLocale } from '@/context/LocaleContext';
 
 export function CreatePlaylistInput() {
+    const { t } = useLocale();
     const [isOpen, setIsOpen] = useState(false);
     const [title, setTitle] = useState('');
     const [isPending, startTransition] = useTransition();

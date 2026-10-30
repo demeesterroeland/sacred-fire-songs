@@ -11,7 +11,7 @@ import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal
 import { deletePlaylist, togglePlaylistVisibility } from '@/app/actions/playlistActions';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
-import { t } from '@/lib/i18n';
+import { useLocale } from '@/context/LocaleContext';
 
 interface PlaylistContextMenuProps {
     playlistId: string;
@@ -26,6 +26,7 @@ interface PlaylistContextMenuProps {
 }
 
 export function PlaylistContextMenu({ playlistId, playlistTitle, isOwner, isPublic, onRenameStart, onGetLink, isLinkAvailable = true }: PlaylistContextMenuProps) {
+    const { t } = useLocale();
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [isDeleting, startDeleteTransition] = useTransition();
     const [, startVisibilityTransition] = useTransition();

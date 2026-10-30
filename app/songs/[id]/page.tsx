@@ -27,7 +27,6 @@ import { parseArtists } from '@/lib/songs/artistUtils';
 import { recordSongView } from '@/app/actions/recordSongView';
 import { useSongRecordings } from '@/hooks/useSongRecordings';
 import { useRecordingsQuery } from '@/hooks/useRecordingsQuery';
-import { t } from '@/lib/i18n';
 import { useLocale } from '@/context/LocaleContext';
 
 // Enforce a timeout on any promise to prevent infinite loading skeletons
@@ -99,7 +98,7 @@ const fetchSong = async (id: string) => {
 };
 
 export default function SongDetailPage() {
-    const { locale } = useLocale();
+    const { t } = useLocale();
     const params = useParams();
     const router = useRouter();
     const id = typeof params.id === 'string' ? params.id : params.id?.[0]; // Safe type handling

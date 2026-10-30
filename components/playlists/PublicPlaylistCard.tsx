@@ -7,6 +7,7 @@ import { CardContent } from '@/components/common/CardContent';
 import { toast } from 'sonner';
 import { usePlaylistRename } from '@/hooks/usePlaylistRename';
 
+import { useLocale } from '@/context/LocaleContext';
 interface PublicPlaylistCardProps {
     id: string;
     title: string;
@@ -17,6 +18,7 @@ interface PublicPlaylistCardProps {
 }
 
 export function PublicPlaylistCard({ id, title, description, isOwner, songCount = 0, songTitles = [] }: PublicPlaylistCardProps) {
+    const { t } = useLocale();
     const {
         optimisticTitle,
         isRenaming,
@@ -31,7 +33,7 @@ export function PublicPlaylistCard({ id, title, description, isOwner, songCount 
     const handleCopyLink = () => {
         const origin = typeof window !== 'undefined' ? window.location.origin : '';
         navigator.clipboard.writeText(`${origin}/library/playlists/${id}`);
-        toast.success('Link copied');
+        toast.success(t('playlists.toast.linkCopied'));
     };
 
     const songCountLabel = `${songCount} song${songCount !== 1 ? 's' : ''}`;

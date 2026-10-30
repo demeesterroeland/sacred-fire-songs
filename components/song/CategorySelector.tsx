@@ -5,12 +5,14 @@ import { useTaxonomy } from '@/lib/hooks/useTaxonomy';
 import { TagPill } from '@/components/ui/TagPill';
 import { Loader2, Search, X } from 'lucide-react';
 
+import { useLocale } from '@/context/LocaleContext';
 interface CategorySelectorProps {
   selectedIds: string[];
   onChange: (ids: string[]) => void;
 }
 
 export default function CategorySelector({ selectedIds, onChange }: CategorySelectorProps) {
+  const { t } = useLocale();
   const { categories, grouped, isLoading, error } = useTaxonomy();
   const [searchTerm, setSearchTerm] = useState('');
 
@@ -59,7 +61,7 @@ export default function CategorySelector({ selectedIds, onChange }: CategorySele
   }
 
   if (error) {
-    return <div className="text-red-400 text-sm">Failed to load tags.</div>;
+    return <div className="text-red-400 text-sm">{t('search.tags.loadError')}</div>;
   }
 
   return (
@@ -72,7 +74,7 @@ export default function CategorySelector({ selectedIds, onChange }: CategorySele
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
-            placeholder="Search tags or browse categories below..."
+            placeholder={t('search.tags.placeholder')}
             className="w-full pl-9 pr-8 py-2 text-xs rounded-lg bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500/50"
           />
           {searchTerm && (

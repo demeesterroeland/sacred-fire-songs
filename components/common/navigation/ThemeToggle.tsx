@@ -2,12 +2,11 @@
 
 import { Sun, Moon, Monitor } from 'lucide-react';
 import { useUserPreferences, type ThemePreference } from '@/context/UserPreferencesContext';
-import { t } from '@/lib/i18n';
 import { useLocale } from '@/context/LocaleContext';
 
 export function ThemeToggle() {
     const { preferences, setPreference } = useUserPreferences();
-    const { locale } = useLocale();
+    const { t } = useLocale();
 
     const themeOptions: { value: ThemePreference; icon: typeof Sun; label: string }[] = [
         { value: 'light', icon: Sun, label: t('theme.light') },

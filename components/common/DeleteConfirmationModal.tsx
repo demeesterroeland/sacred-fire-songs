@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { X, AlertTriangle, Trash2 } from 'lucide-react';
-import { t } from '@/lib/i18n';
+import { useLocale } from '@/context/LocaleContext';
 
 interface DeleteConfirmationModalProps {
     isOpen: boolean;
@@ -21,6 +21,7 @@ export default function DeleteConfirmationModal({
     message,
     isDeleting = false,
 }: DeleteConfirmationModalProps) {
+    const { t } = useLocale();
     const [render, setRender] = useState(false);
 
     // Synchronize rendering state with isOpen prop without triggering cascading renders

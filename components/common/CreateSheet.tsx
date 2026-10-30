@@ -3,7 +3,6 @@
 import { useEffect, useRef } from 'react';
 import { Music, ListMusic } from 'lucide-react';
 import { useRouter, usePathname } from 'next/navigation';
-import { t } from '@/lib/i18n';
 import { useLocale } from '@/context/LocaleContext';
 
 interface CreateSheetProps {
@@ -12,7 +11,7 @@ interface CreateSheetProps {
 }
 
 export default function CreateSheet({ isOpen, onClose }: CreateSheetProps) {
-    const { locale } = useLocale();
+    const { t } = useLocale();
     const router = useRouter();
     const pathname = usePathname();
     const sheetRef = useRef<HTMLDivElement>(null);

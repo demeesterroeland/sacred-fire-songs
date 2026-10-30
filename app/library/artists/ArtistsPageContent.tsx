@@ -4,9 +4,10 @@ import Link from 'next/link';
 import { Mic2 } from 'lucide-react';
 import { CardContent } from '@/components/common/CardContent';
 import type { ArtistSummary } from '@/lib/songs/serverQueries';
-import { t } from '@/lib/i18n';
+import { useLocale } from '@/context/LocaleContext';
 
 export default function ArtistsPageContent({ artists }: { artists: ArtistSummary[] }) {
+    const { t } = useLocale();
     if (artists.length === 0) {
         return (
             <p className="text-sm text-gray-600 italic py-8 text-center">

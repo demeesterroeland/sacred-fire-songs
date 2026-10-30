@@ -3,7 +3,6 @@
 import { TagPill } from '@/components/ui/TagPill';
 import { AuthorPill } from '@/components/ui/AuthorPill';
 import { parseArtists } from '@/lib/songs/artistUtils';
-import { t } from '@/lib/i18n';
 import { useLocale } from '@/context/LocaleContext';
 
 interface CategoryItem {
@@ -19,7 +18,7 @@ interface SongMetadataPillsProps {
 }
 
 export function SongMetadataPills({ originalAuthor, categories = [] }: SongMetadataPillsProps) {
-  const { locale } = useLocale();
+  const { t } = useLocale();
   const artists = parseArtists(originalAuthor);
   const displayArtists = artists.length > 0
     ? artists.map((a) => a.toLowerCase() === 'traditional' ? t('song.traditional') : a)

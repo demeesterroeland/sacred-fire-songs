@@ -7,7 +7,7 @@ import { createClient } from '@/lib/supabase/client';
 import { addSongToPlaylist } from '@/app/actions/playlistActions';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
-import { t } from '@/lib/i18n';
+import { useLocale } from '@/context/LocaleContext';
 
 interface Song {
     id: string;
@@ -24,6 +24,7 @@ interface AddSongsSheetProps {
 }
 
 export function AddSongsSheet({ playlistId, existingCompositionIds, open, onClose }: AddSongsSheetProps) {
+    const { t } = useLocale();
     const [query, setQuery] = useState('');
     const [songs, setSongs] = useState<Song[]>([]);
     const [isSearching, setIsSearching] = useState(false);

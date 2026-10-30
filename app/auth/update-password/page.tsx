@@ -10,7 +10,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 
+import { useLocale } from '@/context/LocaleContext';
 function UpdatePasswordContent() {
+    const { t } = useLocale();
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [error, setError] = useState<string | null>(null);
@@ -23,7 +25,7 @@ function UpdatePasswordContent() {
         e.preventDefault();
 
         if (password !== confirmPassword) {
-            setError("Passwords do not match");
+            setError(t('settings.security.mismatch'));
             return;
         }
 
@@ -40,7 +42,7 @@ function UpdatePasswordContent() {
 
             router.push("/?message=Password updated successfully");
         } catch (error: unknown) {
-            setError(error instanceof Error ? error.message : "An error occurred");
+            setError(error instanceof Error ? error.message : t('common.errorOccurred'));
         } finally {
             setIsLoading(false);
         }
@@ -56,8 +58,8 @@ function UpdatePasswordContent() {
                         <ShieldCheck className="text-white w-6 h-6 md:w-10 md:h-10" />
                     </div>
                     <div className="text-left md:text-center">
-                        <h1 className="text-gray-900 dark:text-white text-xl md:text-3xl font-bold md:mb-2 leading-tight">New Password</h1>
-                        <p className="text-[#8e99aa] text-xs md:text-sm">Please enter and confirm your new password.</p>
+                        <h1 className="text-gray-900 dark:text-white text-xl md:text-3xl font-bold md:mb-2 leading-tight">{t('field.newPassword')}</h1>
+                        <p className="text-[#8e99aa] text-xs md:text-sm">{t('auth.updatePassword.pageDescription')}</p>
                     </div>
                 </div>
 
@@ -69,7 +71,7 @@ function UpdatePasswordContent() {
 
                 <form className="space-y-4 md:space-y-6" onSubmit={handleUpdatePassword}>
                     <div className="space-y-2">
-                        <Label className="text-xs md:text-sm font-semibold text-gray-900 dark:text-white ml-1 tracking-wide uppercase opacity-70">New Password</Label>
+                        <Label className="text-xs md:text-sm font-semibold text-gray-900 dark:text-white ml-1 tracking-wide uppercase opacity-70">{t('field.newPassword')}</Label>
                         <div className="relative group">
                             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5a657a] group-focus-within:text-[#d9481e] transition-colors pointer-events-none">
                                 <Lock className="w-5 h-5" />
@@ -87,7 +89,7 @@ function UpdatePasswordContent() {
                     </div>
 
                     <div className="space-y-2">
-                        <Label className="text-xs md:text-sm font-semibold text-gray-900 dark:text-white ml-1 tracking-wide uppercase opacity-70">Confirm Password</Label>
+                        <Label className="text-xs md:text-sm font-semibold text-gray-900 dark:text-white ml-1 tracking-wide uppercase opacity-70">{t('field.confirmPasswordShort')}</Label>
                         <div className="relative group">
                             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5a657a] group-focus-within:text-[#d9481e] transition-colors pointer-events-none">
                                 <ShieldCheck className="w-5 h-5" />
@@ -115,19 +117,19 @@ function UpdatePasswordContent() {
                         disabled={isLoading}
                         className="w-full h-auto bg-gradient-to-r from-[#d9481e] to-[#f45d1a] hover:brightness-110 active:scale-[0.98] text-white font-bold py-3.5 md:py-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-[0_4px_15px_rgba(217,72,30,0.4)]"
                     >
-                        {isLoading ? "Updating..." : "Update Password"}
+                        {isLoading ? t('settings.security.updating') : t('settings.security.updatePassword')}
                         <ArrowRight className="w-5 h-5" />
                     </Button>
                 </form>
 
                 <div className="mt-12 text-center border-t border-gray-200 dark:border-[#2d3545] pt-6">
                     <p className="text-[#8e99aa] text-sm">
-                        Back to
+                        {t('auth.updatePassword.backTo')}
                         <Link
                             href="/auth/login"
                             className="text-[#d9481e] hover:text-[#f45d1a] underline font-medium transition-colors ml-1"
                         >
-                            Sign in
+                            {t('auth.signInLink')}
                         </Link>
                     </p>
                 </div>
@@ -136,9 +138,14 @@ function UpdatePasswordContent() {
     );
 }
 
+function LoadingFallback() {
+    const { t } = useLocale();
+    return <div>{t('common.loading')}</div>;
+}
+
 export default function UpdatePassword() {
     return (
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<LoadingFallback />}>
             <UpdatePasswordContent />
         </Suspense>
     );

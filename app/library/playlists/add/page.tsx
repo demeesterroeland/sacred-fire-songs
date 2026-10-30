@@ -8,7 +8,9 @@ import { createPlaylist } from '@/app/actions/playlistActions';
 import { toast } from 'sonner';
 import { useAuth } from '@/hooks/useAuth';
 
+import { useLocale } from '@/context/LocaleContext';
 export default function CreatePlaylistPage() {
+    const { t } = useLocale();
     const router = useRouter();
     const { user, loading } = useAuth();
     const [title, setTitle] = useState('');
@@ -32,7 +34,7 @@ export default function CreatePlaylistPage() {
     const handleCreate = () => {
         const trimmed = title.trim();
         if (!trimmed) {
-            toast.error('Please enter a playlist name');
+            toast.error(t('playlists.add.nameRequired'));
             inputRef.current?.focus();
             return;
         }
@@ -42,7 +44,7 @@ export default function CreatePlaylistPage() {
             if ('error' in result) {
                 toast.error(result.error);
             } else {
-                toast.success('Playlist created');
+                toast.success(t('playlists.add.created'));
                 router.push(`/library/playlists/${result.id}`);
             }
         });
@@ -58,7 +60,7 @@ export default function CreatePlaylistPage() {
                     <Link
                         href="/library/playlists"
                         className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors shrink-0"
-                        aria-label="Back to playlists"
+                        aria-label={t('playlists.detail.back')}
                     >
                         <ArrowLeft className="w-5 h-5" />
                     </Link>
@@ -71,12 +73,12 @@ export default function CreatePlaylistPage() {
                                 if (e.key === 'Enter') handleCreate();
                                 if (e.key === 'Escape') router.push('/library/playlists');
                             }}
-                            placeholder="Playlist name…"
+                            placeholder={t('playlists.add.namePlaceholder')}
                             className="w-full bg-transparent text-xl font-bold text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-600 outline-none border-b border-gray-300 dark:border-gray-700 focus:border-amber-500 pb-1 transition-colors"
                         />
                         <p className="text-xs text-gray-500 mt-1.5 flex items-center gap-1.5">
                             <Lock className="w-3 h-3" />
-                            Created as private — you can change this later
+                            {t('playlists.add.privateHint')}
                         </p>
                     </div>
                 </div>
@@ -91,10 +93,10 @@ export default function CreatePlaylistPage() {
                 {isPending ? (
                     <>
                         <Loader2 className="w-5 h-5 animate-spin" />
-                        Creating…
+                        {t('playlists.add.creating')}
                     </>
                 ) : (
-                    'Create Playlist'
+                    t('playlists.add.submit')
                 )}
             </button>
         </div>

@@ -2,7 +2,6 @@
 
 import Link from 'next/link';
 import { Guitar, Music, Mic } from 'lucide-react';
-import { t } from '@/lib/i18n';
 import { useLocale } from '@/context/LocaleContext';
 
 interface SongTechnicalBadgesProps {
@@ -16,7 +15,7 @@ export function SongTechnicalBadges({
   hasMelody,
   hasPersonalRecording,
 }: SongTechnicalBadgesProps) {
-  const { locale } = useLocale();
+  const { t } = useLocale();
   if (!hasChords && !hasMelody && !hasPersonalRecording) return null;
 
   return (

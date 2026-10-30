@@ -8,7 +8,6 @@ import { useSidebar } from '@/context/SidebarContext';
 import { useAuth, type AuthUser } from '@/hooks/useAuth';
 import { getSiteTitle } from '@/lib/env';
 import { UserProfile } from './navigation/UserProfile';
-import { t } from '@/lib/i18n';
 import { useLocale } from '@/context/LocaleContext';
 
 const SEARCH_HISTORY_KEY = 'sacred-fire-songs-search-history';
@@ -26,7 +25,7 @@ function saveSearchHistory(history: string[]) {
 }
 
 export default function Header({ initialUser }: { initialUser?: AuthUser | null }) {
-    const { locale } = useLocale();
+    const { t } = useLocale();
     const pathname = usePathname();
     const router = useRouter();
     const searchParams = useSearchParams();

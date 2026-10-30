@@ -1,7 +1,6 @@
 'use client';
 
 import { parseChordProForDisplay, ChordProSection, ChordProLine, ChordProItem } from '@/lib/chordUtils';
-import { t } from '@/lib/i18n';
 import { useLocale } from '@/context/LocaleContext';
 
 interface SongDisplayProps {
@@ -11,7 +10,7 @@ interface SongDisplayProps {
 }
 
 export default function SongDisplay({ content, melodyNotation, hasChords = false }: SongDisplayProps) {
-    const { locale } = useLocale();
+    const { t } = useLocale();
     const sections: ChordProSection[] = parseChordProForDisplay(content);
 
     return (

@@ -5,7 +5,6 @@ import { User } from "@supabase/supabase-js";
 import { Mail, Lock, LogOut, Eye, EyeOff, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
-import { t } from "@/lib/i18n";
 import { useLocale } from "@/context/LocaleContext";
 
 interface SecuritySettingsProps {
@@ -13,7 +12,7 @@ interface SecuritySettingsProps {
 }
 
 export default function SecuritySettings({ user }: SecuritySettingsProps) {
-  const { locale } = useLocale();
+  const { t } = useLocale();
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);

@@ -10,7 +10,7 @@ import { addSongToPlaylist, createPlaylist } from '@/app/actions/playlistActions
 import { PLAYLIST_KEYS } from '@/lib/songs/queryKeys';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
-import { t } from '@/lib/i18n';
+import { useLocale } from '@/context/LocaleContext';
 
 interface PlaylistPickerProps {
     compositionId: string;
@@ -64,6 +64,7 @@ async function fetchContainingPlaylists(compositionId: string) {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function PlaylistPicker({ compositionId, userId, triggerClassName, iconClassName, label }: PlaylistPickerProps) {
+    const { t } = useLocale();
     const [open, setOpen] = useState(false);
     const [newTitle, setNewTitle] = useState('');
     const [isCreating, startCreateTransition] = useTransition();
@@ -140,9 +141,9 @@ export function PlaylistPicker({ compositionId, userId, triggerClassName, iconCl
             // Add the song to the new playlist
             const addResult = await addSongToPlaylist(result.id, compositionId);
             if (addResult.error) {
-                toast.error(`Playlist created but song could not be added: ${addResult.error}`);
+                toast.error(t('playlists.picker.createdButNotAdded', { error: String(addResult.error) }));
             } else {
-                toast.success(`Added to new playlist "${trimmed}"`, {
+                toast.success(t('playlists.picker.addedToNew', { name: trimmed }), {
                     action: {
                         label: t('playlists.openPlaylist'),
                         onClick: () => { window.location.href = `/library/playlists/${result.id}`; },

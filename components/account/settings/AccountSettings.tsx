@@ -23,7 +23,6 @@ import ProfileSettings from "@/components/account/settings/ProfileSettings";
 import SecuritySettings from "@/components/account/settings/SecuritySettings";
 import PrivacySettings from "@/components/account/settings/PrivacySettings";
 import PreferencesSettings from "@/components/account/settings/PreferencesSettings";
-import { t } from "@/lib/i18n";
 import { useLocale } from "@/context/LocaleContext";
 
 interface AccountSettingsProps {
@@ -34,7 +33,7 @@ interface AccountSettingsProps {
 type TabType = "profile" | "account" | "preferences" | "privacy";
 
 export default function AccountSettings({ user, profile }: AccountSettingsProps) {
-  const { locale } = useLocale();
+  const { t } = useLocale();
   const [activeTab, setActiveTab] = useState<TabType>("profile");
 
   const tabs = [
