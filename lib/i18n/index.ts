@@ -21,12 +21,18 @@
 
 import en, { type TranslationKey } from '@/messages/en';
 import nl from '@/messages/nl';
+import es from '@/messages/es';
+import it from '@/messages/it';
+import ru from '@/messages/ru';
+import qu from '@/messages/qu';
+import fr from '@/messages/fr';
+import pt from '@/messages/pt';
 
 // ─── Supported Locales ────────────────────────────────────────────────────────
 
-export type Locale = 'en' | 'nl';
+export type Locale = 'en' | 'nl' | 'es' | 'it' | 'ru' | 'qu' | 'fr' | 'pt';
 
-export const SUPPORTED_LOCALES: readonly Locale[] = ['en', 'nl'];
+export const SUPPORTED_LOCALES: readonly Locale[] = ['en', 'nl', 'es', 'it', 'ru', 'qu', 'fr', 'pt'];
 export const DEFAULT_LOCALE: Locale = 'en';
 export const LOCALE_STORAGE_KEY = 'sacred-fire-songs-locale';
 export const LOCALE_COOKIE = 'sacred-fire-songs-locale';
@@ -35,6 +41,31 @@ const LOCALE_COOKIE_MAX_AGE = 60 * 60 * 24 * 365; // one year
 export const LOCALE_LABELS: Record<Locale, string> = {
   en: 'English',
   nl: 'Nederlands',
+  es: 'Español',
+  it: 'Italiano',
+  ru: 'Русский',
+  qu: 'Runasimi',
+  fr: 'Français',
+  pt: 'Português',
+};
+
+/** BCP 47 tag used for dates and <html lang> (pt = Brazilian Portuguese, qu = Southern Quechua). */
+export const LOCALE_DATE_TAGS: Record<Locale, string> = {
+  en: 'en-US',
+  nl: 'nl-NL',
+  es: 'es-ES',
+  it: 'it-IT',
+  ru: 'ru-RU',
+  qu: 'qu-PE',
+  fr: 'fr-FR',
+  pt: 'pt-BR',
+};
+
+/** Browser language codes that map onto a supported locale. */
+const LOCALE_ALIASES: Record<string, Locale> = {
+  quz: 'qu', // Cusco Quechua
+  quy: 'qu', // Ayacucho Quechua
+  que: 'qu',
 };
 
 export type { TranslationKey };
@@ -43,9 +74,15 @@ export type TranslateFn = (key: TranslationKey, params?: InterpolationParams) =>
 
 // ─── Dictionary Registry ──────────────────────────────────────────────────────
 
-const dictionaries: Record<Locale, Partial<Record<TranslationKey, string>>> = {
+export const DICTIONARIES: Record<Locale, Partial<Record<TranslationKey, string>>> = {
   en,
   nl,
+  es,
+  it,
+  ru,
+  qu,
+  fr,
+  pt,
 };
 
 // ─── Locale Matching & Resolution ─────────────────────────────────────────────
@@ -58,7 +95,8 @@ export function isLocale(value: unknown): value is Locale {
 export function matchLocale(tag: string | null | undefined): Locale | null {
   if (!tag) return null;
   const base = tag.trim().toLowerCase().split('-')[0];
-  return isLocale(base) ? base : null;
+  if (isLocale(base)) return base;
+  return LOCALE_ALIASES[base] ?? null;
 }
 
 /** Parses an Accept-Language header into tags ordered by preference. */
@@ -145,7 +183,7 @@ export function translateFrom(
  * useLocale().t) instead of the module-level t() wherever the locale is known.
  */
 export function tWithLocale(locale: Locale, key: TranslationKey, params?: InterpolationParams): string {
-  return translateFrom(dictionaries[locale] ?? en, en, key, params);
+  return translateFrom(DICTIONARIES[locale] ?? en, en, key, params);
 }
 
 // ─── Module-level Locale (client convenience) ─────────────────────────────────

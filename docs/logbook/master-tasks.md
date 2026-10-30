@@ -1235,3 +1235,4 @@
 
 ## Session October 30, 2026 (Part 5: Multi-Language Support i18n - Issue #246)
 
+- [x] Add es, it, ru, qu, fr, pt dictionaries + select-based LanguageSwitcher (I18N-12)

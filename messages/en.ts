@@ -160,7 +160,7 @@ const en = {
   'song.technical.recording': 'Recording',
   'song.metadata.key': 'KEY',
   'song.metadata.capo': 'CAPO',
-  'song.metadata.fret': '{capo}nd fret',
+  'song.metadata.fret': 'Fret {capo}',
   'song.metadata.tuning': 'TUNING',
   'song.metadata.standard': 'Standard',
   'song.error.timeout': 'Taking too long…',

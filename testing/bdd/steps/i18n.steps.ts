@@ -2,9 +2,9 @@ import { Before, Given, When, Then } from '@cucumber/cucumber';
 import type { World } from '@cucumber/cucumber';
 import assert from 'node:assert/strict';
 import en from '@/messages/en';
-import nl from '@/messages/nl';
 import {
   DEFAULT_LOCALE,
+  DICTIONARIES,
   LOCALE_COOKIE,
   LOCALE_STORAGE_KEY,
   SUPPORTED_LOCALES,
@@ -64,8 +64,8 @@ Before({ tags: '@i18n' }, function (this: I18nWorld) {
 // Background
 // ---------------------------------------------------------------------------
 
-Given('the supported interface languages are {string} and {string}', function (a: string, b: string) {
-  assert.deepEqual([...SUPPORTED_LOCALES].sort(), [a, b].sort());
+Given('the supported interface languages are {string}', function (list: string) {
+  assert.deepEqual([...SUPPORTED_LOCALES].sort(), parseList(list).sort());
 });
 
 Given('the default interface language is {string}', function (locale: string) {
@@ -241,7 +241,7 @@ Then('the text does not contain {string}', function (this: I18nWorld, part: stri
 // Rule: dictionaries stay in sync
 // ---------------------------------------------------------------------------
 
-const dictionaries: Record<string, Partial<Record<TranslationKey, string>>> = { en, nl };
+const dictionaries: Record<string, Partial<Record<TranslationKey, string>>> = DICTIONARIES;
 
 Then(
   'the {string} dictionary has exactly the keys of the {string} dictionary',
@@ -291,4 +291,8 @@ Then(
 
 Then('dates are formatted with {string}', function (dateLocale: string) {
   assert.equal(pdfLabels.dateLocale, dateLocale);
+});
+
+Then('the key {string} in {string} is {string}', function (key: string, locale: string, expected: string) {
+  assert.equal(dictionaries[locale][key as TranslationKey], expected);
 });

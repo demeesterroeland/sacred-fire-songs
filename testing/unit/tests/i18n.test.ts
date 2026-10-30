@@ -5,6 +5,8 @@ import {
   DEFAULT_LOCALE,
   LOCALE_COOKIE,
   SUPPORTED_LOCALES,
+  DICTIONARIES,
+  LOCALE_LABELS,
   getLocale,
   interpolate,
   isLocale,
@@ -92,7 +94,8 @@ describe('isLocale() / matchLocale()', () => {
   it('accepts only supported locale codes', () => {
     expect(isLocale('en')).toBe(true);
     expect(isLocale('nl')).toBe(true);
-    expect(isLocale('fr')).toBe(false);
+    expect(isLocale('fr')).toBe(true);
+    expect(isLocale('de')).toBe(false);
     expect(isLocale('')).toBe(false);
     expect(isLocale(null)).toBe(false);
     expect(isLocale(42)).toBe(false);
@@ -104,7 +107,13 @@ describe('isLocale() / matchLocale()', () => {
     ['NL-nl', 'nl'],
     ['en-US', 'en'],
     [' en ', 'en'],
-    ['fr-FR', null],
+    ['fr-FR', 'fr'],
+    ['pt-BR', 'pt'],
+    ['es-419', 'es'],
+    ['ru', 'ru'],
+    ['quz', 'qu'],
+    ['quy-PE', 'qu'],
+    ['de-DE', null],
     ['', null],
     [undefined, null],
   ])('matchLocale(%j) → %j', (input, expected) => {
@@ -115,7 +124,7 @@ describe('isLocale() / matchLocale()', () => {
 describe('setLocale()', () => {
   it('ignores an unsupported locale and uses the default', () => {
     setLocale('nl');
-    setLocale('fr' as never);
+    setLocale('de' as never);
     expect(getLocale()).toBe(DEFAULT_LOCALE);
   });
 });
@@ -141,11 +150,11 @@ describe('resolveLocale()', () => {
   });
 
   it('uses the first supported browser language', () => {
-    expect(resolveLocale({ browserLanguages: ['fr-FR', 'nl-BE', 'en'] })).toBe('nl');
+    expect(resolveLocale({ browserLanguages: ['de-DE', 'nl-BE', 'en'] })).toBe('nl');
   });
 
   it('falls back to English when no browser language is supported', () => {
-    expect(resolveLocale({ browserLanguages: ['fr-FR', 'de'] })).toBe('en');
+    expect(resolveLocale({ browserLanguages: ['de-DE', 'ja'] })).toBe('en');
   });
 
   it('prefers the cookie over the browser language', () => {
@@ -157,14 +166,14 @@ describe('resolveLocale()', () => {
   });
 
   it('ignores invalid stored and cookie values', () => {
-    expect(resolveLocale({ stored: 'fr', cookie: 'xx', browserLanguages: ['nl'] })).toBe('nl');
+    expect(resolveLocale({ stored: 'de', cookie: 'xx', browserLanguages: ['nl'] })).toBe('nl');
     expect(resolveLocale({ stored: '<script>', cookie: '' })).toBe('en');
   });
 });
 
 describe('resolveRequestLocale() – server side', () => {
   it('uses the Accept-Language header when no cookie is sent', () => {
-    expect(resolveRequestLocale(undefined, 'fr-FR,fr;q=0.9,nl;q=0.8,en;q=0.7')).toBe('nl');
+    expect(resolveRequestLocale(undefined, 'de-DE,de;q=0.9,nl;q=0.8,en;q=0.7')).toBe('nl');
   });
 
   it('lets the locale cookie override Accept-Language', () => {
@@ -195,26 +204,40 @@ describe('locale cookie helpers', () => {
 describe('dictionaries', () => {
   const enKeys = Object.keys(en).sort();
   const placeholders = (s: string) => [...s.matchAll(/\{(\w+)\}/g)].map((m) => m[1]).sort();
+  const translations = Object.entries(DICTIONARIES).filter(([locale]) => locale !== 'en');
 
-  it('declare English as default and support exactly en + nl', () => {
+  it('declare English as default and support en, nl, es, it, ru, qu, fr, pt', () => {
     expect(DEFAULT_LOCALE).toBe('en');
-    expect([...SUPPORTED_LOCALES].sort()).toEqual(['en', 'nl']);
+    expect([...SUPPORTED_LOCALES].sort()).toEqual(['en', 'es', 'fr', 'it', 'nl', 'pt', 'qu', 'ru']);
+    expect(Object.keys(DICTIONARIES).sort()).toEqual([...SUPPORTED_LOCALES].sort());
   });
 
-  it('Dutch has exactly the same keys as English', () => {
-    expect(Object.keys(nl).sort()).toEqual(enKeys);
+  it('labels every language in its own name', () => {
+    expect(LOCALE_LABELS).toEqual({
+      en: 'English', nl: 'Nederlands', es: 'Español', it: 'Italiano',
+      ru: 'Русский', qu: 'Runasimi', fr: 'Français', pt: 'Português',
+    });
   });
 
-  it('no translation is empty', () => {
-    for (const [key, value] of [...Object.entries(en), ...Object.entries(nl)]) {
+  it.each(translations)('%s has exactly the same keys as English', (_locale, dict) => {
+    expect(Object.keys(dict).sort()).toEqual(enKeys);
+  });
+
+  it.each(Object.entries(DICTIONARIES))('%s has no empty translation', (_locale, dict) => {
+    for (const [key, value] of Object.entries(dict)) {
       expect(value, key).toBeTypeOf('string');
       expect((value as string).trim(), key).not.toBe('');
     }
   });
 
-  it('Dutch uses the same {placeholders} as English for every key', () => {
+  it.each(translations)('%s uses the same {placeholders} as English for every key', (_locale, dict) => {
     for (const key of enKeys as TranslationKey[]) {
-      expect(placeholders(nl[key] ?? ''), key).toEqual(placeholders(en[key]));
+      expect(placeholders(dict[key] ?? ''), key).toEqual(placeholders(en[key]));
     }
+  });
+
+  it.each(translations)('%s actually translates the interface (not a copy of English)', (_locale, dict) => {
+    const same = (enKeys as TranslationKey[]).filter((k) => dict[k] === en[k]);
+    expect(same.length).toBeLessThan(enKeys.length * 0.1);
   });
 });
