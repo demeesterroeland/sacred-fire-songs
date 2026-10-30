@@ -11,8 +11,7 @@
 import { cookies, headers } from 'next/headers';
 import {
   LOCALE_COOKIE,
-  parseAcceptLanguage,
-  resolveLocale,
+  resolveRequestLocale,
   tWithLocale,
   type Locale,
   type TranslateFn,
@@ -20,10 +19,7 @@ import {
 
 export async function getServerLocale(): Promise<Locale> {
   const [cookieStore, headerStore] = await Promise.all([cookies(), headers()]);
-  return resolveLocale({
-    cookie: cookieStore.get(LOCALE_COOKIE)?.value,
-    browserLanguages: parseAcceptLanguage(headerStore.get('accept-language')),
-  });
+  return resolveRequestLocale(cookieStore.get(LOCALE_COOKIE)?.value, headerStore.get('accept-language'));
 }
 
 /** `const t = await getServerT();` → `t('nav.home')` in the request's locale. */

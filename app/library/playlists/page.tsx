@@ -155,7 +155,7 @@ async function GuestView({ publicPlaylists, publicSongCounts, publicSongTitles }
                 <div className="grid grid-cols-1 gap-3">
                     <SmartPlaylistCard icon={Heart}   title={t('librarySummary.favorites.title')} description={t('librarySummary.favorites.description')}      subtitle={<span className="text-xs text-gray-500">{t('playlists.guest.favorites')}</span>} accent="rose"   />
                     <SmartPlaylistCard icon={Music}   title={t('librarySummary.mySongs.title')}     description={t('librarySummary.mySongs.description')}    subtitle={<span className="text-xs text-gray-500">{t('playlists.guest.songs')}</span>} accent="violet" />
-                    <SmartPlaylistCard icon={PenLine} title={t('librarySummary.drafts.title')}    description={t('librarySummary.drafts.description')}        subtitle={<span className="text-xs text-gray-500">{t('playlists.guest.drafts')}</span>} accent="gray"   />
+                    <SmartPlaylistCard icon={PenLine} title={t('librarySummary.drafts.title')}    description={t('playlists.guest.drafts.description')}        subtitle={<span className="text-xs text-gray-500">{t('playlists.guest.drafts')}</span>} accent="gray"   />
                     <SmartPlaylistCard icon={Mic} title={t('librarySummary.recordings.title')} description={t('librarySummary.recordings.description')} accent="violet"
                         subtitle={<span className="text-xs text-gray-500">{t('playlists.guest.recordings')}</span>} />
                 </div>

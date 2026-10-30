@@ -11,13 +11,14 @@
  * - After mount it reads the persisted choice (localStorage > cookie >
  *   navigator.languages > English) and switches if it differs, re-syncing the
  *   cookie and refreshing Server Components so they follow.
- * - setLocaleAndPersist() saves to localStorage + cookie, updates <html lang>,
- *   keeps the module-level t() in sync and refreshes Server Components.
+ * - setLocaleAndPersist() saves to localStorage + cookie, updates <html lang>
+ *   and keeps the module-level t() in sync; an effect then refreshes Server
+ *   Components until the layout's serverLocale matches.
  * - Client Components translate with `const { t } = useLocale()`, which
  *   re-renders them whenever the language changes.
  */
 
-import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   DEFAULT_LOCALE,
@@ -39,6 +40,9 @@ interface LocaleContextType {
   localeLabels: typeof LOCALE_LABELS;
 }
 
+const MAX_REFRESH_RETRIES = 3;
+const REFRESH_RETRY_MS = 1500;
+
 const LocaleContext = createContext<LocaleContextType | undefined>(undefined);
 
 export function LocaleProvider({
@@ -54,24 +58,36 @@ export function LocaleProvider({
   useEffect(() => {
     const resolved = syncLocaleOnMount(browserLocaleEnvironment());
     setLocale(resolved);
-    if (resolved !== serverLocale) {
-      setLocaleState(resolved);
-      router.refresh();
-    }
+    if (resolved !== serverLocale) setLocaleState(resolved);
     // Only on mount: later changes go through setLocaleAndPersist.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const setLocaleAndPersist = useCallback(
-    (next: Locale) => {
-      const resolved = isLocale(next) ? next : DEFAULT_LOCALE;
-      persistLocale(browserLocaleEnvironment(), resolved);
-      setLocale(resolved);
-      setLocaleState(resolved);
+  // Server Components follow the cookie. Refresh until the root layout
+  // re-renders with the same locale (serverLocale prop), retrying a few times
+  // because a refresh can be dropped while other router work is in flight.
+  // Bounded so a browser that blocks cookies never loops.
+  const refreshAttempts = useRef(0);
+  useEffect(() => {
+    if (locale === serverLocale) {
+      refreshAttempts.current = 0;
+      return;
+    }
+    router.refresh();
+    const retry = setInterval(() => {
+      if (refreshAttempts.current >= MAX_REFRESH_RETRIES) return clearInterval(retry);
+      refreshAttempts.current += 1;
       router.refresh();
-    },
-    [router]
-  );
+    }, REFRESH_RETRY_MS);
+    return () => clearInterval(retry);
+  }, [locale, serverLocale, router]);
+
+  const setLocaleAndPersist = useCallback((next: Locale) => {
+    const resolved = isLocale(next) ? next : DEFAULT_LOCALE;
+    persistLocale(browserLocaleEnvironment(), resolved);
+    setLocale(resolved);
+    setLocaleState(resolved);
+  }, []);
 
   const value = useMemo<LocaleContextType>(
     () => ({
