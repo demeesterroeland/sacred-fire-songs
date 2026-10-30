@@ -2,85 +2,83 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { ShieldCheck, Users, Settings as SettingsIcon } from 'lucide-react';
+import { Users, Settings as SettingsIcon, ChevronRight } from 'lucide-react';
 
+const tabs = [
+  { label: 'Users', href: '/admin/users', icon: Users, planned: false },
+  { label: 'Configuration', href: '/admin/configuration', icon: SettingsIcon, planned: true },
+];
+
+/**
+ * Admin area heading, following the Library pattern (app/library/LibraryTabs.tsx):
+ * list pages get a title and pill tabs, detail pages a breadcrumb.
+ */
 export default function AdminHeader() {
   const pathname = usePathname();
+  const parentTab = tabs.find((t) => pathname?.startsWith(t.href + '/'));
 
-  const navItems = [
-    {
-      label: 'Users',
-      href: '/admin/users',
-      icon: Users,
-      active: pathname.startsWith('/admin/users'),
-    },
-    {
-      label: 'Configuration & Settings',
-      href: '/admin/configuration',
-      icon: SettingsIcon,
-      active: pathname.startsWith('/admin/configuration'),
-      badge: 'Planned',
-    },
-  ];
+  if (parentTab) {
+    return (
+      <nav aria-label="Breadcrumb" className="mb-8">
+        <div className="flex items-center gap-1.5 text-sm text-gray-500">
+          <Link href="/admin/users" className="hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+            Administration
+          </Link>
+          <ChevronRight className="w-3.5 h-3.5 shrink-0" />
+          <Link href={parentTab.href} className="hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+            {parentTab.label}
+          </Link>
+        </div>
+      </nav>
+    );
+  }
 
   return (
-    <div className="border-b border-gray-200 dark:border-gray-800 bg-white/50 dark:bg-gray-950/50 backdrop-blur sticky top-[var(--navbar-height)] z-30">
-      <div className="max-w-6xl mx-auto px-4 md:px-8 py-4">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-purple-100 dark:bg-purple-950/60 border border-purple-200 dark:border-purple-800 flex items-center justify-center text-purple-600 dark:text-purple-400 shadow-sm">
-              <ShieldCheck className="w-5 h-5" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h1 className="text-xl font-black text-gray-900 dark:text-white tracking-tight">
-                  Administration
-                </h1>
-                <span className="text-[10px] font-bold uppercase tracking-wider bg-purple-100 text-purple-700 dark:bg-purple-900/40 dark:text-purple-300 px-2 py-0.5 rounded-full border border-purple-200 dark:border-purple-800/50">
-                  Admin Portal
-                </span>
-              </div>
-              <p className="text-xs text-gray-500 dark:text-gray-400">
-                Manage users, view contributions, and monitor community health.
-              </p>
-            </div>
-          </div>
-
-          <nav className="flex items-center gap-2 overflow-x-auto pb-1 sm:pb-0" aria-label="Admin Navigation">
-            {navItems.map((item) => {
-              const Icon = item.icon;
+    <>
+      <header className="mb-8 md:mb-12">
+        <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2 text-gray-900 dark:text-white">
+          Administration
+        </h1>
+        <p className="text-slate-500 dark:text-slate-400">
+          Manage users, view contributions, and monitor community activity.
+        </p>
+      </header>
+      <nav aria-label="Admin navigation" className="relative mb-8">
+        <div className="flex gap-2 overflow-x-auto scrollbar-none pb-1 -mx-4 px-4 md:mx-0 md:px-0">
+          {tabs.map(({ label, href, icon: Icon, planned }) => {
+            const isActive = pathname === href;
+            if (planned) {
               return (
-                <Link
-                  key={item.href}
-                  href={item.badge ? '#' : item.href}
-                  className={`
-                    flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs md:text-sm font-semibold transition-all whitespace-nowrap
-                    ${item.active
-                      ? 'bg-purple-600 text-white shadow-md shadow-purple-900/20'
-                      : item.badge
-                      ? 'text-gray-400 dark:text-gray-600 cursor-not-allowed hover:bg-transparent'
-                      : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 hover:text-gray-900 dark:hover:text-white'
-                    }
-                  `}
-                  onClick={(e) => {
-                    if (item.badge) {
-                      e.preventDefault();
-                    }
-                  }}
+                <span
+                  key={href}
+                  aria-disabled="true"
+                  title="Planned"
+                  className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-bold whitespace-nowrap shrink-0 bg-gray-100 dark:bg-gray-900 text-gray-400 dark:text-gray-600 border border-gray-200/50 dark:border-gray-800/50 cursor-not-allowed"
                 >
-                  <Icon className="w-4 h-4 shrink-0" />
-                  <span>{item.label}</span>
-                  {item.badge && (
-                    <span className="text-[9px] uppercase px-1.5 py-0.5 rounded bg-gray-200 dark:bg-gray-800 text-gray-500 dark:text-gray-400">
-                      {item.badge}
-                    </span>
-                  )}
-                </Link>
+                  <Icon className="w-3.5 h-3.5" />
+                  {label}
+                  <span className="text-[9px] uppercase tracking-wider">· Planned</span>
+                </span>
               );
-            })}
-          </nav>
+            }
+            return (
+              <Link
+                key={href}
+                href={href}
+                aria-current={isActive ? 'page' : undefined}
+                className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-bold transition-all whitespace-nowrap shrink-0 ${
+                  isActive
+                    ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-950'
+                    : 'bg-gray-200/80 dark:bg-gray-800/80 text-gray-500 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white border border-gray-300/50 dark:border-gray-700/50'
+                }`}
+              >
+                <Icon className="w-3.5 h-3.5" />
+                {label}
+              </Link>
+            );
+          })}
         </div>
-      </div>
-    </div>
+      </nav>
+    </>
   );
 }

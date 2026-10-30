@@ -262,7 +262,7 @@ Feature: Admin users overview, details and contributions
       Then it lists "E2E Arrangement" for "E2E Admin Overview Song"
       When I open the "Playlists" tab
       Then it lists "E2E Admin Playlist" as public
-      When I click "Back to All Users"
+      When I click "Users" in the breadcrumb
       Then I am back on /admin/users
 
     @e2e @adminUserDetails

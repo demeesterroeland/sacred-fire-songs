@@ -1,6 +1,6 @@
 # Project Analysis & Design Document: Song Sharing Application (Sacred Fire Songs)
 
-**Version:** 1.37
+**Version:** 1.38
 **Status:** Living Document
 **Date:** Oct 30, 2026
 
@@ -30,6 +30,7 @@
 | **1.35** | Oct 30, 2026 | Added `scripts/export-random-seed.mjs` (`npm run seed:generate`) which runs the random seeder and writes `supabase/seeds/03_songs_random_generated.sql` (200 generated songs) so `supabase db reset` / `supabase start` still seed a realistic local database. |
 | **1.36** | Oct 30, 2026 | Implemented Story 4.2.1 (Issue #18) for musician setlist PDF export using ChordSheetJS and jsPDF with firelight-optimized typography, pagination, section headers, transposition overrides, and UI quick action buttons. |
 | **1.37** | Oct 30, 2026 | Epic 3.6 / Story 3.6.1 (Admin User Overview & Contributions, #257/#258): admin area `/admin/users` and `/admin/users/[id]` with server-side role guard, `public.fn_is_admin()` and admin read policies on `profiles`/`setlists`, per-user status (active/inactive/never), musician status, contribution counts and lists. Fixed the user detail query to use `compositions.original_author` and `song_versions.composition_id`/`version_name`. Added sections 5.2 (admin access), 6.4 (testing pyramid for Story 3.6.1), 7.12–7.13 (admin screens). |
+| **1.38** | Oct 30, 2026 | Admin screens now use the app layout of the Library section: own scroll container (fixes the sticky admin header overlapping the summary cards), page title + pill tabs, breadcrumb on the user detail page, summary cards in the `LibrarySummary` style and pill tabs for contributions. |
 
 
 ## 1. Introduction
@@ -208,10 +209,10 @@ The application is a **Progressive Web App (PWA)** optimized for mobile use duri
 * **Features:** Playlist management with creation and list view of ceremonial sets.
 
 ### 7.12 Admin Users Overview
-* **Status:** Implemented (`app/admin/users/page.tsx`, `components/admin/AdminUsersTable.tsx`). No mockup in `docs/design/screens/`; follows the card/pill styling of the existing screens.
+* **Status:** Implemented (`app/admin/users/page.tsx`, `components/admin/AdminUsersTable.tsx`). No mockup in `docs/design/screens/`; the layout mirrors the Library section (`app/library/layout.tsx`, `LibraryTabs.tsx`): `<main>` scroll container, "Administration" title with pill tabs (Users, Configuration – planned), and summary cards styled like `components/home/LibrarySummary.tsx`.
 * **Access:** `app/admin/layout.tsx` checks the role server-side; non-admins get `components/admin/AccessDeniedNotice.tsx`, guests are redirected to `/auth/login` by `proxy.ts`. Entry points: "Admin Portal" in the account menu and "Administration" in the sidebar (admins only).
 * **Features:** Totals (users, active in last 30 days, songs, playlists, staff), search by name/e-mail, role filter (the "Musician / Expert" option matches both roles), sort (recently joined, top contributors, name), and one row per user with role badge, e-mail, songs/versions/playlists counts, activity status and join date. Separate empty states for "no users" and "no matches".
 
 ### 7.13 Admin User Detail
 * **Status:** Implemented (`app/admin/users/[id]/page.tsx`, `components/admin/AdminUserDetailView.tsx`, `app/admin/users/[id]/not-found.tsx`).
-* **Features:** Profile card (name, e-mail, id, role, join date, last active, activity status, musician status), contribution cards (songs, versions, playlists with public count), and tabs listing songs added, versions submitted and playlists (public/private). An unknown id shows "User Not Found" with a link back to the list.
+* **Features:** Breadcrumb (Administration › Users), profile card (name, e-mail, id, role, join date, last active, activity status, musician status), and pill tabs with counts listing songs added, versions submitted and playlists (with public count, public/private badges). An unknown id shows "User Not Found" with a link back to the list.
