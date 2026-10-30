@@ -57,7 +57,7 @@ function usersList(page: Page) {
 }
 
 /** Opens a listbox picker (components/common/ui/WickSelect.tsx) and chooses an option. */
-async function pick(page: Page, picker: string, option: string) {
+async function pick(page: Page, picker: string, option: string | RegExp) {
   await page.getByRole('button', { name: new RegExp(picker) }).click();
   await page.getByRole('listbox', { name: picker }).getByRole('option', { name: option }).click();
   await expect(page.getByRole('listbox', { name: picker })).toHaveCount(0);
@@ -154,7 +154,7 @@ test.describe('Admin users – overview (AC 1)', () => {
 
   test('the chosen sort is remembered (#278)', async ({ page }) => {
     await page.goto('/admin/users');
-    await pick(page, 'Sort users', 'Most songs');
+    await pick(page, 'Sort users', /Most Songs/);
 
     const songCounts = async () =>
       (await usersList(page).locator('[title$=" songs created"]').allTextContents()).map((t) => parseInt(t, 10));
@@ -162,7 +162,7 @@ test.describe('Admin users – overview (AC 1)', () => {
     expect(counts).toEqual([...counts].sort((a, b) => b - a));
 
     await page.reload();
-    await expect(page.getByRole('button', { name: /Sort users/ })).toContainText('Most songs');
+    await expect(page.getByRole('button', { name: /Sort users/ })).toContainText('Most Songs');
     expect(await songCounts()).toEqual(counts);
   });
 

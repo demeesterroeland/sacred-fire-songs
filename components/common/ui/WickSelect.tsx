@@ -6,7 +6,7 @@ import { ChevronDown } from 'lucide-react';
 import { keyToIndex, typeaheadIndex } from '@/lib/ui/listbox';
 
 /**
- * Single-choice picker in the style of the language picker (i18n branch):
+ * Single-choice picker in the style of the language picker (LanguageSwitcher):
  * a WAI-ARIA listbox where each option carries a small wick and the chosen
  * option's wick is a lit ember that ignites once when picked.
  *

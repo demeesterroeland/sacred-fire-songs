@@ -1,6 +1,6 @@
 /**
  * Pure keyboard logic for WAI-ARIA listbox pickers (components/common/ui/WickSelect.tsx).
- * Same behaviour as the language picker on the i18n branch; DOM-free so it can be unit-tested.
+ * Also used by the language picker (components/common/navigation/LanguageSwitcher.tsx); DOM-free so it can be unit-tested.
  */
 
 /** Arrow / Home / End navigation, clamped (no wrap). Null for other keys. */
