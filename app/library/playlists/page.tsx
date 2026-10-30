@@ -9,6 +9,7 @@ import { CardContent } from '@/components/common/CardContent';
 import { getRecentlyViewed, getRecentlyViewedCount, getUnviewedSongs } from '@/lib/songs/serverQueries';
 import RecentlyViewed from '@/components/library/RecentlyViewed';
 import NewSinceLastVisit from '@/components/library/NewSinceLastVisit';
+import { getServerT } from '@/lib/i18n/server';
 
 interface SongCounts {
     total: number;
@@ -16,15 +17,16 @@ interface SongCounts {
     draft: number;
 }
 
-function SongCountSubtitle({ counts, emptyLabel }: { counts: SongCounts; emptyLabel: string }) {
+async function SongCountSubtitle({ counts, emptyLabel }: { counts: SongCounts; emptyLabel: string }) {
+    const t = await getServerT();
     if (counts.total === 0) return <span className="text-xs text-gray-500">{emptyLabel}</span>;
     return (
         <span className="text-xs text-gray-500 whitespace-nowrap">
-            {counts.total} song{counts.total !== 1 ? 's' : ''}
+            {counts.total === 1 ? t('playlists.songCountSingle') : t('playlists.songCount', { count: counts.total })}
             {' · '}
-            <span className="text-emerald-500/70">{counts.public} public</span>
+            <span className="text-emerald-500/70">{t('playlists.countPublic', { count: counts.public })}</span>
             {' · '}
-            <span className="text-amber-500/70">{counts.draft} draft</span>
+            <span className="text-amber-500/70">{t('playlists.countDraft', { count: counts.draft })}</span>
         </span>
     );
 }
@@ -72,7 +74,8 @@ interface SmartPlaylistCardProps {
     href?: string; // absent = locked (guest)
 }
 
-function SmartPlaylistCard({ icon: Icon, title, description, subtitle, songTitles = [], accent, href }: SmartPlaylistCardProps) {
+async function SmartPlaylistCard({ icon: Icon, title, description, subtitle, songTitles = [], accent, href }: SmartPlaylistCardProps) {
+    const t = await getServerT();
     const c = accentClasses[accent];
     const locked = !href;
 
@@ -92,7 +95,7 @@ function SmartPlaylistCard({ icon: Icon, title, description, subtitle, songTitle
             {locked && (
                 <div className="flex items-center gap-1.5 shrink-0">
                     <Lock aria-hidden="true" className="w-3 h-3 text-gray-600" />
-                    <span className="text-[10px] text-gray-600 font-medium">Members only</span>
+                    <span className="text-[10px] text-gray-600 font-medium">{t('playlists.membersOnly')}</span>
                 </div>
             )}
         </div>
@@ -101,7 +104,7 @@ function SmartPlaylistCard({ icon: Icon, title, description, subtitle, songTitle
     return href ? <Link href={href} className="block w-full min-w-0">{inner}</Link> : inner;
 }
 
-function PublicPlaylistsSection({
+async function PublicPlaylistsSection({
     playlists,
     userId,
     songCounts,
@@ -112,11 +115,12 @@ function PublicPlaylistsSection({
     songCounts: Record<string, number>;
     songTitles: Record<string, string[]>;
 }) {
+    const t = await getServerT();
     if (playlists.length === 0) return null;
 
     return (
         <div>
-            <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-3">Public Playlists</p>
+            <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-3">{t('playlists.publicPlaylists')}</p>
             <div className="grid grid-cols-1 gap-3">
                 {playlists.map(setlist => (
                     <PublicPlaylistCard
@@ -136,44 +140,45 @@ function PublicPlaylistsSection({
 
 // ─── Views ────────────────────────────────────────────────────────────────────
 
-function GuestView({ publicPlaylists, publicSongCounts, publicSongTitles }: {
+async function GuestView({ publicPlaylists, publicSongCounts, publicSongTitles }: {
     publicPlaylists: { id: string; title: string; description: string | null; owner_id: string }[];
     publicSongCounts: Record<string, number>;
     publicSongTitles: Record<string, string[]>;
 }) {
+    const t = await getServerT();
     return (
         <div className="space-y-8">
 
             {/* Smart Playlists — locked for guests */}
             <div>
-                <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-3">Smart Playlists</p>
+                <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-3">{t('playlists.smartPlaylists')}</p>
                 <div className="grid grid-cols-1 gap-3">
-                    <SmartPlaylistCard icon={Heart}   title="Your Favorites" description="Your favorited songs, always with you"      subtitle={<span className="text-xs text-gray-500">Sign in to save favorites</span>} accent="rose"   />
-                    <SmartPlaylistCard icon={Music}   title="Your Songs"     description="Songs you've contributed to the library"    subtitle={<span className="text-xs text-gray-500">Sign in to see your songs</span>} accent="violet" />
-                    <SmartPlaylistCard icon={PenLine} title="My Drafts"    description="Your private work-in-progress songs"        subtitle={<span className="text-xs text-gray-500">Sign in to see your drafts</span>} accent="gray"   />
-                    <SmartPlaylistCard icon={Mic} title="Your Recordings" description="Your private rehearsal recordings" accent="violet"
-                        subtitle={<span className="text-xs text-gray-500">Sign in to see your recordings</span>} />
+                    <SmartPlaylistCard icon={Heart}   title={t('librarySummary.favorites.title')} description={t('librarySummary.favorites.description')}      subtitle={<span className="text-xs text-gray-500">{t('playlists.guest.favorites')}</span>} accent="rose"   />
+                    <SmartPlaylistCard icon={Music}   title={t('librarySummary.mySongs.title')}     description={t('librarySummary.mySongs.description')}    subtitle={<span className="text-xs text-gray-500">{t('playlists.guest.songs')}</span>} accent="violet" />
+                    <SmartPlaylistCard icon={PenLine} title={t('librarySummary.drafts.title')}    description={t('playlists.guest.drafts.description')}        subtitle={<span className="text-xs text-gray-500">{t('playlists.guest.drafts')}</span>} accent="gray"   />
+                    <SmartPlaylistCard icon={Mic} title={t('librarySummary.recordings.title')} description={t('librarySummary.recordings.description')} accent="violet"
+                        subtitle={<span className="text-xs text-gray-500">{t('playlists.guest.recordings')}</span>} />
                 </div>
             </div>
 
             {/* My Private Playlists — ghost demo */}
             <div>
                 <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-                    <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">My Private Playlists</p>
+                    <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">{t('playlists.myPrivatePlaylists')}</p>
                     <div className="flex items-center gap-4">
                         <Link
                             href="/auth/login?next=/library/playlists"
                             className="flex items-center gap-1.5 text-[10px] text-gray-500 hover:text-gray-300 transition-colors"
                         >
                             <LogIn className="w-3 h-3" />
-                            Sign in to create playlists
+                            {t('playlists.signInToCreate')}
                         </Link>
                         <Link
                             href="/auth/login?next=/library/playlists"
                             className="flex items-center gap-1 text-xs font-semibold text-red-500/50 border border-red-500/20 bg-red-500/5 hover:bg-red-500/10 hover:text-red-500/80 rounded-full px-3 py-1 transition-all"
                         >
                             <Plus className="w-3.5 h-3.5" />
-                            New Playlist
+                            {t('playlists.newButton')}
                         </Link>
                     </div>
                 </div>
@@ -184,7 +189,7 @@ function GuestView({ publicPlaylists, publicSongCounts, publicSongTitles }: {
                                 <Flame className="w-6 h-6 text-orange-500" />
                             </div>
                             <Lock aria-hidden="true" className="absolute -top-1 -right-1 w-3 h-3 text-gray-500" />
-                            <span className="sr-only">Members only</span>
+                            <span className="sr-only">{t('playlists.membersOnly')}</span>
                         </div>
                         <div>
                             <h3 className="font-bold text-gray-900 dark:text-gray-100">Yage Ceremony 2024</h3>
@@ -197,7 +202,7 @@ function GuestView({ publicPlaylists, publicSongCounts, publicSongTitles }: {
                                 <Droplets className="w-6 h-6 text-blue-500" />
                             </div>
                             <Lock aria-hidden="true" className="absolute -top-1 -right-1 w-3 h-3 text-gray-500" />
-                            <span className="sr-only">Members only</span>
+                            <span className="sr-only">{t('playlists.membersOnly')}</span>
                         </div>
                         <div>
                             <h3 className="font-bold text-gray-900 dark:text-gray-100">Temazcal — Water Songs</h3>
@@ -214,6 +219,7 @@ function GuestView({ publicPlaylists, publicSongCounts, publicSongTitles }: {
 }
 
 export default async function PlaylistsPage() {
+    const t = await getServerT();
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
@@ -352,30 +358,30 @@ export default async function PlaylistsPage() {
 
             {/* Smart Playlists */}
             <div>
-                <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-3">Smart Playlists</p>
+                <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-3">{t('playlists.smartPlaylists')}</p>
                 <div className="grid grid-cols-1 gap-3">
                     <SmartPlaylistCard
-                        icon={Heart} title="Your Favorites" description="Your favorited songs" accent="rose"
+                        icon={Heart} title={t('librarySummary.favorites.title')} description={t('librarySummary.favorites.description')} accent="rose"
                         href="/songs?favorites=true"
-                        subtitle={<SongCountSubtitle counts={favCounts} emptyLabel="No songs yet — tap ♥ on any song" />}
+                        subtitle={<SongCountSubtitle counts={favCounts} emptyLabel={t('librarySummary.favorites.empty')} />}
                         songTitles={favTitles}
                     />
                     <SmartPlaylistCard
-                        icon={Music} title="Your Songs" description="Songs you've contributed" accent="violet"
+                        icon={Music} title={t('librarySummary.mySongs.title')} description={t('librarySummary.mySongs.description')} accent="violet"
                         href="/songs?mine=true"
-                        subtitle={<SongCountSubtitle counts={mySongsCounts} emptyLabel="No songs yet" />}
+                        subtitle={<SongCountSubtitle counts={mySongsCounts} emptyLabel={t('librarySummary.mySongs.empty')} />}
                         songTitles={mySongsTitles}
                     />
                     <SmartPlaylistCard
-                        icon={PenLine} title="My Drafts" description="Your work-in-progress songs" accent="gray"
+                        icon={PenLine} title={t('librarySummary.drafts.title')} description={t('librarySummary.drafts.description')} accent="gray"
                         href="/songs?status=draft"
-                        subtitle={<SongCountSubtitle counts={myDraftsCounts} emptyLabel="No drafts yet" />}
+                        subtitle={<SongCountSubtitle counts={myDraftsCounts} emptyLabel={t('librarySummary.drafts.empty')} />}
                         songTitles={myDraftsTitles}
                     />
                     <SmartPlaylistCard
-                        icon={Mic} title="Your Recordings" description="Your private rehearsal recordings" accent="violet"
+                        icon={Mic} title={t('librarySummary.recordings.title')} description={t('librarySummary.recordings.description')} accent="violet"
                         href="/songs?myRecordings=true"
-                        subtitle={<SongCountSubtitle counts={myRecordingsCounts} emptyLabel="No recordings yet" />}
+                        subtitle={<SongCountSubtitle counts={myRecordingsCounts} emptyLabel={t('librarySummary.recordings.empty')} />}
                         songTitles={myRecordingsTitles}
                     />
                 </div>
@@ -390,7 +396,7 @@ export default async function PlaylistsPage() {
             {/* My Private Playlists — real data */}
             <div>
                 <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-                    <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">My Private Playlists</p>
+                    <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">{t('playlists.myPrivatePlaylists')}</p>
                     <CreatePlaylistInput />
                 </div>
                 {privateSetlists.length > 0 ? (
@@ -404,14 +410,14 @@ export default async function PlaylistsPage() {
                                     title={setlist.title}
                                     isPublic={setlist.is_public ?? false}
                                     description={setlist.description ?? null}
-                                    subtitle={<SongCountSubtitle counts={counts} emptyLabel="No songs yet" />}
+                                    subtitle={<SongCountSubtitle counts={counts} emptyLabel={t('librarySummary.mySongs.empty')} />}
                                     songTitles={songTitles[setlist.id] ?? []}
                                 />
                             );
                         })}
                     </div>
                 ) : (
-                    <p className="text-sm text-gray-600 italic py-2">No private playlists yet — create your first one above.</p>
+                    <p className="text-sm text-gray-600 italic py-2">{t('playlists.emptyPrivateHint')}</p>
                 )}
             </div>
 

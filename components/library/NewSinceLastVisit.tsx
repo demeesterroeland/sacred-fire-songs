@@ -2,11 +2,13 @@ import Link from 'next/link';
 import { Sparkles, Music } from 'lucide-react';
 import type { Song } from '@/lib/songUtils';
 
+import { getServerT } from '@/lib/i18n/server';
 interface NewSinceLastVisitProps {
   songs: Song[];
 }
 
-export default function NewSinceLastVisit({ songs }: NewSinceLastVisitProps) {
+export default async function NewSinceLastVisit({ songs }: NewSinceLastVisitProps) {
+  const t = await getServerT();
   if (songs.length === 0) return null;
 
   return (
@@ -14,13 +16,13 @@ export default function NewSinceLastVisit({ songs }: NewSinceLastVisitProps) {
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <Sparkles className="w-3.5 h-3.5 text-emerald-500" />
-          <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">New Since Last Visit</p>
+          <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">{t('newSinceLastVisit.section')}</p>
         </div>
         <Link
           href="/songs?new=true"
           className="text-[10px] font-bold text-red-500 hover:text-red-400 uppercase tracking-wider"
         >
-          View All
+          {t('common.viewAll')}
         </Link>
       </div>
       <div className="grid grid-cols-1 gap-2">

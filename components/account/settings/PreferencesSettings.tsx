@@ -1,9 +1,12 @@
 "use client";
 
-import { Monitor, FileText, Music2, Type, WifiOff, Sun, Moon, SlidersHorizontal } from "lucide-react";
+import { Globe, Monitor, FileText, Music2, Type, WifiOff, Sun, Moon, SlidersHorizontal } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { useWakeLock } from "@/hooks/useWakeLock";
 import { useUserPreferences, type ThemePreference } from "@/context/UserPreferencesContext";
+import { useLocale } from "@/context/LocaleContext";
+import type { TranslationKey } from "@/lib/i18n";
+import { LanguageSwitcher } from "@/components/common/navigation/LanguageSwitcher";
 
 interface PreferenceRowProps {
   icon: React.ReactNode;
@@ -20,6 +23,7 @@ function PreferenceRow({
   icon, label, description, checked, onCheckedChange,
   disabled, comingSoon, notSupported,
 }: PreferenceRowProps) {
+  const { t } = useLocale();
   return (
     <div className={`flex items-center justify-between p-4 bg-black/5 dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/5 transition-opacity ${disabled ? "opacity-50" : ""}`}>
       <div className="flex items-start gap-3 pr-4">
@@ -29,14 +33,14 @@ function PreferenceRow({
             <p className="font-medium text-gray-900 dark:text-white">{label}</p>
             {comingSoon && (
               <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-500 bg-black/5 dark:bg-white/5 border border-gray-200 dark:border-white/10 px-2 py-0.5 rounded-full">
-                Coming soon
+                {t("settings.comingSoon")}
               </span>
             )}
           </div>
           <p className="text-sm text-gray-500 dark:text-slate-400 mt-0.5">
             {description}
             {notSupported && (
-              <span className="text-amber-500 block mt-1">Not supported by your browser</span>
+              <span className="text-amber-500 block mt-1">{t('settings.prefs.notSupported')}</span>
             )}
           </p>
         </div>
@@ -51,13 +55,14 @@ function PreferenceRow({
   );
 }
 
-const THEME_OPTIONS: { value: ThemePreference; label: string; icon: React.ReactNode }[] = [
-  { value: 'light', label: 'Light', icon: <Sun className="w-4 h-4" /> },
-  { value: 'dark', label: 'Dark', icon: <Moon className="w-4 h-4" /> },
-  { value: 'system', label: 'System', icon: <Monitor className="w-4 h-4" /> },
+const THEME_OPTIONS: { value: ThemePreference; labelKey: TranslationKey; icon: React.ReactNode }[] = [
+  { value: 'light', labelKey: 'theme.light', icon: <Sun className="w-4 h-4" /> },
+  { value: 'dark', labelKey: 'theme.dark', icon: <Moon className="w-4 h-4" /> },
+  { value: 'system', labelKey: 'theme.system', icon: <Monitor className="w-4 h-4" /> },
 ];
 
 function ThemeSelector() {
+  const { t } = useLocale();
   const { preferences, setPreference } = useUserPreferences();
 
   return (
@@ -67,9 +72,9 @@ function ThemeSelector() {
           {preferences.theme === 'light' ? <Sun className="w-5 h-5" /> : preferences.theme === 'dark' ? <Moon className="w-5 h-5" /> : <Monitor className="w-5 h-5" />}
         </div>
         <div>
-          <p className="font-medium text-gray-900 dark:text-white">Appearance</p>
+          <p className="font-medium text-gray-900 dark:text-white">{t("settings.prefs.appearance")}</p>
           <p className="text-sm text-gray-500 dark:text-slate-400 mt-0.5">
-            Choose between light, dark, or automatic based on your device settings.
+            {t("settings.prefs.appearance.description")}
           </p>
         </div>
       </div>
@@ -85,7 +90,7 @@ function ThemeSelector() {
             }`}
           >
             {option.icon}
-            <span className="hidden sm:inline">{option.label}</span>
+            <span className="hidden sm:inline">{t(option.labelKey)}</span>
           </button>
         ))}
       </div>
@@ -93,22 +98,47 @@ function ThemeSelector() {
   );
 }
 
+function LanguageSelector() {
+  const { t } = useLocale();
+
+  return (
+    <div className="flex items-center justify-between p-4 bg-black/5 dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/5">
+      <div className="flex items-start gap-3 pr-4">
+        <div className="mt-0.5 text-gray-500 dark:text-slate-400">
+          <Globe className="w-5 h-5" />
+        </div>
+        <div>
+          <p className="font-medium text-gray-900 dark:text-white">{t("settings.prefs.language")}</p>
+          <p className="text-sm text-gray-500 dark:text-slate-400 mt-0.5">
+            {t("settings.prefs.language.description")}
+          </p>
+        </div>
+      </div>
+      <LanguageSwitcher className="shrink-0" />
+    </div>
+  );
+}
+
 export default function PreferencesSettings() {
+  const { t } = useLocale();
   const { preferences, setPreference } = useUserPreferences();
   const { isSupported } = useWakeLock();
 
   return (
     <section className="space-y-4">
-      <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">App Preferences</h2>
+      <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">{t("settings.prefs.heading")}</h2>
 
       {/* Theme Selector — functional */}
       <ThemeSelector />
 
+      {/* Language — functional */}
+      <LanguageSelector />
+
       {/* Keep Screen Awake — functional */}
       <PreferenceRow
         icon={<Monitor className="w-5 h-5" />}
-        label="Keep Screen Awake"
-        description="Prevent the screen from dimming while viewing lyrics."
+        label={t("settings.prefs.keepAwake")}
+        description={t("settings.prefs.keepAwake.description")}
         checked={preferences.keepScreenAwake && isSupported}
         onCheckedChange={(v) => setPreference("keepScreenAwake", v)}
         disabled={!isSupported}
@@ -118,8 +148,8 @@ export default function PreferencesSettings() {
       {/* Auto-hide Bottom Nav — functional */}
       <PreferenceRow
         icon={<SlidersHorizontal className="w-5 h-5" />}
-        label="Auto-hide navigation bar"
-        description="Hide bottom navigation bar on song detail pages after a few seconds of inactivity."
+        label={t("settings.prefs.autoHideNav")}
+        description={t("settings.prefs.autoHideNav.description")}
         checked={preferences.autoHideBottomNav}
         onCheckedChange={(v) => setPreference("autoHideBottomNav", v)}
       />
@@ -127,8 +157,8 @@ export default function PreferencesSettings() {
       {/* Auto-scroll Lyrics — disabled */}
       <PreferenceRow
         icon={<FileText className="w-5 h-5" />}
-        label="Auto-scroll Lyrics"
-        description="Automatically scroll through a song during performance."
+        label={t("settings.prefs.autoScroll")}
+        description={t("settings.prefs.autoScroll.description")}
         checked={false}
         onCheckedChange={() => {}}
         disabled
@@ -138,8 +168,8 @@ export default function PreferencesSettings() {
       {/* Default Chord Display — disabled */}
       <PreferenceRow
         icon={<Music2 className="w-5 h-5" />}
-        label="Show Chords by Default"
-        description="Always show chord annotations when opening a song."
+        label={t("settings.prefs.showChords")}
+        description={t("settings.prefs.showChords.description")}
         checked={false}
         onCheckedChange={() => {}}
         disabled
@@ -149,8 +179,8 @@ export default function PreferencesSettings() {
       {/* Font Size — disabled */}
       <PreferenceRow
         icon={<Type className="w-5 h-5" />}
-        label="Large Stage Font"
-        description="Increase text size for better readability on stage."
+        label={t("settings.prefs.largeFont")}
+        description={t("settings.prefs.largeFont.description")}
         checked={false}
         onCheckedChange={() => {}}
         disabled
@@ -160,8 +190,8 @@ export default function PreferencesSettings() {
       {/* Offline Mode — disabled */}
       <PreferenceRow
         icon={<WifiOff className="w-5 h-5" />}
-        label="Offline Mode"
-        description="Cache songs locally for use without an internet connection."
+        label={t("settings.prefs.offlineMode")}
+        description={t("settings.prefs.offlineMode.description")}
         checked={false}
         onCheckedChange={() => {}}
         disabled

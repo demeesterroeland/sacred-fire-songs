@@ -15,11 +15,14 @@ import {
 } from '@/lib/admin/userOverview';
 import { ActivityStatusBadge, RoleBadge } from './AdminBadges';
 
+import { useLocale } from '@/context/LocaleContext';
+import { LOCALE_DATE_TAGS } from '@/lib/i18n';
 interface AdminUsersTableProps {
   initialUsers: AdminUserSummary[];
 }
 
 export default function AdminUsersTable({ initialUsers }: AdminUsersTableProps) {
+  const { t, locale } = useLocale();
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRole, setSelectedRole] = useState<AdminRoleFilter>('all');
   const [sortBy, setSortBy] = useState<AdminUserSort>('joined');
@@ -33,7 +36,7 @@ export default function AdminUsersTable({ initialUsers }: AdminUsersTableProps) 
 
   const formatDate = (isoString?: string | null) => {
     if (!isoString) return 'Never';
-    return new Date(isoString).toLocaleDateString(undefined, {
+    return new Date(isoString).toLocaleDateString(LOCALE_DATE_TAGS[locale], {
       year: 'numeric',
       month: 'short',
       day: 'numeric',
@@ -44,12 +47,12 @@ export default function AdminUsersTable({ initialUsers }: AdminUsersTableProps) 
     <div className="space-y-8">
       {/* Summary cards (same style as components/home/LibrarySummary.tsx) */}
       <section>
-        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">Overview</p>
+        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">{t('admin.overview')}</p>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {[
             {
-              label: `Users · ${stats.activeUsers} active`,
-              title: `${stats.activeUsers} active in the last ${ACTIVE_WINDOW_DAYS} days`,
+              label: t('admin.stats.users', { active: stats.activeUsers }),
+              title: t('admin.stats.usersTitle', { active: stats.activeUsers, days: ACTIVE_WINDOW_DAYS }),
               value: stats.totalUsers,
               icon: Users,
               color: 'text-violet-400',
@@ -57,8 +60,8 @@ export default function AdminUsersTable({ initialUsers }: AdminUsersTableProps) 
               border: 'border-violet-500/20',
             },
             {
-              label: 'Songs created',
-              title: 'Songs created',
+              label: t('admin.stats.songs'),
+              title: t('admin.stats.songs'),
               value: stats.totalSongs,
               icon: Music,
               color: 'text-rose-400',
@@ -66,8 +69,8 @@ export default function AdminUsersTable({ initialUsers }: AdminUsersTableProps) 
               border: 'border-rose-500/20',
             },
             {
-              label: 'Playlists created',
-              title: 'Playlists created',
+              label: t('admin.stats.playlists'),
+              title: t('admin.stats.playlists'),
               value: stats.totalPlaylists,
               icon: ListMusic,
               color: 'text-sky-400',
@@ -75,8 +78,8 @@ export default function AdminUsersTable({ initialUsers }: AdminUsersTableProps) 
               border: 'border-sky-500/20',
             },
             {
-              label: 'Admins & gatekeepers',
-              title: 'Admins & gatekeepers',
+              label: t('admin.stats.privileged'),
+              title: t('admin.stats.privileged'),
               value: stats.privilegedUsers,
               icon: Shield,
               color: 'text-amber-400',
@@ -109,8 +112,8 @@ export default function AdminUsersTable({ initialUsers }: AdminUsersTableProps) 
           <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-gray-400" />
           <input
             type="text"
-            placeholder="Search users by name or email..."
-            aria-label="Search users"
+            placeholder={t('admin.search.placeholder')}
+            aria-label={t('admin.search.label')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-2.5 bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-full text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
@@ -122,25 +125,25 @@ export default function AdminUsersTable({ initialUsers }: AdminUsersTableProps) 
           <select
             value={selectedRole}
             onChange={(e) => setSelectedRole(e.target.value as AdminRoleFilter)}
-            aria-label="Filter by role"
+            aria-label={t('admin.filter.label')}
             className="px-4 py-2.5 bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-full text-xs font-semibold text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500"
           >
-            <option value="all">All Roles</option>
-            <option value="admin">Admin</option>
-            <option value="gatekeeper">Gatekeeper</option>
-            <option value="member">Member</option>
-            <option value="musician">Musician / Expert</option>
+            <option value="all">{t('admin.filter.all')}</option>
+            <option value="admin">{t('admin.role.admin')}</option>
+            <option value="gatekeeper">{t('admin.role.gatekeeper')}</option>
+            <option value="member">{t('admin.role.member')}</option>
+            <option value="musician">{t('admin.filter.musician')}</option>
           </select>
 
           <select
             value={sortBy}
             onChange={(e) => setSortBy(e.target.value as AdminUserSort)}
-            aria-label="Sort users"
+            aria-label={t('admin.sort.label')}
             className="px-4 py-2.5 bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-full text-xs font-semibold text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500"
           >
-            <option value="joined">Sort: Recently Joined</option>
-            <option value="contributions">Sort: Top Contributors</option>
-            <option value="name">Sort: Name (A-Z)</option>
+            <option value="joined">{t('admin.sort.joined')}</option>
+            <option value="contributions">{t('admin.sort.contributions')}</option>
+            <option value="name">{t('admin.sort.name')}</option>
           </select>
         </div>
       </div>
@@ -148,7 +151,7 @@ export default function AdminUsersTable({ initialUsers }: AdminUsersTableProps) 
       {/* Users List / Table */}
       <section>
         <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">
-          Registered users ({filteredUsers.length})
+          {t('admin.list.heading', { count: filteredUsers.length })}
         </p>
         <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white/50 dark:bg-gray-900/30 overflow-hidden">
 
@@ -156,11 +159,11 @@ export default function AdminUsersTable({ initialUsers }: AdminUsersTableProps) 
           <div className="p-12 text-center text-gray-500 dark:text-gray-400">
             <Users className="w-12 h-12 mx-auto mb-3 opacity-30" />
             {initialUsers.length === 0 ? (
-              <p className="text-base font-semibold">No registered users yet</p>
+              <p className="text-base font-semibold">{t('admin.list.emptyAll')}</p>
             ) : (
               <>
-                <p className="text-base font-semibold">No users found</p>
-                <p className="text-xs mt-1">Try adjusting your search query or role filter.</p>
+                <p className="text-base font-semibold">{t('admin.list.emptyFiltered')}</p>
+                <p className="text-xs mt-1">{t('admin.list.emptyHint')}</p>
               </>
             )}
           </div>
@@ -210,45 +213,45 @@ export default function AdminUsersTable({ initialUsers }: AdminUsersTableProps) 
                     <div className="flex items-center gap-4">
                       <div
                         className="flex items-center gap-1.5"
-                        title={`${user.songs_count} songs created`}
+                        title={t('admin.user.songsTitle', { count: user.songs_count })}
                       >
                         <Music className="w-3.5 h-3.5 text-red-500" />
                         <span className="font-semibold">{user.songs_count}</span>
-                        <span className="hidden sm:inline text-gray-400">songs</span>
+                        <span className="hidden sm:inline text-gray-400">{t('admin.user.songs')}</span>
                       </div>
 
                       <div
                         className="flex items-center gap-1.5"
-                        title={`${user.versions_count} song versions contributed`}
+                        title={t('admin.user.versionsTitle', { count: user.versions_count })}
                       >
                         <FileText className="w-3.5 h-3.5 text-amber-500" />
                         <span className="font-semibold">{user.versions_count}</span>
-                        <span className="hidden sm:inline text-gray-400">versions</span>
+                        <span className="hidden sm:inline text-gray-400">{t('admin.user.versions')}</span>
                       </div>
 
                       <div
                         className="flex items-center gap-1.5"
-                        title={`${user.playlists_count} playlists created`}
+                        title={t('admin.user.playlistsTitle', { count: user.playlists_count })}
                       >
                         <ListMusic className="w-3.5 h-3.5 text-blue-500" />
                         <span className="font-semibold">{user.playlists_count}</span>
-                        <span className="hidden sm:inline text-gray-400">playlists</span>
+                        <span className="hidden sm:inline text-gray-400">{t('admin.user.playlists')}</span>
                       </div>
                     </div>
 
                     {/* Join Date */}
                     <div className="flex flex-col items-end text-right text-[11px] text-gray-400">
                       <ActivityStatusBadge status={getActivityStatus(user.last_seen_at)} />
-                      <span>Joined {formatDate(user.created_at)}</span>
+                      <span>{t('admin.user.joined', { date: formatDate(user.created_at) })}</span>
                     </div>
 
                     {/* View Details Link */}
                     <Link
                       href={`/admin/users/${user.id}`}
-                      aria-label={`View details for ${displayName}`}
+                      aria-label={t('admin.user.viewDetails', { name: displayName })}
                       className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-purple-100 dark:hover:bg-purple-950/60 text-gray-700 dark:text-gray-300 hover:text-purple-700 dark:hover:text-purple-300 font-semibold transition-all active:scale-95"
                     >
-                      <span>Details</span>
+                      <span>{t('admin.user.details')}</span>
                       <ChevronRight className="w-3.5 h-3.5" />
                     </Link>
                   </div>

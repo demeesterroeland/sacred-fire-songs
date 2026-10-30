@@ -2,6 +2,7 @@
   "default": {
     "paths": [
       "docs/testing/song.feature",
+      "docs/testing/i18n.feature",
       "docs/testing/admin-users.feature"
     ],
     "import": [
@@ -20,6 +21,7 @@
   "unit": {
     "paths": [
       "docs/testing/song.feature",
+      "docs/testing/i18n.feature",
       "docs/testing/admin-users.feature"
     ],
     "import": [
@@ -38,6 +40,7 @@
   "seed": {
     "paths": [
       "docs/testing/song.feature",
+      "docs/testing/i18n.feature",
       "docs/testing/admin-users.feature"
     ],
     "import": [
@@ -45,6 +48,24 @@
       "testing/bdd/steps/**/*.ts"
     ],
     "tags": "@seed",
+    "format": [
+      "summary"
+    ],
+    "formatOptions": {
+      "snippetInterface": "async-await"
+    },
+    "strict": false
+  },
+  "i18n": {
+    "paths": [
+      "docs/testing/song.feature",
+      "docs/testing/i18n.feature"
+    ],
+    "import": [
+      "testing/bdd/support/**/*.ts",
+      "testing/bdd/steps/**/*.ts"
+    ],
+    "tags": "@i18n and @unit",
     "format": [
       "summary"
     ],

@@ -5,8 +5,10 @@ import { useState, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Mail, KeyRound, ArrowRight, Loader2 } from 'lucide-react';
+import { useLocale } from '@/context/LocaleContext';
 
 function SignUpSuccessContent() {
+    const { t } = useLocale();
     const router = useRouter();
     const searchParams = useSearchParams();
     const email = searchParams.get('email') || '';
@@ -47,9 +49,9 @@ function SignUpSuccessContent() {
                     <Mail className="w-8 h-8" />
                 </div>
 
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Check your email</h1>
+                <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{t('auth.signUpSuccess.title')}</h1>
                 <p className="text-[#8e99aa] text-sm mb-2">
-                    We sent a confirmation link and a 6-digit code to
+                    {t('auth.signUpSuccess.description')}
                 </p>
                 {email && (
                     <p className="text-gray-900 dark:text-white font-semibold text-sm mb-6 truncate max-w-full">{email}</p>
@@ -95,7 +97,7 @@ function SignUpSuccessContent() {
                         {isVerifying ? (
                             <Loader2 className="w-5 h-5 animate-spin" />
                         ) : (
-                            <>Verify & Continue <ArrowRight className="w-5 h-5" /></>
+                            <>{t('auth.signUpSuccess.verify')} <ArrowRight className="w-5 h-5" /></>
                         )}
                     </button>
                 </form>
@@ -105,7 +107,7 @@ function SignUpSuccessContent() {
                         href={`/auth/login${next ? `?next=${encodeURIComponent(next)}` : ""}`}
                         className="text-[#8e99aa] hover:text-gray-900 dark:hover:text-white text-sm transition-colors"
                     >
-                        Return to Login
+                        {t('auth.signUpSuccess.returnToLogin')}
                     </Link>
                 </div>
             </div>

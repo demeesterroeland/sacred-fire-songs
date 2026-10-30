@@ -1,6 +1,6 @@
 # Project Analysis & Design Document: Song Sharing Application (Sacred Fire Songs)
 
-**Version:** 1.38
+**Version:** 1.42
 **Status:** Living Document
 **Date:** Oct 30, 2026
 
@@ -31,6 +31,10 @@
 | **1.36** | Oct 30, 2026 | Implemented Story 4.2.1 (Issue #18) for musician setlist PDF export using ChordSheetJS and jsPDF with firelight-optimized typography, pagination, section headers, transposition overrides, and UI quick action buttons. |
 | **1.37** | Oct 30, 2026 | Epic 3.6 / Story 3.6.1 (Admin User Overview & Contributions, #257/#258): admin area `/admin/users` and `/admin/users/[id]` with server-side role guard, `public.fn_is_admin()` and admin read policies on `profiles`/`setlists`, per-user status (active/inactive/never), musician status, contribution counts and lists. Fixed the user detail query to use `compositions.original_author` and `song_versions.composition_id`/`version_name`. Added sections 5.2 (admin access), 6.4 (testing pyramid for Story 3.6.1), 7.12–7.13 (admin screens). |
 | **1.38** | Oct 30, 2026 | Admin screens now use the app layout of the Library section: own scroll container (fixes the sticky admin header overlapping the summary cards), page title + pill tabs, breadcrumb on the user detail page, summary cards in the `LibrarySummary` style and pill tabs for contributions. |
+| **1.39** | Oct 30, 2026 | Added §6.5 Internationalization (Story 3.7.1, #246): English + Dutch UI via a lightweight typed `t()` (`lib/i18n`), request-scoped server locale (`lib/i18n/server.ts`, cookie → Accept-Language → English), `LocaleProvider` hydrating in the server locale, `LanguageSwitcher` (sidebar, user menu, Account → Preferences). Playlist PDF export (#220) UI strings translated and PDF labels localized via `getPdfLabels(locale)`. Tests: `docs/testing/i18n.feature`, `testing/bdd/steps/i18n.steps.ts`, `e2e/tests/i18n.spec.ts`. |
+| **1.40** | Oct 30, 2026 | §6.5: added Spanish, Italian, Russian, Southern Quechua, French and Brazilian Portuguese (Story 3.7.1, I18N-12); language switcher is now a select. |
+| **1.41** | Oct 30, 2026 | §6.5: language picker redesigned as an accessible listbox with ember "wick" markers (full variant in the sidebar, compact in user menu and Preferences). |
+| **1.42** | Oct 30, 2026 | §6.5: admin area (Story 3.6.1, #259) translated into all eight languages (`admin.*` keys); admin dates follow `LOCALE_DATE_TAGS`; account-menu trigger label `userMenu.trigger`. |
 
 
 ## 1. Introduction
@@ -162,6 +166,16 @@ The application is a **Progressive Web App (PWA)** optimized for mobile use duri
 * **@unit (Cucumber + vitest):** `testing/bdd/steps/admin-users.steps.ts` and `testing/unit/tests/adminUserOverview.test.ts` / `adminQueries.test.ts` run the real query code against `testing/support/fakeSupabase.ts`, an in-memory client that rejects columns missing from the real tables (PostgREST error `42703`).
 * **@seed (Cucumber + Postgres):** `testing/bdd/support/db.ts` connects to `DATABASE_URL` (default local Supabase on port 54322), runs each scenario in a rolled-back transaction and impersonates seeded users (`SET LOCAL ROLE authenticated` + `request.jwt.claims`) to check `fn_is_admin()`, RLS on private playlists, and that the fake's column list matches the database.
 * **@e2e (Playwright):** `e2e/tests/admin-users.spec.ts` (role-based access, account menu link, overview, search/filter/empty state, detail tabs, unknown user). It upserts one song, version and public playlist for the gatekeeper with fixed ids.
+
+### 6.5 Internationalization (i18n)
+* **Languages:** English (default, source of truth), Dutch, Spanish, Italian, Russian, Southern Quechua (Runasimi), French and Brazilian Portuguese. Codes `en nl es it ru qu fr pt`; browser tags `quz`/`quy` map to `qu`, `pt-BR`/`pt-PT` to `pt`; dates use `LOCALE_DATE_TAGS`. Quechua is machine-assisted and needs native review. Only the interface is translated; song content (titles, lyrics, chords, artists, tags) never is. Story 3.7.1 / issue #246; behaviour catalogue in `docs/testing/i18n.feature` (I18N-01 … I18N-10).
+* **Dictionaries:** `messages/en.ts` (`as const`, `TranslationKey = keyof typeof en`) and one `Partial<Record<TranslationKey, string>>` file per language (`messages/nl.ts`, `es`, `it`, `ru`, `qu`, `fr`, `pt`), registered in `DICTIONARIES`. Count strings in Russian/Quechua use count-neutral phrasing because the engine only knows one/other. Keys are dot-namespaced per feature; placeholders use `{name}`. Unit tests enforce identical key sets, identical placeholders and no empty values.
+* **Engine (`lib/i18n/index.ts`):** no third-party library, no middleware or locale URLs. `tWithLocale(locale, key, params)` interpolates and falls back active dictionary → English → the key itself (never blank). `resolveLocale()` picks the explicit choice (localStorage, then cookie) → first supported browser language (`navigator.languages` / `Accept-Language`, `nl-BE` → `nl`) → English; unknown values are ignored.
+* **Server Components:** `const t = await getServerT()` from `lib/i18n/server.ts` reads the `sacred-fire-songs-locale` cookie, else `Accept-Language` (request-scoped, safe under concurrency). The root layout renders `<html lang>` with that locale and passes it to `LocaleProvider`.
+* **Client Components:** `const { t } = useLocale()` (`context/LocaleContext.tsx`). The provider starts in the server's locale, so SSR and hydration match (no hydration mismatch, no English flash). After mount it re-reads localStorage/cookie/browser language (`lib/i18n/persistence.ts`); a browser-language default is never persisted. Switching writes localStorage + a 1-year `SameSite=Lax` cookie, updates `<html lang>` and refreshes Server Components until the layout's locale matches (bounded retries).
+* **Language switcher:** `components/common/navigation/LanguageSwitcher.tsx` (WAI-ARIA listbox: trigger button + list portalled to `<body>` so it is never clipped; each language in its own name and script, sorted by that name; the active language marked by a lit ember "wick" that ignites once on selection, skipped under reduced motion; keyboard: arrows, Home/End, type-ahead, Enter, Esc; pure logic in `components/common/navigation/languageListbox.ts`) in the sidebar footer (also for guests), the user menu and Account → Preferences → Language. The choice is per device/browser (not stored in the profile) and survives reloads and sign-out.
+* **PDF export:** `exportPlaylistToPdf({ …, locale })` uses `getPdfLabels(locale)` (`lib/export/pdfExport.ts`) for page footer, song metadata, subtitle and date format; the UI passes the active locale. Song content in the PDF is untranslated; server-action error messages are shown as the toast description under a translated title.
+* **Not translated:** `app/manifest.ts` and `<title>`/meta description (static, English); server action error codes; unused starter components (`auth-button`, `logout-button`, `LibrarySidebar`, `home/SearchBar`, `YouTubeEmbed`).
 
 ## 7. Screen Inventory (Implemented)
 

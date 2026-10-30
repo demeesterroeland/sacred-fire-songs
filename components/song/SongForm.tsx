@@ -14,6 +14,7 @@ import ChordProEditor from './ChordProEditor';
 
 import { ArtistTagInput } from './ArtistTagInput';
 import { parseArtists, formatArtists, ensureArtistCategoryIds } from '@/lib/songs/artistUtils';
+import { useLocale } from '@/context/LocaleContext';
 
 type SongFormData = {
     title: string;
@@ -38,6 +39,7 @@ interface SongFormProps {
 }
 
 const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
+    const { t } = useLocale();
     const {
         register,
         handleSubmit,
@@ -373,7 +375,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                         <div className="flex items-start gap-3 mb-4">
                             <span className="material-symbols-outlined text-blue-400 mt-0.5">info</span>
                             <p className="text-blue-100 text-xs leading-relaxed flex-1">
-                                Upload a <span className="bg-blue-500/30 px-1 rounded font-mono">.cho</span> or <span className="bg-blue-500/30 px-1 rounded font-mono">.txt</span> file. Title and author will be detected automatically.
+                                {t('songForm.upload.info')}
                             </p>
                         </div>
                         <label className="w-full border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-indigo-500/50 rounded-2xl p-8 flex flex-col items-center justify-center gap-3 transition-colors cursor-pointer bg-gray-100/50 dark:bg-gray-800/50 group">
@@ -387,8 +389,8 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                                 <span className="material-symbols-outlined text-3xl text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white">cloud_upload</span>
                             </div>
                             <div className="text-center">
-                                <p className="text-gray-900 dark:text-white font-semibold group-hover:text-indigo-300">Tap to select file</p>
-                                <p className="text-gray-500 text-xs mt-1">ChordPro files only</p>
+                                <p className="text-gray-900 dark:text-white font-semibold group-hover:text-indigo-300">{t('songForm.upload.select')}</p>
+                                <p className="text-gray-500 text-xs mt-1">{t('songForm.upload.chordProOnly')}</p>
                             </div>
                         </label>
                         <div className="flex items-center justify-end gap-3 mt-2">
@@ -397,13 +399,13 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                                 onClick={() => setShowUpload(false)}
                                 className="cursor-pointer flex min-w-[100px] items-center justify-center rounded-lg h-11 px-6 border border-slate-300 dark:border-[#674d32] text-slate-600 dark:text-[#c9ad92] text-sm font-bold hover:bg-slate-50 dark:hover:bg-[#332619]"
                             >
-                                Cancel
+                                {t('songForm.cancel')}
                             </button>
                             <button
                                 type="button"
                                 className="flex min-w-[100px] cursor-pointer items-center justify-center rounded-lg h-11 px-8 bg-primary text-white text-sm font-bold shadow-lg shadow-primary/20 active:bg-primary/90"
                             >
-                                Upload
+                                {t('songForm.upload.button')}
                             </button>
                         </div>
                     </div>
@@ -419,7 +421,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                             className="text-indigo-400 text-xs font-semibold flex items-center gap-1 opacity-80 hover:opacity-100 transition-opacity"
                         >
                             <span className="material-symbols-outlined text-sm">attachment</span>
-                            Or upload a file (.cho, .txt)
+                            {t('songForm.upload.toggle')}
                         </button>
                     </div>
                 )}
@@ -427,13 +429,13 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                 {/* 1. Title */}
                 <div className="space-y-2">
                     <label htmlFor="title" className="block text-sm font-medium text-gray-600 dark:text-gray-300 p-1">
-                        Song Title
+                        {t('songForm.field.title')}
                     </label>
                     <input
                         id="title"
-                        {...register('title', { required: 'Title is required' })}
+                        {...register('title', { required: t('songForm.field.title.required') })}
                         className="w-full bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all placeholder:text-gray-400 dark:placeholder:text-[#a19eb7]/50"
-                        placeholder="e.g. Grandmother Earth"
+                        placeholder={t('songForm.field.title.placeholder')}
                     />
                     {errors.title && <p className="text-red-400 text-sm">{errors.title.message}</p>}
                 </div>
@@ -441,12 +443,12 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                 {/* 2. Author / Artist (Multi-Artist Pill Input) */}
                 <div className="space-y-2">
                     <label htmlFor="author" className="block text-sm font-medium text-gray-600 dark:text-gray-300 p-1">
-                        Author / Artist(s) <span className="text-gray-500 font-normal">(optional)</span>
+                        {t('songForm.field.author')} <span className="text-gray-500 font-normal">{t('common.optional')}</span>
                     </label>
                     <ArtistTagInput
                         selectedArtists={parseArtists(watch('author') || '')}
                         onChange={(artists) => setValue('author', formatArtists(artists), { shouldDirty: true })}
-                        placeholder="e.g. Traditional or Artist Name"
+                        placeholder={t('songForm.field.author.placeholder')}
                     />
                 </div>
 
@@ -454,15 +456,15 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                 <div className="space-y-2 mt-2">
                     <div className="flex justify-between items-end pb-2">
                         <div>
-                            <h3 className="text-gray-900 dark:text-white text-lg font-bold leading-tight tracking-tight">Lyrics & chords</h3>
-                            <p className="text-[#a19eb7] text-xs font-normal mt-1">Use brackets [] for chords: eg. <span className="font-mono text-primary">[Dm]</span>Abre tus alas <span className="font-mono text-primary">[A7]</span>pajaro volar <span className="font-mono text-primary">[Dm]</span></p>
+                            <h3 className="text-gray-900 dark:text-white text-lg font-bold leading-tight tracking-tight">{t('songForm.field.lyrics')}</h3>
+                            <p className="text-[#a19eb7] text-xs font-normal mt-1">{t('songForm.field.lyrics.hint')} <span className="font-mono text-primary">[Dm]</span>Abre tus alas <span className="font-mono text-primary">[A7]</span>pajaro volar <span className="font-mono text-primary">[Dm]</span></p>
                         </div>
                         <span className="material-symbols-outlined text-[#a19eb7] cursor-pointer">help_outline</span>
                     </div>
 
                     <div className="w-full min-w-0 max-w-full overflow-hidden bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg focus-within:ring-2 focus-within:ring-primary focus-within:border-primary transition-all h-[400px]">
                         <ChordProEditor
-                            {...register('content', { required: 'Content is required' })}
+                            {...register('content', { required: t('songForm.field.content.required') })}
                             value={watch('content') || ''}
                             onPaste={handlePaste}
                             className="w-full h-full rounded-lg"
@@ -475,19 +477,19 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                 {/* 4. Key / Capo / Tuning (collapsible, simplified) */}
                 <details className="group" open={isMetadataExpanded} onToggle={(e) => setIsMetadataExpanded(e.currentTarget.open)}>
                     <summary className="w-full flex items-center justify-between py-3 cursor-pointer select-none list-none">
-                        <h3 className="text-gray-400 font-semibold text-sm">Key, Capo & Tuning</h3>
+                        <h3 className="text-gray-400 font-semibold text-sm">{t('songForm.section.metadata')}</h3>
                         <span className="material-symbols-outlined text-gray-400 transition-transform group-open:rotate-180">expand_more</span>
                     </summary>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pb-3">
                         {/* Key */}
                         <div className="space-y-1.5">
-                            <label className="block text-xs font-medium text-gray-400">Key</label>
+                            <label className="block text-xs font-medium text-gray-400">{t('songForm.field.key')}</label>
                             <div className="relative">
                                 <select
                                     {...register('key')}
                                     className="w-full bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg px-2 py-2 text-xs text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500 appearance-none"
                                 >
-                                    <option value="">(Select Key)</option>
+                                    <option value="">{t('songForm.field.key.select')}</option>
                                     {['C', 'Cm', 'C#', 'Db', 'D', 'Dm', 'Eb', 'E', 'Em', 'F', 'Fm', 'F#', 'Gb', 'G', 'Gm', 'G#', 'Ab', 'A', 'Am', 'Bb', 'B', 'Bm'].map(k => (
                                         <option key={k} value={k}>{k}</option>
                                     ))}
@@ -498,15 +500,23 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
 
                         {/* Capo */}
                         <div className="space-y-1.5">
-                            <label className="block text-xs font-medium text-gray-400">Capo</label>
+                            <label className="block text-xs font-medium text-gray-400">{t('songForm.field.capo')}</label>
                             <div className="relative">
                                 <select
                                     {...register('capo')}
                                     className="w-full bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg px-2 py-2 text-xs text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500 appearance-none"
                                 >
-                                    <option value="">(No Capo)</option>
+                                    <option value="">{t('songForm.field.capo.none')}</option>
                                     {Array.from({ length: 12 }, (_, i) => i + 1).map(i => (
-                                        <option key={i} value={i}>{i === 1 ? '1st Fret' : i === 2 ? '2nd Fret' : i === 3 ? '3rd Fret' : `${i}th Fret`}</option>
+                                        <option key={i} value={i}>
+                                            {i === 1
+                                                ? t('songForm.field.capo.fret1')
+                                                : i === 2
+                                                ? t('songForm.field.capo.fret2')
+                                                : i === 3
+                                                ? t('songForm.field.capo.fret3')
+                                                : t('songForm.field.capo.fretN', { fret: i })}
+                                        </option>
                                     ))}
                                 </select>
                                 <span className="material-symbols-outlined absolute right-1 top-2 text-gray-500 pointer-events-none text-base">arrow_drop_down</span>
@@ -515,14 +525,14 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
 
                         {/* Tuning */}
                         <div className="space-y-1.5">
-                            <label className="block text-xs font-medium text-gray-400">Tuning</label>
+                            <label className="block text-xs font-medium text-gray-400">{t('songForm.field.tuning')}</label>
                             <div className="relative">
                                 <select
                                     {...register('tuning')}
                                     className="w-full bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg px-2 py-2 text-xs text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500 appearance-none"
                                 >
-                                    <option value="">(Select Tuning)</option>
-                                    <option value="Standard">Standard</option>
+                                    <option value="">{t('songForm.field.tuning.select')}</option>
+                                    <option value="Standard">{t('songForm.field.tuning.standard')}</option>
                                     <option value="Drop D">Drop D</option>
                                     <option value="Open G">Open G</option>
                                     <option value="DADGAD">DADGAD</option>
@@ -537,7 +547,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                 {/* 5. Categories / Tags (collapsible, simplified) */}
                 <details className="group" open={isTagsExpanded} onToggle={(e) => setIsTagsExpanded(e.currentTarget.open)}>
                     <summary className="w-full flex items-center justify-between py-3 cursor-pointer select-none list-none">
-                        <h3 className="text-gray-400 font-semibold text-sm">Categories / Tags</h3>
+                        <h3 className="text-gray-400 font-semibold text-sm">{t('songForm.section.categoriesTags')}</h3>
                         <span className="material-symbols-outlined text-gray-400 transition-transform group-open:rotate-180">expand_more</span>
                     </summary>
                     <div className="pb-3">
@@ -551,7 +561,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                 {/* 6. Links (collapsible) */}
                 <details className="group">
                     <summary className="w-full flex items-center justify-between py-3 cursor-pointer select-none list-none">
-                        <h3 className="text-gray-400 font-semibold text-sm">Links (YouTube, Spotify, Soundcloud)</h3>
+                        <h3 className="text-gray-400 font-semibold text-sm">{t('songForm.section.links')}</h3>
                         <span className="material-symbols-outlined text-gray-400 transition-transform group-open:rotate-180">expand_more</span>
                     </summary>
                     <div className="space-y-3 pb-2">
@@ -562,7 +572,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                             <input
                                 {...register('youtubeLink')}
                                 className="w-full pl-11 bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg h-12 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all placeholder:text-gray-400 dark:placeholder:text-[#a19eb7]/50 text-sm"
-                                placeholder="Paste YouTube link"
+                                placeholder={t('songForm.field.youtube.placeholder')}
                             />
                         </div>
 
@@ -573,7 +583,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                             <input
                                 {...register('spotifyLink')}
                                 className="w-full pl-11 bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg h-12 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all placeholder:text-gray-400 dark:placeholder:text-[#a19eb7]/50 text-sm"
-                                placeholder="Paste Spotify link"
+                                placeholder={t('songForm.field.spotify.placeholder')}
                             />
                         </div>
 
@@ -586,7 +596,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                             <input
                                 {...register('soundcloudLink')}
                                 className="w-full pl-11 bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg h-12 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all placeholder:text-gray-400 dark:placeholder:text-[#a19eb7]/50 text-sm"
-                                placeholder="Paste Soundcloud link"
+                                placeholder={t('songForm.field.soundcloud.placeholder')}
                             />
                         </div>
                     </div>
@@ -596,20 +606,20 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                 <details className="group opacity-60">
                     <summary className="w-full flex items-center justify-between py-3 cursor-pointer select-none list-none">
                         <div className="flex items-center gap-2">
-                            <h3 className="text-gray-400 font-semibold text-sm">Melody Notation</h3>
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-500/80 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">Coming Soon</span>
+                            <h3 className="text-gray-400 font-semibold text-sm">{t('songForm.field.melody')}</h3>
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-500/80 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">{t('common.comingSoon')}</span>
                         </div>
                         <span className="material-symbols-outlined text-gray-400 transition-transform group-open:rotate-180">expand_more</span>
                     </summary>
                     <div className="py-3">
-                        <p className="text-gray-500 text-xs">ABC notation support is under development.</p>
+                        <p className="text-gray-500 text-xs">{t('songForm.field.melody.hint')}</p>
                     </div>
                 </details>
             </div>
 
             {serverError && (
                 <div className="p-3 bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-800 rounded-lg text-red-700 dark:text-red-200 text-sm">
-                    Error: {serverError}
+                    {t('common.error')}: {serverError}
                 </div>
             )}
 
@@ -623,10 +633,10 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                     {mutation.isPending && watch('isPublic') === false ? (
                         <>
                             <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                            Saving...
+                            {t('songForm.submitting')}
                         </>
                     ) : (
-                        'Save as Draft'
+                        t('songForm.saveAsDraft')
                     )}
                 </button>
                 <button
@@ -638,10 +648,10 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                     {mutation.isPending && watch('isPublic') === true ? (
                         <>
                             <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
-                            Publishing...
+                            {t('songForm.publishing')}
                         </>
                     ) : (
-                        'Publish Song'
+                        t('songForm.publishSong')
                     )}
                 </button>
             </div>

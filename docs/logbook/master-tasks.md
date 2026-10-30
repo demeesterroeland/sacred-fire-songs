@@ -1264,3 +1264,7 @@
 - [x] Playwright `e2e/tests/admin-users.spec.ts` (24 passed, 2 skipped on mobile)
 - [x] Apply migration `20261009194500` to the local Supabase stack
 - [x] Doc sync: design doc v1.37, epic & user stories v1.37, e2e overview v1.5
+
+## Session October 30, 2026 (Part 6: Multi-Language Support i18n - Issue #246)
+
+- [x] Add es, it, ru, qu, fr, pt dictionaries + select-based LanguageSwitcher (I18N-12)
