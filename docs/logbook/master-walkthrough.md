@@ -2921,3 +2921,14 @@ Removed the last real song content from the app repository (the 221 songs in the
 - **Validation**: dry runs inside `BEGIN … ROLLBACK` against the local Supabase stack: 80 songs → 86 versions, 1 composition without version, 0 `has_chords` mismatches, 25 artist categories, 10 playlists, recordings for all four users; 1000 songs in 332 ms. Unit suite: 385 tests pass. Playwright was not run (it truncates the local DB).
 - **Docs**: `docs/testing/song.feature` v1.0, design doc v1.34, `docs/testing/e2e-test-overview.md`, `e2e/README.md`.
 - **Static seed**: `scripts/export-random-seed.mjs` runs the generator for 200 songs inside a rolled-back transaction and dumps compositions, versions, artist categories, slug-based tag links, playlists, recordings and `song_views` as `supabase/seeds/03_songs_random_generated.sql` (329 KB, timestamps relative to `now()`). Load-tested with `psql -v ON_ERROR_STOP=1` in a transaction: 200 compositions, 219 versions, 757 tag links, 10 playlists, 418 recordings.
+
+## October 30, 2026 (Part 3) - Cucumber Runner Setup for BDD (#263)
+
+**Task Overview**
+Set up the foundational non-browser Cucumber test runner and TypeScript execution pipeline for `docs/testing/song.feature` as Phase 1 of the Testing Pyramid Epic (#262).
+
+**Technical Details**
+- **Dependencies & Scripts**: Installed `@cucumber/cucumber` and `tsx` as devDependencies and added `test:bdd`, `test:bdd:unit`, and `test:bdd:seed` npm scripts using `NODE_OPTIONS="--import tsx"`.
+- **Configuration**: Created `cucumber.json` targeting `docs/testing/song.feature` with `default` (`@unit or @seed`), `unit` (`@unit`), and `seed` (`@seed`) profiles configured with `strict: false` so unimplemented scenarios in downstream sub-issues (#264, #265) report as pending without failing the test run.
+- **Support & Smoke Steps**: Added `SongBddWorld` in `testing/bdd/support/world.ts` and implemented the initial `@unit @chordProParsing` smoke scenario ("Inline chords in square brackets") plus pending step stubs in `testing/bdd/steps/smoke.steps.ts`. Execution completes offline and headlessly in ~0.15s.
+

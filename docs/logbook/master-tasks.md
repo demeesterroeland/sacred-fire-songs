@@ -1214,3 +1214,13 @@
 - [x] Update design doc (v1.34), e2e overview, e2e README
 - [ ] Run the Playwright suite against the new seeder (not run in this session: it wipes the local database)
 - [x] Add `scripts/export-random-seed.mjs` + `npm run seed:generate`; check in `supabase/seeds/03_songs_random_generated.sql` (200 songs) so `supabase db reset` still seeds ~200 songs
+
+## Session October 30, 2026 (Part 3: Cucumber Runner Setup for BDD - Issue #263)
+- [x] Create isolated git worktree `.worktrees/issue-263` on branch `chore/263-cucumber-runner` from `chore/move-song-collection-out`
+- [x] Install `@cucumber/cucumber` and `tsx` as devDependencies in `package.json`
+- [x] Create `cucumber.json` targeting `docs/testing/song.feature` with `default` (`@unit or @seed`), `unit` (`@unit`), and `seed` (`@seed`) profiles
+- [x] Configure Cucumber support code and custom World in `testing/bdd/support/world.ts`
+- [x] Wire smoke step definitions for the initial `@unit @chordProParsing` scenario ("Inline chords in square brackets") and pending stubs for remaining `@unit` (#264) and `@seed` (#265) scenarios in `testing/bdd/steps/smoke.steps.ts`
+- [x] Add `test:bdd`, `test:bdd:unit`, and `test:bdd:seed` npm scripts in `package.json`
+- [x] Verify `npm run test:unit`, `npm run test:bdd`, and `npm run build` succeed cleanly in under 10 seconds
+

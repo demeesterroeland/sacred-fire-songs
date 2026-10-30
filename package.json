@@ -9,6 +9,9 @@
     "test": "vitest run",
     "seed:generate": "node scripts/export-random-seed.mjs 200",
     "test:unit": "vitest run testing/unit/tests/",
+    "test:bdd": "NODE_OPTIONS=\"--import tsx\" cucumber-js --config cucumber.json",
+    "test:bdd:unit": "NODE_OPTIONS=\"--import tsx\" cucumber-js --config cucumber.json --profile unit",
+    "test:bdd:seed": "NODE_OPTIONS=\"--import tsx\" cucumber-js --config cucumber.json --profile seed",
     "test:e2e": "playwright test --config playwright.config.ts",
     "test:e2e:smart": "playwright test --config playwright.config.ts",
     "test:e2e:laptop": "npm run test:e2e:smart",
@@ -51,6 +54,7 @@
     "zod": "^4.3.6"
   },
   "devDependencies": {
+    "@cucumber/cucumber": "^13.3.0",
     "@playwright/test": "^1.60.0",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
@@ -62,6 +66,7 @@
     "sharp": "^0.34.5",
     "supabase": "^2.113.0",
     "tailwindcss": "^4",
+    "tsx": "^4.23.15",
     "typescript": "^5",
     "vitest": "^4.0.16"
   }
