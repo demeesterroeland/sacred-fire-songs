@@ -1224,3 +1224,12 @@
 - [x] Add `test:bdd`, `test:bdd:unit`, and `test:bdd:seed` npm scripts in `package.json`
 - [x] Verify `npm run test:unit`, `npm run test:bdd`, and `npm run build` succeed cleanly in under 10 seconds
 
+## Session October 30, 2026 (Part 4: Story 4.2.1 / Issue #18 - Musician Setlist PDF Export)
+- [x] Write BDD specification `docs/testing/setlist-pdf-export.feature` (cover headers, pagination, transpositions, directives)
+- [x] Write TDD unit tests `testing/unit/tests/pdfExport.test.ts` (12 passing tests)
+- [x] Implement PDF generator `lib/export/pdfExport.ts` using `chordsheetjs` and `jspdf` with ceremony firelight styling
+- [x] Implement `getPlaylistSongsForExport` server action in `app/actions/playlistActions.ts`
+- [x] Add PDF export trigger buttons to `PlaylistDetailHeader.tsx` and `PlaylistContextMenu.tsx`
+- [x] Rebase on `origin/main` after song collection migration (#269) and verify full unit test suite (66/66) & production build
+- [x] Push commit to PR #220 and verify GitHub Actions E2E checks succeed
+
