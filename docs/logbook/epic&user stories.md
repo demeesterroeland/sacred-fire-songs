@@ -1,6 +1,6 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 1.38
+**Version:** 1.39
 **Status:** Living Document
 **Date:** Oct 30, 2026
 
@@ -37,6 +37,7 @@
 | **1.36** | Oct 30, 2026 | Marked Story 4.2.1 as [Implemented] (Issue #18 / PR #220: PDF Setlist export for ceremony musicians using ChordSheetJS & jsPDF). |
 | **1.37** | Oct 30, 2026 | Added Epic 3.6 (Administrative Management, #257) and Story 3.6.1 (User Overview, Details & Contributions, #258); marked Story 3.6.1 as implemented, noted that comments/flags are not modelled yet and linked the executable spec `docs/testing/admin-users.feature`. |
 | **1.38** | Oct 30, 2026 | Added Epic 3.7: Multi-Language Support (Story 3.7.1, issue #246) with acceptance criteria I18N-01…I18N-12 (I18N-11: PDF export from #220; I18N-12: six additional languages), executable in `docs/testing/i18n.feature`. |
+| **1.39** | Oct 30, 2026 | Added Stories 4.2.3 (#303, PDF footer: site URL + 1 cm song QR code) and 4.2.4 (#304, reuse the setlist PDF while the playlist is unchanged), both [Implemented]. |
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
 
@@ -865,6 +866,28 @@ Scenario: Group by Category in PDF
   And I generate the PDF
   Then the PDF should show all "Fire" songs grouped together
   And followed by all "Water" songs grouped together (or vice versa)
+```
+
+**Story 4.2.3:** As a musician printing a setlist, I want the page footer to show just the songbook's main address and a small QR code for the song, so that the footer stays clean and I can open the song on my phone by scanning it. **[Implemented – #303]**
+
+```gherkin
+Scenario: Footer shows only the main site URL and a QR code to the song
+  Given a playlist PDF is exported from the songbook
+  When I look at the bottom-left of a page
+  Then I see only the site's main URL (no song path or id)
+  And a 1 cm × 1 cm QR code that opens the song on that page, also on its continuation pages
+  And pages without a song URL show no QR code
+```
+
+**Story 4.2.4:** As a musician exporting the same setlist several times, I want the app to reuse the last generated PDF when nothing has changed, so that the download is instant. **[Implemented – #304]**
+
+```gherkin
+Scenario: Only regenerate the PDF when the playlist is dirty
+  Given I exported a playlist as PDF
+  When I export it again without changes
+  Then the previous PDF is reused
+  But a change in order, songs added/removed, a song edit, title/description or interface language generates a new PDF
+  And cached PDFs are per user and cleared on sign-out
 ```
 
 ### Epic 4.3: Offline Reliability

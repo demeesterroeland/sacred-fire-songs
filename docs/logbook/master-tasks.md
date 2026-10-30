@@ -1268,3 +1268,10 @@
 ## Session October 30, 2026 (Part 6: Multi-Language Support i18n - Issue #246)
 
 - [x] Add es, it, ru, qu, fr, pt dictionaries + select-based LanguageSwitcher (I18N-12)
+
+## Session October 30, 2026 (Part 7: PDF footer QR code #303 & PDF reuse cache #304)
+- [x] Footer shows only the site host + 1 cm QR code to the page's song (`footerSiteLabel`, `songPageUrl`, `QR_SIZE_PT`)
+- [x] Fix continuation pages missing the song URL (QR now on every page of a song)
+- [x] `lib/export/pdfCache.ts`: SHA-256 fingerprint, `getOrCreatePdf`, IndexedDB store per user + playlist, cleared on sign-out
+- [x] TDD: `pdfExport.test.ts` (+6), `pdfCache.test.ts` (17); QR decoded from a rendered 300 dpi PDF
+- [x] Docs: Stories 4.2.3/4.2.4, design doc 1.43, `setlist-pdf-export.feature`

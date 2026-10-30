@@ -1,6 +1,6 @@
 # Project Analysis & Design Document: Song Sharing Application (Sacred Fire Songs)
 
-**Version:** 1.42
+**Version:** 1.43
 **Status:** Living Document
 **Date:** Oct 30, 2026
 
@@ -35,6 +35,7 @@
 | **1.40** | Oct 30, 2026 | §6.5: added Spanish, Italian, Russian, Southern Quechua, French and Brazilian Portuguese (Story 3.7.1, I18N-12); language switcher is now a select. |
 | **1.41** | Oct 30, 2026 | §6.5: language picker redesigned as an accessible listbox with ember "wick" markers (full variant in the sidebar, compact in user menu and Preferences). |
 | **1.42** | Oct 30, 2026 | §6.5: admin area (Story 3.6.1, #259) translated into all eight languages (`admin.*` keys); admin dates follow `LOCALE_DATE_TAGS`; account-menu trigger label `userMenu.trigger`. |
+| **1.43** | Oct 30, 2026 | PDF export (Stories 4.2.3/4.2.4, #303/#304): footer shows only the site host plus a 1 cm QR code (`qrcode`) linking to the song on that page (continuation pages included); `lib/export/pdfCache.ts` reuses the last PDF per user + playlist (IndexedDB) until a SHA-256 fingerprint of the exported content, locale and site changes; cache cleared on sign-out. |
 
 
 ## 1. Introduction
@@ -174,6 +175,7 @@ The application is a **Progressive Web App (PWA)** optimized for mobile use duri
 * **Server Components:** `const t = await getServerT()` from `lib/i18n/server.ts` reads the `sacred-fire-songs-locale` cookie, else `Accept-Language` (request-scoped, safe under concurrency). The root layout renders `<html lang>` with that locale and passes it to `LocaleProvider`.
 * **Client Components:** `const { t } = useLocale()` (`context/LocaleContext.tsx`). The provider starts in the server's locale, so SSR and hydration match (no hydration mismatch, no English flash). After mount it re-reads localStorage/cookie/browser language (`lib/i18n/persistence.ts`); a browser-language default is never persisted. Switching writes localStorage + a 1-year `SameSite=Lax` cookie, updates `<html lang>` and refreshes Server Components until the layout's locale matches (bounded retries).
 * **Language switcher:** `components/common/navigation/LanguageSwitcher.tsx` (WAI-ARIA listbox: trigger button + list portalled to `<body>` so it is never clipped; each language in its own name and script, sorted by that name; the active language marked by a lit ember "wick" that ignites once on selection, skipped under reduced motion; keyboard: arrows, Home/End, type-ahead, Enter, Esc; pure logic in `components/common/navigation/languageListbox.ts`) in the sidebar footer (also for guests), the user menu and Account → Preferences → Language. The choice is per device/browser (not stored in the profile) and survives reloads and sign-out.
+* **PDF footer & cache (#303/#304):** bottom-left shows the site host and a 1 cm QR code to the page's song; repeated exports reuse the cached PDF (`lib/export/pdfCache.ts`) until the playlist content, language or site changes.
 * **PDF export:** `exportPlaylistToPdf({ …, locale })` uses `getPdfLabels(locale)` (`lib/export/pdfExport.ts`) for page footer, song metadata, subtitle and date format; the UI passes the active locale. Song content in the PDF is untranslated; server-action error messages are shown as the toast description under a translated title.
 * **Not translated:** `app/manifest.ts` and `<title>`/meta description (static, English); server action error codes; unused starter components (`auth-button`, `logout-button`, `LibrarySidebar`, `home/SearchBar`, `YouTubeEmbed`).
 

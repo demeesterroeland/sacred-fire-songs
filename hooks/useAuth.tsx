@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
+import { clearPdfCache } from '@/lib/export/pdfCache';
 export type UserRole = 'admin' | 'gatekeeper' | 'musician' | 'member' | 'guest';
 
 export interface AuthUser {
@@ -133,6 +134,8 @@ export const useAuth = (initialUser: AuthUser | null = null) => {
         await supabase.auth.signOut();
 
         queryClient.clear();
+        // Cached setlist PDFs may contain private playlists (#304).
+        await clearPdfCache();
         setUser(null);
     };
 
