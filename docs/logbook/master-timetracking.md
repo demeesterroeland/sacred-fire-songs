@@ -99,4 +99,6 @@
 
 | **October 30, 2026 (Part 5)** | **Feature/Testing (#258)**: Reviewed Story 3.6.1 against its ACs, fixed the admin user detail query (non-existent columns left the contribution tabs empty), added activity/musician status and public playlist counts, and covered the story with 48 vitest tests, 20 Cucumber @unit/@seed scenarios (`docs/testing/admin-users.feature`) and a Playwright spec. | ~2.5 Hours | ✅ |
 
-| **Total** | **Development + AI Collaboration** | **~179.25 Hours** | |
+| **October 30, 2026 (Part 6)** | **Feature/i18n (#246)**: Merged main twice (#220 PDF export strings + PDF labels localized), six more languages (es, it, ru, qu, fr, pt) redesigned ember listbox language picker, merged #259 admin, request-scoped server locale, LocaleProvider hydration fix, LanguageSwitcher (sidebar/user menu/preferences), finished string migration, Story 3.7.1, `i18n.feature`, vitest + Cucumber + Playwright coverage, main-vs-branch e2e baseline comparison. | ~6.0 Hours | ✅ Completed |
+
+| **Total** | **Development + AI Collaboration** | **~185.25 Hours** | |

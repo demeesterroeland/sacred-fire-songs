@@ -16,10 +16,12 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, Suspense } from "react";
 import { Mail, Lock, ShieldCheck, Flame, X, ArrowRight } from "lucide-react";
+import { useLocale } from "@/context/LocaleContext";
 
 export function SignUpForm(props: React.ComponentPropsWithoutRef<"div">) {
+  const { t } = useLocale();
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div>{t('common.loading')}</div>}>
       <SignUpFormContent {...props} />
     </Suspense>
   );
@@ -28,6 +30,7 @@ function SignUpFormContent({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
+  const { t } = useLocale();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [repeatPassword, setRepeatPassword] = useState("");
@@ -45,7 +48,7 @@ function SignUpFormContent({
     setError(null);
 
     if (password !== repeatPassword) {
-      setError("Passwords do not match");
+      setError(t('settings.security.mismatch'));
       setIsLoading(false);
       return;
     }
@@ -65,7 +68,7 @@ function SignUpFormContent({
 
       router.push(`/auth/sign-up-success?email=${encodeURIComponent(email)}${next ? `&next=${encodeURIComponent(next)}` : ""}`);
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred");
+      setError(error instanceof Error ? error.message : t('common.errorOccurred'));
     } finally {
       setIsLoading(false);
     }
@@ -89,8 +92,8 @@ function SignUpFormContent({
           <Flame className="text-white w-6 h-6 md:w-10 md:h-10 fill-current" />
         </div>
         <div className="text-left md:text-center">
-          <h1 className="text-gray-900 dark:text-white text-xl md:text-3xl font-bold md:mb-2 leading-tight">Create Account</h1>
-          <p className="text-[#8e99aa] text-xs md:text-sm">Join our community of songkeepers.</p>
+          <h1 className="text-gray-900 dark:text-white text-xl md:text-3xl font-bold md:mb-2 leading-tight">{t('auth.signUp.heading')}</h1>
+          <p className="text-[#8e99aa] text-xs md:text-sm">{t('auth.signUp.description')}</p>
         </div>
       </div>
 
@@ -103,7 +106,7 @@ function SignUpFormContent({
       {/* Signup Form */}
       <form onSubmit={handleSignUp} className="space-y-4 md:space-y-4">
         <div className="space-y-1">
-          <Label className="text-xs font-semibold text-gray-900 dark:text-white ml-1 tracking-wide uppercase opacity-70">Email address</Label>
+          <Label className="text-xs font-semibold text-gray-900 dark:text-white ml-1 tracking-wide uppercase opacity-70">{t('field.email.label')}</Label>
           <div className="relative group">
             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5a657a] group-focus-within:text-[#d9481e] transition-colors pointer-events-none">
               <Mail className="w-5 h-5" />
@@ -111,7 +114,7 @@ function SignUpFormContent({
             <Input
               id="email"
               type="email"
-              placeholder="name@example.com"
+              placeholder={t('field.email.placeholder')}
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -121,7 +124,7 @@ function SignUpFormContent({
         </div>
 
         <div className="space-y-1">
-          <Label className="text-xs font-semibold text-gray-900 dark:text-white ml-1 tracking-wide uppercase opacity-70">Password</Label>
+          <Label className="text-xs font-semibold text-gray-900 dark:text-white ml-1 tracking-wide uppercase opacity-70">{t('field.password')}</Label>
           <div className="relative group">
             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5a657a] group-focus-within:text-[#d9481e] transition-colors pointer-events-none">
               <Lock className="w-5 h-5" />
@@ -129,7 +132,7 @@ function SignUpFormContent({
             <Input
               id="password"
               type="password"
-              placeholder="••••••••"
+              placeholder={t('field.password.placeholder')}
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
@@ -139,7 +142,7 @@ function SignUpFormContent({
         </div>
 
         <div className="space-y-1">
-          <Label className="text-xs font-semibold text-gray-900 dark:text-white ml-1 tracking-wide uppercase opacity-70">Repeat Password</Label>
+          <Label className="text-xs font-semibold text-gray-900 dark:text-white ml-1 tracking-wide uppercase opacity-70">{t('field.repeatPassword')}</Label>
           <div className="relative group">
             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5a657a] group-focus-within:text-[#d9481e] transition-colors pointer-events-none">
               <ShieldCheck className="w-5 h-5" />
@@ -147,7 +150,7 @@ function SignUpFormContent({
             <Input
               id="repeat-password"
               type="password"
-              placeholder="••••••••"
+              placeholder={t('field.password.placeholder')}
               required
               value={repeatPassword}
               onChange={(e) => setRepeatPassword(e.target.value)}
@@ -163,7 +166,7 @@ function SignUpFormContent({
           className="w-full h-auto bg-gradient-to-r from-[#d9481e] to-[#f45d1a] hover:brightness-110 active:scale-[0.98] text-white font-bold py-3.5 md:py-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-[0_4px_15px_rgba(217,72,30,0.4)] mt-2 disabled:opacity-50"
           disabled={isLoading}
         >
-          {isLoading ? "Creating account..." : "Create Account"}
+          {isLoading ? t('auth.signUp.submitting') : t('auth.signUp.submit')}
           <ArrowRight className="w-5 h-5" />
         </Button>
       </form>
@@ -171,13 +174,13 @@ function SignUpFormContent({
       {/* Terms and Privacy Footer */}
       <div className="mt-8 text-center md:text-left">
         <p className="text-[#8e99aa] text-[12px] leading-relaxed">
-          By creating an account, you confirm that you agree to our{" "}
+          {t('auth.tos.signUp')}{" "}
           <Link href="#" className="text-gray-900 dark:text-white font-bold hover:underline">
-            Terms Of Service
+            {t('auth.tos.terms')}
           </Link>{" "}
-          and have read our{" "}
+          {t('auth.tos.and')}{" "}
           <Link href="#" className="text-gray-900 dark:text-white font-bold hover:underline">
-            Privacy Policy
+            {t('auth.tos.privacy')}
           </Link>
         </p>
       </div>
@@ -185,12 +188,12 @@ function SignUpFormContent({
       {/* Toggle View Link */}
       <div className="mt-8 text-center pb-4 md:pb-0 border-t border-gray-200 dark:border-[#2d3545] pt-6">
         <p className="text-[#a0aec0] text-sm">
-          Already have an account?
+          {t('auth.signUp.hasAccount')}
           <Link
             href={`/auth/login${next ? `?next=${encodeURIComponent(next)}` : ""}`}
             className="text-[#d9481e] hover:text-[#f45d1a] underline font-medium transition-colors ml-1"
           >
-            Sign in
+            {t('auth.signUp.signIn')}
           </Link>
         </p>
       </div>

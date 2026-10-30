@@ -12,6 +12,7 @@
     "test:bdd": "NODE_OPTIONS=\"--import tsx\" cucumber-js --config cucumber.json",
     "test:bdd:unit": "NODE_OPTIONS=\"--import tsx\" cucumber-js --config cucumber.json --profile unit",
     "test:bdd:seed": "NODE_OPTIONS=\"--import tsx\" cucumber-js --config cucumber.json --profile seed",
+    "test:bdd:i18n": "NODE_OPTIONS=\"--import tsx\" cucumber-js --config cucumber.json --profile i18n",
     "test:e2e": "playwright test --config playwright.config.ts",
     "test:e2e:smart": "playwright test --config playwright.config.ts",
     "test:e2e:laptop": "npm run test:e2e:smart",

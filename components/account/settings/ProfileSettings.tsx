@@ -7,6 +7,7 @@ import { User as UserIcon, Camera, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import { useLocale } from "@/context/LocaleContext";
 
 interface ProfileSettingsProps {
   user: User;
@@ -14,6 +15,7 @@ interface ProfileSettingsProps {
 }
 
 export default function ProfileSettings({ user, profile }: ProfileSettingsProps) {
+  const { t } = useLocale();
   const [fullName, setFullName] = useState(profile?.full_name || "");
   const [isSaving, setIsSaving] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
@@ -31,10 +33,10 @@ export default function ProfileSettings({ user, profile }: ProfileSettingsProps)
 
       if (error) throw error;
 
-      toast.success("Profile updated successfully");
+      toast.success(t("settings.profile.success"));
       router.refresh();
     } catch (error: any) {
-      toast.error(error.message || "Failed to update profile");
+      toast.error(error.message || t("settings.profile.error"));
     } finally {
       setIsSaving(false);
     }
@@ -46,12 +48,12 @@ export default function ProfileSettings({ user, profile }: ProfileSettingsProps)
 
     // Basic validation
     if (!file.type.startsWith("image/")) {
-      toast.error("Please upload an image file");
+      toast.error(t("settings.profile.avatar.notImage"));
       return;
     }
 
     if (file.size > 2 * 1024 * 1024) {
-      toast.error("Image size must be less than 2MB");
+      toast.error(t("settings.profile.avatar.tooLarge"));
       return;
     }
 
@@ -80,10 +82,10 @@ export default function ProfileSettings({ user, profile }: ProfileSettingsProps)
 
       if (updateError) throw updateError;
 
-      toast.success("Avatar updated successfully");
+      toast.success(t("settings.profile.avatar.success"));
       router.refresh();
     } catch (error: any) {
-      toast.error(error.message || "Failed to upload avatar");
+      toast.error(error.message || t("settings.profile.avatar.error"));
     } finally {
       setIsUploading(false);
     }
@@ -105,7 +107,7 @@ export default function ProfileSettings({ user, profile }: ProfileSettingsProps)
             {profile?.avatar_url ? (
               <Image 
                 src={profile.avatar_url} 
-                alt="Avatar" 
+                alt={t('settings.profile.avatar')} 
                 fill 
                 className="object-cover" 
                 sizes="96px"
@@ -117,17 +119,17 @@ export default function ProfileSettings({ user, profile }: ProfileSettingsProps)
         </div>
         <div className="text-center md:text-left">
           <div className="flex items-center gap-2 mb-1">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">Avatar</h3>
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{t("settings.profile.avatar")}</h3>
             <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-black/5 dark:bg-white/5 border border-gray-200 dark:border-white/10 px-2 py-0.5 rounded-full">
-              Coming soon
+              {t("settings.comingSoon")}
             </span>
           </div>
-          <p className="text-sm text-slate-500">Avatar upload will be available soon.</p>
+          <p className="text-sm text-slate-500">{t('settings.profile.avatar.comingSoon')}</p>
         </div>
       </div>
 
       <div className="space-y-2">
-        <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">Full Name</label>
+        <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">{t("settings.profile.displayName")}</label>
         <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
           <input
             type="text"
@@ -141,7 +143,7 @@ export default function ProfileSettings({ user, profile }: ProfileSettingsProps)
             className="w-full sm:w-44 shrink-0 bg-[#f45d1a] text-white font-semibold px-6 py-3 rounded-xl hover:brightness-110 shadow-lg shadow-orange-900/20 transition-all disabled:opacity-50 flex items-center justify-center gap-2 whitespace-nowrap"
           >
             {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}
-            {isSaving ? "Saving..." : "Save Changes"}
+            {isSaving ? t("settings.profile.saving") : t("settings.profile.save")}
           </button>
         </div>
       </div>

@@ -23,6 +23,7 @@ import ProfileSettings from "@/components/account/settings/ProfileSettings";
 import SecuritySettings from "@/components/account/settings/SecuritySettings";
 import PrivacySettings from "@/components/account/settings/PrivacySettings";
 import PreferencesSettings from "@/components/account/settings/PreferencesSettings";
+import { useLocale } from "@/context/LocaleContext";
 
 interface AccountSettingsProps {
   user: User;
@@ -32,20 +33,21 @@ interface AccountSettingsProps {
 type TabType = "profile" | "account" | "preferences" | "privacy";
 
 export default function AccountSettings({ user, profile }: AccountSettingsProps) {
+  const { t } = useLocale();
   const [activeTab, setActiveTab] = useState<TabType>("profile");
 
   const tabs = [
-    { id: "profile" as const,      label: "Profile",      icon: UserIcon },
-    { id: "account" as const,      label: "Account",      icon: Lock },
-    { id: "preferences" as const,  label: "Preferences",  icon: SlidersHorizontal },
-    { id: "privacy" as const,      label: "Privacy & Data", icon: Shield },
+    { id: "profile" as const,      label: t("settings.tab.profile"),      icon: UserIcon },
+    { id: "account" as const,      label: t("settings.tab.security"),      icon: Lock },
+    { id: "preferences" as const,  label: t("settings.tab.preferences"),  icon: SlidersHorizontal },
+    { id: "privacy" as const,      label: t("settings.tab.privacy"), icon: Shield },
   ];
 
   return (
     <main className="flex-1 p-4 md:p-8 lg:p-12">
       <div className="max-w-4xl mx-auto">
         <header className="mb-12">
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2 text-gray-900 dark:text-white">Account Settings</h1>
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2 text-gray-900 dark:text-white">{t("settings.pageTitle")}</h1>
           <p className="text-gray-500 dark:text-slate-400">Manage your profile, account security, and data preferences.</p>
         </header>
 
