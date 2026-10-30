@@ -1,18 +1,19 @@
 # Git Workflow & Branching Guidelines: Sacred Fire Songs
 
-**Version:** 1.0
+**Version:** 1.1
 **Status:** Living Document
-**Date:** Oct 18, 2026
+**Date:** Oct 30, 2026
 
 ## Changelog
 
 | Version | Date | Description of Changes |
 | ----- | ----- | ----- |
+| **1.1** | Oct 30, 2026 | Switch to lightweight **Gitflow** (Epic 5.1, Phase 2): `develop` is the default/integration branch, work branches start from and merge into `develop`, `develop` → `main` via merge commit, `hotfix/*` from `main`. `main` protected by ruleset (PR + `e2e` check, no force-push/delete). `start-issue.sh` branches from `origin/develop` (or `origin/main` for `hotfix`). `preview2prod.sh` flagged as not yet Gitflow-ready. |
 | **1.0** | Oct 18, 2026 | Initial version. Adapted from the generic "Git Workflow Sprint 2 Briefing" to the Sacred Fire Songs GitHub Flow (worktrees, squash merges, Release Please, preview → production scripts). |
 
 ---
 
-Sacred Fire Songs uses **GitHub Flow**: `main` is always releasable, every change happens on a short-lived branch, and branches land on `main` only through a verified, squash-merged Pull Request. Versioning and release tags are fully automated by **Release Please**.
+Sacred Fire Songs uses a **lightweight Gitflow** (see [the migration plan](../plans/2026-10-30-gitflow-cicd-migration.md)): `main` = production, `develop` = integration (and the GitHub **default branch**), short-lived `feat|fix|chore|docs/*` branches for work, `hotfix/*` for urgent production fixes. There are no `release/*` branches: versioning and release tags are fully automated by **Release Please** on `main`.
 
 This guide covers the **Git side** of the process (branches, commits, PRs, releases). For environments, the preview server and Docker deployment, see [development-workflow.md](./development-workflow.md).
 
@@ -22,16 +23,18 @@ This guide covers the **Git side** of the process (branches, commits, PRs, relea
 
 | Branch | Role & Purpose | Status |
 |---|---|---|
-| **`main`** | **Production & releases.** Always builds, always deployable. **Nobody commits here directly** (humans or AI agents). Code lands only via squash-merged PRs. Release tags (`v1.6.0`, `v1.7.0`, …) are cut from `main` by Release Please. | 🟢 Stable |
+| **`main`** | **Production & releases.** Always builds, always deployable. **Nobody commits here directly** (humans or AI agents). Code lands only via the promotion PR `develop` → `main` (**merge commit**), `hotfix/*` PRs and the Release Please PR. Protected by the *Main Branch Protected* ruleset: PR required, `e2e` check must pass, no force-push, no deletion. Release tags (`v1.6.0`, `v1.7.0`, …) are cut from `main` by Release Please. | 🟢 Stable |
+| **`develop`** | **Integration & (future) staging.** Default branch. Every work branch starts from `origin/develop` and lands here via a **squash-merged** PR. `e2e.yml` runs on every PR into and push to `develop`. | 🟡 Integration |
 | **`feat/<issue>-<desc>`** | New user-facing functionality (e.g. `feat/257-admin-users`). Triggers a **minor** version bump. | 🔵 Working |
 | **`fix/<issue>-<desc>`** | Bug fix (e.g. `fix/242-audio-recording-pop`). Triggers a **patch** version bump. | 🔵 Working |
+| **`hotfix/<issue>-<desc>`** | Urgent production fix. Starts from `origin/main`, PR into `main` (squash), then `main` is back-merged into `develop`. | 🔴 Urgent |
 | **`chore/…`, `docs/…`** | Tooling, scripts, refactors, documentation. Do not trigger a release on their own. | 🔵 Working |
 | **`release-please--branches--main`** | Owned by the Release Please bot. Holds the pending `chore(main): release X.Y.Z` PR with the generated `CHANGELOG.md`. **Never commit to it by hand.** | 🤖 Automated |
 
-There is **no `dev` / integration branch**. Its role (integrate and verify before production) is played by the **preview environment**, which runs any feature branch against the staging Supabase project.
+`develop` collects verified features until they are promoted to `main` together. The **preview environment** still runs any branch against the staging Supabase project for verification before its PR is merged.
 
 > [!TIP]
-> Background reading: [GitHub Flow](https://docs.github.com/en/get-started/using-github/github-flow), [Conventional Commits](https://www.conventionalcommits.org/) and [Release Please](https://github.com/googleapis/release-please).
+> Background reading: [Gitflow (+2020 note)](https://nvie.com/posts/a-successful-git-branching-model/), [Conventional Commits](https://www.conventionalcommits.org/) and [Release Please](https://github.com/googleapis/release-please).
 
 ---
 
@@ -42,30 +45,33 @@ There is **no `dev` / integration branch**. Its role (integrate and verify befor
 One feature from issue to production release
 ==========================================================================================
 
-main     ──●───────────────────────────────●───────────────────────────●──── [TAG: v1.7.0]
-           │                               ▲ squash merge (PR #259)    ▲ merge
-           │ start-issue.sh                │ "feat(admin): …"          │ Release PR
-           ▼                               │                           │
-feat/257-admin-users                       │                           │
-           ●────●────●────●────●───────────┘                           │
-        (empty  (commits, pushed with                                  │
-        title    dev2preview.sh → preview)                             │
-        commit)                                                        │
-                                                                       │
-release-please--branches--main        ●────────────────────────────────┘
+main     ──●─────────────────────────────────────────●──────────●──── [TAG: v1.7.0]
+           │                                         ▲ merge    ▲ merge   │ back-merge
+           │                                         │ commit   │ Release │ main → develop
+develop  ──●──────────────────────●──────────────────┘          │ PR      ▼
+           │ start-issue.sh       ▲ squash merge (PR)           │       ──●──
+           ▼                      │ "feat(admin): …"            │
+feat/257-admin-users              │                             │
+           ●────●────●────●───────┘                             │
+        (empty  (commits, verified on preview)                  │
+        title                                                   │
+        commit)                                                 │
+release-please--branches--main                       ●──────────┘
                               (bot opens/updates "chore(main): release 1.7.0")
 ```
 
-1. A branch is created from `main` in its own **worktree** (`.worktrees/issue-<n>`).
+1. A branch is created from `origin/develop` in its own **worktree** (`.worktrees/issue-<n>`).
 2. Work is committed in small Conventional Commits and verified on **preview**.
-3. The PR is **squash-merged**: the whole branch becomes **one** commit on `main`, using the **PR title** as its message.
-4. Release Please reads that message, opens/updates the release PR, and merging it creates the `vX.Y.Z` tag, the GitHub Release and the versioned Docker images.
+3. The PR into `develop` is **squash-merged**: the whole branch becomes **one** commit on `develop`, using the **PR title** as its message.
+4. To release, a promotion PR `develop` → `main` is merged with a **merge commit** (never squash, or the two branches diverge). The individual squashed `feat:`/`fix:` commits reach `main` intact.
+5. Release Please reads those messages, opens/updates the release PR on `main`, and merging it creates the `vX.Y.Z` tag, the GitHub Release and the versioned Docker images.
+6. `main` is merged back into `develop` so the version bump (`package.json`, `CHANGELOG.md`, manifest) reaches `develop` too.
 
 ---
 
 ## 3. Why Commit Messages & PR Titles Matter
 
-1. **The PR title *is* the release note.** Because we squash-merge, the PR title becomes the commit on `main`. Release Please parses it to decide the version bump and the changelog section (`feat` → ✨ New features, `fix` → 🐛 Bug fixes, `perf` → ⚡ Performance, `docs` → 📖 Documentation; `chore`/`refactor`/`test`/`build`/`ci` are hidden). A badly formatted title means a missing or wrong release.
+1. **The PR title *is* the release note.** Because we squash-merge into `develop`, the PR title becomes the commit that is later promoted to `main`. Release Please parses it to decide the version bump and the changelog section (`feat` → ✨ New features, `fix` → 🐛 Bug fixes, `perf` → ⚡ Performance, `docs` → 📖 Documentation; `chore`/`refactor`/`test`/`build`/`ci` are hidden). A badly formatted title means a missing or wrong release.
 2. **Small commits on the branch keep reviews readable.** Commit each logical step (query, component, migration, docs) separately. It makes code review, `git bisect` and the AI logbook (`docs/logbook/`) far easier to follow.
 
 Good commit messages (from this repo's history):
@@ -96,7 +102,7 @@ cd .worktrees/issue-261
 ```
 
 This:
-* creates branch `feat/261-admin-song-moderation` from `main` in worktree `.worktrees/issue-261`,
+* fetches and creates branch `feat/261-admin-song-moderation` from `origin/develop` in worktree `.worktrees/issue-261` (type `hotfix` branches from `origin/main` instead),
 * symlinks the root `.env.local` into the worktree,
 * creates an **empty commit** titled `feat: admin song moderation (#261)`, which serves as the PR title later.
 
@@ -105,7 +111,7 @@ This:
 
 ```bash
 git fetch origin
-git worktree add -b feat/261-admin-song-moderation .worktrees/issue-261 origin/main
+git worktree add --no-track -b feat/261-admin-song-moderation .worktrees/issue-261 origin/develop
 ln -s ../../.env.local .worktrees/issue-261/.env.local
 ```
 </details>
@@ -129,11 +135,11 @@ Before each meaningful commit:
 
 Run a local server per issue on its own port: `3<issue#>` for `next dev`, `4<issue#>` for a production build (e.g. `4261`).
 
-**Keeping the branch up to date:** if `main` moved on while you were working, merge it in (no force-push needed, and the squash merge hides the merge commit anyway):
+**Keeping the branch up to date:** if `develop` moved on while you were working, merge it in (no force-push needed, and the squash merge hides the merge commit anyway):
 
 ```bash
 git fetch origin
-git merge origin/main
+git merge origin/develop
 ```
 
 ### Step 4: Verify on Preview
@@ -147,18 +153,35 @@ Pushes the branch, triggers the `docker.yml` build (tagged with the branch name 
 ### Step 5: Sync Artifacts & Open the Pull Request
 
 1. Run `/sync-artifacts` and **commit the logbook updates** (`docs/logbook/`) on the branch. The promotion script refuses to run with uncommitted logbook changes.
-2. Open the PR to `main`:
+2. Open the PR to `develop` (hotfixes: `--base main`):
 
    ```bash
-   gh pr create --base main --fill-first
+   gh pr create --base develop --fill-first
    ```
 
    `--fill-first` takes the title from the first commit (the one created by `start-issue.sh`). Double-check that the title is a valid Conventional Commit and that the body contains `Closes #<issue>`.
 3. Opening the PR triggers the **Playwright `@smoke` E2E tests** (`e2e.yml`) against staging and the **k6 performance tests** (`performance.yml`). Both must be green.
 
-### Step 6: Promote to Production
+### Step 6: Merge Into `develop`, Then Promote to Production
 
-Only after the feature has been verified on preview **and** the project owner has explicitly confirmed it:
+Only after the feature has been verified on preview **and** the project owner has explicitly confirmed it, squash-merge the PR into `develop`:
+
+```bash
+gh pr merge <pr> --squash
+```
+
+To release, open and merge the promotion PR with a **merge commit**, then merge the Release Please PR and back-merge `main` into `develop`:
+
+```bash
+gh pr create --base main --head develop --title "chore: promote develop to main"
+gh pr merge <promotion-pr> --merge          # merge commit, never --squash
+gh pr merge <release-please-pr> --merge     # creates the vX.Y.Z tag
+gh pr create --base develop --head main --title "chore: back-merge main into develop"
+gh pr merge <back-merge-pr> --merge        # merge commit, keeps the release commit + tag reachable
+```
+
+> [!WARNING]
+> `scripts/preview2prod.sh` is **not yet Gitflow-ready** (Epic 5.1, Phase 4): it still squash-merges the feature PR straight into `main` with `--admin`. Don't use it for feature branches until it has been updated. Its intended behaviour is described below.
 
 ```bash
 scripts/preview2prod.sh --verified --notes-file .brain/release-summary.md
@@ -184,17 +207,18 @@ Never create version tags or edit `CHANGELOG.md` by hand; Release Please owns bo
    git worktree remove .worktrees/issue-261
    git branch -D feat/261-admin-song-moderation   # -D: squash merges aren't seen as "merged" by git
    git fetch --prune
-   git pull --ff-only origin main
+   git pull --ff-only origin develop
    ```
 
 ---
 
 ## 5. Golden Rules
 
-* 🚫 **Never commit directly to `main`**, not even a typo fix. Always branch first.
+* 🚫 **Never commit directly to `main` or `develop`**, not even a typo fix. Always branch first.
 * 🚫 **Never commit to the Release Please branch** or create release tags manually.
 * 🚫 **Never merge without preview verification** and explicit confirmation by the project owner. AI agents do not merge PRs or close issues on their own.
-* ✅ **One issue = one branch = one PR = one squash commit on `main`.**
+* ✅ **One issue = one branch = one PR = one squash commit on `develop`.**
+* ✅ **`develop` → `main` always with a merge commit**, and back-merge `main` → `develop` after every release.
 * ✅ **PR titles follow Conventional Commits**, because they drive versioning and the changelog.
 
 ---
