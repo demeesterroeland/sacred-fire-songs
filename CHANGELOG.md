@@ -1,5 +1,34 @@
 # Changelog
 
+## [1.7.0](https://github.com/demeesterroeland/sacred-fire-songs/compare/v1.6.0...v1.7.0) (2026-10-30)
+
+
+### ✨ New features
+
+* **admin:** Epic 3.6 / Story 3.6.1 – admin user overview, details & contributions ([7f582d1](https://github.com/demeesterroeland/sacred-fire-songs/commit/7f582d12c56bb541a8b14a5670d81f2dd791cd2a))
+* **admin:** implement Epic 3.6 & Story 3.6.1 user overview, details and contributions ([#257](https://github.com/demeesterroeland/sacred-fire-songs/issues/257), [#258](https://github.com/demeesterroeland/sacred-fire-songs/issues/258)) ([5b1237c](https://github.com/demeesterroeland/sacred-fire-songs/commit/5b1237c70afcba1673591b2ed06cdfe5d364c9ea))
+* **export:** embed DejaVu Sans for unicode accents, fix menu trigger and add login prompt ([777b1de](https://github.com/demeesterroeland/sacred-fire-songs/commit/777b1def41e5a3ec49e692d905f995b7fee00d9b))
+* **pdf:** export musician setlists to printable ceremony PDF (closes [#18](https://github.com/demeesterroeland/sacred-fire-songs/issues/18)) ([d4198aa](https://github.com/demeesterroeland/sacred-fire-songs/commit/d4198aae81c88d7f5f62a25880f5d79247a970e8))
+* **pdf:** implement setlist PDF export using ChordSheetJS and jsPDF (closes [#18](https://github.com/demeesterroeland/sacred-fire-songs/issues/18)) ([f880436](https://github.com/demeesterroeland/sacred-fire-songs/commit/f8804361ae69f272d2f60cf9454c27b3b477d3a5))
+* **skills:** add masterplan-orchestrator reusable skill ([3d7b390](https://github.com/demeesterroeland/sacred-fire-songs/commit/3d7b390c8757cf9a656f78d205591f103ecf8429))
+
+
+### 🐛 Bug fixes
+
+* **admin:** repair user detail query and cover Story 3.6.1 with unit, BDD and e2e tests ([#258](https://github.com/demeesterroeland/sacred-fire-songs/issues/258)) ([3a0ef87](https://github.com/demeesterroeland/sacred-fire-songs/commit/3a0ef8764805b8842fca89e69670140075b683fc))
+* **admin:** stop clipping the focus ring on the role and sort selects ([bad0c84](https://github.com/demeesterroeland/sacred-fire-songs/commit/bad0c8409d1eeaf6dd014f2b1f331571cc8bb9e0))
+* **admin:** use the app's Library layout for admin screens ([e9c8a04](https://github.com/demeesterroeland/sacred-fire-songs/commit/e9c8a0461a011c0a998c657ce042b891e19bf124))
+* **pdf:** resolve text overlap, add 3-part footer with song URL, and enforce 200 songs limit ([de18fa2](https://github.com/demeesterroeland/sacred-fire-songs/commit/de18fa2a03ed8b38bd0c62f4d979bf69b9c15085))
+
+
+### 📖 Documentation
+
+* add Epic 3.6 and Story 3.6.1 for administrative management ([ad56fd2](https://github.com/demeesterroeland/sacred-fire-songs/commit/ad56fd2bd7e67710babbc63a5855694835c60638))
+* add git workflow guide ([#260](https://github.com/demeesterroeland/sacred-fire-songs/issues/260)) ([fc55898](https://github.com/demeesterroeland/sacred-fire-songs/commit/fc55898bf84a7dbb1989764469089192616c1dcd))
+* add release summary for PR [#220](https://github.com/demeesterroeland/sacred-fire-songs/issues/220) promotion ([21e16c3](https://github.com/demeesterroeland/sacred-fire-songs/commit/21e16c34cd453738421daf5e517ce58b4516a0ef))
+* **admin:** sync design doc, stories, e2e overview and logbook for Story 3.6.1 ([#258](https://github.com/demeesterroeland/sacred-fire-songs/issues/258)) ([a2ce567](https://github.com/demeesterroeland/sacred-fire-songs/commit/a2ce567788eeea32fab303ea07291748c96e17a2))
+* sync logbooks and design doc for Story 4.2.1 PDF export ([325b0c2](https://github.com/demeesterroeland/sacred-fire-songs/commit/325b0c266406d5e73bbdcfabfaeb11d4b2fb7156))
+
 ## [1.6.0](https://github.com/demeesterroeland/sacred-fire-songs/compare/v1.5.1...v1.6.0) (2026-09-27)
 
 
