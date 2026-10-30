@@ -1,3 +1,4 @@
+// eslint-disable-next-line @typescript-eslint/no-require-imports -- CommonJS-only usage in a dev/test script
 const ChordSheetJS = require('chordsheetjs');
 const parser = new ChordSheetJS.ChordProParser();
 const chordPro = "{title: Test Song}\n[Am]Hello [G]World";

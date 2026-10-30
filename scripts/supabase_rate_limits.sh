@@ -1,9 +1,11 @@
+#!/usr/bin/env bash
 # Determine the root directory of the project
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ROOT_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 # Load environment variables from .env.local
 if [ -f "$ROOT_DIR/.env.local" ]; then
+  # shellcheck disable=SC2046  # word splitting into KEY=VALUE pairs is intended
   export $(grep -v '^#' "$ROOT_DIR/.env.local" | xargs)
 fi
 
