@@ -81,3 +81,7 @@ graphify-out/.graphify_*
 
 # Playwright performance spec output
 e2e/performance-results/
+
+# python bytecode
+__pycache__/
+*.pyc
