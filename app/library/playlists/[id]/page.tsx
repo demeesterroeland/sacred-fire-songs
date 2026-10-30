@@ -83,6 +83,7 @@ export default async function PlaylistDetailPage({ params }: Props) {
                 songCount={mappedItems.length}
                 isOwner={isOwner}
                 isCurator={isCurator}
+                isLoggedIn={!!user}
             />
 
             {/* Song list with DnD */}

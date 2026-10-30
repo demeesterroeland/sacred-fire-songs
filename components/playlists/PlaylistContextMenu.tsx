@@ -74,7 +74,7 @@ export function PlaylistContextMenu({
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <button
-                        onClick={e => e.preventDefault()}
+                        onClick={e => e.stopPropagation()}
                         className="p-1.5 rounded-lg text-gray-600 hover:text-gray-800 dark:hover:text-gray-300 hover:bg-gray-200/60 dark:hover:bg-gray-700/60 transition-colors"
                         aria-label="Playlist options"
                     >
