@@ -123,6 +123,37 @@ describe('PDF Export - TDD Suite', () => {
             const allItems = formatted.sections.flatMap(s => s.lines).flatMap(l => l.items);
             expect(allItems.every(i => !i.chords)).toBe(true);
         });
+
+        it('preserves unicode characters, accents, and acute consonants in lyrics and section labels', () => {
+            const song: ExportSongData = {
+                title: 'Coraźon Sagrado',
+                author: "Mãe D'Água",
+                content: '{start_of_chorus: Refrão}\n{c: Bênção de amor}\n[Am]Limpia coraźon [C]agua brillante\n[F]Flor das águas, [G]saúde e bênção\n[C]Jaya Śiva Śaṅkara\n{end_of_chorus}',
+            };
+
+            const formatted = formatSongForPdf(song);
+            expect(formatted.title).toBe('Coraźon Sagrado');
+            expect(formatted.author).toBe("Mãe D'Água");
+
+            const lineLyrics = formatted.sections
+                .flatMap(s => s.lines)
+                .map(l => l.items.map(i => i.lyrics || '').join(''));
+
+            expect(lineLyrics.some(l => l.includes('coraźon'))).toBe(true);
+            expect(lineLyrics.some(l => l.includes('Flor das águas'))).toBe(true);
+            expect(lineLyrics.some(l => l.includes('saúde e bênção'))).toBe(true);
+            expect(lineLyrics.some(l => l.includes('Śiva Śaṅkara'))).toBe(true);
+
+            const sectionLabels = formatted.sections.map(s => s.label).filter(Boolean);
+            expect(sectionLabels).toContain('Refrão');
+
+            const comments = formatted.sections
+                .flatMap(s => s.lines)
+                .flatMap(l => l.items)
+                .map(i => i.comment)
+                .filter(Boolean);
+            expect(comments).toContain('Bênção de amor');
+        });
     });
 
     describe('exportPlaylistToPdf', () => {
@@ -220,6 +251,33 @@ describe('PDF Export - TDD Suite', () => {
             const blob = await exportPlaylistToPdf(playlist);
             expect(blob).toBeInstanceOf(Blob);
             expect(blob.size).toBeGreaterThan(1000);
+        });
+
+        it('renders complex Unicode accents (coraźon, mães, sanskrit) into PDF without errors', async () => {
+            const playlist: ExportPlaylistData = {
+                title: 'Festival das Águas & Cura',
+                baseUrl: 'https://songbook.bluette.be',
+                songs: [
+                    {
+                        title: 'Agua De Estrellas',
+                        author: 'Mãe Herdeira',
+                        content: '{c: Coro}\n[Am]Limpia coraźon [C]agua brillante [G]cura corazón\n[F]Bênção de Iemanjá, [G]saúde e amor',
+                        url: '/songs/agua-de-estrellas-id',
+                    },
+                    {
+                        title: 'Śiva Śaṅkara Chant',
+                        content: 'Oṁ Namaḥ Śivāya, Har Har Mahādeva',
+                    },
+                ],
+            };
+
+            const blob = await exportPlaylistToPdf(playlist);
+            expect(blob).toBeInstanceOf(Blob);
+            expect(blob.size).toBeGreaterThan(5000);
+
+            const arrayBuffer = await blob.arrayBuffer();
+            const pdfText = new TextDecoder('latin1').decode(arrayBuffer);
+            expect(pdfText).toContain('DejaVuSans');
         });
     });
 
