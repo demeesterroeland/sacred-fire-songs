@@ -12,6 +12,10 @@
     "test:bdd": "NODE_OPTIONS=\"--import tsx\" cucumber-js --config cucumber.json",
     "test:bdd:unit": "NODE_OPTIONS=\"--import tsx\" cucumber-js --config cucumber.json --profile unit",
     "test:bdd:seed": "NODE_OPTIONS=\"--import tsx\" cucumber-js --config cucumber.json --profile seed",
+    "test:bdd:ci": "NODE_OPTIONS=\"--import tsx\" cucumber-js --config cucumber.json --profile ci",
+    "test:scripts": "bats testing/scripts",
+    "lint": "eslint .",
+    "typecheck": "tsc --noEmit",
     "test:bdd:i18n": "NODE_OPTIONS=\"--import tsx\" cucumber-js --config cucumber.json --profile i18n",
     "test:e2e": "playwright test --config playwright.config.ts",
     "test:e2e:smart": "playwright test --config playwright.config.ts",
@@ -64,6 +68,7 @@
     "@types/qrcode": "^1.5.6",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "bats": "^1.13.0",
     "eslint": "^9",
     "eslint-config-next": "16.1.1",
     "pg-to-ts": "^4.1.1",
@@ -72,6 +77,7 @@
     "tailwindcss": "^4",
     "tsx": "^4.23.15",
     "typescript": "^5",
-    "vitest": "^4.0.16"
+    "vitest": "^4.0.16",
+    "yaml": "^2.9.1"
   }
 }

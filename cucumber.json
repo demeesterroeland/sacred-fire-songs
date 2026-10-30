@@ -73,5 +73,22 @@
       "snippetInterface": "async-await"
     },
     "strict": false
+  },
+  "ci": {
+    "paths": [
+      "docs/testing/gitflow-cicd.feature"
+    ],
+    "import": [
+      "testing/bdd/support/**/*.ts",
+      "testing/bdd/steps/**/*.ts"
+    ],
+    "tags": "@ci-contract",
+    "format": [
+      "summary"
+    ],
+    "formatOptions": {
+      "snippetInterface": "async-await"
+    },
+    "strict": false
   }
 }
