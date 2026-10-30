@@ -3,7 +3,7 @@ import { jsPDF } from 'jspdf';
 import { parseChordProForDisplay, ChordProSection } from '@/lib/chordUtils';
 import { parseChordPro, convertChordsOverLyricsToChordPro } from '@/lib/chordProParsing';
 import { DEJAVU_SANS_REGULAR_B64, DEJAVU_SANS_BOLD_B64 } from './dejavuFonts';
-import { DEFAULT_LOCALE, tWithLocale, type Locale, type TranslationKey } from '@/lib/i18n';
+import { DEFAULT_LOCALE, LOCALE_DATE_TAGS, tWithLocale, type Locale, type TranslationKey } from '@/lib/i18n';
 
 export interface ExportSongData {
     title: string;
@@ -29,7 +29,7 @@ export interface ExportPlaylistData {
 export function getPdfLabels(locale: Locale = DEFAULT_LOCALE) {
     const tr = (key: TranslationKey, params?: Record<string, string | number>) => tWithLocale(locale, key, params);
     return {
-        dateLocale: locale === 'nl' ? 'nl-NL' : 'en-US',
+        dateLocale: LOCALE_DATE_TAGS[locale] ?? 'en-US',
         untitledSong: tr('pdf.untitledSong'),
         untitledPlaylist: tr('pdf.untitledPlaylist'),
         page: (page: number, total: number) => tr('pdf.page', { page, total }),

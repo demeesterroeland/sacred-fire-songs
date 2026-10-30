@@ -35,7 +35,7 @@
 | **1.34** | Jun 28, 2026 | Added Epic 4.6: Private Rehearsal & Audio Storage (Story 4.6.1) for microphone recording and private Supabase storage uploads. |
 | **1.35** | Jul 14, 2026 | Vercel preview deploy fix (`framework: null` → `nextjs`), Enter key submits search in modal, header spacing polish. Merged to main, closed #185. Story 1.2.4 fully deployed. |
 | **1.36** | Oct 30, 2026 | Marked Story 4.2.1 as [Implemented] (Issue #18 / PR #220: PDF Setlist export for ceremony musicians using ChordSheetJS & jsPDF). |
-| **1.37** | Oct 30, 2026 | Added Epic 3.7: Multi-Language Support (Story 3.7.1, issue #246) with acceptance criteria I18N-01…I18N-11 (I18N-11: PDF export from #220), executable in `docs/testing/i18n.feature`. |
+| **1.37** | Oct 30, 2026 | Added Epic 3.7: Multi-Language Support (Story 3.7.1, issue #246) with acceptance criteria I18N-01…I18N-12 (I18N-11: PDF export from #220; I18N-12: six additional languages), executable in `docs/testing/i18n.feature`. |
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
 
@@ -601,9 +601,9 @@ Scenario: Onboarding question
 
 ### Epic 3.7: Multi-Language Support (i18n)
 
-> **Scope:** the app interface (navigation, buttons, forms, messages) is available in English and Dutch. Song content (titles, lyrics, artist names, tags) is **not** translated. Executable scenarios: `docs/testing/i18n.feature` (issue #246).
+> **Scope:** the app interface (navigation, buttons, forms, messages) is available in English, Dutch, Spanish, Italian, Russian, Quechua (Runasimi), French and Portuguese. Song content (titles, lyrics, artist names, tags) is **not** translated. Executable scenarios: `docs/testing/i18n.feature` (issue #246).
 
-**Story 3.7.1:** As a visitor or member, I want to use the app in my own language (English or Dutch) and have that choice remembered, so that I understand every screen without switching back each visit.
+**Story 3.7.1:** As a visitor or member, I want to use the app in my own language (English, Dutch, Spanish, Italian, Russian, Quechua, French or Portuguese) and have that choice remembered, so that I understand every screen without switching back each visit.
 
 ```gherkin
 Scenario: I18N-01 – English is the default when nothing is known
@@ -670,6 +670,13 @@ Scenario: I18N-11 – Playlist PDF export follows the interface language
   Then the export button, messages and login prompt are in Dutch
   And the PDF labels (page footer, "Toonsoort", "Door", date) are in Dutch
   And the song titles, lyrics and chords in the PDF are unchanged
+
+Scenario: I18N-12 – Additional languages
+  Given my browser prefers Spanish, Italian, Russian, Quechua ("quz"/"quy"), French or Portuguese ("pt-BR")
+  When I open the app without a stored choice
+  Then the interface is shown in that language
+  And I can pick any of the eight languages, each listed in its own name, from the language menu
+  And every language has a complete translation (same keys and placeholders as English)
 ```
 
 ## Phase 4: Professional Toolkit

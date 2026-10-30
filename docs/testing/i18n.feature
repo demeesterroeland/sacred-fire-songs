@@ -1,8 +1,8 @@
 # Sacred Fire Songs – Interface language (i18n) behaviour catalogue
-# Version: 1.1 | Date: Oct 30, 2026
+# Version: 1.2 | Date: Oct 30, 2026
 #
 # Living Gherkin description of Story 3.7.1 (issue #246) – acceptance criteria
-# I18N-01 … I18N-11 in docs/logbook/epic&user stories.md. Each scenario names
+# I18N-01 … I18N-12 in docs/logbook/epic&user stories.md. Each scenario names
 # the test that covers it, following the testing pyramid of docs/testing/song.feature:
 #   @unit   – Cucumber steps in testing/bdd/steps/i18n.steps.ts (npm run test:bdd)
 #             mirrored by vitest in testing/unit/tests/i18n.test.ts and
@@ -15,15 +15,16 @@
 # Changelog
 #   1.0 – Oct 30, 2026 – Initial catalogue for Story 3.7.1 (#246).
 #   1.1 – Oct 30, 2026 – I18N-11: playlist PDF export (#220) labels and messages.
+#   1.2 – Oct 30, 2026 – I18N-12: Spanish, Italian, Russian, Quechua, French, Portuguese.
 
 Feature: Interface language
-  The interface (navigation, pages, buttons, messages) is available in English
-  and Dutch. The language is resolved from the visitor's explicit choice
+  The interface (navigation, pages, buttons, messages) is available in English,
+  Dutch, Spanish, Italian, Russian, Southern Quechua, French and Brazilian Portuguese. The language is resolved from the visitor's explicit choice
   (localStorage, then the locale cookie), then the browser language, then
   English. Song content (titles, lyrics, chords, artists, tags) is never translated.
 
   Background:
-    Given the supported interface languages are "en" and "nl"
+    Given the supported interface languages are "en, nl, es, it, ru, qu, fr, pt"
     And the default interface language is "en"
 
   # ---------------------------------------------------------------------------
@@ -32,7 +33,7 @@ Feature: Interface language
     @unit @i18n @localeResolution
     Scenario: I18N-01 English is the default when nothing is known
       Given no language has been chosen
-      And the browser prefers the languages "de-DE, fr"
+      And the browser prefers the languages "de-DE, ja"
       When the interface language is resolved
       Then the interface language is "en"
       # vitest: resolveLocale › falls back to English when no browser language is supported
@@ -48,13 +49,17 @@ Feature: Interface language
         | languages     | locale |
         | nl-BE         | nl     |
         | NL-nl, en     | nl     |
-        | fr-FR, nl, en | nl     |
+        | de-DE, nl, en | nl     |
+        | pt-BR, en     | pt     |
+        | es-419        | es     |
+        | quz-PE        | qu     |
+        | ru-RU         | ru     |
         | en-US, nl     | en     |
 
     @unit @i18n @localeResolution
     Scenario: I18N-02 The server uses the Accept-Language header when no cookie is set
       Given no locale cookie is sent
-      And the request header Accept-Language is "fr-FR,fr;q=0.9,nl;q=0.8,en;q=0.7"
+      And the request header Accept-Language is "de-DE,de;q=0.9,nl;q=0.8,en;q=0.7"
       When the server resolves the interface language
       Then the interface language is "nl"
       # lib/i18n/server.ts getServerLocale(); vitest: parseAcceptLanguage
@@ -84,7 +89,7 @@ Feature: Interface language
 
       Examples:
         | stored   | cookie | languages | locale |
-        | fr       | xx     | nl-BE     | nl     |
+        | de       | xx     | nl-BE     | nl     |
         | <script> |        | de        | en     |
         | klingon  | nl     | en        | nl     |
 
@@ -191,6 +196,24 @@ Feature: Interface language
       When the project is type-checked
       Then the type checker reports the key as not assignable to TranslationKey
       # covered by npx tsc --noEmit – TranslationKey = keyof typeof en
+
+  # ---------------------------------------------------------------------------
+  Rule: Every additional language is complete and selectable
+
+    @unit @i18n @dictionaries
+    Scenario Outline: I18N-12 The <locale> dictionary is complete
+      Then the "<locale>" dictionary has exactly the keys of the "en" dictionary
+      And every "<locale>" translation uses the same placeholders as its English source
+      And the key "nav.recentlyViewed" in "<locale>" is "<recentlyViewed>"
+
+      Examples:
+        | locale | recentlyViewed         |
+        | es     | Vistas recientemente   |
+        | it     | Visti di recente       |
+        | ru     | Недавно просмотренные  |
+        | qu     | Qhipa qhawasqakuna     |
+        | fr     | Vus récemment          |
+        | pt     | Vistas recentemente    |
 
   # ---------------------------------------------------------------------------
   Rule: The playlist PDF export follows the interface language

@@ -1,6 +1,12 @@
 import { test, expect, type Page, type BrowserContext } from '@playwright/test';
 import en from '../../messages/en';
 import nl from '../../messages/nl';
+import es from '../../messages/es';
+import it from '../../messages/it';
+import ru from '../../messages/ru';
+import qu from '../../messages/qu';
+import fr from '../../messages/fr';
+import pt from '../../messages/pt';
 import { ROLES, TEST_PASSWORD } from '../fixtures/roles';
 
 /**
@@ -80,12 +86,12 @@ test.describe('Interface language @i18n', () => {
       await page.evaluate(() => ((window as unknown as { __noReload: boolean }).__noReload = true));
 
       const switcher = sidebar(page).getByTestId('language-switcher');
-      await switcher.getByRole('button', { name: 'Nederlands' }).click();
+      await switcher.selectOption('nl');
 
       await expect(sidebar(page).getByRole('link', { name: nl['nav.recentlyViewed'] })).toBeVisible();
       await expect(page.locator('html')).toHaveAttribute('lang', 'nl');
-      await expect(switcher.getByRole('button', { name: 'Nederlands' })).toHaveAttribute('aria-pressed', 'true');
-      await expect(switcher.getByRole('button', { name: 'English' })).toHaveAttribute('aria-pressed', 'false');
+      await expect(switcher).toHaveValue('nl');
+      await expect(switcher.locator('option:checked')).toHaveText('Nederlands');
       expect(await page.evaluate(() => (window as unknown as { __noReload?: boolean }).__noReload)).toBe(true);
 
       expect(await page.evaluate((key) => window.localStorage.getItem(key), LOCALE_KEY)).toBe('nl');
@@ -102,7 +108,7 @@ test.describe('Interface language @i18n', () => {
 
       // ...and back to English
       await openSidebar(page, nl);
-      await sidebar(page).getByTestId('language-switcher').getByRole('button', { name: 'English' }).click();
+      await sidebar(page).getByTestId('language-switcher').selectOption('en');
       await expect(page.getByText(en['playlists.smartPlaylists'], { exact: true })).toBeVisible();
       await expect(page.locator('html')).toHaveAttribute('lang', 'en');
     });
@@ -131,7 +137,7 @@ test.describe('Interface language @i18n', () => {
       await page.goto('/account/settings');
       await page.getByRole('button', { name: en['settings.tab.preferences'] }).click();
       await expect(page.getByText(en['settings.prefs.language.description'])).toBeVisible();
-      await page.getByRole('main').getByTestId('language-switcher').getByRole('button', { name: 'Nederlands' }).click();
+      await page.getByRole('main').getByTestId('language-switcher').selectOption('nl');
       await expect(page.getByRole('heading', { name: nl['settings.prefs.heading'] })).toBeVisible();
 
       // Sign out via the user menu (now in Dutch)
@@ -180,6 +186,34 @@ test.describe('Interface language @i18n', () => {
       await page.goto(href);
       await expect(page.locator('html')).toHaveAttribute('lang', 'nl');
       await expect(page.locator('h1').first()).toHaveText(titleEn);
+    });
+  });
+
+  test.describe('I18N-12: every additional language', () => {
+    test.use({ locale: 'en-US' });
+    const LANGS = { es, it, ru, qu, fr, pt } as const;
+
+    for (const [code, dict] of Object.entries(LANGS)) {
+      test(`switches to ${code} and keeps it after reload`, async ({ page }) => {
+        await page.goto('/songs');
+        await openSidebar(page, en);
+        await sidebar(page).getByTestId('language-switcher').selectOption(code);
+        await expect(page.locator('html')).toHaveAttribute('lang', code);
+        await expect(sidebar(page).getByRole('link', { name: dict['nav.recentlyViewed'] })).toBeVisible();
+        await page.reload();
+        await expect(page.locator('html')).toHaveAttribute('lang', code);
+        await expectSidebarLanguage(page, dict);
+      });
+    }
+  });
+
+  test.describe('I18N-12: Brazilian browser', () => {
+    test.use({ locale: 'pt-BR' });
+
+    test('defaults to Portuguese', async ({ page }) => {
+      await page.goto('/songs');
+      await expect(page.locator('html')).toHaveAttribute('lang', 'pt');
+      await expectSidebarLanguage(page, pt);
     });
   });
 });

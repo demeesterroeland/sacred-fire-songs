@@ -1,45 +1,34 @@
 'use client';
 
 import { useLocale } from '@/context/LocaleContext';
+import { isLocale } from '@/lib/i18n';
 
 /**
- * EN / NL segmented switch. Each option is labelled in its own language
- * ("English", "Nederlands") so it stays recognisable whatever is active.
- * Used in the user menu, the sidebar footer (guests) and Account → Preferences.
+ * Language picker. Each option is labelled in its own language
+ * ("English", "Nederlands", "Русский", …) so it stays recognisable whatever is
+ * active. A native <select> keeps eight languages compact and accessible on
+ * mobile. Used in the user menu, the sidebar footer (guests) and
+ * Account → Preferences.
  */
 export function LanguageSwitcher({ className = '' }: { className?: string }) {
   const { locale, t, setLocaleAndPersist, supportedLocales, localeLabels } = useLocale();
 
   return (
-    <div
-      role="group"
+    <select
       aria-label={t('userMenu.language')}
       data-testid="language-switcher"
-      className={`inline-flex gap-1 ${className}`}
+      value={locale}
+      onChange={(e) => {
+        const next = e.target.value;
+        if (isLocale(next) && next !== locale) setLocaleAndPersist(next);
+      }}
+      className={`text-xs font-bold rounded-md px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-200 border border-gray-200 dark:border-gray-700 focus:outline-none focus:ring-2 focus:ring-red-500/40 cursor-pointer ${className}`}
     >
-      {supportedLocales.map((loc) => {
-        const active = locale === loc;
-        return (
-          <button
-            key={loc}
-            type="button"
-            lang={loc}
-            aria-pressed={active}
-            aria-label={localeLabels[loc]}
-            title={localeLabels[loc]}
-            onClick={() => {
-              if (!active) setLocaleAndPersist(loc);
-            }}
-            className={`px-2 py-0.5 text-xs font-bold rounded transition-colors ${
-              active
-                ? 'bg-red-500 text-white'
-                : 'text-gray-400 dark:text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white'
-            }`}
-          >
-            {loc.toUpperCase()}
-          </button>
-        );
-      })}
-    </div>
+      {supportedLocales.map((loc) => (
+        <option key={loc} value={loc} lang={loc}>
+          {localeLabels[loc]}
+        </option>
+      ))}
+    </select>
   );
 }
