@@ -1,8 +1,8 @@
 # E2E Test Overview & Matrix: Sacred Fire Songs
 
-**Version:** 1.4
+**Version:** 1.5
 **Status:** Living Document
-**Date:** June 23, 2026
+**Date:** Oct 30, 2026
 **Tracking:** GH #142
 
 ## Changelog
@@ -14,6 +14,7 @@
 | **1.2** | May 30, 2026 | CI now runs `@smoke` against the **staging** Supabase on push to `main`/`feat|fix|chore/**` (resolves staging URL + anon key via the CLI) instead of a local stack. Documented the staging seed-data caveat and read-only/shared-DB constraints. |
 | **1.3** | May 31, 2026 | CI hardening: the staging anon key is now read from the `SUPABASE_PUBLISHABLE_KEY_STAGING` secret instead of the `supabase projects api-keys` CLI lookup (which returned no key and failed the run). Dropped the Supabase CLI step; URL derived from the project ref. Documented required secrets. |
 | **1.4** | Jun 23, 2026 | Isolated E2E database environment from staging app `songbook-beta`. Integrated automatic database wipe and seeding via Playwright `globalSetup` hook and `setup-test-db.mjs` script. |
+| **1.5** | Oct 30, 2026 | Added section 4.11 Administration (Epic 3.6) with ADMIN-01 … ADMIN-07, covered by `e2e/tests/admin-users.spec.ts` (Gherkin: `docs/testing/admin-users.feature`). |
 
 ---
 
@@ -209,6 +210,20 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 | PWA-01 | Manifest / installability | Manifest served; install prompt available; standalone launch | icons 192/512; theme color | G | ✅ | 🔲 | P2 | 3.3.1 |
 | PWA-02 | Branding | Installed app shows icon/name/splash/theme | — | G | ✅ | 🔲 | P2 | 3.3.2 |
 | PWA-03 | Offline fallback | Offline shows branded page; cached pages still load | not-cached route | G | ⚠️ | 🔲 | P2 | 4.5.1 |
+
+### 4.11 Administration (Epic 3.6)
+
+Spec: `e2e/tests/admin-users.spec.ts` · Gherkin: `docs/testing/admin-users.feature` (`@e2e`).
+
+| ID | Feature | Scenario | Variants / Edge cases | Roles | Feat | E2E | Pri | Ref |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| ADMIN-01 | Access restricted | Non-admin opening `/admin/users` sees "Access Denied", no user list | member, gatekeeper, musician (expert) | M/GK | ✅ | ✅ | P0 | 3.6.1 |
+| ADMIN-02 | Guest redirect | Guest opening `/admin/users` lands on `/auth/login` | redirect by `proxy.ts` | G | ✅ | ✅ | P1 | 3.6.1 |
+| ADMIN-03 | Admin entry point | "Admin Portal" link in account menu for admin only | member has no link; desktop only | A/M | ✅ | ✅ | P2 | 3.6.1 |
+| ADMIN-04 | Users overview | Every seeded account listed with role badge, join date and status | — | A | ✅ | ✅ | P0 | 3.6.1 |
+| ADMIN-05 | Search / filter | Search by e-mail, "No users found" empty state, "Musician / Expert" role filter | — | A | ✅ | ✅ | P1 | 3.6.1 |
+| ADMIN-06 | User detail & contributions | Detail shows e-mail, role, musician status, joined, last active; tabs list songs, versions, playlists | expert shows "Musician: Yes"; back link | A | ✅ | ✅ | P0 | 3.6.1 |
+| ADMIN-07 | Unknown user | `/admin/users/<unknown id>` shows "User Not Found" with link back | rendered with HTTP 200 (streamed by `app/loading.tsx`) | A | ✅ | ✅ | P2 | 3.6.1 |
 
 ---
 

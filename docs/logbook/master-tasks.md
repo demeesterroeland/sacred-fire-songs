@@ -1195,6 +1195,24 @@
 - [x] Fix local `scripts/restart.sh` port conflict errors using `fuser`
 - [x] Deploy and verify Preview environment
 
+## Session October 8-9, 2026 (Epic 3.6: Administrative Management & Story 3.6.1: User Overview & Contributions)
+
+- [x] Create GitHub Epic #257 (`[Epic 3.6] Administrative Management`) and Story #258 (`[Story 3.6.1] User Overview, Details & Contributions`)
+- [x] Create branch `feat/userstory-3.6` and isolated worktree `.worktrees/feat-userstory-3.6`
+- [x] Update documentation roadmap: `docs/logbook/epic&user stories.md` (v1.36) and `docs/design/application-analysis&design.md` (v1.33)
+- [x] Create Supabase migration `20261009194500_admin_profiles_policy.sql` introducing `public.fn_is_admin()` security definer function and admin read RLS policies on `profiles` and `setlists`
+- [x] Update `docs/design/db-schema.sql` to keep single-file setup script in sync
+- [x] Define TypeScript data contracts in `lib/admin/types.ts`
+- [x] Implement backend queries in `lib/admin/serverQueries.ts` (`checkAdminAccess`, `getAdminUsersList`, `getAdminUserDetails`) with aggregated contribution counts
+- [x] Create `components/admin/AccessDeniedNotice.tsx` and `components/admin/AdminHeader.tsx`
+- [x] Implement server layout `app/admin/layout.tsx` with server-side role check and access-denied fallback
+- [x] Implement Admin Users Overview page `app/admin/users/page.tsx` with client table `AdminUsersTable.tsx` (real-time search, role filter, multi-criteria sorting, stats counters)
+- [x] Implement Admin User Detail page `app/admin/users/[id]/page.tsx` and `AdminUserDetailView.tsx` with tabs for created songs, contributed versions, and playlists
+- [x] Add Admin Portal navigation entry in `components/common/navigation/UserProfile.tsx` and `components/common/Sidebar.tsx` (only visible when `role === 'admin'`)
+- [x] Add comprehensive vitest suite `lib/unit-tests/adminQueries.test.ts` (7 tests covering role verification, list aggregation, and detail mapping)
+- [x] Validate TypeScript compilation (`npx tsc --noEmit`) with zero errors
+- [x] Verify production build (`npm run build`) compiles all `/admin` routes successfully
+
 ## Session October 30, 2026 (Move Song Collection Out of the App Repository)
 - [x] Audit references to `data/songs`, `data/extracted_songs`, `data/scripts` and the songbook scripts in code, tests, CI, Docker and docs (none outside `data/` itself)
 - [x] Export the collection with full history via `git filter-repo` (18 commits, 357 files) and import it into `../sacred-fire-songs-collection`
@@ -1233,3 +1251,16 @@
 - [x] Rebase on `origin/main` after song collection migration (#269) and verify full unit test suite (66/66) & production build
 - [x] Push commit to PR #220 and verify GitHub Actions E2E checks succeed
 
+## Session October 30, 2026 (Part 5: Story 3.6.1 Review, Bug Fix & Test Pyramid - #258, PR #259)
+
+- [x] Merge `origin/main` (song collection move #269, git guide #260, Cucumber runner #271) into `feat/userstory-3.6`; resolve logbook/.brain/design-doc conflicts by combining both sides
+- [x] Review the implementation against the Story 3.6.1 acceptance criteria
+- [x] Fix the user detail query: `compositions.artist` → `original_author`, `song_versions.song_id`/`name` → `composition_id`/`version_name` (contribution tabs were always empty); log query errors
+- [x] Add per-user activity status, `expert` role (musician status), public playlist counts, "Musician / Expert" filter, separate empty states, `User Not Found` page, accessible tabs/list/account-menu labels
+- [x] Extract `lib/admin/userOverview.ts` (pure helpers) and `lib/admin/userQueries.ts` (client-injected queries); `serverQueries.ts` becomes a thin wrapper
+- [x] TDD: `testing/unit/tests/adminUserOverview.test.ts` + `adminQueries.test.ts` (moved from `lib/unit-tests`), 48 tests, against the schema-checking `testing/support/fakeSupabase.ts`
+- [x] Gherkin `docs/testing/admin-users.feature` (@unit/@seed/@e2e, @adminUsers) registered in `cucumber.json`
+- [x] Cucumber steps `testing/bdd/steps/admin-users.steps.ts` + `testing/bdd/support/db.ts` (20 scenarios pass)
+- [x] Playwright `e2e/tests/admin-users.spec.ts` (24 passed, 2 skipped on mobile)
+- [x] Apply migration `20261009194500` to the local Supabase stack
+- [x] Doc sync: design doc v1.37, epic & user stories v1.37, e2e overview v1.5
