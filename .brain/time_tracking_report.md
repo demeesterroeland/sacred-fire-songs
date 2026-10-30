@@ -13,3 +13,5 @@
 | **UI Components & Pages** | Admin layout, access denied notice, header, users table, user detail view, navigation integration | ~1.0h | ✅ Completed |
 | **Verification & Fixes** | Unit test suite (7 tests), TS checks, build verification, logbook sync | ~0.5h | ✅ Completed |
 | **Total** | | **~3.0 Hours** | ✅ |
+
+| **October 30, 2026 (Part 3)** | **Testing/BDD Infra (#263)**: Configured `@cucumber/cucumber` with `tsx` TypeScript loader, `cucumber.json` profiles targeting `docs/testing/song.feature` (`@unit` and `@seed`), `testing/bdd/` support & smoke step definitions, and `npm run test:bdd` scripts. | ~0.5 Hours | ✅ Completed |

@@ -89,4 +89,10 @@
 | **September 27, 2026 (Part 2)** | **Release/Ops**: Finalizing v1.6.0 Release (#242, #251, #253, #254) — Fixed hardware pop, added metadata UI, repaired staging migrator pipeline and .gitignore bugs, and cleared deployment pipeline bottlenecks. | ~2.5 Hours | ✅ Completed |
 | **October 9, 2026** | **Feature/Admin**: Administrative Management & User Overview (#257, #258) — Added Epic 3.6 & Story 3.6.1, PostgreSQL security definer RLS policies on profiles & setlists, admin server queries, Admin Portal layout with role guard, responsive users overview table with search/filters, user detail view with contribution breakdown, and unit test suite. | ~3.0 Hours | ✅ Completed |
 
-| **Total** | **Development + AI Collaboration** | **~172.25 Hours** | |
+| **October 30, 2026** | **Chore/Repo Hygiene**: Moved the ChordPro song collection and songbook scripts out of the app repository into `sacred-fire-songs-collection` with full git history (`git filter-repo`), kept only test fixtures, cleaned `.gitignore`, bumped design doc to v1.33. | ~0.5 Hours | ✅ Completed |
+
+| **October 30, 2026 (Part 2)** | **Test Data/Docs**: Moved the 221 seeded songs to the collection repo, made `random-seeder.mjs` the sole seeding path and extended it to cover every tested song shape (anchors + weighted templates, artists, versions, recordings, favorites, views), wrote `docs/testing/song.feature`. | ~1.5 Hours | ✅ Completed |
+
+| **October 30, 2026 (Part 3)** | **Testing/BDD Infra (#263)**: Configured `@cucumber/cucumber` with `tsx` TypeScript loader, `cucumber.json` profiles targeting `docs/testing/song.feature` (`@unit` and `@seed`), `testing/bdd/` support & smoke step definitions, and `npm run test:bdd` scripts. | ~0.5 Hours | ✅ Completed |
+
+| **Total** | **Development + AI Collaboration** | **~174.75 Hours** | |

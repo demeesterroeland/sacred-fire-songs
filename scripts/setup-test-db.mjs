@@ -134,42 +134,24 @@ async function main() {
     console.log('[setup-test-db] Clearing auth.users...');
     await client.query('DELETE FROM auth.users;');
 
-    // 3. Seeding data
+    // 3. Seeding data: fixed test accounts, then randomly generated songs.
+    // The real song collection lives in the sibling repository
+    // sacred-fire-songs-collection (seeds/03_*.sql .. 10_*.sql) and is no
+    // longer loaded here.
     const seedsDir = path.join(process.cwd(), 'supabase', 'seeds');
     if (!fs.existsSync(seedsDir)) {
       throw new Error(`Seeds directory not found at: ${seedsDir}`);
     }
 
-    if (process.env.E2E_RANDOM_SEED === '1') {
-      console.log('[setup-test-db] Running in RANDOM SEED mode.');
-      
-      console.log('[setup-test-db] Executing seed: 01_auth_users.sql');
-      const authSql = fs.readFileSync(path.join(seedsDir, '01_auth_users.sql'), 'utf8');
-      await client.query(authSql);
-      
-      console.log('[setup-test-db] Executing seed: 02_profiles.sql');
-      const profilesSql = fs.readFileSync(path.join(seedsDir, '02_profiles.sql'), 'utf8');
-      await client.query(profilesSql);
-
-      const { seedRandomData } = await import('./random-seeder.mjs');
-      const songsCount = process.env.E2E_RANDOM_SONGS_COUNT ? parseInt(process.env.E2E_RANDOM_SONGS_COUNT, 10) : 80;
-      await seedRandomData(client, songsCount);
-    } else {
-      const files = fs.readdirSync(seedsDir)
-        .filter(file => file.endsWith('.sql'))
-        .sort();
-
-      console.log(`[setup-test-db] Found ${files.length} seed files in ${seedsDir}`);
-
-      for (const file of files) {
-        console.log(`[setup-test-db] Executing seed: ${file}`);
-        const sqlPath = path.join(seedsDir, file);
-        const sql = fs.readFileSync(sqlPath, 'utf8');
-        
-        // Execute the sql queries
-        await client.query(sql);
-      }
+    for (const file of ['01_auth_users.sql', '02_profiles.sql']) {
+      console.log(`[setup-test-db] Executing seed: ${file}`);
+      const sql = fs.readFileSync(path.join(seedsDir, file), 'utf8');
+      await client.query(sql);
     }
+
+    const { seedRandomData } = await import('./random-seeder.mjs');
+    const songsCount = process.env.E2E_RANDOM_SONGS_COUNT ? parseInt(process.env.E2E_RANDOM_SONGS_COUNT, 10) : 80;
+    await seedRandomData(client, songsCount);
 
     await client.query('COMMIT');
     console.log('[setup-test-db] Database setup and seeding completed successfully!');

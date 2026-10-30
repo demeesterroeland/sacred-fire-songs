@@ -35,3 +35,14 @@ Implemented **Epic 3.6 (Administrative Management)** and **Story 3.6.1 (User Ove
 - **TypeScript**: `npx tsc --noEmit` passes with 0 errors.
 - **Next.js Build**: `npm run build` compiles all `/admin` routes successfully.
 - **Artifacts**: Logbook artifacts (`master-tasks.md`, `master-walkthrough.md`, `master-timetracking.md`) updated directly on the feature branch.
+
+## October 30, 2026 (Cucumber Runner Setup for BDD - Issue #263)
+
+### 1. Cucumber & TypeScript Runner Configuration
+- Installed `@cucumber/cucumber` and `tsx` in `package.json` to execute TypeScript step definitions and resolve `@/*` path aliases directly against `tsconfig.json` without browser dependencies.
+- Created `cucumber.json` targeting `docs/testing/song.feature` with `default` (`@unit or @seed`), `unit` (`@unit`), and `seed` (`@seed`) profiles using `strict: false` so pending scenarios in downstream sub-issues (#264, #265) do not fail the runner.
+- Added `test:bdd`, `test:bdd:unit`, and `test:bdd:seed` scripts to `package.json`.
+
+### 2. Support Code & Initial Smoke Step Definitions
+- Created `testing/bdd/support/world.ts` defining `SongBddWorld` for scenario state across BDD steps.
+- Created `testing/bdd/steps/smoke.steps.ts` implementing the Background steps (offline no-op for unit runs), the full step definitions for the first `@unit @chordProParsing` scenario (`Inline chords in square brackets`), and explicit pending stubs for the remaining `@unit` and `@seed` scenarios.
