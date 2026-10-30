@@ -69,3 +69,16 @@ body {
     animation: ember-ignite 320ms cubic-bezier(0.2, 0.8, 0.2, 1);
   }
 }
+
+/* WickSelect (components/common/ui/WickSelect.tsx): same ignite as the language picker, in the option's accent color. */
+@keyframes wick-ignite {
+  0%   { transform: scale(0.4); box-shadow: 0 0 0 0 transparent; }
+  55%  { transform: scale(1.35); box-shadow: 0 0 0 5px color-mix(in srgb, var(--wick) 25%, transparent), 0 0 14px color-mix(in srgb, var(--wick) 90%, transparent); }
+  100% { transform: scale(1); box-shadow: 0 0 0 3px color-mix(in srgb, var(--wick) 18%, transparent), 0 0 10px color-mix(in srgb, var(--wick) 60%, transparent); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .wick-ignite {
+    animation: wick-ignite 320ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  }
+}

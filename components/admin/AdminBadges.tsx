@@ -2,18 +2,25 @@ import { Shield, UserCheck, Guitar } from 'lucide-react';
 import type { UserRole } from '@/lib/admin/types';
 import { type ActivityStatus } from '@/lib/admin/userOverview';
 import { useLocale } from '@/context/LocaleContext';
+import { ROLE_COLOR, type RoleColor } from '@/lib/admin/roleColors';
 
-const ROLE_STYLES: Record<UserRole, string> = {
-  admin:
-    'font-bold bg-purple-100 text-purple-700 dark:bg-purple-950/80 dark:text-purple-300 border-purple-200 dark:border-purple-800',
-  gatekeeper:
-    'font-bold bg-amber-100 text-amber-700 dark:bg-amber-950/80 dark:text-amber-300 border-amber-200 dark:border-amber-800',
-  expert:
-    'font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
-  musician:
-    'font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
-  member:
-    'font-medium bg-blue-100 text-blue-700 dark:bg-blue-950/80 dark:text-blue-300 border-blue-200 dark:border-blue-800',
+// Keyed by the shared role color (lib/admin/roleColors.ts) so badges and the role filter match.
+const COLOR_STYLES: Record<RoleColor, string> = {
+  purple:
+    'bg-purple-100 text-purple-700 dark:bg-purple-950/80 dark:text-purple-300 border-purple-200 dark:border-purple-800',
+  amber:
+    'bg-amber-100 text-amber-700 dark:bg-amber-950/80 dark:text-amber-300 border-amber-200 dark:border-amber-800',
+  emerald:
+    'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
+  blue: 'bg-blue-100 text-blue-700 dark:bg-blue-950/80 dark:text-blue-300 border-blue-200 dark:border-blue-800',
+};
+
+const ROLE_WEIGHT: Record<UserRole, string> = {
+  admin: 'font-bold',
+  gatekeeper: 'font-bold',
+  expert: 'font-semibold',
+  musician: 'font-semibold',
+  member: 'font-medium',
 };
 
 const FALLBACK_ROLE_STYLE =
@@ -34,7 +41,7 @@ export function RoleBadge({ role, size = 'sm' }: { role: UserRole; size?: 'sm' |
     <span
       className={`inline-flex items-center gap-1 rounded-full text-xs border ${
         size === 'md' ? 'px-3 py-1' : 'px-2.5 py-0.5'
-      } ${ROLE_STYLES[role] ?? FALLBACK_ROLE_STYLE}`}
+      } ${ROLE_COLOR[role] ? `${ROLE_WEIGHT[role]} ${COLOR_STYLES[ROLE_COLOR[role]]}` : FALLBACK_ROLE_STYLE}`}
     >
       {icon} {t(`admin.role.${role}`)}
     </span>

@@ -101,4 +101,6 @@
 
 | **October 30, 2026 (Part 6)** | **Feature/i18n (#246)**: Merged main twice (#220 PDF export strings + PDF labels localized), six more languages (es, it, ru, qu, fr, pt) redesigned ember listbox language picker, merged #259 admin, request-scoped server locale, LocaleProvider hydration fix, LanguageSwitcher (sidebar/user menu/preferences), finished string migration, Story 3.7.1, `i18n.feature`, vitest + Cucumber + Playwright coverage, main-vs-branch e2e baseline comparison. | ~6.0 Hours | ✅ Completed |
 
-| **Total** | **Development + AI Collaboration** | **~185.25 Hours** | |
+| **October 30, 2026 (Part 7)** | **Feature/UI (#278, #279)**: Admin layout aligned with the Library section (fixed header overlap), listbox-style role/sort pickers modelled on the i18n language picker, sort by name and number of songs (persisted), clickable user rows; issues #275–#279 created. | ~1.5 Hours | ✅ |
+
+| **Total** | **Development + AI Collaboration** | **~186.75 Hours** | |
