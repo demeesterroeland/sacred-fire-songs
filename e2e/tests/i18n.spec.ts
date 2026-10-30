@@ -166,7 +166,7 @@ test.describe('Interface language @i18n', () => {
 
       // Sign out via the user menu (now in Dutch)
       await page.goto('/');
-      await page.getByRole('button', { name: nl['userMenu.account'] }).click();
+      await page.getByRole('button', { name: nl['userMenu.trigger'] }).click();
       await page.getByRole('button', { name: nl['userMenu.signOut'] }).click();
       await expect(page.getByRole('link', { name: nl['auth.login.submit'] }).first()).toBeVisible();
 
@@ -262,7 +262,7 @@ test.describe('Interface language @i18n', () => {
 
       test('picking from the user menu keeps the menu working', async ({ page }) => {
         await page.goto('/');
-        await page.getByRole('button', { name: en['userMenu.account'] }).click();
+        await page.getByRole('button', { name: en['userMenu.trigger'] }).click();
         await chooseLanguage(page, page.getByTestId('user-menu'), 'es');
         await expect(page.locator('html')).toHaveAttribute('lang', 'es');
       });

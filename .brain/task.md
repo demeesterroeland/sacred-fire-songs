@@ -1,3 +1,5 @@
+# Task: Story 3.6.1 review + test pyramid alignment (#258, PR #259)
+
 # Tasks: Implement Multi-Language Support (i18n) (#246)
 
 ## Overview
@@ -106,10 +108,14 @@ Implementation of lightweight custom i18n across the application without heavy e
 
 # Task: Set up Cucumber runner and TypeScript test execution for BDD (#263)
 
-- [x] Create isolated git worktree `.worktrees/issue-263` on branch `chore/263-cucumber-runner` from `chore/move-song-collection-out`.
-- [x] Install `@cucumber/cucumber` and `tsx` as devDependencies in `package.json`.
-- [x] Create `cucumber.json` targeting `docs/testing/song.feature` with `default` (`@unit or @seed`), `unit` (`@unit`), and `seed` (`@seed`) profiles.
-- [x] Configure Cucumber support code and custom World in `testing/bdd/support/world.ts`.
-- [x] Wire smoke step definitions for the initial `@unit @chordProParsing` scenario ("Inline chords in square brackets") and pending stubs for remaining `@unit` (#264) and `@seed` (#265) scenarios in `testing/bdd/steps/smoke.steps.ts`.
-- [x] Add `test:bdd`, `test:bdd:unit`, and `test:bdd:seed` npm scripts in `package.json`.
-- [x] Verify `npm run test:unit`, `npm run test:bdd`, and `npm run build` succeed cleanly in under 10 seconds (BDD runner executes in ~0.15s).
+- [x] Merge `origin/main` (song collection move #269, git guide #260, Cucumber runner #271) into `feat/userstory-3.6`; resolve logbook/.brain/design-doc conflicts by combining both sides
+- [x] Review the implementation against the Story 3.6.1 acceptance criteria
+- [x] Fix the user detail query: `compositions.artist` → `original_author`, `song_versions.song_id`/`name` → `composition_id`/`version_name` (contribution tabs were always empty); log query errors
+- [x] Add per-user activity status, `expert` role (musician status), public playlist counts, "Musician / Expert" filter, separate empty states, `User Not Found` page, accessible tabs/list/account-menu labels
+- [x] Extract `lib/admin/userOverview.ts` (pure helpers) and `lib/admin/userQueries.ts` (client-injected queries); `serverQueries.ts` becomes a thin wrapper
+- [x] TDD: `testing/unit/tests/adminUserOverview.test.ts` + `adminQueries.test.ts` (moved from `lib/unit-tests`), 48 tests, against the schema-checking `testing/support/fakeSupabase.ts`
+- [x] Gherkin `docs/testing/admin-users.feature` (@unit/@seed/@e2e, @adminUsers) registered in `cucumber.json`
+- [x] Cucumber steps `testing/bdd/steps/admin-users.steps.ts` + `testing/bdd/support/db.ts` (20 scenarios pass)
+- [x] Playwright `e2e/tests/admin-users.spec.ts` (24 passed, 2 skipped on mobile)
+- [x] Apply migration `20261009194500` to the local Supabase stack
+- [x] Doc sync: design doc v1.37, epic & user stories v1.37, e2e overview v1.5

@@ -1,6 +1,6 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 1.37
+**Version:** 1.38
 **Status:** Living Document
 **Date:** Oct 30, 2026
 
@@ -35,7 +35,8 @@
 | **1.34** | Jun 28, 2026 | Added Epic 4.6: Private Rehearsal & Audio Storage (Story 4.6.1) for microphone recording and private Supabase storage uploads. |
 | **1.35** | Jul 14, 2026 | Vercel preview deploy fix (`framework: null` → `nextjs`), Enter key submits search in modal, header spacing polish. Merged to main, closed #185. Story 1.2.4 fully deployed. |
 | **1.36** | Oct 30, 2026 | Marked Story 4.2.1 as [Implemented] (Issue #18 / PR #220: PDF Setlist export for ceremony musicians using ChordSheetJS & jsPDF). |
-| **1.37** | Oct 30, 2026 | Added Epic 3.7: Multi-Language Support (Story 3.7.1, issue #246) with acceptance criteria I18N-01…I18N-12 (I18N-11: PDF export from #220; I18N-12: six additional languages), executable in `docs/testing/i18n.feature`. |
+| **1.37** | Oct 30, 2026 | Added Epic 3.6 (Administrative Management, #257) and Story 3.6.1 (User Overview, Details & Contributions, #258); marked Story 3.6.1 as implemented, noted that comments/flags are not modelled yet and linked the executable spec `docs/testing/admin-users.feature`. |
+| **1.38** | Oct 30, 2026 | Added Epic 3.7: Multi-Language Support (Story 3.7.1, issue #246) with acceptance criteria I18N-01…I18N-12 (I18N-11: PDF export from #220; I18N-12: six additional languages), executable in `docs/testing/i18n.feature`. |
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
 
@@ -598,6 +599,35 @@ Scenario: Onboarding question
   And answering No (or skipping) should leave it false
   And I can always change this later in my profile settings
 ```
+
+### Epic 3.6: Administrative Management
+
+> **Placeholder & umbrella for administrative user stories.**
+> As an administrator, I want to be able to administer configuration, users, settings, and songs in such a way that I can ensure that I have up-to-date info and can act accordingly.
+
+**Story 3.6.1: [Implemented]** As an Admin, I want to have an overview of all users, view their details, and see their contributions, so that I can monitor community activity and ensure account information is accurate and up to date.
+
+```gherkin
+Scenario: View user list overview
+  Given I am logged in as an Admin
+  When I navigate to the Admin Users overview page
+  Then I should see a list of all registered users
+  And for each user I should see summary details (e.g., name/email, role, join date, status)
+
+Scenario: View user detail and contributions
+  Given I am logged in as an Admin
+  And I am viewing the users overview list
+  When I select a user to view their details
+  Then I should see their profile details (e.g., email, role, musician status, last active)
+  And I should see an overview of their contributions (e.g., songs added, versions submitted, public playlists created, comments/flags)
+
+Scenario: Non-admin access restricted
+  Given I am logged in as a Member or Gatekeeper
+  When I attempt to access the Admin Users overview page
+  Then I should be denied access with an unauthorized notice
+```
+
+> **Implementation notes:** "Status" is derived from `last_seen_at` (active within 30 days / inactive / never active). "Musician status" means role `musician` or `expert`. Comments and flags are not modelled in the database yet, so they are not shown. Executable spec: `docs/testing/admin-users.feature` (`@unit`, `@seed`, `@e2e`).
 
 ### Epic 3.7: Multi-Language Support (i18n)
 
