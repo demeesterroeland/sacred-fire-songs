@@ -1,5 +1,6 @@
 import ChordSheetJS from 'chordsheetjs';
 import { jsPDF } from 'jspdf';
+import QRCode from 'qrcode';
 import { parseChordProForDisplay, ChordProSection } from '@/lib/chordUtils';
 import { parseChordPro, convertChordsOverLyricsToChordPro } from '@/lib/chordProParsing';
 import { DEJAVU_SANS_REGULAR_B64, DEJAVU_SANS_BOLD_B64 } from './dejavuFonts';
@@ -23,6 +24,39 @@ export interface ExportPlaylistData {
     baseUrl?: string;
     /** Interface language for the document labels (page footer, metadata). Defaults to English. */
     locale?: Locale;
+}
+
+/** 1 cm in PDF points (jsPDF unit "pt"): size of the per-page song QR code. */
+export const QR_SIZE_PT = 28.35;
+
+/** Footer label: only the site's host (no protocol, path or song id). */
+export function footerSiteLabel(baseUrl?: string): string {
+    if (!baseUrl) return '';
+    try {
+        return new URL(baseUrl).host;
+    } catch {
+        return '';
+    }
+}
+
+/** Absolute song page URL for the QR code, or undefined when it can't be built. */
+export function songPageUrl(baseUrl?: string, path?: string): string | undefined {
+    if (!baseUrl || !path) return undefined;
+    try {
+        return new URL(path, baseUrl).href;
+    } catch {
+        return undefined;
+    }
+}
+
+/** QR code as PNG data URL; error level M keeps it scannable at 1 cm, margin 2 = quiet zone. */
+async function qrDataUrl(url: string): Promise<string> {
+    return QRCode.toDataURL(url, {
+        errorCorrectionLevel: 'M',
+        margin: 2,
+        width: 240, // ~600 dpi at 1 cm
+        color: { dark: '#000000', light: '#ffffff' },
+    });
 }
 
 /** Document labels in the given interface language (song content is never translated). */
@@ -202,7 +236,7 @@ export async function exportPlaylistToPdf(playlist: ExportPlaylistData): Promise
     const leftMargin = 40;
     const rightMargin = 40;
     const topMargin = 40;
-    const bottomMargin = 45;
+    const bottomMargin = 52; // leaves room above the 1 cm footer QR code
     const usableWidth = pageWidth - leftMargin - rightMargin;
 
     let y = topMargin;
@@ -314,7 +348,7 @@ export async function exportPlaylistToPdf(playlist: ExportPlaylistData): Promise
 
             if (label) {
                 if (y + 20 > pageHeight - bottomMargin) {
-                    addContinuationPage(formattedSong.title);
+                    addContinuationPage(formattedSong.title, formattedSong.url);
                 }
 
                 doc.setFont('DejaVuSans', 'bold');
@@ -343,7 +377,7 @@ export async function exportPlaylistToPdf(playlist: ExportPlaylistData): Promise
                         doc.line(leftMargin - 8, sectionStartY - 2, leftMargin - 8, y - 2);
                     }
 
-                    addContinuationPage(formattedSong.title);
+                    addContinuationPage(formattedSong.title, formattedSong.url);
                 }
 
                 // Pure comment line
@@ -429,9 +463,18 @@ export async function exportPlaylistToPdf(playlist: ExportPlaylistData): Promise
     // ─── Global 3-Part Footer on Every Page ─────────────────────────────────
     // Bottom Left: Song URL
     // Bottom Middle: Playlist: <playlist>
-    // Bottom Right: Page X of Y
+    // ─── Footer: [QR] site host · Playlist: <name> · Page X of Y ─────────────
     const totalPages = doc.getNumberOfPages();
-    const baseDomain = playlist.baseUrl || '';
+    const siteLabel = footerSiteLabel(playlist.baseUrl);
+    const footerBaseline = pageHeight - 20;
+    const qrBottomGap = 12;
+
+    // One QR image per distinct song; continuation pages reuse it (jsPDF alias).
+    const qrBySongUrl = new Map<string, string>();
+    for (let i = 1; i <= totalPages; i++) {
+        const absolute = songPageUrl(playlist.baseUrl, pageSongMap.get(i)?.url);
+        if (absolute && !qrBySongUrl.has(absolute)) qrBySongUrl.set(absolute, await qrDataUrl(absolute));
+    }
 
     for (let i = 1; i <= totalPages; i++) {
         doc.setPage(i);
@@ -439,30 +482,33 @@ export async function exportPlaylistToPdf(playlist: ExportPlaylistData): Promise
         doc.setFontSize(8);
         doc.setTextColor(156, 163, 175);
 
-        const pageSong = pageSongMap.get(i);
-        let leftFooter = '';
-        if (pageSong?.url) {
-            leftFooter = baseDomain ? `${baseDomain}${pageSong.url}` : pageSong.url;
+        const absolute = songPageUrl(playlist.baseUrl, pageSongMap.get(i)?.url);
+        const qr = absolute ? qrBySongUrl.get(absolute) : undefined;
+        let siteX = leftMargin;
+
+        // Bottom Left: QR code linking to the song on this page (1 cm × 1 cm)
+        if (absolute && qr) {
+            const qrY = pageHeight - qrBottomGap - QR_SIZE_PT;
+            doc.addImage(qr, 'PNG', leftMargin, qrY, QR_SIZE_PT, QR_SIZE_PT, absolute, 'NONE');
+            doc.link(leftMargin, qrY, QR_SIZE_PT, QR_SIZE_PT, { url: absolute });
+            siteX = leftMargin + QR_SIZE_PT + 6;
         }
 
-        const midFooter = labels.playlist(sanitizeForPdf(playlist.title || labels.untitledPlaylist));
-        const rightFooter = labels.page(i, totalPages);
-
-        // Bottom Left: Song URL (truncated with ellipsis if very long)
-        if (leftFooter) {
-            const maxUrlWidth = 200;
-            let displayUrl = leftFooter;
-            while (doc.getTextWidth(displayUrl) > maxUrlWidth && displayUrl.length > 10) {
-                displayUrl = displayUrl.slice(0, -4) + '...';
+        // Bottom Left: the site's main URL only
+        if (siteLabel) {
+            let display = siteLabel;
+            while (doc.getTextWidth(display) > 140 && display.length > 10) {
+                display = display.slice(0, -4) + '...';
             }
-            doc.text(displayUrl, leftMargin, pageHeight - 20, { align: 'left' });
+            doc.text(display, siteX, footerBaseline, { align: 'left' });
         }
 
         // Bottom Middle: Playlist: <name>
-        doc.text(midFooter, pageWidth / 2, pageHeight - 20, { align: 'center' });
+        const midFooter = labels.playlist(sanitizeForPdf(playlist.title || labels.untitledPlaylist));
+        doc.text(midFooter, pageWidth / 2, footerBaseline, { align: 'center' });
 
         // Bottom Right: Page X of Y
-        doc.text(rightFooter, pageWidth - rightMargin, pageHeight - 20, { align: 'right' });
+        doc.text(labels.page(i, totalPages), pageWidth - rightMargin, footerBaseline, { align: 'right' });
     }
 
     return doc.output('blob');

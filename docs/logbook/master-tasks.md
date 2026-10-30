@@ -1290,3 +1290,10 @@
 - [x] Create GitHub issues for Epic 5.1 via `scripts/setup_github_roadmap.py` (masterplan-orchestrator): #280 master, #281–#286 phases, #287 Task 5.1.0, #288–#301 stories; #267 moved under #288; #274 blocks #294
 - [x] Plan PR #308 into `develop`
 - [ ] Phase 0 onwards: implementation, one PR into `develop` per phase
+
+## Session October 30, 2026 (Part 9: PDF footer QR code #303 & PDF reuse cache #304)
+- [x] Footer shows only the site host + 1 cm QR code to the page's song (`footerSiteLabel`, `songPageUrl`, `QR_SIZE_PT`)
+- [x] Fix continuation pages missing the song URL (QR now on every page of a song)
+- [x] `lib/export/pdfCache.ts`: SHA-256 fingerprint, `getOrCreatePdf`, IndexedDB store per user + playlist, cleared on sign-out
+- [x] TDD: `pdfExport.test.ts` (+6), `pdfCache.test.ts` (17); QR decoded from a rendered 300 dpi PDF
+- [x] Docs: Stories 4.2.3/4.2.4, design doc 1.43, `setlist-pdf-export.feature`

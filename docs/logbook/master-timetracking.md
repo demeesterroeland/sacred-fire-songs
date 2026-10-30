@@ -103,4 +103,6 @@
 
 | **October 30, 2026 (Part 7)** | **Feature/UI (#278, #279)**: Admin layout aligned with the Library section (fixed header overlap), listbox-style role/sort pickers modelled on the i18n language picker, sort by name and number of songs (persisted), clickable user rows; issues #275–#279 created. | ~1.5 Hours | ✅ |
 
-| **Total** | **Development + AI Collaboration** | **~186.75 Hours** | |
+| **October 30, 2026 (Part 9)** | **Bug/Feature PDF export (#303, #304)**: footer site host + 1 cm song QR code (also on continuation pages, fixing a missing-URL bug), PDF reuse cache with content fingerprint (IndexedDB, per user, cleared on sign-out), TDD + QR decode check. | ~1.0 Hours | ✅ Completed |
+
+| **Total** | **Development + AI Collaboration** | **~187.75 Hours** | |
