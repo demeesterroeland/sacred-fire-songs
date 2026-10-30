@@ -1,6 +1,6 @@
 # Project Analysis & Design Document: Song Sharing Application (Sacred Fire Songs)
 
-**Version:** 1.46
+**Version:** 1.47
 **Status:** Living Document
 **Date:** Oct 30, 2026
 
@@ -39,6 +39,7 @@
 | **1.44** | Oct 30, 2026 | Role colors have one source (`lib/admin/roleColors.ts`): role badges and the role filter picker use the same color per role (admin purple, gatekeeper amber, musician/expert emerald, member blue). `WickSelect` options accept an `accent` color (`wick-ignite` animation in `app/globals.css`). |
 | **1.45** | Oct 30, 2026 | PDF export (Stories 4.2.3/4.2.4, #303/#304): footer shows only the site host plus a 1 cm QR code (`qrcode`) linking to the song on that page (continuation pages included); `lib/export/pdfCache.ts` reuses the last PDF per user + playlist (IndexedDB) until a SHA-256 fingerprint of the exported content, locale and site changes; cache cleared on sign-out. |
 | **1.46** | Oct 30, 2026 | Added §6.6 Delivery Pipeline Contract Tests (Epic 5.1 Phase 0, #287): `testing/support/workflowContract.ts`, Vitest `testing/unit/tests/ci/`, Cucumber profile `ci` for `docs/testing/gitflow-cicd.feature`, bats `testing/scripts/`, npm scripts `test:bdd:ci`, `test:scripts`, `lint`, `typecheck`. |
+| **1.47** | Oct 31, 2026 | §6.6: CI quality gate `ci.yml` (lint ratchet, typecheck, unit, BDD @unit, build, pipeline job), single unit-test tree `testing/unit/tests/`, SHA-pinned actions, Dependabot (Epic 5.1 Phase 1, #282). |
 
 
 ## 1. Introduction
@@ -188,7 +189,10 @@ The application is a **Progressive Web App (PWA)** optimized for mobile use duri
 * **Unit (Vitest):** `testing/unit/tests/ci/workflowContract.test.ts` tests the helper on fixtures plus invariants that already hold (Release Please only on `main`, E2E smoke on PRs into `develop` and `main`).
 * **Acceptance (Cucumber, profile `ci`):** `npm run test:bdd:ci` runs the `@ci-contract` scenarios of `docs/testing/gitflow-cicd.feature` with `testing/bdd/steps/gitflow-cicd.steps.ts`. Written test-first: scenarios of unimplemented stories fail or are `pending` until their story lands. Not part of the default profile.
 * **Scripts (bats):** `npm run test:scripts` runs `testing/scripts/*.bats`; `start-issue.bats` runs `scripts/start-issue.sh` in a throw-away clone with a local bare `origin` (diverged `main`/`develop`).
-* **Static checks:** `npm run typecheck` (`tsc --noEmit`, clean) and `npm run lint` (`eslint .`, baseline 118 errors / 128 warnings, 108 of them `no-explicit-any`; to be handled before `lint` becomes a required check).
+* **Static checks:** `npm run typecheck` (`tsc --noEmit`; `tsconfig.json` excludes `testing/` and `e2e/`, so tests are not type-checked) and `npm run lint` (`eslint . --max-warnings 182`). Lint ratchet: `no-explicit-any` is a warning, all other rules are errors; the warning cap may only go down.
+* **CI quality gate (`.github/workflows/ci.yml`):** on every push and on PRs into `develop`/`main`: jobs `lint`, `typecheck`, `unit` (`npm test`), `bdd` (`test:bdd:unit`, no database), `build`, `pipeline` (actionlint + shellcheck via digest-pinned images, bats, `test:bdd:ci-gate` = strict `@ci-contract` scenarios of implemented stories). The job ids are the required checks of the `main` ruleset.
+* **Single unit-test tree:** Vitest only collects `testing/unit/tests/**/*.test.{ts,tsx,mjs}`; Playwright specs live in `e2e/`.
+* **Supply chain:** every third-party action is pinned to a commit SHA (version in a trailing comment), every workflow declares top-level `permissions`, `.github/dependabot.yml` updates `github-actions` and `npm` weekly against `develop`.
 
 ## 7. Screen Inventory (Implemented)
 

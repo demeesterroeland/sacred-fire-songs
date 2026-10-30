@@ -92,6 +92,7 @@ export function UserPreferencesProvider({ children }: { children: React.ReactNod
     hasMounted.current = true;
 
     const resolved = preferences.theme === 'system' ? getSystemTheme() : preferences.theme;
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional sync of local state with props/route; refactor tracked separately (Epic 5.1 lint ratchet)
     setResolvedTheme(resolved);
     applyThemeClass(resolved, animate);
     updateThemeColor(resolved);

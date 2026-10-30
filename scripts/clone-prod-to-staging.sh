@@ -41,8 +41,10 @@ cd "$ROOT"
 
 ENV_FILE="$ROOT/.env.infrastructure"
 [[ -f "$ENV_FILE" ]] || { echo "ERROR: missing $ENV_FILE"; exit 1; }
-# shellcheck disable=SC1090
-set -a; source "$ENV_FILE"; set +a
+set -a
+# shellcheck disable=SC1090  # path is chosen at runtime
+source "$ENV_FILE"
+set +a
 
 : "${PROD_PROJECT_ID:?set in .env.infrastructure}"
 : "${PROD_DB_PASSWORD:?set in .env.infrastructure}"
