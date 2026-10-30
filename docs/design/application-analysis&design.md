@@ -1,6 +1,6 @@
 # Project Analysis & Design Document: Song Sharing Application (Sacred Fire Songs)
 
-**Version:** 1.35
+**Version:** 1.36
 **Status:** Living Document
 **Date:** Oct 30, 2026
 
@@ -28,6 +28,7 @@
 | **1.33** | Oct 30, 2026 | Moved the ChordPro song collection (`data/songs`, `data/extracted_songs`, `data/scripts`) and the songbook scripts (`scripts/prod_songs_2_pdf.py`, `scripts/compile_songbook.py`) out of this repository into the sibling repository `sacred-fire-songs-collection`, preserving git history. Only test fixtures remain here (`supabase/seeds`, `lib/unit-tests`, `testing/unit/tests`, `e2e/fixtures`). |
 | **1.34** | Oct 30, 2026 | Moved the 221 seeded songs (`supabase/seeds/03_*.sql` … `10_*.sql`) to `sacred-fire-songs-collection`; `setup-test-db.mjs` now always seeds test accounts plus randomly generated songs (`E2E_RANDOM_SEED` flag retired). Extended `random-seeder.mjs` to generate every song shape exercised by the unit and E2E tests, and added `docs/testing/song.feature` describing those situations in Gherkin. |
 | **1.35** | Oct 30, 2026 | Added `scripts/export-random-seed.mjs` (`npm run seed:generate`) which runs the random seeder and writes `supabase/seeds/03_songs_random_generated.sql` (200 generated songs) so `supabase db reset` / `supabase start` still seed a realistic local database. |
+| **1.36** | Oct 30, 2026 | Added §6.4 Internationalization (Story 3.7.1, #246): English + Dutch UI via a lightweight typed `t()` (`lib/i18n`), request-scoped server locale (`lib/i18n/server.ts`, cookie → Accept-Language → English), `LocaleProvider` hydrating in the server locale, `LanguageSwitcher` (sidebar, user menu, Account → Preferences). Tests: `docs/testing/i18n.feature`, `testing/bdd/steps/i18n.steps.ts`, `e2e/tests/i18n.spec.ts`. |
 
 
 ## 1. Introduction
@@ -144,6 +145,15 @@ The application is a **Progressive Web App (PWA)** optimized for mobile use duri
 * **Static Generated Seed:** `supabase/seeds/03_songs_random_generated.sql` is a snapshot of the generator's output (200 songs, timestamps relative to `now()`), loaded by `supabase db reset` / `supabase start` through `config.toml` `sql_paths`. It is a generated file; regenerate it with `npm run seed:generate` after changing the generator.
 * **Programmatic Random Seeding:** `scripts/random-seeder.mjs` (PL/pgSQL, executed by `setup-test-db.mjs`; song count via `E2E_RANDOM_SONGS_COUNT`, default 80) generates randomized song titles, ChordPro content, media links, elements/lineage taxonomy mappings, playlists and private user rehearsal recordings (staggered takes for 30% of songs, and multiple 2-5 takes for 50% of songs). The generated songs deliberately cover every song shape the unit and E2E tests exercise; see `docs/testing/song.feature` for the catalogue of situations. This exercises the system's parsing, filtering, layout, search, and private recording drawer list views.
 * **Local Optimization:** For fast local test iteration, setting the environment variable `E2E_REUSE_DB=1` skips the database wipe and re-seed, reusing the existing database state.
+
+### 6.4 Internationalization (i18n)
+* **Languages:** English (default, source of truth) and Dutch. Only the interface is translated; song content (titles, lyrics, chords, artists, tags) never is. Story 3.7.1 / issue #246; behaviour catalogue in `docs/testing/i18n.feature` (I18N-01 … I18N-10).
+* **Dictionaries:** `messages/en.ts` (`as const`, `TranslationKey = keyof typeof en`) and `messages/nl.ts` (`Partial<Record<TranslationKey, string>>`). Keys are dot-namespaced per feature; placeholders use `{name}`. Unit tests enforce identical key sets, identical placeholders and no empty values.
+* **Engine (`lib/i18n/index.ts`):** no third-party library, no middleware or locale URLs. `tWithLocale(locale, key, params)` interpolates and falls back active dictionary → English → the key itself (never blank). `resolveLocale()` picks the explicit choice (localStorage, then cookie) → first supported browser language (`navigator.languages` / `Accept-Language`, `nl-BE` → `nl`) → English; unknown values are ignored.
+* **Server Components:** `const t = await getServerT()` from `lib/i18n/server.ts` reads the `sacred-fire-songs-locale` cookie, else `Accept-Language` (request-scoped, safe under concurrency). The root layout renders `<html lang>` with that locale and passes it to `LocaleProvider`.
+* **Client Components:** `const { t } = useLocale()` (`context/LocaleContext.tsx`). The provider starts in the server's locale, so SSR and hydration match (no hydration mismatch, no English flash). After mount it re-reads localStorage/cookie/browser language (`lib/i18n/persistence.ts`); a browser-language default is never persisted. Switching writes localStorage + a 1-year `SameSite=Lax` cookie, updates `<html lang>` and refreshes Server Components until the layout's locale matches (bounded retries).
+* **Language switcher:** `components/common/navigation/LanguageSwitcher.tsx` (EN / NL, `aria-pressed`, options labelled in their own language) in the sidebar footer (also for guests), the user menu and Account → Preferences → Language. The choice is per device/browser (not stored in the profile) and survives reloads and sign-out.
+* **Not translated:** `app/manifest.ts` and `<title>`/meta description (static, English); server action error codes; unused starter components (`auth-button`, `logout-button`, `LibrarySidebar`, `home/SearchBar`, `YouTubeEmbed`).
 
 ## 7. Screen Inventory (Implemented)
 

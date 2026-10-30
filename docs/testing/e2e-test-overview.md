@@ -1,8 +1,8 @@
 # E2E Test Overview & Matrix: Sacred Fire Songs
 
-**Version:** 1.4
+**Version:** 1.5
 **Status:** Living Document
-**Date:** June 23, 2026
+**Date:** Oct 30, 2026
 **Tracking:** GH #142
 
 ## Changelog
@@ -14,6 +14,7 @@
 | **1.2** | May 30, 2026 | CI now runs `@smoke` against the **staging** Supabase on push to `main`/`feat|fix|chore/**` (resolves staging URL + anon key via the CLI) instead of a local stack. Documented the staging seed-data caveat and read-only/shared-DB constraints. |
 | **1.3** | May 31, 2026 | CI hardening: the staging anon key is now read from the `SUPABASE_PUBLISHABLE_KEY_STAGING` secret instead of the `supabase projects api-keys` CLI lookup (which returned no key and failed the run). Dropped the Supabase CLI step; URL derived from the project ref. Documented required secrets. |
 | **1.4** | Jun 23, 2026 | Isolated E2E database environment from staging app `songbook-beta`. Integrated automatic database wipe and seeding via Playwright `globalSetup` hook and `setup-test-db.mjs` script. |
+| **1.5** | Oct 30, 2026 | Added ACC-07 (interface language, Story 3.7.1 / #246) covered by `e2e/tests/i18n.spec.ts`; scenarios catalogued in `docs/testing/i18n.feature`. |
 
 ---
 
@@ -105,6 +106,7 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 | ACC-04 | Privacy settings | Toggle privacy / data options | account deletion confirm | M | ⚠️ | 🔲 | P2 | PrivacySettings |
 | ACC-05 | Preferences / theme | Toggle dark/light/system; persists across reload | no flash-of-wrong-theme on reload | G/M | ✅ | 🔲 | P1 | ThemeToggle |
 | ACC-06 | Musician profile toggle | Enable "I play an instrument" reveals musician features | toggle off hides transpose/chord badges/Chords filter | M | ⚠️ | 🔲 | P1 | Story 3.5.1 |
+| ACC-07 | Interface language (EN/NL) | Switch language from sidebar, user menu or Preferences; UI text changes without reload | browser-locale default (nl-BE → NL, de → EN); persists after reload, navigation and sign-out; SSR already in chosen language; no hydration mismatch; song content untranslated | G/M | ✅ | ✅ | P1 | Story 3.7.1, `e2e/tests/i18n.spec.ts` |
 
 ### 4.3 Song Management (Epic 1.1 / 2.2)
 
