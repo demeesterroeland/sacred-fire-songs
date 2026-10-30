@@ -1,6 +1,6 @@
 # Project Analysis & Design Document: Song Sharing Application (Sacred Fire Songs)
 
-**Version:** 1.35
+**Version:** 1.36
 **Status:** Living Document
 **Date:** Oct 30, 2026
 
@@ -28,6 +28,7 @@
 | **1.33** | Oct 30, 2026 | Moved the ChordPro song collection (`data/songs`, `data/extracted_songs`, `data/scripts`) and the songbook scripts (`scripts/prod_songs_2_pdf.py`, `scripts/compile_songbook.py`) out of this repository into the sibling repository `sacred-fire-songs-collection`, preserving git history. Only test fixtures remain here (`supabase/seeds`, `lib/unit-tests`, `testing/unit/tests`, `e2e/fixtures`). |
 | **1.34** | Oct 30, 2026 | Moved the 221 seeded songs (`supabase/seeds/03_*.sql` … `10_*.sql`) to `sacred-fire-songs-collection`; `setup-test-db.mjs` now always seeds test accounts plus randomly generated songs (`E2E_RANDOM_SEED` flag retired). Extended `random-seeder.mjs` to generate every song shape exercised by the unit and E2E tests, and added `docs/testing/song.feature` describing those situations in Gherkin. |
 | **1.35** | Oct 30, 2026 | Added `scripts/export-random-seed.mjs` (`npm run seed:generate`) which runs the random seeder and writes `supabase/seeds/03_songs_random_generated.sql` (200 generated songs) so `supabase db reset` / `supabase start` still seed a realistic local database. |
+| **1.36** | Oct 30, 2026 | Implemented Story 4.2.1 (Issue #18) for musician setlist PDF export using ChordSheetJS and jsPDF with firelight-optimized typography, pagination, section headers, transposition overrides, and UI quick action buttons. |
 
 
 ## 1. Introduction

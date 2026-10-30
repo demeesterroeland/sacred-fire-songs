@@ -2932,3 +2932,15 @@ Set up the foundational non-browser Cucumber test runner and TypeScript executio
 - **Configuration**: Created `cucumber.json` targeting `docs/testing/song.feature` with `default` (`@unit or @seed`), `unit` (`@unit`), and `seed` (`@seed`) profiles configured with `strict: false` so unimplemented scenarios in downstream sub-issues (#264, #265) report as pending without failing the test run.
 - **Support & Smoke Steps**: Added `SongBddWorld` in `testing/bdd/support/world.ts` and implemented the initial `@unit @chordProParsing` smoke scenario ("Inline chords in square brackets") plus pending step stubs in `testing/bdd/steps/smoke.steps.ts`. Execution completes offline and headlessly in ~0.15s.
 
+## October 30, 2026 (Part 4) - Story 4.2.1 (Issue #18): Musician Setlist PDF Export
+
+**Task Overview**
+Implemented Story 4.2.1: *"As a Musician, I want to generate a PDF of my setlist so that I can print it for the ceremony"* following BDD and TDD. Enabled musicians to export ceremony setlists directly into printable, firelight-optimized PDFs.
+
+**Technical Details**
+- **BDD Living Documentation**: Created `docs/testing/setlist-pdf-export.feature` covering multi-song compilation, key transpositions, capo directives, section header extraction, and empty state guards.
+- **TDD Test Suite**: Added `testing/unit/tests/pdfExport.test.ts` (12 unit tests) testing ChordSheetJS AST parsing, semitone transposition arithmetic, word-level chord-over-lyric layout, A4 pagination, and filename sanitization.
+- **PDF Engine (`lib/export/pdfExport.ts`)**: Built using `chordsheetjs` and `jspdf`. Features high-contrast firelight styling (charcoal lyrics `#111827`, terracotta chords `#c2410c`), cover/header block with metadata divider, running `(continued)` headers on page breaks, and centered `"Page X of Y"` footers.
+- **UI & Server Action**: Implemented secure `getPlaylistSongsForExport` in `app/actions/playlistActions.ts`. Added quick-action `Printer` button to `PlaylistDetailHeader.tsx` and "Export PDF" with toast notifications to `PlaylistContextMenu.tsx`.
+- **Validation**: All 66 unit tests passing (`npm run test:unit`), Next.js production build passing with 0 errors across 23 routes (`npm run build`), and Playwright E2E smoke tests passing on GitHub Actions.
+
