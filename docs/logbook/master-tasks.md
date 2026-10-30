@@ -1213,3 +1213,4 @@
 - [x] Write `docs/testing/song.feature` (Gherkin catalogue)
 - [x] Update design doc (v1.34), e2e overview, e2e README
 - [ ] Run the Playwright suite against the new seeder (not run in this session: it wipes the local database)
+- [x] Add `scripts/export-random-seed.mjs` + `npm run seed:generate`; check in `supabase/seeds/03_songs_random_generated.sql` (200 songs) so `supabase db reset` still seeds ~200 songs

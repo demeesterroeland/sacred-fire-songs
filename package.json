@@ -7,6 +7,7 @@
     "build": "next build",
     "start": "next start",
     "test": "vitest run",
+    "seed:generate": "node scripts/export-random-seed.mjs 200",
     "test:unit": "vitest run testing/unit/tests/",
     "test:e2e": "playwright test --config playwright.config.ts",
     "test:e2e:smart": "playwright test --config playwright.config.ts",
