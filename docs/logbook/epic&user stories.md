@@ -1,6 +1,6 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 1.38
+**Version:** 1.39
 **Status:** Living Document
 **Date:** Oct 30, 2026
 
@@ -37,6 +37,7 @@
 | **1.36** | Oct 30, 2026 | Marked Story 4.2.1 as [Implemented] (Issue #18 / PR #220: PDF Setlist export for ceremony musicians using ChordSheetJS & jsPDF). |
 | **1.37** | Oct 30, 2026 | Added Epic 3.6 (Administrative Management, #257) and Story 3.6.1 (User Overview, Details & Contributions, #258); marked Story 3.6.1 as implemented, noted that comments/flags are not modelled yet and linked the executable spec `docs/testing/admin-users.feature`. |
 | **1.38** | Oct 30, 2026 | Added Epic 3.7: Multi-Language Support (Story 3.7.1, issue #246) with acceptance criteria I18N-01…I18N-12 (I18N-11: PDF export from #220; I18N-12: six additional languages), executable in `docs/testing/i18n.feature`. |
+| **1.39** | Oct 30, 2026 | Added Stories 3.6.2 (invite/create users, #275), 3.6.3 (suspend/reactivate, #276), 3.6.4 (change role, #277), 3.6.5 (sort by name and songs, #278, implemented) and 3.6.6 (clickable user rows, #279, implemented). |
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
 
@@ -629,6 +630,42 @@ Scenario: Non-admin access restricted
 
 > **Implementation notes:** "Status" is derived from `last_seen_at` (active within 30 days / inactive / never active). "Musician status" means role `musician` or `expert`. Comments and flags are not modelled in the database yet, so they are not shown. Executable spec: `docs/testing/admin-users.feature` (`@unit`, `@seed`, `@e2e`).
 
+**Story 3.6.2:** As an Admin, I want to invite a new user by e-mail (or create an account directly) with a chosen role, so that I can onboard community members without them having to self-register. (#275 – acceptance criteria in the issue; needs a server-only `SUPABASE_SECRET_KEY`.)
+
+**Story 3.6.3:** As an Admin, I want to suspend and reactivate user accounts, so that I can stop abusive or compromised accounts without deleting their contributions. (#276 – no self-suspend, at least one active admin, confirmation dialog, audit log.)
+
+**Story 3.6.4:** As an Admin, I want to change a user's role, so that I can grant or withdraw permissions as responsibilities change. (#277 – no self-change, at least one active admin, confirmation dialog, audit log.)
+
+**Story 3.6.5: [Implemented]** As an Admin, I want to sort the users overview by name and by number of songs, so that I can quickly find a user or see who contributes most songs. (#278)
+
+```gherkin
+Scenario Outline: Sort the users overview
+  Given I am logged in as an Admin
+  When I sort by "<sort>"
+  Then the users are listed by <order>
+  Examples:
+    | sort         | order                                           |
+    | Name (A-Z)   | display name ascending, falling back to e-mail  |
+    | Name (Z-A)   | display name descending, falling back to e-mail |
+    | Most songs   | number of songs descending, ties by name        |
+    | Fewest songs | number of songs ascending, ties by name         |
+
+Scenario: Sort choice survives a reload
+  Given I sorted by "Most songs"
+  When I reload the page or come back from a user's details
+  Then the list is still sorted by "Most songs"
+```
+
+**Story 3.6.6: [Implemented]** As an Admin, I want to open a user's details by clicking anywhere on their row, so that I don't have to aim for the small "Details" button. (#279)
+
+```gherkin
+Scenario: Click a row to open the user's details
+  Given I am on the Admin Users overview page
+  When I click anywhere on a user's row
+  Then I am on that user's detail page
+  And Enter on the focused row, middle-click and Ctrl/Cmd-click work as for a link
+```
+
 ### Epic 3.7: Multi-Language Support (i18n)
 
 > **Scope:** the app interface (navigation, buttons, forms, messages) is available in English, Dutch, Spanish, Italian, Russian, Quechua (Runasimi), French and Portuguese. Song content (titles, lyrics, artist names, tags) is **not** translated. Executable scenarios: `docs/testing/i18n.feature` (issue #246).
@@ -707,7 +744,6 @@ Scenario: I18N-12 – Additional languages
   Then the interface is shown in that language
   And I can pick any of the eight languages, each listed in its own name, from the language menu
   And every language has a complete translation (same keys and placeholders as English)
-```
 
 ## Phase 4: Professional Toolkit
 
