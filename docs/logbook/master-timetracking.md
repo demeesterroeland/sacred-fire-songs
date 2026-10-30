@@ -103,6 +103,10 @@
 
 | **October 30, 2026 (Part 7)** | **Feature/UI (#278, #279)**: Admin layout aligned with the Library section (fixed header overlap), listbox-style role/sort pickers modelled on the i18n language picker, sort by name and number of songs (persisted), clickable user rows; issues #275–#279 created. | ~1.5 Hours | ✅ |
 
+| **October 30, 2026 (Part 8)** | **Planning/CI-CD (Epic 5.1)**: Gitflow research, gap analysis, migration plan, BDD spec, Epic 5.1 stories and GitHub issue tree (#280–#301), owner decisions recorded, plan PR #308. | ~2.0 Hours | ✅ Completed |
+
 | **October 30, 2026 (Part 9)** | **Bug/Feature PDF export (#303, #304)**: footer site host + 1 cm song QR code (also on continuation pages, fixing a missing-URL bug), PDF reuse cache with content fingerprint (IndexedDB, per user, cleared on sign-out), TDD + QR decode check. | ~1.0 Hours | ✅ Completed |
 
-| **Total** | **Development + AI Collaboration** | **~187.75 Hours** | |
+| **October 30, 2026 (Part 10)** | **CI-CD/Testing (#287)**: Gitflow Phase 0 harness — workflow contract helper, Vitest contract tests, Cucumber `ci` profile, bats tests for `start-issue.sh`, lint/typecheck scripts and baseline. | ~1.0 Hours | ✅ Completed |
+
+| **Total** | **Development + AI Collaboration** | **~190.75 Hours** | |

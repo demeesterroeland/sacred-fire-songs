@@ -1,6 +1,6 @@
 # Gitflow CI/CD Migration — Plan & Orchestration
 
-**Version:** 1.2
+**Version:** 1.3
 **Status:** Approved — in execution (phase by phase, one PR into `develop` per phase)
 **Date:** Oct 30, 2026
 **Branch:** `docs/gitflow-migration-plan`
@@ -13,6 +13,7 @@
 | **1.0** | Oct 30, 2026 | Initial plan. Online research on Gitflow CI/CD, gap analysis against the current GitHub Flow setup (workflows, scripts, docs, branch protection), target design (`main` / `develop` / `feat|fix|chore|docs/*` / `hotfix/*`), Epic 5.1 with 6 phases, test-pyramid / TDD / BDD strategy for the pipeline itself, and open decisions. |
 | **1.1** | Oct 30, 2026 | GitHub issue tree created via `scripts/setup_github_roadmap.py` (masterplan-orchestrator skill): #280 master, #281–#286 phases, #287–#301 task/stories; #267 re-parented under #288; #274 set as blocker of #294. Task 0.1 done. |
 | **1.2** | Oct 30, 2026 | Owner decisions D1–D7 recorded (§8): D3 SSH `docker compose pull && up -d` on the preview server (= staging, secrets/config from `cloud-infra`), D4 PR smoke against **staging** Supabase, D6 Docker/self-host only (no Vercel). Ticked work done in the orchestrator session: `develop` created (`7f582d1`) and default branch, ruleset "Main Branch Protected" (12237277), #302 (e2e/perf triggers for `develop`), #305 (`start-issue.sh` from `origin/develop`, git-workflow v1.1), PR #273 retargeted. Adjusted tasks 1.3, 1.9, 2.1, 2.2, 2.4, 3.2, 3.3, 5.1, 5.7, 5.10 accordingly. |
+| **1.3** | Oct 30, 2026 | Phase 0 (#287) implemented: tasks 0.2–0.5 done; lint baseline recorded; found that `vitest run` also collects the Playwright specs in `e2e/` and `testing/e2e/` (17 files fail to load) — added to task 1.4. |
 
 > **For Claude:** REQUIRED SUB-SKILL: Use `superpowers:executing-plans` (or `superpowers:subagent-driven-development`) to implement this plan phase by phase. One story = one issue = one branch = one PR into `develop` (after Phase 1 exists; before that, into `main`).
 
@@ -192,10 +193,10 @@ Each phase ends with a green gate before the next starts. Story IDs map to `docs
 **Exit:** BDD feature + contract test harness exist and run (red where expected), GitHub issues created.
 
 - [x] 0.1 Create GitHub issues for Epic 5.1 + stories 5.1.1–5.1.14 via `/create-issue` (Gherkin from epic doc).
-- [ ] 0.2 Add `docs/testing/gitflow-cicd.feature` to `cucumber.json` as profile `ci` (`@ci-contract`).
-- [ ] 0.3 Add `yaml` devDependency; scaffold `testing/unit/tests/ci/workflowContract.test.ts` with helper `loadWorkflow(name)`.
-- [ ] 0.4 Add `bats-core` (devDependency `bats`) + `testing/scripts/*.bats` scaffold; `npm run test:scripts`.
-- [ ] 0.5 Add `npm run lint` (`eslint .`) and `npm run typecheck` (`tsc --noEmit`); record current error baseline (fix or allowlist).
+- [x] 0.2 Add `docs/testing/gitflow-cicd.feature` to `cucumber.json` as profile `ci` (`@ci-contract`) + `testing/bdd/steps/gitflow-cicd.steps.ts`; `npm run test:bdd:ci` → 23 scenarios: 1 passed, 11 pending, 11 failed (expected red).
+- [x] 0.3 Add `yaml` devDependency; helper `testing/support/workflowContract.ts` (`loadWorkflow`, triggers, jobs, environments, pinned refs) + `testing/unit/tests/ci/workflowContract.test.ts` (9 tests, green).
+- [x] 0.4 Add `bats` devDependency + `testing/scripts/start-issue.bats` (6 pass, 1 skip = type validation, task 2.4); `npm run test:scripts`.
+- [x] 0.5 Add `npm run lint` (`eslint .`) and `npm run typecheck` (`tsc --noEmit`). Baseline: typecheck clean; lint 118 errors (108 `no-explicit-any`, 6 `react-hooks/set-state-in-effect`, 3 `no-require-imports`, 1 `react-hooks/immutability`) + 128 warnings → decide fix vs. ratchet in 1.1.
 
 ### Phase 1 — Quality gate on today's flow (value even without Gitflow)
 **Exit:** every PR to `main` runs required CI; no false greens. *Stories 5.1.1, 5.1.2, 5.1.3, 5.1.12.*
@@ -203,7 +204,7 @@ Each phase ends with a green gate before the next starts. Story IDs map to `docs
 - [ ] 1.1 TDD: contract test "ci.yml runs on pull_request to main+develop and push to all branches; has jobs `lint`, `typecheck`, `unit`, `bdd`, `build`". → create `ci.yml`.
 - [ ] 1.2 TDD: contract "e2e job fails (not skips) when secrets missing" → fix `e2e.yml`; set the missing staging secrets (`SUPABASE_PROJECT_ID_STAGING`, `SUPABASE_DB_PASSWORD_STAGING`) so the PR smoke really runs against **staging** Supabase (D4).
 - [ ] 1.3 PR smoke stays in `e2e.yml` against **staging** Supabase (D4, no local stack). `ci.yml` gets no `integration` job; `@seed` BDD stays a local/manual layer until a later decision.
-- [ ] 1.4 Dedupe unit tests into one dir (recommend `testing/unit/tests/`, move `artistUtils`, delete `lib/unit-tests/*.test.ts` copies after diff); point `npm test` at it; update CLAUDE.md testing section.
+- [ ] 1.4 Dedupe unit tests into one dir (recommend `testing/unit/tests/`, move `artistUtils`, delete `lib/unit-tests/*.test.ts` copies after diff); point `npm test` at it; exclude the Playwright specs (`e2e/**`, `testing/e2e/**`, also duplicated) from Vitest — today `vitest run` fails to load 17 spec files; update CLAUDE.md testing section.
 - [ ] 1.5 Wire `setlist-pdf-export.feature`; flip BDD `strict: true` for implemented tags.
 - [ ] 1.6 Replace `docker.yml` E2E polling with `needs`/`workflow_run` on CI success; fail closed.
 - [ ] 1.7 Pin actions to SHAs, add `.github/dependabot.yml` (github-actions + npm), least-privilege `permissions:`.

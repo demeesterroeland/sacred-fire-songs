@@ -1297,3 +1297,13 @@
 - [x] `lib/export/pdfCache.ts`: SHA-256 fingerprint, `getOrCreatePdf`, IndexedDB store per user + playlist, cleared on sign-out
 - [x] TDD: `pdfExport.test.ts` (+6), `pdfCache.test.ts` (17); QR decoded from a rendered 300 dpi PDF
 - [x] Docs: Stories 4.2.3/4.2.4, design doc 1.43, `setlist-pdf-export.feature`
+
+## Session October 30, 2026 (Part 10: Gitflow Phase 0 — Spec & Test Harness, #287)
+- [x] Record owner decisions D1–D7 in the plan (v1.2), tick work done in the orchestrator session; merge plan PR #308 into `develop`
+- [x] Branch `chore/287-gitflow-ci-harness` from `origin/develop`
+- [x] `testing/support/workflowContract.ts` + Vitest `testing/unit/tests/ci/workflowContract.test.ts` (9 tests green)
+- [x] Cucumber profile `ci` + `testing/bdd/steps/gitflow-cicd.steps.ts` (`npm run test:bdd:ci`: 1 passed, 11 pending, 11 failed — expected red)
+- [x] bats `testing/scripts/start-issue.bats` (`npm run test:scripts`: 6 pass, 1 skip)
+- [x] `npm run lint` / `npm run typecheck`; baseline recorded (tsc clean, eslint 118 errors / 128 warnings)
+- [x] Doc sync: plan v1.3, design doc v1.46 (§6.6), testing README
+- [ ] Finding for Phase 1 (task 1.4): `vitest run` also collects Playwright specs in `e2e/` + `testing/e2e/` (17 files fail to load)

@@ -3023,7 +3023,32 @@ Acted on manual validation feedback for the admin users overview: layout bug, co
 - **Role colors (follow-up)**: `lib/admin/roleColors.ts` is now the single source for role colors; `RoleBadge` and the role filter options (`WickSelect` `accent`) use it, so each role has the same color in the rows and in the picker. Unit tests in `testing/unit/tests/adminRoleColors.test.ts`.
 - **Moved to develop**: #259 was merged into `main` at `bad0c84`, so the picker/sort/row/role-color commits were cherry-picked onto `feat/278-admin-sort-pickers` from `origin/develop`. Conflicts with the i18n'd admin code were resolved by translating the option labels (`t()`, three new `admin.sort.*` keys in eight locales) and keeping the i18n sort label style ("Sort: …" per language). `languageListbox.ts` now re-exports `keyToIndex`/`typeaheadIndex` from `lib/ui/listbox.ts`. Verified: unit 236, BDD 63 passed (51 pending stubs), Playwright admin + i18n specs green on the build at port 4278 (one i18n test flaked once, then 66/66 on two reruns).
 
+
+## October 30, 2026 (Part 8) - Gitflow CI/CD Migration plan (Epic 5.1, PR #308)
+
+**Task Overview**
+Researched a typical Gitflow CI/CD setup, compared it with the GitHub Flow pipeline and docs, and planned the migration as Epic 5.1 with a test-first approach.
+
+**Technical Details**
+- **Gap analysis**: no PR CI (lint/typecheck/unit/BDD/build); `e2e.yml` reported green while skipping (two staging secrets missing); `deploy-db.yml` deleted but still referenced; `main` without required checks; `--admin` merge in `preview2prod.sh`; wrong image names in `dev2preview.sh`; duplicated unit-test trees.
+- **Plan**: `docs/plans/2026-10-30-gitflow-cicd-migration.md` — lightweight Gitflow (no `release/*`), squash into `develop`, merge commit `develop` → `main`, Release Please on `main`, back-merge, hotfix path; pipeline matrix per test-pyramid layer; phases 0–5.
+- **Spec & tracking**: `docs/testing/gitflow-cicd.feature`; Epic 5.1 stories 5.1.1–5.1.14; GitHub tree #280–#301 via `scripts/setup_github_roadmap.py` (masterplan-orchestrator skill, sub-issues, tier labels, blocked-by links).
+- **Owner decisions**: D3 SSH compose deploy on the preview server (staging), D4 PR smoke against staging Supabase, D6 Docker only; recorded in plan v1.2.
+
 ## October 30, 2026 (Part 9) - PDF footer QR code (#303) and PDF reuse cache (#304)
 
 - **#303**: the bottom-left footer now shows only the site host plus a 1 cm × 1 cm QR code (`qrcode`, error level M, quiet zone 2) that opens the song on that page; it is also a clickable link in PDF viewers. Continuation pages previously lost the song URL (`addContinuationPage` was called without it) — fixed, so every page of a song carries its QR. Content bottom margin raised to 52 pt. Verified by rendering a sample PDF at 300 dpi and decoding every QR with jsQR.
 - **#304**: `lib/export/pdfCache.ts` fingerprints the exported content (title, description, ordered songs with content/key/capo/transposition/URL), interface language, site URL and user (SHA-256). A matching fingerprint reuses the last PDF from IndexedDB (one entry per user + playlist); any change regenerates. Cache failures fall back to generation; sign-out clears the cache. The "Generated {date}" subtitle of a reused PDF keeps its original date (accepted in the issue).
+
+## October 30, 2026 (Part 10) - Gitflow Phase 0: spec & test harness (#287)
+
+**Task Overview**
+Built the harness that lets every later Gitflow story start with a failing test.
+
+**Technical Details**
+- **Contract helper**: `testing/support/workflowContract.ts` parses workflows with `yaml` (triggers, GitHub branch globs, jobs, environments, step order, SHA-pinned actions).
+- **Vitest**: `testing/unit/tests/ci/workflowContract.test.ts` (9 green: fixtures + current invariants).
+- **Cucumber**: profile `ci`, `testing/bdd/steps/gitflow-cicd.steps.ts`; `npm run test:bdd:ci` → 1 passed, 11 pending (need pr-lint/rulesets), 11 failed (missing `ci.yml`, deploy workflows, dependabot, pinning, …) — the expected red baseline.
+- **bats**: `testing/scripts/start-issue.bats` runs `start-issue.sh` in a throw-away clone with a bare local origin (6 pass, type validation skipped until 2.4).
+- **Static**: `npm run typecheck` clean; `npm run lint` baseline 118 errors (108 `no-explicit-any`) / 128 warnings.
+- **Finding**: `vitest run` also collects the Playwright specs in `e2e/` and `testing/e2e/` (17 files fail to load) → task 1.4.

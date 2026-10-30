@@ -1,6 +1,6 @@
 # Project Analysis & Design Document: Song Sharing Application (Sacred Fire Songs)
 
-**Version:** 1.45
+**Version:** 1.46
 **Status:** Living Document
 **Date:** Oct 30, 2026
 
@@ -38,6 +38,7 @@
 | **1.43** | Oct 30, 2026 | Admin users overview: role and sort pickers use the new listbox component `components/common/ui/WickSelect.tsx` (same design as the language picker on the i18n branch, keyboard logic in `lib/ui/listbox.ts`); sort by name A-Z/Z-A and most/fewest songs, remembered in `localStorage` (#278); whole user row opens the details (#279). |
 | **1.44** | Oct 30, 2026 | Role colors have one source (`lib/admin/roleColors.ts`): role badges and the role filter picker use the same color per role (admin purple, gatekeeper amber, musician/expert emerald, member blue). `WickSelect` options accept an `accent` color (`wick-ignite` animation in `app/globals.css`). |
 | **1.45** | Oct 30, 2026 | PDF export (Stories 4.2.3/4.2.4, #303/#304): footer shows only the site host plus a 1 cm QR code (`qrcode`) linking to the song on that page (continuation pages included); `lib/export/pdfCache.ts` reuses the last PDF per user + playlist (IndexedDB) until a SHA-256 fingerprint of the exported content, locale and site changes; cache cleared on sign-out. |
+| **1.46** | Oct 30, 2026 | Added §6.6 Delivery Pipeline Contract Tests (Epic 5.1 Phase 0, #287): `testing/support/workflowContract.ts`, Vitest `testing/unit/tests/ci/`, Cucumber profile `ci` for `docs/testing/gitflow-cicd.feature`, bats `testing/scripts/`, npm scripts `test:bdd:ci`, `test:scripts`, `lint`, `typecheck`. |
 
 
 ## 1. Introduction
@@ -180,6 +181,14 @@ The application is a **Progressive Web App (PWA)** optimized for mobile use duri
 * **PDF footer & cache (#303/#304):** bottom-left shows the site host and a 1 cm QR code to the page's song; repeated exports reuse the cached PDF (`lib/export/pdfCache.ts`) until the playlist content, language or site changes.
 * **PDF export:** `exportPlaylistToPdf({ …, locale })` uses `getPdfLabels(locale)` (`lib/export/pdfExport.ts`) for page footer, song metadata, subtitle and date format; the UI passes the active locale. Song content in the PDF is untranslated; server-action error messages are shown as the toast description under a translated title.
 * **Not translated:** `app/manifest.ts` and `<title>`/meta description (static, English); server action error codes; unused starter components (`auth-button`, `logout-button`, `LibrarySidebar`, `home/SearchBar`, `YouTubeEmbed`).
+
+### 6.6 Delivery Pipeline Contract Tests (Epic 5.1, Gitflow CI/CD)
+* **Branching:** lightweight Gitflow — `main` (production), `develop` (integration + staging, GitHub default branch), work branches `feat|fix|chore|docs/*` squash-merged into `develop`, `hotfix/*` from `main`. Plan: `docs/plans/2026-10-30-gitflow-cicd-migration.md`.
+* **Contract helper:** `testing/support/workflowContract.ts` parses `.github/workflows/*.yml` (via `yaml`) and repo files so the pipeline is tested as data: triggers and branch globs, jobs, environments, step order, SHA-pinned actions.
+* **Unit (Vitest):** `testing/unit/tests/ci/workflowContract.test.ts` tests the helper on fixtures plus invariants that already hold (Release Please only on `main`, E2E smoke on PRs into `develop` and `main`).
+* **Acceptance (Cucumber, profile `ci`):** `npm run test:bdd:ci` runs the `@ci-contract` scenarios of `docs/testing/gitflow-cicd.feature` with `testing/bdd/steps/gitflow-cicd.steps.ts`. Written test-first: scenarios of unimplemented stories fail or are `pending` until their story lands. Not part of the default profile.
+* **Scripts (bats):** `npm run test:scripts` runs `testing/scripts/*.bats`; `start-issue.bats` runs `scripts/start-issue.sh` in a throw-away clone with a local bare `origin` (diverged `main`/`develop`).
+* **Static checks:** `npm run typecheck` (`tsc --noEmit`, clean) and `npm run lint` (`eslint .`, baseline 118 errors / 128 warnings, 108 of them `no-explicit-any`; to be handled before `lint` becomes a required check).
 
 ## 7. Screen Inventory (Implemented)
 
