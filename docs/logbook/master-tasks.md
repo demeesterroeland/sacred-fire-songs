@@ -1277,3 +1277,4 @@
 - [x] #278: sort by name Z-A, most/fewest songs, persisted in localStorage (`useSyncExternalStore`), unit + BDD + e2e
 - [x] #279: whole user row opens the details (stretched link), e2e
 - [x] Doc sync: design doc v1.43, epic & user stories v1.39, e2e overview v1.8, admin-users.feature v1.1
+- [x] PR #259 had already been merged into `main` before these commits; moved them to `feat/278-admin-sort-pickers` from `origin/develop` (Gitflow), translated the new sort options into all eight languages (`admin.sort.nameDesc/songsDesc/songsAsc`), and shared the listbox key logic with the i18n `LanguageSwitcher`
