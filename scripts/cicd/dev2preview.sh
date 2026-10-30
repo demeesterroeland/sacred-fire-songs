@@ -1,18 +1,18 @@
 #!/usr/bin/env bash
 #
-# deploy-to-preview.sh
-# --------------------
+# dev2preview.sh
+# --------------
 # Pushes the current development branch to origin, triggers/tracks the
 # GitHub Actions Docker build, and outputs the exact slugified Docker image tag
 # to deploy on the preview environment.
 #
 # Usage:
-#   scripts/deploy-to-preview.sh [--force]
+#   scripts/cicd/dev2preview.sh [--force]
 #     --force  Allow uncommitted changes (git stash will NOT be used)
 #
 set -euo pipefail
 
-ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT"
 
 
@@ -22,7 +22,7 @@ for arg in "$@"; do
   case "$arg" in
     --force) FORCE=1 ;;
     -h|--help)
-      echo "Usage: scripts/deploy-to-preview.sh [--force]"
+      echo "Usage: scripts/cicd/dev2preview.sh [--force]"
       echo ""
       echo "Options:"
       echo "  --force  Allow uncommitted changes (continues with committed changes only)"

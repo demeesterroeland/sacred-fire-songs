@@ -3065,3 +3065,15 @@ Added the fast layers of the test pyramid as required-check candidates and clean
 - **Supply chain**: SHA-pinned actions, top-level `permissions`, Dependabot; actionlint/shellcheck run from digest-pinned images.
 - **E2E investigation**: both cloud Supabase projects are paused (why `e2e` was a false green). Owner chose a self-hosted E2E stack: cloud-infra PR #106 (`stacks/songbook-e2e`, Tailscale-only Kong :5003 / Postgres :54324, `init-env.sh` generates secrets on the VPS). Tailscale policy advice: the default `* → *` grant must be narrowed or `tag:ci` gets full tailnet access. Then deferred.
 - **Findings**: `tsconfig.json` excludes `testing/`/`e2e/`; preview server compose drifted from cloud-infra git (`…-app:preview`).
+
+## October 31, 2026 (Part 2) - Reorganize scripts/ into cicd/, db/, dev/ (#274)
+
+**Task Overview**
+The flat `scripts/` folder is grouped by purpose and documented in `scripts/README.md`. Restarted from the never-merged `ace267f`, redone on top of Phase 1 (#310) without a `songbook/` category (#269 moved those scripts to `sacred-fire-songs-collection`).
+
+**Technical Details**
+- **Layout**: `scripts/cicd/` (workflow, delivery, GitHub roadmap and story sync — the sync scripts left `.claude/scripts/`), `scripts/db/` (migrations, test DB, seeders, staging clone, auth rate limits), `scripts/dev/` (icons, ChordPro debug helpers). Only `README.md` sits in `scripts/`.
+- **Contract**: `testing/scripts/scripts-layout.bats` fails on loose files, empty categories, a script in two categories, a script missing from the README, or story-sync scripts left in `.claude/scripts/`.
+- **Path fixes**: scripts that resolve the repo root go up two levels; `start-issue.sh` deliberately keeps working from the caller's cwd (the bats contract runs it inside a throw-away clone). `npm run test:perf` now points at `scripts/cicd/run-performance-benchmark.sh` (the old `./run-performance-benchmark.sh` did not exist).
+- **CI**: shellcheck in the `pipeline` job checks `scripts/*/*.sh` (8 files) instead of the now-empty `scripts/*.sh`.
+- **Not changed on purpose**: historical changelog rows and `docs/plans/issue-239-resolution.md` keep the paths of their time; `.agents/skills/masterplan-orchestrator/SKILL.md` uses `scripts/setup_github_roadmap.py` as a generic example.

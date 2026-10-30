@@ -1,11 +1,11 @@
 #!/usr/bin/env bats
-# Contract tests for scripts/start-issue.sh (Epic 5.1, stories 5.1.6 / 5.1.10).
+# Contract tests for scripts/cicd/start-issue.sh (Epic 5.1, stories 5.1.6 / 5.1.10).
 # Each test runs the script in a throw-away clone whose "origin" is a local
 # bare repository with diverged `main` and `develop` branches.
 # Run with: npm run test:scripts
 
 setup() {
-  SCRIPT="$BATS_TEST_DIRNAME/../../scripts/start-issue.sh"
+  SCRIPT="$BATS_TEST_DIRNAME/../../scripts/cicd/start-issue.sh"
   TMP="$(mktemp -d)"
   export GIT_AUTHOR_NAME="bats" GIT_AUTHOR_EMAIL="bats@example.invalid"
   export GIT_COMMITTER_NAME="bats" GIT_COMMITTER_EMAIL="bats@example.invalid"
@@ -35,7 +35,7 @@ teardown() {
 @test "prints usage and fails with fewer than 3 arguments" {
   run bash "$SCRIPT" 300 feat
   [ "$status" -eq 1 ]
-  [[ "$output" == *"Usage: scripts/start-issue.sh"* ]]
+  [[ "$output" == *"Usage: scripts/cicd/start-issue.sh"* ]]
 }
 
 @test "feat branches start from origin/develop" {

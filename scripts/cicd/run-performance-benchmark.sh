@@ -2,24 +2,24 @@
 # Sacred Fire Songs — Performance Benchmark Runner
 #
 # Usage:
-#   ./run-performance-benchmark.sh                              # benchmark localhost:3000 (50 songs)
-#   ./run-performance-benchmark.sh https://my-app.example.com   # benchmark any URL
-#   ./run-performance-benchmark.sh http://localhost:3000 --sample 30
+#   scripts/cicd/run-performance-benchmark.sh                              # benchmark localhost:3000 (50 songs)
+#   scripts/cicd/run-performance-benchmark.sh https://my-app.example.com   # benchmark any URL
+#   scripts/cicd/run-performance-benchmark.sh http://localhost:3000 --sample 30
 #
 #   # Reuse exact same song IDs from a previous run (for fair comparison):
-#   ./run-performance-benchmark.sh https://my-app.example.com --reuse <runId>
+#   scripts/cicd/run-performance-benchmark.sh https://my-app.example.com --reuse <runId>
 #
 # List saved run IDs:
-#   ./run-performance-benchmark.sh --list
+#   scripts/cicd/run-performance-benchmark.sh --list
 #
 # Compare two previous runs:
-#   ./run-performance-benchmark.sh --compare <runId1> <runId2>
+#   scripts/cicd/run-performance-benchmark.sh --compare <runId1> <runId2>
 #
 
 set -e
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-cd "$SCRIPT_DIR"
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+cd "$ROOT"
 
 echo "=========================================================================="
 echo "⚡ Sacred Fire Songs — Performance Benchmark"

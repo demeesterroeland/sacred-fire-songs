@@ -101,7 +101,7 @@ jobs:
       - name: actionlint
         run: docker run --rm -v "$PWD:/repo" -w /repo rhysd/actionlint@sha256:b1934ee5f1c509618f2508e6eb47ee0d3520686341fec936f3b79331f9315667 -no-color # v1.7.12
       - name: shellcheck
-        run: docker run --rm -v "$PWD:/mnt" -w /mnt koalaman/shellcheck@sha256:61862eba1fcf09a484ebcc6feea46f1782532571a34ed51fedf90dd25f925a8d -S warning scripts/*.sh testing/scripts/*.bats # v0.11.0
+        run: docker run --rm -v "$PWD:/mnt" -w /mnt koalaman/shellcheck@sha256:61862eba1fcf09a484ebcc6feea46f1782532571a34ed51fedf90dd25f925a8d -S warning scripts/*/*.sh testing/scripts/*.bats # v0.11.0
       - name: bats (scripts)
         run: npm run test:scripts
       - name: Gitflow contract scenarios (implemented stories)
