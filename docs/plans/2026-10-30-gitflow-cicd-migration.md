@@ -1,7 +1,7 @@
 # Gitflow CI/CD Migration — Plan & Orchestration
 
-**Version:** 1.1
-**Status:** Draft (planning only — no implementation yet)
+**Version:** 1.2
+**Status:** Approved — in execution (phase by phase, one PR into `develop` per phase)
 **Date:** Oct 30, 2026
 **Branch:** `docs/gitflow-migration-plan`
 **Tracking:** GitHub master epic #280 (phases #281–#286, Task 5.1.0 #287, stories #288–#301) · Epic 5.1 in `docs/logbook/epic&user stories.md` · BDD spec `docs/testing/gitflow-cicd.feature`
@@ -12,6 +12,7 @@
 | ----- | ----- | ----- |
 | **1.0** | Oct 30, 2026 | Initial plan. Online research on Gitflow CI/CD, gap analysis against the current GitHub Flow setup (workflows, scripts, docs, branch protection), target design (`main` / `develop` / `feat|fix|chore|docs/*` / `hotfix/*`), Epic 5.1 with 6 phases, test-pyramid / TDD / BDD strategy for the pipeline itself, and open decisions. |
 | **1.1** | Oct 30, 2026 | GitHub issue tree created via `scripts/setup_github_roadmap.py` (masterplan-orchestrator skill): #280 master, #281–#286 phases, #287–#301 task/stories; #267 re-parented under #288; #274 set as blocker of #294. Task 0.1 done. |
+| **1.2** | Oct 30, 2026 | Owner decisions D1–D7 recorded (§8): D3 SSH `docker compose pull && up -d` on the preview server (= staging, secrets/config from `cloud-infra`), D4 PR smoke against **staging** Supabase, D6 Docker/self-host only (no Vercel). Ticked work done in the orchestrator session: `develop` created (`7f582d1`) and default branch, ruleset "Main Branch Protected" (12237277), #302 (e2e/perf triggers for `develop`), #305 (`start-issue.sh` from `origin/develop`, git-workflow v1.1), PR #273 retargeted. Adjusted tasks 1.3, 1.9, 2.1, 2.2, 2.4, 3.2, 3.3, 5.1, 5.7, 5.10 accordingly. |
 
 > **For Claude:** REQUIRED SUB-SKILL: Use `superpowers:executing-plans` (or `superpowers:subagent-driven-development`) to implement this plan phase by phase. One story = one issue = one branch = one PR into `develop` (after Phase 1 exists; before that, into `main`).
 
@@ -135,7 +136,7 @@ Decision recommended: **no `release/*` branches** (single deployed version, Rele
 
 ### 4.2 Pipeline matrix (test pyramid → when it runs)
 
-| Stage / event | Lint + typecheck | Unit (Vitest) | BDD `@unit` | Build | Integration `@seed` + E2E `@smoke` (local Supabase in runner) | Full E2E | k6 perf | Deploy |
+| Stage / event | Lint + typecheck | Unit (Vitest) | BDD `@unit` | Build | E2E `@smoke` vs **staging** Supabase (`e2e.yml`, D4) | Full E2E | k6 perf | Deploy |
 |---|---|---|---|---|---|---|---|---|
 | Push to work branch | ✅ | ✅ | ✅ | — | — | — | — | — |
 | PR → `develop` | ✅ | ✅ | ✅ | ✅ | ✅ (required) | — | label | — |
@@ -146,13 +147,13 @@ Decision recommended: **no `release/*` branches** (single deployed version, Rele
 | Release published / tag `v*` | | | | ✅ | | | | image `:vX.Y.Z` → `environment: Production` (approval) → prod migrations → deploy |
 | PR `hotfix/*` → `main` | ✅ | ✅ | ✅ | ✅ | ✅ | — | — | — |
 
-Pyramid ratio target: many fast unit/BDD-unit tests (seconds) → fewer integration (`@seed`, local Supabase) → few E2E smoke per PR → full E2E + perf only at promotion. E2E per PR runs against a **disposable local Supabase** (`supabase start` in the runner) so it no longer depends on staging secrets or shared state.
+Pyramid ratio target: many fast unit/BDD-unit tests (seconds) → fewer integration (`@seed`, run locally) → few E2E smoke per PR → full E2E + perf only at promotion. E2E smoke per PR runs against the **staging Supabase** (D4); the job fails closed when its secrets are missing and uses a concurrency group because staging is shared.
 
 ### 4.3 Workflow files (target)
 
 | File | Purpose |
 |---|---|
-| `ci.yml` (new) | Reusable + PR/push quality gate: lint, typecheck, unit, BDD `@unit`, build, integration/E2E smoke on local Supabase. Job names are the required checks. |
+| `ci.yml` (new) | Reusable + PR/push quality gate: lint, typecheck, unit, BDD `@unit`, build. Job names (plus `e2e` from `e2e.yml`) are the required checks. |
 | `e2e.yml` | Becomes full-suite vs staging (nightly + PR to `main`); **fails** when secrets are missing on protected targets. |
 | `docker.yml` | Build on `develop` (`:develop`, `:sha`), tags/releases (`:vX.Y.Z`), dispatch (preview); `needs:` CI instead of polling; drop `:latest`. |
 | `deploy-staging.yml` (new) | On successful `develop` image: Supabase migrations to staging → deploy hook/SSH to staging server. `environment: Preview` (rename to `Staging`). |
@@ -200,22 +201,22 @@ Each phase ends with a green gate before the next starts. Story IDs map to `docs
 **Exit:** every PR to `main` runs required CI; no false greens. *Stories 5.1.1, 5.1.2, 5.1.3, 5.1.12.*
 
 - [ ] 1.1 TDD: contract test "ci.yml runs on pull_request to main+develop and push to all branches; has jobs `lint`, `typecheck`, `unit`, `bdd`, `build`". → create `ci.yml`.
-- [ ] 1.2 TDD: contract "e2e job fails (not skips) when secrets missing and base is protected" → fix `e2e.yml`; set missing staging secrets or switch smoke to local Supabase (decision D4).
-- [ ] 1.3 Add `integration` job: `supabase start` + `setup-test-db.mjs` + `test:bdd:seed` + Playwright `@smoke` against local stack.
+- [ ] 1.2 TDD: contract "e2e job fails (not skips) when secrets missing" → fix `e2e.yml`; set the missing staging secrets (`SUPABASE_PROJECT_ID_STAGING`, `SUPABASE_DB_PASSWORD_STAGING`) so the PR smoke really runs against **staging** Supabase (D4).
+- [ ] 1.3 PR smoke stays in `e2e.yml` against **staging** Supabase (D4, no local stack). `ci.yml` gets no `integration` job; `@seed` BDD stays a local/manual layer until a later decision.
 - [ ] 1.4 Dedupe unit tests into one dir (recommend `testing/unit/tests/`, move `artistUtils`, delete `lib/unit-tests/*.test.ts` copies after diff); point `npm test` at it; update CLAUDE.md testing section.
 - [ ] 1.5 Wire `setlist-pdf-export.feature`; flip BDD `strict: true` for implemented tags.
 - [ ] 1.6 Replace `docker.yml` E2E polling with `needs`/`workflow_run` on CI success; fail closed.
 - [ ] 1.7 Pin actions to SHAs, add `.github/dependabot.yml` (github-actions + npm), least-privilege `permissions:`.
 - [ ] 1.8 `workflow-lint.yml` (actionlint, shellcheck, bats, contract tests).
-- [ ] 1.9 Ruleset on `main`: required checks from 1.1/1.3, block force-push, block deletion, include admins.
+- [ ] 1.9 Ruleset on `main` — *partly done*: ruleset "Main Branch Protected" (id 12237277) active with deletion, non_fast_forward, pull_request (0 approvals, merge + squash, no rebase), required check `e2e`, no bypass actors. **Remaining:** add the `ci.yml` checks from 1.1 (needs owner approval: repo setting); clean up the legacy classic protection (`allow_force_pushes: true`, overruled by the ruleset).
 
 ### Phase 2 — Introduce `develop` + branch policy
 **Exit:** `develop` exists, protected; new work targets it. *Stories 5.1.4, 5.1.5, 5.1.6.*
 
-- [ ] 2.1 Create `develop` from `main` (`gh api` / UI); ruleset: required CI checks, squash-only, block force-push, include admins.
-- [ ] 2.2 `main` ruleset: allow merge commits (for `develop` → `main`) + squash (hotfix), disallow rebase; require PR from `develop`, `hotfix/*` or Release Please (enforced by `pr-lint.yml`).
-- [ ] 2.3 Set default branch → `develop` (decision D1) so `gh pr create` and GitHub UI target it by default.
-- [ ] 2.4 TDD (bats): `start-issue.sh` bases on `origin/develop`, `hotfix` type bases on `origin/main`, validates type ∈ {feat,fix,chore,docs,hotfix}.
+- [ ] 2.1 *Partly done*: `develop` created from `main` (`7f582d1`, includes #259). **Remaining:** ruleset for `develop` — required CI checks, squash-only, block force-push/deletion, no bypass (owner approval: repo setting).
+- [x] 2.2 `main` ruleset allows merge (for `develop` → `main`) + squash (hotfix), no rebase (ruleset 12237277). Head-branch policy is enforced by `pr-lint.yml` (2.5).
+- [x] 2.3 Default branch → `develop` (D1).
+- [ ] 2.4 *Partly done* (#305): `start-issue.sh` bases on `origin/develop`, `hotfix` on `origin/main`. **Remaining:** bats tests + type validation ∈ {feat,fix,chore,docs,hotfix}.
 - [ ] 2.5 `pr-lint.yml`: Conventional-Commit title (e.g. `amannn/action-semantic-pull-request`, pinned) + head/base matrix check.
 - [ ] 2.6 TDD (bats): fix image names in `dev2preview.sh` (`-app`), rename headers; make preview build optional (staging replaces most preview needs).
 
@@ -223,17 +224,19 @@ Each phase ends with a green gate before the next starts. Story IDs map to `docs
 **Exit:** merge to `develop` → staging updated with migrations, automatically. *Story 5.1.7.*
 
 - [ ] 3.1 TDD contract: `docker.yml` on push `develop` tags `:develop` + `:sha-<short>`; never `:latest`.
-- [ ] 3.2 Rename environment `Preview` → `Staging`; move staging secrets to environment scope (`SUPABASE_PROJECT_ID`, `SUPABASE_DB_PASSWORD`, `SUPABASE_ACCESS_TOKEN`, deploy key/hook).
-- [ ] 3.3 `deploy-staging.yml`: `supabase db push --include-all` (resurrect from `git show 2eac72a^:.github/workflows/deploy-db.yml`) → deploy (decision D3: SSH `docker compose pull && up -d` vs Coolify/Watchtower webhook) → health check URL.
+- [ ] 3.2 Rename environment `Preview` → `Staging`; move staging secrets to environment scope (`SUPABASE_PROJECT_ID`, `SUPABASE_DB_PASSWORD`, `SUPABASE_ACCESS_TOKEN`, SSH deploy key/host). Names, hosts and paths come from `cloud-infra` (`stacks/songbook-preview/`, Hetzner `bluette-prod` over Tailscale); values go straight from file into `gh secret set` or via `request_secret`, never in chat/logs/commits.
+- [ ] 3.3 `deploy-staging.yml`: `supabase db push --include-all` (resurrect from `git show 2eac72a^:.github/workflows/deploy-db.yml`) → deploy (D3: SSH over Tailscale to the preview server, `IMAGE_TAG=develop`, `docker compose pull && up -d` in `stacks/songbook-preview/`, cf. `cloud-infra/stacks/scripts/update.sh`) → health check URL. Changes to `cloud-infra` go via a PR in that repo after owner approval.
 - [ ] 3.4 Nightly `e2e.yml` full suite + `performance.yml` vs staging; failure opens/updates a GitHub issue.
 
 ### Phase 4 — Release, production & hotfix
+> ⚠️ Every Phase 4 task (production deploy, `--admin` removal, back-merge) and every change to `main` or repo settings needs explicit owner approval first. Release PR #261 (1.7.0) is not merged without that approval.
+
 **Exit:** `develop` → `main` → tag → approved prod deploy → back-merge, all in CI. *Stories 5.1.8, 5.1.9, 5.1.10.*
 
 - [ ] 4.1 New script `scripts/develop2main.sh` (replaces `preview2prod.sh` promotion part): opens PR `develop` → `main` titled `chore(release): promote develop to main`, body = list of squashed commits since last tag; waits checks; **merge commit**, no `--admin`.
 - [ ] 4.2 PR-to-`main` required checks: full E2E vs staging + k6 thresholds.
 - [ ] 4.3 `release-please.yml`: pinned, `target-branch: main`; decide `draft`/`force-tag-creation` (D5).
-- [ ] 4.4 `deploy-production.yml` on `release: published`: `environment: Production` (required reviewer = owner), prod migrations, deploy explicit `vX.Y.Z`, smoke check, inject release summary (moved from `preview2prod.sh`).
+- [ ] 4.4 (owner approval required) `deploy-production.yml` on `release: published` targeting `cloud-infra/stacks/songbook-prod/`: `environment: Production` (required reviewer = owner), prod migrations, deploy explicit `vX.Y.Z`, smoke check, inject release summary (moved from `preview2prod.sh`).
 - [ ] 4.5 `back-merge.yml`: on push `main` → PR `main` → `develop` (auto-merge when no conflict; on conflict, label + notify).
 - [ ] 4.6 Hotfix: `start-issue.sh <n> hotfix …` → PR to `main` → release → back-merge. bats + contract tests.
 - [ ] 4.7 Retire `preview2prod.sh` (or reduce to wrapper calling 4.1) — remove `--admin`.
@@ -241,16 +244,16 @@ Each phase ends with a green gate before the next starts. Story IDs map to `docs
 ### Phase 5 — Documentation, agent tooling & cut-over
 **Exit:** docs 100% aligned; dress rehearsal passed; open branches retargeted. *Stories 5.1.13, 5.1.14.*
 
-- [ ] 5.1 Rewrite `docs/guides/git-workflow.md` → v2.0 Gitflow (branch table, diagram, merge types, hotfix, golden rules, checklist).
+- [ ] 5.1 *Partly done* (#305: v1.1 Gitflow first version, with a warning that `preview2prod.sh` is not yet Gitflow-ready). **Remaining:** polish `docs/guides/git-workflow.md` → v2.0 Gitflow (branch table, diagram, merge types, hotfix, golden rules, checklist).
 - [ ] 5.2 `docs/guides/development-workflow.md` → add version header, environments table (local / preview / staging / prod), remove false claims.
 - [ ] 5.3 Project `CLAUDE.md`: branch protection on `main` **and** `develop`; PRs target `develop`; testing pyramid commands.
-- [ ] 5.4 Global `~/.claude/CLAUDE.md` ship triggers: "merge" = PR → `develop`; "release" = `develop2main.sh` + approval; "klaar" = both. (User-level file — confirm before editing.)
+- [ ] 5.4 Global `~/.claude/CLAUDE.md` ship triggers: "merge" = PR → `develop`; "release" = `develop2main.sh` + approval; "klaar" = both. (User-level file — **ask the owner first**.)
 - [ ] 5.5 PR template: target-branch note, test-pyramid checklist (unit/BDD/integration/E2E), Gherkin scenario IDs.
 - [ ] 5.6 `application-analysis&design.md`: new "Delivery Pipeline & Branching" section; bump version.
-- [ ] 5.7 `e2e-test-overview.md`: remove `deploy-db.yml` claim; document local-Supabase smoke vs staging full suite.
+- [ ] 5.7 `e2e-test-overview.md`: remove `deploy-db.yml` claim; document PR smoke + nightly full suite, both against staging (D4).
 - [ ] 5.8 Skills `/start-story`, `/create-issue`, `/sync-artifacts`: base `develop`.
 - [ ] 5.9 Dress rehearsal (pipeline E2E) with a trivial `docs:` change through the full flow using a draft/prerelease; record run URLs.
-- [ ] 5.10 Cut-over: retarget open PRs/branches (`feat/246-…`, `feat/userstory-3.6`) to `develop`; announce in README.
+- [ ] 5.10 *Partly done*: PR #273 (i18n) retargeted to `develop`; #259 already in `main`/`develop`. **Remaining:** check the other open branches; announce in README.
 
 ---
 
@@ -269,17 +272,17 @@ Progress tracking: story status flags (`[Planned]` → `[In Progress]` → `[Imp
 
 ---
 
-## 8. Open Decisions (owner)
+## 8. Decisions (owner, Oct 30, 2026)
 
 | ID | Decision | Recommendation |
 |---|---|---|
-| D1 | Default branch `develop`? | **Yes** — PRs and agents target it by default; Release Please keeps `target-branch: main`. |
-| D2 | `release/*` branches? | **No** for now (single deployed version). |
-| D3 | Staging deploy mechanism | Reuse current preview server as staging; GitHub Action SSH `docker compose pull && up -d` with `IMAGE_TAG=develop` (or Watchtower polling `:develop`). |
-| D4 | PR E2E smoke target | **Local Supabase in runner** (isolated, no secrets); staging only for nightly/full + PR to `main`. |
-| D5 | Prereleases from `develop` (`vX.Y.Z-rc.N`) | Defer; start with plain releases on `main`. |
-| D6 | Keep Vercel previews? | Only if still used — environments `Preview`/`Production` suggest Vercel; decide whether Docker/self-host is the sole prod target. |
-| D7 | Required reviewers | Solo maintainer: 0 approvals on `develop`, `Production` environment approval by owner as the human gate. |
+| D1 | Default branch `develop`? | ✅ **Decided & done** — `develop` is the GitHub default branch; Release Please keeps `target-branch: main`. |
+| D2 | `release/*` branches? | ✅ **No.** |
+| D3 | Staging deploy mechanism | ✅ **SSH `docker compose pull && up -d`** with `IMAGE_TAG=develop` on the current preview server (= staging, `cloud-infra/stacks/songbook-preview/`). SSH secret(s) via `request_secret` + `gh secret set`. |
+| D4 | PR E2E smoke target | ✅ **Staging Supabase** (as today, no local stack). `e2e.yml` must fail closed when secrets are missing; staging secrets must be complete. |
+| D5 | Prereleases from `develop` (`vX.Y.Z-rc.N`) | ✅ **Deferred.** Plain releases on `main`. |
+| D6 | Keep Vercel previews? | ✅ **Docker only.** Staging and production run only on Docker/self-host; remove or leave out the Vercel-specific parts. |
+| D7 | Required reviewers | ✅ **0 approvals on `develop`**; owner is the required reviewer of the `Production` environment. |
 
 ---
 
@@ -287,6 +290,6 @@ Progress tracking: story status flags (`[Planned]` → `[In Progress]` → `[Imp
 
 - **Back-merge conflicts** after Release PR (CHANGELOG/package.json) → automate 4.5 early, keep Release PR the only writer of those files.
 - **Squash `develop` → `main` by mistake** → ruleset/`pr-lint` rejects squash for head `develop`; script uses `--merge`.
-- **Shared staging DB** flakiness → per-PR E2E on local Supabase (D4); nightly concurrency group.
+- **Shared staging DB** flakiness → concurrency group per branch on `e2e.yml`, nightly runs serialised; staging seed accounts documented (D4 keeps PR smoke on staging).
 - **Agent habits** (global CLAUDE.md, skills) still targeting `main` → Phase 5 must land before cut-over announcement; `pr-lint` blocks wrong base meanwhile.
 - **Migrations run twice** (staging + prod) must be idempotent → `supabase db push` tracks applied versions; keep `--include-all`.

@@ -38,7 +38,7 @@
 | **1.37** | Oct 30, 2026 | Added Epic 3.6 (Administrative Management, #257) and Story 3.6.1 (User Overview, Details & Contributions, #258); marked Story 3.6.1 as implemented, noted that comments/flags are not modelled yet and linked the executable spec `docs/testing/admin-users.feature`. |
 | **1.38** | Oct 30, 2026 | Added Epic 3.7: Multi-Language Support (Story 3.7.1, issue #246) with acceptance criteria I18N-01…I18N-12 (I18N-11: PDF export from #220; I18N-12: six additional languages), executable in `docs/testing/i18n.feature`. |
 | **1.39** | Oct 30, 2026 | Added Phase 5 (Engineering Excellence) with Epic 5.1: Gitflow CI/CD Migration, stories 5.1.1–5.1.14 [Planned]. Plan: `docs/plans/2026-10-30-gitflow-cicd-migration.md`; executable spec: `docs/testing/gitflow-cicd.feature`. |
-| **1.40** | Oct 30, 2026 | Epic 5.1 created on GitHub: master epic #280, phase epics #281–#286, Task 5.1.0 #287, stories #288–#301 (sub-issues, `model:tier-1/2` labels, blocked-by dependencies). Linked issue numbers in the story table. |
+| **1.40** | Oct 30, 2026 | Epic 5.1 created on GitHub: master epic #280, phase epics #281–#286, Task 5.1.0 #287, stories #288–#301 (sub-issues, `model:tier-1/2` labels, blocked-by dependencies). Linked issue numbers in the story table. Story 5.1.1 aligned with owner decision D4 (PR smoke against staging, no local stack). |
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
 
@@ -970,7 +970,7 @@ Move from GitHub Flow to a lightweight Gitflow: `main` = production, `develop` =
 | 5.1.13 | #300 | Documentation & agent tooling aligned to Gitflow | 5 | [Planned] |
 | 5.1.14 | #301 | Dress rehearsal & cut-over of open branches | 5 | [Planned] |
 
-**Story 5.1.1:** As a Maintainer, I want every pull request to run lint, typecheck, unit, BDD, build and a local-Supabase integration/smoke job so that broken code cannot be merged.
+**Story 5.1.1:** As a Maintainer, I want every pull request to run lint, typecheck, unit, BDD, build and the staging smoke E2E (`e2e`) so that broken code cannot be merged.
 
 ```gherkin
 Scenario: A failing unit test blocks the merge

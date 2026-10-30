@@ -23,11 +23,11 @@ Feature: Gitflow branching and CI/CD pipeline
     And it defines the jobs "lint", "typecheck", "unit", "bdd" and "build"
 
   @story-5.1.1 @ci-contract
-  Scenario: CI runs integration tests against a disposable local Supabase
-    Given the workflow "ci.yml"
-    Then the job "integration" runs "supabase start"
-    And the job "integration" runs "npm run test:bdd:seed"
-    And the job "integration" runs Playwright with "--grep @smoke"
+  Scenario: PR smoke E2E runs against the staging Supabase
+    Given the workflow "e2e.yml"
+    Then it triggers on "pull_request" for branches "develop" and "main"
+    And it runs Playwright with "--grep @smoke"
+    And it reads the Supabase URL from the staging secrets
 
   @story-5.1.1 @manual
   Scenario: A failing unit test blocks the merge
@@ -70,7 +70,7 @@ Feature: Gitflow branching and CI/CD pipeline
     Then force pushes are blocked
     And deletion is blocked
     And the rules apply to administrators
-    And the required checks are "lint, typecheck, unit, bdd, build, integration"
+    And the required checks are "lint, typecheck, unit, bdd, build, e2e"
 
     Examples:
       | branch  |
