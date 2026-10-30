@@ -1,13 +1,14 @@
 # Git Workflow & Branching Guidelines: Sacred Fire Songs
 
-**Version:** 1.1
+**Version:** 1.2
 **Status:** Living Document
-**Date:** Oct 30, 2026
+**Date:** Oct 31, 2026
 
 ## Changelog
 
 | Version | Date | Description of Changes |
 | ----- | ----- | ----- |
+| **1.2** | Oct 31, 2026 | Unit tests moved to `testing/unit/tests/` (examples updated); pre-merge checklist lists the `ci.yml` checks (Epic 5.1 Phase 1). |
 | **1.1** | Oct 30, 2026 | Switch to lightweight **Gitflow** (Epic 5.1, Phase 2): `develop` is the default/integration branch, work branches start from and merge into `develop`, `develop` → `main` via merge commit, `hotfix/*` from `main`. `main` protected by ruleset (PR + `e2e` check, no force-push/delete). `start-issue.sh` branches from `origin/develop` (or `origin/main` for `hotfix`). `preview2prod.sh` flagged as not yet Gitflow-ready. |
 | **1.0** | Oct 18, 2026 | Initial version. Adapted from the generic "Git Workflow Sprint 2 Briefing" to the Sacred Fire Songs GitHub Flow (worktrees, squash merges, Release Please, preview → production scripts). |
 
@@ -122,12 +123,12 @@ ln -s ../../.env.local .worktrees/issue-261/.env.local
 ### Step 3: Work With Granular, Focused Commits
 
 ```bash
-git add lib/admin/serverQueries.ts lib/unit-tests/adminQueries.test.ts
+git add lib/admin/serverQueries.ts testing/unit/tests/adminQueries.test.ts
 git commit -m "feat(admin): add server queries for user contributions"
 ```
 
 Before each meaningful commit:
-* Run the unit tests: `npx vitest run` (or a single file: `npx vitest run lib/unit-tests/adminQueries.test.ts`).
+* Run the unit tests: `npx vitest run` (or a single file: `npx vitest run testing/unit/tests/adminQueries.test.ts`).
 * Keep docs in sync (see `CLAUDE.md`):
   * new `supabase/migrations/*.sql` → update `docs/design/db-schema.sql` (`/update-schema`),
   * changed `docs/**` files → bump version, date and changelog (`/update-doc-changelog`),
@@ -225,7 +226,7 @@ Never create version tags or edit `CHANGELOG.md` by hand; Release Please owns bo
 
 ## 6. Pre-Merge Checklist
 
-- [ ] **Tests green locally**: `npx vitest run` passes; `npm run build` succeeds.
+- [ ] **Tests green locally**: `npm test`, `npm run test:bdd:unit`, `npm run lint`, `npm run typecheck` and `npm run build` pass — the same as the required `ci.yml` checks (`lint`, `typecheck`, `unit`, `bdd`, `build`, `pipeline`).
 - [ ] **Database**: every new migration is mirrored in `docs/design/db-schema.sql`.
 - [ ] **Docs in sync**: acceptance criteria in `docs/logbook/epic&user stories.md` verified; `application-analysis&design.md` updated; touched docs have a bumped version + changelog entry.
 - [ ] **Logbook committed**: `/sync-artifacts` ran and `docs/logbook/` changes are committed on the branch.

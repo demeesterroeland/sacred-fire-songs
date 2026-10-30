@@ -7,7 +7,7 @@
  * takes well under a second.
  *
  * The generated data deliberately covers every song situation exercised by the
- * unit tests (lib/unit-tests, testing/unit/tests) and the Playwright suite
+ * unit tests (testing/unit/tests) and the Playwright suite
  * (e2e/tests). The catalogue of those situations lives in
  * docs/testing/song.feature – keep the two in sync.
  *
@@ -92,7 +92,7 @@ const ANCHOR_SONGS = [
     favorites: ['member'], views: ['member', 'admin'],
   },
   {
-    // Chords-over-lyrics (lib/unit-tests/DownToTheRiver-chordsOverLyrics.txt): page markers, curly apostrophe.
+    // Chords-over-lyrics (testing/unit/tests/DownToTheRiver-chordsOverLyrics.txt): page markers, curly apostrophe.
     title: 'Down to the River', author: 'Traditional (Spiritual)', is_public: true, owner: 'admin', minutes_ago: 2,
     key: 'G', capo: 0, tuning: 'Standard', youtube: 'https://www.youtube.com/watch?v=6R7pxNzEAaM', has_chords: true,
     content: `{title: Down to the River}

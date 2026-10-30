@@ -116,7 +116,8 @@ Then('both target the staging URL', function (this: SongBddWorld) {
 // ── Jobs & steps ────────────────────────────────────────────────────────────
 Then(
   'it defines the jobs {string}, {string}, {string}, {string} and {string}',
-  function (this: SongBddWorld, ...jobs: string[]) {
+  function (this: SongBddWorld, a: string, b: string, c: string, d: string, e: string) {
+    const jobs = [a, b, c, d, e];
     const wf = current(this);
     const names = jobNames(wf);
     const missing = jobs.filter((j) => !names.includes(j));

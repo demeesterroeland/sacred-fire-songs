@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { parseArtists, formatArtists, sortTagSuggestions } from '../songs/artistUtils';
+import { parseArtists, formatArtists, sortTagSuggestions } from '@/lib/songs/artistUtils';
 
 describe('artistUtils', () => {
   describe('parseArtists', () => {

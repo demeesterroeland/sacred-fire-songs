@@ -42,6 +42,7 @@ export default function MobileBottomNav() {
 
     useEffect(() => {
         if (!isSongDetailPage || !preferences.autoHideBottomNav) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional sync of local state with props/route; refactor tracked separately (Epic 5.1 lint ratchet)
             setIsVisible(true);
             return;
         }
