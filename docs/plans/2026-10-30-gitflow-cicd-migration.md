@@ -210,7 +210,7 @@ Each phase ends with a green gate before the next starts. Story IDs map to `docs
 - [ ] 1.6 ⏸ Deferred with Story 5.1.2 (the `docker.yml` step waits for E2E).
 - [x] 1.7 All actions SHA-pinned (version comment), top-level `permissions` in every workflow, `.github/dependabot.yml` (github-actions + npm → `develop`).
 - [x] 1.8 Implemented as job `pipeline` in `ci.yml` (not a path-filtered `workflow-lint.yml`, which could never be a required check): actionlint + shellcheck (digest-pinned images), bats, `test:bdd:ci-gate`. Fixed the findings (quoting, shebang, `cd || exit`).
-- [ ] 1.9 Ruleset on `main` — *partly done*: ruleset "Main Branch Protected" (id 12237277) active with deletion, non_fast_forward, pull_request (0 approvals, merge + squash, no rebase), required check `e2e`, no bypass actors. **Remaining:** add the `ci.yml` checks from 1.1 (needs owner approval: repo setting); clean up the legacy classic protection (`allow_force_pushes: true`, overruled by the ruleset).
+- [x] 1.9 Ruleset "Main Branch Protected" (12237277): required checks `lint`, `typecheck`, `unit`, `bdd`, `build`, `pipeline`, `e2e` (GitHub Actions app id 15368), review-thread resolution required; legacy classic branch protection deleted (applied by the owner, Oct 31). Note: `e2e` stays a false green until Story 5.1.2.
 
 ### Phase 2 — Introduce `develop` + branch policy
 **Exit:** `develop` exists, protected; new work targets it. *Stories 5.1.4, 5.1.5, 5.1.6.*

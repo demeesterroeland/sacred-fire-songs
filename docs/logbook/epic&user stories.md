@@ -41,7 +41,7 @@
 | **1.40** | Oct 30, 2026 | Added Phase 5 (Engineering Excellence) with Epic 5.1: Gitflow CI/CD Migration, stories 5.1.1–5.1.14 [Planned]. Plan: `docs/plans/2026-10-30-gitflow-cicd-migration.md`; executable spec: `docs/testing/gitflow-cicd.feature`. |
 | **1.41** | Oct 30, 2026 | Epic 5.1 created on GitHub: master epic #280, phase epics #281–#286, Task 5.1.0 #287, stories #288–#301 (sub-issues, `model:tier-1/2` labels, blocked-by dependencies). Linked issue numbers in the story table. Story 5.1.1 aligned with owner decision D4 (PR smoke against staging, no local stack). |
 | **1.42** | Oct 30, 2026 | Added Stories 4.2.3 (#303, PDF footer: site URL + 1 cm song QR code) and 4.2.4 (#304, reuse the setlist PDF while the playlist is unchanged), both [Implemented]. |
-| **1.43** | Oct 31, 2026 | Epic 5.1 Phase 1 (PR #310): Stories 5.1.1 (CI quality gate; required checks on `main` pending owner action), 5.1.3 (single unit-test tree) and 5.1.12 (pinned actions, permissions, Dependabot) implemented; Story 5.1.2 (E2E) deferred by the owner. |
+| **1.43** | Oct 31, 2026 | Epic 5.1 Phase 1 (PR #310): Stories 5.1.1 (CI quality gate; required checks on the `main` ruleset), 5.1.3 (single unit-test tree) and 5.1.12 (pinned actions, permissions, Dependabot) implemented; Story 5.1.2 (E2E) deferred by the owner. |
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
 
@@ -1015,7 +1015,7 @@ Move from GitHub Flow to a lightweight Gitflow: `main` = production, `develop` =
 
 | Story | Issue | Title | Plan phase | Status |
 |---|---|---|---|---|
-| 5.1.1 | #288 | PR quality gate (`ci.yml`) | 1 | [Implemented] (required checks on `main`: owner action) |
+| 5.1.1 | #288 | PR quality gate (`ci.yml`) | 1 | [Implemented] |
 | 5.1.2 | #289 | No false-green E2E / fail-closed Docker | 1 | [Deferred] (owner, Oct 31; E2E DB on bluette prepared in cloud-infra#106) |
 | 5.1.3 | #290 | Single unit-test tree, strict BDD | 1 | [Implemented] (strict only for `ci-gate`) |
 | 5.1.4 | #292 | Protected `main` + `develop` (rulesets), default branch `develop` | 2 | [Planned] |

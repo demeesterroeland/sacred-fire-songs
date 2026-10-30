@@ -1317,5 +1317,5 @@
 - [x] SHA-pin all actions, top-level permissions, Dependabot → `develop`
 - [x] Fix shellcheck/actionlint findings; ESLint ignores `.worktrees/**`
 - [x] Docs: CLAUDE.md, git-workflow v1.2, e2e overview v1.9, design doc §6.6, plan v1.4, epic stories; issue #288 body aligned with D4
-- [ ] Owner: apply required checks to the `main` ruleset + remove classic protection (blocked for the agent by the permission classifier)
+- [x] Required checks on the `main` ruleset + classic protection removed (applied by the owner; agent was blocked by the permission classifier)
 - [ ] Deferred: Story 5.1.2 (E2E fail-closed, secrets, docker gating), cloud-infra #106 rollout, Tailscale `tag:ci`
