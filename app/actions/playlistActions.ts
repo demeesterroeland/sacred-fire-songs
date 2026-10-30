@@ -332,3 +332,102 @@ export async function reorderPlaylistSongs(
     if (failed) return { error: failed.error!.message };
     return {};
 }
+
+// ─── Export PDF Data ──────────────────────────────────────────────────────────
+
+export interface ExportPlaylistSong {
+    id?: string;
+    title: string;
+    author?: string;
+    key?: string;
+    capo?: number;
+    transposition?: number;
+    content: string;
+    url?: string;
+}
+
+export async function getPlaylistSongsForExport(
+    playlistId: string
+): Promise<{
+    title: string;
+    description?: string | null;
+    songs: ExportPlaylistSong[];
+    error?: string;
+}> {
+    const idParsed = safeParse(uuid, playlistId);
+    if ('error' in idParsed) return { title: '', songs: [], error: 'Invalid playlist ID' };
+
+    const supabase = await createClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    // Export PDF is a member-only feature
+    if (!user) {
+        return { title: '', songs: [], error: 'Please log in to export a PDF songbook' };
+    }
+
+    const { data: playlist, error: playlistError } = await supabase
+        .from('setlists')
+        .select('id, title, owner_id, is_public, description')
+        .eq('id', idParsed.data)
+        .maybeSingle();
+
+    if (playlistError || !playlist) return { title: '', songs: [], error: 'Playlist not found' };
+
+    // Private playlists: only owner can access
+    if (!playlist.is_public && playlist.owner_id !== user.id) {
+        return { title: '', songs: [], error: 'Access denied' };
+    }
+
+    const { data: items, error: itemsError } = await supabase
+        .from('setlist_items')
+        .select(`
+            id,
+            order_index,
+            transposition_override,
+            song_versions (
+                id,
+                key,
+                capo,
+                content_chordpro,
+                compositions (
+                    id,
+                    title,
+                    original_author
+                )
+            )
+        `)
+        .eq('setlist_id', idParsed.data)
+        .order('order_index', { ascending: true });
+
+    if (itemsError) return { title: playlist.title, songs: [], error: itemsError.message };
+
+    if (items && items.length > 200) {
+        return {
+            title: playlist.title,
+            songs: [],
+            error: 'Export limit exceeded: maximum 200 songs allowed per PDF export',
+        };
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const songs: ExportPlaylistSong[] = (items || []).map((item: any) => {
+        const compId = item.song_versions?.compositions?.id;
+        return {
+            id: compId || item.song_versions?.id || undefined,
+            title: item.song_versions?.compositions?.title || 'Unknown',
+            author: item.song_versions?.compositions?.original_author || undefined,
+            key: item.song_versions?.key || undefined,
+            capo: item.song_versions?.capo ?? undefined,
+            transposition: item.transposition_override ?? undefined,
+            content: item.song_versions?.content_chordpro || '',
+            url: compId ? `/songs/${compId}` : undefined,
+        };
+    });
+
+    return {
+        title: playlist.title,
+        description: playlist.description,
+        songs,
+    };
+}
+

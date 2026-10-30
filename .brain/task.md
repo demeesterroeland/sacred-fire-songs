@@ -10,4 +10,4 @@
 - [x] Cucumber steps `testing/bdd/steps/admin-users.steps.ts` + `testing/bdd/support/db.ts` (20 scenarios pass)
 - [x] Playwright `e2e/tests/admin-users.spec.ts` (24 passed, 2 skipped on mobile)
 - [x] Apply migration `20261009194500` to the local Supabase stack
-- [x] Doc sync: design doc v1.36, epic & user stories v1.37, e2e overview v1.5
+- [x] Doc sync: design doc v1.37, epic & user stories v1.37, e2e overview v1.5
