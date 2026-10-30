@@ -23,9 +23,11 @@ on:
   push:
     branches:
       - main
+      - develop
   pull_request:
     branches:
       - main
+      - develop
 
 concurrency:
   # One staging E2E run at a time per branch (they share the same remote DB).

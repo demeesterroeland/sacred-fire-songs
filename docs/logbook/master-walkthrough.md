@@ -3009,7 +3009,21 @@ Finished the English/Dutch i18n started on Sep 27 (WIP secured as a commit), mer
 - **More languages**: Spanish, Italian, Russian, Southern Quechua (machine-assisted, needs native review), French and Brazilian Portuguese dictionaries (582 keys each, parity + placeholder + "not a copy of English" tests); `quz`/`quy` → `qu`; PDF dates per locale; LanguageSwitcher became a native select; I18N-12 in story, feature, steps and e2e.
 - **Merge #259 (admin)**: resolved Sidebar/UserProfile/cucumber.json conflicts, translated the admin area (76 keys) into all eight languages.
 
-## October 30, 2026 (Part 7) - PDF footer QR code (#303) and PDF reuse cache (#304)
+## October 30, 2026 (Part 7) - Admin UI polish, sort and clickable rows (#278, #279, PR #259)
+
+**Task Overview**
+Acted on manual validation feedback for the admin users overview: layout bug, consistency with the rest of the app, select styling, and two follow-up stories implemented on the same branch.
+
+**Technical Details**
+- **Header overlap**: the app shell scrolls inside each section's `<main>`; the admin header was `sticky top-[var(--navbar-height)]` inside that container, so it stuck 3.5rem down and the cards scrolled under it. Admin pages now follow `app/library/layout.tsx` / `LibraryTabs.tsx` (own scroll container, title + pill tabs, breadcrumb on detail pages) and `LibrarySummary` cards.
+- **Pickers**: `components/common/ui/WickSelect.tsx` ports the i18n language picker (uncommitted on `feat/246-implement-multi-language-i18n`) into a generic listbox: portalled, arrow/Home/End/type-ahead keys, ember marker with the `ember-ignite` animation (identical CSS hunk to the i18n branch so the merge stays clean). Keyboard logic in `lib/ui/listbox.ts` is unit-tested.
+- **#278**: new sorts `name_desc`, `songs_desc`, `songs_asc` (ties by name) in `filterAndSortUsers`; `parseAdminUserSort` validates the value stored in `localStorage` (`admin-users-sort`), read through `useSyncExternalStore` to stay hydration-safe.
+- **#279**: the "Details" link is a stretched link (`after:absolute after:inset-0`). Its `active:scale-95` had to move to an inner span: a transform makes the link the containing block of its `::after`, collapsing the overlay on mousedown so row clicks never completed.
+- **Tests**: unit 131 passed, BDD 25 passed (+4 sort scenarios), Playwright admin spec 28 passed / 2 skipped against the production build on port 4258.
+- **Role colors (follow-up)**: `lib/admin/roleColors.ts` is now the single source for role colors; `RoleBadge` and the role filter options (`WickSelect` `accent`) use it, so each role has the same color in the rows and in the picker. Unit tests in `testing/unit/tests/adminRoleColors.test.ts`.
+- **Moved to develop**: #259 was merged into `main` at `bad0c84`, so the picker/sort/row/role-color commits were cherry-picked onto `feat/278-admin-sort-pickers` from `origin/develop`. Conflicts with the i18n'd admin code were resolved by translating the option labels (`t()`, three new `admin.sort.*` keys in eight locales) and keeping the i18n sort label style ("Sort: …" per language). `languageListbox.ts` now re-exports `keyToIndex`/`typeaheadIndex` from `lib/ui/listbox.ts`. Verified: unit 236, BDD 63 passed (51 pending stubs), Playwright admin + i18n specs green on the build at port 4278 (one i18n test flaked once, then 66/66 on two reruns).
+
+## October 30, 2026 (Part 9) - PDF footer QR code (#303) and PDF reuse cache (#304)
 
 - **#303**: the bottom-left footer now shows only the site host plus a 1 cm × 1 cm QR code (`qrcode`, error level M, quiet zone 2) that opens the song on that page; it is also a clickable link in PDF viewers. Continuation pages previously lost the song URL (`addContinuationPage` was called without it) — fixed, so every page of a song carries its QR. Content bottom margin raised to 52 pt. Verified by rendering a sample PDF at 300 dpi and decoding every QR with jsQR.
 - **#304**: `lib/export/pdfCache.ts` fingerprints the exported content (title, description, ordered songs with content/key/capo/transposition/URL), interface language, site URL and user (SHA-256). A matching fingerprint reuses the last PDF from IndexedDB (one entry per user + playlist); any change regenerates. Cache failures fall back to generation; sign-out clears the cache. The "Generated {date}" subtitle of a reused PDF keeps its original date (accepted in the issue).

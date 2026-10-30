@@ -1,6 +1,6 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 1.39
+**Version:** 1.42
 **Status:** Living Document
 **Date:** Oct 30, 2026
 
@@ -37,7 +37,10 @@
 | **1.36** | Oct 30, 2026 | Marked Story 4.2.1 as [Implemented] (Issue #18 / PR #220: PDF Setlist export for ceremony musicians using ChordSheetJS & jsPDF). |
 | **1.37** | Oct 30, 2026 | Added Epic 3.6 (Administrative Management, #257) and Story 3.6.1 (User Overview, Details & Contributions, #258); marked Story 3.6.1 as implemented, noted that comments/flags are not modelled yet and linked the executable spec `docs/testing/admin-users.feature`. |
 | **1.38** | Oct 30, 2026 | Added Epic 3.7: Multi-Language Support (Story 3.7.1, issue #246) with acceptance criteria I18N-01…I18N-12 (I18N-11: PDF export from #220; I18N-12: six additional languages), executable in `docs/testing/i18n.feature`. |
-| **1.39** | Oct 30, 2026 | Added Stories 4.2.3 (#303, PDF footer: site URL + 1 cm song QR code) and 4.2.4 (#304, reuse the setlist PDF while the playlist is unchanged), both [Implemented]. |
+| **1.39** | Oct 30, 2026 | Added Stories 3.6.2 (invite/create users, #275), 3.6.3 (suspend/reactivate, #276), 3.6.4 (change role, #277), 3.6.5 (sort by name and songs, #278, implemented) and 3.6.6 (clickable user rows, #279, implemented). |
+| **1.40** | Oct 30, 2026 | Added Phase 5 (Engineering Excellence) with Epic 5.1: Gitflow CI/CD Migration, stories 5.1.1–5.1.14 [Planned]. Plan: `docs/plans/2026-10-30-gitflow-cicd-migration.md`; executable spec: `docs/testing/gitflow-cicd.feature`. |
+| **1.41** | Oct 30, 2026 | Epic 5.1 created on GitHub: master epic #280, phase epics #281–#286, Task 5.1.0 #287, stories #288–#301 (sub-issues, `model:tier-1/2` labels, blocked-by dependencies). Linked issue numbers in the story table. Story 5.1.1 aligned with owner decision D4 (PR smoke against staging, no local stack). |
+| **1.42** | Oct 30, 2026 | Added Stories 4.2.3 (#303, PDF footer: site URL + 1 cm song QR code) and 4.2.4 (#304, reuse the setlist PDF while the playlist is unchanged), both [Implemented]. |
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
 
@@ -630,6 +633,42 @@ Scenario: Non-admin access restricted
 
 > **Implementation notes:** "Status" is derived from `last_seen_at` (active within 30 days / inactive / never active). "Musician status" means role `musician` or `expert`. Comments and flags are not modelled in the database yet, so they are not shown. Executable spec: `docs/testing/admin-users.feature` (`@unit`, `@seed`, `@e2e`).
 
+**Story 3.6.2:** As an Admin, I want to invite a new user by e-mail (or create an account directly) with a chosen role, so that I can onboard community members without them having to self-register. (#275 – acceptance criteria in the issue; needs a server-only `SUPABASE_SECRET_KEY`.)
+
+**Story 3.6.3:** As an Admin, I want to suspend and reactivate user accounts, so that I can stop abusive or compromised accounts without deleting their contributions. (#276 – no self-suspend, at least one active admin, confirmation dialog, audit log.)
+
+**Story 3.6.4:** As an Admin, I want to change a user's role, so that I can grant or withdraw permissions as responsibilities change. (#277 – no self-change, at least one active admin, confirmation dialog, audit log.)
+
+**Story 3.6.5: [Implemented]** As an Admin, I want to sort the users overview by name and by number of songs, so that I can quickly find a user or see who contributes most songs. (#278)
+
+```gherkin
+Scenario Outline: Sort the users overview
+  Given I am logged in as an Admin
+  When I sort by "<sort>"
+  Then the users are listed by <order>
+  Examples:
+    | sort         | order                                           |
+    | Name (A-Z)   | display name ascending, falling back to e-mail  |
+    | Name (Z-A)   | display name descending, falling back to e-mail |
+    | Most songs   | number of songs descending, ties by name        |
+    | Fewest songs | number of songs ascending, ties by name         |
+
+Scenario: Sort choice survives a reload
+  Given I sorted by "Most songs"
+  When I reload the page or come back from a user's details
+  Then the list is still sorted by "Most songs"
+```
+
+**Story 3.6.6: [Implemented]** As an Admin, I want to open a user's details by clicking anywhere on their row, so that I don't have to aim for the small "Details" button. (#279)
+
+```gherkin
+Scenario: Click a row to open the user's details
+  Given I am on the Admin Users overview page
+  When I click anywhere on a user's row
+  Then I am on that user's detail page
+  And Enter on the focused row, middle-click and Ctrl/Cmd-click work as for a link
+```
+
 ### Epic 3.7: Multi-Language Support (i18n)
 
 > **Scope:** the app interface (navigation, buttons, forms, messages) is available in English, Dutch, Spanish, Italian, Russian, Quechua (Runasimi), French and Portuguese. Song content (titles, lyrics, artist names, tags) is **not** translated. Executable scenarios: `docs/testing/i18n.feature` (issue #246).
@@ -708,7 +747,6 @@ Scenario: I18N-12 – Additional languages
   Then the interface is shown in that language
   And I can pick any of the eight languages, each listed in its own name, from the language menu
   And every language has a complete translation (same keys and placeholders as English)
-```
 
 ## Phase 4: Professional Toolkit
 
@@ -964,6 +1002,158 @@ Scenario: Guest cannot record or see private rehearsals
   When I view the Song Detail page
   Then the "Record Rehearsal" button should be hidden
   And I should not see any private rehearsal recordings
+```
+
+## Phase 5: Engineering Excellence
+
+Delivery-pipeline work. Personas: **Maintainer** (project owner) and **Contributor** (human or AI agent). GitHub master epic: #280 (phases #281–#286, Task 5.1.0 #287). Full acceptance spec: `docs/testing/gitflow-cicd.feature` (tag `@story-5.1.x`). Plan: `docs/plans/2026-10-30-gitflow-cicd-migration.md`.
+
+### Epic 5.1: Gitflow CI/CD Migration
+
+Move from GitHub Flow to a lightweight Gitflow: `main` = production, `develop` = integration + staging, `feat|fix|chore|docs/*` = work branches (squash into `develop`), `hotfix/*` = urgent fixes from `main`. Quality gates follow the test pyramid; the pipeline is built test-first (contract/bats tests → workflow change → Gherkin acceptance).
+
+| Story | Issue | Title | Plan phase | Status |
+|---|---|---|---|---|
+| 5.1.1 | #288 | PR quality gate (`ci.yml`) | 1 | [Planned] |
+| 5.1.2 | #289 | No false-green E2E / fail-closed Docker | 1 | [Planned] |
+| 5.1.3 | #290 | Single unit-test tree, strict BDD | 1 | [Planned] |
+| 5.1.4 | #292 | Protected `main` + `develop` (rulesets), default branch `develop` | 2 | [Planned] |
+| 5.1.5 | #293 | Branch & PR-title policy (`pr-lint.yml`) | 2 | [Planned] |
+| 5.1.6 | #294 | Scripts follow Gitflow (no `--admin`, correct image names) | 2 | [Planned] |
+| 5.1.7 | #295 | Staging CD from `develop` (images, migrations, deploy) | 3 | [Planned] |
+| 5.1.8 | #297 | Production promotion `develop` → `main` with approval | 4 | [Planned] |
+| 5.1.9 | #298 | Automatic back-merge `main` → `develop` | 4 | [Planned] |
+| 5.1.10 | #299 | Hotfix flow | 4 | [Planned] |
+| 5.1.11 | #296 | Test-pyramid schedule (nightly full E2E + perf) | 3 | [Planned] |
+| 5.1.12 | #291 | Supply-chain hardening (pinned actions, Dependabot, permissions) | 1 | [Planned] |
+| 5.1.13 | #300 | Documentation & agent tooling aligned to Gitflow | 5 | [Planned] |
+| 5.1.14 | #301 | Dress rehearsal & cut-over of open branches | 5 | [Planned] |
+
+**Story 5.1.1:** As a Maintainer, I want every pull request to run lint, typecheck, unit, BDD, build and the staging smoke E2E (`e2e`) so that broken code cannot be merged.
+
+```gherkin
+Scenario: A failing unit test blocks the merge
+  Given a pull request to "develop" that breaks a unit test
+  When CI finishes
+  Then the "unit" check is red
+  And GitHub does not allow merging the pull request
+```
+
+**Story 5.1.2:** As a Maintainer, I want E2E and Docker jobs to fail closed so that a green check always means the tests really ran.
+
+```gherkin
+Scenario: Missing staging secrets fail the staging E2E job
+  Given the staging E2E workflow
+  When the required staging secrets are absent
+  Then the job fails with a clear "missing secrets" error instead of being skipped
+```
+
+**Story 5.1.3:** As a Contributor, I want one unit-test directory and all feature files wired into Cucumber so that tests are not duplicated or silently ignored.
+
+```gherkin
+Scenario: Unit tests live in exactly one directory
+  Given the repository
+  Then no "*.test.ts" file exists in "lib/unit-tests"
+  And every "docs/testing/*.feature" file is included in "cucumber.json"
+```
+
+**Story 5.1.4:** As a Maintainer, I want `main` and `develop` protected with required checks, no force-push and rules applying to admins so that history is safe and every change is verified.
+
+```gherkin
+Scenario: Long-lived branches are protected
+  Given the branch "develop" or "main"
+  Then force pushes and deletion are blocked for everyone, including administrators
+  And the CI checks are required before merging
+```
+
+**Story 5.1.5:** As a Maintainer, I want pull requests checked for a Conventional Commit title and an allowed head → base combination so that releases are versioned correctly and work never skips `develop`.
+
+```gherkin
+Scenario: Feature PR into main is rejected
+  Given a pull request from "feat/300-new-thing" into "main"
+  When the "pr-lint" workflow runs
+  Then the policy check fails with "work branches must target develop"
+```
+
+**Story 5.1.6:** As a Contributor, I want `start-issue.sh` and the preview/promotion scripts to follow Gitflow so that the tools never bypass protection or print wrong image names.
+
+```gherkin
+Scenario: start-issue branches work from develop
+  When I run "scripts/start-issue.sh 300 feat new thing"
+  Then the branch "feat/300-new-thing" is created from "origin/develop"
+```
+
+**Story 5.1.7:** As a Maintainer, I want every merge into `develop` to build images, apply migrations to the staging Supabase project and redeploy staging so that staging always reflects `develop`.
+
+```gherkin
+Scenario: Staging reflects develop after a merge
+  Given a feature PR is squash-merged into "develop"
+  When the staging pipeline finishes
+  Then staging runs the new commit with all migrations applied
+```
+
+**Story 5.1.8:** As a Maintainer, I want to promote `develop` to `main` with a merge-commit PR that requires the full E2E and performance checks, and deploy the release tag to production only after my approval.
+
+```gherkin
+Scenario: Production deploy waits for approval
+  Given Release Please published "v1.8.0"
+  When the production deploy workflow starts
+  Then it waits for approval in the "Production" environment
+  And it deploys "ghcr.io/demeesterroeland/sacred-fire-songs-app:v1.8.0", never "latest"
+```
+
+**Story 5.1.9:** As a Maintainer, I want `main` merged back into `develop` after every release or hotfix so that version bumps and fixes are never lost.
+
+```gherkin
+Scenario: Release version bump reaches develop
+  Given Release Please released "v1.8.0" on "main"
+  When the back-merge pull request is merged
+  Then "package.json" on "develop" has version "1.8.0"
+```
+
+**Story 5.1.10:** As a Maintainer, I want a `hotfix/*` path from `main` so that I can fix production without shipping unfinished `develop` work.
+
+```gherkin
+Scenario: Hotfix goes straight to production and back to develop
+  Given a production bug tracked in issue 302
+  When "hotfix/302-prod-crash" is merged into "main"
+  Then a patch release is created
+  And the fix is back-merged into "develop"
+```
+
+**Story 5.1.11:** As a Maintainer, I want the slow test layers (full E2E, k6) to run nightly against staging and on promotion PRs so that per-PR CI stays fast while regressions are still caught.
+
+```gherkin
+Scenario: A nightly failure is visible
+  Given the nightly E2E run against staging fails
+  Then a GitHub issue labelled "ci-nightly" is opened or updated
+```
+
+**Story 5.1.12:** As a Maintainer, I want third-party actions pinned to commit SHAs, least-privilege permissions and Dependabot updates so that the pipeline is not a supply-chain risk.
+
+```gherkin
+Scenario: Third-party actions are pinned
+  Given every workflow in ".github/workflows"
+  Then every third-party "uses:" reference is pinned to a commit SHA
+  And every workflow declares top-level "permissions"
+```
+
+**Story 5.1.13:** As a Contributor, I want the guides, CLAUDE.md, PR template, design doc and agent skills to describe the Gitflow process so that humans and AI agents follow the same rules.
+
+```gherkin
+Scenario: Guides describe Gitflow
+  Given "docs/guides/git-workflow.md" and "docs/guides/development-workflow.md"
+  Then both describe main, develop, work and hotfix branches
+  And both have a version header and changelog entry
+```
+
+**Story 5.1.14:** As a Maintainer, I want a full dress rehearsal and the open branches retargeted to `develop` before announcing the switch so that the cut-over is safe.
+
+```gherkin
+Scenario: Dress rehearsal passes end to end
+  Given a trivial "docs:" change on a work branch
+  When it goes through develop, staging, the release PR, production approval and back-merge
+  Then every stage succeeds and the run URLs are recorded in the logbook
 ```
 
 ## Roles & Permissions Summary

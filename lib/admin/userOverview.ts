@@ -7,7 +7,21 @@ export type ActivityStatus = 'active' | 'inactive' | 'never';
 
 export type AdminRoleFilter = 'all' | 'admin' | 'gatekeeper' | 'musician' | 'member';
 
-export type AdminUserSort = 'joined' | 'contributions' | 'name';
+export const ADMIN_USER_SORTS = [
+  'joined',
+  'contributions',
+  'name',
+  'name_desc',
+  'songs_desc',
+  'songs_asc',
+] as const;
+
+export type AdminUserSort = (typeof ADMIN_USER_SORTS)[number];
+
+/** Validates a persisted/query sort value; unknown values fall back to "joined". */
+export function parseAdminUserSort(raw: string | null | undefined): AdminUserSort {
+  return (ADMIN_USER_SORTS as readonly string[]).includes(raw ?? '') ? (raw as AdminUserSort) : 'joined';
+}
 
 export interface AdminUserFilterOptions {
   query?: string;
@@ -81,6 +95,10 @@ function matchesRole(user: AdminUserSummary, role: AdminRoleFilter): boolean {
   return user.role === role;
 }
 
+function byName(a: AdminUserSummary, b: AdminUserSummary): number {
+  return displayName(a).localeCompare(displayName(b), undefined, { sensitivity: 'base' });
+}
+
 function byJoinedDesc(a: AdminUserSummary, b: AdminUserSummary): number {
   return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
 }
@@ -103,9 +121,10 @@ export function filterAndSortUsers(
       if (sortBy === 'contributions') {
         return getTotalContributions(b) - getTotalContributions(a) || byJoinedDesc(a, b);
       }
-      if (sortBy === 'name') {
-        return displayName(a).localeCompare(displayName(b), undefined, { sensitivity: 'base' });
-      }
+      if (sortBy === 'name') return byName(a, b);
+      if (sortBy === 'name_desc') return byName(b, a);
+      if (sortBy === 'songs_desc') return b.songs_count - a.songs_count || byName(a, b);
+      if (sortBy === 'songs_asc') return a.songs_count - b.songs_count || byName(a, b);
       return byJoinedDesc(a, b);
     });
 }
