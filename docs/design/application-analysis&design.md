@@ -1,8 +1,8 @@
 # Project Analysis & Design Document: Song Sharing Application (Sacred Fire Songs)
 
-**Version:** 1.32
+**Version:** 1.33
 **Status:** Living Document
-**Date:** July 16, 2026
+**Date:** Oct 30, 2026
 
 ## Changelog
 
@@ -25,6 +25,7 @@
 | **1.30** | Jun 28, 2026 | Fixed infinite song detail skeleton loader by adding 5s auth timeout (guest fallback) and 10s page load timeout. Rewrote random seeder into an optimized PL/pgSQL database-side seeder (reducing setup time from 70s to 3s). Added e2e/tests/timeouts.spec.ts, randomized categories/tags, and normally distributed tag assignment. |
 | **1.31** | Jun 29, 2026 | Implemented Private Rehearsal Audio Recording (Story 4.6.1). Created private rehearsals storage bucket and user_recordings table. Integrated AudioRecorder and RehearsalDrawer components on song detail page. |
 | **1.32** | July 16, 2026 | Moved existing song folders from `doc/extracted_songs` to `data/extracted_songs` and created a Python sync & PDF compiler script (`prod_songs_2_pdf.py`) to extract and sync all Production DB songs locally to `.cho` files ignored by Git and compile them into a PDF. |
+| **1.33** | Oct 30, 2026 | Moved the ChordPro song collection (`data/songs`, `data/extracted_songs`, `data/scripts`) and the songbook scripts (`scripts/prod_songs_2_pdf.py`, `scripts/compile_songbook.py`) out of this repository into the sibling repository `sacred-fire-songs-collection`, preserving git history. Only test fixtures remain here (`supabase/seeds`, `lib/unit-tests`, `testing/unit/tests`, `e2e/fixtures`). |
 
 
 ## 1. Introduction
