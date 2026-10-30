@@ -8,6 +8,7 @@ import { CardContent } from '@/components/common/CardContent';
 import { toast } from 'sonner';
 import { usePlaylistRename } from '@/hooks/usePlaylistRename';
 
+import { useLocale } from '@/context/LocaleContext';
 interface PlaylistCardProps {
     id: string;
     title: string;
@@ -18,6 +19,7 @@ interface PlaylistCardProps {
 }
 
 export function PlaylistCard({ id, title, subtitle, isPublic = false, description, songTitles = [] }: PlaylistCardProps) {
+    const { t } = useLocale();
     const {
         optimisticTitle,
         isRenaming,
@@ -32,7 +34,7 @@ export function PlaylistCard({ id, title, subtitle, isPublic = false, descriptio
     const handleCopyLink = () => {
         const origin = typeof window !== 'undefined' ? window.location.origin : '';
         navigator.clipboard.writeText(`${origin}/library/playlists/${id}`);
-        toast.success('Link copied');
+        toast.success(t('playlists.toast.linkCopied'));
     };
 
     return (

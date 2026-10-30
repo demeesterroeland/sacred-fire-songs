@@ -1,13 +1,15 @@
 'use client';
 
 import Link from 'next/link';
+import { useLocale } from '@/context/LocaleContext';
 
 interface BackButtonProps {
     href?: string;
     label?: string;
 }
 
-export function BackButton({ href = '/', label = 'Back' }: BackButtonProps) {
+export function BackButton({ href = '/', label }: BackButtonProps) {
+    const { t } = useLocale();
     return (
         <Link
             href={href}
@@ -27,7 +29,7 @@ export function BackButton({ href = '/', label = 'Back' }: BackButtonProps) {
             >
                 <polyline points="15 18 9 12 15 6" />
             </svg>
-            {label}
+            {label ?? t('common.back')}
         </Link>
     );
 }

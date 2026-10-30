@@ -1,6 +1,6 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 1.38
+**Version:** 1.40
 **Status:** Living Document
 **Date:** Oct 30, 2026
 
@@ -35,8 +35,10 @@
 | **1.34** | Jun 28, 2026 | Added Epic 4.6: Private Rehearsal & Audio Storage (Story 4.6.1) for microphone recording and private Supabase storage uploads. |
 | **1.35** | Jul 14, 2026 | Vercel preview deploy fix (`framework: null` → `nextjs`), Enter key submits search in modal, header spacing polish. Merged to main, closed #185. Story 1.2.4 fully deployed. |
 | **1.36** | Oct 30, 2026 | Marked Story 4.2.1 as [Implemented] (Issue #18 / PR #220: PDF Setlist export for ceremony musicians using ChordSheetJS & jsPDF). |
-| **1.37** | Oct 30, 2026 | Added Phase 5 (Engineering Excellence) with Epic 5.1: Gitflow CI/CD Migration, stories 5.1.1–5.1.14 [Planned]. Plan: `docs/plans/2026-10-30-gitflow-cicd-migration.md`; executable spec: `docs/testing/gitflow-cicd.feature`. |
-| **1.38** | Oct 30, 2026 | Epic 5.1 created on GitHub: master epic #280, phase epics #281–#286, Task 5.1.0 #287, stories #288–#301 (sub-issues, `model:tier-1/2` labels, blocked-by dependencies). Linked issue numbers in the story table. |
+| **1.37** | Oct 30, 2026 | Added Epic 3.6 (Administrative Management, #257) and Story 3.6.1 (User Overview, Details & Contributions, #258); marked Story 3.6.1 as implemented, noted that comments/flags are not modelled yet and linked the executable spec `docs/testing/admin-users.feature`. |
+| **1.38** | Oct 30, 2026 | Added Epic 3.7: Multi-Language Support (Story 3.7.1, issue #246) with acceptance criteria I18N-01…I18N-12 (I18N-11: PDF export from #220; I18N-12: six additional languages), executable in `docs/testing/i18n.feature`. |
+| **1.39** | Oct 30, 2026 | Added Phase 5 (Engineering Excellence) with Epic 5.1: Gitflow CI/CD Migration, stories 5.1.1–5.1.14 [Planned]. Plan: `docs/plans/2026-10-30-gitflow-cicd-migration.md`; executable spec: `docs/testing/gitflow-cicd.feature`. |
+| **1.40** | Oct 30, 2026 | Epic 5.1 created on GitHub: master epic #280, phase epics #281–#286, Task 5.1.0 #287, stories #288–#301 (sub-issues, `model:tier-1/2` labels, blocked-by dependencies). Linked issue numbers in the story table. |
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
 
@@ -598,6 +600,115 @@ Scenario: Onboarding question
   And answering Yes should set is_musician = true on my profile
   And answering No (or skipping) should leave it false
   And I can always change this later in my profile settings
+```
+
+### Epic 3.6: Administrative Management
+
+> **Placeholder & umbrella for administrative user stories.**
+> As an administrator, I want to be able to administer configuration, users, settings, and songs in such a way that I can ensure that I have up-to-date info and can act accordingly.
+
+**Story 3.6.1: [Implemented]** As an Admin, I want to have an overview of all users, view their details, and see their contributions, so that I can monitor community activity and ensure account information is accurate and up to date.
+
+```gherkin
+Scenario: View user list overview
+  Given I am logged in as an Admin
+  When I navigate to the Admin Users overview page
+  Then I should see a list of all registered users
+  And for each user I should see summary details (e.g., name/email, role, join date, status)
+
+Scenario: View user detail and contributions
+  Given I am logged in as an Admin
+  And I am viewing the users overview list
+  When I select a user to view their details
+  Then I should see their profile details (e.g., email, role, musician status, last active)
+  And I should see an overview of their contributions (e.g., songs added, versions submitted, public playlists created, comments/flags)
+
+Scenario: Non-admin access restricted
+  Given I am logged in as a Member or Gatekeeper
+  When I attempt to access the Admin Users overview page
+  Then I should be denied access with an unauthorized notice
+```
+
+> **Implementation notes:** "Status" is derived from `last_seen_at` (active within 30 days / inactive / never active). "Musician status" means role `musician` or `expert`. Comments and flags are not modelled in the database yet, so they are not shown. Executable spec: `docs/testing/admin-users.feature` (`@unit`, `@seed`, `@e2e`).
+
+### Epic 3.7: Multi-Language Support (i18n)
+
+> **Scope:** the app interface (navigation, buttons, forms, messages) is available in English, Dutch, Spanish, Italian, Russian, Quechua (Runasimi), French and Portuguese. Song content (titles, lyrics, artist names, tags) is **not** translated. Executable scenarios: `docs/testing/i18n.feature` (issue #246).
+
+**Story 3.7.1:** As a visitor or member, I want to use the app in my own language (English, Dutch, Spanish, Italian, Russian, Quechua, French or Portuguese) and have that choice remembered, so that I understand every screen without switching back each visit.
+
+```gherkin
+Scenario: I18N-01 – English is the default when nothing is known
+  Given I have never chosen a language
+  And my browser prefers a language the app does not support (e.g. German)
+  When I open any page
+  Then the interface is shown in English
+
+Scenario: I18N-02 – The browser language is the default when supported
+  Given I have never chosen a language
+  And my browser prefers Dutch ("nl-BE", "nl-NL", …)
+  When I open any page
+  Then the interface is shown in Dutch from the first render
+
+Scenario: I18N-03 – Switching language updates the whole interface immediately
+  Given I am on any page (as a guest or signed in)
+  When I pick "NL" in the language switcher (sidebar, user menu or Account → Preferences)
+  Then navigation, page content, buttons and messages switch to Dutch without a full page reload
+  And the <html lang> attribute becomes "nl"
+
+Scenario: I18N-04 – The choice persists across reloads, navigation and logout
+  Given I chose Dutch
+  When I reload, open another page, or sign out and back in on the same device
+  Then the interface is still in Dutch
+  And my choice overrides the browser language
+
+Scenario: I18N-05 – Server-rendered pages honour the choice without a hydration mismatch
+  Given I chose Dutch
+  When a page is rendered on the server and hydrated in the browser
+  Then the server HTML is already Dutch
+  And no React hydration-mismatch error is logged
+
+Scenario: I18N-06 – Missing translations fall back to English
+  Given a key has no Dutch translation
+  When it is shown with Dutch active
+  Then the English text is shown
+  And a key missing in every language shows the key name, never an empty string
+
+Scenario: I18N-07 – An unknown or tampered stored language is ignored
+  Given the stored language is not a supported one (e.g. "fr")
+  When I open the app
+  Then the browser language or English is used instead
+
+Scenario: I18N-08 – Placeholders are interpolated
+  Given a message contains placeholders like {count}
+  When it is shown
+  Then every placeholder is replaced by its value
+  And an unknown placeholder is shown literally
+
+Scenario: I18N-09 – Dictionaries stay in sync
+  Then every language has exactly the same keys as English
+  And every translation uses the same placeholders as its English source
+  And no translation is empty
+  And using an unknown key in code fails the TypeScript build
+
+Scenario: I18N-10 – Song content is never translated
+  Given Dutch is active
+  When I open a song
+  Then its title, lyrics, chords and artist names are shown exactly as entered
+
+Scenario: I18N-11 – Playlist PDF export follows the interface language
+  Given Dutch is active
+  When I export a playlist as PDF
+  Then the export button, messages and login prompt are in Dutch
+  And the PDF labels (page footer, "Toonsoort", "Door", date) are in Dutch
+  And the song titles, lyrics and chords in the PDF are unchanged
+
+Scenario: I18N-12 – Additional languages
+  Given my browser prefers Spanish, Italian, Russian, Quechua ("quz"/"quy"), French or Portuguese ("pt-BR")
+  When I open the app without a stored choice
+  Then the interface is shown in that language
+  And I can pick any of the eight languages, each listed in its own name, from the language menu
+  And every language has a complete translation (same keys and placeholders as English)
 ```
 
 ## Phase 4: Professional Toolkit

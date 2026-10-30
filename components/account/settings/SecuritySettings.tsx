@@ -5,12 +5,14 @@ import { User } from "@supabase/supabase-js";
 import { Mail, Lock, LogOut, Eye, EyeOff, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
+import { useLocale } from "@/context/LocaleContext";
 
 interface SecuritySettingsProps {
   user: User;
 }
 
 export default function SecuritySettings({ user }: SecuritySettingsProps) {
+  const { t } = useLocale();
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
@@ -22,7 +24,7 @@ export default function SecuritySettings({ user }: SecuritySettingsProps) {
 
   const handleUpdatePassword = async () => {
     if (newPassword !== confirmPassword) {
-      toast.error("Passwords do not match");
+      toast.error(t("settings.security.mismatch"));
       return;
     }
 
@@ -30,12 +32,12 @@ export default function SecuritySettings({ user }: SecuritySettingsProps) {
     try {
       const { error } = await supabase.auth.updateUser({ password: newPassword });
       if (error) throw error;
-      toast.success("Password updated successfully");
+      toast.success(t("settings.security.success"));
       setNewPassword("");
       setConfirmPassword("");
     } catch (error) {
       const err = error as Error;
-      toast.error(err.message || "Failed to update password");
+      toast.error(err.message || t("settings.security.error"));
     } finally {
       setIsUpdating(false);
     }
@@ -47,7 +49,7 @@ export default function SecuritySettings({ user }: SecuritySettingsProps) {
       if (error) throw error;
       window.location.href = "/auth/login";
     } catch (error) {
-      toast.error("Failed to log out from all devices");
+      toast.error(t("settings.security.signOutAllError"));
     }
   };
 
@@ -66,7 +68,7 @@ export default function SecuritySettings({ user }: SecuritySettingsProps) {
           className="w-full bg-slate-100/50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/10 px-4 py-3 rounded-xl text-gray-900 dark:text-white opacity-60 cursor-not-allowed"
         />
         <button
-          onClick={() => toast.info("Email change is currently handled via support.")}
+          onClick={() => toast.info(t("settings.profile.emailNote"))}
           className="w-full sm:w-auto bg-[#f45d1a] text-white font-semibold px-6 py-3 rounded-xl hover:brightness-110 shadow-lg shadow-orange-900/20 transition-all"
         >
           Change Email
@@ -80,11 +82,11 @@ export default function SecuritySettings({ user }: SecuritySettingsProps) {
       <div className="space-y-4">
         <h2 className="text-xl font-bold flex items-center gap-2 text-gray-900 dark:text-white">
           <Lock className="w-5 h-5 text-gray-500 dark:text-slate-400" />
-          Password
+          {t("settings.security.changePassword")}
         </h2>
 
         <div className="space-y-2">
-          <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">New Password</label>
+          <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">{t("settings.security.newPassword")}</label>
           <div className="relative">
             <input
               type={showNewPassword ? "text" : "password"}
@@ -105,7 +107,7 @@ export default function SecuritySettings({ user }: SecuritySettingsProps) {
         </div>
 
         <div className="space-y-2">
-          <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">Confirm New Password</label>
+          <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">{t("settings.security.confirmPassword")}</label>
           <div className="relative">
             <input
               type={showConfirmPassword ? "text" : "password"}
@@ -135,7 +137,7 @@ export default function SecuritySettings({ user }: SecuritySettingsProps) {
           }`}
         >
           {isUpdating && <Loader2 className="w-4 h-4 animate-spin" />}
-          {isUpdating ? "Updating..." : "Update Password"}
+          {isUpdating ? t("settings.security.updating") : t("settings.security.updatePassword")}
         </button>
       </div>
 
@@ -147,7 +149,7 @@ export default function SecuritySettings({ user }: SecuritySettingsProps) {
           className="w-full md:w-auto flex items-center justify-center gap-2 text-red-400 hover:text-red-300 transition-colors px-6 py-3 border border-red-500/20 rounded-xl hover:bg-red-500/5"
         >
           <LogOut className="w-5 h-5" />
-          Log Out from all devices
+          {t("settings.security.signOutAll")}
         </button>
       </div>
     </section>

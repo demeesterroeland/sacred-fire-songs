@@ -31,6 +31,16 @@ testing/
 npm run test:unit
 ```
 
+### BDD (Cucumber, non-browser)
+Feature files live in `docs/testing/*.feature`, steps in `testing/bdd/steps/`,
+shared fakes in `testing/support/`.
+```bash
+npm run test:bdd          # @unit and @seed scenarios of every feature
+npm run test:bdd:unit     # @unit only
+npm run test:bdd:seed     # @seed only (needs the seeded local database)
+npm run test:bdd:i18n     # @unit scenarios of docs/testing/i18n.feature
+```
+
 ### E2E Tests
 ```bash
 npm run test:e2e          # All E2E tests

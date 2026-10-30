@@ -87,6 +87,7 @@
 | **September 27, 2026** | **Feature/Architecture**: Unified Audio Experience (#237) — Implemented global audio context, Source Switcher dropdown with dark glassmorphism, hoisted data fetching, fixed CSS progress bar clipping, resolved double scrollbars, and consolidated Playwright E2E test suites via multi-agent sub-branches. | ~4.0 Hours | ✅ Completed |
 
 | **September 27, 2026 (Part 2)** | **Release/Ops**: Finalizing v1.6.0 Release (#242, #251, #253, #254) — Fixed hardware pop, added metadata UI, repaired staging migrator pipeline and .gitignore bugs, and cleared deployment pipeline bottlenecks. | ~2.5 Hours | ✅ Completed |
+| **October 9, 2026** | **Feature/Admin**: Administrative Management & User Overview (#257, #258) — Added Epic 3.6 & Story 3.6.1, PostgreSQL security definer RLS policies on profiles & setlists, admin server queries, Admin Portal layout with role guard, responsive users overview table with search/filters, user detail view with contribution breakdown, and unit test suite. | ~3.0 Hours | ✅ Completed |
 
 | **October 30, 2026** | **Chore/Repo Hygiene**: Moved the ChordPro song collection and songbook scripts out of the app repository into `sacred-fire-songs-collection` with full git history (`git filter-repo`), kept only test fixtures, cleaned `.gitignore`, bumped design doc to v1.33. | ~0.5 Hours | ✅ Completed |
 
@@ -96,4 +97,8 @@
 
 | **October 30, 2026 (Part 4)** | **Feature/Print & Export**: Musician Setlist PDF Export (Story 4.2.1 / Issue #18) — Implemented ChordSheetJS + jsPDF client-side PDF export, high-contrast firelight typography, BDD feature specification (`setlist-pdf-export.feature`), 12 unit tests, and quick-action export buttons on playlist header & menu. | ~2.0 Hours | ✅ Completed |
 
-| **Total** | **Development + AI Collaboration** | **~173.75 Hours** | |
+| **October 30, 2026 (Part 5)** | **Feature/Testing (#258)**: Reviewed Story 3.6.1 against its ACs, fixed the admin user detail query (non-existent columns left the contribution tabs empty), added activity/musician status and public playlist counts, and covered the story with 48 vitest tests, 20 Cucumber @unit/@seed scenarios (`docs/testing/admin-users.feature`) and a Playwright spec. | ~2.5 Hours | ✅ |
+
+| **October 30, 2026 (Part 6)** | **Feature/i18n (#246)**: Merged main twice (#220 PDF export strings + PDF labels localized), six more languages (es, it, ru, qu, fr, pt) redesigned ember listbox language picker, merged #259 admin, request-scoped server locale, LocaleProvider hydration fix, LanguageSwitcher (sidebar/user menu/preferences), finished string migration, Story 3.7.1, `i18n.feature`, vitest + Cucumber + Playwright coverage, main-vs-branch e2e baseline comparison. | ~6.0 Hours | ✅ Completed |
+
+| **Total** | **Development + AI Collaboration** | **~185.25 Hours** | |

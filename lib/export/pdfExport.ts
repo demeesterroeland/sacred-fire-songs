@@ -3,6 +3,7 @@ import { jsPDF } from 'jspdf';
 import { parseChordProForDisplay, ChordProSection } from '@/lib/chordUtils';
 import { parseChordPro, convertChordsOverLyricsToChordPro } from '@/lib/chordProParsing';
 import { DEJAVU_SANS_REGULAR_B64, DEJAVU_SANS_BOLD_B64 } from './dejavuFonts';
+import { DEFAULT_LOCALE, LOCALE_DATE_TAGS, tWithLocale, type Locale, type TranslationKey } from '@/lib/i18n';
 
 export interface ExportSongData {
     title: string;
@@ -20,6 +21,26 @@ export interface ExportPlaylistData {
     description?: string | null;
     songs: ExportSongData[];
     baseUrl?: string;
+    /** Interface language for the document labels (page footer, metadata). Defaults to English. */
+    locale?: Locale;
+}
+
+/** Document labels in the given interface language (song content is never translated). */
+export function getPdfLabels(locale: Locale = DEFAULT_LOCALE) {
+    const tr = (key: TranslationKey, params?: Record<string, string | number>) => tWithLocale(locale, key, params);
+    return {
+        dateLocale: LOCALE_DATE_TAGS[locale] ?? 'en-US',
+        untitledSong: tr('pdf.untitledSong'),
+        untitledPlaylist: tr('pdf.untitledPlaylist'),
+        page: (page: number, total: number) => tr('pdf.page', { page, total }),
+        subtitle: (count: number, date: string) => tr(count === 1 ? 'pdf.subtitle.one' : 'pdf.subtitle.other', { count, date }),
+        by: (author: string) => tr('pdf.by', { author }),
+        key: (key: string) => tr('pdf.key', { key }),
+        capo: (capo: number) => tr('pdf.capo', { capo }),
+        tuning: (tuning: string) => tr('pdf.tuning', { tuning }),
+        continued: (title: string) => tr('pdf.continued', { title }),
+        playlist: (title: string) => tr('pdf.playlist', { title }),
+    };
 }
 
 export interface FormattedSongForPdf {
@@ -76,7 +97,7 @@ export function sanitizeFilename(title: string): string {
  * - Applies musical transposition if requested.
  * - Formats sections with structured lines, chords, lyrics, and annotations.
  */
-export function formatSongForPdf(song: ExportSongData): FormattedSongForPdf {
+export function formatSongForPdf(song: ExportSongData, untitled = 'Untitled Song'): FormattedSongForPdf {
     let contentToProcess = song.content || '';
     let songKey = song.key;
 
@@ -111,7 +132,7 @@ export function formatSongForPdf(song: ExportSongData): FormattedSongForPdf {
     // 2. Parse embedded metadata directives
     const embedded = parseChordPro(contentToProcess);
 
-    const title = sanitizeForPdf(embedded.title || song.title || 'Untitled Song');
+    const title = sanitizeForPdf(embedded.title || song.title || untitled);
     const author = sanitizeForPdf(song.author || embedded.author || '');
     const key = songKey || embedded.key;
     const capo = song.capo !== undefined
@@ -154,6 +175,7 @@ export function formatSongForPdf(song: ExportSongData): FormattedSongForPdf {
  * for musicians in ceremony.
  */
 export async function exportPlaylistToPdf(playlist: ExportPlaylistData): Promise<Blob> {
+    const labels = getPdfLabels(playlist.locale);
     if (!playlist.songs || playlist.songs.length === 0) {
         throw new Error('Playlist has no songs to export');
     }
@@ -198,27 +220,27 @@ export async function exportPlaylistToPdf(playlist: ExportPlaylistData): Promise
         doc.setFont('DejaVuSans', 'normal');
         doc.setFontSize(8.5);
         doc.setTextColor(156, 163, 175);
-        doc.text(`${songTitle} (continued)`, leftMargin, y);
+        doc.text(labels.continued(songTitle), leftMargin, y);
         y += 18;
     };
 
     // ─── Setlist Header on Page 1 ─────────────────────────────────────────────
-    pageSongMap.set(1, { title: playlist.title || 'Setlist' });
+    pageSongMap.set(1, { title: playlist.title || labels.untitledPlaylist });
 
     doc.setFont('DejaVuSans', 'bold');
     doc.setFontSize(22);
     doc.setTextColor(17, 24, 39); // deep charcoal
-    doc.text(sanitizeForPdf(playlist.title || 'Setlist'), leftMargin, y);
+    doc.text(sanitizeForPdf(playlist.title || labels.untitledPlaylist), leftMargin, y);
     y += 20;
 
     // Date & Song Count Sub-header
-    const dateStr = new Date().toLocaleDateString('en-US', {
+    const dateStr = new Date().toLocaleDateString(labels.dateLocale, {
         year: 'numeric',
         month: 'short',
         day: 'numeric',
     });
     const songCount = playlist.songs.length;
-    const subtitle = `${songCount} song${songCount === 1 ? '' : 's'}   •   Generated ${dateStr}`;
+    const subtitle = labels.subtitle(songCount, dateStr);
 
     doc.setFont('DejaVuSans', 'normal');
     doc.setFontSize(9.5);
@@ -243,7 +265,7 @@ export async function exportPlaylistToPdf(playlist: ExportPlaylistData): Promise
 
     // ─── Render Each Song ─────────────────────────────────────────────────────
     playlist.songs.forEach((songData, songIdx) => {
-        const formattedSong = formatSongForPdf(songData);
+        const formattedSong = formatSongForPdf(songData, labels.untitledSong);
 
         // Subsequent songs start on a fresh page
         if (songIdx > 0) {
@@ -263,12 +285,12 @@ export async function exportPlaylistToPdf(playlist: ExportPlaylistData): Promise
 
         // Song Metadata Pills: Author, Key, Capo, Tuning
         const metaPills: string[] = [];
-        if (formattedSong.author) metaPills.push(`By ${formattedSong.author}`);
-        if (formattedSong.key) metaPills.push(`Key: ${formattedSong.key}`);
+        if (formattedSong.author) metaPills.push(labels.by(formattedSong.author));
+        if (formattedSong.key) metaPills.push(labels.key(formattedSong.key));
         if (formattedSong.capo !== undefined && formattedSong.capo > 0) {
-            metaPills.push(`Capo: ${formattedSong.capo}`);
+            metaPills.push(labels.capo(formattedSong.capo));
         }
-        if (formattedSong.tuning) metaPills.push(`Tuning: ${formattedSong.tuning}`);
+        if (formattedSong.tuning) metaPills.push(labels.tuning(formattedSong.tuning));
 
         if (metaPills.length > 0) {
             doc.setFont('DejaVuSans', 'normal');
@@ -423,8 +445,8 @@ export async function exportPlaylistToPdf(playlist: ExportPlaylistData): Promise
             leftFooter = baseDomain ? `${baseDomain}${pageSong.url}` : pageSong.url;
         }
 
-        const midFooter = `Playlist: ${sanitizeForPdf(playlist.title || 'Setlist')}`;
-        const rightFooter = `Page ${i} of ${totalPages}`;
+        const midFooter = labels.playlist(sanitizeForPdf(playlist.title || labels.untitledPlaylist));
+        const rightFooter = labels.page(i, totalPages);
 
         // Bottom Left: Song URL (truncated with ellipsis if very long)
         if (leftFooter) {

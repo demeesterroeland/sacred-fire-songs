@@ -2898,6 +2898,43 @@ Refactored the Rehearsal Drawer and Mini-Player to create a seamless, unified pl
 - **Preview & Pipeline Stability (#253 & #254)**: Resolved deployment pipeline issues for the Preview environment. Renamed the frontend container image to `sacred-fire-songs-app` to prevent naming collisions with the `sacred-fire-songs-migrator` on the Dockge host. Stripped `build:` contexts from `docker-compose.yml` to force strict registry pulling.
 - **Gitignore Migration Bug (#251)**: Investigated and fixed a silent bug where `.gitignore` was swallowing new Supabase `.sql` migration files due to a wildcard `*.sql` rule, breaking the database migrator workflow.
 
+## October 8-9, 2026: Epic 3.6 Administrative Management & Story 3.6.1 (User Overview & Contributions)
+
+**Issues**: Epic #257, Story #258 | **Branch**: `feat/userstory-3.6` | **Worktree**: `.worktrees/feat-userstory-3.6`
+
+### Objective
+Provide administrators with an administrative portal to monitor and manage all users, inspect user details, and review community contributions (songs created, arrangements contributed, and playlists built).
+
+### 1. Database & Security Definer Architecture
+- Addressed PostgreSQL RLS recursion challenges on the `profiles` table by defining a security definer helper function `public.fn_is_admin()`.
+- Created migration `20261009194500_admin_profiles_policy.sql` introducing:
+  - `public.fn_is_admin()`: securely checks if `auth.uid()` has `role = 'admin'` in `public.profiles` without infinite policy recursion.
+  - Policy `"Admins can read all profiles"` on `public.profiles` for `SELECT`.
+  - Policy `"Admins can view all setlists"` on `public.setlists` for `SELECT`.
+- Updated `docs/design/db-schema.sql` to maintain a single-file fresh install setup script.
+
+### 2. Backend & Server Queries (`lib/admin/serverQueries.ts`)
+- Implemented `checkAdminAccess()` for strict session and role verification (`role === 'admin'`).
+- Implemented `getAdminUsersList()` returning all registered users combined with aggregated contribution metrics (`songs_count`, `versions_count`, `playlists_count`) fetched concurrently.
+- Implemented `getAdminUserDetails(userId)` returning complete user profile metadata alongside their created compositions, submitted song versions, and public/private playlists.
+
+### 3. Admin Routing & Access Control
+- `app/admin/layout.tsx`: server-side guard verifying caller's role. Unauthenticated requests are redirected to `/auth/login?next=/admin/users`, while non-admin authenticated users receive a clean `AccessDeniedNotice` view.
+- `app/admin/page.tsx`: auto-redirects to `/admin/users`.
+- `components/admin/AdminHeader.tsx`: sticky administrative navigation with status badges and tabs.
+
+### 4. User Experience & Navigation Integration
+- `components/admin/AdminUsersTable.tsx`: responsive users overview with real-time text search (name/email), role filtering, multi-criteria sorting, quick contribution counters, and high-level platform metric cards.
+- `components/admin/AdminUserDetailView.tsx`: user inspection view displaying avatar, contact/identity information, activity timestamps, and interactive tabs for contributed songs, song versions, and playlists with direct links.
+- `components/common/navigation/UserProfile.tsx`: added "Admin Portal" link with a shield icon (`ShieldCheck`) in the user account dropdown, visible strictly when `user.role === 'admin'`.
+- `components/common/Sidebar.tsx`: added dedicated "Administration" navigation section for admin users.
+
+### 5. Verification & Testing
+- Authored unit test suite in `lib/unit-tests/adminQueries.test.ts` (7 tests covering unauthorized rejection, admin verification, list aggregation, and detail mapping).
+- All 11 test suites and 79 unit tests in `lib/unit-tests/` pass with 100% success.
+- TypeScript compilation (`npx tsc --noEmit`) passes with zero errors.
+- Production build (`npm run build`) generates all dynamic `/admin` routes cleanly.
+
 ## October 30, 2026 - Move Song Collection Out of the App Repository
 
 **Task Overview**
@@ -2944,3 +2981,30 @@ Implemented Story 4.2.1: *"As a Musician, I want to generate a PDF of my setlist
 - **UI & Server Action**: Implemented secure `getPlaylistSongsForExport` in `app/actions/playlistActions.ts`. Added quick-action `Printer` button to `PlaylistDetailHeader.tsx` and "Export PDF" with toast notifications to `PlaylistContextMenu.tsx`.
 - **Validation**: All 66 unit tests passing (`npm run test:unit`), Next.js production build passing with 0 errors across 23 routes (`npm run build`), and Playwright E2E smoke tests passing on GitHub Actions.
 
+## October 30, 2026 (Part 5) - Story 3.6.1 Review, Bug Fix & Test Pyramid (#258, PR #259)
+
+**Task Overview**
+Reviewed the admin users overview against the Story 3.6.1 acceptance criteria after merging `origin/main` (Cucumber runner #271), fixed a data bug, closed the AC gaps and covered every criterion at the unit, BDD (@unit/@seed) and e2e layers.
+
+**Technical Details**
+- **Bug**: `getAdminUserDetails` selected `compositions.artist` and `song_versions.song_id`/`name`, which do not exist (`original_author`, `composition_id`, `version_name`). PostgREST errors were swallowed, so the songs and versions tabs were always empty. The old vi.fn() mocks returned whatever shape the code expected and hid it. Fixed, and errors are now logged.
+- **Refactor**: `lib/admin/userQueries.ts` takes the Supabase client as a parameter (used by vitest, Cucumber and `serverQueries.ts`); `lib/admin/userOverview.ts` holds activity status (30-day window), role labels, musician status (`musician`/`expert`), search/filter/sort and totals.
+- **AC gaps closed**: per-user status in the list, `expert` role badge + "Musician / Expert" filter, musician status and activity status on the detail page, public playlist counts, "No registered users yet" vs "No users found" empty states, `app/admin/users/[id]/not-found.tsx`.
+- **Test double**: `testing/support/fakeSupabase.ts` validates selected columns against the real table shapes (PostgREST 42703 on unknown columns); a @seed scenario checks those shapes against `information_schema` so the fake cannot drift.
+- **Tests**: 48 vitest tests (`testing/unit/tests/admin*.test.ts`), 20 Cucumber scenarios (`docs/testing/admin-users.feature`: access by role, no session, `fn_is_admin()`, RLS on private playlists in a rolled-back transaction, overview, status, counts, search/filter/sort, details, contributions, unknown id), Playwright `e2e/tests/admin-users.spec.ts` (24 passed, 2 skipped on mobile).
+- **Findings outside scope**: guests are redirected by `proxy.ts` to `/auth/login?message=…` (no `next`), so the layout's `next=/admin/users` redirect is unreachable; `notFound()` renders with HTTP 200 because `app/loading.tsx` streams; bare `vitest run` (`npm test`) also collects Playwright specs; `@types/pg` is missing.
+
+
+## October 30, 2026 (Part 6) - Multi-Language Support i18n (#246, Story 3.7.1)
+
+**Task Overview**
+Finished the English/Dutch i18n started on Sep 27 (WIP secured as a commit), merged `origin/main` (#260, #269, Cucumber runner #263/#271) and brought the story in line with the #262 testing pyramid.
+
+**Technical Details**
+- **Architecture**: `lib/i18n` gained `resolveLocale()` (localStorage → cookie → browser language → English), `resolveRequestLocale()` / `parseAcceptLanguage()`, cookie helpers and a fallback chain active → English → key. `lib/i18n/server.ts` gives Server Components a request-scoped `getServerT()`; `lib/i18n/persistence.ts` holds DOM-free browser persistence.
+- **Provider**: `LocaleProvider` starts in the server locale (no hydration mismatch, no English flash), exposes a bound `t` used by every Client Component (`useLocale().t`), and refreshes Server Components until the root layout's locale matches (a single `router.refresh()` was dropped in ~4% of mobile switches).
+- **UI**: `LanguageSwitcher` in sidebar footer (guests), user menu and Account → Preferences → Language; remaining hardcoded strings migrated; English copy changed by the WIP migration restored (it broke the search e2e spec).
+- **Tests**: Story 3.7.1 (I18N-01…10); `docs/testing/i18n.feature`; vitest `i18n.test.ts` + `localePersistence.test.ts` (TDD); Cucumber `i18n.steps.ts` + `npm run test:bdd:i18n`; Playwright `e2e/tests/i18n.spec.ts`. Full headless e2e suite identical to a `main` baseline apart from the new passing i18n tests.
+- **PDF export (#220)**: second `origin/main` merge; export button, toasts, login prompt and context-menu item translated; PDF labels localized via `getPdfLabels(locale)`; I18N-11 added to story, feature and steps.
+- **More languages**: Spanish, Italian, Russian, Southern Quechua (machine-assisted, needs native review), French and Brazilian Portuguese dictionaries (582 keys each, parity + placeholder + "not a copy of English" tests); `quz`/`quy` → `qu`; PDF dates per locale; LanguageSwitcher became a native select; I18N-12 in story, feature, steps and e2e.
+- **Merge #259 (admin)**: resolved Sidebar/UserProfile/cucumber.json conflicts, translated the admin area (76 keys) into all eight languages.

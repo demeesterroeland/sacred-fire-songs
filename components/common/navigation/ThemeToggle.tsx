@@ -2,15 +2,17 @@
 
 import { Sun, Moon, Monitor } from 'lucide-react';
 import { useUserPreferences, type ThemePreference } from '@/context/UserPreferencesContext';
-
-const themeOptions: { value: ThemePreference; icon: typeof Sun; label: string }[] = [
-    { value: 'light', icon: Sun, label: 'Light' },
-    { value: 'dark', icon: Moon, label: 'Dark' },
-    { value: 'system', icon: Monitor, label: 'System' },
-];
+import { useLocale } from '@/context/LocaleContext';
 
 export function ThemeToggle() {
     const { preferences, setPreference } = useUserPreferences();
+    const { t } = useLocale();
+
+    const themeOptions: { value: ThemePreference; icon: typeof Sun; label: string }[] = [
+        { value: 'light', icon: Sun, label: t('theme.light') },
+        { value: 'dark', icon: Moon, label: t('theme.dark') },
+        { value: 'system', icon: Monitor, label: t('theme.system') },
+    ];
 
     // Cycle through: light → dark → system → light
     const cycleTheme = () => {
@@ -27,8 +29,8 @@ export function ThemeToggle() {
         <button
             onClick={cycleTheme}
             className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
-            aria-label={`Theme: ${current.label}`}
-            title={`Theme: ${current.label}`}
+            aria-label={t('theme.label', { theme: current.label })}
+            title={t('theme.label', { theme: current.label })}
         >
             <Icon className="w-5 h-5" />
         </button>

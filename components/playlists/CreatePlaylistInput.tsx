@@ -5,8 +5,10 @@ import { Plus } from 'lucide-react';
 import { createPlaylist } from '@/app/actions/playlistActions';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import { useLocale } from '@/context/LocaleContext';
 
 export function CreatePlaylistInput() {
+    const { t } = useLocale();
     const [isOpen, setIsOpen] = useState(false);
     const [title, setTitle] = useState('');
     const [isPending, startTransition] = useTransition();
@@ -28,9 +30,9 @@ export function CreatePlaylistInput() {
             if ('error' in result) {
                 toast.error(result.error);
             } else {
-                toast.success(`"${trimmed}" created`, {
+                toast.success(t('playlists.created', { name: trimmed }), {
                     action: {
-                        label: 'View Playlist →',
+                        label: t('playlists.viewPlaylist'),
                         onClick: () => { router.push(`/library/playlists/${result.id}`); },
                     },
                     classNames: {
@@ -51,7 +53,7 @@ export function CreatePlaylistInput() {
                 className="flex items-center gap-1 text-xs font-semibold text-red-500 border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 hover:border-red-500/50 rounded-full px-3 py-1 transition-all"
             >
                 <Plus className="w-3.5 h-3.5" />
-                New Playlist
+                {t('playlists.newButton')}
             </button>
         );
     }
@@ -67,7 +69,7 @@ export function CreatePlaylistInput() {
                     if (e.key === 'Escape') { setIsOpen(false); }
                 }}
                 onBlur={submit}
-                placeholder="Playlist name…"
+                placeholder={t('playlists.new.placeholder')}
                 disabled={isPending}
                 className="flex-1 bg-gray-100 dark:bg-gray-800 border border-amber-500/50 rounded-lg px-3 py-1 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-600 outline-none focus:border-amber-500 disabled:opacity-50 min-w-0 w-40"
             />
@@ -76,7 +78,7 @@ export function CreatePlaylistInput() {
                 disabled={isPending || !title.trim()}
                 className="text-xs font-semibold text-amber-400 hover:text-amber-300 disabled:opacity-40 transition-colors px-1 shrink-0"
             >
-                {isPending ? '…' : 'Create'}
+                {isPending ? '…' : t('playlists.create')}
             </button>
         </div>
     );
