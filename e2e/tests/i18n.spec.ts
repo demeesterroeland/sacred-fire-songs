@@ -139,13 +139,14 @@ test.describe('Interface language @i18n', () => {
   });
 
   test.describe('I18N-04: signed-in user', () => {
-    // Fresh login (no shared storageState): signing out revokes the account's
-    // sessions, so use the musician account, which no other spec reuses.
+    // Fresh login (no shared storageState). Supabase's sign-out is global: it
+    // revokes every session of the account, including the stored sessions other
+    // specs reuse. Stub only that server call; the app's own sign-out flow still
+    // runs and clears the local session.
     test.use({ locale: 'en-US' });
 
-    test('choice from Preferences survives signing out and in again', async ({ page, isMobile }) => {
-      // Signing out is global for the account; run once (desktop) to avoid racing the mobile project.
-      test.skip(isMobile, 'covered on desktop; sign-out would race the parallel mobile run');
+    test('choice from Preferences survives signing out and in again', async ({ page }) => {
+      await page.route('**/auth/v1/logout**', (route) => route.fulfill({ status: 204, body: '' }));
       const { email } = ROLES.musician;
 
       const signIn = async (dict: Dict) => {
