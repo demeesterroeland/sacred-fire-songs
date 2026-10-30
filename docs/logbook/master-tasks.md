@@ -1233,3 +1233,14 @@
 - [x] Rebase on `origin/main` after song collection migration (#269) and verify full unit test suite (66/66) & production build
 - [x] Push commit to PR #220 and verify GitHub Actions E2E checks succeed
 
+
+## Session October 30, 2026 (Part 5: Gitflow CI/CD Migration — Planning, Epic 5.1)
+- [x] Create worktree branch `docs/gitflow-migration-plan`
+- [x] Online research: Gitflow (nvie + 2020 note), env mapping, merge strategies, Release Please multi-branch/prerelease, protection & action pinning
+- [x] Gap analysis of workflows, repo settings, scripts, tests and docs (found: no PR CI, E2E false green due to missing staging secrets, `deploy-db.yml` deleted but still referenced, `main` allows force-push / no required checks, `--admin` merge in `preview2prod.sh`, wrong image names in `dev2preview.sh`, duplicate unit-test dirs)
+- [x] Write plan `docs/plans/2026-10-30-gitflow-cicd-migration.md` (6 phases, pipeline matrix, test pyramid / TDD / BDD strategy, orchestration, open decisions D1–D7)
+- [x] Write executable acceptance spec `docs/testing/gitflow-cicd.feature` (test-first, `@ci-contract` / `@script` / `@manual`)
+- [x] Add Phase 5 / Epic 5.1 with stories 5.1.1–5.1.14 to `docs/logbook/epic&user stories.md` (v1.37)
+- [ ] Owner: decide D1–D7 in the plan
+- [ ] Create GitHub issues for Epic 5.1 and its stories (`/create-issue`, Phase 0.1)
+- [ ] Phase 0 onwards: implementation (not started — planning only)
