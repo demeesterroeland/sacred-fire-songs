@@ -1,6 +1,6 @@
 # E2E Test Overview & Matrix: Sacred Fire Songs
 
-**Version:** 1.7
+**Version:** 1.8
 **Status:** Living Document
 **Date:** Oct 30, 2026
 **Tracking:** GH #142
@@ -17,6 +17,7 @@
 | **1.5** | Oct 30, 2026 | Added section 4.11 Administration (Epic 3.6) with ADMIN-01 … ADMIN-07, covered by `e2e/tests/admin-users.spec.ts` (Gherkin: `docs/testing/admin-users.feature`). |
 | **1.6** | Oct 30, 2026 | Added ACC-07 (interface language, Story 3.7.1 / #246) covered by `e2e/tests/i18n.spec.ts`; scenarios catalogued in `docs/testing/i18n.feature`. |
 | **1.7** | Oct 30, 2026 | ACC-07 extended to eight languages (I18N-12). |
+| **1.8** | Oct 30, 2026 | Added ADMIN-08 (remembered sort, #278) and ADMIN-09 (clickable user rows, #279); ADMIN-05 now drives the listbox-style role picker. |
 
 ---
 
@@ -227,6 +228,8 @@ Spec: `e2e/tests/admin-users.spec.ts` · Gherkin: `docs/testing/admin-users.feat
 | ADMIN-05 | Search / filter | Search by e-mail, "No users found" empty state, "Musician / Expert" role filter | — | A | ✅ | ✅ | P1 | 3.6.1 |
 | ADMIN-06 | User detail & contributions | Detail shows e-mail, role, musician status, joined, last active; tabs list songs, versions, playlists | expert shows "Musician: Yes"; back link | A | ✅ | ✅ | P0 | 3.6.1 |
 | ADMIN-07 | Unknown user | `/admin/users/<unknown id>` shows "User Not Found" with link back | rendered with HTTP 200 (streamed by `app/loading.tsx`) | A | ✅ | ✅ | P2 | 3.6.1 |
+| ADMIN-08 | Sort users | "Most songs" orders rows by song count and survives a reload | name A-Z/Z-A and fewest songs covered by @unit | A | ✅ | ✅ | P2 | 3.6.5 |
+| ADMIN-09 | Clickable rows | Clicking a row outside "Details" opens the user's details | keyboard Enter via the row link | A | ✅ | ✅ | P2 | 3.6.6 |
 
 ---
 

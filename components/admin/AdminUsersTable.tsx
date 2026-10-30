@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useMemo, useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Search, Users, Music, ListMusic, FileText, ChevronRight, Shield } from 'lucide-react';
@@ -9,11 +9,27 @@ import {
   ACTIVE_WINDOW_DAYS,
   filterAndSortUsers,
   getActivityStatus,
+  parseAdminUserSort,
   summarizeUsers,
   type AdminRoleFilter,
   type AdminUserSort,
 } from '@/lib/admin/userOverview';
 import { ActivityStatusBadge, RoleBadge } from './AdminBadges';
+import { WickSelect, type WickSelectOption } from '@/components/common/ui/WickSelect';
+import { roleFilterAccent } from '@/lib/admin/roleColors';
+
+const SORT_STORAGE_KEY = 'admin-users-sort';
+const SORT_CHANGE_EVENT = 'admin-users-sort-change';
+
+function subscribeToSort(onChange: () => void) {
+  window.addEventListener('storage', onChange);
+  window.addEventListener(SORT_CHANGE_EVENT, onChange);
+  return () => {
+    window.removeEventListener('storage', onChange);
+    window.removeEventListener(SORT_CHANGE_EVENT, onChange);
+  };
+}
+
 
 import { useLocale } from '@/context/LocaleContext';
 import { LOCALE_DATE_TAGS } from '@/lib/i18n';
@@ -23,9 +39,33 @@ interface AdminUsersTableProps {
 
 export default function AdminUsersTable({ initialUsers }: AdminUsersTableProps) {
   const { t, locale } = useLocale();
+
+  const roleOptions: WickSelectOption<AdminRoleFilter>[] = [
+    { value: 'all', label: t('admin.filter.all') },
+    { value: 'admin', label: t('admin.role.admin'), accent: roleFilterAccent('admin') },
+    { value: 'gatekeeper', label: t('admin.role.gatekeeper'), accent: roleFilterAccent('gatekeeper') },
+    { value: 'member', label: t('admin.role.member'), accent: roleFilterAccent('member') },
+    { value: 'musician', label: t('admin.filter.musician'), accent: roleFilterAccent('musician') },
+  ];
+
+  const sortOptions: WickSelectOption<AdminUserSort>[] = [
+    { value: 'joined', label: t('admin.sort.joined') },
+    { value: 'contributions', label: t('admin.sort.contributions') },
+    { value: 'name', label: t('admin.sort.name') },
+    { value: 'name_desc', label: t('admin.sort.nameDesc') },
+    { value: 'songs_desc', label: t('admin.sort.songsDesc') },
+    { value: 'songs_asc', label: t('admin.sort.songsAsc') },
+  ];
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedRole, setSelectedRole] = useState<AdminRoleFilter>('all');
-  const [sortBy, setSortBy] = useState<AdminUserSort>('joined');
+  // Sort is remembered in localStorage across reloads and visits to a user's details (#278).
+  const sortBy = parseAdminUserSort(
+    useSyncExternalStore(subscribeToSort, () => window.localStorage.getItem(SORT_STORAGE_KEY), () => null)
+  );
+  const changeSort = (next: AdminUserSort) => {
+    window.localStorage.setItem(SORT_STORAGE_KEY, next);
+    window.dispatchEvent(new Event(SORT_CHANGE_EVENT));
+  };
 
   const stats = useMemo(() => summarizeUsers(initialUsers), [initialUsers]);
 
@@ -122,29 +162,20 @@ export default function AdminUsersTable({ initialUsers }: AdminUsersTableProps) 
 
         {/* Filters */}
         <div className="flex flex-wrap items-center gap-2">
-          <select
+          <WickSelect
+            label={t('admin.filter.label')}
+            testId="admin-role-filter"
             value={selectedRole}
-            onChange={(e) => setSelectedRole(e.target.value as AdminRoleFilter)}
-            aria-label={t('admin.filter.label')}
-            className="px-4 py-2.5 bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-full text-xs font-semibold text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500"
-          >
-            <option value="all">{t('admin.filter.all')}</option>
-            <option value="admin">{t('admin.role.admin')}</option>
-            <option value="gatekeeper">{t('admin.role.gatekeeper')}</option>
-            <option value="member">{t('admin.role.member')}</option>
-            <option value="musician">{t('admin.filter.musician')}</option>
-          </select>
-
-          <select
+            options={roleOptions}
+            onChange={setSelectedRole}
+          />
+          <WickSelect
+            label={t('admin.sort.label')}
+            testId="admin-sort"
             value={sortBy}
-            onChange={(e) => setSortBy(e.target.value as AdminUserSort)}
-            aria-label={t('admin.sort.label')}
-            className="px-4 py-2.5 bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-full text-xs font-semibold text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-purple-500"
-          >
-            <option value="joined">{t('admin.sort.joined')}</option>
-            <option value="contributions">{t('admin.sort.contributions')}</option>
-            <option value="name">{t('admin.sort.name')}</option>
-          </select>
+            options={sortOptions}
+            onChange={changeSort}
+          />
         </div>
       </div>
 
@@ -176,7 +207,7 @@ export default function AdminUsersTable({ initialUsers }: AdminUsersTableProps) 
               return (
                 <li
                   key={user.id}
-                  className="p-4 md:px-6 hover:bg-gray-50/70 dark:hover:bg-gray-800/40 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-4"
+                  className="relative cursor-pointer p-4 md:px-6 hover:bg-gray-50/70 dark:hover:bg-gray-800/40 focus-within:bg-gray-50/70 dark:focus-within:bg-gray-800/40 focus-within:ring-2 focus-within:ring-inset focus-within:ring-[#f45d1a]/60 transition-colors flex flex-col md:flex-row md:items-center justify-between gap-4"
                 >
                   {/* User Profile Info */}
                   <div className="flex items-center gap-3.5 min-w-0">
@@ -249,10 +280,15 @@ export default function AdminUsersTable({ initialUsers }: AdminUsersTableProps) 
                     <Link
                       href={`/admin/users/${user.id}`}
                       aria-label={t('admin.user.viewDetails', { name: displayName })}
-                      className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 hover:bg-purple-100 dark:hover:bg-purple-950/60 text-gray-700 dark:text-gray-300 hover:text-purple-700 dark:hover:text-purple-300 font-semibold transition-all active:scale-95"
+                      // Stretched link: the ::after overlay makes the whole row clickable (#279),
+                      // keeping native Enter, middle-click and Ctrl/Cmd-click behaviour.
+                      // No transform on the link itself: it would shrink the overlay mid-click.
+                      className="group/details after:absolute after:inset-0 after:content-[''] focus-visible:outline-none"
                     >
-                      <span>{t('admin.user.details')}</span>
-                      <ChevronRight className="w-3.5 h-3.5" />
+                      <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-gray-100 dark:bg-gray-800 group-hover/details:bg-purple-100 dark:group-hover/details:bg-purple-950/60 text-gray-700 dark:text-gray-300 group-hover/details:text-purple-700 dark:group-hover/details:text-purple-300 font-semibold transition-colors">
+                        <span>{t('admin.user.details')}</span>
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </span>
                     </Link>
                   </div>
                 </li>
