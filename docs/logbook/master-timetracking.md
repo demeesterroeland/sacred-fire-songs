@@ -92,4 +92,6 @@
 
 | **October 30, 2026 (Part 2)** | **Test Data/Docs**: Moved the 221 seeded songs to the collection repo, made `random-seeder.mjs` the sole seeding path and extended it to cover every tested song shape (anchors + weighted templates, artists, versions, recordings, favorites, views), wrote `docs/testing/song.feature`. | ~1.5 Hours | ✅ Completed |
 
-| **Total** | **Development + AI Collaboration** | **~171.25 Hours** | |
+| **October 30, 2026 (Part 3)** | **Feature/Print & Export**: Musician Setlist PDF Export (Story 4.2.1 / Issue #18) — Implemented ChordSheetJS + jsPDF client-side PDF export, high-contrast firelight typography, BDD feature specification (`setlist-pdf-export.feature`), 12 unit tests, and quick-action export buttons on playlist header & menu. | ~2.0 Hours | ✅ Completed |
+
+| **Total** | **Development + AI Collaboration** | **~173.25 Hours** | |

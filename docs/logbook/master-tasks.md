@@ -1214,3 +1214,12 @@
 - [x] Update design doc (v1.34), e2e overview, e2e README
 - [ ] Run the Playwright suite against the new seeder (not run in this session: it wipes the local database)
 - [x] Add `scripts/export-random-seed.mjs` + `npm run seed:generate`; check in `supabase/seeds/03_songs_random_generated.sql` (200 songs) so `supabase db reset` still seeds ~200 songs
+
+## Session October 30, 2026 (Part 3: Story 4.2.1 / Issue #18 - Musician Setlist PDF Export)
+- [x] Write BDD specification `docs/testing/setlist-pdf-export.feature` (cover headers, pagination, transpositions, directives)
+- [x] Write TDD unit tests `testing/unit/tests/pdfExport.test.ts` (12 passing tests)
+- [x] Implement PDF generator `lib/export/pdfExport.ts` using `chordsheetjs` and `jspdf` with ceremony firelight styling
+- [x] Implement `getPlaylistSongsForExport` server action in `app/actions/playlistActions.ts`
+- [x] Add PDF export trigger buttons to `PlaylistDetailHeader.tsx` and `PlaylistContextMenu.tsx`
+- [x] Rebase on `origin/main` after song collection migration (#269) and verify full unit test suite (66/66) & production build
+- [x] Push commit to PR #220 and verify GitHub Actions E2E checks succeed
