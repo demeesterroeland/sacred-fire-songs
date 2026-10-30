@@ -640,6 +640,31 @@ const en = {
   'auth.signUpSuccess.verify': 'Verify & Continue',
   'auth.signUpSuccess.returnToLogin': 'Return to Login',
   'playlists.guest.drafts.description': 'Your private work-in-progress songs',
+
+  // ─── Playlist PDF export (#220) ──────────────────────────────────────────
+  'playlists.export.menu': 'Export PDF',
+  'playlists.export.exporting': 'Exporting PDF...',
+  'playlists.export.addSongsFirst': 'Add songs to export PDF',
+  'playlists.export.generating': 'Generating PDF...',
+  'playlists.export.downloaded': 'PDF downloaded',
+  'playlists.export.failed': 'Failed to generate PDF',
+  'playlists.export.limitExceeded': 'Export limit exceeded: maximum {max} songs can be exported.',
+  'playlists.export.empty': 'Cannot export an empty playlist. Add songs first.',
+  'playlists.export.login.title': 'Log in to export PDF',
+  'playlists.export.login.description': 'PDF songbook export is a member-only feature. Please log in or create an account to download this ceremony songbook.',
+  'playlists.export.login.cancel': 'Cancel',
+  'playlists.export.login.submit': 'Log In',
+  'pdf.page': 'Page {page} of {total}',
+  'pdf.subtitle.one': '{count} song   •   Generated {date}',
+  'pdf.subtitle.other': '{count} songs   •   Generated {date}',
+  'pdf.by': 'By {author}',
+  'pdf.key': 'Key: {key}',
+  'pdf.capo': 'Capo: {capo}',
+  'pdf.tuning': 'Tuning: {tuning}',
+  'pdf.continued': '{title} (continued)',
+  'pdf.playlist': 'Playlist: {title}',
+  'pdf.untitledSong': 'Untitled Song',
+  'pdf.untitledPlaylist': 'Setlist',
 } as const;
 
 export default en;

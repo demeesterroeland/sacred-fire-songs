@@ -77,6 +77,7 @@ kong.yml
 # graphify (keep report + graph, ignore cache/cost)
 graphify-out/cache/
 graphify-out/cost.json
+graphify-out/.graphify_*
 
 # Playwright performance spec output
 e2e/performance-results/

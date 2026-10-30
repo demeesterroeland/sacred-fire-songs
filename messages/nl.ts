@@ -642,6 +642,31 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'auth.signUpSuccess.verify': 'Verifiëren & doorgaan',
   'auth.signUpSuccess.returnToLogin': 'Terug naar aanmelden',
   'playlists.guest.drafts.description': 'Jouw privé liederen in wording',
+
+  // ─── Playlist PDF export (#220) ──────────────────────────────────────────
+  'playlists.export.menu': 'PDF exporteren',
+  'playlists.export.exporting': 'PDF exporteren...',
+  'playlists.export.addSongsFirst': 'Voeg liederen toe om een PDF te exporteren',
+  'playlists.export.generating': 'PDF wordt gemaakt...',
+  'playlists.export.downloaded': 'PDF gedownload',
+  'playlists.export.failed': 'PDF maken mislukt',
+  'playlists.export.limitExceeded': 'Exportlimiet overschreden: je kunt maximaal {max} liederen exporteren.',
+  'playlists.export.empty': 'Een lege afspeellijst kan niet worden geëxporteerd. Voeg eerst liederen toe.',
+  'playlists.export.login.title': 'Meld je aan om een PDF te exporteren',
+  'playlists.export.login.description': 'Het PDF-liedboek exporteren is alleen voor leden. Meld je aan of maak een account aan om dit ceremonieliedboek te downloaden.',
+  'playlists.export.login.cancel': 'Annuleren',
+  'playlists.export.login.submit': 'Aanmelden',
+  'pdf.page': 'Pagina {page} van {total}',
+  'pdf.subtitle.one': '{count} lied   •   Gemaakt op {date}',
+  'pdf.subtitle.other': '{count} liederen   •   Gemaakt op {date}',
+  'pdf.by': 'Door {author}',
+  'pdf.key': 'Toonsoort: {key}',
+  'pdf.capo': 'Capo: {capo}',
+  'pdf.tuning': 'Stemming: {tuning}',
+  'pdf.continued': '{title} (vervolg)',
+  'pdf.playlist': 'Afspeellijst: {title}',
+  'pdf.untitledSong': 'Naamloos lied',
+  'pdf.untitledPlaylist': 'Setlist',
 };
 
 export default nl;
