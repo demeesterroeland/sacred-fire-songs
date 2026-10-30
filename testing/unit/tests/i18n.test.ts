@@ -12,6 +12,7 @@ import {
   parseAcceptLanguage,
   readCookie,
   resolveLocale,
+  resolveRequestLocale,
   serializeLocaleCookie,
   setLocale,
   t,
@@ -158,6 +159,20 @@ describe('resolveLocale()', () => {
   it('ignores invalid stored and cookie values', () => {
     expect(resolveLocale({ stored: 'fr', cookie: 'xx', browserLanguages: ['nl'] })).toBe('nl');
     expect(resolveLocale({ stored: '<script>', cookie: '' })).toBe('en');
+  });
+});
+
+describe('resolveRequestLocale() – server side', () => {
+  it('uses the Accept-Language header when no cookie is sent', () => {
+    expect(resolveRequestLocale(undefined, 'fr-FR,fr;q=0.9,nl;q=0.8,en;q=0.7')).toBe('nl');
+  });
+
+  it('lets the locale cookie override Accept-Language', () => {
+    expect(resolveRequestLocale('en', 'nl-BE,nl;q=0.9')).toBe('en');
+  });
+
+  it('defaults to English without cookie or header', () => {
+    expect(resolveRequestLocale(undefined, null)).toBe('en');
   });
 });
 

@@ -149,7 +149,7 @@ export default function SearchFiltersModal({
                                 value={localSearch}
                                 onChange={(e) => setLocalSearch(e.target.value)}
                                 onKeyDown={(e) => { if (e.key === 'Enter') onSubmit?.(); }}
-                                placeholder={t('search.placeholder')}
+                                placeholder={t('search.placeholder', { count: 200 })}
                                 className="w-full bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl py-2.5 pl-10 pr-4 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500/40 transition-all"
                             />
                         </div>

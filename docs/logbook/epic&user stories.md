@@ -1,8 +1,8 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 1.35
+**Version:** 1.36
 **Status:** Living Document
-**Date:** July 14, 2026
+**Date:** Oct 30, 2026
 
 ## Changelog
 
@@ -34,6 +34,7 @@
 | **1.34** | Mar 1, 2026 | GH sync: marked 3.3.1, 3.3.2, 4.1.8 as [Implemented]. Added Story 1.1.9 (Spotify-style mobile bottom nav bar). |
 | **1.34** | Jun 28, 2026 | Added Epic 4.6: Private Rehearsal & Audio Storage (Story 4.6.1) for microphone recording and private Supabase storage uploads. |
 | **1.35** | Jul 14, 2026 | Vercel preview deploy fix (`framework: null` → `nextjs`), Enter key submits search in modal, header spacing polish. Merged to main, closed #185. Story 1.2.4 fully deployed. |
+| **1.36** | Oct 30, 2026 | Added Epic 3.7: Multi-Language Support (Story 3.7.1, issue #246) with acceptance criteria I18N-01…I18N-10, executable in `docs/testing/i18n.feature`. |
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
 
@@ -595,6 +596,72 @@ Scenario: Onboarding question
   And answering Yes should set is_musician = true on my profile
   And answering No (or skipping) should leave it false
   And I can always change this later in my profile settings
+```
+
+### Epic 3.7: Multi-Language Support (i18n)
+
+> **Scope:** the app interface (navigation, buttons, forms, messages) is available in English and Dutch. Song content (titles, lyrics, artist names, tags) is **not** translated. Executable scenarios: `docs/testing/i18n.feature` (issue #246).
+
+**Story 3.7.1:** As a visitor or member, I want to use the app in my own language (English or Dutch) and have that choice remembered, so that I understand every screen without switching back each visit.
+
+```gherkin
+Scenario: I18N-01 – English is the default when nothing is known
+  Given I have never chosen a language
+  And my browser prefers a language the app does not support (e.g. German)
+  When I open any page
+  Then the interface is shown in English
+
+Scenario: I18N-02 – The browser language is the default when supported
+  Given I have never chosen a language
+  And my browser prefers Dutch ("nl-BE", "nl-NL", …)
+  When I open any page
+  Then the interface is shown in Dutch from the first render
+
+Scenario: I18N-03 – Switching language updates the whole interface immediately
+  Given I am on any page (as a guest or signed in)
+  When I pick "NL" in the language switcher (sidebar, user menu or Account → Preferences)
+  Then navigation, page content, buttons and messages switch to Dutch without a full page reload
+  And the <html lang> attribute becomes "nl"
+
+Scenario: I18N-04 – The choice persists across reloads, navigation and logout
+  Given I chose Dutch
+  When I reload, open another page, or sign out and back in on the same device
+  Then the interface is still in Dutch
+  And my choice overrides the browser language
+
+Scenario: I18N-05 – Server-rendered pages honour the choice without a hydration mismatch
+  Given I chose Dutch
+  When a page is rendered on the server and hydrated in the browser
+  Then the server HTML is already Dutch
+  And no React hydration-mismatch error is logged
+
+Scenario: I18N-06 – Missing translations fall back to English
+  Given a key has no Dutch translation
+  When it is shown with Dutch active
+  Then the English text is shown
+  And a key missing in every language shows the key name, never an empty string
+
+Scenario: I18N-07 – An unknown or tampered stored language is ignored
+  Given the stored language is not a supported one (e.g. "fr")
+  When I open the app
+  Then the browser language or English is used instead
+
+Scenario: I18N-08 – Placeholders are interpolated
+  Given a message contains placeholders like {count}
+  When it is shown
+  Then every placeholder is replaced by its value
+  And an unknown placeholder is shown literally
+
+Scenario: I18N-09 – Dictionaries stay in sync
+  Then every language has exactly the same keys as English
+  And every translation uses the same placeholders as its English source
+  And no translation is empty
+  And using an unknown key in code fails the TypeScript build
+
+Scenario: I18N-10 – Song content is never translated
+  Given Dutch is active
+  When I open a song
+  Then its title, lyrics, chords and artist names are shown exactly as entered
 ```
 
 ## Phase 4: Professional Toolkit

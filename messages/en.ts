@@ -100,7 +100,7 @@ const en = {
   'theme.label': 'Theme: {theme}',
 
   // ─── Songs – List Page ────────────────────────────────────────────────────
-  'songs.searchPlaceholder': 'Search {count}+ songs...',
+  'songs.searchPlaceholder': 'Search {count}+ songs',
   'songs.searchPlaceholderGuest': 'Search {count}+ medicine songs...',
   'songs.pageTitle': 'Songs',
   'songs.noResults': 'No songs found',
@@ -172,11 +172,11 @@ const en = {
   // ─── Songs – Form (Add / Edit) ────────────────────────────────────────────
   'songForm.titleAdd': 'Add New Song',
   'songForm.titleEdit': 'Edit Song',
-  'songForm.field.title': 'Title',
-  'songForm.field.title.placeholder': 'Song title...',
+  'songForm.field.title': 'Song Title',
+  'songForm.field.title.placeholder': 'e.g. Grandmother Earth',
   'songForm.field.author': 'Original Author / Artist',
   'songForm.field.author.placeholder': 'e.g. Traditional or Artist Name',
-  'songForm.field.lyrics': 'Lyrics / ChordPro',
+  'songForm.field.lyrics': 'Lyrics & chords',
   'songForm.field.category': 'Category',
   'songForm.field.tags': 'Tags',
   'songForm.field.youtube': 'YouTube URL',
@@ -336,7 +336,7 @@ const en = {
   'playlists.addSongs.empty': 'No songs found.',
   'playlists.addSongs.done': 'Done',
   'playlists.picker.title': 'My Playlists',
-  'playlists.picker.empty': 'No playlists yet',
+  'playlists.picker.empty': 'No playlists yet — create one above.',
   'playlists.picker.emptyAction': 'Create one first',
   'playlists.picker.added': 'Added to {playlist}',
   'playlists.picker.removed': 'Removed from {playlist}',
@@ -369,12 +369,12 @@ const en = {
 
   // ─── Explore ──────────────────────────────────────────────────────────────
   'explore.pageTitle': 'Explore',
-  'explore.categories.heading': 'Browse by Category',
+  'explore.categories.heading': 'Explore by Category',
   'explore.categories.description': 'Discover songs by theme and tradition',
   'explore.category.description': 'Explore songs related to {category}.',
 
   // ─── Search / Filter Modal ────────────────────────────────────────────────
-  'search.placeholder': 'Search songs…',
+  'search.placeholder': 'Search {count}+ songs...',
   'search.sortBy': 'Sort by',
   'search.sort.title': 'Title',
   'search.sort.author': 'Author',
@@ -394,7 +394,7 @@ const en = {
   'search.tags.heading': 'Tags',
   'search.tags.placeholder': 'Search tags or browse categories below...',
   'search.reset': 'Reset',
-  'search.showResults': 'Show Results',
+  'search.showResults': 'Show results',
   'search.signInRequired': 'Sign in to access personal filters',
 
   // ─── Account Settings ─────────────────────────────────────────────────────
@@ -402,7 +402,7 @@ const en = {
   'settings.tab.profile': 'Profile',
   'settings.tab.security': 'Security',
   'settings.tab.preferences': 'Preferences',
-  'settings.tab.privacy': 'Privacy',
+  'settings.tab.privacy': 'Privacy & Data',
 
   'settings.profile.heading': 'Profile',
   'settings.profile.displayName': 'Display Name',
@@ -427,7 +427,7 @@ const en = {
   'settings.security.confirmPassword': 'Confirm New Password',
   'settings.security.updatePassword': 'Update Password',
   'settings.security.updating': 'Updating...',
-  'settings.security.signOutAll': 'Sign out all devices',
+  'settings.security.signOutAll': 'Log Out from all devices',
   'settings.security.activeSessions': 'Active Sessions',
   'settings.security.mismatch': 'Passwords do not match',
   'settings.security.success': 'Password updated successfully',
@@ -637,6 +637,9 @@ const en = {
   'songForm.artists.addAnother': 'Add another artist...',
   'settings.prefs.notSupported': 'Not supported by your browser',
   'settings.profile.avatar.comingSoon': 'Avatar upload will be available soon.',
+  'auth.signUpSuccess.verify': 'Verify & Continue',
+  'auth.signUpSuccess.returnToLogin': 'Return to Login',
+  'playlists.guest.drafts.description': 'Your private work-in-progress songs',
 } as const;
 
 export default en;

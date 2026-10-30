@@ -97,6 +97,14 @@ export function resolveLocale({ stored, cookie, browserLanguages = [] }: LocaleS
   return DEFAULT_LOCALE;
 }
 
+/** Server side: locale cookie > Accept-Language header > English. */
+export function resolveRequestLocale(
+  cookie: string | null | undefined,
+  acceptLanguage: string | null | undefined
+): Locale {
+  return resolveLocale({ cookie, browserLanguages: parseAcceptLanguage(acceptLanguage) });
+}
+
 // ─── Cookie Helpers ───────────────────────────────────────────────────────────
 
 export function serializeLocaleCookie(locale: Locale): string {

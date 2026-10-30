@@ -102,7 +102,7 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'theme.label': 'Thema: {theme}',
 
   // ─── Songs – List Page ────────────────────────────────────────────────────
-  'songs.searchPlaceholder': 'Zoek in {count}+ liederen...',
+  'songs.searchPlaceholder': 'Zoek in {count}+ liederen',
   'songs.searchPlaceholderGuest': 'Zoek in {count}+ medicinale liederen...',
   'songs.pageTitle': 'Liederen',
   'songs.noResults': 'Geen liederen gevonden',
@@ -174,11 +174,11 @@ const nl: Partial<Record<TranslationKey, string>> = {
   // ─── Songs – Form ─────────────────────────────────────────────────────────
   'songForm.titleAdd': 'Nieuw lied toevoegen',
   'songForm.titleEdit': 'Lied bewerken',
-  'songForm.field.title': 'Titel',
-  'songForm.field.title.placeholder': 'Liedtitel...',
+  'songForm.field.title': 'Liedtitel',
+  'songForm.field.title.placeholder': 'bijv. Grandmother Earth',
   'songForm.field.author': 'Originele auteur / artiest',
   'songForm.field.author.placeholder': 'bijv. Traditioneel of Artiestennaam',
-  'songForm.field.lyrics': 'Songtekst / ChordPro',
+  'songForm.field.lyrics': 'Songtekst & akkoorden',
   'songForm.field.category': 'Categorie',
   'songForm.field.tags': 'Labels',
   'songForm.field.youtube': 'YouTube-URL',
@@ -338,7 +338,7 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'playlists.addSongs.empty': 'Geen liederen gevonden.',
   'playlists.addSongs.done': 'Gereed',
   'playlists.picker.title': 'Mijn afspeellijsten',
-  'playlists.picker.empty': 'Nog geen afspeellijsten',
+  'playlists.picker.empty': 'Nog geen afspeellijsten — maak er hierboven een aan.',
   'playlists.picker.emptyAction': 'Maak er eerst een aan',
   'playlists.picker.added': 'Toegevoegd aan {playlist}',
   'playlists.picker.removed': 'Verwijderd uit {playlist}',
@@ -371,12 +371,12 @@ const nl: Partial<Record<TranslationKey, string>> = {
 
   // ─── Explore ──────────────────────────────────────────────────────────────
   'explore.pageTitle': 'Verkennen',
-  'explore.categories.heading': 'Bladeren per categorie',
+  'explore.categories.heading': 'Ontdek per categorie',
   'explore.categories.description': 'Ontdek liederen per thema en traditie',
   'explore.category.description': 'Verken liederen gerelateerd aan {category}.',
 
   // ─── Search / Filter Modal ────────────────────────────────────────────────
-  'search.placeholder': 'Liederen zoeken…',
+  'search.placeholder': 'Zoek in {count}+ liederen...',
   'search.sortBy': 'Sorteren op',
   'search.sort.title': 'Titel',
   'search.sort.author': 'Auteur',
@@ -404,7 +404,7 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'settings.tab.profile': 'Profiel',
   'settings.tab.security': 'Beveiliging',
   'settings.tab.preferences': 'Voorkeuren',
-  'settings.tab.privacy': 'Privacy',
+  'settings.tab.privacy': 'Privacy & gegevens',
 
   'settings.profile.heading': 'Profiel',
   'settings.profile.displayName': 'Weergavenaam',
@@ -429,7 +429,7 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'settings.security.confirmPassword': 'Wachtwoord bevestigen',
   'settings.security.updatePassword': 'Wachtwoord bijwerken',
   'settings.security.updating': 'Bijwerken...',
-  'settings.security.signOutAll': 'Alle apparaten afmelden',
+  'settings.security.signOutAll': 'Afmelden op alle apparaten',
   'settings.security.activeSessions': 'Actieve sessies',
   'settings.security.mismatch': 'Wachtwoorden komen niet overeen',
   'settings.security.success': 'Wachtwoord succesvol bijgewerkt',
@@ -611,7 +611,7 @@ const nl: Partial<Record<TranslationKey, string>> = {
   // ─── Remaining UI strings (Phase 3 completion) ───────────────────────────
   'common.errorOccurred': 'Er is een fout opgetreden',
   'common.back': 'Terug',
-  'auth.signInLink': 'Inloggen',
+  'auth.signInLink': 'Aanmelden',
   'auth.forgotPassword.pageTitle': 'Wachtwoord herstellen',
   'auth.forgotPassword.pageDescription': 'Vul je e-mailadres in om een herstellink te ontvangen.',
   'auth.forgotPassword.checkEmail': 'Bekijk je e-mail voor de herstellink',
@@ -639,6 +639,9 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'songForm.artists.addAnother': 'Nog een artiest toevoegen...',
   'settings.prefs.notSupported': 'Niet ondersteund door je browser',
   'settings.profile.avatar.comingSoon': 'Een avatar uploaden is binnenkort mogelijk.',
+  'auth.signUpSuccess.verify': 'Verifiëren & doorgaan',
+  'auth.signUpSuccess.returnToLogin': 'Terug naar aanmelden',
+  'playlists.guest.drafts.description': 'Jouw privé liederen in wording',
 };
 
 export default nl;

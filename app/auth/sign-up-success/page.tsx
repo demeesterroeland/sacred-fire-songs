@@ -97,7 +97,7 @@ function SignUpSuccessContent() {
                         {isVerifying ? (
                             <Loader2 className="w-5 h-5 animate-spin" />
                         ) : (
-                            <>Verify &amp; Continue <ArrowRight className="w-5 h-5" /></>
+                            <>{t('auth.signUpSuccess.verify')} <ArrowRight className="w-5 h-5" /></>
                         )}
                     </button>
                 </form>
@@ -107,7 +107,7 @@ function SignUpSuccessContent() {
                         href={`/auth/login${next ? `?next=${encodeURIComponent(next)}` : ""}`}
                         className="text-[#8e99aa] hover:text-gray-900 dark:hover:text-white text-sm transition-colors"
                     >
-                        {t('auth.forgotPassword.backToLogin')}
+                        {t('auth.signUpSuccess.returnToLogin')}
                     </Link>
                 </div>
             </div>
