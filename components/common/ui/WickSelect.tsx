@@ -17,7 +17,11 @@ import { keyToIndex, typeaheadIndex } from '@/lib/ui/listbox';
 export interface WickSelectOption<T extends string> {
   value: T;
   label: string;
+  /** Optional color for this option's wick, glow and selected label (defaults to ember orange). */
+  accent?: string;
 }
+
+const EMBER = '#f45d1a';
 
 const LIST_GAP = 6;
 const LIST_MIN_WIDTH = 208;
@@ -26,14 +30,17 @@ const CLOSE_AFTER_IGNITE_MS = 240;
 
 type Position = { left: number; width: number; top?: number; bottom?: number };
 
-function Wick({ lit, igniting }: { lit: boolean; igniting?: boolean }) {
+function Wick({ lit, igniting, accent }: { lit: boolean; igniting?: boolean; accent?: string }) {
   return (
     <span
       aria-hidden="true"
+      style={{ '--wick': accent ?? EMBER } as React.CSSProperties}
       className={`inline-block w-2 h-2 rounded-full shrink-0 transition-colors ${
         lit
-          ? `bg-[#f45d1a] shadow-[0_0_0_3px_rgba(244,93,26,0.18),0_0_10px_rgba(244,93,26,0.6)] ${igniting ? 'ember-ignite' : ''}`
-          : 'border border-gray-400 dark:border-gray-600 group-data-[active=true]:border-[#f45d1a]/70'
+          ? `bg-[var(--wick)] shadow-[0_0_0_3px_color-mix(in_srgb,var(--wick)_18%,transparent),0_0_10px_color-mix(in_srgb,var(--wick)_60%,transparent)] ${igniting ? 'wick-ignite' : ''}`
+          : accent
+            ? 'border border-[var(--wick)]'
+            : 'border border-gray-400 dark:border-gray-600 group-data-[active=true]:border-[color-mix(in_srgb,var(--wick)_70%,transparent)]'
       }`}
     />
   );
@@ -173,11 +180,11 @@ export function WickSelect<T extends string>({
         onKeyDown={onTriggerKeyDown}
         className={`inline-flex items-center gap-2 pl-3.5 pr-3 py-2.5 rounded-full text-xs font-semibold text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f45d1a]/60 ${className}`}
       >
-        <Wick lit />
+        <Wick lit accent={current?.accent} />
         <span className="sr-only">{label}: </span>
         <span className="truncate">
           {prefix && <span className="text-gray-500 dark:text-gray-400 font-medium">{prefix} </span>}
-          {current?.label}
+          <span style={current?.accent ? { color: current.accent } : undefined}>{current?.label}</span>
         </span>
         <ChevronDown
           aria-hidden="true"
@@ -214,8 +221,10 @@ export function WickSelect<T extends string>({
                     index === activeIndex ? 'bg-gray-100 dark:bg-gray-800' : ''
                   } ${selected ? 'font-semibold text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-300'}`}
                 >
-                  <Wick lit={selected} igniting={igniting === option.value} />
-                  <span className="truncate">{option.label}</span>
+                  <Wick lit={selected} igniting={igniting === option.value} accent={option.accent} />
+                  <span className="truncate" style={selected && option.accent ? { color: option.accent } : undefined}>
+                    {option.label}
+                  </span>
                 </li>
               );
             })}

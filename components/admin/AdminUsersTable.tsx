@@ -16,6 +16,7 @@ import {
 } from '@/lib/admin/userOverview';
 import { ActivityStatusBadge, RoleBadge } from './AdminBadges';
 import { WickSelect, type WickSelectOption } from '@/components/common/ui/WickSelect';
+import { roleFilterAccent } from '@/lib/admin/roleColors';
 
 const SORT_STORAGE_KEY = 'admin-users-sort';
 const SORT_CHANGE_EVENT = 'admin-users-sort-change';

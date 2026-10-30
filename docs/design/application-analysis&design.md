@@ -1,6 +1,6 @@
 # Project Analysis & Design Document: Song Sharing Application (Sacred Fire Songs)
 
-**Version:** 1.43
+**Version:** 1.44
 **Status:** Living Document
 **Date:** Oct 30, 2026
 
@@ -36,6 +36,7 @@
 | **1.41** | Oct 30, 2026 | §6.5: language picker redesigned as an accessible listbox with ember "wick" markers (full variant in the sidebar, compact in user menu and Preferences). |
 | **1.42** | Oct 30, 2026 | §6.5: admin area (Story 3.6.1, #259) translated into all eight languages (`admin.*` keys); admin dates follow `LOCALE_DATE_TAGS`; account-menu trigger label `userMenu.trigger`. |
 | **1.43** | Oct 30, 2026 | Admin users overview: role and sort pickers use the new listbox component `components/common/ui/WickSelect.tsx` (same design as the language picker on the i18n branch, keyboard logic in `lib/ui/listbox.ts`); sort by name A-Z/Z-A and most/fewest songs, remembered in `localStorage` (#278); whole user row opens the details (#279). |
+| **1.44** | Oct 30, 2026 | Role colors have one source (`lib/admin/roleColors.ts`): role badges and the role filter picker use the same color per role (admin purple, gatekeeper amber, musician/expert emerald, member blue). `WickSelect` options accept an `accent` color (`wick-ignite` animation in `app/globals.css`). |
 
 
 ## 1. Introduction
@@ -227,7 +228,7 @@ The application is a **Progressive Web App (PWA)** optimized for mobile use duri
 * **Status:** Implemented (`app/admin/users/page.tsx`, `components/admin/AdminUsersTable.tsx`). No mockup in `docs/design/screens/`; the layout mirrors the Library section (`app/library/layout.tsx`, `LibraryTabs.tsx`): `<main>` scroll container, "Administration" title with pill tabs (Users, Configuration – planned), and summary cards styled like `components/home/LibrarySummary.tsx`.
 * **Access:** `app/admin/layout.tsx` checks the role server-side; non-admins get `components/admin/AccessDeniedNotice.tsx`, guests are redirected to `/auth/login` by `proxy.ts`. Entry points: "Admin Portal" in the account menu and "Administration" in the sidebar (admins only).
 * **Features:** Totals (users, active in last 30 days, songs, playlists, admins & gatekeepers), search by name/e-mail, role filter (the "Musician / Expert" option matches both roles), sort (recently joined, top contributors, name A-Z / Z-A, most / fewest songs; the choice is stored in `localStorage` under `admin-users-sort`), and one row per user with role badge, e-mail, songs/versions/playlists counts, activity status and join date. The whole row opens the user's details (stretched link, so Enter, middle-click and Ctrl/Cmd-click work). Separate empty states for "no users" and "no matches".
-* **Pickers:** role and sort use `WickSelect` (WAI-ARIA listbox portalled to `<body>`: arrow/Home/End/type-ahead keys, Escape closes, lit "ember" marks the chosen option and ignites once on change, `ember-ignite` keyframes in `app/globals.css`).
+* **Pickers:** role and sort use `WickSelect` (WAI-ARIA listbox portalled to `<body>`: arrow/Home/End/type-ahead keys, Escape closes, lit "ember" marks the chosen option and ignites once on change). Role filter options carry their role's color from `lib/admin/roleColors.ts`, the same source as the role badges.
 
 ### 7.13 Admin User Detail
 * **Status:** Implemented (`app/admin/users/[id]/page.tsx`, `components/admin/AdminUserDetailView.tsx`, `app/admin/users/[id]/not-found.tsx`).
