@@ -5,14 +5,14 @@
  * 
  * Usage examples:
  * 
- * # Test with demo data (221 songs)
+ * # Test with the default random dataset (80 songs)
  * npx playwright test --grep @performance
  * 
  * # Test with 500 songs
- * E2E_RANDOM_SEED=1 E2E_RANDOM_SONGS_COUNT=500 npx playwright test --grep @performance
+ * E2E_RANDOM_SONGS_COUNT=500 npx playwright test --grep @performance
  * 
  * # Test with 1000 songs (stress test)
- * E2E_RANDOM_SEED=1 E2E_RANDOM_SONGS_COUNT=1000 npx playwright test --grep @performance
+ * E2E_RANDOM_SONGS_COUNT=1000 npx playwright test --grep @performance
  */
 
 import { test, expect } from '@playwright/test';
@@ -456,15 +456,14 @@ test('@performance Mobile: Time to Load /songs/[id] page', async ({ page }) => {
   console.log(`- FCP: ${avgFcp.toFixed(2)}ms`);
 });
 
-// Performance test with demo Nina Urku dataset (179 songs)
+// Performance test with the default randomly seeded dataset (80 songs unless E2E_RANDOM_SONGS_COUNT is set)
 test.describe('Performance Tests with Larger Datasets', () => {
-  test('@performance Demo Dataset: Nina Urku (179 songs)', async ({ page }) => {
+  test('@performance Default Dataset: random seed', async ({ page }) => {
     const startTime = Date.now();
     const gitCommit = getGitCommit();
     
-    // Get the song count from database (using a simpler approach to avoid cookie issues)
-    // Since we can't reliably connect to the database from E2E tests, we'll skip this part for now
-    const songCount = 179; // Hardcoded for now
+    // Since we can't reliably connect to the database from E2E tests, use the seeder's configured count
+    const songCount = parseInt(process.env.E2E_RANDOM_SONGS_COUNT || '80', 10);
     
     // Run multiple iterations to get average/median
     const iterations = 3;
@@ -491,7 +490,7 @@ test.describe('Performance Tests with Larger Datasets', () => {
         gitCommit,
         iteration: i,
         songCount: songCount,
-        seedMode: 'demo',
+        seedMode: 'random',
         testMode: 'baseline'
       };
       
@@ -529,9 +528,9 @@ test.describe('Performance Tests with Larger Datasets', () => {
     const startTime = Date.now();
     const gitCommit = getGitCommit();
     
-    // Get the song count from environment variable or default to 221
-    const customSongCount = parseInt(process.env.E2E_RANDOM_SONGS_COUNT || '221', 10);
-    const seedMode = process.env.E2E_RANDOM_SEED === '1' ? 'random' : 'custom';
+    // Get the song count from environment variable or default to 80 (the random seeder's default)
+    const customSongCount = parseInt(process.env.E2E_RANDOM_SONGS_COUNT || '80', 10);
+    const seedMode = 'random'; // the test database is always seeded by scripts/random-seeder.mjs
     const testMode = customSongCount > 500 ? 'stress' : 'baseline';
     
     // Since we can't reliably connect to the database from E2E tests, we'll use the environment variable
