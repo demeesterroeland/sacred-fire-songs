@@ -1,6 +1,6 @@
 # Git Workflow & Branching Guidelines: Sacred Fire Songs
 
-**Version:** 1.2
+**Version:** 1.3
 **Status:** Living Document
 **Date:** Oct 31, 2026
 
@@ -8,6 +8,7 @@
 
 | Version | Date | Description of Changes |
 | ----- | ----- | ----- |
+| **1.3** | Oct 31, 2026 | Script paths updated to the reorganized `scripts/` folder (#274): `scripts/cicd/start-issue.sh`, `scripts/cicd/dev2preview.sh`, `scripts/cicd/preview2prod.sh`; see `scripts/README.md`. |
 | **1.2** | Oct 31, 2026 | Unit tests moved to `testing/unit/tests/` (examples updated); pre-merge checklist lists the `ci.yml` checks (Epic 5.1 Phase 1). |
 | **1.1** | Oct 30, 2026 | Switch to lightweight **Gitflow** (Epic 5.1, Phase 2): `develop` is the default/integration branch, work branches start from and merge into `develop`, `develop` → `main` via merge commit, `hotfix/*` from `main`. `main` protected by ruleset (PR + `e2e` check, no force-push/delete). `start-issue.sh` branches from `origin/develop` (or `origin/main` for `hotfix`). `preview2prod.sh` flagged as not yet Gitflow-ready. |
 | **1.0** | Oct 18, 2026 | Initial version. Adapted from the generic "Git Workflow Sprint 2 Briefing" to the Sacred Fire Songs GitHub Flow (worktrees, squash merges, Release Please, preview → production scripts). |
@@ -97,8 +98,8 @@ Never write code without a GitHub Issue. Create one with `/create-issue`, or use
 The recommended way is the helper script, run from the **repository root**:
 
 ```bash
-# scripts/start-issue.sh <issue-number> <type> <description...>
-scripts/start-issue.sh 261 feat admin song moderation
+# scripts/cicd/start-issue.sh <issue-number> <type> <description...>
+scripts/cicd/start-issue.sh 261 feat admin song moderation
 cd .worktrees/issue-261
 ```
 
@@ -146,7 +147,7 @@ git merge origin/develop
 ### Step 4: Verify on Preview
 
 ```bash
-scripts/dev2preview.sh
+scripts/cicd/dev2preview.sh
 ```
 
 Pushes the branch, triggers the `docker.yml` build (tagged with the branch name **and** the rolling `:preview` tag) and waits for it. Then update the preview server and test the feature there. See [development-workflow.md §2–3](./development-workflow.md#2-the-preview-environment-dev2preview).
@@ -182,10 +183,10 @@ gh pr merge <back-merge-pr> --merge        # merge commit, keeps the release com
 ```
 
 > [!WARNING]
-> `scripts/preview2prod.sh` is **not yet Gitflow-ready** (Epic 5.1, Phase 4): it still squash-merges the feature PR straight into `main` with `--admin`. Don't use it for feature branches until it has been updated. Its intended behaviour is described below.
+> `scripts/cicd/preview2prod.sh` is **not yet Gitflow-ready** (Epic 5.1, Phase 4): it still squash-merges the feature PR straight into `main` with `--admin`. Don't use it for feature branches until it has been updated. Its intended behaviour is described below.
 
 ```bash
-scripts/preview2prod.sh --verified --notes-file .brain/release-summary.md
+scripts/cicd/preview2prod.sh --verified --notes-file .brain/release-summary.md
 ```
 
 The script:

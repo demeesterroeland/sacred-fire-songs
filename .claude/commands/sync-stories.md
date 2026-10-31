@@ -7,7 +7,7 @@ Sync the epic & user stories document with GitHub Issues (bidirectional).
 Run the from-GH script to update status markers in the MD based on closed issues:
 
 ```bash
-node .claude/scripts/sync-stories-from-gh.mjs
+node scripts/cicd/sync-stories-from-gh.mjs
 ```
 
 Report what changed.
@@ -17,7 +17,7 @@ Report what changed.
 Push any differences from the MD to GitHub (creates, closes, reopens, or updates issues):
 
 ```bash
-node .claude/scripts/sync-stories-to-gh.mjs "$(pwd)/docs/logbook/epic&user stories.md"
+node scripts/cicd/sync-stories-to-gh.mjs "$(pwd)/docs/logbook/epic&user stories.md"
 ```
 
 ### 3. Report summary

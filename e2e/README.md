@@ -20,8 +20,8 @@ e2e/
 # 1. Boot a local Supabase stack (applies migrations + seeds: test accounts and
 #    200 generated songs from supabase/seeds/03_songs_random_generated.sql)
 npx supabase start
-#    The Playwright globalSetup re-seeds via scripts/setup-test-db.mjs, which runs
-#    the generator live (scripts/random-seeder.mjs, E2E_RANDOM_SONGS_COUNT, default 80).
+#    The Playwright globalSetup re-seeds via scripts/db/setup-test-db.mjs, which runs
+#    the generator live (scripts/db/random-seeder.mjs, E2E_RANDOM_SONGS_COUNT, default 80).
 #    Regenerate the static file with `npm run seed:generate`. The real song collection lives in
 #    ../sacred-fire-songs-collection. See docs/testing/song.feature for what
 #    the generated data covers.

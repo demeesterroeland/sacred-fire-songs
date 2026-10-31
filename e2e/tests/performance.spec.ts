@@ -531,7 +531,7 @@ test.describe('Performance Tests with Larger Datasets', () => {
     
     // Get the song count from environment variable or default to 80 (the random seeder's default)
     const customSongCount = parseInt(process.env.E2E_RANDOM_SONGS_COUNT || '80', 10);
-    const seedMode = 'random'; // the test database is always seeded by scripts/random-seeder.mjs
+    const seedMode = 'random'; // the test database is always seeded by scripts/db/random-seeder.mjs
     const testMode = customSongCount > 500 ? 'stress' : 'baseline';
     
     // Since we can't reliably connect to the database from E2E tests, we'll use the environment variable

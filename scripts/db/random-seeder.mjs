@@ -1,7 +1,7 @@
 /**
  * Sacred Fire Songs – programmatic test-data seeder.
  *
- * Executed by scripts/setup-test-db.mjs after the fixed test accounts
+ * Executed by scripts/db/setup-test-db.mjs after the fixed test accounts
  * (supabase/seeds/01_auth_users.sql + 02_profiles.sql) have been loaded.
  * Everything runs database-side in one PL/pgSQL block, so seeding 1000 songs
  * takes well under a second.

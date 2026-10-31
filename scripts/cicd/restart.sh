@@ -6,9 +6,13 @@ set -e
 # Check if issue number is provided
 if [ -z "$1" ]; then
   echo "❌ Error: Please provide an issue number."
-  echo "Usage: ./scripts/restart.sh <issue-number>"
+  echo "Usage: ./scripts/cicd/restart.sh <issue-number>"
   exit 1
 fi
+
+# Run from the repository root (this script lives in scripts/cicd/)
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
+cd "$ROOT"
 
 # Clean up input (remove # if user typed it)
 ISSUE=$(echo "$1" | tr -d '#')
@@ -17,7 +21,7 @@ WORKTREE_DIR=".worktrees/issue-${ISSUE}"
 # Check if worktree exists
 if [ ! -d "$WORKTREE_DIR" ]; then
   echo "❌ Error: Worktree directory '$WORKTREE_DIR' does not exist."
-  echo "Did you mean to run: ./scripts/start-issue.sh $ISSUE <description> ?"
+  echo "Did you mean to run: ./scripts/cicd/start-issue.sh $ISSUE <description> ?"
   exit 1
 fi
 

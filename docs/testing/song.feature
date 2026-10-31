@@ -1,16 +1,17 @@
 # Sacred Fire Songs – Song behaviour catalogue
-# Version: 1.0 | Date: Oct 30, 2026
+# Version: 1.1 | Date: Oct 31, 2026
 #
 # Living Gherkin description of every song situation that the automated tests
 # exercise. Each scenario names the test that covers it (unit = vitest files in
-# lib/unit-tests and testing/unit/tests; e2e = Playwright specs in e2e/tests;
+# testing/unit/tests; e2e = Playwright specs in e2e/tests;
 # manual = docs/design/test-cases.md). The test database is seeded by
-# scripts/random-seeder.mjs, whose deterministic "anchor" songs are referenced
+# scripts/db/random-seeder.mjs, whose deterministic "anchor" songs are referenced
 # by title below; the seeder must keep producing every shape listed here.
 # A 200-song snapshot of its output is checked in as
 # supabase/seeds/03_songs_random_generated.sql (regenerate: npm run seed:generate).
 #
 # Changelog
+#   1.1 – Oct 31, 2026 – Seeder path is now scripts/db/random-seeder.mjs (#274); unit tests live only in testing/unit/tests.
 #   1.0 – Oct 30, 2026 – Initial catalogue derived from the unit, e2e and manual tests.
 
 Feature: Songs

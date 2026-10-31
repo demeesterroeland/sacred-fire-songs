@@ -3,7 +3,7 @@ import pg from 'pg';
 
 /**
  * Direct Postgres access for @seed scenarios. Uses DATABASE_URL, falling back
- * to the local Supabase stack (same default as scripts/setup-test-db.mjs).
+ * to the local Supabase stack (same default as scripts/db/setup-test-db.mjs).
  *
  * Each @seed scenario gets one client inside a transaction that is always
  * rolled back, so scenarios may insert fixtures without touching the seed.
