@@ -1328,3 +1328,33 @@
 - [x] Update references: `package.json`, `Dockerfile.migrator`, `e2e/global-setup.ts`, `.claude/settings.json`, `.claude/commands/sync-stories.md`, `parseStories.test.mjs`, `start-issue.bats`, `ci.yml` shellcheck glob (`scripts/*/*.sh`), e2e README/perf spec, BDD db support, seed SQL header, `gitflow-cicd.feature`
 - [x] `scripts/README.md`; docs: design doc v1.48, git-workflow v1.3, development-workflow v1.1 (header added), e2e overview v1.10, song.feature v1.1, plan v1.5
 - [x] Verified: lint (182 warnings, cap unchanged), typecheck, unit 286, BDD unit, bats 13 (1 skip), ci-gate 6/6, build, shellcheck, actionlint, `npm run seed:generate`
+
+## Session October 31, 2026 (Part 2: Gitflow Phase 2 — Branch & PR Policy, #283)
+- [x] Merge #318 (scripts reorg #274 + task 1.9 docs, stranded on the old Phase 1 branch) into `develop`; delete `chore/282-gitflow-quality-gate`
+- [x] 2.4 `start-issue.sh` type + issue-number validation (bats red → green, 9/9)
+- [x] 2.6 `dev2preview.sh`: `sacred-fire-songs-app` names, metadata-action tag sanitising (no lowercasing), `--dry-run`, refuses `main`/`develop` (bats 5/5)
+- [x] 2.5 `scripts/cicd/lib/prPolicy.mjs` + `pr-lint.yml` (`pr-policy`), Vitest 44 cases, Cucumber @story-5.1.5 steps; `ci-gate` 16/16
+- [x] 2.1 rulesets as code `.github/rulesets/main.json` + `develop.json`, contract test `rulesets.test.ts`
+- [x] Skipped bats guard against `gh pr merge --admin` (task 4.7, Phase 4 approval)
+- [x] Docs: git-workflow v1.4, design doc §6.6, plan v1.6, epic statuses, CLAUDE.md, scripts/README.md
+- [ ] Owner: apply `.github/rulesets/develop.json` (POST) and `main.json` (PUT, adds `pr-policy`)
+
+## Session October 31, 2026 (Part 3: Gitflow Phase 3 — Staging CD from develop, #284)
+- [x] Verify owner-applied rulesets (`main` 12237277, `develop` 26249878); close Story 5.1.4 (#292)
+- [x] Investigate access: public SSH (key-only) reachable from runners; staging web Tailscale-only; preview stack has a migrator; `/opt/dockge` had uncommitted preview + prod compose drift (prod runs `-app:v1.6.0`)
+- [x] Rewrite @story-5.1.7 scenarios for the SSH forced-command design (red → green, `ci-gate` 18/18)
+- [x] `docker.yml`: build on `develop`, short SHA on push, remove `:latest`
+- [x] `deploy-staging.yml`: workflow_run after develop build, `environment: Staging`, pinned host key, only `deploy develop <sha>`
+- [x] cloud-infra PR #107: `deploy-songbook-staging.sh` (bats 8/8, shellcheck), preview `IMAGE_TAG`, prod compose = running state
+- [x] D6: Vercel tokens removed from `performance.yml`
+- [ ] Owner: merge cloud-infra #107; VPS rollout; `Staging` environment + secrets; first deploy
+- [ ] Deferred: 3.4 nightly E2E/k6 (Tailscale), app-level Vercel code
+
+## Session October 31, 2026 (Part 4: Fix New Playlist auth redirect, #321)
+- [x] Issue #321, branch `fix/321-playlist-add-auth-redirect`
+- [x] RED: unit test for `useAuth` first-render `loading`; e2e spec reproduces redirect to `/`
+- [x] `useAuth`: `loading` starts `true` when no server user is passed (`undefined`), stays `false` for server user / server guest
+- [x] `/library/playlists/add`: server-side auth guard with `next=`, client form `CreatePlaylistForm`
+- [x] Audit `useAuth()` call sites; design doc §6.7, lint cap 182 → 181
+- [ ] Follow-up: fix stale selector in `e2e/tests/auth-hydration.spec.ts`; add `next=` to `SongForm` guest redirect
+- [ ] Owner: OK to merge PR into `develop`, then verify on songbook-beta

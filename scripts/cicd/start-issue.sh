@@ -7,7 +7,7 @@ set -e
 if [ "$#" -lt 3 ]; then
   echo "Usage: scripts/cicd/start-issue.sh <issue-number> <type> <description...>"
   echo "  <issue-number> : The GitHub issue number (e.g. 239)"
-  echo "  <type>         : The Conventional Commit type (e.g. fix, feat, docs, chore)"
+  echo "  <type>         : feat, fix, chore or docs (branches from develop)"
   echo "                   or 'hotfix' for an urgent production fix (branches from main)"
   echo "  <description>  : A short description of the issue (spaces allowed)"
   echo ""
@@ -20,6 +20,18 @@ ISSUE_NUM="$1"
 TYPE="$2"
 shift 2
 DESC="$*"
+
+# Validate input before touching git (Epic 5.1, Story 5.1.6). The branch
+# prefix must match the head-branch policy enforced by .github/workflows/pr-lint.yml.
+ALLOWED_TYPES="feat fix chore docs hotfix"
+if ! [[ "$ISSUE_NUM" =~ ^[0-9]+$ ]]; then
+  echo "❌ Error: Issue number must be numeric (got '$ISSUE_NUM')."
+  exit 2
+fi
+if ! [[ " $ALLOWED_TYPES " == *" $TYPE "* ]]; then
+  echo "❌ Error: Unknown type '$TYPE'. Use one of: ${ALLOWED_TYPES// /, }."
+  exit 2
+fi
 
 # Convert description to kebab-case for the branch name
 KEBAB_DESC="$(echo "$DESC" | tr '[:upper:]' '[:lower:]' | sed -e 's/[^a-z0-9]/-/g' -e 's/-\+/-/g' -e 's/^-//' -e 's/-$//')"

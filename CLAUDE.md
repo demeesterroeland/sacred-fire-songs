@@ -59,7 +59,7 @@ Implementation plans live in `docs/plans/YYYY-MM-DD-<feature>.md`.
 - Test runner: **vitest** — run with `npx vitest run <file>` (not Jest). `npm test` runs all unit tests.
 - Unit tests live in **one** tree: `testing/unit/tests/` (Vitest only collects that folder; `lib/unit-tests/` is gone). Playwright specs live in `e2e/` and never run under Vitest.
 - BDD: `npm run test:bdd:unit` (no database), `npm run test:bdd:seed` (local Supabase). Gitflow pipeline contracts: `npm run test:bdd:ci` / `test:bdd:ci-gate`, bats via `npm run test:scripts`.
-- CI (`.github/workflows/ci.yml`) runs `lint`, `typecheck`, `unit`, `bdd`, `build`, `pipeline` on every push and PR. `npm run lint` caps warnings (`--max-warnings`); never raise the cap, lower it when you remove warnings.
+- CI (`.github/workflows/ci.yml`) runs `lint`, `typecheck`, `unit`, `bdd`, `build`, `pipeline` on every push and PR. `pr-lint.yml` (`pr-policy`) checks every PR into `develop`/`main`: Conventional Commit title and Gitflow head → base (work branches → `develop`; `develop`/`hotfix/*` → `main`). Branch rulesets live in `.github/rulesets/*.json`. `npm run lint` caps warnings (`--max-warnings`); never raise the cap, lower it when you remove warnings.
 
 ## Available Custom Commands
 

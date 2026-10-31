@@ -22,6 +22,8 @@ import {
   readRepoFile,
   readRepoJson,
   readRepoYaml,
+  runScripts,
+  runsCommand,
   repoFileExists,
   stepIndex,
   triggerTypes,
@@ -30,10 +32,13 @@ import {
   usesEnvironment,
   type Workflow,
 } from '../../support/workflowContract';
+import { checkBranches, checkTitle } from '../../../scripts/cicd/lib/prPolicy.mjs';
 
 export interface CiBddState {
   workflows: Workflow[];
   file?: { path: string; text: string };
+  pr?: { head: string; base: string; title: string };
+  policy?: { ok: boolean; titleOk: boolean; branchesOk: boolean };
 }
 
 type CucumberProfile = { paths?: string[] };
@@ -199,6 +204,50 @@ Then('it opens a pull request from {string} into {string}', function (this: Song
   );
 });
 
+Then(
+  '{string} only runs after a successful {string} run on {string}',
+  function (this: SongBddWorld, file: string, buildName: string, branch: string) {
+    const wf = byFile(this, file);
+    const run = wf.on.workflow_run as { workflows?: string[]; types?: string[]; branches?: string[] } | undefined;
+    assert.ok(run?.workflows?.includes(buildName), `${file} is not triggered by the "${buildName}" workflow`);
+    assert.ok(run?.types?.includes('completed'), `${file} must trigger on completed "${buildName}" runs`);
+    assert.ok(run?.branches?.includes(branch), `${file} is not limited to "${branch}" builds`);
+    assert.match(wf.raw, /workflow_run\.conclusion\s*==\s*'success'/, `${file} does not require a successful build`);
+  },
+);
+
+// ── Staging deploy over SSH (story 5.1.7) ───────────────────────────────────
+const sshCommands = (wf: Workflow) =>
+  runScripts(wf)
+    .flatMap((r) => r.split('\n'))
+    .map((l) => l.trim())
+    .filter((l) => /(^|\s)ssh\s/.test(l));
+
+Then('it connects over SSH with a pinned host key from the secret {string}', function (this: SongBddWorld, secret: string) {
+  const wf = current(this);
+  assert.match(wf.raw, new RegExp(`secrets\\.${secret}\\b`), `${wf.file} does not read ${secret}`);
+  const cmds = sshCommands(wf);
+  assert.ok(cmds.length > 0, `${wf.file} never runs ssh`);
+  for (const cmd of cmds) {
+    assert.match(cmd, /StrictHostKeyChecking=yes/, `ssh without StrictHostKeyChecking=yes: ${cmd}`);
+    assert.match(cmd, /UserKnownHostsFile=/, `ssh without a pinned known_hosts file: ${cmd}`);
+  }
+});
+
+Then('the only remote command it sends is {string}', function (this: SongBddWorld, expected: string) {
+  const wf = current(this);
+  const [verb, tag] = expected.split(' ');
+  for (const cmd of sshCommands(wf)) {
+    assert.match(cmd, new RegExp(`\\s${verb} ${tag} "\\$SHA"$`), `unexpected remote command: ${cmd}`);
+  }
+});
+
+Then('it never disables host key checking', function (this: SongBddWorld) {
+  const wf = current(this);
+  assert.doesNotMatch(wf.raw, /StrictHostKeyChecking=(no|accept-new)/, `${wf.file} disables host key checking`);
+  assert.doesNotMatch(wf.raw, /ssh-keyscan/, `${wf.file} trusts whatever host key it scans`);
+});
+
 // ── Fail-closed E2E (story 5.1.2) ───────────────────────────────────────────
 When('the required staging secrets are absent', function () {
   // Static contract: inspected in the Then step below.
@@ -259,27 +308,42 @@ Then('it includes {string}', function (this: SongBddWorld, feature: string) {
   assert.ok(included, `no cucumber.json profile includes ${feature}`);
 });
 
+// ── PR policy (story 5.1.5): pr-lint.yml runs scripts/cicd/lib/prPolicy.mjs ──
+Given('a pull request from {string} into {string}', function (this: SongBddWorld, head: string, base: string) {
+  ci(this).pr = { head, base, title: 'chore: placeholder title' };
+});
+
+Given('a pull request titled {string}', function (this: SongBddWorld, title: string) {
+  ci(this).pr = { head: 'feat/1-placeholder', base: 'develop', title };
+});
+
+When('the {string} workflow runs', function (this: SongBddWorld, name: string) {
+  const wf = loadWorkflow(`${name}.yml`);
+  for (const base of ['develop', 'main']) {
+    assert.ok(triggersOnBranch(wf, 'pull_request', base), `${wf.file} does not run on PRs into ${base}`);
+  }
+  assert.ok(runsCommand(wf, 'scripts/cicd/lib/prPolicy.mjs'), `${wf.file} does not run the PR policy module`);
+  assert.doesNotMatch(wf.raw, /run:[^\n]*\$\{\{\s*github\.event\.pull_request/, `${wf.file} inlines untrusted PR data into run:`);
+  const pr = ci(this).pr;
+  assert.ok(pr, 'no pull request in this scenario');
+  const titleOk = checkTitle(pr.title).ok;
+  const branchesOk = checkBranches(pr.head, pr.base).ok;
+  ci(this).policy = { ok: titleOk && branchesOk, titleOk, branchesOk };
+});
+
+Then('the policy check is {string}', function (this: SongBddWorld, result: string) {
+  const { pr, policy } = ci(this);
+  assert.ok(pr && policy, 'the pr-lint workflow did not run');
+  assert.equal(policy.branchesOk ? 'pass' : 'fail', result, `${pr.head} → ${pr.base}`);
+});
+
+Then('the title check fails', function (this: SongBddWorld) {
+  const { pr, policy } = ci(this);
+  assert.ok(pr && policy, 'the pr-lint workflow did not run');
+  assert.equal(policy.titleOk, false, `title "${pr.title}" unexpectedly passed`);
+});
+
 // ── Need artifacts from later stories → pending until then ──────────────────
-Given('a pull request from {string} into {string}', function (_head: string, _base: string) {
-  return 'pending'; // story 5.1.5: PR policy module used by pr-lint.yml
-});
-
-Given('a pull request titled {string}', function (_title: string) {
-  return 'pending'; // story 5.1.5
-});
-
-When('the {string} workflow runs', function (_name: string) {
-  return 'pending'; // story 5.1.5
-});
-
-Then('the policy check is {string}', function (_result: string) {
-  return 'pending'; // story 5.1.5
-});
-
-Then('the title check fails', function () {
-  return 'pending'; // story 5.1.5
-});
-
 Then('the required checks include the full E2E suite against staging', function () {
   return 'pending'; // story 5.1.8: ruleset contract for PRs into main
 });

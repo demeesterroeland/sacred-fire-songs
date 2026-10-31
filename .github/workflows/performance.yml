@@ -1,12 +1,9 @@
 name: Performance Tests (k6)
 
-# Run k6 load tests against a deployed URL (e.g. Vercel preview).
+# Run k6 load tests against a deployed URL (staging/preview on the self-hosted
+# Docker stack, decision D6: no Vercel).
 # Trigger manually from the GitHub UI, by adding the "perf-test" label to a PR,
 # or on a schedule.
-#
-# Optional repo secrets:
-#   VERCEL_TOKEN                    - Vercel bearer token for protected deployments
-#   VERCEL_PROTECTION_BYPASS_TOKEN  - Vercel deployment protection bypass header
 
 on:
   workflow_dispatch:
@@ -52,7 +49,7 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       # ── Install k6 from official Grafana APT repo ──────────────────────────
       - name: Install k6
         run: |
@@ -69,8 +66,6 @@ jobs:
       - name: Run k6 performance test
         env:
           BASE_URL: ${{ github.event.inputs.base_url || 'https://songbook-beta.bluette.be' }}
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_PROTECTION_BYPASS_TOKEN: ${{ secrets.VERCEL_PROTECTION_BYPASS_TOKEN }}
         run: |
           TEST_SCRIPT="${{ github.event.inputs.test_script || 'testing/performance/tests/scripts/load-test.js' }}"
           TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
@@ -91,7 +86,7 @@ jobs:
       # ── Upload results as artifact ─────────────────────────────────────────
       - name: Upload performance results
         if: always()
-        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: perf-results-${{ github.run_id }}
           path: testing/performance/results/
