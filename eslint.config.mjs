@@ -11,6 +11,10 @@ const eslintConfig = defineConfig([
       // `lint` can be a required CI check. `npm run lint` caps the warning
       // count (--max-warnings); lower the cap whenever warnings are removed.
       "@typescript-eslint/no-explicit-any": "warn",
+      // React Compiler rules enabled by eslint-config-next 16.4: existing
+      // violations are warnings under the same ratchet.
+      "react-hooks/set-state-in-effect": "warn",
+      "react-hooks/immutability": "warn",
     },
   },
   // Override default ignores of eslint-config-next.
