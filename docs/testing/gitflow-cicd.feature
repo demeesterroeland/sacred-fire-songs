@@ -135,13 +135,22 @@ Feature: Gitflow branching and CI/CD pipeline
     Then a push to "develop" builds images tagged "develop" and the short SHA
     And no image is tagged "latest"
     And "deploy-staging.yml" uses the environment "Staging"
-    And it runs "supabase db push" before deploying the app
+    And "deploy-staging.yml" only runs after a successful "Build and push Docker image" run on "develop"
+
+  @story-5.1.7 @ci-contract
+  Scenario: The staging deploy can only trigger the restricted deploy command
+    Given the workflow "deploy-staging.yml"
+    Then it connects over SSH with a pinned host key from the secret "STAGING_SSH_KNOWN_HOSTS"
+    And the only remote command it sends is "deploy develop <commit SHA>"
+    And it never disables host key checking
 
   @story-5.1.7 @manual
   Scenario: Staging reflects develop after a merge
     Given a feature PR is squash-merged into "develop"
     When the staging pipeline finishes
-    Then the staging health endpoint reports the new commit SHA
+    Then the server ran the migrator before restarting the app
+    And the running staging app image carries the new commit SHA as its revision label
+    And the app container is healthy
 
   # ── Story 5.1.8: production promotion ─────────────────────────────────────
   @story-5.1.8 @ci-contract

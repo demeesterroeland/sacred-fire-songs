@@ -1,6 +1,6 @@
 # Gitflow CI/CD Migration — Plan & Orchestration
 
-**Version:** 1.6
+**Version:** 1.7
 **Status:** Approved — in execution (phase by phase, one PR into `develop` per phase)
 **Date:** Oct 31, 2026
 **Branch:** `docs/gitflow-migration-plan`
@@ -17,6 +17,7 @@
 | **1.4** | Oct 31, 2026 | Phase 1 (#282) implemented except Story 5.1.2 (E2E), which the owner deferred: tasks 1.1, 1.3, 1.4, 1.5, 1.7, 1.8 done; 1.2/1.6 deferred; 1.9 ruleset update in the Phase 1 PR. Findings: `tsconfig.json` excludes `testing/`/`e2e/` (tests are not type-checked); cloud staging/prod Supabase projects are paused; preview server compose has drifted from cloud-infra git. |
 | **1.5** | Oct 31, 2026 | #274 reorganized `scripts/` into `scripts/cicd/`, `scripts/db/`, `scripts/dev/` (see `scripts/README.md`); script tasks below refer to `scripts/cicd/…` (task 4.1 path updated). The misnamed usage headers of `dev2preview.sh`/`preview2prod.sh` (G6, task 2.6) were fixed as part of the move. Shellcheck in `ci.yml` now checks `scripts/*/*.sh`. |
 | **1.6** | Oct 31, 2026 | Phase 2 (#283) implemented: 2.4, 2.5, 2.6 done; rulesets as code for 2.1 (owner applies). New required check `pr-policy`. |
+| **1.7** | Oct 31, 2026 | Phase 3 (#284): 3.1 done, 3.3 code done (rollout pending, cloud-infra #107), 3.2 owner action, 3.4 deferred (Tailscale). 2.1 done (owner applied both rulesets). Staging deploy design: SSH forced command + server-side migrator/health/revision check. |
 
 > **For Claude:** REQUIRED SUB-SKILL: Use `superpowers:executing-plans` (or `superpowers:subagent-driven-development`) to implement this plan phase by phase. One story = one issue = one branch = one PR into `develop` (after Phase 1 exists; before that, into `main`).
 
@@ -217,7 +218,7 @@ Each phase ends with a green gate before the next starts. Story IDs map to `docs
 ### Phase 2 — Introduce `develop` + branch policy
 **Exit:** `develop` exists, protected; new work targets it. *Stories 5.1.4, 5.1.5, 5.1.6.*
 
-- [ ] 2.1 *Partly done*: `develop` created from `main` (`7f582d1`). Ruleset as code `.github/rulesets/develop.json` (deletion/force-push blocked, PR + resolved threads, squash + merge — merge only for the `main` → `develop` back-merge —, required checks = `ci.yml` jobs + `pr-policy` + `e2e`, no bypass), checked by `testing/unit/tests/ci/rulesets.test.ts`. **Remaining:** owner applies it (`gh api -X POST …/rulesets --input .github/rulesets/develop.json`) and the updated `main.json` (adds `pr-policy`).
+- [x] 2.1 `develop` created from `main` (`7f582d1`); ruleset *Develop Branch Protected* (26249878) applied by the owner from `.github/rulesets/develop.json` (and `main.json` with `pr-policy`); contract test `rulesets.test.ts`.
 - [x] 2.2 `main` ruleset allows merge (for `develop` → `main`) + squash (hotfix), no rebase (ruleset 12237277, now also as code in `.github/rulesets/main.json`). Head-branch policy is enforced by `pr-lint.yml` (2.5).
 - [x] 2.3 Default branch → `develop` (D1).
 - [x] 2.4 `start-issue.sh` validates the type (`feat|fix|chore|docs|hotfix`) and a numeric issue number before touching git (exit 2); bats 9/9.
@@ -227,10 +228,10 @@ Each phase ends with a green gate before the next starts. Story IDs map to `docs
 ### Phase 3 — Staging CD from `develop`
 **Exit:** merge to `develop` → staging updated with migrations, automatically. *Story 5.1.7.*
 
-- [ ] 3.1 TDD contract: `docker.yml` on push `develop` tags `:develop` + `:sha-<short>`; never `:latest`.
-- [ ] 3.2 Rename environment `Preview` → `Staging`; move staging secrets to environment scope (`SUPABASE_PROJECT_ID`, `SUPABASE_DB_PASSWORD`, `SUPABASE_ACCESS_TOKEN`, SSH deploy key/host). Names, hosts and paths come from `cloud-infra` (`stacks/songbook-preview/`, Hetzner `bluette-prod` over Tailscale); values go straight from file into `gh secret set` or via `request_secret`, never in chat/logs/commits.
-- [ ] 3.3 `deploy-staging.yml`: `supabase db push --include-all` (resurrect from `git show 2eac72a^:.github/workflows/deploy-db.yml`) → deploy (D3: SSH over Tailscale to the preview server, `IMAGE_TAG=develop`, `docker compose pull && up -d` in `stacks/songbook-preview/`, cf. `cloud-infra/stacks/scripts/update.sh`) → health check URL. Changes to `cloud-infra` go via a PR in that repo after owner approval.
-- [ ] 3.4 Nightly `e2e.yml` full suite + `performance.yml` vs staging; failure opens/updates a GitHub issue.
+- [x] 3.1 `docker.yml` builds on push to `develop` (and `main`): branch tag `:develop` + short SHA; both `:latest` tags removed (default branch is now `develop`, so `is_default_branch` would have tagged `develop` as latest). Contract @story-5.1.7.
+- [ ] 3.2 GitHub environment **`Staging`** with secrets `STAGING_SSH_HOST`, `STAGING_SSH_USER`, `STAGING_SSH_KEY`, `STAGING_SSH_KNOWN_HOSTS` (owner approval: repo setting). No Supabase secrets needed: staging migrations run on the server (migrator container). The unused `Preview` environment can be deleted afterwards.
+- [ ] 3.3 *Code done, rollout pending*: `deploy-staging.yml` (after a successful develop image build, `environment: Staging`, pinned host key, sends only `deploy develop <sha>`); server side in cloud-infra PR #107: `stacks/scripts/deploy-songbook-staging.sh` as SSH forced command (`restrict,command=…`) — pull, migrator, app, healthy, revision label == sha; `songbook-preview` uses `IMAGE_TAG` (default `develop`). **Design change vs. plan:** no `supabase db push` from CI — staging is a self-hosted Supabase whose migrations the `migrator` image already applies; and no HTTP health check from the runner — staging is Tailscale-only, so the script checks health on the server. **Remaining:** owner merges #107, VPS rollout (`git checkout` drift + `git pull`, deploy key), environment secrets, first deploy.
+- [ ] 3.4 ⏸ Deferred (owner, with Story 5.1.2): staging is Tailscale-only, so nightly E2E/k6 from GitHub runners needs the `tag:ci` Tailscale setup first. D6 cleanup done meanwhile: Vercel tokens removed from `performance.yml` (Vercel code in the app — `@vercel/speed-insights`, `lib/env.ts`, `hooks/useEnvironment.ts`, Playwright bypass header — is a separate follow-up).
 
 ### Phase 4 — Release, production & hotfix
 > ⚠️ Every Phase 4 task (production deploy, `--admin` removal, back-merge) and every change to `main` or repo settings needs explicit owner approval first. Release PR #261 (1.7.0) is not merged without that approval.

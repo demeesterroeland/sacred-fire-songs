@@ -1338,3 +1338,14 @@
 - [x] Skipped bats guard against `gh pr merge --admin` (task 4.7, Phase 4 approval)
 - [x] Docs: git-workflow v1.4, design doc §6.6, plan v1.6, epic statuses, CLAUDE.md, scripts/README.md
 - [ ] Owner: apply `.github/rulesets/develop.json` (POST) and `main.json` (PUT, adds `pr-policy`)
+
+## Session October 31, 2026 (Part 3: Gitflow Phase 3 — Staging CD from develop, #284)
+- [x] Verify owner-applied rulesets (`main` 12237277, `develop` 26249878); close Story 5.1.4 (#292)
+- [x] Investigate access: public SSH (key-only) reachable from runners; staging web Tailscale-only; preview stack has a migrator; `/opt/dockge` had uncommitted preview + prod compose drift (prod runs `-app:v1.6.0`)
+- [x] Rewrite @story-5.1.7 scenarios for the SSH forced-command design (red → green, `ci-gate` 18/18)
+- [x] `docker.yml`: build on `develop`, short SHA on push, remove `:latest`
+- [x] `deploy-staging.yml`: workflow_run after develop build, `environment: Staging`, pinned host key, only `deploy develop <sha>`
+- [x] cloud-infra PR #107: `deploy-songbook-staging.sh` (bats 8/8, shellcheck), preview `IMAGE_TAG`, prod compose = running state
+- [x] D6: Vercel tokens removed from `performance.yml`
+- [ ] Owner: merge cloud-infra #107; VPS rollout; `Staging` environment + secrets; first deploy
+- [ ] Deferred: 3.4 nightly E2E/k6 (Tailscale), app-level Vercel code

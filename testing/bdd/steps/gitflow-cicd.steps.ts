@@ -22,6 +22,7 @@ import {
   readRepoFile,
   readRepoJson,
   readRepoYaml,
+  runScripts,
   runsCommand,
   repoFileExists,
   stepIndex,
@@ -201,6 +202,50 @@ Then('it opens a pull request from {string} into {string}', function (this: Song
     new RegExp(`--base[= ]${base}`).test(scripts) && new RegExp(`--head[= ]${head}`).test(scripts),
     `${wf.file} does not open a PR ${head} → ${base}`,
   );
+});
+
+Then(
+  '{string} only runs after a successful {string} run on {string}',
+  function (this: SongBddWorld, file: string, buildName: string, branch: string) {
+    const wf = byFile(this, file);
+    const run = wf.on.workflow_run as { workflows?: string[]; types?: string[]; branches?: string[] } | undefined;
+    assert.ok(run?.workflows?.includes(buildName), `${file} is not triggered by the "${buildName}" workflow`);
+    assert.ok(run?.types?.includes('completed'), `${file} must trigger on completed "${buildName}" runs`);
+    assert.ok(run?.branches?.includes(branch), `${file} is not limited to "${branch}" builds`);
+    assert.match(wf.raw, /workflow_run\.conclusion\s*==\s*'success'/, `${file} does not require a successful build`);
+  },
+);
+
+// ── Staging deploy over SSH (story 5.1.7) ───────────────────────────────────
+const sshCommands = (wf: Workflow) =>
+  runScripts(wf)
+    .flatMap((r) => r.split('\n'))
+    .map((l) => l.trim())
+    .filter((l) => /(^|\s)ssh\s/.test(l));
+
+Then('it connects over SSH with a pinned host key from the secret {string}', function (this: SongBddWorld, secret: string) {
+  const wf = current(this);
+  assert.match(wf.raw, new RegExp(`secrets\\.${secret}\\b`), `${wf.file} does not read ${secret}`);
+  const cmds = sshCommands(wf);
+  assert.ok(cmds.length > 0, `${wf.file} never runs ssh`);
+  for (const cmd of cmds) {
+    assert.match(cmd, /StrictHostKeyChecking=yes/, `ssh without StrictHostKeyChecking=yes: ${cmd}`);
+    assert.match(cmd, /UserKnownHostsFile=/, `ssh without a pinned known_hosts file: ${cmd}`);
+  }
+});
+
+Then('the only remote command it sends is {string}', function (this: SongBddWorld, expected: string) {
+  const wf = current(this);
+  const [verb, tag] = expected.split(' ');
+  for (const cmd of sshCommands(wf)) {
+    assert.match(cmd, new RegExp(`\\s${verb} ${tag} "\\$SHA"$`), `unexpected remote command: ${cmd}`);
+  }
+});
+
+Then('it never disables host key checking', function (this: SongBddWorld) {
+  const wf = current(this);
+  assert.doesNotMatch(wf.raw, /StrictHostKeyChecking=(no|accept-new)/, `${wf.file} disables host key checking`);
+  assert.doesNotMatch(wf.raw, /ssh-keyscan/, `${wf.file} trusts whatever host key it scans`);
 });
 
 // ── Fail-closed E2E (story 5.1.2) ───────────────────────────────────────────

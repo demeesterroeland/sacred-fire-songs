@@ -115,4 +115,6 @@
 
 | **October 31, 2026 (Part 2)** | **CI-CD (#283)**: Gitflow Phase 2 — PR policy check (`pr-lint.yml`), rulesets as code, `start-issue.sh` validation, `dev2preview.sh` image names + dry run; recovered #317 via #318. | ~1.5 Hours | ✅ Completed |
 
-| **Total** | **Development + AI Collaboration** | **~195.75 Hours** | |
+| **October 31, 2026 (Part 3)** | **CI-CD (#284)**: Gitflow Phase 3 — develop images, `deploy-staging.yml`, restricted SSH deploy script + compose sync (cloud-infra #107). | ~1.5 Hours | ✅ Completed |
+
+| **Total** | **Development + AI Collaboration** | **~197.25 Hours** | |
