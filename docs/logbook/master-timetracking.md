@@ -99,4 +99,24 @@
 
 | **October 30, 2026 (Part 5)** | **Feature/Testing (#258)**: Reviewed Story 3.6.1 against its ACs, fixed the admin user detail query (non-existent columns left the contribution tabs empty), added activity/musician status and public playlist counts, and covered the story with 48 vitest tests, 20 Cucumber @unit/@seed scenarios (`docs/testing/admin-users.feature`) and a Playwright spec. | ~2.5 Hours | ✅ |
 
-| **Total** | **Development + AI Collaboration** | **~179.25 Hours** | |
+| **October 30, 2026 (Part 6)** | **Feature/i18n (#246)**: Merged main twice (#220 PDF export strings + PDF labels localized), six more languages (es, it, ru, qu, fr, pt) redesigned ember listbox language picker, merged #259 admin, request-scoped server locale, LocaleProvider hydration fix, LanguageSwitcher (sidebar/user menu/preferences), finished string migration, Story 3.7.1, `i18n.feature`, vitest + Cucumber + Playwright coverage, main-vs-branch e2e baseline comparison. | ~6.0 Hours | ✅ Completed |
+
+| **October 30, 2026 (Part 7)** | **Feature/UI (#278, #279)**: Admin layout aligned with the Library section (fixed header overlap), listbox-style role/sort pickers modelled on the i18n language picker, sort by name and number of songs (persisted), clickable user rows; issues #275–#279 created. | ~1.5 Hours | ✅ |
+
+| **October 30, 2026 (Part 8)** | **Planning/CI-CD (Epic 5.1)**: Gitflow research, gap analysis, migration plan, BDD spec, Epic 5.1 stories and GitHub issue tree (#280–#301), owner decisions recorded, plan PR #308. | ~2.0 Hours | ✅ Completed |
+
+| **October 30, 2026 (Part 9)** | **Bug/Feature PDF export (#303, #304)**: footer site host + 1 cm song QR code (also on continuation pages, fixing a missing-URL bug), PDF reuse cache with content fingerprint (IndexedDB, per user, cleared on sign-out), TDD + QR decode check. | ~1.0 Hours | ✅ Completed |
+
+| **October 30, 2026 (Part 10)** | **CI-CD/Testing (#287)**: Gitflow Phase 0 harness — workflow contract helper, Vitest contract tests, Cucumber `ci` profile, bats tests for `start-issue.sh`, lint/typecheck scripts and baseline. | ~1.0 Hours | ✅ Completed |
+
+| **October 31, 2026** | **CI-CD (#282)**: Gitflow Phase 1 — `ci.yml` quality gate, lint ratchet, single unit-test tree, SHA-pinned actions, Dependabot; E2E Supabase stack drafted in cloud-infra #106 (deferred). | ~2.5 Hours | ✅ Completed |
+
+| **October 31, 2026 (Part 2)** | **Chore/Scripts (#274)**: `scripts/` reorganized into `cicd/`, `db/`, `dev/` with `scripts/README.md`, story-sync scripts moved out of `.claude/scripts/`, all references and the CI shellcheck glob updated, layout contract in bats. | ~1.0 Hours | ✅ Completed |
+
+| **October 31, 2026 (Part 2)** | **CI-CD (#283)**: Gitflow Phase 2 — PR policy check (`pr-lint.yml`), rulesets as code, `start-issue.sh` validation, `dev2preview.sh` image names + dry run; recovered #317 via #318. | ~1.5 Hours | ✅ Completed |
+
+| **October 31, 2026 (Part 3)** | **CI-CD (#284)**: Gitflow Phase 3 — develop images, `deploy-staging.yml`, restricted SSH deploy script + compose sync (cloud-infra #107). | ~1.5 Hours | ✅ Completed |
+
+| **October 31, 2026 (Part 4)** | **Bug (#321)**: "New Playlist" redirected logged-in users to `/` — `useAuth` initial `loading` when no server user, server-side guard on `/library/playlists/add`, unit + e2e regression tests. | ~0.75 Hours | ✅ Completed |
+
+| **Total** | **Development + AI Collaboration** | **~198.0 Hours** | |

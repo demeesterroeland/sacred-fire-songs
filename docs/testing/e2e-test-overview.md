@@ -1,8 +1,8 @@
 # E2E Test Overview & Matrix: Sacred Fire Songs
 
-**Version:** 1.5
+**Version:** 1.10
 **Status:** Living Document
-**Date:** Oct 30, 2026
+**Date:** Oct 31, 2026
 **Tracking:** GH #142
 
 ## Changelog
@@ -15,6 +15,11 @@
 | **1.3** | May 31, 2026 | CI hardening: the staging anon key is now read from the `SUPABASE_PUBLISHABLE_KEY_STAGING` secret instead of the `supabase projects api-keys` CLI lookup (which returned no key and failed the run). Dropped the Supabase CLI step; URL derived from the project ref. Documented required secrets. |
 | **1.4** | Jun 23, 2026 | Isolated E2E database environment from staging app `songbook-beta`. Integrated automatic database wipe and seeding via Playwright `globalSetup` hook and `setup-test-db.mjs` script. |
 | **1.5** | Oct 30, 2026 | Added section 4.11 Administration (Epic 3.6) with ADMIN-01 … ADMIN-07, covered by `e2e/tests/admin-users.spec.ts` (Gherkin: `docs/testing/admin-users.feature`). |
+| **1.6** | Oct 30, 2026 | Added ACC-07 (interface language, Story 3.7.1 / #246) covered by `e2e/tests/i18n.spec.ts`; scenarios catalogued in `docs/testing/i18n.feature`. |
+| **1.7** | Oct 30, 2026 | ACC-07 extended to eight languages (I18N-12). |
+| **1.8** | Oct 30, 2026 | Added ADMIN-08 (remembered sort, #278) and ADMIN-09 (clickable user rows, #279); ADMIN-05 now drives the listbox-style role picker. |
+| **1.9** | Oct 31, 2026 | Unit tests now live only in `testing/unit/tests/` (`lib/unit-tests/` removed, Epic 5.1 Story 5.1.3); stale Playwright copies in `testing/e2e/tests/` removed — specs live in `e2e/`. |
+| **1.10** | Oct 31, 2026 | Database setup and seeder paths moved to `scripts/db/` (`scripts/db/setup-test-db.mjs`, `scripts/db/random-seeder.mjs`, #274). |
 
 ---
 
@@ -27,11 +32,11 @@ It is a **living document**: keep it aligned with `docs/logbook/epic&user storie
 ### Scope
 
 - **In scope:** browser-level user workflows across all features (auth, song management, library/discovery, viewer, playlists, favorites, gatekeeper tools, account/settings, navigation, PWA), including role variants and edge cases.
-- **Out of scope (covered elsewhere):** pure unit logic already tested by **vitest** in `lib/unit-tests/` (ChordPro parsing, chord utils, query mappers, Zod schemas, guest-favorites logic, playlist action logic). E2E should not duplicate these; it should exercise the *integrated* flow through the UI.
+- **Out of scope (covered elsewhere):** pure unit logic already tested by **vitest** in `testing/unit/tests/` (ChordPro parsing, chord utils, query mappers, Zod schemas, guest-favorites logic, playlist action logic). E2E should not duplicate these; it should exercise the *integrated* flow through the UI.
 
 ### Current state of testing
 
-- **Unit tests (vitest, v4):** `lib/unit-tests/chordProParsing.test.ts`, `chordUtils.test.ts`, `queries.test.ts`, `songUtils.test.ts`, `playlistActions.test.ts`, `schemas.test.ts`, `useGuestFavorites.test.ts`. Run via `npm test` → `vitest run`.
+- **Unit tests (vitest, v4):** `testing/unit/tests/chordProParsing.test.ts`, `chordUtils.test.ts`, `queries.test.ts`, `songUtils.test.ts`, `playlistActions.test.ts`, `schemas.test.ts`, `useGuestFavorites.test.ts`. Run via `npm test` → `vitest run`.
 - **E2E tests:** **Phase 0 scaffolded** (this branch). Playwright is wired up (`playwright.config.ts`, `e2e/`), with per-role auth setup and a handful of P0 `@smoke` specs. Specs are authored but **not yet verified against a running app + seeded Supabase** — that verification happens once CI (or a dev) runs them. See `e2e/README.md`.
 - **CI:** `.github/workflows/deploy-db.yml` runs Supabase migrations; **`.github/workflows/e2e.yml`** (new) runs the `@smoke` subset against the **staging** Supabase project on every push to `main` / `feat|fix|chore/**`.
 
@@ -59,13 +64,13 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 - **Location:** `e2e/` at repo root, specs as `e2e/<feature>.spec.ts`. Shared fixtures/helpers in `e2e/fixtures/`.
 - **Config:** `playwright.config.ts` with projects for `chromium-desktop` and `mobile-chrome` (Pixel 5 descriptor); `webServer` boots `next build && next start` (test against a production build, not `next dev`).
 - **Auth:** a global-setup that logs in one user per role and saves `storageState` per role (leverage the existing dev quick-login / `NEXT_PUBLIC_DEV_TEST_PASSWORD` and mock-role mechanism noted in `hooks/useAuth.tsx`). Guest = no storage state.
-- **Data:** run against a **local Supabase** stack seeded by `scripts/setup-test-db.mjs`: one account per role from `supabase/seeds/01_auth_users.sql` + `02_profiles.sql`, then randomly generated songs, playlists and recordings from `scripts/random-seeder.mjs` (one deterministic anchor song, `Danza del Cielo Curandero`, is always present). The real song collection lives in the sibling repository `sacred-fire-songs-collection`. Reset/seed between runs so assertions on counts/titles are stable.
+- **Data:** run against a **local Supabase** stack seeded by `scripts/db/setup-test-db.mjs`: one account per role from `supabase/seeds/01_auth_users.sql` + `02_profiles.sql`, then randomly generated songs, playlists and recordings from `scripts/db/random-seeder.mjs` (one deterministic anchor song, `Danza del Cielo Curandero`, is always present). The real song collection lives in the sibling repository `sacred-fire-songs-collection`. Reset/seed between runs so assertions on counts/titles are stable.
 - **Scripts:** add `"test:e2e": "playwright test"` and `"test:e2e:ui": "playwright test --ui"` to `package.json`.
 
 ### CI approach
 
 - `.github/workflows/e2e.yml` runs on **push** to `main` / `feat|fix|chore/**` and tests against the **staging** Supabase project. It derives the staging URL from `SUPABASE_PROJECT_ID_STAGING` and reads the (public) anon key from the `SUPABASE_PUBLISHABLE_KEY_STAGING` secret; `E2E_TEST_PASSWORD` provides the seeded-account password. It installs deps + Chromium, runs the `@smoke` subset, and uploads the HTML report.
-- **Database Isolation:** Playwright E2E tests are configured to run against the online staging Supabase project (which acts as a dedicated E2E DB and is separate from the database driving `songbook-beta`). A global setup hook (`e2e/global-setup.ts`) executes a Node.js setup script (`scripts/setup-test-db.mjs`) to dynamically wipe and seed the database using `supabase/seeds/*.sql` before tests run, ensuring a clean and consistent baseline.
+- **Database Isolation:** Playwright E2E tests are configured to run against the online staging Supabase project (which acts as a dedicated E2E DB and is separate from the database driving `songbook-beta`). A global setup hook (`e2e/global-setup.ts`) executes a Node.js setup script (`scripts/db/setup-test-db.mjs`) to dynamically wipe and seed the database using `supabase/seeds/*.sql` before tests run, ensuring a clean and consistent baseline.
 - **Local Optimization:** For fast local test iteration, setting the environment variable `E2E_REUSE_DB=1` skips the database wipe and re-seed, reusing the existing database state.
 
 ---
@@ -106,6 +111,7 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 | ACC-04 | Privacy settings | Toggle privacy / data options | account deletion confirm | M | ⚠️ | 🔲 | P2 | PrivacySettings |
 | ACC-05 | Preferences / theme | Toggle dark/light/system; persists across reload | no flash-of-wrong-theme on reload | G/M | ✅ | 🔲 | P1 | ThemeToggle |
 | ACC-06 | Musician profile toggle | Enable "I play an instrument" reveals musician features | toggle off hides transpose/chord badges/Chords filter | M | ⚠️ | 🔲 | P1 | Story 3.5.1 |
+| ACC-07 | Interface language (en, nl, es, it, ru, qu, fr, pt) | Switch language from sidebar, user menu or Preferences; UI text changes without reload | browser-locale default (nl-BE → NL, de → EN); persists after reload, navigation and sign-out; SSR already in chosen language; no hydration mismatch; song content untranslated | G/M | ✅ | ✅ | P1 | Story 3.7.1, `e2e/tests/i18n.spec.ts` |
 
 ### 4.3 Song Management (Epic 1.1 / 2.2)
 
@@ -224,6 +230,8 @@ Spec: `e2e/tests/admin-users.spec.ts` · Gherkin: `docs/testing/admin-users.feat
 | ADMIN-05 | Search / filter | Search by e-mail, "No users found" empty state, "Musician / Expert" role filter | — | A | ✅ | ✅ | P1 | 3.6.1 |
 | ADMIN-06 | User detail & contributions | Detail shows e-mail, role, musician status, joined, last active; tabs list songs, versions, playlists | expert shows "Musician: Yes"; back link | A | ✅ | ✅ | P0 | 3.6.1 |
 | ADMIN-07 | Unknown user | `/admin/users/<unknown id>` shows "User Not Found" with link back | rendered with HTTP 200 (streamed by `app/loading.tsx`) | A | ✅ | ✅ | P2 | 3.6.1 |
+| ADMIN-08 | Sort users | "Most songs" orders rows by song count and survives a reload | name A-Z/Z-A and fewest songs covered by @unit | A | ✅ | ✅ | P2 | 3.6.5 |
+| ADMIN-09 | Clickable rows | Clicking a row outside "Details" opens the user's details | keyboard Enter via the row link | A | ✅ | ✅ | P2 | 3.6.6 |
 
 ---
 

@@ -8,6 +8,7 @@ import { usePathname } from 'next/navigation';
 import type { LucideIcon } from 'lucide-react';
 import CreateSheet from './CreateSheet';
 import { useUserPreferences } from '@/context/UserPreferencesContext';
+import { useLocale } from '@/context/LocaleContext';
 
 type TabItem = {
     label: string;
@@ -18,20 +19,21 @@ type TabItem = {
     isAction?: boolean;
 };
 
-const BOTTOM_TABS: TabItem[] = [
-    { label: 'Home', href: '/', icon: Home, exact: true },
-    { label: 'Songs', href: '/songs', icon: Library, exclude: ['/songs/add'] },
-    { label: 'Library', href: '/library/playlists', icon: ListMusic },
-    { label: 'Create', href: '/songs/add', icon: PlusCircle, isAction: true },
-];
-
 export default function MobileBottomNav() {
+    const { t } = useLocale();
     const { isActive } = useActivePath();
     const pathname = usePathname();
     const [isSheetOpen, setIsSheetOpen] = useState(false);
     const { preferences } = useUserPreferences();
     const [isVisible, setIsVisible] = useState(true);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+    const bottomTabs: TabItem[] = [
+        { label: t('nav.home'), href: '/', icon: Home, exact: true },
+        { label: t('nav.songs'), href: '/songs', icon: Library, exclude: ['/songs/add'] },
+        { label: t('nav.library'), href: '/library/playlists', icon: ListMusic },
+        { label: t('nav.create'), href: '/songs/add', icon: PlusCircle, isAction: true },
+    ];
 
     const isSongDetailPage = pathname?.startsWith('/songs/') &&
         pathname !== '/songs' &&
@@ -40,6 +42,7 @@ export default function MobileBottomNav() {
 
     useEffect(() => {
         if (!isSongDetailPage || !preferences.autoHideBottomNav) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional sync of local state with props/route; refactor tracked separately (Epic 5.1 lint ratchet)
             setIsVisible(true);
             return;
         }
@@ -96,7 +99,7 @@ export default function MobileBottomNav() {
 
                 <div className="bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl border-t border-gray-200/50 dark:border-gray-800/50 safe-area-bottom">
                     <div className="flex items-center justify-around h-14 px-2">
-                        {BOTTOM_TABS.map((tab) => {
+                        {bottomTabs.map((tab) => {
                             const active = tab.isAction
                                 ? isSheetOpen
                                 : isActive(tab.href, { exact: tab.exact, exclude: tab.exclude as readonly string[] | undefined });

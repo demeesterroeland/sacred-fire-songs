@@ -2,7 +2,9 @@
   "default": {
     "paths": [
       "docs/testing/song.feature",
-      "docs/testing/admin-users.feature"
+      "docs/testing/i18n.feature",
+      "docs/testing/admin-users.feature",
+      "docs/testing/setlist-pdf-export.feature"
     ],
     "import": [
       "testing/bdd/support/**/*.ts",
@@ -20,7 +22,9 @@
   "unit": {
     "paths": [
       "docs/testing/song.feature",
-      "docs/testing/admin-users.feature"
+      "docs/testing/i18n.feature",
+      "docs/testing/admin-users.feature",
+      "docs/testing/setlist-pdf-export.feature"
     ],
     "import": [
       "testing/bdd/support/**/*.ts",
@@ -38,7 +42,9 @@
   "seed": {
     "paths": [
       "docs/testing/song.feature",
-      "docs/testing/admin-users.feature"
+      "docs/testing/i18n.feature",
+      "docs/testing/admin-users.feature",
+      "docs/testing/setlist-pdf-export.feature"
     ],
     "import": [
       "testing/bdd/support/**/*.ts",
@@ -52,5 +58,57 @@
       "snippetInterface": "async-await"
     },
     "strict": false
+  },
+  "i18n": {
+    "paths": [
+      "docs/testing/song.feature",
+      "docs/testing/i18n.feature"
+    ],
+    "import": [
+      "testing/bdd/support/**/*.ts",
+      "testing/bdd/steps/**/*.ts"
+    ],
+    "tags": "@i18n and @unit",
+    "format": [
+      "summary"
+    ],
+    "formatOptions": {
+      "snippetInterface": "async-await"
+    },
+    "strict": false
+  },
+  "ci": {
+    "paths": [
+      "docs/testing/gitflow-cicd.feature"
+    ],
+    "import": [
+      "testing/bdd/support/**/*.ts",
+      "testing/bdd/steps/**/*.ts"
+    ],
+    "tags": "@ci-contract",
+    "format": [
+      "summary"
+    ],
+    "formatOptions": {
+      "snippetInterface": "async-await"
+    },
+    "strict": false
+  },
+  "ci-gate": {
+    "paths": [
+      "docs/testing/gitflow-cicd.feature"
+    ],
+    "import": [
+      "testing/bdd/support/**/*.ts",
+      "testing/bdd/steps/**/*.ts"
+    ],
+    "tags": "@ci-contract and (@story-5.1.1 or @story-5.1.3 or @story-5.1.5 or @story-5.1.7 or @story-5.1.12)",
+    "format": [
+      "summary"
+    ],
+    "formatOptions": {
+      "snippetInterface": "async-await"
+    },
+    "strict": true
   }
 }

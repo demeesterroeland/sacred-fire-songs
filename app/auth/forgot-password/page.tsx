@@ -10,7 +10,9 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
+import { useLocale } from '@/context/LocaleContext';
 function ForgotPasswordContent() {
+    const { t } = useLocale();
     const router = useRouter();
     const searchParams = useSearchParams();
     const message = searchParams.get('message');
@@ -31,9 +33,9 @@ function ForgotPasswordContent() {
                 redirectTo: `${window.location.origin}/auth/callback?next=/auth/update-password`,
             });
             if (error) throw error;
-            setSuccessMessage("Check your email for the reset link");
+            setSuccessMessage(t('auth.forgotPassword.checkEmail'));
         } catch (error: unknown) {
-            setError(error instanceof Error ? error.message : "An error occurred");
+            setError(error instanceof Error ? error.message : t('common.errorOccurred'));
         } finally {
             setIsLoading(false);
         }
@@ -50,7 +52,7 @@ function ForgotPasswordContent() {
                     onClick={() => router.push('/auth/login')}
                 >
                     <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-                    <span className="text-sm font-medium">Back</span>
+                    <span className="text-sm font-medium">{t('common.back')}</span>
                 </Button>
 
                 {/* Header */}
@@ -59,8 +61,8 @@ function ForgotPasswordContent() {
                         <Key className="text-white w-6 h-6 md:w-10 md:h-10" />
                     </div>
                     <div className="text-left md:text-center">
-                        <h1 className="text-gray-900 dark:text-white text-xl md:text-3xl font-bold md:mb-2 leading-tight">Reset Password</h1>
-                        <p className="text-[#8e99aa] text-xs md:text-sm">Enter your email to receive a reset link.</p>
+                        <h1 className="text-gray-900 dark:text-white text-xl md:text-3xl font-bold md:mb-2 leading-tight">{t('auth.forgotPassword.pageTitle')}</h1>
+                        <p className="text-[#8e99aa] text-xs md:text-sm">{t('auth.forgotPassword.pageDescription')}</p>
                     </div>
                 </div>
 
@@ -75,7 +77,7 @@ function ForgotPasswordContent() {
 
                 <form className="space-y-4 md:space-y-6" onSubmit={handleResetPassword}>
                     <div className="space-y-2">
-                        <Label className="text-xs md:text-sm font-semibold text-gray-900 dark:text-white ml-1 tracking-wide uppercase opacity-70">Email address</Label>
+                        <Label className="text-xs md:text-sm font-semibold text-gray-900 dark:text-white ml-1 tracking-wide uppercase opacity-70">{t('field.email.label')}</Label>
                         <div className="relative group">
                             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5a657a] group-focus-within:text-[#d9481e] transition-colors pointer-events-none">
                                 <Mail className="w-5 h-5" />
@@ -83,7 +85,7 @@ function ForgotPasswordContent() {
                             <Input
                                 id="email"
                                 type="email"
-                                placeholder="name@example.com"
+                                placeholder={t('field.email.placeholder')}
                                 required
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
@@ -97,19 +99,19 @@ function ForgotPasswordContent() {
                         disabled={isLoading}
                         className="w-full h-auto bg-gradient-to-r from-[#d9481e] to-[#f45d1a] hover:brightness-110 active:scale-[0.98] text-white font-bold py-3.5 md:py-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-[0_4px_15px_rgba(217,72,30,0.4)]"
                     >
-                        {isLoading ? "Sending..." : "Send Reset Link"}
+                        {isLoading ? t('auth.forgotPassword.submitting') : t('auth.forgotPassword.submit')}
                         <Sparkles className="w-5 h-5" />
                     </Button>
                 </form>
 
                 <div className="mt-12 text-center border-t border-gray-200 dark:border-[#2d3545] pt-6">
                     <p className="text-[#8e99aa] text-sm">
-                        Remember your password?
+                        {t('auth.forgotPassword.rememberPassword')}
                         <Link
                             href="/auth/login"
                             className="text-[#d9481e] hover:text-[#f45d1a] underline font-medium transition-colors ml-1"
                         >
-                            Sign in
+                            {t('auth.signInLink')}
                         </Link>
                     </p>
                 </div>
@@ -118,9 +120,14 @@ function ForgotPasswordContent() {
     );
 }
 
+function LoadingFallback() {
+    const { t } = useLocale();
+    return <div>{t('common.loading')}</div>;
+}
+
 export default function ForgotPassword() {
     return (
-        <Suspense fallback={<div>Loading...</div>}>
+        <Suspense fallback={<LoadingFallback />}>
             <ForgotPasswordContent />
         </Suspense>
     );

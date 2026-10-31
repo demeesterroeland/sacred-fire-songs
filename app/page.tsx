@@ -3,11 +3,13 @@ import { getLibrarySummary } from "@/lib/songs/serverQueries";
 import CategoryGrid from "@/components/home/CategoryGrid";
 import LibrarySummary from "@/components/home/LibrarySummary";
 import UpdateLastSeen from "@/components/home/UpdateLastSeen";
+import { getServerT } from '@/lib/i18n/server';
 
 // 10-minute (600 seconds) Incremental Static Regeneration (ISR)
 export const revalidate = 600;
 
 export default async function Home() {
+  const t = await getServerT();
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
@@ -33,7 +35,7 @@ export default async function Home() {
 
         {/* Explore by Category */}
         <section>
-          <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-4">Explore by Category</p>
+          <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-4">{t('explore.categories.heading')}</p>
           <CategoryGrid />
         </section>
       </div>

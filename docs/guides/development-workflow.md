@@ -1,5 +1,18 @@
 # Software Development Life Cycle (SDLC) & CI/CD Workflow
 
+**Version:** 1.1
+**Status:** Living Document
+**Date:** Oct 31, 2026
+
+## Changelog
+
+| Version | Date | Description of Changes |
+| ----- | ----- | ----- |
+| **1.1** | Oct 31, 2026 | Added version header and changelog. Preview script path is now `scripts/cicd/dev2preview.sh` (#274, see `scripts/README.md`). |
+| **1.0** | Sep 27, 2026 | Initial version (GitHub Flow, preview and production releases). |
+
+---
+
 This document outlines the industry-standard **GitHub Flow** tailored specifically for the Sacred Fire Songs Docker-based infrastructure. It covers local development, preview deployments, QA testing, and production releases.
 
 ## 1. Local Development (Feature Branches)
@@ -21,7 +34,7 @@ When your feature is functionally complete and you are ready to test it on the a
 
 1. Run the deployment script: 
    ```bash
-   scripts/dev2preview.sh
+   scripts/cicd/dev2preview.sh
    ```
 2. **What happens under the hood?**
    * The script pushes your branch to origin.

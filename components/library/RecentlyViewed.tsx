@@ -2,25 +2,27 @@ import Link from 'next/link';
 import { Clock, Music } from 'lucide-react';
 import type { Song } from '@/lib/songUtils';
 
+import { getServerT } from '@/lib/i18n/server';
 interface RecentlyViewedProps {
   songs: Song[];
   total?: number;
 }
 
-export default function RecentlyViewed({ songs, total }: RecentlyViewedProps) {
+export default async function RecentlyViewed({ songs, total }: RecentlyViewedProps) {
+  const t = await getServerT();
   if (songs.length === 0) return null;
 
   return (
     <div>
       <div className="flex items-center gap-2 mb-3">
         <Clock className="w-3.5 h-3.5 text-gray-500" />
-        <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">Recently Viewed</p>
+        <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">{t('recentlyViewed.section')}</p>
         {total !== undefined && total > 5 && (
           <Link
             href="/library/recently-viewed"
             className="ml-auto text-[10px] font-bold text-red-500 hover:text-red-400 uppercase tracking-wider"
           >
-            View All
+            {t('common.viewAll')}
           </Link>
         )}
       </div>

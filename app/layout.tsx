@@ -44,6 +44,8 @@ import MobileBottomNav from "@/components/common/MobileBottomNav";
 import QueryProvider from "@/components/providers/QueryProvider";
 import { SidebarProvider } from "@/context/SidebarContext";
 import { UserPreferencesProvider } from "@/context/UserPreferencesContext";
+import { LocaleProvider } from "@/context/LocaleContext";
+import { getServerLocale } from "@/lib/i18n/server";
 import { AudioProvider } from "@/components/song/AudioProvider";
 import EnvironmentBanner from "@/components/common/EnvironmentBanner";
 import ServiceWorkerRegistrar from "@/components/providers/ServiceWorkerRegistrar";
@@ -77,6 +79,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
     : process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) || "";
   const envInjection = `window.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY = "${supabaseKey}";`;
 
+  const locale = await getServerLocale();
   const supabase = await createClient();
   const { data: { user: sessionUser } } = await supabase.auth.getUser();
   
@@ -99,7 +102,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
 
 
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <head>
         <meta name="theme-color" content="#1a0505" />
         <script dangerouslySetInnerHTML={{ __html: envInjection }} />
@@ -112,6 +115,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
       >
         <ServiceWorkerRegistrar />
         <EnvironmentBanner />
+        <LocaleProvider serverLocale={locale}>
         <UserPreferencesProvider>
           <AudioProvider>
             <SidebarProvider>
@@ -148,6 +152,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
           <ThemedToaster />
           <SpeedInsights />
         </UserPreferencesProvider>
+        </LocaleProvider>
       </body>
     </html>
   );

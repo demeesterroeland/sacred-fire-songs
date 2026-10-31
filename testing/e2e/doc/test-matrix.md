@@ -26,11 +26,11 @@ It is a **living document**: keep it aligned with `docs/logbook/epic&user storie
 ### Scope
 
 - **In scope:** browser-level user workflows across all features (auth, song management, library/discovery, viewer, playlists, favorites, gatekeeper tools, account/settings, navigation, PWA), including role variants and edge cases.
-- **Out of scope (covered elsewhere):** pure unit logic already tested by **vitest** in `lib/unit-tests/` (ChordPro parsing, chord utils, query mappers, Zod schemas, guest-favorites logic, playlist action logic). E2E should not duplicate these; it should exercise the *integrated* flow through the UI.
+- **Out of scope (covered elsewhere):** pure unit logic already tested by **vitest** in `testing/unit/tests/` (ChordPro parsing, chord utils, query mappers, Zod schemas, guest-favorites logic, playlist action logic). E2E should not duplicate these; it should exercise the *integrated* flow through the UI.
 
 ### Current state of testing
 
-- **Unit tests (vitest, v4):** `lib/unit-tests/chordProParsing.test.ts`, `chordUtils.test.ts`, `queries.test.ts`, `songUtils.test.ts`, `playlistActions.test.ts`, `schemas.test.ts`, `useGuestFavorites.test.ts`. Run via `npm test` → `vitest run`.
+- **Unit tests (vitest, v4):** `testing/unit/tests/chordProParsing.test.ts`, `chordUtils.test.ts`, `queries.test.ts`, `songUtils.test.ts`, `playlistActions.test.ts`, `schemas.test.ts`, `useGuestFavorites.test.ts`. Run via `npm test` → `vitest run`.
 - **E2E tests:** **Phase 0 scaffolded** (this branch). Playwright is wired up (`playwright.config.ts`, `e2e/`), with per-role auth setup and a handful of P0 `@smoke` specs. Specs are authored but **not yet verified against a running app + seeded Supabase** — that verification happens once CI (or a dev) runs them. See `e2e/README.md`.
 - **CI:** `.github/workflows/deploy-db.yml` runs Supabase migrations; **`.github/workflows/e2e.yml`** (new) runs the `@smoke` subset against the **staging** Supabase project on every push to `main` / `feat|fix|chore/**`.
 
@@ -64,7 +64,7 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 ### CI approach
 
 - `.github/workflows/e2e.yml` runs on **push** to `main` / `feat|fix|chore/**` and tests against the **staging** Supabase project. It derives the staging URL from `SUPABASE_PROJECT_ID_STAGING` and reads the (public) anon key from the `SUPABASE_PUBLISHABLE_KEY_STAGING` secret; `E2E_TEST_PASSWORD` provides the seeded-account password. It installs deps + Chromium, runs the `@smoke` subset, and uploads the HTML report.
-- **Database Isolation:** Playwright E2E tests are configured to run against the online staging Supabase project (which acts as a dedicated E2E DB and is separate from the database driving `songbook-beta`). A global setup hook (`e2e/global-setup.ts`) executes a Node.js setup script (`scripts/setup-test-db.mjs`) to dynamically wipe and seed the database using `supabase/seeds/*.sql` before tests run, ensuring a clean and consistent baseline.
+- **Database Isolation:** Playwright E2E tests are configured to run against the online staging Supabase project (which acts as a dedicated E2E DB and is separate from the database driving `songbook-beta`). A global setup hook (`e2e/global-setup.ts`) executes a Node.js setup script (`scripts/db/setup-test-db.mjs`) to dynamically wipe and seed the database using `supabase/seeds/*.sql` before tests run, ensuring a clean and consistent baseline.
 - **Local Optimization:** For fast local test iteration, setting the environment variable `E2E_REUSE_DB=1` skips the database wipe and re-seed, reusing the existing database state.
 
 ---

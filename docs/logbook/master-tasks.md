@@ -1264,3 +1264,97 @@
 - [x] Playwright `e2e/tests/admin-users.spec.ts` (24 passed, 2 skipped on mobile)
 - [x] Apply migration `20261009194500` to the local Supabase stack
 - [x] Doc sync: design doc v1.37, epic & user stories v1.37, e2e overview v1.5
+
+## Session October 30, 2026 (Part 6: Multi-Language Support i18n - Issue #246)
+
+- [x] Add es, it, ru, qu, fr, pt dictionaries + select-based LanguageSwitcher (I18N-12)
+
+## Session October 30, 2026 (Part 7: Admin UI polish, Stories 3.6.5 / 3.6.6 - #278, #279, PR #259)
+- [x] Fix the sticky admin header overlapping the summary cards; move admin pages onto the Library layout (scroll container, title + pill tabs, breadcrumb, LibrarySummary-style cards)
+- [x] Stop clipping the focus ring on the filter pickers
+- [x] Create issues #275 (invite/create), #276 (suspend), #277 (change role), #278 (sort), #279 (clickable rows) under #257
+- [x] Add `components/common/ui/WickSelect.tsx` + `lib/ui/listbox.ts` (listbox picker in the style of the i18n language picker), 6 unit tests
+- [x] #278: sort by name Z-A, most/fewest songs, persisted in localStorage (`useSyncExternalStore`), unit + BDD + e2e
+- [x] #279: whole user row opens the details (stretched link), e2e
+- [x] Doc sync: design doc v1.43, epic & user stories v1.39, e2e overview v1.8, admin-users.feature v1.1
+- [x] PR #259 had already been merged into `main` before these commits; moved them to `feat/278-admin-sort-pickers` from `origin/develop` (Gitflow), translated the new sort options into all eight languages (`admin.sort.nameDesc/songsDesc/songsAsc`), and shared the listbox key logic with the i18n `LanguageSwitcher`
+
+## Session October 30, 2026 (Part 8: Gitflow CI/CD Migration — Planning, Epic 5.1)
+- [x] Create worktree branch `docs/gitflow-migration-plan`
+- [x] Online research: Gitflow (nvie + 2020 note), env mapping, merge strategies, Release Please multi-branch/prerelease, protection & action pinning
+- [x] Gap analysis of workflows, repo settings, scripts, tests and docs (found: no PR CI, E2E false green due to missing staging secrets, `deploy-db.yml` deleted but still referenced, `main` allows force-push / no required checks, `--admin` merge in `preview2prod.sh`, wrong image names in `dev2preview.sh`, duplicate unit-test dirs)
+- [x] Write plan `docs/plans/2026-10-30-gitflow-cicd-migration.md` (6 phases, pipeline matrix, test pyramid / TDD / BDD strategy, orchestration, open decisions D1–D7)
+- [x] Write executable acceptance spec `docs/testing/gitflow-cicd.feature` (test-first, `@ci-contract` / `@script` / `@manual`)
+- [x] Add Phase 5 / Epic 5.1 with stories 5.1.1–5.1.14 to `docs/logbook/epic&user stories.md` (v1.37)
+- [x] Owner decisions D1–D7 recorded in the plan (v1.2); tick work already done (develop + default branch, main ruleset, #302, #305, #273)
+- [x] Create GitHub issues for Epic 5.1 via `scripts/setup_github_roadmap.py` (masterplan-orchestrator): #280 master, #281–#286 phases, #287 Task 5.1.0, #288–#301 stories; #267 moved under #288; #274 blocks #294
+- [x] Plan PR #308 into `develop`
+- [ ] Phase 0 onwards: implementation, one PR into `develop` per phase
+
+## Session October 30, 2026 (Part 9: PDF footer QR code #303 & PDF reuse cache #304)
+- [x] Footer shows only the site host + 1 cm QR code to the page's song (`footerSiteLabel`, `songPageUrl`, `QR_SIZE_PT`)
+- [x] Fix continuation pages missing the song URL (QR now on every page of a song)
+- [x] `lib/export/pdfCache.ts`: SHA-256 fingerprint, `getOrCreatePdf`, IndexedDB store per user + playlist, cleared on sign-out
+- [x] TDD: `pdfExport.test.ts` (+6), `pdfCache.test.ts` (17); QR decoded from a rendered 300 dpi PDF
+- [x] Docs: Stories 4.2.3/4.2.4, design doc 1.43, `setlist-pdf-export.feature`
+
+## Session October 30, 2026 (Part 10: Gitflow Phase 0 — Spec & Test Harness, #287)
+- [x] Record owner decisions D1–D7 in the plan (v1.2), tick work done in the orchestrator session; merge plan PR #308 into `develop`
+- [x] Branch `chore/287-gitflow-ci-harness` from `origin/develop`
+- [x] `testing/support/workflowContract.ts` + Vitest `testing/unit/tests/ci/workflowContract.test.ts` (9 tests green)
+- [x] Cucumber profile `ci` + `testing/bdd/steps/gitflow-cicd.steps.ts` (`npm run test:bdd:ci`: 1 passed, 11 pending, 11 failed — expected red)
+- [x] bats `testing/scripts/start-issue.bats` (`npm run test:scripts`: 6 pass, 1 skip)
+- [x] `npm run lint` / `npm run typecheck`; baseline recorded (tsc clean, eslint 118 errors / 128 warnings)
+- [x] Doc sync: plan v1.3, design doc v1.46 (§6.6), testing README
+- [ ] Finding for Phase 1 (task 1.4): `vitest run` also collects Playwright specs in `e2e/` + `testing/e2e/` (17 files fail to load)
+
+## Session October 31, 2026 (Gitflow Phase 1 — CI Quality Gate, #282, PR #310)
+- [x] Merge Phase 0 PR #309 into `develop`
+- [x] Investigate E2E target: cloud staging/prod Supabase projects are paused; owner chose a self-hosted E2E Supabase on bluette → cloud-infra PR #106 (`stacks/songbook-e2e`, Tailscale-only, `init-env.sh`); then owner deferred all E2E work (Story 5.1.2)
+- [x] `ci.yml`: lint (ratchet `--max-warnings 182`), typecheck, unit, bdd, build, pipeline (actionlint, shellcheck, bats, strict `test:bdd:ci-gate`)
+- [x] One unit-test tree `testing/unit/tests/` (removed `lib/unit-tests/`, stale `testing/e2e/tests/`); Vitest `include` restricted (286 tests)
+- [x] Wire `setlist-pdf-export.feature` with pending stubs; `ci-gate` profile (6/6)
+- [x] SHA-pin all actions, top-level permissions, Dependabot → `develop`
+- [x] Fix shellcheck/actionlint findings; ESLint ignores `.worktrees/**`
+- [x] Docs: CLAUDE.md, git-workflow v1.2, e2e overview v1.9, design doc §6.6, plan v1.4, epic stories; issue #288 body aligned with D4
+- [x] Required checks on the `main` ruleset + classic protection removed (applied by the owner; agent was blocked by the permission classifier)
+- [ ] Deferred: Story 5.1.2 (E2E fail-closed, secrets, docker gating), cloud-infra #106 rollout, Tailscale `tag:ci`
+
+## Session October 31, 2026 (Part 2: Reorganize scripts/ into cicd/, db/, dev/, #274)
+- [x] Branch `chore/274-reorganize-scripts` from `chore/282-gitflow-quality-gate` (PR #310)
+- [x] TDD: `testing/scripts/scripts-layout.bats` written red (4/6 failing), green after the move
+- [x] `git mv` into `scripts/cicd/` (start-issue, restart, dev2preview, preview2prod, run-performance-benchmark, setup_github_roadmap.py, story-sync scripts + `lib/parseStories.mjs` from `.claude/scripts/`), `scripts/db/` (run-migrations, setup-test-db, random-seeder, export-random-seed, clone-prod-to-staging, supabase_rate_limits), `scripts/dev/` (generate-icons, debug_chordpro, test_chord_parsing)
+- [x] Fix root resolution inside moved scripts (`../..`, `parents[2]`), usage strings and misnamed headers; `restart.sh` and `run-performance-benchmark.sh` now cd to the repo root (`npm run test:perf` pointed at a missing root file)
+- [x] Update references: `package.json`, `Dockerfile.migrator`, `e2e/global-setup.ts`, `.claude/settings.json`, `.claude/commands/sync-stories.md`, `parseStories.test.mjs`, `start-issue.bats`, `ci.yml` shellcheck glob (`scripts/*/*.sh`), e2e README/perf spec, BDD db support, seed SQL header, `gitflow-cicd.feature`
+- [x] `scripts/README.md`; docs: design doc v1.48, git-workflow v1.3, development-workflow v1.1 (header added), e2e overview v1.10, song.feature v1.1, plan v1.5
+- [x] Verified: lint (182 warnings, cap unchanged), typecheck, unit 286, BDD unit, bats 13 (1 skip), ci-gate 6/6, build, shellcheck, actionlint, `npm run seed:generate`
+
+## Session October 31, 2026 (Part 2: Gitflow Phase 2 — Branch & PR Policy, #283)
+- [x] Merge #318 (scripts reorg #274 + task 1.9 docs, stranded on the old Phase 1 branch) into `develop`; delete `chore/282-gitflow-quality-gate`
+- [x] 2.4 `start-issue.sh` type + issue-number validation (bats red → green, 9/9)
+- [x] 2.6 `dev2preview.sh`: `sacred-fire-songs-app` names, metadata-action tag sanitising (no lowercasing), `--dry-run`, refuses `main`/`develop` (bats 5/5)
+- [x] 2.5 `scripts/cicd/lib/prPolicy.mjs` + `pr-lint.yml` (`pr-policy`), Vitest 44 cases, Cucumber @story-5.1.5 steps; `ci-gate` 16/16
+- [x] 2.1 rulesets as code `.github/rulesets/main.json` + `develop.json`, contract test `rulesets.test.ts`
+- [x] Skipped bats guard against `gh pr merge --admin` (task 4.7, Phase 4 approval)
+- [x] Docs: git-workflow v1.4, design doc §6.6, plan v1.6, epic statuses, CLAUDE.md, scripts/README.md
+- [ ] Owner: apply `.github/rulesets/develop.json` (POST) and `main.json` (PUT, adds `pr-policy`)
+
+## Session October 31, 2026 (Part 3: Gitflow Phase 3 — Staging CD from develop, #284)
+- [x] Verify owner-applied rulesets (`main` 12237277, `develop` 26249878); close Story 5.1.4 (#292)
+- [x] Investigate access: public SSH (key-only) reachable from runners; staging web Tailscale-only; preview stack has a migrator; `/opt/dockge` had uncommitted preview + prod compose drift (prod runs `-app:v1.6.0`)
+- [x] Rewrite @story-5.1.7 scenarios for the SSH forced-command design (red → green, `ci-gate` 18/18)
+- [x] `docker.yml`: build on `develop`, short SHA on push, remove `:latest`
+- [x] `deploy-staging.yml`: workflow_run after develop build, `environment: Staging`, pinned host key, only `deploy develop <sha>`
+- [x] cloud-infra PR #107: `deploy-songbook-staging.sh` (bats 8/8, shellcheck), preview `IMAGE_TAG`, prod compose = running state
+- [x] D6: Vercel tokens removed from `performance.yml`
+- [ ] Owner: merge cloud-infra #107; VPS rollout; `Staging` environment + secrets; first deploy
+- [ ] Deferred: 3.4 nightly E2E/k6 (Tailscale), app-level Vercel code
+
+## Session October 31, 2026 (Part 4: Fix New Playlist auth redirect, #321)
+- [x] Issue #321, branch `fix/321-playlist-add-auth-redirect`
+- [x] RED: unit test for `useAuth` first-render `loading`; e2e spec reproduces redirect to `/`
+- [x] `useAuth`: `loading` starts `true` when no server user is passed (`undefined`), stays `false` for server user / server guest
+- [x] `/library/playlists/add`: server-side auth guard with `next=`, client form `CreatePlaylistForm`
+- [x] Audit `useAuth()` call sites; design doc §6.7, lint cap 182 → 181
+- [ ] Follow-up: fix stale selector in `e2e/tests/auth-hydration.spec.ts`; add `next=` to `SongForm` guest redirect
+- [ ] Owner: OK to merge PR into `develop`, then verify on songbook-beta

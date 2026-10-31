@@ -23,6 +23,7 @@ import Link from 'next/link';
 import { toast } from 'sonner';
 import { reorderPlaylistSongs, removeSongFromPlaylist } from '@/app/actions/playlistActions';
 import { AddSongsSheet } from './AddSongsSheet';
+import { useLocale } from '@/context/LocaleContext';
 
 export interface PlaylistItem {
     id: string;
@@ -42,6 +43,7 @@ function SortableRow({
     onRemove: (id: string) => void;
     disabled?: boolean;
 }) {
+    const { t } = useLocale();
     const {
         attributes,
         listeners,
@@ -70,7 +72,7 @@ function SortableRow({
                 {...(disabled ? {} : listeners)}
                 disabled={disabled}
                 className="text-gray-700 hover:text-gray-500 cursor-grab active:cursor-grabbing touch-none shrink-0 disabled:opacity-30 disabled:cursor-not-allowed"
-                aria-label="Drag to reorder"
+                aria-label={t('playlists.detail.dragToReorder')}
             >
                 <GripVertical className="w-4 h-4" />
             </button>
@@ -90,7 +92,7 @@ function SortableRow({
                 onClick={() => onRemove(item.id)}
                 disabled={disabled}
                 className="text-gray-700 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 shrink-0 disabled:pointer-events-none"
-                aria-label={`Remove ${item.songTitle} from playlist`}
+                aria-label={t('playlists.detail.removeSong', { title: item.songTitle })}
             >
                 <X className="w-4 h-4" />
             </button>
@@ -111,6 +113,7 @@ export function PlaylistDetailClient({
     isOwner: boolean;
     isCurator?: boolean;
 }) {
+    const { t } = useLocale();
     const canEdit = isOwner || isCurator;
     const [items, setItems] = useState(initialItems);
     const [isPending, startTransition] = useTransition();
@@ -139,7 +142,7 @@ export function PlaylistDetailClient({
             const result = await reorderPlaylistSongs(playlistId, reordered.map(i => i.id));
             if (result.error) {
                 setItems(prev); // revert
-                toast.error('Could not save order');
+                toast.error(t('playlists.toast.couldNotSaveOrder'));
             }
         });
     };
@@ -164,14 +167,14 @@ export function PlaylistDetailClient({
             <>
                 <div className="flex flex-col items-center justify-center py-16 text-center gap-4">
                     <Music className="w-10 h-10 text-gray-700" />
-                    <p className="text-gray-500 text-sm max-w-xs">No songs yet.</p>
+                    <p className="text-gray-500 text-sm max-w-xs">{t('playlists.detail.noSongs')}</p>
                     {canEdit && (
                         <button
                             onClick={() => setSheetOpen(true)}
                             className="flex items-center gap-1.5 text-sm font-semibold text-amber-400 border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 rounded-full px-4 py-1.5 transition-all"
                         >
                             <Plus className="w-4 h-4" />
-                            Add Songs
+                            {t('playlists.detail.addSongs')}
                         </button>
                     )}
                 </div>
@@ -213,7 +216,7 @@ export function PlaylistDetailClient({
                             className="flex items-center gap-1.5 text-sm font-semibold text-amber-400 border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 rounded-full px-4 py-1.5 transition-all"
                         >
                             <Plus className="w-4 h-4" />
-                            Add Songs
+                            {t('playlists.detail.addSongs')}
                         </button>
                     </div>
                     <AddSongsSheet

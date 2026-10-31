@@ -41,6 +41,7 @@ const clearBrowserCache = async (page: any) => {
 // Get git commit hash
 const getGitCommit = (): string => {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports -- CommonJS-only usage in a dev/test script
     const commit = require('child_process').execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim();
     return commit;
   } catch (error) {
@@ -530,7 +531,7 @@ test.describe('Performance Tests with Larger Datasets', () => {
     
     // Get the song count from environment variable or default to 80 (the random seeder's default)
     const customSongCount = parseInt(process.env.E2E_RANDOM_SONGS_COUNT || '80', 10);
-    const seedMode = 'random'; // the test database is always seeded by scripts/random-seeder.mjs
+    const seedMode = 'random'; // the test database is always seeded by scripts/db/random-seeder.mjs
     const testMode = customSongCount > 500 ? 'stress' : 'baseline';
     
     // Since we can't reliably connect to the database from E2E tests, we'll use the environment variable

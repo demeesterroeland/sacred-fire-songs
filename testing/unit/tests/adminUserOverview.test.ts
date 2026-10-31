@@ -8,6 +8,7 @@ import {
   getTotalContributions,
   isAdminRole,
   isMusicianRole,
+  parseAdminUserSort,
   summarizeUsers,
 } from '@/lib/admin/userOverview';
 import type { AdminUserSummary } from '@/lib/admin/types';
@@ -219,6 +220,61 @@ describe('filterAndSortUsers', () => {
       'musician',
       'member',
     ]);
+  });
+});
+
+describe('filterAndSortUsers – name and song sorts (#278)', () => {
+  const ids = (list: AdminUserSummary[]) => list.map((u) => u.id);
+
+  it('sorts by display name Z-A, falling back to email', () => {
+    expect(ids(filterAndSortUsers(USERS, { sortBy: 'name_desc' }))).toEqual([
+      'member',
+      'musician',
+      'gatekeeper',
+      'expert',
+      'admin',
+    ]);
+  });
+
+  it('sorts by most songs first, ties by name', () => {
+    expect(ids(filterAndSortUsers(USERS, { sortBy: 'songs_desc' }))).toEqual([
+      'expert',
+      'gatekeeper',
+      'admin',
+      'musician',
+      'member',
+    ]);
+  });
+
+  it('sorts by fewest songs first, ties by name', () => {
+    expect(ids(filterAndSortUsers(USERS, { sortBy: 'songs_asc' }))).toEqual([
+      'musician',
+      'member',
+      'admin',
+      'gatekeeper',
+      'expert',
+    ]);
+  });
+
+  it('keeps the search and role filter when sorting', () => {
+    expect(ids(filterAndSortUsers(USERS, { role: 'musician', sortBy: 'songs_asc' }))).toEqual([
+      'musician',
+      'expert',
+    ]);
+  });
+});
+
+describe('parseAdminUserSort', () => {
+  it('accepts every known sort', () => {
+    for (const sort of ['joined', 'contributions', 'name', 'name_desc', 'songs_desc', 'songs_asc']) {
+      expect(parseAdminUserSort(sort)).toBe(sort);
+    }
+  });
+
+  it('falls back to "joined" for missing or unknown values', () => {
+    expect(parseAdminUserSort(null)).toBe('joined');
+    expect(parseAdminUserSort(undefined)).toBe('joined');
+    expect(parseAdminUserSort('drop table')).toBe('joined');
   });
 });
 

@@ -10,6 +10,7 @@ import { addSongToPlaylist, createPlaylist } from '@/app/actions/playlistActions
 import { PLAYLIST_KEYS } from '@/lib/songs/queryKeys';
 import { toast } from 'sonner';
 import { cn } from '@/lib/utils';
+import { useLocale } from '@/context/LocaleContext';
 
 interface PlaylistPickerProps {
     compositionId: string;
@@ -63,6 +64,7 @@ async function fetchContainingPlaylists(compositionId: string) {
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export function PlaylistPicker({ compositionId, userId, triggerClassName, iconClassName, label }: PlaylistPickerProps) {
+    const { t } = useLocale();
     const [open, setOpen] = useState(false);
     const [newTitle, setNewTitle] = useState('');
     const [isCreating, startCreateTransition] = useTransition();
@@ -112,7 +114,7 @@ export function PlaylistPicker({ compositionId, userId, triggerClassName, iconCl
                     result.added ? `Added to "${playlistTitle}"` : `Removed from "${playlistTitle}"`,
                     {
                         action: {
-                            label: 'Open Playlist →',
+                            label: t('playlists.openPlaylist'),
                             onClick: () => { window.location.href = `/library/playlists/${playlistId}`; },
                         },
                         classNames: {
@@ -139,11 +141,11 @@ export function PlaylistPicker({ compositionId, userId, triggerClassName, iconCl
             // Add the song to the new playlist
             const addResult = await addSongToPlaylist(result.id, compositionId);
             if (addResult.error) {
-                toast.error(`Playlist created but song could not be added: ${addResult.error}`);
+                toast.error(t('playlists.picker.createdButNotAdded', { error: String(addResult.error) }));
             } else {
-                toast.success(`Added to new playlist "${trimmed}"`, {
+                toast.success(t('playlists.picker.addedToNew', { name: trimmed }), {
                     action: {
-                        label: 'Open Playlist →',
+                        label: t('playlists.openPlaylist'),
                         onClick: () => { window.location.href = `/library/playlists/${result.id}`; },
                     },
                     classNames: {
@@ -161,7 +163,7 @@ export function PlaylistPicker({ compositionId, userId, triggerClassName, iconCl
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
                 <button
-                    aria-label="Add to playlist"
+                    aria-label={t('playlists.picker.addToPlaylist')}
                     className={cn(
                         'p-1 rounded-full transition-all duration-300 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300',
                         triggerClassName
@@ -188,7 +190,7 @@ export function PlaylistPicker({ compositionId, userId, triggerClassName, iconCl
                             if (e.key === 'Enter') handleCreate();
                             if (e.key === 'Escape') setOpen(false);
                         }}
-                        placeholder="New playlist…"
+                        placeholder={t('playlists.picker.newPlaylistPlaceholder')}
                         disabled={isCreating}
                         className="flex-1 bg-transparent text-sm text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-600 outline-none"
                     />
@@ -213,7 +215,7 @@ export function PlaylistPicker({ compositionId, userId, triggerClassName, iconCl
                     )}
                     {!isLoading && playlists.length === 0 && (
                         <p className="text-xs text-gray-600 text-center py-4 px-3">
-                            No playlists yet — create one above.
+                            {t('playlists.picker.empty')}
                         </p>
                     )}
                     {!isLoading && playlists.map(pl => (

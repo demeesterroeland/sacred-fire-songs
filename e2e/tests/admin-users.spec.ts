@@ -56,6 +56,13 @@ function usersList(page: Page) {
   return page.getByRole('list', { name: 'Registered users' });
 }
 
+/** Opens a listbox picker (components/common/ui/WickSelect.tsx) and chooses an option. */
+async function pick(page: Page, picker: string, option: string | RegExp) {
+  await page.getByRole('button', { name: new RegExp(picker) }).click();
+  await page.getByRole('listbox', { name: picker }).getByRole('option', { name: option }).click();
+  await expect(page.getByRole('listbox', { name: picker })).toHaveCount(0);
+}
+
 function userRow(page: Page, email: string) {
   return usersList(page).getByRole('listitem').filter({ hasText: email });
 }
@@ -140,9 +147,31 @@ test.describe('Admin users – overview (AC 1)', () => {
     await expect(usersList(page)).toHaveCount(0);
 
     await search.fill('');
-    await page.getByRole('combobox', { name: 'Filter by role' }).selectOption('musician');
+    await pick(page, 'Filter by role', 'Musician / Expert');
     await expect(usersList(page).getByRole('listitem')).toHaveCount(1);
     await expect(userRow(page, ROLES.musician.email)).toBeVisible();
+  });
+
+  test('the chosen sort is remembered (#278)', async ({ page }) => {
+    await page.goto('/admin/users');
+    await pick(page, 'Sort users', /Most Songs/);
+
+    const songCounts = async () =>
+      (await usersList(page).locator('[title$=" songs created"]').allTextContents()).map((t) => parseInt(t, 10));
+    const counts = await songCounts();
+    expect(counts).toEqual([...counts].sort((a, b) => b - a));
+
+    await page.reload();
+    await expect(page.getByRole('button', { name: /Sort users/ })).toContainText('Most Songs');
+    expect(await songCounts()).toEqual(counts);
+  });
+
+  test('clicking anywhere on a row opens the details (#279)', async ({ page }) => {
+    await page.goto('/admin/users');
+    // Click near the row's left edge, away from the "Details" button.
+    await userRow(page, ROLES.gatekeeper.email).click({ position: { x: 8, y: 8 } });
+    await page.waitForURL(/\/admin\/users\/[0-9a-f-]{36}$/);
+    await expect(page.getByText(ROLES.gatekeeper.email)).toBeVisible();
   });
 });
 

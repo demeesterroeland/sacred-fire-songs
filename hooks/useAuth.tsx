@@ -4,6 +4,7 @@ import { createClient } from '@/lib/supabase/client';
 import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
+import { clearPdfCache } from '@/lib/export/pdfCache';
 export type UserRole = 'admin' | 'gatekeeper' | 'musician' | 'member' | 'guest';
 
 export interface AuthUser {
@@ -14,10 +15,16 @@ export interface AuthUser {
     avatar_url?: string;
 }
 
-export const useAuth = (initialUser: AuthUser | null = null) => {
+/**
+ * `initialUser` is the server's view of the session: a user, or `null` for a
+ * guest. When the caller has no server view (`undefined`), `loading` starts
+ * `true` until the client session resolves, so guest guards don't fire on the
+ * first render (#321).
+ */
+export const useAuth = (initialUser?: AuthUser | null) => {
     const queryClient = useQueryClient();
-    const [user, setUser] = useState<AuthUser | null>(initialUser);
-    const [loading, setLoading] = useState(false); // Server provides authoritative initial state
+    const [user, setUser] = useState<AuthUser | null>(initialUser ?? null);
+    const [loading, setLoading] = useState(initialUser === undefined);
 
     const loadUser = async (signal?: { cancelled: boolean }) => {
         const supabase = createClient();
@@ -93,6 +100,7 @@ export const useAuth = (initialUser: AuthUser | null = null) => {
         // If we didn't get a server user, or if we want to guarantee the profile is fresh, 
         // we can still trigger a background load, but it won't block or flash.
         if (!initialUser) {
+            // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional sync of local state with props/route; refactor tracked separately (Epic 5.1 lint ratchet)
             loadUser(signal);
         }
 
@@ -133,6 +141,8 @@ export const useAuth = (initialUser: AuthUser | null = null) => {
         await supabase.auth.signOut();
 
         queryClient.clear();
+        // Cached setlist PDFs may contain private playlists (#304).
+        await clearPdfCache();
         setUser(null);
     };
 

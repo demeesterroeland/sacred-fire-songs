@@ -2993,3 +2993,122 @@ Reviewed the admin users overview against the Story 3.6.1 acceptance criteria af
 - **Test double**: `testing/support/fakeSupabase.ts` validates selected columns against the real table shapes (PostgREST 42703 on unknown columns); a @seed scenario checks those shapes against `information_schema` so the fake cannot drift.
 - **Tests**: 48 vitest tests (`testing/unit/tests/admin*.test.ts`), 20 Cucumber scenarios (`docs/testing/admin-users.feature`: access by role, no session, `fn_is_admin()`, RLS on private playlists in a rolled-back transaction, overview, status, counts, search/filter/sort, details, contributions, unknown id), Playwright `e2e/tests/admin-users.spec.ts` (24 passed, 2 skipped on mobile).
 - **Findings outside scope**: guests are redirected by `proxy.ts` to `/auth/login?message=…` (no `next`), so the layout's `next=/admin/users` redirect is unreachable; `notFound()` renders with HTTP 200 because `app/loading.tsx` streams; bare `vitest run` (`npm test`) also collects Playwright specs; `@types/pg` is missing.
+
+
+## October 30, 2026 (Part 6) - Multi-Language Support i18n (#246, Story 3.7.1)
+
+**Task Overview**
+Finished the English/Dutch i18n started on Sep 27 (WIP secured as a commit), merged `origin/main` (#260, #269, Cucumber runner #263/#271) and brought the story in line with the #262 testing pyramid.
+
+**Technical Details**
+- **Architecture**: `lib/i18n` gained `resolveLocale()` (localStorage → cookie → browser language → English), `resolveRequestLocale()` / `parseAcceptLanguage()`, cookie helpers and a fallback chain active → English → key. `lib/i18n/server.ts` gives Server Components a request-scoped `getServerT()`; `lib/i18n/persistence.ts` holds DOM-free browser persistence.
+- **Provider**: `LocaleProvider` starts in the server locale (no hydration mismatch, no English flash), exposes a bound `t` used by every Client Component (`useLocale().t`), and refreshes Server Components until the root layout's locale matches (a single `router.refresh()` was dropped in ~4% of mobile switches).
+- **UI**: `LanguageSwitcher` in sidebar footer (guests), user menu and Account → Preferences → Language; remaining hardcoded strings migrated; English copy changed by the WIP migration restored (it broke the search e2e spec).
+- **Tests**: Story 3.7.1 (I18N-01…10); `docs/testing/i18n.feature`; vitest `i18n.test.ts` + `localePersistence.test.ts` (TDD); Cucumber `i18n.steps.ts` + `npm run test:bdd:i18n`; Playwright `e2e/tests/i18n.spec.ts`. Full headless e2e suite identical to a `main` baseline apart from the new passing i18n tests.
+- **PDF export (#220)**: second `origin/main` merge; export button, toasts, login prompt and context-menu item translated; PDF labels localized via `getPdfLabels(locale)`; I18N-11 added to story, feature and steps.
+- **More languages**: Spanish, Italian, Russian, Southern Quechua (machine-assisted, needs native review), French and Brazilian Portuguese dictionaries (582 keys each, parity + placeholder + "not a copy of English" tests); `quz`/`quy` → `qu`; PDF dates per locale; LanguageSwitcher became a native select; I18N-12 in story, feature, steps and e2e.
+- **Merge #259 (admin)**: resolved Sidebar/UserProfile/cucumber.json conflicts, translated the admin area (76 keys) into all eight languages.
+
+## October 30, 2026 (Part 7) - Admin UI polish, sort and clickable rows (#278, #279, PR #259)
+
+**Task Overview**
+Acted on manual validation feedback for the admin users overview: layout bug, consistency with the rest of the app, select styling, and two follow-up stories implemented on the same branch.
+
+**Technical Details**
+- **Header overlap**: the app shell scrolls inside each section's `<main>`; the admin header was `sticky top-[var(--navbar-height)]` inside that container, so it stuck 3.5rem down and the cards scrolled under it. Admin pages now follow `app/library/layout.tsx` / `LibraryTabs.tsx` (own scroll container, title + pill tabs, breadcrumb on detail pages) and `LibrarySummary` cards.
+- **Pickers**: `components/common/ui/WickSelect.tsx` ports the i18n language picker (uncommitted on `feat/246-implement-multi-language-i18n`) into a generic listbox: portalled, arrow/Home/End/type-ahead keys, ember marker with the `ember-ignite` animation (identical CSS hunk to the i18n branch so the merge stays clean). Keyboard logic in `lib/ui/listbox.ts` is unit-tested.
+- **#278**: new sorts `name_desc`, `songs_desc`, `songs_asc` (ties by name) in `filterAndSortUsers`; `parseAdminUserSort` validates the value stored in `localStorage` (`admin-users-sort`), read through `useSyncExternalStore` to stay hydration-safe.
+- **#279**: the "Details" link is a stretched link (`after:absolute after:inset-0`). Its `active:scale-95` had to move to an inner span: a transform makes the link the containing block of its `::after`, collapsing the overlay on mousedown so row clicks never completed.
+- **Tests**: unit 131 passed, BDD 25 passed (+4 sort scenarios), Playwright admin spec 28 passed / 2 skipped against the production build on port 4258.
+- **Role colors (follow-up)**: `lib/admin/roleColors.ts` is now the single source for role colors; `RoleBadge` and the role filter options (`WickSelect` `accent`) use it, so each role has the same color in the rows and in the picker. Unit tests in `testing/unit/tests/adminRoleColors.test.ts`.
+- **Moved to develop**: #259 was merged into `main` at `bad0c84`, so the picker/sort/row/role-color commits were cherry-picked onto `feat/278-admin-sort-pickers` from `origin/develop`. Conflicts with the i18n'd admin code were resolved by translating the option labels (`t()`, three new `admin.sort.*` keys in eight locales) and keeping the i18n sort label style ("Sort: …" per language). `languageListbox.ts` now re-exports `keyToIndex`/`typeaheadIndex` from `lib/ui/listbox.ts`. Verified: unit 236, BDD 63 passed (51 pending stubs), Playwright admin + i18n specs green on the build at port 4278 (one i18n test flaked once, then 66/66 on two reruns).
+
+
+## October 30, 2026 (Part 8) - Gitflow CI/CD Migration plan (Epic 5.1, PR #308)
+
+**Task Overview**
+Researched a typical Gitflow CI/CD setup, compared it with the GitHub Flow pipeline and docs, and planned the migration as Epic 5.1 with a test-first approach.
+
+**Technical Details**
+- **Gap analysis**: no PR CI (lint/typecheck/unit/BDD/build); `e2e.yml` reported green while skipping (two staging secrets missing); `deploy-db.yml` deleted but still referenced; `main` without required checks; `--admin` merge in `preview2prod.sh`; wrong image names in `dev2preview.sh`; duplicated unit-test trees.
+- **Plan**: `docs/plans/2026-10-30-gitflow-cicd-migration.md` — lightweight Gitflow (no `release/*`), squash into `develop`, merge commit `develop` → `main`, Release Please on `main`, back-merge, hotfix path; pipeline matrix per test-pyramid layer; phases 0–5.
+- **Spec & tracking**: `docs/testing/gitflow-cicd.feature`; Epic 5.1 stories 5.1.1–5.1.14; GitHub tree #280–#301 via `scripts/setup_github_roadmap.py` (masterplan-orchestrator skill, sub-issues, tier labels, blocked-by links).
+- **Owner decisions**: D3 SSH compose deploy on the preview server (staging), D4 PR smoke against staging Supabase, D6 Docker only; recorded in plan v1.2.
+
+## October 30, 2026 (Part 9) - PDF footer QR code (#303) and PDF reuse cache (#304)
+
+- **#303**: the bottom-left footer now shows only the site host plus a 1 cm × 1 cm QR code (`qrcode`, error level M, quiet zone 2) that opens the song on that page; it is also a clickable link in PDF viewers. Continuation pages previously lost the song URL (`addContinuationPage` was called without it) — fixed, so every page of a song carries its QR. Content bottom margin raised to 52 pt. Verified by rendering a sample PDF at 300 dpi and decoding every QR with jsQR.
+- **#304**: `lib/export/pdfCache.ts` fingerprints the exported content (title, description, ordered songs with content/key/capo/transposition/URL), interface language, site URL and user (SHA-256). A matching fingerprint reuses the last PDF from IndexedDB (one entry per user + playlist); any change regenerates. Cache failures fall back to generation; sign-out clears the cache. The "Generated {date}" subtitle of a reused PDF keeps its original date (accepted in the issue).
+
+## October 30, 2026 (Part 10) - Gitflow Phase 0: spec & test harness (#287)
+
+**Task Overview**
+Built the harness that lets every later Gitflow story start with a failing test.
+
+**Technical Details**
+- **Contract helper**: `testing/support/workflowContract.ts` parses workflows with `yaml` (triggers, GitHub branch globs, jobs, environments, step order, SHA-pinned actions).
+- **Vitest**: `testing/unit/tests/ci/workflowContract.test.ts` (9 green: fixtures + current invariants).
+- **Cucumber**: profile `ci`, `testing/bdd/steps/gitflow-cicd.steps.ts`; `npm run test:bdd:ci` → 1 passed, 11 pending (need pr-lint/rulesets), 11 failed (missing `ci.yml`, deploy workflows, dependabot, pinning, …) — the expected red baseline.
+- **bats**: `testing/scripts/start-issue.bats` runs `start-issue.sh` in a throw-away clone with a bare local origin (6 pass, type validation skipped until 2.4).
+- **Static**: `npm run typecheck` clean; `npm run lint` baseline 118 errors (108 `no-explicit-any`) / 128 warnings.
+- **Finding**: `vitest run` also collects the Playwright specs in `e2e/` and `testing/e2e/` (17 files fail to load) → task 1.4.
+
+## October 31, 2026 - Gitflow Phase 1: CI quality gate (#282, PR #310)
+
+**Task Overview**
+Added the fast layers of the test pyramid as required-check candidates and cleaned up the test tree and supply chain. E2E work (Story 5.1.2) was deferred by the owner.
+
+**Technical Details**
+- **`ci.yml`**: jobs `lint`, `typecheck`, `unit`, `bdd`, `build`, `pipeline` on every push and on PRs into `develop`/`main`; all green on both events in PR #310.
+- **Lint ratchet**: `no-explicit-any` → warning, `eslint . --max-warnings 182`; nine intentional patterns (sync `setState` in effects, mutated `<audio>` state, CommonJS `require`) got targeted `eslint-disable-next-line … -- reason` instead of behaviour-changing refactors.
+- **Tests**: `lib/unit-tests/` duplicates differed only in import paths → one tree `testing/unit/tests/`; Vitest `include` stops it from loading Playwright specs; PDF feature wired with pending stubs (undefined steps fail even when non-strict).
+- **Supply chain**: SHA-pinned actions, top-level `permissions`, Dependabot; actionlint/shellcheck run from digest-pinned images.
+- **E2E investigation**: both cloud Supabase projects are paused (why `e2e` was a false green). Owner chose a self-hosted E2E stack: cloud-infra PR #106 (`stacks/songbook-e2e`, Tailscale-only Kong :5003 / Postgres :54324, `init-env.sh` generates secrets on the VPS). Tailscale policy advice: the default `* → *` grant must be narrowed or `tag:ci` gets full tailnet access. Then deferred.
+- **Findings**: `tsconfig.json` excludes `testing/`/`e2e/`; preview server compose drifted from cloud-infra git (`…-app:preview`).
+
+## October 31, 2026 (Part 2) - Reorganize scripts/ into cicd/, db/, dev/ (#274)
+
+**Task Overview**
+The flat `scripts/` folder is grouped by purpose and documented in `scripts/README.md`. Restarted from the never-merged `ace267f`, redone on top of Phase 1 (#310) without a `songbook/` category (#269 moved those scripts to `sacred-fire-songs-collection`).
+
+**Technical Details**
+- **Layout**: `scripts/cicd/` (workflow, delivery, GitHub roadmap and story sync — the sync scripts left `.claude/scripts/`), `scripts/db/` (migrations, test DB, seeders, staging clone, auth rate limits), `scripts/dev/` (icons, ChordPro debug helpers). Only `README.md` sits in `scripts/`.
+- **Contract**: `testing/scripts/scripts-layout.bats` fails on loose files, empty categories, a script in two categories, a script missing from the README, or story-sync scripts left in `.claude/scripts/`.
+- **Path fixes**: scripts that resolve the repo root go up two levels; `start-issue.sh` deliberately keeps working from the caller's cwd (the bats contract runs it inside a throw-away clone). `npm run test:perf` now points at `scripts/cicd/run-performance-benchmark.sh` (the old `./run-performance-benchmark.sh` did not exist).
+- **CI**: shellcheck in the `pipeline` job checks `scripts/*/*.sh` (8 files) instead of the now-empty `scripts/*.sh`.
+- **Not changed on purpose**: historical changelog rows and `docs/plans/issue-239-resolution.md` keep the paths of their time; `.agents/skills/masterplan-orchestrator/SKILL.md` uses `scripts/setup_github_roadmap.py` as a generic example.
+
+## October 31, 2026 (Part 2) - Gitflow Phase 2: branch & PR policy (#283)
+
+**Task Overview**
+Enforce the Gitflow rules mechanically: PR title and branch policy as a required check, rulesets for `main` and `develop` as code, and scripts that cannot create or print the wrong thing.
+
+**Technical Details**
+- **PR policy**: `scripts/cicd/lib/prPolicy.mjs` (pure functions + CLI) instead of a third-party action, so it is unit-testable and pinned by definition; `pr-lint.yml` passes title/head/base via `env:` only. Allowed: work branches/Dependabot/`main` (back-merge) → `develop`; `develop`/`hotfix/*`/Release Please → `main`; stacked PRs elsewhere are not policed.
+- **Rulesets as code**: `.github/rulesets/{main,develop}.json`; `rulesets.test.ts` asserts required checks = `ci.yml` jobs + `pr-policy` + `e2e`, no bypass, no rebase. `develop` keeps merge commits allowed for the back-merge (the plan said squash-only, which would make back-merges diverge).
+- **Scripts**: `start-issue.sh` validates before touching git; `dev2preview.sh` printed `sacred-fire-songs:<lowercased>` while CI pushes `sacred-fire-songs-app:<case-kept>` (metadata-action v5 `sanitizeTag` only replaces runs of invalid characters) — fixed, plus `--dry-run`.
+- **Merge mix-up fixed**: #317 had been merged into the already-merged Phase 1 branch; #318 brought it into `develop`.
+
+## October 31, 2026 (Part 3) - Gitflow Phase 3: staging CD from develop (#284)
+
+**Task Overview**
+Make every merge into `develop` land on staging automatically, without giving CI a shell on the host that also runs production.
+
+**Technical Details**
+- **Images**: `docker.yml` now builds on `develop`; `:latest` removed (with `develop` as default branch, `is_default_branch` would have tagged develop images as latest).
+- **Deploy**: `deploy-staging.yml` runs after a successful develop build, in the `Staging` environment, with a pinned known_hosts entry (`StrictHostKeyChecking=yes`, no `ssh-keyscan`). The key is locked on the VPS with `restrict,command="…/deploy-songbook-staging.sh"`, which only accepts `deploy <develop|preview> <40-char sha>` (regex, injection attempts tested) and then: lock → pull → migrator (abort on failure) → `up -d --no-deps app` → wait healthy → revision label == sha.
+- **Design changes vs. plan**: no `supabase db push` (staging Supabase is self-hosted; the migrator image applies migrations), no runner-side HTTP health check (staging is Tailscale-only).
+- **Drift**: `/opt/dockge` had uncommitted compose changes for preview and prod; cloud-infra #107 commits the running prod state byte-for-byte so `git pull` is clean.
+- **Deferred**: nightly E2E/k6 against staging (needs runners on the tailnet).
+
+## October 31, 2026 (Part 4) - Fix: "New Playlist" redirected logged-in users home (#321)
+
+**Task Overview**
+On staging, a logged-in user clicking "New Playlist" (`/library/playlists/add`) landed on `/`.
+
+**Technical Details**
+- **Root cause**: `useAuth()` started with `loading = false` even without a server user (since the server-seeded auth refactor fb03945). The page's client guard saw `user = null, loading = false` on the first render and pushed `/auth/login` without `next=`; the login page found the session server-side and redirected to the default `/`.
+- **Hook fix**: `initialUser === undefined` (caller has no server view) now means `loading = true` until the session resolves; `null` (server-confirmed guest) keeps `loading = false`, so the header stays flash-free for guests too. Side effect: `/songs/[id]/edit` no longer flashes `AccessDenied` for owners.
+- **Page fix**: `/library/playlists/add` is now a Server Component guard (`redirect('/auth/login?next=/library/playlists/add')`), form moved to `components/playlists/CreatePlaylistForm.tsx`.
+- **Tests**: `testing/unit/tests/useAuth.test.ts` (first-render state via `renderToString`, no DOM library needed); `e2e/tests/playlist-add-auth.spec.ts` reproduced the bug (login → `/`) before the fix.
+- **Found, not fixed**: `e2e/tests/auth-hydration.spec.ts` selector `.relative > button.rounded-full` now matches 3 buttons (strict-mode violation); `SongForm` submit-time guest redirect has no `next=`.
