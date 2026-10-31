@@ -15,7 +15,7 @@
     "test:bdd:ci": "NODE_OPTIONS=\"--import tsx\" cucumber-js --config cucumber.json --profile ci",
     "test:bdd:ci-gate": "NODE_OPTIONS=\"--import tsx\" cucumber-js --config cucumber.json --profile ci-gate",
     "test:scripts": "bats testing/scripts",
-    "lint": "eslint . --max-warnings 182",
+    "lint": "eslint . --max-warnings 181",
     "typecheck": "tsc --noEmit",
     "test:bdd:i18n": "NODE_OPTIONS=\"--import tsx\" cucumber-js --config cucumber.json --profile i18n",
     "test:e2e": "playwright test --config playwright.config.ts",

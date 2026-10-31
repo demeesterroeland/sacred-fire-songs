@@ -54,7 +54,7 @@ npx vitest run testing/unit/tests/ci   # workflow contract helper + current inva
 npm run test:bdd:ci                    # @ci-contract scenarios of docs/testing/gitflow-cicd.feature (red until each story lands)
 npm run test:scripts                   # bats tests for scripts/ (testing/scripts/*.bats)
 npm run typecheck                      # tsc --noEmit
-npm run lint                           # eslint . --max-warnings 182 (ratchet: never raise the cap)
+npm run lint                           # eslint . --max-warnings 181 (ratchet: never raise the cap)
 npm run test:bdd:ci-gate               # strict contract scenarios of implemented stories (CI job `pipeline`)
 ```
 

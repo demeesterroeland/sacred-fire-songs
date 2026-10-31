@@ -3100,3 +3100,15 @@ Make every merge into `develop` land on staging automatically, without giving CI
 - **Design changes vs. plan**: no `supabase db push` (staging Supabase is self-hosted; the migrator image applies migrations), no runner-side HTTP health check (staging is Tailscale-only).
 - **Drift**: `/opt/dockge` had uncommitted compose changes for preview and prod; cloud-infra #107 commits the running prod state byte-for-byte so `git pull` is clean.
 - **Deferred**: nightly E2E/k6 against staging (needs runners on the tailnet).
+
+## October 31, 2026 (Part 4) - Fix: "New Playlist" redirected logged-in users home (#321)
+
+**Task Overview**
+On staging, a logged-in user clicking "New Playlist" (`/library/playlists/add`) landed on `/`.
+
+**Technical Details**
+- **Root cause**: `useAuth()` started with `loading = false` even without a server user (since the server-seeded auth refactor fb03945). The page's client guard saw `user = null, loading = false` on the first render and pushed `/auth/login` without `next=`; the login page found the session server-side and redirected to the default `/`.
+- **Hook fix**: `initialUser === undefined` (caller has no server view) now means `loading = true` until the session resolves; `null` (server-confirmed guest) keeps `loading = false`, so the header stays flash-free for guests too. Side effect: `/songs/[id]/edit` no longer flashes `AccessDenied` for owners.
+- **Page fix**: `/library/playlists/add` is now a Server Component guard (`redirect('/auth/login?next=/library/playlists/add')`), form moved to `components/playlists/CreatePlaylistForm.tsx`.
+- **Tests**: `testing/unit/tests/useAuth.test.ts` (first-render state via `renderToString`, no DOM library needed); `e2e/tests/playlist-add-auth.spec.ts` reproduced the bug (login → `/`) before the fix.
+- **Found, not fixed**: `e2e/tests/auth-hydration.spec.ts` selector `.relative > button.rounded-full` now matches 3 buttons (strict-mode violation); `SongForm` submit-time guest redirect has no `next=`.
