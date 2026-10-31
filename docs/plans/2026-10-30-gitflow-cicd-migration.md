@@ -1,6 +1,6 @@
 # Gitflow CI/CD Migration — Plan & Orchestration
 
-**Version:** 1.5
+**Version:** 1.6
 **Status:** Approved — in execution (phase by phase, one PR into `develop` per phase)
 **Date:** Oct 31, 2026
 **Branch:** `docs/gitflow-migration-plan`
@@ -16,6 +16,7 @@
 | **1.3** | Oct 30, 2026 | Phase 0 (#287) implemented: tasks 0.2–0.5 done; lint baseline recorded; found that `vitest run` also collects the Playwright specs in `e2e/` and `testing/e2e/` (17 files fail to load) — added to task 1.4. |
 | **1.4** | Oct 31, 2026 | Phase 1 (#282) implemented except Story 5.1.2 (E2E), which the owner deferred: tasks 1.1, 1.3, 1.4, 1.5, 1.7, 1.8 done; 1.2/1.6 deferred; 1.9 ruleset update in the Phase 1 PR. Findings: `tsconfig.json` excludes `testing/`/`e2e/` (tests are not type-checked); cloud staging/prod Supabase projects are paused; preview server compose has drifted from cloud-infra git. |
 | **1.5** | Oct 31, 2026 | #274 reorganized `scripts/` into `scripts/cicd/`, `scripts/db/`, `scripts/dev/` (see `scripts/README.md`); script tasks below refer to `scripts/cicd/…` (task 4.1 path updated). The misnamed usage headers of `dev2preview.sh`/`preview2prod.sh` (G6, task 2.6) were fixed as part of the move. Shellcheck in `ci.yml` now checks `scripts/*/*.sh`. |
+| **1.6** | Oct 31, 2026 | Phase 2 (#283) implemented: 2.4, 2.5, 2.6 done; rulesets as code for 2.1 (owner applies). New required check `pr-policy`. |
 
 > **For Claude:** REQUIRED SUB-SKILL: Use `superpowers:executing-plans` (or `superpowers:subagent-driven-development`) to implement this plan phase by phase. One story = one issue = one branch = one PR into `develop` (after Phase 1 exists; before that, into `main`).
 
@@ -216,12 +217,12 @@ Each phase ends with a green gate before the next starts. Story IDs map to `docs
 ### Phase 2 — Introduce `develop` + branch policy
 **Exit:** `develop` exists, protected; new work targets it. *Stories 5.1.4, 5.1.5, 5.1.6.*
 
-- [ ] 2.1 *Partly done*: `develop` created from `main` (`7f582d1`, includes #259). **Remaining:** ruleset for `develop` — required CI checks, squash-only, block force-push/deletion, no bypass (owner approval: repo setting).
-- [x] 2.2 `main` ruleset allows merge (for `develop` → `main`) + squash (hotfix), no rebase (ruleset 12237277). Head-branch policy is enforced by `pr-lint.yml` (2.5).
+- [ ] 2.1 *Partly done*: `develop` created from `main` (`7f582d1`). Ruleset as code `.github/rulesets/develop.json` (deletion/force-push blocked, PR + resolved threads, squash + merge — merge only for the `main` → `develop` back-merge —, required checks = `ci.yml` jobs + `pr-policy` + `e2e`, no bypass), checked by `testing/unit/tests/ci/rulesets.test.ts`. **Remaining:** owner applies it (`gh api -X POST …/rulesets --input .github/rulesets/develop.json`) and the updated `main.json` (adds `pr-policy`).
+- [x] 2.2 `main` ruleset allows merge (for `develop` → `main`) + squash (hotfix), no rebase (ruleset 12237277, now also as code in `.github/rulesets/main.json`). Head-branch policy is enforced by `pr-lint.yml` (2.5).
 - [x] 2.3 Default branch → `develop` (D1).
-- [ ] 2.4 *Partly done* (#305): `start-issue.sh` bases on `origin/develop`, `hotfix` on `origin/main`. **Remaining:** bats tests + type validation ∈ {feat,fix,chore,docs,hotfix}.
-- [ ] 2.5 `pr-lint.yml`: Conventional-Commit title (e.g. `amannn/action-semantic-pull-request`, pinned) + head/base matrix check.
-- [ ] 2.6 TDD (bats): fix image names in `dev2preview.sh` (`-app`), rename headers; make preview build optional (staging replaces most preview needs).
+- [x] 2.4 `start-issue.sh` validates the type (`feat|fix|chore|docs|hotfix`) and a numeric issue number before touching git (exit 2); bats 9/9.
+- [x] 2.5 `pr-lint.yml` (job `pr-policy`) runs our own `scripts/cicd/lib/prPolicy.mjs` instead of a third-party action: Conventional-Commit title + head/base matrix; PR data only via `env:`. Vitest 44 cases, Cucumber @story-5.1.5 (10 scenarios) in `ci-gate`.
+- [x] 2.6 `dev2preview.sh`: correct `sacred-fire-songs-app`/`-migrator` names (what the preview server pulls), tag sanitising exactly like `docker/metadata-action` v5 (runs → `-`, no lowercasing — the old script lowercased), `--dry-run`, refuses `main`/`develop`; bats 5/5. `--admin` removal stays in 4.7 (skipped bats guard).
 
 ### Phase 3 — Staging CD from `develop`
 **Exit:** merge to `develop` → staging updated with migrations, automatically. *Story 5.1.7.*

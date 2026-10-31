@@ -7,8 +7,9 @@
 # to deploy on the preview environment.
 #
 # Usage:
-#   scripts/cicd/dev2preview.sh [--force]
-#     --force  Allow uncommitted changes (git stash will NOT be used)
+#   scripts/cicd/dev2preview.sh [--force] [--dry-run]
+#     --force    Allow uncommitted changes (git stash will NOT be used)
+#     --dry-run  Only print the image names; no push, no CI trigger
 #
 set -euo pipefail
 
@@ -17,15 +18,18 @@ cd "$ROOT"
 
 
 FORCE=0
+DRY_RUN=0
 
 for arg in "$@"; do
   case "$arg" in
     --force) FORCE=1 ;;
+    --dry-run) DRY_RUN=1 ;;
     -h|--help)
-      echo "Usage: scripts/cicd/dev2preview.sh [--force]"
+      echo "Usage: scripts/cicd/dev2preview.sh [--force] [--dry-run]"
       echo ""
       echo "Options:"
-      echo "  --force  Allow uncommitted changes (continues with committed changes only)"
+      echo "  --force    Allow uncommitted changes (continues with committed changes only)"
+      echo "  --dry-run  Only print the image names; no push, no CI trigger"
       echo "  -h, --help  Show this help message"
       exit 0
       ;;
@@ -40,15 +44,42 @@ if [[ -z "$BRANCH" ]]; then
   exit 1
 fi
 
-if [[ "$BRANCH" == "main" ]]; then
-  echo "❌ Error: Cannot deploy 'main' to preview using this script."
-  echo "   Preview environments are built from feature/fix branches."
+if [[ "$BRANCH" == "main" || "$BRANCH" == "develop" ]]; then
+  echo "❌ Error: Cannot deploy '$BRANCH' to preview using this script."
+  echo "   Preview environments are built from work branches; develop deploys to staging."
   exit 1
+fi
+
+# 2. Compute the Docker image names exactly as CI pushes them:
+#    images  ghcr.io/<owner>/sacred-fire-songs-app / -migrator (.github/workflows/docker.yml)
+#    tag     docker/metadata-action v5 sanitizeTag: replace runs of [^a-zA-Z0-9._-] with '-',
+#            no lowercasing
+REGISTRY="ghcr.io/demeesterroeland"
+IMAGE_TAG="$(printf '%s' "$BRANCH" | sed -E 's/[^a-zA-Z0-9._-]+/-/g')"
+IMAGE_NAME="${REGISTRY}/sacred-fire-songs-app:${IMAGE_TAG}"
+MIGRATOR_NAME="${REGISTRY}/sacred-fire-songs-migrator:${IMAGE_TAG}"
+PREVIEW_IMAGE="${REGISTRY}/sacred-fire-songs-app:preview"
+
+print_images() {
+  echo ""
+  echo "======================================================================"
+  echo "📦 Preview Docker Images:"
+  echo "   App:      ${IMAGE_NAME}"
+  echo "   Migrator: ${MIGRATOR_NAME}"
+  echo "   Rolling:  ${PREVIEW_IMAGE} (what the preview server pulls)"
+  echo "======================================================================"
+  echo ""
+}
+
+if [[ "$DRY_RUN" -eq 1 ]]; then
+  echo "🧪 Dry run for branch '$BRANCH': nothing is pushed and no workflow is triggered."
+  print_images
+  exit 0
 fi
 
 echo "🚀 Preparing preview deployment for branch: '$BRANCH'..."
 
-# 2. Check for uncommitted changes
+# 3. Check for uncommitted changes
 if ! git diff-index --quiet HEAD --; then
   if [[ "$FORCE" -eq 1 ]]; then
     echo "⚠️  Warning: Uncommitted changes detected, but --force was provided. Continuing with committed changes only."
@@ -60,33 +91,19 @@ if ! git diff-index --quiet HEAD --; then
   fi
 fi
 
-# 3. Check artifact sync on feature branch
+# 4. Check artifact sync on feature branch
 if git status --porcelain docs/logbook | grep -q .; then
   echo "⚠️  Warning: Uncommitted logbook changes detected in docs/logbook/."
   echo "   Per project rules, please commit logbook updates to your feature branch."
 fi
 
-# 4. Push branch to remote
+# 5. Push branch to remote and trigger the build (tags: <branch> + rolling :preview)
 echo "📤 Pushing branch '$BRANCH' to origin..."
-
 git push -u origin "$BRANCH"
 echo "🚀 Triggering Docker build explicitly via GitHub Actions..."
-
 gh workflow run docker.yml --ref "$BRANCH" -f version="preview" || { echo "❌ Failed to trigger workflow."; exit 1; }
 
-# 5. Compute Docker image tag based on GitHub Actions slugify logic
-# (docker/metadata-action slugifies branch refs by replacing non-alphanumeric chars with '-' and lowercasing)
-IMAGE_TAG="$(echo "$BRANCH" | sed -e 's/[^a-zA-Z0-9._-]/-/g' | tr '[:upper:]' '[:lower:]')"
-IMAGE_NAME="ghcr.io/demeesterroeland/sacred-fire-songs:${IMAGE_TAG}"
-MIGRATOR_NAME="ghcr.io/demeesterroeland/sacred-fire-songs-migrator:${IMAGE_TAG}"
-
-echo ""
-echo "======================================================================"
-echo "📦 Preview Docker Images:"
-echo "   App:      ${IMAGE_NAME}"
-echo "   Migrator: ${MIGRATOR_NAME}"
-echo "======================================================================"
-echo ""
+print_images
 
 # 6. Monitor workflow if gh CLI available
 if command -v gh >/dev/null 2>&1; then
@@ -112,8 +129,8 @@ fi
 echo ""
 echo "📋 Preview Server Deployment Steps:"
 echo "----------------------------------------------------------------------"
-echo "1. Your preview server can simply use the rolling ':preview' tag!"
-echo "   (Make sure your .env has IMAGE_TAG=preview)"
+echo "1. The preview server pulls the rolling tag: ${PREVIEW_IMAGE}"
+echo "   (stacks/songbook-preview/docker-compose.yaml in cloud-infra)"
 echo ""
 echo "2. Pull and start containers:"
 echo "   docker compose pull"

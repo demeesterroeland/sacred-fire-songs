@@ -113,4 +113,6 @@
 
 | **October 31, 2026 (Part 2)** | **Chore/Scripts (#274)**: `scripts/` reorganized into `cicd/`, `db/`, `dev/` with `scripts/README.md`, story-sync scripts moved out of `.claude/scripts/`, all references and the CI shellcheck glob updated, layout contract in bats. | ~1.0 Hours | ✅ Completed |
 
-| **Total** | **Development + AI Collaboration** | **~194.25 Hours** | |
+| **October 31, 2026 (Part 2)** | **CI-CD (#283)**: Gitflow Phase 2 — PR policy check (`pr-lint.yml`), rulesets as code, `start-issue.sh` validation, `dev2preview.sh` image names + dry run; recovered #317 via #318. | ~1.5 Hours | ✅ Completed |
+
+| **Total** | **Development + AI Collaboration** | **~195.75 Hours** | |

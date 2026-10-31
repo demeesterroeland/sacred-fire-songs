@@ -1,6 +1,6 @@
 # Project Analysis & Design Document: Song Sharing Application (Sacred Fire Songs)
 
-**Version:** 1.48
+**Version:** 1.49
 **Status:** Living Document
 **Date:** Oct 31, 2026
 
@@ -41,6 +41,7 @@
 | **1.46** | Oct 30, 2026 | Added §6.6 Delivery Pipeline Contract Tests (Epic 5.1 Phase 0, #287): `testing/support/workflowContract.ts`, Vitest `testing/unit/tests/ci/`, Cucumber profile `ci` for `docs/testing/gitflow-cicd.feature`, bats `testing/scripts/`, npm scripts `test:bdd:ci`, `test:scripts`, `lint`, `typecheck`. |
 | **1.47** | Oct 31, 2026 | §6.6: CI quality gate `ci.yml` (lint ratchet, typecheck, unit, BDD @unit, build, pipeline job), single unit-test tree `testing/unit/tests/`, SHA-pinned actions, Dependabot (Epic 5.1 Phase 1, #282). |
 | **1.48** | Oct 31, 2026 | Reorganized `scripts/` into `scripts/cicd/`, `scripts/db/` and `scripts/dev/` (#274), moved the story-sync scripts from `.claude/scripts/` to `scripts/cicd/`, added `scripts/README.md` and `testing/scripts/scripts-layout.bats`; updated §6.3 and §6.6 paths. |
+| **1.49** | Oct 31, 2026 | §6.6: PR policy (`pr-lint.yml`, `scripts/cicd/lib/prPolicy.mjs`), branch rulesets as code (`.github/rulesets/`), `start-issue.sh` input validation, `dev2preview.sh --dry-run` (Epic 5.1 Phase 2, #283). |
 
 
 ## 1. Introduction
@@ -193,6 +194,9 @@ The application is a **Progressive Web App (PWA)** optimized for mobile use duri
 * **Scripts layout (#274):** `scripts/` is grouped by purpose and documented in `scripts/README.md`: `scripts/cicd/` (issue worktrees, preview/production promotion, performance benchmark, GitHub roadmap and story sync — the story-sync scripts moved here from `.claude/scripts/`), `scripts/db/` (migrations, E2E database setup, random seeder, seed export, staging clone, auth rate limits) and `scripts/dev/` (icon generation, ChordPro debug helpers). Shellcheck in the `pipeline` job checks `scripts/*/*.sh`.
 * **Static checks:** `npm run typecheck` (`tsc --noEmit`; `tsconfig.json` excludes `testing/` and `e2e/`, so tests are not type-checked) and `npm run lint` (`eslint . --max-warnings 182`). Lint ratchet: `no-explicit-any` is a warning, all other rules are errors; the warning cap may only go down.
 * **CI quality gate (`.github/workflows/ci.yml`):** on every push and on PRs into `develop`/`main`: jobs `lint`, `typecheck`, `unit` (`npm test`), `bdd` (`test:bdd:unit`, no database), `build`, `pipeline` (actionlint + shellcheck via digest-pinned images, bats, `test:bdd:ci-gate` = strict `@ci-contract` scenarios of implemented stories). The job ids are the required checks of the `main` ruleset.
+* **PR policy (`.github/workflows/pr-lint.yml`, check `pr-policy`):** runs `scripts/cicd/lib/prPolicy.mjs` on PRs into `develop`/`main`. Title must be a Conventional Commit (Release Please input); head → base must follow Gitflow (work branches/Dependabot/back-merge `main` → `develop`; `develop`/`hotfix/*`/Release Please → `main`). PR data reaches the script only through `env:` (no script injection).
+* **Branch rulesets as code (`.github/rulesets/main.json`, `develop.json`):** deletion + force-push blocked, PR with resolved threads, no bypass actors, required checks = all `ci.yml` jobs + `pr-policy` + `e2e`; `main` and `develop` allow merge + squash (merge commits for promotion and back-merge), never rebase. `testing/unit/tests/ci/rulesets.test.ts` keeps the required checks in sync with the workflow job ids; applied with `gh api … --input`.
+* **Scripts under test (bats):** `start-issue.sh` (type/issue validation, base branches), `dev2preview.sh --dry-run` (image names like `docker/metadata-action`: runs of invalid characters → `-`, case kept), scripts layout; a skipped test guards against `gh pr merge --admin` until plan task 4.7.
 * **Single unit-test tree:** Vitest only collects `testing/unit/tests/**/*.test.{ts,tsx,mjs}`; Playwright specs live in `e2e/`.
 * **Supply chain:** every third-party action is pinned to a commit SHA (version in a trailing comment), every workflow declares top-level `permissions`, `.github/dependabot.yml` updates `github-actions` and `npm` weekly against `develop`.
 

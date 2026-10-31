@@ -3077,3 +3077,14 @@ The flat `scripts/` folder is grouped by purpose and documented in `scripts/READ
 - **Path fixes**: scripts that resolve the repo root go up two levels; `start-issue.sh` deliberately keeps working from the caller's cwd (the bats contract runs it inside a throw-away clone). `npm run test:perf` now points at `scripts/cicd/run-performance-benchmark.sh` (the old `./run-performance-benchmark.sh` did not exist).
 - **CI**: shellcheck in the `pipeline` job checks `scripts/*/*.sh` (8 files) instead of the now-empty `scripts/*.sh`.
 - **Not changed on purpose**: historical changelog rows and `docs/plans/issue-239-resolution.md` keep the paths of their time; `.agents/skills/masterplan-orchestrator/SKILL.md` uses `scripts/setup_github_roadmap.py` as a generic example.
+
+## October 31, 2026 (Part 2) - Gitflow Phase 2: branch & PR policy (#283)
+
+**Task Overview**
+Enforce the Gitflow rules mechanically: PR title and branch policy as a required check, rulesets for `main` and `develop` as code, and scripts that cannot create or print the wrong thing.
+
+**Technical Details**
+- **PR policy**: `scripts/cicd/lib/prPolicy.mjs` (pure functions + CLI) instead of a third-party action, so it is unit-testable and pinned by definition; `pr-lint.yml` passes title/head/base via `env:` only. Allowed: work branches/Dependabot/`main` (back-merge) → `develop`; `develop`/`hotfix/*`/Release Please → `main`; stacked PRs elsewhere are not policed.
+- **Rulesets as code**: `.github/rulesets/{main,develop}.json`; `rulesets.test.ts` asserts required checks = `ci.yml` jobs + `pr-policy` + `e2e`, no bypass, no rebase. `develop` keeps merge commits allowed for the back-merge (the plan said squash-only, which would make back-merges diverge).
+- **Scripts**: `start-issue.sh` validates before touching git; `dev2preview.sh` printed `sacred-fire-songs:<lowercased>` while CI pushes `sacred-fire-songs-app:<case-kept>` (metadata-action v5 `sanitizeTag` only replaces runs of invalid characters) — fixed, plus `--dry-run`.
+- **Merge mix-up fixed**: #317 had been merged into the already-merged Phase 1 branch; #318 brought it into `develop`.

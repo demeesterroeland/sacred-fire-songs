@@ -1,6 +1,6 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 1.43
+**Version:** 1.44
 **Status:** Living Document
 **Date:** Oct 30, 2026
 
@@ -42,6 +42,7 @@
 | **1.41** | Oct 30, 2026 | Epic 5.1 created on GitHub: master epic #280, phase epics #281–#286, Task 5.1.0 #287, stories #288–#301 (sub-issues, `model:tier-1/2` labels, blocked-by dependencies). Linked issue numbers in the story table. Story 5.1.1 aligned with owner decision D4 (PR smoke against staging, no local stack). |
 | **1.42** | Oct 30, 2026 | Added Stories 4.2.3 (#303, PDF footer: site URL + 1 cm song QR code) and 4.2.4 (#304, reuse the setlist PDF while the playlist is unchanged), both [Implemented]. |
 | **1.43** | Oct 31, 2026 | Epic 5.1 Phase 1 (PR #310): Stories 5.1.1 (CI quality gate; required checks on the `main` ruleset), 5.1.3 (single unit-test tree) and 5.1.12 (pinned actions, permissions, Dependabot) implemented; Story 5.1.2 (E2E) deferred by the owner. |
+| **1.44** | Oct 31, 2026 | Epic 5.1 Phase 2 (#283): Stories 5.1.5 (PR policy) implemented, 5.1.4 (rulesets as code, `develop` ruleset pending owner action) and 5.1.6 (script fixes; `--admin` removal waits for Phase 4) partly implemented. |
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
 
@@ -1018,9 +1019,9 @@ Move from GitHub Flow to a lightweight Gitflow: `main` = production, `develop` =
 | 5.1.1 | #288 | PR quality gate (`ci.yml`) | 1 | [Implemented] |
 | 5.1.2 | #289 | No false-green E2E / fail-closed Docker | 1 | [Deferred] (owner, Oct 31; E2E DB on bluette prepared in cloud-infra#106) |
 | 5.1.3 | #290 | Single unit-test tree, strict BDD | 1 | [Implemented] (strict only for `ci-gate`) |
-| 5.1.4 | #292 | Protected `main` + `develop` (rulesets), default branch `develop` | 2 | [Planned] |
-| 5.1.5 | #293 | Branch & PR-title policy (`pr-lint.yml`) | 2 | [Planned] |
-| 5.1.6 | #294 | Scripts follow Gitflow (no `--admin`, correct image names) | 2 | [Planned] |
+| 5.1.4 | #292 | Protected `main` + `develop` (rulesets), default branch `develop` | 2 | [Partial] (`develop` ruleset: owner applies `.github/rulesets/develop.json`) |
+| 5.1.5 | #293 | Branch & PR-title policy (`pr-lint.yml`) | 2 | [Implemented] |
+| 5.1.6 | #294 | Scripts follow Gitflow (no `--admin`, correct image names) | 2 | [Partial] (`--admin` removal in Phase 4) |
 | 5.1.7 | #295 | Staging CD from `develop` (images, migrations, deploy) | 3 | [Planned] |
 | 5.1.8 | #297 | Production promotion `develop` → `main` with approval | 4 | [Planned] |
 | 5.1.9 | #298 | Automatic back-merge `main` → `develop` | 4 | [Planned] |
