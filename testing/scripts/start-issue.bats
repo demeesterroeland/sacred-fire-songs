@@ -74,9 +74,27 @@ teardown() {
   [[ "$output" == *"already exists"* ]]
 }
 
-@test "rejects unknown branch types" {
-  skip "story 5.1.6 / plan 2.4: type validation (feat|fix|chore|docs|hotfix) not implemented yet"
+@test "rejects unknown branch types without creating anything" {
   run bash "$SCRIPT" 300 feature new thing
-  [ "$status" -ne 0 ]
+  [ "$status" -eq 2 ]
+  [[ "$output" == *"Unknown type 'feature'"* ]]
+  [[ "$output" == *"feat, fix, chore, docs, hotfix"* ]]
   [ ! -d .worktrees/issue-300 ]
+  run git branch --list 'feature/*'
+  [ -z "$output" ]
+}
+
+@test "rejects a non-numeric issue number" {
+  run bash "$SCRIPT" abc feat new thing
+  [ "$status" -eq 2 ]
+  [[ "$output" == *"Issue number must be numeric"* ]]
+  [ ! -d .worktrees/issue-abc ]
+}
+
+@test "accepts every supported work type" {
+  for type in fix chore docs; do
+    run bash "$SCRIPT" "31${#type}" "$type" some change
+    [ "$status" -eq 0 ]
+    [ "$(git -C ".worktrees/issue-31${#type}" branch --show-current)" = "$type/31${#type}-some-change" ]
+  done
 }

@@ -1328,3 +1328,13 @@
 - [x] Update references: `package.json`, `Dockerfile.migrator`, `e2e/global-setup.ts`, `.claude/settings.json`, `.claude/commands/sync-stories.md`, `parseStories.test.mjs`, `start-issue.bats`, `ci.yml` shellcheck glob (`scripts/*/*.sh`), e2e README/perf spec, BDD db support, seed SQL header, `gitflow-cicd.feature`
 - [x] `scripts/README.md`; docs: design doc v1.48, git-workflow v1.3, development-workflow v1.1 (header added), e2e overview v1.10, song.feature v1.1, plan v1.5
 - [x] Verified: lint (182 warnings, cap unchanged), typecheck, unit 286, BDD unit, bats 13 (1 skip), ci-gate 6/6, build, shellcheck, actionlint, `npm run seed:generate`
+
+## Session October 31, 2026 (Part 2: Gitflow Phase 2 — Branch & PR Policy, #283)
+- [x] Merge #318 (scripts reorg #274 + task 1.9 docs, stranded on the old Phase 1 branch) into `develop`; delete `chore/282-gitflow-quality-gate`
+- [x] 2.4 `start-issue.sh` type + issue-number validation (bats red → green, 9/9)
+- [x] 2.6 `dev2preview.sh`: `sacred-fire-songs-app` names, metadata-action tag sanitising (no lowercasing), `--dry-run`, refuses `main`/`develop` (bats 5/5)
+- [x] 2.5 `scripts/cicd/lib/prPolicy.mjs` + `pr-lint.yml` (`pr-policy`), Vitest 44 cases, Cucumber @story-5.1.5 steps; `ci-gate` 16/16
+- [x] 2.1 rulesets as code `.github/rulesets/main.json` + `develop.json`, contract test `rulesets.test.ts`
+- [x] Skipped bats guard against `gh pr merge --admin` (task 4.7, Phase 4 approval)
+- [x] Docs: git-workflow v1.4, design doc §6.6, plan v1.6, epic statuses, CLAUDE.md, scripts/README.md
+- [ ] Owner: apply `.github/rulesets/develop.json` (POST) and `main.json` (PUT, adds `pr-policy`)

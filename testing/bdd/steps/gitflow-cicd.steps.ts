@@ -22,6 +22,7 @@ import {
   readRepoFile,
   readRepoJson,
   readRepoYaml,
+  runsCommand,
   repoFileExists,
   stepIndex,
   triggerTypes,
@@ -30,10 +31,13 @@ import {
   usesEnvironment,
   type Workflow,
 } from '../../support/workflowContract';
+import { checkBranches, checkTitle } from '../../../scripts/cicd/lib/prPolicy.mjs';
 
 export interface CiBddState {
   workflows: Workflow[];
   file?: { path: string; text: string };
+  pr?: { head: string; base: string; title: string };
+  policy?: { ok: boolean; titleOk: boolean; branchesOk: boolean };
 }
 
 type CucumberProfile = { paths?: string[] };
@@ -259,27 +263,42 @@ Then('it includes {string}', function (this: SongBddWorld, feature: string) {
   assert.ok(included, `no cucumber.json profile includes ${feature}`);
 });
 
+// ── PR policy (story 5.1.5): pr-lint.yml runs scripts/cicd/lib/prPolicy.mjs ──
+Given('a pull request from {string} into {string}', function (this: SongBddWorld, head: string, base: string) {
+  ci(this).pr = { head, base, title: 'chore: placeholder title' };
+});
+
+Given('a pull request titled {string}', function (this: SongBddWorld, title: string) {
+  ci(this).pr = { head: 'feat/1-placeholder', base: 'develop', title };
+});
+
+When('the {string} workflow runs', function (this: SongBddWorld, name: string) {
+  const wf = loadWorkflow(`${name}.yml`);
+  for (const base of ['develop', 'main']) {
+    assert.ok(triggersOnBranch(wf, 'pull_request', base), `${wf.file} does not run on PRs into ${base}`);
+  }
+  assert.ok(runsCommand(wf, 'scripts/cicd/lib/prPolicy.mjs'), `${wf.file} does not run the PR policy module`);
+  assert.doesNotMatch(wf.raw, /run:[^\n]*\$\{\{\s*github\.event\.pull_request/, `${wf.file} inlines untrusted PR data into run:`);
+  const pr = ci(this).pr;
+  assert.ok(pr, 'no pull request in this scenario');
+  const titleOk = checkTitle(pr.title).ok;
+  const branchesOk = checkBranches(pr.head, pr.base).ok;
+  ci(this).policy = { ok: titleOk && branchesOk, titleOk, branchesOk };
+});
+
+Then('the policy check is {string}', function (this: SongBddWorld, result: string) {
+  const { pr, policy } = ci(this);
+  assert.ok(pr && policy, 'the pr-lint workflow did not run');
+  assert.equal(policy.branchesOk ? 'pass' : 'fail', result, `${pr.head} → ${pr.base}`);
+});
+
+Then('the title check fails', function (this: SongBddWorld) {
+  const { pr, policy } = ci(this);
+  assert.ok(pr && policy, 'the pr-lint workflow did not run');
+  assert.equal(policy.titleOk, false, `title "${pr.title}" unexpectedly passed`);
+});
+
 // ── Need artifacts from later stories → pending until then ──────────────────
-Given('a pull request from {string} into {string}', function (_head: string, _base: string) {
-  return 'pending'; // story 5.1.5: PR policy module used by pr-lint.yml
-});
-
-Given('a pull request titled {string}', function (_title: string) {
-  return 'pending'; // story 5.1.5
-});
-
-When('the {string} workflow runs', function (_name: string) {
-  return 'pending'; // story 5.1.5
-});
-
-Then('the policy check is {string}', function (_result: string) {
-  return 'pending'; // story 5.1.5
-});
-
-Then('the title check fails', function () {
-  return 'pending'; // story 5.1.5
-});
-
 Then('the required checks include the full E2E suite against staging', function () {
   return 'pending'; // story 5.1.8: ruleset contract for PRs into main
 });

@@ -16,15 +16,16 @@ Every script lives in exactly one category folder; only this README sits directl
 
 | Script | Purpose | Usage |
 | --- | --- | --- |
-| `cicd/start-issue.sh` | Creates worktree `.worktrees/issue-<n>` and branch `<type>/<n>-<desc>` from `origin/develop` (`hotfix` from `origin/main`), symlinks `.env.local`, adds an empty commit holding the Conventional Commit PR title. | `scripts/cicd/start-issue.sh <issue> <type> <description...>` |
+| `cicd/start-issue.sh` | Creates worktree `.worktrees/issue-<n>` and branch `<type>/<n>-<desc>` from `origin/develop` (`hotfix` from `origin/main`), symlinks `.env.local`, adds an empty commit holding the Conventional Commit PR title. Rejects unknown types (allowed: `feat`, `fix`, `chore`, `docs`, `hotfix`) and non-numeric issue numbers (exit 2). | `scripts/cicd/start-issue.sh <issue> <type> <description...>` |
 | `cicd/restart.sh` | Builds the worktree of an issue and starts the production server on port `4<issue>`. | `scripts/cicd/restart.sh <issue>` |
-| `cicd/dev2preview.sh` | Pushes the current branch, tracks the Docker build workflow and prints the image tag to deploy on the preview server. | `scripts/cicd/dev2preview.sh [--force]` |
+| `cicd/dev2preview.sh` | Pushes the current work branch, triggers the Docker build (branch tag + rolling `:preview`) and prints the `sacred-fire-songs-app` / `-migrator` image names. Refuses `main`/`develop`. `--dry-run` only prints the names. | `scripts/cicd/dev2preview.sh [--force] [--dry-run]` |
 | `cicd/preview2prod.sh` | Promotes a verified preview to production (merge, Release Please, release notes, Docker build). **Not Gitflow-ready yet** (Epic 5.1 Phase 4), see `docs/guides/git-workflow.md`. | `scripts/cicd/preview2prod.sh --verified [options]` |
 | `cicd/run-performance-benchmark.sh` | Runs the performance benchmark against a URL, lists saved runs or builds a comparison report. | `npm run test:perf` or `scripts/cicd/run-performance-benchmark.sh [url] [--sample N] [--reuse <runId>]` |
 | `cicd/setup_github_roadmap.py` | Idempotently creates the Epic 5.1 GitHub issue tree from `docs/testing/gitflow-cicd.feature`. | `python3 scripts/cicd/setup_github_roadmap.py [--dry-run]` |
 | `cicd/sync-stories-to-gh.mjs` | Pushes the user stories in `docs/logbook/epic&user stories.md` to GitHub Issues (Claude Code `PostToolUse` hook in `.claude/settings.json`, or manually). | `node scripts/cicd/sync-stories-to-gh.mjs "<path to epic&user stories.md>"` |
 | `cicd/sync-stories-from-gh.mjs` | Marks stories whose GitHub issue is closed as `[Implemented]` in the epic document. | `node scripts/cicd/sync-stories-from-gh.mjs` (or `/sync-stories`) |
 | `cicd/lib/parseStories.mjs` | Shared parser used by the story-sync scripts (tested by `testing/unit/tests/parseStories.test.mjs`). | Imported, not run directly |
+| `cicd/lib/prPolicy.mjs` | Gitflow PR policy: Conventional Commit title + allowed head → base branches. Run by `.github/workflows/pr-lint.yml`; tested by `testing/unit/tests/ci/prPolicy.test.ts`. | `PR_TITLE=… PR_HEAD=… PR_BASE=… node scripts/cicd/lib/prPolicy.mjs` |
 
 ## `scripts/db/`: database and seed data
 
