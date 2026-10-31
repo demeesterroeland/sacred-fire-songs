@@ -1,0 +1,95 @@
+name: Deploy staging
+
+# Continuous deployment of develop to staging (Epic 5.1, Story 5.1.7, decision D3).
+# After the develop image build succeeds, ask the server to redeploy the
+# songbook-preview (= staging) stack with IMAGE_TAG=develop.
+#
+# The SSH key in the Staging environment is locked on the server with
+#   restrict,command="/opt/dockge/stacks/scripts/deploy-songbook-staging.sh"
+# so it can only run that script (cloud-infra). The script validates
+# "deploy <develop|preview> <40-char sha>", runs the migrator, restarts the app,
+# waits for it to be healthy and checks the image revision label == sha.
+# Spec: docs/testing/gitflow-cicd.feature (@story-5.1.7).
+#
+# Staging environment secrets: STAGING_SSH_HOST, STAGING_SSH_USER,
+# STAGING_SSH_KEY (private key), STAGING_SSH_KNOWN_HOSTS (pinned host key line).
+
+on:
+  workflow_run:
+    workflows: ["Build and push Docker image"]
+    types: [completed]
+    branches: [develop]
+  workflow_dispatch:
+    inputs:
+      sha:
+        description: "Full commit SHA on develop to deploy (default: current develop)"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+concurrency:
+  # One staging deploy at a time; never cancel one that is half-way through.
+  group: deploy-staging
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    if: ${{ github.event_name == 'workflow_dispatch' || (github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.event == 'push') }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    environment:
+      name: Staging
+    steps:
+      - name: Resolve commit SHA
+        id: sha
+        env:
+          RUN_SHA: ${{ github.event.workflow_run.head_sha }}
+          INPUT_SHA: ${{ inputs.sha }}
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+        run: |
+          SHA="${RUN_SHA:-$INPUT_SHA}"
+          if [ -z "$SHA" ]; then
+            SHA="$(gh api "repos/$REPO/commits/develop" -q .sha)"
+          fi
+          if ! [[ "$SHA" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error::Not a full commit SHA: $SHA"
+            exit 1
+          fi
+          echo "value=$SHA" >> "$GITHUB_OUTPUT"
+
+      - name: Configure SSH (pinned host key)
+        env:
+          SSH_KEY: ${{ secrets.STAGING_SSH_KEY }}
+          KNOWN_HOSTS: ${{ secrets.STAGING_SSH_KNOWN_HOSTS }}
+        run: |
+          if [ -z "$SSH_KEY" ] || [ -z "$KNOWN_HOSTS" ]; then
+            echo "::error::Staging environment secrets STAGING_SSH_KEY / STAGING_SSH_KNOWN_HOSTS are missing"
+            exit 1
+          fi
+          install -d -m 700 ~/.ssh
+          printf '%s\n' "$SSH_KEY" > ~/.ssh/staging_deploy
+          chmod 600 ~/.ssh/staging_deploy
+          printf '%s\n' "$KNOWN_HOSTS" > ~/.ssh/staging_known_hosts
+
+      - name: Deploy develop to staging
+        env:
+          SHA: ${{ steps.sha.outputs.value }}
+          HOST: ${{ secrets.STAGING_SSH_HOST }}
+          SSH_USER: ${{ secrets.STAGING_SSH_USER }}
+        run: |
+          ssh -i ~/.ssh/staging_deploy -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile="$HOME/.ssh/staging_known_hosts" -o ConnectTimeout=20 "${SSH_USER:-root}@$HOST" deploy develop "$SHA"
+
+      - name: Summary
+        if: always()
+        env:
+          SHA: ${{ steps.sha.outputs.value }}
+          STATUS: ${{ job.status }}
+        run: |
+          echo "Staging deploy of develop @ \`${SHA:0:7}\` — ${STATUS}" >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Remove key
+        if: always()
+        run: rm -f ~/.ssh/staging_deploy

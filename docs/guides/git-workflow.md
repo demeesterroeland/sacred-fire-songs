@@ -1,6 +1,6 @@
 # Git Workflow & Branching Guidelines: Sacred Fire Songs
 
-**Version:** 1.3
+**Version:** 1.5
 **Status:** Living Document
 **Date:** Oct 31, 2026
 
@@ -8,6 +8,8 @@
 
 | Version | Date | Description of Changes |
 | ----- | ----- | ----- |
+| **1.5** | Oct 31, 2026 | `develop` deploys to **staging** automatically (`docker.yml` → `:develop` image, `deploy-staging.yml` → restricted SSH deploy on the VPS); no more `:latest` images (Epic 5.1 Phase 3). |
+| **1.4** | Oct 31, 2026 | Epic 5.1 Phase 2: branch rulesets as code (`.github/rulesets/main.json`, `develop.json`); `pr-lint.yml` (`pr-policy` check: Conventional Commit title + allowed head → base); `start-issue.sh` validates type/issue number; `dev2preview.sh --dry-run` and correct `sacred-fire-songs-app` image names. |
 | **1.3** | Oct 31, 2026 | Script paths updated to the reorganized `scripts/` folder (#274): `scripts/cicd/start-issue.sh`, `scripts/cicd/dev2preview.sh`, `scripts/cicd/preview2prod.sh`; see `scripts/README.md`. |
 | **1.2** | Oct 31, 2026 | Unit tests moved to `testing/unit/tests/` (examples updated); pre-merge checklist lists the `ci.yml` checks (Epic 5.1 Phase 1). |
 | **1.1** | Oct 30, 2026 | Switch to lightweight **Gitflow** (Epic 5.1, Phase 2): `develop` is the default/integration branch, work branches start from and merge into `develop`, `develop` → `main` via merge commit, `hotfix/*` from `main`. `main` protected by ruleset (PR + `e2e` check, no force-push/delete). `start-issue.sh` branches from `origin/develop` (or `origin/main` for `hotfix`). `preview2prod.sh` flagged as not yet Gitflow-ready. |
@@ -25,8 +27,8 @@ This guide covers the **Git side** of the process (branches, commits, PRs, relea
 
 | Branch | Role & Purpose | Status |
 |---|---|---|
-| **`main`** | **Production & releases.** Always builds, always deployable. **Nobody commits here directly** (humans or AI agents). Code lands only via the promotion PR `develop` → `main` (**merge commit**), `hotfix/*` PRs and the Release Please PR. Protected by the *Main Branch Protected* ruleset: PR required, `e2e` check must pass, no force-push, no deletion. Release tags (`v1.6.0`, `v1.7.0`, …) are cut from `main` by Release Please. | 🟢 Stable |
-| **`develop`** | **Integration & (future) staging.** Default branch. Every work branch starts from `origin/develop` and lands here via a **squash-merged** PR. `e2e.yml` runs on every PR into and push to `develop`. | 🟡 Integration |
+| **`main`** | **Production & releases.** Always builds, always deployable. **Nobody commits here directly** (humans or AI agents). Code lands only via the promotion PR `develop` → `main` (**merge commit**), `hotfix/*` PRs and the Release Please PR. Protected by the *Main Branch Protected* ruleset (`.github/rulesets/main.json`): PR required (merge commit or squash, no rebase), resolved review threads, required checks `lint`, `typecheck`, `unit`, `bdd`, `build`, `pipeline`, `pr-policy`, `e2e`, no force-push, no deletion, no bypass. Release tags (`v1.6.0`, `v1.7.0`, …) are cut from `main` by Release Please. | 🟢 Stable |
+| **`develop`** | **Integration & staging.** Every push builds `sacred-fire-songs-app:develop` (+ short SHA) and `deploy-staging.yml` redeploys the staging stack (migrator first, then the app; health and image revision checked on the server). Default branch. Every work branch starts from `origin/develop` and lands here via a **squash-merged** PR (merge commits only for the `main` → `develop` back-merge). Protected by the *Develop Branch Protected* ruleset (`.github/rulesets/develop.json`, same required checks as `main`). | 🟡 Integration |
 | **`feat/<issue>-<desc>`** | New user-facing functionality (e.g. `feat/257-admin-users`). Triggers a **minor** version bump. | 🔵 Working |
 | **`fix/<issue>-<desc>`** | Bug fix (e.g. `fix/242-audio-recording-pop`). Triggers a **patch** version bump. | 🔵 Working |
 | **`hotfix/<issue>-<desc>`** | Urgent production fix. Starts from `origin/main`, PR into `main` (squash), then `main` is back-merged into `develop`. | 🔴 Urgent |
@@ -108,6 +110,8 @@ This:
 * symlinks the root `.env.local` into the worktree,
 * creates an **empty commit** titled `feat: admin song moderation (#261)`, which serves as the PR title later.
 
+Allowed types are `feat`, `fix`, `chore`, `docs` and `hotfix`; anything else (e.g. `feature`) or a non-numeric issue number is rejected before git is touched (exit 2). The prefixes match the head-branch policy that `pr-lint.yml` enforces.
+
 <details>
 <summary>Manual equivalent</summary>
 
@@ -150,7 +154,7 @@ git merge origin/develop
 scripts/cicd/dev2preview.sh
 ```
 
-Pushes the branch, triggers the `docker.yml` build (tagged with the branch name **and** the rolling `:preview` tag) and waits for it. Then update the preview server and test the feature there. See [development-workflow.md §2–3](./development-workflow.md#2-the-preview-environment-dev2preview).
+Pushes the branch, triggers the `docker.yml` build of `ghcr.io/demeesterroeland/sacred-fire-songs-app` / `-migrator` (tagged with the branch name **and** the rolling `:preview` tag) and waits for it. `--dry-run` only prints the image names. The script refuses `main` and `develop`. Then update the preview server and test the feature there. See [development-workflow.md §2–3](./development-workflow.md#2-the-preview-environment-dev2preview).
 
 ### Step 5: Sync Artifacts & Open the Pull Request
 
@@ -162,7 +166,16 @@ Pushes the branch, triggers the `docker.yml` build (tagged with the branch name 
    ```
 
    `--fill-first` takes the title from the first commit (the one created by `start-issue.sh`). Double-check that the title is a valid Conventional Commit and that the body contains `Closes #<issue>`.
-3. Opening the PR triggers the **Playwright `@smoke` E2E tests** (`e2e.yml`) against staging and the **k6 performance tests** (`performance.yml`). Both must be green.
+3. Opening the PR triggers the required checks: `ci.yml` (`lint`, `typecheck`, `unit`, `bdd`, `build`, `pipeline`), `pr-lint.yml` (`pr-policy`) and `e2e.yml` (`e2e`). The k6 performance tests (`performance.yml`) only run when the PR gets the `perf-test` label.
+
+   **`pr-policy`** fails when the title is not a Conventional Commit (`<type>(<scope>): <description>`, type one of `feat`, `fix`, `perf`, `docs`, `chore`, `refactor`, `test`, `build`, `ci`, `style`, `revert`) or when the branches break the Gitflow rules:
+
+   | Into | Allowed head branches |
+   |---|---|
+   | `develop` | `feat/…`, `fix/…`, `chore/…`, `docs/…`, `dependabot/…`, `main` (back-merge) |
+   | `main` | `develop` (release), `hotfix/…`, `release-please--branches--main…` |
+
+   Editing the PR title re-runs the check. Logic and tests: `scripts/cicd/lib/prPolicy.mjs`, `testing/unit/tests/ci/prPolicy.test.ts`.
 
 ### Step 6: Merge Into `develop`, Then Promote to Production
 
@@ -232,5 +245,5 @@ Never create version tags or edit `CHANGELOG.md` by hand; Release Please owns bo
 - [ ] **Docs in sync**: acceptance criteria in `docs/logbook/epic&user stories.md` verified; `application-analysis&design.md` updated; touched docs have a bumped version + changelog entry.
 - [ ] **Logbook committed**: `/sync-artifacts` ran and `docs/logbook/` changes are committed on the branch.
 - [ ] **Verified on preview** against the staging Supabase project.
-- [ ] **PR ready**: Conventional Commit title, `Closes #<issue>` in the body, E2E smoke and performance checks green.
+- [ ] **PR ready**: Conventional Commit title, correct base branch (`pr-policy` green), `Closes #<issue>` in the body, E2E smoke green.
 - [ ] **After release**: the `vX.Y.Z` tag and GitHub Release exist, and production runs that explicit version.

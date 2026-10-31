@@ -113,4 +113,10 @@
 
 | **October 31, 2026 (Part 2)** | **Chore/Scripts (#274)**: `scripts/` reorganized into `cicd/`, `db/`, `dev/` with `scripts/README.md`, story-sync scripts moved out of `.claude/scripts/`, all references and the CI shellcheck glob updated, layout contract in bats. | ~1.0 Hours | ✅ Completed |
 
-| **Total** | **Development + AI Collaboration** | **~194.25 Hours** | |
+| **October 31, 2026 (Part 2)** | **CI-CD (#283)**: Gitflow Phase 2 — PR policy check (`pr-lint.yml`), rulesets as code, `start-issue.sh` validation, `dev2preview.sh` image names + dry run; recovered #317 via #318. | ~1.5 Hours | ✅ Completed |
+
+| **October 31, 2026 (Part 3)** | **CI-CD (#284)**: Gitflow Phase 3 — develop images, `deploy-staging.yml`, restricted SSH deploy script + compose sync (cloud-infra #107). | ~1.5 Hours | ✅ Completed |
+
+| **October 31, 2026 (Part 4)** | **Bug (#321)**: "New Playlist" redirected logged-in users to `/` — `useAuth` initial `loading` when no server user, server-side guard on `/library/playlists/add`, unit + e2e regression tests. | ~0.75 Hours | ✅ Completed |
+
+| **Total** | **Development + AI Collaboration** | **~198.0 Hours** | |

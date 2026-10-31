@@ -2,7 +2,9 @@ name: Build and push Docker image
 
 on:
   push:
-    branches: ["main"]
+    # develop → staging images (:develop + short SHA, deployed by deploy-staging.yml);
+    # main → short-SHA images; v* tags / releases → semver images for production.
+    branches: ["main", "develop"]
     tags: ["v*"]
   release:
     types: [published]
@@ -24,11 +26,11 @@ jobs:
       contents: read
       packages: write
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3.12.0
+        uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
       - name: Log in to GitHub Container Registry
-        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3.7.0
+        uses: docker/login-action@81c6f93d4bc991e510b342a00b419b3bb4efc5c6 # v4.7.0
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
@@ -66,14 +68,14 @@ jobs:
 
       - name: Extract Docker metadata for App
         id: meta
-        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5.10.0
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
         with:
           images: ghcr.io/${{ github.repository }}-app
           labels: |
             org.opencontainers.image.ref.name=${{ github.ref_name }}
           tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
-            type=sha,prefix=,format=short,enable={{is_default_branch}}
+            # Never :latest — every environment pins an explicit tag (staging :develop, prod vX.Y.Z)
+            type=sha,prefix=,format=short,enable=${{ github.event_name == 'push' }}
             type=ref,event=branch,slugify=true
             type=ref,event=tag
             type=raw,value={{tag}},enable=${{ github.event_name == 'release' }}
@@ -81,7 +83,7 @@ jobs:
             type=raw,value=${{ inputs.version }},enable=${{ github.event_name == 'workflow_dispatch' && inputs.version != '' }}
 
       - name: Build and push app image
-        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: .
           push: true
@@ -94,14 +96,14 @@ jobs:
 
       - name: Extract Docker metadata for Migrator
         id: meta-migrator
-        uses: docker/metadata-action@c299e40c65443455700f0fdfc63efafe5b349051 # v5.10.0
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
         with:
           images: ghcr.io/${{ github.repository_owner }}/sacred-fire-songs-migrator
           labels: |
             org.opencontainers.image.ref.name=${{ github.ref_name }}
           tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
-            type=sha,prefix=,format=short,enable={{is_default_branch}}
+            # Never :latest — every environment pins an explicit tag (staging :develop, prod vX.Y.Z)
+            type=sha,prefix=,format=short,enable=${{ github.event_name == 'push' }}
             type=ref,event=branch,slugify=true
             type=ref,event=tag
             type=raw,value={{tag}},enable=${{ github.event_name == 'release' }}
@@ -109,7 +111,7 @@ jobs:
             type=raw,value=${{ inputs.version }},enable=${{ github.event_name == 'workflow_dispatch' && inputs.version != '' }}
 
       - name: Build and push migrator image
-        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6.19.2
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: .
           file: ./Dockerfile.migrator
