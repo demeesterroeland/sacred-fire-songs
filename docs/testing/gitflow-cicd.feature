@@ -4,7 +4,7 @@
 # Tags:
 #   @story-5.1.x   maps the scenario to its user story
 #   @ci-contract   automatable by parsing .github/workflows/*.yml or scripts (Cucumber profile "ci")
-#   @script        automatable with bats-core against scripts/*.sh
+#   @script        automatable with bats-core against scripts/*/*.sh
 #   @manual        verified on a sandbox branch / real GitHub run; record run URL in master-walkthrough.md
 #
 # Status: written test-first (Phase 0). Every scenario is expected to FAIL until its story is implemented.
@@ -110,17 +110,17 @@ Feature: Gitflow branching and CI/CD pipeline
   # ── Story 5.1.6: scripts follow Gitflow ───────────────────────────────────
   @story-5.1.6 @script
   Scenario: start-issue branches work from develop
-    When I run "scripts/start-issue.sh 300 feat new thing"
+    When I run "scripts/cicd/start-issue.sh 300 feat new thing"
     Then the branch "feat/300-new-thing" is created from "origin/develop"
 
   @story-5.1.6 @script
   Scenario: start-issue branches hotfixes from main
-    When I run "scripts/start-issue.sh 302 hotfix prod crash"
+    When I run "scripts/cicd/start-issue.sh 302 hotfix prod crash"
     Then the branch "hotfix/302-prod-crash" is created from "origin/main"
 
   @story-5.1.6 @script
   Scenario: Preview script prints the image names CI actually pushes
-    When I run "scripts/dev2preview.sh --dry-run" on branch "feat/300-new-thing"
+    When I run "scripts/cicd/dev2preview.sh --dry-run" on branch "feat/300-new-thing"
     Then it prints "ghcr.io/demeesterroeland/sacred-fire-songs-app:feat-300-new-thing"
 
   @story-5.1.6 @script

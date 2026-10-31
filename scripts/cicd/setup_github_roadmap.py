@@ -16,7 +16,7 @@ Gherkin acceptance criteria are read from docs/testing/gitflow-cicd.feature
 Re-running updates bodies and links instead of creating duplicates.
 
 Usage:
-  python3 scripts/setup_github_roadmap.py [--dry-run]
+  python3 scripts/cicd/setup_github_roadmap.py [--dry-run]
 
 Requires: gh (authenticated) + gh-sub-issue extension.
 """
@@ -27,7 +27,7 @@ import sys
 from pathlib import Path
 
 REPO = "demeesterroeland/sacred-fire-songs"
-ROOT = Path(__file__).resolve().parent.parent
+ROOT = Path(__file__).resolve().parents[2]
 FEATURE = ROOT / "docs/testing/gitflow-cicd.feature"
 PLAN = "docs/plans/2026-10-30-gitflow-cicd-migration.md"
 DRY = "--dry-run" in sys.argv
@@ -258,7 +258,7 @@ def ref(code, num):
 
 SOP = """---
 ### 🤖 Agent SOP
-- **Worktree:** `scripts/start-issue.sh <issue#> <type> <desc>` → `.worktrees/issue-<issue#>` (base `main` until 5.1.4 creates `develop`, then `origin/develop`). Symlink `.env.local`, never copy.
+- **Worktree:** `scripts/cicd/start-issue.sh <issue#> <type> <desc>` → `.worktrees/issue-<issue#>` (base `main` until 5.1.4 creates `develop`, then `origin/develop`). Symlink `.env.local`, never copy.
 - **Ports:** dev `3<issue#>`, build/E2E `4<issue#>`.
 - **TDD:** failing contract/bats test first → change → green → actionlint/shellcheck → tick Gherkin scenario.
 - **Pre-close checklist:**
@@ -369,7 +369,7 @@ flowchart LR
 {chr(10).join(table)}
 
 ## 5. AI Agent Standard Operating Procedure
-- **Worktree isolation:** `scripts/start-issue.sh <issue#> <type> <desc>` → `.worktrees/issue-<issue#>`; symlink `.env.local`; never bare `git stash`.
+- **Worktree isolation:** `scripts/cicd/start-issue.sh <issue#> <type> <desc>` → `.worktrees/issue-<issue#>`; symlink `.env.local`; never bare `git stash`.
 - **Ports:** dev `3<issue#>`, build/E2E `4<issue#>`.
 - **Pre-close checklist:** vitest · BDD · lint/actionlint/shellcheck · build · docs synced.
 - **Handoff snapshot comment:**

@@ -1,8 +1,8 @@
 # Gitflow CI/CD Migration — Plan & Orchestration
 
-**Version:** 1.4
+**Version:** 1.5
 **Status:** Approved — in execution (phase by phase, one PR into `develop` per phase)
-**Date:** Oct 30, 2026
+**Date:** Oct 31, 2026
 **Branch:** `docs/gitflow-migration-plan`
 **Tracking:** GitHub master epic #280 (phases #281–#286, Task 5.1.0 #287, stories #288–#301) · Epic 5.1 in `docs/logbook/epic&user stories.md` · BDD spec `docs/testing/gitflow-cicd.feature`
 
@@ -15,6 +15,7 @@
 | **1.2** | Oct 30, 2026 | Owner decisions D1–D7 recorded (§8): D3 SSH `docker compose pull && up -d` on the preview server (= staging, secrets/config from `cloud-infra`), D4 PR smoke against **staging** Supabase, D6 Docker/self-host only (no Vercel). Ticked work done in the orchestrator session: `develop` created (`7f582d1`) and default branch, ruleset "Main Branch Protected" (12237277), #302 (e2e/perf triggers for `develop`), #305 (`start-issue.sh` from `origin/develop`, git-workflow v1.1), PR #273 retargeted. Adjusted tasks 1.3, 1.9, 2.1, 2.2, 2.4, 3.2, 3.3, 5.1, 5.7, 5.10 accordingly. |
 | **1.3** | Oct 30, 2026 | Phase 0 (#287) implemented: tasks 0.2–0.5 done; lint baseline recorded; found that `vitest run` also collects the Playwright specs in `e2e/` and `testing/e2e/` (17 files fail to load) — added to task 1.4. |
 | **1.4** | Oct 31, 2026 | Phase 1 (#282) implemented except Story 5.1.2 (E2E), which the owner deferred: tasks 1.1, 1.3, 1.4, 1.5, 1.7, 1.8 done; 1.2/1.6 deferred; 1.9 ruleset update in the Phase 1 PR. Findings: `tsconfig.json` excludes `testing/`/`e2e/` (tests are not type-checked); cloud staging/prod Supabase projects are paused; preview server compose has drifted from cloud-infra git. |
+| **1.5** | Oct 31, 2026 | #274 reorganized `scripts/` into `scripts/cicd/`, `scripts/db/`, `scripts/dev/` (see `scripts/README.md`); script tasks below refer to `scripts/cicd/…` (task 4.1 path updated). The misnamed usage headers of `dev2preview.sh`/`preview2prod.sh` (G6, task 2.6) were fixed as part of the move. Shellcheck in `ci.yml` now checks `scripts/*/*.sh`. |
 
 > **For Claude:** REQUIRED SUB-SKILL: Use `superpowers:executing-plans` (or `superpowers:subagent-driven-development`) to implement this plan phase by phase. One story = one issue = one branch = one PR into `develop` (after Phase 1 exists; before that, into `main`).
 
@@ -210,7 +211,7 @@ Each phase ends with a green gate before the next starts. Story IDs map to `docs
 - [ ] 1.6 ⏸ Deferred with Story 5.1.2 (the `docker.yml` step waits for E2E).
 - [x] 1.7 All actions SHA-pinned (version comment), top-level `permissions` in every workflow, `.github/dependabot.yml` (github-actions + npm → `develop`).
 - [x] 1.8 Implemented as job `pipeline` in `ci.yml` (not a path-filtered `workflow-lint.yml`, which could never be a required check): actionlint + shellcheck (digest-pinned images), bats, `test:bdd:ci-gate`. Fixed the findings (quoting, shebang, `cd || exit`).
-- [ ] 1.9 Ruleset on `main` — *partly done*: ruleset "Main Branch Protected" (id 12237277) active with deletion, non_fast_forward, pull_request (0 approvals, merge + squash, no rebase), required check `e2e`, no bypass actors. **Remaining:** add the `ci.yml` checks from 1.1 (needs owner approval: repo setting); clean up the legacy classic protection (`allow_force_pushes: true`, overruled by the ruleset).
+- [x] 1.9 Ruleset "Main Branch Protected" (12237277): required checks `lint`, `typecheck`, `unit`, `bdd`, `build`, `pipeline`, `e2e` (GitHub Actions app id 15368), review-thread resolution required; legacy classic branch protection deleted (applied by the owner, Oct 31). Note: `e2e` stays a false green until Story 5.1.2.
 
 ### Phase 2 — Introduce `develop` + branch policy
 **Exit:** `develop` exists, protected; new work targets it. *Stories 5.1.4, 5.1.5, 5.1.6.*
@@ -235,7 +236,7 @@ Each phase ends with a green gate before the next starts. Story IDs map to `docs
 
 **Exit:** `develop` → `main` → tag → approved prod deploy → back-merge, all in CI. *Stories 5.1.8, 5.1.9, 5.1.10.*
 
-- [ ] 4.1 New script `scripts/develop2main.sh` (replaces `preview2prod.sh` promotion part): opens PR `develop` → `main` titled `chore(release): promote develop to main`, body = list of squashed commits since last tag; waits checks; **merge commit**, no `--admin`.
+- [ ] 4.1 New script `scripts/cicd/develop2main.sh` (replaces `preview2prod.sh` promotion part): opens PR `develop` → `main` titled `chore(release): promote develop to main`, body = list of squashed commits since last tag; waits checks; **merge commit**, no `--admin`.
 - [ ] 4.2 PR-to-`main` required checks: full E2E vs staging + k6 thresholds.
 - [ ] 4.3 `release-please.yml`: pinned, `target-branch: main`; decide `draft`/`force-tag-creation` (D5).
 - [ ] 4.4 (owner approval required) `deploy-production.yml` on `release: published` targeting `cloud-infra/stacks/songbook-prod/`: `environment: Production` (required reviewer = owner), prod migrations, deploy explicit `vX.Y.Z`, smoke check, inject release summary (moved from `preview2prod.sh`).

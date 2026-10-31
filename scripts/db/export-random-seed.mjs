@@ -1,15 +1,15 @@
 /**
- * Generates supabase/seeds/03_songs_random_generated.sql from scripts/random-seeder.mjs.
+ * Generates supabase/seeds/03_songs_random_generated.sql from scripts/db/random-seeder.mjs.
  *
  * `npx supabase db reset` / `npx supabase start` load every file in supabase/seeds,
  * so this static file gives a fresh local database ~200 generated songs without
- * needing the Node seeder. The Playwright setup (scripts/setup-test-db.mjs) keeps
+ * needing the Node seeder. The Playwright setup (scripts/db/setup-test-db.mjs) keeps
  * running the generator live.
  *
  * Usage:
- *   node scripts/export-random-seed.mjs            # 200 songs (default)
- *   node scripts/export-random-seed.mjs 300        # custom count
- *   DATABASE_URL=postgres://... node scripts/export-random-seed.mjs
+ *   node scripts/db/export-random-seed.mjs            # 200 songs (default)
+ *   node scripts/db/export-random-seed.mjs 300        # custom count
+ *   DATABASE_URL=postgres://... node scripts/db/export-random-seed.mjs
  *
  * The generator runs inside a transaction that is rolled back, so the database
  * it connects to is left untouched. Timestamps are exported relative to now().
@@ -82,8 +82,8 @@ try {
 -- ${compositions.length} generated songs for local development (\`supabase db reset\` / \`supabase start\`).
 --
 -- GENERATED FILE – do not edit by hand. Regenerate with:
---   npm run seed:generate            (or: node scripts/export-random-seed.mjs ${count})
--- Source generator: scripts/random-seeder.mjs (${ANCHOR_SONGS.length} deterministic anchor songs +
+--   npm run seed:generate            (or: node scripts/db/export-random-seed.mjs ${count})
+-- Source generator: scripts/db/random-seeder.mjs (${ANCHOR_SONGS.length} deterministic anchor songs +
 -- randomized songs covering every shape in docs/testing/song.feature).
 -- Generated: ${new Date().toISOString()}
 --

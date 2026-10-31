@@ -111,4 +111,6 @@
 
 | **October 31, 2026** | **CI-CD (#282)**: Gitflow Phase 1 — `ci.yml` quality gate, lint ratchet, single unit-test tree, SHA-pinned actions, Dependabot; E2E Supabase stack drafted in cloud-infra #106 (deferred). | ~2.5 Hours | ✅ Completed |
 
-| **Total** | **Development + AI Collaboration** | **~193.25 Hours** | |
+| **October 31, 2026 (Part 2)** | **Chore/Scripts (#274)**: `scripts/` reorganized into `cicd/`, `db/`, `dev/` with `scripts/README.md`, story-sync scripts moved out of `.claude/scripts/`, all references and the CI shellcheck glob updated, layout contract in bats. | ~1.0 Hours | ✅ Completed |
+
+| **Total** | **Development + AI Collaboration** | **~194.25 Hours** | |
