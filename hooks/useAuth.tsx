@@ -15,10 +15,16 @@ export interface AuthUser {
     avatar_url?: string;
 }
 
-export const useAuth = (initialUser: AuthUser | null = null) => {
+/**
+ * `initialUser` is the server's view of the session: a user, or `null` for a
+ * guest. When the caller has no server view (`undefined`), `loading` starts
+ * `true` until the client session resolves, so guest guards don't fire on the
+ * first render (#321).
+ */
+export const useAuth = (initialUser?: AuthUser | null) => {
     const queryClient = useQueryClient();
-    const [user, setUser] = useState<AuthUser | null>(initialUser);
-    const [loading, setLoading] = useState(false); // Server provides authoritative initial state
+    const [user, setUser] = useState<AuthUser | null>(initialUser ?? null);
+    const [loading, setLoading] = useState(initialUser === undefined);
 
     const loadUser = async (signal?: { cancelled: boolean }) => {
         const supabase = createClient();
