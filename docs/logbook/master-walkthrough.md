@@ -3088,3 +3088,15 @@ Enforce the Gitflow rules mechanically: PR title and branch policy as a required
 - **Rulesets as code**: `.github/rulesets/{main,develop}.json`; `rulesets.test.ts` asserts required checks = `ci.yml` jobs + `pr-policy` + `e2e`, no bypass, no rebase. `develop` keeps merge commits allowed for the back-merge (the plan said squash-only, which would make back-merges diverge).
 - **Scripts**: `start-issue.sh` validates before touching git; `dev2preview.sh` printed `sacred-fire-songs:<lowercased>` while CI pushes `sacred-fire-songs-app:<case-kept>` (metadata-action v5 `sanitizeTag` only replaces runs of invalid characters) — fixed, plus `--dry-run`.
 - **Merge mix-up fixed**: #317 had been merged into the already-merged Phase 1 branch; #318 brought it into `develop`.
+
+## October 31, 2026 (Part 3) - Gitflow Phase 3: staging CD from develop (#284)
+
+**Task Overview**
+Make every merge into `develop` land on staging automatically, without giving CI a shell on the host that also runs production.
+
+**Technical Details**
+- **Images**: `docker.yml` now builds on `develop`; `:latest` removed (with `develop` as default branch, `is_default_branch` would have tagged develop images as latest).
+- **Deploy**: `deploy-staging.yml` runs after a successful develop build, in the `Staging` environment, with a pinned known_hosts entry (`StrictHostKeyChecking=yes`, no `ssh-keyscan`). The key is locked on the VPS with `restrict,command="…/deploy-songbook-staging.sh"`, which only accepts `deploy <develop|preview> <40-char sha>` (regex, injection attempts tested) and then: lock → pull → migrator (abort on failure) → `up -d --no-deps app` → wait healthy → revision label == sha.
+- **Design changes vs. plan**: no `supabase db push` (staging Supabase is self-hosted; the migrator image applies migrations), no runner-side HTTP health check (staging is Tailscale-only).
+- **Drift**: `/opt/dockge` had uncommitted compose changes for preview and prod; cloud-infra #107 commits the running prod state byte-for-byte so `git pull` is clean.
+- **Deferred**: nightly E2E/k6 against staging (needs runners on the tailnet).

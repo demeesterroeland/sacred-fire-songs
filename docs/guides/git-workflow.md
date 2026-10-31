@@ -1,6 +1,6 @@
 # Git Workflow & Branching Guidelines: Sacred Fire Songs
 
-**Version:** 1.4
+**Version:** 1.5
 **Status:** Living Document
 **Date:** Oct 31, 2026
 
@@ -8,6 +8,7 @@
 
 | Version | Date | Description of Changes |
 | ----- | ----- | ----- |
+| **1.5** | Oct 31, 2026 | `develop` deploys to **staging** automatically (`docker.yml` → `:develop` image, `deploy-staging.yml` → restricted SSH deploy on the VPS); no more `:latest` images (Epic 5.1 Phase 3). |
 | **1.4** | Oct 31, 2026 | Epic 5.1 Phase 2: branch rulesets as code (`.github/rulesets/main.json`, `develop.json`); `pr-lint.yml` (`pr-policy` check: Conventional Commit title + allowed head → base); `start-issue.sh` validates type/issue number; `dev2preview.sh --dry-run` and correct `sacred-fire-songs-app` image names. |
 | **1.3** | Oct 31, 2026 | Script paths updated to the reorganized `scripts/` folder (#274): `scripts/cicd/start-issue.sh`, `scripts/cicd/dev2preview.sh`, `scripts/cicd/preview2prod.sh`; see `scripts/README.md`. |
 | **1.2** | Oct 31, 2026 | Unit tests moved to `testing/unit/tests/` (examples updated); pre-merge checklist lists the `ci.yml` checks (Epic 5.1 Phase 1). |
@@ -27,7 +28,7 @@ This guide covers the **Git side** of the process (branches, commits, PRs, relea
 | Branch | Role & Purpose | Status |
 |---|---|---|
 | **`main`** | **Production & releases.** Always builds, always deployable. **Nobody commits here directly** (humans or AI agents). Code lands only via the promotion PR `develop` → `main` (**merge commit**), `hotfix/*` PRs and the Release Please PR. Protected by the *Main Branch Protected* ruleset (`.github/rulesets/main.json`): PR required (merge commit or squash, no rebase), resolved review threads, required checks `lint`, `typecheck`, `unit`, `bdd`, `build`, `pipeline`, `pr-policy`, `e2e`, no force-push, no deletion, no bypass. Release tags (`v1.6.0`, `v1.7.0`, …) are cut from `main` by Release Please. | 🟢 Stable |
-| **`develop`** | **Integration & (future) staging.** Default branch. Every work branch starts from `origin/develop` and lands here via a **squash-merged** PR (merge commits only for the `main` → `develop` back-merge). Protected by the *Develop Branch Protected* ruleset (`.github/rulesets/develop.json`, same required checks as `main`). | 🟡 Integration |
+| **`develop`** | **Integration & staging.** Every push builds `sacred-fire-songs-app:develop` (+ short SHA) and `deploy-staging.yml` redeploys the staging stack (migrator first, then the app; health and image revision checked on the server). Default branch. Every work branch starts from `origin/develop` and lands here via a **squash-merged** PR (merge commits only for the `main` → `develop` back-merge). Protected by the *Develop Branch Protected* ruleset (`.github/rulesets/develop.json`, same required checks as `main`). | 🟡 Integration |
 | **`feat/<issue>-<desc>`** | New user-facing functionality (e.g. `feat/257-admin-users`). Triggers a **minor** version bump. | 🔵 Working |
 | **`fix/<issue>-<desc>`** | Bug fix (e.g. `fix/242-audio-recording-pop`). Triggers a **patch** version bump. | 🔵 Working |
 | **`hotfix/<issue>-<desc>`** | Urgent production fix. Starts from `origin/main`, PR into `main` (squash), then `main` is back-merged into `develop`. | 🔴 Urgent |

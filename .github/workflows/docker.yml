@@ -2,7 +2,9 @@ name: Build and push Docker image
 
 on:
   push:
-    branches: ["main"]
+    # develop → staging images (:develop + short SHA, deployed by deploy-staging.yml);
+    # main → short-SHA images; v* tags / releases → semver images for production.
+    branches: ["main", "develop"]
     tags: ["v*"]
   release:
     types: [published]
@@ -72,8 +74,8 @@ jobs:
           labels: |
             org.opencontainers.image.ref.name=${{ github.ref_name }}
           tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
-            type=sha,prefix=,format=short,enable={{is_default_branch}}
+            # Never :latest — every environment pins an explicit tag (staging :develop, prod vX.Y.Z)
+            type=sha,prefix=,format=short,enable=${{ github.event_name == 'push' }}
             type=ref,event=branch,slugify=true
             type=ref,event=tag
             type=raw,value={{tag}},enable=${{ github.event_name == 'release' }}
@@ -100,8 +102,8 @@ jobs:
           labels: |
             org.opencontainers.image.ref.name=${{ github.ref_name }}
           tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
-            type=sha,prefix=,format=short,enable={{is_default_branch}}
+            # Never :latest — every environment pins an explicit tag (staging :develop, prod vX.Y.Z)
+            type=sha,prefix=,format=short,enable=${{ github.event_name == 'push' }}
             type=ref,event=branch,slugify=true
             type=ref,event=tag
             type=raw,value={{tag}},enable=${{ github.event_name == 'release' }}
