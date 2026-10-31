@@ -1349,3 +1349,12 @@
 - [x] D6: Vercel tokens removed from `performance.yml`
 - [ ] Owner: merge cloud-infra #107; VPS rollout; `Staging` environment + secrets; first deploy
 - [ ] Deferred: 3.4 nightly E2E/k6 (Tailscale), app-level Vercel code
+
+## Session October 31, 2026 (Part 4: Fix New Playlist auth redirect, #321)
+- [x] Issue #321, branch `fix/321-playlist-add-auth-redirect`
+- [x] RED: unit test for `useAuth` first-render `loading`; e2e spec reproduces redirect to `/`
+- [x] `useAuth`: `loading` starts `true` when no server user is passed (`undefined`), stays `false` for server user / server guest
+- [x] `/library/playlists/add`: server-side auth guard with `next=`, client form `CreatePlaylistForm`
+- [x] Audit `useAuth()` call sites; design doc §6.7, lint cap 182 → 181
+- [ ] Follow-up: fix stale selector in `e2e/tests/auth-hydration.spec.ts`; add `next=` to `SongForm` guest redirect
+- [ ] Owner: OK to merge PR into `develop`, then verify on songbook-beta

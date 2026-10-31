@@ -117,4 +117,6 @@
 
 | **October 31, 2026 (Part 3)** | **CI-CD (#284)**: Gitflow Phase 3 — develop images, `deploy-staging.yml`, restricted SSH deploy script + compose sync (cloud-infra #107). | ~1.5 Hours | ✅ Completed |
 
-| **Total** | **Development + AI Collaboration** | **~197.25 Hours** | |
+| **October 31, 2026 (Part 4)** | **Bug (#321)**: "New Playlist" redirected logged-in users to `/` — `useAuth` initial `loading` when no server user, server-side guard on `/library/playlists/add`, unit + e2e regression tests. | ~0.75 Hours | ✅ Completed |
+
+| **Total** | **Development + AI Collaboration** | **~198.0 Hours** | |
