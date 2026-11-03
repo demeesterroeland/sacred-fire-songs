@@ -1358,3 +1358,13 @@
 - [x] Audit `useAuth()` call sites; design doc §6.7, lint cap 182 → 181
 - [ ] Follow-up: fix stale selector in `e2e/tests/auth-hydration.spec.ts`; add `next=` to `SongForm` guest redirect
 - [ ] Owner: OK to merge PR into `develop`, then verify on <staging-app>
+
+## Session November 3, 2026 (Public-repo isolation)
+- [x] Security scan: tree, history, secrets, environments
+- [x] Remove `deploy-staging.yml` and tracked `graphify-out/`; scrub deployment names to placeholders
+- [x] `performance.yml` without default target; preview repro spec skips without `PREVIEW_URL`
+- [x] `scripts/dev/isolation-guard.sh` + `.githooks/{pre-commit,commit-msg}` + Claude Code hook + `isolation` CI job
+- [x] Canonical root `AGENTS.md`; `CLAUDE.md` imports it; `GEMINI.md` symlink; `.agents/AGENTS.md` removed
+- [x] Story 5.1.7 contract scenarios rewritten (images only, no SSH, no deployment environment)
+- [ ] Owner: set `ISOLATION_DENYLIST` secret, add `isolation` to the required checks, remove the deployment environments
+- [ ] History rewrite of the public repo (owner decision taken; separate step)

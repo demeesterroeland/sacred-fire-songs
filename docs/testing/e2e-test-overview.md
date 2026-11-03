@@ -1,8 +1,8 @@
 # E2E Test Overview & Matrix: Sacred Fire Songs
 
-**Version:** 1.10
+**Version:** 1.11
 **Status:** Living Document
-**Date:** Oct 31, 2026
+**Date:** Nov 3, 2026
 **Tracking:** GH #142
 
 ## Changelog
@@ -20,6 +20,7 @@
 | **1.8** | Oct 30, 2026 | Added ADMIN-08 (remembered sort, #278) and ADMIN-09 (clickable user rows, #279); ADMIN-05 now drives the listbox-style role picker. |
 | **1.9** | Oct 31, 2026 | Unit tests now live only in `testing/unit/tests/` (`lib/unit-tests/` removed, Epic 5.1 Story 5.1.3); stale Playwright copies in `testing/e2e/tests/` removed — specs live in `e2e/`. |
 | **1.10** | Oct 31, 2026 | Database setup and seeder paths moved to `scripts/db/` (`scripts/db/setup-test-db.mjs`, `scripts/db/random-seeder.mjs`, #274). |
+| **1.11** | Nov 3, 2026 | Replaced deployment-specific environment names with neutral placeholders (public-repo isolation). |
 
 ---
 

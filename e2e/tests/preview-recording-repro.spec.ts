@@ -1,9 +1,11 @@
 import { test, expect } from '@playwright/test';
 import { TEST_PASSWORD } from '../fixtures/roles';
 
-const PREVIEW_BASE_URL = process.env.PREVIEW_URL || 'https://staging.example.com';
+// Deployment URLs are not part of this public repo: set PREVIEW_URL to run this repro.
+const PREVIEW_BASE_URL = process.env.PREVIEW_URL ?? '';
 
 test.describe('Preview Environment Rehearsal Playback Debugging', () => {
+  test.skip(!PREVIEW_BASE_URL, 'PREVIEW_URL is not set');
   test('Verify both real uploaded recordings play cleanly without error on Preview', async ({ page }) => {
     const failedRequests: string[] = [];
 

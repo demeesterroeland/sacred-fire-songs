@@ -3112,3 +3112,15 @@ On staging, a logged-in user clicking "New Playlist" (`/library/playlists/add`) 
 - **Page fix**: `/library/playlists/add` is now a Server Component guard (`redirect('/auth/login?next=/library/playlists/add')`), form moved to `components/playlists/CreatePlaylistForm.tsx`.
 - **Tests**: `testing/unit/tests/useAuth.test.ts` (first-render state via `renderToString`, no DOM library needed); `e2e/tests/playlist-add-auth.spec.ts` reproduced the bug (login → `/`) before the fix.
 - **Found, not fixed**: `e2e/tests/auth-hydration.spec.ts` selector `.relative > button.rounded-full` now matches 3 buttons (strict-mode violation); `SongForm` submit-time guest redirect has no `next=`.
+
+## November 3, 2026 - Public-repo isolation and canonical agent instructions
+
+**Task Overview**
+This repository is public open source; the maintainer's own environments are private examples. A scan found deployment details had crept back in (deploy workflow, environment names, server paths in the logbook and plans) even though an isolation rule existed. Root cause: the rule lived in `.agents/AGENTS.md`, a path no AI tool reads, and nothing enforced it.
+
+**Technical Details**
+- **Removed**: `deploy-staging.yml` (this repo now only builds and publishes images), tracked `graphify-out/` (now ignored); ops plans replaced by short stubs. Deployment-specific names in docs, logbook, tests and scripts replaced by placeholders.
+- **`performance.yml`**: target URL comes from the `base_url` input or the `PERF_BASE_URL` repository variable; fails when neither is set. The preview repro spec skips unless `PREVIEW_URL` is set.
+- **Enforcement** (`scripts/dev/isolation-guard.sh`, denylist kept outside the repo): Claude Code `PreToolUse` hook (new text written inside the repo + outward commands), `.githooks/pre-commit` (staged diff), `.githooks/commit-msg`, and the `isolation` CI job (secret `ISOLATION_DENYLIST`, fails closed).
+- **Agent instructions**: root `AGENTS.md` is canonical (read natively by Codex, Copilot, Cursor, OpenCode and others); `CLAUDE.md` imports it with `@AGENTS.md` and keeps only Claude-specific notes; `GEMINI.md` is a symlink.
+- **Story 5.1.7** re-scoped: contract scenarios now assert that `develop` images are published and that no workflow opens SSH or uses a deployment environment.

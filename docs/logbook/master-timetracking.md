@@ -119,4 +119,5 @@
 
 | **October 31, 2026 (Part 4)** | **Bug (#321)**: "New Playlist" redirected logged-in users to `/` — `useAuth` initial `loading` when no server user, server-side guard on `/library/playlists/add`, unit + e2e regression tests. | ~0.75 Hours | ✅ Completed |
 
-| **Total** | **Development + AI Collaboration** | **~198.0 Hours** | |
+| **November 3, 2026** | **Security / Ops**: public-repo isolation — scan, removal of deploy workflow and deployment names, isolation guard (hooks + CI), canonical `AGENTS.md`. | ~2.0 Hours | ✅ Completed |
+| **Total** | **Development + AI Collaboration** | **~200.0 Hours** | |

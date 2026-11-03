@@ -2,8 +2,9 @@ name: Build and push Docker image
 
 on:
   push:
-    # develop → staging images (:develop + short SHA, deployed by deploy-staging.yml);
-    # main → short-SHA images; v* tags / releases → semver images for production.
+    # develop → :develop + short-SHA images; main → short-SHA images;
+    # v* tags / releases → semver images. Images are public on GHCR; how and
+    # where they are deployed is up to each self-hoster and is not part of this repo.
     branches: ["main", "develop"]
     tags: ["v*"]
   release:
