@@ -6,7 +6,7 @@ Helper scripts for **Sacred Fire Songs**, grouped by purpose. Run them from the 
 scripts/
 ├── cicd/     # Issue worktrees, preview/production promotion, benchmarks, GitHub roadmap & story sync
 ├── db/       # Migrations, test-database setup, random seeding, staging clone, Supabase settings
-├── dev/      # Local development helpers (icons, ChordPro debugging)
+├── dev/      # Local development helpers (icons, ChordPro debugging, isolation guard)
 └── README.md
 ```
 
@@ -45,3 +45,4 @@ Every script lives in exactly one category folder; only this README sits directl
 | `dev/generate-icons.mjs` | Generates the PWA icon sizes from `public/icons/icon.svg` with `sharp`. | `node scripts/dev/generate-icons.mjs` |
 | `dev/debug_chordpro.js` | Prints the ChordSheetJS parse tree of a small ChordPro sample. | `node scripts/dev/debug_chordpro.js` |
 | `dev/test_chord_parsing.ts` | Prints the parse result of a ChordPro sample in TypeScript (manual check, not a Vitest test). | `npx tsx scripts/dev/test_chord_parsing.ts` |
+| `dev/isolation-guard.sh` | Blocks private deployment details from this public repo, using a denylist kept outside the repo (`~/.config/sfs/denylist`, CI: `ISOLATION_DENYLIST`). Runs as git hooks, Claude Code hook and the `isolation` CI job. | `scripts/dev/isolation-guard.sh --tree` (or `--staged`, `--claude-hook`, `FILE…`) |
