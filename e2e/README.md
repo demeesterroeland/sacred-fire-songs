@@ -32,6 +32,9 @@ npx supabase status
 export NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
 export NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<key from supabase status>
 export NEXT_PUBLIC_DEV_TEST_PASSWORD=<test-account-password>
+# Optional, for a shared environment where each role has its own password
+# (unset roles fall back to NEXT_PUBLIC_DEV_TEST_PASSWORD):
+# export E2E_PASSWORD_ADMIN=... E2E_PASSWORD_GATEKEEPER=... E2E_PASSWORD_MUSICIAN=... E2E_PASSWORD_MEMBER=...
 
 # 3. Install Playwright browsers (first time only)
 npx playwright install --with-deps chromium
@@ -69,6 +72,7 @@ staging URL from the project ref and reads the (public) anon key from a secret:
 - `SUPABASE_PROJECT_ID_STAGING` — staging project ref (URL = `https://<ref>.supabase.co`)
 - `SUPABASE_PUBLISHABLE_KEY_STAGING` — staging anon/publishable key (public; safe as a secret)
 - `E2E_TEST_PASSWORD` — password for the seeded E2E accounts on staging
+- `E2E_PASSWORD_ADMIN` / `_GATEKEEPER` / `_MUSICIAN` / `_MEMBER` — _optional_ per-role passwords (see `fixtures/roles.ts` `passwordFor`)
 - `SUPABASE_URL_STAGING` — _optional_ full URL override
 
 > ⚠️ Staging must contain the E2E test accounts from `fixtures/roles.ts`

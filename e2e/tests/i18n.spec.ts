@@ -7,7 +7,7 @@ import ru from '../../messages/ru';
 import qu from '../../messages/qu';
 import fr from '../../messages/fr';
 import pt from '../../messages/pt';
-import { ROLES, TEST_PASSWORD } from '../fixtures/roles';
+import { ROLES, passwordFor } from '../fixtures/roles';
 
 /**
  * Story 3.7.1 (#246) – @e2e scenarios of docs/testing/i18n.feature.
@@ -153,7 +153,7 @@ test.describe('Interface language @i18n', () => {
         await page.goto('/auth/login');
         await page.getByRole('button', { name: dict['auth.login.switchToPassword'] }).click();
         await page.locator('#email').fill(email);
-        await page.locator('#password').fill(TEST_PASSWORD);
+        await page.locator('#password').fill(passwordFor('musician'));
         await page.getByRole('button', { name: dict['auth.login.submit'], exact: true }).click();
         await page.waitForURL((url) => url.pathname === '/');
       };
