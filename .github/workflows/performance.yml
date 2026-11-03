@@ -9,9 +9,9 @@ on:
   workflow_dispatch:
     inputs:
       base_url:
-        description: 'Target URL to test'
-        required: true
-        default: 'https://songbook-beta.bluette.be'
+        description: 'Target URL to test (falls back to the PERF_BASE_URL repository variable)'
+        required: false
+        default: ''
       test_script:
         description: 'k6 test script to run'
         required: true
@@ -65,8 +65,14 @@ jobs:
       # ── Run k6 load test ───────────────────────────────────────────────────
       - name: Run k6 performance test
         env:
-          BASE_URL: ${{ github.event.inputs.base_url || 'https://songbook-beta.bluette.be' }}
+          # The target host is deployment-specific and lives outside this public
+          # repo: pass it as input or set the PERF_BASE_URL repository variable.
+          BASE_URL: ${{ github.event.inputs.base_url || vars.PERF_BASE_URL }}
         run: |
+          if [ -z "$BASE_URL" ]; then
+            echo "::error::No target URL: pass base_url or set the PERF_BASE_URL repository variable"
+            exit 1
+          fi
           TEST_SCRIPT="${{ github.event.inputs.test_script || 'testing/performance/tests/scripts/load-test.js' }}"
           TIMESTAMP=$(date +"%Y%m%d_%H%M%S")
 

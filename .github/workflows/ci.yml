@@ -86,6 +86,29 @@ jobs:
       - run: npm ci
       - run: npm run build
 
+  isolation:
+    # This repo is public. Fail if any tracked file names private deployment
+    # infrastructure. The pattern list is deliberately NOT in the repo: it is the
+    # ISOLATION_DENYLIST secret (one extended regex per line). Fail closed when
+    # the secret is missing; fork PRs cannot read secrets, so they are skipped
+    # here and caught by the maintainer's local hooks and on the push to develop.
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    if: ${{ github.event_name != 'pull_request' || github.event.pull_request.head.repo.fork == false }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Scan tracked files against the private denylist
+        env:
+          DENYLIST: ${{ secrets.ISOLATION_DENYLIST }}
+        run: |
+          if [ -z "$DENYLIST" ]; then
+            echo "::error::ISOLATION_DENYLIST secret is missing; the isolation check cannot run"
+            exit 1
+          fi
+          install -m 600 /dev/null "$RUNNER_TEMP/denylist"
+          printf '%s\n' "$DENYLIST" > "$RUNNER_TEMP/denylist"
+          SFS_DENYLIST="$RUNNER_TEMP/denylist" scripts/dev/isolation-guard.sh --tree
+
   pipeline:
     # The CI/CD pipeline itself: workflow lint, shell lint, script tests and
     # the contract scenarios of the Gitflow stories that are already done.

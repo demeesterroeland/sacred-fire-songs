@@ -216,37 +216,35 @@ Then(
   },
 );
 
-// ── Staging deploy over SSH (story 5.1.7) ───────────────────────────────────
+// ── No deployment from this public repo (story 5.1.7) ───────────────────────────────────
 const sshCommands = (wf: Workflow) =>
   runScripts(wf)
     .flatMap((r) => r.split('\n'))
     .map((l) => l.trim())
     .filter((l) => /(^|\s)ssh\s/.test(l));
 
-Then('it connects over SSH with a pinned host key from the secret {string}', function (this: SongBddWorld, secret: string) {
-  const wf = current(this);
-  assert.match(wf.raw, new RegExp(`secrets\\.${secret}\\b`), `${wf.file} does not read ${secret}`);
-  const cmds = sshCommands(wf);
-  assert.ok(cmds.length > 0, `${wf.file} never runs ssh`);
-  for (const cmd of cmds) {
-    assert.match(cmd, /StrictHostKeyChecking=yes/, `ssh without StrictHostKeyChecking=yes: ${cmd}`);
-    assert.match(cmd, /UserKnownHostsFile=/, `ssh without a pinned known_hosts file: ${cmd}`);
+Then('no workflow opens an SSH connection', function (this: SongBddWorld) {
+  for (const wf of ci(this).workflows) {
+    assert.deepEqual(sshCommands(wf), [], `${wf.file} opens an SSH connection`);
   }
 });
 
-Then('the only remote command it sends is {string}', function (this: SongBddWorld, expected: string) {
-  const wf = current(this);
-  const [verb, tag] = expected.split(' ');
-  for (const cmd of sshCommands(wf)) {
-    assert.match(cmd, new RegExp(`\\s${verb} ${tag} "\\$SHA"$`), `unexpected remote command: ${cmd}`);
+Then('no workflow uses a deployment environment', function (this: SongBddWorld) {
+  for (const wf of ci(this).workflows) {
+    assert.doesNotMatch(wf.raw, /^\s+environment:/m, `${wf.file} uses a GitHub deployment environment`);
   }
 });
 
-Then('it never disables host key checking', function (this: SongBddWorld) {
-  const wf = current(this);
-  assert.doesNotMatch(wf.raw, /StrictHostKeyChecking=(no|accept-new)/, `${wf.file} disables host key checking`);
-  assert.doesNotMatch(wf.raw, /ssh-keyscan/, `${wf.file} trusts whatever host key it scans`);
-});
+Then(
+  'it has a job {string} that fails when the secret {string} is missing',
+  function (this: SongBddWorld, job: string, secret: string) {
+    const wf = current(this);
+    assert.ok(wf.jobs[job], `${wf.file} has no job "${job}"`);
+    const script = runScripts({ ...wf, jobs: { [job]: wf.jobs[job] } } as Workflow).join('\n');
+    assert.match(wf.raw, new RegExp(`secrets\\.${secret}\\b`), `${wf.file} does not read ${secret}`);
+    assert.match(script, /if \[ -z "\$DENYLIST" \]; then[\s\S]*?exit 1/, `job "${job}" does not fail closed`);
+  },
+);
 
 // ── Fail-closed E2E (story 5.1.2) ───────────────────────────────────────────
 When('the required staging secrets are absent', function () {

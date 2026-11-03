@@ -128,29 +128,25 @@ Feature: Gitflow branching and CI/CD pipeline
     Given all files in "scripts/"
     Then none contains "gh pr merge" with "--admin"
 
-  # ── Story 5.1.7: staging CD ───────────────────────────────────────────────
+  # ── Story 5.1.7: develop images (deployment is out of scope) ─────────────
+  # Re-scoped Nov 3, 2026: this public repo publishes images only. Deploying them
+  # to a server is the self-hoster's concern and lives outside the repository.
   @story-5.1.7 @ci-contract
-  Scenario: Pushing develop builds and deploys staging
-    Given the workflows "docker.yml" and "deploy-staging.yml"
+  Scenario: Pushing develop publishes staging images
+    Given the workflow "docker.yml"
     Then a push to "develop" builds images tagged "develop" and the short SHA
     And no image is tagged "latest"
-    And "deploy-staging.yml" uses the environment "Staging"
-    And "deploy-staging.yml" only runs after a successful "Build and push Docker image" run on "develop"
 
   @story-5.1.7 @ci-contract
-  Scenario: The staging deploy can only trigger the restricted deploy command
-    Given the workflow "deploy-staging.yml"
-    Then it connects over SSH with a pinned host key from the secret "STAGING_SSH_KNOWN_HOSTS"
-    And the only remote command it sends is "deploy develop <commit SHA>"
-    And it never disables host key checking
+  Scenario: No workflow deploys to a server
+    Given every workflow in ".github/workflows"
+    Then no workflow opens an SSH connection
+    And no workflow uses a deployment environment
 
-  @story-5.1.7 @manual
-  Scenario: Staging reflects develop after a merge
-    Given a feature PR is squash-merged into "develop"
-    When the staging pipeline finishes
-    Then the server ran the migrator before restarting the app
-    And the running staging app image carries the new commit SHA as its revision label
-    And the app container is healthy
+  @story-5.1.7 @ci-contract
+  Scenario: The isolation check guards the public repo
+    Given the workflow "ci.yml"
+    Then it has a job "isolation" that fails when the secret "ISOLATION_DENYLIST" is missing
 
   # ── Story 5.1.8: production promotion ─────────────────────────────────────
   @story-5.1.8 @ci-contract

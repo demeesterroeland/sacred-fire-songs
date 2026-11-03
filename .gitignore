@@ -85,3 +85,6 @@ e2e/performance-results/
 # python bytecode
 __pycache__/
 *.pyc
+
+# graphify output is local-only (built on docs; never commit it)
+graphify-out/

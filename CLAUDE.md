@@ -1,65 +1,12 @@
-# Sacred Fire Songs – Project Instructions
+@AGENTS.md
 
-## Branch Protection (CRITICAL)
+# Claude Code specifics
 
-You are **STRICTLY FORBIDDEN** from committing directly to `main` or `master`.
+`AGENTS.md` (imported above) is the canonical instruction file for all agents. Put shared rules there, not here.
 
-- For **every** change (including typos and one-liners), create a branch: `feat/…`, `fix/…`, `chore/…`, or `docs/…`
-- `main` is updated **only** via merges from verified feature branches.
-- No exceptions. If the user says "just fix it quickly", still branch first, then ask to merge.
-
-## Documentation Sync Policy
-
-All project artifacts must stay 100% synchronized with the codebase.
-
-- Every code change must be reflected in `application-analysis&design.md`.
-- Before completing a task, verify the implementation against acceptance criteria in `epic&user stories.md`.
-- If a UI screen is modified, compare against the visual description in `docs/design/screens/screen*.html` mockups.
-- Propose specific edits to inconsistent files as soon as discrepancies are found.
-- Update version status in `application-analysis&design.md` and related docs if significant changes are made.
-- **Definition of Done**: A task is not "Done" until documentation, tests, and code are in 100% alignment.
-
-## Artifact Synchronization Policy
-
-The agent does NOT retain memory across conversations. To avoid data loss:
-
-| Artifact | Strategy |
-| :--- | :--- |
-| `master-walkthrough.md` | **APPEND** only – safe |
-| `master-tasks.md` | **READ first**, then append/merge |
-| `master-timetracking.md` | **READ first**, then update totals |
-
-Implementation plans live in `docs/plans/YYYY-MM-DD-<feature>.md`.
-
-- At the start of a session, **READ** files in `docs/logbook/` to initialize context.
+- The isolation guard runs as a `PreToolUse` hook (`.claude/settings.json`) on Write/Edit inside this repo and on outward Bash commands (commit, push, `gh pr/issue/release/api`). If it blocks, do not work around it.
 - Run `/sync-artifacts` at the end of a session (before creating a PR or merging).
-- Never overwrite any of those files with an empty or partial list.
-
-## Glob-Triggered Rules
-
-### When modifying `docs/**/*.{md,sql,html}`
-1. Increment the version number in the file header.
-2. Update the date to today.
-3. Add a new changelog entry.
-4. Use the `/update-doc-changelog` command for consistency.
-
-### When modifying `supabase/migrations/*.sql`
-1. Update `docs/design/db-schema.sql` to reflect the changes.
-2. Use the `/update-schema` command if helpful.
-3. Keep `docs/design/db-schema.sql` valid as a single-file fresh-install setup script.
-
-## Supabase Patterns
-
-- Use `.maybeSingle()` (not `.single()`) when a row may not exist — `.single()` returns 406 if zero rows match.
-- Server-side queries belong in `lib/*/serverQueries.ts`; import `createClient` from `@/lib/supabase/server`.
-- Only import server queries from Server Components or Server Actions (never from client components).
-
-## Testing
-
-- Test runner: **vitest** — run with `npx vitest run <file>` (not Jest). `npm test` runs all unit tests.
-- Unit tests live in **one** tree: `testing/unit/tests/` (Vitest only collects that folder; `lib/unit-tests/` is gone). Playwright specs live in `e2e/` and never run under Vitest.
-- BDD: `npm run test:bdd:unit` (no database), `npm run test:bdd:seed` (local Supabase). Gitflow pipeline contracts: `npm run test:bdd:ci` / `test:bdd:ci-gate`, bats via `npm run test:scripts`.
-- CI (`.github/workflows/ci.yml`) runs `lint`, `typecheck`, `unit`, `bdd`, `build`, `pipeline` on every push and PR. `pr-lint.yml` (`pr-policy`) checks every PR into `develop`/`main`: Conventional Commit title and Gitflow head → base (work branches → `develop`; `develop`/`hotfix/*` → `main`). Branch rulesets live in `.github/rulesets/*.json`. `npm run lint` caps warnings (`--max-warnings`); never raise the cap, lower it when you remove warnings.
+- Use `/update-doc-changelog` when modifying `docs/**`, `/update-schema` after a migration.
 
 ## Available Custom Commands
 
