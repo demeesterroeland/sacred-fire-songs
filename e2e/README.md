@@ -63,7 +63,7 @@ implemented.
 ## CI
 
 `.github/workflows/e2e.yml` runs the `@smoke` subset against the **staging**
-Supabase project on every push to `main` / `feat|fix|chore/**`. It derives the
+Supabase project on every push to `main` / `develop` and on PRs into them. It derives the
 staging URL from the project ref and reads the (public) anon key from a secret:
 
 - `SUPABASE_PROJECT_ID_STAGING` — staging project ref (URL = `https://<ref>.supabase.co`)
@@ -71,7 +71,7 @@ staging URL from the project ref and reads the (public) anon key from a secret:
 - `E2E_TEST_PASSWORD` — password for the seeded E2E accounts on staging
 - `SUPABASE_URL_STAGING` — _optional_ full URL override
 
-> ⚠️ Staging must contain the seeded test accounts. `deploy-db.yml` pushes
-> migrations to staging but **not** seed data (`supabase/seeds/*.sql`), so seed
-> those accounts on staging once, or `auth.setup.ts` will fail. Keep CI specs
+> ⚠️ Staging must contain the E2E test accounts from `fixtures/roles.ts`
+> (seed data in `supabase/seeds/*.sql`), or `auth.setup.ts` will fail. Without
+> these secrets (e.g. in forks) the job skips its steps and still passes. Keep CI specs
 > read-only — branches share one staging DB.

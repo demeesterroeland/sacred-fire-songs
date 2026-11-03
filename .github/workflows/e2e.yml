@@ -13,10 +13,10 @@ name: E2E (Playwright)
 # Optional:
 #   SUPABASE_URL_STAGING               - full staging URL; overrides the derived https://<ref>.supabase.co
 #
-# NOTE: staging must contain the seeded test accounts (roel.de.meester+{admin,
-# musician,member}@gmail.com) for the per-role auth setup to succeed. Migrations
-# are pushed to staging by deploy-db.yml, but seed data (supabase/seeds/*.sql) is
-# NOT — seed those accounts on staging once, or auth.setup will fail.
+# NOTE: the staging project must contain the E2E test accounts from
+# e2e/fixtures/roles.ts (seeded via supabase/seeds/*.sql) for the per-role auth
+# setup to succeed. Applying migrations and seeds to staging is up to whoever
+# runs it; this repo does not deploy anywhere.
 
 on:
   workflow_dispatch:
