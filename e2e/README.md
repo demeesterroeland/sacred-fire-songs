@@ -49,6 +49,18 @@ The config builds a **production** bundle (`next build && next start`) and runs
 against it, so timing and bundling match reality. To test an already-running
 server, set `E2E_BASE_URL`.
 
+Notes:
+
+- **Database**: the global setup empties and reseeds the local database
+  (`scripts/db/setup-test-db.mjs`). Set `E2E_REUSE_DB=1` to skip that.
+  Specs that seed data directly use `DATABASE_URL`; against a local Supabase
+  stack it defaults to `postgresql://postgres:postgres@127.0.0.1:54322/postgres`.
+- **Headed specs**: tests tagged `@headed` in their title (audio recording,
+  media focus) run only in the `*-headed` projects and open a real browser
+  window. `E2E_FORCE_HEADLESS=1` runs them headless (CI always does).
+- **`Executable doesn't exist at .../ffmpeg-linux`**: after a Playwright
+  upgrade, run `npx playwright install ffmpeg` (needed for video recording).
+
 ## Roles
 
 `auth.setup.ts` signs in the seeded `admin`, `musician`, and `member` accounts
