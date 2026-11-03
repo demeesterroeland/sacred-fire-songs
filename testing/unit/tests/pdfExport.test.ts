@@ -238,7 +238,7 @@ describe('PDF Export - TDD Suite', () => {
         it('renders 3-part footer with song URL, playlist title, and page numbers', async () => {
             const playlist: ExportPlaylistData = {
                 title: 'Ceremony Setlist',
-                baseUrl: 'https://songbook.bluette.be',
+                baseUrl: 'https://prod.example.com',
                 songs: [
                     {
                         title: 'Agua De Estrellas',
@@ -256,7 +256,7 @@ describe('PDF Export - TDD Suite', () => {
         it('renders complex Unicode accents (coraźon, mães, sanskrit) into PDF without errors', async () => {
             const playlist: ExportPlaylistData = {
                 title: 'Festival das Águas & Cura',
-                baseUrl: 'https://songbook.bluette.be',
+                baseUrl: 'https://prod.example.com',
                 songs: [
                     {
                         title: 'Agua De Estrellas',

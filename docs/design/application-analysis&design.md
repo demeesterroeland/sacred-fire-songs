@@ -1,8 +1,8 @@
 # Project Analysis & Design Document: Song Sharing Application (Sacred Fire Songs)
 
-**Version:** 1.51
+**Version:** 1.52
 **Status:** Living Document
-**Date:** Oct 31, 2026
+**Date:** Nov 3, 2026
 
 ## Changelog
 
@@ -42,8 +42,9 @@
 | **1.47** | Oct 31, 2026 | §6.6: CI quality gate `ci.yml` (lint ratchet, typecheck, unit, BDD @unit, build, pipeline job), single unit-test tree `testing/unit/tests/`, SHA-pinned actions, Dependabot (Epic 5.1 Phase 1, #282). |
 | **1.48** | Oct 31, 2026 | Reorganized `scripts/` into `scripts/cicd/`, `scripts/db/` and `scripts/dev/` (#274), moved the story-sync scripts from `.claude/scripts/` to `scripts/cicd/`, added `scripts/README.md` and `testing/scripts/scripts-layout.bats`; updated §6.3 and §6.6 paths. |
 | **1.49** | Oct 31, 2026 | §6.6: PR policy (`pr-lint.yml`, `scripts/cicd/lib/prPolicy.mjs`), branch rulesets as code (`.github/rulesets/`), `start-issue.sh` input validation, `dev2preview.sh --dry-run` (Epic 5.1 Phase 2, #283). |
-| **1.50** | Oct 31, 2026 | §6.6: staging continuous deployment from `develop` (`docker.yml` develop images, no `:latest`; `deploy-staging.yml` → SSH forced command `deploy-songbook-staging.sh` in cloud-infra) (Epic 5.1 Phase 3, #284). |
+| **1.50** | Oct 31, 2026 | §6.6: staging continuous deployment from `develop` (`docker.yml` develop images, no `:latest`; `deploy-staging.yml` → SSH forced command `<server-deploy-script>` in <infra-repo>) (Epic 5.1 Phase 3, #284). |
 | **1.51** | Oct 31, 2026 | Added §6.7 Client Auth State (#321): `useAuth()` without a server user starts with `loading = true` until the session resolves (`initialUser` `undefined` = unknown, `null` = server-confirmed guest); `/library/playlists/add` guards auth on the server (`redirect('/auth/login?next=/library/playlists/add')`) with the form in `components/playlists/CreatePlaylistForm.tsx`. Fixes logged-in users being redirected to `/` from "New Playlist". Lint cap lowered to 181. |
+| **1.52** | Nov 3, 2026 | Public-repo isolation: removed `deploy-staging.yml` (deployment is out of scope for this public repo; CI only publishes images to GHCR), added `isolation` CI job + `scripts/dev/isolation-guard.sh` (pre-commit, commit-msg, Claude Code hook), `performance.yml` takes its target from input/`PERF_BASE_URL`. Root `AGENTS.md` is now the canonical agent instruction file (`CLAUDE.md` imports it, `GEMINI.md` symlinks it). |
 
 
 ## 1. Introduction
@@ -199,7 +200,8 @@ The application is a **Progressive Web App (PWA)** optimized for mobile use duri
 * **PR policy (`.github/workflows/pr-lint.yml`, check `pr-policy`):** runs `scripts/cicd/lib/prPolicy.mjs` on PRs into `develop`/`main`. Title must be a Conventional Commit (Release Please input); head → base must follow Gitflow (work branches/Dependabot/back-merge `main` → `develop`; `develop`/`hotfix/*`/Release Please → `main`). PR data reaches the script only through `env:` (no script injection).
 * **Branch rulesets as code (`.github/rulesets/main.json`, `develop.json`):** deletion + force-push blocked, PR with resolved threads, no bypass actors, required checks = all `ci.yml` jobs + `pr-policy` + `e2e`; `main` and `develop` allow merge + squash (merge commits for promotion and back-merge), never rebase. `testing/unit/tests/ci/rulesets.test.ts` keeps the required checks in sync with the workflow job ids; applied with `gh api … --input`.
 * **Scripts under test (bats):** `start-issue.sh` (type/issue validation, base branches), `dev2preview.sh --dry-run` (image names like `docker/metadata-action`: runs of invalid characters → `-`, case kept), scripts layout; a skipped test guards against `gh pr merge --admin` until plan task 4.7.
-* **Staging CD (`.github/workflows/deploy-staging.yml`):** a successful `docker.yml` run on `develop` (images `sacred-fire-songs-app` / `-migrator` tagged `:develop` + short SHA; `:latest` is no longer produced anywhere) triggers a deploy in the `Staging` environment. The runner connects with a pinned host key and a key that the VPS locks to `restrict,command="…/deploy-songbook-staging.sh"` (cloud-infra), and sends only `deploy develop <sha>`. The script pulls the images, runs the migrator (self-hosted staging Supabase, no `supabase db push` from CI), restarts the app, waits for the health check and verifies the image's `org.opencontainers.image.revision` label. Staging is Tailscale-only, so all health checks run on the server.
+* **Images, not deployments:** `docker.yml` publishes `sacred-fire-songs-app` / `-migrator` to GHCR (`develop` → `:develop` + short SHA; `main` → short SHA; `v*` tags → semver; no `:latest`). Deploying those images is up to each self-hoster and is deliberately not part of this public repo: there are no deploy workflows, SSH keys or GitHub Environments here.
+* **Public-repo isolation (`isolation` job, `scripts/dev/isolation-guard.sh`):** scans every tracked file against a denylist that is kept outside the repo (CI secret `ISOLATION_DENYLIST`, locally `~/.config/sfs/denylist`) and fails closed when the list is missing. The same script runs as `.githooks/pre-commit` (staged diff), `.githooks/commit-msg` and as a Claude Code `PreToolUse` hook.
 * **Single unit-test tree:** Vitest only collects `testing/unit/tests/**/*.test.{ts,tsx,mjs}`; Playwright specs live in `e2e/`.
 * **Supply chain:** every third-party action is pinned to a commit SHA (version in a trailing comment), every workflow declares top-level `permissions`, `.github/dependabot.yml` updates `github-actions` and `npm` weekly against `develop`.
 

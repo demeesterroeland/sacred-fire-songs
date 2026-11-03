@@ -80,7 +80,7 @@
 | **July 15, 2026 (Part 2)** | **Public Playlist Curation (Story 3.4.6)** | Implement RLS policies, update server actions, adjust client-side detail page/picker visibility, seed gatekeeper role, and write E2E integration tests | ~1.5 Hours | ✅ Completed |
 | **July 16, 2026** | **Song Reorganization & Production DB Sync**: Moved extracted songbooks to `data/extracted_songs/`, created `prod_songs_2_pdf.py` to sync all Production DB songs locally as `.cho` files and compile the PDF, configured `.gitignore` to ignore the synced database directory and generated PDFs, and created `compile_songbook.py` script utilizing the local `chordpro` CLI tool to generate PDF songbooks. | ~1.25 Hours | ✅ Completed |
 | **July 26, 2026** | **UX/Architecture**: Streamline Tag UX & Universal TagPill Architecture (#210) — Created universal `<TagPill />` and `useTaxonomy()`, refactored `/edit`, `/add`, search popup, Song Detail, and Homepage category cards, enforced gray language theme, repositioned `Languages` block, and added cached tag song counts. | ~3.0 Hours | ✅ Completed |
-| **July 27, 2026** | **Release/Ops**: Release v1.2.0 (#209, #212), Hetzner VPS Deployment (`songbook.bluette.be`), Cloud ➔ VPS Live DB Sync (252 songs & 12 users 100% parity), Security Audit (`.env.production`), `backup-secrets.sh` Vaultwarden Guard (`ubuntu-8gb-nbg1-1`), 67-Endpoint Performance Framework, 10-Min ISR Caching (#210, PRs #213, #214), and Automated HTML Benchmark Reporting (#215). | ~3.5 Hours | ✅ Completed |
+| **July 27, 2026** | **Release/Ops**: Release v1.2.0 (#209, #212), VPS Deployment (`prod.example.com`), Cloud ➔ VPS Live DB Sync (252 songs & 12 users 100% parity), Security Audit (`.env.production`), `backup-secrets.sh` Vaultwarden Guard (`ubuntu-8gb-nbg1-1`), 67-Endpoint Performance Framework, 10-Min ISR Caching (#210, PRs #213, #214), and Automated HTML Benchmark Reporting (#215). | ~3.5 Hours | ✅ Completed |
 | **August 14, 2026** | **Feature/UX**: Multi-Artist Tagging (#195, #228), `<BasePill>` Architecture Refactoring, Interactive Filter Links & Tooltips, Delete Button Relocation, Draft Empty State & Guest Flow Improvements, Toast Action Links, and Issue #229 Creation. | ~2.5 Hours | ✅ Completed |
 | **September 26, 2026** | **Bug Fix/UX**: Rehearsal Playback & SongCard Hydration Fix (#230, PR #236) — Fixed SongCard nested link hydration error, handled missing storage audio gracefully with badges/tooltips, added download recording button, and expanded E2E suite coverage | ~3.0 Hours | ✅ Completed |
 
@@ -109,14 +109,15 @@
 
 | **October 30, 2026 (Part 10)** | **CI-CD/Testing (#287)**: Gitflow Phase 0 harness — workflow contract helper, Vitest contract tests, Cucumber `ci` profile, bats tests for `start-issue.sh`, lint/typecheck scripts and baseline. | ~1.0 Hours | ✅ Completed |
 
-| **October 31, 2026** | **CI-CD (#282)**: Gitflow Phase 1 — `ci.yml` quality gate, lint ratchet, single unit-test tree, SHA-pinned actions, Dependabot; E2E Supabase stack drafted in cloud-infra #106 (deferred). | ~2.5 Hours | ✅ Completed |
+| **October 31, 2026** | **CI-CD (#282)**: Gitflow Phase 1 — `ci.yml` quality gate, lint ratchet, single unit-test tree, SHA-pinned actions, Dependabot; E2E Supabase stack drafted in <infra-repo> #106 (deferred). | ~2.5 Hours | ✅ Completed |
 
 | **October 31, 2026 (Part 2)** | **Chore/Scripts (#274)**: `scripts/` reorganized into `cicd/`, `db/`, `dev/` with `scripts/README.md`, story-sync scripts moved out of `.claude/scripts/`, all references and the CI shellcheck glob updated, layout contract in bats. | ~1.0 Hours | ✅ Completed |
 
 | **October 31, 2026 (Part 2)** | **CI-CD (#283)**: Gitflow Phase 2 — PR policy check (`pr-lint.yml`), rulesets as code, `start-issue.sh` validation, `dev2preview.sh` image names + dry run; recovered #317 via #318. | ~1.5 Hours | ✅ Completed |
 
-| **October 31, 2026 (Part 3)** | **CI-CD (#284)**: Gitflow Phase 3 — develop images, `deploy-staging.yml`, restricted SSH deploy script + compose sync (cloud-infra #107). | ~1.5 Hours | ✅ Completed |
+| **October 31, 2026 (Part 3)** | **CI-CD (#284)**: Gitflow Phase 3 — develop images, `deploy-staging.yml`, restricted SSH deploy script + compose sync (<infra-repo> #107). | ~1.5 Hours | ✅ Completed |
 
 | **October 31, 2026 (Part 4)** | **Bug (#321)**: "New Playlist" redirected logged-in users to `/` — `useAuth` initial `loading` when no server user, server-side guard on `/library/playlists/add`, unit + e2e regression tests. | ~0.75 Hours | ✅ Completed |
 
-| **Total** | **Development + AI Collaboration** | **~198.0 Hours** | |
+| **November 3, 2026** | **Security / Ops**: public-repo isolation — scan, removal of deploy workflow and deployment names, isolation guard (hooks + CI), canonical `AGENTS.md`. | ~2.0 Hours | ✅ Completed |
+| **Total** | **Development + AI Collaboration** | **~200.0 Hours** | |

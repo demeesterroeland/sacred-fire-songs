@@ -166,7 +166,7 @@
 
 ### 📖 Documentation
 
-* **infra:** remove environment and deployment docs from engine repo (moved to cloud-infra) ([9d344e2](https://github.com/demeesterroel/sacred-fire-songs/commit/9d344e2d46bfd71c9345d4e034344cb4111d278a))
+* **infra:** remove environment and deployment docs from engine repo (moved to <infra-repo>) ([9d344e2](https://github.com/demeesterroel/sacred-fire-songs/commit/9d344e2d46bfd71c9345d4e034344cb4111d278a))
 * **logbook:** sync session walkthrough for July 20 VPS migration & release v1.0.0 ([598d353](https://github.com/demeesterroel/sacred-fire-songs/commit/598d35313efd13b56c9efb1005bad2b27e482277))
 * **release:** sanitize v1.0.0 release notes and changelog ([130692c](https://github.com/demeesterroel/sacred-fire-songs/commit/130692c100325698a385016a8f4b2e9f80db5fce))
 * **security:** sanitize all logbook walkthroughs, task files, agent rules, and configs to remove private deployment info ([8313923](https://github.com/demeesterroel/sacred-fire-songs/commit/8313923f5df2b60fec53490705582726229c8130))

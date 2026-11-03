@@ -2271,19 +2271,19 @@ Successfully implemented a dedicated `artist` filter parameter (`?artist=Name`) 
 ## Session Update (Jun 23, 2026 — Part 2 — Database Migration to Tailscale & PR #163 Merge)
 
 ### 1. Exposed Supabase API on Tailscale Private IP
-- Configured Kong gateway in `/opt/dockge/stacks/supabase/docker-compose.yaml` to publish container port 8000 on the Tailscale interface, disabling public routing.
-- Set `SITE_URL` and `API_EXTERNAL_URL` inside `/opt/dockge/stacks/supabase/.env` to the private Tailscale database URL.
+- Configured Kong gateway in `<stacks-dir>/stacks/supabase/docker-compose.yaml` to publish container port 8000 on the Tailscale interface, disabling public routing.
+- Set `SITE_URL` and `API_EXTERNAL_URL` inside `<stacks-dir>/stacks/supabase/.env` to the private Tailscale database URL.
 - Cleaned up Traefik routing in the `supabase` stack by setting `traefik.enable=false` and removing public `Host` rules for unused domains on the HTTPS entrypoint. This avoids Let's Encrypt renewal warnings for unused domains.
 - Restarted `supabase` stack to apply configuration changes.
 
 ### 2. Configured and Rebuilt Songbook Stack
-- Updated `NEXT_PUBLIC_SUPABASE_URL` to the private database URL in `/opt/dockge/stacks/songbook/.env`.
+- Updated `NEXT_PUBLIC_SUPABASE_URL` to the private database URL in `<stacks-dir>/stacks/songbook/.env`.
 - Rebuilt the Next.js `songbook` Docker container without cache to bake in the new private database endpoint.
 - Troubleshot Traefik's dynamic router initialization by restarting the `traefik` proxy container.
 
 ### 3. Eliminated Stale References
 - Replaced all references to legacy domains on the server to point to the private database URL in `admin-dashboard/html/index.html` (description changed to Private API) and stack env files.
-- Staged, committed, and clean-aligned `/opt/dockge` Git repository on the VPS.
+- Staged, committed, and clean-aligned `<stacks-dir>` Git repository on the VPS.
 
 ### 4. Merged E2E Foundation PR #163
 - Merged the Playwright Phase 0 E2E test foundation PR after verifying checks passed.
@@ -2325,7 +2325,7 @@ Successfully implemented a dedicated `artist` filter parameter (`?artist=Name`) 
 - Updated `stacks/admin-dashboard/html/index.html` to split the old unified Supabase Studio card into two separate Tailscale cards: Supabase Studio (Staging) pointing to `:4002` and Supabase Studio (Dev) pointing to `:3002`.
 
 ### 5. VPS Configuration & Rebuild
-- Updated VPS \`/opt/dockge/stacks/songbook/.env\` to configure \`NEXT_PUBLIC_SUPABASE_URL\` using the internal Docker hostname \`http://supabase-beta-kong:8000\`.
+- Updated VPS \`<stacks-dir>/stacks/songbook/.env\` to configure \`NEXT_PUBLIC_SUPABASE_URL\` using the internal Docker hostname \`http://supabase-beta-kong:8000\`.
 - Checked out the repository at the absolute URL fix commit and successfully rebuilt/started the \`songbook\` stack, which is now fully healthy and querying staging data.
 
 ## Session Update (Jun 23, 2026 — Part 5 — E2E Programmatic Random Seeder & DB Privileges Repair)
@@ -2603,7 +2603,7 @@ This session addressed a critical bug where slow Supabase Auth calls (due to Tai
 - Reduced menu button padding from `p-2` to `p-1.5` (8px → 6px).
 
 ### 4. Merge & Production Deploy
-- Merged PR #186 (sacred-fire-songs) and PR #8 (songbook-rocks) to main.
+- Merged PR #186 (sacred-fire-songs) and PR #8 (<parent-project>) to main.
 - Resolved `.gitmodules` merge conflict (kept `branch = main`).
 - Verified Vercel production deploy completed successfully.
 - Closed issue #185.
@@ -2625,11 +2625,11 @@ This session addressed a critical bug where slow Supabase Auth calls (due to Tai
 - Added a fallback placeholder for `supabaseUrl` in [next.config.ts](file:///home/roeland/projects/sacred-fire-songs/next.config.ts) to prevent empty environments from breaking compilation during production builds.
 
 ### 4. Vercel Preview Deployments
-- Created `vercel.json` in `songbook-rocks` root with custom build command configurations.
+- Created `vercel.json` in `<parent-project>` root with custom build command configurations.
 - Allows Vercel preview environments to invoke the custom `vercel-prepare.sh` script to check out submodules correctly.
 
 ### 5. Git Submodule Tracking Alignment & Clean Up
-- Audited all branches of `songbook-rocks` and configured `.gitmodules` to align submodule branches with parent branch names.
+- Audited all branches of `<parent-project>` and configured `.gitmodules` to align submodule branches with parent branch names.
 - Cleaned up obsolete branches (`feat/private-rehearsal` and `chore/agent-rules`) in both repositories.
 
 ## July 14, 2026 (Media Player UX & E2E Test Lint Fixes)
@@ -2640,7 +2640,7 @@ This session addressed a critical bug where slow Supabase Auth calls (due to Tai
 - Replaced `// @ts-ignore` with `// @ts-expect-error - overriding window.Blob for testing` to satisfy ESLint documentation requirements.
 
 ### 2. Parent Repository Sync
-- Pinned the `engine` submodule in `songbook-rocks` to the latest commit and pushed to `feat/issue-187-media-player-ux` to trigger the Vercel preview deployment.
+- Pinned the `engine` submodule in `<parent-project>` to the latest commit and pushed to `feat/issue-187-media-player-ux` to trigger the Vercel preview deployment.
 
 ## July 14, 2026 (Mobile UI Overflow Fixes for Issue #188)
 
@@ -2709,7 +2709,7 @@ This session addressed a critical bug where slow Supabase Auth calls (due to Tai
 
 ### 2. Infrastructure Realignment
 - Renamed Supabase database stacks: `stacks/supabase-prod` (`_PROD` DB) and `stacks/supabase-preview` (`_PREVIEW` DB).
-- Standardized application stacks: `stacks/songbook-prod` and `stacks/songbook-preview`.
+- Standardized application stacks: `stacks/<prod-stack>` and `stacks/<staging-stack>`.
 - Restored database dataset from Supabase Cloud pooler to self-hosted database stack (14 auth users, 238 compositions, 238 song versions, 11 setlists).
 - Fixed Kong API Gateway credentials mapping (`kong-runtime.yml`) and Traefik router rules.
 - Secured preview subdomains with Traefik `tailscale-only@docker` middleware restricting access to private VPN.
@@ -2738,8 +2738,8 @@ This session addressed a critical bug where slow Supabase Auth calls (due to Tai
 
 ### 3. Release v1.0.1 & VPS Deployment
 - Merged Release Please PR #204, generating changelog and publishing release tag **`v1.0.1`** on GitHub.
-- Deployed latest container image `ghcr.io/demeesterroel/sacred-fire-songs:latest` (`v1.0.1`) to Hetzner VPS (`songbook-prod` stack) at `https://songbook.bluette.be`.
-- Updated `engine` submodule pointer in `songbook-rocks` repository to trigger automatic Vercel production build for `https://app.songbook.rocks`.
+- Deployed latest container image `ghcr.io/demeesterroel/sacred-fire-songs:latest` (`v1.0.1`) to VPS (`<prod-stack>` stack) at `https://prod.example.com`.
+- Updated `engine` submodule pointer in `<parent-project>` repository to trigger automatic Vercel production build for `https://app.example.com`.
 
 ---
 
@@ -2759,7 +2759,7 @@ This session addressed a critical bug where slow Supabase Auth calls (due to Tai
 - Added 0ms cached category song count calculation (`song_count`) to `getAvailableCategories()` and `fetchCategoryTree()`, displaying song count badges on filter tag pills.
 
 ### 3. Vercel Preview & Main Branch Deployment
-- Merged `feat/210-streamline-tag-ux` into `main` on both `sacred-fire-songs` and `songbook-rocks`.
+- Merged `feat/210-streamline-tag-ux` into `main` on both `sacred-fire-songs` and `<parent-project>`.
 - Cleaned up local and remote feature tracking branches.
 
 ---
@@ -2768,25 +2768,25 @@ This session addressed a critical bug where slow Supabase Auth calls (due to Tai
 
 ### 1. Release v1.2.0 & Production Deployments (#209, #210, #212)
 - Merged Release Please PR #212, publishing release tag **`v1.2.0`** and updating `CHANGELOG.md`.
-- Deployed latest container image `ghcr.io/demeesterroel/sacred-fire-songs:latest` (`v1.2.0`) to Hetzner VPS (`songbook-prod` at `https://songbook.bluette.be`).
-- Updated `engine` submodule pointer in `songbook-rocks` to `v1.2.0` (`524f069`), triggering automatic Vercel production build for `https://app.songbook.rocks`.
+- Deployed latest container image `ghcr.io/demeesterroel/sacred-fire-songs:latest` (`v1.2.0`) to VPS (`<prod-stack>` at `https://prod.example.com`).
+- Updated `engine` submodule pointer in `<parent-project>` to `v1.2.0` (`524f069`), triggering automatic Vercel production build for `https://app.example.com`.
 
 ### 2. Live Database Synchronization (Cloud ➔ VPS)
-- Audited live dataset diffs between Supabase Cloud (`app.songbook.rocks`) and VPS `supabase-prod-db`. Identified 14 new songs (created by `gnatiuc.snejana@gmail.com`), 2 new registered users, and 2 new setlists.
+- Audited live dataset diffs between Supabase Cloud (`app.example.com`) and VPS `supabase-prod-db`. Identified 14 new songs (created by `gnatiuc.snejana@gmail.com`), 2 new registered users, and 2 new setlists.
 - Streamed live database sync from Supabase Cloud directly into VPS `supabase-prod-db` Docker container with `session_replication_role = 'replica'`. Verified 100% data parity (252 songs, 12 users, 12 setlists, 52 categories).
 
 ### 3. Security Audit & Vaultwarden Backup Enhancements (#104)
-- Removed hardcoded Supabase Cloud connection strings from `songbook-rocks/scripts/test-inspect-song-details.mjs` and `test-check-production-songs.mjs`, moving secrets to git-ignored `.env.production`.
+- Removed hardcoded Supabase Cloud connection strings from `<parent-project>/scripts/test-inspect-song-details.mjs` and `test-check-production-songs.mjs`, moving secrets to git-ignored `.env.production`.
 - Enhanced `stacks/scripts/backup-secrets.sh` with 3-phase diff comparison, colorized line diffs, interactive `[y/N]` validation confirmation, and an explicit VPS hostname check (`ubuntu-8gb-nbg1-1`).
 
 ### 4. Comprehensive Performance Framework, 10-Minute ISR & Automated HTML Reports (#210 & PRs #213, #214, #215)
 - Executed multi-category performance benchmark suite across 67 endpoints (25 Random Songs, 10 Media Songs with YT/SoundCloud, 5 Longest Lyrics Songs, 10 Latest Songs, Public Playlist Page, and 16 Playlist Songs).
-- Verified Hetzner VPS is **2x to 4.8x FASTER** for database-driven pages (Song Detail TTFB: 93 ms on VPS vs 258 ms on Vercel; Song Library TTFB: 130 ms on VPS vs 286 ms on Vercel).
+- Verified VPS is **2x to 4.8x FASTER** for database-driven pages (Song Detail TTFB: 93 ms on VPS vs 258 ms on Vercel; Song Library TTFB: 130 ms on VPS vs 286 ms on Vercel).
 - Configured 10-minute (600s) Incremental Static Regeneration (ISR) on `app/page.tsx` and `app/songs/page.tsx` (`export const revalidate = 600;`), and added Traefik Cache-Control headers (`max-age=600`).
 - Created configurable test fixtures ([`testing/performance/benchmark-song-fixtures.json`](file:///home/roeland/projects/sacred-fire-songs/testing/performance/benchmark-song-fixtures.json)) and single CLI runner script (`./run-performance-benchmark.sh` or `npm run test:perf`).
 - Created automated HTML benchmark report generator ([`testing/performance/scripts/generate-html-report.mjs`](file:///home/roeland/projects/sacred-fire-songs/testing/performance/scripts/generate-html-report.mjs)), compiling responsive dark-mode HTML reports at [`testing/performance/reports/index.html`](file:///home/roeland/projects/sacred-fire-songs/testing/performance/reports/index.html).
 - Persisted timestamped historical JSON reports in `testing/performance/reports/`.
-- Merged feature PRs #213, #214, and #215 per the Verification Rule and updated `songbook-rocks` engine submodule pointers accordingly.
+- Merged feature PRs #213, #214, and #215 per the Verification Rule and updated `<parent-project>` engine submodule pointers accordingly.
 
 ---
 
@@ -2895,7 +2895,7 @@ Refactored the Rehearsal Drawer and Mini-Player to create a seamless, unified pl
 **Final Touches for v1.6.0 Release**
 - **Recording Metadata (#251)**: Enhanced the Rehearsal Drawer to precisely extract and display `duration_seconds` (formatted as `mm:ss`) and file size (`MB`) for user recordings.
 - **Hardware Pop Fix (#242)**: Eliminated the loud initial static crackle in the Web Audio API by rendering a 3-second visual countdown (`3... 2... 1...`) to warm up the microphone stream before recording actually begins.
-- **Preview & Pipeline Stability (#253 & #254)**: Resolved deployment pipeline issues for the Preview environment. Renamed the frontend container image to `sacred-fire-songs-app` to prevent naming collisions with the `sacred-fire-songs-migrator` on the Dockge host. Stripped `build:` contexts from `docker-compose.yml` to force strict registry pulling.
+- **Preview & Pipeline Stability (#253 & #254)**: Resolved deployment pipeline issues for the Preview environment. Renamed the frontend container image to `sacred-fire-songs-app` to prevent naming collisions with the `sacred-fire-songs-migrator` on the <stack-manager> host. Stripped `build:` contexts from `docker-compose.yml` to force strict registry pulling.
 - **Gitignore Migration Bug (#251)**: Investigated and fixed a silent bug where `.gitignore` was swallowing new Supabase `.sql` migration files due to a wildcard `*.sql` rule, breaking the database migrator workflow.
 
 ## October 8-9, 2026: Epic 3.6 Administrative Management & Story 3.6.1 (User Overview & Contributions)
@@ -3063,8 +3063,8 @@ Added the fast layers of the test pyramid as required-check candidates and clean
 - **Lint ratchet**: `no-explicit-any` → warning, `eslint . --max-warnings 182`; nine intentional patterns (sync `setState` in effects, mutated `<audio>` state, CommonJS `require`) got targeted `eslint-disable-next-line … -- reason` instead of behaviour-changing refactors.
 - **Tests**: `lib/unit-tests/` duplicates differed only in import paths → one tree `testing/unit/tests/`; Vitest `include` stops it from loading Playwright specs; PDF feature wired with pending stubs (undefined steps fail even when non-strict).
 - **Supply chain**: SHA-pinned actions, top-level `permissions`, Dependabot; actionlint/shellcheck run from digest-pinned images.
-- **E2E investigation**: both cloud Supabase projects are paused (why `e2e` was a false green). Owner chose a self-hosted E2E stack: cloud-infra PR #106 (`stacks/songbook-e2e`, Tailscale-only Kong :5003 / Postgres :54324, `init-env.sh` generates secrets on the VPS). Tailscale policy advice: the default `* → *` grant must be narrowed or `tag:ci` gets full tailnet access. Then deferred.
-- **Findings**: `tsconfig.json` excludes `testing/`/`e2e/`; preview server compose drifted from cloud-infra git (`…-app:preview`).
+- **E2E investigation**: both cloud Supabase projects are paused (why `e2e` was a false green). Owner chose a self-hosted E2E stack: <infra-repo> PR #106 (`stacks/songbook-e2e`, Tailscale-only Kong :5003 / Postgres :54324, `init-env.sh` generates secrets on the VPS). Tailscale policy advice: the default `* → *` grant must be narrowed or `tag:ci` gets full tailnet access. Then deferred.
+- **Findings**: `tsconfig.json` excludes `testing/`/`e2e/`; preview server compose drifted from <infra-repo> git (`…-app:preview`).
 
 ## October 31, 2026 (Part 2) - Reorganize scripts/ into cicd/, db/, dev/ (#274)
 
@@ -3096,9 +3096,9 @@ Make every merge into `develop` land on staging automatically, without giving CI
 
 **Technical Details**
 - **Images**: `docker.yml` now builds on `develop`; `:latest` removed (with `develop` as default branch, `is_default_branch` would have tagged develop images as latest).
-- **Deploy**: `deploy-staging.yml` runs after a successful develop build, in the `Staging` environment, with a pinned known_hosts entry (`StrictHostKeyChecking=yes`, no `ssh-keyscan`). The key is locked on the VPS with `restrict,command="…/deploy-songbook-staging.sh"`, which only accepts `deploy <develop|preview> <40-char sha>` (regex, injection attempts tested) and then: lock → pull → migrator (abort on failure) → `up -d --no-deps app` → wait healthy → revision label == sha.
+- **Deploy**: `deploy-staging.yml` runs after a successful develop build, in the `Staging` environment, with a pinned known_hosts entry (`StrictHostKeyChecking=yes`, no `ssh-keyscan`). The key is locked on the VPS with `restrict,command="…/<server-deploy-script>"`, which only accepts `deploy <develop|preview> <40-char sha>` (regex, injection attempts tested) and then: lock → pull → migrator (abort on failure) → `up -d --no-deps app` → wait healthy → revision label == sha.
 - **Design changes vs. plan**: no `supabase db push` (staging Supabase is self-hosted; the migrator image applies migrations), no runner-side HTTP health check (staging is Tailscale-only).
-- **Drift**: `/opt/dockge` had uncommitted compose changes for preview and prod; cloud-infra #107 commits the running prod state byte-for-byte so `git pull` is clean.
+- **Drift**: `<stacks-dir>` had uncommitted compose changes for preview and prod; <infra-repo> #107 commits the running prod state byte-for-byte so `git pull` is clean.
 - **Deferred**: nightly E2E/k6 against staging (needs runners on the tailnet).
 
 ## October 31, 2026 (Part 4) - Fix: "New Playlist" redirected logged-in users home (#321)
@@ -3112,3 +3112,15 @@ On staging, a logged-in user clicking "New Playlist" (`/library/playlists/add`) 
 - **Page fix**: `/library/playlists/add` is now a Server Component guard (`redirect('/auth/login?next=/library/playlists/add')`), form moved to `components/playlists/CreatePlaylistForm.tsx`.
 - **Tests**: `testing/unit/tests/useAuth.test.ts` (first-render state via `renderToString`, no DOM library needed); `e2e/tests/playlist-add-auth.spec.ts` reproduced the bug (login → `/`) before the fix.
 - **Found, not fixed**: `e2e/tests/auth-hydration.spec.ts` selector `.relative > button.rounded-full` now matches 3 buttons (strict-mode violation); `SongForm` submit-time guest redirect has no `next=`.
+
+## November 3, 2026 - Public-repo isolation and canonical agent instructions
+
+**Task Overview**
+This repository is public open source; the maintainer's own environments are private examples. A scan found deployment details had crept back in (deploy workflow, environment names, server paths in the logbook and plans) even though an isolation rule existed. Root cause: the rule lived in `.agents/AGENTS.md`, a path no AI tool reads, and nothing enforced it.
+
+**Technical Details**
+- **Removed**: `deploy-staging.yml` (this repo now only builds and publishes images), tracked `graphify-out/` (now ignored); ops plans replaced by short stubs. Deployment-specific names in docs, logbook, tests and scripts replaced by placeholders.
+- **`performance.yml`**: target URL comes from the `base_url` input or the `PERF_BASE_URL` repository variable; fails when neither is set. The preview repro spec skips unless `PREVIEW_URL` is set.
+- **Enforcement** (`scripts/dev/isolation-guard.sh`, denylist kept outside the repo): Claude Code `PreToolUse` hook (new text written inside the repo + outward commands), `.githooks/pre-commit` (staged diff), `.githooks/commit-msg`, and the `isolation` CI job (secret `ISOLATION_DENYLIST`, fails closed).
+- **Agent instructions**: root `AGENTS.md` is canonical (read natively by Codex, Copilot, Cursor, OpenCode and others); `CLAUDE.md` imports it with `@AGENTS.md` and keeps only Claude-specific notes; `GEMINI.md` is a symlink.
+- **Story 5.1.7** re-scoped: contract scenarios now assert that `develop` images are published and that no workflow opens SSH or uses a deployment environment.

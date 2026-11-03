@@ -886,12 +886,12 @@
     - [x] Merge PR #113 into main
 
 - [x] **Session — Jun 9, 2026 (Beta Deployment Guide & Vercel-Migration Tracking)**
-    - [x] Author `docs/beta-deployment.md` (beta cutover off Vercel onto Hetzner VPS + staging Supabase)
+    - [x] Author `docs/beta-deployment.md` (beta cutover off Vercel onto VPS + staging Supabase)
     - [x] Update README deployment row to link the beta deployment guide
     - [x] Open PR #147 (docs: add beta deployment guide)
-    - [x] Investigate existing Vercel-migration research (none found; context in cloud-infra)
-    - [x] Create cloud-infra#84 — chore: migrate Songbook prod off Vercel (prod-cutover scope)
-    - [x] Cross-link cloud-infra#34 as blocking dependency
+    - [x] Investigate existing Vercel-migration research (none found; context in <infra-repo>)
+    - [x] Create <infra-repo>#84 — chore: migrate Songbook prod off Vercel (prod-cutover scope)
+    - [x] Cross-link <infra-repo>#34 as blocking dependency
     - [x] Remove stray `issue_draft.md` from main → PR #148
 
 # Task: Implement Dedicated Artist Filtering (#165) & "No Artist" Grouping
@@ -1046,13 +1046,13 @@
 ## Session July 14, 2026 (Search UX Polish, Vercel Fix, Merge & Deploy)
 
 - [x] Diagnose Vercel preview 404: `"framework": null` disables Next.js route/lambda generation
-- [x] Fix `vercel.json`: `"framework": null` → `"framework": "nextjs"` (songbook-rocks)
+- [x] Fix `vercel.json`: `"framework": null` → `"framework": "nextjs"` (<parent-project>)
 - [x] Add Enter key handler to search modal (`SearchFiltersModal.tsx`)
 - [x] Equalize header spacing: menu/search/signin gaps both 8px
 - [x] Reduce menu button padding `p-2` → `p-1.5`
 - [x] Create GitHub issue #188 (UI overflow on <500px screens)
 - [x] Merge PR #186 (sacred-fire-songs) to main
-- [x] Merge PR #8 (songbook-rocks) to main — resolve `.gitmodules` conflict
+- [x] Merge PR #8 (<parent-project>) to main — resolve `.gitmodules` conflict
 - [x] Verify Vercel production deploy completes successfully
 - [x] Close issue #185
 - [x] Clean up feat/issue-185-mobile-search-ux branches (both repos)
@@ -1064,7 +1064,7 @@
 - [x] Implement Header search input focus check safeguard to prevent query reset race conditions in `Header.tsx`
 - [x] Add client-side database query timeout protection in `app/songs/[id]/page.tsx`
 - [x] Resolve Next.js compilation/TypeScript errors by wrapping builders in `Promise.resolve` and adding assertions in `app/songs/[id]/page.tsx`
-- [x] Fix Vercel preview builds by adding `vercel.json` configuration in `songbook-rocks`
+- [x] Fix Vercel preview builds by adding `vercel.json` configuration in `<parent-project>`
 - [x] Align submodule branch tracking across all active branches and delete obsolete branches
 
 ## Session July 14, 2026 (Media Player UX & E2E Test Lint Fixes)
@@ -1128,22 +1128,22 @@
 - [x] Reposition `Languages` to the 6th block in `CATEGORY_ORDER` for a balanced 3-column Explore grid layout
 - [x] Add 0ms cached category song count calculation (`song_count`) to `getAvailableCategories()` and `fetchCategoryTree()`, displaying song count badges on filter tag pills
 - [x] Verify Next.js production build (`next build`) and 108 unit tests pass cleanly
-- [x] Merge `feat/210-streamline-tag-ux` into `main` on both `sacred-fire-songs` and `songbook-rocks` and clean up feature branches
+- [x] Merge `feat/210-streamline-tag-ux` into `main` on both `sacred-fire-songs` and `<parent-project>` and clean up feature branches
 
 ## Session July 27, 2026 (Release v1.2.0, VPS Deployment, Live DB Sync, Security Audit, Performance Framework & HTML Reporting)
 
 - [x] Merge Release Please PR #209 & PR #212, publishing release tag **`v1.2.0`** and updating `CHANGELOG.md`
-- [x] Deploy `ghcr.io/demeesterroel/sacred-fire-songs:latest` (`v1.2.0`) to Hetzner VPS (`songbook-prod` stack)
-- [x] Update `engine` submodule pointer in `songbook-rocks` to `v1.2.0` (`524f069`) to trigger Vercel production build for `https://app.songbook.rocks`
+- [x] Deploy `ghcr.io/demeesterroel/sacred-fire-songs:latest` (`v1.2.0`) to VPS (`<prod-stack>` stack)
+- [x] Update `engine` submodule pointer in `<parent-project>` to `v1.2.0` (`524f069`) to trigger Vercel production build for `https://app.example.com`
 - [x] Perform live database sync from Supabase Cloud to VPS `supabase-prod-db`, restoring 14 new songs, 2 users, and 2 setlists (100% parity across all 252 songs and 12 users)
-- [x] Audit and remove hardcoded production database connection strings from `songbook-rocks` scripts, moving secrets to `.env.production`
+- [x] Audit and remove hardcoded production database connection strings from `<parent-project>` scripts, moving secrets to `.env.production`
 - [x] Update `stacks/scripts/backup-secrets.sh` with 3-phase diff comparison, colorized line diffs, interactive validation prompt, and VPS hostname check (`ubuntu-8gb-nbg1-1`)
-- [x] Run live HTTP performance benchmark suite comparing Vercel Edge (`app.songbook.rocks`) vs Hetzner VPS (`songbook.bluette.be`), confirming VPS is 2x to 4.8x FASTER for DB-driven pages
+- [x] Run live HTTP performance benchmark suite comparing Vercel Edge (`app.example.com`) vs VPS (`prod.example.com`), confirming VPS is 2x to 4.8x FASTER for DB-driven pages
 - [x] Configure 10-minute (600s) ISR revalidation on `app/page.tsx` and `app/songs/page.tsx` (`export const revalidate = 600;`) and Traefik `Cache-Control` headers
 - [x] Create persistent performance benchmark framework with JSON song fixtures (`testing/performance/benchmark-song-fixtures.json`) and single CLI runner script (`./run-performance-benchmark.sh` / `npm run test:perf`)
 - [x] Create automated HTML benchmark report generator (`testing/performance/scripts/generate-html-report.mjs`) compiling dark-mode HTML reports to `testing/performance/reports/index.html`
 - [x] Open Pull Requests #213, #214, and #215 on feature branches and merge into `main` per the Verification Rule and Artifact Sync Policy
-- [x] Update `engine` submodule pointer in `songbook-rocks` to commit `0fec94a`
+- [x] Update `engine` submodule pointer in `<parent-project>` to commit `0fec94a`
 
 
 
@@ -1310,7 +1310,7 @@
 
 ## Session October 31, 2026 (Gitflow Phase 1 — CI Quality Gate, #282, PR #310)
 - [x] Merge Phase 0 PR #309 into `develop`
-- [x] Investigate E2E target: cloud staging/prod Supabase projects are paused; owner chose a self-hosted E2E Supabase on bluette → cloud-infra PR #106 (`stacks/songbook-e2e`, Tailscale-only, `init-env.sh`); then owner deferred all E2E work (Story 5.1.2)
+- [x] Investigate E2E target: cloud staging/prod Supabase projects are paused; owner chose a self-hosted E2E Supabase on <server> → <infra-repo> PR #106 (`stacks/songbook-e2e`, Tailscale-only, `init-env.sh`); then owner deferred all E2E work (Story 5.1.2)
 - [x] `ci.yml`: lint (ratchet `--max-warnings 182`), typecheck, unit, bdd, build, pipeline (actionlint, shellcheck, bats, strict `test:bdd:ci-gate`)
 - [x] One unit-test tree `testing/unit/tests/` (removed `lib/unit-tests/`, stale `testing/e2e/tests/`); Vitest `include` restricted (286 tests)
 - [x] Wire `setlist-pdf-export.feature` with pending stubs; `ci-gate` profile (6/6)
@@ -1318,7 +1318,7 @@
 - [x] Fix shellcheck/actionlint findings; ESLint ignores `.worktrees/**`
 - [x] Docs: CLAUDE.md, git-workflow v1.2, e2e overview v1.9, design doc §6.6, plan v1.4, epic stories; issue #288 body aligned with D4
 - [x] Required checks on the `main` ruleset + classic protection removed (applied by the owner; agent was blocked by the permission classifier)
-- [ ] Deferred: Story 5.1.2 (E2E fail-closed, secrets, docker gating), cloud-infra #106 rollout, Tailscale `tag:ci`
+- [ ] Deferred: Story 5.1.2 (E2E fail-closed, secrets, docker gating), <infra-repo> #106 rollout, Tailscale `tag:ci`
 
 ## Session October 31, 2026 (Part 2: Reorganize scripts/ into cicd/, db/, dev/, #274)
 - [x] Branch `chore/274-reorganize-scripts` from `chore/282-gitflow-quality-gate` (PR #310)
@@ -1341,13 +1341,13 @@
 
 ## Session October 31, 2026 (Part 3: Gitflow Phase 3 — Staging CD from develop, #284)
 - [x] Verify owner-applied rulesets (`main` 12237277, `develop` 26249878); close Story 5.1.4 (#292)
-- [x] Investigate access: public SSH (key-only) reachable from runners; staging web Tailscale-only; preview stack has a migrator; `/opt/dockge` had uncommitted preview + prod compose drift (prod runs `-app:v1.6.0`)
+- [x] Investigate access: public SSH (key-only) reachable from runners; staging web Tailscale-only; preview stack has a migrator; `<stacks-dir>` had uncommitted preview + prod compose drift (prod runs `-app:v1.6.0`)
 - [x] Rewrite @story-5.1.7 scenarios for the SSH forced-command design (red → green, `ci-gate` 18/18)
 - [x] `docker.yml`: build on `develop`, short SHA on push, remove `:latest`
 - [x] `deploy-staging.yml`: workflow_run after develop build, `environment: Staging`, pinned host key, only `deploy develop <sha>`
-- [x] cloud-infra PR #107: `deploy-songbook-staging.sh` (bats 8/8, shellcheck), preview `IMAGE_TAG`, prod compose = running state
+- [x] <infra-repo> PR #107: `<server-deploy-script>` (bats 8/8, shellcheck), preview `IMAGE_TAG`, prod compose = running state
 - [x] D6: Vercel tokens removed from `performance.yml`
-- [ ] Owner: merge cloud-infra #107; VPS rollout; `Staging` environment + secrets; first deploy
+- [ ] Owner: merge <infra-repo> #107; VPS rollout; `Staging` environment + secrets; first deploy
 - [ ] Deferred: 3.4 nightly E2E/k6 (Tailscale), app-level Vercel code
 
 ## Session October 31, 2026 (Part 4: Fix New Playlist auth redirect, #321)
@@ -1357,4 +1357,14 @@
 - [x] `/library/playlists/add`: server-side auth guard with `next=`, client form `CreatePlaylistForm`
 - [x] Audit `useAuth()` call sites; design doc §6.7, lint cap 182 → 181
 - [ ] Follow-up: fix stale selector in `e2e/tests/auth-hydration.spec.ts`; add `next=` to `SongForm` guest redirect
-- [ ] Owner: OK to merge PR into `develop`, then verify on songbook-beta
+- [ ] Owner: OK to merge PR into `develop`, then verify on <staging-app>
+
+## Session November 3, 2026 (Public-repo isolation)
+- [x] Security scan: tree, history, secrets, environments
+- [x] Remove `deploy-staging.yml` and tracked `graphify-out/`; scrub deployment names to placeholders
+- [x] `performance.yml` without default target; preview repro spec skips without `PREVIEW_URL`
+- [x] `scripts/dev/isolation-guard.sh` + `.githooks/{pre-commit,commit-msg}` + Claude Code hook + `isolation` CI job
+- [x] Canonical root `AGENTS.md`; `CLAUDE.md` imports it; `GEMINI.md` symlink; `.agents/AGENTS.md` removed
+- [x] Story 5.1.7 contract scenarios rewritten (images only, no SSH, no deployment environment)
+- [ ] Owner: set `ISOLATION_DENYLIST` secret, add `isolation` to the required checks, remove the deployment environments
+- [ ] History rewrite of the public repo (owner decision taken; separate step)
