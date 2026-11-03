@@ -42,8 +42,10 @@ report() {
 
 case "${1:-}" in
   --staged)
+    # No added lines (message-only amend, deletion-only commit) is clean, not
+    # an error: grep exits 1 on no match, which pipefail would propagate.
     git diff --cached -U0 --diff-filter=ACMR -- . ':!package-lock.json' \
-      | grep -E '^\+[^+]' | report "staged changes" ;;
+      | { grep -E '^\+[^+]' || true; } | report "staged changes" ;;
   --tree)
     status=0
     while IFS= read -r -d '' f; do
