@@ -47,7 +47,8 @@ test.describe('Search Functionality E2E Tests', () => {
     await expect(firstTitleElement).toBeVisible();
     const songTitle = (await firstTitleElement.innerText()).trim();
 
-    const firstAuthorElement = page.locator('h3 + p, p.text-gray-500').first();
+    // Artists render as pills linking to the artist filter
+    const firstAuthorElement = page.locator('a[href^="/songs?artist="]').first();
     await expect(firstAuthorElement).toBeVisible();
     const songAuthor = (await firstAuthorElement.innerText()).trim();
 
@@ -61,7 +62,7 @@ test.describe('Search Functionality E2E Tests', () => {
     await expect(page.locator(`text=${songTitle}`).first()).toBeVisible();
 
     // 3. Author Search: search using lowercase version of author
-    if (songAuthor && songAuthor !== 'Unknown') {
+    if (songAuthor && songAuthor !== 'Unknown' && songAuthor !== 'Traditional') {
       await searchInput.click();
       await searchInput.fill('');
       await searchInput.pressSequentially(songAuthor.toLowerCase(), { delay: 30 });

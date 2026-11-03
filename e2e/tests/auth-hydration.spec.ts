@@ -16,7 +16,6 @@ test.describe('Auth Hydration FOIC', () => {
     await expect(page.getByRole('link', { name: 'Sign In', exact: true })).not.toBeVisible();
 
     // Verify the page eventually settles to show the profile button
-    // The profile button has an image or a gradient fallback with initials
-    await expect(page.locator('.relative > button.rounded-full')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('button', { name: 'Account menu' })).toBeVisible({ timeout: 10000 });
   });
 });

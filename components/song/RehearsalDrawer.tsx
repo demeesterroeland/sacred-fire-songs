@@ -821,6 +821,7 @@ export default function RehearsalDrawer({
         actionButton: 'text-amber-400 text-xs font-bold hover:text-amber-300 transition-colors ml-2',
       },
     });
+    queryClient.invalidateQueries({ queryKey: ["song-recordings", songVersionId] });
     queryClient.invalidateQueries({ queryKey: ["user-recordings-compositions"] });
     queryClient.invalidateQueries({ queryKey: ["global-filter-counts"] });
   };
@@ -850,6 +851,7 @@ export default function RehearsalDrawer({
       if (success) {
         setRecordings((prev) => prev.filter((r) => r.id !== recordingId));
         toast.success(t('rehearsal.recording.delete.success'));
+        queryClient.invalidateQueries({ queryKey: ["song-recordings", songVersionId] });
         queryClient.invalidateQueries({ queryKey: ["user-recordings-compositions"] });
         queryClient.invalidateQueries({ queryKey: ["global-filter-counts"] });
       } else {

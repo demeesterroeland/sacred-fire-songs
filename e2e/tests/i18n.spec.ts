@@ -30,12 +30,13 @@ async function chooseLanguage(page: Page, scope: Locator, code: keyof typeof LAB
 
 /** Sidebar variant: on mobile the drawer can close again right after hydration, so retry open + list. */
 async function chooseInSidebar(page: Page, dict: Dict, code: keyof typeof LABELS) {
+  // The option click is part of the retry: the drawer can also close between
+  // opening the list and picking from it.
   await expect(async () => {
     await openSidebar(page, dict);
     await sidebar(page).getByTestId('language-switcher').click({ timeout: 2_000 });
-    await expect(page.getByRole('listbox')).toBeVisible({ timeout: 1_000 });
-  }).toPass({ timeout: 15_000 });
-  await page.getByRole('listbox').getByRole('option', { name: LABELS[code] }).click();
+    await page.getByRole('listbox').getByRole('option', { name: LABELS[code] }).click({ timeout: 2_000 });
+  }).toPass({ timeout: 20_000 });
   await expect(page.getByRole('listbox')).toHaveCount(0);
 }
 

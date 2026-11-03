@@ -388,7 +388,8 @@ test.describe('Rehearsal Space Media Player E2E Tests', () => {
     await expect(miniPlayer.locator('text=SoundCloud Reference').first()).toBeVisible();
   });
 
-  test('Permutation 15: Spotify active state does not render mini-player on fold @headed', async ({ page }) => {
+  // Owner decision (#342): the mini-player stays visible for every source, Spotify included.
+  test('Permutation 15: Spotify active state keeps mini-player on fold @headed', async ({ page }) => {
     const spotifyBtn = page.locator('button:has-text("Spotify")');
     await expect(spotifyBtn).toBeVisible({ timeout: 10000 });
     await spotifyBtn.click();
@@ -407,18 +408,13 @@ test.describe('Rehearsal Space Media Player E2E Tests', () => {
     await closeBtn.click({ force: true });
 
     const miniPlayer = page.locator('[data-testid="bottom-mini-player"]');
-    await expect(miniPlayer).toBeHidden(); // Spotify controls are disabled/hidden
+    await expect(miniPlayer).toBeVisible();
+    await expect(miniPlayer.locator('text=Spotify Reference').first()).toBeVisible();
   });
 
 
   test('Permutation 15a: Source Switcher dropdown interacts and switches tracks', async ({ page }) => {
-    // Open Rehearsal Space
-    const rehearsalBtn = page.locator('button:has-text("Rehearsal Space")').first();
-    await expect(rehearsalBtn).toBeVisible({ timeout: 15000 });
-    await rehearsalBtn.click();
-    await page.waitForTimeout(1000);
-    
-    // Close it to show mini-player
+    // The Rehearsal Space drawer is open (beforeEach); close it to show the mini-player
     const closeBtn = page.locator('button[aria-label="Close"]').first();
     await closeBtn.click();
     
@@ -459,12 +455,12 @@ test.describe('Rehearsal Space Media Player E2E Tests', () => {
     const miniPlayer = page.locator('[data-testid="bottom-mini-player"]');
     await expect(miniPlayer).toBeVisible();
 
-    const progressLine = miniPlayer.locator('div').first();
+    const progressLine = miniPlayer.locator('[data-testid="mini-progress-bar"]');
     await expect(progressLine).toBeVisible();
 
     const box = await progressLine.boundingBox();
     const clickX = box ? box.width * 0.75 : 300;
-    await progressLine.click({ position: { x: clickX, y: 1 } });
+    await progressLine.click({ position: { x: clickX, y: 4 } });
     await page.waitForTimeout(1000);
 
     const lastYtMessage = await page.evaluate(() => (window as any).lastYtMessage);
@@ -491,12 +487,12 @@ test.describe('Rehearsal Space Media Player E2E Tests', () => {
     const miniPlayer = page.locator('[data-testid="bottom-mini-player"]');
     await expect(miniPlayer).toBeVisible();
 
-    const progressLine = miniPlayer.locator('div').first();
+    const progressLine = miniPlayer.locator('[data-testid="mini-progress-bar"]');
     await expect(progressLine).toBeVisible();
 
     const box = await progressLine.boundingBox();
     const clickX = box ? box.width * 0.75 : 300;
-    await progressLine.click({ position: { x: clickX, y: 1 } });
+    await progressLine.click({ position: { x: clickX, y: 4 } });
     await page.waitForTimeout(1000);
 
     const lastScMessage = await page.evaluate(() => (window as any).lastScMessage);
@@ -506,7 +502,7 @@ test.describe('Rehearsal Space Media Player E2E Tests', () => {
     expect(parsed.value).toBeLessThan(80000);
   });
 
-  test('Permutation 18: Spotify player fold has no progress bar interaction @headed', async ({ page }) => {
+  test('Permutation 18: Spotify player fold sends no seek command from the progress bar @headed', async ({ page }) => {
     const spotifyBtn = page.locator('button:has-text("Spotify")');
     await expect(spotifyBtn).toBeVisible({ timeout: 10000 });
     await spotifyBtn.click();
@@ -525,6 +521,12 @@ test.describe('Rehearsal Space Media Player E2E Tests', () => {
     await closeBtn.click({ force: true });
 
     const miniPlayer = page.locator('[data-testid="bottom-mini-player"]');
-    await expect(miniPlayer).toBeHidden(); // Progress bar container is not displayed for Spotify
+    await expect(miniPlayer).toBeVisible();
+
+    // Spotify's embed has no seek API: clicking the bar must not seek YouTube or SoundCloud
+    await miniPlayer.locator('[data-testid="mini-progress-bar"]').click({ position: { x: 50, y: 4 } });
+    await page.waitForTimeout(500);
+    const messages = await page.evaluate(() => [(window as any).lastYtMessage, (window as any).lastScMessage]);
+    expect(messages.join(' ')).not.toContain('seekTo');
   });
 });
