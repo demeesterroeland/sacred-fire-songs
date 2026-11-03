@@ -149,6 +149,18 @@ async function main() {
       await client.query(sql);
     }
 
+    // The seed SQL hashes the public local-dev password. When a password is
+    // provided (shared/remote test DB), use it instead so the public value
+    // never grants access outside a local stack.
+    const testPassword = process.env.NEXT_PUBLIC_DEV_TEST_PASSWORD;
+    if (testPassword) {
+      console.log('[setup-test-db] Setting seeded account passwords from NEXT_PUBLIC_DEV_TEST_PASSWORD');
+      await client.query(
+        "UPDATE auth.users SET encrypted_password = extensions.crypt($1, extensions.gen_salt('bf'));",
+        [testPassword],
+      );
+    }
+
     const { seedRandomData } = await import('./random-seeder.mjs');
     const songsCount = process.env.E2E_RANDOM_SONGS_COUNT ? parseInt(process.env.E2E_RANDOM_SONGS_COUNT, 10) : 80;
     await seedRandomData(client, songsCount);
