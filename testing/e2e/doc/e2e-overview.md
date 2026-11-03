@@ -25,7 +25,7 @@ npx supabase status
 
 export NEXT_PUBLIC_SUPABASE_URL=http://127.0.0.1:54321
 export NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=<key from supabase status>
-export NEXT_PUBLIC_DEV_TEST_PASSWORD=sacred-fire-dev
+export NEXT_PUBLIC_DEV_TEST_PASSWORD=<test-account-password>
 
 # 3. Install Playwright browsers (first time only)
 npx playwright install --with-deps chromium
