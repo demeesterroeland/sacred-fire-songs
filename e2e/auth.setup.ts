@@ -1,6 +1,6 @@
 import { test as setup, expect } from '@playwright/test';
 import fs from 'fs';
-import { ROLES, TEST_PASSWORD, STORAGE_DIR, type RoleKey } from './fixtures/roles';
+import { ROLES, STORAGE_DIR, passwordFor, type RoleKey } from './fixtures/roles';
 
 /**
  * Authenticates once per seeded role and saves the session (cookies +
@@ -26,7 +26,7 @@ for (const role of Object.keys(ROLES) as RoleKey[]) {
     await page.getByRole('button', { name: 'Sign in with password' }).click();
 
     await page.locator('#email').fill(email);
-    await page.locator('#password').fill(TEST_PASSWORD);
+    await page.locator('#password').fill(passwordFor(role));
     await page.getByRole('button', { name: 'Sign In', exact: true }).click();
 
     // Successful login redirects to the home page.

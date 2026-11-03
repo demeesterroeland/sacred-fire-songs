@@ -34,6 +34,7 @@ try {
  *        NEXT_PUBLIC_SUPABASE_URL
  *        NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
  *        NEXT_PUBLIC_DEV_TEST_PASSWORD   (the seeded dev password)
+ *        E2E_PASSWORD_<ROLE>             (optional per-role override, see e2e/fixtures/roles.ts)
  *
  * The webServer below builds and starts the app against that stack. We test a
  * production build (next build && next start) rather than `next dev`, so timing
