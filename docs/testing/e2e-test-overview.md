@@ -1,6 +1,6 @@
 # E2E Test Overview & Matrix: Sacred Fire Songs
 
-**Version:** 1.11
+**Version:** 1.12
 **Status:** Living Document
 **Date:** Nov 3, 2026
 **Tracking:** GH #142
@@ -21,6 +21,7 @@
 | **1.9** | Oct 31, 2026 | Unit tests now live only in `testing/unit/tests/` (`lib/unit-tests/` removed, Epic 5.1 Story 5.1.3); stale Playwright copies in `testing/e2e/tests/` removed — specs live in `e2e/`. |
 | **1.10** | Oct 31, 2026 | Database setup and seeder paths moved to `scripts/db/` (`scripts/db/setup-test-db.mjs`, `scripts/db/random-seeder.mjs`, #274). |
 | **1.11** | Nov 3, 2026 | Replaced deployment-specific environment names with neutral placeholders (public-repo isolation). |
+| **1.12** | Nov 3, 2026 | CI note: removed the reference to a database deploy workflow; the repo does not deploy anywhere. Staging E2E is optional and skips without secrets. |
 
 ---
 
@@ -39,7 +40,7 @@ It is a **living document**: keep it aligned with `docs/logbook/epic&user storie
 
 - **Unit tests (vitest, v4):** `testing/unit/tests/chordProParsing.test.ts`, `chordUtils.test.ts`, `queries.test.ts`, `songUtils.test.ts`, `playlistActions.test.ts`, `schemas.test.ts`, `useGuestFavorites.test.ts`. Run via `npm test` → `vitest run`.
 - **E2E tests:** **Phase 0 scaffolded** (this branch). Playwright is wired up (`playwright.config.ts`, `e2e/`), with per-role auth setup and a handful of P0 `@smoke` specs. Specs are authored but **not yet verified against a running app + seeded Supabase** — that verification happens once CI (or a dev) runs them. See `e2e/README.md`.
-- **CI:** `.github/workflows/deploy-db.yml` runs Supabase migrations; **`.github/workflows/e2e.yml`** (new) runs the `@smoke` subset against the **staging** Supabase project on every push to `main` / `feat|fix|chore/**`.
+- **CI:** **`.github/workflows/e2e.yml`** runs the `@smoke` subset against a **staging** Supabase project on pushes and PRs to `main` / `develop`, only when its secrets are set; otherwise it skips its steps and passes. This repo does not deploy anywhere.
 
 ---
 
