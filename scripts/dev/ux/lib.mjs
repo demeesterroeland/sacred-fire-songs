@@ -1,6 +1,6 @@
 // Shared helpers for the UX-research screenshot scripts.
 // Run with the repo's node_modules installed, or point PLAYWRIGHT_FROM at a
-// checkout that has them: PLAYWRIGHT_FROM=/path/to/repo/ node scripts/ux/capture-routes.mjs
+// checkout that has them: PLAYWRIGHT_FROM=/path/to/repo/ node scripts/dev/ux/capture-routes.mjs
 import { createRequire } from 'module';
 import fs from 'fs';
 import path from 'path';

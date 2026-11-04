@@ -1,11 +1,12 @@
 # UX Research
 
-**Version:** 1.1 | **Date:** Nov 4, 2026
+**Version:** 1.2 | **Date:** Nov 4, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.2 | Nov 4, 2026 | Capture scripts moved to `scripts/dev/ux/` (scripts layout contract). |
 | 1.1 | Nov 4, 2026 | Screenshots stored as WebP (quality 80) to keep the repo small; added `references/`. |
 | 1.0 | Nov 4, 2026 | Folder created: research report, screenshot set and capture scripts. |
 
@@ -26,16 +27,16 @@ Requires the app on `http://localhost:3000` against the seeded local Supabase (`
 
 ```bash
 # routes (all roles); UX_ROLES=guest,member limits roles
-node scripts/ux/capture-routes.mjs mobile
-node scripts/ux/capture-routes.mjs desktop
+node scripts/dev/ux/capture-routes.mjs mobile
+node scripts/dev/ux/capture-routes.mjs desktop
 # interactive states: drawer, recorder (fake microphone), share / publish / attribution modals
-node scripts/ux/capture-flows.mjs mobile
+node scripts/dev/ux/capture-flows.mjs mobile
 ```
 
 If this checkout has no `node_modules`, point at one that does: `PLAYWRIGHT_FROM=/path/to/checkout/ node …`.
 Other variables: `UX_BASE_URL`, `UX_OUT`, `NEXT_PUBLIC_DEV_TEST_PASSWORD`.
 
-Song IDs in `scripts/ux/lib.mjs` come from the seed and change when it is regenerated; update them if songs show "Song Not Found".
+Song IDs in `scripts/dev/ux/lib.mjs` come from the seed and change when it is regenerated; update them if songs show "Song Not Found".
 
 The scripts write PNG; convert before committing (full-page captures taller than 16 383 px must be cropped first):
 

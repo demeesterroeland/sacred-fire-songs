@@ -1,6 +1,6 @@
 // Phase 2: capture interactive states (menus, modals, drawers, recorder, sharing) that
 // have no route of their own. Mobile first.
-// Usage: PLAYWRIGHT_FROM=/path/with/node_modules/ node scripts/ux/capture-flows.mjs [mobile|desktop]
+// Usage: PLAYWRIGHT_FROM=/path/with/node_modules/ node scripts/dev/ux/capture-flows.mjs [mobile|desktop]
 import { chromium, BASE, SONGS, newContext, settle, shot } from './lib.mjs';
 
 const vp = process.argv[2] ?? 'mobile';

@@ -6,7 +6,7 @@ Helper scripts for **Sacred Fire Songs**, grouped by purpose. Run them from the 
 scripts/
 ├── cicd/     # Issue worktrees, preview/production promotion, benchmarks, GitHub roadmap & story sync
 ├── db/       # Migrations, test-database setup, random seeding, staging clone, Supabase settings
-├── dev/      # Local development helpers (icons, ChordPro debugging, isolation guard)
+├── dev/      # Local development helpers (icons, ChordPro debugging, isolation guard, UX screenshot capture)
 └── README.md
 ```
 
@@ -46,3 +46,6 @@ Every script lives in exactly one category folder; only this README sits directl
 | `dev/debug_chordpro.js` | Prints the ChordSheetJS parse tree of a small ChordPro sample. | `node scripts/dev/debug_chordpro.js` |
 | `dev/test_chord_parsing.ts` | Prints the parse result of a ChordPro sample in TypeScript (manual check, not a Vitest test). | `npx tsx scripts/dev/test_chord_parsing.ts` |
 | `dev/isolation-guard.sh` | Blocks private deployment details from this public repo, using a denylist kept outside the repo (`~/.config/sfs/denylist`, CI: `ISOLATION_DENYLIST`). Runs as git hooks, Claude Code hook and the `isolation` CI job. | `scripts/dev/isolation-guard.sh --tree` (or `--staged`, `--claude-hook`, `FILE…`) |
+| `dev/ux/capture-routes.mjs` | Captures every route per role (guest, member, admin) and viewport as PNG into `docs/ux-research/screenshots/` (Playwright; needs the app on `http://localhost:3000` against the seeded local Supabase). | `node scripts/dev/ux/capture-routes.mjs [mobile\|desktop]` |
+| `dev/ux/capture-flows.mjs` | Captures interactive states (menus, drawer, recorder with fake microphone, share / publish / attribution modals) for the UX research. | `node scripts/dev/ux/capture-flows.mjs [mobile\|desktop]` |
+| `dev/ux/lib.mjs` | Shared helpers for the UX capture scripts (viewports, test accounts, seeded song IDs, `shot()`). See `docs/ux-research/README.md`. | Imported, not run directly |

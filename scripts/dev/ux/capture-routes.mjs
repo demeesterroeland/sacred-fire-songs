@@ -1,6 +1,6 @@
 // Phase 1: capture every route for every role and viewport (mobile first).
-// Usage: PLAYWRIGHT_FROM=/path/with/node_modules/ node scripts/ux/capture-routes.mjs [mobile|desktop]
-import { chromium, BASE, ROLES, SONGS, newContext, settle, shot } from './lib.mjs';
+// Usage: PLAYWRIGHT_FROM=/path/with/node_modules/ node scripts/dev/ux/capture-routes.mjs [mobile|desktop]
+import { chromium, BASE, SONGS, newContext, settle, shot } from './lib.mjs';
 
 const ROUTES = [
   ['01-home', '/'],
