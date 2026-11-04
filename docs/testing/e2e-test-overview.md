@@ -1,8 +1,8 @@
 # E2E Test Overview & Matrix: Sacred Fire Songs
 
-**Version:** 1.12
+**Version:** 1.13
 **Status:** Living Document
-**Date:** Nov 3, 2026
+**Date:** Nov 4, 2026
 **Tracking:** GH #142
 
 ## Changelog
@@ -22,6 +22,7 @@
 | **1.10** | Oct 31, 2026 | Database setup and seeder paths moved to `scripts/db/` (`scripts/db/setup-test-db.mjs`, `scripts/db/random-seeder.mjs`, #274). |
 | **1.11** | Nov 3, 2026 | Replaced deployment-specific environment names with neutral placeholders (public-repo isolation). |
 | **1.12** | Nov 3, 2026 | CI note: removed the reference to a database deploy workflow; the repo does not deploy anywhere. Staging E2E is optional and skips without secrets. |
+| **1.13** | Nov 4, 2026 | PWA-03: offline fallback page covered by `e2e/tests/offline.spec.ts` (#353); cached pages offline still planned. |
 
 ---
 
@@ -217,7 +218,7 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | PWA-01 | Manifest / installability | Manifest served; install prompt available; standalone launch | icons 192/512; theme color | G | ✅ | 🔲 | P2 | 3.3.1 |
 | PWA-02 | Branding | Installed app shows icon/name/splash/theme | — | G | ✅ | 🔲 | P2 | 3.3.2 |
-| PWA-03 | Offline fallback | Offline shows branded page; cached pages still load | not-cached route | G | ⚠️ | 🔲 | P2 | 4.5.1 |
+| PWA-03 | Offline fallback | Offline shows branded page; cached pages still load | not-cached route; Retry offline; auto-reload online | G | ⚠️ | 🟡 | P2 | 4.5.1, `offline.spec.ts` |
 
 ### 4.11 Administration (Epic 3.6)
 

@@ -169,6 +169,10 @@ const pt: Partial<Record<TranslationKey, string>> = {
   'song.error.timeoutDescription': 'A página não carregou a tempo. Pode ser um problema de rede ou de conexão.',
   'song.error.loadFailed': 'Não foi possível carregar esta música',
   'song.error.retry': 'Tentar novamente',
+  // Offline fallback page (public/offline.html, #353)
+  'offline.title': 'Você está offline',
+  'offline.description': 'Esta página precisa de conexão com a internet. Ela será recarregada automaticamente assim que você voltar a ficar online.',
+  'offline.retry': 'Tentar novamente',
   'song.error.unexpected': 'Ocorreu um erro inesperado.',
 
   // ─── Songs – Form (Add / Edit) ────────────────────────────────────────────

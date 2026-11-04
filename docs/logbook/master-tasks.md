@@ -1378,3 +1378,12 @@
 - [x] #348: isolation guard passes commits without added lines (message-only amend, deletion-only); bats contract tests
 - [ ] Owner: per-role E2E password secrets in CI; release v1.7.0 (`develop` → `main`)
 - [ ] Follow-up: offline navigation shows "page not found" instead of an offline message
+
+## Session November 4, 2026 (Part 2: Offline navigation fallback, #353)
+- [x] Reproduced: offline client navigation → Next.js "Failed to fetch RSC payload, falling back to browser navigation" → browser error page (service worker had no fetch handler)
+- [x] `public/sw.js`: stores `public/offline.html` on install; answers GET page navigations only while offline; online path stays native
+- [x] `public/offline.html`: self-contained, 8 languages from `offline.*` keys, Retry + auto-reload on `online`
+- [x] Unknown song id: `lib/songs/fetchSong.ts` with `.maybeSingle()` → "Song Not Found" instead of a load error
+- [x] Test pyramid (#262): vitest + Cucumber @unit via Node `vm` harness (35 checks), 2 Playwright journeys; full desktop E2E 87 passed
+- [x] Docs: `docs/testing/offline.feature`, design doc 1.53, stories 1.47 (Story 4.5.1 [Partial]), e2e overview 1.13
+- [ ] Owner: review PR, verify offline page on a phone; Story 4.5.1 second scenario (cached songs offline) open

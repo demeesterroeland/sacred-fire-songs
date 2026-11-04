@@ -1,8 +1,8 @@
 # Project Analysis & Design Document: Song Sharing Application (Sacred Fire Songs)
 
-**Version:** 1.52
+**Version:** 1.53
 **Status:** Living Document
-**Date:** Nov 3, 2026
+**Date:** Nov 4, 2026
 
 ## Changelog
 
@@ -45,6 +45,7 @@
 | **1.50** | Oct 31, 2026 | §6.6: staging continuous deployment from `develop` (`docker.yml` develop images, no `:latest`; `deploy-staging.yml` → SSH forced command `<server-deploy-script>` in <infra-repo>) (Epic 5.1 Phase 3, #284). |
 | **1.51** | Oct 31, 2026 | Added §6.7 Client Auth State (#321): `useAuth()` without a server user starts with `loading = true` until the session resolves (`initialUser` `undefined` = unknown, `null` = server-confirmed guest); `/library/playlists/add` guards auth on the server (`redirect('/auth/login?next=/library/playlists/add')`) with the form in `components/playlists/CreatePlaylistForm.tsx`. Fixes logged-in users being redirected to `/` from "New Playlist". Lint cap lowered to 181. |
 | **1.52** | Nov 3, 2026 | Public-repo isolation: removed `deploy-staging.yml` (deployment is out of scope for this public repo; CI only publishes images to GHCR), added `isolation` CI job + `scripts/dev/isolation-guard.sh` (pre-commit, commit-msg, Claude Code hook), `performance.yml` takes its target from input/`PERF_BASE_URL`. Root `AGENTS.md` is now the canonical agent instruction file (`CLAUDE.md` imports it, `GEMINI.md` symlinks it). |
+| **1.53** | Nov 4, 2026 | Offline navigation fallback (#353): §3.3 and §6.2 — `public/sw.js` stores the self-contained `public/offline.html` and serves it for page navigations while the browser is offline (online requests stay native); texts from the `offline.*` dictionary keys. Song lookup moved to `lib/songs/fetchSong.ts` and uses `.maybeSingle()`, so an unknown song id shows "Song Not Found" instead of a load error. Spec: `docs/testing/offline.feature`. |
 
 
 ## 1. Introduction
@@ -84,6 +85,7 @@ The application is a **Progressive Web App (PWA)** optimized for mobile use duri
 ### 3.3 Offline Support
 * **[Implemented] PWA:** Installable on mobile.
 * **[Implemented] Caching:** `Stale-While-Revalidate` strategy via TanStack Query ensures songs work offline after first visit.
+* **[Implemented] Offline fallback page (#353):** a page navigation without a connection shows a branded offline page in the visitor's interface language, with Retry and an automatic reload when the connection returns, instead of the browser's error page. Reading songs offline from a cache is not implemented yet (Story 4.5.1, second scenario).
 
 ## 4. Roadmap Status
 
@@ -163,6 +165,7 @@ The application is a **Progressive Web App (PWA)** optimized for mobile use duri
 ### 6.2 Offline Strategy
 * **React Query:** Configured with `staleTime: 1 minute` (default for lists) and `gcTime: 24 hours`. Detail queries may override to 5 minutes.
 * **Browser Cache:** Assets cached via Vercel headers.
+* **Service worker (`public/sw.js`):** on install it stores `public/offline.html` in the `sfs-offline-v<n>` cache (activate removes older versions). Its fetch handler answers only `GET` page navigations while `navigator.onLine` is false, with that page; everything else, and every request while online, is left to the browser (a pass-through fetch handler once broke online navigations). Why it is needed: when Next.js cannot fetch the RSC payload of a client-side navigation it falls back to a full browser navigation, which offline ends on the browser's error page. `offline.html` is self-contained (inline CSS and script) and resolves its language like `resolveLocale()`; bump the cache version when it changes. Behaviour and tests: `docs/testing/offline.feature` (@unit via a Node `vm` harness, @e2e in `e2e/tests/offline.spec.ts`).
 
 ### 6.3 E2E Testing Environment & Database Isolation
 * **Isolation Strategy:** Playwright E2E tests are configured to run against a separate, online staging Supabase instance. This preserves the integrity of the self-hosted Supabase database used to drive the staging application.

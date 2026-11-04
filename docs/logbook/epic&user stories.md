@@ -1,8 +1,8 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 1.46
+**Version:** 1.47
 **Status:** Living Document
-**Date:** Nov 3, 2026
+**Date:** Nov 4, 2026
 
 ## Changelog
 
@@ -45,6 +45,7 @@
 | **1.44** | Oct 31, 2026 | Epic 5.1 Phase 2 (#283): Stories 5.1.5 (PR policy) implemented, 5.1.4 (rulesets as code, `develop` ruleset pending owner action) and 5.1.6 (script fixes; `--admin` removal waits for Phase 4) partly implemented. |
 | **1.45** | Oct 31, 2026 | Story 5.1.4 [Implemented] (both rulesets applied). Story 5.1.7 [Partial]: develop images + `deploy-staging.yml` + server deploy script (<infra-repo> #107), rollout pending. Story 5.1.11 [Deferred] (staging is Tailscale-only). |
 | **1.46** | Nov 3, 2026 | Story 5.1.7 re-scoped: deployment of the maintainer's environments moved out of this public repo (`deploy-staging.yml` removed); this repo only publishes images. Added public-repo isolation enforcement (`isolation` CI job, git hooks, Claude Code hook). |
+| **1.47** | Nov 4, 2026 | Story 4.5.1 [Partial]: offline fallback page for page navigations implemented (#353, `docs/testing/offline.feature`); cached pages and songs offline (second scenario) not yet. |
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
 
@@ -959,7 +960,7 @@ Scenario: Desktop Layout
 
 ### Epic 4.5: Progressive Web App — Offline Reliability
 
-**Story 4.5.1:** As a Musician, I want to see a friendly offline page when I have no internet connection, so that I understand what happened instead of seeing a browser error.
+**Story 4.5.1 [Partial]:** As a Musician, I want to see a friendly offline page when I have no internet connection, so that I understand what happened instead of seeing a browser error.
 
 ```gherkin
 Scenario: Offline fallback page
@@ -975,6 +976,8 @@ Scenario: Cached pages still load offline
   Then the home page shell should still load from the service worker cache
   And cached songs and playlists should remain accessible
 ```
+
+> **Status (Nov 4, 2026, #353):** the offline fallback page is implemented (`public/sw.js`, `public/offline.html`) in the visitor's language, with Retry and automatic reload when back online. It does not yet point to cached playlists, and the second scenario (cached pages and songs offline) is still open.
 
 ### Epic 4.6: Private Rehearsal & Audio Storage
 

@@ -167,6 +167,10 @@ const en = {
   'song.error.timeoutDescription': "The page couldn't load in time. This may be a network or connectivity issue.",
   'song.error.loadFailed': "Couldn't load this song",
   'song.error.retry': 'Retry',
+  // Offline fallback page (public/offline.html, #353)
+  'offline.title': "You're offline",
+  'offline.description': "This page needs an internet connection. It reloads by itself as soon as you're back online.",
+  'offline.retry': 'Try again',
   'song.error.unexpected': 'An unexpected error occurred.',
 
   // ─── Songs – Form (Add / Edit) ────────────────────────────────────────────

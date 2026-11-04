@@ -172,6 +172,10 @@ const ru: Partial<Record<TranslationKey, string>> = {
   'song.error.timeoutDescription': 'Страница не успела загрузиться. Возможно, проблема с сетью или соединением.',
   'song.error.loadFailed': 'Не удалось загрузить эту песню',
   'song.error.retry': 'Повторить',
+  // Offline fallback page (public/offline.html, #353)
+  'offline.title': 'Нет подключения к сети',
+  'offline.description': 'Для этой страницы нужен интернет. Она перезагрузится сама, как только подключение восстановится.',
+  'offline.retry': 'Повторить',
   'song.error.unexpected': 'Произошла непредвиденная ошибка.',
 
   // ─── Songs – Form (Add / Edit) ────────────────────────────────────────────

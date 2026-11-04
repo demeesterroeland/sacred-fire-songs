@@ -18,6 +18,7 @@
     "lint": "eslint . --max-warnings 202",
     "typecheck": "tsc --noEmit",
     "test:bdd:i18n": "NODE_OPTIONS=\"--import tsx\" cucumber-js --config cucumber.json --profile i18n",
+    "test:bdd:offline": "NODE_OPTIONS=\"--import tsx\" cucumber-js --config cucumber.json --profile offline",
     "test:e2e": "playwright test --config playwright.config.ts",
     "test:e2e:smart": "playwright test --config playwright.config.ts",
     "test:e2e:laptop": "npm run test:e2e:smart",

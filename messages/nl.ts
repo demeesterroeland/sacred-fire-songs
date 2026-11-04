@@ -169,6 +169,10 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'song.error.timeoutDescription': 'De pagina kon niet op tijd laden. Dit kan een netwerk- of verbindingsprobleem zijn.',
   'song.error.loadFailed': 'Lied laden mislukt',
   'song.error.retry': 'Opnieuw proberen',
+  // Offline fallback page (public/offline.html, #353)
+  'offline.title': 'Je bent offline',
+  'offline.description': 'Deze pagina heeft een internetverbinding nodig. Ze laadt vanzelf opnieuw zodra je weer online bent.',
+  'offline.retry': 'Opnieuw proberen',
   'song.error.unexpected': 'Er is een onverwachte fout opgetreden.',
 
   // ─── Songs – Form ─────────────────────────────────────────────────────────
