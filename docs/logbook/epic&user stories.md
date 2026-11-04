@@ -1,6 +1,6 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 1.47
+**Version:** 1.48
 **Status:** Living Document
 **Date:** Nov 4, 2026
 
@@ -46,6 +46,7 @@
 | **1.45** | Oct 31, 2026 | Story 5.1.4 [Implemented] (both rulesets applied). Story 5.1.7 [Partial]: develop images + `deploy-staging.yml` + server deploy script (<infra-repo> #107), rollout pending. Story 5.1.11 [Deferred] (staging is Tailscale-only). |
 | **1.46** | Nov 3, 2026 | Story 5.1.7 re-scoped: deployment of the maintainer's environments moved out of this public repo (`deploy-staging.yml` removed); this repo only publishes images. Added public-repo isolation enforcement (`isolation` CI job, git hooks, Claude Code hook). |
 | **1.47** | Nov 4, 2026 | Story 4.5.1 [Partial]: offline fallback page for page navigations implemented (#353, `docs/testing/offline.feature`); cached pages and songs offline (second scenario) not yet. |
+| **1.48** | Nov 4, 2026 | Epic 4.3 Offline Library (#357): stories 4.3.2–4.3.8 added (#358–#364), Story 4.3.1 (#20) rescoped to the setlist view of the offline shell. Built on the integration branch `feat/offline-library`, released separately. |
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
 
@@ -933,9 +934,11 @@ Scenario: Only regenerate the PDF when the playlist is dirty
   And cached PDFs are per user and cleared on sign-out
 ```
 
-### Epic 4.3: Offline Reliability
+### Epic 4.3: Offline Reliability — Offline Library (#357)
 
-**Story 4.3.1:** As a Musician, I want to access my setlists while offline so that I can use the app in the forest.
+A signed-in musician keeps a read-only copy of their whole text library (songs, chords, playlists, favourites, drafts, recently viewed) in IndexedDB on the device, so the installed app works without network. Media shows a "not available offline" notice. Design, decisions and dependency graph: epic #357. Built on the integration branch `feat/offline-library` and released separately after a preview period.
+
+**Story 4.3.1 (#20):** As a Musician, I want to access my setlists while offline so that I can use the app in the forest.
 
 ```
 Scenario: Offline Access
@@ -945,6 +948,22 @@ Scenario: Offline Access
   Then the setlist and its songs should load from the cache
   And I should see an "Offline Mode" indicator
 ```
+
+**Story 4.3.2 (#358):** As a Contributor, I want an offline-library spec and test harness so that every offline story is built test-first.
+
+**Story 4.3.3 (#359):** As a Musician, I want my library stored on my device, tied to my account, so that it is available offline and never shown to someone else.
+
+**Story 4.3.4 (#360):** As a Musician, I want my offline library kept in sync automatically, with an Offline Mode switch (on by default), so that I can rely on it or free up storage.
+
+**Story 4.3.5 (#361):** As a Musician, I want the installed app to open offline on any page so that I reach my library instead of an error.
+
+**Story 4.3.6 (#362):** As a Musician in the forest, I want to browse, search and open my songs offline so that I can play without network.
+
+**Story 4.3.7 (#363):** As a Musician, I want to see that I am offline and which actions are unavailable (greyed out) so that nothing seems broken.
+
+**Story 4.3.8 (#364):** As the Maintainer, I want end-to-end proof, aligned docs and a preview build so that I can test the offline library before it ships.
+
+> Acceptance criteria (Gherkin) live in the GitHub issues and in `docs/testing/offline-library.feature` (from Story 4.3.2).
 
 ### Epic 4.4: Desktop Experience
 
@@ -977,7 +996,7 @@ Scenario: Cached pages still load offline
   And cached songs and playlists should remain accessible
 ```
 
-> **Status (Nov 4, 2026, #353):** the offline fallback page is implemented (`public/sw.js`, `public/offline.html`) in the visitor's language, with Retry and automatic reload when back online. It does not yet point to cached playlists, and the second scenario (cached pages and songs offline) is still open.
+> **Status (Nov 4, 2026, #353):** the offline fallback page is implemented (`public/sw.js`, `public/offline.html`) in the visitor's language, with Retry and automatic reload when back online. It does not yet point to cached playlists, and the second scenario (cached pages and songs offline) is still open; it is delivered by the Offline Library epic (#357, stories 4.3.5 and 4.3.6).
 
 ### Epic 4.6: Private Rehearsal & Audio Storage
 
