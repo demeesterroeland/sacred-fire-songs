@@ -25,16 +25,25 @@ import PrivacySettings from "@/components/account/settings/PrivacySettings";
 import PreferencesSettings from "@/components/account/settings/PreferencesSettings";
 import { useLocale } from "@/context/LocaleContext";
 
+type TabType = "profile" | "account" | "preferences" | "privacy";
+
+const TAB_IDS: readonly TabType[] = ["profile", "account", "preferences", "privacy"];
+
+/** Maps the `?tab=` query value to a settings tab; unknown values open Profile. */
+export function parseSettingsTab(value: string | string[] | undefined): TabType {
+  const tab = Array.isArray(value) ? value[0] : value;
+  return TAB_IDS.find((id) => id === tab) ?? "profile";
+}
+
 interface AccountSettingsProps {
   user: User;
   profile: any;
+  initialTab?: TabType;
 }
 
-type TabType = "profile" | "account" | "preferences" | "privacy";
-
-export default function AccountSettings({ user, profile }: AccountSettingsProps) {
+export default function AccountSettings({ user, profile, initialTab = "profile" }: AccountSettingsProps) {
   const { t } = useLocale();
-  const [activeTab, setActiveTab] = useState<TabType>("profile");
+  const [activeTab, setActiveTab] = useState<TabType>(initialTab);
 
   const tabs = [
     { id: "profile" as const,      label: t("settings.tab.profile"),      icon: UserIcon },

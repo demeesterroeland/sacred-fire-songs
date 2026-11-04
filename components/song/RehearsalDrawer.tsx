@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useTransition, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Music, Trash2, Pencil, Play, Pause, Lock, RotateCcw, RotateCw, GripVertical, Download, ChevronUp, ChevronDown, Check, Share2, Globe, Users, Mic, CheckCircle2, Clock, MoreHorizontal } from "lucide-react";
+import { X, Music, Trash2, Pencil, Play, Pause, Lock, RotateCcw, RotateCw, GripVertical, Download, ChevronUp, ChevronDown, Check, Share2, Globe, Users, Mic, CheckCircle2, Clock, MoreHorizontal, Link2 } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import {
@@ -23,6 +23,8 @@ import { useAudio } from "./AudioProvider";
 import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLocale } from "@/context/LocaleContext";
+import { recordingPermalink } from "@/lib/songs/recordingLink";
+import { usePathname, useSearchParams } from "next/navigation";
 import RecordingShareModal from "./RecordingShareModal";
 import RecordingPublishModal from "./RecordingPublishModal";
 import RecordingAttributionModal from "./RecordingAttributionModal";
@@ -58,8 +60,10 @@ function SortableRecordingItem({
   handleShare,
   handlePublish,
   handleAttribution,
+  handleCopyLink,
   formatDate,
   isCustomSort,
+  isHighlighted = false,
 }: {
   rec: UserRecording;
   activePlaybackId: string | null;
@@ -73,8 +77,11 @@ function SortableRecordingItem({
   handleShare?: (recording: UserRecording) => void;
   handlePublish?: (recording: UserRecording) => void;
   handleAttribution?: (recording: UserRecording) => void;
+  handleCopyLink?: (recording: UserRecording) => void;
   formatDate: (date: string) => string;
   isCustomSort: boolean;
+  /** Opened through a `?recording=` deep link. */
+  isHighlighted?: boolean;
 }) {
   const { t } = useLocale();
   const [isEditing, setIsEditing] = useState(false);
@@ -125,8 +132,17 @@ function SortableRecordingItem({
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl hover:bg-gray-50 dark:hover:bg-gray-900/60 transition-colors group"
+      data-recording-id={rec.id}
+      aria-current={isHighlighted ? "true" : undefined}
+      className={`flex items-center gap-2.5 px-2.5 py-2 rounded-xl transition-colors group ${
+        isHighlighted
+          ? "bg-indigo-500/10 ring-2 ring-indigo-500/50"
+          : "hover:bg-gray-50 dark:hover:bg-gray-900/60"
+      }`}
     >
+      {/* Recordings of other users keep their owner's order (positions are owner-only),
+          so they get an empty slot instead of a handle to stay aligned with the list. */}
+      {isCustomSort && !isOwner && <span className="w-4 h-4 shrink-0 -ml-1" aria-hidden="true" />}
       {/* Drag handle: only in custom sort, revealed on hover on pointer devices */}
       {isCustomSort && isOwner && (
         <button
@@ -269,6 +285,12 @@ function SortableRecordingItem({
               <Mic className="w-4 h-4" />
               {t('recording.attribution.button')}
             </DropdownMenuItem>
+            {handleCopyLink && (
+              <DropdownMenuItem className={menuItemClass} onSelect={() => handleCopyLink(rec)}>
+                <Link2 className="w-4 h-4" />
+                {t('rehearsal.recording.copyLink')}
+              </DropdownMenuItem>
+            )}
             <DropdownMenuSeparator className="bg-gray-200 dark:bg-gray-800" />
             <DropdownMenuItem className={menuItemClass} onSelect={() => { renameRequested.current = true; }}>
               <Pencil className="w-4 h-4" />
@@ -308,6 +330,8 @@ interface RehearsalDrawerProps {
   isSongPublic?: boolean;
   isSongOwner?: boolean;
   onMakeSongPublic?: () => Promise<boolean>;
+  /** Recording opened through `/songs/<id>?recording=<id>`: highlighted and scrolled into view. */
+  highlightRecordingId?: string | null;
 }
 
 export default function RehearsalDrawer({
@@ -325,6 +349,7 @@ export default function RehearsalDrawer({
   isSongPublic = true,
   isSongOwner = false,
   onMakeSongPublic,
+  highlightRecordingId = null,
 }: RehearsalDrawerProps) {
   const { t } = useLocale();
   const { user } = useAuth();
@@ -441,6 +466,37 @@ export default function RehearsalDrawer({
   }, [fetchedRecordings]);
 
   const hasAnyAudioSource = hasMedia || recordings.length > 0;
+
+  // Sign-in from the guest prompt returns to this page, including `?recording=`.
+  const pathname = usePathname();
+  const search = useSearchParams().toString();
+  const currentPath = search ? `${pathname}?${search}` : pathname;
+
+  // Deep link: scroll the linked recording into view once it is rendered.
+  const highlightVisible = isOpen && activeTab === "recorder" && !!highlightRecordingId
+    && recordings.some((r) => r.id === highlightRecordingId);
+  useEffect(() => {
+    if (!highlightVisible || !highlightRecordingId) return;
+    const timer = setTimeout(() => {
+      document
+        .querySelector(`[data-recording-id="${window.CSS.escape(highlightRecordingId)}"]`)
+        ?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 350); // after the drawer's slide-in animation
+    return () => clearTimeout(timer);
+  }, [highlightVisible, highlightRecordingId]);
+
+  const handleCopyLink = async (rec: UserRecording) => {
+    // The link grants nothing by itself: RLS decides who can open it.
+    const ownerOnly = !rec.is_public && (rec.shared_with?.length ?? 0) === 0;
+    try {
+      await navigator.clipboard.writeText(`${window.location.origin}${recordingPermalink(rec.id)}`);
+      toast.success(t('rehearsal.recording.linkCopied'), {
+        description: ownerOnly ? t('rehearsal.recording.linkOwnerOnly') : undefined,
+      });
+    } catch {
+      toast.error(t('common.error'));
+    }
+  };
 
   // ─────────────────────────────────────────────────────────────────────────
   // SINGLE SOURCE OF TRUTH — nowPlaying
@@ -1235,8 +1291,10 @@ export default function RehearsalDrawer({
                                   handleShare={handleShare}
                                   handlePublish={handlePublish}
                                   handleAttribution={handleAttribution}
+                                  handleCopyLink={handleCopyLink}
                                   formatDate={formatDate}
                                   isCustomSort={recordings.length > 1}
+                                  isHighlighted={rec.id === highlightRecordingId}
                                 />
                               ))}
                             </div>
@@ -1259,7 +1317,7 @@ export default function RehearsalDrawer({
                             {t('rehearsal.guest.description')}
                           </p>
                         </div>
-                        <Link href="/auth/login">
+                        <Link href={`/auth/login?next=${encodeURIComponent(currentPath)}`}>
                           <button className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer">
                             {t('rehearsal.guest.signIn')}
                           </button>

@@ -1,6 +1,6 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 1.49
+**Version:** 1.50
 **Status:** Living Document
 **Date:** Nov 4, 2026
 
@@ -48,6 +48,7 @@
 | **1.47** | Nov 4, 2026 | Story 4.5.1 [Partial]: offline fallback page for page navigations implemented (#353, `docs/testing/offline.feature`); cached pages and songs offline (second scenario) not yet. |
 | **1.48** | Nov 4, 2026 | Aligned MD logbook with GitHub: synced [Implemented] statuses (3.4.6, 4.2.1, 4.2.3, 4.2.4, 5.1.3, 5.1.4, 5.1.5); added Story 1.2.5 (#218), Stories 3.1.1 (#13), 3.1.3 (#140), 3.1.4 and sub-stories 3.1.4.1–3.1.4.6 (#323–#329); expanded Epic 4.3 with Stories 4.3.2–4.3.8 (#357, #358–#364). |
 | **1.49** | Nov 4, 2026 | Added Stories 4.6.2 (User-to-User Private Sharing with DRM-lite restriction), 4.6.3 (Public Publication with Explicit Singer Consent Disclaimer), and 4.6.4 (Singer Attribution & Musician Profile Linking), all [Implemented]. Executable spec: `docs/testing/recording-sharing.feature`. |
+| **1.50** | Nov 4, 2026 | Added Story 4.6.6 (Notification & Email Dispatching for Shared Rehearsal Recordings, #373) [Implemented]. Executable spec: `docs/testing/share-notifications.feature`. |
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
 
@@ -1378,6 +1379,35 @@ Scenario: Attributing unregistered singer displays pending invite gracefully
   When the recording is attributed to unregistered singer "Elena Wood" with email "elena@wood.org"
   Then the recording should display "Elena Wood" with a pending invite badge
   And the system should not crash
+```
+
+**Story 4.6.6: [Implemented]** As a registered user, I want an in-app notification and an email when someone shares a rehearsal recording with me so that I find the take without browsing to the song. (GitHub #373)
+
+```gherkin
+Scenario: Recipient is notified in-app and by email
+  Given a recording owner shares a rehearsal recording with a registered user
+  Then the recipient sees an unread notification with the sender, recording and song in the header bell
+  And the recipient receives one email with a direct link to "/recordings/[recordingId]"
+  And the email links to "/account/settings?tab=preferences" to turn email notifications off
+
+Scenario: A notification opens the shared recording
+  Given the recipient opens the notification or the email link
+  Then the song opens on the recording's version with the Recordings tab open
+  And the shared recording is highlighted
+
+Scenario: A recording link grants no access by itself
+  Given a user who is neither the owner nor a recipient opens "/recordings/[recordingId]" of a private recording
+  Then they get "not found" (or the login page when signed out, returning to the link after login)
+
+Scenario: Recipient has turned off email notifications
+  Given the recipient turned off "Email notifications" in Settings → Preferences
+  When a recording is shared with them
+  Then they get the in-app notification but no email
+
+Scenario: Dispatch failure does not block sharing
+  Given the mail server is unreachable
+  When the owner shares a recording
+  Then the share succeeds and the failure is only logged
 ```
 
 ## Phase 5: Engineering Excellence

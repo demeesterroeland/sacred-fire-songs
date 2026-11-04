@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/client";
+import { sendRecordingShareEmail } from "@/lib/actions/notifications";
 
 export interface UserProfileSummary {
   id: string;
@@ -471,6 +472,14 @@ export async function shareRecording(
     console.error("[rehearsal] Error sharing recording:", error);
     return { success: false, error: error.message };
   }
+
+  // The in-app notification is created by a database trigger. The email is
+  // fire-and-forget: a dispatch failure must never fail the share.
+  Promise.resolve()
+    .then(() => sendRecordingShareEmail(recordingId, targetUserId))
+    .catch((e) => {
+      console.warn("[rehearsal] Share email dispatch failed:", e);
+    });
 
   return { success: true };
 }
