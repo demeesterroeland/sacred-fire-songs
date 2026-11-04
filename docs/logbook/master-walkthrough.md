@@ -3124,3 +3124,16 @@ This repository is public open source; the maintainer's own environments are pri
 - **Enforcement** (`scripts/dev/isolation-guard.sh`, denylist kept outside the repo): Claude Code `PreToolUse` hook (new text written inside the repo + outward commands), `.githooks/pre-commit` (staged diff), `.githooks/commit-msg`, and the `isolation` CI job (secret `ISOLATION_DENYLIST`, fails closed).
 - **Agent instructions**: root `AGENTS.md` is canonical (read natively by Codex, Copilot, Cursor, OpenCode and others); `CLAUDE.md` imports it with `@AGENTS.md` and keeps only Claude-specific notes; `GEMINI.md` is a symlink.
 - **Story 5.1.7** re-scoped: contract scenarios now assert that `develop` images are published and that no workflow opens SSH or uses a deployment environment.
+
+## November 3–4, 2026 - Test credentials and a green local E2E suite
+
+**Task Overview**
+The public seed password for the test accounts had also been used on shared test databases. After closing that, the full Playwright suite was run locally against `develop`: 21 tests failed (desktop + mobile). Each failure group became a sub-issue of epic #338, was verified by hand, and was fixed in one PR.
+
+**Technical Details**
+- **Seeding (#336)**: `scripts/db/setup-test-db.mjs` seeds a remote test database only with `E2E_TEST_PASSWORD`, never with the public seed password. The dev-origin LAN address moved to the `ALLOWED_DEV_ORIGINS` env var.
+- **Per-role passwords (#337)**: each role in `e2e/fixtures/roles.ts` has a `passwordEnv` (`E2E_PASSWORD_ADMIN`, `_GATEKEEPER`, `_MUSICIAN`, `_MEMBER`); `passwordFor(role)` falls back to the shared test password, so local runs need no extra setup.
+- **App bug (#347)**: a new or deleted recording did not show up in the rehearsal drawer until reload; `RehearsalDrawer` now invalidates the `song-recordings` query after save and delete.
+- **Config (#347)**: `playwright.config.ts` defaults `DATABASE_URL` to the local Supabase Postgres when the Supabase URL is local; `@headed` specs run only in the `*-headed` projects; `E2E_FORCE_HEADLESS=1` runs them headless.
+- **Specs (#347)**: stale selectors and texts updated (account menu, search, recorder, playlist sheet); the timeout spec rewritten for the current skeleton/retry UI; mini-player expectations for Spotify and mobile; flaky mobile language picking retried as one unit. Result: 162 passed, 6 skipped, twice in a row.
+- **Isolation guard (#348)**: `--staged` exited non-zero when a commit added no lines (grep with `pipefail`), which blocked message-only amends. Fixed, with bats contract tests in `testing/scripts/isolation-guard.bats`.
