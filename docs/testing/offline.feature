@@ -119,6 +119,15 @@ Feature: Offline navigation fallback
     Then the song loads by itself
 
   @e2e @offline
+  Scenario: A signed-in session survives the offline page
+    Given I am signed in and on the songs list
+    And my device goes offline
+    When I open a song
+    Then I see the offline message, which shows no account data and no sign-in link
+    When my connection is restored
+    Then the song loads and I am still signed in
+
+  @e2e @offline
   Scenario: A song that really does not exist still shows "not found"
     Given I am online
     When I open a song id that does not exist
