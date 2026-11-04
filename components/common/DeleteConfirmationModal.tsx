@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { X, AlertTriangle, Trash2 } from 'lucide-react';
+import { useLocale } from '@/context/LocaleContext';
 
 interface DeleteConfirmationModalProps {
     isOpen: boolean;
@@ -20,6 +21,7 @@ export default function DeleteConfirmationModal({
     message,
     isDeleting = false,
 }: DeleteConfirmationModalProps) {
+    const { t } = useLocale();
     const [render, setRender] = useState(false);
 
     // Synchronize rendering state with isOpen prop without triggering cascading renders
@@ -56,7 +58,7 @@ export default function DeleteConfirmationModal({
                     </div>
                     <div>
                         <h3 className="text-xl font-bold text-gray-900 dark:text-white">{title}</h3>
-                        <p className="text-red-400 text-sm">This action cannot be undone.</p>
+                        <p className="text-red-400 text-sm">{t('feedback.delete.body')}</p>
                     </div>
                 </div>
 
@@ -70,7 +72,7 @@ export default function DeleteConfirmationModal({
                         disabled={isDeleting}
                         className="px-4 py-3 rounded-xl font-semibold text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 border border-transparent hover:border-gray-200 dark:hover:border-white/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        Cancel
+                        {t('common.cancel')}
                     </button>
                     <button
                         onClick={onConfirm}
@@ -80,12 +82,12 @@ export default function DeleteConfirmationModal({
                         {isDeleting ? (
                             <>
                                 <span className="animate-spin rounded-full h-4 w-4 border-2 border-white/20 border-t-white"></span>
-                                Deleting...
+                                {t('common.deleting')}
                             </>
                         ) : (
                             <>
                                 <Trash2 className="w-4 h-4" />
-                                Yes, Delete
+                                {t('common.yesDelete')}
                             </>
                         )}
                     </button>

@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Heart, PenLine, Music, Sparkles } from 'lucide-react';
 
+import { getServerT } from '@/lib/i18n/server';
 interface LibrarySummaryProps {
   favoritesCount: number;
   draftsCount: number;
@@ -12,7 +13,7 @@ const stats = [
   {
     key: 'favorites',
     icon: Heart,
-    label: 'Favorites',
+    labelKey: 'nav.favorites',
     href: '/songs?favorites=true',
     color: 'text-rose-400',
     iconFill: 'fill-rose-400',
@@ -22,7 +23,7 @@ const stats = [
   {
     key: 'drafts',
     icon: PenLine,
-    label: 'Drafts',
+    labelKey: 'nav.drafts',
     href: '/songs?status=draft',
     color: 'text-amber-400',
     iconFill: '',
@@ -32,7 +33,7 @@ const stats = [
   {
     key: 'mySongs',
     icon: Music,
-    label: 'Your Songs',
+    labelKey: 'librarySummary.mySongs.title',
     href: '/songs?mine=true',
     color: 'text-violet-400',
     iconFill: '',
@@ -42,7 +43,7 @@ const stats = [
   {
     key: 'newSongs',
     icon: Sparkles,
-    label: 'New songs',
+    labelKey: 'librarySummary.newSongs.title',
     href: '/songs?new=true',
     color: 'text-emerald-400',
     iconFill: '',
@@ -58,10 +59,11 @@ const countMap: Record<string, keyof LibrarySummaryProps> = {
   newSongs: 'newSongsCount',
 };
 
-export default function LibrarySummary(props: LibrarySummaryProps) {
+export default async function LibrarySummary(props: LibrarySummaryProps) {
+  const t = await getServerT();
   return (
     <div>
-      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">Your Library</p>
+      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">{t('library.heading')}</p>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {stats.map((stat) => {
           const Icon = stat.icon;
@@ -77,7 +79,7 @@ export default function LibrarySummary(props: LibrarySummaryProps) {
               </div>
               <div className="min-w-0">
                 <p className="text-lg font-bold text-gray-900 dark:text-white leading-tight">{count}</p>
-                <p className="text-[10px] md:text-xs text-gray-500 truncate">{stat.label}</p>
+                <p className="text-[10px] md:text-xs text-gray-500 truncate">{t(stat.labelKey)}</p>
               </div>
             </Link>
           );

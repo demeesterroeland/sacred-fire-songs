@@ -3,6 +3,7 @@
 import { TagPill } from '@/components/ui/TagPill';
 import { AuthorPill } from '@/components/ui/AuthorPill';
 import { parseArtists } from '@/lib/songs/artistUtils';
+import { useLocale } from '@/context/LocaleContext';
 
 interface CategoryItem {
   name: string;
@@ -17,8 +18,11 @@ interface SongMetadataPillsProps {
 }
 
 export function SongMetadataPills({ originalAuthor, categories = [] }: SongMetadataPillsProps) {
+  const { t } = useLocale();
   const artists = parseArtists(originalAuthor);
-  const displayArtists = artists.length > 0 ? artists : ['Traditional'];
+  const displayArtists = artists.length > 0
+    ? artists.map((a) => a.toLowerCase() === 'traditional' ? t('song.traditional') : a)
+    : [t('song.traditional')];
 
   return (
     <div className="flex items-center gap-2 flex-wrap">

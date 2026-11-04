@@ -3,6 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { Home, Sparkles } from 'lucide-react';
+import { useLocale } from '@/context/LocaleContext';
 
 interface UnderConstructionProps {
   title?: string;
@@ -10,9 +11,10 @@ interface UnderConstructionProps {
 }
 
 export default function UnderConstruction({
-  title = "Under Construction",
-  description = "This corner of the sanctuary is still being woven. The spirits are at work."
+  title,
+  description,
 }: UnderConstructionProps) {
+  const { t } = useLocale();
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-gray-50 dark:bg-gray-950 min-h-[70vh] relative overflow-hidden">
       {/* Background Gradients */}
@@ -36,11 +38,11 @@ export default function UnderConstruction({
         </div>
 
         <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-6 tracking-tight">
-          {title}
+          {title ?? t('feedback.underConstruction.title')}
         </h1>
 
         <p className="text-gray-500 dark:text-gray-400 text-lg mb-12 leading-relaxed max-w-md mx-auto">
-          {description}
+          {description ?? t('feedback.underConstruction.description')}
         </p>
 
         <div className="flex flex-col sm:flex-row items-center justify-center gap-4">
@@ -49,7 +51,7 @@ export default function UnderConstruction({
             className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 bg-gray-100 hover:bg-white text-gray-950 rounded-2xl font-bold transition-all active:scale-95 shadow-xl shadow-white/5 group"
           >
             <Home className="w-5 h-5 group-hover:-translate-y-0.5 transition-transform" />
-            Back to the Hearth
+            {t('feedback.notFound.backToHearth')}
           </Link>
 
           <Link
@@ -57,14 +59,14 @@ export default function UnderConstruction({
             className="w-full sm:w-auto flex items-center justify-center gap-3 px-8 py-4 bg-transparent hover:bg-black/5 dark:hover:bg-white/5 text-gray-900 dark:text-white border border-gray-200 dark:border-white/10 rounded-2xl font-bold transition-all active:scale-95 group"
           >
             <Sparkles className="w-5 h-5 text-gray-500 dark:text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white transition-colors" />
-            Spiritual Inquiry
+            {t('feedback.notFound.spiritualInquiry')}
           </Link>
         </div>
       </div>
 
       {/* Subtle bottom text or link as requested */}
       <div className="mt-16 text-gray-600 text-sm tracking-widest font-light uppercase z-10">
-        Connected to the Sacred Source
+        {t('feedback.notFound.footer')}
       </div>
     </div>
   );

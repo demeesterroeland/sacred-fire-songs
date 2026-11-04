@@ -1,4 +1,5 @@
 import React from 'react';
+import { useLocale } from '@/context/LocaleContext';
 
 interface MediaEmbedsProps {
     youtubeUrl?: string | null;
@@ -7,6 +8,7 @@ interface MediaEmbedsProps {
 }
 
 const MediaEmbeds: React.FC<MediaEmbedsProps> = ({ youtubeUrl, spotifyUrl, soundcloudUrl }) => {
+    const { t } = useLocale();
     if (!youtubeUrl && !spotifyUrl && !soundcloudUrl) return null;
 
     return (
@@ -22,7 +24,7 @@ const MediaEmbeds: React.FC<MediaEmbedsProps> = ({ youtubeUrl, spotifyUrl, sound
                             width="100%"
                             height="100%"
                             src={getYouTubeEmbedUrl(youtubeUrl)}
-                            title="YouTube video player"
+                            title={t('mediaEmbeds.youtubeTitle')}
                             frameBorder="0"
                             allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                             allowFullScreen

@@ -4,6 +4,7 @@ import React, { createContext, useContext, useState, useEffect, useRef } from 'r
 import { toast } from 'sonner';
 import { type UserRecording } from "@/lib/actions/rehearsal";
 
+import { useLocale } from '@/context/LocaleContext';
 interface AudioContextType {
   activePlaybackId: string | null;
   activeRecording: UserRecording | null;
@@ -22,6 +23,7 @@ interface AudioContextType {
 const AudioContext = createContext<AudioContextType | undefined>(undefined);
 
 export function AudioProvider({ children }: { children: React.ReactNode }) {
+  const { t } = useLocale();
   const [activePlaybackId, setActivePlaybackId] = useState<string | null>(null);
   const [activeRecording, setActiveRecording] = useState<UserRecording | null>(null);
   const [audioElements, setAudioElements] = useState<Record<string, HTMLAudioElement>>({});
@@ -51,7 +53,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
     });
 
     if (!audioUrl) {
-      toast.error("Audio URL is not available.");
+      toast.error(t('recorder.audio.noUrl'));
       return;
     }
 
@@ -60,6 +62,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
       const activeAudio = audioElements[activePlaybackId];
       if (activeAudio) {
         activeAudio.pause();
+        // eslint-disable-next-line react-hooks/immutability -- HTMLAudioElement instances held in state are mutated on purpose to stop playback
         activeAudio.currentTime = 0;
       }
     }

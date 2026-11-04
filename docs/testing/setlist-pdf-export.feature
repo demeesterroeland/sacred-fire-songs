@@ -17,9 +17,9 @@ Feature: Setlist PDF Export for Ceremony Printing
     And each song should display its title, author, key, and capo
     And chords should be rendered above their corresponding lyrics
     And the footer on each page should display:
-      | Song URL          | bottom left   |
-      | Playlist: <title> | bottom middle |
-      | Page X of Y       | bottom right  |
+      | Song QR code (1 cm) + site URL | bottom left   |
+      | Playlist: <title>              | bottom middle |
+      | Page X of Y                    | bottom right  |
 
   Scenario: Handling transposition override in PDF export
     Given the setlist contains a song "Down to the River" with content "[C]Down to the [G]river to [C]pray"
@@ -62,3 +62,44 @@ Feature: Setlist PDF Export for Ceremony Printing
     Then the export should be blocked
     And an alert or message should inform me that maximum 200 songs can be exported
     And no PDF file should be generated
+
+  # Story 4.2.3 (#303) – vitest: testing/unit/tests/pdfExport.test.ts › footer site URL and QR code
+  @unit @pdfExport
+  Scenario: Footer shows only the site URL and a QR code to the song
+    Given the setlist is exported from "https://songbook.example.org"
+    And the setlist contains songs with song page URLs
+    When I export the setlist to PDF
+    Then the bottom-left footer shows only "songbook.example.org"
+    And each page shows a 1 cm × 1 cm QR code linking to the song on that page
+    And continuation pages of a song reuse that song's QR code
+    And pages without a song URL show no QR code
+
+  # Story 4.2.4 (#304) – vitest: testing/unit/tests/pdfCache.test.ts
+  @unit @pdfExport
+  Scenario: An unchanged playlist reuses the previous PDF
+    Given I exported the setlist to PDF
+    And nothing in the setlist has changed
+    When I export the setlist to PDF again
+    Then the previously generated PDF is downloaded without regenerating it
+
+  @unit @pdfExport
+  Scenario Outline: A changed playlist generates a new PDF
+    Given I exported the setlist to PDF
+    When <change>
+    And I export the setlist to PDF again
+    Then a new PDF is generated
+
+    Examples:
+      | change                                   |
+      | the song order is changed                |
+      | a song is added                          |
+      | a song is removed                        |
+      | a song's content or key is edited        |
+      | the setlist title or description changes |
+      | the interface language is switched       |
+
+  @unit @pdfExport
+  Scenario: Cached PDFs stay private
+    Given two users export setlists on the same device
+    Then each user only ever receives their own cached PDF
+    And signing out clears every cached PDF

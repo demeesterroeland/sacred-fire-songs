@@ -1,12 +1,23 @@
 {
   "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Write|Edit|Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "scripts/dev/isolation-guard.sh --claude-hook"
+          }
+        ]
+      }
+    ],
     "PostToolUse": [
       {
         "matcher": "Write|Edit",
         "hooks": [
           {
             "type": "command",
-            "command": "node .claude/scripts/sync-stories-to-gh.mjs"
+            "command": "node scripts/cicd/sync-stories-to-gh.mjs"
           }
         ]
       }

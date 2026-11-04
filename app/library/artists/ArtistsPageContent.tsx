@@ -4,12 +4,14 @@ import Link from 'next/link';
 import { Mic2 } from 'lucide-react';
 import { CardContent } from '@/components/common/CardContent';
 import type { ArtistSummary } from '@/lib/songs/serverQueries';
+import { useLocale } from '@/context/LocaleContext';
 
 export default function ArtistsPageContent({ artists }: { artists: ArtistSummary[] }) {
+    const { t } = useLocale();
     if (artists.length === 0) {
         return (
             <p className="text-sm text-gray-600 italic py-8 text-center">
-                No artists yet — songs added to the library will appear here.
+                {t('artists.emptyHint')}
             </p>
         );
     }
@@ -17,7 +19,9 @@ export default function ArtistsPageContent({ artists }: { artists: ArtistSummary
     return (
         <div className="grid grid-cols-1 gap-3">
             {artists.map((artist) => {
-                const songLabel = `${artist.songCount} song${artist.songCount !== 1 ? 's' : ''}`;
+                const songLabel = artist.songCount === 1
+                    ? t('playlists.songCountSingle')
+                    : t('playlists.songCount', { count: artist.songCount });
 
                 return (
                     <Link

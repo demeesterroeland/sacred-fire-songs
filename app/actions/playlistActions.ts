@@ -352,6 +352,8 @@ export async function getPlaylistSongsForExport(
     title: string;
     description?: string | null;
     songs: ExportPlaylistSong[];
+    /** Signed-in user id: scopes the client-side PDF cache (#304). */
+    userId?: string;
     error?: string;
 }> {
     const idParsed = safeParse(uuid, playlistId);
@@ -428,6 +430,7 @@ export async function getPlaylistSongsForExport(
         title: playlist.title,
         description: playlist.description,
         songs,
+        userId: user.id,
     };
 }
 

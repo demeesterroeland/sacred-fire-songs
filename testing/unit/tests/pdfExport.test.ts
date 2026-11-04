@@ -337,3 +337,103 @@ describe('PDF Export - TDD Suite', () => {
         });
     });
 });
+
+describe('PDF Export - document labels follow the interface language (#246)', () => {
+    it('defaults to English labels', async () => {
+        const { getPdfLabels } = await import('@/lib/export/pdfExport');
+        const l = getPdfLabels();
+        expect(l.page(1, 3)).toBe('Page 1 of 3');
+        expect(l.subtitle(1, 'Oct 30, 2026')).toBe('1 song   •   Generated Oct 30, 2026');
+        expect(l.subtitle(2, 'Oct 30, 2026')).toBe('2 songs   •   Generated Oct 30, 2026');
+        expect(l.by('Shimshai')).toBe('By Shimshai');
+        expect(l.key('Am')).toBe('Key: Am');
+        expect(l.capo(2)).toBe('Capo: 2');
+        expect(l.tuning('Drop D')).toBe('Tuning: Drop D');
+        expect(l.continued('Agua')).toBe('Agua (continued)');
+        expect(l.playlist('Ceremony')).toBe('Playlist: Ceremony');
+        expect(l.untitledSong).toBe('Untitled Song');
+        expect(l.untitledPlaylist).toBe('Setlist');
+        expect(l.dateLocale).toBe('en-US');
+    });
+
+    it('uses Dutch labels for locale "nl"', async () => {
+        const { getPdfLabels } = await import('@/lib/export/pdfExport');
+        const l = getPdfLabels('nl');
+        expect(l.page(1, 3)).toBe('Pagina 1 van 3');
+        expect(l.subtitle(2, '30 okt 2026')).toBe('2 liederen   •   Gemaakt op 30 okt 2026');
+        expect(l.subtitle(1, '30 okt 2026')).toBe('1 lied   •   Gemaakt op 30 okt 2026');
+        expect(l.key('Am')).toBe('Toonsoort: Am');
+        expect(l.continued('Agua')).toBe('Agua (vervolg)');
+        expect(l.dateLocale).toBe('nl-NL');
+    });
+
+    it('generates a PDF with Dutch labels without errors', async () => {
+        const blob = await exportPlaylistToPdf({
+            title: 'Ceremonie',
+            locale: 'nl',
+            songs: [{ title: 'Agua', author: 'Mãe', key: 'Am', capo: 2, content: '[Am]Agua' }],
+        });
+        expect(blob.size).toBeGreaterThan(1000);
+    });
+});
+
+describe('PDF Export - footer site URL and QR code (#303)', () => {
+    const countImages = async (blob: Blob) =>
+        (new TextDecoder('latin1').decode(await blob.arrayBuffer()).match(/\/Subtype \/Image/g) ?? []).length;
+
+    it('footerSiteLabel shows only the host of the base URL', async () => {
+        const { footerSiteLabel } = await import('@/lib/export/pdfExport');
+        expect(footerSiteLabel('https://songbook.example.org')).toBe('songbook.example.org');
+        expect(footerSiteLabel('https://songbook.example.org/')).toBe('songbook.example.org');
+        expect(footerSiteLabel('http://localhost:3000/some/path')).toBe('localhost:3000');
+        expect(footerSiteLabel(undefined)).toBe('');
+        expect(footerSiteLabel('not a url')).toBe('');
+    });
+
+    it('songPageUrl builds an absolute song URL only when both parts exist', async () => {
+        const { songPageUrl } = await import('@/lib/export/pdfExport');
+        expect(songPageUrl('https://songbook.example.org', '/songs/abc')).toBe('https://songbook.example.org/songs/abc');
+        expect(songPageUrl('https://songbook.example.org/', '/songs/abc')).toBe('https://songbook.example.org/songs/abc');
+        expect(songPageUrl(undefined, '/songs/abc')).toBeUndefined();
+        expect(songPageUrl('https://songbook.example.org', undefined)).toBeUndefined();
+    });
+
+    it('QR codes are exactly 1 cm (28.35 pt)', async () => {
+        const { QR_SIZE_PT } = await import('@/lib/export/pdfExport');
+        expect(QR_SIZE_PT).toBeCloseTo(28.35, 2);
+    });
+
+    it('embeds one QR image per song with a URL', async () => {
+        const blob = await exportPlaylistToPdf({
+            title: 'Ceremony',
+            baseUrl: 'https://songbook.example.org',
+            songs: [
+                { title: 'Agua', content: '[Am]Agua', url: '/songs/a' },
+                { title: 'Fuego', content: '[C]Fuego', url: '/songs/b' },
+            ],
+        });
+        expect(await countImages(blob)).toBe(2);
+    });
+
+    it('reuses the same QR image on continuation pages of one song', async () => {
+        const long = Array.from({ length: 140 }, (_, i) => `[G]Line ${i + 1} of a long song`).join('\n');
+        const blob = await exportPlaylistToPdf({
+            title: 'Ceremony',
+            baseUrl: 'https://songbook.example.org',
+            songs: [{ title: 'Long', content: long, url: '/songs/long' }],
+        });
+        const pdf = new TextDecoder('latin1').decode(await blob.arrayBuffer());
+        const pages = (pdf.match(/\/Type \/Page\b(?!s)/g) ?? []).length;
+        const drawn = (pdf.match(/\/I\d+ Do/g) ?? []).length;
+        expect(pages).toBeGreaterThan(1);
+        expect(await countImages(blob)).toBe(1); // one image object…
+        expect(drawn).toBe(pages); // …drawn on every page of the song
+    });
+
+    it('prints no QR code without a base URL or song URL', async () => {
+        const noBase = await exportPlaylistToPdf({ title: 'X', songs: [{ title: 'A', content: '[C]a', url: '/songs/a' }] });
+        const noUrl = await exportPlaylistToPdf({ title: 'X', baseUrl: 'https://songbook.example.org', songs: [{ title: 'A', content: '[C]a' }] });
+        expect(await countImages(noBase)).toBe(0);
+        expect(await countImages(noUrl)).toBe(0);
+    });
+});

@@ -15,21 +15,22 @@
  * E2E_RANDOM_SONGS_COUNT=1000 npx playwright test --grep @performance
  */
 
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
 import fs from 'fs';
 import path from 'path';
 import { performanceUtils } from '../fixtures/performance';
 import { PerformanceResult } from '../fixtures/performance';
 
 // Helper function to clear browser cache
-const clearBrowserCache = async (page: any) => {
+const clearBrowserCache = async (page: Page) => {
+  // Storage is only accessible on the app origin, not on about:blank.
+  if (!page.url().startsWith('http')) {
+    await page.goto('/favicon.svg');
+  }
   try {
-    // Attempt to clear cache (this sometimes fails due to security restrictions in Playwright)
     await page.evaluate(() => {
-      // Clear localStorage and sessionStorage
       localStorage.clear();
       sessionStorage.clear();
-      // Clear cookies using document.cookie
       document.cookie.split(";").forEach(c => document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"));
     });
   } catch (error) {
@@ -41,6 +42,7 @@ const clearBrowserCache = async (page: any) => {
 // Get git commit hash
 const getGitCommit = (): string => {
   try {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports -- CommonJS-only usage in a dev/test script
     const commit = require('child_process').execSync('git rev-parse --short HEAD', { encoding: 'utf8' }).trim();
     return commit;
   } catch (error) {
@@ -187,13 +189,7 @@ test('@performance Desktop: Search interaction performance', async ({ page }) =>
   
   for (let i = 1; i <= iterations; i++) {
     // Clear browser cache before each test iteration (using workaround)
-    await page.evaluate(() => {
-      // Clear localStorage and sessionStorage
-      localStorage.clear();
-      sessionStorage.clear();
-      // Clear cookies using document.cookie
-      document.cookie.split(";").forEach(c => document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"));
-    });
+    await clearBrowserCache(page);
     
     // Perform a search
     const searchInput = page.locator('input[placeholder="Search 200+ songs"]');
@@ -258,13 +254,7 @@ test('@performance Desktop: Filter interaction performance', async ({ page }) =>
   
   for (let i = 1; i <= iterations; i++) {
     // Clear browser cache before each test iteration (using workaround)
-    await page.evaluate(() => {
-      // Clear localStorage and sessionStorage
-      localStorage.clear();
-      sessionStorage.clear();
-      // Clear cookies using document.cookie
-      document.cookie.split(";").forEach(c => document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"));
-    });
+    await clearBrowserCache(page);
     
     // Open filter modal
     const filterBtn = page.locator('button[aria-label="Search options"]');
@@ -338,13 +328,7 @@ test('@performance Mobile: Time to Load /songs page', async ({ page }) => {
   
   for (let i = 1; i <= iterations; i++) {
     // Clear browser cache before each test iteration (using workaround)
-    await page.evaluate(() => {
-      // Clear localStorage and sessionStorage
-      localStorage.clear();
-      sessionStorage.clear();
-      // Clear cookies using document.cookie
-      document.cookie.split(";").forEach(c => document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"));
-    });
+    await clearBrowserCache(page);
     
     // Measure performance
     const metrics = await performanceUtils.measurePageLoadTime(page, '/songs');
@@ -407,13 +391,7 @@ test('@performance Mobile: Time to Load /songs/[id] page', async ({ page }) => {
   
   for (let i = 1; i <= iterations; i++) {
     // Clear browser cache before each test iteration (using workaround)
-    await page.evaluate(() => {
-      // Clear localStorage and sessionStorage
-      localStorage.clear();
-      sessionStorage.clear();
-      // Clear cookies using document.cookie
-      document.cookie.split(";").forEach(c => document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"));
-    });
+    await clearBrowserCache(page);
     
     // Measure performance
     const metrics = await performanceUtils.measurePageLoadTime(page, songId);
@@ -471,13 +449,7 @@ test.describe('Performance Tests with Larger Datasets', () => {
     
     for (let i = 1; i <= iterations; i++) {
       // Clear browser cache before each test iteration (using workaround)
-      await page.evaluate(() => {
-        // Clear localStorage and sessionStorage
-        localStorage.clear();
-        sessionStorage.clear();
-        // Clear cookies using document.cookie
-        document.cookie.split(";").forEach(c => document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"));
-      });
+      await clearBrowserCache(page);
       
       // Measure performance
       const metrics = await performanceUtils.measurePageLoadTime(page, '/songs');
@@ -530,7 +502,7 @@ test.describe('Performance Tests with Larger Datasets', () => {
     
     // Get the song count from environment variable or default to 80 (the random seeder's default)
     const customSongCount = parseInt(process.env.E2E_RANDOM_SONGS_COUNT || '80', 10);
-    const seedMode = 'random'; // the test database is always seeded by scripts/random-seeder.mjs
+    const seedMode = 'random'; // the test database is always seeded by scripts/db/random-seeder.mjs
     const testMode = customSongCount > 500 ? 'stress' : 'baseline';
     
     // Since we can't reliably connect to the database from E2E tests, we'll use the environment variable
@@ -542,13 +514,7 @@ test.describe('Performance Tests with Larger Datasets', () => {
     
     for (let i = 1; i <= iterations; i++) {
       // Clear browser cache before each test iteration (using workaround)
-      await page.evaluate(() => {
-        // Clear localStorage and sessionStorage
-        localStorage.clear();
-        sessionStorage.clear();
-        // Clear cookies using document.cookie
-        document.cookie.split(";").forEach(c => document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/"));
-      });
+      await clearBrowserCache(page);
       
       // Measure performance
       const metrics = await performanceUtils.measurePageLoadTime(page, '/songs');

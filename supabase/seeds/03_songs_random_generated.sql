@@ -2,8 +2,8 @@
 -- 200 generated songs for local development (`supabase db reset` / `supabase start`).
 --
 -- GENERATED FILE – do not edit by hand. Regenerate with:
---   npm run seed:generate            (or: node scripts/export-random-seed.mjs 200)
--- Source generator: scripts/random-seeder.mjs (20 deterministic anchor songs +
+--   npm run seed:generate            (or: node scripts/db/export-random-seed.mjs 200)
+-- Source generator: scripts/db/random-seeder.mjs (20 deterministic anchor songs +
 -- randomized songs covering every shape in docs/testing/song.feature).
 -- Generated: 2026-10-30T12:55:27.964Z
 --

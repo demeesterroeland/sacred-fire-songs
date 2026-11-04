@@ -8,10 +8,12 @@ import { Label } from "@/components/ui/label";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, Suspense } from "react";
 import { Flame, User, Compass, CheckCircle } from "lucide-react";
+import { useLocale } from "@/context/LocaleContext";
 
 export function FinishRegistrationForm(props: React.ComponentPropsWithoutRef<"div">) {
+  const { t } = useLocale();
   return (
-    <Suspense fallback={<div>Loading...</div>}>
+    <Suspense fallback={<div>{t('common.loading')}</div>}>
       <FinishRegistrationFormContent {...props} />
     </Suspense>
   );
@@ -21,6 +23,7 @@ function FinishRegistrationFormContent({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
+  const { t } = useLocale();
   const [fullName, setFullName] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
@@ -51,7 +54,7 @@ function FinishRegistrationFormContent({
 
       router.push(next || "/explore");
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : "An error occurred");
+      setError(error instanceof Error ? error.message : t('auth.error.default'));
     } finally {
       setIsLoading(false);
     }
@@ -92,25 +95,24 @@ function FinishRegistrationFormContent({
             <Flame className="text-white w-6 h-6 md:w-10 md:h-10 fill-current" />
           </div>
           <div className="text-left md:text-center">
-            <h1 className="text-gray-900 dark:text-white text-xl md:text-3xl font-bold md:mb-2 leading-tight">Welcome at the Fire</h1>
+            <h1 className="text-gray-900 dark:text-white text-xl md:text-3xl font-bold md:mb-2 leading-tight">{t('auth.heading')}</h1>
           </div>
         </div>
 
         {/* Finish Registration Form */}
         <form onSubmit={handleFinishRegistration} className="space-y-6 md:space-y-8">
           <div className="bg-emerald-50 dark:bg-[#141b24] border border-emerald-500/30 p-4 rounded-xl text-emerald-400 text-[15px] font-medium text-center mb-6 shadow-inner">
-            Email successfully verified!
+            {t('auth.finishRegistration.emailVerified')}
           </div>
 
           <div className="space-y-4">
             <p className="text-[#8e99aa] text-sm text-center leading-relaxed">
-              The smoke has cleared, and your invitation is now official.
-              The circle awaits—tell us how we shall call you as you join us by the fire.
+              {t('auth.finishRegistration.description')}
             </p>
           </div>
 
           <div className="space-y-1">
-            <Label className="text-xs font-semibold text-gray-900 dark:text-white ml-1 tracking-wide uppercase opacity-70">What should we call you?</Label>
+            <Label className="text-xs font-semibold text-gray-900 dark:text-white ml-1 tracking-wide uppercase opacity-70">{t('auth.finishRegistration.nameLabel')}</Label>
             <div className="relative group">
               <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5a657a] group-focus-within:text-[#d9481e] transition-colors pointer-events-none">
                 <User className="w-5 h-5" />
@@ -118,7 +120,7 @@ function FinishRegistrationFormContent({
               <Input
                 id="full-name"
                 type="text"
-                placeholder="Your Full Name"
+                placeholder={t('field.fullName.placeholder')}
                 required
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
@@ -134,7 +136,7 @@ function FinishRegistrationFormContent({
             className="w-full h-auto bg-gradient-to-r from-[#d9481e] to-[#f45d1a] hover:brightness-110 active:scale-[0.98] text-white font-bold py-3.5 md:py-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-[0_4px_15px_rgba(217,72,30,0.4)] disabled:opacity-50"
             disabled={isLoading}
           >
-            {isLoading ? "Finishing..." : "Finish Setup & Explore"}
+            {isLoading ? t('auth.finishRegistration.submitting') : t('auth.finishRegistration.submit')}
             <Compass className="w-5 h-5" />
           </Button>
         </form>
@@ -142,7 +144,7 @@ function FinishRegistrationFormContent({
         {/* Footer */}
         <div className="mt-8 text-center md:text-left border-t border-gray-200 dark:border-[#2d3545] pt-6">
           <p className="text-[#8e99aa] text-[12px] leading-relaxed italic">
-            &quot;May the song carry you home to the sacred fire.&quot;
+            &quot;{t('app.tagline')}&quot;
           </p>
         </div>
       </div>

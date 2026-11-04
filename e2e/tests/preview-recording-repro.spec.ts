@@ -1,9 +1,11 @@
 import { test, expect } from '@playwright/test';
-import { TEST_PASSWORD } from '../fixtures/roles';
+import { ROLES, passwordFor } from '../fixtures/roles';
 
-const PREVIEW_BASE_URL = process.env.PREVIEW_URL || 'https://staging.example.com';
+// Deployment URLs are not part of this public repo: set PREVIEW_URL to run this repro.
+const PREVIEW_BASE_URL = process.env.PREVIEW_URL ?? '';
 
 test.describe('Preview Environment Rehearsal Playback Debugging', () => {
+  test.skip(!PREVIEW_BASE_URL, 'PREVIEW_URL is not set');
   test('Verify both real uploaded recordings play cleanly without error on Preview', async ({ page }) => {
     const failedRequests: string[] = [];
 
@@ -33,8 +35,8 @@ test.describe('Preview Environment Rehearsal Playback Debugging', () => {
     const submitBtn = page.getByRole('button', { name: 'Sign In', exact: true });
 
     if (await emailInput.isVisible({ timeout: 5000 })) {
-      await emailInput.fill('roel.de.meester+member@gmail.com');
-      await passwordInput.fill(TEST_PASSWORD);
+      await emailInput.fill(ROLES.member.email);
+      await passwordInput.fill(passwordFor('member'));
       await submitBtn.click();
       await page.waitForURL((url) => url.pathname === '/', { timeout: 10000 }).catch(() => {});
     }

@@ -5,6 +5,7 @@ import { X, Search, ChevronDown } from 'lucide-react';
 import { TaxonomyNode } from '@/lib/taxonomyUtils';
 import { TagPill } from '@/components/ui/TagPill';
 import { useTaxonomy } from '@/lib/hooks/useTaxonomy';
+import { useLocale } from '@/context/LocaleContext';
 
 interface TagSelectorProps {
   category?: string;
@@ -27,10 +28,12 @@ export default function TagSelector({
   onCategoryChange,
   onTagsChange,
   onClearAll,
-  clearLabel = 'Clear All',
+  clearLabel,
   artist,
   onArtistChange,
 }: TagSelectorProps) {
+  const { t } = useLocale();
+  const resolvedClearLabel = clearLabel ?? t('search.clearAll');
   const [isOpen, setIsOpen] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const wrapperRef = useRef<HTMLDivElement>(null);
@@ -94,7 +97,7 @@ export default function TagSelector({
         {/* Selected Category Pill */}
         {category && (
           <TagPill
-            label={`Category: ${selectedCategoryObject?.name || category}`}
+            label={t('search.tagSelector.categoryPrefix', { category: selectedCategoryObject?.name || category })}
             categorySlug={category}
             variant="selectable"
             selected={true}
@@ -105,7 +108,7 @@ export default function TagSelector({
         {/* Selected Artist Pill */}
         {artist && (
           <TagPill
-            label={`Artist: ${artist}`}
+            label={t('search.tagSelector.artistPrefix', { artist })}
             variant="selectable"
             selected={true}
             onClick={() => onArtistChange?.(undefined)}
@@ -135,8 +138,8 @@ export default function TagSelector({
           className="flex-1 min-w-[140px] bg-transparent border-none outline-none text-xs text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
           placeholder={
             category || tags.length > 0 || artist
-              ? 'Add more tags...'
-              : 'Search tags or browse categories below...'
+              ? t('search.tagSelector.addMoreTags')
+              : t('search.tags.placeholder')
           }
           value={inputValue}
           onChange={(e) => {
@@ -152,7 +155,7 @@ export default function TagSelector({
             onClick={onClearAll}
             className="text-[10px] font-bold text-gray-500 hover:text-red-500 uppercase tracking-wider transition-colors shrink-0 ml-auto"
           >
-            {clearLabel}
+            {resolvedClearLabel}
           </button>
         )}
       </div>
@@ -162,7 +165,7 @@ export default function TagSelector({
         <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-xl shadow-2xl z-50 p-4 max-h-[300px] overflow-y-auto space-y-4 animate-in fade-in slide-in-from-top-2 duration-150">
           <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-2">
             <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500">
-              Browse All Tags by Category
+              {t('search.tagSelector.browseAll')}
             </span>
             <button
               type="button"
@@ -200,7 +203,7 @@ export default function TagSelector({
 
           {filteredGrouped.length === 0 && (
             <div className="text-center py-4 text-gray-400 text-xs">
-              No tags matching &quot;{inputValue}&quot;.
+              {t('search.tagSelector.noMatchingTags', { query: inputValue })}
             </div>
           )}
         </div>

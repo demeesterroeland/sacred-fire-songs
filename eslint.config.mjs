@@ -5,6 +5,18 @@ import nextTs from "eslint-config-next/typescript";
 const eslintConfig = defineConfig([
   ...nextVitals,
   ...nextTs,
+  {
+    rules: {
+      // Lint ratchet (Epic 5.1, Story 5.1.1): existing `any`s are warnings so
+      // `lint` can be a required CI check. `npm run lint` caps the warning
+      // count (--max-warnings); lower the cap whenever warnings are removed.
+      "@typescript-eslint/no-explicit-any": "warn",
+      // React Compiler rules enabled by eslint-config-next 16.4: existing
+      // violations are warnings under the same ratchet.
+      "react-hooks/set-state-in-effect": "warn",
+      "react-hooks/immutability": "warn",
+    },
+  },
   // Override default ignores of eslint-config-next.
   globalIgnores([
     // Default ignores of eslint-config-next:
@@ -12,6 +24,11 @@ const eslintConfig = defineConfig([
     "out/**",
     "build/**",
     "next-env.d.ts",
+    // Local-only folders (other worktrees, generated reports)
+    ".worktrees/**",
+    "graphify-out/**",
+    "playwright-report/**",
+    "test-results/**",
   ]),
 ]);
 

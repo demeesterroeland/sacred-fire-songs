@@ -23,6 +23,13 @@ try {
   console.warn('[playwright.config] Warning: Failed to load .env.test:', e instanceof Error ? e.message : String(e));
 }
 
+// Specs that seed data directly (pg) need DATABASE_URL. Against a local
+// Supabase stack it is always the CLI default, so derive it.
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL ?? '';
+if (!process.env.DATABASE_URL && /127\.0\.0\.1|localhost/.test(supabaseUrl)) {
+  process.env.DATABASE_URL = 'postgresql://postgres:postgres@127.0.0.1:54322/postgres';
+}
+
 /**
  * Playwright configuration for Sacred Fire Songs E2E tests.
  *
@@ -34,6 +41,7 @@ try {
  *        NEXT_PUBLIC_SUPABASE_URL
  *        NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY
  *        NEXT_PUBLIC_DEV_TEST_PASSWORD   (the seeded dev password)
+ *        E2E_PASSWORD_<ROLE>             (optional per-role override, see e2e/fixtures/roles.ts)
  *
  * The webServer below builds and starts the app against that stack. We test a
  * production build (next build && next start) rather than `next dev`, so timing
@@ -76,7 +84,7 @@ export default defineConfig({
     // 2. Desktop Headless (Standard DOM & Auth tests)
     {
       name: 'chromium-desktop-headless',
-      testIgnore: /.*@headed.*/,
+      grepInvert: /@headed/,
       use: { 
         ...devices['Desktop Chrome'],
         channel: 'chrome',
@@ -88,7 +96,7 @@ export default defineConfig({
     // 3. Mobile Headless (Standard DOM & Navigation tests)
     {
       name: 'mobile-chrome-headless',
-      testIgnore: /.*@headed.*/,
+      grepInvert: /@headed/,
       use: { 
         ...devices['Pixel 5'],
         channel: 'chrome',
@@ -100,11 +108,12 @@ export default defineConfig({
     // 4. Desktop Headed (Audio recording & media focus tests)
     {
       name: 'chromium-desktop-headed',
-      testMatch: /.*@headed.*/,
+      grep: /@headed/,
       use: { 
         ...devices['Desktop Chrome'],
         channel: 'chrome',
-        headless: false,
+        // CI has no display; E2E_FORCE_HEADLESS=1 does the same locally.
+        headless: !!process.env.CI || process.env.E2E_FORCE_HEADLESS === '1',
       },
       dependencies: ['setup'],
     },
@@ -112,11 +121,12 @@ export default defineConfig({
     // 5. Mobile Headed (Audio recording & mobile drawer media tests)
     {
       name: 'mobile-chrome-headed',
-      testMatch: /.*@headed.*/,
+      grep: /@headed/,
       use: { 
         ...devices['Pixel 5'],
         channel: 'chrome',
-        headless: false,
+        // CI has no display; E2E_FORCE_HEADLESS=1 does the same locally.
+        headless: !!process.env.CI || process.env.E2E_FORCE_HEADLESS === '1',
       },
       dependencies: ['setup'],
     },

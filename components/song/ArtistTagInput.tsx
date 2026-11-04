@@ -6,6 +6,7 @@ import { AuthorPill } from '@/components/ui/AuthorPill';
 import { createClient } from '@/lib/supabase/client';
 import { parseArtists, sortTagSuggestions } from '@/lib/songs/artistUtils';
 
+import { useLocale } from '@/context/LocaleContext';
 export interface ArtistSuggestion {
   name: string;
   song_count: number;
@@ -21,9 +22,10 @@ export interface ArtistTagInputProps {
 export function ArtistTagInput({
   selectedArtists,
   onChange,
-  placeholder = 'Type artist name and press Enter...',
+  placeholder,
   className = '',
 }: ArtistTagInputProps) {
+  const { t } = useLocale();
   const [inputValue, setInputValue] = useState('');
   const [isOpen, setIsOpen] = useState(false);
   const [availableArtists, setAvailableArtists] = useState<ArtistSuggestion[]>([]);
@@ -184,7 +186,7 @@ export function ArtistTagInput({
           }}
           onFocus={() => setIsOpen(true)}
           onKeyDown={handleKeyDown}
-          placeholder={selectedArtists.length === 0 ? placeholder : 'Add another artist...'}
+          placeholder={selectedArtists.length === 0 ? (placeholder ?? t('songForm.artists.placeholder')) : t('songForm.artists.addAnother')}
           className="flex-1 min-w-[150px] bg-transparent border-none outline-none text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-[#a19eb7]/50"
         />
       </div>

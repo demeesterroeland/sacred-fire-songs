@@ -7,6 +7,7 @@ import { createClient } from '@/lib/supabase/client';
 import { addSongToPlaylist } from '@/app/actions/playlistActions';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import { useLocale } from '@/context/LocaleContext';
 
 interface Song {
     id: string;
@@ -23,6 +24,7 @@ interface AddSongsSheetProps {
 }
 
 export function AddSongsSheet({ playlistId, existingCompositionIds, open, onClose }: AddSongsSheetProps) {
+    const { t } = useLocale();
     const [query, setQuery] = useState('');
     const [songs, setSongs] = useState<Song[]>([]);
     const [isSearching, setIsSearching] = useState(false);
@@ -33,6 +35,7 @@ export function AddSongsSheet({ playlistId, existingCompositionIds, open, onClos
     // Sync checked state when the caller's list changes (e.g. after page refresh)
     // eslint-disable-next-line react-hooks/set-state-in-effect
     useEffect(() => {
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional sync of local state with props/route; refactor tracked separately (Epic 5.1 lint ratchet)
         setAddedIds(new Set(existingCompositionIds));
     }, [existingCompositionIds]);
 
@@ -40,6 +43,7 @@ export function AddSongsSheet({ playlistId, existingCompositionIds, open, onClos
     // eslint-disable-next-line react-hooks/set-state-in-effect
     useEffect(() => {
         if (!open) return;
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional sync of local state with props/route; refactor tracked separately (Epic 5.1 lint ratchet)
         setQuery('');
         setAddedIds(new Set(existingCompositionIds));
     }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -48,6 +52,7 @@ export function AddSongsSheet({ playlistId, existingCompositionIds, open, onClos
     // eslint-disable-next-line react-hooks/set-state-in-effect
     useEffect(() => {
         if (!open) return;
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- intentional sync of local state with props/route; refactor tracked separately (Epic 5.1 lint ratchet)
         setIsSearching(true);
         const timeout = setTimeout(async () => {
             const supabase = createClient();
@@ -110,11 +115,11 @@ export function AddSongsSheet({ playlistId, existingCompositionIds, open, onClos
 
                 {/* Header */}
                 <div className="flex items-center justify-between px-4 pb-3 shrink-0">
-                    <h2 className="font-bold text-gray-900 dark:text-gray-100">Add Songs</h2>
+                    <h2 className="font-bold text-gray-900 dark:text-gray-100">{t('playlists.addSongs.title')}</h2>
                     <button
                         onClick={onClose}
                         className="p-1 text-gray-500 hover:text-gray-300 transition-colors"
-                        aria-label="Close"
+                        aria-label={t('common.close')}
                     >
                         <X className="w-5 h-5" />
                     </button>
@@ -131,7 +136,7 @@ export function AddSongsSheet({ playlistId, existingCompositionIds, open, onClos
                             autoFocus
                             value={query}
                             onChange={e => setQuery(e.target.value)}
-                            placeholder="Search songs…"
+                            placeholder={t('playlists.addSongs.search')}
                             className="flex-1 bg-transparent text-sm text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-600 outline-none"
                         />
                     </div>
@@ -140,7 +145,7 @@ export function AddSongsSheet({ playlistId, existingCompositionIds, open, onClos
                 {/* Song list */}
                 <div className="overflow-y-auto flex-1 pb-6">
                     {!isSearching && songs.length === 0 && (
-                        <p className="text-center text-sm text-gray-600 py-10">No songs found.</p>
+                        <p className="text-center text-sm text-gray-600 py-10">{t('playlists.addSongs.empty')}</p>
                     )}
                     {songs.map(song => {
                         const inPlaylist = addedIds.has(song.id);
@@ -158,7 +163,7 @@ export function AddSongsSheet({ playlistId, existingCompositionIds, open, onClos
                                         <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{song.title}</p>
                                         {!song.is_public && (
                                             <span className="text-[9px] font-black bg-gray-200 dark:bg-gray-800 text-gray-500 px-1.5 py-0.5 rounded border border-gray-300 dark:border-gray-700 uppercase tracking-tighter shrink-0">
-                                                Draft
+                                                {t('search.status.draft')}
                                             </span>
                                         )}
                                     </div>
