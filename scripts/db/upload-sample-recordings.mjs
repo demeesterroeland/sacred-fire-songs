@@ -12,7 +12,22 @@ import path from 'node:path';
 import { createClient } from '@supabase/supabase-js';
 
 const AUDIO_DIR = path.resolve('supabase/seeds/audio');
-const SAMPLE_SECONDS = 30;
+/** Fallback when ffprobe is not installed (the generated samples are 30 s). */
+const DEFAULT_SECONDS = 30;
+
+function durationSeconds(file) {
+  try {
+    const out = execFileSync(
+      'ffprobe',
+      ['-v', 'error', '-show_entries', 'format=duration', '-of', 'default=nw=1:nk=1', file],
+      { encoding: 'utf8' },
+    );
+    const seconds = Math.round(Number.parseFloat(out));
+    return Number.isFinite(seconds) && seconds > 0 ? seconds : DEFAULT_SECONDS;
+  } catch {
+    return DEFAULT_SECONDS;
+  }
+}
 
 function localStackEnv() {
   const out = execFileSync('npx', ['supabase', 'status', '-o', 'env'], { encoding: 'utf8' });
@@ -35,7 +50,10 @@ async function main() {
 
   const samples = readdirSync(AUDIO_DIR).filter((f) => f.endsWith('.mp3')).sort();
   if (samples.length === 0) throw new Error(`No MP3 files in ${AUDIO_DIR}.`);
-  const buffers = samples.map((f) => readFileSync(path.join(AUDIO_DIR, f)));
+  const audio = samples.map((f) => {
+    const file = path.join(AUDIO_DIR, f);
+    return { body: readFileSync(file), seconds: durationSeconds(file) };
+  });
 
   const supabase = createClient(url, key, { auth: { persistSession: false } });
   const { data: rows, error } = await supabase
@@ -47,14 +65,14 @@ async function main() {
   let uploaded = 0;
   for (const [i, row] of rows.entries()) {
     if (!row.storage_path) continue;
-    const body = buffers[i % buffers.length];
+    const { body, seconds } = audio[i % audio.length];
     const { error: upErr } = await supabase.storage
       .from('rehearsals')
       .upload(row.storage_path, body, { contentType: 'audio/mpeg', upsert: true });
     if (upErr) throw new Error(`${row.storage_path}: ${upErr.message}`);
     const { error: updErr } = await supabase
       .from('user_recordings')
-      .update({ file_size_bytes: body.length, duration_seconds: SAMPLE_SECONDS })
+      .update({ file_size_bytes: body.length, duration_seconds: seconds })
       .eq('id', row.id);
     if (updErr) throw updErr;
     uploaded++;
