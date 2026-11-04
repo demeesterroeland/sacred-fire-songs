@@ -421,14 +421,35 @@ export async function shareRecording(
   }
 
   // Strict ownership check: only owner can share
+  // Also verify that the underlying song is public so the recipient can view it
   const { data: rec } = await supabase
     .from("user_recordings")
-    .select("user_id")
+    .select(`
+      user_id,
+      song_version_id,
+      song_versions (
+        composition_id,
+        compositions (
+          id,
+          is_public,
+          owner_id
+        )
+      )
+    `)
     .eq("id", recordingId)
     .maybeSingle();
 
   if (!rec || rec.user_id !== user.id) {
     return { success: false, error: "Only the recording owner can share this recording." };
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const comp = (rec.song_versions as any)?.compositions;
+  if (comp && comp.is_public === false) {
+    return {
+      success: false,
+      error: "This song is private. You must make the song lyrics public before sharing recordings.",
+    };
   }
 
   if (targetUserId === user.id) {
@@ -479,7 +500,52 @@ export async function unshareRecording(
   return { success: true };
 }
 
-// 9. Publish recording publicly with singer consent confirmation (owner only)
+// 9. Make song public (required before sharing recordings on a private song)
+export async function makeSongPublic(
+  compositionId: string
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return { success: false, error: "Not authenticated" };
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  const isAdmin = profile?.role === "admin";
+
+  const { data: comp } = await supabase
+    .from("compositions")
+    .select("id, owner_id, is_public")
+    .eq("id", compositionId)
+    .maybeSingle();
+
+  if (!comp) {
+    return { success: false, error: "Song not found" };
+  }
+
+  if (comp.owner_id !== user.id && !isAdmin) {
+    return { success: false, error: "Only the song owner or an admin can publish this song." };
+  }
+
+  const { error } = await supabase
+    .from("compositions")
+    .update({ is_public: true })
+    .eq("id", compositionId);
+
+  if (error) {
+    console.error("[rehearsal] Error making song public:", error);
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
+}
+
+// 10. Publish recording publicly with singer consent confirmation (owner only)
 export async function publishRecording(
   recordingId: string,
   consentConfirmed: boolean

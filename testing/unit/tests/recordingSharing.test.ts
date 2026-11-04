@@ -4,6 +4,7 @@ import {
   unpublishRecording,
   shareRecording,
   unshareRecording,
+  makeSongPublic,
   updateSingerAttribution,
   getRecordingDownloadUrl,
 } from '@/lib/actions/rehearsal';
@@ -154,6 +155,29 @@ describe('Recording Sharing & DRM-lite Permissions', () => {
       });
     });
 
+    it('prevents sharing a recording if the underlying song is private', async () => {
+      mockGetUser.mockResolvedValue({ data: { user: ownerUser } });
+      mockFrom.mockReturnValue({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({
+            maybeSingle: vi.fn().mockResolvedValue({
+              data: {
+                user_id: ownerUser.id,
+                song_versions: {
+                  compositions: { is_public: false, owner_id: ownerUser.id },
+                },
+              },
+              error: null,
+            }),
+          }),
+        }),
+      });
+
+      const result = await shareRecording(recordingId, recipientUser.id);
+      expect(result.success).toBe(false);
+      expect(result.error).toMatch(/song is private/i);
+    });
+
     it('allows revoking share access', async () => {
       mockGetUser.mockResolvedValue({ data: { user: ownerUser } });
       const mockDelete = vi.fn().mockReturnValue({
@@ -166,6 +190,43 @@ describe('Recording Sharing & DRM-lite Permissions', () => {
       const result = await unshareRecording(recordingId, recipientUser.id);
       expect(result.success).toBe(true);
       expect(mockFrom).toHaveBeenCalledWith('recording_shares');
+    });
+  });
+
+  describe('Song Public Publishing', () => {
+    it('allows song owner to make a song public', async () => {
+      mockGetUser.mockResolvedValue({ data: { user: ownerUser } });
+      const mockUpdate = vi.fn().mockReturnValue({
+        eq: vi.fn().mockResolvedValue({ error: null }),
+      });
+      mockFrom.mockImplementation((table: string) => {
+        if (table === 'profiles') {
+          return {
+            select: vi.fn().mockReturnValue({
+              eq: vi.fn().mockReturnValue({
+                maybeSingle: vi.fn().mockResolvedValue({ data: { role: 'member' } }),
+              }),
+            }),
+          };
+        }
+        if (table === 'compositions') {
+          return {
+            select: vi.fn().mockReturnValue({
+              eq: vi.fn().mockReturnValue({
+                maybeSingle: vi.fn().mockResolvedValue({
+                  data: { id: 'comp-1', owner_id: ownerUser.id, is_public: false },
+                }),
+              }),
+            }),
+            update: mockUpdate,
+          };
+        }
+        return {};
+      });
+
+      const result = await makeSongPublic('comp-1');
+      expect(result.success).toBe(true);
+      expect(mockUpdate).toHaveBeenCalledWith({ is_public: true });
     });
   });
 

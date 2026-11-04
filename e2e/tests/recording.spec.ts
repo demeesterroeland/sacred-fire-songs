@@ -1,4 +1,4 @@
-import { test, expect, Page } from '@playwright/test';
+import { test, expect, Page, Locator } from '@playwright/test';
 import { ROLES } from '../fixtures/roles';
 
 // Set up fake media/mic devices for the chromium instances in this test file
@@ -10,6 +10,12 @@ test.use({
     ],
   },
 });
+
+// Owner actions sit in the row's "More actions" menu; the menu renders in a portal.
+async function recordingAction(page: Page, row: Locator, name: string) {
+  await row.locator('button[aria-label="More actions"]').click();
+  return page.getByRole('menuitem', { name });
+}
 
 test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
   let songUrl: string;
@@ -255,7 +261,7 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       await expect(page.locator('text="Audio URL is not available"')).toHaveCount(0);
 
       // Verify and click the download button
-      const downloadBtn = cardRow.locator('button[aria-label="Download recording"]');
+      const downloadBtn = await recordingAction(page, cardRow, 'Download recording');
       await expect(downloadBtn).toBeVisible();
       const downloadPromise = page.waitForEvent('download');
       await downloadBtn.click();
@@ -263,9 +269,10 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       expect(download.suggestedFilename()).toContain('.webm');
 
       // Clean up/Delete the created take to keep database clean
-      const deleteBtn = cardRow.locator('button[aria-label="Delete recording"]');
+      const deleteBtn = await recordingAction(page, cardRow, 'Delete recording');
       await expect(deleteBtn).toBeVisible();
       await deleteBtn.click();
+      await page.getByRole('button', { name: 'Yes, delete' }).click();
 
       // Verify the take disappears
       await expect(savedTake).toHaveCount(0, { timeout: 10000 });
@@ -341,7 +348,7 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       await expect(page.locator('text="Audio URL is not available"')).toHaveCount(0);
 
       // Verify and click the download button
-      const downloadBtn = container.locator('button[aria-label="Download recording"]');
+      const downloadBtn = await recordingAction(page, container, 'Download recording');
       await expect(downloadBtn).toBeVisible();
       const downloadPromise = page.waitForEvent('download');
       await downloadBtn.click();
@@ -349,8 +356,9 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       expect(download.suggestedFilename()).toContain('.wav');
 
       // 8. Delete it to clean up
-      const deleteBtn = container.locator('button[aria-label="Delete recording"]');
+      const deleteBtn = await recordingAction(page, container, 'Delete recording');
       await deleteBtn.click();
+      await page.getByRole('button', { name: 'Yes, delete' }).click();
 
       // Wait for deletion
       await expect(savedTake).toHaveCount(0, { timeout: 10000 });
@@ -523,8 +531,9 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       await expect(container.locator('svg.lucide-pause')).toBeVisible({ timeout: 5000 });
       
       // Clean up
-      const deleteBtn = container.locator('button[aria-label="Delete recording"]');
+      const deleteBtn = await recordingAction(page, container, 'Delete recording');
       await deleteBtn.click();
+      await page.getByRole('button', { name: 'Yes, delete' }).click();
       await expect(savedTake).toHaveCount(0, { timeout: 10000 });
     });
   });

@@ -9,10 +9,11 @@ import SongDisplay from '@/components/song/SongDisplay';
 import SongDetailSkeleton from '@/components/song/SongDetailSkeleton';
 import MediaEmbeds from '@/components/song/MediaEmbeds';
 import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal';
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Trash2, Edit2, Music, Guitar, Heart, MoreVertical, ListPlus, Mic, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
 import RehearsalDrawer from '@/components/song/RehearsalDrawer';
+import { makeSongPublic } from '@/lib/actions/rehearsal';
 import { useToggleFavorite } from '@/hooks/useToggleFavorite';
 import { PlaylistPicker } from '@/components/playlists/PlaylistPicker';
 import { useDeleteSong } from '@/hooks/useDeleteSong';
@@ -46,6 +47,7 @@ export default function SongDetailPage() {
 
     const { user, loading: authLoading } = useAuth();
     const isAdmin = user?.role === 'admin';
+    const queryClient = useQueryClient();
 
     // Enable Screen Wake Lock on Song Detail Page
     useWakeLock();
@@ -230,6 +232,20 @@ export default function SongDetailPage() {
                 console.error('Could not copy text: ', err);
                 toast.error(t('song.share.copyError'));
             }
+        }
+    };
+
+    const handleMakeSongPublic = async () => {
+        if (!id) return false;
+        const res = await makeSongPublic(id);
+        if (res.success) {
+            queryClient.invalidateQueries({ queryKey: SONG_KEYS.detail(id) });
+            queryClient.invalidateQueries({ queryKey: SONG_KEYS.list() });
+            toast.success(t('song.publishSuccess'));
+            return true;
+        } else {
+            toast.error(res.error || t('song.publishError'));
+            return false;
         }
     };
 
@@ -578,6 +594,9 @@ export default function SongDetailPage() {
                     youtubeUrl={currentVersion.youtube_url}
                     spotifyUrl={currentVersion.spotify_url}
                     soundcloudUrl={currentVersion.soundcloud_url}
+                    isSongPublic={song.is_public ?? true}
+                    isSongOwner={user?.id === song.owner_id || isAdmin}
+                    onMakeSongPublic={handleMakeSongPublic}
                 />
             )}
         </div>
