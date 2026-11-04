@@ -1,8 +1,8 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 1.51
+**Version:** 1.52
 **Status:** Living Document
-**Date:** Nov 4, 2026
+**Date:** Nov 5, 2026
 
 ## Changelog
 
@@ -50,6 +50,7 @@
 | **1.49** | Nov 4, 2026 | Added Stories 4.6.2 (User-to-User Private Sharing with DRM-lite restriction), 4.6.3 (Public Publication with Explicit Singer Consent Disclaimer), and 4.6.4 (Singer Attribution & Musician Profile Linking), all [Implemented]. Executable spec: `docs/testing/recording-sharing.feature`. |
 | **1.50** | Nov 4, 2026 | Added Story 4.6.6 (Notification & Email Dispatching for Shared Rehearsal Recordings, #373) [Implemented]. Executable spec: `docs/testing/share-notifications.feature`. |
 | **1.51** | Nov 4, 2026 | Added Phase 6 and Epic 6.1 (UX & Design Rework, #375): 9 group epics and 34 stories from the UX research in `docs/ux-research/`. |
+| **1.52** | Nov 5, 2026 | Added Story 4.6.5 (Personal Reordering of Shared-with-Me and Public Recordings, #420) [Planned] with Option A decision (decoupled user-specific ordering table). |
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
 
@@ -1409,6 +1410,32 @@ Scenario: Dispatch failure does not block sharing
   Given the mail server is unreachable
   When the owner shares a recording
   Then the share succeeds and the failure is only logged
+```
+
+**Story 4.6.5: [Planned]** As a user viewing a song's recordings (my own, shared takes, and public recordings), I want to reorder any recording in my list (including recordings shared with me) so that I can organize the rehearsal takes in the sequence that works best for my practice without altering other users' views. (GitHub #420)
+
+> [!NOTE] Architecture Decision: Option A (Decoupled User-Specific Ordering Table)
+> Currently, `user_recordings.position` is an owner-only column. Allowing recipients to reorder shared takes without collisions requires decoupling viewer ordering from recording ownership.
+>
+> 1. **Schema:** A junction table `user_song_version_recording_orders (user_id, song_version_id, ordered_recording_ids uuid[], updated_at)` with RLS `auth.uid() = user_id`.
+> 2. **Persistence:** `reorderUserRecordings` upserts the user's `ordered_recording_ids` array atomically instead of modifying `user_recordings.position`.
+> 3. **Query & Sort:** `getUserRecordings` sorts takes according to `ordered_recording_ids`, appending unranked takes by `created_at DESC`.
+> 4. **UI:** `RehearsalDrawer.tsx` enables drag handles for all logged-in users (`isCustomSort && user`), not just the recording owner.
+> 
+> *Cross-cutting applicability:* The same pattern can also be used for personal viewer overrides on shared or public playlists (`user_playlist_orders`).
+
+```gherkin
+Scenario: Drag handle is available for shared recordings
+  Given I am logged in as a registered user
+  And another musician has shared a rehearsal take with me
+  When I open the Rehearsal drawer for the song
+  Then I should see drag handles on both my own takes and shared takes
+
+Scenario: Reordering shared takes persists per user without affecting others
+  Given user "Maya" has a private recording shared with user "Carlos"
+  When "Carlos" reorders the shared recording to the top of his list
+  Then the new order is saved to Carlos's personal recording order
+  And "Maya" continues to see the recording in her original order
 ```
 
 ## Phase 5: Engineering Excellence
