@@ -1368,3 +1368,13 @@
 - [x] Story 5.1.7 contract scenarios rewritten (images only, no SSH, no deployment environment)
 - [ ] Owner: set `ISOLATION_DENYLIST` secret, add `isolation` to the required checks, remove the deployment environments
 - [ ] History rewrite of the public repo (owner decision taken; separate step)
+
+## Session November 3–4, 2026 (Test credentials, per-role E2E passwords, local E2E green)
+- [x] #336: `setup-test-db.mjs` no longer seeds shared test DBs with the public seed password; LAN IP moved to `ALLOWED_DEV_ORIGINS`
+- [x] #337: per-role E2E passwords (`E2E_PASSWORD_<ROLE>`, `passwordFor()` fallback to `NEXT_PUBLIC_DEV_TEST_PASSWORD`) + unit test
+- [x] Epic #338 (#339–#346): full local E2E suite green on `develop` (162 passed, 6 skipped) via #347
+- [x] #347 app fix: `RehearsalDrawer` invalidates `song-recordings` after save/delete
+- [x] #347 config: local `DATABASE_URL` default, `@headed` grep split, `E2E_FORCE_HEADLESS`; lint cap 202
+- [x] #348: isolation guard passes commits without added lines (message-only amend, deletion-only); bats contract tests
+- [ ] Owner: per-role E2E password secrets in CI; release v1.7.0 (`develop` → `main`)
+- [ ] Follow-up: offline navigation shows "page not found" instead of an offline message

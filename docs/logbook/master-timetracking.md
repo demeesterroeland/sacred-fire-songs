@@ -120,4 +120,5 @@
 | **October 31, 2026 (Part 4)** | **Bug (#321)**: "New Playlist" redirected logged-in users to `/` — `useAuth` initial `loading` when no server user, server-side guard on `/library/playlists/add`, unit + e2e regression tests. | ~0.75 Hours | ✅ Completed |
 
 | **November 3, 2026** | **Security / Ops**: public-repo isolation — scan, removal of deploy workflow and deployment names, isolation guard (hooks + CI), canonical `AGENTS.md`. | ~2.0 Hours | ✅ Completed |
-| **Total** | **Development + AI Collaboration** | **~200.0 Hours** | |
+| **November 3–4, 2026** | **Security/Testing (#336, #337, #338–#348)**: test-account seeding fix, per-role E2E passwords, epic for 21 failing local E2E tests with hand verification, fixes incl. `RehearsalDrawer` refresh bug (162 passed), isolation guard empty-diff fix. | ~5.0 Hours | ✅ Completed |
+| **Total** | **Development + AI Collaboration** | **~205.0 Hours** | |
