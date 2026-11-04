@@ -12,6 +12,7 @@ export async function updateSession(request: NextRequest) {
         request.nextUrl.pathname.startsWith("/explore") ||
         request.nextUrl.pathname.startsWith("/library") ||
         request.nextUrl.pathname.startsWith("/playlists") ||
+        request.nextUrl.pathname.startsWith("/recordings") ||
         request.nextUrl.pathname.startsWith("/supabase-api");
 
     let supabaseResponse = NextResponse.next({

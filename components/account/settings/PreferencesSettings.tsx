@@ -1,12 +1,16 @@
 "use client";
 
-import { Globe, Monitor, FileText, Music2, Type, WifiOff, Sun, Moon, SlidersHorizontal } from "lucide-react";
+import { useEffect, useState } from "react";
+import { toast } from "sonner";
+import { Globe, Mail, Monitor, FileText, Music2, Type, WifiOff, Sun, Moon, SlidersHorizontal } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { useWakeLock } from "@/hooks/useWakeLock";
 import { useUserPreferences, type ThemePreference } from "@/context/UserPreferencesContext";
 import { useLocale } from "@/context/LocaleContext";
 import type { TranslationKey } from "@/lib/i18n";
 import { LanguageSwitcher } from "@/components/common/navigation/LanguageSwitcher";
+import { useAuth } from "@/hooks/useAuth";
+import { getEmailNotificationsEnabled, setEmailNotificationsEnabled } from "@/lib/notifications/queries";
 
 interface PreferenceRowProps {
   icon: React.ReactNode;
@@ -119,6 +123,46 @@ function LanguageSelector() {
   );
 }
 
+/** Opt-out for transactional emails such as "a recording was shared with you". */
+function EmailNotificationsRow() {
+  const { t } = useLocale();
+  const { user } = useAuth();
+  const [enabled, setEnabled] = useState<boolean | null>(null);
+
+  useEffect(() => {
+    if (!user?.id) return;
+    let cancelled = false;
+    getEmailNotificationsEnabled(user.id)
+      .then((v) => { if (!cancelled) setEnabled(v); })
+      .catch(() => { if (!cancelled) setEnabled(true); });
+    return () => { cancelled = true; };
+  }, [user?.id]);
+
+  if (!user?.id) return null;
+
+  const onChange = async (v: boolean) => {
+    const previous = enabled;
+    setEnabled(v);
+    try {
+      await setEmailNotificationsEnabled(user.id, v);
+    } catch {
+      setEnabled(previous);
+      toast.error(t("settings.prefs.emailNotifications.saveError"));
+    }
+  };
+
+  return (
+    <PreferenceRow
+      icon={<Mail className="w-5 h-5" />}
+      label={t("settings.prefs.emailNotifications")}
+      description={t("settings.prefs.emailNotifications.description")}
+      checked={enabled ?? true}
+      onCheckedChange={onChange}
+      disabled={enabled === null}
+    />
+  );
+}
+
 export default function PreferencesSettings() {
   const { t } = useLocale();
   const { preferences, setPreference } = useUserPreferences();
@@ -153,6 +197,9 @@ export default function PreferencesSettings() {
         checked={preferences.autoHideBottomNav}
         onCheckedChange={(v) => setPreference("autoHideBottomNav", v)}
       />
+
+      {/* Email notifications — functional (Story 4.6.6) */}
+      <EmailNotificationsRow />
 
       {/* Auto-scroll Lyrics — disabled */}
       <PreferenceRow

@@ -42,6 +42,28 @@ export const TABLE_COLUMNS: Record<string, string[]> = {
     'created_at',
   ],
   setlists: ['id', 'owner_id', 'title', 'description', 'is_public', 'created_at'],
+  user_recordings: [
+    'id',
+    'user_id',
+    'song_version_id',
+    'recording_name',
+    'storage_path',
+    'position',
+    'file_size_bytes',
+    'duration_seconds',
+    'is_public',
+    'singer_consent_confirmed',
+    'singer_profile_id',
+    'singer_name',
+    'singer_email',
+    'created_at',
+  ],
+  recording_shares: [
+    'id',
+    'recording_id',
+    'shared_with_user_id',
+    'created_at',
+  ],
 };
 
 /** Embedded relations supported in select strings: `<embed>(cols)` on `<table>` via `<fk>`. */

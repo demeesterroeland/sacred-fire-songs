@@ -3149,3 +3149,28 @@ Opening a page without a connection showed the browser's error page ("No interne
 - **Offline page**: self-contained HTML (inline CSS + script), language resolved like `resolveLocale()` (stored choice, cookie, browser languages, English); texts are the new `offline.*` keys in all 8 dictionaries, embedded as JSON and kept in sync by a contract test. Retry reloads; the `online` event reloads automatically. `proxy.ts` skips `offline.html`.
 - **Second bug (acceptance criterion 3)**: an unknown song id showed "Couldn't load this song" with a raw PostgREST error because the lookup used `.single()`. The lookup moved to `lib/songs/fetchSong.ts` with `.maybeSingle()`, so the page renders "Song Not Found".
 - **Tests (pyramid, #262)**: `testing/bdd/support/offlineHarness.ts` runs `sw.js` and the page script in a Node `vm` sandbox with fake Cache Storage, navigator, localStorage and document; shared by vitest (`offlineFallback.test.ts`, `fetchSong.test.ts`) and Cucumber (`docs/testing/offline.feature`, `npm run test:bdd:offline`). Only two journeys run in a browser (`e2e/tests/offline.spec.ts`); a first version clicked the card's overlay link in its centre, where pills intercept the pointer, and was flaky until it clicked a corner.
+
+## November 4, 2026 (Part 3) - Private Song Sharing & Recording Attribution
+
+**Task Overview**
+Expanded Epic 4.6 (Private Rehearsal & Audio Storage) to enable controlled user-to-user private sharing, DRM-lite protections (streaming without downloads or resharing), public publication with explicit singer consent disclaimer, and verified musician attribution.
+
+**Technical Details**
+- **Database schema**: Created migration `supabase/migrations/20261104160000_recording_sharing_and_attribution.sql` adding `is_public`, `singer_consent_confirmed`, `singer_profile_id`, `singer_name`, `singer_email` to `user_recordings`; created `recording_shares` table with cascade delete. Synced `docs/design/db-schema.sql` (v2.8).
+- **Search & RLS Security**: Implemented `search_users_for_sharing(search_term)` RPC function. Hardened RLS policies on `user_recordings` (own, shared, and public), `recording_shares`, `storage.objects` for the rehearsals bucket, and profiles for attributed singers and shared contacts.
+- **DRM-lite Enforcement**:
+  - `getRecordingDownloadUrl` and UI download controls strictly restricted to owners (`is_owner !== false`). Shared recipients have streaming playback only (`<audio src={audioUrl}>`).
+  - Resharing is rejected for non-owners in `shareRecording`.
+- **Singer Consent Disclaimer**: `RecordingPublishModal` presents an explicit confirmation modal with a mandatory consent disclaimer checkbox before transitioning a recording to public visibility.
+- **Singer Attribution & Musician Profile**:
+  - `RecordingAttributionModal` supports registered musician lookup or manual entry of name/email.
+  - Attributed registered musicians are displayed with a verified musician badge and linked to `/users/:id`.
+  - Created `/users/[id]` page and `UserProfileView` component displaying musician bio and public attributed recordings.
+  - Unregistered singers display gracefully with a pending invite badge without runtime exceptions.
+- **RehearsalDrawer Integration**:
+  - `SortableRecordingItem` updated with status badges (Public, Shared, Private), singer attribution, and owner-only management buttons (Attribution, Share, Public toggle, Rename, Download, Delete).
+- **i18n & Tests**:
+  - Added dot-namespaced translation keys across all 8 supported languages (`en`, `nl`, `es`, `fr`, `it`, `pt`, `qu`, `ru`) with 100% parity verified in `testing/unit/tests/i18n.test.ts`.
+  - Vitest unit tests: 12 tests in `testing/unit/tests/recordingSharing.test.ts`.
+  - Cucumber BDD tests: 7 scenarios in `docs/testing/recording-sharing.feature`.
+  - All CI gates passed: `npx tsc --noEmit` clean, `npm run lint` clean (201 warnings <= 202 cap), 380 unit tests and 81 BDD scenarios passing.

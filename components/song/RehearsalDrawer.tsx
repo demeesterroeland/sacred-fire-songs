@@ -1,19 +1,34 @@
 "use client";
 
-import React, { useState, useEffect, useTransition, useMemo } from "react";
+import React, { useState, useEffect, useTransition, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Music, Trash2, Pencil, Calendar, Play, Pause, Lock, RotateCcw, RotateCw, GripVertical, Download, ChevronUp, ChevronDown, Check } from "lucide-react";
+import { X, Music, Trash2, Pencil, Play, Pause, Lock, RotateCcw, RotateCw, GripVertical, Download, ChevronUp, ChevronDown, Check, Share2, Globe, Users, Mic, CheckCircle2, Clock, MoreHorizontal, Link2 } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Loader2 } from "lucide-react";
 import AudioRecorder from "./AudioRecorder";
 import { useSongRecordings } from "@/hooks/useSongRecordings";
-import { getUserRecordings, deleteUserRecording, renameUserRecording, reorderUserRecordings, type UserRecording } from "@/lib/actions/rehearsal";
+import { getUserRecordings, deleteUserRecording, renameUserRecording, reorderUserRecordings, unpublishRecording, type UserRecording } from "@/lib/actions/rehearsal";
 import { getYouTubeEmbedUrl, getSpotifyEmbedUrl } from "./MediaEmbeds";
 import { useAuth } from "@/hooks/useAuth";
 import { useAudio } from "./AudioProvider";
 import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLocale } from "@/context/LocaleContext";
+import { recordingPermalink } from "@/lib/songs/recordingLink";
+import { usePathname, useSearchParams } from "next/navigation";
+import RecordingShareModal from "./RecordingShareModal";
+import RecordingPublishModal from "./RecordingPublishModal";
+import RecordingAttributionModal from "./RecordingAttributionModal";
+import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
 import {
   DndContext,
   closestCenter,
@@ -42,8 +57,13 @@ function SortableRecordingItem({
   handleDelete,
   handleDownload,
   handleRename,
+  handleShare,
+  handlePublish,
+  handleAttribution,
+  handleCopyLink,
   formatDate,
   isCustomSort,
+  isHighlighted = false,
 }: {
   rec: UserRecording;
   activePlaybackId: string | null;
@@ -54,12 +74,22 @@ function SortableRecordingItem({
   handleDelete: (id: string, path: string) => void;
   handleDownload: (recording: UserRecording) => void;
   handleRename: (id: string, newName: string) => void;
+  handleShare?: (recording: UserRecording) => void;
+  handlePublish?: (recording: UserRecording) => void;
+  handleAttribution?: (recording: UserRecording) => void;
+  handleCopyLink?: (recording: UserRecording) => void;
   formatDate: (date: string) => string;
   isCustomSort: boolean;
+  /** Opened through a `?recording=` deep link. */
+  isHighlighted?: boolean;
 }) {
   const { t } = useLocale();
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(rec.recording_name);
+  const renameRequested = useRef(false);
+
+  const isOwner = rec.is_owner !== false;
+  const isShared = rec.is_shared === true;
 
   const handleSaveRename = () => {
     if (editValue.trim() && editValue !== rec.recording_name) {
@@ -89,18 +119,36 @@ function SortableRecordingItem({
     zIndex: isDragging ? 10 : undefined,
   };
 
+  const isPlaying = activePlaybackId === rec.id && isRecordingPlaying;
+  const shareCount = rec.shared_with?.length ?? 0;
+  const singerLabel = rec.singer_profile?.full_name || rec.singer_name;
+  const duration = rec.duration_seconds
+    ? `${Math.floor(rec.duration_seconds / 60)}:${(rec.duration_seconds % 60).toString().padStart(2, "0")}`
+    : null;
+  const busy = deletingId === rec.id || downloadingId === rec.id;
+  const menuItemClass = "gap-2 text-gray-700 dark:text-gray-200 focus:bg-gray-100 dark:focus:bg-gray-800 cursor-pointer";
+
   return (
     <div
       ref={setNodeRef}
       style={style}
-      className="flex items-center gap-3 p-4 rounded-2xl bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700 transition-all duration-200 group"
+      data-recording-id={rec.id}
+      aria-current={isHighlighted ? "true" : undefined}
+      className={`flex items-center gap-2.5 px-2.5 py-2 rounded-xl transition-colors group ${
+        isHighlighted
+          ? "bg-indigo-500/10 ring-2 ring-indigo-500/50"
+          : "hover:bg-gray-50 dark:hover:bg-gray-900/60"
+      }`}
     >
-      {/* Drag handle (shown when custom sort is active) */}
-      {isCustomSort && (
+      {/* Recordings of other users keep their owner's order (positions are owner-only),
+          so they get an empty slot instead of a handle to stay aligned with the list. */}
+      {isCustomSort && !isOwner && <span className="w-4 h-4 shrink-0 -ml-1" aria-hidden="true" />}
+      {/* Drag handle: only in custom sort, revealed on hover on pointer devices */}
+      {isCustomSort && isOwner && (
         <button
           {...attributes}
           {...listeners}
-          className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-grab active:cursor-grabbing touch-none shrink-0 p-1 -ml-1"
+          className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-grab active:cursor-grabbing touch-none shrink-0 -ml-1 md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
           aria-label={t('rehearsal.recording.drag.ariaLabel')}
           title={t('rehearsal.recording.drag.ariaLabel')}
         >
@@ -108,27 +156,22 @@ function SortableRecordingItem({
         </button>
       )}
 
-      {/* Play/Pause Button */}
       <button
         onClick={() => handleTogglePlay(rec.id, rec.audioUrl)}
         disabled={!rec.audioUrl}
-        className={`w-10 h-10 rounded-full flex items-center justify-center transition-all duration-200 shadow-sm shrink-0 ${
+        className={`w-9 h-9 rounded-full flex items-center justify-center transition-all shrink-0 ${
           !rec.audioUrl
             ? "bg-gray-100 dark:bg-gray-800 text-gray-400 opacity-50 cursor-not-allowed"
-            : activePlaybackId === rec.id && isRecordingPlaying
+            : isPlaying
             ? "bg-indigo-600 hover:bg-indigo-500 text-white active:scale-95"
-            : "bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 text-indigo-600 dark:text-indigo-400 active:scale-95"
+            : "bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 active:scale-95"
         }`}
-        title={!rec.audioUrl ? t('rehearsal.recording.missingTitle') : activePlaybackId === rec.id && isRecordingPlaying ? t('rehearsal.recording.pause') : t('rehearsal.recording.play')}
+        title={!rec.audioUrl ? t('rehearsal.recording.missingTitle') : isPlaying ? t('rehearsal.recording.pause') : t('rehearsal.recording.play')}
+        aria-label={!rec.audioUrl ? t('rehearsal.recording.missingTitle') : isPlaying ? t('rehearsal.recording.pause') : t('rehearsal.recording.play')}
       >
-        {activePlaybackId === rec.id && isRecordingPlaying ? (
-          <Pause className="w-4 h-4 fill-current" />
-        ) : (
-          <Play className="w-4 h-4 fill-current translate-x-0.5" />
-        )}
+        {isPlaying ? <Pause className="w-3.5 h-3.5 fill-current" /> : <Play className="w-3.5 h-3.5 fill-current translate-x-px" />}
       </button>
 
-      {/* Title and date */}
       <div className="flex-1 min-w-0 text-left">
         {isEditing ? (
           <input
@@ -138,83 +181,136 @@ function SortableRecordingItem({
             onChange={(e) => setEditValue(e.target.value)}
             onBlur={handleSaveRename}
             onKeyDown={handleKeyDown}
-            className="w-full text-sm font-bold bg-white dark:bg-gray-900 border border-indigo-500 rounded px-2 py-0.5 outline-none text-gray-900 dark:text-white"
+            aria-label={t('rehearsal.recording.edit.ariaLabel')}
+            className="w-full text-sm font-semibold bg-white dark:bg-gray-900 border border-indigo-500 rounded px-2 py-0.5 outline-none text-gray-900 dark:text-white"
           />
         ) : (
-          <h4 
-            className={`text-sm font-bold truncate ${!rec.audioUrl ? "text-red-500/80 dark:text-red-400/80" : "text-gray-900 dark:text-white"}`}
-            onDoubleClick={() => setIsEditing(true)}
-          >
-            {rec.recording_name}
-            {!rec.audioUrl && <span className="ml-2 text-[10px] uppercase font-bold text-red-500 bg-red-500/10 px-1.5 py-0.5 rounded">{t('rehearsal.recording.missingBadge')}</span>}
-          </h4>
-        )}
-        <div className="text-[10px] text-gray-400 dark:text-gray-500 flex items-center gap-1.5 mt-0.5 font-medium flex-wrap">
-          <div className="flex items-center gap-1">
-            <Calendar className="w-3 h-3" />
-            {formatDate(rec.created_at)}
+          <div className="flex items-center gap-1.5 min-w-0">
+            <h4
+              className={`text-sm font-semibold truncate ${!rec.audioUrl ? "text-red-500/80 dark:text-red-400/80" : "text-gray-900 dark:text-white"}`}
+              onDoubleClick={() => isOwner && setIsEditing(true)}
+            >
+              {rec.recording_name}
+            </h4>
+            {/* Visibility: private is the default and gets no marker */}
+            {rec.is_public ? (
+              <Globe className="w-3.5 h-3.5 text-emerald-500 shrink-0" aria-label={t('recording.publish.badge')}>
+                <title>{t('recording.publish.badge')}</title>
+              </Globe>
+            ) : isShared ? (
+              <Users className="w-3.5 h-3.5 text-indigo-500 shrink-0" aria-label={t('recording.sharing.badge')}>
+                <title>{t('recording.sharing.badge')}</title>
+              </Users>
+            ) : shareCount > 0 ? (
+              <span className="inline-flex items-center gap-0.5 text-[11px] text-indigo-500 shrink-0" title={`${t('recording.sharing.sharedWithTitle')} (${shareCount})`}>
+                <Users className="w-3.5 h-3.5" aria-hidden />
+                {shareCount}
+              </span>
+            ) : null}
+            {!rec.audioUrl && (
+              <span className="text-[10px] uppercase font-bold text-red-500 bg-red-500/10 px-1.5 py-0.5 rounded shrink-0">
+                {t('rehearsal.recording.missingBadge')}
+              </span>
+            )}
           </div>
-          {(rec.duration_seconds || rec.file_size_bytes) && (
-            <span className="opacity-50 mx-0.5">•</span>
+        )}
+
+        {/* One meta line: date · duration · singer */}
+        <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5 mt-0.5 min-w-0">
+          <span className="shrink-0">{formatDate(rec.created_at)}</span>
+          {duration && <><span aria-hidden className="opacity-50">·</span><span className="shrink-0 tabular-nums">{duration}</span></>}
+          {singerLabel && (
+            <>
+              <span aria-hidden className="opacity-50">·</span>
+              {rec.singer_profile_id && rec.singer_profile ? (
+                <Link
+                  href={`/users/${rec.singer_profile_id}`}
+                  className="inline-flex items-center gap-1 min-w-0 text-indigo-600 dark:text-indigo-400 hover:underline"
+                  title={rec.singer_profile.is_musician ? t('recording.attribution.badgeVerified') : undefined}
+                >
+                  <Mic className="w-3 h-3 shrink-0" aria-hidden />
+                  <span className="truncate">{singerLabel}</span>
+                  {rec.singer_profile.is_musician && <CheckCircle2 className="w-3 h-3 text-amber-500 shrink-0" aria-label={t('recording.attribution.badgeVerified')} />}
+                </Link>
+              ) : (
+                <span className="inline-flex items-center gap-1 min-w-0" title={t('recording.attribution.badgePending')}>
+                  <Mic className="w-3 h-3 shrink-0" aria-hidden />
+                  <span className="truncate">{singerLabel}</span>
+                  <Clock className="w-3 h-3 shrink-0 opacity-60" aria-label={t('recording.attribution.badgePending')} />
+                </span>
+              )}
+            </>
           )}
-          {rec.duration_seconds ? (
-            <span>
-              {Math.floor(rec.duration_seconds / 60).toString().padStart(2, '0')}:
-              {(rec.duration_seconds % 60).toString().padStart(2, '0')}
-            </span>
-          ) : null}
-          {rec.duration_seconds && rec.file_size_bytes ? (
-            <span className="opacity-50 mx-0.5">•</span>
-          ) : null}
-          {rec.file_size_bytes ? (
-            <span>{(rec.file_size_bytes / (1024 * 1024)).toFixed(1)} MB</span>
-          ) : null}
         </div>
       </div>
 
-      {/* Edit Button */}
-      <button
-        onClick={() => setIsEditing(true)}
-        className="p-2 rounded-xl text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition-all active:scale-95 shrink-0"
-        title={t('rehearsal.recording.edit.ariaLabel')}
-        aria-label={t('rehearsal.recording.edit.ariaLabel')}
-      >
-        <Pencil className="w-4 h-4" />
-      </button>
-
-      {/* Download Button */}
-      <button
-        onClick={() => handleDownload(rec)}
-        disabled={!rec.audioUrl || downloadingId === rec.id}
-        className={`p-2 rounded-xl transition-all active:scale-95 shrink-0 ${
-          !rec.audioUrl
-            ? "text-gray-300 dark:text-gray-700 opacity-40 cursor-not-allowed"
-            : "text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40"
-        }`}
-        title={!rec.audioUrl ? t('rehearsal.recording.missingTitle') : t('rehearsal.recording.download.ariaLabel')}
-        aria-label={t('rehearsal.recording.download.ariaLabel')}
-      >
-        {downloadingId === rec.id ? (
-          <div className="w-4 h-4 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
-        ) : (
-          <Download className="w-4 h-4" />
-        )}
-      </button>
-
-      {/* Delete Button */}
-      <button
-        onClick={() => handleDelete(rec.id, rec.storage_path)}
-        disabled={deletingId === rec.id}
-        className="p-2 rounded-xl text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-all active:scale-95 shrink-0"
-        title={t('rehearsal.recording.delete.ariaLabel')}
-        aria-label={t('rehearsal.recording.delete.ariaLabel')}
-      >
-        {deletingId === rec.id ? (
-          <div className="w-4 h-4 border-2 border-red-500/30 border-t-red-500 rounded-full animate-spin" />
-        ) : (
-          <Trash2 className="w-4 h-4" />
-        )}
-      </button>
+      {/* Owner actions live in one menu; recipients only stream (DRM-lite) */}
+      {isOwner && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-200/60 dark:hover:bg-gray-800 transition-colors shrink-0"
+              aria-label={t('common.moreActions')}
+              title={t('common.moreActions')}
+            >
+              {busy ? (
+                <div className="w-4 h-4 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
+              ) : (
+                <MoreHorizontal className="w-4 h-4" />
+              )}
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent
+            align="end"
+            className="w-52 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700"
+            onCloseAutoFocus={(e) => {
+              // Keep focus in the rename input instead of returning it to the trigger
+              if (renameRequested.current) {
+                e.preventDefault();
+                renameRequested.current = false;
+                setIsEditing(true);
+              }
+            }}
+          >
+            <DropdownMenuItem className={menuItemClass} onSelect={() => handleShare?.(rec)}>
+              <Share2 className="w-4 h-4" />
+              {t('recording.sharing.button')}
+              {shareCount > 0 && <span className="ml-auto text-xs text-gray-500">{shareCount}</span>}
+            </DropdownMenuItem>
+            <DropdownMenuItem className={menuItemClass} onSelect={() => handlePublish?.(rec)}>
+              {rec.is_public ? <Lock className="w-4 h-4" /> : <Globe className="w-4 h-4" />}
+              {rec.is_public ? t('recording.publish.makePrivate') : t('recording.publish.makePublic')}
+            </DropdownMenuItem>
+            <DropdownMenuItem className={menuItemClass} onSelect={() => handleAttribution?.(rec)}>
+              <Mic className="w-4 h-4" />
+              {t('recording.attribution.button')}
+            </DropdownMenuItem>
+            {handleCopyLink && (
+              <DropdownMenuItem className={menuItemClass} onSelect={() => handleCopyLink(rec)}>
+                <Link2 className="w-4 h-4" />
+                {t('rehearsal.recording.copyLink')}
+              </DropdownMenuItem>
+            )}
+            <DropdownMenuSeparator className="bg-gray-200 dark:bg-gray-800" />
+            <DropdownMenuItem className={menuItemClass} onSelect={() => { renameRequested.current = true; }}>
+              <Pencil className="w-4 h-4" />
+              {t('rehearsal.recording.edit.ariaLabel')}
+            </DropdownMenuItem>
+            <DropdownMenuItem className={menuItemClass} disabled={!rec.audioUrl} onSelect={() => handleDownload(rec)}>
+              <Download className="w-4 h-4" />
+              {t('rehearsal.recording.download.ariaLabel')}
+            </DropdownMenuItem>
+            <DropdownMenuSeparator className="bg-gray-200 dark:bg-gray-800" />
+            <DropdownMenuItem
+              className="gap-2 text-red-600 dark:text-red-400 focus:bg-red-500/10 focus:text-red-600 cursor-pointer"
+              onSelect={() => handleDelete(rec.id, rec.storage_path)}
+            >
+              <Trash2 className="w-4 h-4" />
+              {t('rehearsal.recording.delete.ariaLabel')}
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
     </div>
   );
 }
@@ -231,6 +327,11 @@ interface RehearsalDrawerProps {
   soundcloudUrl?: string | null;
   onPlayStateChange?: (isPlaying: boolean) => void;
   requestedTab?: "recorder" | "media" | "auto";
+  isSongPublic?: boolean;
+  isSongOwner?: boolean;
+  onMakeSongPublic?: () => Promise<boolean>;
+  /** Recording opened through `/songs/<id>?recording=<id>`: highlighted and scrolled into view. */
+  highlightRecordingId?: string | null;
 }
 
 export default function RehearsalDrawer({
@@ -245,6 +346,10 @@ export default function RehearsalDrawer({
   soundcloudUrl,
   onPlayStateChange,
   requestedTab = "auto",
+  isSongPublic = true,
+  isSongOwner = false,
+  onMakeSongPublic,
+  highlightRecordingId = null,
 }: RehearsalDrawerProps) {
   const { t } = useLocale();
   const { user } = useAuth();
@@ -252,6 +357,13 @@ export default function RehearsalDrawer({
   const [selectedMedia, setSelectedMedia] = useState<"youtube" | "spotify" | "soundcloud" | null>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [pendingDelete, setPendingDelete] = useState<UserRecording | null>(null);
+  const [shareRecording, setShareRecording] = useState<UserRecording | null>(null);
+  const [privateSongPromptRecording, setPrivateSongPromptRecording] = useState<UserRecording | null>(null);
+  const [isPublishingSong, setIsPublishingSong] = useState(false);
+  const [publishRecording, setPublishRecording] = useState<UserRecording | null>(null);
+  const [attributionRecording, setAttributionRecording] = useState<UserRecording | null>(null);
+  const isAdmin = user?.role === 'admin';
   const { activePlaybackId, activeRecording, audioElements, isRecordingPlaying, recordingCurrentTime, recordingDuration, handleTogglePlay: contextHandleTogglePlay, pauseActiveRecording, stopActiveRecording, seekActiveRecording, seekRelativeActiveRecording, clearAudioElements } = useAudio();
 
 
@@ -354,6 +466,37 @@ export default function RehearsalDrawer({
   }, [fetchedRecordings]);
 
   const hasAnyAudioSource = hasMedia || recordings.length > 0;
+
+  // Sign-in from the guest prompt returns to this page, including `?recording=`.
+  const pathname = usePathname();
+  const search = useSearchParams().toString();
+  const currentPath = search ? `${pathname}?${search}` : pathname;
+
+  // Deep link: scroll the linked recording into view once it is rendered.
+  const highlightVisible = isOpen && activeTab === "recorder" && !!highlightRecordingId
+    && recordings.some((r) => r.id === highlightRecordingId);
+  useEffect(() => {
+    if (!highlightVisible || !highlightRecordingId) return;
+    const timer = setTimeout(() => {
+      document
+        .querySelector(`[data-recording-id="${window.CSS.escape(highlightRecordingId)}"]`)
+        ?.scrollIntoView({ behavior: "smooth", block: "center" });
+    }, 350); // after the drawer's slide-in animation
+    return () => clearTimeout(timer);
+  }, [highlightVisible, highlightRecordingId]);
+
+  const handleCopyLink = async (rec: UserRecording) => {
+    // The link grants nothing by itself: RLS decides who can open it.
+    const ownerOnly = !rec.is_public && (rec.shared_with?.length ?? 0) === 0;
+    try {
+      await navigator.clipboard.writeText(`${window.location.origin}${recordingPermalink(rec.id)}`);
+      toast.success(t('rehearsal.recording.linkCopied'), {
+        description: ownerOnly ? t('rehearsal.recording.linkOwnerOnly') : undefined,
+      });
+    } catch {
+      toast.error(t('common.error'));
+    }
+  };
 
   // ─────────────────────────────────────────────────────────────────────────
   // SINGLE SOURCE OF TRUTH — nowPlaying
@@ -865,8 +1008,12 @@ export default function RehearsalDrawer({
     }
   };
 
-  // Handle download recording
+  // Handle download recording (strictly DRM-lite protected: owner only)
   const handleDownload = async (rec: UserRecording) => {
+    if (rec.is_owner === false || rec.can_download === false) {
+      toast.error(t('recording.sharing.cannotDownload'));
+      return;
+    }
     if (!rec.audioUrl) {
       toast.error(t('recorder.audio.missing'));
       return;
@@ -909,6 +1056,39 @@ export default function RehearsalDrawer({
     } finally {
       setDownloadingId(null);
     }
+  };
+
+  const handleShare = (rec: UserRecording) => {
+    if (isSongPublic === false) {
+      if (isSongOwner || isAdmin) {
+        setPrivateSongPromptRecording(rec);
+      } else {
+        toast.error(t('recording.sharing.privateSongPrompt.notOwner'));
+      }
+      return;
+    }
+    setShareRecording(rec);
+  };
+
+  const handlePublish = async (rec: UserRecording) => {
+    if (rec.is_public) {
+      const res = await unpublishRecording(rec.id);
+      if (res.success) {
+        toast.success(t('recording.publish.privateSuccess'));
+        setRecordings((prev) =>
+          prev.map((r) => (r.id === rec.id ? { ...r, is_public: false } : r))
+        );
+        queryClient.invalidateQueries({ queryKey: ["song-recordings", songVersionId] });
+      } else {
+        toast.error(res.error || t('recording.publish.error'));
+      }
+    } else {
+      setPublishRecording(rec);
+    }
+  };
+
+  const handleAttribution = (rec: UserRecording) => {
+    setAttributionRecording(rec);
   };
 
   // Custom play/pause control handler
@@ -1063,29 +1243,18 @@ export default function RehearsalDrawer({
                       
                       {/* Fake practice takes mock list for guest demo preview */}
                       {!user ? (
-                        <div className="space-y-2.5">
-                          <div className="flex items-center gap-4 p-4 rounded-2xl bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800">
-                            <div className="w-10 h-10 rounded-full bg-indigo-50 dark:bg-indigo-950/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0">
-                              <Play className="w-4 h-4 fill-current translate-x-0.5" />
+                        <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-gray-50/60 dark:bg-gray-950 p-1 space-y-0.5">
+                          {[t('rehearsal.demo.take1'), t('rehearsal.demo.take2')].map((name) => (
+                            <div key={name} className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl">
+                              <div className="w-9 h-9 rounded-full bg-indigo-50 dark:bg-indigo-950/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0">
+                                <Play className="w-3.5 h-3.5 fill-current translate-x-px" />
+                              </div>
+                              <div className="flex-1 text-left min-w-0">
+                                <h4 className="text-sm font-semibold text-gray-900 dark:text-white truncate">{name}</h4>
+                                <span className="text-xs text-gray-500 dark:text-gray-400">Jul 1, 2026 · 0:30</span>
+                              </div>
                             </div>
-                            <div className="flex-1 text-left">
-                              <h4 className="text-sm font-bold text-gray-900 dark:text-white">{t('rehearsal.demo.take1')}</h4>
-                              <span className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5 font-medium flex items-center gap-1.5">
-                                <Calendar className="w-3 h-3" /> Jul 1, 2026
-                              </span>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-4 p-4 rounded-2xl bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800">
-                            <div className="w-10 h-10 rounded-full bg-indigo-50 dark:bg-indigo-950/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0">
-                              <Play className="w-4 h-4 fill-current translate-x-0.5" />
-                            </div>
-                            <div className="flex-1 text-left">
-                              <h4 className="text-sm font-bold text-gray-900 dark:text-white">{t('rehearsal.demo.take2')}</h4>
-                              <span className="text-[10px] text-gray-400 dark:text-gray-500 mt-0.5 font-medium flex items-center gap-1.5">
-                                <Calendar className="w-3 h-3" /> Jul 1, 2026
-                              </span>
-                            </div>
-                          </div>
+                          ))}
                         </div>
                       ) : isLoading ? (
                         <div className="flex flex-col items-center justify-center py-8 space-y-2">
@@ -1106,7 +1275,7 @@ export default function RehearsalDrawer({
                             items={recordings.map((r) => r.id)}
                             strategy={verticalListSortingStrategy}
                           >
-                            <div className="space-y-2.5">
+                            <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-gray-50/60 dark:bg-gray-950 p-1 space-y-0.5">
                               {recordings.map((rec) => (
                                 <SortableRecordingItem
                                   key={rec.id}
@@ -1116,11 +1285,16 @@ export default function RehearsalDrawer({
                                   deletingId={deletingId}
                                   downloadingId={downloadingId}
                                   handleTogglePlay={(id, url) => { const rec = recordings.find(r => r.id === id); if (rec) contextHandleTogglePlay(rec, url); }}
-                                  handleDelete={handleDelete}
+                                  handleDelete={(id) => setPendingDelete(recordings.find((r) => r.id === id) ?? null)}
                                   handleRename={handleRename}
                                   handleDownload={handleDownload}
+                                  handleShare={handleShare}
+                                  handlePublish={handlePublish}
+                                  handleAttribution={handleAttribution}
+                                  handleCopyLink={handleCopyLink}
                                   formatDate={formatDate}
                                   isCustomSort={recordings.length > 1}
+                                  isHighlighted={rec.id === highlightRecordingId}
                                 />
                               ))}
                             </div>
@@ -1143,7 +1317,7 @@ export default function RehearsalDrawer({
                             {t('rehearsal.guest.description')}
                           </p>
                         </div>
-                        <Link href="/auth/login">
+                        <Link href={`/auth/login?next=${encodeURIComponent(currentPath)}`}>
                           <button className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer">
                             {t('rehearsal.guest.signIn')}
                           </button>
@@ -1451,6 +1625,115 @@ export default function RehearsalDrawer({
             )}
           </div>
         </div>
+      )}
+
+      {/* Private Song Sharing Confirmation Dialog */}
+      {privateSongPromptRecording && (
+        <Dialog open={!!privateSongPromptRecording} onOpenChange={(open) => !open && setPrivateSongPromptRecording(null)}>
+          <DialogContent className="max-w-md bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white">
+            <DialogHeader>
+              <DialogTitle className="flex items-center gap-2 text-lg font-bold">
+                <Lock className="w-5 h-5 text-amber-500" />
+                {t('recording.sharing.privateSongPrompt.title')}
+              </DialogTitle>
+              <DialogDescription className="text-sm text-gray-500 dark:text-gray-400 pt-2 leading-relaxed">
+                {t('recording.sharing.privateSongPrompt.body')}
+              </DialogDescription>
+            </DialogHeader>
+
+            <DialogFooter className="flex flex-row justify-end gap-2 pt-4 border-t border-gray-100 dark:border-gray-800">
+              <button
+                type="button"
+                onClick={() => setPrivateSongPromptRecording(null)}
+                disabled={isPublishingSong}
+                className="px-4 py-2 text-sm font-medium rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+              >
+                {t('common.cancel')}
+              </button>
+              <button
+                type="button"
+                disabled={isPublishingSong}
+                onClick={async () => {
+                  if (!onMakeSongPublic) return;
+                  setIsPublishingSong(true);
+                  try {
+                    const success = await onMakeSongPublic();
+                    if (success) {
+                      const rec = privateSongPromptRecording;
+                      setPrivateSongPromptRecording(null);
+                      setShareRecording(rec);
+                    }
+                  } finally {
+                    setIsPublishingSong(false);
+                  }
+                }}
+                className="px-4 py-2 text-sm font-medium rounded-lg bg-amber-500 hover:bg-amber-600 text-black font-semibold transition-colors flex items-center gap-2 disabled:opacity-50"
+              >
+                {isPublishingSong ? (
+                  <>
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                    <span>{t('common.loading')}</span>
+                  </>
+                ) : (
+                  <>
+                    <Globe className="w-4 h-4" />
+                    <span>{t('recording.sharing.privateSongPrompt.confirm')}</span>
+                  </>
+                )}
+              </button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Recording Sharing Modal */}
+      {shareRecording && (
+        <RecordingShareModal
+          isOpen={!!shareRecording}
+          onClose={() => setShareRecording(null)}
+          recording={shareRecording}
+          onSharesUpdated={() => {
+            queryClient.invalidateQueries({ queryKey: ["song-recordings", songVersionId] });
+          }}
+        />
+      )}
+
+      {/* Recording Publish Modal (with Singer Consent Disclaimer) */}
+      {publishRecording && (
+        <RecordingPublishModal
+          isOpen={!!publishRecording}
+          onClose={() => setPublishRecording(null)}
+          recording={publishRecording}
+          onPublished={() => {
+            queryClient.invalidateQueries({ queryKey: ["song-recordings", songVersionId] });
+          }}
+        />
+      )}
+
+      {/* Delete confirmation: deleting removes the audio file for good */}
+      <DeleteConfirmationModal
+        isOpen={!!pendingDelete}
+        onClose={() => setPendingDelete(null)}
+        onConfirm={async () => {
+          if (!pendingDelete) return;
+          await handleDelete(pendingDelete.id, pendingDelete.storage_path);
+          setPendingDelete(null);
+        }}
+        title={t('rehearsal.recording.delete.confirmTitle')}
+        message={t('rehearsal.recording.delete.confirmMessage', { name: pendingDelete?.recording_name ?? '' })}
+        isDeleting={!!pendingDelete && deletingId === pendingDelete.id}
+      />
+
+      {/* Singer Attribution Modal */}
+      {attributionRecording && (
+        <RecordingAttributionModal
+          isOpen={!!attributionRecording}
+          onClose={() => setAttributionRecording(null)}
+          recording={attributionRecording}
+          onAttributionUpdated={() => {
+            queryClient.invalidateQueries({ queryKey: ["song-recordings", songVersionId] });
+          }}
+        />
       )}
     </>
   );

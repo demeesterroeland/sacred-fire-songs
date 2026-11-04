@@ -1,11 +1,14 @@
 /*
- **Version:** 2.7
+ **Version:** 3.0
  **Status:** Current
- **Date:** July 15, 2026
+ **Date:** November 4, 2026
  
  ## Usage
  This script provides a complete setup for the "Sacred Fire Songs" database. 
- It consolidates the initial schema and all subsequent migrations up to July 15, 2026.
+ It consolidates the initial schema and all subsequent migrations up to November 4, 2026.
+ (v3.0: Added notifications inbox with share triggers and profiles.email_notifications opt-out).
+ (v2.9: Added is_recording_owner / has_recording_share security definer helpers to prevent RLS recursion).
+ (v2.8: Added recording_shares, singer attribution, public recording visibility, and consent confirmation).
  (v2.7: Added Guaraní and Camino Rojo categories).
  (v2.6: Added partial indexes for is_public and alphabetical title index).
  (v2.4: Added tuning to song_versions).
@@ -23,6 +26,7 @@ create table public.profiles (
   role user_role default 'member',
   full_name text,
   avatar_url text,
+  email_notifications boolean not null default true,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 -- CATEGORIES (Recursive Structure)
@@ -98,13 +102,32 @@ create table public.user_recordings (
   storage_path text not null unique,
   position integer default 0,
   file_size_bytes bigint default 0,
+  duration_seconds integer default 0,
+  is_public boolean default false not null,
+  singer_consent_confirmed boolean default false not null,
+  singer_profile_id uuid references public.profiles(id) on delete set null,
+  singer_name text,
+  singer_email text,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+-- RECORDING SHARES (Private user-to-user sharing)
+create table public.recording_shares (
+  id uuid default gen_random_uuid() primary key,
+  recording_id uuid references public.user_recordings(id) on delete cascade not null,
+  shared_with_user_id uuid references public.profiles(id) on delete cascade not null,
+  created_at timestamptz default timezone('utc'::text, now()) not null,
+  email_sent_at timestamptz,
+  constraint uq_recording_shares unique (recording_id, shared_with_user_id)
 );
 -- 3. Indexes
 -- Partial indexes for public content optimization
 CREATE INDEX IF NOT EXISTS idx_compositions_is_public_true ON public.compositions (created_at DESC) WHERE is_public = true;
 CREATE INDEX IF NOT EXISTS idx_setlists_is_public_true ON public.setlists (created_at DESC) WHERE is_public = true;
 CREATE INDEX IF NOT EXISTS idx_compositions_title_alphabetical ON public.compositions (title ASC);
+CREATE INDEX IF NOT EXISTS idx_recording_shares_user ON public.recording_shares(shared_with_user_id);
+CREATE INDEX IF NOT EXISTS idx_recording_shares_recording ON public.recording_shares(recording_id);
+CREATE INDEX IF NOT EXISTS idx_user_recordings_public ON public.user_recordings(song_version_id) WHERE is_public = true;
+CREATE INDEX IF NOT EXISTS idx_user_recordings_singer ON public.user_recordings(singer_profile_id) WHERE singer_profile_id IS NOT NULL;
 
 -- 4. Triggers & Functions
 -- Trigger to prevent linking songs to parent groups (only subcategories allowed)
@@ -186,9 +209,70 @@ set search_path = public;
 grant execute on function public.fn_is_admin to authenticated;
 grant execute on function public.fn_is_admin to service_role;
 
+-- Recording sharing helpers (security definer to avoid RLS recursion between
+-- user_recordings and recording_shares policies)
+create or replace function public.is_recording_owner(p_recording_id uuid, p_user_id uuid)
+returns boolean
+language sql
+security definer
+set search_path = public
+stable
+as $$
+  select exists (
+    select 1 from public.user_recordings
+    where id = p_recording_id
+    and user_id = p_user_id
+  );
+$$;
+
+create or replace function public.has_recording_share(p_recording_id uuid, p_user_id uuid)
+returns boolean
+language sql
+security definer
+set search_path = public
+stable
+as $$
+  select exists (
+    select 1 from public.recording_shares
+    where recording_id = p_recording_id
+    and shared_with_user_id = p_user_id
+  );
+$$;
+
 -- Profiles Policies
 create policy "Users can read own profile" on public.profiles for
 select to authenticated using (id = auth.uid());
+
+create policy "Allow reading singer profiles" on public.profiles for
+select to authenticated using (
+  exists (
+    select 1 from public.user_recordings ur
+    where ur.singer_profile_id = profiles.id
+    and (
+      ur.is_public = true
+      or ur.user_id = auth.uid()
+      or public.has_recording_share(ur.id, auth.uid())
+    )
+  )
+);
+
+create policy "Allow reading shared recording users" on public.profiles for
+select to authenticated using (
+  exists (
+    select 1 from public.recording_shares rs
+    where (rs.shared_with_user_id = profiles.id and public.is_recording_owner(rs.recording_id, auth.uid()))
+       or (rs.shared_with_user_id = auth.uid() and public.is_recording_owner(rs.recording_id, profiles.id))
+  )
+);
+
+create policy "Allow public reading public singer profiles" on public.profiles for
+select to anon using (
+  exists (
+    select 1 from public.user_recordings ur
+    where ur.singer_profile_id = profiles.id
+    and ur.is_public = true
+  )
+);
 
 create policy "Admins can read all profiles" on public.profiles for
 select to authenticated using (public.fn_is_admin());
@@ -236,6 +320,7 @@ alter table public.song_versions enable row level security;
 alter table public.setlists enable row level security;
 alter table public.setlist_items enable row level security;
 alter table public.user_recordings enable row level security;
+alter table public.recording_shares enable row level security;
 -- Public Read Policies
 create policy "Allow public read access" on public.categories for
 select to public using (true);
@@ -371,11 +456,212 @@ create policy "Auth users can delete setlist items" on public.setlist_items for 
   ) = 'authenticated'
 );
 -- User Recordings Policies
-create policy "Allow users to read their own recordings" on public.user_recordings for
-select to authenticated using (auth.uid() = user_id);
+create policy "Allow users to read accessible recordings" on public.user_recordings for
+select to authenticated using (
+  auth.uid() = user_id
+  or is_public = true
+  or public.has_recording_share(id, auth.uid())
+);
+create policy "Allow public to read public recordings" on public.user_recordings for
+select to anon using (is_public = true);
 create policy "Allow users to insert their own recordings" on public.user_recordings for
 insert to authenticated with check (auth.uid() = user_id);
+create policy "Allow users to update their own recordings" on public.user_recordings for
+update to authenticated using (auth.uid() = user_id);
 create policy "Allow users to delete their own recordings" on public.user_recordings for delete to authenticated using (auth.uid() = user_id);
+
+-- Recording Shares Policies
+create policy "Allow owners and recipients to read shares" on public.recording_shares for
+select to authenticated using (
+  shared_with_user_id = auth.uid()
+  or public.is_recording_owner(recording_id, auth.uid())
+);
+create policy "Allow owners to insert shares" on public.recording_shares for
+insert to authenticated with check (
+  public.is_recording_owner(recording_id, auth.uid())
+);
+create policy "Allow owners and recipients to delete shares" on public.recording_shares for delete to authenticated using (
+  shared_with_user_id = auth.uid()
+  or public.is_recording_owner(recording_id, auth.uid())
+);
+
+-- User lookup helper function for sharing and attribution
+create or replace function public.search_users_for_sharing(search_term text)
+returns table (
+  id uuid,
+  email text,
+  full_name text,
+  avatar_url text,
+  is_musician boolean,
+  role public.user_role
+) language sql security definer set search_path = public as $$
+  select
+    p.id,
+    p.email,
+    p.full_name,
+    p.avatar_url,
+    p.role in ('musician', 'expert') as is_musician,
+    p.role
+  from public.profiles p
+  where
+    char_length(trim(search_term)) >= 2
+    and (
+      p.email ilike ('%' || trim(search_term) || '%')
+      or p.full_name ilike ('%' || trim(search_term) || '%')
+    )
+  limit 10;
+$$;
+grant execute on function public.search_users_for_sharing(text) to authenticated;
+-- NOTIFICATIONS inbox (Story 4.6.6). Display text is rendered client-side from `type`
+--    and the `metadata` snapshot, so it follows the reader's locale.
+CREATE TABLE IF NOT EXISTS public.notifications (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  user_id uuid NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
+  actor_id uuid REFERENCES public.profiles(id) ON DELETE SET NULL,
+  type text NOT NULL CHECK (type IN ('recording_shared')),
+  recording_id uuid REFERENCES public.user_recordings(id) ON DELETE CASCADE,
+  composition_id uuid REFERENCES public.compositions(id) ON DELETE CASCADE,
+  metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
+  read_at timestamptz,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+CREATE INDEX IF NOT EXISTS idx_notifications_user_created ON public.notifications(user_id, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_notifications_user_unread ON public.notifications(user_id) WHERE read_at IS NULL;
+
+ALTER TABLE public.notifications ENABLE ROW LEVEL SECURITY;
+
+-- Recipients read, mark read and dismiss their own notifications. There is no
+-- INSERT policy: rows are only created by the SECURITY DEFINER trigger below.
+DROP POLICY IF EXISTS "Users can read own notifications" ON public.notifications;
+CREATE POLICY "Users can read own notifications" ON public.notifications FOR SELECT TO authenticated
+USING (user_id = auth.uid());
+
+DROP POLICY IF EXISTS "Users can update own notifications" ON public.notifications;
+CREATE POLICY "Users can update own notifications" ON public.notifications FOR UPDATE TO authenticated
+USING (user_id = auth.uid())
+WITH CHECK (user_id = auth.uid());
+
+DROP POLICY IF EXISTS "Users can delete own notifications" ON public.notifications;
+CREATE POLICY "Users can delete own notifications" ON public.notifications FOR DELETE TO authenticated
+USING (user_id = auth.uid());
+
+-- Supabase grants ALL on new public tables by default; narrow it so recipients
+-- can only flip `read_at`.
+REVOKE ALL ON public.notifications FROM anon, authenticated;
+GRANT SELECT, DELETE ON public.notifications TO authenticated;
+GRANT UPDATE (read_at) ON public.notifications TO authenticated;
+
+-- Create a notification when a recording is shared. Errors are swallowed
+--    (logged as WARNING) so a notification failure never blocks the share.
+CREATE OR REPLACE FUNCTION public.fn_notify_recording_shared()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+DECLARE
+  v_owner uuid;
+  v_owner_name text;
+  v_recording_name text;
+  v_composition uuid;
+  v_song_title text;
+BEGIN
+  BEGIN
+    SELECT ur.user_id, ur.recording_name, sv.composition_id, c.title,
+           COALESCE(NULLIF(p.full_name, ''), p.email)
+      INTO v_owner, v_recording_name, v_composition, v_song_title, v_owner_name
+      FROM public.user_recordings ur
+      JOIN public.song_versions sv ON sv.id = ur.song_version_id
+      JOIN public.compositions c ON c.id = sv.composition_id
+      LEFT JOIN public.profiles p ON p.id = ur.user_id
+     WHERE ur.id = NEW.recording_id;
+
+    INSERT INTO public.notifications (user_id, actor_id, type, recording_id, composition_id, metadata)
+    VALUES (
+      NEW.shared_with_user_id, v_owner, 'recording_shared', NEW.recording_id, v_composition,
+      jsonb_build_object(
+        'actor_name', v_owner_name,
+        'song_title', v_song_title,
+        'recording_name', v_recording_name
+      )
+    );
+  EXCEPTION WHEN OTHERS THEN
+    RAISE WARNING 'fn_notify_recording_shared failed for share %: %', NEW.id, SQLERRM;
+  END;
+  RETURN NEW;
+END;
+$$;
+
+-- Revoking a share removes its notification so no dead link stays behind.
+CREATE OR REPLACE FUNCTION public.fn_remove_recording_share_notification()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  DELETE FROM public.notifications
+   WHERE user_id = OLD.shared_with_user_id
+     AND recording_id = OLD.recording_id
+     AND type = 'recording_shared';
+  RETURN OLD;
+END;
+$$;
+
+DROP TRIGGER IF EXISTS trg_notify_recording_shared ON public.recording_shares;
+CREATE TRIGGER trg_notify_recording_shared
+  AFTER INSERT ON public.recording_shares
+  FOR EACH ROW EXECUTE FUNCTION public.fn_notify_recording_shared();
+
+DROP TRIGGER IF EXISTS trg_remove_recording_share_notification ON public.recording_shares;
+CREATE TRIGGER trg_remove_recording_share_notification
+  AFTER DELETE ON public.recording_shares
+  FOR EACH ROW EXECUTE FUNCTION public.fn_remove_recording_share_notification();
+
+-- One transactional email per share. The owner's session claims the share
+--    (sets email_sent_at) and gets the recipient's details back only when the
+--    claim succeeds and the recipient has not opted out. This keeps the email
+--    server action idempotent and owner-only.
+CREATE OR REPLACE FUNCTION public.claim_recording_share_email(p_recording_id uuid, p_recipient_id uuid)
+RETURNS TABLE (
+  recipient_email text,
+  recipient_name text,
+  actor_name text,
+  song_title text,
+  recording_name text,
+  composition_id uuid
+)
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+  WITH claimed AS (
+    UPDATE public.recording_shares rs
+       SET email_sent_at = now()
+     WHERE rs.recording_id = p_recording_id
+       AND rs.shared_with_user_id = p_recipient_id
+       AND rs.email_sent_at IS NULL
+       AND public.is_recording_owner(rs.recording_id, auth.uid())
+    RETURNING rs.recording_id, rs.shared_with_user_id
+  )
+  SELECT rp.email,
+         rp.full_name,
+         COALESCE(NULLIF(op.full_name, ''), op.email),
+         c.title,
+         ur.recording_name,
+         sv.composition_id
+    FROM claimed cl
+    JOIN public.profiles rp ON rp.id = cl.shared_with_user_id
+    JOIN public.user_recordings ur ON ur.id = cl.recording_id
+    JOIN public.profiles op ON op.id = ur.user_id
+    JOIN public.song_versions sv ON sv.id = ur.song_version_id
+    JOIN public.compositions c ON c.id = sv.composition_id
+   WHERE rp.email_notifications;
+$$;
+
+REVOKE EXECUTE ON FUNCTION public.claim_recording_share_email(uuid, uuid) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.claim_recording_share_email(uuid, uuid) TO authenticated;
 -- 7. SEED DATA (Categories)
 with groups as (
   insert into public.categories (name, slug, emoji)

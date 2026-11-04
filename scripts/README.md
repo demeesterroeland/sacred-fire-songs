@@ -6,7 +6,7 @@ Helper scripts for **Sacred Fire Songs**, grouped by purpose. Run them from the 
 scripts/
 ├── cicd/     # Issue worktrees, preview/production promotion, benchmarks, GitHub roadmap & story sync
 ├── db/       # Migrations, test-database setup, random seeding, staging clone, Supabase settings
-├── dev/      # Local development helpers (icons, ChordPro debugging, isolation guard, UX screenshot capture)
+├── dev/      # Local development helpers (icons, ChordPro debugging, sample audio, isolation guard, UX screenshot capture)
 └── README.md
 ```
 
@@ -35,6 +35,7 @@ Every script lives in exactly one category folder; only this README sits directl
 | `db/setup-test-db.mjs` | Wipes the test database and seeds the fixed accounts plus random songs, playlists and recordings (`E2E_RANDOM_SONGS_COUNT`, default 80). | Run by the Playwright `globalSetup` (`e2e/global-setup.ts`); `node scripts/db/setup-test-db.mjs` |
 | `db/random-seeder.mjs` | Database-side (PL/pgSQL) random seeder with deterministic anchor songs covering every song shape in `docs/testing/song.feature`. | Imported by `setup-test-db.mjs` and `export-random-seed.mjs` |
 | `db/export-random-seed.mjs` | Writes `supabase/seeds/03_songs_random_generated.sql` from the random seeder (needs a local database). | `npm run seed:generate` or `node scripts/db/export-random-seed.mjs [count]` |
+| `db/upload-sample-recordings.mjs` | Uploads the sample MP3s from `supabase/seeds/audio/` to the `rehearsals` bucket for every seeded `user_recordings` row, round-robin, and stores each file's real duration (`ffprobe`, 30 s fallback). Local stack only; refuses non-localhost URLs. Run after `npx supabase db reset`. | `npm run seed:audio` |
 | `db/clone-prod-to-staging.sh` | Copies production data to the staging database in one transaction (asks for confirmation). | `scripts/db/clone-prod-to-staging.sh [--yes] [--delete-backup]` |
 | `db/supabase_rate_limits.sh` | Reads and updates the Supabase Auth rate limits through the Management API (`SUPABASE_ACCESS_TOKEN`, `SUPABASE_PROJECT_ID` from `.env.local`). | `scripts/db/supabase_rate_limits.sh` |
 
@@ -45,6 +46,7 @@ Every script lives in exactly one category folder; only this README sits directl
 | `dev/generate-icons.mjs` | Generates the PWA icon sizes from `public/icons/icon.svg` with `sharp`. | `node scripts/dev/generate-icons.mjs` |
 | `dev/debug_chordpro.js` | Prints the ChordSheetJS parse tree of a small ChordPro sample. | `node scripts/dev/debug_chordpro.js` |
 | `dev/test_chord_parsing.ts` | Prints the parse result of a ChordPro sample in TypeScript (manual check, not a Vitest test). | `npx tsx scripts/dev/test_chord_parsing.ts` |
+| `dev/generate-sample-recordings.py` | Synthesizes the deterministic 30 s, 140 BPM sample recordings (frame drum, rattle, hummed melody with group answer, fire crackle) in `supabase/seeds/audio/`. Needs `numpy` and `ffmpeg`. | `python3 scripts/dev/generate-sample-recordings.py` |
 | `dev/isolation-guard.sh` | Blocks private deployment details from this public repo, using a denylist kept outside the repo (`~/.config/sfs/denylist`, CI: `ISOLATION_DENYLIST`). Runs as git hooks, Claude Code hook and the `isolation` CI job. | `scripts/dev/isolation-guard.sh --tree` (or `--staged`, `--claude-hook`, `FILE…`) |
 | `dev/ux/capture-routes.mjs` | Captures every route per role (guest, member, admin) and viewport as PNG into `docs/ux-research/screenshots/` (Playwright; needs the app on `http://localhost:3000` against the seeded local Supabase). | `node scripts/dev/ux/capture-routes.mjs [mobile\|desktop]` |
 | `dev/ux/capture-flows.mjs` | Captures interactive states (menus, drawer, recorder with fake microphone, share / publish / attribution modals) for the UX research. | `node scripts/dev/ux/capture-flows.mjs [mobile\|desktop]` |

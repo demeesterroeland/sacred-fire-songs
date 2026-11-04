@@ -58,6 +58,11 @@ Implementation plans live in `docs/plans/YYYY-MM-DD-<feature>.md`.
 1. Update `docs/design/db-schema.sql` to reflect the changes.
 2. Keep `docs/design/db-schema.sql` valid as a single-file fresh-install setup script.
 
+## Local Server Ports
+
+- Ports derive from the GitHub issue number of the branch: dev server (`npm run dev`) on `3<issue>`, production build / Playwright build server (`npm run build && npm run start`, `PORT=`) on `4<issue>`. Example: issue #245 → dev `3245`, build `4245`.
+- Check the port first with `ss -ltnp | grep ":<port> "` (`lsof` can miss a listening `next-server`). Only use another port if that one is busy, and say so.
+
 ## Database Environments
 
 - **Development**: the local Supabase CLI stack (`npx supabase start`, `http://127.0.0.1:54321`) via `.env.local` (`NEXT_PUBLIC_SUPABASE_URL_DEV`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY_DEV`).
@@ -91,3 +96,13 @@ Always follow **Test-Driven Development (TDD)** and **Behavior-Driven Developmen
 - **Zero Hardcoded UX Strings:** Never hardcode user-facing copy in components, dialogs, forms, toasts, badges, or buttons.
 - **Immediate Translation Sync:** When adding or updating UX copy, **always** register the keys using `useLocale()` / `t(...)` and update **all 8 locale files** in `messages/` (`en.json`, `es.json`, `pt.json`, `fr.json`, `de.json`, `nl.json`, `it.json`, `he.json`).
 - Ensure fallback behavior is clean and date/time formatters use `LOCALE_DATE_TAGS[locale]`.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+## This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->
