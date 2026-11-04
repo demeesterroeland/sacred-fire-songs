@@ -70,9 +70,24 @@ Implementation plans live in `docs/plans/YYYY-MM-DD-<feature>.md`.
 - Server-side queries belong in `lib/*/serverQueries.ts`; import `createClient` from `@/lib/supabase/server`.
 - Only import server queries from Server Components or Server Actions (never from client components).
 
-## Testing
+## Testing Pyramid, TDD & BDD
 
-- Test runner: **vitest** — run with `npx vitest run <file>` (not Jest). `npm test` runs all unit tests.
+Always follow **Test-Driven Development (TDD)** and **Behavior-Driven Development (BDD)** structured by the project's **Testing Pyramid**:
+
+- **TDD First:** Write the failing test or executable specification before writing implementation code.
+- **BDD Gherkin Specifications:** Feature files in `docs/testing/*.feature` define user-visible behavior. Scenarios are tagged `@unit` (L2, in-memory/test-doubles via `npm run test:bdd:unit`), `@seed` (L2/L3 against local Supabase via `npm run test:bdd:seed`), or `@e2e` (L5 Playwright).
+- **Testing Pyramid Layers:**
+  1. **Layer 1 (L1) Static Quality:** TypeScript typecheck (`npx tsc --noEmit`) and ESLint (`npm run lint`).
+  2. **Layer 2 (L2) Unit & Service Contract Tests:** Fast, in-memory Vitest unit tests in `testing/unit/tests/` and fast BDD steps.
+  3. **Layer 3 (L3) Component Tests:** RTL / Vitest component-level interaction tests where applicable.
+  4. **Layer 4 (L4) Integration & API / Contract Tests:** Subsystem contracts, migrations, server actions.
+  5. **Layer 5 (L5) End-to-End (E2E):** Real-browser Playwright specs in `e2e/tests/` verifying user journeys and smoke paths.
 - Unit tests live in **one** tree: `testing/unit/tests/` (Vitest only collects that folder). Playwright specs live in `e2e/` and never run under Vitest.
 - BDD: `npm run test:bdd:unit` (no database), `npm run test:bdd:seed` (local Supabase). Gitflow pipeline contracts: `npm run test:bdd:ci` / `test:bdd:ci-gate`, bats via `npm run test:scripts`.
 - CI (`.github/workflows/ci.yml`) runs `lint`, `typecheck`, `unit`, `bdd`, `build`, `pipeline` and `isolation` on every push and PR. `pr-lint.yml` (`pr-policy`) checks every PR into `develop`/`main`: Conventional Commit title and Gitflow head → base (work branches → `develop`; `develop`/`hotfix/*` → `main`). Branch rulesets live in `.github/rulesets/*.json`. `npm run lint` caps warnings (`--max-warnings`); never raise the cap, lower it when you remove warnings.
+
+## Internationalization (i18n) Policy
+
+- **Zero Hardcoded UX Strings:** Never hardcode user-facing copy in components, dialogs, forms, toasts, badges, or buttons.
+- **Immediate Translation Sync:** When adding or updating UX copy, **always** register the keys using `useLocale()` / `t(...)` and update **all 8 locale files** in `messages/` (`en.json`, `es.json`, `pt.json`, `fr.json`, `de.json`, `nl.json`, `it.json`, `he.json`).
+- Ensure fallback behavior is clean and date/time formatters use `LOCALE_DATE_TAGS[locale]`.
