@@ -10,7 +10,7 @@ import { MoreHorizontal, Pencil, Trash2, Link2, Copy, Globe, Lock, FileText } fr
 import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal';
 import { deletePlaylist, togglePlaylistVisibility } from '@/app/actions/playlistActions';
 import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useLocale } from '@/context/LocaleContext';
 
 interface PlaylistContextMenuProps {
@@ -43,6 +43,7 @@ export function PlaylistContextMenu({
     const [isDeleting, startDeleteTransition] = useTransition();
     const [, startVisibilityTransition] = useTransition();
     const router = useRouter();
+    const pathname = usePathname();
     const preventFocusReturn = useRef(false);
 
     const handleToggleVisibility = () => {
@@ -66,7 +67,11 @@ export function PlaylistContextMenu({
             } else {
                 toast.success(t('playlists.toast.deleted', { title: playlistTitle }));
                 setShowDeleteModal(false);
-                router.refresh();
+                if (pathname?.includes(`/library/playlists/${playlistId}`)) {
+                    router.push('/library/playlists');
+                } else {
+                    router.refresh();
+                }
             }
         });
     };
