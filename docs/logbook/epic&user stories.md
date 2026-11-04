@@ -1,6 +1,6 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 1.47
+**Version:** 1.48
 **Status:** Living Document
 **Date:** Nov 4, 2026
 
@@ -46,6 +46,7 @@
 | **1.45** | Oct 31, 2026 | Story 5.1.4 [Implemented] (both rulesets applied). Story 5.1.7 [Partial]: develop images + `deploy-staging.yml` + server deploy script (<infra-repo> #107), rollout pending. Story 5.1.11 [Deferred] (staging is Tailscale-only). |
 | **1.46** | Nov 3, 2026 | Story 5.1.7 re-scoped: deployment of the maintainer's environments moved out of this public repo (`deploy-staging.yml` removed); this repo only publishes images. Added public-repo isolation enforcement (`isolation` CI job, git hooks, Claude Code hook). |
 | **1.47** | Nov 4, 2026 | Story 4.5.1 [Partial]: offline fallback page for page navigations implemented (#353, `docs/testing/offline.feature`); cached pages and songs offline (second scenario) not yet. |
+| **1.48** | Nov 4, 2026 | Aligned MD logbook with GitHub: synced [Implemented] statuses (3.4.6, 4.2.1, 4.2.3, 4.2.4, 5.1.3, 5.1.4, 5.1.5); added Story 1.2.5 (#218), Stories 3.1.1 (#13), 3.1.3 (#140), 3.1.4 and sub-stories 3.1.4.1–3.1.4.6 (#323–#329); expanded Epic 4.3 with Stories 4.3.2–4.3.8 (#357, #358–#364). |
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
 
@@ -216,6 +217,49 @@ Scenario: Disable Automatic Search when Advanced Filter is Open
   And the search should only execute when I click the "Show results" button
 ```
 
+**Story 1.2.5: [Implemented]** As a logged-in user, I want to filter and identify songs with personal rehearsal recordings and interact with author pills across all viewports.
+
+```gherkin
+Scenario: Personal Rehearsal Recording indicator for logged-in user
+  Given I am logged in as a user who has saved or uploaded a private rehearsal recording for a song
+  When I view the song listing or song detail header
+  Then I should see a personal rehearsal indicator (🎙️ Mic / Violet icon) labeled "Recording" on that song card / detail header
+  And public melody links should continue to display the 🎵 Emerald Note icon
+
+Scenario: Direct Audio File Upload in Rehearsal Drawer
+  Given I am a logged-in user on a song detail page
+  When I open the Rehearsal Drawer
+  Then I should see options to both record live audio and upload an existing audio file (.mp3, .m4a, .wav, .webm)
+  When I select and upload an audio file
+  Then the file should be saved under my private user recordings in Supabase storage
+  And the song should immediately display the "Recording" badge
+
+Scenario: Privacy boundary for anonymous visitors
+  Given I am an anonymous visitor (not logged in)
+  When I view the song listing
+  Then I should NOT see any personal rehearsal indicators (🎙️ Mic / Violet icon)
+  And the "My Recordings" filter toggle should be hidden from the Search & Filter bar
+
+Scenario: Smart Playlist card for "My Recordings"
+  Given I am a logged-in user viewing the Playlists page (/library/playlists)
+  Then I should see a "My Recordings" card under the Smart Playlists section
+  And it should display a Mic (🎙️) icon, description "Your private rehearsal recordings", and count of songs with personal recordings
+  When I click the "My Recordings" Smart Playlist card
+  Then I should be navigated to the Songs page filtered by "?myRecordings=true"
+
+Scenario: Interactive Author Pill across all viewports
+  Given I am viewing a song detail page on mobile, tablet, or desktop
+  Then the author name should be rendered as a clear, interactive pill badge (e.g. 👤 Author Name)
+  When I tap or click the Author pill badge
+  Then I should be navigated to the Songs page filtered strictly by that author ("?artist=AuthorName")
+
+Scenario: Filtering song list by "My Recordings"
+  Given I am logged in on the Songs page
+  When I activate the "My Recordings" filter toggle in the Search & Filter bar
+  Then only songs for which I (auth.uid()) have saved or uploaded a private rehearsal recording should be displayed
+  And the "My Recordings" filter toggle should be displayed as active
+```
+
 ### Epic 1.3: Basic Song Viewer
 
 **Story 1.3.1: [Implemented]** As a Musician, I want to see chords displayed above the lyrics so that I can play the song on my guitar.
@@ -362,6 +406,17 @@ Scenario: Browse by Category
 
 ### Epic 3.1: User Accounts
 
+**Story 3.1.1: [Implemented]** As a Guest, I want to sign up with my Google account so that I don't have to remember another password.
+
+```gherkin
+Scenario: Social Login
+  Given I am on the Login page
+  When I click "Continue with Google"
+  And I authenticate successfully with Google
+  Then a user profile should be created for me in the system
+  And I should be logged in
+```
+
 **Story 3.1.2: [Implemented]** As a Member, I want to "Heart" songs so that I can quickly access my favorites.
 
 ```
@@ -370,6 +425,84 @@ Scenario: Add to Favorites
   When I click the "Heart" icon on a song
   Then the icon should change to filled/active
   And the song should appear in my "My Favorites" list
+```
+
+**Story 3.1.3:** As an operator/maintainer, I want to switch the transactional email delivery mechanism via a single environment variable (between built-in Supabase/Inbucket, Gmail SMTP, and SendGrid SMTP) so that I can use a local mailbox in development and a real provider in production without code changes.
+
+```gherkin
+Scenario: Development email using Inbucket
+  Given the environment is configured with mail provider "inbucket"
+  When an auth email is triggered
+  Then the message is delivered to the local Inbucket mailbox
+
+Scenario: Production email using SMTP provider
+  Given the environment is configured with mail provider "smtp"
+  When an auth email is triggered
+  Then the message is dispatched via the configured external SMTP service
+```
+
+**Story 3.1.4:** As a Guest, I want members-only features to behave consistently — show me what the feature is, tell me why I need an account, and bring me straight back to where I was after signing in.
+
+```gherkin
+Scenario: Members-only feature prompt
+  Given I am an unauthenticated Guest
+  When I attempt to access a members-only action
+  Then I should be shown the context for why an account is required
+  And after authenticating, I should be redirected back to my original destination
+```
+
+**Story 3.1.4.1:** As a Guest, I want foundational sign-in navigation with signInHref, reason keys, and next= query parameters so that my intended destination is preserved across the auth flow.
+
+```gherkin
+Scenario: Preserve intent with next parameter
+  Given I am an unauthenticated Guest
+  When I click sign in with an intended return path
+  Then the sign-in URL includes the return path in the next parameter
+  And successful authentication returns me to that path
+```
+
+**Story 3.1.4.2:** As a Guest, I want a GuestGate locked preview for personal collections so that I can see the value of collections before signing in.
+
+```gherkin
+Scenario: Locked preview of collection
+  Given I am an unauthenticated Guest navigating to a personal collection
+  Then I see a locked preview banner explaining the benefits of membership
+  And an action button prompting me to sign in
+```
+
+**Story 3.1.4.3:** As a Guest, I want a SignInSheet with intent resume for guest actions so that I can complete my action immediately after signing in.
+
+```gherkin
+Scenario: Resume action after sign in
+  Given I triggered an action that requires an account
+  When the SignInSheet opens and I complete authentication
+  Then the pending action resumes or completes seamlessly
+```
+
+**Story 3.1.4.4:** As a Guest, I want guest creation flows to gate at save while preserving input so that I do not lose work when prompted to log in.
+
+```gherkin
+Scenario: Input preserved during gate at save
+  Given I have entered song or playlist data as a Guest
+  When I click save and authenticate
+  Then my entered data is preserved and saved under my new account
+```
+
+**Story 3.1.4.5:** As a Contributor, I want documentation for access tiers and guest pattern mockups so that developers build consistent guest gating.
+
+```gherkin
+Scenario: Access tiers documented
+  Given the project documentation
+  Then access tiers and guest patterns are clearly defined with component usage guidelines
+```
+
+**Story 3.1.4.6:** As a User, I want one consistent way to create a playlist across the app so that playlist creation behaves predictably everywhere.
+
+```gherkin
+Scenario: Consistent playlist creation
+  Given I am anywhere in the app where playlists can be created
+  When I choose to create a playlist
+  Then the same creation interface and validation are presented
 ```
 
 ### Epic 3.2: Version Control
@@ -536,7 +669,7 @@ Scenario: No featured playlists
   Then the Featured section should not appear on the playlists page
 ```
 
-**Story 3.4.6:** As an Admin or Gatekeeper, I want to add/remove songs from any Public Playlist, edit the playlist details, and change the song order, so that we can curate public playlists and maintain high-quality collections.
+**Story 3.4.6: [Implemented]** As an Admin or Gatekeeper, I want to add/remove songs from any Public Playlist, edit the playlist details, and change the song order, so that we can curate public playlists and maintain high-quality collections.
 
 ```gherkin
 Scenario: Gatekeeper adds a song to another user's Public Playlist
@@ -874,7 +1007,7 @@ Scenario: Set playlist cover color
 
 ### Epic 4.2: Print & Export
 
-**Story 4.2.1:** As a Member or Musician, I want to generate a PDF of my setlist so that I can print it for the ceremony. **[Implemented - PR #220]**
+**Story 4.2.1: [Implemented]** As a Member or Musician, I want to generate a PDF of my setlist so that I can print it for the ceremony.
 
 ```
 Scenario: Export PDF (Authenticated Member)
@@ -911,7 +1044,7 @@ Scenario: Group by Category in PDF
   And followed by all "Water" songs grouped together (or vice versa)
 ```
 
-**Story 4.2.3:** As a musician printing a setlist, I want the page footer to show just the songbook's main address and a small QR code for the song, so that the footer stays clean and I can open the song on my phone by scanning it. **[Implemented – #303]**
+**Story 4.2.3: [Implemented]** As a musician printing a setlist, I want the page footer to show just the songbook's main address and a small QR code for the song, so that the footer stays clean and I can open the song on my phone by scanning it.
 
 ```gherkin
 Scenario: Footer shows only the main site URL and a QR code to the song
@@ -922,7 +1055,7 @@ Scenario: Footer shows only the main site URL and a QR code to the song
   And pages without a song URL show no QR code
 ```
 
-**Story 4.2.4:** As a musician exporting the same setlist several times, I want the app to reuse the last generated PDF when nothing has changed, so that the download is instant. **[Implemented – #304]**
+**Story 4.2.4: [Implemented]** As a musician exporting the same setlist several times, I want the app to reuse the last generated PDF when nothing has changed, so that the download is instant.
 
 ```gherkin
 Scenario: Only regenerate the PDF when the playlist is dirty
@@ -946,6 +1079,195 @@ Scenario: Offline Access
   And I should see an "Offline Mode" indicator
 ```
 
+**Story 4.3.2: [Implemented]** As a Contributor, I want an executable offline-library specification and test harness so that every offline story is built test-first.
+
+```gherkin
+Scenario: Offline library spec exists and runs
+  Given the feature file docs/testing/offline-library.feature
+  When I run npm run test:bdd:offline-library
+  Then every scenario of the epic is listed with its tags (@unit or @e2e, @story-4.3.x)
+  And scenarios without step code are reported as pending, not passed
+  And the unit profile is part of the CI bdd job
+
+Scenario: IndexedDB can be tested without a browser
+  Given fake-indexeddb is installed as a dev dependency
+  When a vitest or Cucumber step opens an IndexedDB database
+  Then it runs in Node in milliseconds and every test starts from an empty database
+
+Scenario: Service worker harness covers the new routing
+  Given the Node vm harness of testing/bdd/support/offlineHarness.ts
+  When it loads public/sw.js with a set of cached entries and an online/offline flag
+  Then steps can assert which response a navigation or asset request gets
+```
+
+**Story 4.3.3:** As a Musician, I want my library stored on my device, tied to my account, so that it is available offline and never shown to someone else.
+
+```gherkin
+Scenario: Library copy is scoped to one user
+  Given the local library belongs to user "A"
+  When the store is opened for user "B"
+  Then the store is wiped before anything is written or read for "B"
+
+Scenario: Reading the library
+  Given a stored library with songs, categories, setlists with items, favourite ids and recently viewed ids
+  When the offline UI asks for songs, a song by id, setlists or a setlist by id
+  Then it gets the same Song shape the online app uses (mapCompositionToSong), all versions included
+  And a setlist returns its items in order_index order with transposition overrides
+
+Scenario: Wipe
+  When the library is wiped
+  Then all object stores and the meta record are empty
+
+Scenario: Schema upgrade
+  Given a library stored with an older schema version
+  When the app opens the store with a newer schema version
+  Then the old copy is discarded and a full sync is requested
+```
+
+**Story 4.3.4:** As a Musician, I want my offline library kept up to date automatically while I am online, and a switch to turn it off, so that I can rely on it in the forest or free up storage.
+
+```gherkin
+Scenario: First sync after sign-in
+  Given I am signed in, online, and Offline Mode is on
+  And there is no local library
+  When the app starts
+  Then my setlists, then the songs in them, then the rest of the catalogue, then favourites and recently viewed are stored
+  And Preferences shows the last synced time, the number of songs and the storage used
+
+Scenario: Refresh
+  Given the local library is older than 1 hour
+  When the app starts or the device comes back online
+  Then the library is refreshed in the background without blocking the page
+
+Scenario: Sync now
+  When I press "Sync now" in Preferences
+  Then the library is refreshed and the last synced time updates
+
+Scenario: Offline Mode is on by default and can be turned off
+  Given I never changed the Offline Mode preference
+  Then Offline Mode is on
+  When I turn Offline Mode off
+  Then the local library is wiped and no further sync runs
+
+Scenario Outline: Wipe on identity change
+  Given the local library belongs to me
+  When <event>
+  Then the local library is wiped
+  Examples:
+    | event                                          |
+    | I sign out                                     |
+    | another user signs in on this device           |
+    | the app is online and the server says I am signed out |
+
+Scenario: Guests get nothing
+  Given I am not signed in
+  Then no local library is created
+
+Scenario: Storage full
+  Given the browser refuses to store the whole catalogue
+  Then the songs of my setlists are kept and Preferences says the library is partial
+```
+
+**Story 4.3.5:** As a Musician, I want the installed app to open offline on any page so that I reach my library instead of an error.
+
+```gherkin
+Scenario: Shell is precached without user data
+  When the service worker installs
+  Then it stores the offline shell page and the static chunks it needs in a cache named with the build id
+  And the stored shell HTML contains no user id, e-mail, name or private content
+
+Scenario: Offline navigation gets the shell
+  Given the shell is cached and the device is offline
+  When I navigate to "/", "/songs", "/songs/<id>", "/library/playlists" or "/library/playlists/<id>"
+  Then the service worker answers with the shell and the address bar keeps the requested URL
+
+Scenario: Fallback stays
+  Given the shell is not cached and the device is offline
+  When I navigate to any page
+  Then I get /offline.html as today (#353)
+
+Scenario: Online is untouched
+  Given the device is online
+  When I navigate or load assets
+  Then the service worker does not answer the request
+
+Scenario: New deploy
+  When a new build activates
+  Then old sfs-* caches are deleted and the new shell is precached
+```
+
+**Story 4.3.6:** As a Musician in the forest, I want to browse, search and open my songs offline so that I can play from the app without network.
+
+```gherkin
+Scenario: Song list offline
+  Given my library is stored and I am offline
+  When I open "/songs"
+  Then I see all stored songs with the same cards, search, category/tag filters and sort as online
+
+Scenario: Song detail offline
+  When I open a stored song
+  Then I see its lyrics and chords, can switch versions and transpose
+  And media embeds are replaced by the offline notice (4.3.7)
+
+Scenario: Song not in the library
+  When I open a song that is not stored
+  Then I see "This song is not saved on this device" with a link to the song list
+
+Scenario: Home and library offline
+  When I open "/" or "/library/playlists"
+  Then I see my favourites, drafts, recently viewed and playlists from the local copy
+```
+
+**Story 4.3.7:** As a Musician, I want to see clearly that I am offline and which actions are unavailable so that nothing seems broken.
+
+```gherkin
+Scenario: Offline indicator
+  Given I am offline
+  Then a banner says "Offline · library saved <time>" and the header shows an offline badge
+  When the device comes back online
+  Then the banner disappears
+
+Scenario Outline: Save actions are disabled, not hidden
+  Given I am offline
+  Then <action> is shown greyed out with the hint "Not available offline" and does nothing
+  Examples:
+    | action                                       |
+    | create, edit or delete a song                |
+    | create, rename, delete or reorder a playlist |
+    | add or remove a song to a playlist           |
+    | favourite (heart)                            |
+    | record or delete a recording                 |
+    | every setting in account settings            |
+
+Scenario: Media offline notice
+  Given I am offline
+  When a song has YouTube, Spotify or SoundCloud links or recordings
+  Then each media block shows "Not available offline" instead of an embed or spinner
+```
+
+**Story 4.3.8:** As the Maintainer, I want end-to-end proof, aligned docs and a preview build of the offline library so that I can test the offline library before shipping.
+
+```gherkin
+Scenario: Forest journey (Playwright)
+  Given I signed in, the library synced, and the app is reloaded with the network off
+  When I open "/library/playlists/<id>", then a song from it, then "/songs" and search
+  Then everything renders from the local copy, media shows the offline notice and save actions are disabled
+
+Scenario: No leak between accounts (Playwright)
+  Given user A synced a library and signed out
+  When user B signs in, syncs and goes offline
+  Then B never sees A's private songs or playlists
+
+Scenario: Signed out or Offline Mode off (Playwright)
+  Given I signed out, or turned Offline Mode off
+  When I go offline and navigate
+  Then I get the offline page and no library
+
+Scenario: Preview build
+  When the integration branch is complete
+  Then an image tagged offline-preview is built from feat/offline-library with the docker workflow
+```
+
 ### Epic 4.4: Desktop Experience
 
 **Story 4.4.1: [Implemented]** As a Guest on a laptop, I want a responsive layout so that the app uses the full screen width effectively.
@@ -960,7 +1282,7 @@ Scenario: Desktop Layout
 
 ### Epic 4.5: Progressive Web App — Offline Reliability
 
-**Story 4.5.1 [Partial]:** As a Musician, I want to see a friendly offline page when I have no internet connection, so that I understand what happened instead of seeing a browser error.
+**Story 4.5.1: [Partial]** As a Musician, I want to see a friendly offline page when I have no internet connection, so that I understand what happened instead of seeing a browser error.
 
 ```gherkin
 Scenario: Offline fallback page
@@ -1055,7 +1377,7 @@ Scenario: Missing staging secrets fail the staging E2E job
   Then the job fails with a clear "missing secrets" error instead of being skipped
 ```
 
-**Story 5.1.3:** As a Contributor, I want one unit-test directory and all feature files wired into Cucumber so that tests are not duplicated or silently ignored.
+**Story 5.1.3: [Implemented]** As a Contributor, I want one unit-test directory and all feature files wired into Cucumber so that tests are not duplicated or silently ignored.
 
 ```gherkin
 Scenario: Unit tests live in exactly one directory
@@ -1064,7 +1386,7 @@ Scenario: Unit tests live in exactly one directory
   And every "docs/testing/*.feature" file is included in "cucumber.json"
 ```
 
-**Story 5.1.4:** As a Maintainer, I want `main` and `develop` protected with required checks, no force-push and rules applying to admins so that history is safe and every change is verified.
+**Story 5.1.4: [Implemented]** As a Maintainer, I want `main` and `develop` protected with required checks, no force-push and rules applying to admins so that history is safe and every change is verified.
 
 ```gherkin
 Scenario: Long-lived branches are protected
@@ -1073,7 +1395,7 @@ Scenario: Long-lived branches are protected
   And the CI checks are required before merging
 ```
 
-**Story 5.1.5:** As a Maintainer, I want pull requests checked for a Conventional Commit title and an allowed head → base combination so that releases are versioned correctly and work never skips `develop`.
+**Story 5.1.5: [Implemented]** As a Maintainer, I want pull requests checked for a Conventional Commit title and an allowed head → base combination so that releases are versioned correctly and work never skips `develop`.
 
 ```gherkin
 Scenario: Feature PR into main is rejected
