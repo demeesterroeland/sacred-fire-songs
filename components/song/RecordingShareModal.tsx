@@ -241,6 +241,7 @@ export default function RecordingShareModal({
                     disabled={isSubmitting === share.user_id}
                     className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-colors shrink-0"
                     title={t("recording.sharing.revoke")}
+                    aria-label={t("recording.sharing.revoke")}
                   >
                     {isSubmitting === share.user_id ? (
                       <Loader2 className="w-3.5 h-3.5 animate-spin" />

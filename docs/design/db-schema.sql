@@ -1,11 +1,12 @@
 /*
- **Version:** 2.8
+ **Version:** 2.9
  **Status:** Current
  **Date:** November 4, 2026
  
  ## Usage
  This script provides a complete setup for the "Sacred Fire Songs" database. 
  It consolidates the initial schema and all subsequent migrations up to November 4, 2026.
+ (v2.9: Added is_recording_owner / has_recording_share security definer helpers to prevent RLS recursion).
  (v2.8: Added recording_shares, singer attribution, public recording visibility, and consent confirmation).
  (v2.7: Added Guaraní and Camino Rojo categories).
  (v2.6: Added partial indexes for is_public and alphabetical title index).
@@ -205,6 +206,36 @@ set search_path = public;
 grant execute on function public.fn_is_admin to authenticated;
 grant execute on function public.fn_is_admin to service_role;
 
+-- Recording sharing helpers (security definer to avoid RLS recursion between
+-- user_recordings and recording_shares policies)
+create or replace function public.is_recording_owner(p_recording_id uuid, p_user_id uuid)
+returns boolean
+language sql
+security definer
+set search_path = public
+stable
+as $$
+  select exists (
+    select 1 from public.user_recordings
+    where id = p_recording_id
+    and user_id = p_user_id
+  );
+$$;
+
+create or replace function public.has_recording_share(p_recording_id uuid, p_user_id uuid)
+returns boolean
+language sql
+security definer
+set search_path = public
+stable
+as $$
+  select exists (
+    select 1 from public.recording_shares
+    where recording_id = p_recording_id
+    and shared_with_user_id = p_user_id
+  );
+$$;
+
 -- Profiles Policies
 create policy "Users can read own profile" on public.profiles for
 select to authenticated using (id = auth.uid());
@@ -217,11 +248,7 @@ select to authenticated using (
     and (
       ur.is_public = true
       or ur.user_id = auth.uid()
-      or exists (
-        select 1 from public.recording_shares rs
-        where rs.recording_id = ur.id
-        and rs.shared_with_user_id = auth.uid()
-      )
+      or public.has_recording_share(ur.id, auth.uid())
     )
   )
 );
@@ -230,9 +257,8 @@ create policy "Allow reading shared recording users" on public.profiles for
 select to authenticated using (
   exists (
     select 1 from public.recording_shares rs
-    join public.user_recordings ur on ur.id = rs.recording_id
-    where (rs.shared_with_user_id = profiles.id and ur.user_id = auth.uid())
-       or (ur.user_id = profiles.id and rs.shared_with_user_id = auth.uid())
+    where (rs.shared_with_user_id = profiles.id and public.is_recording_owner(rs.recording_id, auth.uid()))
+       or (rs.shared_with_user_id = auth.uid() and public.is_recording_owner(rs.recording_id, profiles.id))
   )
 );
 
@@ -431,11 +457,7 @@ create policy "Allow users to read accessible recordings" on public.user_recordi
 select to authenticated using (
   auth.uid() = user_id
   or is_public = true
-  or exists (
-    select 1 from public.recording_shares rs
-    where rs.recording_id = user_recordings.id
-    and rs.shared_with_user_id = auth.uid()
-  )
+  or public.has_recording_share(id, auth.uid())
 );
 create policy "Allow public to read public recordings" on public.user_recordings for
 select to anon using (is_public = true);
@@ -449,27 +471,15 @@ create policy "Allow users to delete their own recordings" on public.user_record
 create policy "Allow owners and recipients to read shares" on public.recording_shares for
 select to authenticated using (
   shared_with_user_id = auth.uid()
-  or exists (
-    select 1 from public.user_recordings ur
-    where ur.id = recording_shares.recording_id
-    and ur.user_id = auth.uid()
-  )
+  or public.is_recording_owner(recording_id, auth.uid())
 );
 create policy "Allow owners to insert shares" on public.recording_shares for
 insert to authenticated with check (
-  exists (
-    select 1 from public.user_recordings ur
-    where ur.id = recording_shares.recording_id
-    and ur.user_id = auth.uid()
-  )
+  public.is_recording_owner(recording_id, auth.uid())
 );
 create policy "Allow owners and recipients to delete shares" on public.recording_shares for delete to authenticated using (
   shared_with_user_id = auth.uid()
-  or exists (
-    select 1 from public.user_recordings ur
-    where ur.id = recording_shares.recording_id
-    and ur.user_id = auth.uid()
-  )
+  or public.is_recording_owner(recording_id, auth.uid())
 );
 
 -- User lookup helper function for sharing and attribution

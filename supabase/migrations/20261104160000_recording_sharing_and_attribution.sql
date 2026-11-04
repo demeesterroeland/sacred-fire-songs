@@ -24,6 +24,35 @@ CREATE INDEX IF NOT EXISTS idx_recording_shares_recording ON public.recording_sh
 CREATE INDEX IF NOT EXISTS idx_user_recordings_public ON public.user_recordings(song_version_id) WHERE is_public = true;
 CREATE INDEX IF NOT EXISTS idx_user_recordings_singer ON public.user_recordings(singer_profile_id) WHERE singer_profile_id IS NOT NULL;
 
+-- Helper SECURITY DEFINER functions to prevent RLS recursion
+CREATE OR REPLACE FUNCTION public.is_recording_owner(p_recording_id uuid, p_user_id uuid)
+RETURNS boolean
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+STABLE
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.user_recordings
+    WHERE id = p_recording_id
+    AND user_id = p_user_id
+  );
+$$;
+
+CREATE OR REPLACE FUNCTION public.has_recording_share(p_recording_id uuid, p_user_id uuid)
+RETURNS boolean
+LANGUAGE sql
+SECURITY DEFINER
+SET search_path = public
+STABLE
+AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.recording_shares
+    WHERE recording_id = p_recording_id
+    AND shared_with_user_id = p_user_id
+  );
+$$;
+
 -- 3. Enable RLS on recording_shares
 ALTER TABLE public.recording_shares ENABLE ROW LEVEL SECURITY;
 
@@ -31,32 +60,20 @@ DROP POLICY IF EXISTS "Allow owners and recipients to read shares" ON public.rec
 CREATE POLICY "Allow owners and recipients to read shares" ON public.recording_shares FOR SELECT TO authenticated
 USING (
   shared_with_user_id = auth.uid()
-  OR EXISTS (
-    SELECT 1 FROM public.user_recordings ur
-    WHERE ur.id = recording_shares.recording_id
-    AND ur.user_id = auth.uid()
-  )
+  OR public.is_recording_owner(recording_id, auth.uid())
 );
 
 DROP POLICY IF EXISTS "Allow owners to insert shares" ON public.recording_shares;
 CREATE POLICY "Allow owners to insert shares" ON public.recording_shares FOR INSERT TO authenticated
 WITH CHECK (
-  EXISTS (
-    SELECT 1 FROM public.user_recordings ur
-    WHERE ur.id = recording_shares.recording_id
-    AND ur.user_id = auth.uid()
-  )
+  public.is_recording_owner(recording_id, auth.uid())
 );
 
 DROP POLICY IF EXISTS "Allow owners and recipients to delete shares" ON public.recording_shares;
 CREATE POLICY "Allow owners and recipients to delete shares" ON public.recording_shares FOR DELETE TO authenticated
 USING (
   shared_with_user_id = auth.uid()
-  OR EXISTS (
-    SELECT 1 FROM public.user_recordings ur
-    WHERE ur.id = recording_shares.recording_id
-    AND ur.user_id = auth.uid()
-  )
+  OR public.is_recording_owner(recording_id, auth.uid())
 );
 
 GRANT ALL ON public.recording_shares TO authenticated;
@@ -68,11 +85,7 @@ CREATE POLICY "Allow users to read accessible recordings" ON public.user_recordi
 USING (
   auth.uid() = user_id
   OR is_public = true
-  OR EXISTS (
-    SELECT 1 FROM public.recording_shares rs
-    WHERE rs.recording_id = user_recordings.id
-    AND rs.shared_with_user_id = auth.uid()
-  )
+  OR public.has_recording_share(id, auth.uid())
 );
 
 DROP POLICY IF EXISTS "Allow public to read public recordings" ON public.user_recordings;
@@ -92,11 +105,7 @@ USING (
       WHERE ur.storage_path = name
       AND (
         ur.is_public = true
-        OR EXISTS (
-          SELECT 1 FROM public.recording_shares rs
-          WHERE rs.recording_id = ur.id
-          AND rs.shared_with_user_id = auth.uid()
-        )
+        OR public.has_recording_share(ur.id, auth.uid())
       )
     )
   )
@@ -154,11 +163,7 @@ USING (
     AND (
       ur.is_public = true
       OR ur.user_id = auth.uid()
-      OR EXISTS (
-        SELECT 1 FROM public.recording_shares rs
-        WHERE rs.recording_id = ur.id
-        AND rs.shared_with_user_id = auth.uid()
-      )
+      OR public.has_recording_share(ur.id, auth.uid())
     )
   )
 );
@@ -168,9 +173,8 @@ CREATE POLICY "Allow reading shared recording users" ON public.profiles FOR SELE
 USING (
   EXISTS (
     SELECT 1 FROM public.recording_shares rs
-    JOIN public.user_recordings ur ON ur.id = rs.recording_id
-    WHERE (rs.shared_with_user_id = profiles.id AND ur.user_id = auth.uid())
-       OR (ur.user_id = profiles.id AND rs.shared_with_user_id = auth.uid())
+    WHERE (rs.shared_with_user_id = profiles.id AND public.is_recording_owner(rs.recording_id, auth.uid()))
+       OR (rs.shared_with_user_id = auth.uid() AND public.is_recording_owner(rs.recording_id, profiles.id))
   )
 );
 

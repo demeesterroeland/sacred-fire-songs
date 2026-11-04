@@ -223,14 +223,15 @@ export default function RecordingAttributionModal({
                 {searchResults.length > 0 && (
                   <div className="max-h-44 overflow-y-auto rounded-xl border border-gray-200 dark:border-gray-800 divide-y divide-gray-100 dark:divide-gray-800 bg-white dark:bg-gray-950 shadow-md">
                     {searchResults.map((user) => (
-                      <div
+                      <button
+                        type="button"
                         key={user.id}
                         onClick={() => {
                           setSelectedUser(user);
                           setSearchQuery("");
                           setSearchResults([]);
                         }}
-                        className="flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-900/50 cursor-pointer transition-colors"
+                        className="w-full flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-900/50 cursor-pointer transition-colors"
                       >
                         <div className="text-left min-w-0 pr-2">
                           <div className="flex items-center gap-1.5">
@@ -251,7 +252,7 @@ export default function RecordingAttributionModal({
                           )}
                         </div>
                         <Check className="w-4 h-4 text-indigo-500" />
-                      </div>
+                      </button>
                     ))}
                   </div>
                 )}

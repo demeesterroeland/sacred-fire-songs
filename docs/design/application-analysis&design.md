@@ -1,6 +1,6 @@
 # Project Analysis & Design Document: Song Sharing Application (Sacred Fire Songs)
 
-**Version:** 1.54
+**Version:** 1.55
 **Status:** Living Document
 **Date:** Nov 4, 2026
 
@@ -47,6 +47,7 @@
 | **1.52** | Nov 3, 2026 | Public-repo isolation: removed `deploy-staging.yml` (deployment is out of scope for this public repo; CI only publishes images to GHCR), added `isolation` CI job + `scripts/dev/isolation-guard.sh` (pre-commit, commit-msg, Claude Code hook), `performance.yml` takes its target from input/`PERF_BASE_URL`. Root `AGENTS.md` is now the canonical agent instruction file (`CLAUDE.md` imports it, `GEMINI.md` symlinks it). |
 | **1.53** | Nov 4, 2026 | Offline navigation fallback (#353): §3.3 and §6.2 — `public/sw.js` stores the self-contained `public/offline.html` and serves it for page navigations while the browser is offline (online requests stay native); texts from the `offline.*` dictionary keys. Song lookup moved to `lib/songs/fetchSong.ts` and uses `.maybeSingle()`, so an unknown song id shows "Song Not Found" instead of a load error. Spec: `docs/testing/offline.feature`. |
 | **1.54** | Nov 4, 2026 | Private Song Sharing, DRM-lite & Singer Attribution (§6.8): schema migration `20261104160000_recording_sharing_and_attribution.sql`, `recording_shares` table, RLS policies for own/shared/public audio, owner verification for sharing and DRM-lite download restrictions (stream-only for shared recipients), explicit singer consent disclaimer modal before public publishing, verified musician attribution linking to `/users/:id` and graceful pending badge for unregistered singers. Executable spec: `docs/testing/recording-sharing.feature`. |
+| **1.55** | Nov 4, 2026 | Sharing RLS uses `security definer` helpers `is_recording_owner` / `has_recording_share` (no policy recursion between `user_recordings` and `recording_shares`). Seed audio: four deterministic 30 s sample MP3s in `supabase/seeds/audio/` (`scripts/dev/generate-sample-recordings.py`), uploaded to the `rehearsals` bucket for every seeded recording with `npm run seed:audio`. Known DRM-lite limit tracked in #372 (signed URL can be saved by a recipient). |
 
 
 ## 1. Introduction
@@ -171,7 +172,7 @@ The application is a **Progressive Web App (PWA)** optimized for mobile use duri
 ### 6.3 E2E Testing Environment & Database Isolation
 * **Isolation Strategy:** Playwright E2E tests are configured to run against a separate, online staging Supabase instance. This preserves the integrity of the self-hosted Supabase database used to drive the staging application.
 * **Database Setup & Seeding:** E2E runs use a Playwright `globalSetup` hook (`e2e/global-setup.ts`) to execute a custom Node.js setup script (`scripts/db/setup-test-db.mjs`). This script connects to the target database, dynamically truncates all public tables (preserving the static `categories` lookup taxonomy), wipes `auth.users`, seeds the fixed test accounts from `supabase/seeds/01_auth_users.sql` and `02_profiles.sql`, and then always runs the programmatic random seeder. The real song collection and its SQL seeds (`03_songs_initial.sql` … `10_personal_recordings.sql`) live in the sibling repository `sacred-fire-songs-collection` and are no longer part of this repository.
-* **Static Generated Seed:** `supabase/seeds/03_songs_random_generated.sql` is a snapshot of the generator's output (200 songs, timestamps relative to `now()`), loaded by `supabase db reset` / `supabase start` through `config.toml` `sql_paths`. It is a generated file; regenerate it with `npm run seed:generate` after changing the generator.
+* **Static Generated Seed:** `supabase/seeds/03_songs_random_generated.sql` is a snapshot of the generator's output (200 songs, timestamps relative to `now()`), loaded by `supabase db reset` / `supabase start` through `config.toml` `sql_paths`. It is a generated file; regenerate it with `npm run seed:generate` after changing the generator. The seed only holds recording metadata; `npm run seed:audio` uploads the sample MP3s from `supabase/seeds/audio/` to the `rehearsals` bucket for every seeded `user_recordings` row (local stack only).
 * **Programmatic Random Seeding:** `scripts/db/random-seeder.mjs` (PL/pgSQL, executed by `setup-test-db.mjs`; song count via `E2E_RANDOM_SONGS_COUNT`, default 80) generates randomized song titles, ChordPro content, media links, elements/lineage taxonomy mappings, playlists and private user rehearsal recordings (staggered takes for 30% of songs, and multiple 2-5 takes for 50% of songs). The generated songs deliberately cover every song shape the unit and E2E tests exercise; see `docs/testing/song.feature` for the catalogue of situations. This exercises the system's parsing, filtering, layout, search, and private recording drawer list views.
 * **Local Optimization:** For fast local test iteration, setting the environment variable `E2E_REUSE_DB=1` skips the database wipe and re-seed, reusing the existing database state.
 
