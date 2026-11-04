@@ -1,11 +1,12 @@
 /*
- **Version:** 2.7
+ **Version:** 2.8
  **Status:** Current
- **Date:** July 15, 2026
+ **Date:** November 4, 2026
  
  ## Usage
  This script provides a complete setup for the "Sacred Fire Songs" database. 
- It consolidates the initial schema and all subsequent migrations up to July 15, 2026.
+ It consolidates the initial schema and all subsequent migrations up to November 4, 2026.
+ (v2.8: Added recording_shares, singer attribution, public recording visibility, and consent confirmation).
  (v2.7: Added Guaraní and Camino Rojo categories).
  (v2.6: Added partial indexes for is_public and alphabetical title index).
  (v2.4: Added tuning to song_versions).
@@ -98,13 +99,31 @@ create table public.user_recordings (
   storage_path text not null unique,
   position integer default 0,
   file_size_bytes bigint default 0,
+  duration_seconds integer default 0,
+  is_public boolean default false not null,
+  singer_consent_confirmed boolean default false not null,
+  singer_profile_id uuid references public.profiles(id) on delete set null,
+  singer_name text,
+  singer_email text,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+-- RECORDING SHARES (Private user-to-user sharing)
+create table public.recording_shares (
+  id uuid default gen_random_uuid() primary key,
+  recording_id uuid references public.user_recordings(id) on delete cascade not null,
+  shared_with_user_id uuid references public.profiles(id) on delete cascade not null,
+  created_at timestamptz default timezone('utc'::text, now()) not null,
+  constraint uq_recording_shares unique (recording_id, shared_with_user_id)
 );
 -- 3. Indexes
 -- Partial indexes for public content optimization
 CREATE INDEX IF NOT EXISTS idx_compositions_is_public_true ON public.compositions (created_at DESC) WHERE is_public = true;
 CREATE INDEX IF NOT EXISTS idx_setlists_is_public_true ON public.setlists (created_at DESC) WHERE is_public = true;
 CREATE INDEX IF NOT EXISTS idx_compositions_title_alphabetical ON public.compositions (title ASC);
+CREATE INDEX IF NOT EXISTS idx_recording_shares_user ON public.recording_shares(shared_with_user_id);
+CREATE INDEX IF NOT EXISTS idx_recording_shares_recording ON public.recording_shares(recording_id);
+CREATE INDEX IF NOT EXISTS idx_user_recordings_public ON public.user_recordings(song_version_id) WHERE is_public = true;
+CREATE INDEX IF NOT EXISTS idx_user_recordings_singer ON public.user_recordings(singer_profile_id) WHERE singer_profile_id IS NOT NULL;
 
 -- 4. Triggers & Functions
 -- Trigger to prevent linking songs to parent groups (only subcategories allowed)
@@ -190,6 +209,42 @@ grant execute on function public.fn_is_admin to service_role;
 create policy "Users can read own profile" on public.profiles for
 select to authenticated using (id = auth.uid());
 
+create policy "Allow reading singer profiles" on public.profiles for
+select to authenticated using (
+  exists (
+    select 1 from public.user_recordings ur
+    where ur.singer_profile_id = profiles.id
+    and (
+      ur.is_public = true
+      or ur.user_id = auth.uid()
+      or exists (
+        select 1 from public.recording_shares rs
+        where rs.recording_id = ur.id
+        and rs.shared_with_user_id = auth.uid()
+      )
+    )
+  )
+);
+
+create policy "Allow reading shared recording users" on public.profiles for
+select to authenticated using (
+  exists (
+    select 1 from public.recording_shares rs
+    join public.user_recordings ur on ur.id = rs.recording_id
+    where (rs.shared_with_user_id = profiles.id and ur.user_id = auth.uid())
+       or (ur.user_id = profiles.id and rs.shared_with_user_id = auth.uid())
+  )
+);
+
+create policy "Allow public reading public singer profiles" on public.profiles for
+select to anon using (
+  exists (
+    select 1 from public.user_recordings ur
+    where ur.singer_profile_id = profiles.id
+    and ur.is_public = true
+  )
+);
+
 create policy "Admins can read all profiles" on public.profiles for
 select to authenticated using (public.fn_is_admin());
 
@@ -236,6 +291,7 @@ alter table public.song_versions enable row level security;
 alter table public.setlists enable row level security;
 alter table public.setlist_items enable row level security;
 alter table public.user_recordings enable row level security;
+alter table public.recording_shares enable row level security;
 -- Public Read Policies
 create policy "Allow public read access" on public.categories for
 select to public using (true);
@@ -371,11 +427,78 @@ create policy "Auth users can delete setlist items" on public.setlist_items for 
   ) = 'authenticated'
 );
 -- User Recordings Policies
-create policy "Allow users to read their own recordings" on public.user_recordings for
-select to authenticated using (auth.uid() = user_id);
+create policy "Allow users to read accessible recordings" on public.user_recordings for
+select to authenticated using (
+  auth.uid() = user_id
+  or is_public = true
+  or exists (
+    select 1 from public.recording_shares rs
+    where rs.recording_id = user_recordings.id
+    and rs.shared_with_user_id = auth.uid()
+  )
+);
+create policy "Allow public to read public recordings" on public.user_recordings for
+select to anon using (is_public = true);
 create policy "Allow users to insert their own recordings" on public.user_recordings for
 insert to authenticated with check (auth.uid() = user_id);
+create policy "Allow users to update their own recordings" on public.user_recordings for
+update to authenticated using (auth.uid() = user_id);
 create policy "Allow users to delete their own recordings" on public.user_recordings for delete to authenticated using (auth.uid() = user_id);
+
+-- Recording Shares Policies
+create policy "Allow owners and recipients to read shares" on public.recording_shares for
+select to authenticated using (
+  shared_with_user_id = auth.uid()
+  or exists (
+    select 1 from public.user_recordings ur
+    where ur.id = recording_shares.recording_id
+    and ur.user_id = auth.uid()
+  )
+);
+create policy "Allow owners to insert shares" on public.recording_shares for
+insert to authenticated with check (
+  exists (
+    select 1 from public.user_recordings ur
+    where ur.id = recording_shares.recording_id
+    and ur.user_id = auth.uid()
+  )
+);
+create policy "Allow owners and recipients to delete shares" on public.recording_shares for delete to authenticated using (
+  shared_with_user_id = auth.uid()
+  or exists (
+    select 1 from public.user_recordings ur
+    where ur.id = recording_shares.recording_id
+    and ur.user_id = auth.uid()
+  )
+);
+
+-- User lookup helper function for sharing and attribution
+create or replace function public.search_users_for_sharing(search_term text)
+returns table (
+  id uuid,
+  email text,
+  full_name text,
+  avatar_url text,
+  is_musician boolean,
+  role public.user_role
+) language sql security definer set search_path = public as $$
+  select
+    p.id,
+    p.email,
+    p.full_name,
+    p.avatar_url,
+    p.role in ('musician', 'expert') as is_musician,
+    p.role
+  from public.profiles p
+  where
+    char_length(trim(search_term)) >= 2
+    and (
+      p.email ilike ('%' || trim(search_term) || '%')
+      or p.full_name ilike ('%' || trim(search_term) || '%')
+    )
+  limit 10;
+$$;
+grant execute on function public.search_users_for_sharing(text) to authenticated;
 -- 7. SEED DATA (Categories)
 with groups as (
   insert into public.categories (name, slug, emoji)

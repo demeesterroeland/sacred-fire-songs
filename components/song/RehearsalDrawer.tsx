@@ -2,18 +2,21 @@
 
 import React, { useState, useEffect, useTransition, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Music, Trash2, Pencil, Calendar, Play, Pause, Lock, RotateCcw, RotateCw, GripVertical, Download, ChevronUp, ChevronDown, Check } from "lucide-react";
+import { X, Music, Trash2, Pencil, Calendar, Play, Pause, Lock, RotateCcw, RotateCw, GripVertical, Download, ChevronUp, ChevronDown, Check, Share2, Globe, Users, Mic, CheckCircle2 } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import AudioRecorder from "./AudioRecorder";
 import { useSongRecordings } from "@/hooks/useSongRecordings";
-import { getUserRecordings, deleteUserRecording, renameUserRecording, reorderUserRecordings, type UserRecording } from "@/lib/actions/rehearsal";
+import { getUserRecordings, deleteUserRecording, renameUserRecording, reorderUserRecordings, unpublishRecording, type UserRecording } from "@/lib/actions/rehearsal";
 import { getYouTubeEmbedUrl, getSpotifyEmbedUrl } from "./MediaEmbeds";
 import { useAuth } from "@/hooks/useAuth";
 import { useAudio } from "./AudioProvider";
 import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLocale } from "@/context/LocaleContext";
+import RecordingShareModal from "./RecordingShareModal";
+import RecordingPublishModal from "./RecordingPublishModal";
+import RecordingAttributionModal from "./RecordingAttributionModal";
 import {
   DndContext,
   closestCenter,
@@ -42,6 +45,9 @@ function SortableRecordingItem({
   handleDelete,
   handleDownload,
   handleRename,
+  handleShare,
+  handlePublish,
+  handleAttribution,
   formatDate,
   isCustomSort,
 }: {
@@ -54,12 +60,18 @@ function SortableRecordingItem({
   handleDelete: (id: string, path: string) => void;
   handleDownload: (recording: UserRecording) => void;
   handleRename: (id: string, newName: string) => void;
+  handleShare?: (recording: UserRecording) => void;
+  handlePublish?: (recording: UserRecording) => void;
+  handleAttribution?: (recording: UserRecording) => void;
   formatDate: (date: string) => string;
   isCustomSort: boolean;
 }) {
   const { t } = useLocale();
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(rec.recording_name);
+
+  const isOwner = rec.is_owner !== false;
+  const isShared = rec.is_shared === true;
 
   const handleSaveRename = () => {
     if (editValue.trim() && editValue !== rec.recording_name) {
@@ -95,8 +107,8 @@ function SortableRecordingItem({
       style={style}
       className="flex items-center gap-3 p-4 rounded-2xl bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-gray-700 transition-all duration-200 group"
     >
-      {/* Drag handle (shown when custom sort is active) */}
-      {isCustomSort && (
+      {/* Drag handle (shown when custom sort is active and user is owner) */}
+      {isCustomSort && isOwner && (
         <button
           {...attributes}
           {...listeners}
@@ -128,7 +140,7 @@ function SortableRecordingItem({
         )}
       </button>
 
-      {/* Title and date */}
+      {/* Title, singer attribution, badges and date */}
       <div className="flex-1 min-w-0 text-left">
         {isEditing ? (
           <input
@@ -141,14 +153,67 @@ function SortableRecordingItem({
             className="w-full text-sm font-bold bg-white dark:bg-gray-900 border border-indigo-500 rounded px-2 py-0.5 outline-none text-gray-900 dark:text-white"
           />
         ) : (
-          <h4 
-            className={`text-sm font-bold truncate ${!rec.audioUrl ? "text-red-500/80 dark:text-red-400/80" : "text-gray-900 dark:text-white"}`}
-            onDoubleClick={() => setIsEditing(true)}
-          >
-            {rec.recording_name}
-            {!rec.audioUrl && <span className="ml-2 text-[10px] uppercase font-bold text-red-500 bg-red-500/10 px-1.5 py-0.5 rounded">{t('rehearsal.recording.missingBadge')}</span>}
-          </h4>
+          <div className="flex items-center gap-2 flex-wrap">
+            <h4 
+              className={`text-sm font-bold truncate ${!rec.audioUrl ? "text-red-500/80 dark:text-red-400/80" : "text-gray-900 dark:text-white"}`}
+              onDoubleClick={() => isOwner && setIsEditing(true)}
+            >
+              {rec.recording_name}
+            </h4>
+
+            {/* Status / Visibility Badges */}
+            {rec.is_public ? (
+              <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 px-1.5 py-0.5 rounded">
+                <Globe className="w-2.5 h-2.5" />
+                {t('recording.publish.badge')}
+              </span>
+            ) : isShared ? (
+              <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 px-1.5 py-0.5 rounded">
+                <Users className="w-2.5 h-2.5" />
+                {t('recording.sharing.badge')}
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-gray-500 dark:text-gray-400 bg-gray-500/10 px-1.5 py-0.5 rounded">
+                <Lock className="w-2.5 h-2.5" />
+                {t('recording.publish.privateBadge')}
+              </span>
+            )}
+
+            {!rec.audioUrl && (
+              <span className="text-[10px] uppercase font-bold text-red-500 bg-red-500/10 px-1.5 py-0.5 rounded">
+                {t('rehearsal.recording.missingBadge')}
+              </span>
+            )}
+          </div>
         )}
+
+        {/* Singer Attribution Line */}
+        {rec.singer_profile_id && rec.singer_profile ? (
+          <div className="text-[11px] text-gray-600 dark:text-gray-300 flex items-center gap-1.5 mt-0.5">
+            <Mic className="w-3 h-3 text-indigo-500 shrink-0" />
+            <Link
+              href={`/users/${rec.singer_profile_id}`}
+              className="font-semibold text-indigo-600 dark:text-indigo-400 hover:underline inline-flex items-center gap-1"
+            >
+              <span>{rec.singer_profile.full_name || rec.singer_name || t('user.profile.title')}</span>
+              {rec.singer_profile.is_musician && (
+                <span className="text-[9px] bg-amber-500/15 text-amber-600 dark:text-amber-400 font-bold px-1 py-0.5 rounded inline-flex items-center gap-0.5">
+                  <CheckCircle2 className="w-2.5 h-2.5" />
+                  {t('recording.attribution.badgeVerified')}
+                </span>
+              )}
+            </Link>
+          </div>
+        ) : rec.singer_name ? (
+          <div className="text-[11px] text-gray-500 dark:text-gray-400 flex items-center gap-1.5 mt-0.5">
+            <Mic className="w-3 h-3 text-gray-400 shrink-0" />
+            <span>{rec.singer_name}</span>
+            <span className="text-[9px] bg-gray-500/15 text-gray-500 dark:text-gray-400 font-medium px-1 py-0.5 rounded">
+              {t('recording.attribution.badgePending')}
+            </span>
+          </div>
+        ) : null}
+
         <div className="text-[10px] text-gray-400 dark:text-gray-500 flex items-center gap-1.5 mt-0.5 font-medium flex-wrap">
           <div className="flex items-center gap-1">
             <Calendar className="w-3 h-3" />
@@ -172,49 +237,96 @@ function SortableRecordingItem({
         </div>
       </div>
 
-      {/* Edit Button */}
-      <button
-        onClick={() => setIsEditing(true)}
-        className="p-2 rounded-xl text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition-all active:scale-95 shrink-0"
-        title={t('rehearsal.recording.edit.ariaLabel')}
-        aria-label={t('rehearsal.recording.edit.ariaLabel')}
-      >
-        <Pencil className="w-4 h-4" />
-      </button>
+      {/* Owner controls */}
+      {isOwner ? (
+        <>
+          {/* Singer Attribution Button */}
+          <button
+            onClick={() => handleAttribution?.(rec)}
+            className="p-2 rounded-xl text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition-all active:scale-95 shrink-0"
+            title={t('recording.attribution.button')}
+            aria-label={t('recording.attribution.button')}
+          >
+            <Mic className="w-4 h-4" />
+          </button>
 
-      {/* Download Button */}
-      <button
-        onClick={() => handleDownload(rec)}
-        disabled={!rec.audioUrl || downloadingId === rec.id}
-        className={`p-2 rounded-xl transition-all active:scale-95 shrink-0 ${
-          !rec.audioUrl
-            ? "text-gray-300 dark:text-gray-700 opacity-40 cursor-not-allowed"
-            : "text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40"
-        }`}
-        title={!rec.audioUrl ? t('rehearsal.recording.missingTitle') : t('rehearsal.recording.download.ariaLabel')}
-        aria-label={t('rehearsal.recording.download.ariaLabel')}
-      >
-        {downloadingId === rec.id ? (
-          <div className="w-4 h-4 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
-        ) : (
-          <Download className="w-4 h-4" />
-        )}
-      </button>
+          {/* Share Button */}
+          <button
+            onClick={() => handleShare?.(rec)}
+            className="p-2 rounded-xl text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition-all active:scale-95 shrink-0 relative"
+            title={t('recording.sharing.button')}
+            aria-label={t('recording.sharing.button')}
+          >
+            <Share2 className="w-4 h-4" />
+            {rec.shared_with && rec.shared_with.length > 0 && (
+              <span className="absolute top-1.5 right-1.5 w-1.5 h-1.5 rounded-full bg-indigo-500 ring-2 ring-white dark:ring-gray-950" />
+            )}
+          </button>
 
-      {/* Delete Button */}
-      <button
-        onClick={() => handleDelete(rec.id, rec.storage_path)}
-        disabled={deletingId === rec.id}
-        className="p-2 rounded-xl text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-all active:scale-95 shrink-0"
-        title={t('rehearsal.recording.delete.ariaLabel')}
-        aria-label={t('rehearsal.recording.delete.ariaLabel')}
-      >
-        {deletingId === rec.id ? (
-          <div className="w-4 h-4 border-2 border-red-500/30 border-t-red-500 rounded-full animate-spin" />
-        ) : (
-          <Trash2 className="w-4 h-4" />
-        )}
-      </button>
+          {/* Public / Private Visibility Toggle */}
+          <button
+            onClick={() => handlePublish?.(rec)}
+            className={`p-2 rounded-xl transition-all active:scale-95 shrink-0 ${
+              rec.is_public
+                ? "text-emerald-600 dark:text-emerald-400 hover:bg-emerald-500/10"
+                : "text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40"
+            }`}
+            title={rec.is_public ? t('recording.publish.makePrivate') : t('recording.publish.makePublic')}
+            aria-label={rec.is_public ? t('recording.publish.makePrivate') : t('recording.publish.makePublic')}
+          >
+            {rec.is_public ? <Globe className="w-4 h-4" /> : <Lock className="w-4 h-4" />}
+          </button>
+
+          {/* Edit / Rename Button */}
+          <button
+            onClick={() => setIsEditing(true)}
+            className="p-2 rounded-xl text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40 transition-all active:scale-95 shrink-0"
+            title={t('rehearsal.recording.edit.ariaLabel')}
+            aria-label={t('rehearsal.recording.edit.ariaLabel')}
+          >
+            <Pencil className="w-4 h-4" />
+          </button>
+
+          {/* Download Button */}
+          <button
+            onClick={() => handleDownload(rec)}
+            disabled={!rec.audioUrl || downloadingId === rec.id}
+            className={`p-2 rounded-xl transition-all active:scale-95 shrink-0 ${
+              !rec.audioUrl
+                ? "text-gray-300 dark:text-gray-700 opacity-40 cursor-not-allowed"
+                : "text-gray-400 hover:text-indigo-600 dark:hover:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-950/40"
+            }`}
+            title={!rec.audioUrl ? t('rehearsal.recording.missingTitle') : t('rehearsal.recording.download.ariaLabel')}
+            aria-label={t('rehearsal.recording.download.ariaLabel')}
+          >
+            {downloadingId === rec.id ? (
+              <div className="w-4 h-4 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
+            ) : (
+              <Download className="w-4 h-4" />
+            )}
+          </button>
+
+          {/* Delete Button */}
+          <button
+            onClick={() => handleDelete(rec.id, rec.storage_path)}
+            disabled={deletingId === rec.id}
+            className="p-2 rounded-xl text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-all active:scale-95 shrink-0"
+            title={t('rehearsal.recording.delete.ariaLabel')}
+            aria-label={t('rehearsal.recording.delete.ariaLabel')}
+          >
+            {deletingId === rec.id ? (
+              <div className="w-4 h-4 border-2 border-red-500/30 border-t-red-500 rounded-full animate-spin" />
+            ) : (
+              <Trash2 className="w-4 h-4" />
+            )}
+          </button>
+        </>
+      ) : (
+        /* DRM-lite: Shared user has stream access only; cannot download or reshare */
+        <div className="text-[11px] text-gray-400 dark:text-gray-500 italic px-2 py-1 bg-gray-100 dark:bg-gray-900 rounded-lg select-none shrink-0" title={t('recording.sharing.cannotDownload')}>
+          {t('recording.sharing.badge')}
+        </div>
+      )}
     </div>
   );
 }
@@ -252,6 +364,9 @@ export default function RehearsalDrawer({
   const [selectedMedia, setSelectedMedia] = useState<"youtube" | "spotify" | "soundcloud" | null>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [shareRecording, setShareRecording] = useState<UserRecording | null>(null);
+  const [publishRecording, setPublishRecording] = useState<UserRecording | null>(null);
+  const [attributionRecording, setAttributionRecording] = useState<UserRecording | null>(null);
   const { activePlaybackId, activeRecording, audioElements, isRecordingPlaying, recordingCurrentTime, recordingDuration, handleTogglePlay: contextHandleTogglePlay, pauseActiveRecording, stopActiveRecording, seekActiveRecording, seekRelativeActiveRecording, clearAudioElements } = useAudio();
 
 
@@ -865,8 +980,12 @@ export default function RehearsalDrawer({
     }
   };
 
-  // Handle download recording
+  // Handle download recording (strictly DRM-lite protected: owner only)
   const handleDownload = async (rec: UserRecording) => {
+    if (rec.is_owner === false || rec.can_download === false) {
+      toast.error(t('recording.sharing.cannotDownload'));
+      return;
+    }
     if (!rec.audioUrl) {
       toast.error(t('recorder.audio.missing'));
       return;
@@ -909,6 +1028,31 @@ export default function RehearsalDrawer({
     } finally {
       setDownloadingId(null);
     }
+  };
+
+  const handleShare = (rec: UserRecording) => {
+    setShareRecording(rec);
+  };
+
+  const handlePublish = async (rec: UserRecording) => {
+    if (rec.is_public) {
+      const res = await unpublishRecording(rec.id);
+      if (res.success) {
+        toast.success(t('recording.publish.privateSuccess'));
+        setRecordings((prev) =>
+          prev.map((r) => (r.id === rec.id ? { ...r, is_public: false } : r))
+        );
+        queryClient.invalidateQueries({ queryKey: ["song-recordings", songVersionId] });
+      } else {
+        toast.error(res.error || t('recording.publish.error'));
+      }
+    } else {
+      setPublishRecording(rec);
+    }
+  };
+
+  const handleAttribution = (rec: UserRecording) => {
+    setAttributionRecording(rec);
   };
 
   // Custom play/pause control handler
@@ -1119,6 +1263,9 @@ export default function RehearsalDrawer({
                                   handleDelete={handleDelete}
                                   handleRename={handleRename}
                                   handleDownload={handleDownload}
+                                  handleShare={handleShare}
+                                  handlePublish={handlePublish}
+                                  handleAttribution={handleAttribution}
                                   formatDate={formatDate}
                                   isCustomSort={recordings.length > 1}
                                 />
@@ -1451,6 +1598,42 @@ export default function RehearsalDrawer({
             )}
           </div>
         </div>
+      )}
+
+      {/* Recording Sharing Modal */}
+      {shareRecording && (
+        <RecordingShareModal
+          isOpen={!!shareRecording}
+          onClose={() => setShareRecording(null)}
+          recording={shareRecording}
+          onSharesUpdated={() => {
+            queryClient.invalidateQueries({ queryKey: ["song-recordings", songVersionId] });
+          }}
+        />
+      )}
+
+      {/* Recording Publish Modal (with Singer Consent Disclaimer) */}
+      {publishRecording && (
+        <RecordingPublishModal
+          isOpen={!!publishRecording}
+          onClose={() => setPublishRecording(null)}
+          recording={publishRecording}
+          onPublished={() => {
+            queryClient.invalidateQueries({ queryKey: ["song-recordings", songVersionId] });
+          }}
+        />
+      )}
+
+      {/* Singer Attribution Modal */}
+      {attributionRecording && (
+        <RecordingAttributionModal
+          isOpen={!!attributionRecording}
+          onClose={() => setAttributionRecording(null)}
+          recording={attributionRecording}
+          onAttributionUpdated={() => {
+            queryClient.invalidateQueries({ queryKey: ["song-recordings", songVersionId] });
+          }}
+        />
       )}
     </>
   );

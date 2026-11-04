@@ -2,7 +2,7 @@ import { createClient } from "./supabase/client";
 import { songsQuery, mapCompositionToSong } from './songs/queries';
 import { normalizeWhitespace } from "./utils";
 
-const PAGE_SIZE = 20;
+export const PAGE_SIZE = 20;
 
 
 // lib/songUtils.ts
@@ -33,6 +33,7 @@ export interface Song {
  * Filters a list of songs by title, author, content, tags (AND), or categories (OR).
  */
 export function filterSongs(songs: Song[], query: string, activeFilter: 'all' | 'public' | 'draft' = 'all', additionalFilters?: { tag?: string, category?: string }) {
+    void activeFilter;
     const cleanQuery = normalizeWhitespace(query).toLowerCase();
 
     let filtered = songs.filter(song => {

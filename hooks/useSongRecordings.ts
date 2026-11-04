@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { getUserRecordings, type UserRecording } from '@/lib/actions/rehearsal';
+import { getUserRecordings } from '@/lib/actions/rehearsal';
 
 export function useSongRecordings(songVersionId?: string) {
   return useQuery({

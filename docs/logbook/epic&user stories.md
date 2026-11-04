@@ -1,6 +1,6 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 1.48
+**Version:** 1.49
 **Status:** Living Document
 **Date:** Nov 4, 2026
 
@@ -47,6 +47,7 @@
 | **1.46** | Nov 3, 2026 | Story 5.1.7 re-scoped: deployment of the maintainer's environments moved out of this public repo (`deploy-staging.yml` removed); this repo only publishes images. Added public-repo isolation enforcement (`isolation` CI job, git hooks, Claude Code hook). |
 | **1.47** | Nov 4, 2026 | Story 4.5.1 [Partial]: offline fallback page for page navigations implemented (#353, `docs/testing/offline.feature`); cached pages and songs offline (second scenario) not yet. |
 | **1.48** | Nov 4, 2026 | Aligned MD logbook with GitHub: synced [Implemented] statuses (3.4.6, 4.2.1, 4.2.3, 4.2.4, 5.1.3, 5.1.4, 5.1.5); added Story 1.2.5 (#218), Stories 3.1.1 (#13), 3.1.3 (#140), 3.1.4 and sub-stories 3.1.4.1–3.1.4.6 (#323–#329); expanded Epic 4.3 with Stories 4.3.2–4.3.8 (#357, #358–#364). |
+| **1.49** | Nov 4, 2026 | Added Stories 4.6.2 (User-to-User Private Sharing with DRM-lite restriction), 4.6.3 (Public Publication with Explicit Singer Consent Disclaimer), and 4.6.4 (Singer Attribution & Musician Profile Linking), all [Implemented]. Executable spec: `docs/testing/recording-sharing.feature`. |
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
 
@@ -1331,6 +1332,52 @@ Scenario: Guest cannot record or see private rehearsals
   When I view the Song Detail page
   Then the "Record Rehearsal" button should be hidden
   And I should not see any private rehearsal recordings
+```
+
+**Story 4.6.2: [Implemented]** As a recording owner, I want to share a private recording directly with another registered user with strict DRM-lite permissions so that they can listen without downloading or resharing.
+
+```gherkin
+Scenario: Owner shares recording with registered user
+  Given I am the owner of a private recording "Medicine Song (Ceremony Take)"
+  When I share the recording with "maya@sacredfiresongs.org"
+  Then "maya@sacredfiresongs.org" should have streaming access to the recording
+  And "maya@sacredfiresongs.org" should not have download permissions on the recording
+
+Scenario: Shared recipient cannot reshare recording
+  Given a recording shared by "Carlos" with "Maya"
+  When "Maya" attempts to share the recording with "David"
+  Then the sharing request should be rejected with "Only the recording owner can share this recording."
+```
+
+**Story 4.6.3: [Implemented]** As a recording owner, I want to publish a private recording publicly only after explicitly confirming singer consent so that musical rights and artist integrity are respected.
+
+```gherkin
+Scenario: Publishing without confirming consent is rejected
+  Given I am the owner of a private recording "Pachamama Sunrise"
+  When I attempt to make the recording public without confirming singer consent
+  Then the publication should be rejected with "Singer consent must be explicitly confirmed"
+  And the recording should remain private
+
+Scenario: Publishing with singer consent confirmation succeeds
+  Given I am the owner of a private recording "Pachamama Sunrise"
+  When I confirm singer consent and publish the recording
+  Then the recording visibility should be updated to public
+```
+
+**Story 4.6.4: [Implemented]** As a recording owner, I want to attribute the singer on a recording with verified profile links or pending guest invites so that singers are acknowledged properly.
+
+```gherkin
+Scenario: Attributing registered musician links to verified profile
+  Given a recording by an owner
+  When the recording is attributed to registered musician "Danit" with id "musician-danit-id"
+  Then the recording should display "Danit" with a verified musician badge
+  And clicking the singer attribution should navigate to "/users/musician-danit-id"
+
+Scenario: Attributing unregistered singer displays pending invite gracefully
+  Given a recording by an owner
+  When the recording is attributed to unregistered singer "Elena Wood" with email "elena@wood.org"
+  Then the recording should display "Elena Wood" with a pending invite badge
+  And the system should not crash
 ```
 
 ## Phase 5: Engineering Excellence

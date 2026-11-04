@@ -1387,3 +1387,16 @@
 - [x] Test pyramid (#262): vitest + Cucumber @unit via Node `vm` harness (35 checks), 2 Playwright journeys; full desktop E2E 87 passed
 - [x] Docs: `docs/testing/offline.feature`, design doc 1.53, stories 1.47 (Story 4.5.1 [Partial]), e2e overview 1.13
 - [ ] Owner: review PR, verify offline page on a phone; Story 4.5.1 second scenario (cached songs offline) open
+
+## Session November 4, 2026 (Part 3: Private Song Sharing, DRM-lite & Singer Attribution)
+- [x] Schema migration: `20261104160000_recording_sharing_and_attribution.sql` extending `user_recordings` with `is_public`, `singer_consent_confirmed`, `singer_profile_id`, `singer_name`, `singer_email`; created `recording_shares` table with cascade delete and foreign keys
+- [x] Search RPC `search_users_for_sharing(search_term)` and hardened RLS policies on `user_recordings`, `recording_shares`, `storage.objects` (rehearsals bucket), and `profiles`
+- [x] Synced `docs/design/db-schema.sql` (v2.8)
+- [x] Backend server actions in `lib/actions/rehearsal.ts`: `shareRecording`, `unshareRecording`, `publishRecording`, `unpublishRecording`, `updateSingerAttribution`, `getRecordingDownloadUrl`, `searchUsersForSharing`
+- [x] DRM-lite security: shared recipients cannot download audio (action-level rejection & hidden UI controls) and cannot reshare
+- [x] Singer consent disclaimer: mandatory confirmation checkbox in `RecordingPublishModal` before transitioning private recordings to public
+- [x] Singer attribution & musician profile: `RecordingAttributionModal`, `UserProfileView`, and route `/users/[id]` displaying musician badges and public attributed recordings; graceful fallback for unregistered singers
+- [x] Integrated into `components/song/RehearsalDrawer.tsx` (`SortableRecordingItem` badges, DRM enforcement, modal hooks, query invalidations)
+- [x] i18n key parity: added `recording.sharing.*`, `recording.publish.*`, `recording.attribution.*`, `user.profile.*` in all 8 locales (`en`, `nl`, `es`, `fr`, `it`, `pt`, `qu`, `ru`) — 73 unit tests passed
+- [x] Testing: 12 Vitest unit tests (`testing/unit/tests/recordingSharing.test.ts`), 7 BDD scenarios (`docs/testing/recording-sharing.feature`), typecheck clean (`npx tsc --noEmit`), lint clean (201 warnings <= 202 cap)
+- [x] Docs & plans: `docs/plans/2026-11-04-private-song-sharing-and-recording-attribution.md`, stories v1.49, design doc v1.54

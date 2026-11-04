@@ -1,6 +1,6 @@
 # Project Analysis & Design Document: Song Sharing Application (Sacred Fire Songs)
 
-**Version:** 1.53
+**Version:** 1.54
 **Status:** Living Document
 **Date:** Nov 4, 2026
 
@@ -46,6 +46,7 @@
 | **1.51** | Oct 31, 2026 | Added §6.7 Client Auth State (#321): `useAuth()` without a server user starts with `loading = true` until the session resolves (`initialUser` `undefined` = unknown, `null` = server-confirmed guest); `/library/playlists/add` guards auth on the server (`redirect('/auth/login?next=/library/playlists/add')`) with the form in `components/playlists/CreatePlaylistForm.tsx`. Fixes logged-in users being redirected to `/` from "New Playlist". Lint cap lowered to 181. |
 | **1.52** | Nov 3, 2026 | Public-repo isolation: removed `deploy-staging.yml` (deployment is out of scope for this public repo; CI only publishes images to GHCR), added `isolation` CI job + `scripts/dev/isolation-guard.sh` (pre-commit, commit-msg, Claude Code hook), `performance.yml` takes its target from input/`PERF_BASE_URL`. Root `AGENTS.md` is now the canonical agent instruction file (`CLAUDE.md` imports it, `GEMINI.md` symlinks it). |
 | **1.53** | Nov 4, 2026 | Offline navigation fallback (#353): §3.3 and §6.2 — `public/sw.js` stores the self-contained `public/offline.html` and serves it for page navigations while the browser is offline (online requests stay native); texts from the `offline.*` dictionary keys. Song lookup moved to `lib/songs/fetchSong.ts` and uses `.maybeSingle()`, so an unknown song id shows "Song Not Found" instead of a load error. Spec: `docs/testing/offline.feature`. |
+| **1.54** | Nov 4, 2026 | Private Song Sharing, DRM-lite & Singer Attribution (§6.8): schema migration `20261104160000_recording_sharing_and_attribution.sql`, `recording_shares` table, RLS policies for own/shared/public audio, owner verification for sharing and DRM-lite download restrictions (stream-only for shared recipients), explicit singer consent disclaimer modal before public publishing, verified musician attribution linking to `/users/:id` and graceful pending badge for unregistered singers. Executable spec: `docs/testing/recording-sharing.feature`. |
 
 
 ## 1. Introduction
@@ -213,6 +214,21 @@ The application is a **Progressive Web App (PWA)** optimized for mobile use duri
 * **Unseeded callers:** `useAuth()` without an argument (`initialUser === undefined`) starts with `loading = true` and only drops it once `getSession()` + profile resolve (5 s profile timeout, guest fallback). Client guards must wait for `!loading` before treating `user === null` as a guest.
 * **Prefer server guards:** pages that require login check `supabase.auth.getUser()` in a Server Component and `redirect('/auth/login?next=<path>')` (`/library/playlists/add`, `/library/playlists/[id]`, `/library/recently-viewed`). `/auth/login` redirects an already-signed-in user to `next` (default `/`), so a client guard that fires too early bounces the user to the home page.
 * **Tests:** `testing/unit/tests/useAuth.test.ts` (first-render state), `e2e/tests/playlist-add-auth.spec.ts` (logged-in user stays on the form, guest gets `next=`).
+
+### 6.8 Private Song Sharing, DRM-lite & Singer Attribution
+* **Data Model & Schema:** Extended `user_recordings` with `is_public` (boolean), `singer_consent_confirmed` (boolean), `singer_profile_id` (UUID references `profiles.id`), `singer_name` (text), and `singer_email` (text). Created join table `recording_shares` (`id`, `recording_id`, `shared_with_user_id`, `created_at`) with foreign keys cascading on delete. Performance indexes on `(recording_id, shared_with_user_id)` and lookup columns.
+* **Strict Permissions & DRM-lite:**
+  - Recording owners can manage sharing and revoke access. Non-owners (shared recipients) cannot share or reshare recordings.
+  - Streaming playback is allowed for shared recipients via signed URLs or public access.
+  - Downloads are strictly blocked for non-owners (`getRecordingDownloadUrl` rejects non-owners; client download buttons and controls are omitted for shared recipients).
+* **Singer Consent Disclaimer:** Transitioning a recording to public visibility requires explicit user acknowledgement of singer consent via a confirmation modal (`RecordingPublishModal`), persisting `singer_consent_confirmed = true`.
+* **Singer Attribution:**
+  - Registered musicians: linked by `singer_profile_id` with verified badge and profile link (`/users/:id`), displaying public attributed recordings.
+  - Unregistered singers: handled gracefully with `singer_name` and pending invite status badge without breaking playback or navigation.
+* **Supabase RLS & Storage Security:**
+  - Storage bucket `rehearsals`: SELECT permits owner (`(storage.foldername(name))[1] = auth.uid()::text`), recipients with an active share in `recording_shares`, or public recordings.
+  - Profiles: targeted RLS read policies permit reading singer attribution profiles and recipient identities without blanket profile exposure.
+* **Tests & Quality:** Executable Gherkin spec `docs/testing/recording-sharing.feature`, step definitions `testing/bdd/steps/recording-sharing.steps.ts`, Vitest unit test suite `testing/unit/tests/recordingSharing.test.ts`, and full 8-locale key parity in `messages/*.ts`.
 
 ## 7. Screen Inventory (Implemented)
 

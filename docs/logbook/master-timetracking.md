@@ -122,4 +122,5 @@
 | **November 3, 2026** | **Security / Ops**: public-repo isolation — scan, removal of deploy workflow and deployment names, isolation guard (hooks + CI), canonical `AGENTS.md`. | ~2.0 Hours | ✅ Completed |
 | **November 3–4, 2026** | **Security/Testing (#336, #337, #338–#348)**: test-account seeding fix, per-role E2E passwords, epic for 21 failing local E2E tests with hand verification, fixes incl. `RehearsalDrawer` refresh bug (162 passed), isolation guard empty-diff fix. | ~5.0 Hours | ✅ Completed |
 | **November 4, 2026 (Part 2)** | **Bug/PWA (#353)**: offline navigation fallback — service worker offline page (8 languages), unknown song → "Song Not Found", @unit vm harness + Cucumber + 2 Playwright journeys, docs. | ~2.0 Hours | ✅ Completed |
-| **Total** | **Development + AI Collaboration** | **~207.0 Hours** | |
+| **November 4, 2026 (Part 3)** | **Feature/Rehearsal (Epic 4.6)**: Private Song Sharing & Recording Attribution — DB schema migration, RLS & storage security policies, user search RPC, DRM-lite download prevention & reshare blocking, singer consent disclaimer modal, verified musician attribution & profile view, RehearsalDrawer integration, 8-locale i18n, unit + BDD tests. | ~3.0 Hours | ✅ Completed |
+| **Total** | **Development + AI Collaboration** | **~210.0 Hours** | |
