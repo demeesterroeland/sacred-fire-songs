@@ -1,11 +1,12 @@
 # UX Research: Usability, Friendliness & Flow (Mobile First)
 
-**Version:** 1.1 | **Date:** Nov 4, 2026 | **Status:** Draft for review
+**Version:** 1.2 | **Date:** Nov 4, 2026 | **Status:** Draft for review
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.2 | Nov 4, 2026 | Linked every group and action to its GitHub issue (Epic 6.1, #375). |
 | 1.1 | Nov 4, 2026 | Added section 5 (design direction: sober greyscale, user font-size control, tag density, room for variants/translations) and regrouped the plan into 9 themed groups. |
 | 1.0 | Nov 4, 2026 | First audit: screen inventory for guest, member, gatekeeper and admin, user flows, heuristic findings and a phased improvement plan. Includes the rehearsal drawer, reference tracks, recorder and recording sharing / publishing / singer attribution. |
 
@@ -251,86 +252,86 @@ Why this also prepares for the roadmap: **song/lyric variants and translations**
 
 ## 6. Improvement plan, grouped
 
-41 findings → 29 actions in 9 groups. Priority: **A** quick win (≈ 1 sprint together), **B** flow work (≈ 2 sprints), **C** backlog. Each action becomes a GitHub issue with Gherkin criteria (`/create-issue`); all copy in the 8 locales.
+41 findings → 34 actions in 9 groups. **GitHub:** orchestrator epic #375; each group is a sub-epic and each action a story (numbers in the tables). Priority: **A** quick win (≈ 1 sprint together), **B** flow work (≈ 2 sprints), **C** backlog. Each action becomes a GitHub issue with Gherkin criteria (`/create-issue`); all copy in the 8 locales.
 
-### G1 · Visual language & design system
-
-| # | Pri | Action | Fixes |
-| :-- | :-: | :-- | :-- |
-| G1.1 | A | Design tokens + component sheet (section 5): greyscale palette, one accent, type scale, spacing. Document in `docs/design/`. | S4, A1, A2 |
-| G1.2 | A | Restyle song cards and list rows: title + one meta line, no coloured chips, no glow/border. | S3, S4 |
-| G1.3 | A | Raise small-text contrast and minimum size (≥ 12 px, ≥ 4.5:1); drop uppercase micro-labels. | A1 |
-| G1.4 | B | Category grid: monochrome icons, counts in grey; one accent on hover/active only. | S4 |
-| G1.5 | C | Replace "coming soon" placeholders (Albums, Avatar, Privacy) by hiding them. | N4, F5 |
-
-### G2 · Song page: reading in the circle
+### G1 (#376) · Visual language & design system
 
 | # | Pri | Action | Fixes |
 | :-- | :-: | :-- | :-- |
-| G2.1 | A | Viewer toolbar `Chords · A− · A+` under the title; size stored per device; remove "Large Stage Font" setting. | S5, S6 |
-| G2.2 | A | Collapse Key / Capo / Tuning into one grey line; tags into one line, tap to expand. | S5, S4 |
-| G2.3 | A | Fix clipped sticky title (ellipsis end only). | N8 |
-| G2.4 | B | Sticky bottom action bar in thumb reach: **Practice · Playlist · ♥** (replaces most of the ⋮ sheet). | R1, S7 |
-| G2.5 | C | Add auto-scroll and transpose (musician) to the same toolbar; stay-awake indicator. | S6 |
-| G2.6 | C | Reserve the slot for variant / language segmented control (Epic 3.2, translations). | roadmap |
+| G1.1 (#385) | A | Design tokens + component sheet (section 5): greyscale palette, one accent, type scale, spacing. Document in `docs/design/`. | S4, A1, A2 |
+| G1.2 (#386) | A | Restyle song cards and list rows: title + one meta line, no coloured chips, no glow/border. | S3, S4 |
+| G1.3 (#387) | A | Raise small-text contrast and minimum size (≥ 12 px, ≥ 4.5:1); drop uppercase micro-labels. | A1 |
+| G1.4 (#388) | B | Category grid: monochrome icons, counts in grey; one accent on hover/active only. | S4 |
+| G1.5 (#389) | C | Replace "coming soon" placeholders (Albums, Avatar, Privacy) by hiding them. | N4, F5 |
 
-### G3 · Media player
-
-| # | Pri | Action | Fixes |
-| :-- | :-: | :-- | :-- |
-| G3.1 | A | Mini player only after the user presses play; sheets and drawer get bottom padding when it is visible. | N1, R3 |
-| G3.2 | C | Mini player in greyscale with one accent; show only providers with a link; "Control Track" → "Open player"; status line wraps. | R13 |
-
-### G4 · Practice & recordings
+### G2 (#377) · Song page: reading in the circle
 
 | # | Pri | Action | Fixes |
 | :-- | :-: | :-- | :-- |
-| G4.1 | A | One name: **Practice** (tabs *Listen* / *Record*, lists *My takes* / *Shared with me*). Rename menu item, badge, smart playlist, guest card. | R2 |
-| G4.2 | A | Split list into *My takes* and *Shared with me*; show "Shared by {name}". | R4 |
-| G4.3 | A | Text labels next to status icons ("Public", "Shared · 2", "Pending invite"). | R6 |
-| G4.4 | B | Row actions as a grouped bottom action sheet, 44 px targets, Delete separated in red. | R7, R8, R9 |
-| G4.5 | B | Share dialog: "registered members only", empty state, private-song case as an explicit separate choice. | R10, R12 |
-| G4.6 | B | Shared-with-me inbox: badge in account menu + Library entry; uses the `notifications` table. | R5 |
-| G4.7 | C | Recorder: level meter, count-in, "2:41 left"; Save as the single primary in review. | R14, R15 |
-| G4.8 | C | Publish dialog: name the song, say "all visitors including guests can listen". | R11 |
+| G2.1 (#390) | A | Viewer toolbar `Chords · A− · A+` under the title; size stored per device; remove "Large Stage Font" setting. | S5, S6 |
+| G2.2 (#391) | A | Collapse Key / Capo / Tuning into one grey line; tags into one line, tap to expand. | S5, S4 |
+| G2.3 (#392) | A | Fix clipped sticky title (ellipsis end only). | N8 |
+| G2.4 (#393) | B | Sticky bottom action bar in thumb reach: **Practice · Playlist · ♥** (replaces most of the ⋮ sheet). | R1, S7 |
+| G2.5 (#394) | C | Add auto-scroll and transpose (musician) to the same toolbar; stay-awake indicator. | S6 |
+| G2.6 (#395) | C | Reserve the slot for variant / language segmented control (Epic 3.2, translations). | roadmap |
 
-### G5 · Navigation & information architecture
+### G3 (#378) · Media player
 
 | # | Pri | Action | Fixes |
 | :-- | :-: | :-- | :-- |
-| G5.1 | A | Real 404 for everyone; no login redirect on unknown paths. | N2 |
-| G5.2 | A | Hide Albums tab; Library tab row fits 390 px. | N4 |
-| G5.3 | B | Decide Home vs Explore vs Search in the bottom bar (Story 1.1.9 says Home · Search · Library). | N5 |
-| G5.4 | C | Auth pages: remove the fake modal ✕ or give it a destination. | N7 |
+| G3.1 (#396) | A | Mini player only after the user presses play; sheets and drawer get bottom padding when it is visible. | N1, R3 |
+| G3.2 (#397) | C | Mini player in greyscale with one accent; show only providers with a link; "Control Track" → "Open player"; status line wraps. | R13 |
 
-### G6 · Guest experience
+### G4 (#379) · Practice & recordings
 
 | # | Pri | Action | Fixes |
 | :-- | :-: | :-- | :-- |
-| G6.1 | A | One GuestGate pattern everywhere (edit, history, new playlist, profile): reason + "Sign in" with `next=`. | N3, N6 |
-| G6.2 | B | Add Song as guest: top banner "Draft now, sign in to save". | F4 |
-| G6.3 | C | First-visit Home: one-line welcome, search box in content, "Recently added". | S1 |
+| G4.1 (#398) | A | One name: **Practice** (tabs *Listen* / *Record*, lists *My takes* / *Shared with me*). Rename menu item, badge, smart playlist, guest card. | R2 |
+| G4.2 (#399) | A | Split list into *My takes* and *Shared with me*; show "Shared by {name}". | R4 |
+| G4.3 (#400) | A | Text labels next to status icons ("Public", "Shared · 2", "Pending invite"). | R6 |
+| G4.4 (#401) | B | Row actions as a grouped bottom action sheet, 44 px targets, Delete separated in red. | R7, R8, R9 |
+| G4.5 (#402) | B | Share dialog: "registered members only", empty state, private-song case as an explicit separate choice. | R10, R12 |
+| G4.6 (#403) | B | Shared-with-me inbox: badge in account menu + Library entry; uses the `notifications` table. | R5 |
+| G4.7 (#404) | C | Recorder: level meter, count-in, "2:41 left"; Save as the single primary in review. | R14, R15 |
+| G4.8 (#405) | C | Publish dialog: name the song, say "all visitors including guests can listen". | R11 |
 
-### G7 · Search & browse
-
-| # | Pri | Action | Fixes |
-| :-- | :-: | :-- | :-- |
-| G7.1 | B | Search focus shows recent searches + category chips; compact result rows (ties to G1.2). | S2, S3 |
-
-### G8 · Playlists & forms
-
-| # | Pri | Action | Fixes |
-| :-- | :-: | :-- | :-- |
-| G8.1 | B | Add-to-playlist as a bottom sheet, "New playlist" first, check marks for playlists that already hold the song. | S7 |
-| G8.2 | C | Add Song: live chord preview toggle; upload as a visible secondary button. | F3 |
-| G8.3 | C | New playlist page: explain private/public in one line; clean up the dim button. | F6 |
-
-### G9 · Accessibility & data hygiene
+### G5 (#380) · Navigation & information architecture
 
 | # | Pri | Action | Fixes |
 | :-- | :-: | :-- | :-- |
-| G9.1 | A | Clean the seed: no E2E/smoke playlists in demo data. | A3 |
-| G9.2 | C | axe + screen-reader pass on song page and Practice panel after the restyle. | A1, A2 |
+| G5.1 (#406) | A | Real 404 for everyone; no login redirect on unknown paths. | N2 |
+| G5.2 (#407) | A | Hide Albums tab; Library tab row fits 390 px. | N4 |
+| G5.3 (#408) | B | Decide Home vs Explore vs Search in the bottom bar (Story 1.1.9 says Home · Search · Library). | N5 |
+| G5.4 (#409) | C | Auth pages: remove the fake modal ✕ or give it a destination. | N7 |
+
+### G6 (#381) · Guest experience
+
+| # | Pri | Action | Fixes |
+| :-- | :-: | :-- | :-- |
+| G6.1 (#410) | A | One GuestGate pattern everywhere (edit, history, new playlist, profile): reason + "Sign in" with `next=`. | N3, N6 |
+| G6.2 (#411) | B | Add Song as guest: top banner "Draft now, sign in to save". | F4 |
+| G6.3 (#412) | C | First-visit Home: one-line welcome, search box in content, "Recently added". | S1 |
+
+### G7 (#382) · Search & browse
+
+| # | Pri | Action | Fixes |
+| :-- | :-: | :-- | :-- |
+| G7.1 (#413) | B | Search focus shows recent searches + category chips; compact result rows (ties to G1.2). | S2, S3 |
+
+### G8 (#383) · Playlists & forms
+
+| # | Pri | Action | Fixes |
+| :-- | :-: | :-- | :-- |
+| G8.1 (#414) | B | Add-to-playlist as a bottom sheet, "New playlist" first, check marks for playlists that already hold the song. | S7 |
+| G8.2 (#415) | C | Add Song: live chord preview toggle; upload as a visible secondary button. | F3 |
+| G8.3 (#416) | C | New playlist page: explain private/public in one line; clean up the dim button. | F6 |
+
+### G9 (#384) · Accessibility & data hygiene
+
+| # | Pri | Action | Fixes |
+| :-- | :-: | :-- | :-- |
+| G9.1 (#417) | A | Clean the seed: no E2E/smoke playlists in demo data. | A3 |
+| G9.2 (#418) | C | axe + screen-reader pass on song page and Practice panel after the restyle. | A1, A2 |
 
 **Suggested order:** G1.1 (tokens) → G2.1–G2.3 + G3.1 (song page, the screen people stare at) → G4.1–G4.3 → rest of A → B → C.
 
