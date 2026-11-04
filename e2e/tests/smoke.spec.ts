@@ -60,7 +60,7 @@ test.describe('Member smoke @smoke', () => {
     await expect(page.getByRole('heading', { name: playlistName })).toBeVisible({ timeout: 10000 });
 
     // Clean up created playlist so remote test suites don't accumulate test data
-    const optionsButton = page.getByRole('button', { name: /playlist options|afspeellijstopties|options/i });
+    const optionsButton = page.getByRole('button', { name: /^playlist options$|^afspeellijstopties$/i });
     await expect(optionsButton).toBeVisible();
     await optionsButton.click();
 
