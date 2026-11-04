@@ -1399,4 +1399,4 @@
 - [x] Integrated into `components/song/RehearsalDrawer.tsx` (`SortableRecordingItem` badges, DRM enforcement, modal hooks, query invalidations)
 - [x] i18n key parity: added `recording.sharing.*`, `recording.publish.*`, `recording.attribution.*`, `user.profile.*` in all 8 locales (`en`, `nl`, `es`, `fr`, `it`, `pt`, `qu`, `ru`) — 73 unit tests passed
 - [x] Testing: 12 Vitest unit tests (`testing/unit/tests/recordingSharing.test.ts`), 7 BDD scenarios (`docs/testing/recording-sharing.feature`), typecheck clean (`npx tsc --noEmit`), lint clean (201 warnings <= 202 cap)
-- [x] Docs & plans: `docs/plans/2026-11-04-private-song-sharing-and-recording-attribution.md`, stories v1.49, design doc v1.54
+- [x] Docs & plans: `docs/plans/2026-11-04-private-song-sharing-and-recording-attribution.md`, stories v1.49, design doc v1.54 (plan removed after implementation)
