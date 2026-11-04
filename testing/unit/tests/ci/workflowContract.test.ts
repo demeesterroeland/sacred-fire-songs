@@ -108,6 +108,14 @@ describe('current repository workflows', () => {
     expect(triggersOnBranch(wf, 'push', 'develop')).toBe(false);
   });
 
+  it('opens the release PR against main, not the default branch (develop)', () => {
+    const wf = loadWorkflow('release-please.yml') as { jobs: Record<string, { steps?: { uses?: string; with?: Record<string, unknown> }[] }> };
+    const step = Object.values(wf.jobs)
+      .flatMap((job) => job.steps ?? [])
+      .find((s) => s.uses?.startsWith('googleapis/release-please-action'));
+    expect(step?.with?.['target-branch']).toBe('main');
+  });
+
   it('runs the E2E smoke on pull requests into develop and main', () => {
     const wf = loadWorkflow('e2e.yml');
     expect(triggersOnBranch(wf, 'pull_request', 'develop')).toBe(true);
