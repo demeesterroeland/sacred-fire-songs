@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
 """Generate the sample rehearsal recordings in supabase/seeds/audio/.
 
-Synthesizes short ceremonial-style songs (frame drum, rattle, hummed
-pentatonic melody, room reverb) so local and test databases have real
+Synthesizes short ceremonial circle-style songs at 140 BPM (frame drum on
+every beat, rattle in 8ths, hummed pentatonic melody with a group answer,
+fire crackle, room reverb) so local and test databases have real
 audio behind their seeded user_recordings rows. Output is deterministic
 (fixed seeds), so regenerating gives the same files.
 
@@ -19,19 +20,22 @@ import numpy as np
 
 SR = 44100
 
-# name, bpm, drum pattern (beats within a bar of 4, value = accent), rattle
+# name, bpm, drum pattern (beat within a bar of 4 -> accent), rattle
 # subdivision per beat, root frequency (Hz), melody (scale degrees, -1 = rest,
-# one note per beat), seed
+# one note per `NOTE_BEATS` beats; the second half of each loop is the group
+# answer), seed. All songs use the 140 BPM circle-song feel: drum on every
+# beat, rattle in straight 8ths.
 SONGS = [
-    ("sample-heartbeat-song", 72, {0: 1.0, 0.5: 0.6, 2: 1.0, 2.5: 0.6}, 4, 196.0,
+    ("sample-heartbeat-song", 140, {0: 1.0, 1: 0.65, 2: 0.9, 3: 0.65}, 2, 196.0,
      [0, 2, 3, 2, 0, -1, 4, 3, 2, 0, 2, -1, 3, 2, 0, -1], 1),
-    ("sample-fire-circle", 92, {0: 1.0, 1: 0.7, 2: 0.9, 3: 0.7}, 2, 220.0,
+    ("sample-fire-circle", 140, {0: 1.0, 1: 0.7, 2: 0.85, 3: 0.7}, 2, 220.0,
      [4, 4, 3, 2, 3, 2, 0, -1, 2, 3, 4, 3, 2, 0, 0, -1], 2),
-    ("sample-medicine-walk", 84, {0: 1.0, 1.5: 0.5, 2: 0.8, 3: 0.6}, 4, 174.6,
+    ("sample-medicine-walk", 140, {0: 1.0, 1: 0.6, 2: 0.95, 3: 0.6}, 2, 174.6,
      [0, -1, 2, 3, 4, -1, 3, 2, 3, 2, 0, -1, 2, 0, -2, -1], 3),
-    ("sample-water-prayer", 66, {0: 1.0, 2: 0.7}, 3, 164.8,
+    ("sample-water-prayer", 140, {0: 1.0, 1: 0.7, 2: 0.8, 3: 0.7}, 2, 164.8,
      [0, 2, 4, 5, 4, -1, 2, 0, 2, 4, 2, -1, 0, -2, 0, -1], 4),
 ]
+NOTE_BEATS = 2
 
 # Minor pentatonic in semitones; negative degrees wrap down an octave.
 PENTA = [0, 3, 5, 7, 10]
@@ -117,16 +121,35 @@ def render(spec, seconds):
             start = max(start, 0)
             rattle[start:start + len(sh)] += sh[: len(rattle) - start]
 
-    # melody enters after one bar, loops, one note per beat with slight legato
-    for b in range(4, n_beats):
-        deg = melody[(b - 4) % len(melody)]
+    # melody enters after one bar; second half of each loop is a group answer
+    # (three slightly detuned, slightly late voices)
+    n_notes = (n_beats - 4) // NOTE_BEATS
+    for k in range(n_notes):
+        deg = melody[k % len(melody)]
         if deg == -1:
             continue
-        note = hum_note(degree_to_freq(root, deg), beat * 1.05, rng)
-        start = int(SR * b * beat)
-        voice[start:start + len(note)] += note[: len(voice) - start]
+        freq = degree_to_freq(root, deg)
+        dur = beat * NOTE_BEATS * 1.02
+        start = int(SR * (4 + k * NOTE_BEATS) * beat)
+        group = (k % len(melody)) >= len(melody) // 2
+        voices = [(1.0, 0.0, 1.0)]
+        if group:
+            voices = [(1.0, 0.0, 0.6), (2 ** (8 / 1200), 0.012, 0.5),
+                      (2 ** (-9 / 1200), 0.021, 0.5), (0.5, 0.017, 0.35)]
+        for ratio, delay, gain in voices:
+            note = hum_note(freq * ratio, dur, rng) * gain
+            st = start + int(SR * delay)
+            voice[st:st + len(note)] += note[: len(voice) - st]
 
-    mix = 0.9 * drum + 0.5 * rattle + 0.45 * voice
+    # fire: sparse crackles over the whole take
+    fire = np.zeros(total + SR)
+    for _ in range(int(seconds * 6)):
+        st = int(rng.random() * total)
+        n = int(SR * rng.uniform(0.002, 0.01))
+        pop = np.diff(rng.standard_normal(n + 1)) * np.exp(-np.arange(n) / (SR * 0.002))
+        fire[st:st + n] += pop * rng.uniform(0.05, 0.25)
+
+    mix = 0.9 * drum + 0.45 * rattle + 0.5 * voice + 0.4 * fire
     mix = reverb(mix[:total], rng)
     fade = int(SR * 1.5)
     mix[:int(SR * 0.05)] *= np.linspace(0, 1, int(SR * 0.05))
