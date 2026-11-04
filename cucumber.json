@@ -4,7 +4,8 @@
       "docs/testing/song.feature",
       "docs/testing/i18n.feature",
       "docs/testing/admin-users.feature",
-      "docs/testing/setlist-pdf-export.feature"
+      "docs/testing/setlist-pdf-export.feature",
+      "docs/testing/offline.feature"
     ],
     "import": [
       "testing/bdd/support/**/*.ts",
@@ -24,7 +25,8 @@
       "docs/testing/song.feature",
       "docs/testing/i18n.feature",
       "docs/testing/admin-users.feature",
-      "docs/testing/setlist-pdf-export.feature"
+      "docs/testing/setlist-pdf-export.feature",
+      "docs/testing/offline.feature"
     ],
     "import": [
       "testing/bdd/support/**/*.ts",
@@ -44,7 +46,8 @@
       "docs/testing/song.feature",
       "docs/testing/i18n.feature",
       "docs/testing/admin-users.feature",
-      "docs/testing/setlist-pdf-export.feature"
+      "docs/testing/setlist-pdf-export.feature",
+      "docs/testing/offline.feature"
     ],
     "import": [
       "testing/bdd/support/**/*.ts",
@@ -110,5 +113,22 @@
       "snippetInterface": "async-await"
     },
     "strict": true
+  },
+  "offline": {
+    "paths": [
+      "docs/testing/offline.feature"
+    ],
+    "import": [
+      "testing/bdd/support/**/*.ts",
+      "testing/bdd/steps/**/*.ts"
+    ],
+    "tags": "@offline and @unit",
+    "format": [
+      "summary"
+    ],
+    "formatOptions": {
+      "snippetInterface": "async-await"
+    },
+    "strict": false
   }
 }

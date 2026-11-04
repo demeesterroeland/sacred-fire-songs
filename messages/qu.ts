@@ -173,6 +173,10 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'song.error.timeoutDescription': "Página mana tiempopi apamusqachu. Red icha conexión problema kanman.",
   'song.error.loadFailed': 'Kay takita mana apamuyta atirqanchu',
   'song.error.retry': 'Musuqmanta ruway',
+  // Offline fallback page (public/offline.html, #353)
+  'offline.title': 'Mana internetniyuqmi kanki',
+  'offline.description': "Kay p'anqaqa internetta munan. Internet kutimuqtinqa kikillanmanta musuqmanta kicharikunqa.",
+  'offline.retry': 'Musuqmanta ruway',
   'song.error.unexpected': 'Mana suyasqa pantay tarikurqan.',
 
   // ─── Songs – Form (Add / Edit) ────────────────────────────────────────────

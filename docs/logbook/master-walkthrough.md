@@ -3137,3 +3137,15 @@ The public seed password for the test accounts had also been used on shared test
 - **Config (#347)**: `playwright.config.ts` defaults `DATABASE_URL` to the local Supabase Postgres when the Supabase URL is local; `@headed` specs run only in the `*-headed` projects; `E2E_FORCE_HEADLESS=1` runs them headless.
 - **Specs (#347)**: stale selectors and texts updated (account menu, search, recorder, playlist sheet); the timeout spec rewritten for the current skeleton/retry UI; mini-player expectations for Spotify and mobile; flaky mobile language picking retried as one unit. Result: 162 passed, 6 skipped, twice in a row.
 - **Isolation guard (#348)**: `--staged` exited non-zero when a commit added no lines (grep with `pipefail`), which blocked message-only amends. Fixed, with bats contract tests in `testing/scripts/isolation-guard.bats`.
+
+## November 4, 2026 (Part 2) - Offline navigation fallback (#353)
+
+**Task Overview**
+Opening a page without a connection showed the browser's error page ("No internet" / page not found) instead of an app message.
+
+**Technical Details**
+- **Root cause**: a client-side navigation fetches the RSC payload first; when that fails, Next.js falls back to a full browser navigation. Offline, that navigation reached nothing: `public/sw.js` had no fetch handler (removed in #114 because a pass-through `fetch(event.request)` broke online navigations).
+- **Service worker**: on install it stores `public/offline.html` in `sfs-offline-v1` (activate drops older `sfs-offline-*` caches). The fetch handler answers only `GET` navigations while `navigator.onLine` is false; online requests are never intercepted, so the #114 failure cannot return.
+- **Offline page**: self-contained HTML (inline CSS + script), language resolved like `resolveLocale()` (stored choice, cookie, browser languages, English); texts are the new `offline.*` keys in all 8 dictionaries, embedded as JSON and kept in sync by a contract test. Retry reloads; the `online` event reloads automatically. `proxy.ts` skips `offline.html`.
+- **Second bug (acceptance criterion 3)**: an unknown song id showed "Couldn't load this song" with a raw PostgREST error because the lookup used `.single()`. The lookup moved to `lib/songs/fetchSong.ts` with `.maybeSingle()`, so the page renders "Song Not Found".
+- **Tests (pyramid, #262)**: `testing/bdd/support/offlineHarness.ts` runs `sw.js` and the page script in a Node `vm` sandbox with fake Cache Storage, navigator, localStorage and document; shared by vitest (`offlineFallback.test.ts`, `fetchSong.test.ts`) and Cucumber (`docs/testing/offline.feature`, `npm run test:bdd:offline`). Only two journeys run in a browser (`e2e/tests/offline.spec.ts`); a first version clicked the card's overlay link in its centre, where pills intercept the pointer, and was flaky until it clicked a corner.
