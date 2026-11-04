@@ -35,6 +35,9 @@ class FakeCacheStorage {
         const url = typeof request === 'string' ? request : request.url;
         store.set(url, { url, body: `cached ${url}` });
       },
+      put: async (url: string, response: FakeResponse) => {
+        store.set(url, response);
+      },
     };
   }
 
@@ -67,6 +70,12 @@ export interface ServiceWorkerHarness {
   install(): Promise<void>;
   activate(): Promise<void>;
   fetch(url: string, init?: { mode?: string; method?: string }): Promise<FetchOutcome>;
+  /** Fills a cache (created when missing) with URL to body entries, like a precache or an earlier visit. */
+  preloadCache(name: string, entries: Record<string, string>): Promise<void>;
+  /** Sets the online flag (when given), then sends a request; default is a non-navigation asset request. */
+  request(url: string, options?: { online?: boolean; mode?: string; method?: string }): Promise<FetchOutcome>;
+  /** Readable answer: the body served, 'network error' or 'none (left to the browser)'. */
+  describeResponse(outcome: FetchOutcome): string;
 }
 
 /** Loads public/sw.js with an empty (or pre-filled) Cache Storage. */
@@ -108,23 +117,40 @@ export function loadServiceWorker(existingCaches: string[] = []): ServiceWorkerH
     await Promise.all(pending);
   };
 
+  const setOnline = (online: boolean) => {
+    navigator.onLine = online;
+  };
+
+  const sendFetch: ServiceWorkerHarness['fetch'] = async (url, { mode = 'navigate', method = 'GET' } = {}) => {
+    let answer: Promise<FakeResponse | { type: 'error' }> | undefined;
+    const event = {
+      request: { url: new URL(url, ORIGIN).href, mode, method },
+      respondWith: (p: Promise<FakeResponse | { type: 'error' }>) => {
+        answer = p;
+      },
+    };
+    for (const fn of listeners.fetch ?? []) fn(event);
+    return answer ? { answered: true, response: await answer } : { answered: false };
+  };
+
   return {
     caches,
-    setOnline: (online) => {
-      navigator.onLine = online;
-    },
+    setOnline,
     install: () => dispatchExtendable('install'),
     activate: () => dispatchExtendable('activate'),
-    fetch: async (url, { mode = 'navigate', method = 'GET' } = {}) => {
-      let answer: Promise<FakeResponse | { type: 'error' }> | undefined;
-      const event = {
-        request: { url: new URL(url, ORIGIN).href, mode, method },
-        respondWith: (p: Promise<FakeResponse | { type: 'error' }>) => {
-          answer = p;
-        },
-      };
-      for (const fn of listeners.fetch ?? []) fn(event);
-      return answer ? { answered: true, response: await answer } : { answered: false };
+    fetch: sendFetch,
+    preloadCache: async (name, entries) => {
+      const cache = await caches.open(name);
+      for (const [url, body] of Object.entries(entries)) await cache.put(url, { url, body });
+    },
+    request: (url, { online, mode = 'cors', method = 'GET' } = {}) => {
+      if (online !== undefined) setOnline(online);
+      return sendFetch(url, { mode, method });
+    },
+    describeResponse: (outcome) => {
+      if (!outcome.answered) return 'none (left to the browser)';
+      const response = outcome.response;
+      return response && 'body' in response ? response.body : 'network error';
     },
   };
 }

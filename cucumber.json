@@ -5,7 +5,8 @@
       "docs/testing/i18n.feature",
       "docs/testing/admin-users.feature",
       "docs/testing/setlist-pdf-export.feature",
-      "docs/testing/offline.feature"
+      "docs/testing/offline.feature",
+      "docs/testing/offline-library.feature"
     ],
     "import": [
       "testing/bdd/support/**/*.ts",
@@ -26,7 +27,8 @@
       "docs/testing/i18n.feature",
       "docs/testing/admin-users.feature",
       "docs/testing/setlist-pdf-export.feature",
-      "docs/testing/offline.feature"
+      "docs/testing/offline.feature",
+      "docs/testing/offline-library.feature"
     ],
     "import": [
       "testing/bdd/support/**/*.ts",
@@ -47,7 +49,8 @@
       "docs/testing/i18n.feature",
       "docs/testing/admin-users.feature",
       "docs/testing/setlist-pdf-export.feature",
-      "docs/testing/offline.feature"
+      "docs/testing/offline.feature",
+      "docs/testing/offline-library.feature"
     ],
     "import": [
       "testing/bdd/support/**/*.ts",
@@ -123,6 +126,23 @@
       "testing/bdd/steps/**/*.ts"
     ],
     "tags": "@offline and @unit",
+    "format": [
+      "summary"
+    ],
+    "formatOptions": {
+      "snippetInterface": "async-await"
+    },
+    "strict": false
+  },
+  "offline-library": {
+    "paths": [
+      "docs/testing/offline-library.feature"
+    ],
+    "import": [
+      "testing/bdd/support/**/*.ts",
+      "testing/bdd/steps/**/*.ts"
+    ],
+    "tags": "@unit",
     "format": [
       "summary"
     ],
