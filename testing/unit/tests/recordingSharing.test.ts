@@ -15,6 +15,11 @@ const mockFrom = vi.fn();
 const mockRpc = vi.fn();
 const mockStorageFrom = vi.fn();
 
+const mockSendShareEmail = vi.fn();
+vi.mock('@/lib/actions/notifications', () => ({
+  sendRecordingShareEmail: (...args: unknown[]) => mockSendShareEmail(...args),
+}));
+
 vi.mock('@/lib/supabase/client', () => ({
   createClient: () => ({
     auth: {
@@ -153,6 +158,53 @@ describe('Recording Sharing & DRM-lite Permissions', () => {
         recording_id: recordingId,
         shared_with_user_id: recipientUser.id,
       });
+    });
+
+    function mockOwnedRecordingWithInsert(insertResult: { error: { code?: string; message?: string } | null }) {
+      mockGetUser.mockResolvedValue({ data: { user: ownerUser } });
+      mockFrom.mockImplementation((table: string) => {
+        if (table === 'user_recordings') {
+          return {
+            select: vi.fn().mockReturnValue({
+              eq: vi.fn().mockReturnValue({
+                maybeSingle: vi.fn().mockResolvedValue({ data: { user_id: ownerUser.id }, error: null }),
+              }),
+            }),
+          };
+        }
+        if (table === 'recording_shares') {
+          return { insert: vi.fn().mockResolvedValue(insertResult) };
+        }
+        return {};
+      });
+    }
+
+    it('dispatches the share email for a new share', async () => {
+      mockOwnedRecordingWithInsert({ error: null });
+      mockSendShareEmail.mockResolvedValue(undefined);
+
+      const result = await shareRecording(recordingId, recipientUser.id);
+      expect(result.success).toBe(true);
+      expect(mockSendShareEmail).toHaveBeenCalledWith(recordingId, recipientUser.id);
+    });
+
+    it('does not email again when the recording was already shared', async () => {
+      mockOwnedRecordingWithInsert({ error: { code: '23505', message: 'duplicate' } });
+
+      const result = await shareRecording(recordingId, recipientUser.id);
+      expect(result.success).toBe(true);
+      expect(mockSendShareEmail).not.toHaveBeenCalled();
+    });
+
+    it('still succeeds when the email dispatch fails', async () => {
+      mockOwnedRecordingWithInsert({ error: null });
+      mockSendShareEmail.mockRejectedValue(new Error('smtp down'));
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+      const result = await shareRecording(recordingId, recipientUser.id);
+      expect(result.success).toBe(true);
+      await vi.waitFor(() => expect(warn).toHaveBeenCalled());
+      warn.mockRestore();
     });
 
     it('prevents sharing a recording if the underlying song is private', async () => {

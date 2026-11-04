@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useParams, notFound, useRouter } from 'next/navigation';
+import { useParams, notFound, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -30,6 +30,7 @@ import { useSongRecordings } from '@/hooks/useSongRecordings';
 import { useRecordingsQuery } from '@/hooks/useRecordingsQuery';
 import { useLocale } from '@/context/LocaleContext';
 import { fetchSong, withTimeout } from '@/lib/songs/fetchSong';
+import { parseRecordingParam, RECORDING_PARAM } from '@/lib/songs/recordingLink';
 
 export default function SongDetailPage() {
     const { t } = useLocale();
@@ -43,6 +44,9 @@ export default function SongDetailPage() {
     const [isRehearsalDrawerOpen, setIsRehearsalDrawerOpen] = useState(false);
     const [drawerRequestedTab, setDrawerRequestedTab] = useState<"media" | "recorder" | "auto">("auto");
     const [isAudioPlaying, setIsAudioPlaying] = useState(false);
+    const [highlightRecordingId, setHighlightRecordingId] = useState<string | null>(null);
+    const linkedRecordingId = parseRecordingParam(useSearchParams().get(RECORDING_PARAM));
+    const handledRecordingLink = useRef<string | null>(null);
     const { isDeleting, deleteSong } = useDeleteSong();
 
     const { user, loading: authLoading } = useAuth();
@@ -149,6 +153,34 @@ export default function SongDetailPage() {
     const versions = song?.song_versions || [];
     const currentVersion = versions[selectedVersionIndex];
     const { data: recordings } = useSongRecordings(currentVersion?.id);
+
+    // Deep link `/songs/<id>?recording=<recordingId>` (notifications, emails, "Copy link"):
+    // select the recording's version, open the Recordings tab and highlight the take.
+    useEffect(() => {
+        if (!linkedRecordingId || !song || authLoading) return;
+        if (handledRecordingLink.current === linkedRecordingId) return;
+        handledRecordingLink.current = linkedRecordingId;
+        const songVersions = song.song_versions ?? [];
+        void (async () => {
+            let index = -1;
+            if (user) {
+                const { data } = await createClient()
+                    .from('user_recordings')
+                    .select('song_version_id')
+                    .eq('id', linkedRecordingId)
+                    .maybeSingle();
+                index = data ? songVersions.findIndex((v: { id: string }) => v.id === data.song_version_id) : -1;
+                if (index < 0) toast.error(t('rehearsal.recording.linkUnavailable'));
+            }
+            // Guests see the sign-in prompt of the Recordings tab.
+            if (index >= 0) {
+                setSelectedVersionIndex(index);
+                setHighlightRecordingId(linkedRecordingId);
+            }
+            setDrawerRequestedTab('recorder');
+            setIsRehearsalDrawerOpen(true);
+        })();
+    }, [linkedRecordingId, song, authLoading, user, t]);
 
 
     const marqueeStyle = scrollAmount > 0 ? {
@@ -367,7 +399,7 @@ export default function SongDetailPage() {
                                     toast(t('song.signInForPlaylists'), {
                                         action: {
                                             label: t('song.signInAction'),
-                                            onClick: () => { window.location.href = `/auth/login?next=${encodeURIComponent(window.location.pathname)}`; },
+                                            onClick: () => { window.location.href = `/auth/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`; },
                                         },
                                         classNames: {
                                             actionButton: 'text-amber-400 text-xs font-bold hover:text-amber-300 transition-colors ml-2',
@@ -523,7 +555,7 @@ export default function SongDetailPage() {
                                         toast(t('song.signInForPlaylists'), {
                                             action: {
                                                 label: t('song.signInAction'),
-                                                onClick: () => { window.location.href = `/auth/login?next=${encodeURIComponent(window.location.pathname)}`; },
+                                                onClick: () => { window.location.href = `/auth/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`; },
                                             },
                                             classNames: {
                                                 actionButton: 'text-amber-400 text-xs font-bold hover:text-amber-300 transition-colors ml-2',
@@ -581,7 +613,10 @@ export default function SongDetailPage() {
             {currentVersion && (
                 <RehearsalDrawer
                     isOpen={isRehearsalDrawerOpen}
-                    onClose={() => setIsRehearsalDrawerOpen(false)}
+                    onClose={() => {
+                        setIsRehearsalDrawerOpen(false);
+                        setHighlightRecordingId(null);
+                    }}
                     onOpen={() => {
                         setDrawerRequestedTab("auto");
                         setIsRehearsalDrawerOpen(true);
@@ -597,6 +632,7 @@ export default function SongDetailPage() {
                     isSongPublic={song.is_public ?? true}
                     isSongOwner={user?.id === song.owner_id || isAdmin}
                     onMakeSongPublic={handleMakeSongPublic}
+                    highlightRecordingId={highlightRecordingId}
                 />
             )}
         </div>

@@ -8,6 +8,7 @@ import { useSidebar } from '@/context/SidebarContext';
 import { useAuth, type AuthUser } from '@/hooks/useAuth';
 import { getSiteTitle } from '@/lib/env';
 import { UserProfile } from './navigation/UserProfile';
+import { NotificationBell } from './navigation/NotificationBell';
 import { useLocale } from '@/context/LocaleContext';
 
 const SEARCH_HISTORY_KEY = 'sacred-fire-songs-search-history';
@@ -305,6 +306,8 @@ export default function Header({ initialUser }: { initialUser?: AuthUser | null 
                             )}
                         </div>
                     )}
+
+                    {user && <NotificationBell userId={user.id} />}
 
                     {/* User avatar / Account panel */}
                     <UserProfile layout="header" showText={false} initialUser={initialUser} />
