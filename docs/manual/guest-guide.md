@@ -1,0 +1,77 @@
+# Guest Guide (draft)
+
+**Version:** 0.1 | **Date:** Nov 4, 2026
+
+## Changelog
+
+| Version | Date | Change |
+| :--- | :--- | :--- |
+| 0.1 | Nov 4, 2026 | First draft from the UX research. |
+
+## What Sacred Fire Songs is
+
+A songbook of medicine and ceremony songs with lyrics and chords, for singing together in a circle. Anyone can read and listen. With a free account you can also save favourites, make playlists, add songs and record your own practice takes.
+
+## Finding your way
+
+The screen has three fixed parts:
+
+- **Top bar:** ☰ menu (left), the search field ("Search 200+ songs") with a filter button, and **Sign In** (right).
+- **Content** in the middle.
+- **Bottom bar:** **Home**, **Songs**, **Library**, **Create**.
+
+The ☰ menu repeats the main places (Home, Songs, Playlists, Favorites, Drafts, Recently Viewed, Add Song, New Playlist) and has the **language switch** at the bottom.
+
+## Finding a song
+
+1. **Browse by category** on Home: groups such as *The Elements* (Air, Earth, Fire, Water), *Nature*, *Lineage & Tradition*, *Medicine & Healing*. The number on each chip is how many songs it holds. "+3 more" opens the rest.
+2. **Search:** tap the search field and type a title, a line of the lyrics, an author or a category. Accents do not matter ("aguita" finds "Agüita").
+3. **Filters:** the slider button in the search field opens *Search options*: sort order, content type (songs with chords / with melody) and category & tag filters. Tap **Show results**.
+4. **Songs** in the bottom bar lists all songs A–Z.
+5. **Library → Artists** lists every author with their number of songs.
+
+## Reading a song
+
+- The title is at the top; the coloured chips show author, category, tradition and language.
+- **Key**, **Capo** and **Tuning** are shown above the lyrics.
+- Chords are printed above the word where they change.
+- ⋮ (top right) opens the song menu: like, share, add to playlist, recordings. Actions that need an account ask you to sign in.
+
+## Listening to the song
+
+Open ⋮ → **Recordings** to open the **Rehearsal Space**.
+
+- **Reference Tracks** tab: choose **YouTube**, **SoundCloud** or **Spotify** (when the song has that link) and play it inside the app.
+- A small **player bar** stays above the bottom bar so you can keep listening while reading. Use ⟲ / ⟳ to jump back or forward, ✕ to stop. **(planned: the bar will only appear after you press play)**
+- Tip: wear headphones if you sing along while recording later.
+
+The **Voice Recorder** tab shows what members can do and a **Sign In to Record** button.
+
+## Things that need an account
+
+Favourites, playlists, recently viewed, adding or editing songs, recording, account settings. You can open the **Add Song** form and start typing as a guest; you are asked to sign in when you save **(verify that the draft is kept after sign-in)**.
+
+## Creating an account
+
+1. Tap **Sign In** → **Join the Circle** (or go to *Create Account*).
+2. Enter e-mail and a password (twice) → **Create Account**.
+3. Check your e-mail: click the link **or** type the **6-digit code** → **Verify & Continue**.
+4. On *Welcome at the Fire* enter the name others will see → **Finish Setup & Explore**.
+
+## Signing in
+
+- **Send Magic Link:** enter your e-mail, open the link in the mail. No password needed.
+- **Sign in with password:** tap the button, enter e-mail and password.
+- Forgot your password? **Reset Password** sends a reset link; then choose a new password on *New Password*.
+
+## Install as an app
+
+The site can be installed on your phone's home screen ("Add to Home Screen" / "Install app") and then opens full screen with the Sacred Fire Songs icon **(verify the exact prompt per browser)**.
+
+## No internet?
+
+If you lose connection you see **You're offline**. The page reloads by itself when you are back online, or tap **Try again**.
+
+## Language
+
+Choose your language in the ☰ menu (English, Español, Português, Français, Deutsch, Nederlands, Italiano, עברית). Song titles and lyrics are not translated.

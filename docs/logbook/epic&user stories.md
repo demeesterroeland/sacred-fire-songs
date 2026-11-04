@@ -1,6 +1,6 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 1.50
+**Version:** 1.51
 **Status:** Living Document
 **Date:** Nov 4, 2026
 
@@ -49,6 +49,7 @@
 | **1.48** | Nov 4, 2026 | Aligned MD logbook with GitHub: synced [Implemented] statuses (3.4.6, 4.2.1, 4.2.3, 4.2.4, 5.1.3, 5.1.4, 5.1.5); added Story 1.2.5 (#218), Stories 3.1.1 (#13), 3.1.3 (#140), 3.1.4 and sub-stories 3.1.4.1–3.1.4.6 (#323–#329); expanded Epic 4.3 with Stories 4.3.2–4.3.8 (#357, #358–#364). |
 | **1.49** | Nov 4, 2026 | Added Stories 4.6.2 (User-to-User Private Sharing with DRM-lite restriction), 4.6.3 (Public Publication with Explicit Singer Consent Disclaimer), and 4.6.4 (Singer Attribution & Musician Profile Linking), all [Implemented]. Executable spec: `docs/testing/recording-sharing.feature`. |
 | **1.50** | Nov 4, 2026 | Added Story 4.6.6 (Notification & Email Dispatching for Shared Rehearsal Recordings, #373) [Implemented]. Executable spec: `docs/testing/share-notifications.feature`. |
+| **1.51** | Nov 4, 2026 | Added Phase 6 and Epic 6.1 (UX & Design Rework, #375): 9 group epics and 34 stories from the UX research in `docs/ux-research/`. |
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
 
@@ -1563,6 +1564,65 @@ Scenario: Dress rehearsal passes end to end
   When it goes through develop, staging, the release PR, production approval and back-merge
   Then every stage succeeds and the run URLs are recorded in the logbook
 ```
+
+## Phase 6: Experience & Design
+
+UX and visual rework, mobile first. Personas: **Guest**, **Member**, **Musician**, **Owner** (product decisions), **Contributor**. GitHub master epic: **#375** (group epics #376–#384, stories #385–#418). Research and plan: `docs/ux-research/2026-11-04-ux-research.md` (§4 findings, §5 design direction, §6 plan). Manual knowledge base: `docs/manual/`.
+
+### Epic 6.1: UX & Design Rework
+
+Owner decision of Nov 4, 2026: sober greyscale interface with one accent, smaller type with more air, a reader-controlled font size (`Chords · A− · A+`) instead of a "large font" setting, tags shown as one grey meta line, the ChordPro viewer as the reference style, and a reserved slot on the song page for song variants and translations. Design tokens come first (`docs/design/`), then pages are restyled from them.
+
+| Group | Issue | Theme | Exit criterion |
+|---|---|---|---|
+| G1 | #376 | Visual language & design system | Design tokens exist in `docs/design/`, every list row / card / chip / sheet uses them, no 10–11 px labels remain, contrast ≥ 4.5:1. |
+| G2 | #377 | Song page: reading in the circle | A song opens with a one-line meta row, Key/Capo/Tuning in one line, the `Chords · A− · A+` toolbar, and the title never clips. Taps to Practice ≤ 2. |
+| G3 | #378 | Media player | The mini player appears only after the user starts playback and never covers sheet or drawer content. |
+| G4 | #379 | Practice & recordings | One name (Practice), my takes and shared takes are separate lists with text labels, row actions are a grouped bottom sheet, recipients are notified. |
+| G5 | #380 | Navigation & information architecture | Unknown URLs give a 404 for every role, no dead tabs, the bottom bar matches Story 1.1.9. |
+| G6 | #381 | Guest experience | Every members-only screen uses the same GuestGate pattern with reason and `next=`; guests know up front when saving needs an account. |
+| G7 | #382 | Search & browse | Search focus offers recent searches and category chips; results use the compact row. |
+| G8 | #383 | Playlists & forms | Add-to-playlist is a bottom sheet; Add Song and New Playlist explain themselves. |
+| G9 | #384 | Accessibility & data hygiene | Demo seed holds no test playlists; axe and screen-reader pass on song page and Practice panel. |
+
+| Story | Issue | Code | Pri | Title | Blocked by |
+|---|---|---|---|---|---|
+| 6.1.1 | #385 | `G1.1` | A | As a Contributor, I want design tokens and a component sheet so that every screen is restyled from one sober greyscale system instead of page by page | — |
+| 6.1.2 | #386 | `G1.2` | A | As a Guest, I want song cards and list rows to show a title and one grey meta line so that I can scan a list of songs quickly | #385 |
+| 6.1.3 | #387 | `G1.3` | A | As a Member, I want small labels to be readable so that section headings and meta text are not grey-on-grey | #385 |
+| 6.1.4 | #388 | `G1.4` | B | As a Guest, I want the category grid in a calm monochrome style so that the home page does not shout | #385 |
+| 6.1.5 | #389 | `G1.5` | C | As a Member, I want unfinished features hidden so that I do not meet 'coming soon' placeholders | #407 |
+| 6.1.6 | #390 | `G2.1` | A | As a reader in the circle, I want a `Chords · A− · A+` toolbar on the song page so that I set the text size myself | #385 |
+| 6.1.7 | #391 | `G2.2` | A | As a reader, I want Key, Capo, Tuning and the tags on one grey line each so that the first lyric line is visible without scrolling | #385 |
+| 6.1.8 | #392 | `G2.3` | A | As a reader, I want the sticky song title to truncate at the end so that the first letters are never cut off | — |
+| 6.1.9 | #393 | `G2.4` | B | As a Member, I want a sticky action bar on the song page (Practice · Playlist · ♥) so that the main actions are in thumb reach | #385, #390, #398 |
+| 6.1.10 | #394 | `G2.5` | C | As a Musician, I want auto-scroll and transpose in the same viewer toolbar so that all reading tools live in one place | #390 |
+| 6.1.11 | #395 | `G2.6` | C | As a Contributor, I want a reserved slot for a variant / language switch under the song title so that song variants and translations fit the sober layout later | #391 |
+| 6.1.12 | #396 | `G3.1` | A | As a reader, I want the mini player to appear only after I press play so that it does not cover the lyrics and sheets on every song | — |
+| 6.1.13 | #397 | `G3.2` | C | As a Guest, I want the player and reference tab to be calm and exact so that I know which provider is playing | #385 |
+| 6.1.14 | #398 | `G4.1` | A | As a Member, I want one name — Practice — for the rehearsal feature so that menu, drawer, tabs, badge and library all say the same thing | — |
+| 6.1.15 | #399 | `G4.2` | A | As a Member, I want takes shared with me listed separately from my own takes so that I see who shared what | #398 |
+| 6.1.16 | #400 | `G4.3` | A | As a Member, I want text labels next to take status icons so that I understand 'public', 'shared' and 'pending invite' without a tooltip | #398 |
+| 6.1.17 | #401 | `G4.4` | B | As a Member, I want take actions in a grouped bottom action sheet so that Delete is never one tap from Share | #385, #398 |
+| 6.1.18 | #402 | `G4.5` | B | As a recording owner, I want the Share dialog to explain who can be found and what happens with a private song so that sharing has no surprises | #398 |
+| 6.1.19 | #403 | `G4.6` | B | As a Member, I want to be told when someone shares a take with me so that I do not have to guess which song to open | #399 |
+| 6.1.20 | #404 | `G4.7` | C | As a Member, I want a level meter, count-in and remaining time while recording so that I know the microphone works and when the 3-minute limit comes | #385 |
+| 6.1.21 | #405 | `G4.8` | C | As a recording owner, I want the publish dialog to name the song and say who will hear it so that consent is informed | #402 |
+| 6.1.22 | #406 | `G5.1` | A | As a Guest, I want an unknown URL to show a 404 page so that I am not sent to a login screen for content that does not exist | — |
+| 6.1.23 | #407 | `G5.2` | A | As a Member, I want the Library tab row to fit my phone with no dead tab so that every tab I see works | — |
+| 6.1.24 | #408 | `G5.3` | B | As the Owner, I want a decision on the bottom bar (Home · Songs · Library · Create vs Home · Search · Library) so that Explore, Home and Search stop overlapping | — |
+| 6.1.25 | #409 | `G5.4` | C | As a Guest, I want auth pages without a fake close button so that I always know where I go | #385 |
+| 6.1.26 | #410 | `G6.1` | A | As a Guest, I want every members-only screen to use the same locked preview with a reason and a sign-in button so that gating feels consistent | — |
+| 6.1.27 | #411 | `G6.2` | B | As a Guest, I want to know before typing that saving a song needs an account so that I am not surprised at save | #410 |
+| 6.1.28 | #412 | `G6.3` | C | As a first-time visitor, I want a one-line welcome, a search box and a 'Recently added' row on Home so that I understand the site and find a song fast | #386, #413 |
+| 6.1.29 | #413 | `G7.1` | B | As a Guest, I want recent searches and category chips when I focus the search field so that I can repeat or narrow a search in one tap | #386 |
+| 6.1.30 | #414 | `G8.1` | B | As a Member, I want Add to playlist as a bottom sheet with 'New playlist' first and check marks so that I see where the song already is | #385 |
+| 6.1.31 | #415 | `G8.2` | C | As a Member, I want a live chord preview and a visible upload button on Add Song so that I see what I am writing | #385 |
+| 6.1.32 | #416 | `G8.3` | C | As a Member, I want the New Playlist page to explain private vs public in one line so that I know what I am creating | #385 |
+| 6.1.33 | #417 | `G9.1` | A | As a Contributor, I want the demo seed free of E2E and smoke-test playlists so that screenshots and demos show real-looking data | — |
+| 6.1.34 | #418 | `G9.2` | C | As a reader using assistive technology, I want the song page and Practice panel to pass an accessibility audit so that the app works with a screen reader | #393, #401 |
+
+Priority **A** = quick wins (one sprint together), **B** = flow work, **C** = backlog. Acceptance criteria (Gherkin) live in each GitHub issue and move to `docs/testing/*.feature` when a story starts.
 
 ## Roles & Permissions Summary
 
