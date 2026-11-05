@@ -1,4 +1,5 @@
-import { Home, Library, ListMusic, PlusCircle, Heart, FileText, Clock, Music } from 'lucide-react';
+import { Home, Library, ListMusic, PlusCircle, Heart, FileText, Clock, Music, Mic2, Disc3 } from 'lucide-react';
+import { FEATURES, type Features } from '@/lib/features';
 import type { LucideIcon } from 'lucide-react';
 import type { TranslationKey } from '@/messages/en';
 
@@ -51,3 +52,19 @@ export const NAV_ITEMS = [
   { label: 'Library', labelKey: 'nav.library', href: '/library/playlists', icon: ListMusic },
   { label: 'Create', labelKey: 'nav.create', href: '/songs/add', icon: PlusCircle },
 ] as const;
+
+export type LibraryTab = { labelKey: TranslationKey; href: string; icon: LucideIcon };
+
+const ALL_LIBRARY_TABS: readonly (LibraryTab & { feature?: keyof Features })[] = [
+  { labelKey: 'library.tabs.playlists', href: '/library/playlists', icon: ListMusic },
+  { labelKey: 'library.tabs.history', href: '/library/recently-viewed', icon: Clock },
+  { labelKey: 'library.tabs.artists', href: '/library/artists', icon: Mic2 },
+  { labelKey: 'library.tabs.albums', href: '/library/albums', icon: Disc3, feature: 'albums' },
+];
+
+/** Library tab row (Story 6.1.23, #407): only tabs whose feature is switched on. */
+export function libraryTabs(features: Features = FEATURES): LibraryTab[] {
+  return ALL_LIBRARY_TABS.filter((t) => !t.feature || features[t.feature]).map(
+    ({ labelKey, href, icon }) => ({ labelKey, href, icon })
+  );
+}

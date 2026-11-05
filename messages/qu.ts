@@ -659,7 +659,7 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'search.tagSelector.browseAll': 'Llapa etiquetakunata categoríawan qhaway',
   'search.tagSelector.noMatchingTags': 'Mana etiquetakuna “{query}” nisqawan tupaqchu.',
   'library.heading': 'Bibliotecayki',
-  'library.subtitle': 'Kikiypa listaykikuna, albumkuna hinaspa takiqkuna.',
+  'library.subtitle': 'Listaykikuna, ñawpaq qhawasqaykikuna hinaspa takiqkuna.',
   'library.tabs.history': 'Ñawpa ruwasqa',
   'playlists.songCount': 'Takikuna: {count}',
   'playlists.songCountSingle': '1 taki',
