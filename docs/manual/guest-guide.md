@@ -1,11 +1,12 @@
 # Guest Guide (draft)
 
-**Version:** 0.14 | **Date:** Nov 5, 2026
+**Version:** 0.15 | **Date:** Nov 5, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.15 | Nov 5, 2026 | Song page: a bar at the bottom with Practice, Playlist and Like; the ⋮ menu keeps Share (UX v2, #393). |
 | 0.14 | Nov 5, 2026 | Search field: recent searches and category chips appear when you tap it (UX v2, #413). |
 | 0.13 | Nov 5, 2026 | Add Song as a guest: a banner says saving needs an account; your draft is kept when you sign in (UX v2, #411). |
 | 0.12 | Nov 5, 2026 | Bottom bar is Home · Search · Library; Songs and Create are gone from it (UX v2, #408). |
@@ -47,11 +48,12 @@ The ☰ menu repeats the main places (Home, Songs, Playlists, Favorites, Drafts,
 - A second line shows **Key**, **Capo** and **Tuning**, e.g. `Key E · Capo 3 · Standard`.
 - Under those lines: **Chords** switches the chords on or off, **A−** / **A+** make the text smaller or larger. The app remembers your choice on this device.
 - Chords are printed above the word where they change.
-- ⋮ (top right) opens the song menu: like, share, add to playlist, Practice. Actions that need an account ask you to sign in.
+- A bar at the bottom of the song has **Practice**, **Playlist** and **Like**. It slides away when you scroll down and comes back when you scroll up. **Playlist** and **Like** need an account and ask you to sign in.
+- ⋮ (top right) opens the song menu: **Share Song**.
 
 ## Listening to the song
 
-Open ⋮ → **Practice** to open the Practice panel.
+Tap **Practice** in the bar at the bottom of the song to open the Practice panel.
 
 - **Listen** tab: choose **YouTube**, **SoundCloud** or **Spotify** (when the song has that link) and play it inside the app.
 - A small **player bar** appears above the bottom bar once you press play (a song page never shows it before), so you can keep listening while reading. Use ⟲ / ⟳ to jump back or forward, ✕ to stop. Leaving the song page stops the music.

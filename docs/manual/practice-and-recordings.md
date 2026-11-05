@@ -1,11 +1,12 @@
 # Practice: Listen, Record & Takes (draft)
 
-**Version:** 0.5 | **Date:** Nov 5, 2026
+**Version:** 0.6 | **Date:** Nov 5, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.6 | Nov 5, 2026 | Practice is a button in the bar at the bottom of the song page; it opens on Listen when the song has a reference track, otherwise on Record (UX v2, #393). |
 | 0.5 | Nov 5, 2026 | **⋯** on a take opens a bottom sheet with the actions in groups; Delete take is alone at the bottom, in red (#401). |
 | 0.4 | Nov 5, 2026 | Take rows show their status in words: Public, Shared · n, Pending invite (owner only), Verified musician (#400). |
 | 0.3 | Nov 5, 2026 | Takes shared with you are listed under their own heading, Shared with me, with who shared them (UXD-3, #399). |
@@ -17,7 +18,7 @@
 
 ## Opening Practice
 
-On a song page tap ⋮ → **Practice**. A panel slides up from the bottom with the song title and two tabs. Close it with ✕ or by swiping down.
+On a song page tap **Practice** in the bar at the bottom. If the song has a reference track (YouTube, SoundCloud or Spotify) the panel opens on **Listen**; tap **Record** to start recording (two taps in all). Without a reference track it opens straight on **Record**. A panel slides up from the bottom with the song title and two tabs. Close it with ✕ or by swiping down.
 
 Songs where you have takes show a **Takes** chip, and the header shows how many takes you have.
 
@@ -74,7 +75,7 @@ Rules (so the singer stays protected):
 
 ## When someone shares a take with you
 
-Open the same song → ⋮ → **Practice** → **Record**. Takes shared with you are under their own heading, **Shared with me**, below **My takes**; the heading is hidden when nobody shared a take on this song. Each row says **Shared by <name>** and the length in its grey line. You can play it; there is no ⋯ menu, so download, share and delete are not available. **(planned: a notification when someone shares a take with you)**
+Open the same song → **Practice** → **Record**. Takes shared with you are under their own heading, **Shared with me**, below **My takes**; the heading is hidden when nobody shared a take on this song. Each row says **Shared by <name>** and the length in its grey line. You can play it; there is no ⋯ menu, so download, share and delete are not available. **(planned: a notification when someone shares a take with you)**
 
 ## Making a take public
 

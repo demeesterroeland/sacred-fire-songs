@@ -7,6 +7,7 @@ import { BOTTOM_NAV_ITEMS, isBottomNavActive } from '@/lib/navigation';
 import { requestSearchFocus } from '@/lib/search/focusSearch';
 import { useUserPreferences } from '@/context/UserPreferencesContext';
 import { useLocale } from '@/context/LocaleContext';
+import { bottomNavHeight } from '@/lib/song/actionBar';
 
 /**
  * Mobile bottom bar (Story 6.1.24 / G5.3, #408, owner decision UXD-1):
@@ -65,16 +66,21 @@ export default function MobileBottomNav() {
         };
     }, [isSongDetailPage, preferences.autoHideBottomNav]);
 
-    // Expose nav visibility as CSS custom property for the mini-player to use
+    // Expose the nav's on-screen height as a CSS custom property: the mini player and the song
+    // action bar (#393) sit above it. It is 3.5rem whenever the nav is shown, also when the
+    // auto-hide preference is off (then the nav never slides away).
+    // From `lg` the nav is hidden by CSS, so it takes no height there.
     useEffect(() => {
-        document.documentElement.style.setProperty(
-            '--bottom-nav-height',
-            isVisible && isSongDetailPage && preferences.autoHideBottomNav ? '3.5rem' : '0rem'
-        );
+        const desktop = window.matchMedia('(min-width: 1024px)');
+        const apply = () => document.documentElement.style.setProperty(
+            '--bottom-nav-height', desktop.matches ? '0rem' : bottomNavHeight(isVisible));
+        apply();
+        desktop.addEventListener('change', apply);
         return () => {
+            desktop.removeEventListener('change', apply);
             document.documentElement.style.removeProperty('--bottom-nav-height');
         };
-    }, [isVisible, isSongDetailPage, preferences.autoHideBottomNav]);
+    }, [isVisible]);
 
     return (
         <nav

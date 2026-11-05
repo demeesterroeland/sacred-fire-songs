@@ -1,5 +1,6 @@
 import { test, expect, Page, Locator } from '@playwright/test';
 import { ROLES } from '../fixtures/roles';
+import { clickPractice } from '../fixtures/songActions';
 
 // Set up fake media/mic devices for the chromium instances in this test file
 test.use({
@@ -36,22 +37,7 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
   });
 
   async function openRecordingsDrawer(page: Page) {
-    const recordBtn = page.locator('button[title="Practice"]').first();
-    const moreActionsBtn = page.locator('button[aria-label="More actions"]').first();
-    
-    await Promise.race([
-      recordBtn.waitFor({ state: 'attached', timeout: 10000 }),
-      moreActionsBtn.waitFor({ state: 'attached', timeout: 10000 })
-    ]);
-    
-    if (await recordBtn.isVisible()) {
-      await recordBtn.click();
-    } else {
-      await moreActionsBtn.click();
-      const mobileRecordBtn = page.locator('button:has-text("Practice")').filter({ visible: true }).first();
-      await expect(mobileRecordBtn).toBeVisible({ timeout: 5000 });
-      await mobileRecordBtn.click();
-    }
+    await clickPractice(page, 10000);
 
     // Wait for drawer to slide in and stabilize in viewport
     const drawerTitle = page.locator('h3:has-text("Practice")');

@@ -63,8 +63,7 @@ test.describe('GuestGate on members-only screens @smoke', () => {
 
   test('guest adding a song to a playlist gets the add-to-playlist gate in a sheet', async ({ page }) => {
     await page.goto(`/songs/${await firstPublicSongId(page)}`);
-    await page.getByRole('button', { name: 'More actions' }).click(); // phone layout: the ⋮ menu
-    await page.getByRole('button', { name: /add to playlist/i }).first().click();
+    await page.getByTestId('song-action-playlist').click(); // phone layout: the sticky action bar (#393)
     const gate = page.locator('[data-testid="guest-gate"][data-feature="addToPlaylist"]');
     await expect(gate).toHaveAttribute('data-feature', 'addToPlaylist');
     await expect(gate.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', /\/auth\/login\?next=%2Fsongs%2F/);
@@ -72,8 +71,7 @@ test.describe('GuestGate on members-only screens @smoke', () => {
 
   test('guest tapping the heart gets the favourites gate whose Sign in keeps the query string', async ({ page }) => {
     await page.goto(`/songs/${await firstPublicSongId(page)}?ref=heart`);
-    await page.getByRole('button', { name: 'More actions' }).click(); // phone layout: the heart lives in the ⋮ menu
-    await page.getByRole('button', { name: /add to liked songs/i }).first().click();
+    await page.getByTestId('song-action-favorite').click(); // phone layout: the heart lives in the action bar (#393)
     const gate = page.locator('[data-testid="guest-gate"][data-feature="favourites"]');
     await expect(gate).toBeVisible();
     await expect(gate.getByRole('link', { name: 'Sign in' })).toHaveAttribute(

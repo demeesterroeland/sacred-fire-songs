@@ -20,6 +20,11 @@ interface PlaylistPickerProps {
     /** className for the ListPlus icon — defaults to w-3.5 h-3.5 */
     iconClassName?: string;
     label?: string;
+    /** className for the icon + label wrapper (only when `label` is set) */
+    contentClassName?: string;
+    /** className for the label text */
+    labelClassName?: string;
+    triggerTestId?: string;
 }
 
 // ─── Data fetching ────────────────────────────────────────────────────────────
@@ -63,7 +68,7 @@ async function fetchContainingPlaylists(compositionId: string) {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
-export function PlaylistPicker({ compositionId, userId, triggerClassName, iconClassName, label }: PlaylistPickerProps) {
+export function PlaylistPicker({ compositionId, userId, triggerClassName, iconClassName, label, contentClassName, labelClassName, triggerTestId }: PlaylistPickerProps) {
     const { t } = useLocale();
     const [open, setOpen] = useState(false);
     const [newTitle, setNewTitle] = useState('');
@@ -163,6 +168,7 @@ export function PlaylistPicker({ compositionId, userId, triggerClassName, iconCl
         <Popover open={open} onOpenChange={setOpen}>
             <PopoverTrigger asChild>
                 <button
+                    data-testid={triggerTestId}
                     aria-label={t('playlists.picker.addToPlaylist')}
                     className={cn(
                         'p-1 rounded-pill transition-colors text-fg-muted hover:text-fg',
@@ -170,9 +176,9 @@ export function PlaylistPicker({ compositionId, userId, triggerClassName, iconCl
                     )}
                 >
                     {label ? (
-                        <div className="flex items-center gap-4 w-full">
-                            <ListPlus className={iconClassName ?? 'w-3.5 h-3.5'} />
-                            <span className="text-sm font-bold">{label}</span>
+                        <div className={contentClassName ?? 'flex items-center gap-4 w-full'}>
+                            <ListPlus className={iconClassName ?? 'w-3.5 h-3.5'} aria-hidden />
+                            <span className={labelClassName ?? 'text-sm font-bold'}>{label}</span>
                         </div>
                     ) : (
                         <ListPlus className={iconClassName ?? 'w-3.5 h-3.5'} />

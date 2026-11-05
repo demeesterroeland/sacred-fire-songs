@@ -1,6 +1,6 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 1.76
+**Version:** 1.77
 **Status:** Living Document
 **Date:** Nov 5, 2026
 
@@ -60,6 +60,7 @@
 | **1.59** | Nov 5, 2026 | Epic 6.1: Story 6.1.23 (#407, G5.2) implemented on `feat/ux-v2` — Library tabs fit a phone, Albums hidden behind a feature flag (UXD-4). |
 | **1.61** | Nov 5, 2026 | Epic 6.1: Story 6.1.6 (#390, G2.1) implemented on `feat/ux-v2` — `Chords · A− · A+` reader toolbar, size persisted per device. |
 | **1.60** | Nov 5, 2026 | Epic 6.1: Story 6.1.7 (#391, G2.2) implemented on `feat/ux-v2` — song meta and Key · Capo · Tuning on one grey line each. |
+| **1.77** | Nov 5, 2026 | Epic 6.1: Story 6.1.9 (#393, G2.4) implemented on the integration branch `feat/ux-v2` — sticky Practice · Playlist · ♥ action bar on the song page (phones). |
 | **1.76** | Nov 5, 2026 | Epic 6.1: Story 6.1.29 (#413, G7.1) implemented on `feat/ux-v2` — focusing the search field shows the last 5 recent searches (clearable) and the top-level categories as chips. |
 | **1.75** | Nov 5, 2026 | Epic 6.1: Story 6.1.17 (#401, G4.4) implemented on `feat/ux-v2` — take actions open as a grouped bottom action sheet (Play / Edit name / Download · Share / Singer / Make public / Copy link · Delete alone in red), rows ≥ 44 px, 32 px swipe handle; shared-with-me takes stay listen only. |
 | **1.74** | Nov 5, 2026 | Epic 6.1: Story 6.1.27 (#411, G6.2) implemented on `feat/ux-v2` — guests on Add Song see "Draft now — sign in to save"; the draft survives the sign-in round trip (E2E). |
@@ -1646,7 +1647,7 @@ Owner decision of Nov 4, 2026: sober greyscale interface with one accent, smalle
 | 6.1.6 | #390 | `G2.1` | A | **[Implemented on feat/ux-v2]** As a reader in the circle, I want a `Chords · A− · A+` toolbar on the song page so that I set the text size myself | #385 |
 | 6.1.7 | #391 | `G2.2` | A | **[Implemented on feat/ux-v2]** As a reader, I want Key, Capo, Tuning and the tags on one grey line each so that the first lyric line is visible without scrolling | #385 |
 | 6.1.8 | #392 | `G2.3` | A | **[Implemented on feat/ux-v2]** As a reader, I want the sticky song title to truncate at the end so that the first letters are never cut off | — |
-| 6.1.9 | #393 | `G2.4` | B | As a Member, I want a sticky action bar on the song page (Practice · Playlist · ♥) so that the main actions are in thumb reach | #385, #390, #398 |
+| 6.1.9 | #393 | `G2.4` | B | **[Implemented on feat/ux-v2]** As a Member, I want a sticky action bar on the song page (Practice · Playlist · ♥) so that the main actions are in thumb reach | #385, #390, #398 |
 | 6.1.10 | #394 | `G2.5` | C | As a Musician, I want auto-scroll and transpose in the same viewer toolbar so that all reading tools live in one place | #390 |
 | 6.1.11 | #395 | `G2.6` | C | As a Contributor, I want a reserved slot for a variant / language switch under the song title so that song variants and translations fit the sober layout later | #391 |
 | 6.1.12 | #396 | `G3.1` | A | **[Implemented on feat/ux-v2]** As a reader, I want the mini player to appear only after I press play so that it does not cover the lyrics and sheets on every song | — |

@@ -1,11 +1,12 @@
 # UX v2: Phone Validation Script
 
-**Version:** 1.21 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
+**Version:** 1.22 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.22 | Nov 5, 2026 | Added #393 (sticky Practice · Playlist · ♥ action bar). |
 | 1.21 | Nov 5, 2026 | Added the #413 section (recent searches and category chips in the search field). |
 | 1.20 | Nov 5, 2026 | Added #401 (take actions in a bottom sheet). |
 | 1.19 | Nov 5, 2026 | Added #411 (guest draft banner on Add Song). |
@@ -302,3 +303,20 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 - [ ] 8. Go to Home and tap **Search** in the bottom bar. **Expected:** the song list opens, the cursor is in the field and the panel is open.
 - [ ] 9. Every row, **✕**, **Clear all** and chip is easy to hit with a thumb (at least 44 px) and the text is at least as large as the grey meta line.
 - [ ] 10. Repeat steps 1–2 and 6 in dark mode. Screenshot: `…/413/after-dark/mobile/guest/01-search-focused.webp`. Switch the language to Dutch: the headings **Recente zoekopdrachten**, **Categorieën** and **Alles wissen** show.
+
+### #393 · G2.4 Sticky action bar: Practice · Playlist · ♥
+
+**Preconditions:** a member account and a guest (private window); one song with a YouTube / SoundCloud / Spotify link and one without; light and dark mode; Settings → Preferences → auto-hide on (default).
+
+- [ ] 1. Member: open a song. At the bottom, above the bottom navigation, a bar shows **Practice** (orange, with your number of takes), **Playlist** and **Like**, each with an icon and a word. Screenshot: `docs/ux-research/screenshots/ux-v2/393/after-light/mobile/member/04-song-detail-own.webp`.
+- [ ] 2. The three actions are easy to hit with the thumb (at least 44 px high) and the words are readable.
+- [ ] 3. On the song **with** a reference track: tap **Practice**. The panel opens on **Listen**; tap **Record**: the recorder is ready (two taps). Screenshot: `…/393/after-light/mobile/member/05-practice-opened-from-bar.webp`.
+- [ ] 4. On the song **without** a reference track: tap **Practice**: the panel opens straight on **Record** (one tap). Close it with ✕.
+- [ ] 5. Tap **Like**: the heart fills and the label reads **Liked**. Tap again to undo. Tap **Playlist**: the list of your playlists opens above the bar; tick one and close it.
+- [ ] 6. Tap ⋮ (top right): the menu offers **Share Song** (and **Edit**, **Delete** on your own songs). Practice, Add to Playlist and Like are no longer in it.
+- [ ] 7. Scroll down: the bar slides away. Scroll up a little: it comes back. At the very top it is always there.
+- [ ] 8. Settings → Preferences → switch auto-hide off, return to a song and scroll: the bar (and the bottom navigation) stay put and do not overlap each other.
+- [ ] 9. Press play on a reference track and close the panel: the orange player bar shows **above the navigation**, the action bar sits above the player bar, and the last line of the song can still be scrolled clear of both.
+- [ ] 10. Guest (private window): the bar shows the same three actions. Tap **Like**: the sign-in sheet opens (reason: favourites) and **Sign in** returns you to this song. Tap **Playlist**: the sheet opens with the playlist reason. Tap **Practice**: the panel opens and **Record** shows the sign-in gate. Screenshot: `…/393/after-dark/mobile/guest/03-song-detail.webp`.
+- [ ] 11. Turn the phone sideways and use a phone with a home bar: the bar stays above the home bar and nothing is cut off.
+- [ ] 12. Switch the language to Dutch, Spanish, Italian, Russian, French, Portuguese and Quechua: the three labels and the bar's accessible name are translated and fit on one line. Repeat step 1 in dark mode.

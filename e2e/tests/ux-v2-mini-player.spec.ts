@@ -1,5 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import { ROLES } from '../fixtures/roles';
+import { clickPractice } from '../fixtures/songActions';
 
 /**
  * Story 6.1.12 / G3.1 (#396), UXD-5: the mini player appears only after play.
@@ -20,8 +21,7 @@ async function songLinks(page: Page): Promise<string[]> {
 }
 
 async function openPractice(page: Page) {
-  await page.locator('button[aria-label="More actions"]').first().click();
-  await page.locator('button:has-text("Practice")').filter({ visible: true }).first().click();
+  await clickPractice(page);
   await expect(page.locator('h3:has-text("Practice")')).toBeVisible({ timeout: 10_000 });
   // Wait for the slide-in to finish: the drawer body ends inside the viewport.
   const body = page.getByTestId('rehearsal-drawer-body');
