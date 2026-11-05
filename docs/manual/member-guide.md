@@ -1,11 +1,12 @@
 # Member Guide (draft)
 
-**Version:** 0.3 | **Date:** Nov 5, 2026
+**Version:** 0.5 | **Date:** Nov 5, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.5 | Nov 5, 2026 | Library card renamed to Your takes. |
 | 0.3 | Nov 5, 2026 | Preferences: large stage font removed; text size is on the song page (UX v2, #390). |
 | 0.2 | Nov 5, 2026 | Library tabs: Albums hidden (UX v2, #407). |
 | 0.1 | Nov 4, 2026 | First draft from the UX research. |
@@ -39,7 +40,7 @@ Tabs at the top: **Playlists**, **History**, **Artists**.
 | Your Favorites | Songs you liked |
 | Your Songs | Songs you added |
 | My Drafts | Your songs that are not public yet |
-| Your Recordings | Songs where you have practice takes |
+| Your takes | Songs where you have practice takes |
 
 Below that: **My private playlists** and **Recently viewed** ("View all" opens the full History).
 

@@ -1159,7 +1159,7 @@ export default function RehearsalDrawer({
                   <Music className="w-5 h-5" />
                 </div>
                 <div className="text-left">
-                  <h3 className="text-sm font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">{t('rehearsal.title')}</h3>
+                  <h3 className="text-sm font-bold text-fg-subtle uppercase tracking-wider">{t('practice.title')}</h3>
                   <h2 className="text-base font-extrabold text-gray-900 dark:text-white truncate max-w-[250px] md:max-w-[320px]">
                     {songTitle}
                   </h2>
@@ -1178,6 +1178,7 @@ export default function RehearsalDrawer({
             {hasMedia && (
               <div className="flex px-6 border-b border-gray-100 dark:border-gray-800/50 shrink-0">
                 <button
+                  data-testid="practice-tab-listen"
                   onClick={() => setActiveTab("media")}
                   className={`flex-1 py-3 text-sm font-bold text-center border-b-2 transition-all ${
                     activeTab === "media"
@@ -1185,9 +1186,10 @@ export default function RehearsalDrawer({
                       : "border-transparent text-gray-500 hover:text-gray-900 dark:hover:text-white"
                   }`}
                 >
-                  {t('rehearsal.tab.reference')}
+                  {t('practice.tab.listen')}
                 </button>
                 <button
+                  data-testid="practice-tab-record"
                   onClick={() => setActiveTab("recorder")}
                   className={`flex-1 py-3 text-sm font-bold text-center border-b-2 transition-all ${
                     activeTab === "recorder"
@@ -1195,7 +1197,7 @@ export default function RehearsalDrawer({
                       : "border-transparent text-gray-500 hover:text-gray-900 dark:hover:text-white"
                   }`}
                 >
-                  {t('rehearsal.tab.voiceRecorder')}
+                  {t('practice.tab.record')}
                 </button>
               </div>
             )}
@@ -1240,7 +1242,7 @@ export default function RehearsalDrawer({
 
                     {/* Saved Practice Takes List */}
                     <section className="mt-6 space-y-3">
-                      <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider text-left">{t('rehearsal.recordings.yourRecordings')}</h3>
+                      <h3 className="text-caption font-semibold text-fg-subtle uppercase tracking-wider text-left">{t('practice.takes.mine')}</h3>
                       
                       {/* Fake practice takes mock list for guest demo preview */}
                       {!user ? (
@@ -1469,7 +1471,7 @@ export default function RehearsalDrawer({
               <DropdownMenuContent align="start" className="w-56 bg-[#1a1a1e]/95 backdrop-blur-xl border border-white/10 text-white rounded-xl shadow-2xl p-2 z-[60]" data-testid="mini-source-dropdown">
                 {hasMedia && (
                   <>
-                    <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-gray-400 font-bold px-2 pb-1">{t('rehearsal.tab.reference')}</DropdownMenuLabel>
+                    <DropdownMenuLabel className="text-caption uppercase tracking-wider text-white/60 font-bold px-2 pb-1">{t('practice.tab.listen')}</DropdownMenuLabel>
                     {youtubeUrl && (
                       <DropdownMenuItem className="cursor-pointer focus:bg-white/10 focus:text-white rounded-md transition-colors my-0.5" onClick={() => {
                         stopActiveRecording();
@@ -1516,7 +1518,7 @@ export default function RehearsalDrawer({
                 {recordings.length > 0 && (
                   <>
                     {hasMedia && <DropdownMenuSeparator className="bg-white/10 my-2" />}
-                    <DropdownMenuLabel>{t('miniPlayer.source.userRecordings')}</DropdownMenuLabel>
+                    <DropdownMenuLabel>{t('practice.takes.mine')}</DropdownMenuLabel>
                     {recordings.map(rec => (
                       <DropdownMenuItem key={rec.id} onClick={() => {
                         if (!rec.audioUrl) return;

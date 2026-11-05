@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test.describe('Rehearsal Space Media Player E2E Tests', () => {
+test.describe('Practice Media Player E2E Tests', () => {
   let songUrl = '';
 
   test.beforeAll(async ({ playwright }) => {
@@ -56,7 +56,7 @@ test.describe('Rehearsal Space Media Player E2E Tests', () => {
     await page.goto(songUrl);
 
     // Open Rehearsal Drawer Space (responsive: desktop header button or mobile overflow menu)
-    const recordBtn = page.locator('button[title="Recordings"]').first();
+    const recordBtn = page.locator('button[title="Practice"]').first();
     const moreActionsBtn = page.locator('button[aria-label="More actions"]').first();
 
     await Promise.race([
@@ -68,13 +68,13 @@ test.describe('Rehearsal Space Media Player E2E Tests', () => {
       await recordBtn.click();
     } else {
       await moreActionsBtn.click();
-      const mobileRecordBtn = page.locator('button:has-text("Recordings")').filter({ visible: true }).first();
+      const mobileRecordBtn = page.locator('button:has-text("Practice")').filter({ visible: true }).first();
       await expect(mobileRecordBtn).toBeVisible({ timeout: 5000 });
       await mobileRecordBtn.click();
     }
 
-    // Select Reference Tracks tab
-    const referenceTracksTab = page.locator('button:has-text("Reference Tracks")');
+    // Select Listen tab
+    const referenceTracksTab = page.locator('[data-testid="practice-tab-listen"]');
     await expect(referenceTracksTab).toBeVisible();
     await referenceTracksTab.click();
 
@@ -414,7 +414,7 @@ test.describe('Rehearsal Space Media Player E2E Tests', () => {
 
 
   test('Permutation 15a: Source Switcher dropdown interacts and switches tracks', async ({ page }) => {
-    // The Rehearsal Space drawer is open (beforeEach); close it to show the mini-player
+    // The Practice drawer is open (beforeEach); close it to show the mini-player
     const closeBtn = page.locator('button[aria-label="Close"]').first();
     await closeBtn.click();
     

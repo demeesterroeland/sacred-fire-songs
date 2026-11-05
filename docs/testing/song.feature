@@ -1,5 +1,5 @@
 # Sacred Fire Songs – Song behaviour catalogue
-# Version: 1.1 | Date: Oct 31, 2026
+# Version: 1.2 | Date: Nov 5, 2026
 #
 # Living Gherkin description of every song situation that the automated tests
 # exercise. Each scenario names the test that covers it (unit = vitest files in
@@ -11,6 +11,7 @@
 # supabase/seeds/03_songs_random_generated.sql (regenerate: npm run seed:generate).
 #
 # Changelog
+#   1.2 – Nov 5, 2026 – Story 6.1.14 (#398): the rehearsal feature is called "Practice" everywhere (drawer, menu, tabs Listen / Record, badge, guest card).
 #   1.1 – Oct 31, 2026 – Seeder path is now scripts/db/random-seeder.mjs (#274); unit tests live only in testing/unit/tests.
 #   1.0 – Oct 30, 2026 – Initial catalogue derived from the unit, e2e and manual tests.
 
@@ -164,13 +165,13 @@ Feature: Songs
       Then the skeleton resolves after the guest fallback timeout and the song renders
 
     @e2e @recording
-    Scenario: The Reference Tracks tab only exists when the song has media
+    Scenario: The Listen tab only exists when the song has media
       Given a song without any media link
-      When a member opens the rehearsal drawer
-      Then there is no "Reference Tracks" tab
+      When a member opens the Practice drawer
+      Then there is no "Listen" tab
       Given a song with at least one media link
-      When a guest opens the rehearsal drawer
-      Then the default tab is "Reference Tracks"
+      When a guest opens the Practice drawer
+      Then the default tab is "Listen"
 
     @seed
     Scenario: Keys, capos and tunings
@@ -331,7 +332,7 @@ Feature: Songs
     Scenario: Recording, playing, downloading and deleting a take on the first song
       Given the first song on /songs has no recordings for the member
       When the member records a take and saves it
-      Then the header recordings pill shows "1"
+      Then the Practice button in the header shows "1"
       When the member re-opens the drawer
       Then the take can be played, downloaded as ".webm" and deleted
       # The seeder keeps the newest song ("Morning Sunrise") free of recordings so the count is exactly 1
@@ -354,8 +355,8 @@ Feature: Songs
 
     @e2e @recording
     Scenario: A guest cannot record
-      When a guest opens the rehearsal drawer
-      Then "Personal Rehearsal Recorder" and "Sign In to Record" are shown
+      When a guest opens the Practice drawer
+      Then the "Sign in to record" gate covers the recorder
 
     @e2e @media-player
     Scenario: The mini player keeps playing while the drawer is toggled

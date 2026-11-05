@@ -1,12 +1,13 @@
 # Roles & Glossary (draft)
 
-**Version:** 0.1 | **Date:** Nov 4, 2026
+**Version:** 0.2 | **Date:** Nov 5, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
 | 0.1 | Nov 4, 2026 | First draft. Roles summarised from the Roles & Permissions table in `docs/logbook/epic&user stories.md`. |
+| 0.2 | Nov 5, 2026 | Glossary: Practice replaces Rehearsal Space; Take; Your takes. |
 
 ## Roles
 
@@ -28,13 +29,13 @@
 
 | Word in the app | Meaning |
 | :--- | :--- |
-| Rehearsal Space | Panel on a song with reference tracks and your recorder. |
+| Practice | Panel on a song with a **Listen** tab (reference tracks) and a **Record** tab (your recorder and **My takes**). Replaces the old names Rehearsal Space, Voice Recorder and Recordings. |
 | Reference Track | YouTube / SoundCloud / Spotify version of the song. |
-| Take / Recording | An audio file you recorded or uploaded for a song. Private by default. |
+| Take | An audio file you recorded or uploaded for a song. Private by default. |
 | Shared with you | A take another member shared with you: listen only. |
 | Public (recording) | Take everyone can hear, published with singer consent. |
 | Singer Attribution | Who sings on a take; links to their profile when registered. |
-| Smart playlist | Automatic list (Favorites, Your Songs, Drafts, Recordings). |
+| Smart playlist | Automatic list (Favorites, Your Songs, Drafts, Your takes). |
 | Draft | A song you added that is not public yet. |
 | Magic Link | Sign-in link sent by e-mail, no password needed. |
 | ChordPro (.cho) | Text format for songs with chords in brackets. |
