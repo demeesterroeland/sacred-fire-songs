@@ -27,7 +27,6 @@ const ROUTES = [
   ['24-auth-update-password', '/auth/update-password'],
   ['25-auth-finish-registration', '/auth/finish-registration'],
   ['26-auth-error', '/auth/error?error=Example%20error'],
-  ['27-explore', '/explore'],
   ['28-user-profile', '/users/a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12'], // musician profile (singer attribution target)
   ['30-not-found', '/this-page-does-not-exist'],
   ['31-song-not-found', '/songs/00000000-0000-0000-0000-000000000000'],

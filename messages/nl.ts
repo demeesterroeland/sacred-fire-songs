@@ -73,7 +73,7 @@ const nl: Partial<Record<TranslationKey, string>> = {
   // ─── Navigation ───────────────────────────────────────────────────────────
   'nav.home': 'Startpagina',
   'nav.songs': 'Liederen',
-  'nav.explore': 'Verkennen',
+  'nav.search': 'Zoeken',
   'nav.library': 'Bibliotheek',
   'nav.playlists': 'Afspeellijsten',
   'nav.favorites': 'Favorieten',
@@ -83,6 +83,7 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'nav.newPlaylist': 'Nieuwe afspeellijst',
   'nav.admin': 'Beheer',
   'nav.mainNavigation': 'Hoofdnavigatie',
+  'nav.bottomNavigation': 'Onderste navigatie',
   'nav.showSearch': 'Zoekopties tonen',
 
   // ─── User Menu ────────────────────────────────────────────────────────────

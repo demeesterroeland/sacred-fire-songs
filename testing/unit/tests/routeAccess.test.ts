@@ -38,7 +38,6 @@ describe('route access decision (story 6.1.22, unknown URLs are real 404s)', () 
     '/songs/abc',
     '/songs/abc/edit',
     '/songs/add',
-    '/explore',
     '/library',
     '/library/playlists/add',
     '/library/recently-viewed',

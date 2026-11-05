@@ -6,6 +6,7 @@
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.12 | Nov 5, 2026 | Bottom bar is Home · Search · Library; Songs and Create are gone from it (UX v2, #408). |
 | 0.11 | Nov 5, 2026 | Home categories: grey tiles, tags as plain text with a grey song count (UX v2, #388). |
 | 0.10 | Nov 5, 2026 | Song lists: one row per song with a grey meta line (UX v2, #386). |
 | 0.9 | Nov 5, 2026 | The player bar appears only after you press play (UX v2, #396). |
@@ -26,7 +27,7 @@ The screen has three fixed parts:
 
 - **Top bar:** ☰ menu (left), the search field ("Search 200+ songs") with a filter button, and **Sign In** (right).
 - **Content** in the middle.
-- **Bottom bar:** **Home**, **Songs**, **Library**, **Create**.
+- **Bottom bar:** **Home**, **Search**, **Library**. **Search** opens the song list and puts the cursor in the search field.
 
 The ☰ menu repeats the main places (Home, Songs, Playlists, Favorites, Drafts, Recently Viewed, Add Song, New Playlist) and has the **language switch** at the bottom.
 
@@ -35,7 +36,7 @@ The ☰ menu repeats the main places (Home, Songs, Playlists, Favorites, Drafts,
 1. **Browse by category** on Home: groups such as *The Elements* (Air, Earth, Fire, Water), *Nature*, *Lineage & Tradition*, *Medicine & Healing*. Each tag is a plain link; the grey number after it is how many songs it holds. "+3 more" shows the rest.
 2. **Search:** tap the search field and type a title, a line of the lyrics, an author or a category. Accents do not matter ("aguita" finds "Agüita").
 3. **Filters:** the slider button in the search field opens *Search options*: sort order, content type (songs with chords / with melody) and category & tag filters. Tap **Show results**.
-4. **Songs** in the bottom bar lists all songs A–Z. Each row shows the title, a grey line *author · category · language* and the key on the right; tap the row to open the song.
+4. **Search** in the bottom bar lists all songs A–Z and is ready for typing. Each row shows the title, a grey line *author · category · language* and the key on the right; tap the row to open the song.
 5. **Library → Artists** lists every author with their number of songs.
 
 ## Reading a song

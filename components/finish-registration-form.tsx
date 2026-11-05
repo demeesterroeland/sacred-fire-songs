@@ -53,7 +53,7 @@ function FinishRegistrationFormContent({
       // Notify other components like Sidebar to refresh auth state
       window.dispatchEvent(new Event("auth-role-change"));
 
-      router.push(safeNextPath(next, "/explore"));
+      router.push(safeNextPath(next, "/"));
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : t('auth.error.default'));
     } finally {

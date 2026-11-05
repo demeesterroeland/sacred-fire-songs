@@ -138,7 +138,7 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 | LIB-10 | Albums tab | Placeholder "coming soon" renders | — | G | ⚠️ | 🔲 | P2 | `library/albums` (stub) |
 | LIB-11 | Recently viewed | Auth user sees recently viewed songs | requires auth; records on detail visit | M | ✅ | 🔲 | P1 | `library/recently-viewed` |
 | LIB-12 | New since last visit | Unviewed recent songs surfaced | last_seen tracking | M | ✅ | 🔲 | P2 | NewSinceLastVisit |
-| LIB-13 | Explore/Playlists guest access | Guest can reach Explore & Playlists without login | redirect of `/explore` → `/` | G | ✅ | 🔲 | P2 | 1.2.3 |
+| LIB-13 | Home/Library guest access | Guest can reach Home & Library without login; `/explore` is a 404 (Story 6.1.24) | `e2e/tests/ux-v2-bottom-bar.spec.ts` | G | ✅ | 🔲 | P2 | 1.2.3 |
 
 ### 4.5 Song Viewer (Epic 1.3 / 2.1)
 

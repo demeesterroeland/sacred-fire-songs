@@ -71,7 +71,7 @@ const en = {
   // ─── Navigation ───────────────────────────────────────────────────────────
   'nav.home': 'Home',
   'nav.songs': 'Songs',
-  'nav.explore': 'Explore',
+  'nav.search': 'Search',
   'nav.library': 'Library',
   'nav.playlists': 'Playlists',
   'nav.favorites': 'Favorites',
@@ -81,6 +81,7 @@ const en = {
   'nav.newPlaylist': 'New Playlist',
   'nav.admin': 'Admin',
   'nav.mainNavigation': 'Main navigation',
+  'nav.bottomNavigation': 'Bottom navigation',
   'nav.showSearch': 'Show search options',
 
   // ─── User Menu ────────────────────────────────────────────────────────────
