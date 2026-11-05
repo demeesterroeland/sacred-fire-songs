@@ -7,6 +7,9 @@ import { useLocale } from "@/context/LocaleContext";
 import type { UserRecording } from "@/lib/actions/rehearsal";
 import { takeActionGroups, type TakeActionId } from "@/lib/songs/takeActions";
 
+/** Actions that must run inside the tap (user-gesture APIs), not after the sheet closes. */
+const IMMEDIATE: ReadonlySet<TakeActionId> = new Set<TakeActionId>(["play", "download", "copyLink", "visibility"]);
+
 export type TakeActionHandlers = Record<TakeActionId, () => void>;
 
 interface TakeActionsSheetProps {
@@ -27,12 +30,19 @@ interface TakeActionsSheetProps {
  */
 export default function TakeActionsSheet({ take, open, onOpenChange, isPlaying, on }: TakeActionsSheetProps) {
   const { t } = useLocale();
-  const afterClose = useRef<(() => void) | null>(null);
+  const afterClose = useRef<{ id: TakeActionId; run: () => void } | null>(null);
   const groups = takeActionGroups(take, { canCopyLink: !!on.copyLink });
   const shareCount = take.shared_with?.length ?? 0;
 
   const choose = (id: TakeActionId) => {
-    afterClose.current = on[id] ?? null;
+    const handler = on[id];
+    if (handler && IMMEDIATE.has(id)) {
+      // Clipboard, audio.play() and downloads need the tap itself (iOS Safari).
+      handler();
+      onOpenChange(false);
+      return;
+    }
+    afterClose.current = handler ? { id, run: handler } : null;
     onOpenChange(false);
   };
 
@@ -63,12 +73,18 @@ export default function TakeActionsSheet({ take, open, onOpenChange, isPlaying, 
       <BottomSheetContent
         title={take.recording_name}
         onCloseAutoFocus={(e) => {
-          const run = afterClose.current;
-          if (!run) return;
-          // Keep focus for the next surface (rename field, dialog) instead of the trigger.
-          e.preventDefault();
+          const next = afterClose.current;
+          if (!next) return;
           afterClose.current = null;
-          run();
+          if (next.id === "rename") {
+            // The rename field takes focus itself.
+            e.preventDefault();
+            next.run();
+            return;
+          }
+          // Let focus return to the ⋯ trigger first, so the dialog that opens next
+          // gives focus back to it when it closes.
+          setTimeout(next.run, 0);
         }}
       >
         <div className="pb-2">
@@ -88,7 +104,12 @@ export default function TakeActionsSheet({ take, open, onOpenChange, isPlaying, 
                       onClick={() => choose(id)}
                     >
                       {row.label}
-                      {row.badge ? <span className="ml-2 text-caption text-fg-muted">{row.badge}</span> : null}
+                      {row.badge ? (
+                        <>
+                          <span aria-hidden="true" className="ml-2 text-caption text-fg-muted">{row.badge}</span>
+                          <span className="sr-only">, {t("recording.status.sharedLabel", { count: row.badge })}</span>
+                        </>
+                      ) : null}
                     </SheetAction>
                   );
                 })}

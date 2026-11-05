@@ -38,6 +38,7 @@ export const BottomSheetContent = React.forwardRef<
     setDragY(0);
   };
   const onPointerDown = (e: React.PointerEvent<HTMLDivElement>) => {
+    if (e.button !== 0) return; // primary button / touch / pen only
     drag.current = { startY: e.clientY, startT: e.timeStamp };
     setDragging(true);
     e.currentTarget.setPointerCapture?.(e.pointerId);
@@ -77,6 +78,7 @@ export const BottomSheetContent = React.forwardRef<
           onPointerMove={onPointerMove}
           onPointerUp={onPointerUp}
           onPointerCancel={endDrag}
+          onLostPointerCapture={endDrag}
         >
           <div aria-hidden="true" className="h-1 w-10 rounded-pill bg-line" />
         </div>

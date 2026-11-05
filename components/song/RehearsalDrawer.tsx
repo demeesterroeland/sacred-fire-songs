@@ -253,7 +253,8 @@ function SortableRecordingItem({
           <button
             type="button"
             onClick={() => setActionsOpen(true)}
-            className="grid size-tap shrink-0 place-items-center rounded-control text-fg-muted transition-colors hover:bg-surface-2 hover:text-fg"
+            disabled={busy}
+            className="grid size-tap shrink-0 place-items-center rounded-control text-fg-muted transition-colors hover:bg-surface-2 hover:text-fg disabled:cursor-wait"
             aria-label={t('common.moreActions')}
             aria-haspopup="dialog"
             title={t('common.moreActions')}
