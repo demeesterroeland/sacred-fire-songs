@@ -27,7 +27,7 @@ Songs where you have takes show a **Takes** chip, and the header shows how many 
 ## Listen (everyone)
 
 1. Tab **Listen**.
-2. Choose **YouTube**, **SoundCloud** or **Spotify**. Only the providers the song has a link for are shown, always in that order; the chosen one has a check mark. A line under the buttons says what is playing: *Playing: YouTube Reference* or *Paused: …*.
+2. Choose **YouTube**, **SoundCloud** or **Spotify**. Only the providers the song has a link for are shown, always in that order; the chosen one has a check mark, and a speaker shows the one that is playing. A line under the buttons says what is playing: *Playing: YouTube Reference* or *Paused: …* (for Spotify only the name: Spotify does not tell the app when you pause).
 3. Play it in the panel. The **player bar** above the bottom bar appears once you press play (a song page never shows it before) and keeps playing when you close the panel or scroll the lyrics: ⟲ 15 s back, ▶/❚❚, ⟳ forward, ✕ stop. Leaving the song (another song, Home, Library) stops the music; the bar never carries over.
 
 ## Recording a take (members)

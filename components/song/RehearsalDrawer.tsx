@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useTransition, useMemo } from "react";
 import { motion } from "framer-motion";
-import { X, Music, Play, Pause, RotateCcw, RotateCw, GripVertical, ChevronDown, Check, Mic, MoreHorizontal } from "lucide-react";
+import { X, Music, Play, Pause, RotateCcw, RotateCw, GripVertical, ChevronDown, Check, Mic, MoreHorizontal, Volume2 } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import AudioRecorder from "./AudioRecorder";
@@ -13,7 +13,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useMarkSongNotificationsRead } from "@/hooks/useMarkSongNotificationsRead";
 import { useAudio } from "./AudioProvider";
 import { applyMiniPlayerHeight, isMiniPlayerVisible, mediaSessionReducer, miniPlayerClose, ownsActiveTake } from "@/lib/player/miniPlayer";
-import { availableProviders, PROVIDER_NAMES, playStateKey } from "@/lib/player/referenceProviders";
+import { availableProviders, defaultProvider, PROVIDER_NAMES, playStateKey } from "@/lib/player/referenceProviders";
 import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLocale } from "@/context/LocaleContext";
@@ -397,10 +397,7 @@ export default function RehearsalDrawer({
 
   // Set default active media source and tab when props change or user changes
   useEffect(() => {
-    if (youtubeUrl) setSelectedMedia("youtube");
-    else if (soundcloudUrl) setSelectedMedia("soundcloud");
-    else if (spotifyUrl) setSelectedMedia("spotify");
-    else setSelectedMedia(null);
+    setSelectedMedia(defaultProvider({ youtubeUrl, soundcloudUrl, spotifyUrl }));
   }, [youtubeUrl, soundcloudUrl, spotifyUrl, user]);
 
   // Only set the tab when the drawer opens or when an explicit tab is requested.
@@ -545,6 +542,9 @@ export default function RehearsalDrawer({
     playingSource, isMediaPlaying, mediaCurrentTime, mediaDuration,
     recordings, hasMedia, activeDomain, t,
   ]);
+  // State word (none for Spotify) and the short name for the 390 px bar: brand only for references.
+  const stateKey = playStateKey(nowPlaying.isPlaying, nowPlaying.type === 'media' ? nowPlaying.source : null);
+  const barName = nowPlaying.type === 'media' && nowPlaying.source ? PROVIDER_NAMES[nowPlaying.source] : nowPlaying.label;
   const [isPendingOrder, startOrderTransition] = useTransition();
 
   const dndSensors = useSensors(
@@ -1325,6 +1325,8 @@ export default function RehearsalDrawer({
                     <div role="group" aria-label={t('practice.tab.listen')} data-testid="reference-providers" className="flex gap-1 p-1 bg-surface-2 rounded-control">
                       {referenceProviders.map((provider) => {
                         const selected = selectedMedia === provider;
+                        // The shown provider (check) can differ from the one that plays (speaker).
+                        const playing = nowPlaying.type === 'media' && nowPlaying.source === provider && nowPlaying.isPlaying;
                         return (
                           <button
                             key={provider}
@@ -1340,6 +1342,12 @@ export default function RehearsalDrawer({
                           >
                             {selected && <Check aria-hidden="true" className="size-3.5 shrink-0" />}
                             {PROVIDER_NAMES[provider]}
+                            {playing && (
+                              <>
+                                <Volume2 aria-hidden="true" data-testid={`reference-provider-${provider}-playing`} className="size-3.5 shrink-0" />
+                                <span className="sr-only">{t('miniPlayer.playing')}</span>
+                              </>
+                            )}
                           </button>
                         );
                       })}
@@ -1347,11 +1355,12 @@ export default function RehearsalDrawer({
                   )}
 
                   {/* Says in words what plays and whether it is paused (Story 6.1.13 / G3.2) */}
-                  {miniPlayerVisible && (
-                    <p data-testid="listen-now-playing" role="status" className="text-meta text-fg-muted break-words">
-                      {t('rehearsal.listen.status', { state: t(playStateKey(nowPlaying.isPlaying)), name: nowPlaying.label })}
-                    </p>
-                  )}
+                  {/* Kept mounted so screen readers announce the first change too */}
+                  <p data-testid="listen-now-playing" role="status" className="text-meta text-fg-muted break-words empty:hidden">
+                    {miniPlayerVisible && (stateKey
+                      ? t('rehearsal.listen.status', { state: t(stateKey), name: nowPlaying.label })
+                      : nowPlaying.label)}
+                  </p>
 
                   {/* YouTube Player */}
                   {youtubeUrl && (
@@ -1459,7 +1468,7 @@ export default function RehearsalDrawer({
                     <ChevronDown className="w-3 h-3 opacity-70 shrink-0" />
                   </div>
                   <span data-testid="mini-now-playing" className="text-caption text-fg-muted truncate" title={nowPlaying.label}>
-                    {t(playStateKey(nowPlaying.isPlaying))} · {nowPlaying.label}
+                    {stateKey ? `${t(stateKey)} · ${barName}` : barName}
                   </span>
                 </div>
               </DropdownMenuTrigger>

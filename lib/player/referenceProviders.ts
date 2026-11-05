@@ -31,7 +31,14 @@ export function defaultProvider(urls: ReferenceUrls): ReferenceProvider | null {
   return availableProviders(urls)[0] ?? null;
 }
 
-/** The word that tells the state without colour or motion. */
-export function playStateKey(isPlaying: boolean): 'miniPlayer.playing' | 'miniPlayer.paused' {
+/**
+ * The word that tells the state without colour or motion. Null for Spotify: its embed does not
+ * report pause or end, so the player names the reference without claiming a state.
+ */
+export function playStateKey(
+  isPlaying: boolean,
+  source?: ReferenceProvider | null,
+): 'miniPlayer.playing' | 'miniPlayer.paused' | null {
+  if (source === 'spotify') return null;
   return isPlaying ? 'miniPlayer.playing' : 'miniPlayer.paused';
 }

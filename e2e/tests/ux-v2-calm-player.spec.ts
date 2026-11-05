@@ -112,10 +112,12 @@ test('the mini player is a plain surface, accent only on play, and names its sta
 
   // Playing / Paused in words, with the provider.
   const line = page.getByTestId('mini-now-playing');
-  await expect(line).toHaveText('Playing · YouTube Reference');
+  await expect(line).toHaveText('Playing · YouTube');
   await expect(page.getByTestId('listen-now-playing')).toHaveText('Playing: YouTube Reference');
+  // The playing provider carries a speaker next to its name, apart from the check of the shown one.
+  await expect(page.getByTestId('reference-provider-youtube-playing')).toHaveCount(1);
   await page.evaluate(() => window.postMessage('{"event":"onStateChange","info":2}', '*'));
-  await expect(line).toHaveText('Paused · YouTube Reference');
+  await expect(line).toHaveText('Paused · YouTube');
   await expect(page.getByTestId('listen-now-playing')).toHaveText('Paused: YouTube Reference');
 });
 

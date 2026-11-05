@@ -400,7 +400,7 @@ test.describe('Practice Media Player E2E Tests', () => {
     const miniPlayer = page.locator('[data-testid="bottom-mini-player"]');
     await expect(miniPlayer).toBeVisible();
     await expect(miniPlayer.locator('text=Danza del Cielo Curandero').first()).toBeVisible();
-    await expect(miniPlayer.locator('text=YouTube Reference').first()).toBeVisible();
+    await expect(miniPlayer.getByTestId('mini-now-playing')).toContainText('YouTube');
   });
 
   test('Permutation 14: SoundCloud Mini-Player display on drawer fold', async ({ page }) => {
@@ -417,7 +417,7 @@ test.describe('Practice Media Player E2E Tests', () => {
     const miniPlayer = page.locator('[data-testid="bottom-mini-player"]');
     await expect(miniPlayer).toBeVisible();
     await expect(miniPlayer.locator('text=Danza del Cielo Curandero').first()).toBeVisible();
-    await expect(miniPlayer.locator('text=SoundCloud Reference').first()).toBeVisible();
+    await expect(miniPlayer.getByTestId('mini-now-playing')).toContainText('SoundCloud');
   });
 
   // Owner decision (#342): the mini-player stays visible for every source, Spotify included.
@@ -441,7 +441,7 @@ test.describe('Practice Media Player E2E Tests', () => {
 
     const miniPlayer = page.locator('[data-testid="bottom-mini-player"]');
     await expect(miniPlayer).toBeVisible();
-    await expect(miniPlayer.locator('text=Spotify Reference').first()).toBeVisible();
+    await expect(miniPlayer.getByTestId('mini-now-playing')).toContainText('Spotify');
   });
 
 
@@ -468,7 +468,7 @@ test.describe('Practice Media Player E2E Tests', () => {
     await expect(dropdown).toBeHidden();
     
     // Verify track switched
-    await expect(miniPlayer.locator('text=SoundCloud Reference').first()).toBeVisible();
+    await expect(miniPlayer.getByTestId('mini-now-playing')).toContainText('SoundCloud');
   });
 
   // =========================================================================

@@ -366,12 +366,12 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 
 ### #397 · G3.2 Calm player and reference tab
 
-**Preconditions:** a 390 px phone, English; a song with a YouTube, a SoundCloud and a Spotify link, and a second song with only a YouTube link; a guest is enough (no sign-in); run once in light and once in dark.
+**Preconditions:** a 390 px phone, English; a song with a YouTube, a SoundCloud and a Spotify link, and a second song with only a YouTube link; a guest is enough for steps 1–4 (no sign-in), step 5 needs a member (the Record tab is a preview for guests); run once in light and once in dark.
 
 - [ ] 1. Open the second song (only YouTube) and tap **Practice**. **Expected:** on **Listen** one button, **YouTube**, with a check mark; no SoundCloud or Spotify button. Screenshot: `docs/ux-research/screenshots/ux-v2/397/after-light/mobile/guest/01-listen-one-provider.webp`. Before: `…/397/before-light/…`.
-- [ ] 2. Open the song with three links and tap **Practice**. **Expected:** buttons **YouTube · SoundCloud · Spotify** in that order, each at least 44 px tall; the chosen one has a check mark, a border and a lighter background, no red/orange/green. Tap **Spotify**: the check moves.
-- [ ] 3. Press play on the YouTube player. **Expected:** a plain bar (not orange) appears above the bottom bar; only the round play/pause button is orange. The bar says **Playing · YouTube Reference**, and Listen shows **Playing: YouTube Reference**. Nothing animates. Screenshot: `…/397/after-light/mobile/guest/02-player-playing.webp`.
-- [ ] 4. Pause. **Expected:** both lines now say **Paused**.
-- [ ] 5. Tap **Record**. **Expected:** the line *Reference: YouTube video loaded* is fully readable (wraps on a narrow phone, no "…"), and the button next to it reads **Open player**. Tap it: Listen opens.
+- [ ] 2. Open the song with three links and tap **Practice**. **Expected:** buttons **YouTube · SoundCloud · Spotify** in that order, each at least 44 px tall; the chosen one has a check mark, a border and a lighter background, no red/orange/green. Tap **Spotify**: the check moves. Play the YouTube video, then tap **SoundCloud**: the check moves to SoundCloud while a speaker stays next to **YouTube** (that is what plays).
+- [ ] 3. Press play on the YouTube player. **Expected:** a plain bar (not orange) appears above the bottom bar; only the round play/pause button is orange. The bar says **Playing · YouTube**, and Listen shows **Playing: YouTube Reference**. Nothing animates. Screenshot: `…/397/after-light/mobile/guest/02-player-playing.webp`.
+- [ ] 4. Pause. **Expected:** both lines now say **Paused**. On the Spotify reference both lines show only the name, without Playing or Paused (Spotify does not report a pause).
+- [ ] 5. As a member, tap **Record**. **Expected:** the line *Reference: YouTube video loaded* is fully readable (wraps on a narrow phone, no "…"), and the button next to it reads **Open player**. Tap it: Listen opens.
 - [ ] 6. Switch the language to Dutch, Spanish, Italian, Russian, French, Portuguese and Quechua: **Open player**, **Playing** and **Paused** are translated and fit. Repeat steps 2, 3 and 5 in dark mode (`…/397/after-dark/…`).
 - [ ] 7. In the phone's accessibility settings turn on **Reduce motion** (or the OS equivalent). **Expected:** the bar appears without sliding in.

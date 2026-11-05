@@ -43,6 +43,12 @@ describe('playStateKey', () => {
     expect(playStateKey(true)).toBe('miniPlayer.playing');
     expect(playStateKey(false)).toBe('miniPlayer.paused');
   });
+
+  it('says no state for Spotify: its embed does not report pause', () => {
+    expect(playStateKey(true, 'spotify')).toBeNull();
+    expect(playStateKey(false, 'spotify')).toBeNull();
+    expect(playStateKey(true, 'youtube')).toBe('miniPlayer.playing');
+  });
 });
 
 describe('copy', () => {
