@@ -2,13 +2,12 @@
 
 import { createClient } from '@/lib/supabase/client';
 import { useState, Suspense } from 'react';
-import { Mail, Key, Sparkles, Flame, X, ArrowLeft } from "lucide-react";
+import { Mail, Key, Sparkles, ArrowLeft } from "lucide-react";
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
 
 import { useLocale } from '@/context/LocaleContext';
 function ForgotPasswordContent() {

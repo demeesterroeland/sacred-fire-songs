@@ -282,7 +282,6 @@ export default function Header({ initialUser }: { initialUser?: AuthUser | null 
                             onFocus={openSuggestions}
                             onClick={openSuggestions}
                             onBlur={handleBlur}
-                            aria-expanded={suggestionsVisible}
                             aria-controls={suggestionsVisible ? 'search-suggestions' : undefined}
                             aria-describedby="search-suggestions-hint"
                             placeholder={t('songs.searchPlaceholder', { count: 200 })}

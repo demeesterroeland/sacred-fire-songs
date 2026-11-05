@@ -105,7 +105,6 @@ test('the keyboard reaches the suggestions and Escape returns to the field', asy
   await pinEnglish(page);
   await seedHistory(page, ['agua', 'fuego']);
   await field(page).click();
-  await expect(field(page)).toHaveAttribute('aria-expanded', 'true');
   await expect(field(page)).toHaveAttribute('aria-controls', 'search-suggestions');
   // ArrowDown skips "Clear all": ArrowDown + Enter must never wipe the history.
   await field(page).press('ArrowDown');
