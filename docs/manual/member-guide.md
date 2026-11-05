@@ -91,10 +91,7 @@ Open your song → ⋮ → **Edit** **(verify label)**. You can only edit songs 
 
 - **Profile:** display name. E-mail changes go via support.
 - **Security:** change password, log out from all devices.
-- **Preferences:** appearance, language, keep screen awake, auto-hide navigation on song pages and e-mail notifications (text size is set on the song page with A− / A+).
-
-- **Preferences:** appearance, language, keep screen awake, auto-hide navigation on song pages, auto-scroll, show chords by default, offline mode (text size is set on the song page with A− / A+, auto-scroll with ▶ and ⋯ next to them) **(verify which are active; some are marked "Coming soon")**.
-- **Privacy & Data:** not active yet.
+- **Preferences:** appearance, language, keep screen awake, auto-hide navigation on song pages and e-mail notifications (text size is set on the song page with A− / A+, auto-scroll with ▶ and ⋯ next to them).
 
 ## Public profile
 
