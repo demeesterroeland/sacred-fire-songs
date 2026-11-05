@@ -1,6 +1,6 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 1.57
+**Version:** 1.58
 **Status:** Living Document
 **Date:** Nov 5, 2026
 
@@ -56,6 +56,7 @@
 | **1.55** | Nov 5, 2026 | Story 5.1.13 (#300) implemented: development guide 2.0 (Gitflow, environments, CI vs CD boundary), Gitflow PR template, `/start-story` and `/sync-artifacts` target `develop`, README contributing; documentation contract in `ci-gate`. Story 5.1.10 (#299) code complete; its end-to-end check moves into the 5.1.14 dress rehearsal (owner). |
 | **1.56** | Nov 5, 2026 | Epic 6.1: Story 6.1.1 (#385, G1.1) implemented on the integration branch `feat/ux-v2` — design tokens, component primitives and token tests (`docs/design/design-tokens.md`). |
 | **1.57** | Nov 5, 2026 | Epic 6.1: Story 6.1.33 (#417, G9.1) implemented on `feat/ux-v2` — E2E fixtures removed by a Playwright global teardown; seed hygiene checks. |
+| **1.58** | Nov 5, 2026 | Epic 6.1: Story 6.1.8 (#392, G2.3) implemented on `feat/ux-v2` — sticky song title truncates at the end. |
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
 
@@ -1628,7 +1629,7 @@ Owner decision of Nov 4, 2026: sober greyscale interface with one accent, smalle
 | 6.1.5 | #389 | `G1.5` | C | As a Member, I want unfinished features hidden so that I do not meet 'coming soon' placeholders | #407 |
 | 6.1.6 | #390 | `G2.1` | A | As a reader in the circle, I want a `Chords · A− · A+` toolbar on the song page so that I set the text size myself | #385 |
 | 6.1.7 | #391 | `G2.2` | A | As a reader, I want Key, Capo, Tuning and the tags on one grey line each so that the first lyric line is visible without scrolling | #385 |
-| 6.1.8 | #392 | `G2.3` | A | As a reader, I want the sticky song title to truncate at the end so that the first letters are never cut off | — |
+| 6.1.8 | #392 | `G2.3` | A | **[Implemented on feat/ux-v2]** As a reader, I want the sticky song title to truncate at the end so that the first letters are never cut off | — |
 | 6.1.9 | #393 | `G2.4` | B | As a Member, I want a sticky action bar on the song page (Practice · Playlist · ♥) so that the main actions are in thumb reach | #385, #390, #398 |
 | 6.1.10 | #394 | `G2.5` | C | As a Musician, I want auto-scroll and transpose in the same viewer toolbar so that all reading tools live in one place | #390 |
 | 6.1.11 | #395 | `G2.6` | C | As a Contributor, I want a reserved slot for a variant / language switch under the song title so that song variants and translations fit the sober layout later | #391 |
