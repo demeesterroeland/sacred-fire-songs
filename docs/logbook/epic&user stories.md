@@ -1,6 +1,6 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 1.67
+**Version:** 1.68
 **Status:** Living Document
 **Date:** Nov 5, 2026
 
@@ -60,6 +60,7 @@
 | **1.59** | Nov 5, 2026 | Epic 6.1: Story 6.1.23 (#407, G5.2) implemented on `feat/ux-v2` — Library tabs fit a phone, Albums hidden behind a feature flag (UXD-4). |
 | **1.61** | Nov 5, 2026 | Epic 6.1: Story 6.1.6 (#390, G2.1) implemented on `feat/ux-v2` — `Chords · A− · A+` reader toolbar, size persisted per device. |
 | **1.60** | Nov 5, 2026 | Epic 6.1: Story 6.1.7 (#391, G2.2) implemented on `feat/ux-v2` — song meta and Key · Capo · Tuning on one grey line each. |
+| **1.68** | Nov 5, 2026 | Epic 6.1: Story 6.1.2 (#386, G1.2) implemented on `feat/ux-v2` — compact song rows with one grey meta line. |
 | **1.67** | Nov 5, 2026 | Epic 6.1: Story 6.1.12 (#396, G3.1) implemented on the integration branch `feat/ux-v2` — the mini player appears only after play (UXD-5); sheets, drawer and page reserve `--mini-player-h`. |
 | **1.66** | Nov 5, 2026 | Epic 6.1: Story 6.1.14 (#398, G4.1) implemented on the integration branch `feat/ux-v2` — one name, Practice, in all 8 locales. |
 | **1.65** | Nov 5, 2026 | Epic 6.1: Story 6.1.26 (#410, G6.1) implemented on `feat/ux-v2` — GuestGate on every members-only screen; guest read of public takes requires singer consent (UXD-2). |
@@ -1630,7 +1631,7 @@ Owner decision of Nov 4, 2026: sober greyscale interface with one accent, smalle
 | Story | Issue | Code | Pri | Title | Blocked by |
 |---|---|---|---|---|---|
 | 6.1.1 | #385 | `G1.1` | A | **[Implemented on feat/ux-v2]** As a Contributor, I want design tokens and a component sheet so that every screen is restyled from one sober greyscale system instead of page by page | — |
-| 6.1.2 | #386 | `G1.2` | A | As a Guest, I want song cards and list rows to show a title and one grey meta line so that I can scan a list of songs quickly | #385 |
+| 6.1.2 | #386 | `G1.2` | A | **[Implemented on feat/ux-v2]** As a Guest, I want song cards and list rows to show a title and one grey meta line so that I can scan a list of songs quickly | #385 |
 | 6.1.3 | #387 | `G1.3` | A | As a Member, I want small labels to be readable so that section headings and meta text are not grey-on-grey | #385 |
 | 6.1.4 | #388 | `G1.4` | B | As a Guest, I want the category grid in a calm monochrome style so that the home page does not shout | #385 |
 | 6.1.5 | #389 | `G1.5` | C | As a Member, I want unfinished features hidden so that I do not meet 'coming soon' placeholders | #407 |

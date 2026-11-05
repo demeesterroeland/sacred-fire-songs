@@ -1,11 +1,12 @@
 # UX v2: Agent Decisions (ADR-lite)
 
-**Version:** 1.9 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375)
+**Version:** 1.10 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375)
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.10 | Nov 5, 2026 | Added UXA-015 (song rows drop the chord/melody/take icons and the tag links). |
 | 1.9 | Nov 5, 2026 | Added UXA-010 (mini player details, #396; playback does not follow to another song). |
 | 1.8 | Nov 5, 2026 | Added UXA-008 (take vocabulary in all 8 languages, incl. recorder and dialogs; "Shared with me" heading deferred to #399) and UXA-009 (internal identifiers and message key names keep legacy names), from #398. |
 | 1.7 | Nov 5, 2026 | Added UXA-012, UXA-013 (Story 6.1.26 / #410: GuestGate decisions) and UXA-014 (signed-in users and public takes). |
@@ -33,6 +34,7 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 | UXA-012 | Nov 5, 2026 | #410 | Guest Listen tab for consented public takes deferred until the Practice drawer restructure; RLS enforces consent now | yes |
 | UXA-013 | Nov 5, 2026 | #410 | Fake demo playlists and per-card locks removed from the guest Library; add-to-playlist becomes a bottom sheet gate | yes |
 | UXA-014 | Nov 5, 2026 | #410 | Signed-in users still see public takes without singer consent; UXD-2 covers guests only | yes |
+| UXA-015 | Nov 5, 2026 | #386 | Song rows drop the chord / melody / take icons and the author/tag links | yes |
 
 ---
 
@@ -161,3 +163,12 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 - **Choice:** (b) and (c). The bar stays when paused or when the Practice drawer closes, and goes away on stop (✕), when the take is removed, when the user opens another song, or on a fresh page. `--mini-player-h` = bar height + bottom nav, so sheets, the drawer and the page clear the whole stack. One accent colour for every source (the label names the source), 44 px controls, equalizer only under `motion-safe`. A reference track counts as started as soon as the user presses its play (or the player reports playing), not only when the iframe confirms.
 - **Consequences:** playback never follows the user to another song. Reference tracks stop when the iframe unmounts; the drawer also stops its own active take on unmount, and the bar ignores a take that is not in this song's recordings (`AudioProvider` is global). Stop (✕) acts on what the bar shows. The old source colours (indigo for takes) are gone.
 - **Confirm:** no
+
+### UXA-015 · Song rows without indicator icons and tag links
+
+- **Date / story:** Nov 5, 2026 · #386 (G1.2)
+- **Context:** the old cards had coloured author/tag pills (each a filter link) and amber/green/violet icons for chords, melody and "my take". The story asks for title + one grey meta line + key badge and at most two coloured elements per row.
+- **Options:** (a) keep the icons in grey; (b) drop them; filtering by chords / melody / my takes stays in Search options.
+- **Choice:** (b). The meta line is plain text; the whole row opens the song. Heart (accent when set) and add-to-playlist stay. Artist rows in Library show the song count and titles on the meta line.
+- **Consequences:** a list no longer shows at a glance which songs have chords, melody or a take of yours; one tap fewer to filter by an author or tag from the list.
+- **Confirm:** yes

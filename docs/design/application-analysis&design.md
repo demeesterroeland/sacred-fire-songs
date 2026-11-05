@@ -1,6 +1,6 @@
 # Project Analysis & Design Document: Song Sharing Application (Sacred Fire Songs)
 
-**Version:** 1.72
+**Version:** 1.73
 **Status:** Living Document
 **Date:** Nov 5, 2026
 
@@ -59,6 +59,7 @@
 | **1.64** | Nov 5, 2026 | UX v2 (Story 6.1.23 / #407): Library tab row — Playlists · History · Artists from `libraryTabs()` (`lib/navigation.ts`); Albums hidden behind `FEATURES.albums` (`lib/features.ts`, UXD-4), `/library/albums` renders the not-found page while off. |
 | **1.66** | Nov 5, 2026 | UX v2 (Story 6.1.6 / #390): Song Detail reader toolbar — `ReaderToolbar` (`Chords · A− · A+`) under the meta lines; lyric size from `LYRIC_STEPS`, chords layer on/off, both stored per device (`lib/reader/readerPrefs.ts`, key `sacred-fire-songs-reader`). Removed the disabled `Large Stage Font` preference. |
 | **1.65** | Nov 5, 2026 | UX v2 (Story 6.1.7 / #391): Song Detail meta — `SongMetaLines` replaces the coloured pills, technical badges and the Key/Capo/Tuning grid with two grey lines (`lib/songs/songMeta.ts`). |
+| **1.73** | Nov 5, 2026 | UX v2 (Story 6.1.2 / #386): song cards become compact rows — title, one grey meta line `Author · Category · Language` (`songRowMeta()`), key badge, 44 px heart / add-to-playlist; the same row style in Library (recently viewed, new since last visit, playlist detail) and Artists. |
 | **1.72** | Nov 5, 2026 | UX v2 (Story 6.1.12 / #396, G3.1, UXD-5): added §6.13 "Mini player" — the bar appears only after play, `--mini-player-h` reserves room for sheets, the Practice drawer and the song page. |
 | **1.71** | Nov 5, 2026 | UX v2 (Story 6.1.14 / #398, G4.1): one name, **Practice**, for the rehearsal feature — drawer title, song menu entry, tabs Listen / Record, list heading My takes, Takes chip (`SongMetaLines` link), Library card Your takes, guest card Practice recorder (all 8 locales; message keys `practice.*`). Review fixes: recorder, dialogs, share e-mail and mini-player now say "take" (values only, key names unchanged); mini-player source groups are headed Listen / My takes; `translationKeysExist` test guards literal `t('key')` usage. §7.2b updated. |
 | **1.70** | Nov 5, 2026 | UX v2 (Epic 6.1, Story 6.1.26 / #410; review fixes: `next=` hardened at every consumer, heart gate, `/account` and `/users` removed from `PROTECTED_PATH_PREFIXES` so those pages render the gate): added §6.12 GuestGate — one locked preview with a reason and a `next=` sign-in link on every members-only screen; anon read of public takes now requires singer consent (UXD-2, migration `20261105120000`); `db-schema.sql` 3.1. |
@@ -328,6 +329,7 @@ The application is a **Progressive Web App (PWA)** optimized for mobile use duri
 ### 7.10 Screen 15: Search Songs
 * **Status:** Implemented (`app/songs/SongsPageContent.tsx`).
 * **Features:** Unified search and filtering hub. Supports elements, origins, and categories. Includes active filter pills and results count.
+* **Song rows (Story 6.1.2, `components/home/SongCard.tsx`):** each result is a compact row, not a card: title (`text-row`), one grey `text-meta` line `Author · Category · Language` (`songRowMeta()` in `lib/songs/songMeta.ts`: authors joined, the first non-artist, non-language tag, the first language tag), a key badge on the right, and heart + add-to-playlist as separate 44 px buttons. The whole row is a stretched link; no coloured chips, glow, accent bar or chord/melody/take icons. At 390 × 844 at least six rows are visible (`e2e/tests/ux-v2-song-rows.spec.ts`). Library lists (recently viewed, new since last visit, playlist detail) and Library → Artists use the same `ListRow` style.
 
 ### 7.11 Screen 16: Playlists
 * **Status:** Mockup Created (`doc/design/screens/screen16_playlists.html`).

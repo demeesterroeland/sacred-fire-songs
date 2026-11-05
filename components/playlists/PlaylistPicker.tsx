@@ -165,7 +165,7 @@ export function PlaylistPicker({ compositionId, userId, triggerClassName, iconCl
                 <button
                     aria-label={t('playlists.picker.addToPlaylist')}
                     className={cn(
-                        'p-1 rounded-full transition-all duration-300 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300',
+                        'p-1 rounded-pill transition-colors text-fg-muted hover:text-fg',
                         triggerClassName
                     )}
                 >
