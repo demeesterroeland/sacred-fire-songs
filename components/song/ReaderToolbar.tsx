@@ -20,6 +20,10 @@ interface ReaderToolbarProps extends ReaderPrefs {
 export function ReaderToolbar({ step, chords, hasChords, onChange, className }: ReaderToolbarProps) {
   const { t } = useLocale();
   const last = LYRIC_STEPS.length - 1;
+  const atMin = step <= 0;
+  const atMax = step >= last;
+  // aria-disabled (not disabled) keeps keyboard / screen-reader focus on the button at the ends.
+  const ends = 'aria-disabled:opacity-40 aria-disabled:cursor-default aria-disabled:hover:bg-transparent';
 
   return (
     <Toolbar aria-label={t('viewer.toolbar')} className={cn('bg-transparent p-0', className)} data-testid="reader-toolbar">
@@ -50,17 +54,17 @@ export function ReaderToolbar({ step, chords, hasChords, onChange, className }: 
       )}
       <ToolbarButton
         aria-label={t('viewer.fontSmaller')}
-        disabled={step <= 0}
-        onClick={() => onChange({ step: stepBy(step, -1), chords })}
-        className="border border-line"
+        aria-disabled={atMin}
+        onClick={() => !atMin && onChange({ step: stepBy(step, -1), chords })}
+        className={cn('border border-line', ends)}
       >
         A−
       </ToolbarButton>
       <ToolbarButton
         aria-label={t('viewer.fontLarger')}
-        disabled={step >= last}
-        onClick={() => onChange({ step: stepBy(step, 1), chords })}
-        className="border border-line"
+        aria-disabled={atMax}
+        onClick={() => !atMax && onChange({ step: stepBy(step, 1), chords })}
+        className={cn('border border-line', ends)}
       >
         A+
       </ToolbarButton>

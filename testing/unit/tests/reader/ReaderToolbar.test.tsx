@@ -37,11 +37,20 @@ describe('ReaderToolbar', () => {
     expect(onChange).toHaveBeenLastCalledWith({ step: 1, chords: true });
   });
 
-  it('disables A− at the smallest and A+ at the largest step', () => {
-    const { rerender } = render(<ReaderToolbar step={0} chords hasChords onChange={() => {}} />);
-    expect((screen.getByRole('button', { name: 'Smaller text' }) as HTMLButtonElement).disabled).toBe(true);
-    rerender(<ReaderToolbar step={LYRIC_STEPS.length - 1} chords hasChords onChange={() => {}} />);
-    expect((screen.getByRole('button', { name: 'Larger text' }) as HTMLButtonElement).disabled).toBe(true);
+  it('marks A− / A+ aria-disabled at the ends, keeps them focusable and ignores taps', () => {
+    const onChange = vi.fn();
+    const { rerender } = render(<ReaderToolbar step={0} chords hasChords onChange={onChange} />);
+    const smaller = screen.getByRole('button', { name: 'Smaller text' }) as HTMLButtonElement;
+    expect(smaller.getAttribute('aria-disabled')).toBe('true');
+    expect(smaller.disabled).toBe(false);
+    fireEvent.click(smaller);
+    expect(onChange).not.toHaveBeenCalled();
+    expect(screen.getByRole('button', { name: 'Larger text' }).getAttribute('aria-disabled')).toBe('false');
+    rerender(<ReaderToolbar step={LYRIC_STEPS.length - 1} chords hasChords onChange={onChange} />);
+    const larger = screen.getByRole('button', { name: 'Larger text' });
+    expect(larger.getAttribute('aria-disabled')).toBe('true');
+    fireEvent.click(larger);
+    expect(onChange).not.toHaveBeenCalled();
   });
 
   it('toggles chords, and hides the switch for songs without chords', () => {

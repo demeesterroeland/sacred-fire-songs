@@ -35,15 +35,13 @@ const lyricPx = (page: Page) =>
 
 test.beforeEach(async ({ page }) => {
   test.skip(!songId, 'no public song with chords in the seed');
-  // Start every test from the defaults on this device.
-  await page.addInitScript(() => {
-    localStorage.setItem('sacred-fire-songs-locale', 'en');
-    if (!sessionStorage.getItem('reader-reset')) {
-      localStorage.removeItem('sacred-fire-songs-reader');
-      sessionStorage.setItem('reader-reset', '1');
-    }
-  });
+  // Start every test from the defaults on this device, in English.
   await page.goto(`/songs/${songId}`);
+  await page.evaluate(() => {
+    localStorage.setItem('sacred-fire-songs-locale', 'en');
+    localStorage.removeItem('sacred-fire-songs-reader');
+  });
+  await page.reload();
   await expect(page.getByTestId('reader-toolbar')).toBeVisible();
 });
 
