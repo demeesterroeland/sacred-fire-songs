@@ -129,4 +129,5 @@
 | **November 5, 2026 (Part 3)** | **Fix (#373 follow-up)**: recording-specific not-found page for unopenable recording links, docs, logbook. (estimate) | ~0.5 Hours | ✅ Completed |
 | **November 5, 2026 (Part 4)** | **Docs/CI-CD (#300, Epic 5.1)**: Gitflow documentation and agent tooling, PR template, documentation contract; #299 status. | ~1.0 Hours | ✅ Completed |
 | **November 5, 2026 (Part 5)** | **Feature/UX (Epic 6.1, #375)**: UX v2 Wave A — 14 stories merged into `feat/ux-v2` (tokens, readable labels, song rows, GuestGate, real 404, Practice naming, mini player, takes split + status pills), cross-reviews, sync. (estimate) | ~5.0 Hours | ✅ Completed |
-| **Total** | **Development + AI Collaboration** | **~222.25 Hours** | |
+| **November 5, 2026 (Part 6)** | **Feature/UX (Epic 6.1, #375)**: UX v2 Wave B — 9 stories merged into `feat/ux-v2` (bottom bar, guest draft, take action sheet, search suggestions, song action bar, playlist sheet, share dialog, Shared with me), cross-reviews and review fixes, sync. (estimate) | ~5.5 Hours | ✅ Completed |
+| **Total** | **Development + AI Collaboration** | **~227.75 Hours** | |
