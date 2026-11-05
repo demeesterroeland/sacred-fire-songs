@@ -658,7 +658,7 @@ const ru: Partial<Record<TranslationKey, string>> = {
   'search.tagSelector.browseAll': 'Все теги по категориям',
   'search.tagSelector.noMatchingTags': 'Нет тегов по запросу «{query}».',
   'library.heading': 'Твоя библиотека',
-  'library.subtitle': 'Твоя личная коллекция плейлистов, альбомов и исполнителей.',
+  'library.subtitle': 'Твои плейлисты, история и исполнители.',
   'library.tabs.history': 'История',
   'playlists.songCount': 'Песен: {count}',
   'playlists.songCountSingle': '1 песня',

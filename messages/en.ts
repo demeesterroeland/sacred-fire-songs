@@ -653,7 +653,7 @@ const en = {
   'search.tagSelector.browseAll': 'Browse All Tags by Category',
   'search.tagSelector.noMatchingTags': 'No tags matching "{query}".',
   'library.heading': 'Your Library',
-  'library.subtitle': 'Your personal collection of playlists, albums, and artists.',
+  'library.subtitle': 'Your playlists, history and artists.',
   'library.tabs.history': 'History',
   'playlists.songCount': '{count} songs',
   'playlists.songCountSingle': '1 song',

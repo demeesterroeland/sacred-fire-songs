@@ -1,11 +1,12 @@
 # Member Guide (draft)
 
-**Version:** 0.1 | **Date:** Nov 4, 2026
+**Version:** 0.2 | **Date:** Nov 5, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.2 | Nov 5, 2026 | Library tabs: Albums hidden (UX v2, #407). |
 | 0.1 | Nov 4, 2026 | First draft from the UX research. |
 
 Everything in the [Guest Guide](guest-guide.md) applies. This page covers what an account adds. Practising and recordings have their own page: [practice-and-recordings.md](practice-and-recordings.md).
@@ -28,7 +29,7 @@ Tap the ♡ on a song card or choose **Like** in the song's ⋮ menu. The heart 
 
 ## Library
 
-Tabs at the top: **Playlists**, **History**, **Artists** (and *Albums — coming soon*).
+Tabs at the top: **Playlists**, **History**, **Artists**.
 
 **Smart playlists** are filled automatically:
 

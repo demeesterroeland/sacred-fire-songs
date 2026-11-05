@@ -655,7 +655,7 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'search.tagSelector.browseAll': 'Blader door alle tags per categorie',
   'search.tagSelector.noMatchingTags': 'Geen tags gevonden voor "{query}".',
   'library.heading': 'Jouw bibliotheek',
-  'library.subtitle': 'Jouw persoonlijke collectie afspeellijsten, albums en artiesten.',
+  'library.subtitle': 'Je afspeellijsten, geschiedenis en artiesten.',
   'library.tabs.history': 'Geschiedenis',
   'playlists.songCount': '{count} liederen',
   'playlists.songCountSingle': '1 lied',

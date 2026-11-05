@@ -1,11 +1,12 @@
 # UX v2: Phone Validation Script
 
-**Version:** 1.3 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
+**Version:** 1.4 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.4 | Nov 5, 2026 | Added #407 (Library tabs). |
 | 1.3 | Nov 5, 2026 | Added #392 (sticky title). |
 | 1.2 | Nov 5, 2026 | Added #417 (clean demo data). |
 | 1.1 | Nov 5, 2026 | Added #385 (design tokens). |
@@ -87,3 +88,11 @@ Sections are added per story as it merges into `feat/ux-v2`.
 - [ ] 1. Search "Grandmother's Song of the Thousand Rivers" (or any very long title) and open it.
 - [ ] 2. Scroll down. The header shows the title from its first letter, ending in "…"; it does not slide or animate. Screenshot: `docs/ux-research/screenshots/ux-v2/392/after-dark-song-long-title.webp`.
 - [ ] 3. Open a short title: shown in full, left aligned. The ⋮ button stays on the right and is easy to tap.
+
+### #407 · G5.2 Library tabs fit the phone
+
+**Preconditions:** member; phone (or 390 px window).
+
+- [ ] 1. Open Library. The tab row shows **Playlists · History · Artists**, all fully visible, no Albums. Screenshot: `docs/ux-research/screenshots/ux-v2/407/after-dark/mobile/member/10-playlists.webp`.
+- [ ] 2. Tap each tab. Every tab opens a working page; none says "Coming soon".
+- [ ] 3. Type `/library/albums` in the address bar. You see the not-found page, not an Albums placeholder.

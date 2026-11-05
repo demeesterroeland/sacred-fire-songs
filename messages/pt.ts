@@ -655,7 +655,7 @@ const pt: Partial<Record<TranslationKey, string>> = {
   'search.tagSelector.browseAll': 'Ver todas as tags por categoria',
   'search.tagSelector.noMatchingTags': 'Nenhuma tag correspondente a "{query}".',
   'library.heading': 'Sua biblioteca',
-  'library.subtitle': 'Sua coleção pessoal de playlists, álbuns e artistas.',
+  'library.subtitle': 'Suas playlists, histórico e artistas.',
   'library.tabs.history': 'Histórico',
   'playlists.songCount': '{count} músicas',
   'playlists.songCountSingle': '1 música',

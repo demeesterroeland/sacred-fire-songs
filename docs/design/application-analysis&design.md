@@ -1,6 +1,6 @@
 # Project Analysis & Design Document: Song Sharing Application (Sacred Fire Songs)
 
-**Version:** 1.63
+**Version:** 1.64
 **Status:** Living Document
 **Date:** Nov 5, 2026
 
@@ -56,6 +56,7 @@
 | **1.61** | Nov 5, 2026 | UX v2 (Epic 6.1, Story 6.1.1 / #385): added §6.10 Design System — semantic tokens (`app/styles/sober.css`, `data-style="sober"` × light/dark), Tailwind utility map, component primitives (Button, ListRow, MetaLine, Chip, BottomSheet, Toolbar), token-parity/contrast tests and palette ratchet. |
 | **1.62** | Nov 5, 2026 | UX v2 (Story 6.1.33 / #417): §6.3 demo-data hygiene — Playwright `globalTeardown` (`e2e/global-teardown.ts`) removes E2E fixtures; unit + @seed checks that no playlist title looks like a test fixture (`lib/seed/dataHygiene.ts`). |
 | **1.63** | Nov 5, 2026 | UX v2 (Story 6.1.8 / #392): Song Detail sticky mobile header — title on one line, left aligned, ellipsis at the end (marquee removed), token styling. |
+| **1.64** | Nov 5, 2026 | UX v2 (Story 6.1.23 / #407): Library tab row — Playlists · History · Artists from `libraryTabs()` (`lib/navigation.ts`); Albums hidden behind `FEATURES.albums` (`lib/features.ts`, UXD-4), `/library/albums` renders the not-found page while off. |
 
 
 ## 1. Introduction
@@ -304,6 +305,7 @@ The application is a **Progressive Web App (PWA)** optimized for mobile use duri
 ### 7.11 Screen 16: Playlists
 * **Status:** Mockup Created (`doc/design/screens/screen16_playlists.html`).
 * **Features:** Playlist management with creation and list view of ceremonial sets.
+* **Library tabs (`app/library/LibraryTabs.tsx`, Story 6.1.23):** Playlists · History · Artists, built from `libraryTabs()` in `lib/navigation.ts`; tabs are ≥ 44 px token pills (`bg-chip` / `bg-chip-active`, `aria-current`) that fit 390 px. Albums is on the roadmap but hidden (UXD-4): `FEATURES.albums = false` in `lib/features.ts` removes the tab, and `app/library/albums/page.tsx` calls `notFound()` until the flag is switched on (the route and data model stay).
 
 ### 7.12 Admin Users Overview
 * **Status:** Implemented (`app/admin/users/page.tsx`, `components/admin/AdminUsersTable.tsx`). No mockup in `docs/design/screens/`; the layout mirrors the Library section (`app/library/layout.tsx`, `LibraryTabs.tsx`): `<main>` scroll container, "Administration" title with pill tabs (Users, Configuration – planned), and summary cards styled like `components/home/LibrarySummary.tsx`.
