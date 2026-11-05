@@ -1,11 +1,12 @@
 # UX v2: Agent Decisions (ADR-lite)
 
-**Version:** 1.1 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375)
+**Version:** 1.2 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375)
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.2 | Nov 5, 2026 | Added UXA-006 (song technical badges move into the expanded meta line). |
 | 1.1 | Nov 5, 2026 | UXA-003 refined (grey bridge); added UXA-004 (Claude-only cross-review) and UXA-005 (`accent` = fire accent). |
 | 1.0 | Nov 5, 2026 | Created the decision log for the UX v2 build (UXA-001 to UXA-003). |
 
@@ -18,6 +19,7 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 | UXA-003 | Nov 5, 2026 | #385 | Semantic tokens via Tailwind `@theme`, grey palettes remapped as a bridge | no |
 | UXA-004 | Nov 5, 2026 | all | Cross-review by a different Claude model (owner: Claude models only) | no |
 | UXA-005 | Nov 5, 2026 | #385 | `accent` means the fire accent; shadcn hover uses `surface-2` | no |
+| UXA-006 | Nov 5, 2026 | #391 | Chords / Melody / My take badges move from the song header into the expanded meta line | yes |
 
 ---
 
@@ -65,3 +67,12 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 - **Choice:** (b), done in `components/ui/dialog.tsx` and `dropdown-menu.tsx`.
 - **Consequences:** new code must not use `bg-accent` for hover states (documented in `design-tokens.md` §4).
 - **Confirm:** no
+
+### UXA-006 · Song technical badges inside the meta line
+
+- **Date / story:** Nov 5, 2026 · #391 (G2.2)
+- **Context:** the story asks for one grey meta line and one technical line; the CHORDS / MELODY / RECORDING badges were a third coloured row on the song page (phone and desktop header).
+- **Options:** (a) keep them as a third line; (b) add them to the technical line; (c) show them as links only when the meta line is expanded.
+- **Choice:** (c). The chords are visible in the lyrics anyway; the links (filter by chords/melody/my takes) stay one tap away. Practice entry points come with #393.
+- **Consequences:** the song page no longer shows a "has my take" badge at a glance until the Practice bar (#393) lands.
+- **Confirm:** yes

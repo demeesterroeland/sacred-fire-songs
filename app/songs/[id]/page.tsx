@@ -19,12 +19,7 @@ import { PlaylistPicker } from '@/components/playlists/PlaylistPicker';
 import { useDeleteSong } from '@/hooks/useDeleteSong';
 import { SONG_KEYS } from '@/lib/songs/queryKeys';
 import { useWakeLock } from '@/hooks/useWakeLock';
-import { getCategoryColor, getCategoryStyles } from '@/lib/uiUtils';
-import { TagPill } from '@/components/ui/TagPill';
-import { AuthorPill } from '@/components/ui/AuthorPill';
-import { SongTechnicalBadges } from '@/components/song/SongTechnicalBadges';
-import { SongMetadataPills } from '@/components/song/SongMetadataPills';
-import { parseArtists } from '@/lib/songs/artistUtils';
+import { SongMetaLines } from '@/components/song/SongMetaLines';
 import { recordSongView } from '@/app/actions/recordSongView';
 import { useSongRecordings } from '@/hooks/useSongRecordings';
 import { useRecordingsQuery } from '@/hooks/useRecordingsQuery';
@@ -279,17 +274,8 @@ export default function SongDetailPage() {
                     <div className="flex items-center gap-6">
                         <div className="flex flex-col gap-1">
                             <div className="flex items-center gap-3">
-                                <h1 className="text-3xl font-black text-[#ff4400] tracking-tight">{song.title}</h1>
-                                <SongTechnicalBadges
-                                    hasChords={song.has_chords}
-                                    hasMelody={song.has_melody}
-                                    hasPersonalRecording={hasPersonalRecording}
-                                />
+                                <h1 className="text-display font-semibold text-fg tracking-tight">{song.title}</h1>
                             </div>
-                            <SongMetadataPills
-                                originalAuthor={song.original_author}
-                                categories={categories}
-                            />
                         </div>
                     </div>
                     {/* Action Buttons and User Profile */}
@@ -384,42 +370,19 @@ export default function SongDetailPage() {
 
                 <div className="max-w-5xl px-6 md:px-10 pb-6 md:pb-10 pt-4 md:pt-6 space-y-0">
 
-                    {/* Mobile: Song Title, Author, Badges row */}
-                     <div className="lg:hidden flex flex-col gap-4 mb-4">
-                        <div className="flex-1 space-y-3">
-                            <SongTechnicalBadges
-                                hasChords={song.has_chords}
-                                hasMelody={song.has_melody}
-                                hasPersonalRecording={hasPersonalRecording}
-                            />
-
-                            <SongMetadataPills
-                                originalAuthor={song.original_author}
-                                categories={categories}
-                            />
-                        </div>
-                    </div>
-
-                    {/* Metadata Grid (Key, Capo, Tuning) */}
-                    {(currentVersion?.key || currentVersion?.capo || (currentVersion?.tuning && currentVersion.tuning !== 'Standard')) && (
-                        <div className="grid grid-cols-3 gap-6 py-6 border-y border-gray-200/30 dark:border-gray-800/30">
-                            <div className="text-center space-y-2">
-                                <p className="text-[10px] uppercase font-black text-gray-500 tracking-[0.25em]">{t('song.metadata.key')}</p>
-                                <p className="text-2xl font-mono font-bold text-amber-500">{currentVersion?.key || '-'}</p>
-                            </div>
-                            <div className="text-center space-y-2">
-                                <p className="text-[10px] uppercase font-black text-gray-500 tracking-[0.25em]">{t('song.metadata.capo')}</p>
-                                <p className="text-lg font-bold text-gray-700 dark:text-gray-300">{currentVersion?.capo ? t('song.metadata.fret', { capo: currentVersion.capo }) : '-'}</p>
-                            </div>
-                            <div className="text-center space-y-2">
-                                <p className="text-[10px] uppercase font-black text-gray-500 tracking-[0.25em]">{t('song.metadata.tuning')}</p>
-                                <p className="text-base font-bold text-gray-700 dark:text-gray-300 tracking-wider">{currentVersion?.tuning || t('song.metadata.standard')}</p>
-                            </div>
-                        </div>
-                    )}
+                    {/* Story 6.1.7 (#391): tags on one grey line (tap to expand), Key · Capo · Tuning on another. */}
+                    <SongMetaLines
+                        className="mb-2"
+                        originalAuthor={song.original_author}
+                        categories={categories}
+                        version={currentVersion}
+                        hasChords={song.has_chords}
+                        hasMelody={song.has_melody}
+                        hasPersonalRecording={hasPersonalRecording}
+                    />
 
                     {/* Song Content (Lyrics/Chords) */}
-                    <div className="pt-4 pb-12">
+                    <div className="pt-2 pb-12">
                         <SongDisplay
                             content={currentVersion?.content_chordpro || ''}
                             melodyNotation={currentVersion?.melody_notation || ''}

@@ -1,11 +1,12 @@
 # UX v2: Phone Validation Script
 
-**Version:** 1.4 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
+**Version:** 1.5 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.5 | Nov 5, 2026 | Added #391 (song meta lines). |
 | 1.4 | Nov 5, 2026 | Added #407 (Library tabs). |
 | 1.3 | Nov 5, 2026 | Added #392 (sticky title). |
 | 1.2 | Nov 5, 2026 | Added #417 (clean demo data). |
@@ -96,3 +97,12 @@ Sections are added per story as it merges into `feat/ux-v2`.
 - [ ] 1. Open Library. The tab row shows **Playlists · History · Artists**, all fully visible, no Albums. Screenshot: `docs/ux-research/screenshots/ux-v2/407/after-dark/mobile/member/10-playlists.webp`.
 - [ ] 2. Tap each tab. Every tab opens a working page; none says "Coming soon".
 - [ ] 3. Type `/library/albums` in the address bar. You see the not-found page, not an Albums placeholder.
+
+### #391 · G2.2 Song meta on two grey lines
+
+**Preconditions:** guest; phone (or 390 × 844 window).
+
+- [ ] 1. Open a song with many tags (e.g. "Grandmother's Song of the Thousand Rivers"). Under the title: one grey line `Author · Tag · …` and one line `Key D · Capo 1 · DADGAD`. No coloured chips. Screenshot: `docs/ux-research/screenshots/ux-v2/391/after-dark-song-detail.webp`.
+- [ ] 2. The first lyric line is visible without scrolling.
+- [ ] 3. Tap the meta line. It expands into links (authors, tags, Chords/Melody); tap a tag → the song list filtered by it. Tap the line again to collapse.
+- [ ] 4. A song without key/capo shows only the meta line.

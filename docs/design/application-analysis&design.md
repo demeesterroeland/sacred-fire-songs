@@ -1,6 +1,6 @@
 # Project Analysis & Design Document: Song Sharing Application (Sacred Fire Songs)
 
-**Version:** 1.64
+**Version:** 1.65
 **Status:** Living Document
 **Date:** Nov 5, 2026
 
@@ -57,6 +57,7 @@
 | **1.62** | Nov 5, 2026 | UX v2 (Story 6.1.33 / #417): §6.3 demo-data hygiene — Playwright `globalTeardown` (`e2e/global-teardown.ts`) removes E2E fixtures; unit + @seed checks that no playlist title looks like a test fixture (`lib/seed/dataHygiene.ts`). |
 | **1.63** | Nov 5, 2026 | UX v2 (Story 6.1.8 / #392): Song Detail sticky mobile header — title on one line, left aligned, ellipsis at the end (marquee removed), token styling. |
 | **1.64** | Nov 5, 2026 | UX v2 (Story 6.1.23 / #407): Library tab row — Playlists · History · Artists from `libraryTabs()` (`lib/navigation.ts`); Albums hidden behind `FEATURES.albums` (`lib/features.ts`, UXD-4), `/library/albums` renders the not-found page while off. |
+| **1.65** | Nov 5, 2026 | UX v2 (Story 6.1.7 / #391): Song Detail meta — `SongMetaLines` replaces the coloured pills, technical badges and the Key/Capo/Tuning grid with two grey lines (`lib/songs/songMeta.ts`). |
 
 
 ## 1. Introduction
@@ -269,7 +270,7 @@ The application is a **Progressive Web App (PWA)** optimized for mobile use duri
 
 ### 7.2 Screen 2: Song Detail
 * **Status:** Implemented (`app/songs/[id]/page.tsx`).
-* **Features:** Sticky Header with Back Button, Version Pills, ChordPro Display. The mobile sticky header (`lg:hidden`) shows the song title on one line, left aligned with a 16 px margin, truncated with an ellipsis at the end (full title in the `title` attribute); no scrolling marquee (Story 6.1.8, `e2e/tests/ux-v2-sticky-title.spec.ts`). Integrated "Record Rehearsal" trigger to launch private recording space.
+* **Features:** Sticky Header with Back Button, Version Pills, ChordPro Display. The mobile sticky header (`lg:hidden`) shows the song title on one line, left aligned with a 16 px margin, truncated with an ellipsis at the end (full title in the `title` attribute); no scrolling marquee (Story 6.1.8, `e2e/tests/ux-v2-sticky-title.spec.ts`). Above the lyrics `components/song/SongMetaLines.tsx` shows two grey `text-meta` lines (Story 6.1.7): `Author · Tag · Tag` (a button with `aria-expanded`; tapping expands it into links to the author/tag filters plus Chords, Melody and My take) and `Key E · Capo 3 · Standard` (only when the version has a key, capo or special tuning; `technicalItems()` in `lib/songs/songMeta.ts`). The old `SongMetadataPills` / `SongTechnicalBadges` and the three-column grid are removed; the first lyric line is above the fold at 390 × 844 (`e2e/tests/ux-v2-song-meta.spec.ts`). Integrated "Record Rehearsal" trigger to launch private recording space.
 
 ### 7.2b Rehearsal Space (Slide-Up Bottom Sheet Drawer)
 * **Status:** Implemented (`components/song/RehearsalDrawer.tsx`).
