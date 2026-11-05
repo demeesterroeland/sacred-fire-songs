@@ -730,6 +730,8 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'settings.profile.avatar.comingSoon': 'Rikch’a apachiyqa qayllapi kanqa.',
   'auth.signUpSuccess.verify': 'Takyachiy & Puriy',
   'auth.signUpSuccess.returnToLogin': 'Yaykuyman kutiy',
+  'auth.signUpSuccess.orEnterCode': 'Icha kodigota qillqay',
+  'library.matchAny': 'Ima tupaqpas',
 
   // ─── Playlist PDF export (#220) ──────────────────────────────────────────
   'playlists.export.menu': 'PDF horqoy',

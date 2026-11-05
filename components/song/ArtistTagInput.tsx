@@ -211,7 +211,7 @@ export function ArtistTagInput({
                   <User className="w-3.5 h-3.5 opacity-60" />
                   <span>{item.name}</span>
                 </div>
-                <span className="text-[10px] text-gray-400 dark:text-gray-500 font-mono">
+                <span className="text-caption text-fg-muted font-mono">
                   {item.song_count} {item.song_count === 1 ? 'song' : 'songs'}
                 </span>
               </div>

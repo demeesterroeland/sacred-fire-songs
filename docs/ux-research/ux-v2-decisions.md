@@ -1,11 +1,12 @@
 # UX v2: Agent Decisions (ADR-lite)
 
-**Version:** 1.11 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375)
+**Version:** 1.12 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375)
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.12 | Nov 5, 2026 | Added UXA-017 (readable labels: sentence-case copy, token colours on tested pages, guard allow-list, axe-core pin; #387). |
 | 1.11 | Nov 5, 2026 | Added UXA-016 (what "Shared with me" contains and how the sharer is named, #399). |
 | 1.10 | Nov 5, 2026 | Added UXA-015 (song rows drop the chord/melody/take icons and the tag links). |
 | 1.9 | Nov 5, 2026 | Added UXA-010 (mini player details, #396; playback does not follow to another song). |
@@ -37,6 +38,7 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 | UXA-014 | Nov 5, 2026 | #410 | Signed-in users still see public takes without singer consent; UXD-2 covers guests only | yes |
 | UXA-015 | Nov 5, 2026 | #386 | Song rows drop the chord / melody / take icons and the author/tag links | yes |
 | UXA-016 | Nov 5, 2026 | #399 | "Shared with me" holds takes shared with me; public takes of others get their own "Public takes" list; the sharer is named by full name only; rows of others are listen only | yes |
+| UXA-017 | Nov 5, 2026 | #387 | Readable labels: sentence-case copy, token colours where axe found low contrast, guard allow-list, axe-core pin | yes |
 
 ---
 
@@ -183,3 +185,13 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 - **Choice:** (a), after review: under "Shared with me" a public take nobody shared looked shared, and a sharer's unrelated public takes read "Shared by X". A take counts as shared when the recipient has a share row for it (or it is private and still readable, which only a share allows); other public takes go to **Public takes**. The row says **Shared by {name}** with the owner's full name only; the e-mail is never shown (profile reads are not meant for display, and admins can read every profile). Without a name the row says "Shared with you"; public rows keep the date and length (on a shared row the date is dropped so the name is not cut off at 390 px), and a share without a readable name says "Shared with you" in words. Shared rows are listen only: no ⋯ menu, no rename; the 14 px people icon is removed because text now says it. The mini-player source menu uses the same groups. No migration, no RLS change.
 - **Consequences:** one extra query (the recipient's share rows for the listed takes). If the owner prefers fewer headings, public takes of others can move back under "Shared with me" in `partitionTakes`.
 - **Confirm:** yes (a third list "Public takes" in the Record tab)
+
+### UXA-017 · Readable labels: copy case, colours fixed for contrast, guard scope
+
+- **Date / story:** Nov 5, 2026 · #387 (G1.3)
+- **Context:** axe-core `color-contrast` on `/`, `/songs`, a song page and `/library` (390 px, light and dark) found low contrast beyond the uppercase micro-labels: bottom-bar labels (`gray-400` / `red-400` on white), sidebar group labels, playlist-card sub-lines with green/amber counts on tinted cards, and the red "New" button. Several English section titles were Title Case.
+- **Options:** (a) only restyle the micro-labels; (b) also fix what axe reports on those four pages; for text outside them follow the same rule where the touched line allowed it.
+- **Choice:** (b). English section titles become sentence case (other locales already were): "Your library", "Explore by category", "Public / Smart / My private playlists", "Recently viewed", "New since last visit". Bottom bar uses `text-accent` (active) and `text-fg-muted`. Playlist card counts lose their green/amber colour (the words "public" / "draft" carry the meaning). The "New" button and the amber/red badges become neutral outline / `surface-2` badges. Two hard-coded strings on touched lines ("or enter code", "Match any") became message keys in all 8 locales. The unit guard (`lib/design/labelAudit.ts`) allows only `components/song/RehearsalDrawer.tsx`, which #399 and #400 rework and will clean up (remove the allow-list entry then). `@axe-core/playwright` is pinned at 4.14.0 (released Oct 15, 2026).
+- **Consequences:** a few colour accents on Library cards and badges are gone (greyscale + one accent); `text-accent` on `accent-soft` is 4.48:1 in light, so accent text must not sit on `accent-soft` — use `text-fg` or `text-fg-muted`. Pages other than the four tested ones are only covered by the 12 px guard, not by axe.
+- **Confirm:** yes
+

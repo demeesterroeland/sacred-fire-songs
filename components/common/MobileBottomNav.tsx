@@ -97,7 +97,7 @@ export default function MobileBottomNav() {
                 {/* Top edge glow */}
                 <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-red-500/30 to-transparent" />
 
-                <div className="bg-white/95 dark:bg-gray-950/95 backdrop-blur-xl border-t border-gray-200/50 dark:border-gray-800/50 safe-area-bottom">
+                <div className="bg-bg/95 backdrop-blur-xl border-t border-line safe-area-bottom">
                     <div className="flex items-center justify-around h-14 px-2">
                         {bottomTabs.map((tab) => {
                             const active = tab.isAction
@@ -112,17 +112,17 @@ export default function MobileBottomNav() {
                                         onClick={() => setIsSheetOpen(!isSheetOpen)}
                                         className={`flex flex-col items-center justify-center gap-0.5 min-w-[64px] py-1 rounded-xl transition-colors active:scale-95 ${
                                             active
-                                                ? 'text-red-400'
-                                                : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'
+                                                ? 'text-accent'
+                                                : 'text-fg-muted hover:text-fg'
                                         }`}
                                     >
                                         <div className="relative">
                                             <Icon className="w-[22px] h-[22px]" strokeWidth={active ? 2.5 : 1.8} />
                                             {active && (
-                                                <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-red-400" />
+                                                <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-accent" />
                                             )}
                                         </div>
-                                        <span className={`text-[10px] leading-tight mt-0.5 ${active ? 'font-bold' : 'font-medium'}`}>
+                                        <span className={`text-caption leading-tight mt-0.5 ${active ? 'font-semibold' : 'font-medium'}`}>
                                             {tab.label}
                                         </span>
                                     </button>
@@ -136,17 +136,17 @@ export default function MobileBottomNav() {
                                     onClick={() => setIsSheetOpen(false)}
                                     className={`flex flex-col items-center justify-center gap-0.5 min-w-[64px] py-1 rounded-xl transition-colors active:scale-95 ${
                                         active
-                                            ? 'text-red-400'
-                                            : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'
+                                            ? 'text-accent'
+                                            : 'text-fg-muted hover:text-fg'
                                     }`}
                                 >
                                     <div className="relative">
                                         <Icon className="w-[22px] h-[22px]" strokeWidth={active ? 2.5 : 1.8} />
                                         {active && (
-                                            <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-red-400" />
+                                            <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-accent" />
                                         )}
                                     </div>
-                                    <span className={`text-[10px] leading-tight mt-0.5 ${active ? 'font-bold' : 'font-medium'}`}>
+                                    <span className={`text-caption leading-tight mt-0.5 ${active ? 'font-semibold' : 'font-medium'}`}>
                                         {tab.label}
                                     </span>
                                 </Link>

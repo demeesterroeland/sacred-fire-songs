@@ -35,7 +35,7 @@ export default async function Home() {
 
         {/* Explore by Category */}
         <section>
-          <p className="text-[10px] font-bold text-gray-400 dark:text-gray-500 uppercase tracking-widest mb-4">{t('explore.categories.heading')}</p>
+          <p className="text-meta font-semibold text-fg-muted mb-4">{t('explore.categories.heading')}</p>
           <CategoryGrid />
         </section>
       </div>

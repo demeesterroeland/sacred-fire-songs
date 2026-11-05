@@ -185,7 +185,7 @@ export default function RecordingAttributionModal({
                       {selectedUser.full_name || selectedUser.email}
                     </span>
                     {selectedUser.is_musician && (
-                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400">
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-caption font-semibold bg-surface-2 text-fg-muted">
                         <Music className="w-3 h-3" />
                         {t("recording.attribution.badgeVerified")}
                       </span>
@@ -239,7 +239,7 @@ export default function RecordingAttributionModal({
                               {user.full_name || user.email}
                             </span>
                             {user.is_musician && (
-                              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-caption font-semibold bg-surface-2 text-fg-muted">
                                 <Music className="w-2.5 h-2.5" />
                                 {t("recording.attribution.badgeVerified")}
                               </span>

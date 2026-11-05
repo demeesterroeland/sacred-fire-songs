@@ -38,7 +38,7 @@ export default function EnvironmentBanner() {
   }[env as "preview" | "development"];
 
   return (
-    <div ref={bannerRef} className={`${config.bg} ${config.text} px-4 py-1.5 flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-widest z-[100] sticky top-0 shadow-lg`}>
+    <div ref={bannerRef} className={`${config.bg} ${config.text} px-4 py-1.5 flex items-center justify-center gap-2 text-caption font-semibold z-[100] sticky top-0 shadow-lg`}>
       {config.icon}
       <span>{config.label}</span>
       <span className="opacity-50 mx-1">|</span>

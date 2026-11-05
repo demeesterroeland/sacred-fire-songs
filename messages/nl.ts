@@ -726,6 +726,8 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'settings.profile.avatar.comingSoon': 'Een avatar uploaden is binnenkort mogelijk.',
   'auth.signUpSuccess.verify': 'Verifiëren & doorgaan',
   'auth.signUpSuccess.returnToLogin': 'Terug naar aanmelden',
+  'auth.signUpSuccess.orEnterCode': 'Of voer de code in',
+  'library.matchAny': 'Komt overeen met één',
 
   // ─── Playlist PDF export (#220) ──────────────────────────────────────────
   'playlists.export.menu': 'PDF exporteren',

@@ -107,7 +107,7 @@ function LoginFormContent({
         </div>
         <div className="text-left md:text-center">
           <h1 className="text-gray-900 dark:text-white text-xl md:text-3xl font-bold md:mb-2 leading-tight">{t('auth.login.heading')}</h1>
-          <p className="text-[#8e99aa] text-xs md:text-sm">
+          <p className="text-fg-muted text-caption md:text-sm">
             {mode === 'magic-link'
               ? t('auth.login.magicLinkHint')
               : t('auth.login.passwordHint')}
@@ -124,7 +124,7 @@ function LoginFormContent({
       {/* Login Form */}
       <form onSubmit={mode === 'magic-link' ? handleMagicLink : handlePasswordLogin} className="space-y-4 md:space-y-6">
         <div className="space-y-2">
-          <Label className="text-xs md:text-sm font-semibold text-gray-900 dark:text-white ml-1 tracking-wide uppercase opacity-70">{t('field.email.label')}</Label>
+          <Label className="text-meta md:text-sm font-semibold text-fg-muted ml-1">{t('field.email.label')}</Label>
           <div className="relative group">
             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5a657a] group-focus-within:text-[#d9481e] transition-colors pointer-events-none">
               <Mail className="w-5 h-5" />
@@ -143,7 +143,7 @@ function LoginFormContent({
 
         {mode === 'password' && (
           <div className="space-y-2">
-            <Label className="text-xs md:text-sm font-semibold text-gray-900 dark:text-white ml-1 tracking-wide uppercase opacity-70">{t('field.password')}</Label>
+            <Label className="text-meta md:text-sm font-semibold text-fg-muted ml-1">{t('field.password')}</Label>
             <div className="relative group">
               <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5a657a] group-focus-within:text-[#d9481e] transition-colors pointer-events-none">
                 <Lock className="w-5 h-5" />
@@ -159,7 +159,7 @@ function LoginFormContent({
               />
               <Link
                 href={`/auth/forgot-password${email ? `?email=${encodeURIComponent(email)}` : ''}`}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-[#8e99aa] hover:text-[#d9481e] text-xs font-medium transition-colors border-l border-gray-200 dark:border-[#2d3545] pl-4 h-5 flex items-center"
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-fg-muted hover:text-[#d9481e] text-caption font-medium transition-colors border-l border-gray-200 dark:border-[#2d3545] pl-4 h-5 flex items-center"
               >
                 {t('auth.login.forgotShort')}
               </Link>
@@ -184,7 +184,7 @@ function LoginFormContent({
       {/* Divider */}
       <div className="flex items-center my-6 md:my-8 text-gray-200 dark:text-[#2d3545]">
         <div className="flex-1 border-t border-current"></div>
-        <span className="px-4 text-[#8e99aa] text-[10px] md:text-xs uppercase tracking-widest font-semibold">{t('common.or')}</span>
+        <span className="px-4 text-fg-muted text-caption font-semibold">{t('common.or')}</span>
         <div className="flex-1 border-t border-current"></div>
       </div>
 
@@ -211,7 +211,7 @@ function LoginFormContent({
 
       {/* Terms and Privacy Footer */}
       <div className="mt-8 text-center md:text-left">
-        <p className="text-[#8e99aa] text-[12px] leading-relaxed">
+        <p className="text-fg-muted text-caption leading-relaxed">
           {t('auth.tos.signIn')}{" "}
           <Link href="#" className="text-gray-900 dark:text-white font-bold hover:underline">
             {t('auth.tos.terms')}

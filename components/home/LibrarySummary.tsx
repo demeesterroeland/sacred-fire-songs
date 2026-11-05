@@ -63,7 +63,7 @@ export default async function LibrarySummary(props: LibrarySummaryProps) {
   const t = await getServerT();
   return (
     <div>
-      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">{t('library.heading')}</p>
+      <p className="text-meta font-semibold text-fg-muted mb-4">{t('library.heading')}</p>
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
         {stats.map((stat) => {
           const Icon = stat.icon;
@@ -79,7 +79,7 @@ export default async function LibrarySummary(props: LibrarySummaryProps) {
               </div>
               <div className="min-w-0">
                 <p className="text-lg font-bold text-gray-900 dark:text-white leading-tight">{count}</p>
-                <p className="text-[10px] md:text-xs text-gray-500 truncate">{t(stat.labelKey)}</p>
+                <p className="text-caption text-fg-muted truncate">{t(stat.labelKey)}</p>
               </div>
             </Link>
           );

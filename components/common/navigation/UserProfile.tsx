@@ -97,7 +97,7 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true, init
         aria-expanded={isOpen}
         className="flex items-center gap-2 px-3 py-2 rounded-full bg-gray-200/80 dark:bg-gray-800/80 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors active:scale-95 group border border-transparent hover:border-gray-400 dark:hover:border-gray-600"
       >
-        <div className="w-[26px] h-[26px] rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-[10px] font-bold text-white shadow-inner overflow-hidden shrink-0 relative">
+        <div className="w-[26px] h-[26px] rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-caption font-semibold text-white shadow-inner overflow-hidden shrink-0 relative">
           {user.avatar_url ? (
             <Image 
               src={user.avatar_url} 
@@ -123,7 +123,7 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true, init
         <div data-testid="user-menu" className="absolute top-full right-0 mt-2 w-72 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in zoom-in duration-200 origin-top-right">
           {/* Account Title */}
           <div className="flex justify-between items-center px-4 py-3 border-b border-gray-200 dark:border-gray-800">
-            <span className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">{t('userMenu.account')}</span>
+            <span className="text-sm font-semibold text-fg">{t('userMenu.account')}</span>
             <ThemeToggle />
           </div>
 

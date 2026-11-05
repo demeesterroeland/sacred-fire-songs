@@ -18,11 +18,11 @@ export default async function NewSinceLastVisit({ songs }: NewSinceLastVisitProp
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <Sparkles className="w-3.5 h-3.5 text-fg-subtle" aria-hidden />
-          <p className="text-caption font-semibold text-fg-muted uppercase tracking-widest">{t('newSinceLastVisit.section')}</p>
+          <p className="text-meta font-semibold text-fg-muted">{t('newSinceLastVisit.section')}</p>
         </div>
         <Link
           href="/songs?new=true"
-          className="inline-flex min-h-tap items-center text-caption font-semibold text-fg hover:text-accent uppercase tracking-wider"
+          className="inline-flex min-h-tap items-center text-meta font-semibold text-fg hover:text-accent"
         >
           {t('common.viewAll')}
         </Link>

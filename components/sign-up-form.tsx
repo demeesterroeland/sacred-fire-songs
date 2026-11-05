@@ -93,7 +93,7 @@ function SignUpFormContent({
         </div>
         <div className="text-left md:text-center">
           <h1 className="text-gray-900 dark:text-white text-xl md:text-3xl font-bold md:mb-2 leading-tight">{t('auth.signUp.heading')}</h1>
-          <p className="text-[#8e99aa] text-xs md:text-sm">{t('auth.signUp.description')}</p>
+          <p className="text-fg-muted text-caption md:text-sm">{t('auth.signUp.description')}</p>
         </div>
       </div>
 
@@ -106,7 +106,7 @@ function SignUpFormContent({
       {/* Signup Form */}
       <form onSubmit={handleSignUp} className="space-y-4 md:space-y-4">
         <div className="space-y-1">
-          <Label className="text-xs font-semibold text-gray-900 dark:text-white ml-1 tracking-wide uppercase opacity-70">{t('field.email.label')}</Label>
+          <Label className="text-meta font-semibold text-fg-muted ml-1">{t('field.email.label')}</Label>
           <div className="relative group">
             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5a657a] group-focus-within:text-[#d9481e] transition-colors pointer-events-none">
               <Mail className="w-5 h-5" />
@@ -124,7 +124,7 @@ function SignUpFormContent({
         </div>
 
         <div className="space-y-1">
-          <Label className="text-xs font-semibold text-gray-900 dark:text-white ml-1 tracking-wide uppercase opacity-70">{t('field.password')}</Label>
+          <Label className="text-meta font-semibold text-fg-muted ml-1">{t('field.password')}</Label>
           <div className="relative group">
             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5a657a] group-focus-within:text-[#d9481e] transition-colors pointer-events-none">
               <Lock className="w-5 h-5" />
@@ -142,7 +142,7 @@ function SignUpFormContent({
         </div>
 
         <div className="space-y-1">
-          <Label className="text-xs font-semibold text-gray-900 dark:text-white ml-1 tracking-wide uppercase opacity-70">{t('field.repeatPassword')}</Label>
+          <Label className="text-meta font-semibold text-fg-muted ml-1">{t('field.repeatPassword')}</Label>
           <div className="relative group">
             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5a657a] group-focus-within:text-[#d9481e] transition-colors pointer-events-none">
               <ShieldCheck className="w-5 h-5" />
@@ -173,7 +173,7 @@ function SignUpFormContent({
 
       {/* Terms and Privacy Footer */}
       <div className="mt-8 text-center md:text-left">
-        <p className="text-[#8e99aa] text-[12px] leading-relaxed">
+        <p className="text-fg-muted text-caption leading-relaxed">
           {t('auth.tos.signUp')}{" "}
           <Link href="#" className="text-gray-900 dark:text-white font-bold hover:underline">
             {t('auth.tos.terms')}

@@ -162,7 +162,7 @@ export function AddSongsSheet({ playlistId, existingCompositionIds, open, onClos
                                     <div className="flex items-center gap-2">
                                         <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{song.title}</p>
                                         {!song.is_public && (
-                                            <span className="text-[9px] font-black bg-gray-200 dark:bg-gray-800 text-gray-500 px-1.5 py-0.5 rounded border border-gray-300 dark:border-gray-700 uppercase tracking-tighter shrink-0">
+                                            <span className="text-caption font-semibold bg-surface-2 text-fg-muted px-1.5 py-0.5 rounded border border-line shrink-0">
                                                 {t('search.status.draft')}
                                             </span>
                                         )}

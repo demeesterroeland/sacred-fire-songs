@@ -608,7 +608,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                     <summary className="w-full flex items-center justify-between py-3 cursor-pointer select-none list-none">
                         <div className="flex items-center gap-2">
                             <h3 className="text-gray-400 font-semibold text-sm">{t('songForm.field.melody')}</h3>
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-500/80 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">{t('common.comingSoon')}</span>
+                            <span className="text-caption font-semibold text-fg-muted bg-surface-2 px-2 py-0.5 rounded-full border border-line">{t('common.comingSoon')}</span>
                         </div>
                         <span className="material-symbols-outlined text-gray-400 transition-transform group-open:rotate-180">expand_more</span>
                     </summary>

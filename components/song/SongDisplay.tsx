@@ -32,7 +32,7 @@ export default function SongDisplay({ content, melodyNotation, hasChords = false
                     {/* Section Label */}
                     {section.label && (
                         <span
-                            className={`absolute -left-2 md:-left-4 top-1/2 -translate-x-full -translate-y-1/2 text-caption font-semibold uppercase tracking-widest rotate-180 text-fg-subtle`}
+                            className={`absolute -left-2 md:-left-4 top-1/2 -translate-x-full -translate-y-1/2 text-caption font-semibold rotate-180 text-fg-muted`}
                             style={{ writingMode: 'vertical-rl' }}
                         >
                             {section.label}
@@ -90,7 +90,7 @@ export default function SongDisplay({ content, melodyNotation, hasChords = false
             {/* Melody Notation Section */}
             {melodyNotation && (
                 <div className="pt-8 border-t border-line">
-                    <h3 className="text-caption font-semibold text-fg-muted uppercase tracking-widest mb-4">{t('song.melodyNotation')}</h3>
+                    <h3 className="text-meta font-semibold text-fg-muted mb-4">{t('song.melodyNotation')}</h3>
                     <div className="bg-surface-2 rounded-panel p-6 border border-line font-mono text-meta text-fg-muted whitespace-pre-wrap leading-relaxed">
                         {melodyNotation}
                     </div>

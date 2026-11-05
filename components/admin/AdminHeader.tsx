@@ -60,7 +60,7 @@ export default function AdminHeader() {
                 >
                   <Icon className="w-3.5 h-3.5" />
                   {t(labelKey)}
-                  <span className="text-[9px] uppercase tracking-wider">· {t('admin.planned')}</span>
+                  <span className="text-caption">· {t('admin.planned')}</span>
                 </span>
               );
             }

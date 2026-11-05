@@ -77,7 +77,7 @@ function ForgotPasswordContent() {
 
                 <form className="space-y-4 md:space-y-6" onSubmit={handleResetPassword}>
                     <div className="space-y-2">
-                        <Label className="text-xs md:text-sm font-semibold text-gray-900 dark:text-white ml-1 tracking-wide uppercase opacity-70">{t('field.email.label')}</Label>
+                        <Label className="text-meta md:text-sm font-semibold text-fg-muted ml-1">{t('field.email.label')}</Label>
                         <div className="relative group">
                             <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5a657a] group-focus-within:text-[#d9481e] transition-colors pointer-events-none">
                                 <Mail className="w-5 h-5" />

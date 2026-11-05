@@ -729,6 +729,8 @@ const ru: Partial<Record<TranslationKey, string>> = {
   'settings.profile.avatar.comingSoon': 'Загрузка аватара скоро станет доступна.',
   'auth.signUpSuccess.verify': 'Подтвердить и продолжить',
   'auth.signUpSuccess.returnToLogin': 'Вернуться ко входу',
+  'auth.signUpSuccess.orEnterCode': 'Или введите код',
+  'library.matchAny': 'Любое совпадение',
 
   // ─── Playlist PDF export (#220) ──────────────────────────────────────────
   'playlists.export.menu': 'Экспорт в PDF',

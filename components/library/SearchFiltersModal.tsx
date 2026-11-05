@@ -139,7 +139,7 @@ export default function SearchFiltersModal({
 
                     {/* Search text */}
                     <section>
-                        <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2 block">
+                        <label className="text-meta font-semibold text-fg-muted mb-2 block">
                             {t('search.label')}
                         </label>
                         <div className="relative">
@@ -157,7 +157,7 @@ export default function SearchFiltersModal({
 
                     {/* Tags */}
                     <section>
-                        <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2 block">
+                        <label className="text-meta font-semibold text-fg-muted mb-2 block">
                             {t('search.categoryAndTags')}
                         </label>
                         <TagSelector
@@ -179,7 +179,7 @@ export default function SearchFiltersModal({
 
                     {/* Sort */}
                     <section>
-                        <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-2 block">
+                        <label className="text-meta font-semibold text-fg-muted mb-2 block">
                             {t('search.sortBy')}
                         </label>
                         <div className="relative">
@@ -198,7 +198,7 @@ export default function SearchFiltersModal({
 
                     {/* Content type */}
                     <section>
-                        <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3 block">
+                        <label className="text-meta font-semibold text-fg-muted mb-3 block">
                             {t('search.contentType')}
                         </label>
                         <div className="grid grid-cols-2 gap-3">
@@ -226,7 +226,7 @@ export default function SearchFiltersModal({
                     {/* Personalized Options */}
                     {isAuthenticated && (
                         <section className="pt-4 border-t border-gray-200 dark:border-gray-800/60">
-                            <label className="text-xs font-bold uppercase tracking-wider text-gray-500 dark:text-gray-400 mb-3 block">
+                            <label className="text-meta font-semibold text-fg-muted mb-3 block">
                                 {t('search.yourLibrary')}
                             </label>
                             
@@ -268,7 +268,7 @@ export default function SearchFiltersModal({
                                                 <button
                                                     key={statusOption}
                                                     onClick={() => setFilter('status', statusOption)}
-                                                    className={`flex-1 px-2 py-1.5 text-[11px] font-bold rounded-lg transition-all capitalize ${state.status === statusOption
+                                                    className={`flex-1 px-2 py-1.5 text-caption font-semibold rounded-lg transition-all capitalize ${state.status === statusOption
                                                         ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm ring-1 ring-gray-200 dark:ring-white/5'
                                                         : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
                                                         }`}

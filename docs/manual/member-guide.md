@@ -1,11 +1,12 @@
 # Member Guide (draft)
 
-**Version:** 0.6 | **Date:** Nov 5, 2026
+**Version:** 0.7 | **Date:** Nov 5, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.7 | Nov 5, 2026 | Section titles and small labels are sentence case and larger (13 px titles, nothing below 12 px) with darker grey (UX v2, #387); "Your Library" reads "Your library". |
 | 0.6 | Nov 5, 2026 | Practising: the player bar appears only after you press play and stops with the song page (UX v2, #396); details on the practice page. |
 | 0.5 | Nov 5, 2026 | Library card renamed to Your takes. |
 | 0.3 | Nov 5, 2026 | Preferences: large stage font removed; text size is on the song page (UX v2, #390). |
@@ -24,7 +25,7 @@ Tap your initial (top right). You see your name and role (e.g. *Member*), and:
 
 ## Home when signed in
 
-Above the categories, **Your Library** shows four counters: **Favorites**, **Drafts**, **Your Songs**, **New songs**. Tap one to open that list.
+Above the categories, **Your library** shows four counters: **Favorites**, **Drafts**, **Your Songs**, **New songs**. Tap one to open that list.
 
 ## Favourites
 
