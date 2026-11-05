@@ -1,23 +1,14 @@
 "use client";
 
 import React, { useState, useEffect, useTransition, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { X, Music, Play, Pause, Lock, RotateCcw, RotateCw, GripVertical, ChevronUp, ChevronDown, Check, Globe, Mic, MoreHorizontal } from "lucide-react";
+import { motion } from "framer-motion";
+import { X, Music, Play, Pause, RotateCcw, RotateCw, GripVertical, ChevronDown, Check, Mic, MoreHorizontal } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Loader2 } from "lucide-react";
 import AudioRecorder from "./AudioRecorder";
 import { useSongRecordings } from "@/hooks/useSongRecordings";
-import { getUserRecordings, deleteUserRecording, renameUserRecording, reorderUserRecordings, unpublishRecording, type UserRecording } from "@/lib/actions/rehearsal";
-import { getYouTubeEmbedUrl, getSpotifyEmbedUrl } from "./MediaEmbeds";
+import { deleteUserRecording, renameUserRecording, reorderUserRecordings, unpublishRecording, type UserRecording } from "@/lib/actions/rehearsal";
+import { getYouTubeEmbedUrl } from "./MediaEmbeds";
 import { useAuth } from "@/hooks/useAuth";
 import { useAudio } from "./AudioProvider";
 import { applyMiniPlayerHeight, isMiniPlayerVisible, mediaSessionReducer, miniPlayerClose, ownsActiveTake } from "@/lib/player/miniPlayer";
@@ -331,8 +322,6 @@ export default function RehearsalDrawer({
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<UserRecording | null>(null);
   const [shareRecording, setShareRecording] = useState<UserRecording | null>(null);
-  const [privateSongPromptRecording, setPrivateSongPromptRecording] = useState<UserRecording | null>(null);
-  const [isPublishingSong, setIsPublishingSong] = useState(false);
   const [publishRecording, setPublishRecording] = useState<UserRecording | null>(null);
   const [attributionRecording, setAttributionRecording] = useState<UserRecording | null>(null);
   const isAdmin = user?.role === 'admin';
@@ -1065,17 +1054,8 @@ export default function RehearsalDrawer({
     }
   };
 
-  const handleShare = (rec: UserRecording) => {
-    if (isSongPublic === false) {
-      if (isSongOwner || isAdmin) {
-        setPrivateSongPromptRecording(rec);
-      } else {
-        toast.error(t('recording.sharing.privateSongPrompt.notOwner'));
-      }
-      return;
-    }
-    setShareRecording(rec);
-  };
+  // A private song is explained and confirmed inside the Share dialog (Story 6.1.18).
+  const handleShare = (rec: UserRecording) => setShareRecording(rec);
 
   const handlePublish = async (rec: UserRecording) => {
     if (rec.is_public) {
@@ -1661,71 +1641,15 @@ export default function RehearsalDrawer({
         </div>
       )}
 
-      {/* Private Song Sharing Confirmation Dialog */}
-      {privateSongPromptRecording && (
-        <Dialog open={!!privateSongPromptRecording} onOpenChange={(open) => !open && setPrivateSongPromptRecording(null)}>
-          <DialogContent className="max-w-md bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2 text-lg font-bold">
-                <Lock className="w-5 h-5 text-amber-500" />
-                {t('recording.sharing.privateSongPrompt.title')}
-              </DialogTitle>
-              <DialogDescription className="text-sm text-gray-500 dark:text-gray-400 pt-2 leading-relaxed">
-                {t('recording.sharing.privateSongPrompt.body')}
-              </DialogDescription>
-            </DialogHeader>
-
-            <DialogFooter className="flex flex-row justify-end gap-2 pt-4 border-t border-gray-100 dark:border-gray-800">
-              <button
-                type="button"
-                onClick={() => setPrivateSongPromptRecording(null)}
-                disabled={isPublishingSong}
-                className="px-4 py-2 text-sm font-medium rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-              >
-                {t('common.cancel')}
-              </button>
-              <button
-                type="button"
-                disabled={isPublishingSong}
-                onClick={async () => {
-                  if (!onMakeSongPublic) return;
-                  setIsPublishingSong(true);
-                  try {
-                    const success = await onMakeSongPublic();
-                    if (success) {
-                      const rec = privateSongPromptRecording;
-                      setPrivateSongPromptRecording(null);
-                      setShareRecording(rec);
-                    }
-                  } finally {
-                    setIsPublishingSong(false);
-                  }
-                }}
-                className="px-4 py-2 text-sm font-medium rounded-lg bg-amber-500 hover:bg-amber-600 text-black font-semibold transition-colors flex items-center gap-2 disabled:opacity-50"
-              >
-                {isPublishingSong ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>{t('common.loading')}</span>
-                  </>
-                ) : (
-                  <>
-                    <Globe className="w-4 h-4" />
-                    <span>{t('recording.sharing.privateSongPrompt.confirm')}</span>
-                  </>
-                )}
-              </button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      )}
-
       {/* Recording Sharing Modal */}
       {shareRecording && (
         <RecordingShareModal
           isOpen={!!shareRecording}
           onClose={() => setShareRecording(null)}
           recording={shareRecording}
+          songIsPublic={isSongPublic}
+          canMakeSongPublic={isSongOwner || isAdmin}
+          onMakeSongPublic={onMakeSongPublic}
           onSharesUpdated={() => {
             queryClient.invalidateQueries({ queryKey: ["song-recordings", songVersionId] });
           }}

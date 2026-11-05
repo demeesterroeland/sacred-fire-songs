@@ -1,11 +1,12 @@
 # UX v2: Agent Decisions (ADR-lite)
 
-**Version:** 1.20 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375)
+**Version:** 1.21 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375)
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.21 | Nov 5, 2026 | Added UXA-028 (Share dialog: private-song confirmation moves into the dialog, wording of the two effects, who the search finds; #402). |
 | 1.20 | Nov 5, 2026 | Added UXA-027 (Add to playlist sheet: tap removes, New playlist inline, sheet stays open; #414). |
 | 1.19 | Nov 5, 2026 | Added UXA-023 to UXA-026 (song action bar: ⋮ sheet content, hide-on-scroll rule, bottom nav height fix, bar style and copy; #393). |
 | 1.18 | Nov 5, 2026 | Added UXA-022 (search suggestions: what chips do, when the panel shows, when a search is remembered; #413). |
@@ -57,6 +58,7 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 | UXA-025 | Nov 5, 2026 | #393 | `--bottom-nav-height` reports 3.5rem whenever the nav is on screen (it was 0 with auto-hide off, so bars overlapped the nav) | no |
 | UXA-026 | Nov 5, 2026 | #393 | Action bar style and copy: Practice in accent text with take count, Playlist and Like in grey, new short labels "Playlist" / "Like" / "Liked"; members reuse the playlist popover until #414 | yes |
 | UXA-027 | Nov 5, 2026 | #414 | Add to playlist sheet: tap on a check removes the song, "New playlist" opens a name field in the first row, the sheet stays open until Done | yes |
+| UXA-028 | Nov 5, 2026 | #402 | Share dialog: the private-song confirmation lives inside the dialog and lists both effects; the song becomes public when the owner confirms, before a member is picked | yes |
 
 ---
 
@@ -303,3 +305,12 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 - **Choice:** removing = the existing server toggle (`addSongToPlaylist` deletes the row when the song is already in the playlist), no new action and no RLS change. Creating = (b): tapping **New playlist** turns the first row into a name field with **Create**; it calls the same `createPlaylist` action as the Add playlist page (one creation path, Story 3.1.4.6) and adds the song straight away, so the new playlist appears ticked. The sheet stays open after a tap (b); a **Done** button, the scrim, Escape or a swipe down closes it. The sheet creates a private playlist with just a name; the privacy line of #416 is not added here. Toasts reuse `playlists.picker.added` / `removed` (the hard-coded English strings are gone) and keep the "Open playlist" action. On the song page the ⋮ menu closes together with the sheet.
 - **Consequences:** a playlist "holds" the song when it holds any version of it; unticking removes every version of the song from that playlist, ticking adds the oldest version (review: before, the server toggled only the oldest version while the check looked at all of them). a mistaken tap removes the song without a confirmation (undo = tap again; the toast says "Removed from …"). The sheet needs one more tap than the old popover to leave. Admins and gatekeepers still see public playlists in the list, as before.
 - **Confirm:** yes (tap removes without confirmation)
+
+### UXA-028 · Share dialog: where the private-song confirmation lives and what it promises
+
+- **Date / story:** Nov 5, 2026 · #402 (G4.5)
+- **Context:** the story asks for a confirmation that "the song lyrics become public and the take is shared", and nothing changing until the owner confirms. Real behaviour today (checked in `lib/actions/rehearsal.ts`): `shareRecording` refuses a take on a private song; `makeSongPublic` (song owner or admin) sets `compositions.is_public = true` at once; a take is only shared when a member is picked afterwards (`recording_shares` insert). So the lyrics do become public as the AC says, but the take is not shared by the confirm tap itself, and cancelling after confirming leaves the song public. The search (`search_users_for_sharing`) finds every registered profile by e-mail or name, at least 2 characters, at most 10 results, and shows e-mail addresses.
+- **Options:** (a) keep the separate prompt in `RehearsalDrawer` and only reword it; (b) move the confirmation into the Share dialog as its first step; (c) change the server action so confirm + share happen in one transaction.
+- **Choice:** (b), no change to RLS, actions or data. The dialog opens on a confirmation that lists both effects: the lyrics become public (everyone can see the song) and the take is shared only with the members picked next. The text also states the truth that the song becomes public as soon as the owner confirms, and that nothing changes before. A song owner or admin sees **Make song public and continue** / **Cancel**; a member who only owns the take sees an explanation (no toast) and no search. The helper line and empty state say the search finds registered members and suggest inviting others (no invite mechanism exists; it is only a hint). The old keys `privateSongPrompt.title|body|confirm|notOwner` were reworded in all 8 locales; new keys: `privateSongPrompt.effectLyrics|effectTake|note|notOwnerTitle`, `recording.sharing.helper|noResults`.
+- **Consequences:** review: the dialog title names the step, focus moves to the search once the song is public, a failure shows an error toast, the take line no longer promises "nobody else can listen" (a take can already be public), and the helper no longer offers an invite that does not exist (it says someone without an account needs to sign up first). a song owner who confirms and then closes the dialog without choosing anyone has made the song public. (c) would avoid that but changes data semantics, which is out of scope. The confirmation no longer opens from the drawer, so any future caller of the Share dialog must pass `songIsPublic`, `canMakeSongPublic` and `onMakeSongPublic`. The search results still show e-mail addresses of all registered members; whether that is wanted is a privacy question for the owner.
+- **Confirm:** yes (copy, and the confirmation moves; the e-mail exposure in search is unchanged but worth a decision)
