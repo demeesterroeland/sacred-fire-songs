@@ -1,11 +1,12 @@
 # UX v2: Phone Validation Script
 
-**Version:** 1.15 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
+**Version:** 1.16 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.16 | Nov 5, 2026 | Added #400 (take status in words). |
 | 1.15 | Nov 5, 2026 | Added #387 (readable small labels). |
 | 1.14 | Nov 5, 2026 | Added #399 (takes shared with me listed apart, "Shared by").  |
 | 1.13 | Nov 5, 2026 | Added #386 (compact song rows). |
@@ -223,3 +224,14 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 6. Switch the language (☰ menu → language) to Nederlands and Español and open `/`. **Expected:** the section titles read naturally and are not in capitals.
    - [ ] Pass
 
+### #400 · G4.3 Take status in words
+
+**Preconditions:** member account; a song with a take that you made public (⋯ → **Make Public**) and shared with two people (⋯ → **Share take**), and the singer named as a person without an account (⋯ → **Singer Attribution** → *Singer does not have an account yet*); light and dark mode.
+
+- [ ] 1. Open the song, tap ⋮ → **Practice** → **Record**. Under the take's name grey labels read **Public**, **Shared · 2** and **Pending invite**, each with a small icon. Screenshot: `docs/ux-research/screenshots/ux-v2/400/after-light/mobile/member/01-take-status.webp`.
+- [ ] 2. Nothing needs a long-press or hover to be understood. Labels are at least as big as the grey date line (12 px) and wrap to a second line on a narrow phone without cutting words.
+- [ ] 3. Make the take private (⋯ → **Make Private**): **Public** disappears, **Shared · 2** stays. Remove both shares: **Shared · 2** disappears. A take that is private and not shared has no label at all.
+- [ ] 4. Name a singer who is a verified musician (⋯ → **Singer Attribution**, pick the musician): the label **Verified musician** shows and the singer's name still links to their profile.
+- [ ] 5. Open the take of another member that is shared with you: the row says **Shared by <name>**, with no share count.
+- [ ] 6. Section titles (**Practice**, **My takes**, **Shared with me**) are normal sentence case, not capitals. Screenshot dark: `…/400/after-dark/mobile/member/01-take-status.webp`.
+- [ ] 7. Switch the language to Dutch, Spanish, Italian, Russian, French, Portuguese and Quechua: the labels are translated. Repeat step 1 in dark mode.

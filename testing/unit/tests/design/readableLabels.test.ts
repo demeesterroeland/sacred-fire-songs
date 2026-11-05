@@ -16,8 +16,8 @@ describe('micro-text audit', () => {
     expect(microTextHitsIn('text-[12px] text-[0.75rem] text-[14px] text-caption text-meta')).toEqual([]);
   });
 
-  it('keeps the allow-list to the Practice drawer that #399/#400 rework', () => {
-    expect(MICRO_TEXT_ALLOW_LIST).toEqual(['components/song/RehearsalDrawer.tsx']);
+  it('exempts no file from the guard', () => {
+    expect(MICRO_TEXT_ALLOW_LIST).toEqual([]);
   });
 
   it('app/ and components/ contain no text smaller than 12 px', () => {

@@ -1,11 +1,12 @@
 # Practice: Listen, Record & Takes (draft)
 
-**Version:** 0.3 | **Date:** Nov 5, 2026
+**Version:** 0.4 | **Date:** Nov 5, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.4 | Nov 5, 2026 | Take rows show their status in words: Public, Shared · n, Pending invite (owner only), Verified musician (#400). |
 | 0.3 | Nov 5, 2026 | Takes shared with you are listed under their own heading, Shared with me, with who shared them (UXD-3, #399). |
 | 0.2 | Nov 5, 2026 | The player bar appears only after you press play and stops with the song page (UXD-5, #396). |
 | 0.1 | Nov 4, 2026 | First draft: reference tracks, recorder, upload, managing takes, sharing, publishing with consent, singer attribution, shared-with-me view. |
@@ -87,9 +88,22 @@ Without the tick the take stays private. ⋯ → **Make Private** undoes it.
 ## Naming the singer (attribution)
 
 1. ⋯ → **Singer Attribution**.
-2. Search a **registered musician or user** — their name links to their profile with a ✓ when they are a verified musician.
-3. Or tick **Singer does not have an account yet** and type their name (and optionally e-mail) — shown with a 🕓 *Pending Invite*.
+2. Search a **registered musician or user** — their name links to their profile, and the take shows the grey label *Verified musician* when they are one.
+3. Or tick **Singer does not have an account yet** and type their name (and optionally e-mail) — shown with the grey label *Pending invite* until they have an account.
 4. **Save Attribution**. **Remove Attribution** clears it.
+
+## What the labels under a take mean
+
+Each take can show small grey labels with an icon and words (nothing needs a hover):
+
+| Label | Meaning |
+| :--- | :--- |
+| **Public** | Everyone who visits the song can listen. |
+| **Shared · 2** | You shared it with 2 people (only you see this number). |
+| **Verified musician** | The singer is a verified musician with a profile. |
+| **Pending invite** | The singer has no account yet. Only you, the owner, see this label. |
+
+A private take that nobody has seen has no label. A public take shared with two people shows both **Public** and **Shared · 2**.
 
 ## Questions people will ask (FAQ seeds)
 

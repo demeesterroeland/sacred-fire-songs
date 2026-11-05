@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useTransition, useMemo, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Music, Trash2, Pencil, Play, Pause, Lock, RotateCcw, RotateCw, GripVertical, Download, ChevronUp, ChevronDown, Check, Share2, Globe, Users, Mic, CheckCircle2, Clock, MoreHorizontal, Link2 } from "lucide-react";
+import { X, Music, Trash2, Pencil, Play, Pause, Lock, RotateCcw, RotateCw, GripVertical, Download, ChevronUp, ChevronDown, Check, Share2, Globe, Mic, MoreHorizontal, Link2 } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import {
@@ -26,6 +26,8 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useLocale } from "@/context/LocaleContext";
 import { recordingPermalink } from "@/lib/songs/recordingLink";
 import { partitionTakes } from "@/lib/songs/partitionTakes";
+import { takeStatusPills } from "@/lib/songs/takeStatus";
+import { TakeStatusPills } from "@/components/song/TakeStatusPills";
 import GuestGate from "@/components/common/GuestGate";
 import { usePathname, useSearchParams } from "next/navigation";
 import RecordingShareModal from "./RecordingShareModal";
@@ -198,32 +200,24 @@ function SortableRecordingItem({
         ) : (
           <div className="flex items-center gap-1.5 min-w-0">
             <h4
-              className={`text-sm font-semibold truncate ${!rec.audioUrl ? "text-red-500/80 dark:text-red-400/80" : "text-gray-900 dark:text-white"}`}
+              className={`text-sm font-semibold truncate ${!rec.audioUrl ? "text-fg-muted" : "text-fg"}`}
               onDoubleClick={() => isOwner && setIsEditing(true)}
             >
               {rec.recording_name}
             </h4>
-            {/* Visibility: private is the default and gets no marker */}
-            {rec.is_public ? (
-              <Globe className="w-3.5 h-3.5 text-emerald-500 shrink-0" aria-label={t('recording.publish.badge')}>
-                <title>{t('recording.publish.badge')}</title>
-              </Globe>
-            ) : shareCount > 0 ? (
-              <span className="inline-flex items-center gap-0.5 text-[11px] text-indigo-500 shrink-0" title={`${t('recording.sharing.sharedWithTitle')} (${shareCount})`}>
-                <Users className="w-3.5 h-3.5" aria-hidden />
-                {shareCount}
-              </span>
-            ) : null}
             {!rec.audioUrl && (
-              <span className="text-[10px] uppercase font-bold text-red-500 bg-red-500/10 px-1.5 py-0.5 rounded shrink-0">
+              <span className="text-caption font-medium text-on-chip bg-chip px-2 py-0.5 rounded-pill shrink-0">
                 {t('rehearsal.recording.missingBadge')}
               </span>
             )}
           </div>
         )}
 
+        {/* Status in words: Public, Shared · n, Pending invite, Verified musician (G4.3) */}
+        {!isEditing && <TakeStatusPills pills={takeStatusPills(rec)} />}
+
         {/* One meta line: [shared by ·] date · duration · singer */}
-        <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5 mt-0.5 min-w-0">
+        <div className="text-caption text-fg-muted flex items-center gap-1.5 mt-0.5 min-w-0">
           {sharedByLabel && (
             <span className="min-w-0 truncate font-medium text-fg-muted" data-testid="shared-by">{sharedByLabel}</span>
           )}
@@ -236,18 +230,15 @@ function SortableRecordingItem({
               {rec.singer_profile_id && rec.singer_profile ? (
                 <Link
                   href={`/users/${rec.singer_profile_id}`}
-                  className="inline-flex items-center gap-1 min-w-0 text-indigo-600 dark:text-indigo-400 hover:underline"
-                  title={rec.singer_profile.is_musician ? t('recording.attribution.badgeVerified') : undefined}
+                  className="inline-flex items-center gap-1 min-w-0 text-fg underline underline-offset-2"
                 >
-                  <Mic className="w-3 h-3 shrink-0" aria-hidden />
+                  <Mic className="size-3 shrink-0" aria-hidden />
                   <span className="truncate">{singerLabel}</span>
-                  {rec.singer_profile.is_musician && <CheckCircle2 className="w-3 h-3 text-amber-500 shrink-0" aria-label={t('recording.attribution.badgeVerified')} />}
                 </Link>
               ) : (
-                <span className="inline-flex items-center gap-1 min-w-0" title={t('recording.attribution.badgePending')}>
-                  <Mic className="w-3 h-3 shrink-0" aria-hidden />
+                <span className="inline-flex items-center gap-1 min-w-0">
+                  <Mic className="size-3 shrink-0" aria-hidden />
                   <span className="truncate">{singerLabel}</span>
-                  <Clock className="w-3 h-3 shrink-0 opacity-60" aria-label={t('recording.attribution.badgePending')} />
                 </span>
               )}
             </>
@@ -286,7 +277,7 @@ function SortableRecordingItem({
             <DropdownMenuItem className={menuItemClass} onSelect={() => handleShare?.(rec)}>
               <Share2 className="w-4 h-4" />
               {t('recording.sharing.button')}
-              {shareCount > 0 && <span className="ml-auto text-xs text-gray-500">{shareCount}</span>}
+              {shareCount > 0 && <span className="ml-auto text-caption text-fg-muted">{shareCount}</span>}
             </DropdownMenuItem>
             <DropdownMenuItem className={menuItemClass} onSelect={() => handlePublish?.(rec)}>
               {rec.is_public ? <Lock className="w-4 h-4" /> : <Globe className="w-4 h-4" />}
@@ -1204,7 +1195,7 @@ export default function RehearsalDrawer({
                   <Music className="w-5 h-5" />
                 </div>
                 <div className="text-left">
-                  <h3 className="text-sm font-bold text-fg-subtle uppercase tracking-wider">{t('practice.title')}</h3>
+                  <h3 className="text-meta font-semibold text-fg-muted">{t('practice.title')}</h3>
                   <h2 className="text-base font-extrabold text-gray-900 dark:text-white truncate max-w-[250px] md:max-w-[320px]">
                     {songTitle}
                   </h2>
@@ -1277,7 +1268,7 @@ export default function RehearsalDrawer({
                     <section className="space-y-2">
                       <div className="flex items-baseline justify-end">
                         {hasMedia && (
-                          <span className="text-[10px] text-indigo-500/80 dark:text-indigo-400/80 font-medium">
+                          <span className="text-caption text-fg-muted font-medium">
                             {t('rehearsal.headphonesHint')}
                           </span>
                         )}
@@ -1287,7 +1278,7 @@ export default function RehearsalDrawer({
 
                     {/* Saved Practice Takes List */}
                     <section className="mt-6 space-y-3">
-                      <h3 className="text-caption font-semibold text-fg-subtle uppercase tracking-wider text-left">{t('practice.takes.mine')}</h3>
+                      <h3 className="text-meta font-semibold text-fg-muted text-left">{t('practice.takes.mine')}</h3>
                       
                       {/* Fake practice takes mock list for guest demo preview */}
                       {!user ? (
