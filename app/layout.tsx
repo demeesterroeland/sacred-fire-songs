@@ -15,6 +15,7 @@ const geistMono = Geist_Mono({
 });
 
 import { getSiteTitle } from "@/lib/env";
+import { ACTIVE_STYLE, THEME_COLOR } from "@/lib/design/tokens";
 
 export const metadata: Metadata = {
   title: getSiteTitle(),
@@ -66,7 +67,7 @@ const themeScript = `
       : t === 'dark';
     if (d) document.documentElement.classList.add('dark');
     var m = document.querySelector('meta[name="theme-color"]');
-    if (m) m.setAttribute('content', d ? '#1a0505' : '#ffffff');
+    if (m) m.setAttribute('content', d ? '${THEME_COLOR.dark}' : '${THEME_COLOR.light}');
   } catch(e) {
     document.documentElement.classList.add('dark');
   }
@@ -102,9 +103,9 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
 
 
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang={locale} data-style={ACTIVE_STYLE} suppressHydrationWarning>
       <head>
-        <meta name="theme-color" content="#1a0505" />
+        <meta name="theme-color" content={THEME_COLOR.dark} />
         <script dangerouslySetInnerHTML={{ __html: envInjection }} />
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet" />
@@ -120,7 +121,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
           <AudioProvider>
             <SidebarProvider>
               <QueryProvider>
-                <div className="min-h-screen bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 font-sans selection:bg-red-500/30 overflow-x-clip">
+                <div className="min-h-screen bg-bg text-fg font-sans selection:bg-accent-soft overflow-x-clip">
                   {/* Top navigation bar (full width, like Immich) */}
                   <Suspense>
                     <Header initialUser={initialUser} />

@@ -1,6 +1,6 @@
 # Project Analysis & Design Document: Song Sharing Application (Sacred Fire Songs)
 
-**Version:** 1.60
+**Version:** 1.61
 **Status:** Living Document
 **Date:** Nov 5, 2026
 
@@ -53,6 +53,7 @@
 | **1.58** | Nov 5, 2026 | §6.6 automatic back-merge (Story 5.1.9, #298): `.github/workflows/back-merge.yml` opens a PR `main` → `develop` after every push to `main` (PAT `RELEASE_PLEASE_TOKEN` so CI runs, fails closed without it), labels conflicts `back-merge-conflict`, never merges itself. |
 | **1.59** | Nov 5, 2026 | §6.9 recording permalink: unreachable `/recordings/:id` links render a recording-specific "Recording Not Available" page (`app/recordings/[id]/not-found.tsx`, `NotFound` takes optional `titleKey` / `descriptionKey`, keys `feedback.notFound.recording.*` in all 8 locales) instead of the song-themed "Song Not Found". Same copy for no access, unknown and malformed ids. |
 | **1.60** | Nov 5, 2026 | §6.6 documentation contract (Story 5.1.13, #300): `@story-5.1.13` `ci-gate` scenarios check that the guides, PR template, `/start-story` and README describe Gitflow (no "GitHub Flow", no "no develop branch" outside changelogs). `development-workflow.md` 2.0, Gitflow PR template with test-pyramid checklist. |
+| **1.61** | Nov 5, 2026 | UX v2 (Epic 6.1, Story 6.1.1 / #385): added §6.10 Design System — semantic tokens (`app/styles/sober.css`, `data-style="sober"` × light/dark), Tailwind utility map, component primitives (Button, ListRow, MetaLine, Chip, BottomSheet, Toolbar), token-parity/contrast tests and palette ratchet. |
 
 
 ## 1. Introduction
@@ -248,6 +249,13 @@ The application is a **Progressive Web App (PWA)** optimized for mobile use duri
 * **Configuration:** `SMTP_HOST` (empty = email off; in-app notifications still work), `SMTP_PORT` (465 = TLS on connect, otherwise STARTTLS), `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`, `SITE_URL` (base for email links; required in production because the request `Host` header is caller-controlled). Local: `supabase/config.toml` exposes the mail catcher's SMTP port `54325` (UI on `54324`).
 * **Preferences:** Settings → Preferences → "Email notifications" toggles `profiles.email_notifications`. `/account/settings?tab=<profile|account|preferences|privacy>` opens that tab (`parseSettingsTab`; unknown values open Profile, and the login redirect keeps the tab).
 * **Tests:** `docs/testing/share-notifications.feature` (`@unit` email content, `@seed` trigger/RLS/claim RPC), Vitest `testing/unit/tests/shareNotifications.test.ts` and share wiring in `testing/unit/tests/recordingSharing.test.ts`.
+
+### 6.10 Design System (UX v2, Story 6.1.1)
+* **Tokens:** semantic CSS variables in `app/styles/sober.css`, scoped by `:root[data-style="sober"]` (set on `<html>` in `app/layout.tsx` from `ACTIVE_STYLE`, `lib/design/tokens.ts`) and switched to dark by the existing `.dark` class (ADR 0007 / UXD-7). Greys carry structure; `--accent` (fire orange) is the only hue (primary action, now playing, chords); `--danger` only with a label. Type 12–28 px, spacing 4/8/12/16/24/32, radius control/panel/sheet/pill, 44 px tap size, one sheet shadow. Reference: `docs/design/design-tokens.md`, mockups `docs/design/screens/v2/`.
+* **Tailwind:** `app/globals.css` maps tokens to utilities in `@theme inline` (`bg-surface`, `text-fg-muted`, `border-line`, `bg-accent`, `text-on-accent`, `text-chord`, `text-meta`, `rounded-control`, `min-h-tap`, `shadow-sheet` …); shadcn names (`bg-primary`, `bg-muted`, `border-input`, `ring-ring` …) alias the same tokens. `accent` means the fire accent, not shadcn's hover grey. Bridge: Tailwind's grey palettes render as warm sober greys (same lightness) until each restyle story moves its files to semantic utilities.
+* **Primitives (`components/ui/`):** `button` (primary/secondary/outline/ghost/text/destructive, ≥ 44 px), `list-row`, `meta-line` (`joinMeta`), `chip` (filter-only, `aria-pressed` + check), `bottom-sheet` (Radix Dialog, bottom on phones, reserves `--mini-player-h`; `SheetAction`, `SheetSeparator`), `toolbar` (`ToolbarButton` with `aria-pressed`).
+* **Browser chrome:** `<meta name="theme-color">` = `--bg` per mode (`THEME_COLOR`).
+* **Tests:** `docs/testing/ux-v2-design-system.feature` (`@unit @story-6.1.1`), Vitest `testing/unit/tests/design/designTokens.test.ts` (doc ↔ CSS parity, theme references, one accent, ≥ 12 px, WCAG contrast in both modes) and `paletteRatchet.test.ts` (palette classes in `app/` + `components/` may only go down). Cucumber profiles pick up every `docs/testing/ux-v2-*.feature`.
 
 ## 7. Screen Inventory (Implemented)
 

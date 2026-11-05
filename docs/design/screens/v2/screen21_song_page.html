@@ -1,0 +1,451 @@
+<!--
+**Version:** 1.0
+**Status:** Accepted reference (Story 6.1.1 / G1.1 #385, G2.1–G2.4 #390–#393, G2.6 #395, G3.1 #396)
+**Date:** Nov 5, 2026
+
+## Changelog
+
+| Version | Date | Description of Changes |
+| ----- | ----- | ----- |
+| **1.0** | Nov 5, 2026 | Accepted as the UX v2 reference (#385); token names aligned with `app/styles/sober.css` (`--text-muted`, `--text-subtle`, `--r-control/panel/sheet`, `--elev-sheet`). |
+| **0.1** | Nov 4, 2026 | First mobile song-page mockup on the v2 tokens: three variants (Quiet, Ruled, Stage), `Chords · A− · A+` toolbar, one-line meta, bottom action bar, more-actions sheet, reserved variant/language slot, optional mini player. |
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Song Page Mockup</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="tokens.css">
+<style>
+/* Layout: one reading column, app bar on top, actions in the thumb zone at the bottom. */
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  padding-bottom: calc(var(--bar-h) + var(--s-5) + env(safe-area-inset-bottom, 0px));
+}
+body.playing { padding-bottom: calc(var(--bar-h) * 2 + var(--s-5) + env(safe-area-inset-bottom, 0px)); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--bg); }
+.gutter { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.wrap { max-width: 640px; margin: 0 auto; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: var(--r-control); }
+svg.i { width: 20px; height: 20px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---------- mockup controls (not part of the design) ---------- */
+.mock {
+  border-bottom: 1px dashed var(--text-subtle);
+  background: var(--surface);
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
+  padding-block: var(--s-2);
+}
+.mock .wrap { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-3); align-items: center; }
+.mock strong { color: var(--text); font-weight: var(--fw-semibold); letter-spacing: 0.04em; text-transform: uppercase; }
+.mock-group { display: inline-flex; gap: 2px; background: var(--surface-2); border-radius: var(--r-control); padding: 2px; }
+.mock-group button { padding: 4px 8px; border-radius: 4px; min-height: 28px; }
+.mock-group button[aria-pressed="true"] { background: var(--bg); color: var(--text); font-weight: var(--fw-semibold); }
+.mock a { color: var(--text-muted); }
+.mock-note { flex-basis: 100%; color: var(--text-subtle); }
+
+/* ---------- app bar ---------- */
+.appbar {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20;
+  background: var(--bg);
+  border-bottom: 1px solid transparent;
+  transition: border-color .15s;
+}
+.appbar.scrolled { border-bottom-color: var(--line); }
+.appbar .wrap { height: var(--bar-h); display: flex; align-items: center; gap: var(--s-1); }
+.icon-btn { width: var(--tap); height: var(--tap); display: grid; place-items: center; border-radius: var(--r-control); color: var(--text-muted); flex: none; }
+.icon-btn:hover { color: var(--text); background: var(--surface); }
+.appbar-title {
+  flex: 1; min-width: 0;
+  font-size: var(--fs-row); font-weight: var(--fw-semibold);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  opacity: 0; transition: opacity .15s;
+}
+.appbar.scrolled .appbar-title { opacity: 1; }
+.appbar .icon-btn:first-child { margin-left: -10px; }
+.appbar .icon-btn:last-child { margin-right: -10px; }
+
+/* ---------- header ---------- */
+.head { padding-top: var(--s-2); display: grid; gap: var(--s-2); }
+h1 { margin: 0; font-size: var(--fs-title); line-height: var(--lh-tight); font-weight: var(--fw-semibold); letter-spacing: -0.01em; text-wrap: balance; }
+.meta { font-size: var(--fs-meta); color: var(--text-muted); line-height: 1.45; }
+.meta-btn { display: inline-flex; align-items: center; gap: var(--s-1); text-align: left; min-height: 32px; color: var(--text-muted); }
+.meta-btn svg { width: 16px; height: 16px; transition: transform .15s; }
+.meta-btn[aria-expanded="true"] svg { transform: rotate(180deg); }
+.meta-sep { color: var(--text-subtle); padding-inline: 2px; }
+.meta-detail { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: var(--s-1) var(--s-4); font-size: var(--fs-meta); padding-block: var(--s-1) var(--s-2); }
+.meta-detail dt { color: var(--text-subtle); }
+.meta-detail dd { margin: 0; color: var(--text); }
+.music { font-size: var(--fs-meta); color: var(--text-subtle); font-variant-numeric: tabular-nums; }
+.music b { color: var(--text-muted); font-weight: var(--fw-medium); }
+
+/* reserved slot: variants + translations (G2.6) */
+.slot { display: flex; flex-wrap: wrap; gap: var(--s-2); padding-top: var(--s-2); }
+.seg { display: inline-flex; background: var(--surface); border-radius: var(--r-panel); padding: 3px; gap: 2px; }
+.seg button { min-height: 32px; padding: 0 var(--s-3); border-radius: 7px; font-size: var(--fs-meta); color: var(--text-muted); }
+.seg button[aria-pressed="true"] { background: var(--bg); color: var(--text); font-weight: var(--fw-medium); box-shadow: 0 0 0 1px var(--line); }
+
+/* ---------- viewer toolbar ---------- */
+.toolbar {
+  position: sticky; top: calc(env(safe-area-inset-top, 0px) + var(--bar-h)); z-index: 15;
+  background: var(--bg);
+  margin-top: var(--s-4);
+}
+.toolbar .wrap { display: flex; align-items: center; gap: var(--s-3); min-height: var(--tap); }
+.switch { display: inline-flex; align-items: center; gap: var(--s-2); min-height: var(--tap); font-size: var(--fs-meta); color: var(--text-muted); }
+.switch .track { width: 34px; height: 20px; border-radius: var(--r-pill); background: var(--surface-2); position: relative; transition: background .15s; box-shadow: inset 0 0 0 1px var(--line); }
+.switch .track::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--text-subtle); transition: transform .15s, background .15s; }
+.switch[aria-checked="true"] .track { background: var(--text); box-shadow: none; }
+.switch[aria-checked="true"] .track::after { transform: translateX(14px); background: var(--bg); }
+.switch[aria-checked="true"] { color: var(--text); }
+.sizer { display: inline-flex; border: 1px solid var(--line); border-radius: var(--r-control); overflow: hidden; }
+.sizer button { width: var(--tap); height: 36px; font-size: var(--fs-meta); color: var(--text-muted); font-weight: var(--fw-medium); }
+.sizer button + button { border-left: 1px solid var(--line); }
+.sizer button:hover:not(:disabled) { background: var(--surface); color: var(--text); }
+.sizer button:disabled { color: var(--line); cursor: default; }
+.size-read { font-size: var(--fs-caption); color: var(--text-subtle); font-variant-numeric: tabular-nums; min-width: 4ch; }
+.toolbar .spacer { flex: 1; }
+
+/* ---------- lyrics (the reference style) ---------- */
+.sheet-music { --ls: 19px; padding-top: var(--s-4); }
+.note { font-size: var(--fs-meta); color: var(--text-subtle); font-style: italic; margin: 0 0 var(--s-5); }
+.section { margin: 0 0 var(--s-6); position: relative; }
+.sec-label { display: none; font-size: var(--fs-caption); color: var(--text-subtle); margin-bottom: var(--s-2); }
+.line { display: flex; flex-wrap: wrap; align-items: flex-end; margin-bottom: calc(var(--ls) * 0.55); font-size: var(--ls); line-height: 1.3; }
+.w { display: inline-flex; flex-direction: column; white-space: pre; }
+.ch {
+  font-family: var(--font-mono); font-weight: var(--fw-semibold);
+  font-size: max(12px, calc(var(--ls) * 0.68)); line-height: 1.2;
+  color: var(--chord); min-height: 1.2em;
+}
+.ly { color: var(--text); }
+body.no-chords .ch { display: none; }
+body.no-chords .line { margin-bottom: calc(var(--ls) * 0.2); }
+
+/* ---------- bottom action bar (thumb zone) ---------- */
+.actions {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 25;
+  background: var(--bg);
+  border-top: 1px solid var(--line);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.actions .wrap { height: var(--bar-h); display: flex; align-items: center; gap: var(--s-2); }
+.btn { min-height: var(--tap); display: inline-flex; align-items: center; justify-content: center; gap: var(--s-2); padding: 0 var(--s-4); border-radius: var(--r-control); font-weight: var(--fw-medium); font-size: 15px; }
+.btn-primary { background: var(--accent); color: var(--accent-ink); flex: 1; }
+.btn-primary:hover { filter: brightness(1.06); }
+.btn-ghost { color: var(--text-muted); }
+.btn-ghost:hover { color: var(--text); background: var(--surface); }
+.btn-ghost[aria-pressed="true"] { color: var(--accent); }
+.btn-ghost[aria-pressed="true"] svg { fill: currentColor; }
+
+/* mini player (G3.1: only after the user pressed play) */
+.player {
+  position: fixed; left: 0; right: 0; z-index: 24;
+  bottom: calc(var(--bar-h) + 1px + env(safe-area-inset-bottom, 0px));
+  background: var(--surface);
+  border-top: 1px solid var(--line);
+}
+.player .prog { height: 2px; background: var(--line); }
+.player .prog i { display: block; height: 100%; width: 38%; background: var(--accent); }
+.player .wrap { height: calc(var(--bar-h) - 2px); display: flex; align-items: center; gap: var(--s-3); }
+.player .txt { flex: 1; min-width: 0; }
+.player .t1 { font-size: 14px; font-weight: var(--fw-medium); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.player .t2 { font-size: var(--fs-caption); color: var(--text-subtle); }
+.player .pp { color: var(--accent); }
+
+/* ---------- bottom sheet ---------- */
+.scrim { position: fixed; inset: 0; background: var(--scrim); z-index: 40; opacity: 0; transition: opacity .2s; }
+.scrim.open { opacity: 1; }
+.bsheet {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 41;
+  background: var(--bg); border-radius: var(--r-sheet) var(--r-sheet) 0 0; box-shadow: var(--elev-sheet);
+  padding-bottom: calc(var(--s-2) + env(safe-area-inset-bottom, 0px));
+  transform: translateY(100%); transition: transform .22s ease-out;
+  max-width: 640px; margin: 0 auto;
+}
+.bsheet.open { transform: none; }
+.grabber { width: 36px; height: 4px; border-radius: 2px; background: var(--surface-2); margin: var(--s-2) auto var(--s-1); }
+.bsheet h2 { margin: 0; font-size: var(--fs-meta); font-weight: var(--fw-regular); color: var(--text-subtle); padding-block: var(--s-2); }
+.bsheet ul { list-style: none; margin: 0; padding: 0; }
+.bsheet li + li { border-top: 1px solid var(--line); }
+.row-btn { width: 100%; min-height: 48px; display: flex; align-items: center; gap: var(--s-3); text-align: left; font-size: var(--fs-row); }
+.row-btn svg { color: var(--text-subtle); }
+.bsheet .group + .group { margin-top: var(--s-2); border-top: 6px solid var(--surface); }
+.row-btn.danger { color: var(--danger); }
+.row-btn.danger svg { color: var(--danger); }
+
+/* ---------- variants ---------- */
+/* B · Ruled: hairlines between blocks, section labels, outlined primary */
+[data-variant="ruled"] .toolbar { border-block: 1px solid var(--line); }
+[data-variant="ruled"] .sec-label { display: block; }
+[data-variant="ruled"] .btn-primary { background: transparent; color: var(--accent); box-shadow: inset 0 0 0 1.5px var(--accent); }
+/* C · Stage: larger lyrics by default, chorus marked with a thin accent rule, toolbar on a surface */
+[data-variant="stage"] .toolbar .wrap { background: var(--surface); border-radius: var(--r-panel); padding-inline: var(--s-3); }
+[data-variant="stage"] .section.chorus { padding-left: var(--s-3); border-left: 2px solid var(--accent-soft); }
+[data-variant="stage"] .section.chorus { border-left-color: color-mix(in srgb, var(--accent) 45%, transparent); }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+
+<!-- MOCKUP CONTROLS: switch variants and states; not part of the UI -->
+<div class="mock gutter" aria-label="Mockup controls">
+  <div class="wrap">
+    <strong>Mockup</strong>
+    <span class="mock-group" role="group" aria-label="Variant">
+      <button type="button" id="v-quiet" data-v="quiet" aria-pressed="true">A Quiet</button>
+      <button type="button" id="v-ruled" data-v="ruled" aria-pressed="false">B Ruled</button>
+      <button type="button" id="v-stage" data-v="stage" aria-pressed="false">C Stage</button>
+    </span>
+    <span class="mock-group" role="group" aria-label="Theme">
+      <button type="button" id="t-auto" data-t="auto" aria-pressed="true">Auto</button>
+      <button type="button" id="t-light" data-t="light" aria-pressed="false">Light</button>
+      <button type="button" id="t-dark" data-t="dark" aria-pressed="false">Dark</button>
+    </span>
+    <span class="mock-group" role="group" aria-label="Body size">
+      <button type="button" id="b-15" data-b="15" aria-pressed="false">Body 15</button>
+      <button type="button" id="b-16" data-b="16" aria-pressed="true">16</button>
+    </span>
+    <span class="mock-group" role="group" aria-label="States">
+      <button type="button" id="s-slot" aria-pressed="false">Variants slot</button>
+      <button type="button" id="s-play" aria-pressed="false">Playing</button>
+    </span>
+    <span style="display: inline-flex; gap: 6px; margin-left: auto;">
+      <a href="screen24_home.html">Home</a> ·
+      <a href="screen22_song_list.html">Songs</a> ·
+      <a href="screen23_practice_drawer.html">Practice</a> ·
+      <a href="screen25_playlist_sheet.html">Playlist</a> ·
+      <a href="screen20_design_system.html">Tokens →</a>
+    </span>
+    <span class="mock-note">Test on a phone, at night, at low brightness. Tap ⋯ for the action sheet, the grey meta line to expand tags.</span>
+  </div>
+</div>
+
+<header class="appbar gutter" id="appbar">
+  <div class="wrap">
+    <a href="screen22_song_list.html" class="icon-btn" aria-label="Back"><svg class="i" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></a>
+    <div class="appbar-title" aria-hidden="true">Danza del Cielo Curandero</div>
+    <a href="screen22_song_list.html" class="icon-btn" aria-label="Search songs"><svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg></a>
+    <button class="icon-btn" type="button" id="more" aria-label="More actions" aria-haspopup="dialog"><svg class="i" viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.2"/><circle cx="12" cy="12" r="1.2"/><circle cx="19" cy="12" r="1.2"/></svg></button>
+  </div>
+</header>
+
+<main>
+  <div class="head gutter"><div class="wrap head">
+    <h1 id="title">Danza del Cielo Curandero</h1>
+    <div class="meta">
+      <button class="meta-btn" type="button" id="meta-btn" aria-expanded="false" aria-controls="meta-detail">
+        <span>Herbert Quinteros<span class="meta-sep">·</span>Fire<span class="meta-sep">·</span>Healing<span class="meta-sep">·</span>Spanish</span>
+        <svg class="i" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <dl class="meta-detail" id="meta-detail" hidden>
+        <dt>Author</dt><dd>Herbert Quinteros</dd>
+        <dt>Categories</dt><dd>Fire, Healing / Limpieza</dd>
+        <dt>Language</dt><dd>Spanish</dd>
+        <dt>Includes</dt><dd>Chords, melody, 2 recordings</dd>
+      </dl>
+    </div>
+    <div class="music">Key <b>E</b><span class="meta-sep">·</span>Capo <b>3</b><span class="meta-sep">·</span>Standard tuning</div>
+    <div class="slot" id="slot" hidden>
+      <span class="seg" role="group" aria-label="Version">
+        <button type="button" id="ver-orig" aria-pressed="true">Original</button>
+        <button type="button" id="ver-simple" aria-pressed="false">Simplified</button>
+        <button type="button" id="ver-live" aria-pressed="false">Live</button>
+      </span>
+      <span class="seg" role="group" aria-label="Language">
+        <button type="button" id="lang-es" aria-pressed="true">ES</button>
+        <button type="button" id="lang-en" aria-pressed="false">EN</button>
+      </span>
+    </div>
+  </div></div>
+
+  <div class="toolbar gutter" id="toolbar">
+    <div class="wrap">
+      <button class="switch" type="button" role="switch" aria-checked="true" id="chords"><span class="track"></span>Chords</button>
+      <span class="spacer"></span>
+      <span class="size-read" id="size-read" aria-live="polite">19 px</span>
+      <span class="sizer" role="group" aria-label="Text size">
+        <button type="button" id="smaller" aria-label="Smaller text">A−</button>
+        <button type="button" id="bigger" aria-label="Larger text">A+</button>
+      </span>
+    </div>
+  </div>
+
+  <div class="gutter"><div class="wrap sheet-music" id="lyrics">
+    <p class="note">Canto para abrir el fuego</p>
+
+    <section class="section verse">
+      <div class="sec-label">Verse 1</div>
+      <div class="line"><span class="w"><b class="ch">E</b><span class="ly">Danza del cielo </span></span><span class="w"><b class="ch">A</b><span class="ly">curandero</span></span></div>
+      <div class="line"><span class="w"><b class="ch">B</b><span class="ly">Baila con el </span></span><span class="w"><b class="ch">E</b><span class="ly">viento entero</span></span></div>
+    </section>
+
+    <section class="section chorus">
+      <div class="sec-label">Chorus</div>
+      <div class="line"><span class="w"><b class="ch">E</b><span class="ly">Luna, luna, </span></span><span class="w"><b class="ch">A</b><span class="ly">luna llena</span></span></div>
+      <div class="line"><span class="w"><b class="ch">B</b><span class="ly">Brilla en la </span></span><span class="w"><b class="ch">E</b><span class="ly">noche entera</span></span></div>
+    </section>
+
+    <section class="section verse">
+      <div class="sec-label">Verse 1 (repeat)</div>
+      <div class="line"><span class="w"><b class="ch">E</b><span class="ly">Danza del cielo </span></span><span class="w"><b class="ch">A</b><span class="ly">curandero</span></span></div>
+      <div class="line"><span class="w"><b class="ch">B</b><span class="ly">Baila con el </span></span><span class="w"><b class="ch">E</b><span class="ly">viento entero</span></span></div>
+    </section>
+
+    <section class="section chorus">
+      <div class="sec-label">Chorus</div>
+      <div class="line"><span class="w"><b class="ch">E</b><span class="ly">Luna, luna, </span></span><span class="w"><b class="ch">A</b><span class="ly">luna llena</span></span></div>
+      <div class="line"><span class="w"><b class="ch">B</b><span class="ly">Brilla en la </span></span><span class="w"><b class="ch">E</b><span class="ly">noche entera</span></span></div>
+    </section>
+  </div></div>
+</main>
+
+<div class="player gutter" id="player" hidden>
+  <div class="prog" aria-hidden="true"><i></i></div>
+  <div class="wrap">
+    <button class="icon-btn pp" type="button" aria-label="Pause"><svg class="i" viewBox="0 0 24 24"><path d="M9 6v12M15 6v12"/></svg></button>
+    <div class="txt"><div class="t1">Danza del Cielo Curandero</div><div class="t2">Reference track · YouTube · 1:12 / 3:08</div></div>
+    <button class="icon-btn" type="button" id="close-player" aria-label="Close player"><svg class="i" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg></button>
+  </div>
+</div>
+
+<nav class="actions gutter" aria-label="Song actions">
+  <div class="wrap">
+    <a href="screen23_practice_drawer.html" class="btn btn-primary" id="practice" style="text-decoration: none;"><svg class="i" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/></svg>Practice</a>
+    <a href="screen25_playlist_sheet.html" class="btn btn-ghost" aria-label="Add to playlist" style="text-decoration: none;"><svg class="i" viewBox="0 0 24 24"><path d="M4 6h11M4 12h11M4 18h7M18 15v6M15 18h6"/></svg>Playlist</a>
+    <button class="btn btn-ghost" type="button" id="fav" aria-pressed="false" aria-label="Favourite"><svg class="i" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z"/></svg></button>
+  </div>
+</nav>
+
+<div class="scrim" id="scrim" hidden></div>
+<div class="bsheet gutter" id="bsheet" role="dialog" aria-modal="true" aria-labelledby="bsheet-title" hidden>
+  <div class="grabber" aria-hidden="true"></div>
+  <h2 id="bsheet-title">Danza del Cielo Curandero</h2>
+  <div class="group"><ul>
+    <li><button class="row-btn" type="button"><svg class="i" viewBox="0 0 24 24"><path d="M4 12v7a1 1 0 001 1h14a1 1 0 001-1v-7M16 6l-4-4-4 4M12 2v13"/></svg>Share song</button></li>
+    <li><button class="row-btn" type="button"><svg class="i" viewBox="0 0 24 24"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>Melody notation</button></li>
+    <li><button class="row-btn" type="button"><svg class="i" viewBox="0 0 24 24"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg>Edit song</button></li>
+    <li><button class="row-btn" type="button"><svg class="i" viewBox="0 0 24 24"><path d="M3 12a9 9 0 109-9 9.7 9.7 0 00-6.7 2.7L3 8M3 3v5h5M12 7v5l4 2"/></svg>Version history</button></li>
+  </ul></div>
+  <div class="group"><ul>
+    <li><button class="row-btn" type="button"><svg class="i" viewBox="0 0 24 24"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7"/></svg>Report a problem</button></li>
+  </ul></div>
+</div>
+
+<script>
+(function () {
+  var root = document.documentElement, body = document.body;
+  function store(k, v) { try { if (v === undefined) return localStorage.getItem(k); localStorage.setItem(k, v); } catch (e) { return null; } }
+  function press(group, btn) { group.querySelectorAll('button').forEach(function (b) { b.setAttribute('aria-pressed', String(b === btn)); }); }
+
+  /* lyric size: reader-controlled, remembered per device */
+  var steps = [15, 17, 19, 21, 24, 28];
+  var lyrics = document.getElementById('lyrics'), read = document.getElementById('size-read');
+  var smaller = document.getElementById('smaller'), bigger = document.getElementById('bigger');
+  var idx = parseInt(store('sfs-mock-size'), 10);
+  if (isNaN(idx) || idx < 0 || idx >= steps.length) idx = 2;
+  function applySize() {
+    lyrics.style.setProperty('--ls', steps[idx] + 'px');
+    read.textContent = steps[idx] + ' px';
+    smaller.disabled = idx === 0; bigger.disabled = idx === steps.length - 1;
+    store('sfs-mock-size', String(idx));
+  }
+  smaller.onclick = function () { if (idx > 0) { idx--; applySize(); } };
+  bigger.onclick = function () { if (idx < steps.length - 1) { idx++; applySize(); } };
+  applySize();
+
+  /* chords on/off */
+  var chords = document.getElementById('chords');
+  if (store('sfs-mock-chords') === 'off') { chords.setAttribute('aria-checked', 'false'); body.classList.add('no-chords'); }
+  chords.onclick = function () {
+    var on = chords.getAttribute('aria-checked') !== 'true';
+    chords.setAttribute('aria-checked', String(on));
+    body.classList.toggle('no-chords', !on);
+    store('sfs-mock-chords', on ? 'on' : 'off');
+  };
+
+  /* meta line expand */
+  var metaBtn = document.getElementById('meta-btn'), metaDetail = document.getElementById('meta-detail');
+  metaBtn.onclick = function () { var o = metaBtn.getAttribute('aria-expanded') !== 'true'; metaBtn.setAttribute('aria-expanded', String(o)); metaDetail.hidden = !o; };
+
+  /* favourite */
+  var fav = document.getElementById('fav');
+  fav.onclick = function () { fav.setAttribute('aria-pressed', String(fav.getAttribute('aria-pressed') !== 'true')); };
+
+  /* segmented controls in the slot */
+  document.querySelectorAll('.seg').forEach(function (g) { g.addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) press(g, b); }); });
+
+  /* app bar title appears once the h1 scrolls away */
+  var appbar = document.getElementById('appbar'), title = document.getElementById('title');
+  if ('IntersectionObserver' in window) {
+    new IntersectionObserver(function (es) { appbar.classList.toggle('scrolled', !es[0].isIntersecting); }, { rootMargin: '-64px 0px 0px 0px' }).observe(title);
+  }
+
+  /* bottom sheet */
+  var sheet = document.getElementById('bsheet'), scrim = document.getElementById('scrim'), more = document.getElementById('more');
+  function openSheet() {
+    sheet.hidden = false; scrim.hidden = false;
+    requestAnimationFrame(function () { sheet.classList.add('open'); scrim.classList.add('open'); });
+    var first = sheet.querySelector('button'); if (first) first.focus();
+  }
+  function closeSheet() {
+    sheet.classList.remove('open'); scrim.classList.remove('open');
+    setTimeout(function () { sheet.hidden = true; scrim.hidden = true; }, 220);
+    more.focus();
+  }
+  more.onclick = openSheet;
+  scrim.onclick = closeSheet;
+  sheet.addEventListener('click', function (e) { if (e.target.closest('.row-btn')) closeSheet(); });
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape' && !sheet.hidden) closeSheet(); });
+
+  /* mockup controls */
+  var vGroup = document.querySelector('[aria-label="Variant"]');
+  function setVariant(v, btn) {
+    root.setAttribute('data-variant', v); press(vGroup, btn); store('sfs-mock-variant', v);
+  }
+  vGroup.addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    setVariant(b.dataset.v, b);
+    if (b.dataset.v === 'stage' && idx < 3) { idx = 3; applySize(); }
+  });
+  var savedV = store('sfs-mock-variant');
+  var vBtn = savedV && vGroup.querySelector('[data-v="' + savedV + '"]');
+  setVariant(vBtn ? savedV : 'quiet', vBtn || document.getElementById('v-quiet'));
+
+  var tGroup = document.querySelector('[aria-label="Theme"]');
+  tGroup.addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.t === 'auto') root.removeAttribute('data-theme'); else root.setAttribute('data-theme', b.dataset.t);
+    press(tGroup, b);
+  });
+  var bGroup = document.querySelector('[aria-label="Body size"]');
+  bGroup.addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    root.style.setProperty('--fs-body', b.dataset.b + 'px'); root.style.setProperty('--fs-row', b.dataset.b + 'px');
+    press(bGroup, b);
+  });
+  var slotBtn = document.getElementById('s-slot'), slot = document.getElementById('slot');
+  slotBtn.onclick = function () { var on = slotBtn.getAttribute('aria-pressed') !== 'true'; slotBtn.setAttribute('aria-pressed', String(on)); slot.hidden = !on; };
+  var playBtn = document.getElementById('s-play'), player = document.getElementById('player');
+  function setPlaying(on) { playBtn.setAttribute('aria-pressed', String(on)); player.hidden = !on; body.classList.toggle('playing', on); }
+  playBtn.onclick = function () { setPlaying(playBtn.getAttribute('aria-pressed') !== 'true'); };
+  document.getElementById('close-player').onclick = function () { setPlaying(false); };
+})();
+</script>
+</body>
+</html>

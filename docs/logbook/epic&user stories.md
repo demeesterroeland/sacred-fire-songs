@@ -1,6 +1,6 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 1.55
+**Version:** 1.56
 **Status:** Living Document
 **Date:** Nov 5, 2026
 
@@ -54,6 +54,7 @@
 | **1.53** | Nov 5, 2026 | Epic 5.1: Story 5.1.8 (#297) re-scoped and implemented — promotion `develop` → `main` via `scripts/cicd/develop2main.sh` (merge commit, no `--admin`) and versioned release images; production deployment lives outside the public repo. Story 5.1.6 (#294) completed (no script uses `--admin`). Stories 5.1.1, 5.1.7 and 5.1.12 closed on GitHub. |
 | **1.54** | Nov 5, 2026 | Story 5.1.9 (#298) implemented: `back-merge.yml` opens the PR `main` → `develop` after every push to `main`, labels conflicts; merged by the owner, never automatically. |
 | **1.55** | Nov 5, 2026 | Story 5.1.13 (#300) implemented: development guide 2.0 (Gitflow, environments, CI vs CD boundary), Gitflow PR template, `/start-story` and `/sync-artifacts` target `develop`, README contributing; documentation contract in `ci-gate`. Story 5.1.10 (#299) code complete; its end-to-end check moves into the 5.1.14 dress rehearsal (owner). |
+| **1.56** | Nov 5, 2026 | Epic 6.1: Story 6.1.1 (#385, G1.1) implemented on the integration branch `feat/ux-v2` — design tokens, component primitives and token tests (`docs/design/design-tokens.md`). |
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
 
@@ -1619,7 +1620,7 @@ Owner decision of Nov 4, 2026: sober greyscale interface with one accent, smalle
 
 | Story | Issue | Code | Pri | Title | Blocked by |
 |---|---|---|---|---|---|
-| 6.1.1 | #385 | `G1.1` | A | As a Contributor, I want design tokens and a component sheet so that every screen is restyled from one sober greyscale system instead of page by page | — |
+| 6.1.1 | #385 | `G1.1` | A | **[Implemented on feat/ux-v2]** As a Contributor, I want design tokens and a component sheet so that every screen is restyled from one sober greyscale system instead of page by page | — |
 | 6.1.2 | #386 | `G1.2` | A | As a Guest, I want song cards and list rows to show a title and one grey meta line so that I can scan a list of songs quickly | #385 |
 | 6.1.3 | #387 | `G1.3` | A | As a Member, I want small labels to be readable so that section headings and meta text are not grey-on-grey | #385 |
 | 6.1.4 | #388 | `G1.4` | B | As a Guest, I want the category grid in a calm monochrome style so that the home page does not shout | #385 |
