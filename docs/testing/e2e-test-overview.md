@@ -24,8 +24,8 @@
 | **1.12** | Nov 3, 2026 | CI note: removed the reference to a database deploy workflow; the repo does not deploy anywhere. Staging E2E is optional and skips without secrets. |
 | **1.13** | Nov 4, 2026 | PWA-03: offline fallback page covered by `e2e/tests/offline.spec.ts` (#353); cached pages offline still planned. |
 | **1.14** | Nov 5, 2026 | Story 6.1.26 (#410): guests on members-only screens now get the GuestGate (locked preview, reason, `Sign in` with `next=`) instead of a redirect; ACC-01 updated, new spec `e2e/tests/guest-gate.spec.ts` covers every gated route. |
-| **1.16** | Nov 6, 2026 | Story 6.1.5 (#389): ACC-04 (Privacy settings) is hidden behind `FEATURES.privacySettings`; LIB-10 (Albums) answers not-found. New spec `ux-v2-hide-unfinished.spec.ts` asserts no "Coming soon" in Library, Settings and the song form. |
 | **1.15** | Nov 5, 2026 | LIB-13 follows Story 6.1.24: no `/explore` route; bottom bar spec `ux-v2-bottom-bar.spec.ts`. |
+| **1.16** | Nov 6, 2026 | Story 6.1.5 (#389): ACC-04 (Privacy settings) is hidden behind `FEATURES.privacySettings`; LIB-10 (Albums) answers not-found. New spec `ux-v2-hide-unfinished.spec.ts` asserts no "Coming soon" in Library, Settings and the song form. |
 
 ---
 
