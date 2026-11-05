@@ -527,6 +527,7 @@ export default function SongDetailPage() {
                     }}
                     requestedTab={drawerRequestedTab}
                     songVersionId={currentVersion.id}
+                    compositionId={id}
                     onPlayStateChange={setIsAudioPlaying}
                     songTitle={song.title}
                     songAuthor={song.original_author || t('song.traditional')}

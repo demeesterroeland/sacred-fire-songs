@@ -51,3 +51,13 @@ export const SHARE_EXPLAIN_FIXTURE_IDS = {
   version: 'eeeeeeee-3618-4000-a000-000000000002',
   take: 'eeeeeeee-3618-4000-a000-000000000003',
 } as const;
+
+/**
+ * Story 6.1.19 / G4.6 (#403): a song with one take owned by the gatekeeper and shared with
+ * the member, for the "Shared with me" journey. Removed by e2e/global-teardown.ts.
+ */
+export const SHARED_WITH_ME_FIXTURE_IDS = {
+  song: 'eeeeeeee-3619-4000-a000-000000000001',
+  version: 'eeeeeeee-3619-4000-a000-000000000002',
+  take: 'eeeeeeee-3619-4000-a000-000000000003',
+} as const;

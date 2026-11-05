@@ -6,6 +6,7 @@ import { ChevronRight } from 'lucide-react';
 import { libraryTabs } from '@/lib/navigation';
 import { useLocale } from '@/context/LocaleContext';
 import LibraryCreateButton from './LibraryCreateButton';
+import { SharedWithMeLink } from '@/components/library/SharedWithMeLink';
 
 export default function LibraryTabs() {
     const { t } = useLocale();
@@ -16,6 +17,23 @@ export default function LibraryTabs() {
 
     // Detail page = a tab's href + at least one more path segment
     const parentTab = tabs.find(t => pathname?.startsWith(t.href + '/'));
+
+    // Story 6.1.19 (#403): "Shared with me" is entered from a row under the tabs, not a tab of its own.
+    if (pathname === '/library/shared') {
+        return (
+            <nav aria-label={t('nav.library')} className="mb-8">
+                <div className="flex items-center gap-1.5 text-meta text-fg-muted">
+                    <Link href="/library" className="inline-flex min-h-tap items-center hover:text-fg transition-colors">
+                        {t('nav.library')}
+                    </Link>
+                    <ChevronRight className="size-3.5 shrink-0" aria-hidden />
+                    <span aria-current="page" className="inline-flex min-h-tap items-center text-fg">
+                        {t('sharedWithMe.title')}
+                    </span>
+                </div>
+            </nav>
+        );
+    }
 
     if (parentTab) {
         // Breadcrumb only — no heading, no tabs
@@ -72,6 +90,7 @@ export default function LibraryTabs() {
                 {/* Edge fade: hints that the row scrolls if a locale's labels are wider than the phone. */}
                 <div aria-hidden className="pointer-events-none absolute inset-y-0 -right-4 w-6 bg-gradient-to-l from-bg to-transparent md:hidden" />
             </nav>
+            <SharedWithMeLink />
         </>
     );
 }
