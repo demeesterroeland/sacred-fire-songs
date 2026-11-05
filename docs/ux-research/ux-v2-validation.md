@@ -77,4 +77,4 @@ Sections are added per story as it merges into `feat/ux-v2`.
 **Preconditions:** guest or member; preview freshly reset and seeded (§0).
 
 - [ ] 1. Open Library → Playlists → public playlists. No title contains "E2E" or "Smoke Test".
-- [ ] 2. Search "E2E" and "Smoke". No playlist or song fixture appears.
+- [ ] 2. Search "E2E" and "Smoke". No playlist or song fixture appears (E2E practice takes are removed after each test run).

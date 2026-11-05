@@ -24,6 +24,6 @@ describe('committed demo seed', () => {
     expect(block.length).toBeGreaterThan(0);
     const titles = [...block.matchAll(/\(\s*'[0-9a-f-]{36}',\s*'[0-9a-f-]{36}',\s*'((?:[^']|'')*)'/g)].map((m) => m[1]);
     expect(titles.length).toBeGreaterThan(0);
-    expect(titles.filter(isTestFixtureTitle)).toEqual([]);
+    expect(titles.filter((t) => isTestFixtureTitle(t))).toEqual([]);
   });
 });

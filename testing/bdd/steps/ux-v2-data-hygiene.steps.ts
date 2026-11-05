@@ -16,6 +16,6 @@ Then('no playlist title contains {string} or {string}', async function (a: strin
     'SELECT title FROM public.setlists WHERE title ILIKE $1 OR title ILIKE $2',
     [`%${a}%`, `%${b}%`],
   );
-  const offending = rows.map((r) => r.title).filter(isTestFixtureTitle);
+  const offending = rows.map((r) => r.title).filter((t) => isTestFixtureTitle(t, [a, b]));
   assert.deepEqual(offending, [], 'playlists left behind by tests');
 });

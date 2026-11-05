@@ -1,6 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import pg from 'pg';
 import { ROLES } from '../fixtures/roles';
+import { ADMIN_USERS_FIXTURE_IDS } from '../fixtures/ids';
 
 /**
  * Story 3.6.1 – Admin users overview, details and contributions (#258).
@@ -12,9 +13,9 @@ const DATABASE_URL =
 
 // Fixed ids so both projects (desktop + mobile) upsert the same fixture rows.
 // e2e/global-teardown.ts deletes them after the run (Story 6.1.33, #417).
-const SONG_ID = 'eeeeeeee-3610-4000-a000-000000000001';
-const VERSION_ID = 'eeeeeeee-3610-4000-a000-000000000002';
-const PLAYLIST_ID = 'eeeeeeee-3610-4000-a000-000000000003';
+const SONG_ID = ADMIN_USERS_FIXTURE_IDS.song;
+const VERSION_ID = ADMIN_USERS_FIXTURE_IDS.version;
+const PLAYLIST_ID = ADMIN_USERS_FIXTURE_IDS.playlist;
 const SONG_TITLE = 'E2E Admin Overview Song';
 const VERSION_NAME = 'E2E Arrangement';
 const PLAYLIST_TITLE = 'E2E Admin Playlist';
