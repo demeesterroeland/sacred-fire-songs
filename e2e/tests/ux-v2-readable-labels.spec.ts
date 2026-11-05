@@ -25,7 +25,8 @@ async function setTheme(page: Page, theme: (typeof THEMES)[number]) {
 
 async function settle(page: Page) {
   await page.waitForLoadState('networkidle', { timeout: 10000 }).catch(() => {});
-  await page.waitForTimeout(500);
+  // Measured sizes and contrast need the final fonts, not a fixed delay.
+  await page.evaluate(() => document.fonts.ready.then(() => undefined));
 }
 
 async function firstSongPath(page: Page): Promise<string> {
@@ -68,7 +69,8 @@ async function expectReadable(page: Page, where: string) {
 }
 
 for (const theme of THEMES) {
-  test.describe(`Readable labels, ${theme} @smoke`, () => {
+  // Light runs in the CI @smoke subset; dark runs in the full suite (keeps smoke fast and stable).
+  test.describe(`Readable labels, ${theme}${theme === 'light' ? ' @smoke' : ''}`, () => {
     test.describe('guest', () => {
       test.beforeEach(({ page }) => setTheme(page, theme));
 
