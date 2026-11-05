@@ -20,6 +20,7 @@ import { getUserRecordings, deleteUserRecording, renameUserRecording, reorderUse
 import { getYouTubeEmbedUrl, getSpotifyEmbedUrl } from "./MediaEmbeds";
 import { useAuth } from "@/hooks/useAuth";
 import { useAudio } from "./AudioProvider";
+import { applyMiniPlayerHeight, isMiniPlayerVisible, mediaSessionReducer, ownsActiveTake } from "@/lib/player/miniPlayer";
 import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLocale } from "@/context/LocaleContext";
@@ -466,7 +467,32 @@ export default function RehearsalDrawer({
     }
   }, [fetchedRecordings]);
 
-  const hasAnyAudioSource = hasMedia || recordings.length > 0;
+  // UXD-5 (#396): the mini player shows only after the user pressed play. A take
+  // of this song is "started" while it is the active playback; a reference track is
+  // latched in `mediaSessionStarted` wherever `setIsMediaPlaying(true)` is called.
+  // `AudioProvider` is global, so `activePlaybackId` may name a take of another song:
+  // `isMiniPlayerVisible` ignores it, and the cleanup below stops it when leaving.
+  const [mediaSessionStarted, dispatchMediaSession] = React.useReducer(mediaSessionReducer, false);
+  const songRecordingIds = useMemo(() => recordings.map((r) => r.id), [recordings]);
+  const miniPlayerVisible = isMiniPlayerVisible({ mediaSessionStarted, activePlaybackId, songRecordingIds });
+
+  // Leaving the song page: stop a take of this song, so no audio keeps playing without its bar.
+  const leaveRef = React.useRef({ activePlaybackId, songRecordingIds, stopActiveRecording });
+  useEffect(() => {
+    leaveRef.current = { activePlaybackId, songRecordingIds, stopActiveRecording };
+  });
+  useEffect(() => {
+    return () => {
+      const { activePlaybackId: id, songRecordingIds: ids, stopActiveRecording: stop } = leaveRef.current;
+      if (ownsActiveTake(id, ids)) stop();
+    };
+  }, []);
+
+  // Sheets, the drawer and the page pad their bottom by `--mini-player-h` while the bar is visible.
+  useEffect(() => {
+    applyMiniPlayerHeight(miniPlayerVisible, document.documentElement);
+    return () => applyMiniPlayerHeight(false, document.documentElement);
+  }, [miniPlayerVisible]);
 
   // Sign-in from the guest prompt returns to this page, including `?recording=`.
   const pathname = usePathname();
@@ -590,6 +616,7 @@ export default function RehearsalDrawer({
   };
 
   const playYouTube = () => {
+    dispatchMediaSession('playing');
     pauseSoundCloud();
     if (youtubeRef.current?.contentWindow) {
       if (typeof window !== "undefined" && (window as any).__E2E__) {
@@ -641,6 +668,7 @@ export default function RehearsalDrawer({
   };
 
   const playSoundCloud = () => {
+    dispatchMediaSession('playing');
     pauseYouTube();
     if (soundcloudRef.current?.contentWindow) {
       if (typeof window !== "undefined" && (window as any).__E2E__) {
@@ -824,6 +852,7 @@ export default function RehearsalDrawer({
 
     if (recordingJustStarted) {
       setActiveDomain('recording');
+      dispatchMediaSession('take-started');
       if (isMediaPlaying) {
         // Recording just started → pause any active iframe and clear its state
         if (playingSource === "youtube") pauseYouTube();
@@ -857,6 +886,7 @@ export default function RehearsalDrawer({
           const state = Number(data.info);
           if (state === 1 || state === 3) {
             setIsMediaPlaying(true);
+            dispatchMediaSession('playing');
             setPlayingSource("youtube");
             pauseSoundCloud();
           } else if (state === 2 || state === 0 || state === -1) {
@@ -875,6 +905,7 @@ export default function RehearsalDrawer({
         // SoundCloud messages
         if (data.event === "play" || data.method === "play" || data.action === "play") {
           setIsMediaPlaying(true);
+          dispatchMediaSession('playing');
           setPlayingSource("soundcloud");
           pauseYouTube();
         } else if (data.event === "pause" || data.method === "pause" || data.action === "pause") {
@@ -915,6 +946,7 @@ export default function RehearsalDrawer({
           if (selectedMedia === 'spotify' || (iframe.src && iframe.src.includes('spotify.com'))) {
             console.log("[E2E Debug] Spotify matched, pausing others");
             setIsMediaPlaying(true);
+            dispatchMediaSession('playing');
             setPlayingSource("spotify");
             // Pause other controllable sources immediately
             pauseYouTube();
@@ -1203,7 +1235,7 @@ export default function RehearsalDrawer({
             )}
 
             {/* Content Body */}
-            <div className={`flex-1 overflow-y-auto p-6 space-y-6 ${hasAnyAudioSource ? 'pb-24' : ''}`}>
+            <div data-testid="rehearsal-drawer-body" className="flex-1 overflow-y-auto p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px)+var(--mini-player-h,0px))] space-y-6">
               
               <div className="relative" style={{ display: activeTab === "recorder" ? "block" : "none" }}>
                   {/* Blurred overlay wrapper if guest */}
@@ -1416,17 +1448,19 @@ export default function RehearsalDrawer({
           </motion.div>
 
       {/* Floating Horizontal Bottom Mini Player Widget */}
-      {hasAnyAudioSource && (
+      {miniPlayerVisible && (
 
         <div 
           data-testid="bottom-mini-player"
-          className={`fixed bottom-[calc(var(--bottom-nav-height,3.5rem)+env(safe-area-inset-bottom,0px))] lg:bottom-4 left-0 right-0 lg:left-1/2 lg:-translate-x-1/2 z-[60] w-full lg:max-w-xl lg:rounded-2xl shadow-2xl backdrop-blur-md text-white h-14 flex items-center justify-between px-4 border-t lg:border border-white/10 select-none animate-in slide-in-from-bottom duration-300 ${nowPlaying.type === 'recording' ? 'bg-indigo-600/95' : 'bg-[#FF5500]/95'}`}
+          role="region"
+          aria-label={t('miniPlayer.region')}
+          className="fixed bottom-[calc(var(--bottom-nav-height,3.5rem)+env(safe-area-inset-bottom,0px))] lg:bottom-4 inset-x-0 lg:left-1/2 lg:right-auto lg:-translate-x-1/2 z-[60] w-full lg:max-w-xl lg:rounded-panel shadow-sheet bg-accent text-on-accent h-bar flex items-center justify-between px-2 border-t lg:border border-line-strong select-none motion-safe:animate-in motion-safe:slide-in-from-bottom motion-safe:duration-300"
         >
           {/* Visual Progress Bar (Clipped to container corners) */}
-          <div className="absolute inset-0 pointer-events-none lg:rounded-2xl overflow-hidden z-0">
-            <div className="absolute top-0 inset-x-0 h-1 bg-white/20">
+          <div className="absolute inset-0 pointer-events-none lg:rounded-panel overflow-hidden z-0">
+            <div className="absolute top-0 inset-x-0 h-1 bg-on-accent/25">
               <div 
-                className="h-full bg-white"
+                className="h-full bg-on-accent"
                 style={{ width: `${Math.min(100, (nowPlaying.currentTime / (nowPlaying.duration || 1)) * 100)}%` }}
               />
             </div>
@@ -1439,41 +1473,41 @@ export default function RehearsalDrawer({
             className="absolute top-0 inset-x-0 h-2 -mt-1 cursor-pointer group z-40 flex items-center"
           >
             <div 
-              className="w-3 h-3 bg-white rounded-full absolute opacity-0 group-hover:opacity-100 transition-opacity"
+              className="w-3 h-3 bg-on-accent rounded-pill absolute opacity-0 group-hover:opacity-100 motion-safe:transition-opacity"
               style={{ left: `calc(${Math.min(100, (nowPlaying.currentTime / (nowPlaying.duration || 1)) * 100)}% - 6px)` }}
             />
           </div>
 
           {/* Equalizer & Source Switcher Dropdown */}
-          <div className="flex items-center gap-3 flex-1 min-w-0 h-full py-2 cursor-pointer" onClick={onOpen}>
+          <div className="flex items-center gap-2 flex-1 min-w-0 h-full pl-2 cursor-pointer" onClick={onOpen}>
             <div className="flex gap-0.5 items-end h-4 w-4 shrink-0 justify-center cursor-pointer">
-              <span className={`w-[2px] bg-white rounded-full transition-all duration-300 ${nowPlaying.isPlaying ? 'animate-eq-bar-1' : 'h-1.5'}`} />
-              <span className={`w-[2px] bg-white rounded-full transition-all duration-300 ${nowPlaying.isPlaying ? 'animate-eq-bar-2' : 'h-3'}`} />
-              <span className={`w-[2px] bg-white rounded-full transition-all duration-300 ${nowPlaying.isPlaying ? 'animate-eq-bar-3' : 'h-2'}`} />
+              <span className={`w-[2px] h-1.5 bg-on-accent rounded-pill ${nowPlaying.isPlaying ? 'motion-safe:animate-eq-bar-1' : ''}`} />
+              <span className={`w-[2px] h-3 bg-on-accent rounded-pill ${nowPlaying.isPlaying ? 'motion-safe:animate-eq-bar-2' : ''}`} />
+              <span className={`w-[2px] h-2 bg-on-accent rounded-pill ${nowPlaying.isPlaying ? 'motion-safe:animate-eq-bar-3' : ''}`} />
             </div>
             
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <div 
                   data-testid="mini-source-switcher" 
-                  className="flex flex-col text-left min-w-0 cursor-pointer hover:bg-white/10 rounded px-2 -mx-2 transition-colors"
+                  className="flex flex-col justify-center min-h-tap text-left min-w-0 cursor-pointer hover:bg-on-accent/15 rounded-control px-2 -mx-2"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <div className="flex items-center gap-1">
-                    <span className="text-xs font-black truncate">{songTitle}</span>
+                    <span className="text-meta font-semibold truncate">{songTitle}</span>
                     <ChevronDown className="w-3 h-3 opacity-70 shrink-0" />
                   </div>
-                  <span className="text-[9px] uppercase tracking-widest opacity-80 truncate">
+                  <span className="text-caption truncate">
                     {nowPlaying.label}
                   </span>
                 </div>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-56 bg-[#1a1a1e]/95 backdrop-blur-xl border border-white/10 text-white rounded-xl shadow-2xl p-2 z-[60]" data-testid="mini-source-dropdown">
+              <DropdownMenuContent align="start" className="w-56 bg-surface border border-line text-fg rounded-control shadow-sheet p-2 z-[60]" data-testid="mini-source-dropdown">
                 {hasMedia && (
                   <>
-                    <DropdownMenuLabel className="text-caption uppercase tracking-wider text-white/60 font-bold px-2 pb-1">{t('practice.tab.listen')}</DropdownMenuLabel>
+                    <DropdownMenuLabel className="text-caption text-fg-muted font-semibold px-2 pb-1">{t('practice.tab.listen')}</DropdownMenuLabel>
                     {youtubeUrl && (
-                      <DropdownMenuItem className="cursor-pointer focus:bg-white/10 focus:text-white rounded-md transition-colors my-0.5" onClick={() => {
+                      <DropdownMenuItem className="cursor-pointer min-h-tap focus:bg-surface-2 focus:text-fg rounded-control my-0.5" onClick={() => {
                         stopActiveRecording();
                         pauseSoundCloud();
                         setSelectedMedia("youtube");
@@ -1487,7 +1521,7 @@ export default function RehearsalDrawer({
                       </DropdownMenuItem>
                     )}
                     {soundcloudUrl && (
-                      <DropdownMenuItem className="cursor-pointer focus:bg-white/10 focus:text-white rounded-md transition-colors my-0.5" onClick={() => {
+                      <DropdownMenuItem className="cursor-pointer min-h-tap focus:bg-surface-2 focus:text-fg rounded-control my-0.5" onClick={() => {
                         stopActiveRecording();
                         pauseYouTube();
                         setSelectedMedia("soundcloud");
@@ -1501,7 +1535,7 @@ export default function RehearsalDrawer({
                       </DropdownMenuItem>
                     )}
                     {spotifyUrl && (
-                      <DropdownMenuItem className="cursor-pointer focus:bg-white/10 focus:text-white rounded-md transition-colors my-0.5" onClick={() => {
+                      <DropdownMenuItem className="cursor-pointer min-h-tap focus:bg-surface-2 focus:text-fg rounded-control my-0.5" onClick={() => {
                         stopActiveRecording();
                         onOpen?.();
                         setSelectedMedia("spotify");
@@ -1517,10 +1551,10 @@ export default function RehearsalDrawer({
                 )}
                 {recordings.length > 0 && (
                   <>
-                    {hasMedia && <DropdownMenuSeparator className="bg-white/10 my-2" />}
+                    {hasMedia && <DropdownMenuSeparator className="bg-line my-2" />}
                     <DropdownMenuLabel>{t('practice.takes.mine')}</DropdownMenuLabel>
                     {recordings.map(rec => (
-                      <DropdownMenuItem key={rec.id} onClick={() => {
+                      <DropdownMenuItem key={rec.id} className="min-h-tap" onClick={() => {
                         if (!rec.audioUrl) return;
                         contextHandleTogglePlay(rec, rec.audioUrl);
                       }}>
@@ -1537,14 +1571,15 @@ export default function RehearsalDrawer({
           </div>
 
           {/* Controls */}
-          <div className="flex items-center gap-1.5 ml-4 shrink-0">
+          <div className="flex items-center ml-2 shrink-0">
             {/* Seek Back */}
             {(nowPlaying.source || nowPlaying.recordingId) && (
               <button 
                 onClick={() => seekRelative(-15)}
                 data-testid="mini-seek-back-btn"
                 title={t('miniPlayer.seekBack')}
-                className="p-2 text-white/80 hover:text-white transition-colors cursor-pointer shrink-0"
+                aria-label={t('miniPlayer.seekBack')}
+                className="size-tap flex items-center justify-center rounded-pill hover:bg-on-accent/15 cursor-pointer shrink-0"
               >
                 <RotateCcw className="w-[18px] h-[18px]" />
               </button>
@@ -1554,12 +1589,13 @@ export default function RehearsalDrawer({
             <button 
               onClick={handleMiniPlayerPlayPause}
               data-testid="mini-play-pause-btn"
-              className="w-8 h-8 rounded-full bg-black/20 hover:bg-black/35 flex items-center justify-center text-white cursor-pointer transition-transform hover:scale-105 shrink-0"
+              aria-label={nowPlaying.isPlaying ? t('miniPlayer.pause') : t('miniPlayer.play')}
+              className="size-tap flex items-center justify-center rounded-pill bg-on-accent/20 hover:bg-on-accent/30 cursor-pointer shrink-0"
             >
               {nowPlaying.isPlaying ? (
-                <Pause className="w-3.5 h-3.5 fill-white" />
+                <Pause className="w-4 h-4 fill-current" />
               ) : (
-                <Play className="w-3.5 h-3.5 fill-white ml-0.5" />
+                <Play className="w-4 h-4 fill-current ml-0.5" />
               )}
             </button>
 
@@ -1569,20 +1605,22 @@ export default function RehearsalDrawer({
                 onClick={() => seekRelative(15)}
                 data-testid="mini-seek-forward-btn"
                 title={t('miniPlayer.seekForward')}
-                className="p-2 text-white/80 hover:text-white transition-colors cursor-pointer shrink-0"
+                aria-label={t('miniPlayer.seekForward')}
+                className="size-tap flex items-center justify-center rounded-pill hover:bg-on-accent/15 cursor-pointer shrink-0"
               >
                 <RotateCw className="w-[18px] h-[18px]" />
               </button>
             )}
 
-            <span className="w-px h-6 bg-white/10 mx-1 shrink-0" />
+            <span className="w-px h-6 bg-on-accent/30 mx-1 shrink-0" />
 
             {/* Expand Drawer */}
             <button 
               onClick={onOpen}
               data-testid="mini-expand-btn"
               title={t('miniPlayer.expand')}
-              className="p-2 text-white/85 hover:text-white hover:bg-white/10 rounded transition-colors cursor-pointer shrink-0"
+              aria-label={t('miniPlayer.expand')}
+              className="size-tap flex items-center justify-center rounded-pill hover:bg-on-accent/15 cursor-pointer shrink-0"
             >
               <Music className="w-4 h-4" />
             </button>
@@ -1591,18 +1629,19 @@ export default function RehearsalDrawer({
             {(playingSource || activePlaybackId) && (
               <button 
                 onClick={() => {
-                  if (activePlaybackId) {
-                    stopActiveRecording();
-                  } else {
-                    pauseYouTube();
-                    pauseSoundCloud();
-                    setPlayingSource(null);
-                    setIsMediaPlaying(false);
-                  }
+                  // ✕ stops everything this song plays and hides the bar (UXD-5): the reference
+                  // track and this song's take, so a paused take cannot take over the bar.
+                  if (ownsActiveTake(activePlaybackId, songRecordingIds)) stopActiveRecording();
+                  pauseYouTube();
+                  pauseSoundCloud();
+                  setPlayingSource(null);
+                  setIsMediaPlaying(false);
+                  dispatchMediaSession('stopped');
                 }}
                 data-testid="mini-close-btn"
                 title={t('miniPlayer.stop')}
-                className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded transition-colors cursor-pointer shrink-0"
+                aria-label={t('miniPlayer.stop')}
+                className="size-tap flex items-center justify-center rounded-pill hover:bg-on-accent/15 cursor-pointer shrink-0"
               >
                 <X className="w-4 h-4" />
               </button>

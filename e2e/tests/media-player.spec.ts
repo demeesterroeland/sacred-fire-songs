@@ -358,6 +358,52 @@ test.describe('Practice Media Player E2E Tests', () => {
   // CATEGORY 3: BOTTOM MINI-PLAYER DISPLAY & SYNC (3 Permutations)
   // =========================================================================
 
+  // Story 6.1.12 / G3.1 (#396), UXD-5: the mini player appears only after play.
+  test('Mini-player is not rendered on load, appears after play, hides after stop', async ({ page }) => {
+    const miniPlayer = page.locator('[data-testid="bottom-mini-player"]');
+    const reserved = () => page.evaluate(() => document.documentElement.style.getPropertyValue('--mini-player-h'));
+
+    // Fresh song page with the drawer open and a reference track preselected: no bar, nothing reserved
+    await expect(miniPlayer).toHaveCount(0);
+    expect(await reserved()).toBe('');
+
+    // Press play: bar appears, and the drawer body reserves room so the last row is never covered
+    await page.evaluate(() => window.postMessage('{"event":"onStateChange","info":1}', '*'));
+    await expect(miniPlayer).toBeVisible();
+    await expect.poll(reserved).toContain('3.5rem');
+    const barHeight = (await miniPlayer.boundingBox())!.height;
+    const bodyPad = await page.locator('[data-testid="rehearsal-drawer-body"]').evaluate(
+      (el) => parseFloat(getComputedStyle(el).paddingBottom),
+    );
+    expect(bodyPad).toBeGreaterThanOrEqual(barHeight);
+
+    // Scrolled to the end, the last visible block of the drawer ends above the bar
+    // (reference-track bar: no seeded take with audio in this mocked song; the take case is in ux-v2-mini-player.spec.ts).
+    const body = page.locator('[data-testid="rehearsal-drawer-body"]');
+    await body.evaluate((el) => { el.scrollTop = el.scrollHeight; });
+    await expect
+      .poll(async () => {
+        const barTop = (await miniPlayer.boundingBox())!.y;
+        const lastBottom = await body.evaluate((el) => {
+          const shown = [...el.children].filter((c) => (c as HTMLElement).offsetHeight > 0);
+          return shown[shown.length - 1].getBoundingClientRect().bottom;
+        });
+        return barTop - lastBottom;
+      })
+      .toBeGreaterThanOrEqual(0);
+
+    // Pause keeps the bar; closing the drawer keeps it too
+    await page.evaluate(() => window.postMessage('{"event":"onStateChange","info":2}', '*'));
+    await expect(miniPlayer).toBeVisible();
+    await page.locator('button[aria-label="Close"]').first().click();
+    await expect(miniPlayer).toBeVisible();
+
+    // Stop removes the bar and the reserved space
+    await miniPlayer.locator('[data-testid="mini-close-btn"]').click();
+    await expect(miniPlayer).toHaveCount(0);
+    await expect.poll(reserved).toBe('');
+  });
+
   test('Permutation 13: YouTube Mini-Player display on drawer fold', async ({ page }) => {
     await page.evaluate(() => window.postMessage('{"event":"onStateChange","info":1}', '*'));
     await page.waitForTimeout(500);
@@ -414,7 +460,8 @@ test.describe('Practice Media Player E2E Tests', () => {
 
 
   test('Permutation 15a: Source Switcher dropdown interacts and switches tracks', async ({ page }) => {
-    // The Practice drawer is open (beforeEach); close it to show the mini-player
+    // The Practice drawer is open (beforeEach); the mini-player only appears after play (#396)
+    await page.evaluate(() => window.postMessage('{"event":"onStateChange","info":1}', '*'));
     const closeBtn = page.locator('button[aria-label="Close"]').first();
     await closeBtn.click();
     

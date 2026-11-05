@@ -6,6 +6,7 @@
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.2 | Nov 5, 2026 | The player bar appears only after you press play and stops with the song page (UXD-5, #396). |
 | 0.1 | Nov 4, 2026 | First draft: reference tracks, recorder, upload, managing takes, sharing, publishing with consent, singer attribution, shared-with-me view. |
 | 0.2 | Nov 5, 2026 | One name: Practice (panel, menu, tabs Listen / Record, Takes chip, My takes). Button and message wording now says "take" (Save Take, Delete take, Share take, Publish Take). |
 
@@ -21,7 +22,7 @@ Songs where you have takes show a **Takes** chip, and the header shows how many 
 
 1. Tab **Listen**.
 2. Choose **YouTube**, **SoundCloud** or **Spotify**.
-3. Play it in the panel. The **player bar** above the bottom bar keeps playing when you close the panel or scroll the lyrics: ⟲ 10 s back, ▶/❚❚, ⟳ forward, ✕ stop.
+3. Play it in the panel. The **player bar** above the bottom bar appears once you press play (a song page never shows it before) and keeps playing when you close the panel or scroll the lyrics: ⟲ 15 s back, ▶/❚❚, ⟳ forward, ✕ stop. Leaving the song (another song, Home, Library) stops the music; the bar never carries over.
 
 ## Recording a take (members)
 

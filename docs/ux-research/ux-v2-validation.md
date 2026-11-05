@@ -1,11 +1,12 @@
 # UX v2: Phone Validation Script
 
-**Version:** 1.11 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
+**Version:** 1.12 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.12 | Nov 5, 2026 | Added #396 (mini player on play, none on the next song). |
 | 1.11 | Nov 5, 2026 | Added #398 (one name: Practice; recorder and dialogs say "take"). |
 | 1.10 | Nov 5, 2026 | Added #410 (GuestGate). |
 | 1.9 | Nov 5, 2026 | Added #406 (real 404). |
@@ -167,3 +168,17 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 - [ ] 7. Switch the language (account menu) to Dutch, Spanish, Italian, Russian, French, Portuguese and Quechua. Steps 1–6 show the translated word for Practice, Listen, Record, takes. Nothing says Rehearsal Space, Voice Recorder or Recordings in any language.
 - [ ] 8. On **Record**, start a take and stop it: the review step reads *Review your take*, the name field *Take Name (e.g. Take 1)*, the button **Save Take**. In the list, ⋯ → Delete asks **Delete take?**; Share is titled **Share take**.
 - [ ] 9. With a reference track and a take loaded, tap the mini-player title: the source menu is headed **Listen** (not "Reference Tracks") and **My takes** (not "User Recordings").
+
+### #396 · G3.1 Mini player appears only after play
+
+**Preconditions:** member account; a song with a reference track (YouTube) and at least one saved take; light and dark mode.
+
+- [ ] 1. Open any song, e.g. `/songs/<id>` (do not tap anything). No orange bar above the bottom bar; the last lyric line scrolls fully into view. Screenshot: `docs/ux-research/screenshots/ux-v2/396/after-light/mobile/member/01-song-no-player.webp`.
+- [ ] 2. Tap ⋮ → **Recordings** → **Reference Tracks**, tap play on the YouTube video. The orange player bar appears above the bottom bar with the song title and *YouTube Reference*. Screenshot: `…/396/after-light/mobile/member/02-drawer-player-on-play.webp`.
+- [ ] 3. Scroll the panel to its end. The last row is fully visible above the bar (nothing hidden behind it).
+- [ ] 4. Tap pause on the bar, then close the panel. The bar stays (paused). Tap ✕ on the bar: the bar disappears.
+- [ ] 5. Reopen ⋮ → **Recordings** → **Voice Recorder**, tap ▶ on the last take, scroll to the end. The last take row is fully visible above the bar. Screenshot: `…/396/after-light/mobile/member/03-drawer-scrolled-to-end.webp`.
+- [ ] 6. Open ⋮ (the song menu sheet) while the take plays. The sheet's last action is not covered by the bar.
+- [ ] 7. Play the take, then open another song from Songs (bottom bar). The music stops and no bar shows on the other song (the bar never follows you to another song).
+- [ ] 8. Repeat step 1 in dark mode; with *reduce motion* on, the equalizer bars do not animate.
+

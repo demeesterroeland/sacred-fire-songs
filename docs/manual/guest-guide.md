@@ -1,11 +1,12 @@
 # Guest Guide (draft)
 
-**Version:** 0.8 | **Date:** Nov 5, 2026
+**Version:** 0.9 | **Date:** Nov 5, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.9 | Nov 5, 2026 | The player bar appears only after you press play (UX v2, #396). |
 | 0.8 | Nov 5, 2026 | Renamed to Practice (menu, Listen / Record tabs). |
 | 0.7 | Nov 5, 2026 | Members-only screens now show one locked preview with the reason and a **Sign in** button that brings you back (Story 6.1.26). |
 | 0.6 | Nov 5, 2026 | Added "A link that does not work" (real 404 page). |
@@ -48,7 +49,7 @@ The ☰ menu repeats the main places (Home, Songs, Playlists, Favorites, Drafts,
 Open ⋮ → **Practice** to open the Practice panel.
 
 - **Listen** tab: choose **YouTube**, **SoundCloud** or **Spotify** (when the song has that link) and play it inside the app.
-- A small **player bar** stays above the bottom bar so you can keep listening while reading. Use ⟲ / ⟳ to jump back or forward, ✕ to stop. **(planned: the bar will only appear after you press play)**
+- A small **player bar** appears above the bottom bar once you press play (a song page never shows it before), so you can keep listening while reading. Use ⟲ / ⟳ to jump back or forward, ✕ to stop. Leaving the song page stops the music.
 - Tip: wear headphones if you sing along while recording later.
 
 The **Record** tab shows what members can do and a **Sign In to Record** button.
