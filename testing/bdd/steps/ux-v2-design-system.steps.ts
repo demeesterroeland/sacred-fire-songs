@@ -11,6 +11,7 @@ import {
   missingThemeReferences,
   type TokenSources,
 } from '../../../lib/design/tokenAudit';
+import { smallTextUsage } from '../../../lib/design/paletteAudit';
 
 const state = new WeakMap<object, { s?: TokenSources }>();
 const get = (w: object) => {
@@ -46,11 +47,15 @@ Given('any component in the component sheet', function (this: object) {
 
 Then('its smallest text style is at least {int} px', function (this: object, px: number) {
   assert.equal(px, MIN_FONT_PX);
+  assert.deepEqual(smallTextUsage(['components/ui']), {}, 'no sub-12 px text in components/ui');
   const sizes = Object.values(fontSizesPx(get(this).s!.light));
   assert.ok(Math.min(...sizes) >= px, `smallest token font size ${Math.min(...sizes)} px`);
 });
 
 Then('body text contrast against its background is at least {float}:1', function (this: object, min: number) {
-  const failing = contrastChecks(get(this).s!).filter((c) => c.min >= min && c.ratio < min);
-  assert.deepEqual(failing, []);
+  const textPairs = contrastChecks(get(this).s!).filter((c) => c.min >= min);
+  assert.ok(textPairs.length >= 20, 'text/background pairs are checked in both modes');
+  assert.deepEqual(textPairs.filter((c) => c.ratio < min), []);
+  const sizes = Object.values(fontSizesPx(get(this).s!.light));
+  assert.ok(sizes.length >= 5);
 });

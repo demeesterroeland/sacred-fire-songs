@@ -26,14 +26,13 @@ export const BottomSheetContent = React.forwardRef<
   BottomSheetContentProps
 >(({ title, hideTitle, description, className, children, ...props }, ref) => (
   <DialogPrimitive.Portal>
-    <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-scrim motion-safe:data-[state=open]:animate-in motion-safe:data-[state=open]:fade-in-0" />
+    <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-scrim" />
     <DialogPrimitive.Content
       ref={ref}
       className={cn(
         "fixed inset-x-0 bottom-0 z-50 flex max-h-[85dvh] flex-col rounded-t-sheet border-t border-line bg-surface text-fg shadow-sheet outline-none",
         "pb-[calc(env(safe-area-inset-bottom,0px)+var(--mini-player-h,0px))]",
-        "sm:inset-x-auto sm:bottom-auto sm:left-1/2 sm:top-1/2 sm:w-full sm:max-w-md sm:-translate-x-1/2 sm:-translate-y-1/2 sm:rounded-panel sm:border sm:pb-0",
-        "motion-safe:data-[state=open]:animate-in motion-safe:data-[state=open]:slide-in-from-bottom-4",
+        "sm:inset-0 sm:m-auto sm:h-fit sm:w-full sm:max-w-md sm:rounded-panel sm:border sm:pb-0",
         className,
       )}
       {...(description ? {} : { "aria-describedby": undefined })}

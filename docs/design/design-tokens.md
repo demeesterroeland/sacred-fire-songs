@@ -54,6 +54,10 @@ Contrast is measured against `--bg` / `--surface` (WCAG 2.2). `—` in Dark mean
 
 Accent text is allowed on `--bg` and `--surface`, not on `--surface-2` (4.4 : 1 in light).
 
+**One accent:** `--accent` is the only accent hue. `--danger` is a status colour, not an accent: it appears only on destructive actions and errors, always next to a text label. The token test enforces "one saturated hue besides `--danger`".
+
+**Temporary bridge:** `app/globals.css` also remaps Tailwind's grey palettes (`gray`, `slate`, `zinc`, `neutral`, `stone`) to warm greys of the same lightness, so screens that still use palette classes look calmer. It is not part of the style file and is removed once the palette ratchet (§6) reaches zero (follow-up after Epic 6.1).
+
 ## 3. Type, spacing, radius, size
 
 | Token | Value | Tailwind | Use |
@@ -106,12 +110,14 @@ Primitives in `components/ui/` (React) and the visual sheet `docs/design/screens
 | Component | File | Anatomy & rules |
 | :--- | :--- | :--- |
 | **Button** | `components/ui/button.tsx` | `primary` (accent fill, one per screen) · `secondary` (surface-2 fill) · `outline` · `ghost` · `text` (accent text, no fill) · `destructive`. Height ≥ 44 px on touch (`size="default"`), `icon` is 44 × 44. |
-| **ListRow** | `components/ui/list-row.tsx` | One line title (`text-row`, `text-fg`), optional `MetaLine` under it, optional leading icon and trailing slot; divider `border-line`; whole row is the target (≥ 44 px). No card, no border radius, no glow. |
+| **ListRow** | `components/ui/list-row.tsx` | Title (`text-row`, `text-fg`, up to 2 lines), optional `MetaLine` under it, optional leading icon and trailing slot; divider `border-line`; whole row is the target (≥ 44 px): a `<button>` with `onClick`, or the child link with `asChild` (then `trailing` must not be interactive). No card, no border radius, no glow. |
 | **MetaLine** | `components/ui/meta-line.tsx` | One grey line (`text-meta`, `text-fg-muted`), items joined by " · ", truncates at the end; optional "show all" expand. Replaces coloured tag chips on cards and the song page. |
 | **Chip** | `components/ui/chip.tsx` | Filter-only. `rounded-pill`, `bg-chip`; selected = inverted (`bg-chip-active`) **plus** a check icon and `aria-pressed`. Never decorative. |
 | **BottomSheet** | `components/ui/bottom-sheet.tsx` | Radix Dialog at the bottom on mobile (centered dialog ≥ `sm`), `bg-surface`, `rounded-t-sheet`, `shadow-sheet`, `bg-scrim` overlay, grab handle, title, safe-area padding; reserves space for the mini player (`--mini-player-h`). One sheet component for menus, pickers and action sheets. |
-| **Toolbar** | `components/ui/toolbar.tsx` | `role="toolbar"`, `bg-surface rounded-panel`, items are 44 px `ToolbarButton`s with text or icon + `aria-label`; toggle buttons use `aria-pressed`. Used for `Chords · A− · A+`. |
+| **Toolbar** | `components/ui/toolbar.tsx` | `role="toolbar"` with a required translated `aria-label`, `bg-surface rounded-panel`, items are 44 px `ToolbarButton`s with text or icon + `aria-label`; toggles use `aria-pressed` **and** a visible cue (raised background + underline). Buttons stay in the tab order. Used for `Chords · A− · A+`. |
 
 ## 6. Migration rule for restyle stories
 
-Each restyle story converts the files it touches from palette classes to the utilities in §4. The ratchet test `testing/unit/tests/design/paletteRatchet.test.ts` counts palette classes in `app/` and `components/`; lower its baseline when you remove them, never raise it.
+Each restyle story converts the files it touches from palette classes to the utilities in §4. Two ratchets only go down: `testing/unit/tests/design/paletteRatchet.test.ts` (palette classes in `app/` and `components/`, baseline 3081 at #385) and `primitives.test.ts` (arbitrary text sizes below 12 px, baseline 70). Lower a baseline when you remove usages; never raise it.
+
+`cn()` (`lib/utils.ts`) is configured so tailwind-merge treats `text-caption … text-display` as font sizes and `rounded-control …`, `shadow-sheet` as their groups; without it a token size and a token colour would cancel each other.

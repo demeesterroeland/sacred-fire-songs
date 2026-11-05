@@ -37,3 +37,27 @@ export function paletteUsage(root = path.resolve(__dirname, '..', '..')): Record
   }
   return result;
 }
+
+/** Arbitrary font sizes below 12 px (`text-[10px]`, `text-[0.65rem]` …). */
+export const SMALL_TEXT_RE = /(?<![\w-])(?:[a-z0-9-]+:)*text-\[(\d+(?:\.\d+)?)(px|rem)\]/g;
+
+export function countSmallText(source: string, minPx = 12): number {
+  let n = 0;
+  for (const m of source.matchAll(SMALL_TEXT_RE)) {
+    const px = m[2] === 'rem' ? parseFloat(m[1]) * 16 : parseFloat(m[1]);
+    if (px < minPx) n++;
+  }
+  return n;
+}
+
+/** Sub-12 px arbitrary text sizes per file under the given dirs. */
+export function smallTextUsage(dirs = ['app', 'components'], root = path.resolve(__dirname, '..', '..')): Record<string, number> {
+  const result: Record<string, number> = {};
+  for (const dir of dirs) {
+    for (const file of walk(path.join(root, dir))) {
+      const n = countSmallText(fs.readFileSync(file, 'utf8'));
+      if (n > 0) result[path.relative(root, file)] = n;
+    }
+  }
+  return result;
+}

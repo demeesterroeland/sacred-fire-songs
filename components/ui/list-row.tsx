@@ -19,14 +19,17 @@ export interface ListRowProps extends Omit<React.HTMLAttributes<HTMLElement>, "t
  * List row (component sheet, Story 6.1.1 / G1.1): title + one grey meta line,
  * divider between rows, no card, no glow. The whole row is a ≥ 44 px target.
  * With `asChild`, pass exactly one element (e.g. <Link>) as `children`; it
- * receives the row classes and the title/meta/leading/trailing content.
+ * receives the row classes and the title/meta/leading/trailing content. Then
+ * `trailing` must NOT be interactive (no nested buttons inside a link); put a
+ * row action next to the row instead. With `onClick` (no `asChild`) the row
+ * renders as a <button>.
  */
 export function ListRow({ title, meta, metaMax, leading, trailing, asChild, className, children, ...props }: ListRowProps) {
   const content = (
     <>
       {leading ? <span className="shrink-0 text-fg-muted">{leading}</span> : null}
       <span className="min-w-0 flex-1">
-        <span className="block truncate text-row font-medium text-fg">{title}</span>
+        <span className="block line-clamp-2 text-row font-medium text-fg">{title}</span>
         {meta ? <MetaLine items={meta} max={metaMax} className="mt-0.5" /> : null}
       </span>
       {trailing ? <span className="shrink-0">{trailing}</span> : null}
@@ -41,6 +44,13 @@ export function ListRow({ title, meta, metaMax, leading, trailing, asChild, clas
       <Slot className={classes} {...props}>
         {React.cloneElement(children, undefined, content)}
       </Slot>
+    );
+  }
+  if (props.onClick) {
+    return (
+      <button type="button" className={classes} {...(props as React.ButtonHTMLAttributes<HTMLButtonElement>)}>
+        {content}
+      </button>
     );
   }
   return (

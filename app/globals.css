@@ -157,6 +157,16 @@ body {
   font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
 }
 
+/* Respect reduced motion everywhere (WCAG 2.3.3); individual animations may still opt in with motion-safe:. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
 /* Focus is always visible and uses the token (keyboard users). */
 :focus-visible {
   outline: 2px solid var(--focus);
