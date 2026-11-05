@@ -1,11 +1,12 @@
 # UX v2: Phone Validation Script
 
-**Version:** 1.26 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
+**Version:** 1.27 | **Date:** Nov 6, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.27 | Nov 6, 2026 | Added #389 (unfinished features hidden). |
 | 1.26 | Nov 5, 2026 | Added #397 (calm player and reference tab). |
 | 1.25 | Nov 5, 2026 | Added #403 (Shared with me). |
 | 1.24 | Nov 5, 2026 | Added #402 (Share dialog explains who can be found and what happens on a private song). |
@@ -375,3 +376,15 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 - [ ] 5. As a member, tap **Record**. **Expected:** the line *Reference: YouTube video loaded* is fully readable (wraps on a narrow phone, no "…"), and the button next to it reads **Open player**. Tap it: Listen opens.
 - [ ] 6. Switch the language to Dutch, Spanish, Italian, Russian, French, Portuguese and Quechua: **Open player**, **Playing** and **Paused** are translated and fit. Repeat steps 2, 3 and 5 in dark mode (`…/397/after-dark/…`).
 - [ ] 7. In the phone's accessibility settings turn on **Reduce motion** (or the OS equivalent). **Expected:** the bar appears without sliding in.
+
+### #389 · G1.5 Unfinished features are hidden
+
+**Preconditions:** a member account on a 390 px phone, English. Run once in light and once in dark.
+
+- [ ] 1. Open **Library**. **Expected:** the tab row shows Playlists, Recently viewed and Artists; no Albums tab and no text "Coming soon" anywhere. Screenshot: `docs/ux-research/screenshots/ux-v2/389/after-light/mobile/member/09-library.webp`.
+- [ ] 2. Open the avatar menu → **Account settings**. **Expected:** three tabs: Profile, Security, Preferences; no Privacy & Data. The Profile tab starts with **Display Name** (no grey avatar block, no badge). Screenshot: `…/389/after-light/mobile/member/15-settings.webp`. Before: `…/389/before-light/mobile/member/15-settings.webp`.
+- [ ] 3. Tap **Preferences**. **Expected:** Appearance, Language, Keep Screen Awake, Auto-hide navigation bar and Email notifications; no greyed-out rows, no "Coming soon". Screenshot: `…/389/after-light/mobile/member/16-settings-preferences.webp`.
+- [ ] 4. Open `/account/settings?tab=privacy`. **Expected:** the Profile tab opens (no error page, no privacy toggles).
+- [ ] 5. Open `/library/albums`. **Expected:** the "Page not found" page.
+- [ ] 6. Open **Create → Add song** and scroll to the end of the form. **Expected:** no "Melody notation" section with a "Coming soon" badge. Screenshot: `…/389/after-light/mobile/member/17-song-add-bottom.webp`.
+- [ ] 7. Switch the language to Dutch, Spanish, Italian, Russian, French, Portuguese and Quechua and repeat steps 2–3: no placeholder text in any language. Repeat steps 1–3 in dark mode.

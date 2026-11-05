@@ -565,10 +565,8 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'viewer.fontLarger': 'Hatun qillqa',
   'settings.prefs.offlineMode': 'Mana internet modo',
   'settings.prefs.offlineMode.description': 'Takikunata aparatopi waqaychay, mana internetwan llamk’anapaq.',
-  'settings.comingSoon': 'Qayllapi hamunqa',
 
   'settings.privacy.heading': 'Pakay configuración',
-  'settings.privacy.notActive': 'Kay configuracionkunaqa manaraq llamk’achkanchu.',
   'settings.privacy.makePublic': 'Perfil llapa runapaq',
   'settings.privacy.makePublic.description': 'Huk runakuna llapa runapaq taki huñuykikunata rikunankupaq.',
   'settings.privacy.showActivity': 'Ruwayta rikuchiy',
@@ -596,7 +594,6 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'common.edit': 'Allinchay',
   'common.loading': 'Apamushan...',
   'common.viewAll': 'Llapanta qhaway',
-  'common.comingSoon': 'Qayllapi hamunqa',
   'common.or': 'Icha',
 
   // ─── Auth – Login (redesigned) ────────────────────────────────────────────
@@ -754,7 +751,6 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'songForm.artists.placeholder': 'Takiqpa sutin qillqay, hinaspa Enter ñit’iy...',
   'songForm.artists.addAnother': 'Huk takiq yapay...',
   'settings.prefs.notSupported': 'Navegadorniykiqa mana yanapanchu',
-  'settings.profile.avatar.comingSoon': 'Rikch’a apachiyqa qayllapi kanqa.',
   'auth.signUpSuccess.verify': 'Takyachiy & Puriy',
   'auth.signUpSuccess.returnToLogin': 'Yaykuyman kutiy',
   'auth.signUpSuccess.orEnterCode': 'Icha kodigota qillqay',

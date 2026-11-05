@@ -202,7 +202,7 @@ describe('parseSettingsTab', () => {
   it('opens the tab named in ?tab=', async () => {
     const { parseSettingsTab } = await import('@/components/account/settings/AccountSettings');
     expect(parseSettingsTab('preferences')).toBe('preferences');
-    expect(parseSettingsTab(['privacy', 'account'])).toBe('privacy');
+    expect(parseSettingsTab(['account', 'privacy'])).toBe('account');
   });
 
   it('falls back to Profile for missing or unknown values', async () => {

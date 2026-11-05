@@ -1,11 +1,12 @@
 # UX v2: Agent Decisions (ADR-lite)
 
-**Version:** 1.23 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375)
+**Version:** 1.24 | **Date:** Nov 6, 2026 | **Epic:** 6.1 (#375)
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.24 | Nov 6, 2026 | Added UXA-030 and UXA-031 (unfinished features hidden behind lib/features.ts, deep link of a hidden settings tab, planned preferences and melody notation; #389). |
 | 1.23 | Nov 5, 2026 | Added UXA-034 and UXA-035 (Listen tab providers and status; calm mini player; #397). |
 | 1.22 | Nov 5, 2026 | Added UXA-029 (Shared with me: badge on the bell only, entry as a Library row, read rules; #403). |
 | 1.21 | Nov 5, 2026 | Added UXA-028 (Share dialog: private-song confirmation moves into the dialog, wording of the two effects, who the search finds; #402). |
@@ -64,6 +65,8 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 | UXA-034 | Nov 5, 2026 | #397 | Listen tab: one button per provider with a link, also for a single provider; chosen = surface + border + check (no brand colours); a status line says what plays and whether it is paused | yes |
 | UXA-035 | Nov 5, 2026 | #397 | Mini player: plain surface bar, grey progress, accent only on the play button, equalizer and pulsing dot removed, subtitle "Playing · name" / "Paused · name"; "Control Track" becomes "Open player" | yes |
 | UXA-029 | Nov 5, 2026 | #403 | Shared with me: the unread badge stays on the bell only (account menu and Library entries say "n new" in words), the Library entry is a row under the tabs (not a fifth tab), one row per take, opening Practice marks the song's notifications read | yes |
+| UXA-030 | Nov 6, 2026 | #389 | Unfinished features hide behind one list of switches (`lib/features.ts`), all off: avatar block, Privacy & Data tab, planned preference rows. The "Coming soon" labels and their message keys are deleted; code and routes stay. A `?tab=privacy` link opens Profile like any unknown tab. | yes |
+| UXA-031 | Nov 6, 2026 | #389 | Two placeholders beyond the story text are hidden too: the three disabled Preferences rows (auto-scroll, default chords, offline mode) and the "Melody notation" section of the song form. | yes |
 
 ---
 
@@ -346,3 +349,21 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 - **Choice:** plain `bg-surface` bar with `border-line-strong`; progress is grey; the play/pause button is the only accent element. The equalizer is removed (a decorative animation says less than the word); the subtitle reads *Playing · name* or *Paused · name*. `rehearsal.controlTrack` becomes **Open player** (it opens the Listen tab).
 - **Consequences:** review: the bar names references by brand only ("Playing · YouTube") so it fits at 390 px; the full label is in the Listen status line. The equalizer in the desktop Practice header button on the song page is still animated (follow-up). `miniPlayer.playing` is now shown in the bar (it was only a tooltip). The small equalizer in the desktop Practice header button (song page) is outside the player and is untouched; it is not under `motion-safe` yet.
 - **Confirm:** yes (look, copy)
+
+### UXA-030 · Unfinished features hide behind one list of switches
+
+- **Date / story:** Nov 6, 2026 · #389 (G1.5)
+- **Context:** the story asks to hide the Albums tab, the avatar block and the Privacy & Data tab "behind a feature flag defaulting to off" and to remove `settings.comingSoon` usages that become dead. #407 already added `FEATURES.albums` (UXD-4) and removed the Albums tab. The avatar block is a grey picture with a "Coming soon" badge (the upload handler exists but no control calls it). The Privacy & Data tab shows toggles, a data export and "Delete My Account" that do nothing, under a "not yet active" banner.
+- **Options:** (a) one flag per feature in the existing `lib/features.ts`; (b) an environment variable; (c) delete the code. Deep link of a hidden tab: (a) fall back to Profile like an unknown value; (b) 404.
+- **Choice:** (a) switches in `lib/features.ts`, a compile-time constant, all off: `avatarUpload`, `privacySettings` (next to `albums`). The code and the data model stay, so a later story switches a feature on once it works. The "Coming soon" badges, the "not yet active" banner and the keys `settings.comingSoon`, `settings.privacy.notActive`, `settings.profile.avatar.comingSoon` and `common.comingSoon` are deleted from all 8 locales (nothing would render them: a feature that is switched on must be finished). The settings tab list is computed in `lib/account/settingsTabs.ts` (`visibleSettingsTabs`); `?tab=privacy` already followed the "unknown value opens Profile" rule, which now covers it. This is a query parameter on a page that exists, so a 404 (#406 is for unknown paths) would be wrong; the Albums route keeps its real not-found page (#407).
+- **Consequences:** members cannot reach Privacy & Data or the avatar block; there is still no way to delete an account or export data in the app (it never worked). The flags are not runtime-configurable: turning one on needs a code change. The remaining privacy toggles in `PrivacySettings.tsx` are inert and must be wired before `privacySettings` is switched on.
+- **Confirm:** yes (hides an existing tab and block; no data or permission change)
+
+### UXA-031 · Planned preference rows and melody notation are hidden too
+
+- **Date / story:** Nov 6, 2026 · #389 (G1.5)
+- **Context:** the story names three places, but the acceptance test says "no element labelled Coming soon is visible in Library and Account Settings". The Preferences tab has three greyed rows with a "Coming soon" badge (auto-scroll lyrics, show chords by default, offline mode), and the Add/Edit song form has a "Melody notation" section with a "Coming soon" badge (the story gap analysis found only the settings ones; the song form is the same kind of placeholder).
+- **Options:** (a) hide them behind switches, like the others; (b) keep the rows without the badge (still dead switches); (c) leave them.
+- **Choice:** (a): `plannedPreferences` and `melodyNotation`, both off. Offline mode belongs to the Offline Library epic (#357), which brings its own setting. Wording of the Preferences page: it now lists appearance, language, keep screen awake, auto-hide navigation and e-mail notifications, all working.
+- **Consequences:** a member who read about "auto-scroll" or "offline mode" on the Preferences page no longer sees them; the manual drops them too. Melody notation is not offered anywhere until it exists.
+- **Confirm:** yes (removes visible, if inert, UI)

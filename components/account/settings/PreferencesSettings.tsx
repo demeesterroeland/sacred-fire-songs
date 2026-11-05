@@ -7,6 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { useWakeLock } from "@/hooks/useWakeLock";
 import { useUserPreferences, type ThemePreference } from "@/context/UserPreferencesContext";
 import { useLocale } from "@/context/LocaleContext";
+import { FEATURES } from "@/lib/features";
 import type { TranslationKey } from "@/lib/i18n";
 import { LanguageSwitcher } from "@/components/common/navigation/LanguageSwitcher";
 import { useAuth } from "@/hooks/useAuth";
@@ -19,13 +20,12 @@ interface PreferenceRowProps {
   checked: boolean;
   onCheckedChange: (v: boolean) => void;
   disabled?: boolean;
-  comingSoon?: boolean;
   notSupported?: boolean;
 }
 
 function PreferenceRow({
   icon, label, description, checked, onCheckedChange,
-  disabled, comingSoon, notSupported,
+  disabled, notSupported,
 }: PreferenceRowProps) {
   const { t } = useLocale();
   return (
@@ -35,11 +35,6 @@ function PreferenceRow({
         <div>
           <div className="flex items-center gap-2">
             <p className="font-medium text-gray-900 dark:text-white">{label}</p>
-            {comingSoon && (
-              <span className="text-caption font-semibold text-fg-muted bg-surface-2 border border-line px-2 py-0.5 rounded-full">
-                {t("settings.comingSoon")}
-              </span>
-            )}
           </div>
           <p className="text-sm text-gray-500 dark:text-slate-400 mt-0.5">
             {description}
@@ -201,38 +196,40 @@ export default function PreferencesSettings() {
       {/* Email notifications — functional (Story 4.6.6) */}
       <EmailNotificationsRow />
 
-      {/* Auto-scroll Lyrics — disabled */}
-      <PreferenceRow
-        icon={<FileText className="w-5 h-5" />}
-        label={t("settings.prefs.autoScroll")}
-        description={t("settings.prefs.autoScroll.description")}
-        checked={false}
-        onCheckedChange={() => {}}
-        disabled
-        comingSoon
-      />
+      {/* Not implemented yet: hidden until FEATURES.plannedPreferences is on (Story 6.1.5, #389). */}
+      {FEATURES.plannedPreferences && (
+        <>
+        {/* Auto-scroll Lyrics — disabled */}
+        <PreferenceRow
+          icon={<FileText className="w-5 h-5" />}
+          label={t("settings.prefs.autoScroll")}
+          description={t("settings.prefs.autoScroll.description")}
+          checked={false}
+          onCheckedChange={() => {}}
+          disabled
+        />
 
-      {/* Default Chord Display — disabled */}
-      <PreferenceRow
-        icon={<Music2 className="w-5 h-5" />}
-        label={t("settings.prefs.showChords")}
-        description={t("settings.prefs.showChords.description")}
-        checked={false}
-        onCheckedChange={() => {}}
-        disabled
-        comingSoon
-      />
+        {/* Default Chord Display — disabled */}
+        <PreferenceRow
+          icon={<Music2 className="w-5 h-5" />}
+          label={t("settings.prefs.showChords")}
+          description={t("settings.prefs.showChords.description")}
+          checked={false}
+          onCheckedChange={() => {}}
+          disabled
+        />
 
-      {/* Offline Mode — disabled */}
-      <PreferenceRow
-        icon={<WifiOff className="w-5 h-5" />}
-        label={t("settings.prefs.offlineMode")}
-        description={t("settings.prefs.offlineMode.description")}
-        checked={false}
-        onCheckedChange={() => {}}
-        disabled
-        comingSoon
-      />
+        {/* Offline Mode — disabled */}
+        <PreferenceRow
+          icon={<WifiOff className="w-5 h-5" />}
+          label={t("settings.prefs.offlineMode")}
+          description={t("settings.prefs.offlineMode.description")}
+          checked={false}
+          onCheckedChange={() => {}}
+          disabled
+        />
+        </>
+      )}
     </section>
   );
 }

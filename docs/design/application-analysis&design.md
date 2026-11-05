@@ -1,8 +1,8 @@
 # Project Analysis & Design Document: Song Sharing Application (Sacred Fire Songs)
 
-**Version:** 1.86
+**Version:** 1.87
 **Status:** Living Document
-**Date:** Nov 5, 2026
+**Date:** Nov 6, 2026
 
 ## Changelog
 
@@ -59,6 +59,7 @@
 | **1.64** | Nov 5, 2026 | UX v2 (Story 6.1.23 / #407): Library tab row — Playlists · History · Artists from `libraryTabs()` (`lib/navigation.ts`); Albums hidden behind `FEATURES.albums` (`lib/features.ts`, UXD-4), `/library/albums` renders the not-found page while off. |
 | **1.66** | Nov 5, 2026 | UX v2 (Story 6.1.6 / #390): Song Detail reader toolbar — `ReaderToolbar` (`Chords · A− · A+`) under the meta lines; lyric size from `LYRIC_STEPS`, chords layer on/off, both stored per device (`lib/reader/readerPrefs.ts`, key `sacred-fire-songs-reader`). Removed the disabled `Large Stage Font` preference. |
 | **1.65** | Nov 5, 2026 | UX v2 (Story 6.1.7 / #391): Song Detail meta — `SongMetaLines` replaces the coloured pills, technical badges and the Key/Capo/Tuning grid with two grey lines (`lib/songs/songMeta.ts`). |
+| **1.87** | Nov 6, 2026 | UX v2 (Story 6.1.5 / #389, G1.5): unfinished features are hidden — new §6.16. `lib/features.ts` now holds the switches `albums`, `avatarUpload`, `privacySettings`, `plannedPreferences`, `melodyNotation` (all off); Settings shows Profile, Security and Preferences only, `?tab=privacy` opens Profile; the "Coming soon" badges and keys are removed from all 8 locales. Decisions UXA-030, UXA-031. |
 | **1.86** | Nov 5, 2026 | UX v2 (Story 6.1.13 / #397, G3.2): the mini player is calm — `bg-surface` bar, grey progress, accent only on the play button, no equalizer bars, subtitle "Playing · <name>" / "Paused · <name>"; the Listen tab shows a provider button for every provider with a link (`availableProviders()` in `lib/player/referenceProviders.ts`, also for a single provider; pressed = surface + border + check, no brand colours) and a status line "Playing: <name>"; the Record tab status line wraps and "Control Track" is **Open player** (`rehearsal.controlTrack`). UXA-034, UXA-035. §6.13 updated. |
 | **1.85** | Nov 5, 2026 | UX v2 (Story 6.1.19 / #403, G4.6, UXD-3): **Shared with me** — new members-only page `/library/shared` (`lib/notifications/serverQueries.ts` `getSharedWithMe`, pure join in `lib/notifications/sharedWithMe.ts`, list `components/library/SharedWithMeList.tsx`; guests get the `sharedWithMe` GuestGate), entered from a row under the Library tabs (`SharedWithMeLink`) and from the account menu, both with the unread count in words. Opening a song's Practice drawer (also through a take's deep link) marks that song's notifications read (`hooks/useMarkSongNotificationsRead.ts`, `markSongNotificationsRead`) and updates the bell cache at once. Bell and menu share one query (`useNotificationsQuery`, key `notificationsKey`). No migration. New §6.15. |
 | **1.84** | Nov 5, 2026 | UX v2 (Story 6.1.18 / #402, G4.5): the Share dialog explains itself. `components/song/RecordingShareModal.tsx` takes `songIsPublic`, `canMakeSongPublic` and `onMakeSongPublic`; the old standalone private-song prompt in `RehearsalDrawer` is gone and the non-owner toast is replaced by an explanation inside the dialog. Step logic: `lib/songs/shareDialogStep.ts`. Behaviour is unchanged: `shareRecording` still refuses a private song, `makeSongPublic` (owner or admin) still sets `compositions.is_public`. New copy in 8 locales (UXA-028). |
@@ -326,6 +327,12 @@ The application is a **Progressive Web App (PWA)** optimized for mobile use duri
 * **Entries:** account menu item "Shared with me" and a Library row under the tabs, both with "{n} new" in words when unread notifications exist. The numeric badge stays on the bell only (UXA-029); the avatar has no second badge.
 * **Mark as read:** `useMarkSongNotificationsRead` (called by `RehearsalDrawer` with `compositionId`) runs once per opening: it sets `read_at` on every unread notification of that song (`markSongNotificationsRead`, one UPDATE under the recipient's column grant) and rewrites the `['notifications', userId]` cache, so the bell badge drops at once. A failed call invalidates the query. Opening the list page alone does not mark anything read.
 * **Tests:** `docs/testing/ux-v2-shared-with-me.feature` (`@unit`, `@seed`, `@e2e`), Vitest `testing/unit/tests/notifications/*`, Playwright `e2e/tests/ux-v2-shared-with-me.spec.ts`.
+
+### 6.16 Unfinished features hidden (UX v2, Story 6.1.5, G1.5, UXD-4)
+* **Switches:** `lib/features.ts` (`FEATURES`, all `false`): `albums` (Library tab and `/library/albums`, see §6.14), `avatarUpload` (the avatar block in `ProfileSettings.tsx`), `privacySettings` (the "Privacy & Data" tab, `PrivacySettings.tsx`), `plannedPreferences` (auto-scroll, default chords, offline mode rows in `PreferencesSettings.tsx`), `melodyNotation` (the "Melody notation" section of `SongForm.tsx`). A feature that is off keeps its code, route and data; a feature is switched on only when it works.
+* **Settings tabs:** `lib/account/settingsTabs.ts` — `visibleSettingsTabs()` lists Profile, Security, Preferences; `parseSettingsTab()` maps a hidden or unknown `?tab=` to Profile (no 404: it is a query parameter on an existing page).
+* **Copy:** the message keys `settings.comingSoon`, `settings.privacy.notActive`, `settings.profile.avatar.comingSoon`, `common.comingSoon` are deleted from `messages/*.ts`; no screen shows "Coming soon".
+* **Tests:** `docs/testing/ux-v2-hide-unfinished.feature` (`@story-6.1.5`, `@unit` + `@e2e`), Vitest `testing/unit/tests/account/hideUnfinished.test.ts`, Playwright `e2e/tests/ux-v2-hide-unfinished.spec.ts`. Decisions: UXA-030, UXA-031.
 
 ## 7. Screen Inventory (Implemented)
 

@@ -1,5 +1,6 @@
-# Version: 1.1 | Date: Nov 5, 2026
+# Version: 1.2 | Date: Nov 6, 2026
 # Changelog
+# 1.2 | Nov 6, 2026 | Story 6.1.5 (#389): the deep-link example uses ?tab=preferences, because ?tab=privacy now opens Profile (hidden tab).
 # 1.1 | Nov 5, 2026 | #410 review fixes: hardened next= validation at every consumer; favourites gate on the heart; add-to-playlist gets its own feature key.
 # 1.0 | Nov 5, 2026 | Story 6.1.26 / G6.1 (#410): one GuestGate pattern on every members-only screen; UXD-2 guests hear consented public takes only.
 @story-6.1.26
@@ -19,7 +20,7 @@ Feature: UX v2 GuestGate on every members-only screen
       | path                        | feature        | href                                                  |
       | /library/recently-viewed    | history        | /auth/login?next=%2Flibrary%2Frecently-viewed          |
       | /library/playlists/add      | newPlaylist    | /auth/login?next=%2Flibrary%2Fplaylists%2Fadd          |
-      | /account/settings?tab=privacy | settings    | /auth/login?next=%2Faccount%2Fsettings%3Ftab%3Dprivacy |
+      | /account/settings?tab=preferences | settings | /auth/login?next=%2Faccount%2Fsettings%3Ftab%3Dpreferences |
       | /songs/abc/edit             | edit           | /auth/login?next=%2Fsongs%2Fabc%2Fedit                 |
       | /songs/abc?ref=heart        | favourites     | /auth/login?next=%2Fsongs%2Fabc%3Fref%3Dheart          |
       | /songs/abc                  | addToPlaylist  | /auth/login?next=%2Fsongs%2Fabc                        |

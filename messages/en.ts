@@ -559,10 +559,8 @@ const en = {
   'viewer.fontLarger': 'Larger text',
   'settings.prefs.offlineMode': 'Offline Mode',
   'settings.prefs.offlineMode.description': 'Cache songs locally for use without an internet connection.',
-  'settings.comingSoon': 'Coming soon',
 
   'settings.privacy.heading': 'Privacy Settings',
-  'settings.privacy.notActive': 'These settings are not yet active.',
   'settings.privacy.makePublic': 'Make Profile Public',
   'settings.privacy.makePublic.description': 'Allow others to see your public song collections.',
   'settings.privacy.showActivity': 'Show Activity',
@@ -590,7 +588,6 @@ const en = {
   'common.edit': 'Edit',
   'common.loading': 'Loading...',
   'common.viewAll': 'View All',
-  'common.comingSoon': 'Coming soon',
   'common.or': 'Or',
 
   // ─── Auth – Login (redesigned) ────────────────────────────────────────────
@@ -748,7 +745,6 @@ const en = {
   'songForm.artists.placeholder': 'Type artist name and press Enter...',
   'songForm.artists.addAnother': 'Add another artist...',
   'settings.prefs.notSupported': 'Not supported by your browser',
-  'settings.profile.avatar.comingSoon': 'Avatar upload will be available soon.',
   'auth.signUpSuccess.verify': 'Verify & Continue',
   'auth.signUpSuccess.returnToLogin': 'Return to Login',
   'auth.signUpSuccess.orEnterCode': 'Or enter the code',

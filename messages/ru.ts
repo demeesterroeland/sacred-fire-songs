@@ -564,10 +564,8 @@ const ru: Partial<Record<TranslationKey, string>> = {
   'viewer.fontLarger': 'Крупнее текст',
   'settings.prefs.offlineMode': 'Офлайн-режим',
   'settings.prefs.offlineMode.description': 'Сохранять песни на устройстве для использования без интернета.',
-  'settings.comingSoon': 'Скоро',
 
   'settings.privacy.heading': 'Настройки приватности',
-  'settings.privacy.notActive': 'Эти настройки пока не активны.',
   'settings.privacy.makePublic': 'Сделать профиль публичным',
   'settings.privacy.makePublic.description': 'Разреши другим видеть твои публичные коллекции песен.',
   'settings.privacy.showActivity': 'Показывать активность',
@@ -595,7 +593,6 @@ const ru: Partial<Record<TranslationKey, string>> = {
   'common.edit': 'Изменить',
   'common.loading': 'Загрузка...',
   'common.viewAll': 'Показать все',
-  'common.comingSoon': 'Скоро',
   'common.or': 'Или',
 
   // ─── Auth – Login (redesigned) ────────────────────────────────────────────
@@ -753,7 +750,6 @@ const ru: Partial<Record<TranslationKey, string>> = {
   'songForm.artists.placeholder': 'Введи имя исполнителя и нажми Enter...',
   'songForm.artists.addAnother': 'Добавить ещё исполнителя...',
   'settings.prefs.notSupported': 'Не поддерживается твоим браузером',
-  'settings.profile.avatar.comingSoon': 'Загрузка аватара скоро станет доступна.',
   'auth.signUpSuccess.verify': 'Подтвердить и продолжить',
   'auth.signUpSuccess.returnToLogin': 'Вернуться ко входу',
   'auth.signUpSuccess.orEnterCode': 'Или введите код',
