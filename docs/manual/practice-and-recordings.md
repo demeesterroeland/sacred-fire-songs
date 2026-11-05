@@ -1,11 +1,12 @@
 # Practice: Listen, Record & Takes (draft)
 
-**Version:** 0.7 | **Date:** Nov 5, 2026
+**Version:** 0.8 | **Date:** Nov 5, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.8 | Nov 5, 2026 | Listen: one button per available provider (even when there is only one), the player and the Listen tab say in words what plays and whether it is paused; "Control Track" is now **Open player** (UX v2, #397). |
 | 0.7 | Nov 5, 2026 | The Share dialog explains who can be found and, on a private song, what happens before you confirm (#402). |
 | 0.6 | Nov 5, 2026 | Practice is a button in the bar at the bottom of the song page; it opens on Listen when the song has a reference track, otherwise on Record (UX v2, #393). |
 | 0.5 | Nov 5, 2026 | **⋯** on a take opens a bottom sheet with the actions in groups; Delete take is alone at the bottom, in red (#401). |
@@ -26,13 +27,13 @@ Songs where you have takes show a **Takes** chip, and the header shows how many 
 ## Listen (everyone)
 
 1. Tab **Listen**.
-2. Choose **YouTube**, **SoundCloud** or **Spotify**.
+2. Choose **YouTube**, **SoundCloud** or **Spotify**. Only the providers the song has a link for are shown, always in that order; the chosen one has a check mark. A line under the buttons says what is playing: *Playing: YouTube Reference* or *Paused: …*.
 3. Play it in the panel. The **player bar** above the bottom bar appears once you press play (a song page never shows it before) and keeps playing when you close the panel or scroll the lyrics: ⟲ 15 s back, ▶/❚❚, ⟳ forward, ✕ stop. Leaving the song (another song, Home, Library) stops the music; the bar never carries over.
 
 ## Recording a take (members)
 
 1. Tab **Record**. The first time, your browser asks for **microphone** permission — allow it.
-2. **Record Audio** is selected. A reference track can keep playing (*Reference: YouTube video loaded*) — **wear headphones** so it is not recorded along.
+2. **Record Audio** is selected. A reference track can keep playing (*Reference: YouTube video loaded*, with **Open player** to go back to the Listen tab) — **wear headphones** so it is not recorded along.
 3. Tap the big red **microphone** button. The timer runs. You can **pause / resume**, or **cancel and discard**.
 4. Tap **stop**. *Review your take*: listen in the preview player and change the name (default: *Take – date time*).
 5. **Save Take** stores it privately, or **Discard**.

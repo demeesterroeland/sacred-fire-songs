@@ -268,7 +268,8 @@ const pt: Partial<Record<TranslationKey, string>> = {
   'rehearsal.reference.loaded.youtube': 'Referência: vídeo do YouTube carregado',
   'rehearsal.reference.loaded.soundcloud': 'Referência: faixa do SoundCloud carregada',
   'rehearsal.reference.loaded.spotify': 'Referência: player do Spotify carregado',
-  'rehearsal.controlTrack': 'Faixa guia',
+  'rehearsal.controlTrack': 'Abrir player',
+  'rehearsal.listen.status': '{state}: {name}',
   'rehearsal.headphonesHint': '🎧 Use fones de ouvido para evitar vazamento de som',
   'practice.takes.mine': 'Meus takes',
   'practice.takes.shared': 'Compartilhados comigo',
@@ -380,6 +381,7 @@ const pt: Partial<Record<TranslationKey, string>> = {
   'miniPlayer.play': 'Reproduzir',
   'miniPlayer.pause': 'Pausar',
   'miniPlayer.playing': 'Tocando',
+  'miniPlayer.paused': 'Em pausa',
   'miniPlayer.source.userRecording': 'Meu take',
   'miniPlayer.source.select': 'Selecionar fonte',
 

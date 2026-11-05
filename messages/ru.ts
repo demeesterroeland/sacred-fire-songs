@@ -271,7 +271,8 @@ const ru: Partial<Record<TranslationKey, string>> = {
   'rehearsal.reference.loaded.youtube': 'Эталон: видео YouTube загружено',
   'rehearsal.reference.loaded.soundcloud': 'Эталон: трек SoundCloud загружен',
   'rehearsal.reference.loaded.spotify': 'Эталон: плеер Spotify загружен',
-  'rehearsal.controlTrack': 'Контрольный трек',
+  'rehearsal.controlTrack': 'Открыть плеер',
+  'rehearsal.listen.status': '{state}: {name}',
   'rehearsal.headphonesHint': '🎧 Надень наушники, чтобы избежать наводок',
   'practice.takes.mine': 'Мои дубли',
   'practice.takes.shared': 'Поделились со мной',
@@ -383,6 +384,7 @@ const ru: Partial<Record<TranslationKey, string>> = {
   'miniPlayer.play': 'Воспроизвести',
   'miniPlayer.pause': 'Пауза',
   'miniPlayer.playing': 'Играет',
+  'miniPlayer.paused': 'На паузе',
   'miniPlayer.source.userRecording': 'Мой дубль',
   'miniPlayer.source.select': 'Выбери источник',
 

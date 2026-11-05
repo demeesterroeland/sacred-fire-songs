@@ -1,6 +1,6 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 1.80
+**Version:** 1.81
 **Status:** Living Document
 **Date:** Nov 5, 2026
 
@@ -63,6 +63,7 @@
 | **1.80** | Nov 5, 2026 | Epic 6.1: Story 6.1.19 (#403, G4.6) implemented on `feat/ux-v2` — **Shared with me** page (`/library/shared`) listing takes shared with me with the sharer and a **New** marker, entered from the account menu and a Library row (unread count in words); opening a song's Practice drawer marks its notifications read and the bell badge drops (UXD-3, UXA-029). |
 | **1.79** | Nov 5, 2026 | Epic 6.1: Story 6.1.18 (#402, G4.5) implemented on `feat/ux-v2` — the Share dialog says who can be found (registered members) with an empty state and invite hint, and on a private song lists both effects (lyrics become public, take is shared) before anything changes; non-owners get an explanation instead of a toast. |
 | **1.78** | Nov 5, 2026 | Epic 6.1: Story 6.1.30 (#414, G8.1) implemented on `feat/ux-v2` — Add to playlist is a bottom sheet with "New playlist" first, check marks and tap-to-toggle; Story 3.1.4.6 reused (one `createPlaylist` action). |
+| **1.81** | Nov 5, 2026 | Epic 6.1: Story 6.1.13 (#397, G3.2) implemented on `feat/ux-v2` — calm mini player (plain bar, accent only on play, state in words), provider buttons only for providers with a link, "Open player", wrapping status line. |
 | **1.77** | Nov 5, 2026 | Epic 6.1: Story 6.1.9 (#393, G2.4) implemented on the integration branch `feat/ux-v2` — sticky Practice · Playlist · ♥ action bar on the song page (phones). |
 | **1.76** | Nov 5, 2026 | Epic 6.1: Story 6.1.29 (#413, G7.1) implemented on `feat/ux-v2` — focusing the search field shows the last 5 recent searches (clearable) and the top-level categories as chips. |
 | **1.75** | Nov 5, 2026 | Epic 6.1: Story 6.1.17 (#401, G4.4) implemented on `feat/ux-v2` — take actions open as a grouped bottom action sheet (Play / Edit name / Download · Share / Singer / Make public / Copy link · Delete alone in red), rows ≥ 44 px, 32 px swipe handle; shared-with-me takes stay listen only. |
@@ -1654,7 +1655,7 @@ Owner decision of Nov 4, 2026: sober greyscale interface with one accent, smalle
 | 6.1.10 | #394 | `G2.5` | C | As a Musician, I want auto-scroll and transpose in the same viewer toolbar so that all reading tools live in one place | #390 |
 | 6.1.11 | #395 | `G2.6` | C | As a Contributor, I want a reserved slot for a variant / language switch under the song title so that song variants and translations fit the sober layout later | #391 |
 | 6.1.12 | #396 | `G3.1` | A | **[Implemented on feat/ux-v2]** As a reader, I want the mini player to appear only after I press play so that it does not cover the lyrics and sheets on every song | — |
-| 6.1.13 | #397 | `G3.2` | C | As a Guest, I want the player and reference tab to be calm and exact so that I know which provider is playing | #385 |
+| 6.1.13 | #397 | `G3.2` | C | **[Implemented on feat/ux-v2]** As a Guest, I want the player and reference tab to be calm and exact so that I know which provider is playing | #385 |
 | 6.1.14 | #398 | `G4.1` | A | **[Implemented on feat/ux-v2]** As a Member, I want one name — Practice — for the rehearsal feature so that menu, drawer, tabs, badge and library all say the same thing | — |
 | 6.1.15 | #399 | `G4.2` | A | **[Implemented on feat/ux-v2]** As a Member, I want takes shared with me listed separately from my own takes so that I see who shared what | #398 |
 | 6.1.16 | #400 | `G4.3` | A | **[Implemented on feat/ux-v2]** As a Member, I want text labels next to take status icons so that I understand 'public', 'shared' and 'pending invite' without a tooltip | #398 |

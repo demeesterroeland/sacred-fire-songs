@@ -1,11 +1,12 @@
 # UX v2: Agent Decisions (ADR-lite)
 
-**Version:** 1.22 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375)
+**Version:** 1.23 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375)
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.23 | Nov 5, 2026 | Added UXA-034 and UXA-035 (Listen tab providers and status; calm mini player; #397). |
 | 1.22 | Nov 5, 2026 | Added UXA-029 (Shared with me: badge on the bell only, entry as a Library row, read rules; #403). |
 | 1.21 | Nov 5, 2026 | Added UXA-028 (Share dialog: private-song confirmation moves into the dialog, wording of the two effects, who the search finds; #402). |
 | 1.20 | Nov 5, 2026 | Added UXA-027 (Add to playlist sheet: tap removes, New playlist inline, sheet stays open; #414). |
@@ -60,6 +61,8 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 | UXA-026 | Nov 5, 2026 | #393 | Action bar style and copy: Practice in accent text with take count, Playlist and Like in grey, new short labels "Playlist" / "Like" / "Liked"; members reuse the playlist popover until #414 | yes |
 | UXA-027 | Nov 5, 2026 | #414 | Add to playlist sheet: tap on a check removes the song, "New playlist" opens a name field in the first row, the sheet stays open until Done | yes |
 | UXA-028 | Nov 5, 2026 | #402 | Share dialog: the private-song confirmation lives inside the dialog and lists both effects; the song becomes public when the owner confirms, before a member is picked | yes |
+| UXA-034 | Nov 5, 2026 | #397 | Listen tab: one button per provider with a link, also for a single provider; chosen = surface + border + check (no brand colours); a status line says what plays and whether it is paused | yes |
+| UXA-035 | Nov 5, 2026 | #397 | Mini player: plain surface bar, grey progress, accent only on the play button, equalizer and pulsing dot removed, subtitle "Playing · name" / "Paused · name"; "Control Track" becomes "Open player" | yes |
 | UXA-029 | Nov 5, 2026 | #403 | Shared with me: the unread badge stays on the bell only (account menu and Library entries say "n new" in words), the Library entry is a row under the tabs (not a fifth tab), one row per take, opening Practice marks the song's notifications read | yes |
 
 ---
@@ -325,3 +328,21 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 - **Choice:** badge (a): one thing, one badge. The account menu and Library entries say "3 new" in words, so the count is visible without a second dot, and the avatar stays calm. Library entry (b): the tab row was fitted to 390 px in #407 and a fifth tab would scroll off; the page is a breadcrumb page (Library › Shared with me). Rows (b): each take has its own sharer, name and link, so one tap lands on the right take (the permalink opens the song with Practice on it). Read rule (b), as the story says; the deep link opens the drawer too, so tapping a row also clears it. The mark-read call updates every unread notification of the song, also ones older than the bell's latest 20.
 - **Consequences:** the "n new" count, like the bell, counts the latest 20 notifications, so it tops out at 20; opening Practice still marks older unread rows of that song read (review: before, an unread row older than the latest 20 never cleared). a user who only opens the list without opening a song still sees "New" and the bell number; "Mark all as read" in the bell remains the way to clear them. If a notification was dismissed or deleted, the share still lists but without a "New" marker. A song the recipient cannot read (private) is named from the notification snapshot, else by the take name. New keys in 8 locales: `sharedWithMe.title|empty|new|unreadCount`, `guestGate.sharedWithMe.title|reason` (Quechua to proofread).
 - **Confirm:** yes (no avatar badge, entry placement, copy)
+
+### UXA-034 · Listen tab: providers and status line
+
+- **Date / story:** Nov 5, 2026 · #397 (G3.2)
+- **Context:** the story says provider buttons appear only for providers with a link ("verify current behaviour first"). Verified: the buttons already depended on the link, but only appeared when the song had two or more providers; with one link the tab showed a bare player and no name. The Gherkin expects a "YouTube" button for a song with only a YouTube link. Each button also carried a brand colour (red, orange, green) when chosen.
+- **Options:** (a) keep hiding the buttons for a single provider; (b) always show the buttons of the providers that exist; and either brand colours or greys for the chosen one.
+- **Choice:** (b) with greys. The buttons are a labelled group in a fixed order (YouTube, SoundCloud, Spotify), 44 px tall; the chosen one has `aria-pressed`, a surface background, a border and a check (never colour alone). A line under the buttons (`role="status"`) says *Playing: YouTube Reference* or *Paused: …* while the bar is visible, so it is clear which reference or take plays. The Record tab status line may wrap (no truncation) and loses its pulsing dot.
+- **Consequences:** a song with one link now shows one (already pressed) button; the brand colours of the provider buttons are gone (the embedded players keep their own look). New keys `rehearsal.listen.status` and `miniPlayer.paused` in eight languages (Quechua to be proofread).
+- **Confirm:** yes (single provider now shows a button, brand colours removed, copy)
+
+### UXA-035 · Calm mini player and "Open player"
+
+- **Date / story:** Nov 5, 2026 · #397 (G3.2)
+- **Context:** the bar was solid accent with animated equalizer bars; "Control Track" on the Record tab did not say what it does. Design rules: greyscale plus one accent, no decorative motion, state never by colour or motion alone.
+- **Options:** keep the equalizer under `motion-safe`, or remove it; accent bar, or plain bar with an accent play button.
+- **Choice:** plain `bg-surface` bar with `border-line-strong`; progress is grey; the play/pause button is the only accent element. The equalizer is removed (a decorative animation says less than the word); the subtitle reads *Playing · name* or *Paused · name*. `rehearsal.controlTrack` becomes **Open player** (it opens the Listen tab).
+- **Consequences:** `miniPlayer.playing` is now shown in the bar (it was only a tooltip). The small equalizer in the desktop Practice header button (song page) is outside the player and is untouched; it is not under `motion-safe` yet.
+- **Confirm:** yes (look, copy)
