@@ -1,11 +1,12 @@
 # UX v2: Phone Validation Script
 
-**Version:** 1.20 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
+**Version:** 1.21 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.21 | Nov 5, 2026 | Added the #413 section (recent searches and category chips in the search field). |
 | 1.20 | Nov 5, 2026 | Added #401 (take actions in a bottom sheet). |
 | 1.19 | Nov 5, 2026 | Added #411 (guest draft banner on Add Song). |
 | 1.18 | Nov 5, 2026 | Added the #408 section (bottom bar Home · Search · Library); #387 step 2 labels updated. |
@@ -286,3 +287,18 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 - [ ] 7. Open the sheet and drag the grey bar down: the sheet follows your finger and closes when you let go after a long drag. A tap on the bar or a short slow drag leaves it open. Tapping outside the sheet also closes it.
 - [ ] 8. Look at a take under **Shared with me** (or **Public takes**): no **⋯** button — only its play button.
 - [ ] 9. Switch the language to Dutch, Spanish, Italian, Russian, French, Portuguese and Quechua and open the sheet: all rows are translated and Delete is still alone at the bottom.
+
+### #413 · G7.1 Recent searches and category chips
+
+**Preconditions:** signed out (guest) on a 390 px phone, English; light and dark. Clear the site data first so the recent searches start empty. Seed data as in the setup section.
+
+- [ ] 1. Open `/songs` and tap the search field. **Expected:** a panel opens under the top bar with only a **Categories** heading and grey chips (The Elements, Nature, …); no empty "Recent searches" heading.
+- [ ] 2. Type `agua`, press Enter on the keyboard. Open `/songs` again and tap the search field. **Expected:** **Recent searches** lists `agua` above **Categories**. Screenshot: `docs/ux-research/screenshots/ux-v2/413/after-light/mobile/guest/01-search-focused.webp`. Before: `docs/ux-research/screenshots/ux-v2/413/before-light/mobile/guest/01-search-focused.webp`.
+- [ ] 3. Search six different words one after another (leave the field after each). **Expected:** only the last 5 are listed, newest on top.
+- [ ] 4. Tap a recent search. **Expected:** the song list shows the results for that word and the panel closes.
+- [ ] 5. Tap the **✕** next to one search: only that one goes. Tap **Clear all**: the searches go, the categories stay. Reload the page: they are still gone.
+- [ ] 6. Tap a category chip (e.g. **Nature**). **Expected:** the song list shows only songs of that category. Tap the field again: that chip is marked with a check and a dark fill (not just a colour). Tap it again: the filter is removed.
+- [ ] 7. With the panel open, tap anywhere outside it: it closes. Open it again and press Esc (hardware keyboard): it closes.
+- [ ] 8. Go to Home and tap **Search** in the bottom bar. **Expected:** the song list opens, the cursor is in the field and the panel is open.
+- [ ] 9. Every row, **✕**, **Clear all** and chip is easy to hit with a thumb (at least 44 px) and the text is at least as large as the grey meta line.
+- [ ] 10. Repeat steps 1–2 and 6 in dark mode. Screenshot: `…/413/after-dark/mobile/guest/01-search-focused.webp`. Switch the language to Dutch: the headings **Recente zoekopdrachten**, **Categorieën** and **Alles wissen** show.

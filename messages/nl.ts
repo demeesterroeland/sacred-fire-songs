@@ -618,6 +618,7 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'header.searchOptions': 'Zoekopties',
   'header.recentSearches': 'Recente zoekopdrachten',
   'header.clearAll': 'Alles wissen',
+  'header.suggestionsHint': 'Druk op pijl omlaag voor recente zoekopdrachten en categorieën.',
   'header.addSong': 'Lied toevoegen',
   'header.newPlaylist': 'Nieuwe afspeellijst',
 

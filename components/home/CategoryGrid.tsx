@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { fetchCategoryTree, type TaxonomyNode } from '@/lib/taxonomyUtils';
+import { sortCategories } from '@/lib/categoryOrder';
 import { renderCategoryIcon } from '@/lib/iconUtils';
 import { useLocale } from '@/context/LocaleContext';
 import Link from 'next/link';
@@ -51,15 +52,6 @@ function TagList({ tags }: { tags: TaxonomyNode[] }) {
   );
 }
 
-const CATEGORY_ORDER = [
-  'The Elements',
-  'Nature',
-  'Lineage & Tradition',
-  'Medicine & Healing',
-  'Spiritual Concepts',
-  'Languages',
-];
-
 export default function CategoryGrid() {
   const { t } = useLocale();
   const { data: tree = [], isLoading } = useQuery({
@@ -68,14 +60,7 @@ export default function CategoryGrid() {
     staleTime: 1000 * 60 * 60,
   });
 
-  const sortedTree = [...tree].sort((a, b) => {
-    const indexA = CATEGORY_ORDER.indexOf(a.name);
-    const indexB = CATEGORY_ORDER.indexOf(b.name);
-    if (indexA !== -1 && indexB !== -1) return indexA - indexB;
-    if (indexA !== -1) return -1;
-    if (indexB !== -1) return 1;
-    return a.name.localeCompare(b.name);
-  });
+  const sortedTree = sortCategories(tree);
 
   if (isLoading) {
     return (

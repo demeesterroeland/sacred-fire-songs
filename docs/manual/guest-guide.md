@@ -1,11 +1,12 @@
 # Guest Guide (draft)
 
-**Version:** 0.13 | **Date:** Nov 5, 2026
+**Version:** 0.14 | **Date:** Nov 5, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.14 | Nov 5, 2026 | Search field: recent searches and category chips appear when you tap it (UX v2, #413). |
 | 0.13 | Nov 5, 2026 | Add Song as a guest: a banner says saving needs an account; your draft is kept when you sign in (UX v2, #411). |
 | 0.12 | Nov 5, 2026 | Bottom bar is Home · Search · Library; Songs and Create are gone from it (UX v2, #408). |
 | 0.11 | Nov 5, 2026 | Home categories: grey tiles, tags as plain text with a grey song count (UX v2, #388). |
@@ -35,7 +36,7 @@ The ☰ menu repeats the main places (Home, Songs, Playlists, Favorites, Drafts,
 ## Finding a song
 
 1. **Browse by category** on Home: groups such as *The Elements* (Air, Earth, Fire, Water), *Nature*, *Lineage & Tradition*, *Medicine & Healing*. Each tag is a plain link; the grey number after it is how many songs it holds. "+3 more" shows the rest.
-2. **Search:** tap the search field and type a title, a line of the lyrics, an author or a category. Accents do not matter ("aguita" finds "Agüita").
+2. **Search:** tap the search field and type a title, a line of the lyrics, an author or a category. Accents do not matter ("aguita" finds "Agüita"). Before you type, the field offers your last 5 searches (tap one to repeat it, **✕** removes one, **Clear all** removes them all; they are kept on this device only) and the main categories as grey buttons (tap one to show only those songs; tap it again to remove the filter). Tap outside the list or press Esc to close it.
 3. **Filters:** the slider button in the search field opens *Search options*: sort order, content type (songs with chords / with melody) and category & tag filters. Tap **Show results**.
 4. **Search** in the bottom bar lists all songs A–Z and is ready for typing. Each row shows the title, a grey line *author · category · language* and the key on the right; tap the row to open the song.
 5. **Library → Artists** lists every author with their number of songs.
