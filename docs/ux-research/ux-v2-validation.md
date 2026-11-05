@@ -1,11 +1,12 @@
 # UX v2: Phone Validation Script
 
-**Version:** 1.17 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
+**Version:** 1.19 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.19 | Nov 5, 2026 | Added #411 (guest draft banner on Add Song). |
 | 1.18 | Nov 5, 2026 | Added the #408 section (bottom bar Home · Search · Library); #387 step 2 labels updated. |
 | 1.17 | Nov 5, 2026 | Added #388 (calm category grid). |
 | 1.16 | Nov 5, 2026 | Added #400 (take status in words). |
@@ -260,3 +261,13 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 - [ ] 6. **Home** and the song list have no **+**. As a guest, Library shows the sign-in preview and no **+**.
 - [ ] 7. Open `/explore`: a "Page not found" page, not Home.
 - [ ] 8. Switch the language to Dutch, Spanish, Italian, Russian, French, Portuguese and Quechua: the middle item is translated (Zoeken, Buscar, Cerca, Поиск, Rechercher, Pesquisar, Maskay) and the three items still fit one row.
+
+### #411 · G6.2 Guest draft on Add Song
+
+**Preconditions:** signed out (guest) on a 390 px phone, English; run once in light and once in dark. A member account to sign in with.
+
+- [ ] 1. Open `/songs/add`. **Expected:** above the form a grey box says **Draft now — sign in to save** and "Your draft stays on this device while you sign in.", with an orange **Sign in** button. Screenshot: `docs/ux-research/screenshots/ux-v2/411/after-light/mobile/guest/06-song-add.webp`. Before: `docs/ux-research/screenshots/ux-v2/411/before-light/mobile/guest/06-song-add.webp`.
+- [ ] 2. Type a title and a few lyric lines.
+- [ ] 3. Tap **Sign in** in the box and sign in. **Expected:** you come back to Add Song, the box is gone and the title and lyrics you typed are still there.
+- [ ] 4. Sign out, open `/songs/add`, type a title and lyrics and press **Publish Song**. **Expected:** the sign-in page opens; after signing in you are back on Add Song with the text kept.
+- [ ] 5. Switch the language to Dutch, Spanish, Italian, Russian, French, Portuguese and Quechua: the box is translated. Repeat step 1 in dark mode (`…/411/after-dark/mobile/guest/06-song-add.webp`).

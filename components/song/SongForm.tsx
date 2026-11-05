@@ -9,6 +9,9 @@ import { useState, useEffect } from 'react';
 import { flushSync } from 'react-dom';
 import { parseChordPro, hasChords } from '@/lib/chordProParsing';
 import { useAuth } from '@/hooks/useAuth';
+import { readSongDraft, writeSongDraft, clearSongDraft } from '@/lib/songs/songDraft';
+import { signInHref } from '@/lib/auth/guestGate';
+import GuestDraftBanner from '@/components/song/GuestDraftBanner';
 import CategorySelector from './CategorySelector';
 import ChordProEditor from './ChordProEditor';
 
@@ -39,6 +42,8 @@ interface SongFormProps {
     versionId?: string; // For updating the specific version
 }
 
+const ADD_SONG_PATH = '/songs/add';
+
 const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
     const { t } = useLocale();
     const {
@@ -62,7 +67,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
         }
     });
 
-    const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth();
 
     const queryClient = useQueryClient();
     const router = useRouter();
@@ -87,42 +92,28 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
     const currentCategoryIds = watch('categoryIds') || [];
 
 
-    // Persistence Logic (Create Mode)
+    // Persistence Logic (Create Mode): the draft survives a sign-in round trip (#411)
     useEffect(() => {
         if (mode !== 'create') return;
-        const STORAGE_KEY = 'song-form-draft';
 
         // Restore on mount
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-            try {
-                const parsed = JSON.parse(saved);
-                // Check if draft has meaningful data before restoring (optional, but good UX)
-                const hasData = Object.values(parsed).some(v => Array.isArray(v) ? v.length > 0 : !!v);
+        const parsed = readSongDraft();
+        if (parsed) {
+            Object.keys(parsed).forEach((key) => {
+                setValue(key as keyof SongFormData, parsed[key] as never);
+            });
 
-                if (hasData) {
-                    // Update form values
-                    Object.keys(parsed).forEach((key) => {
-                        setValue(key as keyof SongFormData, parsed[key]);
-                    });
-
-                    // Restore UI states
-                    if (parsed.key || parsed.capo || (parsed.tuning && parsed.tuning !== 'Standard')) {
-                        setIsMetadataExpanded(true);
-                    }
-                    if (parsed.categoryIds && parsed.categoryIds.length > 0) {
-                        setIsTagsExpanded(true);
-                    }
-                }
-            } catch (e) {
-                console.error("Failed to restore draft", e);
+            // Restore UI states
+            if (parsed.key || parsed.capo || (parsed.tuning && parsed.tuning !== 'Standard')) {
+                setIsMetadataExpanded(true);
+            }
+            if (Array.isArray(parsed.categoryIds) && parsed.categoryIds.length > 0) {
+                setIsTagsExpanded(true);
             }
         }
 
         // Save on change
-        const subscription = watch((value) => {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
-        });
+        const subscription = watch((value) => writeSongDraft(value));
         return () => subscription.unsubscribe();
     }, [mode, setValue, watch]);
 
@@ -335,7 +326,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
         },
         onSuccess: (id) => {
             if (mode === 'create') {
-                localStorage.removeItem('song-form-draft');
+                clearSongDraft();
             }
             queryClient.invalidateQueries({ queryKey: SONG_KEYS.all() });
             queryClient.invalidateQueries({ queryKey: SONG_KEYS.detail(id) });
@@ -352,13 +343,16 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
 
     const handleFormSubmit = (data: SongFormData) => {
         if (!user) {
-            router.push('/auth/login?message=Please log in to save songs');
+            // Keep the way back to this form; the draft is already in storage (#411).
+            router.push(signInHref(ADD_SONG_PATH));
             return;
         }
         mutation.mutate(data);
     };
 
     return (
+        <>
+        {mode === 'create' && !user && !authLoading && <GuestDraftBanner next={ADD_SONG_PATH} />}
         <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 p-4 sm:p-6 rounded-2xl w-full max-w-2xl mx-auto shadow-xl min-w-0">
             <div className="space-y-4">
                 {/* File Upload Toggle Section */}
@@ -657,6 +651,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                 </button>
             </div>
         </form>
+        </>
     );
 }
 
