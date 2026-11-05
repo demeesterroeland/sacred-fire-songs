@@ -133,12 +133,10 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       // Switch to "Voice Recorder" tab
       await voiceRecorderTab.click();
 
-      // Verify that the Guest Sign In CTA overlay card is visible
-      const ctaTitle = page.locator('h4:has-text("Personal Audio Recorder")');
-      await expect(ctaTitle).toBeVisible();
-
-      const ctaBtn = page.locator('button:has-text("Sign In to Record")');
-      await expect(ctaBtn).toBeVisible();
+      // Verify that the unified GuestGate (Story 6.1.26) covers the recorder
+      const gate = page.locator('[data-testid="guest-gate"][data-feature="recorder"]');
+      await expect(gate).toBeVisible();
+      await expect(gate.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', /\/auth\/login\?next=/);
     });
   });
 

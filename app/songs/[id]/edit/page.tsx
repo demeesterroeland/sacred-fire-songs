@@ -1,10 +1,11 @@
 'use client';
 
-import { useParams } from 'next/navigation';
+import { useParams, usePathname } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 
 import SongForm from '@/components/song/SongForm';
-import AccessDenied from '@/components/common/feedback/AccessDenied';
+import NotYoursToEdit from '@/components/common/feedback/NotYoursToEdit';
+import GuestGate from '@/components/common/GuestGate';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { useLocale } from '@/context/LocaleContext';
@@ -46,8 +47,8 @@ export default function EditSongPage() {
     const { t } = useLocale();
     const params = useParams();
     const id = typeof params.id === 'string' ? params.id : params.id?.[0];
+    const pathname = usePathname();
     const { user, loading: authLoading } = useAuth();
-
 
     const { data: song, isLoading, error } = useQuery({
         queryKey: ['song', id, 'edit'],
@@ -56,10 +57,19 @@ export default function EditSongPage() {
         retry: 1
     });
 
-    if (isLoading) return <div className="p-8 text-gray-900 dark:text-white text-center">{t('common.loading')}</div>;
+    // Guests get the unified GuestGate (Story 6.1.26); the warm "not yours" copy is for signed-in non-owners.
+    if (!authLoading && !user) {
+        return (
+            <div className="mx-auto max-w-xl p-4">
+                <GuestGate feature="edit" next={pathname || `/songs/${id}/edit`} />
+            </div>
+        );
+    }
+
+    if (isLoading || authLoading) return <div className="p-8 text-fg text-center">{t('common.loading')}</div>;
     if (error || !song) {
         console.error("Fetch error:", error);
-        return <div className="p-8 text-red-500 text-center">{t('song.edit.loadError')}</div>;
+        return <div className="p-8 text-danger text-center">{t('song.edit.loadError')}</div>;
     }
 
     // Permission Check (Client-side visual check, RLS enforces actual security)
@@ -75,7 +85,7 @@ export default function EditSongPage() {
         const isAdmin = user?.role === 'admin';
 
         if (!user || (!isOwner && !isAdmin)) {
-            return <AccessDenied />;
+            return <NotYoursToEdit songId={id} />;
         }
     }
 
@@ -97,7 +107,7 @@ export default function EditSongPage() {
 
 
     return (
-        <div className="min-h-screen bg-white dark:bg-gray-950 pb-20">
+        <div className="min-h-screen bg-bg pb-20">
 
             <main className="container mx-auto px-4 pt-4 lg:pt-8">
 

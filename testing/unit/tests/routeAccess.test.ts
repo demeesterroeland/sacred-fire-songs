@@ -7,16 +7,13 @@ import {
 
 describe('route access decision (story 6.1.22, unknown URLs are real 404s)', () => {
   it('exports the protected prefixes as the single source of truth', () => {
-    expect([...PROTECTED_PATH_PREFIXES].sort()).toEqual(['/account', '/admin', '/users']);
+    expect([...PROTECTED_PATH_PREFIXES].sort()).toEqual(['/admin']);
   });
 
   it.each([
-    '/account',
-    '/account/settings',
     '/admin',
     '/admin/users',
     '/admin/users/abc-123',
-    '/users/abc-123',
   ])('treats %s as protected', (path) => {
     expect(isProtectedPath(path)).toBe(true);
   });
@@ -48,6 +45,9 @@ describe('route access decision (story 6.1.22, unknown URLs are real 404s)', () 
     '/playlists/x',
     '/recordings/abc',
     '/notes',
+    '/account',
+    '/account/settings',
+    '/users/abc-123',
     '/supabase-api/rest/v1/songs',
   ])('keeps existing public/self-guarded route %s unprotected (pages guard themselves)', (path) => {
     expect(isProtectedPath(path)).toBe(false);
@@ -55,8 +55,9 @@ describe('route access decision (story 6.1.22, unknown URLs are real 404s)', () 
 
   it('redirects a guest to login on a protected path only', () => {
     expect(shouldRedirectToLogin('/admin/users', false)).toBe(true);
-    expect(shouldRedirectToLogin('/account/settings', false)).toBe(true);
-    expect(shouldRedirectToLogin('/users/abc', false)).toBe(true);
+    // Story 6.1.26: /account and /users render the GuestGate for guests instead.
+    expect(shouldRedirectToLogin('/account/settings', false)).toBe(false);
+    expect(shouldRedirectToLogin('/users/abc', false)).toBe(false);
     expect(shouldRedirectToLogin('/this-page-does-not-exist', false)).toBe(false);
     expect(shouldRedirectToLogin('/songs/abc', false)).toBe(false);
   });

@@ -17,6 +17,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState, Suspense } from "react";
 import { Mail, Lock, Sparkles, Flame, X, ArrowRight } from "lucide-react";
 import { useLocale } from "@/context/LocaleContext";
+import { safeNextPath } from '@/lib/auth/safeNext';
 
 export function LoginForm(props: React.ComponentPropsWithoutRef<"div">) {
   return (
@@ -79,7 +80,7 @@ function LoginFormContent({
       if (error) throw error;
 
       window.dispatchEvent(new Event("auth-role-change"));
-      router.push(next || "/");
+      router.push(safeNextPath(next));
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : t('common.errorOccurred'));
     } finally {

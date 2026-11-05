@@ -15,6 +15,7 @@ import ChordProEditor from './ChordProEditor';
 import { ArtistTagInput } from './ArtistTagInput';
 import { parseArtists, formatArtists, ensureArtistCategoryIds } from '@/lib/songs/artistUtils';
 import { useLocale } from '@/context/LocaleContext';
+import { safeNextPath } from '@/lib/auth/safeNext';
 
 type SongFormData = {
     title: string;
@@ -340,7 +341,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
             queryClient.invalidateQueries({ queryKey: SONG_KEYS.detail(id) });
             // Bust global filter counts (chords/melody/mine may have changed)
             queryClient.invalidateQueries({ queryKey: SONG_KEYS.globalFilterCounts() });
-            const returnTo = mode === 'create' ? (searchParams.get('next') || '/') : `/songs/${id}`;
+            const returnTo = mode === 'create' ? safeNextPath(searchParams.get('next')) : `/songs/${id}`;
             router.refresh();
             router.push(returnTo);
         },

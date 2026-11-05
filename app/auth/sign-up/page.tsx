@@ -2,10 +2,11 @@ import { createClient } from '@/lib/supabase/server';
 import { redirect } from 'next/navigation';
 import { BackButton } from '@/components/common/BackButton';
 import { SignUpForm } from '@/components/sign-up-form';
+import { safeNextPath } from '@/lib/auth/safeNext';
 
 export default async function SignUp(props: { searchParams: Promise<{ next?: string }> }) {
     const searchParams = await props.searchParams;
-    const next = searchParams.next || '/';
+    const next = safeNextPath(searchParams.next);
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
     if (user) redirect(next);

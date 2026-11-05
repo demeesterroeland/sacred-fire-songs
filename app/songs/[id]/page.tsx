@@ -12,6 +12,7 @@ import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Trash2, Edit2, Music, Guitar, Heart, MoreVertical, ListPlus, Mic, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
+import GuestGateSheet from '@/components/common/GuestGateSheet';
 import RehearsalDrawer from '@/components/song/RehearsalDrawer';
 import { makeSongPublic } from '@/lib/actions/rehearsal';
 import { useToggleFavorite } from '@/hooks/useToggleFavorite';
@@ -40,6 +41,7 @@ export default function SongDetailPage() {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isOverflowOpen, setIsOverflowOpen] = useState(false);
     const [isRehearsalDrawerOpen, setIsRehearsalDrawerOpen] = useState(false);
+    const [isGuestGateOpen, setIsGuestGateOpen] = useState(false);
     const [drawerRequestedTab, setDrawerRequestedTab] = useState<"media" | "recorder" | "auto">("auto");
     const [isAudioPlaying, setIsAudioPlaying] = useState(false);
     const [highlightRecordingId, setHighlightRecordingId] = useState<string | null>(null);
@@ -112,7 +114,7 @@ export default function SongDetailPage() {
         },
         enabled: !!user,
     });
-    const { isFav, handleToggle: handleToggleFavorite } = useToggleFavorite(id!, favoriteIds.has(id!));
+    const { isFav, handleToggle: handleToggleFavorite, signInGate: favouritesGate } = useToggleFavorite(id!, favoriteIds.has(id!));
 
     // Personal recordings — check if logged-in user has any recordings for this song's composition
     const { userRecordingCompositionIds } = useRecordingsQuery(user?.id);
@@ -336,15 +338,7 @@ export default function SongDetailPage() {
                         {!user && (
                             <button
                                 onClick={() => {
-                                    toast(t('song.signInForPlaylists'), {
-                                        action: {
-                                            label: t('song.signInAction'),
-                                            onClick: () => { window.location.href = `/auth/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`; },
-                                        },
-                                        classNames: {
-                                            actionButton: 'text-amber-400 text-xs font-bold hover:text-amber-300 transition-colors ml-2',
-                                        },
-                                    });
+                                    setIsGuestGateOpen(true);
                                 }}
                                 aria-label={t('song.addToPlaylist')}
                                 className="p-2 rounded-full transition-all duration-300 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
@@ -478,15 +472,7 @@ export default function SongDetailPage() {
                                 <button
                                     onClick={() => {
                                         setIsOverflowOpen(false);
-                                        toast(t('song.signInForPlaylists'), {
-                                            action: {
-                                                label: t('song.signInAction'),
-                                                onClick: () => { window.location.href = `/auth/login?next=${encodeURIComponent(window.location.pathname + window.location.search)}`; },
-                                            },
-                                            classNames: {
-                                                actionButton: 'text-amber-400 text-xs font-bold hover:text-amber-300 transition-colors ml-2',
-                                            },
-                                        });
+                                        setIsGuestGateOpen(true);
                                     }}
                                     className="w-full flex items-center gap-4 px-6 py-4 hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors text-left text-gray-700 dark:text-gray-300"
                                 >
@@ -534,6 +520,9 @@ export default function SongDetailPage() {
                     </div>
                 </>
             )}
+
+            <GuestGateSheet feature="addToPlaylist" open={isGuestGateOpen} onOpenChange={setIsGuestGateOpen} />
+            <GuestGateSheet feature="favourites" open={favouritesGate.open} onOpenChange={favouritesGate.onOpenChange} />
 
             {/* Rehearsal Drawer Sheet */}
             {currentVersion && (

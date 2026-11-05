@@ -24,6 +24,7 @@ import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLocale } from "@/context/LocaleContext";
 import { recordingPermalink } from "@/lib/songs/recordingLink";
+import GuestGate from "@/components/common/GuestGate";
 import { usePathname, useSearchParams } from "next/navigation";
 import RecordingShareModal from "./RecordingShareModal";
 import RecordingPublishModal from "./RecordingPublishModal";
@@ -1204,7 +1205,7 @@ export default function RehearsalDrawer({
               
               <div className="relative" style={{ display: activeTab === "recorder" ? "block" : "none" }}>
                   {/* Blurred overlay wrapper if guest */}
-                  <div className={!user ? "blur-[4px] pointer-events-none select-none" : ""}>
+                  <div className={!user ? "blur-[4px] pointer-events-none select-none" : ""} inert={!user} aria-hidden={!user || undefined}>
                     {/* Sticky Mini-Player Status Bar */}
                     {hasMedia && selectedMedia && (
                       <div className="flex items-center justify-between p-3.5 bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-950/50 rounded-2xl shrink-0">
@@ -1304,27 +1305,8 @@ export default function RehearsalDrawer({
                     </section>
                   </div>
 
-                  {/* CTA Lock Overlay Card */}
-                  {!user && (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center z-10 pointer-events-auto">
-                      <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-md p-6 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-xl max-w-sm space-y-4">
-                        <div className="w-12 h-12 bg-indigo-500/10 text-indigo-500 rounded-full flex items-center justify-center mx-auto">
-                          <Lock className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <h4 className="text-sm font-bold text-gray-900 dark:text-white">{t('rehearsal.guest.title')}</h4>
-                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
-                            {t('rehearsal.guest.description')}
-                          </p>
-                        </div>
-                        <Link href={`/auth/login?next=${encodeURIComponent(currentPath)}`}>
-                          <button className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer">
-                            {t('rehearsal.guest.signIn')}
-                          </button>
-                        </Link>
-                      </div>
-                    </div>
-                  )}
+                  {/* Unified GuestGate over the blurred preview (Story 6.1.26 / G6.1) */}
+                  {!user && <GuestGate feature="recorder" variant="overlay" next={currentPath} />}
                 </div>
 
               <div className="space-y-6 text-left" style={activeTab !== "media" ? { visibility: "hidden", height: 0, overflow: "hidden", margin: 0, padding: 0 } : undefined}>

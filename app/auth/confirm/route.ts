@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { type EmailOtpType } from "@supabase/supabase-js";
 import { type NextRequest, NextResponse } from "next/server";
+import { safeNextPath } from "@/lib/auth/safeNext";
 
 export async function GET(request: NextRequest) {
     const { searchParams, origin } = new URL(request.url);
@@ -26,10 +27,20 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient();
 
     // Helper to ensure we have a valid absolute URL for redirection
+    // `next` is untrusted: only same-site paths survive (absolute same-origin URLs are reduced to their path).
     const getRedirectUrl = (baseUrl: string) => {
-        if (next!.startsWith("http")) return next!;
+        let target = next!;
+        if (/^https?:\/\//i.test(target)) {
+            try {
+                const abs = new URL(target);
+                if (abs.origin !== origin && abs.origin !== baseUrl) return `${baseUrl}/`;
+                target = abs.pathname + abs.search + abs.hash;
+            } catch {
+                return `${baseUrl}/`;
+            }
+        }
         // Ensure 'next' starts with /
-        const path = next!.startsWith("/") ? next : `/${next}`;
+        const path = safeNextPath(target.startsWith("/") ? target : `/${target}`);
         return `${baseUrl}${path}`;
     };
 
