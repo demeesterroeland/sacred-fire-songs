@@ -1,11 +1,12 @@
 # Guest Guide (draft)
 
-**Version:** 0.16 | **Date:** Nov 5, 2026
+**Version:** 0.17 | **Date:** Nov 6, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.17 | Nov 6, 2026 | Sign-in and sign-up pages have a **Back** link instead of a ✕; it returns to the page you came from, else Home (UX v2, #409). |
 | 0.16 | Nov 5, 2026 | The player bar is calm (plain background, orange only on play) and says *Playing* or *Paused* with what plays; the Listen tab shows only the providers the song has (UX v2, #397). |
 | 0.15 | Nov 5, 2026 | Song page: a bar at the bottom with Practice, Playlist and Like; the ⋮ menu keeps Share (UX v2, #393). |
 | 0.14 | Nov 5, 2026 | Search field: recent searches and category chips appear when you tap it (UX v2, #413). |
@@ -67,6 +68,8 @@ The **Record** tab shows what members can do and a **Sign In to Record** button.
 Favourites, playlists, recently viewed, adding or editing songs, recording, account settings, singer profiles. Each of these screens shows the same grey preview with a lock, one sentence saying why it is locked and a **Sign in** button; after signing in you land on the screen you came from. Guests will be able to listen to public takes that the singer agreed to publish (Practice → Listen); recording, sharing and downloading stay members-only. The list of takes for guests follows in a later update. You can open the **Add Song** form and start typing as a guest: a grey box at the top says **Draft now — sign in to save**: saving a song needs an account. Your draft stays on this device, so after you sign in (from the box or when you press save) you are back on the form with your text still there.
 
 ## Creating an account
+
+The sign-in and sign-up pages have a **Back** link at the top left. It takes you back to the page you came from (for example the song), or to Home if you opened the page directly.
 
 1. Tap **Sign In** → **Join the Circle** (or go to *Create Account*).
 2. Enter e-mail and a password (twice) → **Create Account**.
