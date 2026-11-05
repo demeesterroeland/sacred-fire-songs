@@ -483,7 +483,7 @@ export default function RehearsalDrawer({
   // `isMiniPlayerVisible` ignores it, and the cleanup below stops it when leaving.
   const [mediaSessionStarted, dispatchMediaSession] = React.useReducer(mediaSessionReducer, false);
   // Story 6.1.15 / G4.2 (#399): my own takes and the takes shared with me are listed apart.
-  const { mine: myTakes, shared: sharedTakes } = useMemo(() => partitionTakes(recordings), [recordings]);
+  const { mine: myTakes, shared: sharedTakes, public: publicTakes } = useMemo(() => partitionTakes(recordings), [recordings]);
   const songRecordingIds = useMemo(() => recordings.map((r) => r.id), [recordings]);
   const miniPlayerVisible = isMiniPlayerVisible({ mediaSessionStarted, activePlaybackId, songRecordingIds });
 
@@ -605,7 +605,7 @@ export default function RehearsalDrawer({
     if (oldIndex < 0 || newIndex < 0) return;
     const reordered = arrayMove(myTakes, oldIndex, newIndex);
 
-    setRecordings([...reordered, ...sharedTakes]);
+    setRecordings([...reordered, ...sharedTakes, ...publicTakes]);
 
     startOrderTransition(async () => {
       const res = await reorderUserRecordings(reordered.map((r) => r.id));
@@ -1351,14 +1351,17 @@ export default function RehearsalDrawer({
                       )}
                     </section>
 
-                    {/* Takes shared with me: listen only, hidden when there are none (Story 6.1.15 / G4.2) */}
-                    {user && !isLoading && sharedTakes.length > 0 && (
-                      <section className="mt-6 space-y-3" data-testid="shared-takes">
-                        <h3 className="text-caption font-semibold text-fg-subtle uppercase tracking-wider text-left">{t('practice.takes.shared')}</h3>
+                    {/* Takes of others, listen only: shared with me, then public takes; each hidden when empty (Story 6.1.15 / G4.2) */}
+                    {user && !isLoading && ([
+                      { key: 'shared', testId: 'shared-takes', label: t('practice.takes.shared'), takes: sharedTakes },
+                      { key: 'public', testId: 'public-takes', label: t('practice.takes.public'), takes: publicTakes },
+                    ] as const).map((group) => group.takes.length > 0 && (
+                      <section key={group.key} className="mt-6 space-y-3" data-testid={group.testId}>
+                        <h3 className="text-meta font-semibold text-fg-muted text-left">{group.label}</h3>
                         <DndContext sensors={dndSensors} collisionDetection={closestCenter}>
-                          <SortableContext items={sharedTakes.map((r) => r.id)} strategy={verticalListSortingStrategy} disabled>
+                          <SortableContext items={group.takes.map((r) => r.id)} strategy={verticalListSortingStrategy} disabled>
                             <div className="rounded-panel border border-line bg-surface p-1 space-y-0.5">
-                              {sharedTakes.map((rec) => (
+                              {group.takes.map((rec) => (
                                 <SortableRecordingItem
                                   key={rec.id}
                                   rec={rec}
@@ -1379,7 +1382,7 @@ export default function RehearsalDrawer({
                           </SortableContext>
                         </DndContext>
                       </section>
-                    )}
+                    ))}
                   </div>
 
                   {/* Unified GuestGate over the blurred preview (Story 6.1.26 / G6.1) */}
@@ -1595,9 +1598,10 @@ export default function RehearsalDrawer({
                 {([
                   { key: 'mine', label: t('practice.takes.mine'), takes: myTakes },
                   { key: 'shared', label: t('practice.takes.shared'), takes: sharedTakes },
-                ] as const).map((group, i) => group.takes.length > 0 && (
+                  { key: 'public', label: t('practice.takes.public'), takes: publicTakes },
+                ] as const).map((group, i, all) => group.takes.length > 0 && (
                   <React.Fragment key={group.key}>
-                    {(hasMedia || (i > 0 && myTakes.length > 0)) && <DropdownMenuSeparator className="bg-line my-2" />}
+                    {(hasMedia || all.slice(0, i).some((g) => g.takes.length > 0)) && <DropdownMenuSeparator className="bg-line my-2" />}
                     <DropdownMenuLabel>{group.label}</DropdownMenuLabel>
                     {group.takes.map(rec => (
                       <DropdownMenuItem key={rec.id} className="min-h-tap" onClick={() => {

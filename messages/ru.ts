@@ -267,6 +267,7 @@ const ru: Partial<Record<TranslationKey, string>> = {
   'rehearsal.headphonesHint': '🎧 Надень наушники, чтобы избежать наводок',
   'practice.takes.mine': 'Мои дубли',
   'practice.takes.shared': 'Поделились со мной',
+  'practice.takes.public': 'Публичные дубли',
   'rehearsal.demo.take1': 'Вокальная практика — пробный дубль 1',
   'rehearsal.demo.take2': 'Гитарные аккорды — проход 2',
   'rehearsal.loadingRecordings': 'Загружаем дубли...',

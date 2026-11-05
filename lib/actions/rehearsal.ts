@@ -132,9 +132,24 @@ export async function getUserRecordings(songVersionId: string): Promise<UserReco
     }
   }
 
+  // Takes of others that were shared with me (a recipient may read its own share rows).
+  // A private take of someone else is readable only through a share, so it counts as shared too.
+  const otherIds = user ? rawRecordings.filter((r) => r.user_id !== user.id).map((r) => r.id) : [];
+  const sharedWithMe = new Set<string>();
+  if (user && otherIds.length > 0) {
+    const { data: myShares } = await supabase
+      .from("recording_shares")
+      .select("recording_id")
+      .eq("shared_with_user_id", user.id)
+      .in("recording_id", otherIds);
+    for (const s of myShares ?? []) sharedWithMe.add(s.recording_id);
+  }
+  const isSharedWithMe = (rec: { id: string; user_id: string; is_public?: boolean | null }) =>
+    !!user && rec.user_id !== user.id && (sharedWithMe.has(rec.id) || !rec.is_public);
+
   // Owners of takes shared with me: the share policy lets a recipient read the owner's profile.
   const otherOwnerIds = user
-    ? Array.from(new Set(rawRecordings.filter((r) => r.user_id !== user.id).map((r) => r.user_id)))
+    ? Array.from(new Set(rawRecordings.filter((r) => isSharedWithMe(r)).map((r) => r.user_id)))
     : [];
   const ownerNames = new Map<string, string | null>();
   if (otherOwnerIds.length > 0) {
@@ -149,7 +164,7 @@ export async function getUserRecordings(songVersionId: string): Promise<UserReco
   const recordingsWithUrls = await Promise.all(
     rawRecordings.map(async (rec) => {
       const isOwner = user ? rec.user_id === user.id : false;
-      const isShared = user ? rec.user_id !== user.id && !rec.is_public : false;
+      const isShared = isSharedWithMe(rec);
       // Strict DRM-lite: only the owner can download and only the owner can share
       const canDownload = isOwner;
       const canShare = isOwner;
@@ -159,7 +174,7 @@ export async function getUserRecordings(songVersionId: string): Promise<UserReco
         : null;
 
       const sharedWith = isOwner ? sharesMap.get(rec.id) || [] : undefined;
-      const sharedByNameFor = isOwner ? undefined : ownerNames.get(rec.user_id) ?? null;
+      const sharedByNameFor = isShared ? ownerNames.get(rec.user_id) ?? null : undefined;
 
       if (!rec.storage_path) {
         return {

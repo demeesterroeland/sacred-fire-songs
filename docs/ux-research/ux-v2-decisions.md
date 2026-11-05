@@ -36,7 +36,7 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 | UXA-013 | Nov 5, 2026 | #410 | Fake demo playlists and per-card locks removed from the guest Library; add-to-playlist becomes a bottom sheet gate | yes |
 | UXA-014 | Nov 5, 2026 | #410 | Signed-in users still see public takes without singer consent; UXD-2 covers guests only | yes |
 | UXA-015 | Nov 5, 2026 | #386 | Song rows drop the chord / melody / take icons and the author/tag links | yes |
-| UXA-016 | Nov 5, 2026 | #399 | "Shared with me" holds every take of another user (shared or public); the sharer is the full name, else e-mail; shared rows are listen only | yes |
+| UXA-016 | Nov 5, 2026 | #399 | "Shared with me" holds takes shared with me; public takes of others get their own "Public takes" list; the sharer is named by full name only; rows of others are listen only | yes |
 
 ---
 
@@ -180,6 +180,6 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 - **Date / story:** Nov 5, 2026 · #399 (G4.2)
 - **Context:** the story splits the Record tab in "My takes" and "Shared with me". The take query returns more than those two groups: signed-in users also see public takes of other users (UXA-014). A recipient can read the profile of a take's owner only through the share policy.
 - **Options:** (a) a third list for public takes of others; (b) show them under "Shared with me"; (c) hide them in the drawer.
-- **Choice:** (b). The split is "I own it" versus "someone else's": a public take is shared with everyone, and a third heading is more noise than help. The row says **Shared by {name}** with the owner's full name, else e-mail (the e-mail is already shown to the same person in the share dialog). When the owner's profile cannot be read (a public take of a stranger) the meta line falls back to the date and length (on a shared row the date is dropped so the name is not cut off at 390 px), and a share without a readable name says "Shared with you" in words. Shared rows are listen only: no ⋯ menu, no rename; the 14 px people icon is removed because text now says it. The mini-player source menu uses the same two groups. No migration, no RLS change.
-- **Consequences:** if the owner wants public takes of others kept apart, add a third group in `partitionTakes`.
-- **Confirm:** yes (public takes of others now sit under "Shared with me")
+- **Choice:** (a), after review: under "Shared with me" a public take nobody shared looked shared, and a sharer's unrelated public takes read "Shared by X". A take counts as shared when the recipient has a share row for it (or it is private and still readable, which only a share allows); other public takes go to **Public takes**. The row says **Shared by {name}** with the owner's full name only; the e-mail is never shown (profile reads are not meant for display, and admins can read every profile). Without a name the row says "Shared with you"; public rows keep the date and length (on a shared row the date is dropped so the name is not cut off at 390 px), and a share without a readable name says "Shared with you" in words. Shared rows are listen only: no ⋯ menu, no rename; the 14 px people icon is removed because text now says it. The mini-player source menu uses the same groups. No migration, no RLS change.
+- **Consequences:** one extra query (the recipient's share rows for the listed takes). If the owner prefers fewer headings, public takes of others can move back under "Shared with me" in `partitionTakes`.
+- **Confirm:** yes (a third list "Public takes" in the Record tab)

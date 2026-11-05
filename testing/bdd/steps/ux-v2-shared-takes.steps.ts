@@ -40,9 +40,18 @@ Then('{string} lists {string} and {string}', function (this: World, section: str
   assert.deepEqual(this.result.mine.map((r) => r.recording_name), [a, b]);
 });
 
+Given('{string} made the take {string} public', function (this: World, _owner: string, name: string) {
+  this.takes = [...(this.takes ?? []), { ...take(name, false), is_public: true, is_shared: false }];
+});
+
 Then('{string} lists {string}', function (this: World, section: string, name: string) {
-  assert.equal(section, 'Shared with me');
-  assert.deepEqual(this.result.shared.map((r) => r.recording_name), [name]);
+  const list = section === 'Shared with me' ? this.result.shared : section === 'Public takes' ? this.result.public : null;
+  assert.ok(list, `unknown section ${section}`);
+  assert.deepEqual(list.map((r) => r.recording_name), [name]);
+});
+
+Then('a sharer without a full name is not named', function () {
+  assert.equal(sharedByName({ full_name: null, email: 'nina@example.org' }), null);
 });
 
 Then('{string} is not listed under {string}', function (this: World, name: string, section: string) {

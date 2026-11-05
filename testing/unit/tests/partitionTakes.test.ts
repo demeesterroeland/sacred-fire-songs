@@ -27,7 +27,7 @@ describe('partitionTakes', () => {
   });
 
   it('never lists a take in both sections', () => {
-    const list = [take('a', { is_owner: true }), take('b', { is_owner: false })];
+    const list = [take('a', { is_owner: true }), take('b', { is_owner: false, is_shared: true })];
     const { mine, shared } = partitionTakes(list);
     const overlap = mine.filter((m) => shared.some((s) => s.id === m.id));
     expect(overlap).toEqual([]);
@@ -41,20 +41,24 @@ describe('partitionTakes', () => {
   });
 
   it('returns two empty lists for no takes', () => {
-    expect(partitionTakes([])).toEqual({ mine: [], shared: [] });
+    expect(partitionTakes([])).toEqual({ mine: [], shared: [], public: [] });
   });
 
-  it('lists a public take of someone else under shared', () => {
-    const { mine, shared } = partitionTakes([take('p', { is_owner: false, is_public: true })]);
+  it('lists a public take of someone else under public, not under shared', () => {
+    const { mine, shared, public: open } = partitionTakes([
+      take('p', { is_owner: false, is_public: true, is_shared: false }),
+      take('s', { is_owner: false, is_public: true, is_shared: true }),
+    ]);
     expect(mine).toEqual([]);
-    expect(shared.map((r) => r.id)).toEqual(['p']);
+    expect(shared.map((r) => r.id)).toEqual(['s']);
+    expect(open.map((r) => r.id)).toEqual(['p']);
   });
 });
 
 describe('sharedByName', () => {
-  it('prefers the full name, then the email, then null', () => {
+  it('uses the full name only, never the email', () => {
     expect(sharedByName({ full_name: 'Nina', email: 'n@x.org' })).toBe('Nina');
-    expect(sharedByName({ full_name: '  ', email: 'n@x.org' })).toBe('n@x.org');
+    expect(sharedByName({ full_name: '  ', email: 'n@x.org' })).toBeNull();
     expect(sharedByName({ full_name: null, email: '' })).toBeNull();
     expect(sharedByName(null)).toBeNull();
     expect(sharedByName(undefined)).toBeNull();
