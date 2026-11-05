@@ -193,7 +193,7 @@ const en = {
   'songForm.status.draft': 'Draft',
   'songForm.submit': 'Save Song',
   'songForm.guestDraft.title': 'Draft now — sign in to save',
-  'songForm.guestDraft.body': 'Your draft stays on this device while you sign in.',
+  'songForm.guestDraft.body': 'Saving a song needs an account. Your draft stays on this device while you sign in.',
   'songForm.guestDraft.signIn': 'Sign in',
   'songForm.submitting': 'Saving...',
   'songForm.cancel': 'Cancel',

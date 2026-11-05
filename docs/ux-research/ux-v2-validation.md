@@ -266,7 +266,7 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 
 **Preconditions:** signed out (guest) on a 390 px phone, English; run once in light and once in dark. A member account to sign in with.
 
-- [ ] 1. Open `/songs/add`. **Expected:** above the form a grey box says **Draft now — sign in to save** and "Your draft stays on this device while you sign in.", with an orange **Sign in** button. Screenshot: `docs/ux-research/screenshots/ux-v2/411/after-light/mobile/guest/06-song-add.webp`. Before: `docs/ux-research/screenshots/ux-v2/411/before-light/mobile/guest/06-song-add.webp`.
+- [ ] 1. Open `/songs/add`. **Expected:** above the form a grey box says **Draft now — sign in to save** and "Saving a song needs an account. Your draft stays on this device while you sign in.", with an orange **Sign in** button. Screenshot: `docs/ux-research/screenshots/ux-v2/411/after-light/mobile/guest/06-song-add.webp`. Before: `docs/ux-research/screenshots/ux-v2/411/before-light/mobile/guest/06-song-add.webp`.
 - [ ] 2. Type a title and a few lyric lines.
 - [ ] 3. Tap **Sign in** in the box and sign in. **Expected:** you come back to Add Song, the box is gone and the title and lyrics you typed are still there.
 - [ ] 4. Sign out, open `/songs/add`, type a title and lyrics and press **Publish Song**. **Expected:** the sign-in page opens; after signing in you are back on Add Song with the text kept.

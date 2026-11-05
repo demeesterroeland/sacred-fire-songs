@@ -1,5 +1,6 @@
 'use client';
 
+import { useId } from 'react';
 import Link from 'next/link';
 import { PencilLine } from 'lucide-react';
 import { useLocale } from '@/context/LocaleContext';
@@ -12,15 +13,16 @@ import { signInHref } from '@/lib/auth/guestGate';
  */
 export default function GuestDraftBanner({ next }: { next: string }) {
   const { t } = useLocale();
+  const titleId = useId();
   return (
-    <aside
-      aria-labelledby="guest-draft-title"
+    <section
+      aria-labelledby={titleId}
       data-testid="guest-draft-banner"
       className="mx-auto mb-4 flex w-full max-w-2xl items-start gap-3 rounded-panel border border-line bg-surface-2 p-4"
     >
       <PencilLine aria-hidden="true" className="mt-0.5 size-5 shrink-0 text-fg-muted" />
       <div className="min-w-0 flex-1">
-        <p id="guest-draft-title" className="text-body font-semibold text-fg">
+        <p id={titleId} className="text-body font-semibold text-fg">
           {t('songForm.guestDraft.title')}
         </p>
         <p className="text-meta text-fg-muted">{t('songForm.guestDraft.body')}</p>
@@ -31,6 +33,6 @@ export default function GuestDraftBanner({ next }: { next: string }) {
       >
         {t('songForm.guestDraft.signIn')}
       </Link>
-    </aside>
+    </section>
   );
 }

@@ -199,7 +199,7 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'songForm.status.draft': 'Borrador',
   'songForm.submit': 'Taki waqaychay',
   'songForm.guestDraft.title': 'Kunanqa qillqay — yaykuy waqaychanaykipaq',
-  'songForm.guestDraft.body': 'Qillqasqaykiqa kay antaypim qhipan yaykunaykikama.',
+  'songForm.guestDraft.body': 'Takita waqaychanaykipaqqa cuentayki kanan. Qillqasqaykiqa kay antaypim qhipan yaykunaykikama.',
   'songForm.guestDraft.signIn': 'Yaykuy',
   'songForm.submitting': 'Waqaychashan...',
   'songForm.cancel': 'Saqiy',

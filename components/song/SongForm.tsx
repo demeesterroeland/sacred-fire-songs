@@ -342,6 +342,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
     });
 
     const handleFormSubmit = (data: SongFormData) => {
+        if (authLoading) return; // session not known yet: don't bounce a signed-in user to sign-in
         if (!user) {
             // Keep the way back to this form; the draft is already in storage (#411).
             router.push(signInHref(ADD_SONG_PATH));

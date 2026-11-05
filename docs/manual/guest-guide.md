@@ -60,7 +60,7 @@ The **Record** tab shows what members can do and a **Sign In to Record** button.
 
 ## Things that need an account
 
-Favourites, playlists, recently viewed, adding or editing songs, recording, account settings, singer profiles. Each of these screens shows the same grey preview with a lock, one sentence saying why it is locked and a **Sign in** button; after signing in you land on the screen you came from. Guests will be able to listen to public takes that the singer agreed to publish (Practice → Listen); recording, sharing and downloading stay members-only. The list of takes for guests follows in a later update. You can open the **Add Song** form and start typing as a guest: a grey box at the top says **Draft now — sign in to save**. Your draft stays on this device, so after you sign in (from the box or when you press save) you are back on the form with your text still there.
+Favourites, playlists, recently viewed, adding or editing songs, recording, account settings, singer profiles. Each of these screens shows the same grey preview with a lock, one sentence saying why it is locked and a **Sign in** button; after signing in you land on the screen you came from. Guests will be able to listen to public takes that the singer agreed to publish (Practice → Listen); recording, sharing and downloading stay members-only. The list of takes for guests follows in a later update. You can open the **Add Song** form and start typing as a guest: a grey box at the top says **Draft now — sign in to save**: saving a song needs an account. Your draft stays on this device, so after you sign in (from the box or when you press save) you are back on the form with your text still there.
 
 ## Creating an account
 

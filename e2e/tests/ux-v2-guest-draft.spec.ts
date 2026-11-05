@@ -13,6 +13,7 @@ test.describe('Guest draft on Add Song', () => {
     const banner = page.getByTestId('guest-draft-banner');
     await expect(banner).toBeVisible();
     await expect(banner).toContainText('Draft now — sign in to save');
+    await expect(banner).toContainText('Saving a song needs an account');
 
     const title = 'Draft fire song ' + Date.now();
     const lyrics = '[Dm]Abre tus alas';

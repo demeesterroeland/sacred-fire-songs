@@ -17,6 +17,8 @@ describe('GuestDraftBanner', () => {
   it('says that saving needs an account and links to sign-in with the way back', () => {
     render(<GuestDraftBanner next="/songs/add" />);
     expect(screen.getByText('Draft now — sign in to save')).toBeTruthy();
+    expect(screen.getByText(/Saving a song needs an account/)).toBeTruthy();
+    expect(screen.getByRole('region', { name: 'Draft now — sign in to save' })).toBeTruthy();
     const link = screen.getByRole('link', { name: 'Sign in' });
     expect(link.getAttribute('href')).toBe('/auth/login?next=%2Fsongs%2Fadd');
     expect(link.className).toMatch(/min-h-tap/);
