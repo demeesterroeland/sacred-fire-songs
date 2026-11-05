@@ -3174,3 +3174,14 @@ Expanded Epic 4.6 (Private Rehearsal & Audio Storage) to enable controlled user-
   - Vitest unit tests: 12 tests in `testing/unit/tests/recordingSharing.test.ts`.
   - Cucumber BDD tests: 7 scenarios in `docs/testing/recording-sharing.feature`.
   - All CI gates passed: `npx tsc --noEmit` clean, `npm run lint` clean (201 warnings <= 202 cap), 380 unit tests and 81 BDD scenarios passing.
+
+## November 5, 2026 - Epic 5.1 Story 5.1.8: Gitflow promotion (#297)
+
+**Task Overview**
+Re-scoped Story 5.1.8 to the public-repo boundary decided by the owner: CI (build, lint, tests) and image delivery to GHCR live in this repository; deployment (CD) including approvals and deploy secrets does not. Implemented the `develop` → `main` promotion and finished Story 5.1.6.
+
+**Technical Details**
+- **Spec (test-first):** `docs/testing/gitflow-cicd.feature` — "A published release builds versioned images" (`docker.yml` on `release: published`, `{{tag}}` + semver, no `latest`), "No workflow deploys a release" (no environment, no `deploy*` workflow), and a `@script` promotion scenario. The slow-layer required-checks scenario is tagged `@deferred` (blocked on 5.1.2/5.1.11). `cucumber.json` `ci-gate` now includes `@story-5.1.8 and not @deferred`.
+- **Steps:** new `it tags release images with the release version`, `no workflow file name starts with {string}`; removed dead steps for the deleted staging/production deploy workflows.
+- **Script:** `scripts/cicd/develop2main.sh` (replaces `preview2prod.sh`) opens/reuses the promotion PR, waits for checks, asks for confirmation and merges with `--merge` only; then merges the Release Please PR, optionally prepends a release summary, and prints the explicit app/migrator `vX.Y.Z` images. `--dry-run` makes no `gh` call.
+- **Tests:** `testing/scripts/develop2main.bats` with a logging `gh` stub (6 tests); `branch-protection.bats` `--admin` guard active (scoped to `*.sh`). Unit 412/412, `ci-gate` 21/21, bats 32/32, lint and typecheck clean, isolation guard clean.

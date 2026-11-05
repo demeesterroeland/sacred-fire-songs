@@ -25,11 +25,9 @@ import {
   runScripts,
   runsCommand,
   repoFileExists,
-  stepIndex,
   triggerTypes,
   triggersOnAllBranches,
   triggersOnBranch,
-  usesEnvironment,
   type Workflow,
 } from '../../support/workflowContract';
 import { checkBranches, checkTitle } from '../../../scripts/cicd/lib/prPolicy.mjs';
@@ -158,14 +156,6 @@ Then('it only runs after the {string} checks succeeded for the same commit', fun
   assert.ok(viaWorkflowRun || viaReusable, `${wf.file} is not gated on a successful ${ciFile} run`);
 });
 
-Then('it runs {string} before deploying the app', function (this: SongBddWorld, cmd: string) {
-  const wf = byFile(this, 'deploy-staging.yml');
-  const migrate = stepIndex(wf, cmd);
-  const deploy = stepIndex(wf, 'docker compose');
-  assert.ok(migrate >= 0, `${wf.file} never runs "${cmd}"`);
-  assert.ok(deploy > migrate, `${wf.file} must run "${cmd}" before "docker compose"`);
-});
-
 // ── Images & environments ───────────────────────────────────────────────────
 Then('a push to {string} builds images tagged {string} and the short SHA', function (this: SongBddWorld, branch: string, tag: string) {
   const wf = byFile(this, 'docker.yml');
@@ -180,19 +170,10 @@ Then('no image is tagged {string}', function (this: SongBddWorld, tag: string) {
   }
 });
 
-Then('{string} uses the environment {string}', function (this: SongBddWorld, file: string, env: string) {
-  assert.ok(usesEnvironment(byFile(this, file), env), `${file} does not use environment ${env}`);
-});
-
-Then('it uses the environment {string}', function (this: SongBddWorld, env: string) {
+Then('it tags release images with the release version', function (this: SongBddWorld) {
   const wf = current(this);
-  assert.ok(usesEnvironment(wf, env), `${wf.file} does not use environment ${env}`);
-});
-
-Then('it deploys the explicit release tag, never {string}', function (this: SongBddWorld, tag: string) {
-  const wf = current(this);
-  assert.match(wf.raw, /github\.event\.release\.tag_name|release_tag|tag_name/, `${wf.file} does not deploy the release tag`);
-  assert.doesNotMatch(wf.raw, new RegExp(`:${tag}\\b`), `${wf.file} references :${tag}`);
+  assert.match(wf.raw, /type=raw,value=\{\{tag\}\},enable=\$\{\{ github\.event_name == 'release' \}\}/, `${wf.file} does not tag the vX.Y.Z release tag`);
+  assert.match(wf.raw, /type=raw,value=\$\{\{ steps\.semver\.outputs\.value \}\}/, `${wf.file} does not tag the X.Y.Z version`);
 });
 
 Then('it opens a pull request from {string} into {string}', function (this: SongBddWorld, head: string, base: string) {
@@ -233,6 +214,11 @@ Then('no workflow uses a deployment environment', function (this: SongBddWorld) 
   for (const wf of ci(this).workflows) {
     assert.doesNotMatch(wf.raw, /^\s+environment:/m, `${wf.file} uses a GitHub deployment environment`);
   }
+});
+
+Then('no workflow file name starts with {string}', function (this: SongBddWorld, prefix: string) {
+  const deploys = ci(this).workflows.map((w) => w.file).filter((f) => f.startsWith(prefix));
+  assert.deepEqual(deploys, [], `deployment workflows belong outside this public repo: ${deploys.join(', ')}`);
 });
 
 Then(

@@ -1,6 +1,6 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 1.52
+**Version:** 1.53
 **Status:** Living Document
 **Date:** Nov 5, 2026
 
@@ -51,6 +51,7 @@
 | **1.50** | Nov 4, 2026 | Added Story 4.6.6 (Notification & Email Dispatching for Shared Rehearsal Recordings, #373) [Implemented]. Executable spec: `docs/testing/share-notifications.feature`. |
 | **1.51** | Nov 4, 2026 | Added Phase 6 and Epic 6.1 (UX & Design Rework, #375): 9 group epics and 34 stories from the UX research in `docs/ux-research/`. |
 | **1.52** | Nov 5, 2026 | Added Story 4.6.5 (Personal Reordering of Shared-with-Me and Public Recordings, #420) [Planned] with Option A decision (decoupled user-specific ordering table). |
+| **1.53** | Nov 5, 2026 | Epic 5.1: Story 5.1.8 (#297) re-scoped and implemented — promotion `develop` → `main` via `scripts/cicd/develop2main.sh` (merge commit, no `--admin`) and versioned release images; production deployment lives outside the public repo. Story 5.1.6 (#294) completed (no script uses `--admin`). Stories 5.1.1, 5.1.7 and 5.1.12 closed on GitHub. |
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
 
@@ -1453,9 +1454,9 @@ Move from GitHub Flow to a lightweight Gitflow: `main` = production, `develop` =
 | 5.1.3 | #290 | Single unit-test tree, strict BDD | 1 | [Implemented] (strict only for `ci-gate`) |
 | 5.1.4 | #292 | Protected `main` + `develop` (rulesets), default branch `develop` | 2 | [Implemented] |
 | 5.1.5 | #293 | Branch & PR-title policy (`pr-lint.yml`) | 2 | [Implemented] |
-| 5.1.6 | #294 | Scripts follow Gitflow (no `--admin`, correct image names) | 2 | [Partial] (`--admin` removal in Phase 4) |
+| 5.1.6 | #294 | Scripts follow Gitflow (no `--admin`, correct image names) | 2 | [Implemented] |
 | 5.1.7 | #295 | Staging CD from `develop` (images, migrations, deploy) | 3 | [Re-scoped] (this repo publishes `develop` images; deployment lives outside the public repo) |
-| 5.1.8 | #297 | Production promotion `develop` → `main` with approval | 4 | [Planned] |
+| 5.1.8 | #297 | Promotion `develop` → `main` + versioned release images | 4 | [Implemented] (re-scoped Nov 5: deployment and its approval live outside the public repo; slow-layer required checks deferred with 5.1.2/5.1.11) |
 | 5.1.9 | #298 | Automatic back-merge `main` → `develop` | 4 | [Planned] |
 | 5.1.10 | #299 | Hotfix flow | 4 | [Planned] |
 | 5.1.11 | #296 | Test-pyramid schedule (nightly full E2E + perf) | 3 | [Deferred] (needs Tailscale `tag:ci`, with 5.1.2) |
@@ -1528,14 +1529,16 @@ Scenario: Staging reflects develop after a merge
   Then staging runs the new commit with all migrations applied
 ```
 
-**Story 5.1.8:** As a Maintainer, I want to promote `develop` to `main` with a merge-commit PR that requires the full E2E and performance checks, and deploy the release tag to production only after my approval.
+**Story 5.1.8: [Implemented]** As a Maintainer, I want to promote `develop` to `main` with a merge-commit PR and get explicit `vX.Y.Z` release images, so that every release is traceable and deployable without `:latest`.
+
+> Re-scoped Nov 5, 2026: CI and image delivery live in this repo; deploying a release (CD, approvals, deploy secrets) lives outside the public repository. Requiring the full E2E and k6 checks on the promotion PR is deferred with Stories 5.1.2 / 5.1.11.
 
 ```gherkin
-Scenario: Production deploy waits for approval
+Scenario: A published release builds versioned images
   Given Release Please published "v1.8.0"
-  When the production deploy workflow starts
-  Then it waits for approval in the "Production" environment
-  And it deploys "ghcr.io/demeesterroeland/sacred-fire-songs-app:v1.8.0", never "latest"
+  When the Docker workflow finishes
+  Then "ghcr.io/demeesterroeland/sacred-fire-songs-app:v1.8.0" exists, never "latest"
+  And no workflow in this repository deploys it
 ```
 
 **Story 5.1.9:** As a Maintainer, I want `main` merged back into `develop` after every release or hotfix so that version bumps and fixes are never lost.
