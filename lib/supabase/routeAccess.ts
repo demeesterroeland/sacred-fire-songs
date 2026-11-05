@@ -9,6 +9,8 @@
  * per-page checks stay the source of truth. Do not add a prefix here to "open" a page.
  * Reusable by the guest gate (G6.1) when it decides what to lock.
  */
+// Prefixes match whole segments (`/account`, `/account/...`), so any future /account/* or
+// /users/* page inherits protection without touching this list.
 export const PROTECTED_PATH_PREFIXES = ['/account', '/admin', '/users'] as const;
 
 /** True when `pathname` is a protected prefix itself or below it (`/admin-x` is not). */

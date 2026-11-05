@@ -1,5 +1,6 @@
-# Version: 1.0 | Date: Nov 5, 2026
+# Version: 1.1 | Date: Nov 5, 2026
 # Changelog
+# 1.1 | Nov 5, 2026 | Reworded the copy step to what it checks; the rendered page and status are covered by e2e/tests/real-404.spec.ts.
 # 1.0 | Nov 5, 2026 | Story 6.1.22 / G5.1 (#406): unknown URLs show a real 404 page for every role.
 @story-6.1.22
 Feature: Unknown URLs show a real 404 page
@@ -11,7 +12,7 @@ Feature: Unknown URLs show a real 404 page
   Scenario: Unknown path as guest
     Given a guest opens a path that does not exist
     Then the proxy does not redirect to the login page
-    And the "Page not found" page is shown with a link home
+    And the "Page not found" copy and a "Go home" label exist in all 8 locales
 
   @unit
   Scenario: Protected areas still send a guest to login

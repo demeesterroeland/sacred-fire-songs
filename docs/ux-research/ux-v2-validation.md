@@ -122,7 +122,7 @@ Sections are added per story as it merges into `feat/ux-v2`.
 
 ### #406 · G5.1 Unknown URL shows a real 404
 
-**Preconditions:** guest (signed out) for steps 1–4, member for step 5, admin for step 6.
+**Preconditions:** guest (signed out) for steps 1–4, member for step 5, admin for step 6. Visual check only: the browser address bar does not show HTTP status. An unmatched URL is a real HTTP 404; the unknown-song page (step 4) is rendered by the streamed song route and keeps HTTP 200 with `noindex` (automated in `e2e/tests/real-404.spec.ts`).
 
 - [ ] 1. Signed out, open `/this-page-does-not-exist`. The page says **Page not found** with a **Go home** button; the address stays the same and there is no login screen. Screenshot: `docs/ux-research/screenshots/ux-v2/406/after-light/mobile/guest/30-not-found.webp` (dark: `after-dark/…`).
 - [ ] 2. Tap **Go home**: the home page opens.

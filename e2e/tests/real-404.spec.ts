@@ -2,6 +2,14 @@ import { test, expect } from '@playwright/test';
 import { ROLES } from '../fixtures/roles';
 
 // Story 6.1.22 (G5.1, #406): an unknown URL is a real 404 for every role, never a login redirect.
+//
+// Two different mechanisms, two different HTTP statuses (measured on the production build):
+// - Unmatched URL (no route): Next answers a real HTTP 404 with `app/not-found.tsx`.
+// - notFound() thrown inside a streamed route (unknown song id, private playlist): because
+//   `app/loading.tsx` flushes the shell first, the status line (200) is already sent when the
+//   page calls notFound(). Next then renders the not-found UI and adds
+//   `<meta name="robots" content="noindex">`, so crawlers do not index it, but the HTTP status
+//   stays 200. We assert that real behaviour, not a status the framework cannot give here.
 const UNKNOWN = '/this-page-does-not-exist';
 
 async function expectGenericNotFound(page: import('@playwright/test').Page) {
@@ -32,8 +40,11 @@ test.describe('unknown URL is a real 404', () => {
     });
 
     test('an unknown song id keeps the song-specific page', async ({ page }) => {
-      await page.goto('/songs/00000000-0000-4000-a000-000000000000');
+      const response = await page.goto('/songs/00000000-0000-4000-a000-000000000000');
+      // Streamed route (see the note at the top): status 200, not-found UI, noindex.
+      expect(response?.status()).toBe(200);
       await expect(page.getByRole('heading', { name: 'Song Not Found' })).toBeVisible();
+      await expect(page.locator('meta[name="robots"][content="noindex"]')).toHaveCount(1);
     });
   });
 

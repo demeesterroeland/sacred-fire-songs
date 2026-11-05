@@ -27,7 +27,8 @@ Then('the proxy redirects to the login page', function (this: object) {
   assert.equal(shouldRedirectToLogin(get(this).path!, false), true);
 });
 
-Then('the "Page not found" page is shown with a link home', function () {
+// Copy only: the rendered page and its HTTP behaviour are asserted in e2e/tests/real-404.spec.ts.
+Then('the "Page not found" copy and a "Go home" label exist in all 8 locales', function () {
   assert.equal(tWithLocale('en', 'feedback.notFound.page.title'), 'Page not found');
   assert.equal(tWithLocale('en', 'feedback.notFound.page.home'), 'Go home');
   for (const locale of LOCALES) {
