@@ -12,6 +12,7 @@ import {
   safeNextPath,
   signInHref,
 } from '@/lib/auth/guestGate';
+import { shouldRedirectToLogin } from '@/lib/supabase/routeAccess';
 
 vi.mock('@/context/LocaleContext', () => ({
   useLocale: () => ({ t: (key: keyof typeof en) => en[key] }),
@@ -108,9 +109,10 @@ describe('members-only screens render GuestGate instead of redirecting', () => {
   });
 
   it('the account and user-profile prefixes reach the page so it can render the gate', () => {
-    const proxy = read('lib/supabase/proxy.ts');
-    expect(proxy).toContain('"/account"');
-    expect(proxy).toContain('"/users"');
+    for (const p of ['/account', '/account/settings', '/users/abc']) {
+      expect(shouldRedirectToLogin(p, false)).toBe(false);
+    }
+    expect(shouldRedirectToLogin('/admin', false)).toBe(true);
   });
 });
 
