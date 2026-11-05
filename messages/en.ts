@@ -877,6 +877,12 @@ const en = {
   'guestGate.addToPlaylist.reason': 'Your favourites and playlists live in your account, so they follow you to every device.',
   'guestGate.favourites.title': 'Sign in to save favourites',
   'guestGate.favourites.reason': 'Your liked songs live in your account, so they follow you to every device.',
+  'sharedWithMe.unreadCount': '{count} new',
+  'sharedWithMe.title': 'Shared with me',
+  'sharedWithMe.empty': 'Nothing has been shared with you yet. When someone shares a take with you, it shows up here.',
+  'sharedWithMe.new': 'New',
+  'guestGate.sharedWithMe.title': 'Sign in to see what is shared with you',
+  'guestGate.sharedWithMe.reason': 'Takes that members share with you are listed here once you sign in.',
 } as const;
 
 export default en;

@@ -879,6 +879,12 @@ const it: Partial<Record<TranslationKey, string>> = {
   'guestGate.addToPlaylist.reason': 'I tuoi preferiti e le tue playlist vivono nel tuo account, così ti seguono su ogni dispositivo.',
   'guestGate.favourites.title': 'Accedi per salvare i preferiti',
   'guestGate.favourites.reason': 'I tuoi canti preferiti vivono nel tuo account, così ti seguono su ogni dispositivo.',
+  'sharedWithMe.unreadCount': 'Nuove: {count}',
+  'sharedWithMe.title': 'Condivisi con me',
+  'sharedWithMe.empty': 'Nessuno ha ancora condiviso qualcosa con te. Quando qualcuno condivide una registrazione con te, compare qui.',
+  'sharedWithMe.new': 'Nuova',
+  'guestGate.sharedWithMe.title': 'Accedi per vedere cosa è condiviso con te',
+  'guestGate.sharedWithMe.reason': 'Le registrazioni che i membri condividono con te compaiono qui dopo l\'accesso.',
 };
 
 export default it;

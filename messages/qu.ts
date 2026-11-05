@@ -883,6 +883,12 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'guestGate.addToPlaylist.reason': 'Munasqaykikunapas listaykikunapas cuentaykipi kanku, chaymi llapa aparatupi qatiykusunki.',
   'guestGate.favourites.title': 'Munasqakunata waqaychanaykipaq yaykuy',
   'guestGate.favourites.reason': 'Munasqa takiykikuna cuentaykipi kanku, chaymi llapa aparatupi qatiykusunki.',
+  'sharedWithMe.unreadCount': 'Mosoq: {count}',
+  'sharedWithMe.title': 'Ñoqaman qusqakuna',
+  'sharedWithMe.empty': 'Manaraq imapas qusqa kanchu. Pipas grabaciónta qusqaykita, kaypi rikhurinqa.',
+  'sharedWithMe.new': 'Mosoq',
+  'guestGate.sharedWithMe.title': 'Yaykuy, qusqaykita qhawanaykipaq',
+  'guestGate.sharedWithMe.reason': 'Huk kaqkuna qusqayki grabaciones kaypi rikhurinku, yaykusqaykiman hina.',
 };
 
 export default qu;

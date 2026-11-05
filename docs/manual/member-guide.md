@@ -1,11 +1,12 @@
 # Member Guide (draft)
 
-**Version:** 0.10 | **Date:** Nov 5, 2026
+**Version:** 0.11 | **Date:** Nov 5, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.11 | Nov 5, 2026 | **Shared with me**: a list of takes others shared with you, in the account menu and under the Library tabs; the bell tells you when a take arrives, and opening the song's Practice panel marks it read (UX v2, #403). |
 | 0.10 | Nov 5, 2026 | Add to playlist is a sheet from the bottom with **New playlist** first and a check next to playlists that already hold the song (UX v2, #414). |
 | 0.9 | Nov 5, 2026 | Like and Add to playlist moved from the song's ⋮ menu to the bar at the bottom of the song (UX v2, #393). |
 | 0.8 | Nov 5, 2026 | Create moved from the bottom bar to the **+** in Library (UX v2, #408). |
@@ -22,7 +23,7 @@ Everything in the [Guest Guide](guest-guide.md) applies. This page covers what a
 
 Tap your initial (top right). You see your name and role (e.g. *Member*), and:
 
-- **Account Settings**, **Your Favorites**, **My Drafts**, **My Playlists**, **Recently Viewed**
+- **Account Settings**, **Your Favorites**, **My Drafts**, **My Playlists**, **Shared with me** (with "3 new" when there are new takes), **Recently Viewed**
 - **Language** and the light / dark / automatic theme switch
 - **Sign Out**
 
@@ -36,7 +37,11 @@ Tap **Like** in the bar at the bottom of the song page. The heart fills and the 
 
 ## Library
 
-Tabs at the top: **Playlists**, **History**, **Artists**.
+Tabs at the top: **Playlists**, **History**, **Artists**. Under the tabs, the row **Shared with me** opens the takes others shared with you.
+
+### Shared with me
+
+When someone shares a take with you, the bell at the top shows a number. **Shared with me** (account menu, or Library) lists every take shared with you: the song, *Shared by* the person's name and the take. A take you have not opened yet says **New**. Tap a row to open the song with that take highlighted. Opening a song's **Practice** panel marks that song's new takes as read, and the number on the bell goes down. Guests are asked to sign in.
 
 **Smart playlists** are filled automatically:
 

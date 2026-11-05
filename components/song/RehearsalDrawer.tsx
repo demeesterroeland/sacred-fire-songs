@@ -10,6 +10,7 @@ import { useSongRecordings } from "@/hooks/useSongRecordings";
 import { deleteUserRecording, renameUserRecording, reorderUserRecordings, unpublishRecording, type UserRecording } from "@/lib/actions/rehearsal";
 import { getYouTubeEmbedUrl } from "./MediaEmbeds";
 import { useAuth } from "@/hooks/useAuth";
+import { useMarkSongNotificationsRead } from "@/hooks/useMarkSongNotificationsRead";
 import { useAudio } from "./AudioProvider";
 import { applyMiniPlayerHeight, isMiniPlayerVisible, mediaSessionReducer, miniPlayerClose, ownsActiveTake } from "@/lib/player/miniPlayer";
 import Link from "next/link";
@@ -283,6 +284,8 @@ interface RehearsalDrawerProps {
   onClose: () => void;
   onOpen?: () => void;
   songVersionId: string;
+  /** The song: opening the drawer marks its "shared a take with you" notifications read (Story 6.1.19). */
+  compositionId?: string | null;
   songTitle: string;
   songAuthor: string;
   youtubeUrl?: string | null;
@@ -302,6 +305,7 @@ export default function RehearsalDrawer({
   onClose,
   onOpen,
   songVersionId,
+  compositionId = null,
   songTitle,
   songAuthor,
   youtubeUrl,
@@ -325,6 +329,7 @@ export default function RehearsalDrawer({
   const [publishRecording, setPublishRecording] = useState<UserRecording | null>(null);
   const [attributionRecording, setAttributionRecording] = useState<UserRecording | null>(null);
   const isAdmin = user?.role === 'admin';
+  useMarkSongNotificationsRead({ userId: user?.id, compositionId, isOpen });
   const { activePlaybackId, activeRecording, audioElements, isRecordingPlaying, recordingCurrentTime, recordingDuration, handleTogglePlay: contextHandleTogglePlay, pauseActiveRecording, stopActiveRecording, seekActiveRecording, seekRelativeActiveRecording, clearAudioElements } = useAudio();
 
 

@@ -1,5 +1,5 @@
 import { type AuthUser } from '@/hooks/useAuth';
-import { LogOut, ChevronDown, Settings, User, Heart, FileText, ListMusic, Sun, Moon, Monitor, SlidersHorizontal, Clock, Globe, ShieldCheck } from 'lucide-react';
+import { LogOut, ChevronDown, Settings, User, Heart, FileText, ListMusic, Sun, Moon, Monitor, SlidersHorizontal, Clock, Globe, ShieldCheck, Users } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
@@ -7,6 +7,8 @@ import Image from 'next/image';
 import { useUserPreferences, type ThemePreference } from '@/context/UserPreferencesContext';
 import { useLocale } from '@/context/LocaleContext';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { useNotificationsQuery } from '@/hooks/useNotificationsQuery';
+import { unreadSharedCount } from '@/lib/notifications/sharedWithMe';
 
 import { usePathname, useRouter } from 'next/navigation';
 
@@ -43,6 +45,33 @@ function ThemeToggle() {
         );
       })}
     </div>
+  );
+}
+
+/**
+ * "Shared with me" entry (Story 6.1.19 / G4.6, UXD-3). The unread count is said in words
+ * ("3 new"); the badge stays on the bell only, so one thing never has two badges. It reads
+ * the same query as the bell, so both drop together.
+ */
+function SharedWithMeMenuItem({ userId, onNavigate }: { userId: string; onNavigate: () => void }) {
+  const { t } = useLocale();
+  const { data } = useNotificationsQuery(userId);
+  const unread = unreadSharedCount(data);
+  return (
+    <Link
+      href="/library/shared"
+      onClick={onNavigate}
+      data-testid="user-menu-shared-with-me"
+      className="flex min-h-tap items-center gap-3 rounded-control p-2 text-fg-muted transition-colors hover:bg-surface-2 hover:text-fg"
+    >
+      <Users className="w-4 h-4" aria-hidden="true" />
+      <span className="flex-1 text-sm font-medium">{t('sharedWithMe.title')}</span>
+      {unread > 0 && (
+        <span data-testid="user-menu-shared-unread" className="rounded-pill bg-chip px-2 py-0.5 text-caption font-semibold text-on-chip">
+          {t('sharedWithMe.unreadCount', { count: unread })}
+        </span>
+      )}
+    </Link>
   );
 }
 
@@ -187,6 +216,7 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true, init
                 <ListMusic className="w-4 h-4 group-hover:text-purple-400" />
                 <span className="text-sm font-medium">{t('userMenu.playlists')}</span>
               </Link>
+              <SharedWithMeMenuItem userId={user.id} onNavigate={() => setIsOpen(false)} />
               <Link href="/library/recently-viewed" className="flex items-center gap-3 p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group">
                 <Clock className="w-4 h-4 group-hover:text-amber-400" />
                 <span className="text-sm font-medium">{t('userMenu.recentlyViewed')}</span>

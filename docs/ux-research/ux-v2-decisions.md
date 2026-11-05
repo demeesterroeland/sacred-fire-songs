@@ -1,11 +1,12 @@
 # UX v2: Agent Decisions (ADR-lite)
 
-**Version:** 1.21 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375)
+**Version:** 1.22 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375)
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.22 | Nov 5, 2026 | Added UXA-029 (Shared with me: badge on the bell only, entry as a Library row, read rules; #403). |
 | 1.21 | Nov 5, 2026 | Added UXA-028 (Share dialog: private-song confirmation moves into the dialog, wording of the two effects, who the search finds; #402). |
 | 1.20 | Nov 5, 2026 | Added UXA-027 (Add to playlist sheet: tap removes, New playlist inline, sheet stays open; #414). |
 | 1.19 | Nov 5, 2026 | Added UXA-023 to UXA-026 (song action bar: ⋮ sheet content, hide-on-scroll rule, bottom nav height fix, bar style and copy; #393). |
@@ -59,6 +60,7 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 | UXA-026 | Nov 5, 2026 | #393 | Action bar style and copy: Practice in accent text with take count, Playlist and Like in grey, new short labels "Playlist" / "Like" / "Liked"; members reuse the playlist popover until #414 | yes |
 | UXA-027 | Nov 5, 2026 | #414 | Add to playlist sheet: tap on a check removes the song, "New playlist" opens a name field in the first row, the sheet stays open until Done | yes |
 | UXA-028 | Nov 5, 2026 | #402 | Share dialog: the private-song confirmation lives inside the dialog and lists both effects; the song becomes public when the owner confirms, before a member is picked | yes |
+| UXA-029 | Nov 5, 2026 | #403 | Shared with me: the unread badge stays on the bell only (account menu and Library entries say "n new" in words), the Library entry is a row under the tabs (not a fifth tab), one row per take, opening Practice marks the song's notifications read | yes |
 
 ---
 
@@ -314,3 +316,12 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 - **Choice:** (b), no change to RLS, actions or data. The dialog opens on a confirmation that lists both effects: the lyrics become public (everyone can see the song) and the take is shared only with the members picked next. The text also states the truth that the song becomes public as soon as the owner confirms, and that nothing changes before. A song owner or admin sees **Make song public and continue** / **Cancel**; a member who only owns the take sees an explanation (no toast) and no search. The helper line and empty state say the search finds registered members and suggest inviting others (no invite mechanism exists; it is only a hint). The old keys `privateSongPrompt.title|body|confirm|notOwner` were reworded in all 8 locales; new keys: `privateSongPrompt.effectLyrics|effectTake|note|notOwnerTitle`, `recording.sharing.helper|noResults`.
 - **Consequences:** review: the dialog title names the step, focus moves to the search once the song is public, a failure shows an error toast, the take line no longer promises "nobody else can listen" (a take can already be public), and the helper no longer offers an invite that does not exist (it says someone without an account needs to sign up first). a song owner who confirms and then closes the dialog without choosing anyone has made the song public. (c) would avoid that but changes data semantics, which is out of scope. The confirmation no longer opens from the drawer, so any future caller of the Share dialog must pass `songIsPublic`, `canMakeSongPublic` and `onMakeSongPublic`. The search results still show e-mail addresses of all registered members; whether that is wanted is a privacy question for the owner.
 - **Confirm:** yes (copy, and the confirmation moves; the e-mail exposure in search is unchanged but worth a decision)
+
+### UXA-029 · Shared with me: where the badge lives, where the entry lives, when it is read
+
+- **Date / story:** Nov 5, 2026 · #403 (G4.6)
+- **Context:** the story text asks for "a badge on the account avatar", a "Shared with me" entry in the account menu and in Library, and mark-as-read on Practice open. UXD-3 already keeps the header bell (Story 4.6.6) next to the list. UXA-028 is taken by #402 (not merged yet).
+- **Options:** badge: (a) bell only, count in words on the entries; (b) bell and a second badge on the avatar. Library entry: (a) a fifth tab; (b) a row under the tabs. Rows: (a) one per song; (b) one per take. Read rule: (a) opening the list marks all read; (b) only opening the song's Practice drawer does.
+- **Choice:** badge (a): one thing, one badge. The account menu and Library entries say "3 new" in words, so the count is visible without a second dot, and the avatar stays calm. Library entry (b): the tab row was fitted to 390 px in #407 and a fifth tab would scroll off; the page is a breadcrumb page (Library › Shared with me). Rows (b): each take has its own sharer, name and link, so one tap lands on the right take (the permalink opens the song with Practice on it). Read rule (b), as the story says; the deep link opens the drawer too, so tapping a row also clears it. The mark-read call updates every unread notification of the song, also ones older than the bell's latest 20.
+- **Consequences:** the "n new" count, like the bell, counts the latest 20 notifications, so it tops out at 20; opening Practice still marks older unread rows of that song read (review: before, an unread row older than the latest 20 never cleared). a user who only opens the list without opening a song still sees "New" and the bell number; "Mark all as read" in the bell remains the way to clear them. If a notification was dismissed or deleted, the share still lists but without a "New" marker. A song the recipient cannot read (private) is named from the notification snapshot, else by the take name. New keys in 8 locales: `sharedWithMe.title|empty|new|unreadCount`, `guestGate.sharedWithMe.title|reason` (Quechua to proofread).
+- **Confirm:** yes (no avatar badge, entry placement, copy)

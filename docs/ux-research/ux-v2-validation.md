@@ -1,11 +1,12 @@
 # UX v2: Phone Validation Script
 
-**Version:** 1.24 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
+**Version:** 1.25 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.25 | Nov 5, 2026 | Added #403 (Shared with me). |
 | 1.24 | Nov 5, 2026 | Added #402 (Share dialog explains who can be found and what happens on a private song). |
 | 1.23 | Nov 5, 2026 | Added #414 (Add to playlist bottom sheet). |
 | 1.22 | Nov 5, 2026 | Added #393 (sticky Practice · Playlist · ♥ action bar). |
@@ -346,3 +347,18 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 - [ ] 5. Type the name of the second member and tap **Share**. **Expected:** they appear under *Shared with (1)* and get a notification.
 - [ ] 6. Sign in as a member who has a take on a private song they do not own (ask the song owner to make it private again) and tap ⋯ → **Share**. **Expected:** the dialog says *This song is private* and that only the song owner can make the lyrics public; no search box and no toast.
 - [ ] 7. Repeat steps 1, 3 and 4 in dark mode (`…/402/after-dark/…`) and in Dutch, Spanish, Italian, Russian, French, Portuguese and Quechua: all text is translated. Every button is at least 44 px tall.
+
+### #403 · G4.6 Shared with me
+
+**Preconditions:** two accounts, Alice and Bob (members), on a 390 px phone, English; Bob is signed in, Alice's session on a laptop. Alice has a take on a song and shares it with Bob (Practice → Record → take ⋮ → Share). Run once in light and once in dark.
+
+- [ ] 1. As Bob open any page. **Expected:** the bell at the top shows a number badge (1). The avatar has no badge. Screenshot: `docs/ux-research/screenshots/ux-v2/403/after-light/mobile/member/01-library.webp`.
+- [ ] 2. Tap the avatar. **Expected:** the menu lists **Shared with me** with the words **1 new** next to it (a 44 px row).
+- [ ] 3. Tap **Library**. **Expected:** under the tabs a row **Shared with me** with **1 new** and an arrow. Before: `…/403/before-light/mobile/member/01-library.webp`.
+- [ ] 4. Tap **Shared with me**. **Expected:** the page shows the breadcrumb Library › Shared with me and one row: the song title, *Shared by Alice · <take name>* and the word **New** with a dot. Screenshot: `…/403/after-light/mobile/member/02-shared-with-me.webp`.
+- [ ] 5. Tap the row. **Expected:** the song opens with the Practice panel on that take, highlighted. The bell number goes away at once.
+- [ ] 6. Back on **Shared with me**: the row has no **New** marker. Reload the page: still read.
+- [ ] 7. Alice shares another take of a different song. As Bob, open that song normally (not through the list) and tap **Practice**. **Expected:** the bell number drops; the take was marked read.
+- [ ] 8. Bob with nothing shared: the page reads "Nothing has been shared with you yet. …". Screenshot: `…/403/after-light/mobile/member/03-shared-empty.webp`.
+- [ ] 9. Signed out (private window): open `/library/shared`. **Expected:** the locked preview "Sign in to see what is shared with you" and a **Sign in** button that returns you here.
+- [ ] 10. Switch the language to Dutch, Spanish, Italian, Russian, French, Portuguese and Quechua: the menu entry, the **N new** text, the page title, **New** and the empty text are translated and fit on one line. Repeat steps 1–4 in dark mode.
