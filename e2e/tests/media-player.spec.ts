@@ -86,7 +86,7 @@ test.describe('Practice Media Player E2E Tests', () => {
 
     const scBtn = page.locator('button:has-text("SoundCloud")');
     await scBtn.click();
-    await expect(scBtn).toHaveClass(/text-\[#ff5500\]/);
+    await expect(scBtn).toHaveAttribute("aria-pressed", "true");
 
     const lastYtMessage = await page.evaluate(() => (window as any).lastYtMessage);
     expect(lastYtMessage).toBeNull(); // Did not receive pause command
@@ -98,7 +98,7 @@ test.describe('Practice Media Player E2E Tests', () => {
 
     const spotifyBtn = page.locator('button:has-text("Spotify")');
     await spotifyBtn.click();
-    await expect(spotifyBtn).toHaveClass(/text-\[#1db954\]/);
+    await expect(spotifyBtn).toHaveAttribute("aria-pressed", "true");
 
     const lastYtMessage = await page.evaluate(() => (window as any).lastYtMessage);
     expect(lastYtMessage).toBeNull(); // Did not receive pause command
@@ -107,7 +107,7 @@ test.describe('Practice Media Player E2E Tests', () => {
   test('Permutation 3: Play SC -> Switch to YT (audio persists, no pause sent)', async ({ page }) => {
     const scBtn = page.locator('button:has-text("SoundCloud")');
     await scBtn.click();
-    await expect(scBtn).toHaveClass(/text-\[#ff5500\]/);
+    await expect(scBtn).toHaveAttribute("aria-pressed", "true");
     await page.waitForTimeout(1000);
 
     await page.evaluate(() => window.postMessage('{"event":"play"}', '*'));
@@ -115,7 +115,7 @@ test.describe('Practice Media Player E2E Tests', () => {
 
     const ytBtn = page.locator('button:has-text("YouTube")');
     await ytBtn.click();
-    await expect(ytBtn).toHaveClass(/text-red-550/);
+    await expect(ytBtn).toHaveAttribute("aria-pressed", "true");
 
     const lastScMessage = await page.evaluate(() => (window as any).lastScMessage);
     expect(lastScMessage).toBeNull(); // Did not receive pause command
@@ -124,7 +124,7 @@ test.describe('Practice Media Player E2E Tests', () => {
   test('Permutation 4: Play SC -> Switch to SP (audio persists, no pause sent)', async ({ page }) => {
     const scBtn = page.locator('button:has-text("SoundCloud")');
     await scBtn.click();
-    await expect(scBtn).toHaveClass(/text-\[#ff5500\]/);
+    await expect(scBtn).toHaveAttribute("aria-pressed", "true");
     await page.waitForTimeout(1000);
 
     await page.evaluate(() => window.postMessage('{"event":"play"}', '*'));
@@ -132,7 +132,7 @@ test.describe('Practice Media Player E2E Tests', () => {
 
     const spotifyBtn = page.locator('button:has-text("Spotify")');
     await spotifyBtn.click();
-    await expect(spotifyBtn).toHaveClass(/text-\[#1db954\]/);
+    await expect(spotifyBtn).toHaveAttribute("aria-pressed", "true");
 
     const lastScMessage = await page.evaluate(() => (window as any).lastScMessage);
     expect(lastScMessage).toBeNull(); // Did not receive pause command
@@ -141,7 +141,7 @@ test.describe('Practice Media Player E2E Tests', () => {
   test('Permutation 5: Play SP -> Switch to YT (audio persists, no tab change override)', async ({ page }) => {
     const spotifyBtn = page.locator('button:has-text("Spotify")');
     await spotifyBtn.click();
-    await expect(spotifyBtn).toHaveClass(/text-\[#1db954\]/);
+    await expect(spotifyBtn).toHaveAttribute("aria-pressed", "true");
     await page.waitForTimeout(1000);
 
     // Focus Spotify iframe (this calls pauseYouTube + pauseSoundCloud internally)
@@ -160,7 +160,7 @@ test.describe('Practice Media Player E2E Tests', () => {
 
     const ytBtn = page.locator('button:has-text("YouTube")');
     await ytBtn.click();
-    await expect(ytBtn).toHaveClass(/text-red-550/);
+    await expect(ytBtn).toHaveAttribute("aria-pressed", "true");
 
     const source = await page.evaluate(() => (window as any).lastYtMessage);
     expect(source).toBeNull(); // Tab switch alone should NOT send a pause to YouTube
@@ -169,7 +169,7 @@ test.describe('Practice Media Player E2E Tests', () => {
   test('Permutation 6: Play SP -> Switch to SC (audio persists, no tab change override)', async ({ page }) => {
     const spotifyBtn = page.locator('button:has-text("Spotify")');
     await spotifyBtn.click();
-    await expect(spotifyBtn).toHaveClass(/text-\[#1db954\]/);
+    await expect(spotifyBtn).toHaveAttribute("aria-pressed", "true");
     await page.waitForTimeout(1000);
 
     // Focus Spotify iframe (this calls pauseYouTube + pauseSoundCloud internally)
@@ -188,7 +188,7 @@ test.describe('Practice Media Player E2E Tests', () => {
 
     const scBtn = page.locator('button:has-text("SoundCloud")');
     await scBtn.click();
-    await expect(scBtn).toHaveClass(/text-\[#ff5500\]/);
+    await expect(scBtn).toHaveAttribute("aria-pressed", "true");
 
     const source = await page.evaluate(() => (window as any).lastScMessage);
     expect(source).toBeNull(); // Tab switch alone should NOT send a pause to SoundCloud
@@ -400,7 +400,7 @@ test.describe('Practice Media Player E2E Tests', () => {
     const miniPlayer = page.locator('[data-testid="bottom-mini-player"]');
     await expect(miniPlayer).toBeVisible();
     await expect(miniPlayer.locator('text=Danza del Cielo Curandero').first()).toBeVisible();
-    await expect(miniPlayer.locator('text=YouTube Reference').first()).toBeVisible();
+    await expect(miniPlayer.getByTestId('mini-now-playing')).toContainText('YouTube');
   });
 
   test('Permutation 14: SoundCloud Mini-Player display on drawer fold', async ({ page }) => {
@@ -417,7 +417,7 @@ test.describe('Practice Media Player E2E Tests', () => {
     const miniPlayer = page.locator('[data-testid="bottom-mini-player"]');
     await expect(miniPlayer).toBeVisible();
     await expect(miniPlayer.locator('text=Danza del Cielo Curandero').first()).toBeVisible();
-    await expect(miniPlayer.locator('text=SoundCloud Reference').first()).toBeVisible();
+    await expect(miniPlayer.getByTestId('mini-now-playing')).toContainText('SoundCloud');
   });
 
   // Owner decision (#342): the mini-player stays visible for every source, Spotify included.
@@ -441,7 +441,7 @@ test.describe('Practice Media Player E2E Tests', () => {
 
     const miniPlayer = page.locator('[data-testid="bottom-mini-player"]');
     await expect(miniPlayer).toBeVisible();
-    await expect(miniPlayer.locator('text=Spotify Reference').first()).toBeVisible();
+    await expect(miniPlayer.getByTestId('mini-now-playing')).toContainText('Spotify');
   });
 
 
@@ -468,7 +468,7 @@ test.describe('Practice Media Player E2E Tests', () => {
     await expect(dropdown).toBeHidden();
     
     // Verify track switched
-    await expect(miniPlayer.locator('text=SoundCloud Reference').first()).toBeVisible();
+    await expect(miniPlayer.getByTestId('mini-now-playing')).toContainText('SoundCloud');
   });
 
   // =========================================================================

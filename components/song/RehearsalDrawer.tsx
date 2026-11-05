@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useTransition, useMemo } from "react";
 import { motion } from "framer-motion";
-import { X, Music, Play, Pause, RotateCcw, RotateCw, GripVertical, ChevronDown, Check, Mic, MoreHorizontal } from "lucide-react";
+import { X, Music, Play, Pause, RotateCcw, RotateCw, GripVertical, ChevronDown, Check, Mic, MoreHorizontal, Volume2 } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import AudioRecorder from "./AudioRecorder";
@@ -13,6 +13,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { useMarkSongNotificationsRead } from "@/hooks/useMarkSongNotificationsRead";
 import { useAudio } from "./AudioProvider";
 import { applyMiniPlayerHeight, isMiniPlayerVisible, mediaSessionReducer, miniPlayerClose, ownsActiveTake } from "@/lib/player/miniPlayer";
+import { availableProviders, defaultProvider, PROVIDER_NAMES, playStateKey } from "@/lib/player/referenceProviders";
 import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLocale } from "@/context/LocaleContext";
@@ -345,6 +346,7 @@ export default function RehearsalDrawer({
   const [activeDomain, setActiveDomain] = useState<'recording' | 'media' | null>(null);
 
   const hasMedia = !!(youtubeUrl || spotifyUrl || soundcloudUrl);
+  const referenceProviders = availableProviders({ youtubeUrl, soundcloudUrl, spotifyUrl });
 
   // Notify parent of play state change
   useEffect(() => {
@@ -395,10 +397,7 @@ export default function RehearsalDrawer({
 
   // Set default active media source and tab when props change or user changes
   useEffect(() => {
-    if (youtubeUrl) setSelectedMedia("youtube");
-    else if (soundcloudUrl) setSelectedMedia("soundcloud");
-    else if (spotifyUrl) setSelectedMedia("spotify");
-    else setSelectedMedia(null);
+    setSelectedMedia(defaultProvider({ youtubeUrl, soundcloudUrl, spotifyUrl }));
   }, [youtubeUrl, soundcloudUrl, spotifyUrl, user]);
 
   // Only set the tab when the drawer opens or when an explicit tab is requested.
@@ -543,6 +542,9 @@ export default function RehearsalDrawer({
     playingSource, isMediaPlaying, mediaCurrentTime, mediaDuration,
     recordings, hasMedia, activeDomain, t,
   ]);
+  // State word (none for Spotify) and the short name for the 390 px bar: brand only for references.
+  const stateKey = playStateKey(nowPlaying.isPlaying, nowPlaying.type === 'media' ? nowPlaying.source : null);
+  const barName = nowPlaying.type === 'media' && nowPlaying.source ? PROVIDER_NAMES[nowPlaying.source] : nowPlaying.label;
   const [isPendingOrder, startOrderTransition] = useTransition();
 
   const dndSensors = useSensors(
@@ -1095,24 +1097,6 @@ export default function RehearsalDrawer({
 
   return (
     <>
-      <style>{`
-        @keyframes eq1 {
-          0%, 100% { height: 4px; }
-          50% { height: 16px; }
-        }
-        @keyframes eq2 {
-          0%, 100% { height: 8px; }
-          50% { height: 16px; }
-        }
-        @keyframes eq3 {
-          0%, 100% { height: 6px; }
-          50% { height: 16px; }
-        }
-        .animate-eq-bar-1 { animation: eq1 0.8s ease-in-out infinite; }
-        .animate-eq-bar-2 { animation: eq2 0.5s ease-in-out infinite; }
-        .animate-eq-bar-3 { animation: eq3 0.7s ease-in-out infinite; }
-      `}</style>
-
       {/* Backdrop */}
       <motion.div
         initial={{ opacity: 0, pointerEvents: "none" }}
@@ -1201,10 +1185,9 @@ export default function RehearsalDrawer({
                   <div className={!user ? "blur-[4px] pointer-events-none select-none" : ""} inert={!user} aria-hidden={!user || undefined}>
                     {/* Sticky Mini-Player Status Bar */}
                     {hasMedia && selectedMedia && (
-                      <div className="flex items-center justify-between p-3.5 bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-950/50 rounded-2xl shrink-0">
+                      <div data-testid="reference-status" className="flex items-center justify-between gap-3 p-3.5 bg-surface border border-line rounded-panel shrink-0">
                         <div className="flex items-center gap-2.5 min-w-0">
-                          <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse shrink-0" />
-                          <span className="text-xs font-semibold text-gray-600 dark:text-gray-300 truncate">
+                          <span className="text-meta font-medium text-fg-muted break-words">
                             {selectedMedia === "youtube" && t('rehearsal.reference.loaded.youtube')}
                             {selectedMedia === "soundcloud" && t('rehearsal.reference.loaded.soundcloud')}
                             {selectedMedia === "spotify" && t('rehearsal.reference.loaded.spotify')}
@@ -1212,7 +1195,8 @@ export default function RehearsalDrawer({
                         </div>
                         <button
                           onClick={() => setActiveTab("media")}
-                          className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline shrink-0"
+                          data-testid="reference-open-player"
+                          className="inline-flex min-h-tap items-center px-2 text-meta font-semibold text-fg underline underline-offset-2 shrink-0"
                         >
                           {t('rehearsal.controlTrack')}
                         </button>
@@ -1336,47 +1320,47 @@ export default function RehearsalDrawer({
                 </div>
 
               <div className="space-y-6 text-left" style={activeTab !== "media" ? { visibility: "hidden", height: 0, overflow: "hidden", margin: 0, padding: 0 } : undefined}>
-                  {/* Media Selector Buttons (only if more than 1 media type exists) */}
-                  {((youtubeUrl ? 1 : 0) + (spotifyUrl ? 1 : 0) + (soundcloudUrl ? 1 : 0)) > 1 && (
-                    <div className="flex gap-2 p-1 bg-gray-100 dark:bg-gray-950 rounded-xl">
-                      {youtubeUrl && (
-                        <button
-                          onClick={() => setSelectedMedia("youtube")}
-                          className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                            selectedMedia === "youtube"
-                              ? "bg-white dark:bg-gray-800 text-red-550 shadow-sm border border-gray-200/50 dark:border-gray-700/50"
-                              : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
-                          }`}
-                        >
-                          YouTube
-                        </button>
-                      )}
-                      {soundcloudUrl && (
-                        <button
-                          onClick={() => setSelectedMedia("soundcloud")}
-                          className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                            selectedMedia === "soundcloud"
-                              ? "bg-white dark:bg-gray-800 text-[#ff5500] shadow-sm border border-gray-200/50 dark:border-gray-700/50"
-                              : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
-                          }`}
-                        >
-                          SoundCloud
-                        </button>
-                      )}
-                      {spotifyUrl && (
-                        <button
-                          onClick={() => setSelectedMedia("spotify")}
-                          className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                            selectedMedia === "spotify"
-                              ? "bg-white dark:bg-gray-800 text-[#1db954] shadow-sm border border-gray-200/50 dark:border-gray-700/50"
-                              : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
-                          }`}
-                        >
-                          Spotify
-                        </button>
-                      )}
+                  {/* Provider buttons: only providers with a link, fixed order; the pressed one is checked (Story 6.1.13 / G3.2) */}
+                  {referenceProviders.length > 0 && (
+                    <div role="group" aria-label={t('practice.tab.listen')} data-testid="reference-providers" className="flex gap-1 p-1 bg-surface-2 rounded-control">
+                      {referenceProviders.map((provider) => {
+                        const selected = selectedMedia === provider;
+                        // The shown provider (check) can differ from the one that plays (speaker).
+                        const playing = nowPlaying.type === 'media' && nowPlaying.source === provider && nowPlaying.isPlaying;
+                        return (
+                          <button
+                            key={provider}
+                            type="button"
+                            data-testid={`reference-provider-${provider}`}
+                            aria-pressed={selected}
+                            onClick={() => setSelectedMedia(provider)}
+                            className={`flex-1 min-h-tap inline-flex items-center justify-center gap-1.5 rounded-control px-2 text-meta font-semibold motion-safe:transition-colors ${
+                              selected
+                                ? "bg-surface text-fg border border-line-strong"
+                                : "text-fg-muted hover:bg-surface"
+                            }`}
+                          >
+                            {selected && <Check aria-hidden="true" className="size-3.5 shrink-0" />}
+                            {PROVIDER_NAMES[provider]}
+                            {playing && (
+                              <>
+                                <Volume2 aria-hidden="true" data-testid={`reference-provider-${provider}-playing`} className="size-3.5 shrink-0" />
+                                <span className="sr-only">{t('miniPlayer.playing')}</span>
+                              </>
+                            )}
+                          </button>
+                        );
+                      })}
                     </div>
                   )}
+
+                  {/* Says in words what plays and whether it is paused (Story 6.1.13 / G3.2) */}
+                  {/* Kept mounted so screen readers announce the first change too */}
+                  <p data-testid="listen-now-playing" role="status" className="text-meta text-fg-muted break-words empty:hidden">
+                    {miniPlayerVisible && (stateKey
+                      ? t('rehearsal.listen.status', { state: t(stateKey), name: nowPlaying.label })
+                      : nowPlaying.label)}
+                  </p>
 
                   {/* YouTube Player */}
                   {youtubeUrl && (
@@ -1446,13 +1430,13 @@ export default function RehearsalDrawer({
           data-testid="bottom-mini-player"
           role="region"
           aria-label={t('miniPlayer.region')}
-          className="fixed bottom-[calc(var(--bottom-nav-height,3.5rem)+env(safe-area-inset-bottom,0px))] lg:bottom-4 inset-x-0 lg:left-1/2 lg:right-auto lg:-translate-x-1/2 z-[60] w-full lg:max-w-xl lg:rounded-panel shadow-sheet bg-accent text-on-accent h-bar flex items-center justify-between px-2 border-t lg:border border-line-strong select-none motion-safe:animate-in motion-safe:slide-in-from-bottom motion-safe:duration-300"
+          className="fixed bottom-[calc(var(--bottom-nav-height,3.5rem)+env(safe-area-inset-bottom,0px))] lg:bottom-4 inset-x-0 lg:left-1/2 lg:right-auto lg:-translate-x-1/2 z-[60] w-full lg:max-w-xl lg:rounded-panel shadow-sheet bg-surface text-fg h-bar flex items-center justify-between px-2 border-t lg:border border-line-strong select-none motion-safe:animate-in motion-safe:slide-in-from-bottom motion-safe:duration-300"
         >
           {/* Visual Progress Bar (Clipped to container corners) */}
           <div className="absolute inset-0 pointer-events-none lg:rounded-panel overflow-hidden z-0">
-            <div className="absolute top-0 inset-x-0 h-1 bg-on-accent/25">
+            <div className="absolute top-0 inset-x-0 h-1 bg-line">
               <div 
-                className="h-full bg-on-accent"
+                className="h-full bg-fg-muted"
                 style={{ width: `${Math.min(100, (nowPlaying.currentTime / (nowPlaying.duration || 1)) * 100)}%` }}
               />
             </div>
@@ -1465,32 +1449,26 @@ export default function RehearsalDrawer({
             className="absolute top-0 inset-x-0 h-2 -mt-1 cursor-pointer group z-40 flex items-center"
           >
             <div 
-              className="w-3 h-3 bg-on-accent rounded-pill absolute opacity-0 group-hover:opacity-100 motion-safe:transition-opacity"
+              className="w-3 h-3 bg-fg rounded-pill absolute opacity-0 group-hover:opacity-100 motion-safe:transition-opacity"
               style={{ left: `calc(${Math.min(100, (nowPlaying.currentTime / (nowPlaying.duration || 1)) * 100)}% - 6px)` }}
             />
           </div>
 
           {/* Equalizer & Source Switcher Dropdown */}
           <div className="flex items-center gap-2 flex-1 min-w-0 h-full pl-2 cursor-pointer" onClick={onOpen}>
-            <div className="flex gap-0.5 items-end h-4 w-4 shrink-0 justify-center cursor-pointer">
-              <span className={`w-[2px] h-1.5 bg-on-accent rounded-pill ${nowPlaying.isPlaying ? 'motion-safe:animate-eq-bar-1' : ''}`} />
-              <span className={`w-[2px] h-3 bg-on-accent rounded-pill ${nowPlaying.isPlaying ? 'motion-safe:animate-eq-bar-2' : ''}`} />
-              <span className={`w-[2px] h-2 bg-on-accent rounded-pill ${nowPlaying.isPlaying ? 'motion-safe:animate-eq-bar-3' : ''}`} />
-            </div>
-            
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <div 
                   data-testid="mini-source-switcher" 
-                  className="flex flex-col justify-center min-h-tap text-left min-w-0 cursor-pointer hover:bg-on-accent/15 rounded-control px-2 -mx-2"
+                  className="flex flex-col justify-center min-h-tap text-left min-w-0 cursor-pointer hover:bg-surface-2 rounded-control px-2 -mx-2"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <div className="flex items-center gap-1">
                     <span className="text-meta font-semibold truncate">{songTitle}</span>
                     <ChevronDown className="w-3 h-3 opacity-70 shrink-0" />
                   </div>
-                  <span className="text-caption truncate">
-                    {nowPlaying.label}
+                  <span data-testid="mini-now-playing" className="text-caption text-fg-muted truncate" title={nowPlaying.label}>
+                    {stateKey ? `${t(stateKey)} · ${barName}` : barName}
                   </span>
                 </div>
               </DropdownMenuTrigger>
@@ -1575,7 +1553,7 @@ export default function RehearsalDrawer({
                 data-testid="mini-seek-back-btn"
                 title={t('miniPlayer.seekBack')}
                 aria-label={t('miniPlayer.seekBack')}
-                className="size-tap flex items-center justify-center rounded-pill hover:bg-on-accent/15 cursor-pointer shrink-0"
+                className="size-tap flex items-center justify-center rounded-pill hover:bg-surface-2 cursor-pointer shrink-0"
               >
                 <RotateCcw className="w-[18px] h-[18px]" />
               </button>
@@ -1586,7 +1564,7 @@ export default function RehearsalDrawer({
               onClick={handleMiniPlayerPlayPause}
               data-testid="mini-play-pause-btn"
               aria-label={nowPlaying.isPlaying ? t('miniPlayer.pause') : t('miniPlayer.play')}
-              className="size-tap flex items-center justify-center rounded-pill bg-on-accent/20 hover:bg-on-accent/30 cursor-pointer shrink-0"
+              className="size-tap flex items-center justify-center rounded-pill bg-accent text-on-accent hover:opacity-90 cursor-pointer shrink-0"
             >
               {nowPlaying.isPlaying ? (
                 <Pause className="w-4 h-4 fill-current" />
@@ -1602,13 +1580,13 @@ export default function RehearsalDrawer({
                 data-testid="mini-seek-forward-btn"
                 title={t('miniPlayer.seekForward')}
                 aria-label={t('miniPlayer.seekForward')}
-                className="size-tap flex items-center justify-center rounded-pill hover:bg-on-accent/15 cursor-pointer shrink-0"
+                className="size-tap flex items-center justify-center rounded-pill hover:bg-surface-2 cursor-pointer shrink-0"
               >
                 <RotateCw className="w-[18px] h-[18px]" />
               </button>
             )}
 
-            <span className="w-px h-6 bg-on-accent/30 mx-1 shrink-0" />
+            <span className="w-px h-6 bg-line mx-1 shrink-0" />
 
             {/* Expand Drawer */}
             <button 
@@ -1616,7 +1594,7 @@ export default function RehearsalDrawer({
               data-testid="mini-expand-btn"
               title={t('miniPlayer.expand')}
               aria-label={t('miniPlayer.expand')}
-              className="size-tap flex items-center justify-center rounded-pill hover:bg-on-accent/15 cursor-pointer shrink-0"
+              className="size-tap flex items-center justify-center rounded-pill hover:bg-surface-2 cursor-pointer shrink-0"
             >
               <Music className="w-4 h-4" />
             </button>
@@ -1637,7 +1615,7 @@ export default function RehearsalDrawer({
                 data-testid="mini-close-btn"
                 title={t('miniPlayer.stop')}
                 aria-label={t('miniPlayer.stop')}
-                className="size-tap flex items-center justify-center rounded-pill hover:bg-on-accent/15 cursor-pointer shrink-0"
+                className="size-tap flex items-center justify-center rounded-pill hover:bg-surface-2 cursor-pointer shrink-0"
               >
                 <X className="w-4 h-4" />
               </button>

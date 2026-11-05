@@ -266,7 +266,8 @@ const en = {
   'rehearsal.reference.loaded.youtube': 'Reference: YouTube video loaded',
   'rehearsal.reference.loaded.soundcloud': 'Reference: SoundCloud track loaded',
   'rehearsal.reference.loaded.spotify': 'Reference: Spotify player loaded',
-  'rehearsal.controlTrack': 'Control Track',
+  'rehearsal.controlTrack': 'Open player',
+  'rehearsal.listen.status': '{state}: {name}',
   'rehearsal.headphonesHint': '🎧 Wear headphones to prevent bleed',
   'practice.takes.mine': 'My takes',
   'practice.takes.shared': 'Shared with me',
@@ -378,6 +379,7 @@ const en = {
   'miniPlayer.play': 'Play',
   'miniPlayer.pause': 'Pause',
   'miniPlayer.playing': 'Playing',
+  'miniPlayer.paused': 'Paused',
   'miniPlayer.source.userRecording': 'My take',
   'miniPlayer.source.select': 'Select Source',
 

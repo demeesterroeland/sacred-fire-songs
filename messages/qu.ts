@@ -272,7 +272,8 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'rehearsal.reference.loaded.youtube': 'Pukllana: YouTube video apamusqa',
   'rehearsal.reference.loaded.soundcloud': 'Pukllana: SoundCloud taki apamusqa',
   'rehearsal.reference.loaded.spotify': 'Pukllana: Spotify player apamusqa',
-  'rehearsal.controlTrack': 'Pukllana taki',
+  'rehearsal.controlTrack': 'Takichiqta kichay',
+  'rehearsal.listen.status': '{state}: {name}',
   'rehearsal.headphonesHint': '🎧 Auricularkunata churakuy, mana tuqyayta hap’inaykipaq',
   'practice.takes.mine': 'Tomakuna',
   'practice.takes.shared': 'Ñoqaman qusqakuna',
@@ -384,6 +385,7 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'miniPlayer.play': 'Waqachiy',
   'miniPlayer.pause': 'Samachiy',
   'miniPlayer.playing': 'Takichishan',
+  'miniPlayer.paused': 'Samachkan',
   'miniPlayer.source.userRecording': 'Toma',
   'miniPlayer.source.select': 'Maymanta akllay',
 

@@ -268,7 +268,8 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'rehearsal.reference.loaded.youtube': 'Referentie: YouTube-video geladen',
   'rehearsal.reference.loaded.soundcloud': 'Referentie: SoundCloud-track geladen',
   'rehearsal.reference.loaded.spotify': 'Referentie: Spotify-speler geladen',
-  'rehearsal.controlTrack': 'Track bedienen',
+  'rehearsal.controlTrack': 'Speler openen',
+  'rehearsal.listen.status': '{state}: {name}',
   'rehearsal.headphonesHint': '🎧 Gebruik een koptelefoon om overspraak te voorkomen',
   'practice.takes.mine': 'Mijn takes',
   'practice.takes.shared': 'Met mij gedeeld',
@@ -380,6 +381,7 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'miniPlayer.play': 'Afspelen',
   'miniPlayer.pause': 'Pauzeren',
   'miniPlayer.playing': 'Wordt afgespeeld',
+  'miniPlayer.paused': 'Gepauzeerd',
   'miniPlayer.source.userRecording': 'Mijn take',
   'miniPlayer.source.select': 'Bron selecteren',
 

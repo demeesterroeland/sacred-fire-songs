@@ -1,11 +1,12 @@
 # Guest Guide (draft)
 
-**Version:** 0.15 | **Date:** Nov 5, 2026
+**Version:** 0.16 | **Date:** Nov 5, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.16 | Nov 5, 2026 | The player bar is calm (plain background, orange only on play) and says *Playing* or *Paused* with what plays; the Listen tab shows only the providers the song has (UX v2, #397). |
 | 0.15 | Nov 5, 2026 | Song page: a bar at the bottom with Practice, Playlist and Like; the ⋮ menu keeps Share (UX v2, #393). |
 | 0.14 | Nov 5, 2026 | Search field: recent searches and category chips appear when you tap it (UX v2, #413). |
 | 0.13 | Nov 5, 2026 | Add Song as a guest: a banner says saving needs an account; your draft is kept when you sign in (UX v2, #411). |
@@ -56,7 +57,7 @@ The ☰ menu repeats the main places (Home, Songs, Playlists, Favorites, Drafts,
 Tap **Practice** in the bar at the bottom of the song to open the Practice panel.
 
 - **Listen** tab: choose **YouTube**, **SoundCloud** or **Spotify** (when the song has that link) and play it inside the app.
-- A small **player bar** appears above the bottom bar once you press play (a song page never shows it before), so you can keep listening while reading. Use ⟲ / ⟳ to jump back or forward, ✕ to stop. Leaving the song page stops the music.
+- A small **player bar** (plain background, only the play button is orange; it says *Playing* or *Paused* and what plays) appears above the bottom bar once you press play (a song page never shows it before), so you can keep listening while reading. Use ⟲ / ⟳ to jump back or forward, ✕ to stop. Leaving the song page stops the music.
 - Tip: wear headphones if you sing along while recording later.
 
 The **Record** tab shows what members can do and a **Sign In to Record** button.
