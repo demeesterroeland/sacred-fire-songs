@@ -94,7 +94,7 @@ Always follow **Test-Driven Development (TDD)** and **Behavior-Driven Developmen
 ## Internationalization (i18n) Policy
 
 - **Zero Hardcoded UX Strings:** Never hardcode user-facing copy in components, dialogs, forms, toasts, badges, or buttons.
-- **Immediate Translation Sync:** When adding or updating UX copy, **always** register the keys using `useLocale()` / `t(...)` and update **all 8 locale files** in `messages/` (`en.json`, `es.json`, `pt.json`, `fr.json`, `de.json`, `nl.json`, `it.json`, `he.json`).
+- **Immediate Translation Sync:** When adding or updating UX copy, **always** register the keys using `useLocale()` / `t(...)` and update **every locale file** in `messages/` — currently 8: `en.ts`, `nl.ts`, `es.ts`, `it.ts`, `ru.ts`, `qu.ts`, `fr.ts`, `pt.ts` (source of truth: `SUPPORTED_LOCALES` in `lib/i18n/index.ts`; `useLocale` comes from `@/context/LocaleContext`).
 - Ensure fallback behavior is clean and date/time formatters use `LOCALE_DATE_TAGS[locale]`.
 
 <!-- BEGIN:nextjs-agent-rules -->
