@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { clickPractice } from '../fixtures/songActions';
 
 test.describe('Practice Media Player E2E Tests', () => {
   let songUrl = '';
@@ -55,23 +56,8 @@ test.describe('Practice Media Player E2E Tests', () => {
 
     await page.goto(songUrl);
 
-    // Open Rehearsal Drawer Space (responsive: desktop header button or mobile overflow menu)
-    const recordBtn = page.locator('button[title="Practice"]').first();
-    const moreActionsBtn = page.locator('button[aria-label="More actions"]').first();
-
-    await Promise.race([
-      recordBtn.waitFor({ state: 'attached', timeout: 15000 }).catch(() => {}),
-      moreActionsBtn.waitFor({ state: 'attached', timeout: 15000 }).catch(() => {})
-    ]);
-
-    if (await recordBtn.isVisible()) {
-      await recordBtn.click();
-    } else {
-      await moreActionsBtn.click();
-      const mobileRecordBtn = page.locator('button:has-text("Practice")').filter({ visible: true }).first();
-      await expect(mobileRecordBtn).toBeVisible({ timeout: 5000 });
-      await mobileRecordBtn.click();
-    }
+    // Open Rehearsal Drawer Space (responsive: desktop header button or the phone action bar)
+    await clickPractice(page);
 
     // Select Listen tab
     const referenceTracksTab = page.locator('[data-testid="practice-tab-listen"]');

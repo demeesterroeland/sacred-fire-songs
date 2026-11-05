@@ -1,16 +1,15 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
-import { useParams, notFound, useRouter, useSearchParams } from 'next/navigation';
+import { useParams, notFound, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
 import SongDisplay from '@/components/song/SongDisplay';
 import SongDetailSkeleton from '@/components/song/SongDetailSkeleton';
-import MediaEmbeds from '@/components/song/MediaEmbeds';
 import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Trash2, Edit2, Music, Guitar, Heart, MoreVertical, ListPlus, Mic, Share2 } from 'lucide-react';
+import { Trash2, Edit2, Music, Heart, MoreVertical, ListPlus, Mic, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
 import GuestGateSheet from '@/components/common/GuestGateSheet';
 import RehearsalDrawer from '@/components/song/RehearsalDrawer';
@@ -20,6 +19,10 @@ import { PlaylistPicker } from '@/components/playlists/PlaylistPicker';
 import { useDeleteSong } from '@/hooks/useDeleteSong';
 import { SONG_KEYS } from '@/lib/songs/queryKeys';
 import { useWakeLock } from '@/hooks/useWakeLock';
+import { SongActionBar } from '@/components/song/SongActionBar';
+import { useActionBarVisibility } from '@/hooks/useActionBarVisibility';
+import { useUserPreferences } from '@/context/UserPreferencesContext';
+import { practiceTab } from '@/lib/song/actionBar';
 import { SongMetaLines } from '@/components/song/SongMetaLines';
 import { ReaderToolbar } from '@/components/song/ReaderToolbar';
 import { useReaderPrefs } from '@/lib/reader/useReaderPrefs';
@@ -33,7 +36,6 @@ import { parseRecordingParam, RECORDING_PARAM } from '@/lib/songs/recordingLink'
 export default function SongDetailPage() {
     const { t } = useLocale();
     const params = useParams();
-    const router = useRouter();
     const id = typeof params.id === 'string' ? params.id : params.id?.[0]; // Safe type handling
 
     const [selectedVersionIndex, setSelectedVersionIndex] = useState(0);
@@ -123,6 +125,16 @@ export default function SongDetailPage() {
     const versions = song?.song_versions || [];
     const currentVersion = versions[selectedVersionIndex];
     const { data: recordings } = useSongRecordings(currentVersion?.id);
+
+    // Story 6.1.9 (#393): the phone action bar hides on scroll down when the user has auto-hide on.
+    const { preferences } = useUserPreferences();
+    const actionBarVisible = useActionBarVisibility(preferences.autoHideBottomNav);
+    const hasMedia = !!(currentVersion?.youtube_url || currentVersion?.spotify_url || currentVersion?.soundcloud_url);
+    const openPractice = () => {
+        // Listen when there is reference media, otherwise straight to Record. Guests see the gate there.
+        setDrawerRequestedTab(practiceTab(hasMedia));
+        setIsRehearsalDrawerOpen(true);
+    };
 
     // Deep link `/songs/<id>?recording=<recordingId>` (notifications, emails, "Copy link"):
     // select the recording's version, open the Recordings tab and highlight the take.
@@ -365,7 +377,7 @@ export default function SongDetailPage() {
                     </div>
                 </div>
 
-                <div className="max-w-5xl px-6 md:px-10 pb-[calc(1.5rem+var(--mini-player-h,0px))] md:pb-[calc(2.5rem+var(--mini-player-h,0px))] pt-4 md:pt-6 space-y-0">
+                <div className="max-w-5xl px-6 md:px-10 pb-[calc(1.5rem+var(--mini-player-h,0px)+var(--action-bar-h,0px))] md:pb-[calc(2.5rem+var(--mini-player-h,0px)+var(--action-bar-h,0px))] lg:pb-[calc(2.5rem+var(--mini-player-h,0px))] pt-4 md:pt-6 space-y-0">
 
                     {/* Story 6.1.7 (#391): tags on one grey line (tap to expand), Key · Capo · Tuning on another. */}
                     <SongMetaLines
@@ -411,6 +423,28 @@ export default function SongDetailPage() {
                 />
             </main>
 
+            {/* Story 6.1.9 (#393): Practice · Playlist · ♥ in thumb reach (phones). */}
+            <SongActionBar
+                isFavorite={isFav}
+                onPractice={openPractice}
+                onToggleFavorite={handleToggleFavorite}
+                onGuestPlaylist={() => setIsGuestGateOpen(true)}
+                takeCount={recordings?.length ?? 0}
+                visible={actionBarVisible}
+                playlistSlot={user && id ? (
+                    <PlaylistPicker
+                        compositionId={id}
+                        userId={user.id}
+                        label={t('songBar.playlist')}
+                        triggerTestId="song-action-playlist"
+                        triggerClassName="min-h-tap min-w-0 flex-1 rounded-control px-2 text-meta font-medium text-fg-muted hover:bg-surface-2 hover:text-fg"
+                        contentClassName="flex items-center justify-center gap-1.5"
+                        iconClassName="size-5 shrink-0"
+                        labelClassName="truncate text-meta font-medium"
+                    />
+                ) : undefined}
+            />
+
             {/* Mobile Bottom Drawer Context Menu */}
             {isOverflowOpen && (
                 <>
@@ -421,6 +455,7 @@ export default function SongDetailPage() {
                     />
                     {/* Bottom sheet */}
                     <div 
+                        data-testid="song-overflow-sheet"
                         className="fixed bottom-0 inset-x-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 rounded-t-3xl shadow-2xl z-50 pb-[calc(env(safe-area-inset-bottom,0px)+var(--mini-player-h,0px))] lg:hidden animate-in slide-in-from-bottom duration-300 flex flex-col"
                     >
                         {/* Handle bar */}
@@ -439,15 +474,6 @@ export default function SongDetailPage() {
 
                         {/* Action options */}
                         <div className="py-2">
-                            {/* Like / Favorite */}
-                            <button
-                                onClick={() => { handleToggleFavorite(); setIsOverflowOpen(false); }}
-                                className="w-full flex items-center gap-4 px-6 py-4 hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors text-left text-gray-700 dark:text-gray-300"
-                            >
-                                <Heart className={`w-5 h-5 ${isFav ? 'text-amber-500 fill-amber-500' : 'text-gray-400 dark:text-gray-500'}`} />
-                                <span className="text-sm font-bold">{isFav ? t('song.removeFromFavorites') : t('song.addToFavorites')}</span>
-                            </button>
-
                             {/* Share */}
                             <button
                                 onClick={() => { handleShare(); setIsOverflowOpen(false); }}
@@ -455,43 +481,6 @@ export default function SongDetailPage() {
                             >
                                 <Share2 className="w-5 h-5 text-gray-400 dark:text-gray-500" />
                                 <span className="text-sm font-bold">{t('song.share')}</span>
-                            </button>
-
-                            {/* Add to Playlist */}
-                            {user ? (
-                                id && (
-                                    <PlaylistPicker
-                                        compositionId={id as string}
-                                        userId={user.id}
-                                        label={t('song.addToPlaylist')}
-                                        triggerClassName="w-full flex items-center gap-4 px-6 py-4 hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors text-left rounded-none text-gray-700 dark:text-gray-300"
-                                        iconClassName="w-5 h-5"
-                                    />
-                                )
-                            ) : (
-                                <button
-                                    onClick={() => {
-                                        setIsOverflowOpen(false);
-                                        setIsGuestGateOpen(true);
-                                    }}
-                                    className="w-full flex items-center gap-4 px-6 py-4 hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors text-left text-gray-700 dark:text-gray-300"
-                                >
-                                    <ListPlus className="w-5 h-5 text-gray-400 dark:text-gray-500" />
-                                    <span className="text-sm font-bold">{t('song.addToPlaylist')}</span>
-                                </button>
-                            )}
-
-                            {/* Record Rehearsal */}
-                            <button
-                                onClick={() => {
-                                    setIsOverflowOpen(false);
-                                    setDrawerRequestedTab("recorder");
-                                    setIsRehearsalDrawerOpen(true);
-                                }}
-                                className="w-full flex items-center gap-4 px-6 py-4 hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors text-left text-gray-700 dark:text-gray-300"
-                            >
-                                <Mic className="w-5 h-5 text-gray-400 dark:text-gray-500" />
-                                <span className="text-sm font-bold">{t('practice.title')}</span>
                             </button>
 
                             {/* Edit */}

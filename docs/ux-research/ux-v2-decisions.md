@@ -1,11 +1,12 @@
 # UX v2: Agent Decisions (ADR-lite)
 
-**Version:** 1.18 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375)
+**Version:** 1.19 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375)
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.19 | Nov 5, 2026 | Added UXA-023 to UXA-026 (song action bar: ⋮ sheet content, hide-on-scroll rule, bottom nav height fix, bar style and copy; #393). |
 | 1.18 | Nov 5, 2026 | Added UXA-022 (search suggestions: what chips do, when the panel shows, when a search is remembered; #413). |
 | 1.17 | Nov 5, 2026 | Added UXA-021 (take action sheet: group order, Copy link kept, listen-only takes get no sheet, swipe on the shared sheet, #401). |
 | 1.16 | Nov 5, 2026 | Added UXA-020 (bottom bar: Search target, "+" in Library, /explore gone; #408). |
@@ -50,6 +51,10 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 | UXA-020 | Nov 5, 2026 | #408 | Bottom bar: Search = `/songs` with the header field focused; "+" in the Library header (members only); `/explore` is a 404 | yes |
 | UXA-021 | Nov 5, 2026 | #401 | Take action sheet: Rename and Download sit with Play, Copy link stays under Share, takes of others get no sheet, swipe-to-close on the shared bottom sheet, no new copy | yes |
 | UXA-022 | Nov 5, 2026 | #413 | Search suggestions: top-level category chips toggle the `category` filter; panel only while the field is empty; a search is remembered on Enter, on tap and on leaving the field with ≥ 2 characters; selected chip = inverted greys + check | yes |
+| UXA-023 | Nov 5, 2026 | #393 | The ⋮ sheet loses Practice, Playlist and the heart (they live in the action bar); desktop header keeps its buttons and its Practice opens on Record | yes |
+| UXA-024 | Nov 5, 2026 | #393 | Action bar hides on scroll down only when the auto-hide preference is on; 8 px jitter threshold, always visible near the top | no |
+| UXA-025 | Nov 5, 2026 | #393 | `--bottom-nav-height` reports 3.5rem whenever the nav is on screen (it was 0 with auto-hide off, so bars overlapped the nav) | no |
+| UXA-026 | Nov 5, 2026 | #393 | Action bar style and copy: Practice in accent text with take count, Playlist and Like in grey, new short labels "Playlist" / "Like" / "Liked"; members reuse the playlist popover until #414 | yes |
 
 ---
 
@@ -252,3 +257,38 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 - **Consequences:** searches are stored on this device only (no account, no server). Picking a chip drops the old `tag` filter (tags belong to a category). ArrowDown from the field skips "Clear all", so ArrowDown + Enter never wipes the history (review). Focusing the field when it already holds the current search (`/songs?search=agua`) shows no panel until the text is cleared (Esc clears it).
 - **Confirm:** yes (more searches are remembered than before; the field's look changes)
 
+### UXA-023 · What stays in the ⋮ sheet; desktop unchanged
+
+- **Date / story:** Nov 5, 2026 · #393 (G2.4)
+- **Context:** the story says the ⋮ sheet "keeps secondary actions (share song, edit, delete)". It does not say whether Practice, Add to playlist and Like stay there as duplicates. On desktop (`lg`) the bar is not shown; the header already has Practice, Playlist, ♥ and Share.
+- **Options:** (a) keep duplicates in ⋮; (b) move the three actions out of ⋮ and leave only share, edit, delete; (c) also change the desktop Practice button to open on Listen when media exists.
+- **Choice:** (b) for phones. Two ways to the same action cost screen space and invite "which one?"; the bar is always in reach. Desktop is not touched (no bar there; the header buttons stay and Practice there still opens on Record), so the Listen-first rule is a phone rule for now. A guest's ⋮ sheet therefore shows only **Share Song**.
+- **Consequences:** every E2E spec that reached Practice, Playlist or the heart through ⋮ now uses the bar (`e2e/fixtures/songActions.ts`, `song-action-*` test ids). Desktop and phone differ on the Practice start tab until someone decides to unify them.
+- **Confirm:** yes (changes where actions live and the desktop/phone difference)
+
+### UXA-024 · When the action bar hides
+
+- **Date / story:** Nov 5, 2026 · #393 (G2.4)
+- **Context:** "hides on scroll down, shows on scroll up (respects the auto-hide preference)". The preference is the existing Settings → Preferences switch `autoHideBottomNav` (it also hides the bottom nav after 3 s of inactivity).
+- **Options:** (a) the bar follows the nav's inactivity timer; (b) the bar hides on scroll direction only while the preference is on and never hides while it is off.
+- **Choice:** (b). Scroll direction is measured against an anchor that moves only after 8 px, so slow scrolling still counts and jitter does not flicker; within 48 px of the top the bar always shows. A hidden bar leaves the tab order and the accessibility tree (`visibility: hidden` after the slide). The page reserves the bar's height (`--action-bar-h`) while it is mounted, whether it is shown or not, so the end of the song never jumps.
+- **Consequences:** with the preference on, the nav (inactivity timer) and the bar (scroll direction) hide for different reasons and can be out of step for a moment.
+- **Confirm:** no
+
+### UXA-025 · Bottom nav height variable was 0 with auto-hide off
+
+- **Date / story:** Nov 5, 2026 · #393 (G2.4)
+- **Context:** `MobileBottomNav` published `--bottom-nav-height` as 3.5rem only when it was on a song page, visible **and** the auto-hide preference was on. With the preference off the nav is always on screen but the variable was 0, so the mini player (#396) already sat on top of the nav and the new action bar would have done the same.
+- **Options:** (a) leave it and compute the bar position differently; (b) publish the nav's real on-screen height (`bottomNavHeight(isVisible)`).
+- **Choice:** (b), a one-line change in `components/common/MobileBottomNav.tsx` plus `bottomNavHeight()` in `lib/song/actionBar.ts`. The bar sits at `max(--mini-player-h, --bottom-nav-height) + safe-area inset`, so it clears the nav and rises above the mini player (whose own height already includes the nav).
+- **Consequences:** from `lg` the nav is hidden by CSS, so the variable is 0 there (review: otherwise desktop pages padded 56 px extra under the mini player). #408 rewrites the bottom nav in parallel; whoever merges second must keep publishing the nav's real height in `--bottom-nav-height` (see `testing/unit/tests/songActionBar.test.ts`, `e2e/tests/ux-v2-song-action-bar.spec.ts`).
+- **Confirm:** no
+
+### UXA-026 · Bar style and copy
+
+- **Date / story:** Nov 5, 2026 · #393 (G2.4)
+- **Context:** the story fixes the three actions, not how they look or what they say. Design rules: greyscale plus one accent, 44 px targets, labels at least 12 px, colour never alone. The mini player (#396) is already an accent-filled bar.
+- **Options:** (a) Practice as an accent-filled button; (b) icons only; (c) icon plus text label, Practice in accent text.
+- **Choice:** (c). `Toolbar` / `ToolbarButton` primitives, three equal thirds, icon and 13 px label side by side. Practice is accent text with the number of takes in a grey chip (so an accent fill does not stack on the accent mini player); Playlist is grey; the heart is a grey outline that becomes a filled heart with the label **Liked** (shape and word change, not only colour). New keys `songBar.toolbar` ("Song actions"), `songBar.playlist`, `songBar.like`, `songBar.liked` in all 8 locales; the accessible names stay "Add to Playlist" and "Add to / Remove from Liked Songs". Members get the existing playlist popover in the middle slot (it flips above the bar); #414 turns it into a bottom sheet. A guest's Playlist and heart open the sign-in sheet; Practice opens the drawer for guests too (Record shows the recorder gate).
+- **Consequences:** two new short labels in every language to proofread; Quechua "Munay" / "Munasqa" and the Dutch "Favoriet" / "In favorieten" should be checked by native speakers.
+- **Confirm:** yes (copy and look)

@@ -1,6 +1,7 @@
 import { test, expect, type Page } from '@playwright/test';
 import pg from 'pg';
 import { ROLES } from '../fixtures/roles';
+import { clickPractice } from '../fixtures/songActions';
 import { TAKE_STATUS_FIXTURE_IDS as IDS } from '../fixtures/ids';
 
 /**
@@ -65,8 +66,7 @@ test.beforeAll(async () => {
 
 async function openRecordTab(page: Page) {
   await page.goto(`/songs/${IDS.song}`);
-  await page.locator('button[aria-label="More actions"]').first().click();
-  await page.locator('button:has-text("Practice")').filter({ visible: true }).first().click();
+  await clickPractice(page);
   await expect(page.locator('h3:has-text("Practice")')).toBeVisible({ timeout: 10_000 });
   const recordTab = page.locator('[data-testid="practice-tab-record"]');
   if (await recordTab.count()) await recordTab.first().click({ force: true });

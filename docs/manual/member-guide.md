@@ -1,11 +1,12 @@
 # Member Guide (draft)
 
-**Version:** 0.8 | **Date:** Nov 5, 2026
+**Version:** 0.9 | **Date:** Nov 5, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.9 | Nov 5, 2026 | Like and Add to playlist moved from the song's ⋮ menu to the bar at the bottom of the song (UX v2, #393). |
 | 0.8 | Nov 5, 2026 | Create moved from the bottom bar to the **+** in Library (UX v2, #408). |
 | 0.7 | Nov 5, 2026 | Section titles and small labels are sentence case and larger (13 px titles, nothing below 12 px) with darker grey (UX v2, #387); "Your Library" reads "Your library". |
 | 0.6 | Nov 5, 2026 | Practising: the player bar appears only after you press play and stops with the song page (UX v2, #396); details on the practice page. |
@@ -30,7 +31,7 @@ Above the categories, **Your library** shows four counters: **Favorites**, **Dra
 
 ## Favourites
 
-Tap the ♡ on a song card or choose **Like** in the song's ⋮ menu. The heart turns orange. Remove it the same way ("Remove from Liked Songs"). All favourites are in **Library → Your Favorites**.
+Tap **Like** in the bar at the bottom of the song page. The heart fills and the label reads **Liked**. Remove it the same way ("Remove from Liked Songs"). All favourites are in **Library → Your Favorites**.
 
 ## Library
 
@@ -52,7 +53,7 @@ Below that: **My private playlists** and **Recently viewed** ("View all" opens t
 **Create:** bottom bar **Library → +  → New Playlist**, or **Library → + New Playlist**. Type a name → **Create Playlist**. New playlists are private; you can change that later.
 
 **Add songs:**
-- From a song: ⋮ → **Add to Playlist** → pick a playlist.
+- From a song: **Playlist** in the bar at the bottom → pick a playlist.
 - From the playlist: **+ Add Songs** and search.
 
 **In a playlist** you can: reorder songs by dragging, add a description, switch **public / private** (lock icon), **print / export PDF** (printer icon) for the ceremony, share the link of a public playlist, and duplicate it via ⋯ **(verify menu labels)**.

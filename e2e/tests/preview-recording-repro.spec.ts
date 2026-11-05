@@ -1,3 +1,4 @@
+import { clickPractice } from '../fixtures/songActions';
 import { test, expect } from '@playwright/test';
 import { ROLES, passwordFor } from '../fixtures/roles';
 
@@ -46,8 +47,7 @@ test.describe('Preview Environment Rehearsal Playback Debugging', () => {
     await page.waitForLoadState('networkidle');
 
     // 3. Open Practice drawer
-    const recordBtn = page.locator('button[title="Practice"]').first();
-    await recordBtn.click();
+    await clickPractice(page); // phone: action bar (#393); desktop: header button
     await page.waitForTimeout(1000);
 
     // Switch to Record tab
