@@ -120,36 +120,6 @@ export default function SongDetailPage() {
     const { userRecordingCompositionIds } = useRecordingsQuery(user?.id);
     const hasPersonalRecording = !!id && userRecordingCompositionIds.has(id);
 
-    const titleRef = useRef<HTMLSpanElement>(null);
-    const [scrollAmount, setScrollAmount] = useState(0);
-
-    useEffect(() => {
-        if (songLoading || authLoading || !song) return;
-
-        const calculateOverflow = () => {
-            const el = titleRef.current;
-            // Compare span width vs the flex-1 container (grandparent of the overflow wrapper)
-            const container = el?.parentElement?.parentElement;
-            if (el && container) {
-                el.style.transform = 'none';
-                const overflow = el.scrollWidth - container.clientWidth;
-                if (overflow > 0) {
-                    setScrollAmount(overflow);
-                } else {
-                    setScrollAmount(0);
-                }
-                el.style.transform = '';
-            }
-        };
-
-        const timer = setTimeout(calculateOverflow, 100);
-
-        window.addEventListener('resize', calculateOverflow);
-        return () => {
-            clearTimeout(timer);
-            window.removeEventListener('resize', calculateOverflow);
-        };
-    }, [song?.title, songLoading, authLoading]);
     const versions = song?.song_versions || [];
     const currentVersion = versions[selectedVersionIndex];
     const { data: recordings } = useSongRecordings(currentVersion?.id);
@@ -181,13 +151,6 @@ export default function SongDetailPage() {
             setIsRehearsalDrawerOpen(true);
         })();
     }, [linkedRecordingId, song, authLoading, user, t]);
-
-
-    const marqueeStyle = scrollAmount > 0 ? {
-        '--scroll-amount': `-${scrollAmount}px`,
-        animation: 'marquee 8s ease-in-out infinite alternate',
-        textAlign: 'left' as const,
-    } as React.CSSProperties : { textAlign: 'center' as const };
 
     if (songLoading || authLoading) {
         if (skeletonTimedOut) {
@@ -287,38 +250,26 @@ export default function SongDetailPage() {
     return (
         <div className="flex flex-col h-full">
             {/* Mobile Header (Visible only on mobile < lg) */}
-            <header style={{ top: 'var(--env-banner-height, 0px)', width: '100vw', maxWidth: '100vw' }} className="lg:hidden flex items-center px-4 py-2 sticky left-0 bg-gray-100/95 dark:bg-gray-900/95 backdrop-blur-md z-30 border-b border-gray-200 dark:border-white/5 shadow-lg min-h-[56px]">
-                {/* Title + Author — flex-1 min-w-0 constrains width */}
-                <div className="flex-1 min-w-0 overflow-hidden py-0.5 mx-4">
-                    {/* overflow-hidden clips; span is block so it fills the constrained width */}
-                    <div className="overflow-hidden">
-                        <span
-                            ref={titleRef}
-                            style={marqueeStyle}
-                            className="font-black text-2xl text-[#ff4400] tracking-tight whitespace-nowrap block w-full"
-                        >
-                            {song.title}
-                        </span>
-                    </div>
-                </div>
+            <header style={{ top: 'var(--env-banner-height, 0px)', width: '100vw', maxWidth: '100vw' }} className="lg:hidden flex items-center gap-2 pl-4 pr-1 sticky left-0 bg-bg/95 backdrop-blur-md z-30 border-b border-line min-h-bar">
+                {/* Story 6.1.8 (#392): one line, left aligned, ellipsis at the end so the first letters always show. */}
+                <h1
+                    data-testid="sticky-song-title"
+                    title={song.title}
+                    className="flex-1 min-w-0 truncate text-left text-title font-semibold text-fg"
+                >
+                    {song.title}
+                </h1>
                 {/* 3-dot menu — flex-none so it never shrinks */}
                 <div className="flex-none flex items-center">
                     <button
                         onClick={() => setIsOverflowOpen(!isOverflowOpen)}
-                        className="p-2 text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                        className="inline-flex size-tap items-center justify-center rounded-control text-fg-muted hover:text-fg transition-colors"
                         aria-label={t('common.moreActions')}
                     >
                         <MoreVertical className="w-5 h-5" />
                     </button>
                 </div>
             </header>
-
-            <style dangerouslySetInnerHTML={{ __html: `
-                @keyframes marquee {
-                    0%, 15% { transform: translateX(0); }
-                    85%, 100% { transform: translateX(var(--scroll-amount)); }
-                }
-            `}} />
 
             <main className="flex-1 min-w-0 bg-white dark:bg-gray-950">
 
@@ -475,8 +426,6 @@ export default function SongDetailPage() {
                             hasChords={song.has_chords}
                         />
                     </div>
-
-
 
                     <div className="h-20"></div>
                 </div>

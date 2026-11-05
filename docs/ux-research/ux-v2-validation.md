@@ -1,11 +1,12 @@
 # UX v2: Phone Validation Script
 
-**Version:** 1.2 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
+**Version:** 1.3 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.3 | Nov 5, 2026 | Added #392 (sticky title). |
 | 1.2 | Nov 5, 2026 | Added #417 (clean demo data). |
 | 1.1 | Nov 5, 2026 | Added #385 (design tokens). |
 | 1.0 | Nov 5, 2026 | Skeleton: setup, reset and seed, preview image, smoke path. Story sections are added as stories merge. |
@@ -78,3 +79,11 @@ Sections are added per story as it merges into `feat/ux-v2`.
 
 - [ ] 1. Open Library → Playlists → public playlists. No title contains "E2E" or "Smoke Test".
 - [ ] 2. Search "E2E" and "Smoke". No playlist or song fixture appears (E2E practice takes are removed after each test run).
+
+### #392 · G2.3 Sticky song title truncates at the end
+
+**Preconditions:** any role; phone (or 390 px window).
+
+- [ ] 1. Search "Grandmother's Song of the Thousand Rivers" (or any very long title) and open it.
+- [ ] 2. Scroll down. The header shows the title from its first letter, ending in "…"; it does not slide or animate. Screenshot: `docs/ux-research/screenshots/ux-v2/392/after-dark-song-long-title.webp`.
+- [ ] 3. Open a short title: shown in full, left aligned. The ⋮ button stays on the right and is easy to tap.
