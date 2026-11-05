@@ -80,11 +80,10 @@ describe('/recordings/[id]', () => {
     await expect(open(REC)).rejects.toThrow(`REDIRECT /songs/comp-1?recording=${REC}`);
   });
 
-  it('sends guests to login and back to the recording', async () => {
+  it('shows guests the GuestGate (sign in, then back to the recording)', async () => {
     mockGetUser.mockResolvedValue({ data: { user: null } });
-    await expect(open(REC)).rejects.toThrow(
-      `REDIRECT /auth/login?next=${encodeURIComponent(`/recordings/${REC}`)}`,
-    );
+    const page = (await open(REC)) as { props: { children: { props: { feature: string; next: string } } } };
+    expect(page.props.children.props).toMatchObject({ feature: 'sharing', next: `/recordings/${REC}` });
   });
 
   it('is not found for signed-in users without access, without revealing that it exists', async () => {

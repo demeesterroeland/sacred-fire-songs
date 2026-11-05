@@ -1,16 +1,16 @@
 import { createClient } from '@/lib/supabase/server';
-import { redirect } from 'next/navigation';
 import Link from 'next/link';
 import { Clock, Music } from 'lucide-react';
 import { getRecentlyViewedLight } from '@/lib/songs/serverQueries';
 import { getServerT } from '@/lib/i18n/server';
+import GuestGate from '@/components/common/GuestGate';
 
 export default async function RecentlyViewedPage() {
     const t = await getServerT();
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
-    if (!user) redirect('/auth/login?next=/library/recently-viewed');
+    if (!user) return <GuestGate feature="history" next="/library/recently-viewed" />;
 
     const songs = await getRecentlyViewedLight(user.id, 50);
 

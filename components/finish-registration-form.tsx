@@ -9,6 +9,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, Suspense } from "react";
 import { Flame, User, Compass, CheckCircle } from "lucide-react";
 import { useLocale } from "@/context/LocaleContext";
+import { safeNextPath } from '@/lib/auth/safeNext';
 
 export function FinishRegistrationForm(props: React.ComponentPropsWithoutRef<"div">) {
   const { t } = useLocale();
@@ -52,7 +53,7 @@ function FinishRegistrationFormContent({
       // Notify other components like Sidebar to refresh auth state
       window.dispatchEvent(new Event("auth-role-change"));
 
-      router.push(next || "/explore");
+      router.push(safeNextPath(next, "/explore"));
     } catch (error: unknown) {
       setError(error instanceof Error ? error.message : t('auth.error.default'));
     } finally {

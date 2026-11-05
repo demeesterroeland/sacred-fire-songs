@@ -127,14 +127,14 @@ test.describe('Interface language @i18n', () => {
       await expect(page.locator('html')).toHaveAttribute('lang', 'nl');
       await expectSidebarLanguage(page, nl);
 
-      // I18N-04: navigation to a Server Component page (guest playlists view)
+      // I18N-04: navigation to a Server Component page (guest playlists view, GuestGate copy)
       await page.goto('/library/playlists');
-      await expect(page.getByText(nl['playlists.smartPlaylists']!, { exact: true })).toBeVisible();
+      await expect(page.getByText(nl['guestGate.smartPlaylists.title']!, { exact: true })).toBeVisible();
 
       // ...and back to English
       await openSidebar(page, nl);
       await chooseInSidebar(page, nl, 'en');
-      await expect(page.getByText(en['playlists.smartPlaylists'], { exact: true })).toBeVisible();
+      await expect(page.getByText(en['guestGate.smartPlaylists.title'], { exact: true })).toBeVisible();
       await expect(page.locator('html')).toHaveAttribute('lang', 'en');
     });
   });

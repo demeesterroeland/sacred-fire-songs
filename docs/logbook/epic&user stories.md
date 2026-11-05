@@ -1,6 +1,6 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 1.64
+**Version:** 1.65
 **Status:** Living Document
 **Date:** Nov 5, 2026
 
@@ -60,6 +60,7 @@
 | **1.59** | Nov 5, 2026 | Epic 6.1: Story 6.1.23 (#407, G5.2) implemented on `feat/ux-v2` — Library tabs fit a phone, Albums hidden behind a feature flag (UXD-4). |
 | **1.61** | Nov 5, 2026 | Epic 6.1: Story 6.1.6 (#390, G2.1) implemented on `feat/ux-v2` — `Chords · A− · A+` reader toolbar, size persisted per device. |
 | **1.60** | Nov 5, 2026 | Epic 6.1: Story 6.1.7 (#391, G2.2) implemented on `feat/ux-v2` — song meta and Key · Capo · Tuning on one grey line each. |
+| **1.65** | Nov 5, 2026 | Epic 6.1: Story 6.1.26 (#410, G6.1) implemented on `feat/ux-v2` — GuestGate on every members-only screen; guest read of public takes requires singer consent (UXD-2). |
 | **1.64** | Nov 5, 2026 | Epic 6.1: Story 6.1.22 (#406, G5.1) implemented on `feat/ux-v2` — unknown URLs show a real 404 page for every role; the proxy redirects guests to login only for `/account`, `/admin`, `/users`. Spec: `docs/testing/ux-v2-real-404.feature`. |
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
@@ -1651,7 +1652,7 @@ Owner decision of Nov 4, 2026: sober greyscale interface with one accent, smalle
 | 6.1.23 | #407 | `G5.2` | A | **[Implemented on feat/ux-v2]** As a Member, I want the Library tab row to fit my phone with no dead tab so that every tab I see works | — |
 | 6.1.24 | #408 | `G5.3` | B | As the Owner, I want a decision on the bottom bar (Home · Songs · Library · Create vs Home · Search · Library) so that Explore, Home and Search stop overlapping | — |
 | 6.1.25 | #409 | `G5.4` | C | As a Guest, I want auth pages without a fake close button so that I always know where I go | #385 |
-| 6.1.26 | #410 | `G6.1` | A | As a Guest, I want every members-only screen to use the same locked preview with a reason and a sign-in button so that gating feels consistent | — |
+| 6.1.26 | #410 | `G6.1` | A | **[Implemented on feat/ux-v2]** As a Guest, I want every members-only screen to use the same locked preview with a reason and a sign-in button so that gating feels consistent | — |
 | 6.1.27 | #411 | `G6.2` | B | As a Guest, I want to know before typing that saving a song needs an account so that I am not surprised at save | #410 |
 | 6.1.28 | #412 | `G6.3` | C | As a first-time visitor, I want a one-line welcome, a search box and a 'Recently added' row on Home so that I understand the site and find a song fast | #386, #413 |
 | 6.1.29 | #413 | `G7.1` | B | As a Guest, I want recent searches and category chips when I focus the search field so that I can repeat or narrow a search in one tap | #386 |

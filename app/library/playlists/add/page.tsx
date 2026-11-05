@@ -1,12 +1,12 @@
 import { createClient } from '@/lib/supabase/server';
-import { redirect } from 'next/navigation';
 import { CreatePlaylistForm } from '@/components/playlists/CreatePlaylistForm';
+import GuestGate from '@/components/common/GuestGate';
 
 export default async function CreatePlaylistPage() {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
-    if (!user) redirect(`/auth/login?next=${encodeURIComponent('/library/playlists/add')}`);
+    if (!user) return <GuestGate feature="newPlaylist" next="/library/playlists/add" />;
 
     return <CreatePlaylistForm />;
 }

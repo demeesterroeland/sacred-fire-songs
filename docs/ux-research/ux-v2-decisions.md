@@ -1,11 +1,12 @@
 # UX v2: Agent Decisions (ADR-lite)
 
-**Version:** 1.6 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375)
+**Version:** 1.7 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375)
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.7 | Nov 5, 2026 | Added UXA-012, UXA-013 (Story 6.1.26 / #410: GuestGate decisions) and UXA-014 (signed-in users and public takes). |
 | 1.6 | Nov 5, 2026 | Added UXA-011 (generic 404 copy and protected-prefix routing, #406). |
 | 1.3 | Nov 5, 2026 | Added UXA-007 (reader text-size steps follow the #385 tokens). |
 | 1.2 | Nov 5, 2026 | Added UXA-006 (song technical badges move into the expanded meta line). |
@@ -24,6 +25,9 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 | UXA-006 | Nov 5, 2026 | #391 | Chords / Melody / My take badges move from the song header into the expanded meta line | yes |
 | UXA-007 | Nov 5, 2026 | #390 | Reader text-size steps follow the #385 `LYRIC_STEPS` tokens (15–28 px, six steps) | no |
 | UXA-011 | Nov 5, 2026 | #406 | Generic 404 copy "Page not found" + plain "Go home"; only `/account`, `/admin`, `/users` redirect guests to login | yes |
+| UXA-012 | Nov 5, 2026 | #410 | Guest Listen tab for consented public takes deferred until the Practice drawer restructure; RLS enforces consent now | yes |
+| UXA-013 | Nov 5, 2026 | #410 | Fake demo playlists and per-card locks removed from the guest Library; add-to-playlist becomes a bottom sheet gate | yes |
+| UXA-014 | Nov 5, 2026 | #410 | Signed-in users still see public takes without singer consent; UXD-2 covers guests only | yes |
 
 ---
 
@@ -96,4 +100,32 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 - **Options:** (a) keep the allowlist and add a 404 check; (b) invert it: only a short list of protected prefixes redirects, everything else falls through to `app/not-found.tsx`.
 - **Choice:** (b). The list is `PROTECTED_PATH_PREFIXES` in `lib/supabase/routeAccess.ts` (`/account`, `/admin`, `/users`: exactly the existing routes that were not on the allowlist, so nothing opens that was protected). Prefixes match whole segments (`/admin-x` is a 404). Copy: "Page not found", a one-sentence warm line, and a plain "Go home" button in all 8 locales. The song (`app/songs/[id]`) and recording (`app/recordings/[id]`) not-found pages keep their own copy. Private playlists and unknown user ids now show the generic 404 instead of "Song Not Found". Pages under `/library`, `/songs`, `/recordings`, `/playlists` still guard themselves.
 - **Consequences:** unknown paths now answer 404 for everyone, including static files in `public/` that the old allowlist hid from guests. Routing only; RLS is unchanged. The guest gate (#410) can reuse the constant. The warm sentence ("The fire is still burning ...") is a copy-tone choice to confirm.
+- **Update (#410, Nov 5, 2026):** `/account` and `/users` left the list; those pages render the GuestGate for guests (UXA-012..014). The list is now `/admin` only.
 - **Confirm:** yes
+
+### UXA-012 · Guest Listen tab for public takes deferred
+
+- **Date / story:** Nov 5, 2026 · #410 (G6.1)
+- **Context:** UXD-2 says guests may listen to consented public takes in Practice → Listen. #410 only asks for the GuestGate pattern and the Record-tab gate; the drawer (`RehearsalDrawer.tsx`, ~1700 lines) is being renamed and restructured by #398 (G4.1) and later #399/#400.
+- **Options:** (a) wire a guest takes list into the drawer now; (b) enforce the rule in RLS now and wire the list after the drawer restructure.
+- **Choice:** (b). Migration `20261105120000` makes anon reads (table and storage) require `is_public AND singer_consent_confirmed`, proven by an `@seed` scenario. The guest Listen list is a follow-up on top of the new drawer; until then guests see reference tracks only (unchanged).
+- **Consequences:** the data rule is enforced server-side already; no guest UI exposes takes yet. Follow-up issue: "Guests: list consented public takes in Practice → Listen".
+- **Confirm:** yes (permissions)
+
+### UXA-013 · Removing the fake demo playlists and per-card locks from the guest Library
+
+- **Date / story:** Nov 5, 2026 · #410 (G6.1)
+- **Context:** the guest Library showed four locked smart-playlist cards and two hard-coded demo private playlists ("Yage Ceremony 2024", "Temazcal — Water Songs", English only, not translated).
+- **Options:** (a) keep them and restyle; (b) replace them with one GuestGate (`smartPlaylists`) and keep the public playlists below it.
+- **Choice:** (b): one pattern, no untranslated fake content, one sign-in button instead of three. Dropped keys: `playlists.guest.*`, `playlists.membersOnly`, `playlists.signInToCreate`, `rehearsal.guest.*`, `song.signInForPlaylists`, `song.signInAction` (all locales).
+- **Consequences:** guests no longer see a "ghost" of what a private playlist looks like; the blurred placeholder rows are generic. The song-page add-to-playlist prompt for guests changes from a toast to a bottom sheet with the same gate (`addToPlaylist`).
+- **Confirm:** yes (behaviour, copy)
+
+### UXA-014 · Signed-in users still see public takes without singer consent
+
+- **Date / story:** Nov 5, 2026 · #410 (G6.1), found in review
+- **Context:** UXD-2 says public takes are listenable by guests only when the singer consented. Migration `20261105120000` tightens the `anon` policies, but the `authenticated` policy on `user_recordings` still reads `is_public = true` (no consent check), so a signed-in user can read a public take without singer consent that a guest cannot.
+- **Options:** (a) tighten the `authenticated` policy too (RLS change beyond the story); (b) leave it, log it, ask the owner.
+- **Choice:** (b). UXD-2 as written covers guests; the story does not authorise further RLS changes.
+- **Consequences:** a public take without consent is visible to members but not to guests. Owner to decide whether members should follow the same rule; then a follow-up migration is needed.
+- **Confirm:** yes (permissions)

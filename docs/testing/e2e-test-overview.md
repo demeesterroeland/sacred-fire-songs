@@ -1,8 +1,8 @@
 # E2E Test Overview & Matrix: Sacred Fire Songs
 
-**Version:** 1.13
+**Version:** 1.14
 **Status:** Living Document
-**Date:** Nov 4, 2026
+**Date:** Nov 5, 2026
 **Tracking:** GH #142
 
 ## Changelog
@@ -23,6 +23,7 @@
 | **1.11** | Nov 3, 2026 | Replaced deployment-specific environment names with neutral placeholders (public-repo isolation). |
 | **1.12** | Nov 3, 2026 | CI note: removed the reference to a database deploy workflow; the repo does not deploy anywhere. Staging E2E is optional and skips without secrets. |
 | **1.13** | Nov 4, 2026 | PWA-03: offline fallback page covered by `e2e/tests/offline.spec.ts` (#353); cached pages offline still planned. |
+| **1.14** | Nov 5, 2026 | Story 6.1.26 (#410): guests on members-only screens now get the GuestGate (locked preview, reason, `Sign in` with `next=`) instead of a redirect; ACC-01 updated, new spec `e2e/tests/guest-gate.spec.ts` covers every gated route. |
 
 ---
 
@@ -108,7 +109,7 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 
 | ID | Feature | Scenario | Variants / Edge cases | Roles | Feat | E2E | Pri | Ref |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ACC-01 | Settings access control | Unauthenticated user is redirected to login | deep-link to `/account/settings` | G | ✅ | 🟡 | P0 | `app/account/settings` |
+| ACC-01 | Settings access control | Unauthenticated user sees the GuestGate with a `Sign in` link carrying `next=` | deep-link to `/account/settings` | G | ✅ | 🟡 | P0 | `app/account/settings` |
 | ACC-02 | Profile settings | Update display name and save | empty name; avatar upload | M | ⚠️ | 🔲 | P1 | ProfileSettings |
 | ACC-03 | Security settings | Change password from settings | wrong current password; mismatch | M | ⚠️ | 🔲 | P1 | SecuritySettings |
 | ACC-04 | Privacy settings | Toggle privacy / data options | account deletion confirm | M | ⚠️ | 🔲 | P2 | PrivacySettings |

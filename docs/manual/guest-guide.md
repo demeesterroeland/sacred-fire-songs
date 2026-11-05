@@ -1,11 +1,12 @@
 # Guest Guide (draft)
 
-**Version:** 0.6 | **Date:** Nov 5, 2026
+**Version:** 0.7 | **Date:** Nov 5, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.7 | Nov 5, 2026 | Members-only screens now show one locked preview with the reason and a **Sign in** button that brings you back (Story 6.1.26). |
 | 0.6 | Nov 5, 2026 | Added "A link that does not work" (real 404 page). |
 | 0.3 | Nov 5, 2026 | Song page: `Chords · A− · A+` toolbar (UX v2, #390). |
 | 0.2 | Nov 5, 2026 | Song page: meta on two grey lines (UX v2, #391). |
@@ -53,7 +54,7 @@ The **Voice Recorder** tab shows what members can do and a **Sign In to Record**
 
 ## Things that need an account
 
-Favourites, playlists, recently viewed, adding or editing songs, recording, account settings. You can open the **Add Song** form and start typing as a guest; you are asked to sign in when you save **(verify that the draft is kept after sign-in)**.
+Favourites, playlists, recently viewed, adding or editing songs, recording, account settings, singer profiles. Each of these screens shows the same grey preview with a lock, one sentence saying why it is locked and a **Sign in** button; after signing in you land on the screen you came from. Guests will be able to listen to public takes that the singer agreed to publish (Practice → Listen); recording, sharing and downloading stay members-only. The list of takes for guests follows in a later update. You can open the **Add Song** form and start typing as a guest; you are asked to sign in when you save **(verify that the draft is kept after sign-in)**.
 
 ## Creating an account
 

@@ -1,11 +1,12 @@
 /*
- **Version:** 3.0
+ **Version:** 3.1
  **Status:** Current
- **Date:** November 4, 2026
+ **Date:** November 5, 2026
  
  ## Usage
  This script provides a complete setup for the "Sacred Fire Songs" database. 
- It consolidates the initial schema and all subsequent migrations up to November 4, 2026.
+ It consolidates the initial schema and all subsequent migrations up to November 5, 2026.
+ (v3.1: Anon (guest) reads of public takes now also require singer_consent_confirmed; UXD-2, Story 6.1.26).
  (v3.0: Added notifications inbox with share triggers and profiles.email_notifications opt-out).
  (v2.9: Added is_recording_owner / has_recording_share security definer helpers to prevent RLS recursion).
  (v2.8: Added recording_shares, singer attribution, public recording visibility, and consent confirmation).
@@ -463,7 +464,7 @@ select to authenticated using (
   or public.has_recording_share(id, auth.uid())
 );
 create policy "Allow public to read public recordings" on public.user_recordings for
-select to anon using (is_public = true);
+select to anon using (is_public = true and singer_consent_confirmed = true);
 create policy "Allow users to insert their own recordings" on public.user_recordings for
 insert to authenticated with check (auth.uid() = user_id);
 create policy "Allow users to update their own recordings" on public.user_recordings for

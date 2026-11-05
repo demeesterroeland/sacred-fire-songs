@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
-import { Heart, ListMusic, Flame, Droplets, Lock, Globe, PenLine, Music, Plus, LogIn, Mic } from 'lucide-react';
+import { Heart, PenLine, Music, Mic } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { CreatePlaylistInput } from '@/components/playlists/CreatePlaylistInput';
 import { PlaylistCard } from '@/components/playlists/PlaylistCard';
@@ -10,6 +10,7 @@ import { getRecentlyViewed, getRecentlyViewedCount, getUnviewedSongs } from '@/l
 import RecentlyViewed from '@/components/library/RecentlyViewed';
 import NewSinceLastVisit from '@/components/library/NewSinceLastVisit';
 import { getServerT } from '@/lib/i18n/server';
+import GuestGate from '@/components/common/GuestGate';
 
 interface SongCounts {
     total: number;
@@ -71,19 +72,15 @@ interface SmartPlaylistCardProps {
     subtitle: React.ReactNode;
     songTitles?: string[];
     accent: keyof typeof accentClasses;
-    href?: string; // absent = locked (guest)
+    href: string;
 }
 
 async function SmartPlaylistCard({ icon: Icon, title, description, subtitle, songTitles = [], accent, href }: SmartPlaylistCardProps) {
-    const t = await getServerT();
     const c = accentClasses[accent];
-    const locked = !href;
 
     const inner = (
-        <div className={`border p-4 rounded-2xl flex items-center gap-4 transition-all w-full min-w-0 ${c.card} ${
-            locked ? 'cursor-default' : `group ${c.cardHover} hover:-translate-y-0.5`
-        }`}>
-            <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-colors ${c.icon} ${locked ? '' : c.iconHover}`}>
+        <div className={`border p-4 rounded-2xl flex items-center gap-4 transition-all w-full min-w-0 group ${c.card} ${c.cardHover} hover:-translate-y-0.5`}>
+            <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-colors ${c.icon} ${c.iconHover}`}>
                 <Icon className={`w-6 h-6 ${c.iconText}`} />
             </div>
             <CardContent
@@ -92,16 +89,10 @@ async function SmartPlaylistCard({ icon: Icon, title, description, subtitle, son
                 subtitle={subtitle}
                 songTitles={songTitles}
             />
-            {locked && (
-                <div className="flex items-center gap-1.5 shrink-0">
-                    <Lock aria-hidden="true" className="w-3 h-3 text-gray-600" />
-                    <span className="text-[10px] text-gray-600 font-medium">{t('playlists.membersOnly')}</span>
-                </div>
-            )}
         </div>
     );
 
-    return href ? <Link href={href} className="block w-full min-w-0">{inner}</Link> : inner;
+    return <Link href={href} className="block w-full min-w-0">{inner}</Link>;
 }
 
 async function PublicPlaylistsSection({
@@ -145,72 +136,11 @@ async function GuestView({ publicPlaylists, publicSongCounts, publicSongTitles }
     publicSongCounts: Record<string, number>;
     publicSongTitles: Record<string, string[]>;
 }) {
-    const t = await getServerT();
     return (
         <div className="space-y-8">
 
-            {/* Smart Playlists — locked for guests */}
-            <div>
-                <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-3">{t('playlists.smartPlaylists')}</p>
-                <div className="grid grid-cols-1 gap-3">
-                    <SmartPlaylistCard icon={Heart}   title={t('librarySummary.favorites.title')} description={t('librarySummary.favorites.description')}      subtitle={<span className="text-xs text-gray-500">{t('playlists.guest.favorites')}</span>} accent="rose"   />
-                    <SmartPlaylistCard icon={Music}   title={t('librarySummary.mySongs.title')}     description={t('librarySummary.mySongs.description')}    subtitle={<span className="text-xs text-gray-500">{t('playlists.guest.songs')}</span>} accent="violet" />
-                    <SmartPlaylistCard icon={PenLine} title={t('librarySummary.drafts.title')}    description={t('playlists.guest.drafts.description')}        subtitle={<span className="text-xs text-gray-500">{t('playlists.guest.drafts')}</span>} accent="gray"   />
-                    <SmartPlaylistCard icon={Mic} title={t('librarySummary.recordings.title')} description={t('librarySummary.recordings.description')} accent="violet"
-                        subtitle={<span className="text-xs text-gray-500">{t('playlists.guest.recordings')}</span>} />
-                </div>
-            </div>
-
-            {/* My Private Playlists — ghost demo */}
-            <div>
-                <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-                    <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">{t('playlists.myPrivatePlaylists')}</p>
-                    <div className="flex items-center gap-4">
-                        <Link
-                            href="/auth/login?next=/library/playlists"
-                            className="flex items-center gap-1.5 text-[10px] text-gray-500 hover:text-gray-300 transition-colors"
-                        >
-                            <LogIn className="w-3 h-3" />
-                            {t('playlists.signInToCreate')}
-                        </Link>
-                        <Link
-                            href="/auth/login?next=/library/playlists"
-                            className="flex items-center gap-1 text-xs font-semibold text-red-500/50 border border-red-500/20 bg-red-500/5 hover:bg-red-500/10 hover:text-red-500/80 rounded-full px-3 py-1 transition-all"
-                        >
-                            <Plus className="w-3.5 h-3.5" />
-                            {t('playlists.newButton')}
-                        </Link>
-                    </div>
-                </div>
-                <div className="grid grid-cols-1 gap-3 opacity-40 pointer-events-none select-none">
-                    <div className="bg-gray-100/40 dark:bg-gray-900/40 p-4 rounded-2xl border border-gray-200 dark:border-gray-800 flex items-center gap-4">
-                        <div className="relative w-12 h-12 shrink-0">
-                            <div className="w-12 h-12 bg-gray-200 dark:bg-gray-800 rounded-xl flex items-center justify-center">
-                                <Flame className="w-6 h-6 text-orange-500" />
-                            </div>
-                            <Lock aria-hidden="true" className="absolute -top-1 -right-1 w-3 h-3 text-gray-500" />
-                            <span className="sr-only">{t('playlists.membersOnly')}</span>
-                        </div>
-                        <div>
-                            <h3 className="font-bold text-gray-900 dark:text-gray-100">Yage Ceremony 2024</h3>
-                            <p className="text-xs text-gray-500 mt-0.5">12 songs</p>
-                        </div>
-                    </div>
-                    <div className="bg-gray-100/40 dark:bg-gray-900/40 p-4 rounded-2xl border border-gray-200 dark:border-gray-800 flex items-center gap-4">
-                        <div className="relative w-12 h-12 shrink-0">
-                            <div className="w-12 h-12 bg-gray-200 dark:bg-gray-800 rounded-xl flex items-center justify-center">
-                                <Droplets className="w-6 h-6 text-blue-500" />
-                            </div>
-                            <Lock aria-hidden="true" className="absolute -top-1 -right-1 w-3 h-3 text-gray-500" />
-                            <span className="sr-only">{t('playlists.membersOnly')}</span>
-                        </div>
-                        <div>
-                            <h3 className="font-bold text-gray-900 dark:text-gray-100">Temazcal — Water Songs</h3>
-                            <p className="text-xs text-gray-500 mt-0.5">8 songs</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
+            {/* Smart + private playlists are members-only: one locked preview with the reason (Story 6.1.26) */}
+            <GuestGate feature="smartPlaylists" next="/library/playlists" />
 
             <PublicPlaylistsSection playlists={publicPlaylists} songCounts={publicSongCounts} songTitles={publicSongTitles} />
 

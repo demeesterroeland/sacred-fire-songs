@@ -51,6 +51,20 @@ export async function queryAsUser<T extends pg.QueryResultRow>(
   }
 }
 
+/** Runs `sql` as the `anon` role (a guest with no session), so RLS applies as for a signed-out visitor. */
+export async function queryAsAnon<T extends pg.QueryResultRow>(sql: string, params: unknown[] = []): Promise<T[]> {
+  const db = await seedDb();
+  await db.query('SAVEPOINT as_anon');
+  try {
+    await db.query(`SELECT set_config('request.jwt.claims', $1, true)`, [JSON.stringify({ role: 'anon' })]);
+    await db.query('SET LOCAL ROLE anon');
+    const { rows } = await db.query<T>(sql, params);
+    return rows;
+  } finally {
+    await db.query('ROLLBACK TO SAVEPOINT as_anon');
+  }
+}
+
 /** Seeded profile id for an e-mail address (see supabase/seeds/02_profiles.sql). */
 export async function profileIdByEmail(email: string): Promise<string> {
   const db = await seedDb();

@@ -24,16 +24,12 @@ import SecuritySettings from "@/components/account/settings/SecuritySettings";
 import PrivacySettings from "@/components/account/settings/PrivacySettings";
 import PreferencesSettings from "@/components/account/settings/PreferencesSettings";
 import { useLocale } from "@/context/LocaleContext";
+import { parseSettingsTab, type SettingsTab } from "@/lib/account/settingsTabs";
 
-type TabType = "profile" | "account" | "preferences" | "privacy";
+// Re-exported for tests; server code imports it from "@/lib/account/settingsTabs".
+export { parseSettingsTab };
 
-const TAB_IDS: readonly TabType[] = ["profile", "account", "preferences", "privacy"];
-
-/** Maps the `?tab=` query value to a settings tab; unknown values open Profile. */
-export function parseSettingsTab(value: string | string[] | undefined): TabType {
-  const tab = Array.isArray(value) ? value[0] : value;
-  return TAB_IDS.find((id) => id === tab) ?? "profile";
-}
+type TabType = SettingsTab;
 
 interface AccountSettingsProps {
   user: User;

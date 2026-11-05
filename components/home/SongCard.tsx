@@ -7,6 +7,7 @@ import { AuthorPill } from '@/components/ui/AuthorPill';
 import { parseArtists } from '@/lib/songs/artistUtils';
 import { cn } from '@/lib/utils';
 import { useToggleFavorite } from '@/hooks/useToggleFavorite';
+import GuestGateSheet from '@/components/common/GuestGateSheet';
 import { PlaylistPicker } from '@/components/playlists/PlaylistPicker';
 
 import { useLocale } from '@/context/LocaleContext';
@@ -49,7 +50,7 @@ export default function SongCard({
     categories = []
 }: SongCardProps) {
     const { t } = useLocale();
-    const { isFav, handleToggle } = useToggleFavorite(id, isFavorite);
+    const { isFav, handleToggle, signInGate } = useToggleFavorite(id, isFavorite);
 
     // Mapping color name to Tailwind class
     const borderColors: Record<string, string> = {
@@ -213,6 +214,7 @@ export default function SongCard({
                     />
                 </button>
             </div>
+            {signInGate.open && <GuestGateSheet feature="favourites" {...signInGate} />}
         </div>
     );
 }

@@ -1,11 +1,12 @@
 # UX v2: Phone Validation Script
 
-**Version:** 1.9 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
+**Version:** 1.10 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.10 | Nov 5, 2026 | Added #410 (GuestGate). |
 | 1.9 | Nov 5, 2026 | Added #406 (real 404). |
 | 1.6 | Nov 5, 2026 | Added #390 (reader toolbar). |
 | 1.5 | Nov 5, 2026 | Added #391 (song meta lines). |
@@ -130,3 +131,24 @@ Sections are added per story as it merges into `feat/ux-v2`.
 - [ ] 4. Open `/songs/00000000-0000-4000-a000-000000000000`: **Song Not Found** (song copy, not the generic one). Screenshot: `…/406/after-light/mobile/guest/31-song-not-found.webp`.
 - [ ] 5. Sign in as member, open `/this-page-does-not-exist`: the same **Page not found** page.
 - [ ] 6. Sign in as admin, open `/this-page-does-not-exist`: the same **Page not found** page.
+
+### #410 · G6.1 One GuestGate on every members-only screen
+
+**Preconditions:** signed out (guest) for steps 1–9; signed in as the seeded member for steps 10–11. Seeded song owned by the musician: `/songs/fb193fc1-8d60-45db-85ab-b076d5985255`.
+
+Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, and a **Sign in** button at least 44 px high. Screenshots: `docs/ux-research/screenshots/ux-v2/410/`.
+
+- [ ] 1. Open `/library/recently-viewed`. You stay on this URL and see the "Sign in to see your history" gate (no jump to a login page). Screenshot: `…/410/after-light-12-recently-viewed.webp`.
+- [ ] 2. Tap **Sign in**, sign in with the member account. You land on `/library/recently-viewed` with your history.
+- [ ] 3. Open `/library/playlists/add`: "Sign in to create a playlist". Tap **Sign in**: the address bar shows `/auth/login?next=%2Flibrary%2Fplaylists%2Fadd`.
+- [ ] 4. Open `/library/playlists`: one gate "Sign in to see your library", with the public playlists listed below it (no fake "Yage Ceremony" cards). Screenshot: `…/410/after-light-10-playlists.webp`.
+- [ ] 5. Open `/account/settings` and `/account/settings?tab=privacy`: "Sign in to open your settings"; after signing in you return to the same tab.
+- [ ] 6. Open `/users/a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12`: "Sign in to see profiles".
+- [ ] 7. Open `/songs/fb193fc1-8d60-45db-85ab-b076d5985255/edit`: "Sign in to edit songs" (no "Not Yours to Edit"). Screenshot: `…/410/after-light-08-song-edit-other.webp`.
+- [ ] 8. On a song, tap ⋮ → **Add to playlist**: a bottom sheet with the gate "Sign in to add songs to playlists"; **Sign in** returns to the same song.
+- [ ] 9. On a song, open Practice (microphone button) → **Record** tab: the blurred recorder is covered by the gate "Sign in to record". Screenshot: `…/410/after-light-63-recorder.webp`.
+- [ ] 10. As the member, open `/songs/fb193fc1-8d60-45db-85ab-b076d5985255/edit` (not your song): the warm "This Medicine is Not Yours to Edit" with **Back to the song** and **Return to the Circle**.
+- [ ] 11. As the member, open `/library/recently-viewed`, `/library/playlists/add`, `/account/settings`: no gate, the normal screens.
+- [ ] 12. Dark mode and a 390 px window: every gate readable, no horizontal scroll.
+- [ ] 13. On a song, tap the heart (♥): a bottom sheet with the gate "Sign in to save favourites" (no toast). Add `?ref=heart` to the URL first: **Sign in** leads to `/auth/login?next=%2Fsongs%2F…%3Fref%3Dheart`. The same on a heart in the song list.
+- [ ] 14. Open `/auth/login?next=//example.org` while signed in, and `/auth/login?next=/%5Cexample.org` after signing in: you land on the home page, never on another site.
