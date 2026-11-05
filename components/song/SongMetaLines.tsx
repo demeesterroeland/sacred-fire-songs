@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { ChevronDown } from 'lucide-react';
 import { useLocale } from '@/context/LocaleContext';
 import { joinMeta } from '@/components/ui/meta-line';
-import { songAuthors, technicalItems, type VersionTechnical } from '@/lib/songs/songMeta';
+import { songAuthors, songMetaItems, technicalItems, type VersionTechnical } from '@/lib/songs/songMeta';
 import { cn } from '@/lib/utils';
 
 interface CategoryItem {
@@ -41,7 +41,7 @@ export function SongMetaLines({
   const [open, setOpen] = useState(false);
   const listId = useId();
   const authors = songAuthors(originalAuthor, tr);
-  const meta = joinMeta([...authors, ...categories.map((c) => c.name)]);
+  const meta = joinMeta(songMetaItems(originalAuthor, categories, tr));
   const technical = joinMeta(technicalItems(version, tr));
 
   const links: { label: string; href: string }[] = [

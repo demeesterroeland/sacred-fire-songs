@@ -39,37 +39,41 @@ test('Lyrics above the fold on five seeded songs', async ({ page }) => {
     const meta = page.getByTestId('song-meta-lines');
     await expect(meta).toBeVisible();
 
-    // Metadata occupies at most two lines: one meta line + one technical line.
-    const lines = await meta.evaluate((el) => {
-      const lh = (n: Element) => parseFloat(getComputedStyle(n).lineHeight) || 18;
-      const span = el.querySelector('[data-testid="song-meta-line"] span')!;
+    // Metadata occupies at most two lines: the 44 px meta-line button + one technical line.
+    const { height, techHeight, maxTech } = await meta.evaluate((el) => {
       const tech = el.querySelector('[data-testid="song-technical-line"]');
-      return (
-        Math.round(span.getBoundingClientRect().height / lh(span)) +
-        (tech ? Math.round(tech.getBoundingClientRect().height / lh(tech)) : 0)
-      );
+      const fs = parseFloat(getComputedStyle(el).fontSize);
+      return {
+        height: el.getBoundingClientRect().height,
+        techHeight: tech ? tech.getBoundingClientRect().height : 0,
+        maxTech: fs * 1.6,
+      };
     });
-    expect(lines, song.title).toBeLessThanOrEqual(2);
+    expect(techHeight, song.title).toBeLessThanOrEqual(maxTech);
+    expect(height, song.title).toBeLessThanOrEqual(44 + maxTech + 1);
 
     // First lyric line fully inside the viewport, above the fixed bottom bars.
     const first = page.getByTestId('lyric-line').first();
     await expect(first).toBeVisible();
     const visible = await first.evaluate((el) => {
       const r = el.getBoundingClientRect();
-      const covers = [...document.querySelectorAll('body *')]
+      const bars = [...document.querySelectorAll('body *')]
         .filter((n) => ['fixed', 'sticky'].includes(getComputedStyle(n).position))
         .map((n) => n.getBoundingClientRect())
-        .filter((b) => b.top > window.innerHeight / 2 && b.height > 0)
-        .map((b) => b.top);
-      const limit = Math.min(window.innerHeight, ...covers);
-      return { top: r.top, bottom: r.bottom, limit };
+        .filter((b) => b.height > 0 && b.width > 0);
+      const mid = window.innerHeight / 2;
+      const limit = Math.min(window.innerHeight, ...bars.filter((b) => b.top > mid).map((b) => b.top));
+      const floor = Math.max(0, ...bars.filter((b) => b.bottom < mid).map((b) => b.bottom));
+      return { top: r.top, bottom: r.bottom, limit, floor };
     });
-    expect(visible.top, song.title).toBeGreaterThanOrEqual(0);
+    // Below the sticky top bars, above the fixed bottom bars.
+    expect(visible.top, song.title).toBeGreaterThanOrEqual(visible.floor);
     expect(visible.bottom, song.title).toBeLessThanOrEqual(visible.limit);
   }
 });
 
 test('the meta line expands into the full tag list', async ({ page }) => {
+  test.skip(!songs.length, 'no public song with lyrics seeded');
   await page.goto(`/songs/${songs[0].id}`);
   const toggle = page.getByTestId('song-meta-line');
   await expect(toggle).toHaveAttribute('aria-expanded', 'false');
