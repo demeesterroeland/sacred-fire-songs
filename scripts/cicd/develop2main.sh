@@ -16,7 +16,7 @@
 #
 # Deploying a release is NOT part of this public repository: CI here builds,
 # tests and publishes images to GHCR; each self-hoster deploys them their own way.
-# After the release, back-merge main into develop (Story 5.1.9).
+# After the release, back-merge.yml opens the PR main → develop (Story 5.1.9).
 #
 # Usage:
 #   scripts/cicd/develop2main.sh [options]
@@ -76,7 +76,7 @@ print_images() {
   echo "   Migrator: ${MIGRATOR_IMAGE}:${tag}"
   echo ""
   echo "ℹ️  Deploying the release is outside this repository."
-  echo "   Next: back-merge main into develop (gh pr create --base develop --head main)."
+  echo "   Next: merge the back-merge PR main → develop that back-merge.yml opens (merge commit)."
 }
 
 # 1. Is there anything to promote?

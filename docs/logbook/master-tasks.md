@@ -1408,4 +1408,6 @@
 - [x] `scripts/cicd/develop2main.sh` replaces `preview2prod.sh`: PR `develop` → `main`, merge commit, owner confirmation, Release Please PR, `vX.Y.Z` images; no `--admin`
 - [x] bats: `develop2main.bats` (stubbed `gh`), `--admin` guard un-skipped (Story 5.1.6 complete)
 - [x] Docs: design doc 1.57, stories 1.53, git-workflow guide 1.7, scripts README
-- [ ] Next: 5.1.9 back-merge (#298), then 5.1.2/5.1.11 with the Tailscale `tag:ci` E2E database
+- [x] PR #422 merged into `develop` (owner)
+- [x] #298: `back-merge.yml` (push `main` → PR `main` → `develop`, PAT, fail closed, conflict label, no self-merge); contract scenarios in `ci-gate`; docs
+- [ ] Next: 5.1.10 hotfix (#299); 5.1.2/5.1.11 once the Tailscale `tag:ci` + E2E database secrets are in the repo
