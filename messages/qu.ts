@@ -622,6 +622,7 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'header.searchOptions': 'Maskay akllanakuna',
   'header.recentSearches': 'Qhipa maskasqakuna',
   'header.clearAll': 'Llapanta qichuy',
+  'header.suggestionsHint': "Uraman flechata ñitiy qhipa maskasqakunapaq, t'aqakunapaqpas.",
   'header.addSong': 'Taki yapay',
   'header.newPlaylist': 'Musuq lista',
 

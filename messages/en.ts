@@ -616,6 +616,7 @@ const en = {
   'header.searchOptions': 'Search options',
   'header.recentSearches': 'Recent searches',
   'header.clearAll': 'Clear all',
+  'header.suggestionsHint': 'Press the down arrow for recent searches and categories.',
   'header.addSong': 'Add Song',
   'header.newPlaylist': 'New Playlist',
 

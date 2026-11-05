@@ -3,7 +3,8 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { ListMusic, Loader2, Menu, Music, PlusCircle, Search, SlidersHorizontal, X } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { ListMusic, Loader2, Menu, Music, PlusCircle, Search, SlidersHorizontal } from 'lucide-react';
 import { useSidebar } from '@/context/SidebarContext';
 import { useAuth, type AuthUser } from '@/hooks/useAuth';
 import { getSiteTitle } from '@/lib/env';
@@ -11,20 +12,15 @@ import { UserProfile } from './navigation/UserProfile';
 import { NotificationBell } from './navigation/NotificationBell';
 import { useLocale } from '@/context/LocaleContext';
 import { FOCUS_SEARCH_EVENT } from '@/lib/search/focusSearch';
-
-const SEARCH_HISTORY_KEY = 'sacred-fire-songs-search-history';
-const MAX_HISTORY = 8;
-
-function getSearchHistory(): string[] {
-    if (typeof window === 'undefined') return [];
-    try {
-        return JSON.parse(localStorage.getItem(SEARCH_HISTORY_KEY) || '[]');
-    } catch { return []; }
-}
-
-function saveSearchHistory(history: string[]) {
-    localStorage.setItem(SEARCH_HISTORY_KEY, JSON.stringify(history.slice(0, MAX_HISTORY)));
-}
+import {
+    addRecentSearch,
+    clearRecentSearches,
+    readRecentSearches,
+    removeRecentSearch,
+} from '@/lib/search/history';
+import { fetchCategoryTree } from '@/lib/taxonomyUtils';
+import { sortCategories } from '@/lib/categoryOrder';
+import SearchSuggestions from '@/components/search/SearchSuggestions';
 
 export default function Header({ initialUser }: { initialUser?: AuthUser | null }) {
     const { t } = useLocale();
@@ -35,6 +31,9 @@ export default function Header({ initialUser }: { initialUser?: AuthUser | null 
     const { user } = useAuth(initialUser);
     const inputRef = useRef<HTMLInputElement>(null);
     const searchWrapperRef = useRef<HTMLDivElement>(null);
+    const suggestionsRef = useRef<HTMLDivElement>(null);
+    // Set when focus returns to the field after Escape: that focus must not reopen the panel.
+    const skipOpenRef = useRef(false);
     const createMenuRef = useRef<HTMLDivElement>(null);
     const [createMenuOpen, setCreateMenuOpen] = useState(false);
 
@@ -43,12 +42,33 @@ export default function Header({ initialUser }: { initialUser?: AuthUser | null 
     const [searchValue, setSearchValue] = useState(
         isOnSongsPage ? (searchParams.get('search') || '') : ''
     );
+    // Suggestion panel (Story 6.1.29 / G7.1, #413): recent searches + category chips.
     const [historyOpen, setHistoryOpen] = useState(false);
+    const [hasOpened, setHasOpened] = useState(false);
     const [searchHistory, setSearchHistory] = useState<string[]>([]);
+    const { data: categoryTree = [] } = useQuery({
+        queryKey: ['taxonomy'],
+        queryFn: fetchCategoryTree,
+        staleTime: 1000 * 60 * 60,
+        enabled: hasOpened,
+    });
+    const categories = sortCategories(categoryTree);
+    const activeCategory = isOnSongsPage ? (searchParams.get('category') ?? undefined) : undefined;
 
-    // Load history on mount
+    const openSuggestions = useCallback(() => {
+        if (skipOpenRef.current) {
+            skipOpenRef.current = false;
+            return;
+        }
+        setSearchHistory(readRecentSearches());
+        setHasOpened(true);
+        setHistoryOpen(true);
+    }, []);
+
+    // Load history on mount (localStorage is only readable on the client)
     useEffect(() => {
-        setSearchHistory(getSearchHistory());
+        // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time read of an external store
+        setSearchHistory(readRecentSearches());
     }, []);
 
     // Sync search value when navigating to /songs with a search param
@@ -59,44 +79,42 @@ export default function Header({ initialUser }: { initialUser?: AuthUser | null 
         }
     }, [isOnSongsPage, searchParams, searchValue]);
 
-    // Bottom bar "Search" tab (Story 6.1.24, #408): focus the field on tap.
+    // Bottom bar "Search" tab (Story 6.1.24, #408): focus the field on tap and show the suggestions,
+    // also when the field already had focus (no focus event fires then).
     useEffect(() => {
-        const focusInput = () => inputRef.current?.focus();
+        const focusInput = () => {
+            inputRef.current?.focus();
+            skipOpenRef.current = false;
+            openSuggestions();
+        };
         window.addEventListener(FOCUS_SEARCH_EVENT, focusInput);
         return () => window.removeEventListener(FOCUS_SEARCH_EVENT, focusInput);
-    }, []);
+    }, [openSuggestions]);
 
-    // Close dropdowns on outside click
+    // Close dropdowns on outside tap or click
     useEffect(() => {
-        const handleClick = (e: MouseEvent) => {
-            if (searchWrapperRef.current && !searchWrapperRef.current.contains(e.target as Node)) {
+        const handleClick = (e: PointerEvent) => {
+            const target = e.target as Node;
+            if (
+                searchWrapperRef.current && !searchWrapperRef.current.contains(target) &&
+                !suggestionsRef.current?.contains(target)
+            ) {
                 setHistoryOpen(false);
             }
             if (createMenuRef.current && !createMenuRef.current.contains(e.target as Node)) {
                 setCreateMenuOpen(false);
             }
         };
-        document.addEventListener('mousedown', handleClick);
-        return () => document.removeEventListener('mousedown', handleClick);
+        document.addEventListener('pointerdown', handleClick);
+        return () => document.removeEventListener('pointerdown', handleClick);
     }, []);
 
-    const addToHistory = useCallback((term: string) => {
-        const trimmed = term.trim();
-        if (!trimmed) return;
-        const updated = [trimmed, ...searchHistory.filter(h => h !== trimmed)].slice(0, MAX_HISTORY);
-        setSearchHistory(updated);
-        saveSearchHistory(updated);
-    }, [searchHistory]);
-
     const removeFromHistory = useCallback((term: string) => {
-        const updated = searchHistory.filter(h => h !== term);
-        setSearchHistory(updated);
-        saveSearchHistory(updated);
-    }, [searchHistory]);
+        setSearchHistory(removeRecentSearch(term));
+    }, []);
 
     const clearHistory = useCallback(() => {
-        setSearchHistory([]);
-        saveSearchHistory([]);
+        setSearchHistory(clearRecentSearches());
     }, []);
 
     // Live search: debounce URL updates ONLY when user is actively typing (input focused)
@@ -133,13 +151,15 @@ export default function Header({ initialUser }: { initialUser?: AuthUser | null 
     const handleSearch = (term?: string) => {
         const trimmed = (term ?? searchValue).trim();
         if (trimmed) {
-            addToHistory(trimmed);
+            setSearchHistory(addRecentSearch(trimmed));
             router.push(`/songs?search=${encodeURIComponent(trimmed)}`);
         } else if (isOnSongsPage) {
             router.push('/songs');
         }
         setHistoryOpen(false);
     };
+
+    const suggestionsVisible = historyOpen && !searchValue && (searchHistory.length > 0 || categories.length > 0);
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter') {
@@ -151,14 +171,66 @@ export default function Header({ initialUser }: { initialUser?: AuthUser | null 
             setHistoryOpen(false);
             inputRef.current?.blur();
         }
+        if (e.key === 'ArrowDown' && historyOpen) {
+            const first = suggestionsRef.current?.querySelector<HTMLElement>('button:not([data-clear-all])');
+            if (first) {
+                e.preventDefault();
+                first.focus();
+            }
+        }
+    };
+
+    // Keep a search the person typed and left (the field live-searches, so Enter is optional).
+    const handleBlur = (e: React.FocusEvent) => {
+        const term = searchValue.trim();
+        if (term.length >= 2) setSearchHistory(addRecentSearch(term));
+        closeIfFocusLeaves(e);
+    };
+
+    // Tabbing out of the field and the panel closes the panel; taps outside are handled above.
+    const closeIfFocusLeaves = (e: React.FocusEvent) => {
+        const next = e.relatedTarget as Node | null;
+        if (!next) return;
+        if (searchWrapperRef.current?.contains(next) || suggestionsRef.current?.contains(next)) return;
+        setHistoryOpen(false);
+    };
+
+    // Escape inside the panel: close it and give the field back its focus without reopening.
+    const closeSuggestionsFromPanel = () => {
+        setHistoryOpen(false);
+        skipOpenRef.current = true;
+        inputRef.current?.focus();
+        // jsdom/old browsers that do not fire focus: do not leave the flag armed
+        setTimeout(() => { skipOpenRef.current = false; }, 0);
+    };
+
+    const toggleCategory = (slug: string) => {
+        const params = new URLSearchParams(isOnSongsPage ? searchParams.toString() : '');
+        if (params.get('category') === slug) params.delete('category');
+        else params.set('category', slug);
+        params.delete('tag'); // tags belong to the previous category
+        params.delete('search');
+        setHistoryOpen(false);
+        inputRef.current?.blur();
+        router.push(params.toString() ? `/songs?${params.toString()}` : '/songs');
+    };
+
+    const selectRecent = (term: string) => {
+        setSearchValue(term);
+        handleSearch(term);
+        inputRef.current?.blur();
     };
 
     // Keyboard shortcut: "/" to focus search
     useEffect(() => {
         const handleGlobalKey = (e: KeyboardEvent) => {
-            if (e.key === '/' && !e.metaKey && !e.ctrlKey &&
-                !(e.target instanceof HTMLInputElement) &&
-                !(e.target instanceof HTMLTextAreaElement)) {
+            const target = e.target as HTMLElement | null;
+            if (e.key === '/' && !e.metaKey && !e.ctrlKey && !e.altKey &&
+                !(target instanceof HTMLInputElement) &&
+                !(target instanceof HTMLTextAreaElement) &&
+                !(target instanceof HTMLSelectElement) &&
+                !target?.isContentEditable &&
+                !target?.closest('[role="dialog"]')) {
                 e.preventDefault();
                 inputRef.current?.focus();
             }
@@ -170,9 +242,9 @@ export default function Header({ initialUser }: { initialUser?: AuthUser | null 
     return (
         <nav
             id="app-navbar"
-            className="h-[var(--navbar-height)] w-full text-sm relative lg:sticky lg:top-0 z-50 bg-white/95 dark:bg-gray-950/95 backdrop-blur-md"
+            className="h-[var(--navbar-height)] w-full text-sm relative lg:sticky lg:top-0 z-50 bg-bg/95 backdrop-blur-md"
         >
-            <div className="grid h-full grid-cols-[auto_1fr_auto] lg:grid-cols-[16rem_1fr_auto] items-center border-b border-gray-200/60 dark:border-gray-800/60">
+            <div className="grid h-full grid-cols-[auto_1fr_auto] lg:grid-cols-[16rem_1fr_auto] items-center border-b border-line">
                 {/* Left: Menu button + Logo */}
                 <div className="flex items-center gap-1.5 ms-4 lg:me-4">
                     {/* Mobile menu toggle */}
@@ -197,9 +269,9 @@ export default function Header({ initialUser }: { initialUser?: AuthUser | null 
                     <div ref={searchWrapperRef} className="relative w-full max-w-3xl group">
                         {/* Search icon / loading spinner */}
                         {isSearching && isOnSongsPage && !searchFiltersOpen ? (
-                            <Loader2 className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-red-400 animate-spin pointer-events-none z-10" />
+                            <Loader2 className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-fg-subtle animate-spin pointer-events-none z-10" />
                         ) : (
-                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 group-focus-within:text-gray-600 dark:group-focus-within:text-gray-300 transition-colors pointer-events-none z-10" />
+                            <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-fg-subtle group-focus-within:text-fg-muted transition-colors pointer-events-none z-10" />
                         )}
                         <input
                             ref={inputRef}
@@ -207,66 +279,33 @@ export default function Header({ initialUser }: { initialUser?: AuthUser | null 
                             value={searchValue}
                             onChange={(e) => setSearchValue(e.target.value)}
                             onKeyDown={handleKeyDown}
-                            onFocus={() => setHistoryOpen(true)}
+                            onFocus={openSuggestions}
+                            onClick={openSuggestions}
+                            onBlur={handleBlur}
+                            aria-controls={suggestionsVisible ? 'search-suggestions' : undefined}
+                            aria-describedby="search-suggestions-hint"
                             placeholder={t('songs.searchPlaceholder', { count: 200 })}
-                            className="w-full bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-full py-2.5 pl-10 pr-12 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500/40 transition-all relative z-10"
+                            className="w-full min-h-tap bg-surface-2 border border-line rounded-control py-2.5 pl-10 pr-14 text-body text-fg placeholder:text-fg-subtle focus:outline-none focus:ring-2 focus:ring-accent focus:border-line-strong transition-all relative z-10"
                         />
+                        <span id="search-suggestions-hint" className="sr-only">{t('header.suggestionsHint')}</span>
                         <button
-                            onClick={() => setSearchFiltersOpen(!searchFiltersOpen)}
-                            className={`absolute right-2.5 top-1/2 -translate-y-1/2 p-1.5 rounded-full transition-colors z-10 ${
+                            onClick={() => {
+                                setHistoryOpen(false);
+                                setSearchFiltersOpen(!searchFiltersOpen);
+                            }}
+                            className={`absolute right-1 top-1/2 -translate-y-1/2 size-tap inline-flex items-center justify-center rounded-control transition-colors z-10 ${
                                 hasActiveSearchFilters
-                                    ? 'text-red-500 bg-red-100 dark:bg-red-500/15'
-                                    : 'text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-800'
+                                    ? 'text-accent bg-accent-soft'
+                                    : 'text-fg-subtle hover:text-fg hover:bg-surface'
                             }`}
                             aria-label={t('header.searchOptions')}
                             title={t('nav.showSearch')}
                         >
                             <SlidersHorizontal className="w-4 h-4" />
                             {hasActiveSearchFilters && (
-                                <span className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-red-500 ring-1.5 ring-gray-100 dark:ring-gray-900" />
+                                <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-accent" />
                             )}
                         </button>
-
-                        {/* Recent searches dropdown */}
-                        {historyOpen && searchHistory.length > 0 && !searchValue && (
-                            <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-2xl shadow-black/10 dark:shadow-black/40 z-50 overflow-hidden">
-                                <div className="flex items-center justify-between px-4 pt-3 pb-2">
-                                    <span className="text-xs font-semibold text-gray-400 dark:text-gray-500">{t('header.recentSearches')}</span>
-                                    <button
-                                        onClick={clearHistory}
-                                        className="text-xs font-semibold text-red-500 hover:text-red-400 transition-colors"
-                                    >
-                                        {t('header.clearAll')}
-                                    </button>
-                                </div>
-                                <div className="pb-1">
-                                    {searchHistory.map((term) => (
-                                        <div
-                                            key={term}
-                                            className="flex items-center gap-3 px-4 py-2.5 hover:bg-gray-100 dark:hover:bg-gray-800/70 transition-colors cursor-pointer group/item"
-                                            onClick={() => {
-                                                setSearchValue(term);
-                                                handleSearch(term);
-                                            }}
-                                        >
-                                            <Search className="w-4 h-4 text-gray-400 shrink-0" />
-                                            <span className="text-sm text-gray-700 dark:text-gray-300 flex-1 truncate">{term}</span>
-                                            <button
-                                                onClick={(e) => {
-                                                    e.stopPropagation();
-                                                    removeFromHistory(term);
-                                                }}
-                                                className="p-1.5 rounded-full text-gray-400 dark:text-gray-500 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-200 dark:hover:bg-gray-700 transition-all shrink-0"
-                                                aria-label={`${t('common.remove')} "${term}"`}
-                                                title={t('common.remove')}
-                                            >
-                                                <X className="w-3.5 h-3.5" />
-                                            </button>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        )}
                     </div>
                 </div>
 
@@ -321,6 +360,29 @@ export default function Header({ initialUser }: { initialUser?: AuthUser | null 
                     <UserProfile layout="header" showText={false} initialUser={initialUser} />
                 </div>
             </div>
+
+            {/* Suggestions: recent searches + category chips (Story 6.1.29 / G7.1) */}
+            {suggestionsVisible && (
+                <div
+                    id="search-suggestions"
+                    ref={suggestionsRef}
+                    onBlur={closeIfFocusLeaves}
+                    className="absolute inset-x-2 top-full z-50 mt-1 lg:inset-x-auto lg:left-[17rem] lg:w-[min(48rem,calc(100%-21rem))]"
+                >
+                    <SearchSuggestions
+                        recent={searchHistory}
+                        categories={categories}
+                        activeCategory={activeCategory}
+                        onSelectRecent={selectRecent}
+                        onRemoveRecent={removeFromHistory}
+                        onClearRecent={clearHistory}
+                        onToggleCategory={toggleCategory}
+                        onClose={closeSuggestionsFromPanel}
+                        onLeaveTop={() => inputRef.current?.focus()}
+                        className="max-h-[70dvh] overflow-y-auto"
+                    />
+                </div>
+            )}
         </nav>
     );
 }

@@ -618,6 +618,7 @@ const pt: Partial<Record<TranslationKey, string>> = {
   'header.searchOptions': 'Opções de busca',
   'header.recentSearches': 'Buscas recentes',
   'header.clearAll': 'Limpar tudo',
+  'header.suggestionsHint': 'Pressione a seta para baixo para ver pesquisas recentes e categorias.',
   'header.addSong': 'Adicionar música',
   'header.newPlaylist': 'Nova playlist',
 

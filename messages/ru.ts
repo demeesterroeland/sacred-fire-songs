@@ -621,6 +621,7 @@ const ru: Partial<Record<TranslationKey, string>> = {
   'header.searchOptions': 'Параметры поиска',
   'header.recentSearches': 'Недавние запросы',
   'header.clearAll': 'Очистить всё',
+  'header.suggestionsHint': 'Нажмите стрелку вниз, чтобы открыть недавние поиски и категории.',
   'header.addSong': 'Добавить песню',
   'header.newPlaylist': 'Новый плейлист',
 

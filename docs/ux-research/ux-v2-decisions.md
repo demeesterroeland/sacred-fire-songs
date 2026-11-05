@@ -1,11 +1,12 @@
 # UX v2: Agent Decisions (ADR-lite)
 
-**Version:** 1.17 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375)
+**Version:** 1.18 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375)
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.18 | Nov 5, 2026 | Added UXA-022 (search suggestions: what chips do, when the panel shows, when a search is remembered; #413). |
 | 1.17 | Nov 5, 2026 | Added UXA-021 (take action sheet: group order, Copy link kept, listen-only takes get no sheet, swipe on the shared sheet, #401). |
 | 1.16 | Nov 5, 2026 | Added UXA-020 (bottom bar: Search target, "+" in Library, /explore gone; #408). |
 | 1.15 | Nov 5, 2026 | Added UXA-019 (category grid: tag emoji and flags dropped, #388). |
@@ -48,6 +49,7 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 | UXA-019 | Nov 5, 2026 | #388 | Category grid: tags lose their emoji / flag, the category icon stays (grey) | no |
 | UXA-020 | Nov 5, 2026 | #408 | Bottom bar: Search = `/songs` with the header field focused; "+" in the Library header (members only); `/explore` is a 404 | yes |
 | UXA-021 | Nov 5, 2026 | #401 | Take action sheet: Rename and Download sit with Play, Copy link stays under Share, takes of others get no sheet, swipe-to-close on the shared bottom sheet, no new copy | yes |
+| UXA-022 | Nov 5, 2026 | #413 | Search suggestions: top-level category chips toggle the `category` filter; panel only while the field is empty; a search is remembered on Enter, on tap and on leaving the field with ≥ 2 characters; selected chip = inverted greys + check | yes |
 
 ---
 
@@ -240,3 +242,13 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 - **Choice:** (b) and (d). Groups: **Play / Pause, Edit take name, Download take** · **Share, Singer Attribution, Make Public / Make Private, Copy link** · **Delete take** alone, in `text-danger` with the word "Delete take" (colour never alone), after a divider and at least three rows away from Share. A sheet with one row (Play) would be an extra tap for nothing, so shared and public takes keep only their play button. Copy link is kept (dropping it would remove a feature) in the share group. The shared `BottomSheet` now has a 32 px handle on phones that follows a swipe down and closes the sheet (80 px, or a 30 px flick faster than 0.5 px/ms; a tap does nothing); Esc and the scrim also close it. Rows reuse the existing labels ("Edit take name", "Download take", "Delete take"), so no new copy and no new keys in the 8 locales. The chosen action runs after the sheet has closed, so two dialogs never overlap (rename focuses the name field, Share / Singer / Publish open their dialogs, Delete opens the same confirmation as before). The ⋯ trigger grew from about 28 px to a 44 px target.
 - **Consequences:** every `BottomSheet` on a phone gets the swipe handle and a taller (32 px) top area; the sheet title on touch is the take name. Playing from the sheet and from the row stay equal. The "Edit take name" row opens an inline field on the row, not a dialog.
 - **Confirm:** yes (Rename and Download moved into the first group; swipe on every bottom sheet)
+
+### UXA-022 · Search suggestions: what a chip does, when the panel shows, when a search is remembered
+
+- **Date / story:** Nov 5, 2026 · #413 (G7.1)
+- **Context:** the story asks for the last 5 searches and the top-level categories as chips when the search field is focused. It does not say what a chip tap does, when the panel is shown, when a search counts as "searched" (the field live-searches, so Enter is optional), or how a selected chip looks. The brief also says "the accent only marks the selected state", while the Chip primitive of the component sheet marks selection with inverted greys plus a check.
+- **Options:** chip tap: (a) set the category filter and keep other filters; (b) open the category's page; (c) put the category name in the field. Panel: (a) only while the field is empty; (b) always on focus. Remembering: (a) Enter only (as before); (b) also when the person leaves the field with a term; (c) every debounced live search. Selected chip: (a) the Chip primitive as is; (b) accent fill.
+- **Choice:** chip = (a): it toggles `category=<slug>` on `/songs`, keeps the other URL filters (sort, tag, …) and drops the search term (the panel only shows with an empty field); a second tap removes it, so a chip both narrows and un-narrows in one tap. Only top-level categories are chips (the tags stay on the Search options sheet and the home grid). Panel = (a): while the field holds text the person is typing, not choosing; with no recent searches it shows the chips alone. Remembering = (b): Enter, tapping a suggestion and leaving the field with at least 2 characters (a half-typed "a" is not kept); (c) would store "ag", "agu", "agua". Selected chip = (a): the component sheet's inverted greys + check + `aria-pressed` (colour never alone); the accent stays on the focus ring. Older builds stored up to 8 searches: only 5 are shown, and the list is cut to 5 on the next write. "Clear all" and the per-search remove reuse the existing `header.clearAll` and `common.remove` keys; the category heading reuses `search.categories.heading`. The panel is full width under the top bar on phones (the field itself is only about 230 px wide there). The header search field and its filter button were moved to tokens and 44 px targets because they are the focus state's anchor.
+- **Consequences:** searches are stored on this device only (no account, no server). Picking a chip drops the old `tag` filter (tags belong to a category). ArrowDown from the field skips "Clear all", so ArrowDown + Enter never wipes the history (review). Focusing the field when it already holds the current search (`/songs?search=agua`) shows no panel until the text is cleared (Esc clears it).
+- **Confirm:** yes (more searches are remembered than before; the field's look changes)
+
