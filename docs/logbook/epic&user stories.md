@@ -1,6 +1,6 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 1.54
+**Version:** 1.55
 **Status:** Living Document
 **Date:** Nov 5, 2026
 
@@ -53,6 +53,7 @@
 | **1.52** | Nov 5, 2026 | Added Story 4.6.5 (Personal Reordering of Shared-with-Me and Public Recordings, #420) [Planned] with Option A decision (decoupled user-specific ordering table). |
 | **1.53** | Nov 5, 2026 | Epic 5.1: Story 5.1.8 (#297) re-scoped and implemented — promotion `develop` → `main` via `scripts/cicd/develop2main.sh` (merge commit, no `--admin`) and versioned release images; production deployment lives outside the public repo. Story 5.1.6 (#294) completed (no script uses `--admin`). Stories 5.1.1, 5.1.7 and 5.1.12 closed on GitHub. |
 | **1.54** | Nov 5, 2026 | Story 5.1.9 (#298) implemented: `back-merge.yml` opens the PR `main` → `develop` after every push to `main`, labels conflicts; merged by the owner, never automatically. |
+| **1.55** | Nov 5, 2026 | Story 5.1.13 (#300) implemented: development guide 2.0 (Gitflow, environments, CI vs CD boundary), Gitflow PR template, `/start-story` and `/sync-artifacts` target `develop`, README contributing; documentation contract in `ci-gate`. Story 5.1.10 (#299) code complete; its end-to-end check moves into the 5.1.14 dress rehearsal (owner). |
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
 
@@ -1459,10 +1460,10 @@ Move from GitHub Flow to a lightweight Gitflow: `main` = production, `develop` =
 | 5.1.7 | #295 | Staging CD from `develop` (images, migrations, deploy) | 3 | [Re-scoped] (this repo publishes `develop` images; deployment lives outside the public repo) |
 | 5.1.8 | #297 | Promotion `develop` → `main` + versioned release images | 4 | [Implemented] (re-scoped Nov 5: deployment and its approval live outside the public repo; slow-layer required checks deferred with 5.1.2/5.1.11) |
 | 5.1.9 | #298 | Automatic back-merge `main` → `develop` | 4 | [Implemented] (PR opened automatically; owner merges) |
-| 5.1.10 | #299 | Hotfix flow | 4 | [Planned] |
+| 5.1.10 | #299 | Hotfix flow | 4 | [Partial] (code + automatic back-merge done; end-to-end check in the 5.1.14 dress rehearsal) |
 | 5.1.11 | #296 | Test-pyramid schedule (nightly full E2E + perf) | 3 | [Deferred] (needs Tailscale `tag:ci`, with 5.1.2) |
 | 5.1.12 | #291 | Supply-chain hardening (pinned actions, Dependabot, permissions) | 1 | [Implemented] |
-| 5.1.13 | #300 | Documentation & agent tooling aligned to Gitflow | 5 | [Planned] |
+| 5.1.13 | #300 | Documentation & agent tooling aligned to Gitflow | 5 | [Implemented] |
 | 5.1.14 | #301 | Dress rehearsal & cut-over of open branches | 5 | [Planned] |
 
 **Story 5.1.1:** As a Maintainer, I want every pull request to run lint, typecheck, unit, BDD, build and the staging smoke E2E (`e2e`) so that broken code cannot be merged.
@@ -1578,7 +1579,7 @@ Scenario: Third-party actions are pinned
   And every workflow declares top-level "permissions"
 ```
 
-**Story 5.1.13:** As a Contributor, I want the guides, CLAUDE.md, PR template, design doc and agent skills to describe the Gitflow process so that humans and AI agents follow the same rules.
+**Story 5.1.13: [Implemented]** As a Contributor, I want the guides, CLAUDE.md, PR template, design doc and agent skills to describe the Gitflow process so that humans and AI agents follow the same rules.
 
 ```gherkin
 Scenario: Guides describe Gitflow

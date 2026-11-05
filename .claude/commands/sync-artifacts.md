@@ -1,6 +1,6 @@
 Sync session artifacts (tasks, walkthrough, time tracking) to the `/doc/logbook/` master files.
 
-Run this workflow before opening a PR or merging to main. Do NOT run for intermediate commits.
+Run this workflow before opening a PR (into `develop`, or `main` for a hotfix). Do NOT run for intermediate commits.
 
 ## Steps
 

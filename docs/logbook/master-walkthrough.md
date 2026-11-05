@@ -3190,6 +3190,12 @@ Re-scoped Story 5.1.8 to the public-repo boundary decided by the owner: CI (buil
 - `.github/workflows/back-merge.yml`: on push to `main` (and manually) it checks `origin/develop..origin/main`, opens or reuses the PR `main` → `develop` with `RELEASE_PLEASE_TOKEN` (so CI runs; fails closed if missing), test-merges and labels conflicts `back-merge-conflict` with a comment. Never merges itself (no `--auto`/`--admin`).
 - Spec: new `@story-5.1.9` contract scenario; 5.1.9 added to `ci-gate` (23/23). actionlint clean.
 
+**Story 5.1.13: documentation & agent tooling (#300)**
+- `docs/guides/development-workflow.md` 2.0: branches/environments table, work branch → `develop` → promotion → release → back-merge → hotfix, CI vs CD boundary, removed the outdated `:latest` claim.
+- `.github/pull_request_template.md`: Gitflow target branch, Conventional Commit title, test-pyramid checklist (L1–L5), isolation reminder.
+- `/start-story`: branches via `start-issue.sh` from `origin/develop`, Conventional PR titles (the old `[Story X.X.X]` title failed `pr-policy`), no direct commits to `main`, no self-closing of issues. `/sync-artifacts` and README contributing aligned.
+- Spec: `@story-5.1.13` Scenario Outline over five files (changelog rows excluded) in `ci-gate`.
+
 ## November 4–5, 2026 - Story 4.6.6: Notifications for shared rehearsal recordings (#373)
 
 **Task Overview**

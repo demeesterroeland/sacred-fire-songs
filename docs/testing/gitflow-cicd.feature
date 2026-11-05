@@ -238,12 +238,24 @@ Feature: Gitflow branching and CI/CD pipeline
     Then it has update entries for "github-actions" and "npm" targeting "develop"
 
   # ── Story 5.1.13: documentation ───────────────────────────────────────────
-  @story-5.1.13 @manual
-  Scenario: Guides describe Gitflow
-    Given "docs/guides/git-workflow.md" and "docs/guides/development-workflow.md"
-    Then both describe main, develop, work branches and hotfix branches
-    And neither says there is no develop branch
-    And both have a version header and changelog entry
+  @story-5.1.13 @ci-contract
+  Scenario Outline: Guides, templates and agent commands describe Gitflow
+    Given the file "<file>"
+    Then outside its changelog it mentions <terms>
+    And outside its changelog it never says "GitHub Flow" or "no develop branch"
+
+    Examples:
+      | file                               | terms                                          |
+      | docs/guides/git-workflow.md        | "develop", "hotfix/", "back-merge" and "main"  |
+      | docs/guides/development-workflow.md | "develop", "hotfix/", "back-merge" and "main" |
+      | .github/pull_request_template.md   | "develop", "hotfix/", "test:bdd:unit" and "main" |
+      | .claude/commands/start-story.md    | "origin/develop", "start-issue.sh", "PR" and "develop" |
+      | README.md                          | "develop", "hotfix/", "Conventional Commit" and "main" |
+
+  @story-5.1.13 @ci-contract
+  Scenario: Guides have a version header
+    Given the file "docs/guides/development-workflow.md"
+    Then it has a "**Version:**" header and a changelog table
 
   # ── Story 5.1.14: cut-over ────────────────────────────────────────────────
   @story-5.1.14 @manual

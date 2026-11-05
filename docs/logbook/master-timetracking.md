@@ -127,4 +127,5 @@
 | **November 5, 2026 (Part 2)** | **CI-CD (#298, Epic 5.1)**: `back-merge.yml` (automatic PR `main` → `develop`, PAT, conflict label), contract scenarios, docs. | ~0.75 Hours | ✅ Completed |
 | **November 4, 2026 (Part 4)** | **Feature/Rehearsal (#373, Story 4.6.6)**: share notifications — notifications table + trigger, claim RPC, bell, email opt-out, SMTP email, recording permalink `/recordings/[id]` with highlight, copy link, seed audio; unit, BDD and browser verification, 8 locales. (estimate) | ~3.5 Hours | ✅ Completed |
 | **November 5, 2026 (Part 3)** | **Fix (#373 follow-up)**: recording-specific not-found page for unopenable recording links, docs, logbook. (estimate) | ~0.5 Hours | ✅ Completed |
-| **Total** | **Development + AI Collaboration** | **~216.25 Hours** | |
+| **November 5, 2026 (Part 4)** | **Docs/CI-CD (#300, Epic 5.1)**: Gitflow documentation and agent tooling, PR template, documentation contract; #299 status. | ~1.0 Hours | ✅ Completed |
+| **Total** | **Development + AI Collaboration** | **~217.25 Hours** | |

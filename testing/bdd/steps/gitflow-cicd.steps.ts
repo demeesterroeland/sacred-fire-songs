@@ -352,6 +352,43 @@ Then('the title check fails', function (this: SongBddWorld) {
   assert.equal(policy.titleOk, false, `title "${pr.title}" unexpectedly passed`);
 });
 
+// ── Documentation describes Gitflow (story 5.1.13) ──────────────────────────
+/** File text without the changelog table rows (they keep historic wording). */
+function bodyText(world: SongBddWorld): { path: string; body: string } {
+  const file = ci(world).file;
+  assert.ok(file, 'no file loaded — start the scenario with Given the file "…"');
+  const body = file.text
+    .split('\n')
+    .filter((l) => !/^\|\s*\*\*\d+\.\d+\*\*\s*\|/.test(l))
+    .join('\n');
+  return { path: file.path, body };
+}
+
+Then(
+  'outside its changelog it mentions {string}, {string}, {string} and {string}',
+  function (this: SongBddWorld, a: string, b: string, c: string, d: string) {
+    const { path, body } = bodyText(this);
+    for (const term of [a, b, c, d]) assert.ok(body.includes(term), `${path} does not mention "${term}"`);
+  },
+);
+
+Then(
+  'outside its changelog it never says {string} or {string}',
+  function (this: SongBddWorld, a: string, b: string) {
+    const { path, body } = bodyText(this);
+    for (const term of [a, b]) {
+      assert.ok(!body.toLowerCase().includes(term.toLowerCase()), `${path} still says "${term}"`);
+    }
+  },
+);
+
+Then('it has a {string} header and a changelog table', function (this: SongBddWorld, header: string) {
+  const { path } = bodyText(this);
+  const text = ci(this).file?.text ?? '';
+  assert.ok(text.includes(header), `${path} has no ${header} header`);
+  assert.match(text, /^\|\s*\*\*\d+\.\d+\*\*\s*\|/m, `${path} has no changelog table`);
+});
+
 // ── Need artifacts from later stories → pending until then ──────────────────
 Then('the required checks include the full E2E suite against staging', function () {
   return 'pending'; // story 5.1.8: ruleset contract for PRs into main
