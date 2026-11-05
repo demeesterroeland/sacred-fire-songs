@@ -1,11 +1,12 @@
 # UX v2: Phone Validation Script
 
-**Version:** 1.22 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
+**Version:** 1.23 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.23 | Nov 5, 2026 | Added #414 (Add to playlist bottom sheet). |
 | 1.22 | Nov 5, 2026 | Added #393 (sticky Practice · Playlist · ♥ action bar). |
 | 1.21 | Nov 5, 2026 | Added the #413 section (recent searches and category chips in the search field). |
 | 1.20 | Nov 5, 2026 | Added #401 (take actions in a bottom sheet). |
@@ -320,3 +321,15 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 - [ ] 10. Guest (private window): the bar shows the same three actions. Tap **Like**: the sign-in sheet opens (reason: favourites) and **Sign in** returns you to this song. Tap **Playlist**: the sheet opens with the playlist reason. Tap **Practice**: the panel opens and **Record** shows the sign-in gate. Screenshot: `…/393/after-dark/mobile/guest/03-song-detail.webp`.
 - [ ] 11. Turn the phone sideways and use a phone with a home bar: the bar stays above the home bar and nothing is cut off.
 - [ ] 12. Switch the language to Dutch, Spanish, Italian, Russian, French, Portuguese and Quechua: the three labels and the bar's accessible name are translated and fit on one line. Repeat step 1 in dark mode.
+
+### #414 · G8.1 Add to playlist as a bottom sheet
+
+**Preconditions:** signed in as a member on a 390 px phone, English; run once in light and once in dark. Two private playlists exist, e.g. "Water Ceremony" and "Fire Circle", and "Water Ceremony" already holds the song you open.
+
+- [ ] 1. Open that song and tap ⋮, then **Add to Playlist**. **Expected:** a sheet slides up from the bottom (not a small box over a blurred page) titled **Add to playlist**. The first row is **New playlist**; below it your playlists. **Water Ceremony** has a check on the right, **Fire Circle** has none. Screenshot: `docs/ux-research/screenshots/ux-v2/414/after-light/mobile/member/01-playlist-sheet.webp`. Before: `docs/ux-research/screenshots/ux-v2/414/before-light/mobile/member/01-playlist-sheet.webp`.
+- [ ] 2. Tap **Fire Circle**. **Expected:** the check appears at once, a message says "Added to Fire Circle" with **Open playlist**; the sheet stays open.
+- [ ] 3. Tap **Water Ceremony**. **Expected:** its check disappears and a message says "Removed from Water Ceremony".
+- [ ] 4. Tap **New playlist**, type a name, tap **Create**. **Expected:** the new playlist is in the list with a check; open **Library → Playlists** later and it holds the song.
+- [ ] 5. Tap **Done** (or the dark area above the sheet, or swipe the grey handle down). **Expected:** the sheet and the ⋮ menu close. Every row is easy to hit with a thumb (at least 44 px).
+- [ ] 6. Switch the language to Dutch, Spanish, Italian, Russian, French, Portuguese and Quechua: **New playlist**, **Create** and **Done** are translated. Repeat step 1 in dark mode (`…/414/after-dark/mobile/member/01-playlist-sheet.webp`).
+- [ ] 7. Clean up: delete the playlists you made in step 4.

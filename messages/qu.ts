@@ -712,6 +712,10 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'playlists.detail.noSongs': 'Manaraq takikuna.',
   'playlists.picker.addToPlaylist': 'Listaman yapay',
   'playlists.picker.newPlaylistPlaceholder': 'Musuq lista…',
+  'playlists.picker.newPlaylist': 'Musuq lista',
+  'playlists.picker.newPlaylistName': 'Listapa sutin',
+  'playlists.picker.create': 'Ruway',
+  'playlists.picker.done': 'Tukusqa',
   // ─── Remaining UI strings (Phase 3 completion) ───────────────────────────
   'common.errorOccurred': 'Pantay tarikurqan',
   'common.back': 'Kutiy',

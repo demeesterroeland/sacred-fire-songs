@@ -706,6 +706,10 @@ const en = {
   'playlists.detail.noSongs': 'No songs yet.',
   'playlists.picker.addToPlaylist': 'Add to playlist',
   'playlists.picker.newPlaylistPlaceholder': 'New playlist…',
+  'playlists.picker.newPlaylist': 'New playlist',
+  'playlists.picker.newPlaylistName': 'Playlist name',
+  'playlists.picker.create': 'Create',
+  'playlists.picker.done': 'Done',
   // ─── Remaining UI strings (Phase 3 completion) ───────────────────────────
   'common.errorOccurred': 'An error occurred',
   'common.back': 'Back',
