@@ -102,7 +102,7 @@ test('a playing take shows the bar, never covers the last row, and does not foll
     if (await leftover.count()) {
       const row = leftover.locator('xpath=ancestor::div[contains(@class, "group")][1]');
       await row.locator('button[aria-label="More actions"]').click();
-      await page.getByRole('menuitem', { name: 'Delete take' }).click();
+      await page.getByRole('dialog').getByRole('button', { name: 'Delete take', exact: true }).click();
       await page.getByRole('button', { name: 'Yes, delete' }).click();
       await expect(leftover).toHaveCount(0, { timeout: 10_000 });
     }

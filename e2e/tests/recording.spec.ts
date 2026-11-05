@@ -11,10 +11,10 @@ test.use({
   },
 });
 
-// Owner actions sit in the row's "More actions" menu; the menu renders in a portal.
+// Owner actions sit in the row's "More actions" bottom sheet (Story 6.1.17 / G4.4); the sheet renders in a portal.
 async function recordingAction(page: Page, row: Locator, name: string) {
   await row.locator('button[aria-label="More actions"]').click();
-  return page.getByRole('menuitem', { name });
+  return page.getByRole('dialog').getByRole('button', { name, exact: true });
 }
 
 test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {

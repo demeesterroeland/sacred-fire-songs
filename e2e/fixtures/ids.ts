@@ -30,3 +30,13 @@ export const TAKE_STATUS_FIXTURE_IDS = {
   version: 'eeeeeeee-3616-4000-a000-000000000002',
   take: 'eeeeeeee-3616-4000-a000-000000000003',
 } as const;
+
+/**
+ * Story 6.1.17 / G4.4 (#401): a song with one private take of the member, for the
+ * take action sheet. Removed by e2e/global-teardown.ts.
+ */
+export const TAKE_ACTIONS_FIXTURE_IDS = {
+  song: 'eeeeeeee-3617-4000-a000-000000000001',
+  version: 'eeeeeeee-3617-4000-a000-000000000002',
+  take: 'eeeeeeee-3617-4000-a000-000000000003',
+} as const;

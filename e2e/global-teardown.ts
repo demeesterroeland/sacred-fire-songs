@@ -1,5 +1,5 @@
 import pg from 'pg';
-import { ADMIN_USERS_FIXTURE_IDS, SHARED_TAKES_FIXTURE_IDS, TAKE_STATUS_FIXTURE_IDS } from './fixtures/ids';
+import { ADMIN_USERS_FIXTURE_IDS, SHARED_TAKES_FIXTURE_IDS, TAKE_ACTIONS_FIXTURE_IDS, TAKE_STATUS_FIXTURE_IDS } from './fixtures/ids';
 
 /**
  * Story 6.1.33 / G9.1 (#417): leave no test fixtures behind in the shared
@@ -36,6 +36,10 @@ export default async function globalTeardown(): Promise<void> {
     await client.query('DELETE FROM public.user_recordings WHERE id = $1', [status.take]);
     await client.query('DELETE FROM public.song_versions WHERE id = $1', [status.version]);
     await client.query('DELETE FROM public.compositions WHERE id = $1', [status.song]);
+    const actions = TAKE_ACTIONS_FIXTURE_IDS;
+    await client.query('DELETE FROM public.user_recordings WHERE id = $1', [actions.take]);
+    await client.query('DELETE FROM public.song_versions WHERE id = $1', [actions.version]);
+    await client.query('DELETE FROM public.compositions WHERE id = $1', [actions.song]);
     await client.query('DELETE FROM public.setlists WHERE id = $1', [ids.playlist]);
     await client.query('DELETE FROM public.song_versions WHERE id = $1', [ids.version]);
     await client.query('DELETE FROM public.compositions WHERE id = $1', [ids.song]);
