@@ -1,11 +1,12 @@
 # UX v2: Phone Validation Script
 
-**Version:** 1.0 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
+**Version:** 1.1 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.1 | Nov 5, 2026 | Added #385 (design tokens). |
 | 1.0 | Nov 5, 2026 | Skeleton: setup, reset and seed, preview image, smoke path. Story sections are added as stories merge. |
 
 Use a phone (or a 390 px browser window) against the preview image. Tick each box. Report a failure as **"failed #N step X"**, a pass as **"validated #N"**.
@@ -60,3 +61,12 @@ Seeded songs: **Danza del Cielo Curandero** (member's song, media + 5 takes, 2 s
 ## 2. Stories
 
 Sections are added per story as it merges into `feat/ux-v2`.
+
+### #385 · G1.1 Design tokens and component sheet
+
+**Preconditions:** any role; light and dark mode (account menu → theme).
+
+- [ ] 1. Open `/` in dark mode. Background is near-black warm grey (not red-black); the phone's status bar matches it. Screenshot: `docs/ux-research/screenshots/ux-v2/385/after-dark-01-home.webp`.
+- [ ] 2. Switch to light mode. Background is warm off-white; greys look warm, not blue. Screenshot: `…/385/after-light-01-home.webp`.
+- [ ] 3. Open a dialog (e.g. song ⋮ → Delete is not needed; account menu is enough). Hover/pressed rows are grey, never orange.
+- [ ] 4. On a laptop, open `docs/design/screens/v2/screen20_design_system.html`: the component sheet shows the same colours as the app.

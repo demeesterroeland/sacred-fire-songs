@@ -1,11 +1,12 @@
 # UX Research
 
-**Version:** 1.2 | **Date:** Nov 4, 2026
+**Version:** 1.3 | **Date:** Nov 5, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.3 | Nov 5, 2026 | UX v2: `UX_SCHEME` (light/dark), `UX_ROUTES` filter and `capture-story.sh` for per-story before/after sets in `screenshots/ux-v2/<issue>/`. |
 | 1.2 | Nov 4, 2026 | Capture scripts moved to `scripts/dev/ux/` (scripts layout contract). |
 | 1.1 | Nov 4, 2026 | Screenshots stored as WebP (quality 80) to keep the repo small; added `references/`. |
 | 1.0 | Nov 4, 2026 | Folder created: research report, screenshot set and capture scripts. |
@@ -34,7 +35,17 @@ node scripts/dev/ux/capture-flows.mjs mobile
 ```
 
 If this checkout has no `node_modules`, point at one that does: `PLAYWRIGHT_FROM=/path/to/checkout/ node …`.
-Other variables: `UX_BASE_URL`, `UX_OUT`, `NEXT_PUBLIC_DEV_TEST_PASSWORD`.
+Other variables: `UX_BASE_URL`, `UX_OUT`, `UX_SCHEME` (`light` or `dark`, default `dark`), `UX_ROUTES` (comma list of route-name prefixes, e.g. `01-home,03-song`), `NEXT_PUBLIC_DEV_TEST_PASSWORD`.
+
+### UX v2 before/after per story
+
+```bash
+# before: a server on the integration branch head; after: the story branch
+scripts/dev/ux/capture-story.sh 390 before http://localhost:3428 03-song,04-song guest,member
+scripts/dev/ux/capture-story.sh 390 after  http://localhost:3390 03-song,04-song guest,member
+```
+
+Output: `screenshots/ux-v2/<issue>/<before|after>-<light|dark>/mobile/<role>/<name>.webp` (390 × 844, WebP).
 
 Song IDs in `scripts/dev/ux/lib.mjs` come from the seed and change when it is regenerated; update them if songs show "Song Not Found".
 

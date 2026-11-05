@@ -45,8 +45,24 @@ export async function login(context, email) {
   await page.close();
 }
 
+// UX_SCHEME=light|dark (default dark) sets both the media query and the app's stored theme.
+export const SCHEME = process.env.UX_SCHEME === 'light' ? 'light' : 'dark';
+
+/** UX_ROUTES=01-home,03-song-detail limits capture to those names (prefix match). */
+export function routeSelected(name) {
+  const only = process.env.UX_ROUTES?.split(',').map((s) => s.trim()).filter(Boolean);
+  return !only || only.some((o) => name.startsWith(o));
+}
+
 export async function newContext(browser, viewportKey, role) {
-  const context = await browser.newContext({ ...VIEWPORTS[viewportKey], locale: 'en-US', colorScheme: 'dark' });
+  const context = await browser.newContext({ ...VIEWPORTS[viewportKey], locale: 'en-US', colorScheme: SCHEME });
+  await context.addInitScript((theme) => {
+    try {
+      const key = 'sacred-fire-songs-preferences';
+      const prefs = JSON.parse(localStorage.getItem(key) || '{}');
+      localStorage.setItem(key, JSON.stringify({ ...prefs, theme }));
+    } catch {}
+  }, SCHEME);
   if (ROLES[role]) await login(context, ROLES[role]);
   return context;
 }

@@ -1,11 +1,12 @@
 # UX v2: Agent Decisions (ADR-lite)
 
-**Version:** 1.0 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375)
+**Version:** 1.1 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375)
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.1 | Nov 5, 2026 | UXA-003 refined (grey bridge); added UXA-004 (Claude-only cross-review) and UXA-005 (`accent` = fire accent). |
 | 1.0 | Nov 5, 2026 | Created the decision log for the UX v2 build (UXA-001 to UXA-003). |
 
 Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to UXD-7) are ADRs in [`docs/design/adr/`](../design/adr/README.md). Entries marked `Confirm: yes` change behaviour, copy tone, data or permissions beyond the story text; they are listed in the GitHub issue "UX v2: decisions to confirm".
@@ -14,7 +15,9 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 | :--- | :--- | :--- | :--- | :--- |
 | UXA-001 | Nov 5, 2026 | all | Capture scripts live in `scripts/dev/ux/`, not `scripts/ux/` | no |
 | UXA-002 | Nov 5, 2026 | #385 | Start from the owner's draft tokens and v2 mockups | no |
-| UXA-003 | Nov 5, 2026 | #385 | Semantic tokens via Tailwind `@theme`, palette remap as a bridge | no |
+| UXA-003 | Nov 5, 2026 | #385 | Semantic tokens via Tailwind `@theme`, grey palettes remapped as a bridge | no |
+| UXA-004 | Nov 5, 2026 | all | Cross-review by a different Claude model (owner: Claude models only) | no |
+| UXA-005 | Nov 5, 2026 | #385 | `accent` means the fire accent; shadcn hover uses `surface-2` | no |
 
 ---
 
@@ -41,6 +44,24 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 - **Date / story:** Nov 5, 2026 · #385 (G1.1)
 - **Context:** about 90 components use Tailwind palette classes (`gray-*`, `red-*`, `amber-*`, `indigo-*`). UXD-7 requires components to use semantic tokens only, but each restyle story owns its own screens.
 - **Options:** (a) rewrite all components in #385; (b) expose semantic utilities (`bg-surface`, `text-muted`, `text-accent`, …) and leave palette classes to the restyle stories; (c) (b) plus map the Tailwind `gray` scale to the sober warm greys so untouched screens already look calmer.
-- **Choice:** (b) for #385, guarded by a test; each restyle story converts its own files to semantic utilities. A lint-style unit test lists remaining palette classes so the count only goes down.
-- **Consequences:** mixed look until the restyle stories land; tracked by the palette-class counter.
+- **Choice:** (b) + (c) for the grey palettes only: `gray/slate/zinc/neutral/stone-*` render as warm sober greys with the same lightness as Tailwind's (contrast unchanged). Hue palettes (`red`, `amber`, `indigo`, …) are not remapped, because some of them still carry meaning; each restyle story converts its own files. The ratchet test `paletteRatchet.test.ts` (baseline 3081 at #385) only lets the count go down.
+- **Consequences:** untouched screens already read calmer; colourful accents remain until their story lands.
+- **Confirm:** no
+
+### UXA-004 · Cross-review with Claude models only
+
+- **Date / story:** Nov 5, 2026 · all stories
+- **Context:** the build prompt asks for a reviewer from a different model family (Gemini for Claude-authored work). The owner then said to use only Claude models.
+- **Options:** (a) Gemini review; (b) a different Claude model than the author.
+- **Choice:** (b). Opus-authored work is reviewed by Sonnet; Sonnet- or Haiku-authored work by Opus. The reviewer gets the diff, the Gherkin and the quality bar, not the author's conclusions.
+- **Consequences:** less model diversity; mitigated by the blind brief.
+- **Confirm:** no
+
+### UXA-005 · `accent` means the fire accent
+
+- **Date / story:** Nov 5, 2026 · #385 (G1.1)
+- **Context:** shadcn-style primitives use `bg-accent` for a hover grey; UXD-7 names the fire orange `--accent`.
+- **Options:** (a) rename the fire token; (b) keep `--accent` = fire and move shadcn hovers to `bg-surface-2`.
+- **Choice:** (b), done in `components/ui/dialog.tsx` and `dropdown-menu.tsx`.
+- **Consequences:** new code must not use `bg-accent` for hover states (documented in `design-tokens.md` §4).
 - **Confirm:** no

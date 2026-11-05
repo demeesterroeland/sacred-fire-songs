@@ -1,6 +1,6 @@
 // Phase 1: capture every route for every role and viewport (mobile first).
 // Usage: PLAYWRIGHT_FROM=/path/with/node_modules/ node scripts/dev/ux/capture-routes.mjs [mobile|desktop]
-import { chromium, BASE, SONGS, newContext, settle, shot } from './lib.mjs';
+import { chromium, BASE, SONGS, newContext, routeSelected, settle, shot } from './lib.mjs';
 
 const ROUTES = [
   ['01-home', '/'],
@@ -43,6 +43,7 @@ for (const vp of viewports) {
     const context = await newContext(browser, vp, role);
     const page = await context.newPage();
     for (const [name, route] of ROUTES) {
+      if (!routeSelected(name)) continue;
       try {
         await page.goto(`${BASE}${route}`, { waitUntil: 'domcontentloaded', timeout: 30000 });
         await settle(page);
@@ -53,7 +54,7 @@ for (const vp of viewports) {
       }
     }
     // A playlist detail: open the first playlist card we can find.
-    try {
+    if (routeSelected('18-playlist-detail')) try {
       await page.goto(`${BASE}/library/playlists`);
       await settle(page);
       const link = page.locator('a[href^="/library/playlists/"]:not([href$="/add"])').first();
@@ -66,7 +67,7 @@ for (const vp of viewports) {
       console.log(`  ⚠️  no playlist detail: ${e.message.split('\n')[0]}`);
     }
     // Admin user detail
-    if (role === 'admin') {
+    if (role === 'admin' && routeSelected('19-admin-user-detail')) {
       try {
         await page.goto(`${BASE}/admin/users`);
         await settle(page);

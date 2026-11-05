@@ -40,7 +40,7 @@ export function BasePill({
       {icon}
       <span>{label}</span>
       {typeof count === 'number' && (
-        <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-white/20 dark:bg-gray-700/50">
+        <span className="text-caption px-1.5 py-0.5 rounded-full bg-white/20 dark:bg-gray-700/50">
           {count}
         </span>
       )}
