@@ -1,11 +1,12 @@
 # Member Guide (draft)
 
-**Version:** 0.2 | **Date:** Nov 5, 2026
+**Version:** 0.3 | **Date:** Nov 5, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.3 | Nov 5, 2026 | Preferences: large stage font removed; text size is on the song page (UX v2, #390). |
 | 0.2 | Nov 5, 2026 | Library tabs: Albums hidden (UX v2, #407). |
 | 0.1 | Nov 4, 2026 | First draft from the UX research. |
 
@@ -75,7 +76,7 @@ Open your song → ⋮ → **Edit** **(verify label)**. You can only edit songs 
 
 - **Profile:** display name (avatar upload is coming soon). E-mail changes go via support.
 - **Security:** change password, log out from all devices.
-- **Preferences:** appearance, language, keep screen awake, auto-hide navigation on song pages, auto-scroll, show chords by default, large stage font, offline mode **(verify which are active; some are marked "Coming soon")**.
+- **Preferences:** appearance, language, keep screen awake, auto-hide navigation on song pages, auto-scroll, show chords by default, offline mode (text size is set on the song page with A− / A+) **(verify which are active; some are marked "Coming soon")**.
 - **Privacy & Data:** not active yet.
 
 ## Public profile

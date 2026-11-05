@@ -1,11 +1,12 @@
 # UX v2: Phone Validation Script
 
-**Version:** 1.5 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
+**Version:** 1.6 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.6 | Nov 5, 2026 | Added #390 (reader toolbar). |
 | 1.5 | Nov 5, 2026 | Added #391 (song meta lines). |
 | 1.4 | Nov 5, 2026 | Added #407 (Library tabs). |
 | 1.3 | Nov 5, 2026 | Added #392 (sticky title). |
@@ -106,3 +107,14 @@ Sections are added per story as it merges into `feat/ux-v2`.
 - [ ] 2. The first lyric line is visible without scrolling.
 - [ ] 3. Tap the meta line. It expands into links (authors, tags, Chords/Melody); tap a tag → the song list filtered by it. Tap the line again to collapse.
 - [ ] 4. A song without key/capo shows only the meta line.
+
+### #390 · G2.1 Reader toolbar `Chords · A− · A+`
+
+**Preconditions:** guest; phone (or 390 × 844 window).
+
+- [ ] 1. Open a song with chords (e.g. "Abuelita Corazón Viejo"). Under the grey meta lines: a `Chords` switch, `A−` and `A+`. Screenshot: `docs/ux-research/screenshots/ux-v2/390/after-light-song-detail.webp`.
+- [ ] 2. Tap `A+` twice. The lyrics grow two steps; the chords grow with them. `A+` greys out at the largest size, `A−` at the smallest.
+- [ ] 3. Reload the page (or open another song). The size you chose stays.
+- [ ] 4. Switch `Chords` off. The chord letters disappear, every lyric line stays on its own line, nothing jumps sideways. Screenshot: `…/390/after-dark-song-detail-large-no-chords.webp`.
+- [ ] 5. A song without chords shows only `A−` / `A+`.
+- [ ] 6. Settings → Preferences no longer lists "Large Stage Font".

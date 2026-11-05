@@ -1,11 +1,12 @@
 # UX v2: Agent Decisions (ADR-lite)
 
-**Version:** 1.2 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375)
+**Version:** 1.3 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375)
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.3 | Nov 5, 2026 | Added UXA-007 (reader text-size steps follow the #385 tokens). |
 | 1.2 | Nov 5, 2026 | Added UXA-006 (song technical badges move into the expanded meta line). |
 | 1.1 | Nov 5, 2026 | UXA-003 refined (grey bridge); added UXA-004 (Claude-only cross-review) and UXA-005 (`accent` = fire accent). |
 | 1.0 | Nov 5, 2026 | Created the decision log for the UX v2 build (UXA-001 to UXA-003). |
@@ -20,6 +21,7 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 | UXA-004 | Nov 5, 2026 | all | Cross-review by a different Claude model (owner: Claude models only) | no |
 | UXA-005 | Nov 5, 2026 | #385 | `accent` means the fire accent; shadcn hover uses `surface-2` | no |
 | UXA-006 | Nov 5, 2026 | #391 | Chords / Melody / My take badges move from the song header into the expanded meta line | yes |
+| UXA-007 | Nov 5, 2026 | #390 | Reader text-size steps follow the #385 `LYRIC_STEPS` tokens (15–28 px, six steps) | no |
 
 ---
 
@@ -76,3 +78,12 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 - **Choice:** (c). The chords are visible in the lyrics anyway; the links (filter by chords/melody/my takes) stay one tap away. Practice entry points come with #393.
 - **Consequences:** the song page no longer shows a "has my take" badge at a glance until the Practice bar (#393) lands.
 - **Confirm:** yes
+
+### UXA-007 · Reader text-size steps follow the design tokens
+
+- **Date / story:** Nov 5, 2026 · #390 (G2.1)
+- **Context:** the story text names five steps from 14 to 26 px; the tokens merged with #385 define `LYRIC_STEPS` = 15, 17, 19, 21, 24, 28 px (default 17) and `MIN_FONT_PX` = 12.
+- **Options:** (a) a second scale for the toolbar; (b) use the token scale.
+- **Choice:** (b). One source of truth; chords run at 70 % of the lyric size and never below 12 px. The old disabled "Large Stage Font" preference had no stored value, so it is removed without a migration. The disabled "Show chords by default" row stays until #389 hides unfinished features.
+- **Consequences:** six steps instead of five; the smallest lyric size is 15 px, not 14.
+- **Confirm:** no

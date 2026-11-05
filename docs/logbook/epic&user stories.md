@@ -1,6 +1,6 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 1.60
+**Version:** 1.61
 **Status:** Living Document
 **Date:** Nov 5, 2026
 
@@ -58,6 +58,7 @@
 | **1.57** | Nov 5, 2026 | Epic 6.1: Story 6.1.33 (#417, G9.1) implemented on `feat/ux-v2` — E2E fixtures removed by a Playwright global teardown; seed hygiene checks. |
 | **1.58** | Nov 5, 2026 | Epic 6.1: Story 6.1.8 (#392, G2.3) implemented on `feat/ux-v2` — sticky song title truncates at the end. |
 | **1.59** | Nov 5, 2026 | Epic 6.1: Story 6.1.23 (#407, G5.2) implemented on `feat/ux-v2` — Library tabs fit a phone, Albums hidden behind a feature flag (UXD-4). |
+| **1.61** | Nov 5, 2026 | Epic 6.1: Story 6.1.6 (#390, G2.1) implemented on `feat/ux-v2` — `Chords · A− · A+` reader toolbar, size persisted per device. |
 | **1.60** | Nov 5, 2026 | Epic 6.1: Story 6.1.7 (#391, G2.2) implemented on `feat/ux-v2` — song meta and Key · Capo · Tuning on one grey line each. |
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
@@ -1629,7 +1630,7 @@ Owner decision of Nov 4, 2026: sober greyscale interface with one accent, smalle
 | 6.1.3 | #387 | `G1.3` | A | As a Member, I want small labels to be readable so that section headings and meta text are not grey-on-grey | #385 |
 | 6.1.4 | #388 | `G1.4` | B | As a Guest, I want the category grid in a calm monochrome style so that the home page does not shout | #385 |
 | 6.1.5 | #389 | `G1.5` | C | As a Member, I want unfinished features hidden so that I do not meet 'coming soon' placeholders | #407 |
-| 6.1.6 | #390 | `G2.1` | A | As a reader in the circle, I want a `Chords · A− · A+` toolbar on the song page so that I set the text size myself | #385 |
+| 6.1.6 | #390 | `G2.1` | A | **[Implemented on feat/ux-v2]** As a reader in the circle, I want a `Chords · A− · A+` toolbar on the song page so that I set the text size myself | #385 |
 | 6.1.7 | #391 | `G2.2` | A | **[Implemented on feat/ux-v2]** As a reader, I want Key, Capo, Tuning and the tags on one grey line each so that the first lyric line is visible without scrolling | #385 |
 | 6.1.8 | #392 | `G2.3` | A | **[Implemented on feat/ux-v2]** As a reader, I want the sticky song title to truncate at the end so that the first letters are never cut off | — |
 | 6.1.9 | #393 | `G2.4` | B | As a Member, I want a sticky action bar on the song page (Practice · Playlist · ♥) so that the main actions are in thumb reach | #385, #390, #398 |
