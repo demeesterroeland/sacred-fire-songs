@@ -1,6 +1,6 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 1.56
+**Version:** 1.57
 **Status:** Living Document
 **Date:** Nov 5, 2026
 
@@ -55,6 +55,7 @@
 | **1.54** | Nov 5, 2026 | Story 5.1.9 (#298) implemented: `back-merge.yml` opens the PR `main` → `develop` after every push to `main`, labels conflicts; merged by the owner, never automatically. |
 | **1.55** | Nov 5, 2026 | Story 5.1.13 (#300) implemented: development guide 2.0 (Gitflow, environments, CI vs CD boundary), Gitflow PR template, `/start-story` and `/sync-artifacts` target `develop`, README contributing; documentation contract in `ci-gate`. Story 5.1.10 (#299) code complete; its end-to-end check moves into the 5.1.14 dress rehearsal (owner). |
 | **1.56** | Nov 5, 2026 | Epic 6.1: Story 6.1.1 (#385, G1.1) implemented on the integration branch `feat/ux-v2` — design tokens, component primitives and token tests (`docs/design/design-tokens.md`). |
+| **1.57** | Nov 5, 2026 | Epic 6.1: Story 6.1.33 (#417, G9.1) implemented on `feat/ux-v2` — E2E fixtures removed by a Playwright global teardown; seed hygiene checks. |
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
 
@@ -1652,7 +1653,7 @@ Owner decision of Nov 4, 2026: sober greyscale interface with one accent, smalle
 | 6.1.30 | #414 | `G8.1` | B | As a Member, I want Add to playlist as a bottom sheet with 'New playlist' first and check marks so that I see where the song already is | #385 |
 | 6.1.31 | #415 | `G8.2` | C | As a Member, I want a live chord preview and a visible upload button on Add Song so that I see what I am writing | #385 |
 | 6.1.32 | #416 | `G8.3` | C | As a Member, I want the New Playlist page to explain private vs public in one line so that I know what I am creating | #385 |
-| 6.1.33 | #417 | `G9.1` | A | As a Contributor, I want the demo seed free of E2E and smoke-test playlists so that screenshots and demos show real-looking data | — |
+| 6.1.33 | #417 | `G9.1` | A | **[Implemented on feat/ux-v2]** As a Contributor, I want the demo seed free of E2E and smoke-test playlists so that screenshots and demos show real-looking data | — |
 | 6.1.34 | #418 | `G9.2` | C | As a reader using assistive technology, I want the song page and Practice panel to pass an accessibility audit so that the app works with a screen reader | #393, #401 |
 
 Priority **A** = quick wins (one sprint together), **B** = flow work, **C** = backlog. Acceptance criteria (Gherkin) live in each GitHub issue and move to `docs/testing/*.feature` when a story starts.
