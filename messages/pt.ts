@@ -263,6 +263,7 @@ const pt: Partial<Record<TranslationKey, string>> = {
   'rehearsal.controlTrack': 'Faixa guia',
   'rehearsal.headphonesHint': '🎧 Use fones de ouvido para evitar vazamento de som',
   'practice.takes.mine': 'Minhas takes',
+  'practice.takes.shared': 'Compartilhadas comigo',
   'rehearsal.demo.take1': 'Estudo de voz - Take guia 1',
   'rehearsal.demo.take2': 'Cifras de violão - Take 2',
   'rehearsal.loadingRecordings': 'Carregando takes...',

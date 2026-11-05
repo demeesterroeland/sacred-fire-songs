@@ -25,6 +25,7 @@ import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLocale } from "@/context/LocaleContext";
 import { recordingPermalink } from "@/lib/songs/recordingLink";
+import { partitionTakes } from "@/lib/songs/partitionTakes";
 import GuestGate from "@/components/common/GuestGate";
 import { usePathname, useSearchParams } from "next/navigation";
 import RecordingShareModal from "./RecordingShareModal";
@@ -128,6 +129,14 @@ function SortableRecordingItem({
     ? `${Math.floor(rec.duration_seconds / 60)}:${(rec.duration_seconds % 60).toString().padStart(2, "0")}`
     : null;
   const busy = deletingId === rec.id || downloadingId === rec.id;
+  // Takes of other users say in words who shared them (Story 6.1.15 / G4.2); no colour-only cue.
+  const sharedByLabel = isOwner
+    ? null
+    : rec.shared_by_name
+      ? t('recording.sharing.sharedBy', { name: rec.shared_by_name })
+      : isShared
+        ? t('recording.sharing.badge')
+        : null;
   const menuItemClass = "gap-2 text-gray-700 dark:text-gray-200 focus:bg-gray-100 dark:focus:bg-gray-800 cursor-pointer";
 
   return (
@@ -199,10 +208,6 @@ function SortableRecordingItem({
               <Globe className="w-3.5 h-3.5 text-emerald-500 shrink-0" aria-label={t('recording.publish.badge')}>
                 <title>{t('recording.publish.badge')}</title>
               </Globe>
-            ) : isShared ? (
-              <Users className="w-3.5 h-3.5 text-indigo-500 shrink-0" aria-label={t('recording.sharing.badge')}>
-                <title>{t('recording.sharing.badge')}</title>
-              </Users>
             ) : shareCount > 0 ? (
               <span className="inline-flex items-center gap-0.5 text-[11px] text-indigo-500 shrink-0" title={`${t('recording.sharing.sharedWithTitle')} (${shareCount})`}>
                 <Users className="w-3.5 h-3.5" aria-hidden />
@@ -217,9 +222,13 @@ function SortableRecordingItem({
           </div>
         )}
 
-        {/* One meta line: date · duration · singer */}
+        {/* One meta line: [shared by ·] date · duration · singer */}
         <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5 mt-0.5 min-w-0">
-          <span className="shrink-0">{formatDate(rec.created_at)}</span>
+          {sharedByLabel && (
+            <span className="min-w-0 truncate font-medium text-fg-muted" data-testid="shared-by">{sharedByLabel}</span>
+          )}
+          {/* A shared row spends the width on the name; the date is the owner's concern. */}
+          {!sharedByLabel && <span className="shrink-0">{formatDate(rec.created_at)}</span>}
           {duration && <><span aria-hidden className="opacity-50">·</span><span className="shrink-0 tabular-nums">{duration}</span></>}
           {singerLabel && (
             <>
@@ -473,6 +482,8 @@ export default function RehearsalDrawer({
   // `AudioProvider` is global, so `activePlaybackId` may name a take of another song:
   // `isMiniPlayerVisible` ignores it, and the cleanup below stops it when leaving.
   const [mediaSessionStarted, dispatchMediaSession] = React.useReducer(mediaSessionReducer, false);
+  // Story 6.1.15 / G4.2 (#399): my own takes and the takes shared with me are listed apart.
+  const { mine: myTakes, shared: sharedTakes } = useMemo(() => partitionTakes(recordings), [recordings]);
   const songRecordingIds = useMemo(() => recordings.map((r) => r.id), [recordings]);
   const miniPlayerVisible = isMiniPlayerVisible({ mediaSessionStarted, activePlaybackId, songRecordingIds });
 
@@ -588,11 +599,13 @@ export default function RehearsalDrawer({
     const { active, over } = event;
     if (!over || active.id === over.id) return;
 
-    const oldIndex = recordings.findIndex((r) => r.id === active.id);
-    const newIndex = recordings.findIndex((r) => r.id === over.id);
-    const reordered = arrayMove(recordings, oldIndex, newIndex);
+    // Only my own takes can be reordered; takes shared with me keep the owner's order.
+    const oldIndex = myTakes.findIndex((r) => r.id === active.id);
+    const newIndex = myTakes.findIndex((r) => r.id === over.id);
+    if (oldIndex < 0 || newIndex < 0) return;
+    const reordered = arrayMove(myTakes, oldIndex, newIndex);
 
-    setRecordings(reordered);
+    setRecordings([...reordered, ...sharedTakes]);
 
     startOrderTransition(async () => {
       const res = await reorderUserRecordings(reordered.map((r) => r.id));
@@ -1296,7 +1309,7 @@ export default function RehearsalDrawer({
                           <div className="w-6 h-6 border-2 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin" />
                           <span className="text-xs text-gray-400">{t('rehearsal.loadingRecordings')}</span>
                         </div>
-                      ) : recordings.length === 0 ? (
+                      ) : myTakes.length === 0 ? (
                         <div className="text-center py-10 border border-dashed border-gray-200 dark:border-gray-800 rounded-2xl p-4">
                           <p className="text-2xl mb-1">🎤</p>
                           <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200">{t('rehearsal.recordings.empty')}</h4>
@@ -1307,11 +1320,11 @@ export default function RehearsalDrawer({
                       ) : (
                         <DndContext sensors={dndSensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
                           <SortableContext
-                            items={recordings.map((r) => r.id)}
+                            items={myTakes.map((r) => r.id)}
                             strategy={verticalListSortingStrategy}
                           >
                             <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-gray-50/60 dark:bg-gray-950 p-1 space-y-0.5">
-                              {recordings.map((rec) => (
+                              {myTakes.map((rec) => (
                                 <SortableRecordingItem
                                   key={rec.id}
                                   rec={rec}
@@ -1328,7 +1341,7 @@ export default function RehearsalDrawer({
                                   handleAttribution={handleAttribution}
                                   handleCopyLink={handleCopyLink}
                                   formatDate={formatDate}
-                                  isCustomSort={recordings.length > 1}
+                                  isCustomSort={myTakes.length > 1}
                                   isHighlighted={rec.id === highlightRecordingId}
                                 />
                               ))}
@@ -1337,6 +1350,36 @@ export default function RehearsalDrawer({
                         </DndContext>
                       )}
                     </section>
+
+                    {/* Takes shared with me: listen only, hidden when there are none (Story 6.1.15 / G4.2) */}
+                    {user && !isLoading && sharedTakes.length > 0 && (
+                      <section className="mt-6 space-y-3" data-testid="shared-takes">
+                        <h3 className="text-caption font-semibold text-fg-subtle uppercase tracking-wider text-left">{t('practice.takes.shared')}</h3>
+                        <DndContext sensors={dndSensors} collisionDetection={closestCenter}>
+                          <SortableContext items={sharedTakes.map((r) => r.id)} strategy={verticalListSortingStrategy} disabled>
+                            <div className="rounded-panel border border-line bg-surface p-1 space-y-0.5">
+                              {sharedTakes.map((rec) => (
+                                <SortableRecordingItem
+                                  key={rec.id}
+                                  rec={rec}
+                                  activePlaybackId={activePlaybackId}
+                                  isRecordingPlaying={isRecordingPlaying}
+                                  deletingId={deletingId}
+                                  downloadingId={downloadingId}
+                                  handleTogglePlay={(id, url) => { const rec = recordings.find(r => r.id === id); if (rec) contextHandleTogglePlay(rec, url); }}
+                                  handleDelete={() => undefined}
+                                  handleRename={handleRename}
+                                  handleDownload={handleDownload}
+                                  formatDate={formatDate}
+                                  isCustomSort={false}
+                                  isHighlighted={rec.id === highlightRecordingId}
+                                />
+                              ))}
+                            </div>
+                          </SortableContext>
+                        </DndContext>
+                      </section>
+                    )}
                   </div>
 
                   {/* Unified GuestGate over the blurred preview (Story 6.1.26 / G6.1) */}
@@ -1549,11 +1592,14 @@ export default function RehearsalDrawer({
                     )}
                   </>
                 )}
-                {recordings.length > 0 && (
-                  <>
-                    {hasMedia && <DropdownMenuSeparator className="bg-line my-2" />}
-                    <DropdownMenuLabel>{t('practice.takes.mine')}</DropdownMenuLabel>
-                    {recordings.map(rec => (
+                {([
+                  { key: 'mine', label: t('practice.takes.mine'), takes: myTakes },
+                  { key: 'shared', label: t('practice.takes.shared'), takes: sharedTakes },
+                ] as const).map((group, i) => group.takes.length > 0 && (
+                  <React.Fragment key={group.key}>
+                    {(hasMedia || (i > 0 && myTakes.length > 0)) && <DropdownMenuSeparator className="bg-line my-2" />}
+                    <DropdownMenuLabel>{group.label}</DropdownMenuLabel>
+                    {group.takes.map(rec => (
                       <DropdownMenuItem key={rec.id} className="min-h-tap" onClick={() => {
                         if (!rec.audioUrl) return;
                         contextHandleTogglePlay(rec, rec.audioUrl);
@@ -1564,8 +1610,8 @@ export default function RehearsalDrawer({
                         </div>
                       </DropdownMenuItem>
                     ))}
-                  </>
-                )}
+                  </React.Fragment>
+                ))}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>

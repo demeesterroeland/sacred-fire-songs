@@ -263,6 +263,7 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'rehearsal.controlTrack': 'Track bedienen',
   'rehearsal.headphonesHint': '🎧 Gebruik een koptelefoon om overspraak te voorkomen',
   'practice.takes.mine': 'Mijn takes',
+  'practice.takes.shared': 'Met mij gedeeld',
   'rehearsal.demo.take1': 'Zangoefening - Gidstake 1',
   'rehearsal.demo.take2': 'Gitaarakkoorden - Oefening 2',
   'rehearsal.loadingRecordings': 'Takes laden...',

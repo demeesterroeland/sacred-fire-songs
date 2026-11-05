@@ -1,6 +1,6 @@
 # Project Analysis & Design Document: Song Sharing Application (Sacred Fire Songs)
 
-**Version:** 1.73
+**Version:** 1.74
 **Status:** Living Document
 **Date:** Nov 5, 2026
 
@@ -59,6 +59,7 @@
 | **1.64** | Nov 5, 2026 | UX v2 (Story 6.1.23 / #407): Library tab row — Playlists · History · Artists from `libraryTabs()` (`lib/navigation.ts`); Albums hidden behind `FEATURES.albums` (`lib/features.ts`, UXD-4), `/library/albums` renders the not-found page while off. |
 | **1.66** | Nov 5, 2026 | UX v2 (Story 6.1.6 / #390): Song Detail reader toolbar — `ReaderToolbar` (`Chords · A− · A+`) under the meta lines; lyric size from `LYRIC_STEPS`, chords layer on/off, both stored per device (`lib/reader/readerPrefs.ts`, key `sacred-fire-songs-reader`). Removed the disabled `Large Stage Font` preference. |
 | **1.65** | Nov 5, 2026 | UX v2 (Story 6.1.7 / #391): Song Detail meta — `SongMetaLines` replaces the coloured pills, technical badges and the Key/Capo/Tuning grid with two grey lines (`lib/songs/songMeta.ts`). |
+| **1.74** | Nov 5, 2026 | UX v2 (Story 6.1.15 / #399, G4.2, UXD-3): the Practice Record tab lists **My takes** and **Shared with me** apart (`partitionTakes` in `lib/songs/partitionTakes.ts`; section hidden when empty). A shared row says **Shared by {name}** in its meta line (`recording.sharing.sharedBy`, name from `getUserRecordings` → `shared_by_name`) and offers listen only: no download, share or delete. New key `practice.takes.shared` in all 8 locales; the mini-player source menu follows the same split. §7.2b updated. No migration, no RLS change. |
 | **1.73** | Nov 5, 2026 | UX v2 (Story 6.1.2 / #386): song cards become compact rows — title, one grey meta line `Author · Category · Language` (`songRowMeta()`), key badge, 44 px heart / add-to-playlist; the same row style in Library (recently viewed, new since last visit, playlist detail) and Artists. |
 | **1.72** | Nov 5, 2026 | UX v2 (Story 6.1.12 / #396, G3.1, UXD-5): added §6.13 "Mini player" — the bar appears only after play, `--mini-player-h` reserves room for sheets, the Practice drawer and the song page. |
 | **1.71** | Nov 5, 2026 | UX v2 (Story 6.1.14 / #398, G4.1): one name, **Practice**, for the rehearsal feature — drawer title, song menu entry, tabs Listen / Record, list heading My takes, Takes chip (`SongMetaLines` link), Library card Your takes, guest card Practice recorder (all 8 locales; message keys `practice.*`). Review fixes: recorder, dialogs, share e-mail and mini-player now say "take" (values only, key names unchanged); mini-player source groups are headed Listen / My takes; `translationKeysExist` test guards literal `t('key')` usage. §7.2b updated. |
@@ -301,6 +302,7 @@ The application is a **Progressive Web App (PWA)** optimized for mobile use duri
 
 ### 7.2b Practice (Slide-Up Bottom Sheet Drawer)
 * **Status:** Implemented (`components/song/RehearsalDrawer.tsx`). Called **Practice** everywhere in the UI since Story 6.1.14 (#398): song menu entry **Practice**, tabs **Listen** (reference tracks) and **Record** (recorder, **My takes** list), **Takes** chip on songs, **Your takes** in the Library, **Practice recorder** guest card. The audio item is a *take* in every user-visible noun (Save Take, Delete take?, Share take, Publish Take, share e-mail); the mini-player source groups are headed **Listen** and **My takes**.
+* **Takes shared with me (Story 6.1.15 / #399, UXD-3):** the Record tab shows two lists. **My takes** holds the takes I own (sortable, full action menu); **Shared with me** holds every take of another user I can see (shared with me, or public), heading `practice.takes.shared`, hidden when empty. A shared row's meta line reads **Shared by {name}** · length (no date, so the name is not truncated on a phone) (full name, else e-mail; the name comes from the owner profile that the share policy lets the recipient read, so a public take of a stranger falls back to the date line) and has no ⋯ menu: listen only (DRM-lite). The split is the pure helper `partitionTakes` (`lib/songs/partitionTakes.ts`); the old 14 px people icon is gone. The mini-player source menu uses the same two groups.
 * **Features:** Live microphone capture (HTML5 MediaRecorder), local playback pre-save review, private cloud storage upload (Supabase Storage 'rehearsals' private bucket), and list of past saved takes with play/delete actions.
 
 ### 7.3 Screen 3: Login

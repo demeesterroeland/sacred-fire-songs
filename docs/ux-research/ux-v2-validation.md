@@ -1,11 +1,12 @@
 # UX v2: Phone Validation Script
 
-**Version:** 1.13 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
+**Version:** 1.14 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.14 | Nov 5, 2026 | Added #399 (takes shared with me listed apart, "Shared by").  |
 | 1.13 | Nov 5, 2026 | Added #386 (compact song rows). |
 | 1.12 | Nov 5, 2026 | Added #396 (mini player on play, none on the next song). |
 | 1.11 | Nov 5, 2026 | Added #398 (one name: Practice; recorder and dialogs say "take"). |
@@ -192,3 +193,15 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 - [ ] 3. As a member tap ♥ on a row: it fills with the accent colour; the song does not open. Tap the playlist icon: the playlist picker opens.
 - [ ] 4. Library → Playlists: Recently viewed and New since last visit use the same grey rows. Open a playlist: its songs are rows too, with the drag handle and remove button.
 - [ ] 5. Library → Artists: each artist is a row with the number of songs and their titles on one grey line.
+
+### #399 · G4.2 Takes shared with me are listed apart
+
+**Preconditions:** two member accounts, A and B. As A, on a song: record (or upload) a take and share it with B (⋯ → Share take). B also has at least one own take on the same song. Run steps 1–6 as B; step 7 as A.
+
+- [ ] 1. As B, open the song, tap ⋮ → **Practice** → **Record**. Under the recorder two lists show: **My takes** and **Shared with me**. Screenshot: `docs/ux-research/screenshots/ux-v2/399/after-light/mobile/member/01-record-tab.webp`.
+- [ ] 2. The take A shared is listed under **Shared with me** and not under **My takes**. B's own take is under **My takes** only.
+- [ ] 3. The shared row's grey line reads **Shared by <A's name>** followed by the length (no date on shared rows). Screenshot: `docs/ux-research/screenshots/ux-v2/399/after-dark/mobile/member/01-record-tab.webp`. No tooltip is needed to know it is shared.
+- [ ] 4. The shared row has a play button but no ⋯ menu: no Download, Share or Delete. Double-tapping its name does not start renaming. The own take keeps its ⋯ menu.
+- [ ] 5. Tap play on the shared take: it plays, and the player bar appears (#396). Open the bar's title menu: the takes are grouped under **My takes** and **Shared with me**.
+- [ ] 6. Switch the language (account menu) to Dutch, Spanish, Italian, Russian, French, Portuguese and Quechua: the heading and "Shared by" are translated. Repeat step 1 in dark mode.
+- [ ] 7. As A (or as any user with no shared takes), open the Record tab: there is no **Shared with me** heading at all.

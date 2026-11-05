@@ -85,5 +85,6 @@ Then('the mini-player source groups are headed by the Listen tab and the My take
   const drawer = read('components/song/RehearsalDrawer.tsx');
   assert.ok(!drawer.includes("t('rehearsal.reference.tracks')"), 'old Reference Tracks heading');
   assert.match(drawer, /DropdownMenuLabel[^>]*>\{t\('practice\.tab\.listen'\)\}/);
-  assert.match(drawer, /DropdownMenuLabel>\{t\('practice\.takes\.mine'\)\}/);
+  // Since #399 the take groups are data-driven: `label: t('practice.takes.mine')` heads the DropdownMenuLabel.
+  assert.match(drawer, /label: t\('practice\.takes\.mine'\)[\s\S]*<DropdownMenuLabel>\{group\.label\}<\/DropdownMenuLabel>/);
 });

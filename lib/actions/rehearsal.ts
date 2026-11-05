@@ -1,5 +1,6 @@
 import { createClient } from "@/lib/supabase/client";
 import { sendRecordingShareEmail } from "@/lib/actions/notifications";
+import { sharedByName } from "@/lib/songs/partitionTakes";
 
 export interface UserProfileSummary {
   id: string;
@@ -39,6 +40,8 @@ export interface UserRecording {
   can_share?: boolean;
   singer_profile?: UserProfileSummary | null;
   shared_with?: RecordingShareInfo[];
+  /** Who shared this take with the current user (set for takes of other users when readable). */
+  shared_by_name?: string | null;
 }
 
 // 1. Fetch user recordings for a specific song version (own, shared, and public)
@@ -129,6 +132,19 @@ export async function getUserRecordings(songVersionId: string): Promise<UserReco
     }
   }
 
+  // Owners of takes shared with me: the share policy lets a recipient read the owner's profile.
+  const otherOwnerIds = user
+    ? Array.from(new Set(rawRecordings.filter((r) => r.user_id !== user.id).map((r) => r.user_id)))
+    : [];
+  const ownerNames = new Map<string, string | null>();
+  if (otherOwnerIds.length > 0) {
+    const { data: owners } = await supabase
+      .from("profiles")
+      .select("id, email, full_name")
+      .in("id", otherOwnerIds);
+    for (const o of owners ?? []) ownerNames.set(o.id, sharedByName(o));
+  }
+
   // Create temporary signed URLs for each recording since the rehearsals bucket is private
   const recordingsWithUrls = await Promise.all(
     rawRecordings.map(async (rec) => {
@@ -143,6 +159,7 @@ export async function getUserRecordings(songVersionId: string): Promise<UserReco
         : null;
 
       const sharedWith = isOwner ? sharesMap.get(rec.id) || [] : undefined;
+      const sharedByNameFor = isOwner ? undefined : ownerNames.get(rec.user_id) ?? null;
 
       if (!rec.storage_path) {
         return {
@@ -153,6 +170,7 @@ export async function getUserRecordings(songVersionId: string): Promise<UserReco
           can_share: canShare,
           singer_profile: singerProfile,
           shared_with: sharedWith,
+          shared_by_name: sharedByNameFor,
         };
       }
 
@@ -171,6 +189,7 @@ export async function getUserRecordings(songVersionId: string): Promise<UserReco
             can_share: canShare,
             singer_profile: singerProfile,
             shared_with: sharedWith,
+          shared_by_name: sharedByNameFor,
           };
         }
 
@@ -183,6 +202,7 @@ export async function getUserRecordings(songVersionId: string): Promise<UserReco
           can_share: canShare,
           singer_profile: singerProfile,
           shared_with: sharedWith,
+          shared_by_name: sharedByNameFor,
         };
       } catch (e) {
         console.error(`[rehearsal] EXCEPTION signing URL for id=${rec.id}:`, e);
@@ -194,6 +214,7 @@ export async function getUserRecordings(songVersionId: string): Promise<UserReco
           can_share: canShare,
           singer_profile: singerProfile,
           shared_with: sharedWith,
+          shared_by_name: sharedByNameFor,
         };
       }
     })
