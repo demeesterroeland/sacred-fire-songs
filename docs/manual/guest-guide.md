@@ -1,11 +1,12 @@
 # Guest Guide (draft)
 
-**Version:** 0.17 | **Date:** Nov 6, 2026
+**Version:** 0.18 | **Date:** Nov 6, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.18 | Nov 6, 2026 | Song page: **Auto-scroll** (▶) and **⋯** reading tools in the same toolbar (UX v2, #394). |
 | 0.17 | Nov 6, 2026 | Sign-in and sign-up pages have a **Back** link instead of a ✕; it returns to the page you came from, else Home (UX v2, #409). |
 | 0.16 | Nov 5, 2026 | The player bar is calm (plain background, orange only on play) and says *Playing* or *Paused* with what plays; the Listen tab shows only the providers the song has (UX v2, #397). |
 | 0.15 | Nov 5, 2026 | Song page: a bar at the bottom with Practice, Playlist and Like; the ⋮ menu keeps Share (UX v2, #393). |
@@ -49,6 +50,7 @@ The ☰ menu repeats the main places (Home, Songs, Playlists, Favorites, Drafts,
 - The title is at the top. Under it, one grey line shows the author and the tags (category, tradition, language); tap it to see them all as links.
 - A second line shows **Key**, **Capo** and **Tuning**, e.g. `Key E · Capo 3 · Standard`.
 - Under those lines: **Chords** switches the chords on or off, **A−** / **A+** make the text smaller or larger. The app remembers your choice on this device.
+- **▶** scrolls the song for you, hands free; touch the screen to pause it, or press **⏸**. **⋯** (*More reading tools*) sets the scroll speed (five steps). While the scroll runs the toolbar stays under the title. A small sun next to **⋯** means the screen stays on while you sing.
 - Chords are printed above the word where they change.
 - A bar at the bottom of the song has **Practice**, **Playlist** and **Like**. It slides away when you scroll down and comes back when you scroll up. **Playlist** and **Like** need an account and ask you to sign in.
 - ⋮ (top right) opens the song menu: **Share Song**.

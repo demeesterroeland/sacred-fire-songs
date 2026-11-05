@@ -2,6 +2,7 @@
 import { Given, When, Then } from '@cucumber/cucumber';
 import assert from 'node:assert/strict';
 import { DEFAULT_LYRIC_STEP, LYRIC_STEPS, MIN_FONT_PX } from '../../../lib/design/tokens';
+import { DEFAULT_SCROLL_SPEED } from '../../../lib/reader/autoScroll';
 import {
   DEFAULT_READER_PREFS,
   READER_PREFS_KEY,
@@ -63,7 +64,7 @@ When('the preferences are read back from the same storage', function (this: obje
 });
 
 Then('the size is two steps above the default and chords are off', function (this: object) {
-  assert.deepEqual(get(this).prefs, { step: DEFAULT_LYRIC_STEP + 2, chords: false });
+  assert.deepEqual(get(this).prefs, { step: DEFAULT_LYRIC_STEP + 2, chords: false, speed: DEFAULT_SCROLL_SPEED });
 });
 
 Then('unreadable stored preferences give the defaults', function () {

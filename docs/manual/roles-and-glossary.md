@@ -1,11 +1,12 @@
 # Roles & Glossary (draft)
 
-**Version:** 0.3 | **Date:** Nov 5, 2026
+**Version:** 0.4 | **Date:** Nov 6, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.4 | Nov 6, 2026 | Transpose is in the song page's **⋯ reading tools** (musician, expert and admin; UX v2, #394). |
 | 0.1 | Nov 4, 2026 | First draft. Roles summarised from the Roles & Permissions table in `docs/logbook/epic&user stories.md`. |
 | 0.3 | Nov 5, 2026 | Glossary: Shared with me (list of takes shared with you, #399). |
 | 0.2 | Nov 5, 2026 | Glossary: Practice replaces Rehearsal Space; Take; Your takes. |
@@ -22,7 +23,7 @@
 | Add songs, edit own songs | — | ✅ | ✅ | ✅ |
 | Playlists, PDF export | — | ✅ | ✅ | ✅ |
 | Record, share, publish own takes | — | ✅ | ✅ | ✅ |
-| Transpose, sheet music | — | musician | musician | ✅ |
+| Transpose (song page → ⋯), sheet music | — | musician | musician | ✅ |
 | Edit details & links of any song, curate public playlists | — | — | ✅ | ✅ |
 | Admin portal (users overview) | — | — | — | ✅ |
 

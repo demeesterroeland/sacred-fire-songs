@@ -8,7 +8,7 @@ export interface ParsedChordPro {
 
 // Heuristic to check if a line is a "Chords" line
 // It should mostly contain chord characters and spaces.
-function isChordLine(line: string): boolean {
+export function isChordLine(line: string): boolean {
     const trimmed = line.trim();
     if (trimmed.length === 0) return false;
 

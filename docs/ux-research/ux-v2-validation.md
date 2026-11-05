@@ -1,11 +1,12 @@
 # UX v2: Phone Validation Script
 
-**Version:** 1.29 | **Date:** Nov 6, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
+**Version:** 1.30 | **Date:** Nov 6, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.30 | Nov 6, 2026 | Added #394 (auto-scroll and transpose in the reader toolbar). |
 | 1.29 | Nov 6, 2026 | Added #404 (recorder level meter, count-in, time left, review buttons); review: rolling no-sound window, bold last 10 s, meter below the clock. |
 | 1.28 | Nov 6, 2026 | Added #409 (auth pages without a fake close button). |
 | 1.27 | Nov 6, 2026 | Added #389 (unfinished features hidden). |
@@ -418,3 +419,19 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 - [ ] 9. Start with the count-in on and tap the bin during the count-in. **Expected:** the count-in stops, the recorder is back to *Ready to record* and the browser's microphone indicator goes out.
 - [ ] 10. Turn on *Reduce motion* in the phone's accessibility settings. **Expected:** the microphone icon does not pulse; the bars still change height.
 - [ ] 11. Switch the language to Dutch, Spanish, Italian, Russian, French, Portuguese and Quechua: the limit line, the count-in label, *Starting in n*, *n left*, the meter's name and the silence hint are translated and fit on the phone. Repeat steps 1–7 in dark mode (`…/404/after-dark/…`).
+
+### #394 · G2.5 Auto-scroll and transpose in the reader toolbar
+
+**Preconditions:** a 390 px phone, English, light and dark; three accounts: **musician** (`…+expert@…`), **member** and a guest (private window); a long song with chords (e.g. *Grandmother's Song of the Thousand Rivers…*) and a song in key **E** (e.g. *Danza del Cielo Curandero*); Settings → Preferences → keep screen awake on (default).
+
+- [ ] 1. Musician: open the long song. Under the grey lines one row shows **Chords**, **A−**, **A+**, a **▶** button and a **⋯** button, all easy to hit (44 px); nothing wraps or runs off the screen. Screenshot: `docs/ux-research/screenshots/ux-v2/394/after-light/mobile/musician/01-toolbar.webp`.
+- [ ] 2. Open the song in key **E**, tap **⋯**: a sheet *Reading tools* shows **Transpose** (− 0 +) and **Auto-scroll**. Tap **+** twice. **Expected:** the value reads **+2**, the line under it reads *Key F# (original E)*. Screenshot: `…/394/after-light/mobile/musician/03-tools-transposed.webp`.
+- [ ] 3. Tap **Close**. **Expected:** every chord on the page is two semitones higher (first chord E → F#), the grey line reads **Key F#**, and the **⋯** button shows **+2** as text. Screenshot: `…/394/after-light/mobile/musician/04-song-transposed.webp`.
+- [ ] 4. **⋯** → **Original key**. **Expected:** chords and key are as written again. Leave the song and come back: it opens in its own key (a shift is not remembered).
+- [ ] 5. Long song: tap **▶**. **Expected:** the page scrolls down slowly, the button becomes **⏸**, the toolbar sticks right under the title bar and the lyrics keep scrolling under it; the bar at the bottom slides away. Screenshot: `…/394/after-light/mobile/musician/05-auto-scroll-running.webp`.
+- [ ] 6. While it scrolls tap **A+**: the text grows and scrolling goes on. Open **⋯**, tap **Faster**: it speeds up (the sheet says *Speed 4 of 5*); tap **Pause** in the sheet: it stops.
+- [ ] 7. Tap **▶** again, then tap on the lyrics. **Expected:** it pauses and the toolbar scrolls away with the page again. Start it once more and let it run to the end of the lyrics: it stops by itself, with the last line still on screen.
+- [ ] 8. On a phone that allows it, the screen stays on and a small sun appears after **⋯** (*Screen stays on*; also a line in the **⋯** sheet). With keep screen awake off in Settings, no sun shows.
+- [ ] 9. Member and guest: the row has the same buttons; the **⋯** sheet has **Auto-scroll** only, no **Transpose**.
+- [ ] 10. Switch to Dutch, Spanish, Italian, Russian, French, Portuguese and Quechua: the buttons' names, the sheet and the speed line are translated and fit; repeat step 2 in dark mode (`…/394/after-dark/mobile/musician/02-tools-sheet.webp`).
+- [ ] 11. Desktop (wide window): the same row; auto-scroll scrolls the main area and the toolbar sticks under the song title while it runs.
