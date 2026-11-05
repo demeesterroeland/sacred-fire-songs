@@ -1,11 +1,12 @@
 # Member Guide (draft)
 
-**Version:** 0.9 | **Date:** Nov 5, 2026
+**Version:** 0.10 | **Date:** Nov 5, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.10 | Nov 5, 2026 | Add to playlist is a sheet from the bottom with **New playlist** first and a check next to playlists that already hold the song (UX v2, #414). |
 | 0.9 | Nov 5, 2026 | Like and Add to playlist moved from the song's ⋮ menu to the bar at the bottom of the song (UX v2, #393). |
 | 0.8 | Nov 5, 2026 | Create moved from the bottom bar to the **+** in Library (UX v2, #408). |
 | 0.7 | Nov 5, 2026 | Section titles and small labels are sentence case and larger (13 px titles, nothing below 12 px) with darker grey (UX v2, #387); "Your Library" reads "Your library". |
@@ -54,6 +55,8 @@ Below that: **My private playlists** and **Recently viewed** ("View all" opens t
 
 **Add songs:**
 - From a song: **Playlist** in the bar at the bottom → pick a playlist.
+
+- From a song: ⋮ → **Add to Playlist**. A sheet slides up: **New playlist** is the first row, then your playlists. A check shows where the song already is. Tap a playlist to add the song; tap a playlist with a check to take it out again. **Done** closes the sheet.
 - From the playlist: **+ Add Songs** and search.
 
 **In a playlist** you can: reorder songs by dragging, add a description, switch **public / private** (lock icon), **print / export PDF** (printer icon) for the ceremony, share the link of a public playlist, and duplicate it via ⋯ **(verify menu labels)**.

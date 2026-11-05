@@ -1,11 +1,12 @@
 # UX v2: Agent Decisions (ADR-lite)
 
-**Version:** 1.19 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375)
+**Version:** 1.20 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375)
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.20 | Nov 5, 2026 | Added UXA-027 (Add to playlist sheet: tap removes, New playlist inline, sheet stays open; #414). |
 | 1.19 | Nov 5, 2026 | Added UXA-023 to UXA-026 (song action bar: ⋮ sheet content, hide-on-scroll rule, bottom nav height fix, bar style and copy; #393). |
 | 1.18 | Nov 5, 2026 | Added UXA-022 (search suggestions: what chips do, when the panel shows, when a search is remembered; #413). |
 | 1.17 | Nov 5, 2026 | Added UXA-021 (take action sheet: group order, Copy link kept, listen-only takes get no sheet, swipe on the shared sheet, #401). |
@@ -55,6 +56,7 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 | UXA-024 | Nov 5, 2026 | #393 | Action bar hides on scroll down only when the auto-hide preference is on; 8 px jitter threshold, always visible near the top | no |
 | UXA-025 | Nov 5, 2026 | #393 | `--bottom-nav-height` reports 3.5rem whenever the nav is on screen (it was 0 with auto-hide off, so bars overlapped the nav) | no |
 | UXA-026 | Nov 5, 2026 | #393 | Action bar style and copy: Practice in accent text with take count, Playlist and Like in grey, new short labels "Playlist" / "Like" / "Liked"; members reuse the playlist popover until #414 | yes |
+| UXA-027 | Nov 5, 2026 | #414 | Add to playlist sheet: tap on a check removes the song, "New playlist" opens a name field in the first row, the sheet stays open until Done | yes |
 
 ---
 
@@ -292,3 +294,12 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 - **Choice:** (c). `Toolbar` / `ToolbarButton` primitives, three equal thirds, icon and 13 px label side by side. Practice is accent text with the number of takes in a grey chip (so an accent fill does not stack on the accent mini player); Playlist is grey; the heart is a grey outline that becomes a filled heart with the label **Liked** (shape and word change, not only colour). New keys `songBar.toolbar` ("Song actions"), `songBar.playlist`, `songBar.like`, `songBar.liked` in all 8 locales; the accessible names stay "Add to Playlist" and "Add to / Remove from Liked Songs". Members get the existing playlist popover in the middle slot (it flips above the bar); #414 turns it into a bottom sheet. A guest's Playlist and heart open the sign-in sheet; Practice opens the drawer for guests too (Record shows the recorder gate).
 - **Consequences:** two new short labels in every language to proofread; Quechua "Munay" / "Munasqa" and the Dutch "Favoriet" / "In favorieten" should be checked by native speakers.
 - **Confirm:** yes (copy and look)
+
+### UXA-027 · Add to playlist sheet: removing, creating, staying open
+
+- **Date / story:** Nov 5, 2026 · #414 (G8.1)
+- **Context:** the story asks for a bottom sheet with "New playlist" first and check marks, and the scope says "playlists with the song show a check and tap removes". It does not say how "New playlist" asks for a name, whether the sheet closes after a tap, or what Story 3.1.4.6 ("one creation interface") means for a sheet.
+- **Options:** creation: (a) navigate to the Add playlist page; (b) a name field inside the first row; (c) a second sheet. After a tap: (a) close the sheet; (b) stay open so several playlists can be ticked.
+- **Choice:** removing = the existing server toggle (`addSongToPlaylist` deletes the row when the song is already in the playlist), no new action and no RLS change. Creating = (b): tapping **New playlist** turns the first row into a name field with **Create**; it calls the same `createPlaylist` action as the Add playlist page (one creation path, Story 3.1.4.6) and adds the song straight away, so the new playlist appears ticked. The sheet stays open after a tap (b); a **Done** button, the scrim, Escape or a swipe down closes it. The sheet creates a private playlist with just a name; the privacy line of #416 is not added here. Toasts reuse `playlists.picker.added` / `removed` (the hard-coded English strings are gone) and keep the "Open playlist" action. On the song page the ⋮ menu closes together with the sheet.
+- **Consequences:** a playlist "holds" the song when it holds any version of it; unticking removes every version of the song from that playlist, ticking adds the oldest version (review: before, the server toggled only the oldest version while the check looked at all of them). a mistaken tap removes the song without a confirmation (undo = tap again; the toast says "Removed from …"). The sheet needs one more tap than the old popover to leave. Admins and gatekeepers still see public playlists in the list, as before.
+- **Confirm:** yes (tap removes without confirmation)

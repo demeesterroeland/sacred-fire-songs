@@ -708,6 +708,10 @@ const es: Partial<Record<TranslationKey, string>> = {
   'playlists.detail.noSongs': 'Aún no hay canciones.',
   'playlists.picker.addToPlaylist': 'Añadir a una lista',
   'playlists.picker.newPlaylistPlaceholder': 'Nueva lista…',
+  'playlists.picker.newPlaylist': 'Nueva lista',
+  'playlists.picker.newPlaylistName': 'Nombre de la lista',
+  'playlists.picker.create': 'Crear',
+  'playlists.picker.done': 'Listo',
   // ─── Remaining UI strings (Phase 3 completion) ───────────────────────────
   'common.errorOccurred': 'Ocurrió un error',
   'common.back': 'Atrás',

@@ -711,6 +711,10 @@ const ru: Partial<Record<TranslationKey, string>> = {
   'playlists.detail.noSongs': 'Песен пока нет.',
   'playlists.picker.addToPlaylist': 'Добавить в плейлист',
   'playlists.picker.newPlaylistPlaceholder': 'Новый плейлист…',
+  'playlists.picker.newPlaylist': 'Новый плейлист',
+  'playlists.picker.newPlaylistName': 'Название плейлиста',
+  'playlists.picker.create': 'Создать',
+  'playlists.picker.done': 'Готово',
   // ─── Remaining UI strings (Phase 3 completion) ───────────────────────────
   'common.errorOccurred': 'Произошла ошибка',
   'common.back': 'Назад',

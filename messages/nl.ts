@@ -708,6 +708,10 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'playlists.detail.noSongs': 'Nog geen liederen.',
   'playlists.picker.addToPlaylist': 'Toevoegen aan afspeellijst',
   'playlists.picker.newPlaylistPlaceholder': 'Nieuwe afspeellijst…',
+  'playlists.picker.newPlaylist': 'Nieuwe afspeellijst',
+  'playlists.picker.newPlaylistName': 'Naam van de afspeellijst',
+  'playlists.picker.create': 'Maak aan',
+  'playlists.picker.done': 'Klaar',
   // ─── Remaining UI strings (Phase 3 completion) ───────────────────────────
   'common.errorOccurred': 'Er is een fout opgetreden',
   'common.back': 'Terug',
