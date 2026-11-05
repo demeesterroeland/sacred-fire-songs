@@ -460,6 +460,7 @@ const en = {
   'explore.pageTitle': 'Explore',
   'explore.categories.heading': 'Explore by category',
   'explore.categories.description': 'Discover songs by theme and tradition',
+  'explore.categories.more': '+{count} more',
   'explore.category.description': 'Explore songs related to {category}.',
 
   // ─── Search / Filter Modal ────────────────────────────────────────────────

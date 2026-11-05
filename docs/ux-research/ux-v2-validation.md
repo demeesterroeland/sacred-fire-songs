@@ -1,11 +1,12 @@
 # UX v2: Phone Validation Script
 
-**Version:** 1.16 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
+**Version:** 1.17 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.17 | Nov 5, 2026 | Added #388 (calm category grid). |
 | 1.16 | Nov 5, 2026 | Added #400 (take status in words). |
 | 1.15 | Nov 5, 2026 | Added #387 (readable small labels). |
 | 1.14 | Nov 5, 2026 | Added #399 (takes shared with me listed apart, "Shared by").  |
@@ -235,3 +236,13 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 - [ ] 5. Open the take of another member that is shared with you: the row says **Shared by <name>**, with no share count.
 - [ ] 6. Section titles (**Practice**, **My takes**, **Shared with me**) are normal sentence case, not capitals. Screenshot dark: `…/400/after-dark/mobile/member/01-take-status.webp`.
 - [ ] 7. Switch the language to Dutch, Spanish, Italian, Russian, French, Portuguese and Quechua: the labels are translated. Repeat step 1 in dark mode.
+
+### #388 · G1.4 Calm category grid
+
+**Preconditions:** signed out (guest) on a 390 px phone, English; run once in light and once in dark. Seed data as in the setup section.
+
+- [ ] 1. Open `/`. **Expected:** under "Explore by category" the tiles are plain grey cards with a grey icon; no blue, green, purple, amber or red tiles and no coloured chips. Screenshot: `docs/ux-research/screenshots/ux-v2/388/after-light/mobile/guest/01-home.webp`. Before: `docs/ux-research/screenshots/ux-v2/388/before-light/mobile/guest/01-home.webp`.
+- [ ] 2. **Expected:** the tags inside a tile (e.g. *Air 7*, *Earth 8*) are plain text with the number in a lighter grey; no emoji or flags.
+- [ ] 3. Press and hold a category title or a tag. **Expected:** only then it turns orange (the one accent); releasing opens the songs list for that category or tag.
+- [ ] 4. Tap **+3 more** in a tile. **Expected:** the hidden tags appear in the same tile. Every link is easy to hit with a thumb (at least 44 px tall).
+- [ ] 5. Repeat steps 1–4 in dark mode. Screenshot: `…/388/after-dark/mobile/guest/01-home.webp`.

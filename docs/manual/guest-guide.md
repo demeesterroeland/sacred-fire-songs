@@ -1,11 +1,12 @@
 # Guest Guide (draft)
 
-**Version:** 0.10 | **Date:** Nov 5, 2026
+**Version:** 0.11 | **Date:** Nov 5, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.11 | Nov 5, 2026 | Home categories: grey tiles, tags as plain text with a grey song count (UX v2, #388). |
 | 0.10 | Nov 5, 2026 | Song lists: one row per song with a grey meta line (UX v2, #386). |
 | 0.9 | Nov 5, 2026 | The player bar appears only after you press play (UX v2, #396). |
 | 0.8 | Nov 5, 2026 | Renamed to Practice (menu, Listen / Record tabs). |
@@ -31,7 +32,7 @@ The ☰ menu repeats the main places (Home, Songs, Playlists, Favorites, Drafts,
 
 ## Finding a song
 
-1. **Browse by category** on Home: groups such as *The Elements* (Air, Earth, Fire, Water), *Nature*, *Lineage & Tradition*, *Medicine & Healing*. The number on each chip is how many songs it holds. "+3 more" opens the rest.
+1. **Browse by category** on Home: groups such as *The Elements* (Air, Earth, Fire, Water), *Nature*, *Lineage & Tradition*, *Medicine & Healing*. Each tag is a plain link; the grey number after it is how many songs it holds. "+3 more" shows the rest.
 2. **Search:** tap the search field and type a title, a line of the lyrics, an author or a category. Accents do not matter ("aguita" finds "Agüita").
 3. **Filters:** the slider button in the search field opens *Search options*: sort order, content type (songs with chords / with melody) and category & tag filters. Tap **Show results**.
 4. **Songs** in the bottom bar lists all songs A–Z. Each row shows the title, a grey line *author · category · language* and the key on the right; tap the row to open the song.

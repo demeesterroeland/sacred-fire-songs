@@ -2,91 +2,54 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { fetchCategoryTree } from '@/lib/taxonomyUtils';
+import { fetchCategoryTree, type TaxonomyNode } from '@/lib/taxonomyUtils';
 import { renderCategoryIcon } from '@/lib/iconUtils';
+import { useLocale } from '@/context/LocaleContext';
 import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
 
-import { TagPill } from '@/components/ui/TagPill';
-
 const MOBILE_TAG_LIMIT = 4;
 
-function TagList({ tags }: { tags: { id: string; slug: string; emoji: string | null; name: string; song_count?: number }[] }) {
+/** Pressed / focus feedback is the only place the accent appears (Story 6.1.4 / G1.4, #388). */
+const PRESSED = 'active:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent';
+
+/** Tags as plain text links with a grey count: no coloured chips, no emoji. */
+function TagList({ tags }: { tags: TaxonomyNode[] }) {
+  const { t } = useLocale();
   const [expanded, setExpanded] = useState(false);
   const overflow = tags.length - MOBILE_TAG_LIMIT;
 
   return (
-    <div className="flex flex-wrap gap-1.5 md:gap-2 relative z-10 mt-auto">
+    <ul className="relative z-10 flex flex-wrap gap-x-3">
       {tags.map((tag, i) => (
-        <TagPill
-          key={tag.id}
-          label={tag.name}
-          categorySlug={tag.slug}
-          emoji={tag.emoji || undefined}
-          count={tag.song_count}
-          variant="badge"
-          href={`/songs?tag=${tag.slug}`}
-          className={!expanded && i >= MOBILE_TAG_LIMIT ? '!hidden md:!inline-flex' : ''}
-        />
+        <li key={tag.id} className={!expanded && i >= MOBILE_TAG_LIMIT ? 'hidden md:list-item' : ''}>
+          <Link
+            href={`/songs?tag=${tag.slug}`}
+            className={`inline-flex min-h-tap items-center gap-1 text-meta text-fg-muted hover:text-fg ${PRESSED}`}
+          >
+            {tag.name}
+            {tag.song_count !== undefined && (
+              <span data-testid="tag-count" className="tabular-nums text-fg-subtle">
+                {tag.song_count}
+              </span>
+            )}
+          </Link>
+        </li>
       ))}
       {overflow > 0 && !expanded && (
-        <button
-          onClick={() => setExpanded(true)}
-          className="md:hidden px-2 py-1 rounded-full bg-gray-300/50 dark:bg-gray-700/50 text-fg-muted text-caption font-medium border border-gray-400 dark:border-gray-600 hover:bg-gray-400 dark:hover:bg-gray-600 hover:text-gray-900 dark:hover:text-white transition-all relative z-10"
-        >
-          +{overflow} more
-        </button>
+        <li className="md:hidden">
+          <button
+            type="button"
+            onClick={() => setExpanded(true)}
+            className={`inline-flex min-h-tap items-center text-meta font-medium text-fg-muted hover:text-fg ${PRESSED}`}
+          >
+            {t('explore.categories.more', { count: overflow })}
+          </button>
+        </li>
       )}
-    </div>
+    </ul>
   );
 }
-
-const getColorClasses = (slug: string) => {
-  switch (slug) {
-    case 'the-elements':
-      return {
-        bg: 'hover:border-blue-500/40 shadow-blue-900/10',
-        icon: 'bg-blue-500/10 text-blue-500',
-        text: 'group-hover:text-blue-400',
-      };
-    case 'nature':
-      return {
-        bg: 'hover:border-green-500/40 shadow-green-900/10',
-        icon: 'bg-green-500/10 text-green-500',
-        text: 'group-hover:text-green-400',
-      };
-    case 'languages':
-      return {
-        bg: 'hover:border-purple-500/40 shadow-purple-900/10',
-        icon: 'bg-purple-500/10 text-purple-500',
-        text: 'group-hover:text-purple-400',
-      };
-    case 'lineage-tradition':
-      return {
-        bg: 'hover:border-amber-500/40 shadow-amber-900/10',
-        icon: 'bg-amber-500/10 text-amber-500',
-        text: 'group-hover:text-amber-400',
-      };
-    case 'medicine-healing':
-      return {
-        bg: 'hover:border-red-500/40 shadow-red-900/10',
-        icon: 'bg-red-500/10 text-red-500',
-        text: 'group-hover:text-red-400',
-      };
-    case 'spiritual-concepts':
-      return {
-        bg: 'hover:border-indigo-500/40 shadow-indigo-900/10',
-        icon: 'bg-indigo-500/10 text-indigo-500',
-        text: 'group-hover:text-indigo-400',
-      };
-    default:
-      return {
-        bg: 'hover:border-gray-300 dark:hover:border-gray-700',
-        icon: 'bg-gray-200 dark:bg-gray-800 text-gray-500',
-        text: 'group-hover:text-gray-900 dark:group-hover:text-white',
-      };
-  }
-};
 
 const CATEGORY_ORDER = [
   'The Elements',
@@ -98,6 +61,7 @@ const CATEGORY_ORDER = [
 ];
 
 export default function CategoryGrid() {
+  const { t } = useLocale();
   const { data: tree = [], isLoading } = useQuery({
     queryKey: ['taxonomy'],
     queryFn: fetchCategoryTree,
@@ -116,46 +80,39 @@ export default function CategoryGrid() {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="w-8 h-8 animate-spin text-gray-600" />
+        <Loader2 aria-hidden="true" className="size-8 motion-safe:animate-spin text-fg-subtle" />
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
-      {sortedTree.map((category) => {
-        const colors = getColorClasses(category.slug);
-        return (
-          <div key={category.id} className="category-card group flex flex-col h-full">
-            <div
-              className={`glass-panel relative p-4 md:p-6 rounded-2xl md:rounded-3xl border border-gray-200/50 dark:border-gray-800/50 transition-all h-full shadow-2xl ${colors.bg}`}
-            >
-              <div className="flex items-start justify-center mb-4 md:mb-6">
-                <div
-                  className={`category-icon w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl flex items-center justify-center transition-transform duration-300 ${colors.icon}`}
-                >
-                  {renderCategoryIcon(category.icon_name, category.emoji, 'w-6 h-6 md:w-8 md:h-8', 'text-2xl md:text-3xl')}
-                </div>
-              </div>
-
-              <Link
-                href={`/songs?category=${category.slug}`}
-                className="before:absolute before:inset-0 z-0 block"
-              >
-                <h3 className={`text-base md:text-xl font-bold text-gray-900 dark:text-white mb-2 md:mb-3 transition-colors ${colors.text}`}>
-                  {category.name}
-                </h3>
-              </Link>
-
-              <p className="hidden md:block text-gray-400 text-sm mb-6 leading-relaxed relative z-0">
-                Explore songs related to {category.name.toLowerCase()}.
-              </p>
-
-              <TagList tags={category.children} />
-            </div>
+    <div data-testid="category-grid" className="grid grid-cols-2 gap-3 md:gap-6 lg:grid-cols-3">
+      {sortedTree.map((category) => (
+        <div
+          key={category.id}
+          className="group relative flex h-full flex-col rounded-panel border border-line bg-surface p-4 transition-colors hover:bg-surface-2 active:border-line-strong md:p-6"
+        >
+          <div
+            aria-hidden="true"
+            className="mb-3 flex size-10 items-center justify-center rounded-control bg-surface-2 text-fg-muted md:size-12"
+          >
+            {renderCategoryIcon(category.icon_name, category.emoji, 'size-5 md:size-6', 'text-xl grayscale')}
           </div>
-        );
-      })}
+
+          <Link
+            href={`/songs?category=${category.slug}`}
+            className={`z-0 flex min-h-tap items-center before:absolute before:inset-0 before:rounded-panel ${PRESSED}`}
+          >
+            <h3 className="text-row font-semibold text-fg group-active:text-accent">{category.name}</h3>
+          </Link>
+
+          <p className="relative z-0 mb-4 hidden text-meta text-fg-muted md:block">
+            {t('explore.category.description', { category: category.name.toLowerCase() })}
+          </p>
+
+          <TagList tags={category.children} />
+        </div>
+      ))}
     </div>
   );
 }

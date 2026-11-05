@@ -462,6 +462,7 @@ const es: Partial<Record<TranslationKey, string>> = {
   'explore.pageTitle': 'Explorar',
   'explore.categories.heading': 'Explorar por categoría',
   'explore.categories.description': 'Descubre canciones por temática y tradición',
+  'explore.categories.more': '+{count} más',
   'explore.category.description': 'Explora canciones relacionadas con {category}.',
 
   // ─── Search / Filter Modal ────────────────────────────────────────────────
