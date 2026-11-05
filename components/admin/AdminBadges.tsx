@@ -58,7 +58,7 @@ export function ActivityStatusBadge({ status }: { status: ActivityStatus }) {
   const { t } = useLocale();
   const style = STATUS_STYLES[status];
   return (
-    <span className={`inline-flex items-center gap-1.5 text-[11px] font-semibold ${style.text}`}>
+    <span className={`inline-flex items-center gap-1.5 text-caption font-semibold ${style.text}`}>
       <span className={`w-1.5 h-1.5 rounded-full ${style.dot}`} aria-hidden="true" />
       {t(`admin.status.${status}`)}
     </span>

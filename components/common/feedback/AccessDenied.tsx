@@ -47,7 +47,7 @@ export default function AccessDenied() {
                 <div className="absolute top-0 left-1/2 -translate-x-1/2 -translate-y-24 opacity-50">
                     <div className="flex items-center gap-2">
                         <Flame className="w-4 h-4 text-red-500" />
-                        <span className="text-xs uppercase tracking-[0.2em] text-gray-500 dark:text-gray-400 font-bold">{t('app.name')}</span>
+                        <span className="text-meta text-fg-muted font-semibold">{t('app.name')}</span>
                     </div>
                 </div>
 

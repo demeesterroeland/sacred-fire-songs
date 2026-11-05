@@ -177,7 +177,7 @@ export default function RecordingShareModal({
                         {user.full_name || user.email}
                       </span>
                       {user.is_musician && (
-                        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                        <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-caption font-semibold bg-surface-2 text-fg-muted">
                           <Music className="w-2.5 h-2.5" />
                           {t("recording.attribution.badgeVerified")}
                         </span>
@@ -211,7 +211,7 @@ export default function RecordingShareModal({
 
         {/* Existing Shares List */}
         <div className="space-y-2 mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
-          <h4 className="text-xs font-bold text-gray-400 uppercase tracking-wider text-left">
+          <h4 className="text-meta font-semibold text-fg-muted text-left">
             {t("recording.sharing.sharedWithTitle")} ({currentShares.length})
           </h4>
 
@@ -231,7 +231,7 @@ export default function RecordingShareModal({
                       {share.full_name || share.email}
                     </span>
                     {share.full_name && (
-                      <span className="text-[10px] text-gray-400 truncate block">
+                      <span className="text-caption text-fg-muted truncate block">
                         {share.email}
                       </span>
                     )}

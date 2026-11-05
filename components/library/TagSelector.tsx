@@ -153,7 +153,7 @@ export default function TagSelector({
           <button
             type="button"
             onClick={onClearAll}
-            className="text-[10px] font-bold text-gray-500 hover:text-red-500 uppercase tracking-wider transition-colors shrink-0 ml-auto"
+            className="text-caption font-semibold text-fg-muted hover:text-danger transition-colors shrink-0 ml-auto"
           >
             {resolvedClearLabel}
           </button>
@@ -164,7 +164,7 @@ export default function TagSelector({
       {isOpen && (
         <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-xl shadow-2xl z-50 p-4 max-h-[300px] overflow-y-auto space-y-4 animate-in fade-in slide-in-from-top-2 duration-150">
           <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-2">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-gray-500">
+            <span className="text-caption font-semibold text-fg-muted">
               {t('search.tagSelector.browseAll')}
             </span>
             <button
@@ -178,7 +178,7 @@ export default function TagSelector({
 
           {filteredGrouped.map(({ parentName, categories: groupCats }) => (
             <div key={parentName} className="space-y-1.5">
-              <h5 className="text-[11px] font-bold text-gray-500 uppercase tracking-wider">
+              <h5 className="text-caption font-semibold text-fg-muted">
                 {parentName}
               </h5>
               <div className="flex flex-wrap gap-1.5">

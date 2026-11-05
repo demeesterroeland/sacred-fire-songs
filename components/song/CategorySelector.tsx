@@ -107,7 +107,7 @@ export default function CategorySelector({ selectedIds, onChange }: CategorySele
       {/* 2. Selected Tags Bar */}
       {selectedCategories.length > 0 && (
         <div className="p-3 bg-red-50/50 dark:bg-red-950/30 border border-red-200/60 dark:border-red-900/40 rounded-lg space-y-1.5">
-          <span className="text-[10px] font-bold tracking-wider uppercase text-red-600 dark:text-red-400">
+          <span className="text-caption font-semibold text-danger">
             Selected Tags ({selectedCategories.length})
           </span>
           <div className="flex flex-wrap gap-1.5">
@@ -130,7 +130,7 @@ export default function CategorySelector({ selectedIds, onChange }: CategorySele
       <div className="space-y-4 pt-1 max-h-[320px] overflow-y-auto pr-1">
         {filteredGrouped.map(({ parentName, categories: groupCats }) => (
           <div key={parentName} className="space-y-2">
-            <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+            <h4 className="text-meta font-semibold text-fg-muted">
               {parentName}
             </h4>
             <div className="flex flex-wrap gap-2">

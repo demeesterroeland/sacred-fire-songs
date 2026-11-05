@@ -20,14 +20,14 @@ interface SongCounts {
 
 async function SongCountSubtitle({ counts, emptyLabel }: { counts: SongCounts; emptyLabel: string }) {
     const t = await getServerT();
-    if (counts.total === 0) return <span className="text-xs text-gray-500">{emptyLabel}</span>;
+    if (counts.total === 0) return <span className="text-caption text-fg-muted">{emptyLabel}</span>;
     return (
-        <span className="text-xs text-gray-500 whitespace-nowrap">
+        <span className="text-caption text-fg-muted whitespace-nowrap">
             {counts.total === 1 ? t('playlists.songCountSingle') : t('playlists.songCount', { count: counts.total })}
             {' · '}
-            <span className="text-emerald-500/70">{t('playlists.countPublic', { count: counts.public })}</span>
+            <span>{t('playlists.countPublic', { count: counts.public })}</span>
             {' · '}
-            <span className="text-amber-500/70">{t('playlists.countDraft', { count: counts.draft })}</span>
+            <span>{t('playlists.countDraft', { count: counts.draft })}</span>
         </span>
     );
 }
@@ -111,7 +111,7 @@ async function PublicPlaylistsSection({
 
     return (
         <div>
-            <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-3">{t('playlists.publicPlaylists')}</p>
+            <p className="text-meta font-semibold text-fg-muted mb-3">{t('playlists.publicPlaylists')}</p>
             <div className="grid grid-cols-1 gap-3">
                 {playlists.map(setlist => (
                     <PublicPlaylistCard
@@ -288,7 +288,7 @@ export default async function PlaylistsPage() {
 
             {/* Smart Playlists */}
             <div>
-                <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest mb-3">{t('playlists.smartPlaylists')}</p>
+                <p className="text-meta font-semibold text-fg-muted mb-3">{t('playlists.smartPlaylists')}</p>
                 <div className="grid grid-cols-1 gap-3">
                     <SmartPlaylistCard
                         icon={Heart} title={t('librarySummary.favorites.title')} description={t('librarySummary.favorites.description')} accent="rose"
@@ -326,7 +326,7 @@ export default async function PlaylistsPage() {
             {/* My Private Playlists — real data */}
             <div>
                 <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-                    <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">{t('playlists.myPrivatePlaylists')}</p>
+                    <p className="text-meta font-semibold text-fg-muted">{t('playlists.myPrivatePlaylists')}</p>
                     <CreatePlaylistInput />
                 </div>
                 {privateSetlists.length > 0 ? (
@@ -347,7 +347,7 @@ export default async function PlaylistsPage() {
                         })}
                     </div>
                 ) : (
-                    <p className="text-sm text-gray-600 italic py-2">{t('playlists.emptyPrivateHint')}</p>
+                    <p className="text-sm text-fg-muted italic py-2">{t('playlists.emptyPrivateHint')}</p>
                 )}
             </div>
 

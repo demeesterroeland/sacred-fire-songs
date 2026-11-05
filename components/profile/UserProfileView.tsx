@@ -50,7 +50,7 @@ export default function UserProfileView({ profile }: { profile: MusicianProfileD
 
       {/* Attributed Recordings Section */}
       <div className="space-y-3 text-left">
-        <h2 className="text-sm font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
+        <h2 className="text-sm font-semibold text-fg-muted flex items-center gap-2">
           <Mic className="w-4 h-4 text-indigo-500" />
           {t("user.profile.attributedRecordings")} ({profile.attributed_recordings.length})
         </h2>
@@ -77,7 +77,7 @@ export default function UserProfileView({ profile }: { profile: MusicianProfileD
                       {rec.song_title}
                     </span>
                   )}
-                  <div className="text-[10px] text-gray-400 flex items-center gap-1 mt-1">
+                  <div className="text-caption text-fg-muted flex items-center gap-1 mt-1">
                     <Calendar className="w-3 h-3" />
                     {new Date(rec.created_at).toLocaleDateString([], {
                       month: "short",

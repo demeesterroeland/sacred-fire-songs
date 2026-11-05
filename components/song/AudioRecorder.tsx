@@ -333,7 +333,7 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
           <p className="text-xs font-semibold text-gray-800 dark:text-gray-200">
             {t('recorder.upload.heading')}
           </p>
-          <p className="text-[11px] text-gray-500 dark:text-gray-400 mt-1 max-w-[240px] leading-tight">
+          <p className="text-caption text-fg-muted mt-1 max-w-[240px] leading-tight">
             {t('recorder.upload.formats')}
           </p>
         </div>

@@ -86,7 +86,7 @@ export default function SecuritySettings({ user }: SecuritySettingsProps) {
         </h2>
 
         <div className="space-y-2">
-          <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">{t("settings.security.newPassword")}</label>
+          <label className="text-meta font-semibold text-fg-muted">{t("settings.security.newPassword")}</label>
           <div className="relative">
             <input
               type={showNewPassword ? "text" : "password"}
@@ -107,7 +107,7 @@ export default function SecuritySettings({ user }: SecuritySettingsProps) {
         </div>
 
         <div className="space-y-2">
-          <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">{t("settings.security.confirmPassword")}</label>
+          <label className="text-meta font-semibold text-fg-muted">{t("settings.security.confirmPassword")}</label>
           <div className="relative">
             <input
               type={showConfirmPassword ? "text" : "password"}

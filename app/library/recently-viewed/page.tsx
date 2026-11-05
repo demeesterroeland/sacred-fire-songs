@@ -20,7 +20,7 @@ export default async function RecentlyViewedPage() {
         <div>
             <div className="flex items-center gap-2 mb-4">
                 <Clock className="w-4 h-4 text-fg-subtle" aria-hidden />
-                <h2 className="text-meta font-semibold text-fg-muted uppercase tracking-widest">{t('recentlyViewed.section')}</h2>
+                <h2 className="text-meta font-semibold text-fg-muted">{t('recentlyViewed.section')}</h2>
                 <span className="text-caption text-fg-subtle ml-1">({songs.length})</span>
             </div>
 

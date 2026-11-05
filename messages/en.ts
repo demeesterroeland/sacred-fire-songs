@@ -431,10 +431,10 @@ const en = {
 
   'recentlyViewed.pageTitle': 'Recently Viewed',
   'recentlyViewed.empty': 'No songs viewed yet.',
-  'recentlyViewed.section': 'Recently Viewed',
+  'recentlyViewed.section': 'Recently viewed',
   'recentlyViewed.viewAll': 'View All',
 
-  'newSinceLastVisit.section': 'New Since Last Visit',
+  'newSinceLastVisit.section': 'New since last visit',
   'newSinceLastVisit.viewAll': 'View All',
 
   // ─── Library Summary (Home) ───────────────────────────────────────────────
@@ -453,7 +453,7 @@ const en = {
 
   // ─── Explore ──────────────────────────────────────────────────────────────
   'explore.pageTitle': 'Explore',
-  'explore.categories.heading': 'Explore by Category',
+  'explore.categories.heading': 'Explore by category',
   'explore.categories.description': 'Discover songs by theme and tradition',
   'explore.category.description': 'Explore songs related to {category}.',
 
@@ -653,16 +653,16 @@ const en = {
   'search.tagSelector.addMoreTags': 'Add more tags...',
   'search.tagSelector.browseAll': 'Browse All Tags by Category',
   'search.tagSelector.noMatchingTags': 'No tags matching "{query}".',
-  'library.heading': 'Your Library',
+  'library.heading': 'Your library',
   'library.subtitle': 'Your playlists, history and artists.',
   'library.tabs.history': 'History',
   'playlists.songCount': '{count} songs',
   'playlists.songCountSingle': '1 song',
   'playlists.countPublic': '{count} public',
   'playlists.countDraft': '{count} draft',
-  'playlists.publicPlaylists': 'Public Playlists',
-  'playlists.smartPlaylists': 'Smart Playlists',
-  'playlists.myPrivatePlaylists': 'My Private Playlists',
+  'playlists.publicPlaylists': 'Public playlists',
+  'playlists.smartPlaylists': 'Smart playlists',
+  'playlists.myPrivatePlaylists': 'My private playlists',
   'playlists.emptyPrivateHint': 'No private playlists yet — create your first one above.',
   'recentlyViewed.emptyWithAction': 'No recently viewed songs yet. Start exploring to see your history here.',
   'albums.likedAlbums': 'Liked Albums',
@@ -724,6 +724,8 @@ const en = {
   'settings.profile.avatar.comingSoon': 'Avatar upload will be available soon.',
   'auth.signUpSuccess.verify': 'Verify & Continue',
   'auth.signUpSuccess.returnToLogin': 'Return to Login',
+  'auth.signUpSuccess.orEnterCode': 'Or enter the code',
+  'library.matchAny': 'Match any',
 
   // ─── Playlist PDF export (#220) ──────────────────────────────────────────
   'playlists.export.menu': 'Export PDF',

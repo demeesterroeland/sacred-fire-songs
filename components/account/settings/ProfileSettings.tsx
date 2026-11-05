@@ -120,7 +120,7 @@ export default function ProfileSettings({ user, profile }: ProfileSettingsProps)
         <div className="text-center md:text-left">
           <div className="flex items-center gap-2 mb-1">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{t("settings.profile.avatar")}</h3>
-            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-black/5 dark:bg-white/5 border border-gray-200 dark:border-white/10 px-2 py-0.5 rounded-full">
+            <span className="text-caption font-semibold text-fg-muted bg-surface-2 border border-line px-2 py-0.5 rounded-full">
               {t("settings.comingSoon")}
             </span>
           </div>
@@ -129,7 +129,7 @@ export default function ProfileSettings({ user, profile }: ProfileSettingsProps)
       </div>
 
       <div className="space-y-2">
-        <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider ml-1">{t("settings.profile.displayName")}</label>
+        <label className="text-meta font-semibold text-fg-muted ml-1">{t("settings.profile.displayName")}</label>
         <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
           <input
             type="text"

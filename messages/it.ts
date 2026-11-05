@@ -726,6 +726,8 @@ const it: Partial<Record<TranslationKey, string>> = {
   'settings.profile.avatar.comingSoon': 'Il caricamento dell\'avatar sarà disponibile presto.',
   'auth.signUpSuccess.verify': 'Verifica e continua',
   'auth.signUpSuccess.returnToLogin': "Torna all'accesso",
+  'auth.signUpSuccess.orEnterCode': 'Oppure inserisci il codice',
+  'library.matchAny': 'Corrisponde a uno qualsiasi',
 
   // ─── Playlist PDF export (#220) ──────────────────────────────────────────
   'playlists.export.menu': 'Esporta PDF',

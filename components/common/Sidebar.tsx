@@ -41,7 +41,7 @@ export default function Sidebar() {
                             <div key={sIdx}>
                                 {/* Section header */}
                                 {sectionLabel && (
-                                    <p className="text-xs font-medium text-gray-400 dark:text-gray-500 ps-7 pt-5 pb-2">
+                                    <p className="text-meta font-semibold text-fg-muted ps-7 pt-5 pb-2">
                                         {sectionLabel}
                                     </p>
                                 )}
@@ -80,7 +80,7 @@ export default function Sidebar() {
                     {/* Admin Section */}
                     {user?.role === 'admin' && (
                         <div>
-                            <p className="text-xs font-bold uppercase tracking-wider text-purple-600 dark:text-purple-400 ps-7 pt-5 pb-2">
+                            <p className="text-meta font-semibold text-fg-muted ps-7 pt-5 pb-2">
                                 {t('nav.administration')}
                             </p>
                             <Link
@@ -107,7 +107,7 @@ export default function Sidebar() {
 
                     {/* Application SemVer Version Tag */}
                     <div>
-                        <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-400 transition-colors">
+                        <span className="inline-flex items-center gap-1.5 text-caption font-medium text-fg-muted hover:text-fg transition-colors">
                             <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/80 animate-pulse" />
                             {process.env.NEXT_PUBLIC_APP_VERSION ? (
                                 <span>

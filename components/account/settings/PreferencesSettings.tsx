@@ -36,7 +36,7 @@ function PreferenceRow({
           <div className="flex items-center gap-2">
             <p className="font-medium text-gray-900 dark:text-white">{label}</p>
             {comingSoon && (
-              <span className="text-[10px] font-bold uppercase tracking-wider text-gray-400 dark:text-slate-500 bg-black/5 dark:bg-white/5 border border-gray-200 dark:border-white/10 px-2 py-0.5 rounded-full">
+              <span className="text-caption font-semibold text-fg-muted bg-surface-2 border border-line px-2 py-0.5 rounded-full">
                 {t("settings.comingSoon")}
               </span>
             )}

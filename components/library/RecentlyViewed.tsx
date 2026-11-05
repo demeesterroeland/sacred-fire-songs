@@ -18,11 +18,11 @@ export default async function RecentlyViewed({ songs, total }: RecentlyViewedPro
     <div>
       <div className="flex items-center gap-2 mb-3">
         <Clock className="w-3.5 h-3.5 text-fg-subtle" aria-hidden />
-        <p className="text-caption font-semibold text-fg-muted uppercase tracking-widest">{t('recentlyViewed.section')}</p>
+        <p className="text-meta font-semibold text-fg-muted">{t('recentlyViewed.section')}</p>
         {total !== undefined && total > 5 && (
           <Link
             href="/library/recently-viewed"
-            className="ml-auto inline-flex min-h-tap items-center text-caption font-semibold text-fg hover:text-accent uppercase tracking-wider"
+            className="ml-auto inline-flex min-h-tap items-center text-meta font-semibold text-fg hover:text-accent"
           >
             {t('common.viewAll')}
           </Link>

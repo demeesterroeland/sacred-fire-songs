@@ -32,7 +32,7 @@ function TagList({ tags }: { tags: { id: string; slug: string; emoji: string | n
       {overflow > 0 && !expanded && (
         <button
           onClick={() => setExpanded(true)}
-          className="md:hidden px-2 py-1 rounded-full bg-gray-300/50 dark:bg-gray-700/50 text-gray-600 dark:text-gray-300 text-[10px] font-medium border border-gray-400 dark:border-gray-600 hover:bg-gray-400 dark:hover:bg-gray-600 hover:text-gray-900 dark:hover:text-white transition-all relative z-10"
+          className="md:hidden px-2 py-1 rounded-full bg-gray-300/50 dark:bg-gray-700/50 text-fg-muted text-caption font-medium border border-gray-400 dark:border-gray-600 hover:bg-gray-400 dark:hover:bg-gray-600 hover:text-gray-900 dark:hover:text-white transition-all relative z-10"
         >
           +{overflow} more
         </button>

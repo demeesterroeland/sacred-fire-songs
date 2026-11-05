@@ -25,7 +25,7 @@ export default function PrivacySettings({ user, profile }: PrivacySettingsProps)
       <div className="flex items-center gap-3 p-3 bg-black/5 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl">
         <Shield className="w-4 h-4 text-gray-500 dark:text-slate-400 shrink-0" />
         <p className="text-sm text-gray-500 dark:text-slate-400">{t("settings.privacy.notActive")}</p>
-        <span className="ml-auto text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-black/5 dark:bg-white/5 border border-gray-200 dark:border-white/10 px-2 py-0.5 rounded-full shrink-0">
+        <span className="ml-auto text-caption font-semibold text-fg-muted bg-surface-2 border border-line px-2 py-0.5 rounded-full shrink-0">
           {t("settings.comingSoon")}
         </span>
       </div>

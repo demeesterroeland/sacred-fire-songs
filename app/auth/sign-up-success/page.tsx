@@ -60,7 +60,7 @@ function SignUpSuccessContent() {
                 {/* Divider */}
                 <div className="w-full flex items-center gap-3 mb-6">
                     <div className="flex-1 h-px bg-gray-200 dark:bg-[#2d3545]" />
-                    <span className="text-[10px] font-bold text-[#5a657a] uppercase tracking-widest">or enter code</span>
+                    <span className="text-caption font-semibold text-fg-muted">{t('auth.signUpSuccess.orEnterCode')}</span>
                     <div className="flex-1 h-px bg-gray-200 dark:bg-[#2d3545]" />
                 </div>
 

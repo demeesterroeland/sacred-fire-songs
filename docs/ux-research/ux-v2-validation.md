@@ -1,11 +1,12 @@
 # UX v2: Phone Validation Script
 
-**Version:** 1.14 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
+**Version:** 1.15 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.15 | Nov 5, 2026 | Added #387 (readable small labels). |
 | 1.14 | Nov 5, 2026 | Added #399 (takes shared with me listed apart, "Shared by").  |
 | 1.13 | Nov 5, 2026 | Added #386 (compact song rows). |
 | 1.12 | Nov 5, 2026 | Added #396 (mini player on play, none on the next song). |
@@ -205,3 +206,20 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 - [ ] 5. Tap play on the shared take: it plays, and the player bar appears (#396). Open the bar's title menu: the takes are grouped under **My takes** and **Shared with me**.
 - [ ] 6. Switch the language (account menu) to Dutch, Spanish, Italian, Russian, French, Portuguese and Quechua: the heading and "Shared by" are translated. Repeat step 1 in dark mode.
 - [ ] 7. As A (or as any user with no shared takes), open the Record tab: there is no **Shared with me** heading at all.
+
+### #387 · G1.3 Small labels are readable
+**Preconditions:** member signed in on a 390 px phone, English; run once in light and once in dark (Account settings → Preferences → theme). Seed data as in the setup section.
+
+1. Open `/`. **Expected:** the section titles "Your library" and "Explore by category" are sentence case, 13 px, clearly readable grey — not tiny uppercase letters. Counter labels (Favorites, Drafts …) are readable. Screenshot: `docs/ux-research/screenshots/ux-v2/387/after-light/mobile/member/01-home.webp` (and `after-dark`). Before: `docs/ux-research/screenshots/ux-v2/387/before-light/mobile/member/01-home.webp`.
+   - [ ] Pass
+2. Look at the bottom bar on `/`. **Expected:** the labels (Home, Songs, Library, Create) are as large as the other small text and readable; the active one is orange. Same screenshot.
+   - [ ] Pass
+3. Open `/library` (opens Playlists). **Expected:** "Public playlists", "Smart playlists", "My private playlists" are sentence case; the card sub-lines (song counts, descriptions) are readable grey and the "New" button has a visible outline. Screenshot: `docs/ux-research/screenshots/ux-v2/387/after-light/mobile/member/09-library.webp`.
+   - [ ] Pass
+4. Open `/songs`, then any song. **Expected:** nothing looks greyed-out or tiny; section labels on the song page (Verse, Chorus, media titles) are readable. Screenshots: `…/387/after-light/mobile/member/02-songs-search.webp`, `03-song-detail.webp`.
+   - [ ] Pass
+5. Repeat steps 1–4 in dark mode. **Expected:** the same, text readable on the dark background.
+   - [ ] Pass
+6. Switch the language (☰ menu → language) to Nederlands and Español and open `/`. **Expected:** the section titles read naturally and are not in capitals.
+   - [ ] Pass
+
