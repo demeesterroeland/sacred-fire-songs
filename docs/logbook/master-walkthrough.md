@@ -3195,3 +3195,16 @@ Re-scoped Story 5.1.8 to the public-repo boundary decided by the owner: CI (buil
 - `.github/pull_request_template.md`: Gitflow target branch, Conventional Commit title, test-pyramid checklist (L1–L5), isolation reminder.
 - `/start-story`: branches via `start-issue.sh` from `origin/develop`, Conventional PR titles (the old `[Story X.X.X]` title failed `pr-policy`), no direct commits to `main`, no self-closing of issues. `/sync-artifacts` and README contributing aligned.
 - Spec: `@story-5.1.13` Scenario Outline over five files (changelog rows excluded) in `ci-gate`.
+
+## November 4–5, 2026 - Story 4.6.6: Notifications for shared rehearsal recordings (#373)
+
+**Task Overview**
+Sharing a private recording now tells the recipient: an in-app notification (header bell) and an email, both opening the recording itself. Recipients can opt out of email; a failed dispatch never blocks the share.
+
+**Technical Details**
+- **Database:** `notifications` is written only by the `security definer` trigger `fn_notify_recording_shared` (no INSERT policy; `REVOKE ALL` then `GRANT SELECT, DELETE` and a column grant on `read_at`, because Supabase grants ALL by default). Revoking a share removes its notification. `claim_recording_share_email` sets `recording_shares.email_sent_at` and returns the recipient only for the owner, once, when `profiles.email_notifications` is true.
+- **Email:** `lib/notifications/email.ts` (pure content and SMTP config), `mailer.ts` (nodemailer), server action `sendRecordingShareEmail` using `after()`. Production requires `SITE_URL`, since the request Host is caller-controlled; names are HTML-escaped; language is the default locale (profiles store none yet).
+- **UI:** `NotificationBell` (react-query, optimistic read state), `EmailNotificationsRow` in Preferences, `?tab=` on `/account/settings`.
+- **Recording links:** `/recordings/[id]` reads the recording under RLS and redirects to `/songs/:id?recording=:id`; the song page selects the recording's version, opens the Recordings tab and highlights the row. Access is decided by RLS only: owner, recipients, or public. Guests are sent to login with `next` pointing back at the link; users without access get a 404 that does not reveal whether the recording exists (recording-specific copy, follow-up fix).
+- **Tests:** unit 422, BDD `@shareNotifications` (3 + 5 seed scenarios plus an outline for the link parser), tsc clean, lint 199 warnings (cap lowered to 201). Verified end to end in a headless browser against the local stack with an SMTP sink: bell, mark read, navigation, email content and escaping, copy link, guest and no-access paths.
+- **Also:** `heartbeat-of-the-earth.mp3` joins the seed audio (real duration via `ffprobe`); the #371 plan file was removed.

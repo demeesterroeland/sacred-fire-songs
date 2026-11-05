@@ -1414,3 +1414,13 @@
 - [x] #300: `development-workflow.md` 2.0, Gitflow PR template, `/start-story` + `/sync-artifacts` + README aligned; `@story-5.1.13` documentation contract in `ci-gate`
 - [ ] Owner: confirm changes to the global ship triggers in the private `~/.claude/CLAUDE.md` (merge = into `develop`; release = `develop2main.sh`)
 - [ ] Next: 5.1.14 dress rehearsal (#301, incl. hotfix); 5.1.2/5.1.11 once the Tailscale `tag:ci` + E2E database secrets are in the repo
+
+## Session November 4–5, 2026 (Story 4.6.6: share notifications, #373)
+- [x] Migration `20261104190000_recording_share_notifications.sql`: `notifications` inbox (trigger-created only, recipients may only set `read_at`), `recording_shares.email_sent_at`, `profiles.email_notifications`, `claim_recording_share_email` RPC (idempotent, owner-only); `docs/design/db-schema.sql` v3.0
+- [x] Header bell (`NotificationBell`) with unread badge, "Mark all as read", 60 s polling; Settings → Preferences "Email notifications" switch
+- [x] Transactional email via `nodemailer` (`SMTP_*`, `SITE_URL`; skipped when no SMTP host, never blocks the share); footer links to `/account/settings?tab=preferences` (`?tab=` opens the matching settings tab)
+- [x] Recording permalink `/recordings/[id]` → `/songs/:id?recording=:id` (version, Recordings tab, highlighted row); "Copy link" in the ⋯ menu with an owner-only hint; guest sign-in keeps `?recording=`; no drag-handle gap for shared rows
+- [x] Spec first: `docs/testing/share-notifications.feature` (3 `@unit`, 5 `@seed` + outline), Vitest `shareNotifications`, `recordingLink`; 8 locales; lint cap 202 → 201
+- [x] Seed audio: `heartbeat-of-the-earth.mp3` (90 s) added; `seed:audio` stores each file's real duration; #371 implementation plan removed
+- [x] Follow-up `fix/373-recording-not-found`: unopenable recording links show "Recording Not Available" (same copy for no access, unknown and malformed ids; `NotFound` takes optional keys), design doc 1.58
+- [ ] Open: #372 (DRM-lite stream route), #420 (personal reordering of shared recordings); pre-existing `docs/design/db-schema.sql` fresh-install failure at `idx_compositions_is_public_true`; emails use the default locale until profiles store a language

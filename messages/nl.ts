@@ -629,6 +629,8 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'common.yesDelete': 'Ja, verwijderen',
   'feedback.notFound.title': 'Lied niet gevonden',
   'feedback.notFound.description': 'Het medicijn dat je zoekt lijkt het bos in te zijn gewandeld.',
+  'feedback.notFound.recording.title': 'Opname niet beschikbaar',
+  'feedback.notFound.recording.description': 'Deze opname bestaat niet of is niet met je gedeeld.',
   'feedback.accessDenied.title': 'Dit medicijn is niet aan jou om te bewerken',
   'feedback.accessDenied.description': 'Alleen de hoeder van het lied mag de vorm veranderen.',
   'feedback.accessDenied.returnToCircle': 'Keer terug naar de cirkel',

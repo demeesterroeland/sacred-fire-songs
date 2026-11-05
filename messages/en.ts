@@ -627,6 +627,8 @@ const en = {
   'common.yesDelete': 'Yes, Delete',
   'feedback.notFound.title': 'Song Not Found',
   'feedback.notFound.description': "The medicine you're looking for seems to have wandered into the forest.",
+  'feedback.notFound.recording.title': 'Recording Not Available',
+  'feedback.notFound.recording.description': "This recording doesn't exist or isn't shared with you.",
   'feedback.accessDenied.title': 'This Medicine is Not Yours to Edit',
   'feedback.accessDenied.description': 'Only the song keeper may change its form.',
   'feedback.accessDenied.returnToCircle': 'Return to the Circle',
