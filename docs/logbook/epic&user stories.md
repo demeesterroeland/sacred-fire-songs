@@ -1,6 +1,6 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 1.83
+**Version:** 1.84
 **Status:** Living Document
 **Date:** Nov 6, 2026
 
@@ -60,6 +60,7 @@
 | **1.59** | Nov 5, 2026 | Epic 6.1: Story 6.1.23 (#407, G5.2) implemented on `feat/ux-v2` — Library tabs fit a phone, Albums hidden behind a feature flag (UXD-4). |
 | **1.61** | Nov 5, 2026 | Epic 6.1: Story 6.1.6 (#390, G2.1) implemented on `feat/ux-v2` — `Chords · A− · A+` reader toolbar, size persisted per device. |
 | **1.60** | Nov 5, 2026 | Epic 6.1: Story 6.1.7 (#391, G2.2) implemented on `feat/ux-v2` — song meta and Key · Capo · Tuning on one grey line each. |
+| **1.84** | Nov 6, 2026 | Epic 6.1: Story 6.1.20 (#404, G4.7) implemented on `feat/ux-v2` — recorder level meter, optional 3-2-1 count-in, `m:ss left` in the last minute, Save Take as the single full-width primary in review (review fixes: mic released on failed start, live regions, iOS audio context). |
 | **1.83** | Nov 6, 2026 | Epic 6.1: Story 6.1.25 (#409, G5.4) implemented on `feat/ux-v2`: auth pages without the fake ✕; Back returns to the `next=` target, else Home. |
 | **1.82** | Nov 6, 2026 | Epic 6.1: Story 6.1.5 (#389, G1.5) implemented on `feat/ux-v2` — unfinished features hidden behind `lib/features.ts` (Albums already by #407; avatar block, Privacy & Data tab, planned preference rows, melody notation section); "Coming soon" copy removed from all 8 locales. Decisions UXA-030, UXA-031. |
 | **1.80** | Nov 5, 2026 | Epic 6.1: Story 6.1.19 (#403, G4.6) implemented on `feat/ux-v2` — **Shared with me** page (`/library/shared`) listing takes shared with me with the sharer and a **New** marker, entered from the account menu and a Library row (unread count in words); opening a song's Practice drawer marks its notifications read and the bell badge drops (UXD-3, UXA-029). |
@@ -1666,7 +1667,7 @@ Owner decision of Nov 4, 2026: sober greyscale interface with one accent, smalle
 | 6.1.17 | #401 | `G4.4` | B | **[Implemented on feat/ux-v2]** As a Member, I want take actions in a grouped bottom action sheet so that Delete is never one tap from Share | #385, #398 |
 | 6.1.18 | #402 | `G4.5` | B | As a recording owner, I want the Share dialog to explain who can be found and what happens with a private song so that sharing has no surprises | #398 |
 | 6.1.19 | #403 | `G4.6` | B | **[Implemented on feat/ux-v2]** As a Member, I want to be told when someone shares a take with me so that I do not have to guess which song to open | #399 |
-| 6.1.20 | #404 | `G4.7` | C | As a Member, I want a level meter, count-in and remaining time while recording so that I know the microphone works and when the 3-minute limit comes | #385 |
+| 6.1.20 | #404 | `G4.7` | C | **[Implemented on feat/ux-v2]** As a Member, I want a level meter, count-in and remaining time while recording so that I know the microphone works and when the 3-minute limit comes | #385 |
 | 6.1.21 | #405 | `G4.8` | C | As a recording owner, I want the publish dialog to name the song and say who will hear it so that consent is informed | #402 |
 | 6.1.22 | #406 | `G5.1` | A | **[Implemented on feat/ux-v2]** As a Guest, I want an unknown URL to show a 404 page so that I am not sent to a login screen for content that does not exist | — |
 | 6.1.23 | #407 | `G5.2` | A | **[Implemented on feat/ux-v2]** As a Member, I want the Library tab row to fit my phone with no dead tab so that every tab I see works | — |

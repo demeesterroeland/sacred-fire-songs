@@ -421,6 +421,12 @@ const ru: Partial<Record<TranslationKey, string>> = {
   'recorder.error.fileSizeLimit': 'Размер файла превышает лимит: {limit}.',
   'recorder.error.saveFailed': 'Не удалось сохранить дубль на сервере. Попробуй ещё раз.',
   'recorder.error.unexpected': 'Во время загрузки произошла непредвиденная ошибка.',
+  'recorder.meter.label': 'Уровень входного сигнала',
+  'recorder.meter.silent': 'Звука пока нет. Проверь, что микрофон включён и не отключён.',
+  'recorder.limit': 'Максимальная длина дубля: 3 минуты',
+  'recorder.timeLeft': 'Осталось {time}',
+  'recorder.countIn.label': 'Отсчёт 3-2-1 перед записью',
+  'recorder.countIn.status': 'Начало через {n}',
 
   // ─── Library & Playlists ──────────────────────────────────────────────────
   'library.tabs.playlists': 'Плейлисты',

@@ -1,11 +1,12 @@
 # Practice: Listen, Record & Takes (draft)
 
-**Version:** 0.8 | **Date:** Nov 5, 2026
+**Version:** 0.9 | **Date:** Nov 6, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.9 | Nov 6, 2026 | Recorder: level meter, optional 3-2-1 count-in, time left in the last minute, Save Take as the one big button (#404); the no-sound hint follows the last 3 seconds. |
 | 0.8 | Nov 5, 2026 | Listen: one button per available provider (even when there is only one), the player and the Listen tab say in words what plays and whether it is paused; "Control Track" is now **Open player** (UX v2, #397). |
 | 0.7 | Nov 5, 2026 | The Share dialog explains who can be found and, on a private song, what happens before you confirm (#402). |
 | 0.6 | Nov 5, 2026 | Practice is a button in the bar at the bottom of the song page; it opens on Listen when the song has a reference track, otherwise on Record (UX v2, #393). |
@@ -34,11 +35,12 @@ Songs where you have takes show a **Takes** chip, and the header shows how many 
 
 1. Tab **Record**. The first time, your browser asks for **microphone** permission — allow it.
 2. **Record Audio** is selected. A reference track can keep playing (*Reference: YouTube video loaded*, with **Open player** to go back to the Listen tab) — **wear headphones** so it is not recorded along.
-3. Tap the big red **microphone** button. The timer runs. You can **pause / resume**, or **cancel and discard**.
-4. Tap **stop**. *Review your take*: listen in the preview player and change the name (default: *Take – date time*).
-5. **Save Take** stores it privately, or **Discard**.
+3. Under the timer the recorder says *Maximum take length: 3 minutes*. The switch **Count in 3-2-1 before recording** is on by default: switch it off if you want to start at once (the app remembers your choice on this phone).
+4. Tap the big **microphone** button. With the count-in on you read *Starting in 3 … 1* (tap the bin to cancel); then the timer runs. The **level meter** below the timer moves with your voice: if the bars stay flat for 3 seconds in a row, a hint says *No sound yet* — check that your microphone is on and not muted. It disappears when you make a sound. In the last 10 seconds the time left turns red and bold. You can **pause / resume**, or **cancel and discard**.
+5. Tap **stop**. *Review your take*: listen in the preview player and change the name (default: *Take – date time*).
+6. **Save Take** (the big button) stores it privately; **Discard** below it throws it away.
 
-Limits: a take stops automatically at **3:00**.
+Limits: a take stops automatically at **3:00**. In the last minute the screen says how long is left, for example *1:00 left* at 2:00.
 
 ### Uploading an existing file
 

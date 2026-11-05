@@ -418,6 +418,12 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'recorder.error.fileSizeLimit': 'Bestandsgrootte overschrijdt de limiet van {limit}.',
   'recorder.error.saveFailed': 'Take opslaan op de opslagserver mislukt. Probeer het opnieuw.',
   'recorder.error.unexpected': 'Er is een onverwachte fout opgetreden tijdens het uploaden.',
+  'recorder.meter.label': 'Ingangsniveau',
+  'recorder.meter.silent': 'Nog geen geluid. Controleer of je microfoon aan staat en niet gedempt is.',
+  'recorder.limit': 'Maximale lengte van een opname: 3 minuten',
+  'recorder.timeLeft': 'Nog {time}',
+  'recorder.countIn.label': 'Aftellen 3-2-1 voor de opname',
+  'recorder.countIn.status': 'Begint over {n}',
 
   // ─── Library & Playlists ──────────────────────────────────────────────────
   'library.tabs.playlists': 'Afspeellijsten',
