@@ -73,7 +73,7 @@ const fr: Partial<Record<TranslationKey, string>> = {
   // ─── Navigation ───────────────────────────────────────────────────────────
   'nav.home': "Accueil",
   'nav.songs': "Chants",
-  'nav.explore': "Explorer",
+  'nav.search': 'Rechercher',
   'nav.library': "Bibliothèque",
   'nav.playlists': "Playlists",
   'nav.favorites': "Favoris",
@@ -83,6 +83,7 @@ const fr: Partial<Record<TranslationKey, string>> = {
   'nav.newPlaylist': "Nouvelle playlist",
   'nav.admin': "Admin",
   'nav.mainNavigation': "Navigation principale",
+  'nav.bottomNavigation': 'Navigation du bas',
   'nav.showSearch': "Afficher les options de recherche",
 
   // ─── User Menu ────────────────────────────────────────────────────────────

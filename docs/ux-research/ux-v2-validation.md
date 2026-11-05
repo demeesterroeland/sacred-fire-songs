@@ -6,6 +6,7 @@
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.18 | Nov 5, 2026 | Added the #408 section (bottom bar Home · Search · Library); #387 step 2 labels updated. |
 | 1.17 | Nov 5, 2026 | Added #388 (calm category grid). |
 | 1.16 | Nov 5, 2026 | Added #400 (take status in words). |
 | 1.15 | Nov 5, 2026 | Added #387 (readable small labels). |
@@ -214,7 +215,7 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 
 1. Open `/`. **Expected:** the section titles "Your library" and "Explore by category" are sentence case, 13 px, clearly readable grey — not tiny uppercase letters. Counter labels (Favorites, Drafts …) are readable. Screenshot: `docs/ux-research/screenshots/ux-v2/387/after-light/mobile/member/01-home.webp` (and `after-dark`). Before: `docs/ux-research/screenshots/ux-v2/387/before-light/mobile/member/01-home.webp`.
    - [ ] Pass
-2. Look at the bottom bar on `/`. **Expected:** the labels (Home, Songs, Library, Create) are as large as the other small text and readable; the active one is orange. Same screenshot.
+2. Look at the bottom bar on `/`. **Expected:** the labels (Home, Search, Library) are as large as the other small text and readable; the active one is orange. Same screenshot.
    - [ ] Pass
 3. Open `/library` (opens Playlists). **Expected:** "Public playlists", "Smart playlists", "My private playlists" are sentence case; the card sub-lines (song counts, descriptions) are readable grey and the "New" button has a visible outline. Screenshot: `docs/ux-research/screenshots/ux-v2/387/after-light/mobile/member/09-library.webp`.
    - [ ] Pass
@@ -246,3 +247,16 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 - [ ] 3. Press and hold a category title or a tag. **Expected:** only then it turns orange (the one accent); releasing opens the songs list for that category or tag.
 - [ ] 4. Tap **+3 more** in a tile. **Expected:** the hidden tags appear in the same tile. Every link is easy to hit with a thumb (at least 44 px tall).
 - [ ] 5. Repeat steps 1–4 in dark mode. Screenshot: `…/388/after-dark/mobile/guest/01-home.webp`.
+
+### #408 · G5.3 Bottom bar: Home · Search · Library
+
+**Preconditions:** 390 px phone, English, light and dark. Run steps 1–3 as a guest (signed out), steps 4–6 as a member.
+
+- [ ] 1. Open `/`, `/songs` and `/library/playlists`. The bottom bar has exactly three items: **Home**, **Search**, **Library**. No Songs, no Create. Screenshots: `docs/ux-research/screenshots/ux-v2/408/after-light/mobile/guest/01-home.webp`, `…/after-dark/mobile/guest/01-home.webp`.
+- [ ] 2. The current page's item is orange and bold, the other two grey; never two orange items. Each item is easy to hit with a thumb and its label is as large as other small text.
+- [ ] 3. On `/`, tap **Search**. The song list opens, the cursor is in the search field (the keyboard opens) and **Search** is highlighted.
+- [ ] 4. Sign in. Open **Library**. A round **+** sits at the right of the heading "Library". Tap it: a sheet slides up with **Add Song** and **New Playlist**. Screenshot: `docs/ux-research/screenshots/ux-v2/408/after-light/mobile/member/02-library-create.webp`.
+- [ ] 5. Tap **New Playlist**: the new-playlist form opens. Go back, tap **+**, then **Add Song**: the add-song form opens. Tap outside the sheet: it closes.
+- [ ] 6. **Home** and the song list have no **+**. As a guest, Library shows the sign-in preview and no **+**.
+- [ ] 7. Open `/explore`: a "Page not found" page, not Home.
+- [ ] 8. Switch the language to Dutch, Spanish, Italian, Russian, French, Portuguese and Quechua: the middle item is translated (Zoeken, Buscar, Cerca, Поиск, Rechercher, Pesquisar, Maskay) and the three items still fit one row.

@@ -2,38 +2,27 @@
 
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
-import { Home, Library, ListMusic, PlusCircle } from 'lucide-react';
-import { useActivePath } from '@/hooks/useActivePath';
 import { usePathname } from 'next/navigation';
-import type { LucideIcon } from 'lucide-react';
-import CreateSheet from './CreateSheet';
+import { BOTTOM_NAV_ITEMS, isBottomNavActive } from '@/lib/navigation';
+import { requestSearchFocus } from '@/lib/search/focusSearch';
 import { useUserPreferences } from '@/context/UserPreferencesContext';
 import { useLocale } from '@/context/LocaleContext';
 
-type TabItem = {
-    label: string;
-    href: string;
-    icon: LucideIcon;
-    exact?: boolean;
-    exclude?: string[];
-    isAction?: boolean;
-};
-
+/**
+ * Mobile bottom bar (Story 6.1.24 / G5.3, #408, owner decision UXD-1):
+ * Home · Search · Library. One accent marks the current item; Create is a "+"
+ * in Library, Practice lives on the song page.
+ */
 export default function MobileBottomNav() {
     const { t } = useLocale();
-    const { isActive } = useActivePath();
     const pathname = usePathname();
-    const [isSheetOpen, setIsSheetOpen] = useState(false);
     const { preferences } = useUserPreferences();
     const [isVisible, setIsVisible] = useState(true);
+    // Set after mount: the Search tap can only request focus once React has hydrated.
+    const [hydrated, setHydrated] = useState(false);
+    // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time mount flag
+    useEffect(() => setHydrated(true), []);
     const timeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-    const bottomTabs: TabItem[] = [
-        { label: t('nav.home'), href: '/', icon: Home, exact: true },
-        { label: t('nav.songs'), href: '/songs', icon: Library, exclude: ['/songs/add'] },
-        { label: t('nav.library'), href: '/library/playlists', icon: ListMusic },
-        { label: t('nav.create'), href: '/songs/add', icon: PlusCircle, isAction: true },
-    ];
 
     const isSongDetailPage = pathname?.startsWith('/songs/') &&
         pathname !== '/songs' &&
@@ -49,11 +38,11 @@ export default function MobileBottomNav() {
 
         const showNav = () => {
             setIsVisible(true);
-            
+
             if (timeoutRef.current) {
                 clearTimeout(timeoutRef.current);
             }
-            
+
             timeoutRef.current = setTimeout(() => {
                 setIsVisible(false);
             }, 3000);
@@ -88,73 +77,41 @@ export default function MobileBottomNav() {
     }, [isVisible, isSongDetailPage, preferences.autoHideBottomNav]);
 
     return (
-        <>
-            <CreateSheet
-                isOpen={isSheetOpen}
-                onClose={() => setIsSheetOpen(false)}
-            />
-            <nav className={`fixed bottom-0 inset-x-0 z-30 lg:hidden transition-transform duration-300 ${!isVisible ? 'translate-y-full' : 'translate-y-0'}`}>
-                {/* Top edge glow */}
-                <div className="absolute top-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-red-500/30 to-transparent" />
-
-                <div className="bg-bg/95 backdrop-blur-xl border-t border-line safe-area-bottom">
-                    <div className="flex items-center justify-around h-14 px-2">
-                        {bottomTabs.map((tab) => {
-                            const active = tab.isAction
-                                ? isSheetOpen
-                                : isActive(tab.href, { exact: tab.exact, exclude: tab.exclude as readonly string[] | undefined });
-                            const Icon = tab.icon;
-
-                            if (tab.isAction) {
-                                return (
-                                    <button
-                                        key={tab.label}
-                                        onClick={() => setIsSheetOpen(!isSheetOpen)}
-                                        className={`flex flex-col items-center justify-center gap-0.5 min-w-[64px] py-1 rounded-xl transition-colors active:scale-95 ${
-                                            active
-                                                ? 'text-accent'
-                                                : 'text-fg-muted hover:text-fg'
-                                        }`}
-                                    >
-                                        <div className="relative">
-                                            <Icon className="w-[22px] h-[22px]" strokeWidth={active ? 2.5 : 1.8} />
-                                            {active && (
-                                                <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-accent" />
-                                            )}
-                                        </div>
-                                        <span className={`text-caption leading-tight mt-0.5 ${active ? 'font-semibold' : 'font-medium'}`}>
-                                            {tab.label}
-                                        </span>
-                                    </button>
-                                );
-                            }
-
-                            return (
-                                <Link
-                                    key={tab.href}
-                                    href={tab.href}
-                                    onClick={() => setIsSheetOpen(false)}
-                                    className={`flex flex-col items-center justify-center gap-0.5 min-w-[64px] py-1 rounded-xl transition-colors active:scale-95 ${
-                                        active
-                                            ? 'text-accent'
-                                            : 'text-fg-muted hover:text-fg'
-                                    }`}
-                                >
-                                    <div className="relative">
-                                        <Icon className="w-[22px] h-[22px]" strokeWidth={active ? 2.5 : 1.8} />
-                                        {active && (
-                                            <div className="absolute -bottom-1.5 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-accent" />
-                                        )}
-                                    </div>
-                                    <span className={`text-caption leading-tight mt-0.5 ${active ? 'font-semibold' : 'font-medium'}`}>
-                                        {tab.label}
-                                    </span>
-                                </Link>
-                            );
-                        })}
-                    </div>
+        <nav
+            data-testid="bottom-nav"
+            aria-label={t('nav.bottomNavigation')}
+            data-hydrated={hydrated ? 'true' : undefined}
+            className={`fixed bottom-0 inset-x-0 z-30 lg:hidden motion-safe:transition-transform motion-safe:duration-300 ${!isVisible ? 'translate-y-full' : 'translate-y-0'}`}
+        >
+            <div className="bg-bg/95 backdrop-blur-xl border-t border-line safe-area-bottom">
+                <div className="flex h-bar items-stretch px-2">
+                    {BOTTOM_NAV_ITEMS.map((item) => {
+                        const active = isBottomNavActive(pathname, item);
+                        const Icon = item.icon;
+                        return (
+                            <Link
+                                key={item.id}
+                                href={item.href}
+                                aria-current={active ? 'page' : undefined}
+                                onClick={item.focusSearch ? requestSearchFocus : undefined}
+                                className={`flex min-h-tap flex-1 flex-col items-center justify-center gap-0.5 rounded-control py-1 transition-colors motion-safe:active:scale-95 ${
+                                    active ? 'text-accent' : 'text-fg-muted hover:text-fg'
+                                }`}
+                            >
+                                <span className="relative">
+                                    <Icon className="size-[22px]" strokeWidth={active ? 2.5 : 1.8} aria-hidden />
+                                    {active && (
+                                        <span aria-hidden className="absolute -bottom-1.5 left-1/2 size-1 -translate-x-1/2 rounded-pill bg-accent" />
+                                    )}
+                                </span>
+                                <span className={`mt-0.5 text-caption leading-tight ${active ? 'font-semibold' : 'font-medium'}`}>
+                                    {t(item.labelKey)}
+                                </span>
+                            </Link>
+                        );
+                    })}
                 </div>
-            </nav>
-        </>
+            </div>
+        </nav>
     );
 }

@@ -60,6 +60,7 @@
 | **1.59** | Nov 5, 2026 | Epic 6.1: Story 6.1.23 (#407, G5.2) implemented on `feat/ux-v2` — Library tabs fit a phone, Albums hidden behind a feature flag (UXD-4). |
 | **1.61** | Nov 5, 2026 | Epic 6.1: Story 6.1.6 (#390, G2.1) implemented on `feat/ux-v2` — `Chords · A− · A+` reader toolbar, size persisted per device. |
 | **1.60** | Nov 5, 2026 | Epic 6.1: Story 6.1.7 (#391, G2.2) implemented on `feat/ux-v2` — song meta and Key · Capo · Tuning on one grey line each. |
+| **1.73** | Nov 5, 2026 | Epic 6.1: Story 6.1.24 (#408, G5.3) implemented on `feat/ux-v2` — bottom bar is Home · Search · Library (UXD-1), Create is a "+" in Library, `/explore` removed; Story 1.1.9 updated. |
 | **1.72** | Nov 5, 2026 | Epic 6.1: Story 6.1.4 (#388, G1.4) implemented on `feat/ux-v2` — calm monochrome category grid: grey tiles, tags as text links with a grey count, 44 px links, accent only when pressed. |
 | **1.71** | Nov 5, 2026 | Epic 6.1: Story 6.1.16 (#400, G4.3) implemented on `feat/ux-v2` — take rows show **Public**, **Shared · n**, **Pending invite** and **Verified musician** as text pills (no tooltip-only icons), in 8 locales. |
 | **1.70** | Nov 5, 2026 | Epic 6.1: Story 6.1.3 (#387, G1.3) implemented on `feat/ux-v2` — small labels readable: sentence-case 13 px section titles, nothing below 12 px, axe-core colour-contrast smoke test. |
@@ -1657,7 +1658,7 @@ Owner decision of Nov 4, 2026: sober greyscale interface with one accent, smalle
 | 6.1.21 | #405 | `G4.8` | C | As a recording owner, I want the publish dialog to name the song and say who will hear it so that consent is informed | #402 |
 | 6.1.22 | #406 | `G5.1` | A | **[Implemented on feat/ux-v2]** As a Guest, I want an unknown URL to show a 404 page so that I am not sent to a login screen for content that does not exist | — |
 | 6.1.23 | #407 | `G5.2` | A | **[Implemented on feat/ux-v2]** As a Member, I want the Library tab row to fit my phone with no dead tab so that every tab I see works | — |
-| 6.1.24 | #408 | `G5.3` | B | As the Owner, I want a decision on the bottom bar (Home · Songs · Library · Create vs Home · Search · Library) so that Explore, Home and Search stop overlapping | — |
+| 6.1.24 | #408 | `G5.3` | B | **[Implemented on feat/ux-v2]** As the Owner, I want a decision on the bottom bar (Home · Songs · Library · Create vs Home · Search · Library) so that Explore, Home and Search stop overlapping | — |
 | 6.1.25 | #409 | `G5.4` | C | As a Guest, I want auth pages without a fake close button so that I always know where I go | #385 |
 | 6.1.26 | #410 | `G6.1` | A | **[Implemented on feat/ux-v2]** As a Guest, I want every members-only screen to use the same locked preview with a reason and a sign-in button so that gating feels consistent | — |
 | 6.1.27 | #411 | `G6.2` | B | As a Guest, I want to know before typing that saving a song needs an account so that I am not surprised at save | #410 |
@@ -1729,12 +1730,12 @@ Scenario: Restore draft
         *   Submitting the song successfully clears the draft.
         *   Draft persistence only applies to the "Add" mode, not Edit.
 
-**Story 1.1.9: [Implemented]** As a User, I want a Spotify-style mobile bottom navigation bar with Home, Search, Your Library, and Create tabs so that I can navigate the app with one hand.
+**Story 1.1.9: [Implemented]** As a User, I want a Spotify-style mobile bottom navigation bar with Home, Search and Your Library tabs so that I can navigate the app with one hand. (Decision UXD-1, Story 6.1.24: Create is a "+" inside Library, not a fourth tab.)
 
 ```
 Scenario: Bottom bar visible on mobile
   Given I am viewing any page on a mobile device (< md breakpoint)
-  Then I should see a fixed bottom navigation bar with four tabs: Home, Search, Your Library, and Create
+  Then I should see a fixed bottom navigation bar with three tabs: Home, Search and Your Library
   And the bottom bar should not appear on tablet or desktop
 
 Scenario: Navigate via bottom bar
@@ -1745,8 +1746,12 @@ Scenario: Navigate via bottom bar
   Then I should navigate to the songs page with the search field focused
   When I tap "Your Library"
   Then I should navigate to the playlists/library page
-  When I tap "Create"
-  Then I should navigate to the add song page (or show a guest nudge if not authenticated)
+
+Scenario: Create from Library
+  Given I am signed in and on the Library page of a mobile device
+  When I tap "+"
+  Then a sheet offers "Add Song" and "New Playlist"
+  And guests see no "+" (the Library shows its sign-in preview)
 
 Scenario: Active tab indicator
   Given I am on the songs page
@@ -1766,7 +1771,6 @@ Scenario: Top-right avatar hidden on mobile
 
 Scenario: Guest bottom bar
   Given I am not logged in on a mobile device
-  Then the bottom bar should still show Home, Search, and Your Library
-  And "Create" should show a sign-in nudge when tapped
+  Then the bottom bar shows the same three tabs: Home, Search, and Your Library
   And the hamburger icon should remain (no avatar replacement)
 ```

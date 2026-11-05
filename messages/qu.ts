@@ -77,7 +77,7 @@ const qu: Partial<Record<TranslationKey, string>> = {
   // ─── Navigation ───────────────────────────────────────────────────────────
   'nav.home': 'Wasi',
   'nav.songs': 'Takikuna',
-  'nav.explore': 'Maskay',
+  'nav.search': 'Maskay',
   'nav.library': 'Biblioteca',
   'nav.playlists': 'Listakuna',
   'nav.favorites': 'Munasqakuna',
@@ -87,6 +87,7 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'nav.newPlaylist': 'Musuq lista',
   'nav.admin': 'Kamachiq',
   'nav.mainNavigation': 'Hatun puriy',
+  'nav.bottomNavigation': 'Uray puriy',
   'nav.showSearch': 'Maskay akllanakunata rikuchiy',
 
   // ─── User Menu ────────────────────────────────────────────────────────────

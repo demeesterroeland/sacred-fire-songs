@@ -1,11 +1,12 @@
 # Member Guide (draft)
 
-**Version:** 0.7 | **Date:** Nov 5, 2026
+**Version:** 0.8 | **Date:** Nov 5, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.8 | Nov 5, 2026 | Create moved from the bottom bar to the **+** in Library (UX v2, #408). |
 | 0.7 | Nov 5, 2026 | Section titles and small labels are sentence case and larger (13 px titles, nothing below 12 px) with darker grey (UX v2, #387); "Your Library" reads "Your library". |
 | 0.6 | Nov 5, 2026 | Practising: the player bar appears only after you press play and stops with the song page (UX v2, #396); details on the practice page. |
 | 0.5 | Nov 5, 2026 | Library card renamed to Your takes. |
@@ -48,7 +49,7 @@ Below that: **My private playlists** and **Recently viewed** ("View all" opens t
 
 ## Playlists (setlists)
 
-**Create:** bottom bar **Create → New Playlist**, or **Library → + New Playlist**. Type a name → **Create Playlist**. New playlists are private; you can change that later.
+**Create:** bottom bar **Library → +  → New Playlist**, or **Library → + New Playlist**. Type a name → **Create Playlist**. New playlists are private; you can change that later.
 
 **Add songs:**
 - From a song: ⋮ → **Add to Playlist** → pick a playlist.
@@ -60,7 +61,7 @@ The PDF has one song per section with chords, and a footer with the site address
 
 ## Adding a song
 
-Bottom bar **Create → Add Song**.
+Bottom bar **Library → + → Add Song**.
 
 1. **Song Title** (required) and **Original Author / Artist** (optional; you can add several).
 2. **Lyrics & chords:** put chords in square brackets right before the syllable: `[Dm]Abre tus alas [A7]pájaro volar`. Chords written on a line above the lyrics are converted automatically. The **?** shows help.

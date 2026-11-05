@@ -10,6 +10,7 @@ import { getSiteTitle } from '@/lib/env';
 import { UserProfile } from './navigation/UserProfile';
 import { NotificationBell } from './navigation/NotificationBell';
 import { useLocale } from '@/context/LocaleContext';
+import { FOCUS_SEARCH_EVENT } from '@/lib/search/focusSearch';
 
 const SEARCH_HISTORY_KEY = 'sacred-fire-songs-search-history';
 const MAX_HISTORY = 8;
@@ -57,6 +58,13 @@ export default function Header({ initialUser }: { initialUser?: AuthUser | null 
             setSearchValue(searchParams.get('search') || '');
         }
     }, [isOnSongsPage, searchParams, searchValue]);
+
+    // Bottom bar "Search" tab (Story 6.1.24, #408): focus the field on tap.
+    useEffect(() => {
+        const focusInput = () => inputRef.current?.focus();
+        window.addEventListener(FOCUS_SEARCH_EVENT, focusInput);
+        return () => window.removeEventListener(FOCUS_SEARCH_EVENT, focusInput);
+    }, []);
 
     // Close dropdowns on outside click
     useEffect(() => {

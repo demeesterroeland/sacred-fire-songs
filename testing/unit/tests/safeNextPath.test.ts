@@ -40,7 +40,7 @@ describe('safeNextPath', () => {
   });
 
   it('uses the caller fallback when given', () => {
-    expect(safeNextPath('//evil.example', '/explore')).toBe('/explore');
+    expect(safeNextPath('//evil.example', '/')).toBe('/');
   });
 
   it.each([

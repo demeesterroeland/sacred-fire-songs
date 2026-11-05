@@ -1,11 +1,12 @@
 # UX v2: Agent Decisions (ADR-lite)
 
-**Version:** 1.15 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375)
+**Version:** 1.16 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375)
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.16 | Nov 5, 2026 | Added UXA-020 (bottom bar: Search target, "+" in Library, /explore gone; #408). |
 | 1.15 | Nov 5, 2026 | Added UXA-019 (category grid: tag emoji and flags dropped, #388). |
 | 1.14 | Nov 5, 2026 | UXA-010 now asks for confirmation (playback stopping on leaving a song is a product choice; listed in the decisions issue). |
 | 1.13 | Nov 5, 2026 | Added UXA-018 (take status pills: what "Pending invite" means, Public and Shared both shown, shared-with-me rows without a count, #400). |
@@ -44,6 +45,7 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 | UXA-017 | Nov 5, 2026 | #387 | Readable labels: sentence-case copy, token colours where axe found low contrast, guard allow-list, axe-core pin | yes |
 | UXA-018 | Nov 5, 2026 | #400 | Take status pills: "Pending invite" = singer without a linked profile; Public and Shared · n both shown; no count on others' takes | yes |
 | UXA-019 | Nov 5, 2026 | #388 | Category grid: tags lose their emoji / flag, the category icon stays (grey) | no |
+| UXA-020 | Nov 5, 2026 | #408 | Bottom bar: Search = `/songs` with the header field focused; "+" in the Library header (members only); `/explore` is a 404 | yes |
 
 ---
 
@@ -217,3 +219,13 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 - **Choice:** (b). Tags show name + grey count only. A category without a Lucide icon falls back to its emoji with the CSS `grayscale` filter. `TagPill` stays in use elsewhere (song rows, filters); only the home grid stops using it.
 - **Consequences:** the language tags no longer show flags on the home page; the language name carries the meaning.
 - **Confirm:** no
+
+### UXA-020 · Bottom bar: where Search goes, where "+" sits, what `/explore` becomes
+
+- **Date / story:** Nov 5, 2026 · #408 (G5.3, owner decision UXD-1)
+- **Context:** UXD-1 fixes the bar as Home · Search · Library, Create inside Library as a "+", `/explore` redirect removed. It does not say what Search opens, where the "+" lives, whether guests see it, or what the old URL answers.
+- **Options:** Search: (a) a new search page; (b) the existing song list `/songs` with the header search field focused; (c) the global search modal. "+": (a) top of the Library page; (b) a floating button; (c) per tab. `/explore`: (a) real 404; (b) keep a redirect.
+- **Choice:** Search = (b): the tab links to `/songs` and the tap focuses the always-visible header field (the song list is where results already show, and Story 1.1.9 words it that way). Search stays highlighted on song pages; Library on every `/library/*` page; only one item is ever active. "+" = (a): a 44 px outline button right of the Library title (phones only; from `lg` the header Create menu does the same), opening a bottom sheet with Add Song and New Playlist. Guests see no "+" (the Library already shows a locked preview with Sign in), replacing the old "sign-in nudge" on the Create tab. `/explore` = (a): the route is deleted, so it answers 404 with the page from #406; the sign-up fallback that pointed at it now goes to Home. `nav.explore` is deleted from all 8 locales; new `nav.search` has real translations. The red top-edge glow of the bar is removed (greyscale + one accent).
+- **Consequences:** Old bookmarks and links to `/explore` now show "Page not found". Contributors need two taps (Library, "+") instead of one. Library's `+` is not on the Playlists detail pages (breadcrumb view).
+- **Review note:** a tap before the page has hydrated is a plain link, so the song list opens without focusing the field (graceful, not broken). Search always opens the full list, so an active `?tag=` filter is dropped.
+- **Confirm:** yes (guests lose the Create nudge; `/explore` 404s)

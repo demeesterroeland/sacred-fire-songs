@@ -1,6 +1,6 @@
 # E2E Test Overview & Matrix: Sacred Fire Songs
 
-**Version:** 1.14
+**Version:** 1.15
 **Status:** Living Document
 **Date:** Nov 5, 2026
 **Tracking:** GH #142
@@ -24,6 +24,7 @@
 | **1.12** | Nov 3, 2026 | CI note: removed the reference to a database deploy workflow; the repo does not deploy anywhere. Staging E2E is optional and skips without secrets. |
 | **1.13** | Nov 4, 2026 | PWA-03: offline fallback page covered by `e2e/tests/offline.spec.ts` (#353); cached pages offline still planned. |
 | **1.14** | Nov 5, 2026 | Story 6.1.26 (#410): guests on members-only screens now get the GuestGate (locked preview, reason, `Sign in` with `next=`) instead of a redirect; ACC-01 updated, new spec `e2e/tests/guest-gate.spec.ts` covers every gated route. |
+| **1.15** | Nov 5, 2026 | LIB-13 follows Story 6.1.24: no `/explore` route; bottom bar spec `ux-v2-bottom-bar.spec.ts`. |
 
 ---
 
@@ -149,7 +150,7 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 | LIB-10 | Albums tab | Placeholder "coming soon" renders | — | G | ⚠️ | 🔲 | P2 | `library/albums` (stub) |
 | LIB-11 | Recently viewed | Auth user sees recently viewed songs | requires auth; records on detail visit | M | ✅ | 🔲 | P1 | `library/recently-viewed` |
 | LIB-12 | New since last visit | Unviewed recent songs surfaced | last_seen tracking | M | ✅ | 🔲 | P2 | NewSinceLastVisit |
-| LIB-13 | Explore/Playlists guest access | Guest can reach Explore & Playlists without login | redirect of `/explore` → `/` | G | ✅ | 🔲 | P2 | 1.2.3 |
+| LIB-13 | Home/Library guest access | Guest can reach Home & Library without login; `/explore` is a 404 (Story 6.1.24) | `e2e/tests/ux-v2-bottom-bar.spec.ts` | G | ✅ | 🔲 | P2 | 1.2.3 |
 
 ### 4.5 Song Viewer (Epic 1.3 / 2.1)
 
