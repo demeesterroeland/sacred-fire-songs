@@ -261,6 +261,8 @@ const en = {
   'rehearsal.controlTrack': 'Control Track',
   'rehearsal.headphonesHint': '🎧 Wear headphones to prevent bleed',
   'practice.takes.mine': 'My takes',
+  'practice.takes.shared': 'Shared with me',
+  'practice.takes.public': 'Public takes',
   'rehearsal.demo.take1': 'Vocal Practice - Guide Take 1',
   'rehearsal.demo.take2': 'Guitar Chords - Run 2',
   'rehearsal.loadingRecordings': 'Loading takes...',

@@ -267,6 +267,8 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'rehearsal.controlTrack': 'Pukllana taki',
   'rehearsal.headphonesHint': '🎧 Auricularkunata churakuy, mana tuqyayta hap’inaykipaq',
   'practice.takes.mine': 'Tomakuna',
+  'practice.takes.shared': 'Ñoqaman qusqakuna',
+  'practice.takes.public': 'Llapanpaq tomakuna',
   'rehearsal.demo.take1': 'Kunka yachakuy - Pukllana 1',
   'rehearsal.demo.take2': 'Guitarra acordekuna - Ruway 2',
   'rehearsal.loadingRecordings': 'Grabacionkuna apamushan...',

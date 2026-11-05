@@ -1,11 +1,12 @@
 # Practice: Listen, Record & Takes (draft)
 
-**Version:** 0.2 | **Date:** Nov 5, 2026
+**Version:** 0.3 | **Date:** Nov 5, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.3 | Nov 5, 2026 | Takes shared with you are listed under their own heading, Shared with me, with who shared them (UXD-3, #399). |
 | 0.2 | Nov 5, 2026 | The player bar appears only after you press play and stops with the song page (UXD-5, #396). |
 | 0.1 | Nov 4, 2026 | First draft: reference tracks, recorder, upload, managing takes, sharing, publishing with consent, singer attribution, shared-with-me view. |
 | 0.2 | Nov 5, 2026 | One name: Practice (panel, menu, tabs Listen / Record, Takes chip, My takes). Button and message wording now says "take" (Save Take, Delete take, Share take, Publish Take). |
@@ -72,7 +73,7 @@ Rules (so the singer stays protected):
 
 ## When someone shares a take with you
 
-Open the same song → ⋮ → **Practice** → **Record**. The shared take is in the list with a 👥 icon (*Shared with you*). You can play it; download and share are not available. **(planned: a separate "Shared with me" section and a notification)**
+Open the same song → ⋮ → **Practice** → **Record**. Takes shared with you are under their own heading, **Shared with me**, below **My takes**; the heading is hidden when nobody shared a take on this song. Each row says **Shared by <name>** and the length in its grey line. You can play it; there is no ⋯ menu, so download, share and delete are not available. **(planned: a notification when someone shares a take with you)**
 
 ## Making a take public
 

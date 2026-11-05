@@ -1,12 +1,13 @@
 # Roles & Glossary (draft)
 
-**Version:** 0.2 | **Date:** Nov 5, 2026
+**Version:** 0.3 | **Date:** Nov 5, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
 | 0.1 | Nov 4, 2026 | First draft. Roles summarised from the Roles & Permissions table in `docs/logbook/epic&user stories.md`. |
+| 0.3 | Nov 5, 2026 | Glossary: Shared with me (list of takes shared with you, #399). |
 | 0.2 | Nov 5, 2026 | Glossary: Practice replaces Rehearsal Space; Take; Your takes. |
 
 ## Roles
@@ -32,7 +33,7 @@
 | Practice | Panel on a song with a **Listen** tab (reference tracks) and a **Record** tab (your recorder and **My takes**). Replaces the old names Rehearsal Space, Voice Recorder and Recordings. |
 | Reference Track | YouTube / SoundCloud / Spotify version of the song. |
 | Take | An audio file you recorded or uploaded for a song. Private by default. |
-| Shared with you | A take another member shared with you: listen only. |
+| Shared with me | The list of takes other members shared with you, under My takes in Practice → Record. Each row says who shared it. Listen only. |
 | Public (recording) | Take everyone can hear, published with singer consent. |
 | Singer Attribution | Who sings on a take; links to their profile when registered. |
 | Smart playlist | Automatic list (Favorites, Your Songs, Drafts, Your takes). |
