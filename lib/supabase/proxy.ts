@@ -1,20 +1,8 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
+import { shouldRedirectToLogin } from "@/lib/supabase/routeAccess";
 
 export async function updateSession(request: NextRequest) {
-    // List of routes that don't need authentication checks in the middleware
-    const isPublicRoute =
-        request.nextUrl.pathname === "/" ||
-        request.nextUrl.pathname.startsWith("/auth") ||
-        request.nextUrl.pathname.startsWith("/login") ||
-        request.nextUrl.pathname.startsWith("/notes") ||
-        request.nextUrl.pathname.startsWith("/songs") ||
-        request.nextUrl.pathname.startsWith("/explore") ||
-        request.nextUrl.pathname.startsWith("/library") ||
-        request.nextUrl.pathname.startsWith("/playlists") ||
-        request.nextUrl.pathname.startsWith("/recordings") ||
-        request.nextUrl.pathname.startsWith("/supabase-api");
-
     let supabaseResponse = NextResponse.next({
         request,
     });
@@ -52,8 +40,9 @@ export async function updateSession(request: NextRequest) {
     // This refreshes the session even if the route is public
     const { data: { user } } = await supabase.auth.getUser();
 
-    // Redirect to login if not authenticated and trying to access a protected route
-    if (!user && !isPublicRoute) {
+    // Only protected prefixes redirect a guest to login; unknown paths fall through to
+    // app/not-found.tsx (see lib/supabase/routeAccess.ts).
+    if (shouldRedirectToLogin(request.nextUrl.pathname, !!user)) {
         const url = request.nextUrl.clone();
         url.pathname = "/auth/login";
         url.searchParams.set('message', 'Please log in to access this page');

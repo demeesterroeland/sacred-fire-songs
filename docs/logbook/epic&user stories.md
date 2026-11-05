@@ -1,6 +1,6 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 1.61
+**Version:** 1.64
 **Status:** Living Document
 **Date:** Nov 5, 2026
 
@@ -60,6 +60,7 @@
 | **1.59** | Nov 5, 2026 | Epic 6.1: Story 6.1.23 (#407, G5.2) implemented on `feat/ux-v2` — Library tabs fit a phone, Albums hidden behind a feature flag (UXD-4). |
 | **1.61** | Nov 5, 2026 | Epic 6.1: Story 6.1.6 (#390, G2.1) implemented on `feat/ux-v2` — `Chords · A− · A+` reader toolbar, size persisted per device. |
 | **1.60** | Nov 5, 2026 | Epic 6.1: Story 6.1.7 (#391, G2.2) implemented on `feat/ux-v2` — song meta and Key · Capo · Tuning on one grey line each. |
+| **1.64** | Nov 5, 2026 | Epic 6.1: Story 6.1.22 (#406, G5.1) implemented on `feat/ux-v2` — unknown URLs show a real 404 page for every role; the proxy redirects guests to login only for `/account`, `/admin`, `/users`. Spec: `docs/testing/ux-v2-real-404.feature`. |
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
 
@@ -1646,7 +1647,7 @@ Owner decision of Nov 4, 2026: sober greyscale interface with one accent, smalle
 | 6.1.19 | #403 | `G4.6` | B | As a Member, I want to be told when someone shares a take with me so that I do not have to guess which song to open | #399 |
 | 6.1.20 | #404 | `G4.7` | C | As a Member, I want a level meter, count-in and remaining time while recording so that I know the microphone works and when the 3-minute limit comes | #385 |
 | 6.1.21 | #405 | `G4.8` | C | As a recording owner, I want the publish dialog to name the song and say who will hear it so that consent is informed | #402 |
-| 6.1.22 | #406 | `G5.1` | A | As a Guest, I want an unknown URL to show a 404 page so that I am not sent to a login screen for content that does not exist | — |
+| 6.1.22 | #406 | `G5.1` | A | **[Implemented on feat/ux-v2]** As a Guest, I want an unknown URL to show a 404 page so that I am not sent to a login screen for content that does not exist | — |
 | 6.1.23 | #407 | `G5.2` | A | **[Implemented on feat/ux-v2]** As a Member, I want the Library tab row to fit my phone with no dead tab so that every tab I see works | — |
 | 6.1.24 | #408 | `G5.3` | B | As the Owner, I want a decision on the bottom bar (Home · Songs · Library · Create vs Home · Search · Library) so that Explore, Home and Search stop overlapping | — |
 | 6.1.25 | #409 | `G5.4` | C | As a Guest, I want auth pages without a fake close button so that I always know where I go | #385 |

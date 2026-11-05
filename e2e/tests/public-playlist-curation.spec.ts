@@ -96,8 +96,8 @@ test.describe('Public Playlist Curation (Story 3.4.6)', () => {
     test('cannot access another user\'s private playlist', async ({ page }) => {
       // My Healing Practice is a private playlist owned by member
       await page.goto(`/library/playlists/${privatePlaylistId}`);
-      // Should show Not Found page (with custom "Song Not Found" header)
-      await expect(page.locator('h1').first()).toHaveText('Song Not Found');
+      // Shows the generic 404 page (not the song-specific one)
+      await expect(page.locator('h1').first()).toHaveText('Page not found');
     });
   });
 
