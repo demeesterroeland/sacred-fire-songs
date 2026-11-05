@@ -1,11 +1,12 @@
 # Guest Guide (draft)
 
-**Version:** 0.11 | **Date:** Nov 5, 2026
+**Version:** 0.13 | **Date:** Nov 5, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.13 | Nov 5, 2026 | Add Song as a guest: a banner says saving needs an account; your draft is kept when you sign in (UX v2, #411). |
 | 0.12 | Nov 5, 2026 | Bottom bar is Home · Search · Library; Songs and Create are gone from it (UX v2, #408). |
 | 0.11 | Nov 5, 2026 | Home categories: grey tiles, tags as plain text with a grey song count (UX v2, #388). |
 | 0.10 | Nov 5, 2026 | Song lists: one row per song with a grey meta line (UX v2, #386). |
@@ -59,7 +60,7 @@ The **Record** tab shows what members can do and a **Sign In to Record** button.
 
 ## Things that need an account
 
-Favourites, playlists, recently viewed, adding or editing songs, recording, account settings, singer profiles. Each of these screens shows the same grey preview with a lock, one sentence saying why it is locked and a **Sign in** button; after signing in you land on the screen you came from. Guests will be able to listen to public takes that the singer agreed to publish (Practice → Listen); recording, sharing and downloading stay members-only. The list of takes for guests follows in a later update. You can open the **Add Song** form and start typing as a guest; you are asked to sign in when you save **(verify that the draft is kept after sign-in)**.
+Favourites, playlists, recently viewed, adding or editing songs, recording, account settings, singer profiles. Each of these screens shows the same grey preview with a lock, one sentence saying why it is locked and a **Sign in** button; after signing in you land on the screen you came from. Guests will be able to listen to public takes that the singer agreed to publish (Practice → Listen); recording, sharing and downloading stay members-only. The list of takes for guests follows in a later update. You can open the **Add Song** form and start typing as a guest: a grey box at the top says **Draft now — sign in to save**: saving a song needs an account. Your draft stays on this device, so after you sign in (from the box or when you press save) you are back on the form with your text still there.
 
 ## Creating an account
 
