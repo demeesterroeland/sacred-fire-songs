@@ -5,6 +5,7 @@
 #   @story-5.1.x   maps the scenario to its user story
 #   @ci-contract   automatable by parsing .github/workflows/*.yml or scripts (Cucumber profile "ci")
 #   @script        automatable with bats-core against scripts/*/*.sh
+#   @deferred      blocked on another story; excluded from the strict "ci-gate" profile
 #   @manual        verified on a sandbox branch / real GitHub run; record run URL in master-walkthrough.md
 #
 # Status: written test-first (Phase 0). Every scenario is expected to FAIL until its story is implemented.
@@ -148,13 +149,27 @@ Feature: Gitflow branching and CI/CD pipeline
     Given the workflow "ci.yml"
     Then it has a job "isolation" that fails when the secret "ISOLATION_DENYLIST" is missing
 
-  # ── Story 5.1.8: production promotion ─────────────────────────────────────
+  # ── Story 5.1.8: promotion develop → main, versioned release images ───────
+  # Re-scoped Nov 5, 2026: CI and image delivery live in this repo; deploying a
+  # release (CD, approvals, deploy secrets) lives outside the public repository.
   @story-5.1.8 @ci-contract
-  Scenario: Production deploy is gated by an approval
-    Given the workflow "deploy-production.yml"
+  Scenario: A published release builds versioned images
+    Given the workflow "docker.yml"
     Then it triggers on "release" type "published"
-    And it uses the environment "Production"
-    And it deploys the explicit release tag, never "latest"
+    And it tags release images with the release version
+    And no image is tagged "latest"
+
+  @story-5.1.8 @ci-contract
+  Scenario: No workflow deploys a release
+    Given every workflow in ".github/workflows"
+    Then no workflow uses a deployment environment
+    And no workflow file name starts with "deploy"
+
+  @story-5.1.8 @script
+  Scenario: The promotion script merges develop into main with a merge commit
+    When I run "scripts/cicd/develop2main.sh --yes --skip-release"
+    Then it opens a pull request from "develop" into "main"
+    And it merges that pull request with "--merge", never with "--squash" or "--admin"
 
   @story-5.1.8 @manual
   Scenario: Promotion from develop to main keeps history
@@ -163,7 +178,8 @@ Feature: Gitflow branching and CI/CD pipeline
     Then it is merged with a merge commit
     And Release Please proposes a minor version with both entries in the changelog
 
-  @story-5.1.8 @ci-contract
+  # Deferred with 5.1.2 / 5.1.11: needs the CI E2E database on the tailnet.
+  @story-5.1.8 @ci-contract @deferred
   Scenario: Promotion PR requires the slow test layers
     Given a pull request from "develop" into "main"
     Then the required checks include the full E2E suite against staging
