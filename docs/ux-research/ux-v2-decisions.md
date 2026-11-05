@@ -1,11 +1,12 @@
 # UX v2: Agent Decisions (ADR-lite)
 
-**Version:** 1.16 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375)
+**Version:** 1.17 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375)
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.17 | Nov 5, 2026 | Added UXA-021 (take action sheet: group order, Copy link kept, listen-only takes get no sheet, swipe on the shared sheet, #401). |
 | 1.16 | Nov 5, 2026 | Added UXA-020 (bottom bar: Search target, "+" in Library, /explore gone; #408). |
 | 1.15 | Nov 5, 2026 | Added UXA-019 (category grid: tag emoji and flags dropped, #388). |
 | 1.14 | Nov 5, 2026 | UXA-010 now asks for confirmation (playback stopping on leaving a song is a product choice; listed in the decisions issue). |
@@ -46,6 +47,7 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 | UXA-018 | Nov 5, 2026 | #400 | Take status pills: "Pending invite" = singer without a linked profile; Public and Shared · n both shown; no count on others' takes | yes |
 | UXA-019 | Nov 5, 2026 | #388 | Category grid: tags lose their emoji / flag, the category icon stays (grey) | no |
 | UXA-020 | Nov 5, 2026 | #408 | Bottom bar: Search = `/songs` with the header field focused; "+" in the Library header (members only); `/explore` is a 404 | yes |
+| UXA-021 | Nov 5, 2026 | #401 | Take action sheet: Rename and Download sit with Play, Copy link stays under Share, takes of others get no sheet, swipe-to-close on the shared bottom sheet, no new copy | yes |
 
 ---
 
@@ -229,3 +231,12 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 - **Consequences:** Old bookmarks and links to `/explore` now show "Page not found". Contributors need two taps (Library, "+") instead of one. Library's `+` is not on the Playlists detail pages (breadcrumb view).
 - **Review note:** a tap before the page has hydrated is a plain link, so the song list opens without focusing the field (graceful, not broken). Search always opens the full list, so an active `?tag=` filter is dropped.
 - **Confirm:** yes (guests lose the Create nudge; `/explore` 404s)
+
+### UXA-021 · Take action sheet: groups, listen-only takes, swipe
+
+- **Date / story:** Nov 5, 2026 · #401 (G4.4)
+- **Context:** the story lists the groups as "Play / Rename · Share / Singer / Make public · Download · Delete (red, separated)" and says shared-with-me takes "show only Play". The old menu had one more action, **Copy link** (deep link to the take), and the shared `BottomSheet` (#385) had a drawing of a handle but no gesture. Rows of other people already had no ⋯ button (#399).
+- **Options:** (a) follow the story's order literally (Download as its own group); (b) put Play, Rename and Download together as "this take", Share-type actions together, Delete alone; for takes of others (c) show a ⋯ that opens a sheet with only Play, or (d) keep no ⋯ and let the row's play button be the one action.
+- **Choice:** (b) and (d). Groups: **Play / Pause, Edit take name, Download take** · **Share, Singer Attribution, Make Public / Make Private, Copy link** · **Delete take** alone, in `text-danger` with the word "Delete take" (colour never alone), after a divider and at least three rows away from Share. A sheet with one row (Play) would be an extra tap for nothing, so shared and public takes keep only their play button. Copy link is kept (dropping it would remove a feature) in the share group. The shared `BottomSheet` now has a 32 px handle on phones that follows a swipe down and closes the sheet (80 px, or a 30 px flick faster than 0.5 px/ms; a tap does nothing); Esc and the scrim also close it. Rows reuse the existing labels ("Edit take name", "Download take", "Delete take"), so no new copy and no new keys in the 8 locales. The chosen action runs after the sheet has closed, so two dialogs never overlap (rename focuses the name field, Share / Singer / Publish open their dialogs, Delete opens the same confirmation as before). The ⋯ trigger grew from about 28 px to a 44 px target.
+- **Consequences:** every `BottomSheet` on a phone gets the swipe handle and a taller (32 px) top area; the sheet title on touch is the take name. Playing from the sheet and from the row stay equal. The "Edit take name" row opens an inline field on the row, not a dialog.
+- **Confirm:** yes (Rename and Download moved into the first group; swipe on every bottom sheet)

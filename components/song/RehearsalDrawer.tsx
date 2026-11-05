@@ -1,8 +1,8 @@
 "use client";
 
-import React, { useState, useEffect, useTransition, useMemo, useRef } from "react";
+import React, { useState, useEffect, useTransition, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, Music, Trash2, Pencil, Play, Pause, Lock, RotateCcw, RotateCw, GripVertical, Download, ChevronUp, ChevronDown, Check, Share2, Globe, Mic, MoreHorizontal, Link2 } from "lucide-react";
+import { X, Music, Play, Pause, Lock, RotateCcw, RotateCw, GripVertical, ChevronUp, ChevronDown, Check, Globe, Mic, MoreHorizontal } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
 import {
@@ -28,6 +28,8 @@ import { recordingPermalink } from "@/lib/songs/recordingLink";
 import { partitionTakes } from "@/lib/songs/partitionTakes";
 import { takeStatusPills } from "@/lib/songs/takeStatus";
 import { TakeStatusPills } from "@/components/song/TakeStatusPills";
+import TakeActionsSheet from "@/components/song/TakeActionsSheet";
+import { takeHasActionSheet } from "@/lib/songs/takeActions";
 import GuestGate from "@/components/common/GuestGate";
 import { usePathname, useSearchParams } from "next/navigation";
 import RecordingShareModal from "./RecordingShareModal";
@@ -91,7 +93,7 @@ function SortableRecordingItem({
   const { t } = useLocale();
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(rec.recording_name);
-  const renameRequested = useRef(false);
+  const [actionsOpen, setActionsOpen] = useState(false);
 
   const isOwner = rec.is_owner !== false;
   const isShared = rec.is_shared === true;
@@ -125,7 +127,6 @@ function SortableRecordingItem({
   };
 
   const isPlaying = activePlaybackId === rec.id && isRecordingPlaying;
-  const shareCount = rec.shared_with?.length ?? 0;
   const singerLabel = rec.singer_profile?.full_name || rec.singer_name;
   const duration = rec.duration_seconds
     ? `${Math.floor(rec.duration_seconds / 60)}:${(rec.duration_seconds % 60).toString().padStart(2, "0")}`
@@ -139,7 +140,6 @@ function SortableRecordingItem({
       : isShared
         ? t('recording.sharing.badge')
         : null;
-  const menuItemClass = "gap-2 text-gray-700 dark:text-gray-200 focus:bg-gray-100 dark:focus:bg-gray-800 cursor-pointer";
 
   return (
     <div
@@ -246,72 +246,41 @@ function SortableRecordingItem({
         </div>
       </div>
 
-      {/* Owner actions live in one menu; recipients only stream (DRM-lite) */}
-      {isOwner && (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-200/60 dark:hover:bg-gray-800 transition-colors shrink-0"
-              aria-label={t('common.moreActions')}
-              title={t('common.moreActions')}
-            >
-              {busy ? (
-                <div className="w-4 h-4 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
-              ) : (
-                <MoreHorizontal className="w-4 h-4" />
-              )}
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="end"
-            className="w-52 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700"
-            onCloseAutoFocus={(e) => {
-              // Keep focus in the rename input instead of returning it to the trigger
-              if (renameRequested.current) {
-                e.preventDefault();
-                renameRequested.current = false;
-                setIsEditing(true);
-              }
-            }}
+      {/* Owner actions open one grouped bottom sheet; recipients only stream (DRM-lite).
+          Story 6.1.17 / G4.4 (#401): Delete is never one tap from Share. */}
+      {takeHasActionSheet(rec) && (
+        <>
+          <button
+            type="button"
+            onClick={() => setActionsOpen(true)}
+            className="grid size-tap shrink-0 place-items-center rounded-control text-fg-muted transition-colors hover:bg-surface-2 hover:text-fg"
+            aria-label={t('common.moreActions')}
+            aria-haspopup="dialog"
+            title={t('common.moreActions')}
           >
-            <DropdownMenuItem className={menuItemClass} onSelect={() => handleShare?.(rec)}>
-              <Share2 className="w-4 h-4" />
-              {t('recording.sharing.button')}
-              {shareCount > 0 && <span className="ml-auto text-caption text-fg-muted">{shareCount}</span>}
-            </DropdownMenuItem>
-            <DropdownMenuItem className={menuItemClass} onSelect={() => handlePublish?.(rec)}>
-              {rec.is_public ? <Lock className="w-4 h-4" /> : <Globe className="w-4 h-4" />}
-              {rec.is_public ? t('recording.publish.makePrivate') : t('recording.publish.makePublic')}
-            </DropdownMenuItem>
-            <DropdownMenuItem className={menuItemClass} onSelect={() => handleAttribution?.(rec)}>
-              <Mic className="w-4 h-4" />
-              {t('recording.attribution.button')}
-            </DropdownMenuItem>
-            {handleCopyLink && (
-              <DropdownMenuItem className={menuItemClass} onSelect={() => handleCopyLink(rec)}>
-                <Link2 className="w-4 h-4" />
-                {t('rehearsal.recording.copyLink')}
-              </DropdownMenuItem>
+            {busy ? (
+              <div className="size-4 animate-spin rounded-full border-2 border-accent/30 border-t-accent motion-reduce:animate-none" />
+            ) : (
+              <MoreHorizontal className="size-5" />
             )}
-            <DropdownMenuSeparator className="bg-gray-200 dark:bg-gray-800" />
-            <DropdownMenuItem className={menuItemClass} onSelect={() => { renameRequested.current = true; }}>
-              <Pencil className="w-4 h-4" />
-              {t('rehearsal.recording.edit.ariaLabel')}
-            </DropdownMenuItem>
-            <DropdownMenuItem className={menuItemClass} disabled={!rec.audioUrl} onSelect={() => handleDownload(rec)}>
-              <Download className="w-4 h-4" />
-              {t('rehearsal.recording.download.ariaLabel')}
-            </DropdownMenuItem>
-            <DropdownMenuSeparator className="bg-gray-200 dark:bg-gray-800" />
-            <DropdownMenuItem
-              className="gap-2 text-red-600 dark:text-red-400 focus:bg-red-500/10 focus:text-red-600 cursor-pointer"
-              onSelect={() => handleDelete(rec.id, rec.storage_path)}
-            >
-              <Trash2 className="w-4 h-4" />
-              {t('rehearsal.recording.delete.ariaLabel')}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+          </button>
+          <TakeActionsSheet
+            take={rec}
+            open={actionsOpen}
+            onOpenChange={setActionsOpen}
+            isPlaying={isPlaying}
+            on={{
+              play: () => handleTogglePlay(rec.id, rec.audioUrl),
+              rename: () => setIsEditing(true),
+              download: () => handleDownload(rec),
+              share: () => handleShare?.(rec),
+              singer: () => handleAttribution?.(rec),
+              visibility: () => handlePublish?.(rec),
+              copyLink: handleCopyLink ? () => handleCopyLink(rec) : undefined,
+              delete: () => handleDelete(rec.id, rec.storage_path),
+            }}
+          />
+        </>
       )}
     </div>
   );

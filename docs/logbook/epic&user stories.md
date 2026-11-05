@@ -1,6 +1,6 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 1.74
+**Version:** 1.75
 **Status:** Living Document
 **Date:** Nov 5, 2026
 
@@ -60,6 +60,7 @@
 | **1.59** | Nov 5, 2026 | Epic 6.1: Story 6.1.23 (#407, G5.2) implemented on `feat/ux-v2` — Library tabs fit a phone, Albums hidden behind a feature flag (UXD-4). |
 | **1.61** | Nov 5, 2026 | Epic 6.1: Story 6.1.6 (#390, G2.1) implemented on `feat/ux-v2` — `Chords · A− · A+` reader toolbar, size persisted per device. |
 | **1.60** | Nov 5, 2026 | Epic 6.1: Story 6.1.7 (#391, G2.2) implemented on `feat/ux-v2` — song meta and Key · Capo · Tuning on one grey line each. |
+| **1.75** | Nov 5, 2026 | Epic 6.1: Story 6.1.17 (#401, G4.4) implemented on `feat/ux-v2` — take actions open as a grouped bottom action sheet (Play / Edit name / Download · Share / Singer / Make public / Copy link · Delete alone in red), rows ≥ 44 px, 32 px swipe handle; shared-with-me takes stay listen only. |
 | **1.74** | Nov 5, 2026 | Epic 6.1: Story 6.1.27 (#411, G6.2) implemented on `feat/ux-v2` — guests on Add Song see "Draft now — sign in to save"; the draft survives the sign-in round trip (E2E). |
 | **1.73** | Nov 5, 2026 | Epic 6.1: Story 6.1.24 (#408, G5.3) implemented on `feat/ux-v2` — bottom bar is Home · Search · Library (UXD-1), Create is a "+" in Library, `/explore` removed; Story 1.1.9 updated. |
 | **1.72** | Nov 5, 2026 | Epic 6.1: Story 6.1.4 (#388, G1.4) implemented on `feat/ux-v2` — calm monochrome category grid: grey tiles, tags as text links with a grey count, 44 px links, accent only when pressed. |
@@ -1652,7 +1653,7 @@ Owner decision of Nov 4, 2026: sober greyscale interface with one accent, smalle
 | 6.1.14 | #398 | `G4.1` | A | **[Implemented on feat/ux-v2]** As a Member, I want one name — Practice — for the rehearsal feature so that menu, drawer, tabs, badge and library all say the same thing | — |
 | 6.1.15 | #399 | `G4.2` | A | **[Implemented on feat/ux-v2]** As a Member, I want takes shared with me listed separately from my own takes so that I see who shared what | #398 |
 | 6.1.16 | #400 | `G4.3` | A | **[Implemented on feat/ux-v2]** As a Member, I want text labels next to take status icons so that I understand 'public', 'shared' and 'pending invite' without a tooltip | #398 |
-| 6.1.17 | #401 | `G4.4` | B | As a Member, I want take actions in a grouped bottom action sheet so that Delete is never one tap from Share | #385, #398 |
+| 6.1.17 | #401 | `G4.4` | B | **[Implemented on feat/ux-v2]** As a Member, I want take actions in a grouped bottom action sheet so that Delete is never one tap from Share | #385, #398 |
 | 6.1.18 | #402 | `G4.5` | B | As a recording owner, I want the Share dialog to explain who can be found and what happens with a private song so that sharing has no surprises | #398 |
 | 6.1.19 | #403 | `G4.6` | B | As a Member, I want to be told when someone shares a take with me so that I do not have to guess which song to open | #399 |
 | 6.1.20 | #404 | `G4.7` | C | As a Member, I want a level meter, count-in and remaining time while recording so that I know the microphone works and when the 3-minute limit comes | #385 |

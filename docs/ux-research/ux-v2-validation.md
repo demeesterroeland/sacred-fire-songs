@@ -1,11 +1,12 @@
 # UX v2: Phone Validation Script
 
-**Version:** 1.19 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
+**Version:** 1.20 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.20 | Nov 5, 2026 | Added #401 (take actions in a bottom sheet). |
 | 1.19 | Nov 5, 2026 | Added #411 (guest draft banner on Add Song). |
 | 1.18 | Nov 5, 2026 | Added the #408 section (bottom bar Home · Search · Library); #387 step 2 labels updated. |
 | 1.17 | Nov 5, 2026 | Added #388 (calm category grid). |
@@ -271,3 +272,17 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 - [ ] 3. Tap **Sign in** in the box and sign in. **Expected:** you come back to Add Song, the box is gone and the title and lyrics you typed are still there.
 - [ ] 4. Sign out, open `/songs/add`, type a title and lyrics and press **Publish Song**. **Expected:** the sign-in page opens; after signing in you are back on Add Song with the text kept.
 - [ ] 5. Switch the language to Dutch, Spanish, Italian, Russian, French, Portuguese and Quechua: the box is translated. Repeat step 1 in dark mode (`…/411/after-dark/mobile/guest/06-song-add.webp`).
+
+### #401 · G4.4 Take actions in a grouped bottom sheet
+
+**Preconditions:** member account; a song with at least one take of your own and one take that someone shared with you; English, 390 px phone; light and dark mode.
+
+- [ ] 1. Open the song, tap ⋮ → **Practice** → **Record**. On a take of **My takes**, the **⋯** button is a comfortable thumb target. Tap it. A sheet slides up from the bottom, titled with the take's name, with a small grey bar at its top. Screenshot: `docs/ux-research/screenshots/ux-v2/401/after-light/mobile/member/01-take-actions.webp`.
+- [ ] 2. Three groups, separated by thin lines: **Play, Edit take name, Download take** · **Share, Singer Attribution, Make Public, Copy link** · **Delete take** alone at the bottom, red text with a bin icon. Delete is not next to Share.
+- [ ] 3. Every row is easy to hit with a thumb (at least 44 px tall) and reads clearly in dark mode too. Screenshot dark: `…/401/after-dark/mobile/member/01-take-actions.webp`.
+- [ ] 4. Tap **Share**: the sheet closes and the **Share take** dialog opens as before. Close it.
+- [ ] 5. Open the sheet again, tap **Edit take name**: the sheet closes and the name field is ready to type in on the row. Press Esc to leave the name unchanged.
+- [ ] 6. Open the sheet, tap **Delete take**: the sheet closes and the question **Delete take?** appears. Tap **Cancel**: the take is still there.
+- [ ] 7. Open the sheet and drag the grey bar down: the sheet follows your finger and closes when you let go after a long drag. A tap on the bar or a short slow drag leaves it open. Tapping outside the sheet also closes it.
+- [ ] 8. Look at a take under **Shared with me** (or **Public takes**): no **⋯** button — only its play button.
+- [ ] 9. Switch the language to Dutch, Spanish, Italian, Russian, French, Portuguese and Quechua and open the sheet: all rows are translated and Delete is still alone at the bottom.

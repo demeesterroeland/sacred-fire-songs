@@ -1,11 +1,12 @@
 # Practice: Listen, Record & Takes (draft)
 
-**Version:** 0.4 | **Date:** Nov 5, 2026
+**Version:** 0.5 | **Date:** Nov 5, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.5 | Nov 5, 2026 | **⋯** on a take opens a bottom sheet with the actions in groups; Delete take is alone at the bottom, in red (#401). |
 | 0.4 | Nov 5, 2026 | Take rows show their status in words: Public, Shared · n, Pending invite (owner only), Verified musician (#400). |
 | 0.3 | Nov 5, 2026 | Takes shared with you are listed under their own heading, Shared with me, with who shared them (UXD-3, #399). |
 | 0.2 | Nov 5, 2026 | The player bar appears only after you press play and stops with the song page (UXD-5, #396). |
@@ -53,14 +54,13 @@ Under **My takes** each take shows ▶ play, name, date and length, and status i
 
 Drag the ⠿ handle to reorder takes (sort: Newest, Oldest, Custom → **Save order**).
 
-Tap **⋯** on a take for:
+Tap **⋯** on one of your takes. A sheet slides up from the bottom with the actions in groups:
 
-- **Share** — see below
-- **Make Public / Make Private**
-- **Singer Attribution**
-- **Edit take name** (type, then Save)
-- **Download take** (your own takes only)
-- **Delete take** — asks to confirm; the file is removed for good and people it was shared with lose access.
+- **Play** (or **Pause**), **Edit take name** (type, then Save) and **Download take**
+- **Share** (see below), **Singer Attribution**, **Make Public / Make Private** and **Copy link**
+- **Delete take**, on its own at the bottom in red — it asks to confirm; the file is removed for good and people it was shared with lose access.
+
+Choose an action and the sheet closes. To close it without choosing, swipe the bar at its top down, press Esc, or tap outside it. Takes that other people shared with you or made public have no ⋯: you can only play them.
 
 ## Sharing a take with someone
 
