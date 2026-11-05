@@ -632,6 +632,8 @@ const ru: Partial<Record<TranslationKey, string>> = {
   'common.yesDelete': 'Да, удалить',
   'feedback.notFound.title': 'Песня не найдена',
   'feedback.notFound.description': 'Похоже, медицина, которую ты ищешь, ушла блуждать в лес.',
+  'feedback.notFound.recording.title': 'Запись недоступна',
+  'feedback.notFound.recording.description': 'Эта запись не существует или не доступна вам.',
   'feedback.accessDenied.title': 'Эту медицину не тебе изменять',
   'feedback.accessDenied.description': 'Менять её облик может только хранитель песни.',
   'feedback.accessDenied.returnToCircle': 'Вернуться в круг',

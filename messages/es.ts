@@ -629,6 +629,8 @@ const es: Partial<Record<TranslationKey, string>> = {
   'common.yesDelete': 'Sí, eliminar',
   'feedback.notFound.title': 'Canción no encontrada',
   'feedback.notFound.description': 'La medicina que buscas parece haberse perdido en el bosque.',
+  'feedback.notFound.recording.title': 'Grabación no disponible',
+  'feedback.notFound.recording.description': 'Esta grabación no existe o no se ha compartido contigo.',
   'feedback.accessDenied.title': 'Esta medicina no es tuya para editar',
   'feedback.accessDenied.description': 'Solo el guardián de la canción puede cambiar su forma.',
   'feedback.accessDenied.returnToCircle': 'Volver al círculo',

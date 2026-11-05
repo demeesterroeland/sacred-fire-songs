@@ -3185,3 +3185,17 @@ Re-scoped Story 5.1.8 to the public-repo boundary decided by the owner: CI (buil
 - **Steps:** new `it tags release images with the release version`, `no workflow file name starts with {string}`; removed dead steps for the deleted staging/production deploy workflows.
 - **Script:** `scripts/cicd/develop2main.sh` (replaces `preview2prod.sh`) opens/reuses the promotion PR, waits for checks, asks for confirmation and merges with `--merge` only; then merges the Release Please PR, optionally prepends a release summary, and prints the explicit app/migrator `vX.Y.Z` images. `--dry-run` makes no `gh` call.
 - **Tests:** `testing/scripts/develop2main.bats` with a logging `gh` stub (6 tests); `branch-protection.bats` `--admin` guard active (scoped to `*.sh`). Unit 412/412, `ci-gate` 21/21, bats 32/32, lint and typecheck clean, isolation guard clean.
+
+
+## November 4–5, 2026 - Story 4.6.6: Notifications for shared rehearsal recordings (#373)
+
+**Task Overview**
+Sharing a private recording now tells the recipient: an in-app notification (header bell) and an email, both opening the recording itself. Recipients can opt out of email; a failed dispatch never blocks the share.
+
+**Technical Details**
+- **Database:** `notifications` is written only by the `security definer` trigger `fn_notify_recording_shared` (no INSERT policy; `REVOKE ALL` then `GRANT SELECT, DELETE` and a column grant on `read_at`, because Supabase grants ALL by default). Revoking a share removes its notification. `claim_recording_share_email` sets `recording_shares.email_sent_at` and returns the recipient only for the owner, once, when `profiles.email_notifications` is true.
+- **Email:** `lib/notifications/email.ts` (pure content and SMTP config), `mailer.ts` (nodemailer), server action `sendRecordingShareEmail` using `after()`. Production requires `SITE_URL`, since the request Host is caller-controlled; names are HTML-escaped; language is the default locale (profiles store none yet).
+- **UI:** `NotificationBell` (react-query, optimistic read state), `EmailNotificationsRow` in Preferences, `?tab=` on `/account/settings`.
+- **Recording links:** `/recordings/[id]` reads the recording under RLS and redirects to `/songs/:id?recording=:id`; the song page selects the recording's version, opens the Recordings tab and highlights the row. Access is decided by RLS only: owner, recipients, or public. Guests are sent to login with `next` pointing back at the link; users without access get a 404 that does not reveal whether the recording exists (recording-specific copy, follow-up fix).
+- **Tests:** unit 422, BDD `@shareNotifications` (3 + 5 seed scenarios plus an outline for the link parser), tsc clean, lint 199 warnings (cap lowered to 201). Verified end to end in a headless browser against the local stack with an SMTP sink: bell, mark read, navigation, email content and escaping, copy link, guest and no-access paths.
+- **Also:** `heartbeat-of-the-earth.mp3` joins the seed audio (real duration via `ffprobe`); the #371 plan file was removed.

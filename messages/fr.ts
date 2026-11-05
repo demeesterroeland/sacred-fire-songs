@@ -629,6 +629,8 @@ const fr: Partial<Record<TranslationKey, string>> = {
   'common.yesDelete': "Oui, supprimer",
   'feedback.notFound.title': "Chant introuvable",
   'feedback.notFound.description': "La médecine que tu cherches semble s'être égarée dans la forêt.",
+  'feedback.notFound.recording.title': 'Enregistrement indisponible',
+  'feedback.notFound.recording.description': 'Cet enregistrement n’existe pas ou n’est pas partagé avec vous.',
   'feedback.accessDenied.title': "Cette médecine n'est pas à toi de la modifier",
   'feedback.accessDenied.description': "Seul le gardien du chant peut en changer la forme.",
   'feedback.accessDenied.returnToCircle': "Retourner au cercle",
