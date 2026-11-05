@@ -101,7 +101,7 @@ export default function CategoryGrid() {
 
           <Link
             href={`/songs?category=${category.slug}`}
-            className={`z-0 flex min-h-tap items-center before:absolute before:inset-0 before:rounded-panel ${PRESSED}`}
+            className="z-0 flex min-h-tap items-center outline-none before:absolute before:inset-0 before:rounded-panel focus-visible:before:outline-2 focus-visible:before:outline-offset-2 focus-visible:before:outline-accent"
           >
             <h3 className="text-row font-semibold text-fg group-active:text-accent">{category.name}</h3>
           </Link>

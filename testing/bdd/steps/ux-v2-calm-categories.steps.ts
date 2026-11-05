@@ -23,6 +23,7 @@ Then('category tiles use only greyscale colours except the pressed state', funct
   }
 });
 
+// Source-level guard (literal classNames); the rendered check is the RTL test.
 Then('every category link is at least 44 px tall', function (this: World) {
   const links = this.source.match(/<(Link|button)\b[\s\S]*?className=\{?[`"][^`"]*[`"]/g) ?? [];
   assert.ok(links.length >= 3, 'category, tag and more links found');
