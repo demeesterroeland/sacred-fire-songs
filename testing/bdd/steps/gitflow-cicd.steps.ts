@@ -185,6 +185,31 @@ Then('it opens a pull request from {string} into {string}', function (this: Song
   );
 });
 
+// ── Back-merge main → develop (story 5.1.9) ──────────────────────────────────
+Then(
+  'it opens the pull request with the secret {string} and fails when it is missing',
+  function (this: SongBddWorld, secret: string) {
+    const wf = current(this);
+    assert.match(wf.raw, new RegExp(`GH_TOKEN:\\s*\\$\\{\\{\\s*secrets\\.${secret}\\s*\\}\\}`), `${wf.file} does not use ${secret} as GH_TOKEN`);
+    const script = runScripts(wf).join('\n');
+    assert.match(script, /if \[ -z "\$GH_TOKEN" \]; then[\s\S]*?exit 1/, `${wf.file} does not fail closed without ${secret}`);
+  },
+);
+
+Then(
+  'it labels the pull request {string} when main does not merge cleanly',
+  function (this: SongBddWorld, label: string) {
+    const script = runScripts(current(this)).join('\n');
+    assert.match(script, /git merge --no-commit --no-ff/, 'no test merge before labelling');
+    assert.match(script, new RegExp(`--add-label ${label}\\b`), `does not add the label "${label}"`);
+  },
+);
+
+Then('it never merges the pull request itself', function (this: SongBddWorld) {
+  const wf = current(this);
+  assert.doesNotMatch(runScripts(wf).join('\n'), /gh pr merge/, `${wf.file} merges the back-merge PR itself`);
+});
+
 Then(
   '{string} only runs after a successful {string} run on {string}',
   function (this: SongBddWorld, file: string, buildName: string, branch: string) {

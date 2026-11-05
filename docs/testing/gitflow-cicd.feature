@@ -192,6 +192,13 @@ Feature: Gitflow branching and CI/CD pipeline
     Then it triggers on "push" to "main"
     And it opens a pull request from "main" into "develop"
 
+  @story-5.1.9 @ci-contract
+  Scenario: The back-merge PR runs CI and reports conflicts
+    Given the workflow "back-merge.yml"
+    Then it opens the pull request with the secret "RELEASE_PLEASE_TOKEN" and fails when it is missing
+    And it labels the pull request "back-merge-conflict" when main does not merge cleanly
+    And it never merges the pull request itself
+
   @story-5.1.9 @manual
   Scenario: Release version bump reaches develop
     Given Release Please released "v1.8.0" on "main"

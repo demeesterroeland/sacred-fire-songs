@@ -1,6 +1,6 @@
 # Git Workflow & Branching Guidelines: Sacred Fire Songs
 
-**Version:** 1.7
+**Version:** 1.8
 **Status:** Living Document
 **Date:** Nov 5, 2026
 
@@ -8,6 +8,7 @@
 
 | Version | Date | Description of Changes |
 | ----- | ----- | ----- |
+| **1.8** | Nov 5, 2026 | `back-merge.yml` opens the back-merge PR `main` → `develop` automatically after every push to `main`; conflicts get the `back-merge-conflict` label (Story 5.1.9). |
 | **1.7** | Nov 5, 2026 | Promotion via `scripts/cicd/develop2main.sh` (Story 5.1.8): PR `develop` → `main` with a merge commit, never `--admin`; replaces `preview2prod.sh`. CI and image delivery live in this repo, deployment (CD) does not. |
 | **1.6** | Nov 3, 2026 | `develop` publishes images only; deploying them is outside this public repo (`deploy-staging.yml` removed). Enable the isolation git hooks with `git config core.hooksPath .githooks`. |
 | **1.5** | Oct 31, 2026 | `develop` deploys to **staging** automatically (`docker.yml` → `:develop` image, `deploy-staging.yml` → restricted SSH deploy on the VPS); no more `:latest` images (Epic 5.1 Phase 3). |
@@ -200,9 +201,10 @@ The script never uses `--squash`, `--admin`, `--auto` or `--delete-branch` (`dev
 gh pr create --base main --head develop --title "chore(release): promote develop to main"
 gh pr merge <promotion-pr> --merge          # merge commit, never --squash
 gh pr merge <release-please-pr> --merge     # creates the vX.Y.Z tag
-gh pr create --base develop --head main --title "chore: back-merge main into develop"
-gh pr merge <back-merge-pr> --merge        # merge commit, keeps the release commit + tag reachable
+gh pr merge <back-merge-pr> --merge        # PR opened by back-merge.yml; merge commit keeps the release commit + tag reachable
 ```
+
+After every push to `main`, `.github/workflows/back-merge.yml` opens (or updates) the back-merge PR `main` → `develop` itself. It never merges it: you merge it with a merge commit once its checks pass. If `main` does not merge cleanly it gets the `back-merge-conflict` label; resolve on a `chore/…` branch from `develop` that merges `origin/main`.
 
 Never create version tags or edit `CHANGELOG.md` by hand; Release Please owns both.
 
