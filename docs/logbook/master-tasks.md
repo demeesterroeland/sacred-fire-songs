@@ -1435,3 +1435,12 @@
 - [x] Wave A sync: lint cap 201 → 188, palette baseline 2535, UXA-010 now needs owner confirmation
 - [ ] Next: preview build `ux-v2-preview`, Wave B (#388, 393, 401, 402, 403, 408, 411, 413, 414), Wave C, #418 last
 - [ ] Follow-ups: hard-coded English toasts in `useToggleFavorite`; guest Listen list for consented takes (UXA-012); admin/auth/settings pages not axe-covered; unused `YouTubeEmbed.tsx`; native-speaker check qu/ru
+
+## Session November 5, 2026 (Epic 6.1 UX v2, Wave B, #375)
+- [x] #388 (PR #447), #408 bottom bar Home · Search · Library (#446), #411 guest song draft kept through sign-in (#450), #401 take actions bottom sheet (#448), #413 recent searches + category chips (#451)
+- [x] #393 sticky Practice · Playlist · ♥ action bar on the song page (#449), #414 Add to playlist bottom sheet with check marks (#452)
+- [x] #402 Share dialog explains who can be found and what a private song does (#453), #403 Shared with me page, "n new" entries, mark read on Practice (#454)
+- [x] Decisions UXA-019…029, owner checklist #431 updated; validation script sections per story
+- [x] Wave B sync: lint cap 188 → 177, palette baseline 2252; UX capture scripts look seeded song ids up by title (ids change on every reseed)
+- [ ] Next: preview build `ux-v2-preview`, Wave C (#389, 394, 395, 397, 404, 405, 409, 412, 415, 416), #418 last
+- [ ] Follow-ups: native-speaker check qu (share, shared-with-me copy) and nl/qu action-bar labels; concurrent tabs can add a playlist item twice (no unique constraint); Library sub-pages use h2 while Shared with me has h1; pre-existing security finding on member search reported to the owner privately

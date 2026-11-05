@@ -3222,3 +3222,17 @@ The first 14 UX v2 stories landed on the integration branch `feat/ux-v2`: sober 
 - **i18n:** every new string in 8 locales; it/pt/ru/fr gender aligned with each locale's word for "take".
 - **Tests:** Vitest 707, BDD unit 136 passed / 47 pending, BDD seed 11 / 13 pending, Playwright smoke + story specs green; lint 188 warnings, cap lowered to 188.
 - **Decisions:** UXA-006…018 (ADR-lite), owner checklist issue #431.
+
+## November 5, 2026 - Epic 6.1 UX v2, Wave B (#375)
+
+**Task Overview**
+Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · Library, a sticky song action bar (Practice · Playlist · ♥), bottom sheets for take actions and Add to playlist, search suggestions, a guest song draft that survives sign-in, a Share dialog that explains itself, and a Shared with me page.
+
+**Technical Details**
+- **Navigation:** `MobileBottomNav` with three items; `--bottom-nav-height` reports the real height (0 on desktop); the song action bar hides on scroll down only while the bottom bar hides too. On phones the song's ⋮ sheet keeps Share Song, Edit, Delete.
+- **Sheets:** `components/ui/bottom-sheet.tsx` can be swiped down (primary button only, lost pointer capture ends the drag). `TakeActionsSheet` runs Play/Download/Copy link/Visibility inside the tap and defers the rest until focus returns. `PlaylistPicker` toggles per song (any version): untick removes every version, tick adds the oldest; the check follows what the server did.
+- **Search:** recent searches (device only) and top-level category chips under the field; ARIA `aria-controls` + hint, no `aria-expanded` on a textbox.
+- **Sharing:** the Share dialog opens on one of three steps (`shareDialogStep`); a private song asks inside the dialog and changes nothing until confirmed. `/library/shared` lists takes shared with me from the recipient's own `recording_shares` and notifications; opening Practice marks that song's notifications read and updates the bell cache.
+- **Guests:** `songDraft` keeps the Add song form on the device while the guest signs in.
+- **Tests:** Vitest 837, BDD unit 174 passed / 47 pending, BDD seed 12 / 13 pending, Playwright story specs and smoke green; lint 177 warnings, cap lowered to 177; palette baseline 2252.
+- **Decisions:** UXA-019…029, owner checklist #431.
