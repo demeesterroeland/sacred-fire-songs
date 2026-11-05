@@ -3185,3 +3185,7 @@ Re-scoped Story 5.1.8 to the public-repo boundary decided by the owner: CI (buil
 - **Steps:** new `it tags release images with the release version`, `no workflow file name starts with {string}`; removed dead steps for the deleted staging/production deploy workflows.
 - **Script:** `scripts/cicd/develop2main.sh` (replaces `preview2prod.sh`) opens/reuses the promotion PR, waits for checks, asks for confirmation and merges with `--merge` only; then merges the Release Please PR, optionally prepends a release summary, and prints the explicit app/migrator `vX.Y.Z` images. `--dry-run` makes no `gh` call.
 - **Tests:** `testing/scripts/develop2main.bats` with a logging `gh` stub (6 tests); `branch-protection.bats` `--admin` guard active (scoped to `*.sh`). Unit 412/412, `ci-gate` 21/21, bats 32/32, lint and typecheck clean, isolation guard clean.
+
+**Story 5.1.9: automatic back-merge (#298)**
+- `.github/workflows/back-merge.yml`: on push to `main` (and manually) it checks `origin/develop..origin/main`, opens or reuses the PR `main` → `develop` with `RELEASE_PLEASE_TOKEN` (so CI runs; fails closed if missing), test-merges and labels conflicts `back-merge-conflict` with a comment. Never merges itself (no `--auto`/`--admin`).
+- Spec: new `@story-5.1.9` contract scenario; 5.1.9 added to `ci-gate` (23/23). actionlint clean.

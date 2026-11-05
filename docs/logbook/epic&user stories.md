@@ -1,6 +1,6 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 1.53
+**Version:** 1.54
 **Status:** Living Document
 **Date:** Nov 5, 2026
 
@@ -52,6 +52,7 @@
 | **1.51** | Nov 4, 2026 | Added Phase 6 and Epic 6.1 (UX & Design Rework, #375): 9 group epics and 34 stories from the UX research in `docs/ux-research/`. |
 | **1.52** | Nov 5, 2026 | Added Story 4.6.5 (Personal Reordering of Shared-with-Me and Public Recordings, #420) [Planned] with Option A decision (decoupled user-specific ordering table). |
 | **1.53** | Nov 5, 2026 | Epic 5.1: Story 5.1.8 (#297) re-scoped and implemented — promotion `develop` → `main` via `scripts/cicd/develop2main.sh` (merge commit, no `--admin`) and versioned release images; production deployment lives outside the public repo. Story 5.1.6 (#294) completed (no script uses `--admin`). Stories 5.1.1, 5.1.7 and 5.1.12 closed on GitHub. |
+| **1.54** | Nov 5, 2026 | Story 5.1.9 (#298) implemented: `back-merge.yml` opens the PR `main` → `develop` after every push to `main`, labels conflicts; merged by the owner, never automatically. |
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
 
@@ -1457,7 +1458,7 @@ Move from GitHub Flow to a lightweight Gitflow: `main` = production, `develop` =
 | 5.1.6 | #294 | Scripts follow Gitflow (no `--admin`, correct image names) | 2 | [Implemented] |
 | 5.1.7 | #295 | Staging CD from `develop` (images, migrations, deploy) | 3 | [Re-scoped] (this repo publishes `develop` images; deployment lives outside the public repo) |
 | 5.1.8 | #297 | Promotion `develop` → `main` + versioned release images | 4 | [Implemented] (re-scoped Nov 5: deployment and its approval live outside the public repo; slow-layer required checks deferred with 5.1.2/5.1.11) |
-| 5.1.9 | #298 | Automatic back-merge `main` → `develop` | 4 | [Planned] |
+| 5.1.9 | #298 | Automatic back-merge `main` → `develop` | 4 | [Implemented] (PR opened automatically; owner merges) |
 | 5.1.10 | #299 | Hotfix flow | 4 | [Planned] |
 | 5.1.11 | #296 | Test-pyramid schedule (nightly full E2E + perf) | 3 | [Deferred] (needs Tailscale `tag:ci`, with 5.1.2) |
 | 5.1.12 | #291 | Supply-chain hardening (pinned actions, Dependabot, permissions) | 1 | [Implemented] |
@@ -1541,7 +1542,7 @@ Scenario: A published release builds versioned images
   And no workflow in this repository deploys it
 ```
 
-**Story 5.1.9:** As a Maintainer, I want `main` merged back into `develop` after every release or hotfix so that version bumps and fixes are never lost.
+**Story 5.1.9: [Implemented]** As a Maintainer, I want `main` merged back into `develop` after every release or hotfix so that version bumps and fixes are never lost.
 
 ```gherkin
 Scenario: Release version bump reaches develop
