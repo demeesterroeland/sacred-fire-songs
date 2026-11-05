@@ -1410,4 +1410,7 @@
 - [x] Docs: design doc 1.57, stories 1.53, git-workflow guide 1.7, scripts README
 - [x] PR #422 merged into `develop` (owner)
 - [x] #298: `back-merge.yml` (push `main` → PR `main` → `develop`, PAT, fail closed, conflict label, no self-merge); contract scenarios in `ci-gate`; docs
-- [ ] Next: 5.1.10 hotfix (#299); 5.1.2/5.1.11 once the Tailscale `tag:ci` + E2E database secrets are in the repo
+- [x] PR #423 merged (owner); #299 code deliverables ticked, end-to-end hotfix check moved to the 5.1.14 dress rehearsal (owner decision)
+- [x] #300: `development-workflow.md` 2.0, Gitflow PR template, `/start-story` + `/sync-artifacts` + README aligned; `@story-5.1.13` documentation contract in `ci-gate`
+- [ ] Owner: confirm changes to the global ship triggers in the private `~/.claude/CLAUDE.md` (merge = into `develop`; release = `develop2main.sh`)
+- [ ] Next: 5.1.14 dress rehearsal (#301, incl. hotfix); 5.1.2/5.1.11 once the Tailscale `tag:ci` + E2E database secrets are in the repo
