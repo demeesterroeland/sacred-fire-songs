@@ -633,6 +633,8 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'common.yesDelete': 'Arí, qichuy',
   'feedback.notFound.title': 'Taki mana tarisqachu',
   'feedback.notFound.description': 'Maskasqayki qhali kayqa sach’a-sach’api purinanpaq riqsisqa.',
+  'feedback.notFound.recording.title': 'Grabación mana kanchu',
+  'feedback.notFound.recording.description': 'Kay grabación manam kanchu utaq manam qamwan rakisqachu.',
   'feedback.accessDenied.title': 'Kay Qhali mana qampaqchu allinchanapaq',
   'feedback.accessDenied.description': 'Takipa waqaychaqnillanmi rikch’ayninta hukchanman.',
   'feedback.accessDenied.returnToCircle': 'Muyuman kutiy',

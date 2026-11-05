@@ -3,8 +3,18 @@
 import Link from 'next/link';
 import { Home, Music2 } from 'lucide-react';
 import { useLocale } from '@/context/LocaleContext';
+import type { TranslationKey } from '@/lib/i18n';
 
-export default function NotFound() {
+interface NotFoundProps {
+  /** Dictionary keys; the defaults are the song-themed copy. */
+  titleKey?: TranslationKey;
+  descriptionKey?: TranslationKey;
+}
+
+export default function NotFound({
+  titleKey = 'feedback.notFound.title',
+  descriptionKey = 'feedback.notFound.description',
+}: NotFoundProps = {}) {
   const { t } = useLocale();
   return (
     <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-gray-100 dark:bg-gray-900 h-full min-h-[60vh]">
@@ -13,9 +23,9 @@ export default function NotFound() {
         <Music2 className="w-24 h-24 text-red-500 relative z-10" />
       </div>
 
-      <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">{t('feedback.notFound.title')}</h1>
+      <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">{t(titleKey)}</h1>
       <p className="text-gray-500 dark:text-gray-400 max-w-[280px] mb-12 leading-relaxed">
-        {t('feedback.notFound.description')}
+        {t(descriptionKey)}
       </p>
 
       <Link
