@@ -20,7 +20,7 @@ import { getUserRecordings, deleteUserRecording, renameUserRecording, reorderUse
 import { getYouTubeEmbedUrl, getSpotifyEmbedUrl } from "./MediaEmbeds";
 import { useAuth } from "@/hooks/useAuth";
 import { useAudio } from "./AudioProvider";
-import { applyMiniPlayerHeight, isMiniPlayerVisible, mediaSessionReducer, ownsActiveTake } from "@/lib/player/miniPlayer";
+import { applyMiniPlayerHeight, isMiniPlayerVisible, mediaSessionReducer, miniPlayerClose, ownsActiveTake } from "@/lib/player/miniPlayer";
 import Link from "next/link";
 import { useQueryClient } from "@tanstack/react-query";
 import { useLocale } from "@/context/LocaleContext";
@@ -1631,7 +1631,7 @@ export default function RehearsalDrawer({
                 onClick={() => {
                   // ✕ stops everything this song plays and hides the bar (UXD-5): the reference
                   // track and this song's take, so a paused take cannot take over the bar.
-                  if (ownsActiveTake(activePlaybackId, songRecordingIds)) stopActiveRecording();
+                  if (miniPlayerClose(activePlaybackId, songRecordingIds).stopTake) stopActiveRecording();
                   pauseYouTube();
                   pauseSoundCloud();
                   setPlayingSource(null);

@@ -4,6 +4,7 @@ import {
   applyMiniPlayerHeight,
   isMiniPlayerVisible,
   mediaSessionReducer,
+  miniPlayerClose,
   ownsActiveTake,
 } from '@/lib/player/miniPlayer';
 
@@ -80,5 +81,25 @@ describe('applyMiniPlayerHeight', () => {
     applyMiniPlayerHeight(false, root);
     expect(root.style.removeProperty).toHaveBeenCalledWith(MINI_PLAYER_CSS_VAR);
     expect(root.props.has(MINI_PLAYER_CSS_VAR)).toBe(false);
+  });
+});
+
+describe('✕ closes the bar whatever plays (UXD-5)', () => {
+  const ids = ['take-a'];
+  it.each([
+    ['only a take of this song', { mediaSessionStarted: false, activePlaybackId: 'take-a' }, true],
+    ['only a reference track', { mediaSessionStarted: true, activePlaybackId: null }, false],
+    ['a paused take and a playing reference track', { mediaSessionStarted: true, activePlaybackId: 'take-a' }, true],
+    ['a reference track while a take of another song is active', { mediaSessionStarted: true, activePlaybackId: 'take-b' }, false],
+  ])('%s: stops what this song plays and hides the bar', (_label, state, stopTake) => {
+    const close = miniPlayerClose(state.activePlaybackId, ids);
+    expect(close.stopTake).toBe(stopTake);
+    expect(close.stopReference).toBe(true);
+    const after = {
+      mediaSessionStarted: mediaSessionReducer(state.mediaSessionStarted, 'stopped'),
+      activePlaybackId: close.stopTake ? null : state.activePlaybackId,
+      songRecordingIds: ids,
+    };
+    expect(isMiniPlayerVisible(after)).toBe(false);
   });
 });

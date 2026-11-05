@@ -28,6 +28,17 @@ export function isMiniPlayerVisible({ mediaSessionStarted, activePlaybackId, son
   return mediaSessionStarted || ownsActiveTake(activePlaybackId, songRecordingIds);
 }
 
+/**
+ * What ✕ on the bar stops: always the reference track, and the active take when it belongs to
+ * this song. A paused take must not take over the bar after ✕ (UXD-5: ✕ stops and hides).
+ */
+export function miniPlayerClose(
+  activePlaybackId: string | null,
+  songRecordingIds: readonly string[],
+): { stopTake: boolean; stopReference: true } {
+  return { stopTake: ownsActiveTake(activePlaybackId, songRecordingIds), stopReference: true };
+}
+
 export type MediaSessionEvent = 'playing' | 'stopped' | 'take-started';
 
 /** Pause keeps the bar (no event); `stopped` and a take taking over end the media session. */
