@@ -561,10 +561,8 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'viewer.fontLarger': 'Grotere tekst',
   'settings.prefs.offlineMode': 'Offline modus',
   'settings.prefs.offlineMode.description': 'Sla liederen lokaal op voor gebruik zonder internetverbinding.',
-  'settings.comingSoon': 'Binnenkort beschikbaar',
 
   'settings.privacy.heading': 'Privacy-instellingen',
-  'settings.privacy.notActive': 'Deze instellingen zijn nog niet actief.',
   'settings.privacy.makePublic': 'Profiel openbaar maken',
   'settings.privacy.makePublic.description': 'Laat anderen je openbare liedrenverzamelingen zien.',
   'settings.privacy.showActivity': 'Activiteit tonen',
@@ -592,7 +590,6 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'common.edit': 'Bewerken',
   'common.loading': 'Laden...',
   'common.viewAll': 'Alles bekijken',
-  'common.comingSoon': 'Binnenkort beschikbaar',
   'common.or': 'Of',
 
   // ─── Auth – Login (redesigned) ────────────────────────────────────────────
@@ -750,7 +747,6 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'songForm.artists.placeholder': 'Typ een artiestennaam en druk op Enter...',
   'songForm.artists.addAnother': 'Nog een artiest toevoegen...',
   'settings.prefs.notSupported': 'Niet ondersteund door je browser',
-  'settings.profile.avatar.comingSoon': 'Een avatar uploaden is binnenkort mogelijk.',
   'auth.signUpSuccess.verify': 'Verifiëren & doorgaan',
   'auth.signUpSuccess.returnToLogin': 'Terug naar aanmelden',
   'auth.signUpSuccess.orEnterCode': 'Of voer de code in',

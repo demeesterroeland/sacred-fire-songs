@@ -24,7 +24,8 @@ import SecuritySettings from "@/components/account/settings/SecuritySettings";
 import PrivacySettings from "@/components/account/settings/PrivacySettings";
 import PreferencesSettings from "@/components/account/settings/PreferencesSettings";
 import { useLocale } from "@/context/LocaleContext";
-import { parseSettingsTab, type SettingsTab } from "@/lib/account/settingsTabs";
+import { parseSettingsTab, visibleSettingsTabs, type SettingsTab } from "@/lib/account/settingsTabs";
+import { FEATURES } from "@/lib/features";
 
 // Re-exported for tests; server code imports it from "@/lib/account/settingsTabs".
 export { parseSettingsTab };
@@ -41,12 +42,14 @@ export default function AccountSettings({ user, profile, initialTab = "profile" 
   const { t } = useLocale();
   const [activeTab, setActiveTab] = useState<TabType>(initialTab);
 
-  const tabs = [
-    { id: "profile" as const,      label: t("settings.tab.profile"),      icon: UserIcon },
-    { id: "account" as const,      label: t("settings.tab.security"),      icon: Lock },
-    { id: "preferences" as const,  label: t("settings.tab.preferences"),  icon: SlidersHorizontal },
-    { id: "privacy" as const,      label: t("settings.tab.privacy"), icon: Shield },
-  ];
+  // Story 6.1.5 (#389): only tabs that work; "Privacy & Data" is hidden while FEATURES.privacySettings is off.
+  const tabMeta = {
+    profile:     { label: t("settings.tab.profile"),     icon: UserIcon },
+    account:     { label: t("settings.tab.security"),    icon: Lock },
+    preferences: { label: t("settings.tab.preferences"), icon: SlidersHorizontal },
+    privacy:     { label: t("settings.tab.privacy"),     icon: Shield },
+  } satisfies Record<TabType, { label: string; icon: typeof Lock }>;
+  const tabs = visibleSettingsTabs().map((id) => ({ id, ...tabMeta[id] }));
 
   return (
     <main className="flex-1 p-4 md:p-8 lg:p-12">
@@ -83,7 +86,7 @@ export default function AccountSettings({ user, profile, initialTab = "profile" 
           {activeTab === "profile" && <ProfileSettings user={user} profile={profile} />}
           {activeTab === "account" && <SecuritySettings user={user} />}
           {activeTab === "preferences" && <PreferencesSettings />}
-          {activeTab === "privacy" && <PrivacySettings user={user} profile={profile} />}
+          {FEATURES.privacySettings && activeTab === "privacy" && <PrivacySettings user={user} profile={profile} />}
         </div>
       </div>
     </main>

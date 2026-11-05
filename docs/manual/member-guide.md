@@ -1,11 +1,12 @@
 # Member Guide (draft)
 
-**Version:** 0.11 | **Date:** Nov 5, 2026
+**Version:** 0.12 | **Date:** Nov 6, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.12 | Nov 6, 2026 | Settings lists only what works: Profile, Security and Preferences; no "Coming soon" items (UX v2, #389). |
 | 0.11 | Nov 5, 2026 | **Shared with me**: a list of takes others shared with you, in the account menu and under the Library tabs; the bell tells you when a take arrives, and opening the song's Practice panel marks it read (UX v2, #403). |
 | 0.10 | Nov 5, 2026 | Add to playlist is a sheet from the bottom with **New playlist** first and a check next to playlists that already hold the song (UX v2, #414). |
 | 0.9 | Nov 5, 2026 | Like and Add to playlist moved from the song's ⋮ menu to the bar at the bottom of the song (UX v2, #393). |
@@ -87,10 +88,9 @@ Open your song → ⋮ → **Edit** **(verify label)**. You can only edit songs 
 
 **Account Settings** has tabs:
 
-- **Profile:** display name (avatar upload is coming soon). E-mail changes go via support.
+- **Profile:** display name. E-mail changes go via support.
 - **Security:** change password, log out from all devices.
-- **Preferences:** appearance, language, keep screen awake, auto-hide navigation on song pages, auto-scroll, show chords by default, offline mode (text size is set on the song page with A− / A+) **(verify which are active; some are marked "Coming soon")**.
-- **Privacy & Data:** not active yet.
+- **Preferences:** appearance, language, keep screen awake, auto-hide navigation on song pages and e-mail notifications (text size is set on the song page with A− / A+).
 
 ## Public profile
 

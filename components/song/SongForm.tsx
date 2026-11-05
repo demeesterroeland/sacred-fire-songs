@@ -19,6 +19,7 @@ import { ArtistTagInput } from './ArtistTagInput';
 import { parseArtists, formatArtists, ensureArtistCategoryIds } from '@/lib/songs/artistUtils';
 import { useLocale } from '@/context/LocaleContext';
 import { safeNextPath } from '@/lib/auth/safeNext';
+import { FEATURES } from '@/lib/features';
 
 type SongFormData = {
     title: string;
@@ -598,19 +599,20 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                     </div>
                 </details>
 
-                {/* 7. Melody Notation — Coming Soon */}
-                <details className="group opacity-60">
-                    <summary className="w-full flex items-center justify-between py-3 cursor-pointer select-none list-none">
-                        <div className="flex items-center gap-2">
-                            <h3 className="text-gray-400 font-semibold text-sm">{t('songForm.field.melody')}</h3>
-                            <span className="text-caption font-semibold text-fg-muted bg-surface-2 px-2 py-0.5 rounded-full border border-line">{t('common.comingSoon')}</span>
+                {/* 7. Melody Notation — hidden until FEATURES.melodyNotation is on (Story 6.1.5, #389) */}
+                {FEATURES.melodyNotation && (
+                    <details className="group opacity-60">
+                        <summary className="w-full flex items-center justify-between py-3 cursor-pointer select-none list-none">
+                            <div className="flex items-center gap-2">
+                                <h3 className="text-gray-400 font-semibold text-sm">{t('songForm.field.melody')}</h3>
+                            </div>
+                            <span className="material-symbols-outlined text-gray-400 transition-transform group-open:rotate-180">expand_more</span>
+                        </summary>
+                        <div className="py-3">
+                            <p className="text-gray-500 text-xs">{t('songForm.field.melody.hint')}</p>
                         </div>
-                        <span className="material-symbols-outlined text-gray-400 transition-transform group-open:rotate-180">expand_more</span>
-                    </summary>
-                    <div className="py-3">
-                        <p className="text-gray-500 text-xs">{t('songForm.field.melody.hint')}</p>
-                    </div>
-                </details>
+                    </details>
+                )}
             </div>
 
             {serverError && (

@@ -561,10 +561,8 @@ const pt: Partial<Record<TranslationKey, string>> = {
   'viewer.fontLarger': 'Texto maior',
   'settings.prefs.offlineMode': 'Modo offline',
   'settings.prefs.offlineMode.description': 'Guarda as músicas no aparelho para usar sem conexão com a internet.',
-  'settings.comingSoon': 'Em breve',
 
   'settings.privacy.heading': 'Configurações de privacidade',
-  'settings.privacy.notActive': 'Estas configurações ainda não estão ativas.',
   'settings.privacy.makePublic': 'Tornar perfil público',
   'settings.privacy.makePublic.description': 'Permita que outras pessoas vejam suas coleções públicas de músicas.',
   'settings.privacy.showActivity': 'Mostrar atividade',
@@ -592,7 +590,6 @@ const pt: Partial<Record<TranslationKey, string>> = {
   'common.edit': 'Editar',
   'common.loading': 'Carregando...',
   'common.viewAll': 'Ver tudo',
-  'common.comingSoon': 'Em breve',
   'common.or': 'Ou',
 
   // ─── Auth – Login (redesigned) ────────────────────────────────────────────
@@ -750,7 +747,6 @@ const pt: Partial<Record<TranslationKey, string>> = {
   'songForm.artists.placeholder': 'Digite o nome do artista e pressione Enter...',
   'songForm.artists.addAnother': 'Adicionar outro artista...',
   'settings.prefs.notSupported': 'Não é compatível com o seu navegador',
-  'settings.profile.avatar.comingSoon': 'O envio de avatar estará disponível em breve.',
   'auth.signUpSuccess.verify': 'Verificar e continuar',
   'auth.signUpSuccess.returnToLogin': 'Voltar para o login',
   'auth.signUpSuccess.orEnterCode': 'Ou introduza o código',

@@ -1,8 +1,8 @@
 # E2E Test Overview & Matrix: Sacred Fire Songs
 
-**Version:** 1.15
+**Version:** 1.16
 **Status:** Living Document
-**Date:** Nov 5, 2026
+**Date:** Nov 6, 2026
 **Tracking:** GH #142
 
 ## Changelog
@@ -25,6 +25,7 @@
 | **1.13** | Nov 4, 2026 | PWA-03: offline fallback page covered by `e2e/tests/offline.spec.ts` (#353); cached pages offline still planned. |
 | **1.14** | Nov 5, 2026 | Story 6.1.26 (#410): guests on members-only screens now get the GuestGate (locked preview, reason, `Sign in` with `next=`) instead of a redirect; ACC-01 updated, new spec `e2e/tests/guest-gate.spec.ts` covers every gated route. |
 | **1.15** | Nov 5, 2026 | LIB-13 follows Story 6.1.24: no `/explore` route; bottom bar spec `ux-v2-bottom-bar.spec.ts`. |
+| **1.16** | Nov 6, 2026 | Story 6.1.5 (#389): ACC-04 (Privacy settings) is hidden behind `FEATURES.privacySettings`; LIB-10 (Albums) answers not-found. New spec `ux-v2-hide-unfinished.spec.ts` asserts no "Coming soon" in Library, Settings and the song form. |
 
 ---
 
@@ -113,7 +114,7 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 | ACC-01 | Settings access control | Unauthenticated user sees the GuestGate with a `Sign in` link carrying `next=` | deep-link to `/account/settings` | G | ✅ | 🟡 | P0 | `app/account/settings` |
 | ACC-02 | Profile settings | Update display name and save | empty name; avatar upload | M | ⚠️ | 🔲 | P1 | ProfileSettings |
 | ACC-03 | Security settings | Change password from settings | wrong current password; mismatch | M | ⚠️ | 🔲 | P1 | SecuritySettings |
-| ACC-04 | Privacy settings | Toggle privacy / data options | account deletion confirm | M | ⚠️ | 🔲 | P2 | PrivacySettings |
+| ACC-04 | Privacy settings | Hidden (`FEATURES.privacySettings` off): no tab, `?tab=privacy` opens Profile | — | M | ⚠️ | ✅ | P2 | `ux-v2-hide-unfinished.spec.ts` |
 | ACC-05 | Preferences / theme | Toggle dark/light/system; persists across reload | no flash-of-wrong-theme on reload | G/M | ✅ | 🔲 | P1 | ThemeToggle |
 | ACC-06 | Musician profile toggle | Enable "I play an instrument" reveals musician features | toggle off hides transpose/chord badges/Chords filter | M | ⚠️ | 🔲 | P1 | Story 3.5.1 |
 | ACC-07 | Interface language (en, nl, es, it, ru, qu, fr, pt) | Switch language from sidebar, user menu or Preferences; UI text changes without reload | browser-locale default (nl-BE → NL, de → EN); persists after reload, navigation and sign-out; SSR already in chosen language; no hydration mismatch; song content untranslated | G/M | ✅ | ✅ | P1 | Story 3.7.1, `e2e/tests/i18n.spec.ts` |
@@ -147,7 +148,7 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 | LIB-07 | Auth-state refresh | Library updates after login/logout without manual refresh | private/draft appear on login; disappear on logout | G↔M | ✅ | 🟡 | P0 | bug #62 |
 | LIB-08 | Filters: chords/melody/favorites/mine/status | Each filter narrows the list with correct counts | musician-gated Chords filter | M | ✅ | 🔲 | P1 | useSongsFilter |
 | LIB-09 | Artists tab | Browse songs aggregated by author | author with 1 vs many songs | G | ✅ | 🔲 | P2 | `library/artists` |
-| LIB-10 | Albums tab | Placeholder "coming soon" renders | — | G | ⚠️ | 🔲 | P2 | `library/albums` (stub) |
+| LIB-10 | Albums tab | Hidden (UXD-4): no tab, `/library/albums` renders not-found | — | G | ⚠️ | ✅ | P2 | `ux-v2-library-tabs.spec.ts` |
 | LIB-11 | Recently viewed | Auth user sees recently viewed songs | requires auth; records on detail visit | M | ✅ | 🔲 | P1 | `library/recently-viewed` |
 | LIB-12 | New since last visit | Unviewed recent songs surfaced | last_seen tracking | M | ✅ | 🔲 | P2 | NewSinceLastVisit |
 | LIB-13 | Home/Library guest access | Guest can reach Home & Library without login; `/explore` is a 404 (Story 6.1.24) | `e2e/tests/ux-v2-bottom-bar.spec.ts` | G | ✅ | 🔲 | P2 | 1.2.3 |

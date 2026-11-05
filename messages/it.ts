@@ -561,10 +561,8 @@ const it: Partial<Record<TranslationKey, string>> = {
   'viewer.fontLarger': 'Testo più grande',
   'settings.prefs.offlineMode': 'Modalità offline',
   'settings.prefs.offlineMode.description': 'Salva i canti in locale per usarli senza connessione a internet.',
-  'settings.comingSoon': 'Prossimamente',
 
   'settings.privacy.heading': 'Impostazioni privacy',
-  'settings.privacy.notActive': 'Queste impostazioni non sono ancora attive.',
   'settings.privacy.makePublic': 'Rendi pubblico il profilo',
   'settings.privacy.makePublic.description': 'Permetti ad altri di vedere le tue raccolte pubbliche di canti.',
   'settings.privacy.showActivity': 'Mostra attività',
@@ -592,7 +590,6 @@ const it: Partial<Record<TranslationKey, string>> = {
   'common.edit': 'Modifica',
   'common.loading': 'Caricamento...',
   'common.viewAll': 'Vedi tutti',
-  'common.comingSoon': 'Prossimamente',
   'common.or': 'Oppure',
 
   // ─── Auth – Login (redesigned) ────────────────────────────────────────────
@@ -750,7 +747,6 @@ const it: Partial<Record<TranslationKey, string>> = {
   'songForm.artists.placeholder': "Scrivi il nome dell'artista e premi Invio...",
   'songForm.artists.addAnother': "Aggiungi un altro artista...",
   'settings.prefs.notSupported': 'Non supportato dal tuo browser',
-  'settings.profile.avatar.comingSoon': 'Il caricamento dell\'avatar sarà disponibile presto.',
   'auth.signUpSuccess.verify': 'Verifica e continua',
   'auth.signUpSuccess.returnToLogin': "Torna all'accesso",
   'auth.signUpSuccess.orEnterCode': 'Oppure inserisci il codice',

@@ -3,11 +3,12 @@
 import { useState, useRef } from "react";
 import Image from "next/image";
 import { User } from "@supabase/supabase-js";
-import { User as UserIcon, Camera, Loader2 } from "lucide-react";
+import { User as UserIcon, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useLocale } from "@/context/LocaleContext";
+import { FEATURES } from "@/lib/features";
 
 interface ProfileSettingsProps {
   user: User;
@@ -93,40 +94,39 @@ export default function ProfileSettings({ user, profile }: ProfileSettingsProps)
 
   return (
     <section className="space-y-8">
-      <input
-        type="file"
-        ref={fileInputRef}
-        onChange={handleFileChange}
-        accept="image/*"
-        className="hidden"
-      />
+      {/* Avatar upload is unfinished: hidden until FEATURES.avatarUpload is on (Story 6.1.5, #389). */}
+      {FEATURES.avatarUpload && (
+        <>
+        <input
+          type="file"
+          ref={fileInputRef}
+          onChange={handleFileChange}
+          accept="image/*"
+          className="hidden"
+        />
 
-      <div className="flex flex-col md:flex-row items-center gap-8 pb-8 border-b border-gray-200 dark:border-white/5 opacity-50">
-        <div className="relative">
-          <div className="w-24 h-24 rounded-full overflow-hidden bg-slate-200 dark:bg-slate-800 ring-2 ring-gray-900/10 dark:ring-white/10 flex items-center justify-center relative">
-            {profile?.avatar_url ? (
-              <Image 
-                src={profile.avatar_url} 
-                alt={t('settings.profile.avatar')} 
-                fill 
-                className="object-cover" 
-                sizes="96px"
-              />
-            ) : (
-              <UserIcon className="w-12 h-12 text-slate-600" />
-            )}
+        <div className="flex flex-col md:flex-row items-center gap-8 pb-8 border-b border-gray-200 dark:border-white/5 opacity-50">
+          <div className="relative">
+            <div className="w-24 h-24 rounded-full overflow-hidden bg-slate-200 dark:bg-slate-800 ring-2 ring-gray-900/10 dark:ring-white/10 flex items-center justify-center relative">
+              {profile?.avatar_url ? (
+                <Image 
+                  src={profile.avatar_url} 
+                  alt={t('settings.profile.avatar')} 
+                  fill 
+                  className="object-cover" 
+                  sizes="96px"
+                />
+              ) : (
+                <UserIcon className="w-12 h-12 text-slate-600" />
+              )}
+            </div>
           </div>
-        </div>
-        <div className="text-center md:text-left">
-          <div className="flex items-center gap-2 mb-1">
+          <div className="text-center md:text-left">
             <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{t("settings.profile.avatar")}</h3>
-            <span className="text-caption font-semibold text-fg-muted bg-surface-2 border border-line px-2 py-0.5 rounded-full">
-              {t("settings.comingSoon")}
-            </span>
           </div>
-          <p className="text-sm text-slate-500">{t('settings.profile.avatar.comingSoon')}</p>
         </div>
-      </div>
+        </>
+      )}
 
       <div className="space-y-2">
         <label className="text-meta font-semibold text-fg-muted ml-1">{t("settings.profile.displayName")}</label>
