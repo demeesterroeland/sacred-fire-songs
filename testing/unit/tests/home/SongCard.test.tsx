@@ -17,7 +17,9 @@ vi.mock('@/context/LocaleContext', () => ({
       })[k] ?? k,
   }),
 }));
-vi.mock('@/hooks/useToggleFavorite', () => ({ useToggleFavorite: () => ({ isFav: false, handleToggle: vi.fn() }) }));
+vi.mock('@/hooks/useToggleFavorite', () => ({
+  useToggleFavorite: () => ({ isFav: false, handleToggle: vi.fn(), signInGate: { open: false, onOpenChange: vi.fn(), next: '/' } }),
+}));
 vi.mock('@/components/playlists/PlaylistPicker', () => ({
   PlaylistPicker: () => <button type="button" aria-label="Add to playlist" />,
 }));
