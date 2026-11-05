@@ -19,3 +19,14 @@ export const SHARED_TAKES_FIXTURE_IDS = {
   sharedTake: 'eeeeeeee-3615-4000-a000-000000000003',
   ownTake: 'eeeeeeee-3615-4000-a000-000000000004',
 } as const;
+
+/**
+ * Story 6.1.16 / G4.3 (#400): a song with one public take of the member, shared with
+ * two people and attributed to a singer without an account. Removed by
+ * e2e/global-teardown.ts.
+ */
+export const TAKE_STATUS_FIXTURE_IDS = {
+  song: 'eeeeeeee-3616-4000-a000-000000000001',
+  version: 'eeeeeeee-3616-4000-a000-000000000002',
+  take: 'eeeeeeee-3616-4000-a000-000000000003',
+} as const;

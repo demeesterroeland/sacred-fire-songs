@@ -13,11 +13,10 @@ export const ARBITRARY_TEXT_SIZE_RE = /(?<![\w-])(?:[a-z0-9-]+:)*text-\[(\d+(?:\
 export const MIN_TEXT_PX = 12;
 
 /**
- * Files exempt from the guard. RehearsalDrawer.tsx is being reworked by the
- * Practice stories (#399, #400), which apply the same rule there; remove this
- * entry once they have merged.
+ * Files exempt from the guard. Empty since #400 removed the last sub-12 px
+ * labels from RehearsalDrawer.tsx; keep it empty.
  */
-export const MICRO_TEXT_ALLOW_LIST: readonly string[] = ['components/song/RehearsalDrawer.tsx'];
+export const MICRO_TEXT_ALLOW_LIST: readonly string[] = [];
 
 export function textSizePx(value: number, unit: string): number {
   return unit === 'px' ? value : value * 16;
