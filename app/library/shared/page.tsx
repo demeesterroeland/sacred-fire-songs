@@ -19,7 +19,7 @@ export default async function SharedWithMePage() {
         <div>
             <div className="flex items-center gap-2 mb-4">
                 <Users className="w-4 h-4 text-fg-subtle" aria-hidden />
-                <h2 className="text-meta font-semibold text-fg-muted">{t('sharedWithMe.title')}</h2>
+                <h1 className="text-meta font-semibold text-fg-muted">{t('sharedWithMe.title')}</h1>
                 <span className="text-caption text-fg-subtle ml-1">({items.length})</span>
             </div>
             <SharedWithMeList items={items} />

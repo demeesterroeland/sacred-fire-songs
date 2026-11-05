@@ -58,6 +58,20 @@ describe('useMarkSongNotificationsRead', () => {
     expect(markSongNotificationsRead).not.toHaveBeenCalled();
   });
 
+  it('asks the server when the bell cache is full, since older unread rows may sit beyond it', async () => {
+    const full = Array.from({ length: 20 }, (_, i) => note({ id: `r${i}`, read_at: 'x' }));
+    client.setQueryData(['notifications', 'me'], full);
+    renderHook(() => useMarkSongNotificationsRead({ userId: 'me', compositionId: 'song-1', isOpen: true }), { wrapper });
+    await waitFor(() => expect(markSongNotificationsRead).toHaveBeenCalledWith('song-1'));
+  });
+
+  it('refetches the bell after a successful mark', async () => {
+    client.setQueryData(['notifications', 'me'], [note()]);
+    const spy = vi.spyOn(client, 'invalidateQueries');
+    renderHook(() => useMarkSongNotificationsRead({ userId: 'me', compositionId: 'song-1', isOpen: true }), { wrapper });
+    await waitFor(() => expect(spy).toHaveBeenCalledWith({ queryKey: ['notifications', 'me'] }));
+  });
+
   it('asks the server when the bell has not loaded yet', async () => {
     renderHook(() => useMarkSongNotificationsRead({ userId: 'me', compositionId: 'song-1', isOpen: true }), { wrapper });
     await waitFor(() => expect(markSongNotificationsRead).toHaveBeenCalledWith('song-1'));

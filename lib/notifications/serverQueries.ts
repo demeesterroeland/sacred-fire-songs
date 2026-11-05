@@ -27,10 +27,10 @@ export async function getSharedWithMe(userId: string): Promise<SharedTake[]> {
   const ownerIds = Array.from(new Set(rows.map((r) => r.user_recordings?.user_id).filter((id): id is string => !!id)));
   const recordingIds = rows.map((r) => r.recording_id);
 
-  const [{ data: owners }, { data: notes }] = await Promise.all([
+  const [{ data: owners }, { data: notes, error: notesError }] = await Promise.all([
     ownerIds.length > 0
-      ? supabase.from('profiles').select('id, full_name, email').in('id', ownerIds)
-      : Promise.resolve({ data: [] as { id: string; full_name: string | null; email: string | null }[] }),
+      ? supabase.from('profiles').select('id, full_name').in('id', ownerIds)
+      : Promise.resolve({ data: [] as { id: string; full_name: string | null }[] }),
     supabase
       .from('notifications')
       .select('recording_id, composition_id, metadata, read_at')
@@ -38,6 +38,9 @@ export async function getSharedWithMe(userId: string): Promise<SharedTake[]> {
       .eq('type', 'recording_shared')
       .in('recording_id', recordingIds),
   ]);
+
+  // Without notifications every row reads as seen; log it rather than fail the page.
+  if (notesError) console.error('[notifications] Shared with me: notifications query failed:', notesError);
 
   return buildSharedWithMe(
     rows,
