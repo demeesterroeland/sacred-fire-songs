@@ -23,7 +23,7 @@ function memoryStorage(init: Record<string, string> = {}) {
 
 describe('lyric size steps', () => {
   it('defaults to the token default step with chords on', () => {
-    expect(DEFAULT_READER_PREFS).toEqual({ step: DEFAULT_LYRIC_STEP, chords: true });
+    expect(DEFAULT_READER_PREFS).toEqual({ step: DEFAULT_LYRIC_STEP, chords: true, speed: 3 });
   });
 
   it('moves one step at a time and stops at both ends', () => {
@@ -40,22 +40,29 @@ describe('lyric size steps', () => {
 });
 
 describe('persistence', () => {
+  it('stores the auto-scroll speed (1..5) and keeps older stored values working', () => {
+    expect(parseReaderPrefs('{"step": 2, "chords": false}')).toEqual({ step: 2, chords: false, speed: 3 });
+    expect(parseReaderPrefs('{"speed": 9}').speed).toBe(5);
+    expect(parseReaderPrefs('{"speed": 0}').speed).toBe(1);
+    expect(parseReaderPrefs('{"speed": "fast"}').speed).toBe(3);
+  });
+
   it('ignores missing or broken data', () => {
     expect(parseReaderPrefs(null)).toEqual(DEFAULT_READER_PREFS);
     expect(parseReaderPrefs('{oops')).toEqual(DEFAULT_READER_PREFS);
-    expect(parseReaderPrefs('{"step": 42, "chords": "x"}')).toEqual({ step: LYRIC_STEPS.length - 1, chords: true });
+    expect(parseReaderPrefs('{"step": 42, "chords": "x"}')).toEqual({ step: LYRIC_STEPS.length - 1, chords: true, speed: 3 });
   });
 
   it('round-trips through storage', () => {
     const s = memoryStorage();
-    saveReaderPrefs({ step: 3, chords: false }, s);
-    expect(JSON.parse(s.raw.get(READER_PREFS_KEY)!)).toEqual({ step: 3, chords: false });
-    expect(loadReaderPrefs(s)).toEqual({ step: 3, chords: false });
+    saveReaderPrefs({ step: 3, chords: false, speed: 5 }, s);
+    expect(JSON.parse(s.raw.get(READER_PREFS_KEY)!)).toEqual({ step: 3, chords: false, speed: 5 });
+    expect(loadReaderPrefs(s)).toEqual({ step: 3, chords: false, speed: 5 });
   });
 
   it('survives a storage that throws', () => {
     const broken = { getItem: () => { throw new Error('blocked'); }, setItem: () => { throw new Error('blocked'); } };
     expect(loadReaderPrefs(broken)).toEqual(DEFAULT_READER_PREFS);
-    expect(() => saveReaderPrefs({ step: 2, chords: true }, broken)).not.toThrow();
+    expect(() => saveReaderPrefs({ step: 2, chords: true, speed: 3 }, broken)).not.toThrow();
   });
 });

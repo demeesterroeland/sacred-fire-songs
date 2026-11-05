@@ -15,9 +15,9 @@ describe('useReaderPrefs', () => {
   it('starts at the defaults and persists a change to localStorage', () => {
     const { result } = renderHook(() => useReaderPrefs());
     expect(result.current[0]).toEqual(DEFAULT_READER_PREFS);
-    act(() => result.current[1]({ step: 3, chords: false }));
-    expect(result.current[0]).toEqual({ step: 3, chords: false });
-    expect(JSON.parse(localStorage.getItem(READER_PREFS_KEY)!)).toEqual({ step: 3, chords: false });
+    act(() => result.current[1]({ step: 3, chords: false, speed: 3 }));
+    expect(result.current[0]).toEqual({ step: 3, chords: false, speed: 3 });
+    expect(JSON.parse(localStorage.getItem(READER_PREFS_KEY)!)).toEqual({ step: 3, chords: false, speed: 3 });
   });
 
   it('reads a stored value and clamps an out-of-range step', () => {
@@ -32,7 +32,7 @@ describe('useReaderPrefs', () => {
       throw new Error('blocked');
     });
     const { result } = renderHook(() => useReaderPrefs());
-    act(() => result.current[1]({ step: 4, chords: true }));
-    expect(result.current[0]).toEqual({ step: 4, chords: true });
+    act(() => result.current[1]({ step: 4, chords: true, speed: 3 }));
+    expect(result.current[0]).toEqual({ step: 4, chords: true, speed: 3 });
   });
 });

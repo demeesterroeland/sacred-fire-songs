@@ -1,11 +1,12 @@
 # UX v2: Agent Decisions (ADR-lite)
 
-**Version:** 1.26 | **Date:** Nov 6, 2026 | **Epic:** 6.1 (#375)
+**Version:** 1.27 | **Date:** Nov 6, 2026 | **Epic:** 6.1 (#375)
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.27 | Nov 6, 2026 | Added UXA-032 (reader tools: where transpose and speed live, who transposes, how a shift is kept) and UXA-033 (auto-scroll: speeds, what pauses it, the sticky toolbar, stay-awake indicator; #394). |
 | 1.26 | Nov 6, 2026 | Added UXA-036 (recorder: remaining-time rule, limit caption, silent-microphone hint, meter design) and UXA-037 (count-in default and memory, cancel during count-in, review buttons; #404). |
 | 1.25 | Nov 6, 2026 | Added UXA-038 and UXA-039 (auth pages: where Back leads, plain page layout; #409). |
 | 1.24 | Nov 6, 2026 | Added UXA-030 and UXA-031 (unfinished features hidden behind lib/features.ts, deep link of a hidden settings tab, planned preferences and melody notation; #389). |
@@ -64,6 +65,8 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 | UXA-026 | Nov 5, 2026 | #393 | Action bar style and copy: Practice in accent text with take count, Playlist and Like in grey, new short labels "Playlist" / "Like" / "Liked"; members reuse the playlist popover until #414 | yes |
 | UXA-027 | Nov 5, 2026 | #414 | Add to playlist sheet: tap on a check removes the song, "New playlist" opens a name field in the first row, the sheet stays open until Done | yes |
 | UXA-028 | Nov 5, 2026 | #402 | Share dialog: the private-song confirmation lives inside the dialog and lists both effects; the song becomes public when the owner confirms, before a member is picked | yes |
+| UXA-032 | Nov 6, 2026 | #394 | Reader tools: transpose and speed live in a ⋯ bottom sheet (toolbar keeps Chords · A− · A+ · ▶ · ⋯), only musician / expert / admin transpose, the shift is per song and not stored, key shown on the meta line, range ±11 | yes |
+| UXA-033 | Nov 6, 2026 | #394 | Auto-scroll: five speeds, a touch / wheel / paging key outside the reading tools pauses it, it stops when the end of the lyrics is on screen, the toolbar sticks under the title bar only while it runs, the stay-awake indicator shows only while the browser really holds the lock | yes |
 | UXA-034 | Nov 5, 2026 | #397 | Listen tab: one button per provider with a link, also for a single provider; chosen = surface + border + check (no brand colours); a status line says what plays and whether it is paused | yes |
 | UXA-035 | Nov 5, 2026 | #397 | Mini player: plain surface bar, grey progress, accent only on the play button, equalizer and pulsing dot removed, subtitle "Playing · name" / "Paused · name"; "Control Track" becomes "Open player" | yes |
 | UXA-029 | Nov 5, 2026 | #403 | Shared with me: the unread badge stays on the bell only (account menu and Library entries say "n new" in words), the Library entry is a row under the tabs (not a fifth tab), one row per take, opening Practice marks the song's notifications read | yes |
@@ -73,6 +76,7 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 | UXA-037 | Nov 6, 2026 | #404 | Recorder: count-in on by default and remembered per device, cancel during the count-in, Save full-width primary with Discard as a text button below | yes |
 | UXA-038 | Nov 6, 2026 | #409 | Auth pages: "Back" leads to the hardened `next=` target, else Home; a `next` pointing at another auth page counts as none (no loop); the ✕ is removed, not repurposed; forgot-password's Back returns to login and keeps `next` | no |
 | UXA-039 | Nov 6, 2026 | #409 | Auth pages are plain pages on tokens: Back link above the form, no card on phones, bordered panel from `md`, accent-soft flame badge instead of the orange gradient and glow; sign-up-success and error pages are not touched | no |
+
 
 ---
 
@@ -138,6 +142,7 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 - **Choice:** (b). One source of truth; chords run at 70 % of the lyric size and never below 12 px. The old disabled "Large Stage Font" preference had no stored value, so it is removed without a migration. The disabled "Show chords by default" row stays until #389 hides unfinished features.
 - **Consequences:** six steps instead of five; the smallest lyric size is 15 px, not 14.
 - **Confirm:** no
+
 ### UXA-011 · Generic 404 copy and protected-prefix routing
 
 - **Date / story:** Nov 5, 2026 · #406 (G5.1)
@@ -337,6 +342,24 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 - **Choice:** badge (a): one thing, one badge. The account menu and Library entries say "3 new" in words, so the count is visible without a second dot, and the avatar stays calm. Library entry (b): the tab row was fitted to 390 px in #407 and a fifth tab would scroll off; the page is a breadcrumb page (Library › Shared with me). Rows (b): each take has its own sharer, name and link, so one tap lands on the right take (the permalink opens the song with Practice on it). Read rule (b), as the story says; the deep link opens the drawer too, so tapping a row also clears it. The mark-read call updates every unread notification of the song, also ones older than the bell's latest 20.
 - **Consequences:** the "n new" count, like the bell, counts the latest 20 notifications, so it tops out at 20; opening Practice still marks older unread rows of that song read (review: before, an unread row older than the latest 20 never cleared). a user who only opens the list without opening a song still sees "New" and the bell number; "Mark all as read" in the bell remains the way to clear them. If a notification was dismissed or deleted, the share still lists but without a "New" marker. A song the recipient cannot read (private) is named from the notification snapshot, else by the take name. New keys in 8 locales: `sharedWithMe.title|empty|new|unreadCount`, `guestGate.sharedWithMe.title|reason` (Quechua to proofread).
 - **Confirm:** yes (no avatar badge, entry placement, copy)
+
+### UXA-032 · Reader tools: where transpose and speed live, who transposes, how a shift is kept
+
+- **Date / story:** Nov 6, 2026 · #394 (G2.5)
+- **Context:** the story puts transpose (musician) and auto-scroll in the G2.1 toolbar, "overflow menu on 390 px". The code had neither on the song page (transpose only existed in the PDF export; auto-scroll was a disabled "Coming soon" preference), so there was nothing to move. The story does not say what the overflow looks like, which roles are "musician", whether a shift is remembered, or how far it goes.
+- **Options:** layout: (a) everything in one wrapped row; (b) `Chords · A− · A+ · ▶` plus a ⋯ button that opens the shared bottom sheet with transpose and speed; (c) a ⋯ popover menu. Roles: (a) musician and expert only; (b) also admin; (c) also gatekeeper. Memory: (a) per song on this device; (b) for this visit only. Range: (a) wrap around after 12; (b) stop at ±11.
+- **Choice:** layout (b): the row on a 390 px phone is Chords · A− · A+ · Auto-scroll (▶ / ⏸) · ⋯, five 44 px controls in one line; the ⋯ sheet "Reading tools" holds **Transpose** (− / value / +, the new key with the original in brackets, **Original key** after a change) and the **Auto-scroll** start / pause and speed. The sheet is the shared `BottomSheet` (modal, scrim, swipe handle, **Close** button) and auto-scroll keeps running behind it. When the song is shifted, the ⋯ button shows the shift as text (`+2`) and the meta line reads the new key (`Key F# · Capo 1 · …`); the capo is not changed. Roles (b): `musician`, `expert` and `admin` (the roles table: Transpose = musician and admin; the gatekeeper column says "musician" but a profile has one role, so a gatekeeper without the musician role does not transpose). Guests and members see the ⋯ button with auto-scroll only; songs without chords never offer transpose. Memory (b): the shift belongs to the song page you are on and is forgotten when you leave it (a transposed song silently kept on the next visit would make chords look wrong); the auto-scroll speed is a device preference stored with the other reader preferences (older stored values get speed 3). Range (b): −11 … +11, a text value with a sign (`+2`, `−3`), never colour alone. Only the displayed chords and key change, never the stored song. Chords written above the lyrics are converted first, tokens that are not chords (`N.C.`) stay.
+- **Consequences:** two taps (⋯, +) for the first semitone instead of one; the PDF export keeps its own `transposition` input, untouched. The "Auto-scroll Lyrics" row in Settings → Preferences stays "Coming soon" (this story does not change Settings). Spelling follows the key the song moves to: flats when it lands in a flat key (song in E, +1 → F: A shows Bb, not A#), sharps in sharp keys (E +2 → F#), and the usual names in C / Am (C#, Eb, F#, Ab, Bb). The new key is named the way musicians write it (G +3 → Bb, Am +1 → Bbm, never A# or E#); without a written key the first chord stands in for it. Only tokens shaped like a chord (root A–G, optional #/b, chord quality, optional /bass) are shifted, so section labels such as [Chorus], [Coro] or [Coda] stay as written; a chord line with no lyric to attach to (song end, intro, before a directive) is shifted in place.
+- **Confirm:** yes (new role gate, shift not remembered, key on the meta line)
+
+### UXA-033 · Auto-scroll: speeds, what pauses it, sticky toolbar, stay-awake indicator
+
+- **Date / story:** Nov 6, 2026 · #394 (G2.5)
+- **Context:** the story asks for "auto-scroll play/pause + speed" and a "stay-awake indicator when wake lock is active". It gives no speeds, no rule for stopping and does not say how the controls stay reachable while the page scrolls away from the toolbar.
+- **Options:** speed: (a) a free slider; (b) five fixed levels. Stopping: (a) only the play button; (b) also any touch on the page, a wheel or a paging key; (c) also at the end of the song. Reach: (a) the toolbar always sticky; (b) sticky only while auto-scroll runs; (c) a floating pause button. Indicator: (a) shown when the preference "keep screen awake" is on; (b) shown only when the browser really holds the lock.
+- **Choice:** speed (b): five levels, 10 / 18 / 28 / 42 / 60 px per second (default level 3 = 28 px per second, a little under one line a second at the default text size), shown as "Speed 3 of 5" with **Slower** and **Faster**; whole pixels are scrolled each frame and the fraction carried over so level 1 is smooth; a frame counts at most 100 ms, so a background tab cannot make the page jump. Stopping (b)+(c): a touch, mouse press, wheel or ↑ ↓ PgUp PgDn Home End Space anywhere outside the reading tools pauses it (the toolbar and the sheet are marked, so changing the text size, the speed or transposing does not pause it), and it stops by itself when the end of the lyrics is on screen (the page bottom otherwise). Tapping the darkened backdrop of a sheet closes the sheet and does not pause it. Reach (b): the toolbar strip sticks right under the title bar (under the page header on desktop, which scrolls inside the main area, so the scroll container is looked up) only while auto-scroll runs, and scrolls away with the page otherwise, so the lyrics are never covered at rest; while it scrolls the action bar slides away when the user has auto-hide on (as for any downward scroll). Indicator (b): a small sun icon after the ⋯ button (label "Screen stays on", also a row of words in the sheet) is shown only while the Wake Lock sentinel is held; it disappears when the preference is off, the browser refuses (for example a low battery) or the tab is hidden. `useWakeLock` now returns `isActive`; its console logging was removed.
+- **Consequences:** a tap on the lyrics while scrolling pauses instead of doing nothing; there is no way to scroll by hand during auto-scroll except by touching (which pauses). The 5 levels are fixed; a free speed or "start after 3 s" is a possible follow-up. 8 locales have new keys `viewer.*` (Quechua strings need a native check).
+- **Confirm:** yes (tap pauses, sticky strip while scrolling, new stay-awake icon)
 
 ### UXA-034 · Listen tab: providers and status line
 

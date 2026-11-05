@@ -1,13 +1,15 @@
 import { LYRIC_STEPS, DEFAULT_LYRIC_STEP, MIN_FONT_PX } from '@/lib/design/tokens';
+import { DEFAULT_SCROLL_SPEED, clampSpeed } from '@/lib/reader/autoScroll';
 
 /**
  * Reader toolbar preferences (Epic 6.1, Story 6.1.6 / G2.1, #390): lyric size
- * step and the chords layer, stored per device in localStorage.
+ * step and the chords layer, plus the auto-scroll speed level (Story 6.1.10 /
+ * G2.5, #394), stored per device in localStorage.
  */
-export type ReaderPrefs = { step: number; chords: boolean };
+export type ReaderPrefs = { step: number; chords: boolean; speed: number };
 
 export const READER_PREFS_KEY = 'sacred-fire-songs-reader';
-export const DEFAULT_READER_PREFS: ReaderPrefs = { step: DEFAULT_LYRIC_STEP, chords: true };
+export const DEFAULT_READER_PREFS: ReaderPrefs = { step: DEFAULT_LYRIC_STEP, chords: true, speed: DEFAULT_SCROLL_SPEED };
 
 type StorageLike = Pick<Storage, 'getItem' | 'setItem'>;
 
@@ -36,6 +38,7 @@ export function parseReaderPrefs(raw: string | null): ReaderPrefs {
     return {
       step: typeof v.step === 'number' && Number.isFinite(v.step) ? clamp(v.step) : DEFAULT_READER_PREFS.step,
       chords: typeof v.chords === 'boolean' ? v.chords : DEFAULT_READER_PREFS.chords,
+      speed: typeof v.speed === 'number' ? clampSpeed(v.speed) : DEFAULT_READER_PREFS.speed,
     };
   } catch {
     return DEFAULT_READER_PREFS;
@@ -54,7 +57,7 @@ export function loadReaderPrefs(storage?: StorageLike): ReaderPrefs {
 export function saveReaderPrefs(prefs: ReaderPrefs, storage?: StorageLike): void {
   try {
     const s = storage ?? (typeof window !== 'undefined' ? window.localStorage : undefined);
-    s?.setItem(READER_PREFS_KEY, JSON.stringify({ step: clamp(prefs.step), chords: prefs.chords }));
+    s?.setItem(READER_PREFS_KEY, JSON.stringify({ step: clamp(prefs.step), chords: prefs.chords, speed: clampSpeed(prefs.speed) }));
   } catch {
     /* private mode / blocked storage: keep the in-memory value */
   }

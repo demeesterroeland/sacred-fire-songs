@@ -56,7 +56,7 @@ export const BottomSheetContent = React.forwardRef<
 
   return (
     <DialogPrimitive.Portal>
-      <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-scrim" />
+      <DialogPrimitive.Overlay data-sheet-overlay="" className="fixed inset-0 z-50 bg-scrim" />
       <DialogPrimitive.Content
         ref={ref}
         className={cn(

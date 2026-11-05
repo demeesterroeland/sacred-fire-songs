@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef } from 'react';
 import { useParams, notFound, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
@@ -19,13 +19,18 @@ import { PlaylistPicker } from '@/components/playlists/PlaylistPicker';
 import { useDeleteSong } from '@/hooks/useDeleteSong';
 import { SONG_KEYS } from '@/lib/songs/queryKeys';
 import { useWakeLock } from '@/hooks/useWakeLock';
+import { useAutoScroll } from '@/hooks/useAutoScroll';
 import { SongActionBar } from '@/components/song/SongActionBar';
 import { useActionBarVisibility } from '@/hooks/useActionBarVisibility';
 import { useUserPreferences } from '@/context/UserPreferencesContext';
 import { practiceTab } from '@/lib/song/actionBar';
 import { SongMetaLines } from '@/components/song/SongMetaLines';
 import { ReaderToolbar } from '@/components/song/ReaderToolbar';
+import { ReadingToolsSheet } from '@/components/song/ReadingToolsSheet';
 import { useReaderPrefs } from '@/lib/reader/useReaderPrefs';
+import { speedBy } from '@/lib/reader/autoScroll';
+import { canTranspose, shiftSemitones, transposeChordPro, transposeKey } from '@/lib/reader/transpose';
+import { cn } from '@/lib/utils';
 import { recordSongView } from '@/app/actions/recordSongView';
 import { useSongRecordings } from '@/hooks/useSongRecordings';
 import { useRecordingsQuery } from '@/hooks/useRecordingsQuery';
@@ -55,8 +60,29 @@ export default function SongDetailPage() {
     const isAdmin = user?.role === 'admin';
     const queryClient = useQueryClient();
 
-    // Enable Screen Wake Lock on Song Detail Page
-    useWakeLock();
+    // Enable Screen Wake Lock on Song Detail Page; `awake` feeds the reader's stay-awake indicator (Story 6.1.10, #394).
+    const { isActive: awake } = useWakeLock();
+
+    // Story 6.1.10 / G2.5 (#394): auto-scroll and transpose live in the reader toolbar.
+    const toolbarWrapRef = useRef<HTMLDivElement>(null);
+    const lyricsRef = useRef<HTMLDivElement>(null);
+    const toolsButtonRef = useRef<HTMLButtonElement>(null);
+    const autoScroll = useAutoScroll(readerPrefs.speed, toolbarWrapRef, lyricsRef);
+    // On desktop the page header sticks at the top of the scrolling area; the sticky toolbar sits right under it.
+    const [desktopHeader, setDesktopHeader] = useState<HTMLDivElement | null>(null);
+    const [desktopHeaderH, setDesktopHeaderH] = useState(0);
+    useEffect(() => {
+        if (!desktopHeader || typeof ResizeObserver === 'undefined') return;
+        const measure = () => setDesktopHeaderH(desktopHeader.offsetHeight);
+        measure();
+        const ro = new ResizeObserver(measure);
+        ro.observe(desktopHeader);
+        return () => ro.disconnect();
+    }, [desktopHeader]);
+    const [isToolsOpen, setIsToolsOpen] = useState(false);
+    const [transposeState, setTransposeState] = useState<{ id: string | undefined; n: number }>({ id, n: 0 });
+    // The shift belongs to the song it was set on; opening another song starts in its own key.
+    const semitones = transposeState.id === id ? transposeState.n : 0;
 
     // Record song view for "Recently Viewed" feature
     useEffect(() => {
@@ -125,6 +151,14 @@ export default function SongDetailPage() {
     const versions = song?.song_versions || [];
     const currentVersion = versions[selectedVersionIndex];
     const { data: recordings } = useSongRecordings(currentVersion?.id);
+    const mayTranspose = canTranspose(user?.role) && !!song?.has_chords;
+    const shownContent = useMemo(
+        () => transposeChordPro(currentVersion?.content_chordpro || '', mayTranspose ? semitones : 0, { key: currentVersion?.key }),
+        [currentVersion?.content_chordpro, currentVersion?.key, mayTranspose, semitones],
+    );
+    const shownVersion = currentVersion && mayTranspose && semitones !== 0
+        ? { ...currentVersion, key: transposeKey(currentVersion.key, semitones) }
+        : currentVersion;
 
     // Story 6.1.9 (#393): the phone action bar hides on scroll down when the user has auto-hide on.
     const { preferences } = useUserPreferences();
@@ -286,7 +320,7 @@ export default function SongDetailPage() {
             <main className="flex-1 min-w-0 bg-white dark:bg-gray-950">
 
                 {/* Desktop Page Header (Title, Actions) - Visible only on desktop >= lg */}
-                <div className="hidden lg:flex justify-between items-center px-8 py-4 border-b border-gray-200/50 dark:border-gray-800/50 bg-white/50 dark:bg-gray-950/50 sticky top-0 backdrop-blur-md z-10 transition-all">
+                <div ref={setDesktopHeader} className="hidden lg:flex justify-between items-center px-8 py-4 border-b border-gray-200/50 dark:border-gray-800/50 bg-white/50 dark:bg-gray-950/50 sticky top-0 backdrop-blur-md z-10 transition-all">
                     {/* Title and Artist */}
                     <div className="flex items-center gap-6">
                         <div className="flex flex-col gap-1">
@@ -384,25 +418,45 @@ export default function SongDetailPage() {
                         className="mb-2"
                         originalAuthor={song.original_author}
                         categories={categories}
-                        version={currentVersion}
+                        version={shownVersion}
                         hasChords={song.has_chords}
                         hasMelody={song.has_melody}
                         hasPersonalRecording={hasPersonalRecording}
                     />
 
-                    {/* Story 6.1.6 (#390): Chords · A− · A+, remembered on this device. */}
-                    <ReaderToolbar
-                        className="-ml-2 mb-2"
-                        step={readerPrefs.step}
-                        chords={readerPrefs.chords}
-                        hasChords={song.has_chords}
-                        onChange={setReaderPrefs}
-                    />
+                    {/* Story 6.1.6 (#390): Chords · A− · A+, remembered on this device.
+                        Story 6.1.10 (#394): plus auto-scroll and ⋯ (transpose, speed). The strip sticks under the
+                        header only while auto-scroll runs, so it can be paused or slowed without scrolling back. */}
+                    <div
+                        ref={toolbarWrapRef}
+                        data-testid="reader-toolbar-wrap"
+                        style={{ '--desktop-header-h': `${desktopHeaderH}px` } as React.CSSProperties}
+                        data-scrolling={autoScroll.playing ? 'true' : 'false'}
+                        className={cn(
+                            '-mx-6 mb-2 px-4 md:-mx-10 md:px-8',
+                            autoScroll.playing && 'sticky top-[calc(var(--env-banner-height,0px)+var(--bar-h))] z-20 border-b border-line bg-bg lg:top-[var(--desktop-header-h)]',
+                        )}
+                    >
+                        <ReaderToolbar
+                            step={readerPrefs.step}
+                            chords={readerPrefs.chords}
+                            speed={readerPrefs.speed}
+                            hasChords={song.has_chords}
+                            onChange={setReaderPrefs}
+                            scrolling={autoScroll.playing}
+                            onToggleScroll={autoScroll.toggle}
+                            onOpenTools={() => setIsToolsOpen(true)}
+                            toolsOpen={isToolsOpen}
+                            toolsButtonRef={toolsButtonRef}
+                            semitones={mayTranspose ? semitones : 0}
+                            awake={awake}
+                        />
+                    </div>
 
                     {/* Song Content (Lyrics/Chords) */}
-                    <div className="pt-2 pb-12">
+                    <div ref={lyricsRef} className="pt-2 pb-12">
                         <SongDisplay
-                            content={currentVersion?.content_chordpro || ''}
+                            content={shownContent}
                             melodyNotation={currentVersion?.melody_notation || ''}
                             hasChords={song.has_chords}
                             sizeStep={readerPrefs.step}
@@ -443,6 +497,23 @@ export default function SongDetailPage() {
                         labelClassName="truncate text-meta font-medium"
                     />
                 ) : undefined}
+            />
+
+            <ReadingToolsSheet
+                open={isToolsOpen}
+                onOpenChange={setIsToolsOpen}
+                transpose={mayTranspose ? {
+                    semitones,
+                    originalKey: currentVersion?.key,
+                    onShift: (delta) => setTransposeState({ id, n: shiftSemitones(semitones, delta) }),
+                    onReset: () => setTransposeState({ id, n: 0 }),
+                } : undefined}
+                speed={readerPrefs.speed}
+                onSpeed={(delta) => setReaderPrefs({ ...readerPrefs, speed: speedBy(readerPrefs.speed, delta) })}
+                scrolling={autoScroll.playing}
+                onToggleScroll={autoScroll.toggle}
+                awake={awake}
+                returnFocusRef={toolsButtonRef}
             />
 
             {/* Mobile Bottom Drawer Context Menu */}

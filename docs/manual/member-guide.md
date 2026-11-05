@@ -1,11 +1,12 @@
 # Member Guide (draft)
 
-**Version:** 0.12 | **Date:** Nov 6, 2026
+**Version:** 0.13 | **Date:** Nov 6, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.13 | Nov 6, 2026 | Song page toolbar: **Auto-scroll** (▶) and **⋯ reading tools** with scroll speed; musicians also **Transpose** (UX v2, #394). |
 | 0.12 | Nov 6, 2026 | Settings lists only what works: Profile, Security and Preferences; no "Coming soon" items (UX v2, #389). |
 | 0.11 | Nov 5, 2026 | **Shared with me**: a list of takes others shared with you, in the account menu and under the Library tabs; the bell tells you when a take arrives, and opening the song's Practice panel marks it read (UX v2, #403). |
 | 0.10 | Nov 5, 2026 | Add to playlist is a sheet from the bottom with **New playlist** first and a check next to playlists that already hold the song (UX v2, #414). |
@@ -91,6 +92,9 @@ Open your song → ⋮ → **Edit** **(verify label)**. You can only edit songs 
 - **Profile:** display name. E-mail changes go via support.
 - **Security:** change password, log out from all devices.
 - **Preferences:** appearance, language, keep screen awake, auto-hide navigation on song pages and e-mail notifications (text size is set on the song page with A− / A+).
+
+- **Preferences:** appearance, language, keep screen awake, auto-hide navigation on song pages, auto-scroll, show chords by default, offline mode (text size is set on the song page with A− / A+, auto-scroll with ▶ and ⋯ next to them) **(verify which are active; some are marked "Coming soon")**.
+- **Privacy & Data:** not active yet.
 
 ## Public profile
 
