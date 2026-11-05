@@ -1,0 +1,62 @@
+# UX v2: Phone Validation Script
+
+**Version:** 1.0 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
+
+## Changelog
+
+| Version | Date | Change |
+| :--- | :--- | :--- |
+| 1.0 | Nov 5, 2026 | Skeleton: setup, reset and seed, preview image, smoke path. Story sections are added as stories merge. |
+
+Use a phone (or a 390 px browser window) against the preview image. Tick each box. Report a failure as **"failed #N step X"**, a pass as **"validated #N"**.
+
+## 0. Setup
+
+### Run the preview image locally
+
+```bash
+# in a checkout of the repo, with a .env built from .env.example
+IMAGE_TAG=ux-v2-preview docker compose pull
+IMAGE_TAG=ux-v2-preview docker compose up -d
+# open http://<host>:<port>/ on the phone (same network); port from docker-compose.yml
+```
+
+### Reset and seed the local stack (dev server instead of the image)
+
+```bash
+npx supabase start
+npx supabase db reset          # applies migrations + supabase/seeds/*
+npm run seed:audio             # optional: sample takes for the Practice panel
+npm run dev -- --port 3000
+```
+
+Test accounts (password `NEXT_PUBLIC_DEV_TEST_PASSWORD`, default `sacred-fire-dev`): **member** `…+member@…`, **gatekeeper** `…+gatekeeper@…` (recipient of shared takes), **admin** `…+admin@…` (see `scripts/dev/ux/lib.mjs`).
+
+Seeded songs: **Danza del Cielo Curandero** (member's song, media + 5 takes, 2 shared), **Morning Sunrise** (musician's song, media), **Down to the River** (admin's song).
+
+## 1. Ten-minute smoke path
+
+### Guest (signed out, private window)
+
+- [ ] 1. Open `/`. Calm greyscale page; one orange accent at most. Bottom bar: **Home · Search · Library**.
+- [ ] 2. Tap **Search**, type `danza`, open **Danza del Cielo Curandero**.
+- [ ] 3. Song page: title not clipped, one grey meta line, first lyric line visible without scrolling. No mini player.
+- [ ] 4. Tap **A+** twice: lyrics grow. Reload: size is kept.
+- [ ] 5. Open **Practice** → **Listen**: reference tracks and public takes play. **Record** shows the locked preview with "Sign in".
+- [ ] 6. Open `/does-not-exist`: a 404 page, not the login page.
+
+### Member
+
+- [ ] 7. Sign in as member. **Library** shows no Albums tab; the tab row fits the screen; a "+" creates a song or playlist.
+- [ ] 8. Open the same song: sticky bar **Practice · Playlist · ♥** in thumb reach.
+- [ ] 9. **Playlist** opens a bottom sheet with "New playlist" first and check marks.
+- [ ] 10. **Practice** → **Record**: lists **My takes** and **Shared with me**; status icons have text labels.
+
+### In the circle (song page, low light)
+
+- [ ] 11. Dark mode, phone at arm's length: chords in orange, lyrics readable, no text smaller than 12 px.
+- [ ] 12. Play a reference track: the mini player appears only now and does not cover the last lyric line.
+
+## 2. Stories
+
+Sections are added per story as it merges into `feat/ux-v2`.
