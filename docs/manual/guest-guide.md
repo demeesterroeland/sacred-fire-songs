@@ -1,11 +1,12 @@
 # Guest Guide (draft)
 
-**Version:** 0.1 | **Date:** Nov 4, 2026
+**Version:** 0.2 | **Date:** Nov 5, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.2 | Nov 5, 2026 | Song page: meta on two grey lines (UX v2, #391). |
 | 0.1 | Nov 4, 2026 | First draft from the UX research. |
 
 ## What Sacred Fire Songs is
@@ -32,8 +33,8 @@ The ☰ menu repeats the main places (Home, Songs, Playlists, Favorites, Drafts,
 
 ## Reading a song
 
-- The title is at the top; the coloured chips show author, category, tradition and language.
-- **Key**, **Capo** and **Tuning** are shown above the lyrics.
+- The title is at the top. Under it, one grey line shows the author and the tags (category, tradition, language); tap it to see them all as links.
+- A second line shows **Key**, **Capo** and **Tuning**, e.g. `Key E · Capo 3 · Standard`.
 - Chords are printed above the word where they change.
 - ⋮ (top right) opens the song menu: like, share, add to playlist, recordings. Actions that need an account ask you to sign in.
 

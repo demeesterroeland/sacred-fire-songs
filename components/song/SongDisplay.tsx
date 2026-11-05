@@ -33,7 +33,7 @@ export default function SongDisplay({ content, melodyNotation, hasChords = false
                     {/* Section Content */}
                     <div className={`${hasChords ? 'space-y-4' : 'space-y-1'} ${section.type === 'chorus' ? 'pl-2' : ''}`}>
                         {section.lines.map((line: ChordProLine, lineIdx) => (
-                            <div key={lineIdx}>
+                            <div key={lineIdx} data-testid="lyric-line">
                                 <div className={`flex flex-wrap pl-4 md:pl-6`}>
                                     {line.items.map((item: ChordProItem, itemIdx) => {
                                         // Inline comment item — {c:} or {ci:}
