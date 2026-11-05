@@ -1,11 +1,12 @@
 # UX v2: Phone Validation Script
 
-**Version:** 1.12 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
+**Version:** 1.13 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.13 | Nov 5, 2026 | Added #386 (compact song rows). |
 | 1.12 | Nov 5, 2026 | Added #396 (mini player on play, none on the next song). |
 | 1.11 | Nov 5, 2026 | Added #398 (one name: Practice; recorder and dialogs say "take"). |
 | 1.10 | Nov 5, 2026 | Added #410 (GuestGate). |
@@ -182,3 +183,12 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 - [ ] 7. Play the take, then open another song from Songs (bottom bar). The music stops and no bar shows on the other song (the bar never follows you to another song).
 - [ ] 8. Repeat step 1 in dark mode; with *reduce motion* on, the equalizer bars do not animate.
 
+### #386 · G1.2 Compact song rows
+
+**Preconditions:** guest, then member; phone (or 390 × 844 window).
+
+- [ ] 1. Open **Songs** (`/songs`). Each song is one row: the title, one grey line `Author · Category · Language`, and the key on the right. No coloured chips. At least six rows fit on the screen. Screenshot: `docs/ux-research/screenshots/ux-v2/386/after-light/mobile/member/02-songs-search.webp`.
+- [ ] 2. Tap a row anywhere except the icons: the song opens.
+- [ ] 3. As a member tap ♥ on a row: it fills with the accent colour; the song does not open. Tap the playlist icon: the playlist picker opens.
+- [ ] 4. Library → Playlists: Recently viewed and New since last visit use the same grey rows. Open a playlist: its songs are rows too, with the drag handle and remove button.
+- [ ] 5. Library → Artists: each artist is a row with the number of songs and their titles on one grey line.
