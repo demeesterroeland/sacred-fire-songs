@@ -1,11 +1,12 @@
 # UX v2: Agent Decisions (ADR-lite)
 
-**Version:** 1.3 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375)
+**Version:** 1.6 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375)
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.6 | Nov 5, 2026 | Added UXA-011 (generic 404 copy and protected-prefix routing, #406). |
 | 1.3 | Nov 5, 2026 | Added UXA-007 (reader text-size steps follow the #385 tokens). |
 | 1.2 | Nov 5, 2026 | Added UXA-006 (song technical badges move into the expanded meta line). |
 | 1.1 | Nov 5, 2026 | UXA-003 refined (grey bridge); added UXA-004 (Claude-only cross-review) and UXA-005 (`accent` = fire accent). |
@@ -22,6 +23,7 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 | UXA-005 | Nov 5, 2026 | #385 | `accent` means the fire accent; shadcn hover uses `surface-2` | no |
 | UXA-006 | Nov 5, 2026 | #391 | Chords / Melody / My take badges move from the song header into the expanded meta line | yes |
 | UXA-007 | Nov 5, 2026 | #390 | Reader text-size steps follow the #385 `LYRIC_STEPS` tokens (15–28 px, six steps) | no |
+| UXA-011 | Nov 5, 2026 | #406 | Generic 404 copy "Page not found" + plain "Go home"; only `/account`, `/admin`, `/users` redirect guests to login | yes |
 
 ---
 
@@ -87,3 +89,11 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 - **Choice:** (b). One source of truth; chords run at 70 % of the lyric size and never below 12 px. The old disabled "Large Stage Font" preference had no stored value, so it is removed without a migration. The disabled "Show chords by default" row stays until #389 hides unfinished features.
 - **Consequences:** six steps instead of five; the smallest lyric size is 15 px, not 14.
 - **Confirm:** no
+### UXA-011 · Generic 404 copy and protected-prefix routing
+
+- **Date / story:** Nov 5, 2026 · #406 (G5.1)
+- **Context:** the proxy sent every path outside a public allowlist to login, so an unknown URL looked like a login-gated page. The generic 404 reused the song copy "Song Not Found".
+- **Options:** (a) keep the allowlist and add a 404 check; (b) invert it: only a short list of protected prefixes redirects, everything else falls through to `app/not-found.tsx`.
+- **Choice:** (b). The list is `PROTECTED_PATH_PREFIXES` in `lib/supabase/routeAccess.ts` (`/account`, `/admin`, `/users`: exactly the existing routes that were not on the allowlist, so nothing opens that was protected). Prefixes match whole segments (`/admin-x` is a 404). Copy: "Page not found", a one-sentence warm line, and a plain "Go home" button in all 8 locales. The song (`app/songs/[id]`) and recording (`app/recordings/[id]`) not-found pages keep their own copy. Private playlists and unknown user ids now show the generic 404 instead of "Song Not Found". Pages under `/library`, `/songs`, `/recordings`, `/playlists` still guard themselves.
+- **Consequences:** unknown paths now answer 404 for everyone, including static files in `public/` that the old allowlist hid from guests. Routing only; RLS is unchanged. The guest gate (#410) can reuse the constant. The warm sentence ("The fire is still burning ...") is a copy-tone choice to confirm.
+- **Confirm:** yes

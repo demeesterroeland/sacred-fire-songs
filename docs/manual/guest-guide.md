@@ -1,11 +1,12 @@
 # Guest Guide (draft)
 
-**Version:** 0.3 | **Date:** Nov 5, 2026
+**Version:** 0.6 | **Date:** Nov 5, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.6 | Nov 5, 2026 | Added "A link that does not work" (real 404 page). |
 | 0.3 | Nov 5, 2026 | Song page: `Chords · A− · A+` toolbar (UX v2, #390). |
 | 0.2 | Nov 5, 2026 | Song page: meta on two grey lines (UX v2, #391). |
 | 0.1 | Nov 4, 2026 | First draft from the UX research. |
@@ -74,6 +75,10 @@ The site can be installed on your phone's home screen ("Add to Home Screen" / "I
 ## No internet?
 
 If you lose connection you see **You're offline**. The page reloads by itself when you are back online, or tap **Try again**.
+
+## A link that does not work
+
+If a web address does not exist, you see **Page not found** with a **Go home** button. You are not sent to the sign-in page. Pages that need an account (for example Account settings) still ask you to sign in.
 
 ## Language
 

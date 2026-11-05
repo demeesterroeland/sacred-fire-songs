@@ -7,6 +7,7 @@ import NotFound from '@/components/common/feedback/NotFound';
 export default function RecordingNotFound() {
   return (
     <NotFound
+      icon="music"
       titleKey="feedback.notFound.recording.title"
       descriptionKey="feedback.notFound.recording.description"
     />

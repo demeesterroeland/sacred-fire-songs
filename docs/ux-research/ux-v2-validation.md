@@ -1,11 +1,12 @@
 # UX v2: Phone Validation Script
 
-**Version:** 1.6 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
+**Version:** 1.9 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.9 | Nov 5, 2026 | Added #406 (real 404). |
 | 1.6 | Nov 5, 2026 | Added #390 (reader toolbar). |
 | 1.5 | Nov 5, 2026 | Added #391 (song meta lines). |
 | 1.4 | Nov 5, 2026 | Added #407 (Library tabs). |
@@ -118,3 +119,14 @@ Sections are added per story as it merges into `feat/ux-v2`.
 - [ ] 4. Switch `Chords` off. The chord letters disappear, every lyric line stays on its own line, nothing jumps sideways. Screenshot: `…/390/after-dark-song-detail-large-no-chords.webp`.
 - [ ] 5. A song without chords shows only `A−` / `A+`.
 - [ ] 6. Settings → Preferences no longer lists "Large Stage Font".
+
+### #406 · G5.1 Unknown URL shows a real 404
+
+**Preconditions:** guest (signed out) for steps 1–4, member for step 5, admin for step 6.
+
+- [ ] 1. Signed out, open `/this-page-does-not-exist`. The page says **Page not found** with a **Go home** button; the address stays the same and there is no login screen. Screenshot: `docs/ux-research/screenshots/ux-v2/406/after-light/mobile/guest/30-not-found.webp` (dark: `after-dark/…`).
+- [ ] 2. Tap **Go home**: the home page opens.
+- [ ] 3. Open `/admin`: you are sent to the login page (still protected).
+- [ ] 4. Open `/songs/00000000-0000-4000-a000-000000000000`: **Song Not Found** (song copy, not the generic one). Screenshot: `…/406/after-light/mobile/guest/31-song-not-found.webp`.
+- [ ] 5. Sign in as member, open `/this-page-does-not-exist`: the same **Page not found** page.
+- [ ] 6. Sign in as admin, open `/this-page-does-not-exist`: the same **Page not found** page.

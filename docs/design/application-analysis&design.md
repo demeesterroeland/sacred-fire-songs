@@ -1,6 +1,6 @@
 # Project Analysis & Design Document: Song Sharing Application (Sacred Fire Songs)
 
-**Version:** 1.66
+**Version:** 1.69
 **Status:** Living Document
 **Date:** Nov 5, 2026
 
@@ -59,6 +59,7 @@
 | **1.64** | Nov 5, 2026 | UX v2 (Story 6.1.23 / #407): Library tab row — Playlists · History · Artists from `libraryTabs()` (`lib/navigation.ts`); Albums hidden behind `FEATURES.albums` (`lib/features.ts`, UXD-4), `/library/albums` renders the not-found page while off. |
 | **1.66** | Nov 5, 2026 | UX v2 (Story 6.1.6 / #390): Song Detail reader toolbar — `ReaderToolbar` (`Chords · A− · A+`) under the meta lines; lyric size from `LYRIC_STEPS`, chords layer on/off, both stored per device (`lib/reader/readerPrefs.ts`, key `sacred-fire-songs-reader`). Removed the disabled `Large Stage Font` preference. |
 | **1.65** | Nov 5, 2026 | UX v2 (Story 6.1.7 / #391): Song Detail meta — `SongMetaLines` replaces the coloured pills, technical badges and the Key/Capo/Tuning grid with two grey lines (`lib/songs/songMeta.ts`). |
+| **1.69** | Nov 5, 2026 | UX v2 (Story 6.1.22 / #406): §6.11 Unknown URLs — the proxy (`lib/supabase/proxy.ts`) redirects guests to login only for `PROTECTED_PATH_PREFIXES` (`lib/supabase/routeAccess.ts`: `/account`, `/admin`, `/users`); every other unknown path renders `app/not-found.tsx` ("Page not found" + "Go home", `feedback.notFound.page.*` in all 8 locales, token-styled `NotFound`). Song (`app/songs/[id]/not-found.tsx`) and recording not-found pages keep their own copy. |
 
 
 ## 1. Introduction
@@ -262,6 +263,11 @@ The application is a **Progressive Web App (PWA)** optimized for mobile use duri
 * **Primitives (`components/ui/`):** `button` (primary/secondary/outline/ghost/text/destructive, ≥ 44 px), `list-row`, `meta-line` (`joinMeta`), `chip` (filter-only, `aria-pressed` + check), `bottom-sheet` (Radix Dialog, bottom on phones, reserves `--mini-player-h`; `SheetAction`, `SheetSeparator`), `toolbar` (`ToolbarButton` with `aria-pressed`).
 * **Browser chrome:** `<meta name="theme-color">` = `--bg` per mode (`THEME_COLOR`).
 * **Tests:** `docs/testing/ux-v2-design-system.feature` (`@unit @story-6.1.1`), Vitest `testing/unit/tests/design/designTokens.test.ts` (doc ↔ CSS parity, theme references, one accent, ≥ 12 px, WCAG contrast in both modes) and `paletteRatchet.test.ts` (palette classes in `app/` + `components/` may only go down). Cucumber profiles pick up every `docs/testing/ux-v2-*.feature`.
+
+### 6.11 Unknown URLs (UX v2, Story 6.1.22)
+* **Routing:** `updateSession` calls `shouldRedirectToLogin(pathname, isAuthenticated)`; only `PROTECTED_PATH_PREFIXES` (whole path segments) send a guest to `/auth/login`. Everything else falls through, so Next renders the 404. This is a routing rule, not an RLS change: members-only pages under `/library`, `/songs`, `/recordings` still guard themselves.
+* **404 pages:** `app/not-found.tsx` (generic, all roles), `app/songs/[id]/not-found.tsx` ("Song Not Found"), `app/recordings/[id]/not-found.tsx` ("Recording Not Available"). One `NotFound` component, token-styled, plain "Go home" button.
+* **Tests:** `docs/testing/ux-v2-real-404.feature` (`@unit @story-6.1.22`), `testing/unit/tests/routeAccess.test.ts`, `notFoundPages.test.ts`, Playwright `e2e/tests/real-404.spec.ts`.
 
 ## 7. Screen Inventory (Implemented)
 
