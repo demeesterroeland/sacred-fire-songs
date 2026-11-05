@@ -1,11 +1,12 @@
 # Practice: Listen, Record & Takes (draft)
 
-**Version:** 0.6 | **Date:** Nov 5, 2026
+**Version:** 0.7 | **Date:** Nov 5, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.7 | Nov 5, 2026 | The Share dialog explains who can be found and, on a private song, what happens before you confirm (#402). |
 | 0.6 | Nov 5, 2026 | Practice is a button in the bar at the bottom of the song page; it opens on Listen when the song has a reference track, otherwise on Record (UX v2, #393). |
 | 0.5 | Nov 5, 2026 | **⋯** on a take opens a bottom sheet with the actions in groups; Delete take is alone at the bottom, in red (#401). |
 | 0.4 | Nov 5, 2026 | Take rows show their status in words: Public, Shared · n, Pending invite (owner only), Verified musician (#400). |
@@ -66,12 +67,12 @@ Choose an action and the sheet closes. To close it without choosing, swipe the b
 ## Sharing a take with someone
 
 1. ⋯ → **Share**.
-2. Search a **registered member** by e-mail or name and add them.
+2. Search a **registered member** by e-mail or name and add them. The dialog says it under the search box: *You can share with registered members only. Someone without an account needs to sign up first.* If nobody matches, it says so and repeats that hint.
 3. *Shared with (n)* lists everyone; **Revoke** removes access.
 
 Rules (so the singer stays protected):
 - People you share with can **listen only**: they cannot download it ("Shared takes cannot be downloaded") and cannot share it further ("Only the recording owner can share this recording.").
-- The song must be public so they can open it. If the song is private and it is **your** song, you are asked *Make lyrics public to share take?* → **Make Public & Share**. If it is someone else's private song, you cannot share takes on it.
+- The song must be public so they can open it. If the song is private and it is **your** song, the dialog first asks *Make the song public to share this take?* and lists two effects: **the song lyrics become public** (everyone can see the song), and **the take is shared** only with the members you pick next. Nothing changes until you tap **Make song public and continue**; **Cancel** leaves everything as it was. If you leave after confirming, the song stays public. If it is someone else's private song, the dialog explains that only the song owner can make the lyrics public, and shows no search.
 
 ## When someone shares a take with you
 

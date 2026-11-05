@@ -40,3 +40,14 @@ export const TAKE_ACTIONS_FIXTURE_IDS = {
   version: 'eeeeeeee-3617-4000-a000-000000000002',
   take: 'eeeeeeee-3617-4000-a000-000000000003',
 } as const;
+
+/**
+ * Story 6.1.18 / G4.5 (#402): a private song owned by the member with one take of the member.
+ * The spec makes the song public while it runs and resets it first. Removed by
+ * e2e/global-teardown.ts.
+ */
+export const SHARE_EXPLAIN_FIXTURE_IDS = {
+  song: 'eeeeeeee-3618-4000-a000-000000000001',
+  version: 'eeeeeeee-3618-4000-a000-000000000002',
+  take: 'eeeeeeee-3618-4000-a000-000000000003',
+} as const;

@@ -1,11 +1,12 @@
 # UX v2: Phone Validation Script
 
-**Version:** 1.23 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
+**Version:** 1.24 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.24 | Nov 5, 2026 | Added #402 (Share dialog explains who can be found and what happens on a private song). |
 | 1.23 | Nov 5, 2026 | Added #414 (Add to playlist bottom sheet). |
 | 1.22 | Nov 5, 2026 | Added #393 (sticky Practice · Playlist · ♥ action bar). |
 | 1.21 | Nov 5, 2026 | Added the #413 section (recent searches and category chips in the search field). |
@@ -333,3 +334,15 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 - [ ] 5. Tap **Done** (or the dark area above the sheet, or swipe the grey handle down). **Expected:** the sheet and the ⋮ menu close. Every row is easy to hit with a thumb (at least 44 px).
 - [ ] 6. Switch the language to Dutch, Spanish, Italian, Russian, French, Portuguese and Quechua: **New playlist**, **Create** and **Done** are translated. Repeat step 1 in dark mode (`…/414/after-dark/mobile/member/01-playlist-sheet.webp`).
 - [ ] 7. Clean up: delete the playlists you made in step 4.
+
+### #402 · G4.5 Share dialog explains itself
+
+**Preconditions:** member account that owns a **private** song with one take (Add Song → leave it private → Practice → Record a take); a second registered member to share with; English; light and dark mode.
+
+- [ ] 1. Open the song, tap **Practice** in the bar at the bottom → **Record**, then ⋯ on the take → **Share**. **Expected:** the dialog title reads *Make the song public to share this take?* with two lines: *The song lyrics become public: everyone can see this song.* and *The take "…" is shared with the members you pick next.* and *Nothing changes until you confirm.* There is no search box yet. Screenshot: `docs/ux-research/screenshots/ux-v2/402/after-light/mobile/member/01-share-private.webp`.
+- [ ] 2. Tap **Cancel**. **Expected:** the dialog closes; the song is still private (no **Public** badge on the song page) and nothing is shared.
+- [ ] 3. Open **Share** again and tap **Make song public and continue**. **Expected:** the search box appears with the line *You can share with registered members only. Someone without an account needs to sign up first.* The song is now public. Screenshot: `…/402/after-light/mobile/member/02-share-search.webp`.
+- [ ] 4. Type `zzqxjv` in the search box. **Expected:** *No registered member found for "zzqxjv". Someone without an account needs to sign up first.* Screenshot: `…/402/after-light/mobile/member/03-share-empty.webp`.
+- [ ] 5. Type the name of the second member and tap **Share**. **Expected:** they appear under *Shared with (1)* and get a notification.
+- [ ] 6. Sign in as a member who has a take on a private song they do not own (ask the song owner to make it private again) and tap ⋯ → **Share**. **Expected:** the dialog says *This song is private* and that only the song owner can make the lyrics public; no search box and no toast.
+- [ ] 7. Repeat steps 1, 3 and 4 in dark mode (`…/402/after-dark/…`) and in Dutch, Spanish, Italian, Russian, French, Portuguese and Quechua: all text is translated. Every button is at least 44 px tall.

@@ -72,7 +72,7 @@ describe('Practice naming (en)', () => {
     expect(en['miniPlayer.source.userRecording']).toBe('My take');
     expect(en['recorder.btn.save']).toBe('Save Take');
     expect(en['rehearsal.recording.delete.confirmTitle']).toBe('Delete take?');
-    expect(en['recording.sharing.privateSongPrompt.body']).toContain('practice takes');
+    expect(en['recording.sharing.privateSongPrompt.effectTake']).toContain('take');
   });
 
   it('keeps none of the six legacy names in any English string', () => {
