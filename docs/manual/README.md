@@ -1,11 +1,12 @@
 # User Manual (knowledge base)
 
-**Version:** 0.1 | **Date:** Nov 4, 2026 | **Status:** Knowledge collection — not yet the published manual
+**Version:** 0.2 | **Date:** Nov 5, 2026 | **Status:** Knowledge collection — not yet the published manual
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.2 | Nov 5, 2026 | Screenshot note: the mini player now appears only after play (#396). |
 | 0.1 | Nov 4, 2026 | Collected knowledge from the UX research (screens, flows, roles, recording sharing) as the base for a manual for guests and members. |
 
 ## Purpose
@@ -24,7 +25,7 @@ Raw material for a future end-user manual for **guests** and **members**. Writte
 
 ## Screenshot candidates
 
-Source: `docs/ux-research/screenshots/mobile/<role>/`. Copy the chosen ones into `docs/manual/screenshots/` once the priority-A UX fixes have landed (otherwise they show the dev banner and the always-on mini player).
+Source: `docs/ux-research/screenshots/mobile/<role>/`. Copy the chosen ones into `docs/manual/screenshots/` once the priority-A UX fixes have landed (otherwise they show the dev banner and the former always-on mini player; it now appears only after play).
 
 | Manual section | Candidate |
 | :--- | :--- |

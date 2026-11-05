@@ -365,7 +365,7 @@ export default function SongDetailPage() {
                     </div>
                 </div>
 
-                <div className="max-w-5xl px-6 md:px-10 pb-6 md:pb-10 pt-4 md:pt-6 space-y-0">
+                <div className="max-w-5xl px-6 md:px-10 pb-[calc(1.5rem+var(--mini-player-h,0px))] md:pb-[calc(2.5rem+var(--mini-player-h,0px))] pt-4 md:pt-6 space-y-0">
 
                     {/* Story 6.1.7 (#391): tags on one grey line (tap to expand), Key · Capo · Tuning on another. */}
                     <SongMetaLines
@@ -421,7 +421,7 @@ export default function SongDetailPage() {
                     />
                     {/* Bottom sheet */}
                     <div 
-                        className="fixed bottom-0 inset-x-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 rounded-t-3xl shadow-2xl z-50 pb-safe-bottom lg:hidden animate-in slide-in-from-bottom duration-300 flex flex-col"
+                        className="fixed bottom-0 inset-x-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 rounded-t-3xl shadow-2xl z-50 pb-[calc(env(safe-area-inset-bottom,0px)+var(--mini-player-h,0px))] lg:hidden animate-in slide-in-from-bottom duration-300 flex flex-col"
                     >
                         {/* Handle bar */}
                         <div className="w-12 h-1.5 bg-gray-300 dark:bg-gray-700 rounded-full mx-auto my-3 shrink-0" />

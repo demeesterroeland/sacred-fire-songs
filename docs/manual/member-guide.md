@@ -1,17 +1,18 @@
 # Member Guide (draft)
 
-**Version:** 0.5 | **Date:** Nov 5, 2026
+**Version:** 0.6 | **Date:** Nov 5, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.6 | Nov 5, 2026 | Practising: the player bar appears only after you press play and stops with the song page (UX v2, #396); details on the practice page. |
 | 0.5 | Nov 5, 2026 | Library card renamed to Your takes. |
 | 0.3 | Nov 5, 2026 | Preferences: large stage font removed; text size is on the song page (UX v2, #390). |
 | 0.2 | Nov 5, 2026 | Library tabs: Albums hidden (UX v2, #407). |
 | 0.1 | Nov 4, 2026 | First draft from the UX research. |
 
-Everything in the [Guest Guide](guest-guide.md) applies. This page covers what an account adds. Practising and recordings have their own page: [practice-and-recordings.md](practice-and-recordings.md).
+Everything in the [Guest Guide](guest-guide.md) applies. This page covers what an account adds. Practising and recordings have their own page: [practice-and-recordings.md](practice-and-recordings.md) (the player bar shows only after you press play on a reference track or a take).
 
 ## Your account menu
 
