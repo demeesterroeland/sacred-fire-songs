@@ -1,11 +1,12 @@
 # UX v2: Phone Validation Script
 
-**Version:** 1.10 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
+**Version:** 1.11 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.11 | Nov 5, 2026 | Added #398 (one name: Practice; recorder and dialogs say "take"). |
 | 1.10 | Nov 5, 2026 | Added #410 (GuestGate). |
 | 1.9 | Nov 5, 2026 | Added #406 (real 404). |
 | 1.6 | Nov 5, 2026 | Added #390 (reader toolbar). |
@@ -152,3 +153,17 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 - [ ] 12. Dark mode and a 390 px window: every gate readable, no horizontal scroll.
 - [ ] 13. On a song, tap the heart (♥): a bottom sheet with the gate "Sign in to save favourites" (no toast). Add `?ref=heart` to the URL first: **Sign in** leads to `/auth/login?next=%2Fsongs%2F…%3Fref%3Dheart`. The same on a heart in the song list.
 - [ ] 14. Open `/auth/login?next=//example.org` while signed in, and `/auth/login?next=/%5Cexample.org` after signing in: you land on the home page, never on another site.
+
+### #398 · G4.1 One name: Practice
+
+**Preconditions:** a member account on a song that has at least one YouTube, SoundCloud or Spotify link (so both tabs show). Repeat step 1 as a guest.
+
+- [ ] 1. Open the song, tap ⋮ (top right). The menu entry reads **Practice** (not "Recordings"). Screenshot: `docs/ux-research/screenshots/ux-v2/398/after-light/mobile/member/01-song-menu.webp`.
+- [ ] 2. Tap **Practice**. The panel title reads **Practice** (not "Rehearsal Space"). Screenshot: `docs/ux-research/screenshots/ux-v2/398/after-light/mobile/member/02-drawer.webp`, Record tab: `docs/ux-research/screenshots/ux-v2/398/after-light/mobile/member/03-drawer-record-tab.webp`.
+- [ ] 3. The two tabs read **Listen** and **Record**.
+- [ ] 4. On **Record**, the list under the recorder is headed **My takes**. As a guest, the lock card reads **Practice recorder**.
+- [ ] 5. Close the panel. On the song list, a song where you have takes shows a **Takes** chip.
+- [ ] 6. Open Library. The card reads **Your takes**. Screenshot: `docs/ux-research/screenshots/ux-v2/398/after-light/mobile/member/10-playlists.webp`.
+- [ ] 7. Switch the language (account menu) to Dutch, Spanish, Italian, Russian, French, Portuguese and Quechua. Steps 1–6 show the translated word for Practice, Listen, Record, takes. Nothing says Rehearsal Space, Voice Recorder or Recordings in any language.
+- [ ] 8. On **Record**, start a take and stop it: the review step reads *Review your take*, the name field *Take Name (e.g. Take 1)*, the button **Save Take**. In the list, ⋯ → Delete asks **Delete take?**; Share is titled **Share take**.
+- [ ] 9. With a reference track and a take loaded, tap the mini-player title: the source menu is headed **Listen** (not "Reference Tracks") and **My takes** (not "User Recordings").

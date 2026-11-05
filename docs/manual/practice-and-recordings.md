@@ -1,36 +1,37 @@
-# Practice, Reference Tracks & Recordings (draft)
+# Practice: Listen, Record & Takes (draft)
 
-**Version:** 0.1 | **Date:** Nov 4, 2026
+**Version:** 0.2 | **Date:** Nov 5, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
 | 0.1 | Nov 4, 2026 | First draft: reference tracks, recorder, upload, managing takes, sharing, publishing with consent, singer attribution, shared-with-me view. |
+| 0.2 | Nov 5, 2026 | One name: Practice (panel, menu, tabs Listen / Record, Takes chip, My takes). Button and message wording now says "take" (Save Take, Delete take, Share take, Publish Take). |
 
-> Naming note: today the app calls this place **Rehearsal Space** (menu item **Recordings**, tabs **Reference Tracks** and **Voice Recorder**). The UX plan proposes one name, **Practice**. Update this page if that lands.
+> Naming: the app calls this place **Practice** everywhere: menu item, panel title, tabs **Listen** and **Record**, the **Takes** chip on songs, **Your takes** in the Library. (Before Nov 2026 it was called Rehearsal Space, Recordings and Voice Recorder.)
 
-## Opening the Rehearsal Space
+## Opening Practice
 
-On a song page tap ⋮ → **Recordings**. A panel slides up from the bottom with the song title and two tabs. Close it with ✕ or by swiping down.
+On a song page tap ⋮ → **Practice**. A panel slides up from the bottom with the song title and two tabs. Close it with ✕ or by swiping down.
 
-Songs where you have takes show a **RECORDING** chip, and the header shows how many takes you have.
+Songs where you have takes show a **Takes** chip, and the header shows how many takes you have.
 
-## Reference Tracks (everyone)
+## Listen (everyone)
 
-1. Tab **Reference Tracks**.
+1. Tab **Listen**.
 2. Choose **YouTube**, **SoundCloud** or **Spotify**.
 3. Play it in the panel. The **player bar** above the bottom bar keeps playing when you close the panel or scroll the lyrics: ⟲ 10 s back, ▶/❚❚, ⟳ forward, ✕ stop.
 
 ## Recording a take (members)
 
-1. Tab **Voice Recorder**. The first time, your browser asks for **microphone** permission — allow it.
+1. Tab **Record**. The first time, your browser asks for **microphone** permission — allow it.
 2. **Record Audio** is selected. A reference track can keep playing (*Reference: YouTube video loaded*) — **wear headphones** so it is not recorded along.
 3. Tap the big red **microphone** button. The timer runs. You can **pause / resume**, or **cancel and discard**.
-4. Tap **stop**. *Review your recording*: listen in the preview player and change the name (default: *Recording – date time*).
-5. **Save Recording** stores it privately, or **Discard**.
+4. Tap **stop**. *Review your take*: listen in the preview player and change the name (default: *Take – date time*).
+5. **Save Take** stores it privately, or **Discard**.
 
-Limits: a recording stops automatically at **3:00**.
+Limits: a take stops automatically at **3:00**.
 
 ### Uploading an existing file
 
@@ -38,7 +39,7 @@ Choose **Upload File** instead of Record Audio. Accepted: mp3, wav, ogg, m4a, we
 
 ## Your takes
 
-Under **Your Recordings** each take shows ▶ play, name, date and length, and status icons:
+Under **My takes** each take shows ▶ play, name, date and length, and status icons:
 
 | Icon | Meaning |
 | :--- | :--- |
@@ -54,9 +55,9 @@ Tap **⋯** on a take for:
 - **Share** — see below
 - **Make Public / Make Private**
 - **Singer Attribution**
-- **Edit recording name** (type, then Save)
-- **Download recording** (your own takes only)
-- **Delete recording** — asks to confirm; the file is removed for good and people it was shared with lose access.
+- **Edit take name** (type, then Save)
+- **Download take** (your own takes only)
+- **Delete take** — asks to confirm; the file is removed for good and people it was shared with lose access.
 
 ## Sharing a take with someone
 
@@ -65,19 +66,19 @@ Tap **⋯** on a take for:
 3. *Shared with (n)* lists everyone; **Revoke** removes access.
 
 Rules (so the singer stays protected):
-- People you share with can **listen only**: they cannot download it ("Shared recordings cannot be downloaded") and cannot share it further ("Only the recording owner can share this recording.").
-- The song must be public so they can open it. If the song is private and it is **your** song, you are asked *Make lyrics public to share recording?* → **Make Public & Share**. If it is someone else's private song, you cannot share takes on it.
+- People you share with can **listen only**: they cannot download it ("Shared takes cannot be downloaded") and cannot share it further ("Only the recording owner can share this recording.").
+- The song must be public so they can open it. If the song is private and it is **your** song, you are asked *Make lyrics public to share take?* → **Make Public & Share**. If it is someone else's private song, you cannot share takes on it.
 
 ## When someone shares a take with you
 
-Open the same song → ⋮ → **Recordings** → **Voice Recorder**. The shared take is in the list with a 👥 icon (*Shared with you*). You can play it; download and share are not available. **(planned: a separate "Shared with me" section and a notification)**
+Open the same song → ⋮ → **Practice** → **Record**. The shared take is in the list with a 👥 icon (*Shared with you*). You can play it; download and share are not available. **(planned: a separate "Shared with me" section and a notification)**
 
 ## Making a take public
 
 1. ⋯ → **Make Public**.
 2. Read **Singer Consent & Rights**.
-3. Tick *I confirm that I have obtained explicit consent and permission from the singer/musician to publish this recording publicly.*
-4. **Publish Recording**. Everyone who visits the song can now listen.
+3. Tick *I confirm that I have obtained explicit consent and permission from the singer/musician to publish this take publicly.*
+4. **Publish Take**. Everyone who visits the song can now listen.
 
 Without the tick the take stays private. ⋯ → **Make Private** undoes it.
 

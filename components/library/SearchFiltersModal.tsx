@@ -252,7 +252,7 @@ export default function SearchFiltersModal({
                                     onClick={() => setFilter('myRecordings', !state.myRecordings)}
                                     disabled={!state.myRecordings && recordingsCount === 0}
                                     icon={<Mic className="w-4 h-4" strokeWidth={1.5} />}
-                                    label={t('rehearsal.recordings.yourRecordings')}
+                                    label={t('search.filter.recordings')}
                                     count={recordingsCount ? recordingsCount : undefined}
                                     activeColor="violet"
                                 />
@@ -338,7 +338,7 @@ function ToggleCard({
             <span className={`shrink-0 ${active ? colors.icon : ''}`}>{icon}</span>
             <span className="text-sm font-semibold truncate leading-tight flex-1">{label}</span>
             {count !== undefined && (
-                <span className="shrink-0 ml-auto px-1.5 py-0.5 rounded-full bg-gray-200 dark:bg-gray-800 text-gray-500 text-[10px] font-bold">
+                <span className="shrink-0 ml-auto px-1.5 py-0.5 rounded-full bg-gray-200 dark:bg-gray-800 text-gray-500 text-caption font-bold">
                     {count}
                 </span>
             )}

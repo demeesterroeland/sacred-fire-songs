@@ -1,11 +1,12 @@
 # UX v2: Agent Decisions (ADR-lite)
 
-**Version:** 1.7 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375)
+**Version:** 1.8 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375)
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.8 | Nov 5, 2026 | Added UXA-008 (take vocabulary in all 8 languages, incl. recorder and dialogs; "Shared with me" heading deferred to #399) and UXA-009 (internal identifiers and message key names keep legacy names), from #398. |
 | 1.7 | Nov 5, 2026 | Added UXA-012, UXA-013 (Story 6.1.26 / #410: GuestGate decisions) and UXA-014 (signed-in users and public takes). |
 | 1.6 | Nov 5, 2026 | Added UXA-011 (generic 404 copy and protected-prefix routing, #406). |
 | 1.3 | Nov 5, 2026 | Added UXA-007 (reader text-size steps follow the #385 tokens). |
@@ -24,6 +25,8 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 | UXA-005 | Nov 5, 2026 | #385 | `accent` means the fire accent; shadcn hover uses `surface-2` | no |
 | UXA-006 | Nov 5, 2026 | #391 | Chords / Melody / My take badges move from the song header into the expanded meta line | yes |
 | UXA-007 | Nov 5, 2026 | #390 | Reader text-size steps follow the #385 `LYRIC_STEPS` tokens (15–28 px, six steps) | no |
+| UXA-008 | Nov 5, 2026 | #398 | "Take(s)" is the noun for a recording in every language, including recorder, dialogs, e-mail, list empty states and filters; "Shared with me" heading deferred to #399; Quechua needs native review | yes |
+| UXA-009 | Nov 5, 2026 | #398 | Internal identifiers keep their legacy names (`myRecordings` URL param, reserved smart-playlist title, `rehearsal.*` / `recording.*` message key names) | no |
 | UXA-011 | Nov 5, 2026 | #406 | Generic 404 copy "Page not found" + plain "Go home"; only `/account`, `/admin`, `/users` redirect guests to login | yes |
 | UXA-012 | Nov 5, 2026 | #410 | Guest Listen tab for consented public takes deferred until the Practice drawer restructure; RLS enforces consent now | yes |
 | UXA-013 | Nov 5, 2026 | #410 | Fake demo playlists and per-card locks removed from the guest Library; add-to-playlist becomes a bottom sheet gate | yes |
@@ -129,3 +132,22 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 - **Choice:** (b). UXD-2 as written covers guests; the story does not authorise further RLS changes.
 - **Consequences:** a public take without consent is visible to members but not to guests. Owner to decide whether members should follow the same rule; then a follow-up migration is needed.
 - **Confirm:** yes (permissions)
+
+### UXA-008 · "Take" as the one noun, in every language
+
+- **Date / story:** Nov 5, 2026 · #398 (G4.1)
+- **Context:** the story names the heading "My takes", the badge "Takes", the smart playlist "Your takes" and the guest card "Practice recorder". The same audio items were also called "recordings" in filters, empty states, the toast action, the recorder (Save / Preview / name placeholder), delete / share / publish dialogs, the share e-mail, the mini-player source group and the not-found page.
+- **Options:** (a) rename only the six places named in the story; (b) rename every user-visible noun for the item. Verbs and progress states ("Start recording", "Recording...", "Recording paused") stay: the user is recording, the result is a take.
+- **Choice:** (b), after review (first pass kept "Save Recording" and similar). Now "Save Take", "Delete take?", "Share take", "Publish Take", "My take" (fallback mini-player label), and the e-mail says "practice take". Dropdown group headings in the mini-player follow the names elsewhere: the reference group is headed **Listen** (the tab name; the old "Reference Tracks" label is removed) and the takes group **My takes**. Translations: nl "take(s)", es "toma(s)", it "take", ru "дубль/дубли", fr "prise(s)", pt "take(s)", qu "toma(kuna)" (one form: Tomakuna). Practice → nl Oefenen, es Práctica, it Pratica, ru Практика, fr Pratique, pt Prática, qu Yachakuy. ru guest card: "Диктофон для практики".
+- **Deferred:** the "Shared with me" list heading in the drawer still follows the old wording where it exists; renaming and splitting that list belongs to #399 (G4.2, takes shared with me listed separately), so no code changes here.
+- **Consequences:** the owner should have a native speaker check the Quechua and Russian terms before release.
+- **Confirm:** yes (copy tone in 7 languages)
+
+### UXA-009 · Internal identifiers keep legacy names
+
+- **Date / story:** Nov 5, 2026 · #398 (G4.1)
+- **Context:** the old names also exist as identifiers: the `?myRecordings=true` URL param, the reserved smart-playlist title `My Recordings` (`lib/playlists/smartPlaylists.ts`), `rehearsal.*` message keys and the `RehearsalDrawer` component.
+- **Options:** (a) rename all; (b) rename only user-visible copy and message keys that embedded an old name.
+- **Choice:** (b). Renaming the URL param would break saved links; the reserved title only blocks users from creating a playlist with that name. Message keys that carried the old name as a *label* (`rehearsal.title`, `rehearsal.tab.*`, `song.recordings`, …) moved to `practice.*`. Keys whose *value* was reworded to "take" (`recorder.btn.save`, `recording.sharing.*`, `recording.publish.*`, `email.recordingShared.*`, `feedback.notFound.recording.*`, `miniPlayer.source.userRecording`, …) keep their key names so the diff stays reviewable; only the visible values changed.
+- **Consequences:** a later cleanup can rename the component and the remaining `rehearsal.*` / `recording.*` keys.
+- **Confirm:** no

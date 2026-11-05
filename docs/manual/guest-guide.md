@@ -1,11 +1,12 @@
 # Guest Guide (draft)
 
-**Version:** 0.7 | **Date:** Nov 5, 2026
+**Version:** 0.8 | **Date:** Nov 5, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.8 | Nov 5, 2026 | Renamed to Practice (menu, Listen / Record tabs). |
 | 0.7 | Nov 5, 2026 | Members-only screens now show one locked preview with the reason and a **Sign in** button that brings you back (Story 6.1.26). |
 | 0.6 | Nov 5, 2026 | Added "A link that does not work" (real 404 page). |
 | 0.3 | Nov 5, 2026 | Song page: `Chords · A− · A+` toolbar (UX v2, #390). |
@@ -40,17 +41,17 @@ The ☰ menu repeats the main places (Home, Songs, Playlists, Favorites, Drafts,
 - A second line shows **Key**, **Capo** and **Tuning**, e.g. `Key E · Capo 3 · Standard`.
 - Under those lines: **Chords** switches the chords on or off, **A−** / **A+** make the text smaller or larger. The app remembers your choice on this device.
 - Chords are printed above the word where they change.
-- ⋮ (top right) opens the song menu: like, share, add to playlist, recordings. Actions that need an account ask you to sign in.
+- ⋮ (top right) opens the song menu: like, share, add to playlist, Practice. Actions that need an account ask you to sign in.
 
 ## Listening to the song
 
-Open ⋮ → **Recordings** to open the **Rehearsal Space**.
+Open ⋮ → **Practice** to open the Practice panel.
 
-- **Reference Tracks** tab: choose **YouTube**, **SoundCloud** or **Spotify** (when the song has that link) and play it inside the app.
+- **Listen** tab: choose **YouTube**, **SoundCloud** or **Spotify** (when the song has that link) and play it inside the app.
 - A small **player bar** stays above the bottom bar so you can keep listening while reading. Use ⟲ / ⟳ to jump back or forward, ✕ to stop. **(planned: the bar will only appear after you press play)**
 - Tip: wear headphones if you sing along while recording later.
 
-The **Voice Recorder** tab shows what members can do and a **Sign In to Record** button.
+The **Record** tab shows what members can do and a **Sign In to Record** button.
 
 ## Things that need an account
 

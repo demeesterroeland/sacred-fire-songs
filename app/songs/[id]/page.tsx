@@ -307,7 +307,7 @@ export default function SongDetailPage() {
                                     setIsRehearsalDrawerOpen(true);
                                 }}
                                 className="flex items-center gap-2 px-3 py-2 bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 rounded-lg text-sm font-bold border border-indigo-500/20 transition-all active:scale-[0.98]"
-                                title={t('song.recordings')}
+                                title={t('practice.title')}
                             >
                                 {isAudioPlaying ? (
                                     <div className="flex items-end gap-[2px] h-4 w-4 overflow-hidden" title={t('miniPlayer.playing')}>
@@ -319,9 +319,9 @@ export default function SongDetailPage() {
                                 ) : (
                                     <Mic className="w-4 h-4" />
                                 )}
-                                <span className="hidden xl:inline">{t('song.recordings')}</span>
+                                <span className="hidden xl:inline">{t('practice.title')}</span>
                                 {recordings && recordings.length > 0 && (
-                                    <span className="ml-1 px-1.5 py-0.5 rounded-md bg-indigo-600/20 text-[10px] font-black">
+                                    <span className="ml-1 px-1.5 py-0.5 rounded-md bg-indigo-600/20 text-caption font-black">
                                         {recordings.length}
                                     </span>
                                 )}
@@ -491,7 +491,7 @@ export default function SongDetailPage() {
                                 className="w-full flex items-center gap-4 px-6 py-4 hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors text-left text-gray-700 dark:text-gray-300"
                             >
                                 <Mic className="w-5 h-5 text-gray-400 dark:text-gray-500" />
-                                <span className="text-sm font-bold">{t('song.recordings')}</span>
+                                <span className="text-sm font-bold">{t('practice.title')}</span>
                             </button>
 
                             {/* Edit */}

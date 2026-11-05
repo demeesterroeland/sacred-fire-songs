@@ -29,21 +29,21 @@ async function escape(page) {
 }
 
 async function openDrawer(page) {
-  const direct = page.locator('button[title="Recordings"]').filter({ visible: true }).first();
+  const direct = page.locator('button[title="Practice"]').filter({ visible: true }).first();
   if (await direct.count()) {
     await direct.click();
   } else {
     await page.locator('button[aria-label="More actions"]').filter({ visible: true }).first().click();
     await page.waitForTimeout(400);
-    await page.locator('button:has-text("Recordings")').filter({ visible: true }).first().click();
+    await page.locator('button:has-text("Practice")').filter({ visible: true }).first().click();
   }
-  await page.locator('h3:has-text("Rehearsal Space")').waitFor({ timeout: 10000 });
+  await page.locator('h3:has-text("Practice")').waitFor({ timeout: 10000 });
   await page.waitForTimeout(1000);
 }
 
 async function openRecordingMenu(page, index = 0) {
   // Row-level "More actions" buttons live inside the drawer.
-  const drawer = page.locator('h3:has-text("Rehearsal Space")').locator('xpath=ancestor::*[contains(@class,"fixed")][1]');
+  const drawer = page.locator('h3:has-text("Practice")').locator('xpath=ancestor::*[contains(@class,"fixed")][1]');
   await drawer.locator('button[aria-label="More actions"]').nth(index).click();
   await page.waitForTimeout(500);
 }
@@ -119,7 +119,7 @@ async function common(page, role) {
   await step('drawer reference tracks', async () => {
     await go(page, `/songs/${SONGS.memberSong}`);
     await openDrawer(page);
-    await page.locator('button:has-text("Reference Tracks")').filter({ visible: true }).first().click().catch(() => {});
+    await page.locator('[data-testid="practice-tab-listen"]').filter({ visible: true }).first().click().catch(() => {});
     await page.waitForTimeout(800);
     await shot(page, vp, role, '60-drawer-reference-tracks', { fullPage: false });
     const yt = page.locator('button:has-text("YouTube")').filter({ visible: true }).first();
@@ -136,7 +136,7 @@ async function common(page, role) {
     }
   });
   await step('drawer voice recorder', async () => {
-    await page.locator('button:has-text("Voice Recorder")').filter({ visible: true }).first().click();
+    await page.locator('[data-testid="practice-tab-record"]').filter({ visible: true }).first().click();
     await page.waitForTimeout(1500);
     await shot(page, vp, role, '63-drawer-voice-recorder', { fullPage: false });
     await shot(page, vp, role, '63b-drawer-voice-recorder-full', { fullPage: true });
@@ -147,7 +147,7 @@ async function memberRecording(page, role) {
   await step('record a take', async () => {
     await go(page, `/songs/${SONGS.musicianSong}`);
     await openDrawer(page);
-    await page.locator('button:has-text("Voice Recorder")').filter({ visible: true }).first().click().catch(() => {});
+    await page.locator('[data-testid="practice-tab-record"]').filter({ visible: true }).first().click().catch(() => {});
     await page.waitForTimeout(800);
     await page.locator('button[title="Start recording"]').click();
     await page.waitForTimeout(2500);
@@ -162,7 +162,7 @@ async function memberRecording(page, role) {
   await step('recording row menu', async () => {
     await go(page, `/songs/${SONGS.memberSong}`);
     await openDrawer(page);
-    await page.locator('button:has-text("Voice Recorder")').filter({ visible: true }).first().click().catch(() => {});
+    await page.locator('[data-testid="practice-tab-record"]').filter({ visible: true }).first().click().catch(() => {});
     await page.waitForTimeout(1200);
     await openRecordingMenu(page, 0);
     await shot(page, vp, role, '66-recording-row-menu', { fullPage: false });
@@ -177,7 +177,7 @@ async function memberRecording(page, role) {
     await step(name, async () => {
       await go(page, `/songs/${SONGS.memberSong}`);
       await openDrawer(page);
-      await page.locator('button:has-text("Voice Recorder")').filter({ visible: true }).first().click().catch(() => {});
+      await page.locator('[data-testid="practice-tab-record"]').filter({ visible: true }).first().click().catch(() => {});
       await page.waitForTimeout(1200);
       await openRecordingMenu(page, 0);
       await page.getByRole('menuitem', { name: item }).first().click();
@@ -189,7 +189,7 @@ async function memberRecording(page, role) {
   await step('mini player', async () => {
     await go(page, `/songs/${SONGS.memberSong}`);
     await openDrawer(page);
-    await page.locator('button:has-text("Voice Recorder")').filter({ visible: true }).first().click().catch(() => {});
+    await page.locator('[data-testid="practice-tab-record"]').filter({ visible: true }).first().click().catch(() => {});
     await page.waitForTimeout(1200);
     await page.locator('button[title="Play"]').filter({ visible: true }).first().click();
     await page.waitForTimeout(2000);
@@ -205,7 +205,7 @@ async function sharedWithMe(page, role) {
   await step('shared recording seen by recipient', async () => {
     await go(page, `/songs/${SONGS.memberSong}`);
     await openDrawer(page);
-    await page.locator('button:has-text("Voice Recorder")').filter({ visible: true }).first().click().catch(() => {});
+    await page.locator('[data-testid="practice-tab-record"]').filter({ visible: true }).first().click().catch(() => {});
     await page.waitForTimeout(1500);
     await shot(page, vp, role, '74-shared-with-you', { fullPage: false });
     await shot(page, vp, role, '74b-shared-with-you-full', { fullPage: true });

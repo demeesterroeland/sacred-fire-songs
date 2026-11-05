@@ -49,7 +49,7 @@ export function SongMetaLines({
     ...categories.map((c) => ({ label: c.name, href: `/songs?tag=${encodeURIComponent(c.slug)}` })),
     ...(hasChords ? [{ label: t('song.technical.chords'), href: '/songs?chords=true' }] : []),
     ...(hasMelody ? [{ label: t('song.technical.melody'), href: '/songs?melody=true' }] : []),
-    ...(hasPersonalRecording ? [{ label: t('song.technical.recording'), href: '/songs?myRecordings=true' }] : []),
+    ...(hasPersonalRecording ? [{ label: t('song.technical.takes'), href: '/songs?myRecordings=true' }] : []),
   ];
 
   return (
