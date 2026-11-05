@@ -1,6 +1,6 @@
 # Project Analysis & Design Document: Song Sharing Application (Sacred Fire Songs)
 
-**Version:** 1.61
+**Version:** 1.62
 **Status:** Living Document
 **Date:** Nov 5, 2026
 
@@ -54,6 +54,7 @@
 | **1.59** | Nov 5, 2026 | §6.9 recording permalink: unreachable `/recordings/:id` links render a recording-specific "Recording Not Available" page (`app/recordings/[id]/not-found.tsx`, `NotFound` takes optional `titleKey` / `descriptionKey`, keys `feedback.notFound.recording.*` in all 8 locales) instead of the song-themed "Song Not Found". Same copy for no access, unknown and malformed ids. |
 | **1.60** | Nov 5, 2026 | §6.6 documentation contract (Story 5.1.13, #300): `@story-5.1.13` `ci-gate` scenarios check that the guides, PR template, `/start-story` and README describe Gitflow (no "GitHub Flow", no "no develop branch" outside changelogs). `development-workflow.md` 2.0, Gitflow PR template with test-pyramid checklist. |
 | **1.61** | Nov 5, 2026 | UX v2 (Epic 6.1, Story 6.1.1 / #385): added §6.10 Design System — semantic tokens (`app/styles/sober.css`, `data-style="sober"` × light/dark), Tailwind utility map, component primitives (Button, ListRow, MetaLine, Chip, BottomSheet, Toolbar), token-parity/contrast tests and palette ratchet. |
+| **1.62** | Nov 5, 2026 | UX v2 (Story 6.1.33 / #417): §6.3 demo-data hygiene — Playwright `globalTeardown` (`e2e/global-teardown.ts`) removes E2E fixtures; unit + @seed checks that no playlist title looks like a test fixture (`lib/seed/dataHygiene.ts`). |
 
 
 ## 1. Introduction
@@ -180,6 +181,7 @@ The application is a **Progressive Web App (PWA)** optimized for mobile use duri
 * **Database Setup & Seeding:** E2E runs use a Playwright `globalSetup` hook (`e2e/global-setup.ts`) to execute a custom Node.js setup script (`scripts/db/setup-test-db.mjs`). This script connects to the target database, dynamically truncates all public tables (preserving the static `categories` lookup taxonomy), wipes `auth.users`, seeds the fixed test accounts from `supabase/seeds/01_auth_users.sql` and `02_profiles.sql`, and then always runs the programmatic random seeder. The real song collection and its SQL seeds (`03_songs_initial.sql` … `10_personal_recordings.sql`) live in the sibling repository `sacred-fire-songs-collection` and are no longer part of this repository.
 * **Static Generated Seed:** `supabase/seeds/03_songs_random_generated.sql` is a snapshot of the generator's output (200 songs, timestamps relative to `now()`), loaded by `supabase db reset` / `supabase start` through `config.toml` `sql_paths`. It is a generated file; regenerate it with `npm run seed:generate` after changing the generator. The seed only holds recording metadata; `npm run seed:audio` uploads the sample MP3s from `supabase/seeds/audio/` to the `rehearsals` bucket for every seeded `user_recordings` row (local stack only).
 * **Programmatic Random Seeding:** `scripts/db/random-seeder.mjs` (PL/pgSQL, executed by `setup-test-db.mjs`; song count via `E2E_RANDOM_SONGS_COUNT`, default 80) generates randomized song titles, ChordPro content, media links, elements/lineage taxonomy mappings, playlists and private user rehearsal recordings (staggered takes for 30% of songs, and multiple 2-5 takes for 50% of songs). The generated songs deliberately cover every song shape the unit and E2E tests exercise; see `docs/testing/song.feature` for the catalogue of situations. This exercises the system's parsing, filtering, layout, search, and private recording drawer list views.
+* **Demo-Data Hygiene (Story 6.1.33):** tests must not leave fixtures in the shared database. `e2e/global-teardown.ts` (Playwright `globalTeardown`, runs once after all projects) deletes the admin-users fixtures by their fixed ids and any `Smoke Test Playlist <ms>` left when the smoke spec failed before its UI clean-up. `lib/seed/dataHygiene.ts` (`isTestFixtureTitle`) defines what a fixture title looks like; `testing/unit/tests/dataHygiene.test.ts` checks the committed seed and `docs/testing/ux-v2-data-hygiene.feature` (@seed) checks the database.
 * **Local Optimization:** For fast local test iteration, setting the environment variable `E2E_REUSE_DB=1` skips the database wipe and re-seed, reusing the existing database state.
 
 ### 6.4 Testing Pyramid for Story 3.6.1 (Admin Users)

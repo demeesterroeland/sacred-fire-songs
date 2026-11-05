@@ -1,11 +1,12 @@
 # UX v2: Phone Validation Script
 
-**Version:** 1.1 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
+**Version:** 1.2 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.2 | Nov 5, 2026 | Added #417 (clean demo data). |
 | 1.1 | Nov 5, 2026 | Added #385 (design tokens). |
 | 1.0 | Nov 5, 2026 | Skeleton: setup, reset and seed, preview image, smoke path. Story sections are added as stories merge. |
 
@@ -70,3 +71,10 @@ Sections are added per story as it merges into `feat/ux-v2`.
 - [ ] 2. Switch to light mode. Background is warm off-white; greys look warm, not blue. Screenshot: `…/385/after-light-01-home.webp`.
 - [ ] 3. Open a dialog (e.g. song ⋮ → Delete is not needed; account menu is enough). Hover/pressed rows are grey, never orange.
 - [ ] 4. On a laptop, open `docs/design/screens/v2/screen20_design_system.html`: the component sheet shows the same colours as the app.
+
+### #417 · G9.1 Clean demo data
+
+**Preconditions:** guest or member; preview freshly reset and seeded (§0).
+
+- [ ] 1. Open Library → Playlists → public playlists. No title contains "E2E" or "Smoke Test".
+- [ ] 2. Search "E2E" and "Smoke". No playlist or song fixture appears.
