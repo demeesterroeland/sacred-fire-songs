@@ -20,15 +20,31 @@ test('long title in the sticky header shows its beginning and an ellipsis', asyn
       'SELECT id, title FROM public.compositions WHERE is_public ORDER BY length(title) DESC LIMIT 1'
     )
     .finally(() => client.end());
-  test.skip(!song, 'no public song seeded');
+  test.skip(!song || song.title.length < 40, 'no public song with a long title seeded');
 
   await page.goto(`/songs/${song.id}`);
   const header = page.locator('header').filter({ has: page.getByTestId('sticky-song-title') });
   const title = page.getByTestId('sticky-song-title');
   await expect(title).toHaveText(song.title);
 
+  const headerTop = await header.evaluate((el) => el.getBoundingClientRect().top);
   await page.mouse.wheel(0, 800);
+  // The page scrolls in the window or an inner container; either must have moved.
+  await expect
+    .poll(() =>
+      page.evaluate(() =>
+        Math.max(
+          document.scrollingElement?.scrollTop ?? 0,
+          ...[...document.querySelectorAll('*')].map((el) => el.scrollTop)
+        )
+      )
+    )
+    .toBeGreaterThan(0);
   await expect(header).toBeInViewport();
+  // Sticky: it stays pinned at (or above) where it started instead of scrolling away.
+  const pinnedTop = await header.evaluate((el) => el.getBoundingClientRect().top);
+  expect(pinnedTop).toBeGreaterThanOrEqual(0);
+  expect(pinnedTop).toBeLessThanOrEqual(headerTop);
 
   const box = await title.evaluate((el) => {
     const cs = getComputedStyle(el);
@@ -43,6 +59,7 @@ test('long title in the sticky header shows its beginning and an ellipsis', asyn
       transform: cs.transform,
       leftGap: r.left - h.left,
       fontPx: parseFloat(cs.fontSize),
+      scrollLeft: el.scrollLeft,
     };
   });
   expect(box.overflowing).toBe(true);
@@ -53,4 +70,5 @@ test('long title in the sticky header shows its beginning and an ellipsis', asyn
   expect(box.transform).toBe('none');
   expect(box.leftGap).toBeGreaterThanOrEqual(16);
   expect(box.fontPx).toBeGreaterThanOrEqual(12);
+  expect(box.scrollLeft).toBe(0); // the text starts at its first letter
 });

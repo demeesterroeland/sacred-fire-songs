@@ -152,7 +152,6 @@ export default function SongDetailPage() {
         })();
     }, [linkedRecordingId, song, authLoading, user, t]);
 
-
     if (songLoading || authLoading) {
         if (skeletonTimedOut) {
             return (
@@ -271,7 +270,6 @@ export default function SongDetailPage() {
                     </button>
                 </div>
             </header>
-
 
             <main className="flex-1 min-w-0 bg-white dark:bg-gray-950">
 
@@ -428,8 +426,6 @@ export default function SongDetailPage() {
                             hasChords={song.has_chords}
                         />
                     </div>
-
-
 
                     <div className="h-20"></div>
                 </div>
