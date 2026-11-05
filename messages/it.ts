@@ -418,6 +418,12 @@ const it: Partial<Record<TranslationKey, string>> = {
   'recorder.error.fileSizeLimit': 'Il file supera il limite di {limit}.',
   'recorder.error.saveFailed': 'Impossibile salvare il take sul server di archiviazione. Riprova.',
   'recorder.error.unexpected': "Si è verificato un errore imprevisto durante il caricamento.",
+  'recorder.meter.label': 'Livello di ingresso',
+  'recorder.meter.silent': 'Ancora nessun suono. Controlla che il microfono sia acceso e non silenziato.',
+  'recorder.limit': 'Durata massima di una registrazione: 3 minuti',
+  'recorder.timeLeft': 'Mancano {time}',
+  'recorder.countIn.label': 'Conto alla rovescia 3-2-1 prima di registrare',
+  'recorder.countIn.status': 'Si parte tra {n}',
 
   // ─── Library & Playlists ──────────────────────────────────────────────────
   'library.tabs.playlists': 'Playlist',

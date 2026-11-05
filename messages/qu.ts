@@ -422,6 +422,12 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'recorder.error.fileSizeLimit': 'Archivo {limit}-manta aswan hatunmi.',
   'recorder.error.saveFailed': 'Toma servidorpi mana waqaychasqachu. Musuqmanta ruway.',
   'recorder.error.unexpected': 'Apachiypi mana suyasqa pantay tarikurqan.',
+  'recorder.meter.label': 'Yaykuq uyarinapa sayaynin',
+  'recorder.meter.silent': 'Manaraqmi ima ruqyaypas uyarikunchu. Micrófonoykiqa rupharichkanmanta, ama upallachiyta qhaway.',
+  'recorder.limit': 'Hukniraq grabasqapa aswan unayninqa: 3 minutos',
+  'recorder.timeLeft': '{time} saqisqa',
+  'recorder.countIn.label': '3-2-1 yupay grabayta qallarinaykikama',
+  'recorder.countIn.status': '{n} qhipanpi qallarin',
 
   // ─── Library & Playlists ──────────────────────────────────────────────────
   'library.tabs.playlists': 'Listakuna',

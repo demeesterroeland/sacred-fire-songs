@@ -1,11 +1,12 @@
 # UX v2: Agent Decisions (ADR-lite)
 
-**Version:** 1.25 | **Date:** Nov 6, 2026 | **Epic:** 6.1 (#375)
+**Version:** 1.26 | **Date:** Nov 6, 2026 | **Epic:** 6.1 (#375)
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.26 | Nov 6, 2026 | Added UXA-036 (recorder: remaining-time rule, limit caption, silent-microphone hint, meter design) and UXA-037 (count-in default and memory, cancel during count-in, review buttons; #404). |
 | 1.25 | Nov 6, 2026 | Added UXA-038 and UXA-039 (auth pages: where Back leads, plain page layout; #409). |
 | 1.24 | Nov 6, 2026 | Added UXA-030 and UXA-031 (unfinished features hidden behind lib/features.ts, deep link of a hidden settings tab, planned preferences and melody notation; #389). |
 | 1.23 | Nov 5, 2026 | Added UXA-034 and UXA-035 (Listen tab providers and status; calm mini player; #397). |
@@ -68,6 +69,8 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 | UXA-029 | Nov 5, 2026 | #403 | Shared with me: the unread badge stays on the bell only (account menu and Library entries say "n new" in words), the Library entry is a row under the tabs (not a fifth tab), one row per take, opening Practice marks the song's notifications read | yes |
 | UXA-030 | Nov 6, 2026 | #389 | Unfinished features hide behind one list of switches (`lib/features.ts`), all off: avatar block, Privacy & Data tab, planned preference rows. The "Coming soon" labels and their message keys are deleted; code and routes stay. A `?tab=privacy` link opens Profile like any unknown tab. | yes |
 | UXA-031 | Nov 6, 2026 | #389 | Two placeholders beyond the story text are hidden too: the three disabled Preferences rows (auto-scroll, default chords, offline mode) and the "Melody notation" section of the song form. | yes |
+| UXA-036 | Nov 6, 2026 | #404 | Recorder: `m:ss left` from 2:00 on (not "2:41 left"), the limit in words before recording, a "No sound yet" hint after 3 s, meter = 8 bars of recent levels | yes |
+| UXA-037 | Nov 6, 2026 | #404 | Recorder: count-in on by default and remembered per device, cancel during the count-in, Save full-width primary with Discard as a text button below | yes |
 | UXA-038 | Nov 6, 2026 | #409 | Auth pages: "Back" leads to the hardened `next=` target, else Home; a `next` pointing at another auth page counts as none (no loop); the ✕ is removed, not repurposed; forgot-password's Back returns to login and keeps `next` | no |
 | UXA-039 | Nov 6, 2026 | #409 | Auth pages are plain pages on tokens: Back link above the form, no card on phones, bordered panel from `md`, accent-soft flame badge instead of the orange gradient and glow; sign-up-success and error pages are not touched | no |
 
@@ -388,3 +391,23 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 - **Choice:** (b): `components/auth/AuthShell.tsx` gives all four auth forms the same layout (Back link, header with an accent-soft flame/key badge, token inputs ≥ 44 px, notices with a border and words, not colour alone). Phones show no card; from `md` a bordered panel. Primary actions use the shared `Button` (one accent fill per screen). `sign-up-success` and `error` pages are left as they are (no ✕ or Home trap there; a later restyle can use the same shell).
 - **Consequences:** palette baseline −192, lint warnings −11. The magic-link success text is a neutral notice instead of a green box. The Terms / Privacy links are still placeholders (`#`), as before.
 - **Confirm:** no
+
+### UXA-036 · Recorder: when "left" shows, the limit in words, the silent-microphone hint, the meter
+
+- **Date / story:** Nov 6, 2026 · #404 (G4.7)
+- **Context:** the scope says "Timer shows `2:41 left` in the last minute"; the Gherkin says a recording at 2:00 shows "1:00 left". 2:41 left would be 19 s into a take, not the last minute, so the two disagree. The mockup (`screen23_practice_drawer.html`) shows *Maximum take length: 3 minutes (2:41 left)* in one line and an eight-bar meter. The story does not say what the meter does while paused or what happens when the microphone is silent (R14: "know the microphone works").
+- **Options:** left time: (a) always from the start; (b) from the last minute on, as the Gherkin; (c) only in the last 10 s. Meter: (a) one bar that grows; (b) eight bars with the recent levels (mockup). Silent microphone: (a) nothing; (b) a hint after a few seconds.
+- **Choice:** left time (b): from 2:00 on the line reads `m:ss left` (always words and numbers; bold, danger colour in the last 10 s); before that the same line states the limit (*Maximum take length: 3 minutes*), so the limit is known before it comes. The elapsed clock stays `mm:ss`. Meter (b): eight bars showing the last eight levels (about 20 per second), bar height = level (8–32 px), `role="meter"` with an accessible name and the value; no CSS transition, so reduced motion needs nothing extra. It listens during the count-in and while recording, reads 0 while paused, and the microphone is never routed to the speakers. The level is RMS on a dB scale (−60 dB … 0 dB). Hint (b): after 3 s in a row of recording with no level above about −51 dB the recorder says *No sound yet. Check that your microphone is on and not muted.* It is a rolling 3-second window: the next sound clears it and another 3 s of silence brings it back; the count-in and a pause are not counted. It is polite live text in a region that is always mounted (empty until needed).
+- **Consequences:** the caption and the hint are new copy (8 locales; Quechua to proofread). A very quiet room with a good microphone can trigger the hint for a take that starts with silence; it goes away at the first sound and costs nothing. Web Audio is missing in very old browsers: the meter then stays flat, the recording still works. The 2:41 example in the story text is read as an example, not as a rule. Known limitation: the take clock counts one tick per second (as before), so on a very busy phone the shown time can lag the real time slightly; the meter and the 3-minute stop use that same clock.
+- **Review:** the last 10 s are bold as well as red (colour is never alone); the no-sound hint is a rolling window instead of a latch for the whole stream; the meter sits *below* the clock and the limit/time-left line; the count-in line and the hint are live regions that are always mounted; one audio context per take is created in the record tap (iOS) and shared with the meter; a failed start releases the microphone; Discard detaches the recorder so a late stop cannot refill the take; the meter lives in its own component so the recorder does not re-render 20 times a second.
+- **Confirm:** yes (new copy: limit caption and silent hint)
+
+### UXA-037 · Recorder: count-in default, memory, cancel, and the review buttons
+
+- **Date / story:** Nov 6, 2026 · #404 (G4.7)
+- **Context:** today every recording starts with a 3-2-1 count-in (also to warm the microphone, avoiding the "pop" at the start). The story asks for an *optional* count-in toggle and for Save as the single full-width primary with Discard as a text button. It does not say what the default is, whether the choice is remembered, or whether the count-in can be cancelled (today it cannot).
+- **Options:** default: (a) on, as today; (b) off. Memory: (a) none; (b) per device (`localStorage`). Cancel during count-in: (a) no; (b) yes.
+- **Choice:** default (a) on, so nothing changes for anyone who does not touch the switch, and the microphone still has three seconds to warm up; memory (b), key `sfs:recorder:count-in` (`"off"` when switched off), read once when the recorder opens, failures of storage are ignored; cancel (b): the bin button is shown during the count-in and releases the microphone. The toggle is a native checkbox with `role="switch"` in a 44 px labelled row (*Count in 3-2-1 before recording*), shown only while idle. Review: **Save Take** is the single `primary` full-width Button (min 44 px), **Discard** a `ghost` Button, full width below it, no border; Discard has no icon any more.
+- **Consequences:** with the count-in off, recording starts as soon as the microphone answers and the first fraction of a second can contain the microphone start-up pop. The choice does not follow the member to another device. The old side-by-side Discard / Save pair is gone, so Discard is one tap further from the thumb on purpose (it is a destructive action).
+- **Review:** the count-in line (*Starting in n*) is a live region that is mounted empty and filled in, so screen readers announce each step; if capturing cannot start after the count-in, the microphone is released and the error shows instead of an uncaught error; the Dutch count-in reads *Begint over n* and the French time left *Il reste m:ss*.
+- **Confirm:** yes (default on and remembered on the device)

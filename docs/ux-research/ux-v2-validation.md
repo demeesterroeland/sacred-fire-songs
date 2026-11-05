@@ -1,11 +1,12 @@
 # UX v2: Phone Validation Script
 
-**Version:** 1.28 | **Date:** Nov 6, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
+**Version:** 1.29 | **Date:** Nov 6, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.29 | Nov 6, 2026 | Added #404 (recorder level meter, count-in, time left, review buttons); review: rolling no-sound window, bold last 10 s, meter below the clock. |
 | 1.28 | Nov 6, 2026 | Added #409 (auth pages without a fake close button). |
 | 1.27 | Nov 6, 2026 | Added #389 (unfinished features hidden). |
 | 1.26 | Nov 5, 2026 | Added #397 (calm player and reference tab). |
@@ -401,3 +402,19 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 - [ ] 5. From the login page tap **Sign in with password**, then **Forgot**. **Expected:** the page has **Back** and no ✕; **Back** returns to the login page, whose **Back** still leads to the song. Screenshot: `…/409/after-light/mobile/guest/23-auth-forgot-password.webp`.
 - [ ] 6. Open **Add Song**, type a title, tap **Sign in** in the grey box, sign in with a member account. **Expected:** you land on Add Song and your title is still there.
 - [ ] 7. **Back**, the links and the buttons are all at least 44 px tall and readable (no text smaller than the small grey captions). Switch the language to Dutch, Spanish, Italian, Russian, French, Portuguese and Quechua: **Back** is translated.
+
+### #404 · G4.7 Recorder: level meter, count-in, time left
+
+**Preconditions:** member account on a 390 px phone with a working microphone, English; any song; allow microphone access when asked. Run once in light and once in dark. Nothing here needs saving: discard each take.
+
+- [ ] 1. Open a song, tap **Practice** → **Record**. **Expected:** under the clock *00:00* the line *Maximum take length: 3 minutes*; a row **Count in 3-2-1 before recording** with a switch that is on (the row is at least 44 px high). Screenshot: `docs/ux-research/screenshots/ux-v2/404/after-light/mobile/member/01-record-idle.webp` (before: `…/404/before-light/…`).
+- [ ] 2. Tap the big microphone button. **Expected:** *Starting in 3*, *2*, *1* (also shown in the button) and the eight meter bars already move when you speak. Screenshot: `…/404/after-light/mobile/member/02-count-in.webp`.
+- [ ] 3. After the count-in, talk, then stay silent. **Expected:** *Recording…*, the clock runs and the **level meter** below it follows your voice: louder = taller bars. Screenshot: `…/404/after-light/mobile/member/03-recording.webp`.
+- [ ] 4. Stay silent for about 5 seconds. **Expected:** after 3 seconds of silence the hint *No sound yet. Check that your microphone is on and not muted.* appears under the meter; it goes away as soon as you make a sound and comes back after another 3 seconds of silence (the count-in and a pause do not count; a muted take shows the hint every time).
+- [ ] 5. Record until **2:00**. **Expected:** the line under the clock changes from the limit to *1:00 left*, counting down; in the last 10 seconds it turns red and also bold (not colour alone). Pause: the bars drop to the bottom and the text stays. Screenshot: `…/404/after-light/mobile/member/04-time-left.webp`.
+- [ ] 6. Let it reach **3:00**. **Expected:** the take stops by itself with the toast about the limit, and the review opens.
+- [ ] 7. In review: **Expected:** the name field, then **Save Take** as one wide orange button and **Discard** as plain text below it; both at least 44 px high. Screenshot: `…/404/after-light/mobile/member/05-review.webp` (before: `…/404/before-light/…/05-review.webp`). Tap **Discard**.
+- [ ] 8. Switch **Count in 3-2-1 before recording** off, tap the microphone. **Expected:** recording starts at once. Discard, close the panel, reopen it: the switch is still off.
+- [ ] 9. Start with the count-in on and tap the bin during the count-in. **Expected:** the count-in stops, the recorder is back to *Ready to record* and the browser's microphone indicator goes out.
+- [ ] 10. Turn on *Reduce motion* in the phone's accessibility settings. **Expected:** the microphone icon does not pulse; the bars still change height.
+- [ ] 11. Switch the language to Dutch, Spanish, Italian, Russian, French, Portuguese and Quechua: the limit line, the count-in label, *Starting in n*, *n left*, the meter's name and the silence hint are translated and fit on the phone. Repeat steps 1–7 in dark mode (`…/404/after-dark/…`).

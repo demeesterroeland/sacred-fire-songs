@@ -416,6 +416,12 @@ const en = {
   'recorder.error.fileSizeLimit': 'File size exceeds the {limit} limit.',
   'recorder.error.saveFailed': 'Failed to save take to storage server. Please try again.',
   'recorder.error.unexpected': 'An unexpected error occurred during upload.',
+  'recorder.meter.label': 'Input level',
+  'recorder.meter.silent': 'No sound yet. Check that your microphone is on and not muted.',
+  'recorder.limit': 'Maximum take length: 3 minutes',
+  'recorder.timeLeft': '{time} left',
+  'recorder.countIn.label': 'Count in 3-2-1 before recording',
+  'recorder.countIn.status': 'Starting in {n}',
 
   // ─── Library & Playlists ──────────────────────────────────────────────────
   'library.tabs.playlists': 'Playlists',
