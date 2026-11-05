@@ -1,11 +1,12 @@
 # UX v2: Agent Decisions (ADR-lite)
 
-**Version:** 1.13 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375)
+**Version:** 1.14 | **Date:** Nov 5, 2026 | **Epic:** 6.1 (#375)
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.14 | Nov 5, 2026 | UXA-010 now asks for confirmation (playback stopping on leaving a song is a product choice; listed in the decisions issue). |
 | 1.13 | Nov 5, 2026 | Added UXA-018 (take status pills: what "Pending invite" means, Public and Shared both shown, shared-with-me rows without a count, #400). |
 | 1.12 | Nov 5, 2026 | Added UXA-017 (readable labels: sentence-case copy, token colours on tested pages, guard allow-list, axe-core pin; #387). |
 | 1.11 | Nov 5, 2026 | Added UXA-016 (what "Shared with me" contains and how the sharer is named, #399). |
@@ -32,7 +33,7 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 | UXA-007 | Nov 5, 2026 | #390 | Reader text-size steps follow the #385 `LYRIC_STEPS` tokens (15–28 px, six steps) | no |
 | UXA-008 | Nov 5, 2026 | #398 | "Take(s)" is the noun for a recording in every language, including recorder, dialogs, e-mail, list empty states and filters; "Shared with me" heading deferred to #399; Quechua needs native review | yes |
 | UXA-009 | Nov 5, 2026 | #398 | Internal identifiers keep their legacy names (`myRecordings` URL param, reserved smart-playlist title, `rehearsal.*` / `recording.*` message key names) | no |
-| UXA-010 | Nov 5, 2026 | #396 | Mini player: shows after play, stays on pause, reserves bar + bottom nav, one accent colour | no |
+| UXA-010 | Nov 5, 2026 | #396 | Mini player: shows after play, stays on pause, reserves bar + bottom nav, one accent colour || yes |
 | UXA-011 | Nov 5, 2026 | #406 | Generic 404 copy "Page not found" + plain "Go home"; only `/account`, `/admin`, `/users` redirect guests to login | yes |
 | UXA-012 | Nov 5, 2026 | #410 | Guest Listen tab for consented public takes deferred until the Practice drawer restructure; RLS enforces consent now | yes |
 | UXA-013 | Nov 5, 2026 | #410 | Fake demo playlists and per-card locks removed from the guest Library; add-to-playlist becomes a bottom sheet gate | yes |
@@ -168,7 +169,7 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 - **Options:** (a) hide on pause; (b) keep the bar after play until stopped; reserve only the bar height; (c) reserve bar height plus the bottom nav it sits on.
 - **Choice:** (b) and (c). The bar stays when paused or when the Practice drawer closes, and goes away on stop (✕), when the take is removed, when the user opens another song, or on a fresh page. `--mini-player-h` = bar height + bottom nav, so sheets, the drawer and the page clear the whole stack. One accent colour for every source (the label names the source), 44 px controls, equalizer only under `motion-safe`. A reference track counts as started as soon as the user presses its play (or the player reports playing), not only when the iframe confirms.
 - **Consequences:** playback never follows the user to another song. Reference tracks stop when the iframe unmounts; the drawer also stops its own active take on unmount, and the bar ignores a take that is not in this song's recordings (`AudioProvider` is global). Stop (✕) acts on what the bar shows. The old source colours (indigo for takes) are gone.
-- **Confirm:** no
+- **Confirm:** yes (music stops when the user leaves the song; the bar never carries over)
 
 ### UXA-015 · Song rows without indicator icons and tag links
 
