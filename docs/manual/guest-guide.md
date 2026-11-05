@@ -1,11 +1,12 @@
 # Guest Guide (draft)
 
-**Version:** 0.2 | **Date:** Nov 5, 2026
+**Version:** 0.3 | **Date:** Nov 5, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.3 | Nov 5, 2026 | Song page: `Chords · A− · A+` toolbar (UX v2, #390). |
 | 0.2 | Nov 5, 2026 | Song page: meta on two grey lines (UX v2, #391). |
 | 0.1 | Nov 4, 2026 | First draft from the UX research. |
 
@@ -35,6 +36,7 @@ The ☰ menu repeats the main places (Home, Songs, Playlists, Favorites, Drafts,
 
 - The title is at the top. Under it, one grey line shows the author and the tags (category, tradition, language); tap it to see them all as links.
 - A second line shows **Key**, **Capo** and **Tuning**, e.g. `Key E · Capo 3 · Standard`.
+- Under those lines: **Chords** switches the chords on or off, **A−** / **A+** make the text smaller or larger. The app remembers your choice on this device.
 - Chords are printed above the word where they change.
 - ⋮ (top right) opens the song menu: like, share, add to playlist, recordings. Actions that need an account ask you to sign in.
 

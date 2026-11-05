@@ -20,6 +20,8 @@ import { useDeleteSong } from '@/hooks/useDeleteSong';
 import { SONG_KEYS } from '@/lib/songs/queryKeys';
 import { useWakeLock } from '@/hooks/useWakeLock';
 import { SongMetaLines } from '@/components/song/SongMetaLines';
+import { ReaderToolbar } from '@/components/song/ReaderToolbar';
+import { useReaderPrefs } from '@/lib/reader/useReaderPrefs';
 import { recordSongView } from '@/app/actions/recordSongView';
 import { useSongRecordings } from '@/hooks/useSongRecordings';
 import { useRecordingsQuery } from '@/hooks/useRecordingsQuery';
@@ -34,6 +36,7 @@ export default function SongDetailPage() {
     const id = typeof params.id === 'string' ? params.id : params.id?.[0]; // Safe type handling
 
     const [selectedVersionIndex, setSelectedVersionIndex] = useState(0);
+    const [readerPrefs, setReaderPrefs] = useReaderPrefs();
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isOverflowOpen, setIsOverflowOpen] = useState(false);
     const [isRehearsalDrawerOpen, setIsRehearsalDrawerOpen] = useState(false);
@@ -381,12 +384,23 @@ export default function SongDetailPage() {
                         hasPersonalRecording={hasPersonalRecording}
                     />
 
+                    {/* Story 6.1.6 (#390): Chords · A− · A+, remembered on this device. */}
+                    <ReaderToolbar
+                        className="-ml-2 mb-2"
+                        step={readerPrefs.step}
+                        chords={readerPrefs.chords}
+                        hasChords={song.has_chords}
+                        onChange={setReaderPrefs}
+                    />
+
                     {/* Song Content (Lyrics/Chords) */}
                     <div className="pt-2 pb-12">
                         <SongDisplay
                             content={currentVersion?.content_chordpro || ''}
                             melodyNotation={currentVersion?.melody_notation || ''}
                             hasChords={song.has_chords}
+                            sizeStep={readerPrefs.step}
+                            showChords={readerPrefs.chords}
                         />
                     </div>
 

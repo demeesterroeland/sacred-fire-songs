@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import { Globe, Mail, Monitor, FileText, Music2, Type, WifiOff, Sun, Moon, SlidersHorizontal } from "lucide-react";
+import { Globe, Mail, Monitor, FileText, Music2, WifiOff, Sun, Moon, SlidersHorizontal } from "lucide-react";
 import { Switch } from "@/components/ui/switch";
 import { useWakeLock } from "@/hooks/useWakeLock";
 import { useUserPreferences, type ThemePreference } from "@/context/UserPreferencesContext";
@@ -217,17 +217,6 @@ export default function PreferencesSettings() {
         icon={<Music2 className="w-5 h-5" />}
         label={t("settings.prefs.showChords")}
         description={t("settings.prefs.showChords.description")}
-        checked={false}
-        onCheckedChange={() => {}}
-        disabled
-        comingSoon
-      />
-
-      {/* Font Size — disabled */}
-      <PreferenceRow
-        icon={<Type className="w-5 h-5" />}
-        label={t("settings.prefs.largeFont")}
-        description={t("settings.prefs.largeFont.description")}
         checked={false}
         onCheckedChange={() => {}}
         disabled
