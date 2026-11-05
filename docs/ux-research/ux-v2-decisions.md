@@ -1,11 +1,12 @@
 # UX v2: Agent Decisions (ADR-lite)
 
-**Version:** 1.24 | **Date:** Nov 6, 2026 | **Epic:** 6.1 (#375)
+**Version:** 1.25 | **Date:** Nov 6, 2026 | **Epic:** 6.1 (#375)
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.25 | Nov 6, 2026 | Added UXA-038 and UXA-039 (auth pages: where Back leads, plain page layout; #409). |
 | 1.24 | Nov 6, 2026 | Added UXA-030 and UXA-031 (unfinished features hidden behind lib/features.ts, deep link of a hidden settings tab, planned preferences and melody notation; #389). |
 | 1.23 | Nov 5, 2026 | Added UXA-034 and UXA-035 (Listen tab providers and status; calm mini player; #397). |
 | 1.22 | Nov 5, 2026 | Added UXA-029 (Shared with me: badge on the bell only, entry as a Library row, read rules; #403). |
@@ -67,6 +68,8 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 | UXA-029 | Nov 5, 2026 | #403 | Shared with me: the unread badge stays on the bell only (account menu and Library entries say "n new" in words), the Library entry is a row under the tabs (not a fifth tab), one row per take, opening Practice marks the song's notifications read | yes |
 | UXA-030 | Nov 6, 2026 | #389 | Unfinished features hide behind one list of switches (`lib/features.ts`), all off: avatar block, Privacy & Data tab, planned preference rows. The "Coming soon" labels and their message keys are deleted; code and routes stay. A `?tab=privacy` link opens Profile like any unknown tab. | yes |
 | UXA-031 | Nov 6, 2026 | #389 | Two placeholders beyond the story text are hidden too: the three disabled Preferences rows (auto-scroll, default chords, offline mode) and the "Melody notation" section of the song form. | yes |
+| UXA-038 | Nov 6, 2026 | #409 | Auth pages: "Back" leads to the hardened `next=` target, else Home; a `next` pointing at another auth page counts as none (no loop); the ✕ is removed, not repurposed; forgot-password's Back returns to login and keeps `next` | no |
+| UXA-039 | Nov 6, 2026 | #409 | Auth pages are plain pages on tokens: Back link above the form, no card on phones, bordered panel from `md`, accent-soft flame badge instead of the orange gradient and glow; sign-up-success and error pages are not touched | no |
 
 ---
 
@@ -367,3 +370,21 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 - **Choice:** (a): `plannedPreferences` and `melodyNotation`, both off. Offline mode belongs to the Offline Library epic (#357), which brings its own setting. Wording of the Preferences page: it now lists appearance, language, keep screen awake, auto-hide navigation and e-mail notifications, all working.
 - **Consequences:** a member who read about "auto-scroll" or "offline mode" on the Preferences page no longer sees them; the manual drops them too. Melody notation is not offered anywhere until it exists.
 - **Confirm:** yes (removes visible, if inert, UI)
+
+### UXA-038 · Where "Back" leads on the auth pages
+
+- **Date / story:** Nov 6, 2026 · #409 (G5.4)
+- **Context:** the login and sign-up cards had a ✕ that always went Home, and a second "Back" (page level) that also went Home. The story says: remove ✕ or make it Back to the `next=` target or home.
+- **Options:** (a) browser history back (`router.back()`); (b) a link to the validated `next=` target, else Home.
+- **Choice:** (b). History back breaks after a reload, a direct visit, or after moving login → sign-up → login (it would walk the auth pages). The `next=` target is already what sign-in returns to (GuestGate, #410), so Back and a successful sign-in lead to the same page. `authBackHref` reuses the hardened `safeNextPath`; a target under `/auth` (a loop) becomes Home. `next` is carried across login, sign-up and forgot-password, so the way back survives the detours. The ✕ is removed rather than turned into a second Back: one control, one word, in the same place on every auth page.
+- **Consequences:** a guest who reached login from the header "Sign In" on a page gets `next=<that page>` from `UserProfile` and goes back there; a visit with no `next` goes Home. If `next` is a members-only page, Back leads to its locked preview (GuestGate), which is the page they came from. No new message keys (`common.back` already exists in 8 locales).
+- **Confirm:** no
+
+### UXA-039 · Auth pages as plain pages on tokens
+
+- **Date / story:** Nov 6, 2026 · #409 (G5.4)
+- **Context:** scope item "plain page layout for auth using the tokens". The forms were palette-heavy (hex colours, an orange gradient button with glow, a heavy card with a large shadow), which made a blank page look like a modal.
+- **Options:** (a) keep the card and only remove ✕; (b) a plain page with the shared tokens and the shared `Button`.
+- **Choice:** (b): `components/auth/AuthShell.tsx` gives all four auth forms the same layout (Back link, header with an accent-soft flame/key badge, token inputs ≥ 44 px, notices with a border and words, not colour alone). Phones show no card; from `md` a bordered panel. Primary actions use the shared `Button` (one accent fill per screen). `sign-up-success` and `error` pages are left as they are (no ✕ or Home trap there; a later restyle can use the same shell).
+- **Consequences:** palette baseline −192, lint warnings −11. The magic-link success text is a neutral notice instead of a green box. The Terms / Privacy links are still placeholders (`#`), as before.
+- **Confirm:** no

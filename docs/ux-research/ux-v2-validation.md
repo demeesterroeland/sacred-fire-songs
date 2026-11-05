@@ -1,11 +1,12 @@
 # UX v2: Phone Validation Script
 
-**Version:** 1.27 | **Date:** Nov 6, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
+**Version:** 1.28 | **Date:** Nov 6, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.28 | Nov 6, 2026 | Added #409 (auth pages without a fake close button). |
 | 1.27 | Nov 6, 2026 | Added #389 (unfinished features hidden). |
 | 1.26 | Nov 5, 2026 | Added #397 (calm player and reference tab). |
 | 1.25 | Nov 5, 2026 | Added #403 (Shared with me). |
@@ -388,3 +389,15 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 - [ ] 5. Open `/library/albums`. **Expected:** the "Page not found" page.
 - [ ] 6. Open **Create → Add song** and scroll to the end of the form. **Expected:** no "Melody notation" section with a "Coming soon" badge. Screenshot: `…/389/after-light/mobile/member/17-song-add-bottom.webp`.
 - [ ] 7. Switch the language to Dutch, Spanish, Italian, Russian, French, Portuguese and Quechua and repeat steps 2–3: no placeholder text in any language. Repeat steps 1–3 in dark mode.
+
+### #409 · G5.4 Auth pages without a fake close button
+
+**Preconditions:** signed out (private window), 390 px phone, English; run once in light and once in dark. Pick any song, e.g. the first one in the list.
+
+- [ ] 1. Open a song, tap **Sign In** in the top bar. **Expected:** the login page shows **Back** at the top left (a plain link with an arrow), the heading **Welcome back**, the form. There is no ✕ anywhere. Screenshot: `docs/ux-research/screenshots/ux-v2/409/after-light/mobile/guest/20-auth-login.webp`. Before (✕ at the top right of a card): `…/409/before-light/mobile/guest/20-auth-login.webp`.
+- [ ] 2. Tap **Back**. **Expected:** you are on that song again (not on Home).
+- [ ] 3. Open `/auth/login` directly (type the address) and tap **Back**. **Expected:** Home.
+- [ ] 4. Open a song, tap **Sign In**, then **Join the Circle**. **Expected:** the sign-up page also has **Back** and no ✕; tapping **Back** returns to the song. Screenshot: `…/409/after-dark/mobile/guest/21-auth-sign-up.webp`.
+- [ ] 5. From the login page tap **Sign in with password**, then **Forgot**. **Expected:** the page has **Back** and no ✕; **Back** returns to the login page, whose **Back** still leads to the song. Screenshot: `…/409/after-light/mobile/guest/23-auth-forgot-password.webp`.
+- [ ] 6. Open **Add Song**, type a title, tap **Sign in** in the grey box, sign in with a member account. **Expected:** you land on Add Song and your title is still there.
+- [ ] 7. **Back**, the links and the buttons are all at least 44 px tall and readable (no text smaller than the small grey captions). Switch the language to Dutch, Spanish, Italian, Russian, French, Portuguese and Quechua: **Back** is translated.

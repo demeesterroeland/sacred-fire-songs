@@ -3,6 +3,8 @@ import { redirect } from 'next/navigation';
 import { BackButton } from '@/components/common/BackButton';
 import { SignUpForm } from '@/components/sign-up-form';
 import { safeNextPath } from '@/lib/auth/safeNext';
+import { authBackHref } from '@/lib/auth/authBack';
+import { AuthPage } from '@/components/auth/AuthShell';
 
 export default async function SignUp(props: { searchParams: Promise<{ next?: string }> }) {
     const searchParams = await props.searchParams;
@@ -12,11 +14,8 @@ export default async function SignUp(props: { searchParams: Promise<{ next?: str
     if (user) redirect(next);
 
     return (
-        <div className="flex-1 flex flex-col items-center justify-center min-h-[80vh] px-4">
-            <BackButton />
-            <div className="w-full max-w-md">
-                <SignUpForm />
-            </div>
-        </div>
+        <AuthPage back={<BackButton href={authBackHref(searchParams.next)} testId="auth-back" />}>
+            <SignUpForm />
+        </AuthPage>
     );
 }

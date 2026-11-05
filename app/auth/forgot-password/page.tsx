@@ -2,19 +2,26 @@
 
 import { createClient } from '@/lib/supabase/client';
 import { useState, Suspense } from 'react';
-import { Mail, Key, Sparkles, ArrowLeft } from "lucide-react";
+import { Mail, Key, Sparkles } from "lucide-react";
 import Link from 'next/link';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { useSearchParams } from 'next/navigation';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
+import { BackButton } from '@/components/common/BackButton';
+import { AuthCard, AuthHeader, AuthNotice, AuthPage, authFooterClass, authIconClass, authInputClass, authLabelClass, authLinkClass } from '@/components/auth/AuthShell';
+import { authPageHref } from '@/lib/auth/authBack';
+import { safeNextPath } from '@/lib/auth/safeNext';
 
 import { useLocale } from '@/context/LocaleContext';
 function ForgotPasswordContent() {
     const { t } = useLocale();
-    const router = useRouter();
     const searchParams = useSearchParams();
     const message = searchParams.get('message');
+    const rawNext = searchParams.get('next');
+    // Back goes to the sign-in page, which keeps the way back to where the guest came from.
+    const safeNext = rawNext ? safeNextPath(rawNext) : null;
+    const loginHref = authPageHref('login', { next: safeNext && safeNext !== '/' ? safeNext : null });
     const [email, setEmail] = useState(searchParams.get('email') || "");
     const [error, setError] = useState<string | null>(null);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
@@ -40,46 +47,29 @@ function ForgotPasswordContent() {
         }
     };
 
+    const notice = error || successMessage || message;
+
     return (
-        <div className="flex-1 flex items-center justify-center p-4">
-            <div className="relative w-full max-w-[420px] bg-white dark:bg-[#1c222d] md:border md:border-gray-200 dark:md:border-[#2d3545] md:rounded-3xl p-6 md:p-8 md:shadow-2xl transition-all duration-300">
-                {/* Back Button */}
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    className="absolute left-4 top-4 md:left-8 md:top-8 text-[#5a657a] hover:text-gray-900 dark:hover:text-white transition-colors flex items-center gap-2 group p-0 bg-transparent hover:bg-transparent"
-                    onClick={() => router.push('/auth/login')}
-                >
-                    <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
-                    <span className="text-sm font-medium">{t('common.back')}</span>
-                </Button>
+        <AuthPage back={<BackButton href={loginHref} testId="auth-back" />}>
+            <AuthCard>
+                <AuthHeader
+                    icon={<Key />}
+                    title={t('auth.forgotPassword.pageTitle')}
+                    description={t('auth.forgotPassword.pageDescription')}
+                />
 
-                {/* Header */}
-                <div className="flex flex-row md:flex-col items-center md:items-center gap-4 md:gap-0 mb-8 md:mb-10 mt-12 md:mt-8">
-                    <div className="w-12 h-12 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-[#d9481e] to-[#f45d1a] flex items-center justify-center shadow-[0_0_20px_rgba(217,72,30,0.3)] md:mb-6 flex-shrink-0">
-                        <Key className="text-white w-6 h-6 md:w-10 md:h-10" />
-                    </div>
-                    <div className="text-left md:text-center">
-                        <h1 className="text-gray-900 dark:text-white text-xl md:text-3xl font-bold md:mb-2 leading-tight">{t('auth.forgotPassword.pageTitle')}</h1>
-                        <p className="text-[#8e99aa] text-xs md:text-sm">{t('auth.forgotPassword.pageDescription')}</p>
-                    </div>
-                </div>
-
-                {(message || successMessage || error) && (
-                    <div className={`mb-6 p-3 rounded-xl text-sm text-center ${error || (message && message.includes('Could not'))
-                        ? 'bg-red-500/10 border border-red-500/20 text-red-400'
-                        : 'bg-emerald-500/10 border border-emerald-500/20 text-emerald-400'
-                        }`}>
-                        {error || successMessage || message}
+                {notice && (
+                    <div className="mb-6">
+                        <AuthNotice tone={error || (message && message.includes('Could not')) ? 'error' : 'info'}>{notice}</AuthNotice>
                     </div>
                 )}
 
                 <form className="space-y-4 md:space-y-6" onSubmit={handleResetPassword}>
                     <div className="space-y-2">
-                        <Label className="text-meta md:text-sm font-semibold text-fg-muted ml-1">{t('field.email.label')}</Label>
-                        <div className="relative group">
-                            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5a657a] group-focus-within:text-[#d9481e] transition-colors pointer-events-none">
-                                <Mail className="w-5 h-5" />
+                        <Label htmlFor="email" className={authLabelClass}>{t('field.email.label')}</Label>
+                        <div className="group relative">
+                            <div className={authIconClass}>
+                                <Mail className="size-5" />
                             </div>
                             <Input
                                 id="email"
@@ -88,34 +78,27 @@ function ForgotPasswordContent() {
                                 required
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
-                                className="w-full bg-transparent border-gray-200 dark:border-[#2d3545] rounded-xl py-3.5 md:py-4 pl-12 pr-4 text-gray-900 dark:text-white placeholder-[#5a657a] focus:outline-none focus:border-[#d9481e] transition-all text-[14px] md:text-[15px] h-auto"
+                                className={authInputClass}
                             />
                         </div>
                     </div>
 
-                    <Button
-                        type="submit"
-                        disabled={isLoading}
-                        className="w-full h-auto bg-gradient-to-r from-[#d9481e] to-[#f45d1a] hover:brightness-110 active:scale-[0.98] text-white font-bold py-3.5 md:py-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-[0_4px_15px_rgba(217,72,30,0.4)]"
-                    >
+                    <Button type="submit" disabled={isLoading} className="w-full">
                         {isLoading ? t('auth.forgotPassword.submitting') : t('auth.forgotPassword.submit')}
-                        <Sparkles className="w-5 h-5" />
+                        <Sparkles />
                     </Button>
                 </form>
 
-                <div className="mt-12 text-center border-t border-gray-200 dark:border-[#2d3545] pt-6">
-                    <p className="text-[#8e99aa] text-sm">
+                <div className={authFooterClass}>
+                    <p>
                         {t('auth.forgotPassword.rememberPassword')}
-                        <Link
-                            href="/auth/login"
-                            className="text-[#d9481e] hover:text-[#f45d1a] underline font-medium transition-colors ml-1"
-                        >
+                        <Link href={loginHref} className={`${authLinkClass} ml-1`}>
                             {t('auth.signInLink')}
                         </Link>
                     </p>
                 </div>
-            </div>
-        </div>
+            </AuthCard>
+        </AuthPage>
     );
 }
 
