@@ -6,7 +6,7 @@
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
-| 0.4 | Nov 5, 2026 | Take rows show their status in words: Public, Shared · n, Pending invite, Verified musician (#400). |
+| 0.4 | Nov 5, 2026 | Take rows show their status in words: Public, Shared · n, Pending invite (owner only), Verified musician (#400). |
 | 0.3 | Nov 5, 2026 | Takes shared with you are listed under their own heading, Shared with me, with who shared them (UXD-3, #399). |
 | 0.2 | Nov 5, 2026 | The player bar appears only after you press play and stops with the song page (UXD-5, #396). |
 | 0.1 | Nov 4, 2026 | First draft: reference tracks, recorder, upload, managing takes, sharing, publishing with consent, singer attribution, shared-with-me view. |
@@ -101,7 +101,7 @@ Each take can show small grey labels with an icon and words (nothing needs a hov
 | **Public** | Everyone who visits the song can listen. |
 | **Shared · 2** | You shared it with 2 people (only you see this number). |
 | **Verified musician** | The singer is a verified musician with a profile. |
-| **Pending invite** | The singer has no account yet. |
+| **Pending invite** | The singer has no account yet. Only you, the owner, see this label. |
 
 A private take that nobody has seen has no label. A public take shared with two people shows both **Public** and **Shared · 2**.
 

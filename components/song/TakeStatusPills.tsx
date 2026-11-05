@@ -29,7 +29,14 @@ export function TakeStatusPills({ pills }: { pills: TakeStatusPill[] }) {
             className="inline-flex items-center gap-1 rounded-pill bg-chip px-2 py-0.5 text-caption font-medium text-on-chip"
           >
             <Icon aria-hidden="true" className="size-3 shrink-0" />
-            {t(`recording.status.${pill.kind}`, { count: pill.count ?? 0 })}
+            {pill.kind === "shared" ? (
+              <>
+                <span aria-hidden="true">{t("recording.status.shared", { count: pill.count ?? 0 })}</span>
+                <span className="sr-only">{t("recording.status.sharedLabel", { count: pill.count ?? 0 })}</span>
+              </>
+            ) : (
+              t(`recording.status.${pill.kind}`)
+            )}
           </li>
         );
       })}

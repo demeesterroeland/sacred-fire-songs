@@ -22,6 +22,12 @@ describe('TakeStatusPills', () => {
     expect(screen.getByText('Shared · 2')).toBeTruthy();
   });
 
+  it('tells screen readers how many people the take is shared with', () => {
+    render(<TakeStatusPills pills={[{ kind: 'shared', count: 2 }]} />);
+    expect(screen.getByText('Shared · 2').getAttribute('aria-hidden')).toBe('true');
+    expect(screen.getByText('Shared, number of people: 2').className).toContain('sr-only');
+  });
+
   it('shows "Pending invite" and "Verified musician" as text', () => {
     render(<TakeStatusPills pills={[{ kind: 'pending' }, { kind: 'verified' }]} />);
     expect(screen.getByText('Pending invite')).toBeTruthy();
@@ -51,12 +57,12 @@ describe('TakeStatusPills', () => {
 });
 
 describe('status keys in every locale', () => {
-  const keys = ['recording.status.public', 'recording.status.shared', 'recording.status.pending', 'recording.status.verified'];
+  const keys = ['recording.status.public', 'recording.status.shared', 'recording.status.pending', 'recording.status.verified', 'recording.status.sharedLabel'];
   it.each(keys)('%s exists in all locales; shared keeps the {count} placeholder', (key) => {
     for (const locale of SUPPORTED_LOCALES) {
       const v = (DICTIONARIES[locale] as Record<string, string>)[key];
       expect(v, `${locale} ${key}`).toBeTruthy();
-      if (key.endsWith('shared')) expect(v).toContain('{count}');
+      if (key.includes('shared')) expect(v).toContain('{count}');
     }
   });
 });

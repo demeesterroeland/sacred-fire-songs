@@ -45,6 +45,10 @@ describe('takeStatusPills', () => {
     expect(takeStatusPills({ is_owner: true, singer_name: 'Ana' })).toEqual([{ kind: 'pending' }]);
   });
 
+  it('shows "Pending invite" only to the owner (it is the owner\'s to-do)', () => {
+    expect(takeStatusPills({ is_owner: false, is_public: true, singer_name: 'Ana' })).toEqual([{ kind: 'public' }]);
+  });
+
   it('lists visibility before the singer status', () => {
     expect(takeStatusPills({ is_owner: true, is_public: true, singer_name: 'Ana' }).map((p) => p.kind)).toEqual(['public', 'pending']);
   });

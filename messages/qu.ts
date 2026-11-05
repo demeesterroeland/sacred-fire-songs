@@ -326,6 +326,7 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'recording.publish.badge': 'Llapapaq',
   'recording.status.public': 'Llapapaq',
   'recording.status.shared': 'Qusqa · {count}',
+  'recording.status.sharedLabel': 'Qusqa, runakuna: {count}',
   'recording.status.pending': 'Suyachkaq',
   'recording.status.verified': 'Takyasqa takiq',
   'recording.publish.privateBadge': 'Pakasqa',

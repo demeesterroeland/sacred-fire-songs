@@ -320,6 +320,7 @@ const en = {
   'recording.publish.badge': 'Public',
   'recording.status.public': 'Public',
   'recording.status.shared': 'Shared · {count}',
+  'recording.status.sharedLabel': 'Shared, number of people: {count}',
   'recording.status.pending': 'Pending invite',
   'recording.status.verified': 'Verified musician',
   'recording.publish.privateBadge': 'Private',

@@ -322,6 +322,7 @@ const es: Partial<Record<TranslationKey, string>> = {
   'recording.publish.badge': 'Pública',
   'recording.status.public': 'Pública',
   'recording.status.shared': 'Compartida · {count}',
+  'recording.status.sharedLabel': 'Compartida, número de personas: {count}',
   'recording.status.pending': 'Invitación pendiente',
   'recording.status.verified': 'Músico verificado',
   'recording.publish.privateBadge': 'Privada',

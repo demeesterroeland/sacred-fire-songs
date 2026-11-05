@@ -23,7 +23,7 @@ export type TakeStatusInput = Pick<
  * no pill. Only the owner knows who a take is shared with, so a take of someone else
  * never shows a share count (its row already says "Shared by …").
  * "Pending invite" is the existing meaning of an attribution to a singer who has no
- * linked profile yet (UXA-018).
+ * linked profile yet (UXA-018); it is the owner's to-do, so only the owner sees it.
  */
 export function takeStatusPills(rec: TakeStatusInput): TakeStatusPill[] {
   const pills: TakeStatusPill[] = [];
@@ -32,7 +32,7 @@ export function takeStatusPills(rec: TakeStatusInput): TakeStatusPill[] {
   if (shareCount > 0) pills.push({ kind: "shared", count: shareCount });
   if (rec.singer_profile_id && rec.singer_profile) {
     if (rec.singer_profile.is_musician) pills.push({ kind: "verified" });
-  } else if (rec.singer_name) {
+  } else if (rec.singer_name && rec.is_owner !== false) {
     pills.push({ kind: "pending" });
   }
   return pills;

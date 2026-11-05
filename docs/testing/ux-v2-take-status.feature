@@ -1,5 +1,6 @@
-# Version: 1.0 | Date: Nov 5, 2026
+# Version: 1.1 | Date: Nov 5, 2026
 # Changelog
+# 1.1 | Nov 5, 2026 | Review fixes: "Pending invite" only for the owner; screen readers hear the share count in words.
 # 1.0 | Nov 5, 2026 | Story 6.1.16 / G4.3 (#400): text labels next to take status icons.
 @story-6.1.16
 Feature: Take status is readable without hovering
@@ -20,6 +21,12 @@ Feature: Take status is readable without hovering
     Then its row shows the text "Pending invite"
 
   @unit
+  Scenario: Someone else's take does not show their pending invite
+    Given someone else's public take sung by "Ana" who has no account yet
+    When the take row lists its status
+    Then its row shows the text "Public"
+
+  @unit
   Scenario: A singer who is a verified musician shows it in words
     Given a take sung by the verified musician "Nina"
     When the take row lists its status
@@ -33,7 +40,7 @@ Feature: Take status is readable without hovering
 
   @unit
   Scenario: Status texts exist in every language
-    Then every language has the status texts
+    Then every language has the status texts, including the spoken share count
 
   @e2e
   Scenario: Status is readable on a phone without hovering

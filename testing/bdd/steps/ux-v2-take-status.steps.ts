@@ -25,6 +25,10 @@ Given('a take sung by {string} who has no account yet', function (this: World, n
   this.take = { is_owner: true, singer_name: name };
 });
 
+Given("someone else's public take sung by {string} who has no account yet", function (this: World, name: string) {
+  this.take = { is_owner: false, is_public: true, singer_name: name };
+});
+
 Given('a take sung by the verified musician {string}', function (this: World, name: string) {
   this.take = {
     is_owner: true,
@@ -53,10 +57,10 @@ Then('its row shows no status', function (this: World) {
   assert.deepEqual(this.pills, []);
 });
 
-Then('every language has the status texts', function () {
+Then('every language has the status texts, including the spoken share count', function () {
   for (const locale of SUPPORTED_LOCALES) {
     const d = DICTIONARIES[locale] as Record<string, string>;
-    for (const kind of ['public', 'shared', 'pending', 'verified']) {
+    for (const kind of ['public', 'shared', 'sharedLabel', 'pending', 'verified']) {
       assert.ok(d[`recording.status.${kind}`], `${locale} recording.status.${kind}`);
     }
   }

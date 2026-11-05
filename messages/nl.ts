@@ -322,6 +322,7 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'recording.publish.badge': 'Openbaar',
   'recording.status.public': 'Openbaar',
   'recording.status.shared': 'Gedeeld · {count}',
+  'recording.status.sharedLabel': 'Gedeeld, aantal personen: {count}',
   'recording.status.pending': 'Uitnodiging in behandeling',
   'recording.status.verified': 'Geverifieerde muzikant',
   'recording.publish.privateBadge': 'Privé',
