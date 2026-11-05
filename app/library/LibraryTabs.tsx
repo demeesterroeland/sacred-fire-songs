@@ -21,7 +21,7 @@ export default function LibraryTabs() {
         return (
             <nav aria-label={t('nav.library')} className="mb-8">
                 <div className="flex items-center gap-1.5 text-meta text-fg-muted">
-                    <Link href={parentTab.href} className="inline-flex min-h-tap items-center hover:text-fg transition-colors">
+                    <Link href="/library" className="inline-flex min-h-tap items-center hover:text-fg transition-colors">
                         {t('nav.library')}
                     </Link>
                     <ChevronRight className="size-3.5 shrink-0" aria-hidden />
@@ -49,18 +49,20 @@ export default function LibraryTabs() {
                                 key={href}
                                 href={href}
                                 aria-current={isActive ? 'page' : undefined}
-                                className={`inline-flex min-h-tap items-center gap-1.5 px-4 rounded-pill text-meta font-semibold whitespace-nowrap shrink-0 transition-colors ${
+                                className={`inline-flex min-h-tap items-center gap-1.5 px-3.5 rounded-pill text-meta font-semibold whitespace-nowrap shrink-0 transition-colors ${
                                     isActive
                                         ? 'bg-chip-active text-on-chip-active'
                                         : 'bg-chip text-on-chip hover:bg-line'
                                 }`}
                             >
-                                <Icon className="size-4" aria-hidden />
+                                <Icon className="hidden sm:block size-4" aria-hidden />
                                 {label}
                             </Link>
                         );
                     })}
                 </div>
+                {/* Edge fade: hints that the row scrolls if a locale's labels are wider than the phone. */}
+                <div aria-hidden className="pointer-events-none absolute inset-y-0 -right-4 w-6 bg-gradient-to-l from-bg to-transparent md:hidden" />
             </nav>
         </>
     );
