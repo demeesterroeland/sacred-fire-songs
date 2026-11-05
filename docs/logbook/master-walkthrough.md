@@ -3208,3 +3208,17 @@ Sharing a private recording now tells the recipient: an in-app notification (hea
 - **Recording links:** `/recordings/[id]` reads the recording under RLS and redirects to `/songs/:id?recording=:id`; the song page selects the recording's version, opens the Recordings tab and highlights the row. Access is decided by RLS only: owner, recipients, or public. Guests are sent to login with `next` pointing back at the link; users without access get a 404 that does not reveal whether the recording exists (recording-specific copy, follow-up fix).
 - **Tests:** unit 422, BDD `@shareNotifications` (3 + 5 seed scenarios plus an outline for the link parser), tsc clean, lint 199 warnings (cap lowered to 201). Verified end to end in a headless browser against the local stack with an SMTP sink: bell, mark read, navigation, email content and escaping, copy link, guest and no-access paths.
 - **Also:** `heartbeat-of-the-earth.mp3` joins the seed audio (real duration via `ffprobe`); the #371 plan file was removed.
+
+## November 5, 2026 - Epic 6.1 UX v2, Wave A (#375)
+
+**Task Overview**
+The first 14 UX v2 stories landed on the integration branch `feat/ux-v2`: sober greyscale with one fire accent, readable type (nothing below 12 px), compact song rows, one GuestGate, a real 404, the Practice naming, a mini player that only appears after play, and takes listed and labelled in words.
+
+**Technical Details**
+- **Process:** each story on its own branch from `feat/ux-v2`; author and reviewer are different Claude models (Sonnet ↔ Opus); squash merge after green CI (UXD-6). Shared docs (analysis, epic, decisions, validation) are rebased with version renumbering per merge.
+- **Design guards:** `paletteRatchet.test.ts` (raw palette classes only go down, now 2535), `lib/design/labelAudit.ts` (no `text-[9–11px]`, allow-list empty since #400), axe-core `color-contrast` Playwright test on four pages, light and dark (light in `@smoke`).
+- **Routing:** `PROTECTED_PATH_PREFIXES = ['/admin']`; members-only pages render `GuestGate` with a hardened `next=` link; unknown URLs return HTTP 404.
+- **Practice:** `partitionTakes` → My takes / Shared with me / Public takes; `getUserRecordings` reads `recording_shares` for the viewer; `takeStatusPills` + `TakeStatusPills` (Public, Shared · n, Pending invite for the owner, Verified musician); `miniPlayerClose` stops take and reference together.
+- **i18n:** every new string in 8 locales; it/pt/ru/fr gender aligned with each locale's word for "take".
+- **Tests:** Vitest 707, BDD unit 136 passed / 47 pending, BDD seed 11 / 13 pending, Playwright smoke + story specs green; lint 188 warnings, cap lowered to 188.
+- **Decisions:** UXA-006…018 (ADR-lite), owner checklist issue #431.

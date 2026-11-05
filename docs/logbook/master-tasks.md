@@ -1424,3 +1424,14 @@
 - [x] Seed audio: `heartbeat-of-the-earth.mp3` (90 s) added; `seed:audio` stores each file's real duration; #371 implementation plan removed
 - [x] Follow-up `fix/373-recording-not-found`: unopenable recording links show "Recording Not Available" (same copy for no access, unknown and malformed ids; `NotFound` takes optional keys), design doc 1.58
 - [ ] Open: #372 (DRM-lite stream route), #420 (personal reordering of shared recordings); pre-existing `docs/design/db-schema.sql` fresh-install failure at `idx_compositions_is_public_true`; emails use the default locale until profiles store a language
+
+## Session November 5, 2026 (Epic 6.1 UX v2, Wave A, #375)
+- [x] Integration branch `feat/ux-v2`; story PRs squash-merged after green CI + cross-review by a different Claude model (UXD-6)
+- [x] #385 type scale + tokens (PR #429), #417 E2E fixture teardown (#430), #392 (#435), #407 (#437), #391 song meta lines (#438), #390 reader toolbar (#440), #406 real 404 (#433)
+- [x] #410 GuestGate on every members-only screen, guest read of public takes needs singer consent (#439)
+- [x] #398 one name, Practice (#436); #396 mini player only after play (#434); #386 compact song rows (#441)
+- [x] #399 My takes / Shared with me / Public takes (#442); #387 readable labels, axe contrast test (#443); #400 take status in words (#444)
+- [x] Decisions UXA-006…018 in `docs/ux-research/ux-v2-decisions.md`, owner checklist in #431; validation script `docs/ux-research/ux-v2-validation.md`
+- [x] Wave A sync: lint cap 201 → 188, palette baseline 2535, UXA-010 now needs owner confirmation
+- [ ] Next: preview build `ux-v2-preview`, Wave B (#388, 393, 401, 402, 403, 408, 411, 413, 414), Wave C, #418 last
+- [ ] Follow-ups: hard-coded English toasts in `useToggleFavorite`; guest Listen list for consented takes (UXA-012); admin/auth/settings pages not axe-covered; unused `YouTubeEmbed.tsx`; native-speaker check qu/ru
