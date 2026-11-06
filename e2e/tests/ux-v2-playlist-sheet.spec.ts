@@ -99,10 +99,17 @@ test('tapping a playlist adds or removes the song and flips its check', async ({
   const fire = dialog.getByRole('checkbox', { name: FIRE });
   await expect(water).toHaveAttribute('aria-checked', 'true', { timeout: 10_000 });
 
+  // The marks flip before the save finishes, and a reload would cancel a save still under way: wait for each one.
+  const saved = () =>
+    page.waitForResponse((r) => r.request().method() !== 'GET' && (!!r.request().headers()['next-action'] || r.url().includes('/rest/v1/')));
+  const fireSaved = saved();
   await fire.click();
   await expect(fire).toHaveAttribute('aria-checked', 'true');
+  await fireSaved;
+  const waterSaved = saved();
   await water.click();
   await expect(water).toHaveAttribute('aria-checked', 'false');
+  await waterSaved;
 
   // The change is stored: reopening the sheet shows the same marks.
   await page.keyboard.press('Escape');

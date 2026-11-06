@@ -22,7 +22,7 @@ async function songLinks(page: Page): Promise<string[]> {
 
 async function openPractice(page: Page) {
   await clickPractice(page);
-  await expect(page.locator('h3:has-text("Practice")')).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByTestId('practice-drawer')).toBeVisible({ timeout: 10_000 });
   // Wait for the slide-in to finish: the drawer body ends inside the viewport.
   const body = page.getByTestId('rehearsal-drawer-body');
   await expect

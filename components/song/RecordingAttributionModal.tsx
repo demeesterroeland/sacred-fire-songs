@@ -1,5 +1,6 @@
 "use client";
 
+import { returnFocusToTake } from "@/lib/a11y/returnFocusToTake";
 import React, { useState, useEffect } from "react";
 import {
   Dialog,
@@ -150,7 +151,7 @@ export default function RecordingAttributionModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-md bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-3xl p-6 shadow-2xl">
+      <DialogContent onCloseAutoFocus={returnFocusToTake(recording.id)} className="max-w-md bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-3xl p-6 shadow-2xl">
         <DialogHeader className="text-left space-y-1">
           <DialogTitle className="text-lg font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
             <Mic className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
@@ -213,6 +214,7 @@ export default function RecordingAttributionModal({
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder={t("recording.attribution.searchPlaceholder")}
+                    aria-label={t("recording.attribution.searchPlaceholder")}
                     className="w-full pl-9 pr-8 py-2.5 bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-xl text-sm outline-none focus:border-indigo-500 text-gray-900 dark:text-white"
                   />
                   {isSearching && (
@@ -270,6 +272,7 @@ export default function RecordingAttributionModal({
                 value={customName}
                 onChange={(e) => setCustomName(e.target.value)}
                 placeholder={t("recording.attribution.namePlaceholder")}
+                aria-label={t("recording.attribution.namePlaceholder")}
                 className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-xl text-sm outline-none focus:border-indigo-500 text-gray-900 dark:text-white"
               />
             </div>
@@ -282,6 +285,7 @@ export default function RecordingAttributionModal({
                 value={customEmail}
                 onChange={(e) => setCustomEmail(e.target.value)}
                 placeholder={t("recording.attribution.emailPlaceholder")}
+                aria-label={t("recording.attribution.emailPlaceholder")}
                 className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-xl text-sm outline-none focus:border-indigo-500 text-gray-900 dark:text-white"
               />
             </div>

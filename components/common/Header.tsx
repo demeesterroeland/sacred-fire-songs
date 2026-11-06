@@ -222,7 +222,7 @@ export default function Header({ initialUser }: { initialUser?: AuthUser | null 
                     </button>
 
                     {/* Logo */}
-                    <Link href="/" className="flex items-center gap-2.5 group/logo shrink-0">
+                    <Link href="/" className="hidden lg:flex items-center gap-2.5 group/logo shrink-0">
                         <span className="hidden lg:block font-bold text-base text-gray-900 dark:text-white tracking-tight group-hover/logo:text-red-600 dark:group-hover/logo:text-red-400 transition-colors">
                             {getSiteTitle()}
                         </span>
@@ -241,6 +241,7 @@ export default function Header({ initialUser }: { initialUser?: AuthUser | null 
                         <input
                             ref={inputRef}
                             type="text"
+                            aria-label={t('home.search.label')}
                             value={searchValue}
                             onChange={(e) => setSearchValue(e.target.value)}
                             onKeyDown={handleKeyDown}

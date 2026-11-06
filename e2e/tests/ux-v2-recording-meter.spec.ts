@@ -26,7 +26,7 @@ async function openRecorder(page: Page) {
   const href = await link.getAttribute('href');
   await page.goto(href!);
   // The first tap can land before the page hydrates: tap again until the drawer is open.
-  const title = page.locator('h3:has-text("Practice")');
+  const title = page.getByTestId('practice-drawer');
   await expect(async () => {
     if (!(await title.isVisible())) await clickPractice(page, 5_000);
     await expect(title).toBeVisible({ timeout: 2_500 });
@@ -90,7 +90,7 @@ test('count-in off: recording starts at once; the meter moves with the input @ux
   // Reduced motion: no transition on the bars, no pulsing icon.
   const motion = await page.evaluate(() => {
     const bar = document.querySelector<HTMLElement>('[data-testid="recorder-level-meter"] [data-bar]')!;
-    const icon = document.querySelector<SVGElement>('h4 svg')!;
+    const icon = document.querySelector<SVGElement>('h3 svg')!;
     return { transition: getComputedStyle(bar).transitionDuration, animation: getComputedStyle(icon).animationName };
   });
   expect(parseFloat(motion.transition)).toBeLessThan(0.001); // global reduced-motion rule: ~0 s

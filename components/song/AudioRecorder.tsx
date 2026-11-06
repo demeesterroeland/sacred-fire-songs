@@ -432,13 +432,16 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved, onDirty
       {isRecordView && (
         <>
           {/* Title */}
-          <h4 className="flex items-center gap-2 text-meta font-semibold text-fg">
+          <h3 className="flex items-center gap-2 text-meta font-semibold text-fg">
             <Mic className={`size-4 ${recordingState === "recording" ? "text-danger motion-safe:animate-pulse" : "text-fg-subtle"}`} />
-            {recordingState === "idle" && t('recorder.state.idle')}
-            {recordingState === "recording" && t('recorder.state.recording')}
-            {recordingState === "paused" && t('recorder.state.paused')}
-            {recordingState === "stopped" && t('recorder.state.stopped')}
-          </h4>
+            {/* A live region: a screen reader hears "Recording...", "Recording paused" and so on (Story 6.1.34, #418). */}
+            <span role="status">
+              {recordingState === "idle" && t('recorder.state.idle')}
+              {recordingState === "recording" && t('recorder.state.recording')}
+              {recordingState === "paused" && t('recorder.state.paused')}
+              {recordingState === "stopped" && t('recorder.state.stopped')}
+            </span>
+          </h3>
 
           {/* Timer */}
           <div className="font-mono text-display font-bold tracking-tight text-fg">
@@ -490,27 +493,33 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved, onDirty
 
       {/* Mode: Upload View (when idle) */}
       {activeTab === "upload" && recordingState === "idle" && (
-        <div
-          className="group flex min-h-tap w-full cursor-pointer flex-col items-center justify-center rounded-panel border-2 border-dashed border-line-strong px-4 py-4 text-center transition-colors hover:bg-surface-2"
-          onClick={() => fileInputRef.current?.click()}
-        >
+        <>
+          {/* The file input stays out of the button (no interactive element inside a button) and out of the Tab order. */}
           <input
             type="file"
             ref={fileInputRef}
             onChange={handleFileSelect}
             accept="audio/*,.mp3,.wav,.ogg,.m4a,.webm,.opus,.flac,.aac"
+            tabIndex={-1}
+            aria-hidden="true"
             className="hidden"
           />
-          <div className="mb-2 rounded-pill bg-accent-soft p-3 text-accent">
-            <FileAudio className="size-6" />
-          </div>
-          <p className="text-meta font-semibold text-fg">
-            {t('recorder.upload.heading')}
-          </p>
-          <p className="mt-1 max-w-[240px] text-caption leading-tight text-fg-muted">
-            {t('recorder.upload.formats')}
-          </p>
-        </div>
+          <button
+            type="button"
+            className="group flex min-h-tap w-full cursor-pointer flex-col items-center justify-center rounded-panel border-2 border-dashed border-line-strong px-4 py-4 text-center transition-colors hover:bg-surface-2"
+            onClick={() => fileInputRef.current?.click()}
+          >
+            <span className="mb-2 rounded-pill bg-accent-soft p-3 text-accent">
+              <FileAudio className="size-6" aria-hidden />
+            </span>
+            <span className="block text-meta font-semibold text-fg">
+              {t('recorder.upload.heading')}
+            </span>
+            <span className="mt-1 block max-w-[240px] text-caption leading-tight text-fg-muted">
+              {t('recorder.upload.formats')}
+            </span>
+          </button>
+        </>
       )}
 
       {/* Local preview audio player (shown for both recorded and uploaded files once stopped/selected) */}

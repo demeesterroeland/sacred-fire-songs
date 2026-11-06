@@ -86,7 +86,7 @@ test.beforeEach(async ({}, testInfo) => {
 async function openPublishDialog(page: Page, songId: string, takeName: string) {
   await page.goto(`/songs/${songId}`);
   await clickPractice(page);
-  await expect(page.locator('h3:has-text("Practice")')).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByTestId('practice-drawer')).toBeVisible({ timeout: 10_000 });
   const recordTab = page.locator('[data-testid="practice-tab-record"]');
   if (await recordTab.count()) await recordTab.first().click({ force: true });
   const row = page.locator('[data-recording-id]', { hasText: takeName });

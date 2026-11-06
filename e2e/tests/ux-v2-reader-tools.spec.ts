@@ -155,10 +155,19 @@ test.describe('Musician @story-6.1.10', () => {
     await expect.poll(() => page.evaluate(() => window.scrollY), { timeout: 15_000 }).toBeGreaterThan(before + 120);
 
     // Stuck right under the sticky title bar, and not over the action bar.
+    // The strip is only stuck once the page has scrolled it up to the title bar: how far that is depends on the
+    // song (a few px more or less), so wait for it to arrive instead of sampling after a fixed distance. Then it
+    // must stay there while the page keeps scrolling.
     const header = page.getByTestId('sticky-song-title').locator('xpath=ancestor::header[1]');
-    const headerBottom = (await header.boundingBox())!;
+    const gap = async () => {
+      const headerBox = (await header.boundingBox())!;
+      const wrapBox = await box(page, 'reader-toolbar-wrap');
+      return Math.abs(wrapBox.y - (headerBox.y + headerBox.height));
+    };
+    await expect.poll(gap, { timeout: 15_000 }).toBeLessThan(2);
+    await page.waitForTimeout(300);
+    expect(await gap()).toBeLessThan(2);
     const wrap = await box(page, 'reader-toolbar-wrap');
-    expect(Math.abs(wrap.y - (headerBottom.y + headerBottom.height))).toBeLessThan(2);
     const bar = page.getByTestId('song-action-bar');
     if ((await bar.getAttribute('data-visible')) === 'true') {
       const b = (await bar.boundingBox())!;

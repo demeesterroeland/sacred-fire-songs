@@ -1,6 +1,6 @@
 # E2E Test Overview & Matrix: Sacred Fire Songs
 
-**Version:** 1.17
+**Version:** 1.18
 **Status:** Living Document
 **Date:** Nov 6, 2026
 **Tracking:** GH #142
@@ -25,6 +25,7 @@
 | **1.13** | Nov 4, 2026 | PWA-03: offline fallback page covered by `e2e/tests/offline.spec.ts` (#353); cached pages offline still planned. |
 | **1.14** | Nov 5, 2026 | Story 6.1.26 (#410): guests on members-only screens now get the GuestGate (locked preview, reason, `Sign in` with `next=`) instead of a redirect; ACC-01 updated, new spec `e2e/tests/guest-gate.spec.ts` covers every gated route. |
 | **1.15** | Nov 5, 2026 | LIB-13 follows Story 6.1.24: no `/explore` route; bottom bar spec `ux-v2-bottom-bar.spec.ts`. |
+| **1.18** | Nov 6, 2026 | Story 6.1.34 (#418): `e2e/tests/ux-v2-a11y-audit.spec.ts` (axe-core on the song page, the Practice panel, the recorder and the sheets and dialogs reachable from them; guest and member; light and dark; keyboard and focus journeys, including the delete confirmation, Escape while renaming and Tab reaching the embedded player; the sticky-title spec now picks a long-titled public song that has enough lyrics to scroll). Fixed fixture ids `A11Y_AUDIT_FIXTURE_IDS` (a second song with a reference video for the player), removed by `e2e/global-teardown.ts`. The Practice panel is now a dialog: specs wait for `data-testid="practice-drawer"` (not the old `h3`), recorder state and share list headings are `h3`, tabs expose `aria-selected`. |
 | **1.17** | Nov 6, 2026 | Story 6.1.32 (#416): PL-01 covers the New Playlist page: private line, Make public switch, Create enabled once named. New spec `ux-v2-new-playlist-visibility.spec.ts`. |
 | **1.16** | Nov 6, 2026 | Story 6.1.5 (#389): ACC-04 (Privacy settings) is hidden behind `FEATURES.privacySettings`; LIB-10 (Albums) answers not-found. New spec `ux-v2-hide-unfinished.spec.ts` asserts no "Coming soon" in Library, Settings and the song form. |
 

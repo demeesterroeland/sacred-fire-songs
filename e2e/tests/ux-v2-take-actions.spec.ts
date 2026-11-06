@@ -1,5 +1,5 @@
-import { clickPractice } from '../fixtures/songActions';
-import { test, expect, type Page } from '@playwright/test';
+import { clickPractice, expectPracticeStaysOpen } from '../fixtures/songActions';
+import { test, expect, type Locator, type Page } from '@playwright/test';
 import pg from 'pg';
 import { ROLES } from '../fixtures/roles';
 import { TAKE_ACTIONS_FIXTURE_IDS as IDS } from '../fixtures/ids';
@@ -52,9 +52,29 @@ test.beforeAll(async () => {
 async function openRecordTab(page: Page) {
   await page.goto(`/songs/${IDS.song}`);
   await clickPractice(page); // phone: the action bar (#393), not the ⋮ sheet
-  await expect(page.locator('h3:has-text("Practice")')).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByTestId('practice-drawer')).toBeVisible({ timeout: 10_000 });
   const recordTab = page.locator('[data-testid="practice-tab-record"]');
   if (await recordTab.count()) await recordTab.first().click({ force: true });
+}
+
+/** Sheets and dialogs on top of the Practice panel (the panel is itself a dialog, Story 6.1.34 / #418). */
+const sheets = (page: Page) => page.locator('[role="dialog"]:not([data-testid="practice-drawer"])');
+
+/** Layout pixels come out as floats (43.9999 for a 44 px target). Allow that rounding, nothing looser. */
+const TAP = 44 - 0.01;
+
+/** The box once it stopped moving: the Practice panel and sheets slide in, and a box taken mid-slide is off. */
+async function settledBox(locator: Locator) {
+  let last: { x: number; y: number; width: number; height: number } | null = null;
+  await expect
+    .poll(async () => {
+      const box = await locator.boundingBox();
+      const same = !!box && !!last && ['x', 'y', 'width', 'height'].every((k) => Math.abs(box[k as 'x'] - last![k as 'x']) < 0.01);
+      last = box;
+      return same;
+    }, { intervals: [100], timeout: 5_000 })
+    .toBe(true);
+  return last!;
 }
 
 async function openActions(page: Page) {
@@ -63,11 +83,11 @@ async function openActions(page: Page) {
   await expect(row).toHaveCount(1, { timeout: 15_000 });
   const trigger = row.locator('button[aria-label="More actions"]');
   // The trigger is a 44 px target.
-  const box = await trigger.boundingBox();
-  expect(box!.width).toBeGreaterThanOrEqual(44);
-  expect(box!.height).toBeGreaterThanOrEqual(44);
+  const box = await settledBox(trigger);
+  expect(box.width).toBeGreaterThanOrEqual(TAP);
+  expect(box.height).toBeGreaterThanOrEqual(TAP);
   await trigger.click();
-  const sheet = page.getByRole('dialog');
+  const sheet = sheets(page);
   await expect(sheet).toBeVisible();
   return { row, sheet };
 }
@@ -95,8 +115,8 @@ test('grouped actions: Delete sits alone at the bottom and every row is at least
 
   // Every row >= 44 px; Delete is in the danger colour AND says so in words.
   for (const button of await sheet.getByRole('button').all()) {
-    const box = await button.boundingBox();
-    expect(box!.height, await button.innerText()).toBeGreaterThanOrEqual(44);
+    const box = await settledBox(button);
+    expect(box.height, await button.innerText()).toBeGreaterThanOrEqual(TAP);
   }
   const share = sheet.getByRole('button', { name: 'Share', exact: true });
   const del = sheet.getByRole('button', { name: 'Delete take', exact: true });
@@ -104,9 +124,9 @@ test('grouped actions: Delete sits alone at the bottom and every row is at least
   expect(await color(del)).not.toBe(await color(share));
 
   // Delete is not next to Share: other rows sit between, plus a separator.
-  const shareBox = (await share.boundingBox())!;
-  const delBox = (await del.boundingBox())!;
-  expect(delBox.y - (shareBox.y + shareBox.height)).toBeGreaterThanOrEqual(3 * 44);
+  const shareBox = await settledBox(share);
+  const delBox = await settledBox(del);
+  expect(delBox.y - (shareBox.y + shareBox.height)).toBeGreaterThanOrEqual(3 * 44 - 0.05);
 
   // The 32 px handle.
   const handle = sheet.locator('[data-sheet-handle]');
@@ -123,34 +143,38 @@ test('the sheet closes on a swipe down and on Escape', async ({ page }) => {
   await page.mouse.move(x, y + 60, { steps: 4 });
   await page.mouse.move(x, y + 160, { steps: 4 });
   await page.mouse.up();
-  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(sheets(page)).toHaveCount(0);
 
   await page.locator('[data-recording-id]', { hasText: TAKE }).locator('button[aria-label="More actions"]').click();
-  await expect(page.getByRole('dialog')).toBeVisible();
+  await expect(sheets(page)).toBeVisible();
   await page.keyboard.press('Escape');
-  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(sheets(page)).toHaveCount(0);
 });
 
 test('choosing Share closes the sheet and opens the share dialog', async ({ page }) => {
   const { sheet } = await openActions(page);
   await sheet.getByRole('button', { name: 'Share', exact: true }).click();
-  await expect(page.getByRole('dialog').filter({ hasText: 'Share take' })).toBeVisible({ timeout: 10_000 });
+  await expect(sheets(page).filter({ hasText: 'Share take' })).toBeVisible({ timeout: 10_000 });
   await expect(page.getByRole('button', { name: 'Delete take' })).toHaveCount(0);
 });
 
 test('choosing Edit take name closes the sheet and focuses the rename field', async ({ page }) => {
   const { sheet } = await openActions(page);
   await sheet.getByRole('button', { name: 'Edit take name', exact: true }).click();
-  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(sheets(page)).toHaveCount(0);
   const input = page.locator('input[aria-label="Edit take name"]');
   await expect(input).toBeFocused();
   await page.keyboard.press('Escape'); // leave the name unchanged
+  // Escape ends the edit only: the Practice panel stays open (Story 6.1.34 / #418).
+  await expect(input).toHaveCount(0);
+  await expectPracticeStaysOpen(page);
+  await expect(page.locator('[data-recording-id]', { hasText: TAKE })).toHaveCount(1);
 });
 
 test('Delete still asks for confirmation; cancelling keeps the take', async ({ page }) => {
   const { row, sheet } = await openActions(page);
   await sheet.getByRole('button', { name: 'Delete take', exact: true }).click();
-  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(sheets(page)).toHaveCount(0);
   await expect(page.getByText('Delete take?')).toBeVisible();
   await page.getByRole('button', { name: 'Cancel' }).click();
   await expect(page.getByText('Delete take?')).toHaveCount(0);

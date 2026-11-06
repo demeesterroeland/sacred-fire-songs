@@ -1,5 +1,5 @@
 import pg from 'pg';
-import { ADMIN_USERS_FIXTURE_IDS, PUBLISH_CONSENT_FIXTURE_IDS, SHARED_TAKES_FIXTURE_IDS, SHARED_WITH_ME_FIXTURE_IDS, SHARE_EXPLAIN_FIXTURE_IDS, TAKE_ACTIONS_FIXTURE_IDS, TAKE_STATUS_FIXTURE_IDS, VARIANT_SLOT_FIXTURE_IDS } from './fixtures/ids';
+import { A11Y_AUDIT_FIXTURE_IDS, ADMIN_USERS_FIXTURE_IDS, PUBLISH_CONSENT_FIXTURE_IDS, SHARED_TAKES_FIXTURE_IDS, SHARED_WITH_ME_FIXTURE_IDS, SHARE_EXPLAIN_FIXTURE_IDS, TAKE_ACTIONS_FIXTURE_IDS, TAKE_STATUS_FIXTURE_IDS, VARIANT_SLOT_FIXTURE_IDS } from './fixtures/ids';
 
 /**
  * Story 6.1.33 / G9.1 (#417): leave no test fixtures behind in the shared
@@ -44,6 +44,10 @@ export default async function globalTeardown(): Promise<void> {
     await client.query('DELETE FROM public.user_recordings WHERE id = ANY($1)', [[consent.take, consent.longTake, consent.privateTake, consent.guestTake]]);
     await client.query('DELETE FROM public.song_versions WHERE id = ANY($1)', [[consent.version, consent.privateVersion, consent.guestVersion, consent.emptyVersion]]);
     await client.query('DELETE FROM public.compositions WHERE id = ANY($1)', [[consent.song, consent.privateSong, consent.guestSong, consent.emptySong]]);
+    const audit = A11Y_AUDIT_FIXTURE_IDS;
+    await client.query('DELETE FROM public.user_recordings WHERE id = ANY($1)', [[audit.privateTake, audit.publicTake]]);
+    await client.query('DELETE FROM public.song_versions WHERE id = ANY($1)', [[audit.version, audit.playerVersion]]);
+    await client.query('DELETE FROM public.compositions WHERE id = ANY($1)', [[audit.song, audit.playerSong]]);
     const explain = SHARE_EXPLAIN_FIXTURE_IDS;
     await client.query('DELETE FROM public.user_recordings WHERE id = $1', [explain.take]);
     await client.query('DELETE FROM public.song_versions WHERE id = $1', [explain.version]);

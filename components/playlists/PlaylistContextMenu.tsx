@@ -45,6 +45,7 @@ export function PlaylistContextMenu({
     const router = useRouter();
     const pathname = usePathname();
     const preventFocusReturn = useRef(false);
+    const triggerRef = useRef<HTMLButtonElement>(null);
 
     const handleToggleVisibility = () => {
         const next = !isPublic;
@@ -81,6 +82,7 @@ export function PlaylistContextMenu({
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <button
+                        ref={triggerRef}
                         onClick={e => e.stopPropagation()}
                         className="p-1.5 rounded-lg text-gray-600 hover:text-gray-800 dark:hover:text-gray-300 hover:bg-gray-200/60 dark:hover:bg-gray-700/60 transition-colors"
                         aria-label={t('playlists.optionsAria')}
@@ -190,6 +192,8 @@ export function PlaylistContextMenu({
                 title={t('playlists.deleteModal.title')}
                 message={t('playlists.deleteModal.message', { title: playlistTitle })}
                 isDeleting={isDeleting}
+                // The menu that opened this closed with its Delete item: focus goes back to its trigger.
+                fallbackFocus={() => triggerRef.current}
             />
         </>
     );

@@ -1,5 +1,6 @@
 "use client";
 
+import { returnFocusToTake } from "@/lib/a11y/returnFocusToTake";
 import React, { useState, useEffect, useRef } from "react";
 import {
   Dialog,
@@ -172,7 +173,7 @@ export default function RecordingShareModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent data-testid="share-dialog" className="max-w-md bg-surface border border-line rounded-panel p-6 shadow-sheet">
+      <DialogContent data-testid="share-dialog" onCloseAutoFocus={returnFocusToTake(recording?.id ?? "")} className="max-w-md bg-surface border border-line rounded-panel p-6 shadow-sheet">
         <DialogHeader className="text-left space-y-1">
           <DialogTitle className="text-title font-semibold text-fg flex items-center gap-2">
             {step === "search" ? (
@@ -263,6 +264,7 @@ export default function RecordingShareModal({
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={t("recording.sharing.searchPlaceholder")}
+                  aria-label={t("recording.sharing.searchPlaceholder")}
                   aria-describedby="share-helper"
                   className="w-full min-h-tap pl-9 pr-9 bg-bg border border-line-strong rounded-control text-body outline-none focus-visible:outline-2 focus-visible:outline-focus text-fg placeholder:text-fg-subtle"
                 />
@@ -330,9 +332,9 @@ export default function RecordingShareModal({
 
             {/* Existing Shares List */}
             <div className="space-y-2 mt-4 pt-4 border-t border-line">
-              <h4 className="text-meta font-semibold text-fg-muted text-left">
+              <h3 className="text-meta font-semibold text-fg-muted text-left">
                 {t("recording.sharing.sharedWithTitle")} ({currentShares.length})
-              </h4>
+              </h3>
 
               {currentShares.length === 0 ? (
                 <p className="text-meta text-fg-muted py-2 text-left">{t("recording.sharing.noShares")}</p>

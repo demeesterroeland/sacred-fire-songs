@@ -104,3 +104,18 @@ export const PUBLISH_CONSENT_FIXTURE_IDS = {
   emptySong: 'eeeeeeee-3621-4000-a000-00000000000b',
   emptyVersion: 'eeeeeeee-3621-4000-a000-00000000000c',
 } as const;
+
+/**
+ * Story 6.1.34 / G9.2 (#418): a public song of the member with one private take and one public
+ * take (with the singer consent), for the accessibility audit of the song page, the Practice
+ * panel and its sheets. Removed by e2e/global-teardown.ts.
+ */
+export const A11Y_AUDIT_FIXTURE_IDS = {
+  song: 'eeeeeeee-3634-4000-a000-000000000001',
+  version: 'eeeeeeee-3634-4000-a000-000000000002',
+  privateTake: 'eeeeeeee-3634-4000-a000-000000000003',
+  publicTake: 'eeeeeeee-3634-4000-a000-000000000004',
+  /** A second song with a reference video, so the Listen tab shows the embedded player. */
+  playerSong: 'eeeeeeee-3634-4000-a000-000000000005',
+  playerVersion: 'eeeeeeee-3634-4000-a000-000000000006',
+} as const;

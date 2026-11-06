@@ -9,9 +9,10 @@ import SongDisplay from '@/components/song/SongDisplay';
 import SongDetailSkeleton from '@/components/song/SongDetailSkeleton';
 import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Trash2, Edit2, Music, Heart, MoreVertical, ListPlus, Mic, Share2 } from 'lucide-react';
+import { Trash2, Edit2, Heart, MoreVertical, ListPlus, Mic, Share2 } from 'lucide-react';
 import { toast } from 'sonner';
 import GuestGateSheet from '@/components/common/GuestGateSheet';
+import { BottomSheet, BottomSheetContent, BottomSheetTrigger, SheetAction } from '@/components/ui/bottom-sheet';
 import RehearsalDrawer from '@/components/song/RehearsalDrawer';
 import { makeSongPublic } from '@/lib/actions/rehearsal';
 import { useToggleFavorite } from '@/hooks/useToggleFavorite';
@@ -52,6 +53,7 @@ export default function SongDetailPage() {
     const [readerPrefs, setReaderPrefs] = useReaderPrefs();
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isOverflowOpen, setIsOverflowOpen] = useState(false);
+    const overflowTriggerRef = useRef<HTMLButtonElement>(null);
     const [isRehearsalDrawerOpen, setIsRehearsalDrawerOpen] = useState(false);
     const [isGuestGateOpen, setIsGuestGateOpen] = useState(false);
     const [drawerRequestedTab, setDrawerRequestedTab] = useState<"media" | "recorder" | "auto">("auto");
@@ -332,17 +334,58 @@ export default function SongDetailPage() {
                 </h1>
                 {/* 3-dot menu — flex-none so it never shrinks */}
                 <div className="flex-none flex items-center">
-                    <button
-                        onClick={() => setIsOverflowOpen(!isOverflowOpen)}
-                        className="inline-flex size-tap items-center justify-center rounded-control text-fg-muted hover:text-fg transition-colors"
-                        aria-label={t('common.moreActions')}
-                    >
-                        <MoreVertical className="w-5 h-5" />
-                    </button>
+                    <BottomSheet open={isOverflowOpen} onOpenChange={setIsOverflowOpen}>
+                        <BottomSheetTrigger asChild>
+                            <button
+                                ref={overflowTriggerRef}
+                                type="button"
+                                className="inline-flex size-tap items-center justify-center rounded-control text-fg-muted hover:text-fg transition-colors"
+                                aria-label={t('common.moreActions')}
+                            >
+                                <MoreVertical className="w-5 h-5" aria-hidden />
+                            </button>
+                        </BottomSheetTrigger>
+                        {/* Story 6.1.34 (#418): the song menu is a real dialog: named, focus trapped, Escape closes, focus returns to ⋯. */}
+                        <BottomSheetContent
+                            data-testid="song-overflow-sheet"
+                            title={song.title}
+                            description={t('song.by', { author: song.original_author || t('song.traditional') })}
+                            className="lg:hidden"
+                        >
+                            <div className="pb-2">
+                                <SheetAction
+                                    icon={<Share2 />}
+                                    onClick={() => { handleShare(); setIsOverflowOpen(false); }}
+                                >
+                                    {t('song.share')}
+                                </SheetAction>
+                                {(song.owner_id === user?.id || isAdmin) && (
+                                    <Link
+                                        href={editSongHref(id, currentVersion?.id)}
+                                        onClick={() => setIsOverflowOpen(false)}
+                                        className="flex min-h-tap w-full items-center gap-3 px-4 py-3 text-left text-body text-fg transition-colors hover:bg-surface-2"
+                                    >
+                                        <span aria-hidden="true" className="shrink-0 [&_svg]:size-5"><Edit2 /></span>
+                                        <span className="min-w-0 flex-1">{t('song.edit')}</span>
+                                    </Link>
+                                )}
+                                {(song.owner_id === user?.id || isAdmin) && (
+                                    <SheetAction
+                                        tone="danger"
+                                        icon={<Trash2 />}
+                                        onClick={() => { setIsOverflowOpen(false); setIsDeleteModalOpen(true); }}
+                                    >
+                                        {t('song.delete')}
+                                    </SheetAction>
+                                )}
+                            </div>
+                        </BottomSheetContent>
+                    </BottomSheet>
                 </div>
             </header>
 
-            <main className="flex-1 min-w-0 bg-white dark:bg-gray-950">
+            {/* The layout owns the one <main> landmark. */}
+            <div className="flex-1 min-w-0 bg-white dark:bg-gray-950">
 
                 {/* Desktop Page Header (Title, Actions) - Visible only on desktop >= lg */}
                 <div ref={setDesktopHeader} className="hidden lg:flex justify-between items-center px-8 py-4 border-b border-gray-200/50 dark:border-gray-800/50 bg-white/50 dark:bg-gray-950/50 sticky top-0 backdrop-blur-md z-10 transition-all">
@@ -380,13 +423,15 @@ export default function SongDetailPage() {
                                 }}
                                 className="flex items-center gap-2 px-3 py-2 bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 rounded-lg text-sm font-bold border border-indigo-500/20 transition-all active:scale-[0.98]"
                                 title={t('practice.title')}
+                                aria-label={t('practice.title')}
+                                data-testid="song-header-practice"
                             >
                                 {isAudioPlaying ? (
-                                    <div className="flex items-end gap-[2px] h-4 w-4 overflow-hidden" title={t('miniPlayer.playing')}>
-                                        <div className="w-[3px] bg-indigo-600 dark:bg-indigo-400 animate-[equalizer_1s_ease-in-out_infinite]" />
-                                        <div className="w-[3px] bg-indigo-600 dark:bg-indigo-400 animate-[equalizer_1.2s_ease-in-out_infinite_0.2s]" />
-                                        <div className="w-[3px] bg-indigo-600 dark:bg-indigo-400 animate-[equalizer_0.9s_ease-in-out_infinite_0.4s]" />
-                                        <div className="w-[3px] bg-indigo-600 dark:bg-indigo-400 animate-[equalizer_1.1s_ease-in-out_infinite_0.1s]" />
+                                    <div aria-hidden className="flex items-end gap-[2px] h-4 w-4 overflow-hidden">
+                                        <div className="h-3/5 w-[3px] bg-accent motion-safe:animate-[equalizer_1s_ease-in-out_infinite]" />
+                                        <div className="h-3/5 w-[3px] bg-accent motion-safe:animate-[equalizer_1.2s_ease-in-out_infinite_0.2s]" />
+                                        <div className="h-3/5 w-[3px] bg-accent motion-safe:animate-[equalizer_0.9s_ease-in-out_infinite_0.4s]" />
+                                        <div className="h-3/5 w-[3px] bg-accent motion-safe:animate-[equalizer_1.1s_ease-in-out_infinite_0.1s]" />
                                     </div>
                                 ) : (
                                     <Mic className="w-4 h-4" />
@@ -509,8 +554,10 @@ export default function SongDetailPage() {
                     title={t('song.delete.confirm.modalTitle')}
                     message={t('song.delete.confirm.message', { title: song.title })}
                     isDeleting={isDeleting}
+                    // The ⋯ sheet that opened this closes in the same moment: focus goes back to ⋯.
+                    fallbackFocus={() => overflowTriggerRef.current}
                 />
-            </main>
+            </div>
 
             {/* Story 6.1.9 (#393): Practice · Playlist · ♥ in thumb reach (phones). */}
             <SongActionBar
@@ -550,71 +597,6 @@ export default function SongDetailPage() {
                 awake={awake}
                 returnFocusRef={toolsButtonRef}
             />
-
-            {/* Mobile Bottom Drawer Context Menu */}
-            {isOverflowOpen && (
-                <>
-                    {/* Backdrop overlay */}
-                    <div 
-                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 lg:hidden animate-in fade-in duration-200" 
-                        onClick={() => setIsOverflowOpen(false)} 
-                    />
-                    {/* Bottom sheet */}
-                    <div 
-                        data-testid="song-overflow-sheet"
-                        className="fixed bottom-0 inset-x-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 rounded-t-3xl shadow-2xl z-50 pb-[calc(env(safe-area-inset-bottom,0px)+var(--mini-player-h,0px))] lg:hidden animate-in slide-in-from-bottom duration-300 flex flex-col"
-                    >
-                        {/* Handle bar */}
-                        <div className="w-12 h-1.5 bg-gray-300 dark:bg-gray-700 rounded-full mx-auto my-3 shrink-0" />
-                        
-                        {/* Song Info header inside sheet */}
-                        <div className="flex items-center gap-4 px-6 py-4 border-b border-gray-100 dark:border-gray-800/50">
-                            <div className="w-12 h-12 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-xl flex items-center justify-center text-white shrink-0 shadow-lg shadow-purple-500/10">
-                                <Music className="w-6 h-6" />
-                            </div>
-                            <div className="flex-1 min-w-0">
-                                <h2 className="text-base font-black text-gray-900 dark:text-white truncate text-left">{song.title}</h2>
-                                <p className="text-xs text-gray-500 dark:text-gray-400 truncate text-left">{t('song.by', { author: song.original_author || t('song.traditional') })}</p>
-                            </div>
-                        </div>
-
-                        {/* Action options */}
-                        <div className="py-2">
-                            {/* Share */}
-                            <button
-                                onClick={() => { handleShare(); setIsOverflowOpen(false); }}
-                                className="w-full flex items-center gap-4 px-6 py-4 hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors text-left text-gray-700 dark:text-gray-300"
-                            >
-                                <Share2 className="w-5 h-5 text-gray-400 dark:text-gray-500" />
-                                <span className="text-sm font-bold">{t('song.share')}</span>
-                            </button>
-
-                            {/* Edit */}
-                            {(song.owner_id === user?.id || isAdmin) && (
-                                <Link
-                                    href={editSongHref(id, currentVersion?.id)}
-                                    onClick={() => setIsOverflowOpen(false)}
-                                    className="flex items-center gap-4 px-6 py-4 hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors text-gray-700 dark:text-gray-300"
-                                >
-                                    <Edit2 className="w-5 h-5 text-gray-400 dark:text-gray-500" />
-                                    <span className="text-sm font-bold">{t('song.edit')}</span>
-                                </Link>
-                            )}
-
-                            {/* Delete */}
-                            {(song.owner_id === user?.id || isAdmin) && (
-                                <button
-                                    onClick={() => { setIsOverflowOpen(false); setIsDeleteModalOpen(true); }}
-                                    className="w-full flex items-center gap-4 px-6 py-4 hover:bg-red-500/10 transition-colors text-red-500 text-left"
-                                >
-                                    <Trash2 className="w-5 h-5" />
-                                    <span className="text-sm font-bold">{t('song.delete')}</span>
-                                </button>
-                            )}
-                        </div>
-                    </div>
-                </>
-            )}
 
             <GuestGateSheet feature="addToPlaylist" open={isGuestGateOpen} onOpenChange={setIsGuestGateOpen} />
             <GuestGateSheet feature="favourites" open={favouritesGate.open} onOpenChange={favouritesGate.onOpenChange} />
