@@ -37,7 +37,8 @@ export default function ProfileSettings({ user, profile }: ProfileSettingsProps)
       toast.success(t("settings.profile.success"));
       router.refresh();
     } catch (error: any) {
-      toast.error(error.message || t("settings.profile.error"));
+      console.error('[settings]', error);
+      toast.error(t("settings.profile.error"));
     } finally {
       setIsSaving(false);
     }
@@ -86,7 +87,8 @@ export default function ProfileSettings({ user, profile }: ProfileSettingsProps)
       toast.success(t("settings.profile.avatar.success"));
       router.refresh();
     } catch (error: any) {
-      toast.error(error.message || t("settings.profile.avatar.error"));
+      console.error('[settings]', error);
+      toast.error(t("settings.profile.avatar.error"));
     } finally {
       setIsUploading(false);
     }

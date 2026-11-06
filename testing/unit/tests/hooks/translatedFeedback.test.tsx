@@ -14,7 +14,9 @@ const { toggleFavorite, toast, supabaseDelete } = vi.hoisted(() => ({
   toast: Object.assign(vi.fn(), { success: vi.fn(), error: vi.fn(), info: vi.fn() }),
   supabaseDelete: vi.fn(),
 }));
+const { renamePlaylist } = vi.hoisted(() => ({ renamePlaylist: vi.fn() }));
 vi.mock('@/app/actions/toggleFavorite', () => ({ toggleFavorite }));
+vi.mock('@/app/actions/playlistActions', () => ({ renamePlaylist }));
 vi.mock('sonner', () => ({ toast }));
 vi.mock('next/navigation', () => ({ useRouter: () => ({ refresh: vi.fn(), push: vi.fn() }) }));
 vi.mock('@/lib/supabase/client', () => ({
@@ -29,6 +31,7 @@ vi.mock('@/context/LocaleContext', () => ({
 
 import { useToggleFavorite } from '@/hooks/useToggleFavorite';
 import { useDeleteSong } from '@/hooks/useDeleteSong';
+import { usePlaylistRename } from '@/hooks/usePlaylistRename';
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
   <QueryClientProvider client={new QueryClient()}>{children}</QueryClientProvider>
@@ -79,6 +82,35 @@ describe('useDeleteSong failure', () => {
     expect(alert).not.toHaveBeenCalled();
     expect(toast.error).toHaveBeenCalledWith(`nl:${(DICTIONARIES.nl as Record<string, string>)['song.delete.failed']}`);
     expect(result.current.isDeleting).toBe(false);
+  });
+});
+
+describe('usePlaylistRename failure (validation 1 review, M4)', () => {
+  it.each([
+    ['Playlist not found', 'errors.playlistNotFound'],
+    ['duplicate key value violates unique constraint "setlists_pkey"', 'errors.generic'],
+  ])('a server answer of "%s" is shown in the person\'s language (%s), never as sent', async (serverError, key) => {
+    renamePlaylist.mockResolvedValue({ error: serverError });
+    const { result } = renderHook(() => usePlaylistRename('p1', 'Old'));
+    act(() => result.current.setDraftTitle('New'));
+    await act(async () => {
+      result.current.handleRenameSave();
+    });
+    await vi.waitFor(() => expect(toast.error).toHaveBeenCalled());
+    expect(toast.error).toHaveBeenCalledWith(`nl:${(DICTIONARIES.nl as Record<string, string>)[key]}`);
+    expect(toast.error).not.toHaveBeenCalledWith(serverError);
+  });
+});
+
+describe('favourites toasts use the menu\'s word (review L7)', () => {
+  // The menu says "Your Favorites"; the toasts used to say "Liked Songs" (and the same split in five languages).
+  const stem: Record<string, string> = { en: 'Favorites', nl: 'favorieten', es: 'favoritas', it: 'preferiti', ru: 'избран', fr: 'favoris', pt: 'favoritas' };
+  it.each(Object.entries(stem))('%s names them like the user menu does', (locale, word) => {
+    const dict = DICTIONARIES[locale as keyof typeof DICTIONARIES] as Record<string, string>;
+    expect(dict['userMenu.favorites'].toLowerCase()).toContain(word.toLowerCase());
+    for (const key of ['favorites.toast.added', 'favorites.toast.removed', 'favorites.toast.view']) {
+      expect(dict[key].toLowerCase(), `${locale}: ${key}`).toContain(word.toLowerCase());
+    }
   });
 });
 

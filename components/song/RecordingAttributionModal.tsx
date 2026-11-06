@@ -19,6 +19,7 @@ import {
 import { useLocale } from "@/context/LocaleContext";
 import { toast } from "sonner";
 import { Mic, Search, Music, Loader2, Check, UserX } from "lucide-react";
+import { actionErrorMessage } from '@/lib/errors/actionError';
 
 interface RecordingAttributionModalProps {
   recording: UserRecording | null;
@@ -117,7 +118,7 @@ export default function RecordingAttributionModal({
         onAttributionUpdated?.();
         onClose();
       } else {
-        toast.error(res.error || t("recording.attribution.error"));
+        toast.error(actionErrorMessage(res.error, t, 'recording.attribution.error'));
       }
     } catch {
       toast.error(t("recording.attribution.error"));
@@ -140,7 +141,7 @@ export default function RecordingAttributionModal({
         onAttributionUpdated?.();
         onClose();
       } else {
-        toast.error(res.error || t("recording.attribution.error"));
+        toast.error(actionErrorMessage(res.error, t, 'recording.attribution.error'));
       }
     } catch {
       toast.error(t("recording.attribution.error"));

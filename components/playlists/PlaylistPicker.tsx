@@ -13,6 +13,7 @@ import { buildPickerRows, toggleMembership } from '@/lib/playlists/pickerModel';
 import { PLAYLIST_KEYS } from '@/lib/songs/queryKeys';
 import { cn } from '@/lib/utils';
 import { useLocale } from '@/context/LocaleContext';
+import { actionErrorMessage } from '@/lib/errors/actionError';
 
 interface PlaylistPickerProps {
     compositionId: string;
@@ -91,7 +92,7 @@ export function PlaylistPicker({ compositionId, userId, triggerClassName, iconCl
         try {
             const result = await addSongToPlaylist(playlistId, compositionId);
             if (result.error) {
-                toast.error(result.error);
+                toast.error(actionErrorMessage(result.error, t));
                 queryClient.invalidateQueries({ queryKey: containingKey }); // revert
             } else {
                 // The server decides: keep the check mark in line with what it did.
@@ -117,12 +118,12 @@ export function PlaylistPicker({ compositionId, userId, triggerClassName, iconCl
         startCreateTransition(async () => {
             const result = await createPlaylist(trimmed);
             if ('error' in result) {
-                toast.error(result.error);
+                toast.error(actionErrorMessage(result.error, t));
                 return;
             }
             const addResult = await addSongToPlaylist(result.id, compositionId);
             if (addResult.error) {
-                toast.error(t('playlists.picker.createdButNotAdded', { error: String(addResult.error) }));
+                toast.error(t('playlists.picker.createdButNotAdded'));
                 // The playlist exists now: a second Create would make a duplicate.
                 setNewTitle('');
                 setCreating(false);

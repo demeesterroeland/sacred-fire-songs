@@ -6,6 +6,7 @@ import { createPlaylist } from '@/app/actions/playlistActions';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { useLocale } from '@/context/LocaleContext';
+import { actionErrorMessage } from '@/lib/errors/actionError';
 
 export function CreatePlaylistInput() {
     const { t } = useLocale();
@@ -28,7 +29,7 @@ export function CreatePlaylistInput() {
         startTransition(async () => {
             const result = await createPlaylist(trimmed);
             if ('error' in result) {
-                toast.error(result.error);
+                toast.error(actionErrorMessage(result.error, t));
             } else {
                 toast.success(t('playlists.created', { name: trimmed }), {
                     action: {

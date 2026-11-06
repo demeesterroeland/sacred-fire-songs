@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { NEW_PLAYLIST_IS_PUBLIC, canCreatePlaylist, visibilityExplainKey } from '@/lib/playlists/visibility';
 import { useLocale } from '@/context/LocaleContext';
+import { actionErrorMessage } from '@/lib/errors/actionError';
 
 /** Client half of /library/playlists/add; the page guards auth on the server (#321). */
 export function CreatePlaylistForm() {
@@ -52,7 +53,7 @@ export function CreatePlaylistForm() {
             }
             if ('error' in result) {
                 submittingRef.current = false;
-                toast.error(result.error);
+                toast.error(actionErrorMessage(result.error, t));
             } else {
                 toast.success(t('playlists.add.created'));
                 router.push(`/library/playlists/${result.id}`);

@@ -143,4 +143,29 @@ describe('ReadingToolsSheet focus', () => {
     rerender(ui(false));
     await waitFor(() => expect(document.activeElement).toBe(ref.current));
   });
+
+  // Validation 1 review, M1: the ⋯ button can be gone when the sheet closes (the song now fits): focus goes to a neighbour.
+  it('returns focus to the fallback when the ⋯ button no longer exists', async () => {
+    const gone = { current: null as HTMLElement | null };
+    const fallback = { current: null as HTMLElement | null };
+    const base = {
+      onOpenChange: vi.fn(),
+      transpose: { semitones: 0, originalKey: 'E', onShift: vi.fn(), onReset: vi.fn() },
+      speed: 3,
+      onSpeed: vi.fn(),
+      scrolling: false,
+      awake: false,
+      returnFocusRef: gone,
+      fallbackFocusRef: fallback,
+    };
+    const ui = (open: boolean) => (
+      <>
+        <button ref={(el) => { fallback.current = el; }}>larger</button>
+        <ReadingToolsSheet {...base} open={open} />
+      </>
+    );
+    const { rerender } = render(ui(true));
+    rerender(ui(false));
+    await waitFor(() => expect(document.activeElement).toBe(fallback.current));
+  });
 });

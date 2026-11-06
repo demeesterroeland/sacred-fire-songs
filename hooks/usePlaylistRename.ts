@@ -5,6 +5,7 @@ import { renamePlaylist } from '@/app/actions/playlistActions';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { useLocale } from '@/context/LocaleContext';
+import { actionErrorMessage } from '@/lib/errors/actionError';
 
 export function usePlaylistRename(id: string, initialTitle: string) {
     const [isRenaming, setIsRenaming] = useState(false);
@@ -35,7 +36,7 @@ export function usePlaylistRename(id: string, initialTitle: string) {
         startTransition(async () => {
             const result = await renamePlaylist(id, trimmed);
             if (result.error) {
-                toast.error(result.error);
+                toast.error(actionErrorMessage(result.error, t));
                 setOptimisticTitle(initialTitle);
             } else {
                 toast.success(t('playlists.rename.success'));

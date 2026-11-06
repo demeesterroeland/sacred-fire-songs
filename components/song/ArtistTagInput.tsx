@@ -161,7 +161,7 @@ export function ArtistTagInput({
     <div ref={containerRef} className={`relative w-full ${className}`}>
       {/* Input container with selected pills inline */}
       <div
-        className="flex flex-wrap items-center gap-1.5 min-h-[46px] w-full bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-primary focus-within:border-primary transition-all cursor-text"
+        className="field-composite flex flex-wrap items-center gap-1.5 min-h-[46px] w-full bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg px-3 py-2 transition-all cursor-text"
         onClick={() => inputRef.current?.focus()}
       >
         <User className="w-4 h-4 text-gray-400 shrink-0 mr-1" />

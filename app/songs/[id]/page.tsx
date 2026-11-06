@@ -42,6 +42,7 @@ import { useRecordingsQuery } from '@/hooks/useRecordingsQuery';
 import { useLocale } from '@/context/LocaleContext';
 import { fetchSong, withTimeout } from '@/lib/songs/fetchSong';
 import { linkedTakeTab, parseRecordingParam, RECORDING_PARAM } from '@/lib/songs/recordingLink';
+import { actionErrorMessage } from '@/lib/errors/actionError';
 
 export default function SongDetailPage() {
     const { t } = useLocale();
@@ -81,6 +82,7 @@ export default function SongDetailPage() {
     const toolbarWrapRef = useRef<HTMLDivElement>(null);
     const lyricsRef = useRef<HTMLDivElement>(null);
     const toolsButtonRef = useRef<HTMLButtonElement>(null);
+    const largerButtonRef = useRef<HTMLButtonElement>(null);
     // Auto-scroll (▶, and its section in the tools sheet) only exists while the end of the lyrics is below the fold.
     const canAutoScroll = useLyricsBelowFold(lyricsRef, toolbarWrapRef);
     const autoScroll = useAutoScroll(readerPrefs.speed, toolbarWrapRef, lyricsRef, canAutoScroll);
@@ -187,6 +189,9 @@ export default function SongDetailPage() {
     // or shift); lists, filters and the meta links keep using the song-level flag (any version).
     const shownHasChords = versionHasChords(currentVersion);
     const mayTranspose = canTranspose(user?.role) && shownHasChords;
+    // Review M1: the sheet holds transpose and auto-scroll only. When neither is left (the window grew and the song
+    // now fits) it closes instead of staying open with nothing but "Close" (adjusting state while rendering).
+    if (isToolsOpen && !mayTranspose && !canAutoScroll) setIsToolsOpen(false);
     const shownContent = useMemo(
         () => transposeChordPro(currentVersion?.content_chordpro || '', mayTranspose ? semitones : 0, { key: currentVersion?.key }),
         [currentVersion?.content_chordpro, currentVersion?.key, mayTranspose, semitones],
@@ -318,7 +323,7 @@ export default function SongDetailPage() {
             toast.success(t('song.publishSuccess'));
             return true;
         } else {
-            toast.error(res.error || t('song.publishError'));
+            toast.error(actionErrorMessage(res.error, t, 'song.publishError'));
             return false;
         }
     };
@@ -534,6 +539,7 @@ export default function SongDetailPage() {
                             onOpenTools={mayTranspose || canAutoScroll ? () => setIsToolsOpen(true) : undefined}
                             toolsOpen={isToolsOpen}
                             toolsButtonRef={toolsButtonRef}
+                            fallbackFocusRef={largerButtonRef}
                             semitones={mayTranspose ? semitones : 0}
                             awake={awake}
                         />
@@ -605,6 +611,7 @@ export default function SongDetailPage() {
                 onToggleScroll={canAutoScroll ? autoScroll.toggle : undefined}
                 awake={awake}
                 returnFocusRef={toolsButtonRef}
+                fallbackFocusRef={largerButtonRef}
             />
 
             <GuestGateSheet feature="addToPlaylist" open={isGuestGateOpen} onOpenChange={setIsGuestGateOpen} />

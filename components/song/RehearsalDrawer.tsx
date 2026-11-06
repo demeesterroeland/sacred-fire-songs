@@ -48,6 +48,7 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { actionErrorMessage } from '@/lib/errors/actionError';
 
 function SortableRecordingItem({
   rec,
@@ -1141,7 +1142,7 @@ export default function RehearsalDrawer({
         );
         queryClient.invalidateQueries({ queryKey: ["song-recordings", songVersionId] });
       } else {
-        toast.error(res.error || t('recording.publish.error'));
+        toast.error(actionErrorMessage(res.error, t, 'recording.publish.error'));
       }
     } else {
       setPublishRecording(rec);

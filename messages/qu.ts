@@ -786,7 +786,6 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'playlists.picker.newPrivateHint': 'Mosoq listakunaqa pakasqa: qanlla rikunki, llapa runapaq mana ruwaspaqa.',
   'playlists.add.creating': 'Ruwashan…',
   'playlists.add.submit': 'Lista ruway',
-  'playlists.picker.createdButNotAdded': 'Lista ruwasqa, ichaqa taki mana yapasqachu: {error}',
   'playlists.picker.addedToNew': 'Musuq “{name}” listaman yapasqa',
   'playlists.detail.dragToReorder': 'Ñiqichanaykipaq llust’iy',
   'playlists.detail.removeSong': '{title} listamanta qichuy',
@@ -941,6 +940,19 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'song.delete.failed': "Taki mana qichuyta atikurqachu. Huk kutita ruway.",
   'playlists.rename.success': "Lista sutinchasqa",
   'settings.pageIntro': "Perfilnikita, cuenta waqaychayniykita, willakuy akllasqaykikunatapas kamachiy.",
+  "errors.generic": "Pantay tarikurqan. Huk kutita ruway.",
+  "errors.notSignedIn": "Pantay tarikurqan. Huk kutita ruway.",
+  "errors.accessDenied": "Pantay tarikurqan. Huk kutita ruway.",
+  "errors.playlistNotFound": "Pantay tarikurqan. Huk kutita ruway.",
+  "errors.songNotFound": "Pantay tarikurqan. Huk kutita ruway.",
+  "errors.smartPlaylistLocked": "Pantay tarikurqan. Huk kutita ruway.",
+  "errors.titleRequired": "Pantay tarikurqan. Huk kutita ruway.",
+  "errors.titleTooLong": "Pantay tarikurqan. Huk kutita ruway.",
+  "errors.descriptionTooLong": "Pantay tarikurqan. Huk kutita ruway.",
+  "playlists.picker.createdButNotAdded": "Pantay tarikurqan. Huk kutita ruway.",
+  "playlists.addSongs.added": "\"{title}\" yapasqa",
+  "playlists.addSongs.removed": "\"{title}\" qichusqa",
+  "errors.exportLimit": "Pantay tarikurqan. Huk kutita ruway.",
 };
 
 export default qu;

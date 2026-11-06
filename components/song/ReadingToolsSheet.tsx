@@ -32,6 +32,8 @@ interface ReadingToolsSheetProps {
   awake: boolean;
   /** The button that opened the sheet; it gets focus back when the sheet closes. */
   returnFocusRef?: RefObject<HTMLElement | null>;
+  /** Where focus goes instead when that button is gone by the time the sheet closes (the song now fits). */
+  fallbackFocusRef?: RefObject<HTMLElement | null>;
 }
 
 const stepButton = 'border border-line aria-disabled:cursor-default aria-disabled:opacity-40 aria-disabled:hover:bg-transparent';
@@ -51,6 +53,7 @@ export function ReadingToolsSheet({
   onToggleScroll,
   awake,
   returnFocusRef,
+  fallbackFocusRef,
 }: ReadingToolsSheetProps) {
   const { t } = useLocale();
   const level = clampSpeed(speed);
@@ -63,9 +66,10 @@ export function ReadingToolsSheet({
         {...{ [AUTOSCROLL_KEEP_ATTR]: '' }}
         onCloseAutoFocus={(e) => {
           // No Radix trigger here (the ⋯ button lives in the toolbar): focus it ourselves, not <body>.
-          if (returnFocusRef?.current) {
+          const back = returnFocusRef?.current?.isConnected ? returnFocusRef.current : fallbackFocusRef?.current;
+          if (back) {
             e.preventDefault();
-            returnFocusRef.current.focus();
+            back.focus();
           }
         }}
       >

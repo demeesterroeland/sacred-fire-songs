@@ -87,7 +87,7 @@ export default function TagSelector({
     <div className="space-y-3 relative w-full" ref={wrapperRef}>
       {/* 1. Search Bar & Active Tag Pills */}
       <div
-        className="flex min-h-tap cursor-text flex-wrap items-center gap-2 rounded-control border border-line-strong bg-surface px-3 py-2 focus-within:border-fg"
+        className="field-composite flex min-h-tap cursor-text flex-wrap items-center gap-2 rounded-control border border-line-strong bg-surface px-3 py-2"
         onClick={() => inputRef.current?.focus()}
       >
         <Search aria-hidden className="size-4 shrink-0 text-fg-subtle" />
@@ -174,7 +174,7 @@ export default function TagSelector({
                       {cat.emoji && <span aria-hidden className="leading-none">{cat.emoji}</span>}
                       {cat.name}
                       {cat.song_count !== undefined && (
-                        <span className="tabular-nums text-fg-subtle opacity-80">{cat.song_count}</span>
+                        <span className="font-normal tabular-nums">{cat.song_count}</span>
                       )}
                     </Chip>
                   );

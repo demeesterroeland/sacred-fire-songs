@@ -128,4 +128,27 @@ describe('ReaderToolbar', () => {
       for (const b of screen.getAllByRole('button')) expect(b.className).toMatch(/min-h-tap/);
     });
   });
+
+  // Validation 1 review, M1: a focused button that goes away must not drop focus to <body>.
+  it('moves focus to A+ when the focused ▶ and ⋯ buttons go away (the window grew, the song now fits)', () => {
+    const base = { step: 1, chords: true, speed: 3, hasChords: true, onChange: () => {} };
+    const { rerender } = render(<ReaderToolbar {...base} onToggleScroll={() => {}} onOpenTools={() => {}} />);
+    screen.getByTestId('autoscroll-toggle').focus();
+    expect(document.activeElement).toBe(screen.getByTestId('autoscroll-toggle'));
+    rerender(<ReaderToolbar {...base} />);
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Larger text' }));
+
+    rerender(<ReaderToolbar {...base} onOpenTools={() => {}} />);
+    screen.getByTestId('reader-tools-button').focus();
+    rerender(<ReaderToolbar {...base} />);
+    expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Larger text' }));
+  });
+
+  it('leaves focus alone when it was not on the button that went away', () => {
+    const base = { step: 1, chords: true, speed: 3, hasChords: true, onChange: () => {} };
+    const { rerender } = render(<ReaderToolbar {...base} onToggleScroll={() => {}} />);
+    screen.getByRole('switch', { name: 'Chords' }).focus();
+    rerender(<ReaderToolbar {...base} />);
+    expect(document.activeElement).toBe(screen.getByRole('switch', { name: 'Chords' }));
+  });
 });

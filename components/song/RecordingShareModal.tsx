@@ -22,6 +22,7 @@ import { useLocale } from "@/context/LocaleContext";
 import { shareDialogStep } from "@/lib/songs/shareDialogStep";
 import { toast } from "sonner";
 import { Search, UserPlus, Trash2, Loader2, Music, Check, Shield, Lock, Globe } from "lucide-react";
+import { actionErrorMessage } from '@/lib/errors/actionError';
 
 interface RecordingShareModalProps {
   recording: UserRecording | null;
@@ -127,7 +128,7 @@ export default function RecordingShareModal({
         setSearchQuery("");
         onSharesUpdated?.();
       } else {
-        toast.error(res.error || t("recording.sharing.error"));
+        toast.error(actionErrorMessage(res.error, t, 'recording.sharing.error'));
       }
     } catch {
       toast.error(t("recording.sharing.error"));
@@ -162,7 +163,7 @@ export default function RecordingShareModal({
         setCurrentShares((prev) => prev.filter((s) => s.user_id !== targetUserId));
         onSharesUpdated?.();
       } else {
-        toast.error(res.error || t("recording.sharing.error"));
+        toast.error(actionErrorMessage(res.error, t, 'recording.sharing.error'));
       }
     } catch {
       toast.error(t("recording.sharing.error"));

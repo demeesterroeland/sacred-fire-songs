@@ -351,13 +351,12 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved, onDirty
         onRecordingSaved(recording);
         discardRecording();
       } else {
-        setErrorMsg(error || t('recorder.error.saveFailed'));
+        if (error) console.error('[recorder] Save failed:', error);
+        setErrorMsg(t('recorder.error.saveFailed'));
       }
     } catch (err) {
       console.error("[recorder] Upload error:", err);
-      const e = err as { message?: string; error_description?: string } | null;
-      const msg = typeof err === 'string' ? err : (e?.message || e?.error_description || JSON.stringify(err));
-      setErrorMsg(msg && msg !== '{}' ? msg : t('recorder.error.unexpected'));
+      setErrorMsg(t('recorder.error.unexpected'));
     } finally {
       setIsUploading(false);
     }

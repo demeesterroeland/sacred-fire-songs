@@ -36,8 +36,8 @@ export default function SecuritySettings({ user }: SecuritySettingsProps) {
       setNewPassword("");
       setConfirmPassword("");
     } catch (error) {
-      const err = error as Error;
-      toast.error(err.message || t("settings.security.error"));
+      console.error('[settings]', error);
+      toast.error(t("settings.security.error"));
     } finally {
       setIsUpdating(false);
     }

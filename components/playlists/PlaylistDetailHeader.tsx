@@ -24,6 +24,7 @@ import {
     DialogDescription,
     DialogFooter,
 } from '@/components/ui/dialog';
+import { actionErrorMessage } from '@/lib/errors/actionError';
 
 interface Props {
     playlistId: string;
@@ -71,7 +72,7 @@ export function PlaylistDetailHeader({
         startTransition(async () => {
             const result = await togglePlaylistVisibility(playlistId, next);
             if (result.error) {
-                toast.error(result.error);
+                toast.error(actionErrorMessage(result.error, t));
                 setIsPublic(!next);
             } else {
                 toast.success(next ? t('playlists.toast.nowPublic') : t('playlists.toast.nowPrivate'));
@@ -102,7 +103,7 @@ export function PlaylistDetailHeader({
         startTransition(async () => {
             const result = await updatePlaylistDescription(playlistId, trimmed);
             if (result.error) {
-                toast.error(result.error);
+                toast.error(actionErrorMessage(result.error, t));
                 setOptimisticDesc(initialDescription ?? '');
             }
         });
@@ -137,7 +138,7 @@ export function PlaylistDetailHeader({
         try {
             const result = await getPlaylistSongsForExport(playlistId);
             if (result.error) {
-                toast.error(t('playlists.export.failed'), { id: toastId, description: result.error });
+                toast.error(t('playlists.export.failed'), { id: toastId, description: actionErrorMessage(result.error, t) });
                 return;
             }
 

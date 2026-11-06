@@ -12,6 +12,7 @@ import { deletePlaylist, togglePlaylistVisibility } from '@/app/actions/playlist
 import { toast } from 'sonner';
 import { useRouter, usePathname } from 'next/navigation';
 import { useLocale } from '@/context/LocaleContext';
+import { actionErrorMessage } from '@/lib/errors/actionError';
 
 interface PlaylistContextMenuProps {
     playlistId: string;
@@ -52,7 +53,7 @@ export function PlaylistContextMenu({
         startVisibilityTransition(async () => {
             const result = await togglePlaylistVisibility(playlistId, next);
             if (result.error) {
-                toast.error(result.error);
+                toast.error(actionErrorMessage(result.error, t));
             } else {
                 toast.success(next ? t('playlists.toast.nowPublic') : t('playlists.toast.nowPrivate'));
                 router.refresh();
@@ -64,7 +65,7 @@ export function PlaylistContextMenu({
         startDeleteTransition(async () => {
             const result = await deletePlaylist(playlistId);
             if (result.error) {
-                toast.error(result.error);
+                toast.error(actionErrorMessage(result.error, t));
             } else {
                 toast.success(t('playlists.toast.deleted', { title: playlistTitle }));
                 setShowDeleteModal(false);
