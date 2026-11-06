@@ -4,7 +4,8 @@
       "docs/testing/song.feature",
       "docs/testing/i18n.feature",
       "docs/testing/admin-users.feature",
-      "docs/testing/setlist-pdf-export.feature"
+      "docs/testing/setlist-pdf-export.feature",
+      "docs/testing/access-policies.feature"
     ],
     "import": [
       "testing/bdd/support/**/*.ts",
@@ -24,7 +25,8 @@
       "docs/testing/song.feature",
       "docs/testing/i18n.feature",
       "docs/testing/admin-users.feature",
-      "docs/testing/setlist-pdf-export.feature"
+      "docs/testing/setlist-pdf-export.feature",
+      "docs/testing/access-policies.feature"
     ],
     "import": [
       "testing/bdd/support/**/*.ts",
@@ -44,7 +46,8 @@
       "docs/testing/song.feature",
       "docs/testing/i18n.feature",
       "docs/testing/admin-users.feature",
-      "docs/testing/setlist-pdf-export.feature"
+      "docs/testing/setlist-pdf-export.feature",
+      "docs/testing/access-policies.feature"
     ],
     "import": [
       "testing/bdd/support/**/*.ts",

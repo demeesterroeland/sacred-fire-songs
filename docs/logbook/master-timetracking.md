@@ -121,4 +121,6 @@
 
 | **November 3, 2026** | **Security / Ops**: public-repo isolation — scan, removal of deploy workflow and deployment names, isolation guard (hooks + CI), canonical `AGENTS.md`. | ~2.0 Hours | ✅ Completed |
 | **November 3–4, 2026** | **Security/Testing (#336, #337, #338–#348)**: test-account seeding fix, per-role E2E passwords, epic for 21 failing local E2E tests with hand verification, fixes incl. `RehearsalDrawer` refresh bug (162 passed), isolation guard empty-diff fix. | ~5.0 Hours | ✅ Completed |
-| **Total** | **Development + AI Collaboration** | **~205.0 Hours** | |
+| **November 6, 2026** | **Database**: profile and playlist item access rules, fresh-install schema repair, role-based `@seed` scenarios. | ~1.0 Hours | Completed |
+| **November 6, 2026** | **Database**: write rules for profile fields, categories, playlists and song versions, role-based `@seed` scenarios. | ~1.0 Hours | Completed |
+| **Total** | **Development + AI Collaboration** | **~207.0 Hours** | |
