@@ -74,7 +74,7 @@
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "bats": "^1.13.0",
-    "eslint": "^9",
+    "eslint": "^10",
     "eslint-config-next": "16.4.3",
     "pg-to-ts": "^4.1.1",
     "sharp": "^0.35.5",
