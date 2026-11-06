@@ -1,11 +1,12 @@
 # UX v2: Agent Decisions (ADR-lite)
 
-**Version:** 1.27 | **Date:** Nov 6, 2026 | **Epic:** 6.1 (#375)
+**Version:** 1.28 | **Date:** Nov 6, 2026 | **Epic:** 6.1 (#375)
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.28 | Nov 6, 2026 | Added UXA-046 and UXA-047 (New Playlist visibility switch and wording; Add to playlist sheet stays private; #416). |
 | 1.27 | Nov 6, 2026 | Added UXA-032 (reader tools: where transpose and speed live, who transposes, how a shift is kept) and UXA-033 (auto-scroll: speeds, what pauses it, the sticky toolbar, stay-awake indicator; #394). |
 | 1.26 | Nov 6, 2026 | Added UXA-036 (recorder: remaining-time rule, limit caption, silent-microphone hint, meter design) and UXA-037 (count-in default and memory, cancel during count-in, review buttons; #404). |
 | 1.25 | Nov 6, 2026 | Added UXA-038 and UXA-039 (auth pages: where Back leads, plain page layout; #409). |
@@ -76,6 +77,8 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 | UXA-037 | Nov 6, 2026 | #404 | Recorder: count-in on by default and remembered per device, cancel during the count-in, Save full-width primary with Discard as a text button below | yes |
 | UXA-038 | Nov 6, 2026 | #409 | Auth pages: "Back" leads to the hardened `next=` target, else Home; a `next` pointing at another auth page counts as none (no loop); the ✕ is removed, not repurposed; forgot-password's Back returns to login and keeps `next` | no |
 | UXA-039 | Nov 6, 2026 | #409 | Auth pages are plain pages on tokens: Back link above the form, no card on phones, bordered panel from `md`, accent-soft flame badge instead of the orange gradient and glow; sign-up-success and error pages are not touched | no |
+| UXA-046 | Nov 6, 2026 | #416 | New Playlist: a Make public switch (off by default) and one line that follows it, worded from what RLS does (private: only you; public: anyone, with or without an account); any member may create public | yes |
+| UXA-047 | Nov 6, 2026 | #416 | Add to playlist sheet keeps creating private only and says so under the name field; the shared `Switch` moves to semantic tokens (affects Settings → Preferences look) | no |
 
 
 ---
@@ -434,3 +437,21 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 - **Consequences:** with the count-in off, recording starts as soon as the microphone answers and the first fraction of a second can contain the microphone start-up pop. The choice does not follow the member to another device. The old side-by-side Discard / Save pair is gone, so Discard is one tap further from the thumb on purpose (it is a destructive action).
 - **Review:** the count-in line (*Starting in n*) is a live region that is mounted empty and filled in, so screen readers announce each step; if capturing cannot start after the count-in, the microphone is released and the error shows instead of an uncaught error; the Dutch count-in reads *Begint over n* and the French time left *Il reste m:ss*.
 - **Confirm:** yes (default on and remembered on the device)
+
+### UXA-046 · New Playlist: visibility switch and one line of explanation
+
+- **Date / story:** Nov 6, 2026 · #416 (G8.3)
+- **Context:** the page only had a small grey hint (*Created as private — you can change this later*); there was no way to choose. The story asks for one line that states the playlist is private unless made public, plus a visibility switch on creation. What is true in the database: RLS on `setlists` lets the owner (and admins) read a private playlist and everyone, signed in or not, read a public one; public playlists are listed under *Public playlists*. Only the owner (or an admin or gatekeeper, for a public one) can change it afterwards.
+- **Options:** (a) a switch plus a line that always says the same thing; (b) a switch plus one line that follows the switch; (c) two radio cards (Private / Public) with longer text.
+- **Choice:** (b): a **Make public** switch, off by default, and one line under it: off *Private: only you can see this playlist unless you make it public.*, on *Public: anyone can find and open this playlist, with or without an account.* The line is tied to the switch with `aria-describedby`, and the icon changes (lock / globe) so the state is never colour alone. Any member may create a public playlist directly: this is the same right they already have after creating (the playlist's menu → Make Public), so it adds no new permission, only one tap fewer. `createPlaylist(title, isPublic = false)`; only an explicit `true` is public. RLS and the data model are not touched.
+- **Consequences:** the key `playlists.add.privateHint` is replaced by `visibilityLabel`, `privateExplain` and `publicExplain` in all 8 locales. A member can now publish a playlist in one step; the copy says who can see it. Songs inside a public playlist still follow their own visibility. "Only you" is shorthand: admins can also open private playlists (moderation), as `lib/playlists/visibility.ts` states.
+- **Confirm:** yes (new way to publish at creation, new copy)
+
+### UXA-047 · Add to playlist sheet stays private; shared Switch on tokens
+
+- **Date / story:** Nov 6, 2026 · #416 (G8.3), with #414 (G8.1)
+- **Context:** the story says to keep the wording consistent where the sheet also creates playlists. The sheet is a quick action while looking at a song; adding a switch there would slow it down and crowd the sheet.
+- **Options:** (a) no hint in the sheet; (b) the same switch in the sheet; (c) a one-line hint under the name field, private only.
+- **Choice:** (c): when *New playlist* opens its name field the sheet says *New playlists are private: only you can see them unless you make them public.* (`playlists.picker.newPrivateHint`). Making it public is done from the playlist afterwards. The shared `components/ui/switch.tsx` moved from shadcn defaults (`bg-primary`, `bg-input`, 32×18 px) to semantic tokens (accent when on, `line-strong` when off, 44×24 px, no transition under reduced motion), because the new page needs a token-based switch; Settings → Preferences uses the same component and keeps its own colour override.
+- **Consequences:** the switches in Settings → Preferences are a little larger, use the accent token instead of a hex colour and now have an accessible name (the row label); no other behaviour changes.
+- **Confirm:** no

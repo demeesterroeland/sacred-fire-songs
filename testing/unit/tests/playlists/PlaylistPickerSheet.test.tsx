@@ -10,6 +10,7 @@ const messages: Record<string, string> = {
   'playlists.picker.newPlaylist': 'New playlist',
   'playlists.picker.newPlaylistName': 'Playlist name',
   'playlists.picker.create': 'Create',
+  'playlists.picker.newPrivateHint': 'New playlists are private: only you can see them unless you make them public.',
   'playlists.picker.done': 'Done',
   'playlists.picker.empty': 'No playlists yet',
   'playlists.picker.added': 'Added to {playlist}',
@@ -121,6 +122,15 @@ describe('PlaylistPicker sheet', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Create' }));
     await waitFor(() => expect(createPlaylist).toHaveBeenCalledWith('Sunrise'));
     await waitFor(() => expect(addSongToPlaylist).toHaveBeenCalledWith('p-new', 'song-1'));
+  });
+
+  it('G8.3: naming a new playlist says it is private (same wording rule as the New Playlist page)', async () => {
+    renderPicker();
+    await openSheet();
+    await screen.findByRole('checkbox', { name: 'Water Ceremony' });
+    expect(screen.queryByText(messages['playlists.picker.newPrivateHint'])).toBeNull();
+    fireEvent.click(screen.getByRole('button', { name: 'New playlist' }));
+    expect(screen.getByText(messages['playlists.picker.newPrivateHint'])).toBeTruthy();
   });
 
   it('keeps Create disabled until a name is typed', async () => {

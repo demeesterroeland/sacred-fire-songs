@@ -48,7 +48,8 @@ function PreferenceRow({
         checked={checked}
         onCheckedChange={onCheckedChange}
         disabled={disabled}
-        className="data-[state=checked]:bg-[#f45d1a] shrink-0"
+        aria-label={label}
+        className="shrink-0"
       />
     </div>
   );
