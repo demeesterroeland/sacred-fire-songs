@@ -42,6 +42,16 @@ export const TAKE_ACTIONS_FIXTURE_IDS = {
 } as const;
 
 /**
+ * UX v2 validation 1 (fix 7): a public song whose Original has chords and whose Simplified is lyrics only,
+ * flagged has_chords = true at song level. Removed by e2e/global-teardown.ts.
+ */
+export const VALIDATION_1_FIXTURE_IDS = {
+  song: 'eeeeeeee-3619-4000-a000-000000000001',
+  original: 'eeeeeeee-3619-4000-a000-000000000002',
+  simplified: 'eeeeeeee-3619-4000-a000-000000000003',
+} as const;
+
+/**
  * Story 6.1.18 / G4.5 (#402): a private song owned by the member with one take of the member.
  * The spec makes the song public while it runs and resets it first. Removed by
  * e2e/global-teardown.ts.

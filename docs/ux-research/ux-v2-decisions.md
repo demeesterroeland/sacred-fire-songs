@@ -1,11 +1,12 @@
 # UX v2: Agent Decisions (ADR-lite)
 
-**Version:** 1.33 | **Date:** Nov 6, 2026 | **Epic:** 6.1 (#375)
+**Version:** 1.34 | **Date:** Nov 6, 2026 | **Epic:** 6.1 (#375)
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.34 | Nov 6, 2026 | Added UXA-054 to UXA-060 (validation round 1: when auto-scroll is offered, the expanded meta line, one focus style for text fields, where the search suggestions panel lives, search options on tokens, translated feedback, song flags versus the reader; Part of #375). |
 | 1.33 | Nov 6, 2026 | Added UXA-050 to UXA-053 (accessibility audit of the song page and Practice panel: Practice is a modal dialog with its own focus handling, every layer on top of it is a Radix dialog including the delete confirmation; heading levels; what the fixes change on screen; audit scope and what it cannot show; #418). |
 | 1.32 | Nov 6, 2026 | Added UXA-040 (publish dialog: a take on a private song starts with making the song public) and UXA-041 (publish dialog: header, layout on tokens, reversible line; #405); UXA-012 updated: guests hear public takes on the Listen tab (#405). |
 | 1.31 | Nov 6, 2026 | Added UXA-048 (what the variant slot shows, where, and what a version switch changes; review round 2: a take in progress blocks switching, `?version=` deep link, song flags across versions, playlist uses the oldest version) and UXA-049 (version order: oldest first; #395). |
@@ -578,3 +579,55 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 - **Choice:** axe-core (WCAG 2.0, 2.1 and 2.2 A and AA, plus best-practice) runs in Playwright on a production build, mobile project (390 px), as a guest and as a member, in light and dark: song page, Practice Listen, Practice Record (guest: behind the sign-in gate), the recorder idle, on the upload step and while recording (Chromium's fake microphone), the take actions sheet, the playlist sheet (the sign-in sheet for a guest), the Make public dialog, the share and singer dialogs, the reading tools sheet and the song menu. The spec fails on any violation, minor and moderate included, and excludes no rule and no selector. Take rows of the fixture have no audio file, so play buttons are audited in their disabled, explained state. Not covered by the automated run: the desktop layout, the other roles (musician, admin), a take that is playing, and everything a person with a screen reader judges (reading order, wording, whether announcements are timely). VoiceOver and TalkBack were not run; the owner's checklist is in `docs/ux-research/2026-11-06-a11y-audit.md` and is still to be done. The fixed ids of `SearchSuggestions` (two panels open at once) were not flagged on the song page and are left alone.
 - **Confirm:** no.
 
+### UXA-054 · Auto-scroll is offered only when the end of the lyrics is below the fold
+
+- **Date / story:** Nov 6, 2026 · validation round 1, fix 1 (Part of #375)
+- **Context:** ▶ was always shown. On a song that fits the screen it did nothing, which reads as broken.
+- **Options:** (a) disable ▶ on short songs; (b) hide ▶ and the sheet's Auto-scroll section; (c) leave it.
+- **Choice:** (b). `useLyricsBelowFold` (`hooks/useAutoScroll.ts`) measures the bottom of the lyrics against the window (or the desktop scroll container) with `endBelowFold` (`lib/reader/autoScroll.ts`); one pixel of overflow counts as fitting. The measure ignores how far the person has scrolled, so ▶ does not vanish while reading, and it is repeated when the lyrics, their surroundings or the window change size (`ResizeObserver` plus `resize`: text size, Chords switch, version switch, content load, rotation). `useAutoScroll` takes `enabled`: a running scroll stops when the song starts to fit, and it does not start again by itself. The ⋯ button stays only while it has something to open (Transpose for a musician on a song with chords, or Auto-scroll); the stay-awake sun in the toolbar still shows the wake lock. The only layout change is the button appearing or leaving.
+- **Confirm:** no.
+- **Consequences:** a musician on a short song with chords still has ⋯ (Transpose); a member or guest on a short song has neither ▶ nor ⋯. The first frame has no ▶ (measured after mount), so the button appears a moment after the lyrics.
+
+### UXA-055 · The expanded meta line shows the links only
+
+- **Date / story:** Nov 6, 2026 · validation round 1, fix 2
+- **Context:** expanding the grey line kept the summary "Author · Tags" and added the same words again as links; the links had no cue that they can be tapped without hover.
+- **Choice:** one row, one button for both states (keyboard focus stays on it): collapsed it is the summary and a chevron; expanded the summary is replaced by the list of links and the chevron (named *Hide tags*) collapses again. Links are underlined permanently.
+- **Confirm:** no.
+
+### UXA-056 · Text fields have one focus style
+
+- **Date / story:** Nov 6, 2026 · validation round 1, fix 3
+- **Context:** the global `:focus-visible` outline in `app/globals.css` is unlayered, so it beats every Tailwind utility: `outline-none` on a field never removed it, and `focus:border-*` / `focus:ring-*` added a second cue on top (underline plus box on the New Playlist name).
+- **Options:** (a) remove the global outline for fields; (b) keep it, stop stacking; (c) a different cue per component.
+- **Choice:** (b). Boxed fields keep the 2 px token outline (`input:focus-visible`, also `textarea` and `select`) and the rule sets `box-shadow: none`, so no ring can pile on. The one underlined field (the New Playlist name) uses `.field-underline`: no outline, a 2 px accent underline instead of 1 px grey (a thicker line, not only a colour change). Focus stays visible in both (WCAG 2.4.7). Components no longer carry `outline-none`, `focus:ring-*` or `focus:border-*` on an `<input>` or `<textarea>`; `textFieldFocus.test.ts` fails when one comes back. The inline name and description edits in the playlist header and the playlist cards and `CreatePlaylistInput` moved from amber and gray to tokens.
+- **Confirm:** no.
+
+### UXA-057 · The search suggestions panel is part of the page flow
+
+- **Date / story:** Nov 6, 2026 · validation round 1, fix 4
+- **Context:** the header's panel was `position: absolute` under the top bar and covered the first songs (and Home's content for a member).
+- **Options:** (a) make the song page own the panel; (b) render the header's panel into a slot at the top of the main column; (c) keep floating and add a scrim.
+- **Choice:** (b). `SuggestionsSlot` (top of `<main>` in `app/layout.tsx`, takes no room while empty) receives the panel through `SuggestionsPortal`; the header keeps all state and focus handling, React events still reach it through the portal, so close-on-outside, Escape and the arrow keys are unchanged. Every page therefore pushes down, not only `/songs`. On open the slot scrolls into view (the desktop main area scrolls on its own). Home's inline panel for guests lost `absolute` for the same reason. The panel lost its floating shadow.
+- **Consequences:** the focus order has the panel after the page's own header controls in the DOM, as before. Pressing Escape inside the *field* still blurs it (unchanged).
+- **Confirm:** yes (the list visibly moves).
+
+### UXA-058 · Search options use tokens; a category chip reads its name
+
+- **Date / story:** Nov 6, 2026 · validation round 1, fix 5
+- **Choice:** `SearchFiltersModal` and `TagSelector` use tokens only. **Show results** is the one accent button; **Clear all** is outlined. Selected tags, the selected category and the toggle cards are neutral per the Chip rule (inverted fill, a check, `aria-pressed`), no colour per category; the status filter is the shared `Segmented`. The chip shows `categoryDisplayName(...)` (`lib/taxonomy/categoryName.ts`): the name from the category tree or tag list, and a readable form of the slug while the taxonomy has not loaded. Category names are database content, not UI copy, so they are not in `messages/`.
+- **Confirm:** no.
+
+### UXA-059 · Hook feedback and the Settings intro are translated
+
+- **Date / story:** Nov 6, 2026 · validation round 1, fix 6
+- **Choice:** `useToggleFavorite` (toast and its action), `useDeleteSong` (a translated toast replaces `alert` and no longer shows the database message), `usePlaylistRename` and the Settings intro use message keys in all 8 languages. A test fails when a hook calls `alert()` or `toast` with a literal. Server-action error strings shown as toasts (e.g. a rename error from the server) are still English and are left for a separate story.
+- **Confirm:** no.
+
+### UXA-060 · Song flags cover every version; the reader follows the version shown
+
+- **Date / story:** Nov 6, 2026 · validation round 1, fix 7
+- **Context:** `compositions.has_chords` / `has_melody` must be true when ANY version has them (`lib/songs/versionFlags.ts`), but older rows could disagree, and the song page used the song-level flag for the Chords switch and transpose even when a lyrics-only version was shown.
+- **Choice:** (1) a data migration (`20261106180000_recompute_song_flags.sql`) recomputes both flags for every song with the same rule: melody = a media link or a notation, chords = `hasChords()` (a bracketed chord or a chords-over-lyrics line, reproduced in SQL by a `pg_temp` helper that leaves nothing behind); it only writes rows that differ, so it is idempotent. A test runs it in a rolled-back transaction and compares the SQL rule with `hasChords()` on a corpus. No database-side upkeep (a trigger) was added. (2) The song page asks `versionHasChords(currentVersion)` for the Chords switch, the lyric rendering and transpose; lists, filters, cards and the meta links keep the song-level flag. Showing *Simplified* (lyrics only) therefore has no Chords switch, while the Chords filter still finds the song.
+- **Confirm:** no.
+- **Consequences:** `docs/design/db-schema.sql` declares both columns and ends with the same recompute (v3.3).
