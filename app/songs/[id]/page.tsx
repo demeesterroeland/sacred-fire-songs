@@ -33,6 +33,7 @@ import { blocksVersionSwitch, linkedVersionChoice, resolveVersionIndex, type Ver
 import { ReadingToolsSheet } from '@/components/song/ReadingToolsSheet';
 import { useReaderPrefs } from '@/lib/reader/useReaderPrefs';
 import { speedBy } from '@/lib/reader/autoScroll';
+import { versionHasChords } from '@/lib/songs/versionFlags';
 import { canTranspose, shiftSemitones, transposeChordPro, transposeKey } from '@/lib/reader/transpose';
 import { cn } from '@/lib/utils';
 import { recordSongView } from '@/app/actions/recordSongView';
@@ -182,7 +183,10 @@ export default function SongDetailPage() {
         setHighlightRecordingId(null);
     };
     const { data: recordings } = useSongRecordings(currentVersion?.id);
-    const mayTranspose = canTranspose(user?.role) && !!song?.has_chords;
+    // The Chords switch and transpose follow the version being SHOWN (a lyrics-only Simplified has none to switch
+    // or shift); lists, filters and the meta links keep using the song-level flag (any version).
+    const shownHasChords = versionHasChords(currentVersion);
+    const mayTranspose = canTranspose(user?.role) && shownHasChords;
     const shownContent = useMemo(
         () => transposeChordPro(currentVersion?.content_chordpro || '', mayTranspose ? semitones : 0, { key: currentVersion?.key }),
         [currentVersion?.content_chordpro, currentVersion?.key, mayTranspose, semitones],
@@ -523,7 +527,7 @@ export default function SongDetailPage() {
                             step={readerPrefs.step}
                             chords={readerPrefs.chords}
                             speed={readerPrefs.speed}
-                            hasChords={song.has_chords}
+                            hasChords={shownHasChords}
                             onChange={setReaderPrefs}
                             scrolling={autoScroll.playing}
                             onToggleScroll={canAutoScroll ? autoScroll.toggle : undefined}
@@ -540,7 +544,7 @@ export default function SongDetailPage() {
                         <SongDisplay
                             content={shownContent}
                             melodyNotation={currentVersion?.melody_notation || ''}
-                            hasChords={song.has_chords}
+                            hasChords={shownHasChords}
                             sizeStep={readerPrefs.step}
                             showChords={readerPrefs.chords}
                         />
