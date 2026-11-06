@@ -20,7 +20,7 @@ import { PlaylistPicker } from '@/components/playlists/PlaylistPicker';
 import { useDeleteSong } from '@/hooks/useDeleteSong';
 import { SONG_KEYS } from '@/lib/songs/queryKeys';
 import { useWakeLock } from '@/hooks/useWakeLock';
-import { useAutoScroll } from '@/hooks/useAutoScroll';
+import { useAutoScroll, useLyricsBelowFold } from '@/hooks/useAutoScroll';
 import { SongActionBar } from '@/components/song/SongActionBar';
 import { useActionBarVisibility } from '@/hooks/useActionBarVisibility';
 import { useUserPreferences } from '@/context/UserPreferencesContext';
@@ -80,7 +80,9 @@ export default function SongDetailPage() {
     const toolbarWrapRef = useRef<HTMLDivElement>(null);
     const lyricsRef = useRef<HTMLDivElement>(null);
     const toolsButtonRef = useRef<HTMLButtonElement>(null);
-    const autoScroll = useAutoScroll(readerPrefs.speed, toolbarWrapRef, lyricsRef);
+    // Auto-scroll (▶, and its section in the tools sheet) only exists while the end of the lyrics is below the fold.
+    const canAutoScroll = useLyricsBelowFold(lyricsRef, toolbarWrapRef);
+    const autoScroll = useAutoScroll(readerPrefs.speed, toolbarWrapRef, lyricsRef, canAutoScroll);
     // On desktop the page header sticks at the top of the scrolling area; the sticky toolbar sits right under it.
     const [desktopHeader, setDesktopHeader] = useState<HTMLDivElement | null>(null);
     const [desktopHeaderH, setDesktopHeaderH] = useState(0);
@@ -524,8 +526,8 @@ export default function SongDetailPage() {
                             hasChords={song.has_chords}
                             onChange={setReaderPrefs}
                             scrolling={autoScroll.playing}
-                            onToggleScroll={autoScroll.toggle}
-                            onOpenTools={() => setIsToolsOpen(true)}
+                            onToggleScroll={canAutoScroll ? autoScroll.toggle : undefined}
+                            onOpenTools={mayTranspose || canAutoScroll ? () => setIsToolsOpen(true) : undefined}
                             toolsOpen={isToolsOpen}
                             toolsButtonRef={toolsButtonRef}
                             semitones={mayTranspose ? semitones : 0}
@@ -593,7 +595,7 @@ export default function SongDetailPage() {
                 speed={readerPrefs.speed}
                 onSpeed={(delta) => setReaderPrefs({ ...readerPrefs, speed: speedBy(readerPrefs.speed, delta) })}
                 scrolling={autoScroll.playing}
-                onToggleScroll={autoScroll.toggle}
+                onToggleScroll={canAutoScroll ? autoScroll.toggle : undefined}
                 awake={awake}
                 returnFocusRef={toolsButtonRef}
             />

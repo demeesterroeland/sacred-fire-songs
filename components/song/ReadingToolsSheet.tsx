@@ -26,7 +26,8 @@ interface ReadingToolsSheetProps {
   speed: number;
   onSpeed: (delta: -1 | 1) => void;
   scrolling: boolean;
-  onToggleScroll: () => void;
+  /** Omit when the whole song fits the screen: the Auto-scroll section is then not shown. */
+  onToggleScroll?: () => void;
   /** The screen wake lock is held. */
   awake: boolean;
   /** The button that opened the sheet; it gets focus back when the sheet closes. */
@@ -119,6 +120,7 @@ export function ReadingToolsSheet({
             </div>
           )}
 
+          {onToggleScroll && (
           <div role="group" aria-label={t('viewer.autoScroll')} className="flex flex-col gap-2 px-4 py-3">
             <div className="flex items-center gap-2">
               <span className="min-w-0 flex-1 text-body font-medium text-fg">{t('viewer.autoScroll')}</span>
@@ -149,6 +151,7 @@ export function ReadingToolsSheet({
               </ToolbarButton>
             </div>
           </div>
+          )}
 
           {awake && (
             <div data-testid="stay-awake-row" className="flex items-center gap-3 px-4 py-3 text-meta text-fg-muted">

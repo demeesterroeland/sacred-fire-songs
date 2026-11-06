@@ -57,11 +57,16 @@ async function openSong(page: Page, id: string, opts: { wakeLock?: boolean } = {
   await expect(page.getByTestId('reader-toolbar')).toBeVisible({ timeout: 20_000 });
 }
 
-/** The page is short on some seeds: make it long enough to scroll. */
+/**
+ * Seeded songs are short. Auto-scroll is only offered when the end of the lyrics is below the fold, so
+ * the tests that scroll use a short phone window (the lyrics run below it) and a tall page.
+ */
 async function makeScrollable(page: Page) {
+  await page.setViewportSize({ width: 390, height: 520 });
   await page.evaluate(() => {
     document.body.style.minHeight = '6000px';
   });
+  await expect(page.getByTestId('autoscroll-toggle')).toBeVisible();
 }
 
 const box = async (page: Page, testId: string) => (await page.getByTestId(testId).boundingBox())!;
@@ -100,6 +105,8 @@ test.describe('Musician @story-6.1.10', () => {
   test('the toolbar stays one row of 44 px controls on 390 px, clear of the action bar and the lyrics', async ({ page }) => {
     test.skip(!longSong, 'no public chord song in the seed');
     await openSong(page, longSong);
+    await page.setViewportSize({ width: 390, height: 600 }); // lyrics run below the fold: ▶ is offered
+    await expect(page.getByTestId('autoscroll-toggle')).toBeVisible();
     const toolbar = page.getByTestId('reader-toolbar');
     const buttons = toolbar.locator('button');
     expect(await buttons.count()).toBe(5); // Chords · A− · A+ · Auto-scroll · ⋯
@@ -223,6 +230,7 @@ test.describe('Member @story-6.1.10', () => {
   test('has auto-scroll but no Transpose', async ({ page }) => {
     test.skip(!longSong, 'no public chord song in the seed');
     await openSong(page, longSong);
+    await page.setViewportSize({ width: 390, height: 520 });
     await expect(page.getByTestId('autoscroll-toggle')).toBeVisible();
     await page.getByTestId('reader-tools-button').click();
     const sheet = page.getByRole('dialog', { name: 'Reading tools' });
@@ -235,8 +243,55 @@ test.describe('Guest @story-6.1.10', () => {
   test('has auto-scroll but no Transpose', async ({ page }) => {
     test.skip(!longSong, 'no public chord song in the seed');
     await openSong(page, longSong);
+    await page.setViewportSize({ width: 390, height: 520 });
     await expect(page.getByTestId('autoscroll-toggle')).toBeVisible();
     await page.getByTestId('reader-tools-button').click();
     await expect(page.getByRole('dialog', { name: 'Reading tools' }).getByRole('group', { name: 'Transpose' })).toHaveCount(0);
+  });
+});
+
+test.describe('Auto-scroll only when the song does not fit @validation-1', () => {
+  test('a song that fits the screen has no ▶ and no tools button for a guest; shrinking the window brings ▶ back', async ({ page }) => {
+    test.skip(!longSong, 'no public chord song in the seed');
+    await page.setViewportSize({ width: 390, height: 2400 });
+    await openSong(page, longSong);
+    await page.setViewportSize({ width: 390, height: 2400 });
+    await expect(page.getByTestId('reader-toolbar')).toBeVisible();
+    await expect(page.getByTestId('autoscroll-toggle')).toHaveCount(0);
+    await expect(page.getByTestId('reader-tools-button')).toHaveCount(0); // guest: nothing else in the sheet
+    // Viewport resize: the end of the lyrics is now below the fold.
+    await page.setViewportSize({ width: 390, height: 520 });
+    await expect(page.getByTestId('autoscroll-toggle')).toBeVisible();
+    await expect(page.getByTestId('reader-tools-button')).toBeVisible();
+    // ...and back: the button leaves again.
+    await page.setViewportSize({ width: 390, height: 2400 });
+    await expect(page.getByTestId('autoscroll-toggle')).toHaveCount(0);
+  });
+
+  test('a running scroll stops when the window grows until the song fits', async ({ page }) => {
+    test.skip(!longSong, 'no public chord song in the seed');
+    await openSong(page, longSong);
+    await makeScrollable(page);
+    const toggle = page.getByTestId('autoscroll-toggle');
+    await toggle.click();
+    await expect(toggle).toHaveAttribute('aria-pressed', 'true');
+    await page.setViewportSize({ width: 390, height: 2400 });
+    await expect(toggle).toHaveCount(0);
+    await page.setViewportSize({ width: 390, height: 520 });
+    await expect(page.getByTestId('autoscroll-toggle')).toHaveAttribute('aria-pressed', 'false'); // did not restart
+  });
+
+  test('the tools sheet of a musician has no Auto-scroll section on a song that fits, but still Transpose', async ({ browser }) => {
+    test.skip(!longSong, 'no public chord song in the seed');
+    const ctx = await browser.newContext({ storageState: ROLES.musician.storage, viewport: { width: 390, height: 2400 } });
+    const page = await ctx.newPage();
+    await openSong(page, longSong);
+    await page.setViewportSize({ width: 390, height: 2400 });
+    await expect(page.getByTestId('autoscroll-toggle')).toHaveCount(0);
+    await page.getByTestId('reader-tools-button').click();
+    const sheet = page.getByRole('dialog', { name: 'Reading tools' });
+    await expect(sheet.getByRole('group', { name: 'Transpose' })).toBeVisible();
+    await expect(sheet.getByRole('group', { name: 'Auto-scroll' })).toHaveCount(0);
+    await ctx.close();
   });
 });

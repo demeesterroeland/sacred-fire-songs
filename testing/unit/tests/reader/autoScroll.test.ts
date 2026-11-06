@@ -5,6 +5,7 @@ import {
   MAX_FRAME_MS,
   SCROLL_SPEEDS,
   clampSpeed,
+  endBelowFold,
   isAtBottom,
   speedBy,
   stepScroll,
@@ -59,5 +60,27 @@ describe('isAtBottom', () => {
     expect(isAtBottom(1000, 800, 1800)).toBe(true);
     expect(isAtBottom(999.4, 800, 1800)).toBe(true);
     expect(isAtBottom(500, 800, 1800)).toBe(false);
+  });
+});
+
+describe('endBelowFold', () => {
+  it('is false when the end of the lyrics fits in the first screen', () => {
+    expect(endBelowFold({ endBottom: 600, viewportTop: 0, viewportHeight: 800, scrollTop: 0 })).toBe(false);
+  });
+  it('is true when the end of the lyrics is below the fold', () => {
+    expect(endBelowFold({ endBottom: 1500, viewportTop: 0, viewportHeight: 800, scrollTop: 0 })).toBe(true);
+  });
+  it('does not depend on how far the page is already scrolled', () => {
+    expect(endBelowFold({ endBottom: 600 - 500, viewportTop: 0, viewportHeight: 800, scrollTop: 500 })).toBe(false);
+    expect(endBelowFold({ endBottom: 1500 - 500, viewportTop: 0, viewportHeight: 800, scrollTop: 500 })).toBe(true);
+  });
+  it('measures inside a scroll container that starts below the page top', () => {
+    // main area starts at y=64 and is 736 high; lyrics end 900 below the container top
+    expect(endBelowFold({ endBottom: 64 + 900, viewportTop: 64, viewportHeight: 736, scrollTop: 0 })).toBe(true);
+    expect(endBelowFold({ endBottom: 64 + 700, viewportTop: 64, viewportHeight: 736, scrollTop: 0 })).toBe(false);
+  });
+  it('treats a one-pixel overflow as fitting', () => {
+    expect(endBelowFold({ endBottom: 801, viewportTop: 0, viewportHeight: 800, scrollTop: 0 })).toBe(false);
+    expect(endBelowFold({ endBottom: 802, viewportTop: 0, viewportHeight: 800, scrollTop: 0 })).toBe(true);
   });
 });

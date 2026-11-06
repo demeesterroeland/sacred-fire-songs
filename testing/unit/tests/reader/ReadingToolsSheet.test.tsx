@@ -33,6 +33,14 @@ function setup(over: Partial<React.ComponentProps<typeof ReadingToolsSheet>> = {
 }
 
 describe('ReadingToolsSheet', () => {
+  it('has no Auto-scroll section when the song fits the screen (no toggle given)', () => {
+    setup({ onToggleScroll: undefined });
+    expect(screen.queryByTestId('tools-scroll-toggle')).toBeNull();
+    expect(screen.queryByRole('group', { name: 'Auto-scroll' })).toBeNull();
+    expect(screen.queryByTestId('scroll-speed')).toBeNull();
+    expect(screen.getByTestId('transpose-group')).toBeTruthy(); // transpose is unaffected
+  });
+
   it('is a dialog titled Reading tools', () => {
     setup();
     expect(screen.getByRole('dialog', { name: 'Reading tools' })).toBeTruthy();

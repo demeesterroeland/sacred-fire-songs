@@ -141,6 +141,25 @@ describe('useAutoScroll', () => {
     expect(result.current.playing).toBe(false);
   });
 
+  it('stops by itself when auto-scroll is no longer possible (the song now fits the screen)', () => {
+    const { result, rerender } = renderHook(({ on }) => useAutoScroll(3, undefined, undefined, on), {
+      initialProps: { on: true },
+    });
+    act(() => result.current.toggle());
+    expect(result.current.playing).toBe(true);
+    rerender({ on: false });
+    expect(result.current.playing).toBe(false);
+    // and it does not restart by itself when the song stops fitting again
+    rerender({ on: true });
+    expect(result.current.playing).toBe(false);
+  });
+
+  it('cannot be started while auto-scroll is not possible', () => {
+    const { result } = renderHook(() => useAutoScroll(3, undefined, undefined, false));
+    act(() => result.current.toggle());
+    expect(result.current.playing).toBe(false);
+  });
+
   it('stops scheduling frames when it unmounts', () => {
     const { result, unmount } = renderHook(() => useAutoScroll(3));
     act(() => result.current.toggle());

@@ -39,3 +39,14 @@ export function stepScroll(carry: number, dtMs: number, level: number): { px: nu
 export function isAtBottom(scrollY: number, viewportHeight: number, scrollHeight: number): boolean {
   return scrollY + viewportHeight >= scrollHeight - 1;
 }
+
+/**
+ * True when the end of the lyrics lies below the first screen, so scrolling it into view makes sense.
+ * Independent of the current scroll position (a reader who already scrolled keeps the ▶ button):
+ * `endBottom` is the lyrics' bottom edge in viewport coordinates, `viewportTop`/`viewportHeight` describe
+ * what scrolls (the window, or a scroll container), `scrollTop` is how far it has scrolled. A single
+ * pixel of overflow counts as fitting.
+ */
+export function endBelowFold(m: { endBottom: number; viewportTop: number; viewportHeight: number; scrollTop: number }): boolean {
+  return m.endBottom - m.viewportTop + m.scrollTop > m.viewportHeight + 1;
+}
