@@ -49,7 +49,7 @@
     "chordsheetjs": "^18.0.0",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
-    "framer-motion": "^12.23.26",
+    "framer-motion": "^14.9.0",
     "jspdf": "^4.2.1",
     "lucide-react": "^0.562.0",
     "next": "^16.4.3",
