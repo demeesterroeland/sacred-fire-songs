@@ -1379,3 +1379,4 @@
 - [x] Profile and playlist item access rules: migration `20261106120000`, `public_profiles` view, `fn_can_edit_setlist`, `db-schema.sql` installs cleanly (v2.8), `@seed` role scenarios in `access-policies.feature`
 - [ ] Owner: per-role E2E password secrets in CI; release v1.7.0 (`develop` → `main`)
 - [ ] Follow-up: offline navigation shows "page not found" instead of an offline message
+- [x] Write rules for profile fields, categories, playlists and song versions: migration `20261106130000`, trigger `trg_guard_profile_fields`, column privileges on `setlists` and `song_versions`, `db-schema.sql` v2.9, `access-policies.feature` v1.1 (104 `@seed` scenarios).

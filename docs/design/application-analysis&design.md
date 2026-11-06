@@ -1,6 +1,6 @@
 # Project Analysis & Design Document: Song Sharing Application (Sacred Fire Songs)
 
-**Version:** 1.53
+**Version:** 1.54
 **Status:** Living Document
 **Date:** Nov 6, 2026
 
@@ -46,6 +46,7 @@
 | **1.51** | Oct 31, 2026 | Added §6.7 Client Auth State (#321): `useAuth()` without a server user starts with `loading = true` until the session resolves (`initialUser` `undefined` = unknown, `null` = server-confirmed guest); `/library/playlists/add` guards auth on the server (`redirect('/auth/login?next=/library/playlists/add')`) with the form in `components/playlists/CreatePlaylistForm.tsx`. Fixes logged-in users being redirected to `/` from "New Playlist". Lint cap lowered to 181. |
 | **1.52** | Nov 3, 2026 | Public-repo isolation: removed `deploy-staging.yml` (deployment is out of scope for this public repo; CI only publishes images to GHCR), added `isolation` CI job + `scripts/dev/isolation-guard.sh` (pre-commit, commit-msg, Claude Code hook), `performance.yml` takes its target from input/`PERF_BASE_URL`. Root `AGENTS.md` is now the canonical agent instruction file (`CLAUDE.md` imports it, `GEMINI.md` symlinks it). |
 | **1.53** | Nov 6, 2026 | Added profile and playlist item access rules (`public.public_profiles`, `public.fn_can_edit_setlist`), migration `20261106120000`, `docs/testing/access-policies.feature`. |
+| **1.54** | Nov 6, 2026 | Added write rules for profile fields, categories, playlists and song versions (`public.fn_guard_profile_fields`), migration `20261106130000`, `docs/testing/access-policies.feature` v1.1. |
 
 
 ## 1. Introduction
@@ -148,6 +149,10 @@ The application is a **Progressive Web App (PWA)** optimized for mobile use duri
 * **Queries:** `lib/admin/userQueries.ts` holds the queries with the Supabase client injected (`fetchAdminAccess`, `fetchAdminUsersList`, `fetchAdminUserDetails`); `lib/admin/serverQueries.ts` wraps them with the server client (`checkAdminAccess`, `getAdminUsersList`, `getAdminUserDetails`). Both list and detail queries return `null` for non-admin callers. Pure presentation logic (activity status, role labels, search/filter/sort, totals) lives in `lib/admin/userOverview.ts`.
 * **Profile access:** a signed-in user reads their own full profile; an admin reads every profile. Guests have no row access to `profiles` and no privilege on `profiles.email`. The fields anyone may read (`id`, `full_name`, `avatar_url`) come from the read-only view `public.public_profiles`.
 * **Playlist item access (`setlist_items`):** readable when the parent playlist is public, owned by the caller, or the caller is admin. Writable (old and new row) through `public.fn_can_edit_setlist()`: owner, admin, or gatekeeper on a public playlist.
+* **Profile writes:** a signed-in user changes their own profile fields (name, avatar, last seen). `id`, `email` and `created_at` change only in a trusted server context (service role, auth triggers), through the trigger `trg_guard_profile_fields`. `role` changes only there or through an admin. Signed-in users have no `INSERT` or `DELETE` privilege on `profiles`; `handle_new_user` creates a new profile with the default role `member`.
+* **Category writes (`categories`):** admins insert, update and delete. Signed-in users may insert only artist sub-categories (`artist-*` under `artists`) and the `Artists` parent if it does not exist yet, because saving a song creates these through the user's session.
+* **Playlist writes (`setlists`):** owners update their own playlists; admins and gatekeepers update public playlists, which stay public. `owner_id` is not updatable through the API (column privileges allow `title`, `description` and `is_public`).
+* **Song version writes (`song_versions`):** insert requires `contributor_id` to be the caller and the caller to own the song or be admin (`public.fn_check_song_manage_access`). `composition_id`, `contributor_id` and `vote_count` are not updatable through the API. New editable columns need an addition to the column privileges.
 * **Activity status:** `active` when `profiles.last_seen_at` is within 30 days, `inactive` when older, `never` when null.
 * **Not modelled yet:** comments and flags (named as example contributions in Story 3.6.1) have no tables, so they are not shown.
 

@@ -1,11 +1,12 @@
 /*
- **Version:** 2.8
+ **Version:** 2.9
  **Status:** Current
  **Date:** Nov 6, 2026
  
  ## Usage
  This script provides a complete setup for the "Sacred Fire Songs" database. 
  It consolidates the initial schema and all subsequent migrations up to Nov 6, 2026.
+ (v2.9: Write rules for profile fields, categories, playlist owner and song versions; fn_guard_profile_fields, fn_check_song_manage_access).
  (v2.8: Profile and playlist item access rules, public_profiles view, fn_can_edit_setlist;
  installs without errors again: added missing columns, song_views, new-user trigger).
  (v2.7: Added Guaraní and Camino Rojo categories).
@@ -139,14 +140,19 @@ create trigger trg_check_subcategory before
 insert
   or
 update on public.song_category_map for each row execute function public.check_is_subcategory();
--- Create a profile for every new auth user
-create or replace function public.handle_new_user() returns trigger as $$
+-- Create a profile for every new auth user. New profiles start with the default role.
+create or replace function public.handle_new_user() returns trigger
+language plpgsql
+security definer
+set search_path = ''
+as $$
 begin
   insert into public.profiles (id, email, role)
-  values (new.id, new.email, 'member');
+  values (new.id, new.email, 'member'::public.user_role);
   return new;
 end;
-$$ language plpgsql security definer;
+$$;
+revoke all on function public.handle_new_user() from public, anon, authenticated;
 drop trigger if exists on_auth_user_created on auth.users;
 create trigger on_auth_user_created
 after insert on auth.users for each row execute function public.handle_new_user();
@@ -224,6 +230,43 @@ select to authenticated using (public.fn_is_admin());
 create policy "Users can update own profile" on public.profiles for
 update to authenticated using (id = auth.uid()) with check (id = auth.uid());
 
+-- id, email and created_at change only in a trusted server context (service role,
+-- auth triggers). role changes there or through an admin. A trigger is used because
+-- admin and member share the authenticated database role.
+create or replace function public.fn_guard_profile_fields() returns trigger
+language plpgsql
+set search_path = ''
+as $$
+begin
+  -- API callers run as anon or authenticated. Every other role is a trusted context.
+  if current_user not in ('anon', 'authenticated') then
+    return new;
+  end if;
+
+  if new.id is distinct from old.id
+    or new.email is distinct from old.email
+    or new.created_at is distinct from old.created_at
+  then
+    raise exception 'This profile field cannot be changed' using errcode = '42501';
+  end if;
+
+  if new.role is distinct from old.role and not public.fn_is_admin() then
+    raise exception 'This profile field cannot be changed' using errcode = '42501';
+  end if;
+
+  return new;
+end;
+$$;
+revoke all on function public.fn_guard_profile_fields() from public, anon, authenticated;
+create trigger trg_guard_profile_fields
+before update on public.profiles
+for each row execute function public.fn_guard_profile_fields();
+
+revoke insert, delete, truncate, references, trigger on public.profiles from authenticated;
+
+create policy "Admins can update profiles" on public.profiles for
+update to authenticated using (public.fn_is_admin()) with check (public.fn_is_admin());
+
 -- anon has no row access and no privilege on the email column. id and role stay
 -- granted because row-level policies on other tables look up the caller's role.
 revoke all on public.profiles from anon;
@@ -288,23 +331,22 @@ create policy "Public versions are viewable by everyone" on public.song_versions
 select using (true);
 -- Admin/Member Policies (Simplified for MVP)
 -- Admin/Member Policies (Optimized: Split actions, cached auth)
-create policy "Admins/Members can manage categories" on public.categories for
+-- admin manages categories. Signed-in users may add an artist sub-category, and the
+-- Artists parent if it does not exist yet: saving a song creates them through the
+-- user's session.
+create policy "Admins can insert categories" on public.categories for
+insert to authenticated with check (public.fn_is_admin());
+create policy "Admins can update categories" on public.categories for
+update to authenticated using (public.fn_is_admin()) with check (public.fn_is_admin());
+create policy "Admins can delete categories" on public.categories for delete to authenticated using (public.fn_is_admin());
+create policy "Users can add artist categories" on public.categories for
 insert to authenticated with check (
-    (
-      select auth.role()
-    ) = 'authenticated'
+    (parent_id is null and slug = 'artists' and name = 'Artists')
+    or (
+      slug like 'artist-%'
+      and parent_id = (select c.id from public.categories c where c.slug = 'artists')
+    )
   );
-create policy "Admins/Members can update categories" on public.categories for
-update to authenticated using (
-    (
-      select auth.role()
-    ) = 'authenticated'
-  );
-create policy "Admins/Members can delete categories" on public.categories for delete to authenticated using (
-  (
-    select auth.role()
-  ) = 'authenticated'
-);
 -- Compositions: Authenticated creation
 -- Compositions: Authenticated creation, Owner Edit, Admin Edit
 -- Compositions: Public creation (Mock Mode compatibility)
@@ -333,8 +375,31 @@ update to public using (true);
 create policy "Allow public delete compositions" on public.compositions for delete to public using (true);
 -- Song Versions: Strict contributor check + Admin Override
 -- create policy "Users can insert versions" on public.song_versions for insert with check ((select auth.uid()) = contributor_id);
-create policy "Allow public insert versions" on public.song_versions for
-insert to public with check (true);
+create or replace function public.fn_check_song_manage_access(target_song_id uuid) returns boolean as $$
+begin
+  return exists (
+    select 1 from public.compositions
+    where id = target_song_id and owner_id = auth.uid()
+  ) or exists (
+    select 1 from public.profiles
+    where id = auth.uid() and role = 'admin'
+  );
+end;
+$$ language plpgsql security definer
+set search_path = public;
+grant execute on function public.fn_check_song_manage_access to authenticated;
+grant execute on function public.fn_check_song_manage_access to service_role;
+create policy "Song managers can insert versions" on public.song_versions for
+insert to authenticated with check (
+    contributor_id = (select auth.uid())
+    and public.fn_check_song_manage_access(composition_id)
+  );
+-- A version stays on its song and keeps its contributor.
+revoke update on public.song_versions from anon, authenticated;
+grant update (
+  version_name, content_chordpro, melody_notation, key, capo, tuning,
+  soundcloud_url, youtube_url, spotify_url
+) on public.song_versions to authenticated;
 create policy "Contributors can update their versions" on public.song_versions for
 update to authenticated using (
     contributor_id = (
@@ -371,11 +436,8 @@ insert to authenticated with check (
     )
   );
 create policy "Owners can update setlists" on public.setlists for
-update to authenticated using (
-    owner_id = (
-      select auth.uid()
-    )
-  );
+update to authenticated using (owner_id = (select auth.uid()))
+  with check (owner_id = (select auth.uid()));
 create policy "Owners can delete setlists" on public.setlists for
 delete to authenticated using (
     owner_id = (
@@ -386,13 +448,15 @@ create policy "Admins can view all setlists" on public.setlists for
 select to authenticated using (public.fn_is_admin());
 create policy "Admins and Gatekeepers can update public setlists" on public.setlists for
 update to authenticated using (
-    is_public = true 
-    and (
-      select role 
-      from public.profiles 
-      where id = auth.uid()
-    ) in ('admin'::public.user_role, 'gatekeeper'::public.user_role)
+    is_public = true
+    and (select role::text from public.profiles where id = (select auth.uid())) in ('admin', 'gatekeeper')
+  ) with check (
+    is_public = true
+    and (select role::text from public.profiles where id = (select auth.uid())) in ('admin', 'gatekeeper')
   );
+-- A policy cannot compare a row with its previous value, so column privileges keep owner_id fixed.
+revoke update on public.setlists from anon, authenticated;
+grant update (title, description, is_public) on public.setlists to authenticated;
 -- Setlist Items Policies
 -- Read: parent playlist is public, or the caller owns it, or the caller is admin.
 -- Write: caller owns the parent playlist, or is admin, or is gatekeeper and the

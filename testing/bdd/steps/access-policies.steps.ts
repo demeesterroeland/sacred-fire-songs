@@ -1,8 +1,8 @@
 import assert from 'node:assert/strict';
-import { Given, Then } from '@cucumber/cucumber';
+import { Given, Then, When } from '@cucumber/cucumber';
 import type { QueryResultRow } from 'pg';
 import type { SongBddWorld } from '../support/world';
-import { profileIdByEmail, queryAsAnon, queryAsUser, seedDb } from '../support/db';
+import { profileIdByEmail, queryAsAnon, queryAsServiceRole, queryAsUser, seedDb } from '../support/db';
 
 /**
  * Steps for docs/testing/access-policies.feature. Every statement runs as the
@@ -17,6 +17,14 @@ export interface AccessBddState {
   songVersionId: string;
   playlists: Record<PlaylistName, string>;
   items: Record<PlaylistName, string>;
+  songs?: Record<SongName, SongFixture>;
+  newUserId?: string;
+}
+
+type SongName = "the member's" | "the other member's";
+interface SongFixture {
+  compositionId: string;
+  versionId: string;
 }
 
 const OTHER_MEMBER_ID = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd3a0b01';
@@ -267,3 +275,377 @@ Then(
 
 // "the admin account can read every profile and every playlist in the database"
 // is defined in admin-users.steps.ts and reused here.
+
+Given('the member and the other member each own a public song with one version', async function (this: SongBddWorld) {
+  const db = await seedDb();
+  const addSong = async (ownerId: string, title: string): Promise<SongFixture> => {
+    const { rows } = await db.query<{ id: string }>(
+      `INSERT INTO public.compositions (title, owner_id, is_public) VALUES ($1, $2, true) RETURNING id`,
+      [title, ownerId]
+    );
+    const { rows: versions } = await db.query<{ id: string }>(
+      `INSERT INTO public.song_versions (composition_id, content_chordpro, contributor_id)
+       VALUES ($1, 'BDD', $2) RETURNING id`,
+      [rows[0].id, ownerId]
+    );
+    return { compositionId: rows[0].id, versionId: versions[0].id };
+  };
+  const memberId = await profileIdByEmail(SEEDED_EMAILS.member);
+  access(this).songs = {
+    "the member's": await addSong(memberId, 'BDD member song'),
+    "the other member's": await addSong(OTHER_MEMBER_ID, 'BDD other song'),
+  };
+});
+
+function songs(world: SongBddWorld): Record<SongName, SongFixture> {
+  const fixtures = access(world).songs;
+  assert.ok(fixtures, 'Background did not create the song fixtures');
+  return fixtures;
+}
+
+// ── Protected profile fields ──────────────────────────────────────────────────
+
+Then(
+  /^the (member|gatekeeper|admin) account is refused changing their own (role|email)$/,
+  async function (this: SongBddWorld, account: string, field: 'role' | 'email') {
+    const id = await profileIdByEmail(SEEDED_EMAILS[account]);
+    const value = field === 'role' ? 'admin' : 'changed@example.invalid';
+    await assertRefused(
+      () => queryAsUser(id, `UPDATE public.profiles SET ${field} = $2 WHERE id = $1 RETURNING id`, [id, value]),
+      `${account} changing their own ${field}`
+    );
+  }
+);
+
+Then('the member is refused inserting a second profile row', async function (this: SongBddWorld) {
+  const id = await profileIdByEmail(SEEDED_EMAILS.member);
+  const db = await seedDb();
+  const spareId = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd3a0b02';
+  await db.query(`INSERT INTO auth.users (id, email) VALUES ($1, 'spare@example.invalid')`, [spareId]);
+  await db.query('DELETE FROM public.profiles WHERE id = $1', [spareId]);
+  await assertRefused(
+    () =>
+      queryAsUser(id, `INSERT INTO public.profiles (id, email, role) VALUES ($1, 'spare@example.invalid', 'admin') RETURNING id`, [
+        spareId,
+      ]),
+    'member inserting a profile row for another auth user'
+  );
+});
+
+Then('the member is refused upserting their own profile with another role', async function () {
+  const id = await profileIdByEmail(SEEDED_EMAILS.member);
+  await assertRefused(
+    () =>
+      queryAsUser(
+        id,
+        `INSERT INTO public.profiles (id, email, role) VALUES ($1, $2, 'admin')
+         ON CONFLICT (id) DO UPDATE SET role = EXCLUDED.role RETURNING id`,
+        [id, SEEDED_EMAILS.member]
+      ),
+    'member upserting their own profile'
+  );
+});
+
+Then('the member cannot change the role of another account', async function (this: SongBddWorld) {
+  const id = await profileIdByEmail(SEEDED_EMAILS.member);
+  const rows = await queryAsUser(id, `UPDATE public.profiles SET role = 'admin' WHERE id = $1 RETURNING id`, [
+    access(this).otherMemberId,
+  ]);
+  assert.equal(rows.length, 0);
+});
+
+Then('a guest is refused changing any profile', async function () {
+  const id = await profileIdByEmail(SEEDED_EMAILS.member);
+  await assertRefused(
+    () => queryAsAnon(`UPDATE public.profiles SET role = 'admin' WHERE id = $1 RETURNING id`, [id]),
+    'guest updating a profile'
+  );
+});
+
+Then('the member can update their own name, avatar and last seen time', async function () {
+  const id = await profileIdByEmail(SEEDED_EMAILS.member);
+  const rows = await queryAsUser<{ full_name: string; avatar_url: string }>(
+    id,
+    `UPDATE public.profiles SET full_name = 'New name', avatar_url = 'https://example.invalid/a.png', last_seen_at = now()
+      WHERE id = $1 RETURNING full_name, avatar_url`,
+    [id]
+  );
+  assert.deepEqual(rows, [{ full_name: 'New name', avatar_url: 'https://example.invalid/a.png' }]);
+});
+
+Then('the admin can change the role of the other member', async function (this: SongBddWorld) {
+  const id = await profileIdByEmail(SEEDED_EMAILS.admin);
+  const rows = await queryAsUser<{ role: string }>(
+    id,
+    `UPDATE public.profiles SET role = 'musician' WHERE id = $1 RETURNING role`,
+    [access(this).otherMemberId]
+  );
+  assert.deepEqual(rows, [{ role: 'musician' }]);
+});
+
+Then('the gatekeeper cannot change the role of the other member', async function (this: SongBddWorld) {
+  const id = await profileIdByEmail(SEEDED_EMAILS.gatekeeper);
+  const rows = await queryAsUser(id, `UPDATE public.profiles SET role = 'musician' WHERE id = $1 RETURNING id`, [
+    access(this).otherMemberId,
+  ]);
+  assert.equal(rows.length, 0);
+});
+
+Then('the service role can change the role and e-mail of the other member', async function (this: SongBddWorld) {
+  const rows = await queryAsServiceRole<{ role: string; email: string }>(
+    `UPDATE public.profiles SET role = 'musician', email = 'synced@example.invalid' WHERE id = $1 RETURNING role, email`,
+    [access(this).otherMemberId]
+  );
+  assert.deepEqual(rows, [{ role: 'musician', email: 'synced@example.invalid' }]);
+});
+
+const NEW_USER_ID = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd3a0b03';
+const NEW_USER_EMAIL = 'new-registration@example.invalid';
+
+When('a new auth user registers asking for the admin role in their metadata', async function () {
+  const db = await seedDb();
+  await db.query(`INSERT INTO auth.users (id, email, raw_user_meta_data) VALUES ($1, $2, $3)`, [
+    NEW_USER_ID,
+    NEW_USER_EMAIL,
+    JSON.stringify({ role: 'admin' }),
+  ]);
+});
+
+Then('the new profile has the member role and the registered e-mail', async function () {
+  const db = await seedDb();
+  const { rows } = await db.query('SELECT role, email FROM public.profiles WHERE id = $1', [NEW_USER_ID]);
+  assert.deepEqual(rows, [{ role: 'member', email: NEW_USER_EMAIL }]);
+});
+
+// ── Categories ────────────────────────────────────────────────────────────────
+
+async function artistsParentId(): Promise<string> {
+  const db = await seedDb();
+  const { rows } = await db.query<{ id: string }>(
+    `INSERT INTO public.categories (name, slug, emoji) VALUES ('Artists', 'artists', '👤')
+     ON CONFLICT (slug) DO UPDATE SET name = EXCLUDED.name RETURNING id`
+  );
+  return rows[0].id;
+}
+
+Then(
+  /^a (guest|member|gatekeeper|admin) (can|cannot) add an artist sub-category$/,
+  async function (this: SongBddWorld, account: string, result: string) {
+    const parentId = await artistsParentId();
+    const allowed = await isAllowed(() =>
+      queryAs(
+        this,
+        account,
+        `INSERT INTO public.categories (name, slug, emoji, parent_id)
+         VALUES ('BDD Artist', 'artist-bdd-artist', '👤', $1) RETURNING id`,
+        [parentId]
+      )
+    );
+    assert.equal(allowed, result === 'can', `${account} adding an artist sub-category`);
+  }
+);
+
+Given('the Artists parent category does not exist', async function () {
+  const db = await seedDb();
+  await db.query(`DELETE FROM public.song_category_map WHERE category_id IN
+    (SELECT id FROM public.categories WHERE parent_id = (SELECT id FROM public.categories WHERE slug = 'artists'))`);
+  await db.query(`DELETE FROM public.categories WHERE parent_id = (SELECT id FROM public.categories WHERE slug = 'artists')`);
+  await db.query(`DELETE FROM public.categories WHERE slug = 'artists'`);
+});
+
+Then('a member can add the Artists parent category', async function (this: SongBddWorld) {
+  const rows = await queryAs(
+    this,
+    'member',
+    `INSERT INTO public.categories (name, slug, emoji, parent_id) VALUES ('Artists', 'artists', '👤', NULL) RETURNING id`
+  );
+  assert.equal(rows.length, 1);
+});
+
+Then(
+  /^a (guest|member|gatekeeper|admin) (can|cannot) add a category outside the artists group$/,
+  async function (this: SongBddWorld, account: string, result: string) {
+    const db = await seedDb();
+    const { rows: others } = await db.query<{ id: string }>(
+      `SELECT id FROM public.categories WHERE parent_id IS NULL AND slug <> 'artists' LIMIT 1`
+    );
+    assert.ok(others[0], 'Expected a seeded category group');
+    const parentId = await artistsParentId();
+    const statements = [
+      () =>
+        queryAs(this, account, `INSERT INTO public.categories (name, slug) VALUES ('BDD Group', 'bdd-group') RETURNING id`),
+      () =>
+        queryAs(
+          this,
+          account,
+          `INSERT INTO public.categories (name, slug, parent_id) VALUES ('BDD Child', 'artist-bdd-child', $1) RETURNING id`,
+          [others[0].id]
+        ),
+      () =>
+        queryAs(
+          this,
+          account,
+          `INSERT INTO public.categories (name, slug, parent_id) VALUES ('BDD Plain', 'plain-bdd', $1) RETURNING id`,
+          [parentId]
+        ),
+    ];
+    for (const [index, run] of statements.entries()) {
+      assert.equal(await isAllowed(run), result === 'can', `${account} category insert variant ${index}`);
+    }
+  }
+);
+
+Then(
+  /^a (member|gatekeeper|admin) (can|cannot) (rename|delete) an existing category$/,
+  async function (this: SongBddWorld, account: string, result: string, action: string) {
+    const db = await seedDb();
+    const { rows } = await db.query<{ id: string }>(
+      `INSERT INTO public.categories (name, slug) VALUES ('BDD Fixture', 'bdd-fixture') RETURNING id`
+    );
+    const sql =
+      action === 'rename'
+        ? `UPDATE public.categories SET name = 'Renamed' WHERE id = $1 RETURNING id`
+        : `DELETE FROM public.categories WHERE id = $1 RETURNING id`;
+    const allowed = await isAllowed(() => queryAs(this, account, sql, [rows[0].id]));
+    assert.equal(allowed, result === 'can', `${account} ${action} category`);
+  }
+);
+
+// ── Playlist ownership ────────────────────────────────────────────────────────
+
+Then(
+  /^a (member|gatekeeper|admin) is refused changing the owner of the member's (public|private) playlist$/,
+  async function (this: SongBddWorld, account: string, visibility: 'public' | 'private') {
+    const s = access(this);
+    const allowed = await isAllowed(() =>
+      queryAs(this, account, 'UPDATE public.setlists SET owner_id = $2 WHERE id = $1 RETURNING id', [
+        s.playlists[`the member's ${visibility}`],
+        s.otherMemberId,
+      ])
+    );
+    assert.equal(allowed, false, `${account} changing the owner of a ${visibility} playlist`);
+  }
+);
+
+Then('a gatekeeper is refused upserting the member\'s public playlist with another owner', async function (this: SongBddWorld) {
+  const s = access(this);
+  await assertRefused(
+    () =>
+      queryAs(
+        this,
+        'gatekeeper',
+        `INSERT INTO public.setlists (id, owner_id, title, is_public) VALUES ($1, $2, 'BDD public', true)
+         ON CONFLICT (id) DO UPDATE SET owner_id = EXCLUDED.owner_id RETURNING id`,
+        [s.playlists["the member's public"], s.otherMemberId]
+      ),
+    'gatekeeper upserting a playlist with another owner'
+  );
+});
+
+Then(
+  /^a (member|other member|gatekeeper) (can|cannot) rename the member's (public|private) playlist$/,
+  async function (this: SongBddWorld, account: string, result: string, visibility: 'public' | 'private') {
+    const allowed = await isAllowed(() =>
+      queryAs(this, account, `UPDATE public.setlists SET title = 'Renamed', description = 'D' WHERE id = $1 RETURNING id`, [
+        access(this).playlists[`the member's ${visibility}`],
+      ])
+    );
+    assert.equal(allowed, result === 'can', `${account} renaming a ${visibility} playlist`);
+  }
+);
+
+Then('the member can publish their own private playlist', async function (this: SongBddWorld) {
+  const rows = await queryAs(this, 'member', 'UPDATE public.setlists SET is_public = true WHERE id = $1 RETURNING id', [
+    access(this).playlists["the member's private"],
+  ]);
+  assert.equal(rows.length, 1);
+});
+
+// ── Song versions ─────────────────────────────────────────────────────────────
+
+async function accountId(world: SongBddWorld, account: string): Promise<string | null> {
+  if (account === 'guest') return null;
+  return account === 'other member' ? access(world).otherMemberId : profileIdByEmail(SEEDED_EMAILS[account]);
+}
+
+Then(
+  /^a (guest|member|other member|gatekeeper|admin) (can|cannot) add a version to (the member's|the other member's) song$/,
+  async function (this: SongBddWorld, account: string, result: string, song: SongName) {
+    const contributor = await accountId(this, account);
+    const allowed = await isAllowed(() =>
+      queryAs(
+        this,
+        account,
+        `INSERT INTO public.song_versions (composition_id, content_chordpro, contributor_id) VALUES ($1, 'x', $2) RETURNING id`,
+        [songs(this)[song].compositionId, contributor]
+      )
+    );
+    assert.equal(allowed, result === 'can', `${account} adding a version to ${song} song`);
+  }
+);
+
+Then('the member is refused adding a version to their song as the other member', async function (this: SongBddWorld) {
+  await assertRefused(
+    () =>
+      queryAs(
+        this,
+        'member',
+        `INSERT INTO public.song_versions (composition_id, content_chordpro, contributor_id) VALUES ($1, 'x', $2) RETURNING id`,
+        [songs(this)["the member's"].compositionId, access(this).otherMemberId]
+      ),
+    'member adding a version in another name'
+  );
+});
+
+Then(
+  /^a (member|admin) is refused moving the member's version to (the other member's) song$/,
+  async function (this: SongBddWorld, account: string, target: SongName) {
+    const s = songs(this);
+    await assertRefused(
+      () =>
+        queryAs(this, account, 'UPDATE public.song_versions SET composition_id = $2 WHERE id = $1 RETURNING id', [
+          s["the member's"].versionId,
+          s[target].compositionId,
+        ]),
+      `${account} moving a version to another song`
+    );
+  }
+);
+
+Then(
+  "the member is refused moving the other member's version they contributed to their own song",
+  async function (this: SongBddWorld) {
+    const db = await seedDb();
+    const s = songs(this);
+    const memberId = await profileIdByEmail(SEEDED_EMAILS.member);
+    await db.query('UPDATE public.song_versions SET contributor_id = $2 WHERE id = $1', [
+      s["the other member's"].versionId,
+      memberId,
+    ]);
+    await assertRefused(
+      () =>
+        queryAs(this, 'member', 'UPDATE public.song_versions SET composition_id = $2 WHERE id = $1 RETURNING id', [
+          s["the other member's"].versionId,
+          s["the member's"].compositionId,
+        ]),
+      'contributor moving a version'
+    );
+  }
+);
+
+Then(
+  /^a (member|other member|admin) (can|cannot) edit the content of the member's version$/,
+  async function (this: SongBddWorld, account: string, result: string) {
+    const allowed = await isAllowed(() =>
+      queryAs(
+        this,
+        account,
+        `UPDATE public.song_versions SET content_chordpro = 'edited', key = 'C', capo = 1, tuning = 'Standard',
+                youtube_url = 'y', spotify_url = 's', soundcloud_url = 'c', melody_notation = 'm'
+          WHERE id = $1 RETURNING id`,
+        [songs(this)["the member's"].versionId]
+      )
+    );
+    assert.equal(allowed, result === 'can', `${account} editing version content`);
+  }
+);
