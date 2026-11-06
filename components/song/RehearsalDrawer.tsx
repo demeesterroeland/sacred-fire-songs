@@ -436,8 +436,9 @@ export default function RehearsalDrawer({
     enabled: !!publishRecording && !!compositionId,
     staleTime: 0,
     retry: 1,
-    // Coming back to the tab must not flip the dialog to "checking" and hide Publish under the owner.
+    // Coming back to the tab or the network must not flip the dialog to "checking" and hide Publish under the owner.
     refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
   // A failed lookup is shown as such (not read as "private"); the dialog then does not offer to publish.
   const publishVisibilityUnreadable = !!compositionId && songVisibility.isError;
