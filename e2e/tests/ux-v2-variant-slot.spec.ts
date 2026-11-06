@@ -1,8 +1,11 @@
-import { test, expect, type Page } from '@playwright/test';
+import { test, expect as baseExpect, type Page } from '@playwright/test';
 import pg from 'pg';
 import { ROLES } from '../fixtures/roles';
 import { VARIANT_SLOT_FIXTURE_IDS as IDS } from '../fixtures/ids';
 import { clickPractice } from '../fixtures/songActions';
+
+// The first render of a song can need a retry of its 4.5 s query on a busy machine.
+const expect = baseExpect.configure({ timeout: 15_000 });
 
 // The Practice drawer slides in and out but stays mounted: wait until it is fully in or out of the viewport.
 async function drawerSettled(page: Page, open: boolean) {

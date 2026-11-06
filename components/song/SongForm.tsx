@@ -668,7 +668,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                 <button
                     type="submit"
                     onClick={() => setValue('isPublic', false)}
-                    disabled={mutation.isPending}
+                    disabled={mutation.isPending || authLoading}
                     className="flex-1 bg-transparent border-2 border-gray-300 dark:border-[#3f3d52] text-gray-500 dark:text-[#a19eb7] hover:text-gray-900 dark:hover:text-white hover:border-gray-400 dark:hover:border-white/20 font-bold py-3 rounded-xl active:scale-[0.98] transition-all disabled:opacity-50 flex justify-center items-center gap-2"
                 >
                     {mutation.isPending && watch('isPublic') === false ? (
@@ -683,7 +683,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                 <button
                     type="submit"
                     onClick={() => setValue('isPublic', true)}
-                    disabled={mutation.isPending}
+                    disabled={mutation.isPending || authLoading}
                     className="flex-1 bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-xl shadow-lg shadow-red-500/20 active:scale-[0.98] transition-transform disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2"
                 >
                     {mutation.isPending && watch('isPublic') === true ? (

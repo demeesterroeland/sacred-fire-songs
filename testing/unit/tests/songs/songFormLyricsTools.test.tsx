@@ -13,7 +13,8 @@ vi.mock('next/navigation', () => ({
   useRouter: () => ({ push: vi.fn(), refresh: vi.fn() }),
   useSearchParams: () => new URLSearchParams(),
 }));
-vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ user: { id: 'u1' }, loading: false }) }));
+let authLoading = false;
+vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ user: { id: 'u1' }, loading: authLoading }) }));
 vi.mock('@/lib/supabase/client', () => ({ createClient: () => ({}) }));
 vi.mock('@tanstack/react-query', () => ({
   useQueryClient: () => ({ invalidateQueries: vi.fn() }),
@@ -99,6 +100,18 @@ describe('SongForm lyrics tools', () => {
     fireEvent.click(screen.getByRole('button', { name: 'Preview' }));
     const region = screen.getByRole('region', { name: 'Preview of your song' });
     expect(region.getAttribute('tabindex')).toBe('0');
+  });
+
+  it('keeps Save and Publish disabled until the session is known, so a tap is never silently dropped', () => {
+    authLoading = true;
+    try {
+      const { container } = render(<SongForm mode="create" />);
+      const submits = Array.from(container.querySelectorAll<HTMLButtonElement>('button[type="submit"]'));
+      expect(submits).toHaveLength(2);
+      expect(submits.every((b) => b.disabled)).toBe(true);
+    } finally {
+      authLoading = false;
+    }
   });
 
   it('Upload opens the file picker', () => {
