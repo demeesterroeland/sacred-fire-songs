@@ -929,6 +929,12 @@ const en = {
   'sharedWithMe.new': 'New',
   'guestGate.sharedWithMe.title': 'Sign in to see what is shared with you',
   'guestGate.sharedWithMe.reason': 'Takes that members share with you are listed here once you sign in.',
+  'favorites.toast.added': "Added to Liked Songs",
+  'favorites.toast.removed': "Removed from Liked Songs",
+  'favorites.toast.view': "View Liked Songs →",
+  'song.delete.failed': "Could not delete the song. Please try again.",
+  'playlists.rename.success': "Playlist renamed",
+  'settings.pageIntro': "Manage your profile, account security, and data preferences.",
 } as const;
 
 export default en;

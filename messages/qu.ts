@@ -935,6 +935,12 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'sharedWithMe.new': 'Mosoq',
   'guestGate.sharedWithMe.title': 'Yaykuy, qusqaykita qhawanaykipaq',
   'guestGate.sharedWithMe.reason': 'Huk kaqkuna qusqayki grabaciones kaypi rikhurinku, yaykusqaykiman hina.',
+  'favorites.toast.added': "Munasqakunaman yapasqa",
+  'favorites.toast.removed': "Munasqakunamanta qichusqa",
+  'favorites.toast.view': "Munasqakunata qhaway →",
+  'song.delete.failed': "Taki mana qichuyta atikurqachu. Huk kutita ruway.",
+  'playlists.rename.success': "Lista sutinchasqa",
+  'settings.pageIntro': "Perfilnikita, cuenta waqaychayniykita, willakuy akllasqaykikunatapas kamachiy.",
 };
 
 export default qu;

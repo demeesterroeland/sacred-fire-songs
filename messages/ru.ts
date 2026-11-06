@@ -933,6 +933,12 @@ const ru: Partial<Record<TranslationKey, string>> = {
   'sharedWithMe.new': 'Новая',
   'guestGate.sharedWithMe.title': 'Войдите, чтобы увидеть, чем с вами поделились',
   'guestGate.sharedWithMe.reason': 'Записи, которыми участники делятся с вами, появятся здесь после входа.',
+  'favorites.toast.added': "Добавлено в любимые",
+  'favorites.toast.removed': "Убрано из любимых",
+  'favorites.toast.view': "Показать любимые →",
+  'song.delete.failed': "Не удалось удалить песню. Попробуйте ещё раз.",
+  'playlists.rename.success': "Плейлист переименован",
+  'settings.pageIntro': "Управляйте профилем, безопасностью аккаунта и настройками данных.",
 };
 
 export default ru;

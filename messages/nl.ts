@@ -930,6 +930,12 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'sharedWithMe.new': 'Nieuw',
   'guestGate.sharedWithMe.title': 'Log in om te zien wat er met je is gedeeld',
   'guestGate.sharedWithMe.reason': 'Opnames die leden met je delen, staan hier zodra je bent ingelogd.',
+  'favorites.toast.added': "Toegevoegd aan favorieten",
+  'favorites.toast.removed': "Verwijderd uit favorieten",
+  'favorites.toast.view': "Bekijk favorieten →",
+  'song.delete.failed': "Het lied kon niet worden verwijderd. Probeer het opnieuw.",
+  'playlists.rename.success': "Afspeellijst hernoemd",
+  'settings.pageIntro': "Beheer je profiel, accountbeveiliging en gegevensvoorkeuren.",
 };
 
 export default nl;

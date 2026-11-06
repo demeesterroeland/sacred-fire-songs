@@ -931,6 +931,12 @@ const fr: Partial<Record<TranslationKey, string>> = {
   'sharedWithMe.new': 'Nouvelle',
   'guestGate.sharedWithMe.title': 'Connectez-vous pour voir ce qui est partagé avec vous',
   'guestGate.sharedWithMe.reason': 'Les prises que des membres partagent avec vous apparaissent ici une fois connecté.',
+  'favorites.toast.added': "Ajouté aux chants aimés",
+  'favorites.toast.removed': "Retiré des chants aimés",
+  'favorites.toast.view': "Voir les chants aimés →",
+  'song.delete.failed': "Impossible de supprimer le chant. Réessaie.",
+  'playlists.rename.success': "Playlist renommée",
+  'settings.pageIntro': "Gère ton profil, la sécurité du compte et tes préférences de données.",
 };
 
 export default fr;
