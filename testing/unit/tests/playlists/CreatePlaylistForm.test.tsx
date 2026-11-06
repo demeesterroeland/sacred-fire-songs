@@ -94,4 +94,16 @@ describe('CreatePlaylistForm visibility (G8.3)', () => {
     await waitFor(() => expect(push).toHaveBeenCalled());
     expect(createPlaylist).toHaveBeenCalledTimes(1);
   });
+
+  it('a failed request lets the member try again', async () => {
+    createPlaylist.mockRejectedValueOnce(new Error('network'));
+    render(<CreatePlaylistForm />);
+    fireEvent.change(nameInput(), { target: { value: 'Fire Circle' } });
+    fireEvent.keyDown(nameInput(), { key: 'Enter' });
+    await waitFor(() => expect(createPlaylist).toHaveBeenCalledTimes(1));
+    await waitFor(() => expect((screen.getByRole('button', { name: 'Create Playlist' }) as HTMLButtonElement).disabled).toBe(false));
+    fireEvent.keyDown(nameInput(), { key: 'Enter' });
+    await waitFor(() => expect(push).toHaveBeenCalled());
+    expect(createPlaylist).toHaveBeenCalledTimes(2);
+  });
 });

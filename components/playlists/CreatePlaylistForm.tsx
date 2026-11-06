@@ -41,7 +41,15 @@ export function CreatePlaylistForm() {
 
         submittingRef.current = true;
         startTransition(async () => {
-            const result = await createPlaylist(trimmed, isPublic);
+            let result: Awaited<ReturnType<typeof createPlaylist>>;
+            try {
+                result = await createPlaylist(trimmed, isPublic);
+            } catch {
+                // A thrown or rejected request must not leave the form locked.
+                submittingRef.current = false;
+                toast.error(t('common.errorOccurred'));
+                return;
+            }
             if ('error' in result) {
                 submittingRef.current = false;
                 toast.error(result.error);
