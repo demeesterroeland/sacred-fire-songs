@@ -52,10 +52,13 @@ test.beforeAll(async () => {
 async function openRecordTab(page: Page) {
   await page.goto(`/songs/${IDS.song}`);
   await clickPractice(page); // phone: the action bar (#393), not the ⋮ sheet
-  await expect(page.locator('h3:has-text("Practice")')).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByTestId('practice-drawer')).toBeVisible({ timeout: 10_000 });
   const recordTab = page.locator('[data-testid="practice-tab-record"]');
   if (await recordTab.count()) await recordTab.first().click({ force: true });
 }
+
+/** Sheets and dialogs on top of the Practice panel (the panel is itself a dialog, Story 6.1.34 / #418). */
+const sheets = (page: Page) => page.locator('[role="dialog"]:not([data-testid="practice-drawer"])');
 
 async function openActions(page: Page) {
   await openRecordTab(page);
@@ -67,7 +70,7 @@ async function openActions(page: Page) {
   expect(box!.width).toBeGreaterThanOrEqual(44);
   expect(box!.height).toBeGreaterThanOrEqual(44);
   await trigger.click();
-  const sheet = page.getByRole('dialog');
+  const sheet = sheets(page);
   await expect(sheet).toBeVisible();
   return { row, sheet };
 }
@@ -123,25 +126,25 @@ test('the sheet closes on a swipe down and on Escape', async ({ page }) => {
   await page.mouse.move(x, y + 60, { steps: 4 });
   await page.mouse.move(x, y + 160, { steps: 4 });
   await page.mouse.up();
-  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(sheets(page)).toHaveCount(0);
 
   await page.locator('[data-recording-id]', { hasText: TAKE }).locator('button[aria-label="More actions"]').click();
-  await expect(page.getByRole('dialog')).toBeVisible();
+  await expect(sheets(page)).toBeVisible();
   await page.keyboard.press('Escape');
-  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(sheets(page)).toHaveCount(0);
 });
 
 test('choosing Share closes the sheet and opens the share dialog', async ({ page }) => {
   const { sheet } = await openActions(page);
   await sheet.getByRole('button', { name: 'Share', exact: true }).click();
-  await expect(page.getByRole('dialog').filter({ hasText: 'Share take' })).toBeVisible({ timeout: 10_000 });
+  await expect(sheets(page).filter({ hasText: 'Share take' })).toBeVisible({ timeout: 10_000 });
   await expect(page.getByRole('button', { name: 'Delete take' })).toHaveCount(0);
 });
 
 test('choosing Edit take name closes the sheet and focuses the rename field', async ({ page }) => {
   const { sheet } = await openActions(page);
   await sheet.getByRole('button', { name: 'Edit take name', exact: true }).click();
-  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(sheets(page)).toHaveCount(0);
   const input = page.locator('input[aria-label="Edit take name"]');
   await expect(input).toBeFocused();
   await page.keyboard.press('Escape'); // leave the name unchanged
@@ -150,7 +153,7 @@ test('choosing Edit take name closes the sheet and focuses the rename field', as
 test('Delete still asks for confirmation; cancelling keeps the take', async ({ page }) => {
   const { row, sheet } = await openActions(page);
   await sheet.getByRole('button', { name: 'Delete take', exact: true }).click();
-  await expect(page.getByRole('dialog')).toHaveCount(0);
+  await expect(sheets(page)).toHaveCount(0);
   await expect(page.getByText('Delete take?')).toBeVisible();
   await page.getByRole('button', { name: 'Cancel' }).click();
   await expect(page.getByText('Delete take?')).toHaveCount(0);

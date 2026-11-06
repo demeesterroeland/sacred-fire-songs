@@ -1,11 +1,12 @@
 # UX v2: Phone Validation Script
 
-**Version:** 1.35 | **Date:** Nov 6, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
+**Version:** 1.36 | **Date:** Nov 6, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.36 | Nov 6, 2026 | Added #418 (accessibility audit of the song page and the Practice panel: what to check with a keyboard and a screen reader on a phone; the screen reader pass is still to be done). |
 | 1.35 | Nov 6, 2026 | Added #405 (publish dialog names the song and says who will hear the take; a take on a private song starts with making the song public; guests hear public takes on the Listen tab; long names, focus return). |
 | 1.34 | Nov 6, 2026 | Added #395 (version switch under the song title; steps 6, 6b, 6c: `?version=` link, Save returns to the edited version, a take in progress blocks switching). |
 | 1.33 | Nov 6, 2026 | Added #415 (Add Song preview and visible upload button). |
@@ -509,3 +510,16 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 - [ ] 7. Switch **Preview** on, leave the title empty and tap **Publish Song**. **Expected:** the editor comes back and the first empty required field is focused with its message.
 - [ ] 8. Reload the page (signed out first if you like): the typed title and lyrics are still there (draft), and Preview is off.
 - [ ] 9. Scroll to the end of the form. **Expected:** no Melody notation section. Switch the language to Dutch, Spanish, Italian, Russian, French, Portuguese and Quechua: both buttons and the hint are translated and the two buttons stay on one row and long labels wrap inside them. Repeat in dark mode.
+
+### #418 · G9.2 Accessibility audit of the song page and the Practice panel
+
+**Preconditions:** a 390 px phone; steps 1 to 5 need a keyboard (Bluetooth, or a desktop browser narrowed to 390 px); steps 6 and 7 need VoiceOver (iPhone) or TalkBack (Android). Run signed out once and as a member once, in light and in dark. The automated part (axe-core, keyboard journeys) ran in CI-style on a build and is described in `docs/ux-research/2026-11-06-a11y-audit.md`; **the screen reader pass has not been done by anyone yet**, steps 6 and 7 are it. The full checklist with a result column is section 5 of that file.
+
+- [ ] 1. Open a song. Press **Tab** repeatedly. **Expected:** a visible focus ring moves through the header, the reader toolbar and the bar at the bottom (*Practice*, *Playlist*, *Like*) in reading order; **A−** and **A+** show a focus ring.
+- [ ] 2. Focus **Practice** and press **Enter**. **Expected:** the Practice panel opens and focus is inside it; the song page behind it is not reachable with Tab. Press **Tab** many times: focus stays in the panel (and the mini player bar if one is showing), then goes back to the start. **Shift+Tab** does the same backwards.
+- [ ] 3. Signed out: with focus on the **Listen** tab press **→**. **Expected:** the **Record** tab is selected and focused (the sign-in prompt shows); **←** goes back; **Home** and **End** jump to the first and last tab.
+- [ ] 4. Press **Escape**. **Expected:** the panel closes and the focus ring is back on **Practice**. Repeat with the close button (✕).
+- [ ] 5. Signed in as a member: open a take's **⋯** (More actions), press **Escape**. **Expected:** the sheet closes and focus is back on that **⋯** button. Open **Playlist** and the song menu (**⋯** top right) and close each with Escape: focus returns to the button you used. In the Record tab, choose **Upload File**: the big dashed area is reachable with Tab and **Enter** opens the file picker.
+- [ ] 6. **VoiceOver or TalkBack, song page and Practice panel** (steps 1 to 12 of `docs/ux-research/2026-11-06-a11y-audit.md` §5): the panel is announced as a dialog named *Practice, <song>*; Listen and Record are read as tabs with *selected*; the recorder says *Recording...* and *Recording paused* when you start and pause; each sheet and dialog is announced with its title and closes with focus back where it was. Write the result per step in the audit file.
+- [ ] 7. Switch the language to Dutch and repeat the recorder part of step 6: the announcements are in Dutch.
+- [ ] 8. Turn on reduced motion in the phone's settings and open the site on a laptop-width window: the bars in the **Practice** button of a playing song do not move.

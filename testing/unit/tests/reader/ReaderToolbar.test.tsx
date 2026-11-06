@@ -22,8 +22,9 @@ describe('ReaderToolbar', () => {
     render(<ReaderToolbar step={1} chords speed={3} hasChords onChange={() => {}} />);
     expect(screen.getByRole('toolbar', { name: 'Reading options' })).toBeTruthy();
     expect(screen.getByRole('switch', { name: 'Chords' }).getAttribute('aria-checked')).toBe('true');
-    expect(screen.getByRole('button', { name: 'Smaller text' }).textContent).toBe('A−');
-    expect(screen.getByRole('button', { name: 'Larger text' }).textContent).toBe('A+');
+    // The visible glyph is hidden from assistive technology; the translated words are the name (Story 6.1.34, #418).
+    expect(screen.getByRole('button', { name: 'Smaller text' }).querySelector('[aria-hidden]')?.textContent).toBe('A−');
+    expect(screen.getByRole('button', { name: 'Larger text' }).querySelector('[aria-hidden]')?.textContent).toBe('A+');
   });
 
   it('A+ grows and A− shrinks the size one step', () => {

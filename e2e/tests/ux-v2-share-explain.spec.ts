@@ -72,7 +72,7 @@ test.beforeEach(async ({}, testInfo) => {
 async function openShareDialog(page: Page) {
   await page.goto(`/songs/${IDS.song}`);
   await clickPractice(page); // phone: the action bar (#393)
-  await expect(page.locator('h3:has-text("Practice")')).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByTestId('practice-drawer')).toBeVisible({ timeout: 10_000 });
   const recordTab = page.locator('[data-testid="practice-tab-record"]');
   if (await recordTab.count()) await recordTab.first().click({ force: true });
   const row = page.getByTestId('rehearsal-drawer-body').locator('[data-recording-id]', { hasText: TAKE });

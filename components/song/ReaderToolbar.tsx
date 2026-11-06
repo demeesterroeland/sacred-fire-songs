@@ -90,20 +90,20 @@ export function ReaderToolbar({
         </button>
       )}
       <ToolbarButton
-        aria-label={t('viewer.fontSmaller')}
         aria-disabled={atMin}
         onClick={() => !atMin && onChange({ step: stepBy(step, -1), chords, speed })}
         className={cn('border border-line', ends)}
       >
-        A−
+        <span aria-hidden>A−</span>
+        <span className="sr-only">{t('viewer.fontSmaller')}</span>
       </ToolbarButton>
       <ToolbarButton
-        aria-label={t('viewer.fontLarger')}
         aria-disabled={atMax}
         onClick={() => !atMax && onChange({ step: stepBy(step, 1), chords, speed })}
         className={cn('border border-line', ends)}
       >
-        A+
+        <span aria-hidden>A+</span>
+        <span className="sr-only">{t('viewer.fontLarger')}</span>
       </ToolbarButton>
       {onToggleScroll && (
         <ToolbarButton

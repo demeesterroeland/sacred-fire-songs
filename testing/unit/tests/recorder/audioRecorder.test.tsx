@@ -88,6 +88,20 @@ const setup = (props: { onDirtyChange?: (dirty: boolean) => void } = {}) =>
 const tick = async (ms: number) => { await act(async () => { vi.advanceTimersByTime(ms); }); };
 const press = async (name: string) => { await act(async () => { fireEvent.click(screen.getByTitle(name)); }); };
 
+/** The count-in region is the paragraph; the recorder's state line is a second status element (Story 6.1.34, #418). */
+const countInRegion = () => screen.getAllByRole('status').find((el) => el.tagName === 'P')!;
+
+describe('recorder state line', () => {
+  it('is a live region so a screen reader hears each state', async () => {
+    setup();
+    const state = screen.getByText('Ready to record');
+    expect(state.getAttribute('role')).toBe('status');
+    fireEvent.click(screen.getByRole('switch'));
+    await press('Start recording');
+    expect(screen.getByText('Recording...')).toBe(state); // same element, new text
+  });
+});
+
 describe('count-in toggle', () => {
   it('is on by default, in words, and states the 3-minute limit', () => {
     setup();
@@ -107,15 +121,15 @@ describe('count-in toggle', () => {
     expect(screen.queryByText('Recording...')).toBeNull();
     await tick(1000);
     expect(screen.getByText('Recording...')).toBeTruthy();
-    expect(screen.getAllByRole('status').every((el) => el.textContent === '')).toBe(true);
+    expect(countInRegion().textContent).toBe('');
   });
 
   it('the live region is mounted empty before the count-in fills it (so screen readers announce it)', async () => {
     setup();
-    const region = screen.getAllByRole('status')[0];
+    const region = countInRegion();
     expect(region.textContent).toBe('');
     await press('Start recording');
-    expect(screen.getAllByRole('status')[0]).toBe(region); // same element, now with text
+    expect(countInRegion()).toBe(region); // same element, now with text
     expect(region.textContent).toBe('Starting in 3');
   });
 

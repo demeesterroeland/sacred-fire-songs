@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useTransition, useMemo } from "react";
+import React, { useState, useEffect, useTransition, useMemo, useId, useRef } from "react";
 import { motion } from "framer-motion";
 import { X, Music, Play, Pause, RotateCcw, RotateCw, GripVertical, ChevronDown, Check, Mic, MoreHorizontal, Volume2 } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
@@ -18,6 +18,8 @@ import Link from "next/link";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocale } from "@/context/LocaleContext";
 import { recordingPermalink, takeListTab } from "@/lib/songs/recordingLink";
+import { useModalFocus } from "@/hooks/useModalFocus";
+import { nextTabIndex } from "@/lib/a11y/focusTrap";
 import { partitionTakes } from "@/lib/songs/partitionTakes";
 import { takeStatusPills } from "@/lib/songs/takeStatus";
 import { TakeStatusPills } from "@/components/song/TakeStatusPills";
@@ -100,7 +102,7 @@ function SortableRecordingItem({
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") handleSaveRename();
-    if (e.key === "Escape") { setEditValue(rec.recording_name); setIsEditing(false); }
+    if (e.key === "Escape") { e.stopPropagation(); setEditValue(rec.recording_name); setIsEditing(false); }
   };
 
   const {
@@ -325,6 +327,20 @@ export default function RehearsalDrawer({
   const { t } = useLocale();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<"recorder" | "media">("media");
+  // Dialog semantics (Story 6.1.34 / G9.2, #418): focus moves in, stays in, and returns to the opener.
+  const dialogId = useId();
+  const dialogRef = useRef<HTMLDivElement>(null);
+  // dnd-kit renders a live region next to the list. Left inside the panel it counts as "keep visible" for Radix's
+  // aria-hidden pass, so the panel stayed readable behind a sheet opened from a take. At <body> it is out of the way.
+  const dndAccessibility = useMemo(() => ({ container: typeof document === "undefined" ? undefined : document.body }), []);
+  useModalFocus({
+    open: isOpen,
+    containerRef: dialogRef,
+    onEscape: onClose,
+    // The mini player floats above the drawer: its controls follow the drawer's in the Tab order.
+    extraScope: () => Array.from(document.querySelectorAll<HTMLElement>('[data-testid="bottom-mini-player"]')),
+    fallbackSelector: '[data-testid="song-action-practice"], button[title="Practice"]',
+  });
   const [selectedMedia, setSelectedMedia] = useState<"youtube" | "spotify" | "soundcloud" | null>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
@@ -349,6 +365,15 @@ export default function RehearsalDrawer({
   const [activeDomain, setActiveDomain] = useState<'recording' | 'media' | null>(null);
 
   const hasMedia = !!(youtubeUrl || spotifyUrl || soundcloudUrl);
+  const showTabs = hasMedia || !user;
+  const onTabsKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const order = ["media", "recorder"] as const;
+    const next = nextTabIndex(e.key, order.indexOf(activeTab), order.length);
+    if (next === null) return;
+    e.preventDefault();
+    setActiveTab(order[next]);
+    document.getElementById(`${dialogId}-tab-${order[next]}`)?.focus();
+  };
   const referenceProviders = availableProviders({ youtubeUrl, soundcloudUrl, spotifyUrl });
 
   // Notify parent of play state change
@@ -1138,6 +1163,13 @@ export default function RehearsalDrawer({
 
       {/* Bottom Drawer Sheet */}
       <motion.div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={`${dialogId}-kind ${dialogId}-title`}
+        data-testid="practice-drawer"
+        tabIndex={-1}
+        inert={!isOpen}
         initial={{ y: "100%", visibility: "hidden" }}
         animate={isOpen ? {
           y: 0,
@@ -1149,65 +1181,70 @@ export default function RehearsalDrawer({
           }
         }}
         transition={{ type: "spring", damping: 25, stiffness: 200 }}
-        className="fixed bottom-0 inset-x-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 rounded-t-3xl shadow-2xl z-50 max-h-[90vh] md:max-h-[80vh] flex flex-col w-full max-w-xl mx-auto border-x pb-safe-bottom"
+        className="fixed bottom-0 inset-x-0 bg-bg text-fg border-t border-line rounded-t-3xl shadow-sheet z-50 max-h-[90vh] md:max-h-[80vh] flex flex-col w-full max-w-xl mx-auto border-x pb-safe-bottom outline-none"
       >
             {/* Header handle */}
-            <div className="w-12 h-1.5 bg-gray-300 dark:bg-gray-700 rounded-full mx-auto my-3 shrink-0 cursor-pointer" onClick={onClose} />
+            <div className="w-12 h-1.5 bg-line-strong rounded-full mx-auto my-3 shrink-0 cursor-pointer" onClick={onClose} />
 
             {/* Header Title bar */}
-            <div className="flex items-center justify-between px-6 pb-4 border-b border-gray-100 dark:border-gray-800/50 shrink-0">
+            <div className="flex items-center justify-between px-6 pb-4 border-b border-line shrink-0">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center text-white shadow-md">
                   <Music className="w-5 h-5" />
                 </div>
                 <div className="text-left">
-                  <h3 className="text-meta font-semibold text-fg-muted">{t('practice.title')}</h3>
-                  <h2 className="text-base font-extrabold text-gray-900 dark:text-white truncate max-w-[250px] md:max-w-[320px]">
+                  <h2 id={`${dialogId}-kind`} className="text-meta font-semibold text-fg-muted">{t('practice.title')}</h2>
+                  <p id={`${dialogId}-title`} className="text-base font-extrabold text-fg truncate max-w-[250px] md:max-w-[320px]">
                     {songTitle}
-                  </h2>
+                  </p>
                 </div>
               </div>
               <button
                 onClick={onClose}
-                className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                className="inline-flex size-tap items-center justify-center rounded-control text-fg-muted hover:bg-surface-2 hover:text-fg transition-colors"
                 aria-label={t('common.close')}
               >
-                <X className="w-5 h-5" />
+                <X className="w-5 h-5" aria-hidden />
               </button>
             </div>
 
-             {/* Tabs Navigation (a guest always has Listen: the public takes live there) */}
-            {(hasMedia || !user) && (
-              <div className="flex px-6 border-b border-gray-100 dark:border-gray-800/50 shrink-0">
-                <button
-                  data-testid="practice-tab-listen"
-                  onClick={() => setActiveTab("media")}
-                  className={`flex-1 py-3 text-sm font-bold text-center border-b-2 transition-all ${
-                    activeTab === "media"
-                      ? "border-indigo-600 text-indigo-600 dark:text-indigo-400"
-                      : "border-transparent text-gray-500 hover:text-gray-900 dark:hover:text-white"
-                  }`}
-                >
-                  {t('practice.tab.listen')}
-                </button>
-                <button
-                  data-testid="practice-tab-record"
-                  onClick={() => setActiveTab("recorder")}
-                  className={`flex-1 py-3 text-sm font-bold text-center border-b-2 transition-all ${
-                    activeTab === "recorder"
-                      ? "border-indigo-600 text-indigo-600 dark:text-indigo-400"
-                      : "border-transparent text-gray-500 hover:text-gray-900 dark:hover:text-white"
-                  }`}
-                >
-                  {t('practice.tab.record')}
-                </button>
+              {/* Tabs Navigation (a guest always has Listen: the public takes live there) */}
+            {showTabs && (
+              <div role="tablist" aria-label={t('practice.title')} onKeyDown={onTabsKeyDown} className="flex px-6 border-b border-line shrink-0">
+                {([
+                  { id: "media", testId: "practice-tab-listen", label: t('practice.tab.listen') },
+                  { id: "recorder", testId: "practice-tab-record", label: t('practice.tab.record') },
+                ] as const).map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    role="tab"
+                    id={`${dialogId}-tab-${tab.id}`}
+                    aria-selected={activeTab === tab.id}
+                    aria-controls={`${dialogId}-panel-${tab.id}`}
+                    tabIndex={activeTab === tab.id ? 0 : -1}
+                    data-testid={tab.testId}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex-1 py-3 text-sm font-bold text-center border-b-2 transition-all ${
+                      activeTab === tab.id
+                        ? "border-accent text-accent"
+                        : "border-transparent text-fg-muted hover:text-fg"
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
               </div>
             )}
 
             {/* Content Body */}
             <div data-testid="rehearsal-drawer-body" className="flex-1 overflow-y-auto p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px)+var(--mini-player-h,0px))] space-y-6">
               
-              <div className="relative" style={{ display: activeTab === "recorder" ? "block" : "none" }}>
+              <div
+                className="relative"
+                style={{ display: activeTab === "recorder" ? "block" : "none" }}
+                {...(showTabs ? { role: "tabpanel", id: `${dialogId}-panel-recorder`, "aria-labelledby": `${dialogId}-tab-recorder` } : {})}
+              >
                   {/* Blurred overlay wrapper if guest */}
                   <div className={!user ? "blur-[4px] pointer-events-none select-none" : ""} inert={!user} aria-hidden={!user || undefined}>
                     {/* Sticky Mini-Player Status Bar */}
@@ -1275,7 +1312,7 @@ export default function RehearsalDrawer({
                           </p>
                         </div>
                       ) : (
-                        <DndContext sensors={dndSensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                        <DndContext sensors={dndSensors} collisionDetection={closestCenter} accessibility={dndAccessibility} onDragEnd={handleDragEnd}>
                           <SortableContext
                             items={myTakes.map((r) => r.id)}
                             strategy={verticalListSortingStrategy}
@@ -1315,7 +1352,7 @@ export default function RehearsalDrawer({
                     ] as const).map((group) => group.takes.length > 0 && (
                       <section key={group.key} className="mt-6 space-y-3" data-testid={group.testId}>
                         <h3 className="text-meta font-semibold text-fg-muted text-left">{group.label}</h3>
-                        <DndContext sensors={dndSensors} collisionDetection={closestCenter}>
+                        <DndContext sensors={dndSensors} collisionDetection={closestCenter} accessibility={dndAccessibility}>
                           <SortableContext items={group.takes.map((r) => r.id)} strategy={verticalListSortingStrategy} disabled>
                             <div className="rounded-panel border border-line bg-surface p-1 space-y-0.5">
                               {group.takes.map((rec) => (
@@ -1346,7 +1383,11 @@ export default function RehearsalDrawer({
                   {!user && <GuestGate feature="recorder" variant="overlay" next={currentPath} />}
                 </div>
 
-              <div className="space-y-6 text-left" style={activeTab !== "media" ? { visibility: "hidden", height: 0, overflow: "hidden", margin: 0, padding: 0 } : undefined}>
+              <div
+                className="space-y-6 text-left"
+                style={activeTab !== "media" ? { visibility: "hidden", height: 0, overflow: "hidden", margin: 0, padding: 0 } : undefined}
+                {...(showTabs ? { role: "tabpanel", id: `${dialogId}-panel-media`, "aria-labelledby": `${dialogId}-tab-media` } : {})}
+              >
                   {/* Provider buttons: only providers with a link, fixed order; the pressed one is checked (Story 6.1.13 / G3.2) */}
                   {referenceProviders.length > 0 && (
                     <div role="group" aria-label={t('practice.tab.listen')} data-testid="reference-providers" className="flex gap-1 p-1 bg-surface-2 rounded-control">
@@ -1460,7 +1501,7 @@ export default function RehearsalDrawer({
                           {t('practice.takes.publicEmptyGuest')}
                         </p>
                       ) : (
-                        <DndContext sensors={dndSensors} collisionDetection={closestCenter}>
+                        <DndContext sensors={dndSensors} collisionDetection={closestCenter} accessibility={dndAccessibility}>
                           <SortableContext items={publicTakes.map((r) => r.id)} strategy={verticalListSortingStrategy} disabled>
                             <div className="rounded-panel border border-line bg-surface p-1 space-y-0.5">
                               {publicTakes.map((rec) => (

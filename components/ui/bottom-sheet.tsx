@@ -11,6 +11,8 @@ import { clampSwipe, shouldDismissSheet } from "@/lib/design/swipeDismiss";
  * a centred dialog from `sm` up. Surface + sheet radius + the only shadow.
  * Reserves room for the mini player via `--mini-player-h` (#396). On phones the
  * 32 px handle on top follows a swipe down and closes the sheet (Story 6.1.17 / G4.4, #401).
+ * Focus returns to the element that had it when the sheet opened, also when the sheet is controlled
+ * and has no `BottomSheetTrigger` (Story 6.1.34 / G9.2, #418).
  */
 export const BottomSheet = DialogPrimitive.Root;
 export const BottomSheetTrigger = DialogPrimitive.Trigger;
@@ -26,7 +28,10 @@ export interface BottomSheetContentProps extends Omit<React.ComponentPropsWithou
 export const BottomSheetContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
   BottomSheetContentProps
->(({ title, hideTitle, description, className, style, children, ...props }, ref) => {
+>(({ title, hideTitle, description, className, style, children, onOpenAutoFocus, onCloseAutoFocus, ...props }, ref) => {
+  // The element focused when the sheet opens is the opener (a Radix trigger, or any button that set `open`).
+  // This wrapper stays mounted while the sheet is closed, so it is read when the content mounts.
+  const opener = React.useRef<HTMLElement | null>(null);
   const closeRef = React.useRef<HTMLButtonElement>(null);
   const drag = React.useRef<{ startY: number; startT: number } | null>(null);
   const [dragY, setDragY] = React.useState(0);
@@ -68,6 +73,22 @@ export const BottomSheetContent = React.forwardRef<
         )}
         style={dragY ? { ...style, transform: `translateY(${dragY}px)` } : style}
         {...(description ? {} : { "aria-describedby": undefined })}
+        onOpenAutoFocus={(e) => {
+          const active = document.activeElement;
+          opener.current = active instanceof HTMLElement && active !== document.body ? active : null;
+          onOpenAutoFocus?.(e);
+        }}
+        onCloseAutoFocus={(e) => {
+          onCloseAutoFocus?.(e);
+          if (e.defaultPrevented) return;
+          // Radix only refocuses its own trigger; give focus back to whatever opened a controlled sheet.
+          const target = opener.current;
+          opener.current = null;
+          if (target?.isConnected) {
+            e.preventDefault();
+            target.focus({ preventScroll: true });
+          }
+        }}
         {...props}
       >
         {/* 32 px drag handle (phones): swipe down to close. */}

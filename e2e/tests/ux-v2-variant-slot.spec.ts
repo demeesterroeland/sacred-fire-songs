@@ -177,7 +177,7 @@ test.describe('Practice follows the chosen version', () => {
     const control = page.getByRole('radiogroup', { name: 'Song version' });
     // Original has no reference track: Practice opens on Record (no Listen tab).
     await clickPractice(page);
-    await expect(page.locator('h3:has-text("Practice")')).toBeVisible();
+    await expect(page.getByTestId('practice-drawer')).toBeVisible();
     await expect(page.getByTestId('practice-tab-listen')).toHaveCount(0);
     await page.locator('button[aria-label="Close"]').first().click();
     await drawerSettled(page, false);
@@ -302,7 +302,7 @@ test.describe('a playing take does not outlive its version', () => {
     await page.goto(`/songs/${IDS.song}`);
     await expect(page.getByText('Original verse for the variant slot')).toBeVisible();
     await clickPractice(page);
-    await expect(page.locator('h3:has-text("Practice")')).toBeVisible();
+    await expect(page.getByTestId('practice-drawer')).toBeVisible();
     await drawerSettled(page, true);
 
     await page.getByRole('button', { name: 'Upload File' }).click({ force: true });

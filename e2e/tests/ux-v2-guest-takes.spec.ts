@@ -89,8 +89,8 @@ test.beforeEach(async ({}, testInfo) => {
 test('a guest sees a public take on the Listen tab, read only, and can play it', async ({ page }) => {
   await page.goto(`/songs/${IDS.guestSong}`);
   await clickPractice(page);
-  await expect(page.locator('h3:has-text("Practice")')).toBeVisible({ timeout: 10_000 });
-  await expect(page.getByTestId('practice-tab-listen')).toHaveAttribute('class', /border-indigo-600/);
+  await expect(page.getByTestId('practice-drawer')).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByTestId('practice-tab-listen')).toHaveAttribute('aria-selected', 'true');
 
   const list = page.getByTestId('guest-public-takes');
   await expect(list).toBeVisible();
@@ -114,15 +114,15 @@ test('a guest sees a public take on the Listen tab, read only, and can play it',
 test('a song without public takes shows an empty state to a guest', async ({ page }) => {
   await page.goto(`/songs/${IDS.emptySong}`);
   await clickPractice(page);
-  await expect(page.locator('h3:has-text("Practice")')).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByTestId('practice-drawer')).toBeVisible({ timeout: 10_000 });
   await expect(page.getByTestId('guest-public-takes-empty')).toHaveText('No public takes of this song yet.', { timeout: 15_000 });
 });
 
 test('a take link opens a guest on Listen with that take highlighted, in view and playable', async ({ page }) => {
   await page.goto(`/songs/${IDS.guestSong}?recording=${IDS.guestTake}`);
-  await expect(page.locator('h3:has-text("Practice")')).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByTestId('practice-drawer')).toBeVisible({ timeout: 15_000 });
   // Listen, not the Record gate.
-  await expect(page.getByTestId('practice-tab-listen')).toHaveAttribute('class', /border-indigo-600/);
+  await expect(page.getByTestId('practice-tab-listen')).toHaveAttribute('aria-selected', 'true');
   const row = page.getByTestId('guest-public-takes').locator('[data-recording-id]', { hasText: TAKE });
   await expect(row).toHaveAttribute('aria-current', 'true', { timeout: 15_000 });
   await expect(row).toBeInViewport({ timeout: 10_000 });
@@ -135,7 +135,7 @@ test('a take link opens a guest on Listen with that take highlighted, in view an
 
 test('a link to a take that is not there keeps the sign-in prompt of the Record tab', async ({ page }) => {
   await page.goto(`/songs/${IDS.guestSong}?recording=00000000-0000-4000-a000-0000000000bb`);
-  await expect(page.locator('h3:has-text("Practice")')).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByTestId('practice-drawer')).toBeVisible({ timeout: 15_000 });
   await expect(page.getByTestId('guest-gate').first()).toBeVisible({ timeout: 10_000 });
 });
 
@@ -145,8 +145,8 @@ test.describe('on a wide screen', () => {
   test('Practice opens a guest on Listen, not on the Record gate', async ({ page }) => {
     await page.goto(`/songs/${IDS.guestSong}`);
     await clickPractice(page);
-    await expect(page.locator('h3:has-text("Practice")')).toBeVisible({ timeout: 10_000 });
-    await expect(page.getByTestId('practice-tab-listen')).toHaveAttribute('class', /border-indigo-600/);
+    await expect(page.getByTestId('practice-drawer')).toBeVisible({ timeout: 10_000 });
+    await expect(page.getByTestId('practice-tab-listen')).toHaveAttribute('aria-selected', 'true');
     await expect(page.getByTestId('guest-public-takes').locator('[data-recording-id]', { hasText: TAKE })).toHaveCount(1, { timeout: 15_000 });
   });
 });

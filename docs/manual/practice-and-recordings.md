@@ -1,11 +1,12 @@
 # Practice: Listen, Record & Takes (draft)
 
-**Version:** 0.10 | **Date:** Nov 6, 2026
+**Version:** 0.11 | **Date:** Nov 6, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.11 | Nov 6, 2026 | Keyboard and screen reader notes for the Practice panel; the recorder says its state out loud (#418). |
 | 0.10 | Nov 6, 2026 | The Make Public dialog names the take and the song and says who will hear it; a take on a private song starts with making the song public; guests hear public takes on the Listen tab (a link to a public take opens it there); the dialog says you can make the take private again, but not undo what was heard (#405). |
 | 0.9 | Nov 6, 2026 | Recorder: level meter, optional 3-2-1 count-in, time left in the last minute, Save Take as the one big button (#404); the no-sound hint follows the last 3 seconds. |
 | 0.8 | Nov 5, 2026 | Listen: one button per available provider (even when there is only one), the player and the Listen tab say in words what plays and whether it is paused; "Control Track" is now **Open player** (UX v2, #397). |
@@ -25,6 +26,10 @@
 On a song page tap **Practice** in the bar at the bottom. If the song has a reference track (YouTube, SoundCloud or Spotify) the panel opens on **Listen**; tap **Record** to start recording (two taps in all). Without a reference track it opens straight on **Record**. A panel slides up from the bottom with the song title and two tabs. Close it with ✕ or by swiping down.
 
 Songs where you have takes show a **Takes** chip, and the header shows how many takes you have.
+
+### With a keyboard or a screen reader
+
+Practice opens as a dialog named *Practice* and the song. While it is open, **Tab** and **Shift+Tab** move only inside it (and the mini player, if it is showing), **Escape** or the ✕ button closes it, and focus goes back to the **Practice** button. **Listen** and **Record** are tabs: use the **←** and **→** keys (or **Home** and **End**) to switch. The recorder says *Recording...* and *Recording paused* out loud when you start or pause, and **Upload File** can be reached and opened with the keyboard.
 
 ## Listen (everyone)
 

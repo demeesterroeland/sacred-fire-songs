@@ -263,6 +263,7 @@ export default function RecordingShareModal({
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
                   placeholder={t("recording.sharing.searchPlaceholder")}
+                  aria-label={t("recording.sharing.searchPlaceholder")}
                   aria-describedby="share-helper"
                   className="w-full min-h-tap pl-9 pr-9 bg-bg border border-line-strong rounded-control text-body outline-none focus-visible:outline-2 focus-visible:outline-focus text-fg placeholder:text-fg-subtle"
                 />
@@ -330,9 +331,9 @@ export default function RecordingShareModal({
 
             {/* Existing Shares List */}
             <div className="space-y-2 mt-4 pt-4 border-t border-line">
-              <h4 className="text-meta font-semibold text-fg-muted text-left">
+              <h3 className="text-meta font-semibold text-fg-muted text-left">
                 {t("recording.sharing.sharedWithTitle")} ({currentShares.length})
-              </h4>
+              </h3>
 
               {currentShares.length === 0 ? (
                 <p className="text-meta text-fg-muted py-2 text-left">{t("recording.sharing.noShares")}</p>

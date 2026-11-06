@@ -134,7 +134,7 @@ test('"Shared with me" lists the song with the sharer; opening it and the Practi
   await row.click();
   // The take's deep link opens the song with its Practice drawer.
   await expect(page).toHaveURL(new RegExp(`/songs/${IDS.song}\\?recording=${IDS.take}`), { timeout: 20_000 });
-  await expect(page.locator('h3:has-text("Practice")')).toBeVisible({ timeout: 15_000 });
+  await expect(page.getByTestId('practice-drawer')).toBeVisible({ timeout: 15_000 });
   await expect.poll(() => bellUnread(page), { timeout: 15_000 }).toBeLessThan(before);
   await expect.poll(takeNotificationRead, { timeout: 15_000 }).toBe(true);
 
@@ -152,7 +152,7 @@ test('opening Practice on the song page marks that song read and drops the bell 
   expect(await takeNotificationRead()).toBe(false);
 
   await clickPractice(page);
-  await expect(page.locator('h3:has-text("Practice")')).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByTestId('practice-drawer')).toBeVisible({ timeout: 10_000 });
   await expect.poll(() => bellUnread(page), { timeout: 15_000 }).toBeLessThan(before);
 
   // Persisted: read in the database, and still read after a reload.

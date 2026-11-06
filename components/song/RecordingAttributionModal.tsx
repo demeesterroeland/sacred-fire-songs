@@ -213,6 +213,7 @@ export default function RecordingAttributionModal({
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder={t("recording.attribution.searchPlaceholder")}
+                    aria-label={t("recording.attribution.searchPlaceholder")}
                     className="w-full pl-9 pr-8 py-2.5 bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-xl text-sm outline-none focus:border-indigo-500 text-gray-900 dark:text-white"
                   />
                   {isSearching && (
@@ -270,6 +271,7 @@ export default function RecordingAttributionModal({
                 value={customName}
                 onChange={(e) => setCustomName(e.target.value)}
                 placeholder={t("recording.attribution.namePlaceholder")}
+                aria-label={t("recording.attribution.namePlaceholder")}
                 className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-xl text-sm outline-none focus:border-indigo-500 text-gray-900 dark:text-white"
               />
             </div>
@@ -282,6 +284,7 @@ export default function RecordingAttributionModal({
                 value={customEmail}
                 onChange={(e) => setCustomEmail(e.target.value)}
                 placeholder={t("recording.attribution.emailPlaceholder")}
+                aria-label={t("recording.attribution.emailPlaceholder")}
                 className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-xl text-sm outline-none focus:border-indigo-500 text-gray-900 dark:text-white"
               />
             </div>

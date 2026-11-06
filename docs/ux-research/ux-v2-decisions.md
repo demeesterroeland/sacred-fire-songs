@@ -1,11 +1,12 @@
 # UX v2: Agent Decisions (ADR-lite)
 
-**Version:** 1.32 | **Date:** Nov 6, 2026 | **Epic:** 6.1 (#375)
+**Version:** 1.33 | **Date:** Nov 6, 2026 | **Epic:** 6.1 (#375)
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.33 | Nov 6, 2026 | Added UXA-050 to UXA-053 (accessibility audit of the song page and Practice panel: Practice is a modal dialog with its own focus handling; heading levels; what the fixes change on screen; audit scope and what it cannot show; #418). |
 | 1.32 | Nov 6, 2026 | Added UXA-040 (publish dialog: a take on a private song starts with making the song public) and UXA-041 (publish dialog: header, layout on tokens, reversible line; #405); UXA-012 updated: guests hear public takes on the Listen tab (#405). |
 | 1.31 | Nov 6, 2026 | Added UXA-048 (what the variant slot shows, where, and what a version switch changes; review round 2: a take in progress blocks switching, `?version=` deep link, song flags across versions, playlist uses the oldest version) and UXA-049 (version order: oldest first; #395). |
 | 1.30 | Nov 6, 2026 | Added UXA-044 (Add Song preview replaces the editor in place, debounced) and UXA-045 (upload is one visible button; dead help icon and dead second Upload removed; #415). |
@@ -542,3 +543,38 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 - **Options:** (a) leave the order alone; (b) sort oldest first by `created_at`; (c) add a stored `position` column.
 - **Choice:** (b), in one shared helper (`lib/songs/versionOrder.ts`: `created_at` ascending, `id` as tiebreak) used by `fetchSong`, the edit page and the list cards, so every user of the list (switch, selected index, deep link, Edit, song card) sees the same first version. Edit opens the version being read (`/songs/<id>/edit?version=<id>`) and falls back to the first. The oldest version is the original, so it is first and opens by default. (c) would be a migration and is not needed until versions can be reordered.
 - **Consequences:** for a song with one version nothing changes. For songs with several versions the first one is now always the oldest. Songs with identical timestamps are ordered by id, so the order is the same on every read.
+
+### UXA-050 · The Practice drawer is a modal dialog with its own focus handling
+
+- **Date / story:** Nov 6, 2026 · #418 (G9.2)
+- **Context:** the Practice panel was an animated `div`: no dialog role, no name, no Escape, nothing kept Tab inside it and focus was lost when it closed. It stays mounted while closed (the reference-track players and the take that is playing live in it), so it cannot simply be rendered as a Radix dialog that mounts on open.
+- **Options:** (a) move the panel onto the Radix-based `BottomSheet` and mount it on open; (b) keep the panel and add the dialog behaviour (`role="dialog"`, `aria-modal`, name, `inert` while closed) with one small hook; (c) leave it.
+- **Choice:** (b). `hooks/useModalFocus.ts`: focus moves to the dialog on open, Tab and Shift+Tab wrap inside it, Escape closes it, and focus returns to whatever opened it (the Practice button; if the opener is gone, the first visible Practice button). The hook ignores keys that happen inside another layer (a Radix sheet opened from a take) and keys another handler already used (Escape while renaming a take). The mini player floats above the panel: its controls follow the panel's in the Tab order, so a keyboard user can still pause. `aria-modal` stays on, so a screen reader reads the panel only; the same play controls are on every take row, so nothing is lost there. The two tabs follow the ARIA tab pattern (`tablist`, `tab`, `tabpanel`, arrow keys, Home and End, only the selected tab in the Tab order); the tab list shows when the song has a reference track or the viewer is a guest, as before. `BottomSheet` now returns focus to the element that opened it when it has no trigger (the take actions sheet is controlled), because Radix only refocuses a trigger it knows.
+- **Confirm:** no (behaviour for mouse and touch is unchanged).
+- **Consequences:** `getByRole('dialog')` in e2e now also matches the open panel; specs wait for `data-testid="practice-drawer"` instead of the old `h3` and scope sheets accordingly.
+
+### UXA-051 · Heading levels in the Practice panel
+
+- **Date / story:** Nov 6, 2026 · #418 (G9.2)
+- **Context:** axe `heading-order` flagged the panel: the song page has an `h1`, and the panel jumped to `h3` (title), then `h4` (recorder state).
+- **Choice:** under the page `h1`: **Practice** is the panel's `h2`; the song title in the panel is a paragraph (it is part of the dialog's name, *Practice <song>*); the recorder state and the share dialog's *Shared with* list are `h3`; take names stay `h4`. Nothing changes on screen.
+- **Confirm:** no.
+
+### UXA-052 · Fixes in the audit that change how something looks or where it is
+
+- **Date / story:** Nov 6, 2026 · #418 (G9.2)
+- **Context:** the audit fixes below are not visible to most people, but four are.
+- **Choice and what changes:**
+  1. The song menu (⋯, phones) was a hand-built sheet; it is now the shared `BottomSheet` (real dialog, same three actions, token colours, no gradient tile). The song title and the *by <author>* line are its title and description.
+  2. The Practice panel's tabs and frame use tokens: the selected tab is underlined and orange (was indigo), the unselected tab is `text-fg-muted` (the old grey failed 4.5:1 in dark), the frame is `bg-bg` with `border-line`, the close button is a 44 px target.
+  3. The desktop Practice button's equalizer bars stand still (60 % high) when the device asks for reduced motion, and use the accent colour.
+  4. The header logo link is not rendered on phones (it had no visible content and no name, yet it was a focus stop); the desktop link is unchanged.
+  Not visible: *A−* / *A+* get their accessible names (*Smaller text*, *Larger text*) from hidden text, so the visible glyph is part of what is read; names for the header search field, the share and singer search fields and the singer name and e-mail fields; the file upload in the recorder is a real button (it was a clickable `div`, so a keyboard could not reach it); the recorder's state line (*Ready to record*, *Recording...*, *Recording paused*) is a live region; the song page has no second `main` landmark (the layout owns it).
+- **Confirm:** yes (1 to 4 are visible).
+
+### UXA-053 · What the audit covers, and what it cannot show
+
+- **Date / story:** Nov 6, 2026 · #418 (G9.2)
+- **Choice:** axe-core (WCAG 2.0, 2.1 and 2.2 A and AA, plus best-practice) runs in Playwright on a production build, mobile project (390 px), as a guest and as a member, in light and dark: song page, Practice Listen, Practice Record (guest: behind the sign-in gate), the recorder idle, on the upload step and while recording (Chromium's fake microphone), the take actions sheet, the playlist sheet (the sign-in sheet for a guest), the Make public dialog, the share and singer dialogs, the reading tools sheet and the song menu. The spec fails on any violation, minor and moderate included, and excludes no rule and no selector. Take rows of the fixture have no audio file, so play buttons are audited in their disabled, explained state. Not covered by the automated run: the desktop layout, the other roles (musician, admin), a take that is playing, and everything a person with a screen reader judges (reading order, wording, whether announcements are timely). VoiceOver and TalkBack were not run; the owner's checklist is in `docs/ux-research/2026-11-06-a11y-audit.md` and is still to be done. The fixed ids of `SearchSuggestions` (two panels open at once) were not flagged on the song page and are left alone.
+- **Confirm:** no.
+
