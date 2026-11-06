@@ -57,22 +57,49 @@ export function useSearchSuggestions() {
 
   const close = useCallback(() => setOpen(false), []);
 
-  // A tap outside the field and the panel closes the panel.
+  // True from the moment a pointer goes down until just after its click: a press must not move the page.
+  const pressingRef = useRef(false);
+
+  // A tap outside the field and the panel closes the panel. It closes on the CLICK, not on the press: the panel
+  // sits in the page flow, so closing it moves the list up, and a press on a song would then release on
+  // something else (validation 1 review, B1). The click lands on what was under the finger at press time.
   useEffect(() => {
     if (!open) return;
-    const onDown = (e: PointerEvent) => {
-      const target = e.target as Node;
-      if (!wrapperRef.current?.contains(target) && !panelRef.current?.contains(target)) setOpen(false);
+    const isOutside = (target: Node) => !wrapperRef.current?.contains(target) && !panelRef.current?.contains(target);
+    const onDown = () => {
+      pressingRef.current = true;
     };
-    document.addEventListener('pointerdown', onDown);
-    return () => document.removeEventListener('pointerdown', onDown);
+    const onUp = () => {
+      // The click follows the release in the same turn; forget the press right after it.
+      setTimeout(() => {
+        pressingRef.current = false;
+      }, 0);
+    };
+    const onClick = (e: MouseEvent) => {
+      pressingRef.current = false;
+      if (isOutside(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('pointerdown', onDown, true);
+    document.addEventListener('pointerup', onUp, true);
+    document.addEventListener('pointercancel', onUp, true);
+    document.addEventListener('click', onClick, true);
+    return () => {
+      document.removeEventListener('pointerdown', onDown, true);
+      document.removeEventListener('pointerup', onUp, true);
+      document.removeEventListener('pointercancel', onUp, true);
+      document.removeEventListener('click', onClick, true);
+      pressingRef.current = false;
+    };
   }, [open]);
 
   /** Focus moved: tabbing out of the field and the panel closes the panel. */
   const closeIfFocusLeaves = useCallback((e: React.FocusEvent) => {
     const next = e.relatedTarget as Node | null;
-    if (!next) return; // a tap on something unfocusable: the pointerdown handler decides
+    if (!next) return; // a tap on something unfocusable: the click handler decides
     if (wrapperRef.current?.contains(next) || panelRef.current?.contains(next)) return;
+    // A browser focuses a link or button on press: the click that follows closes the panel, so that the
+    // page holds still until the press is released.
+    if (pressingRef.current) return;
     setOpen(false);
   }, []);
 

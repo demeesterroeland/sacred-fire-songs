@@ -1553,6 +1553,7 @@ export default function RehearsalDrawer({
 
         <div 
           data-testid="bottom-mini-player"
+          data-reader-bar=""
           role="region"
           aria-label={t('miniPlayer.region')}
           className="fixed bottom-[calc(var(--bottom-nav-height,3.5rem)+env(safe-area-inset-bottom,0px))] lg:bottom-4 inset-x-0 lg:left-1/2 lg:right-auto lg:-translate-x-1/2 z-[60] w-full lg:max-w-xl lg:rounded-panel shadow-sheet bg-surface text-fg h-bar flex items-center justify-between px-2 border-t lg:border border-line-strong select-none motion-safe:animate-in motion-safe:slide-in-from-bottom motion-safe:duration-300"

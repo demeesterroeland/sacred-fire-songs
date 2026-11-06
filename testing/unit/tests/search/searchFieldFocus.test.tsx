@@ -116,6 +116,55 @@ describe.each(fields)('$name suggestion panel', ({ name, render: mount, role }) 
     expect(container).toBeTruthy();
   });
 
+  // Validation 1 review, B1: the panel is in the page flow, so closing it moves the list. A press that lands on a
+  // song must not move the page before it is released: the panel closes on the click, not on the press.
+  it('stays open while a press is down outside, even when the press moves focus; closes on the click', async () => {
+    mount();
+    const outside = document.createElement('a');
+    outside.href = '/songs/abc';
+    outside.textContent = 'a song';
+    document.body.appendChild(outside);
+    act(() => screen.getByRole(role).focus());
+    await screen.findByTestId('search-suggestions');
+
+    fireEvent.pointerDown(outside);
+    act(() => outside.focus()); // a browser focuses a link on mouse down
+    expect(screen.getByTestId('search-suggestions')).toBeTruthy(); // the page has not moved yet
+
+    fireEvent.pointerUp(outside);
+    fireEvent.click(outside);
+    expect(screen.queryByTestId('search-suggestions')).toBeNull();
+    outside.remove();
+  });
+
+  it('a press on something unfocusable outside also waits for the click', async () => {
+    mount();
+    const outside = document.createElement('div');
+    document.body.appendChild(outside);
+    act(() => screen.getByRole(role).focus());
+    await screen.findByTestId('search-suggestions');
+    fireEvent.pointerDown(outside);
+    expect(screen.getByTestId('search-suggestions')).toBeTruthy();
+    fireEvent.pointerUp(outside);
+    fireEvent.click(outside);
+    expect(screen.queryByTestId('search-suggestions')).toBeNull();
+    outside.remove();
+  });
+
+  it('a press that is cancelled does not leave the panel stuck: the next Tab out still closes it', async () => {
+    mount();
+    const outside = document.createElement('button');
+    document.body.appendChild(outside);
+    act(() => screen.getByRole(role).focus());
+    await screen.findByTestId('search-suggestions');
+    fireEvent.pointerDown(outside);
+    fireEvent.pointerCancel(outside);
+    await act(async () => { await new Promise((r) => setTimeout(r, 5)); });
+    act(() => outside.focus());
+    expect(screen.queryByTestId('search-suggestions')).toBeNull();
+    outside.remove();
+  });
+
   it('stays open while focus moves from the field into the panel', async () => {
     mount();
     act(() => screen.getByRole(role).focus());
@@ -131,6 +180,16 @@ describe.each(fields)('$name suggestion panel', ({ name, render: mount, role }) 
     await screen.findByTestId('search-suggestions');
     fireEvent.keyDown(input, { key: 'ArrowDown' });
     expect(document.activeElement).toBe(screen.getByRole('button', { name: 'fuego' }));
+  });
+});
+
+describe('Header: tabbing to the search options button leaves the field (L4)', () => {
+  it('closes the suggestions so the page is not left pushed down', async () => {
+    wrap(<Header />);
+    act(() => screen.getByRole('textbox').focus());
+    expect(await screen.findByTestId('search-suggestions')).toBeTruthy();
+    act(() => screen.getByRole('button', { name: DICTIONARIES.en['header.searchOptions'] as string }).focus());
+    expect(screen.queryByTestId('search-suggestions')).toBeNull();
   });
 });
 

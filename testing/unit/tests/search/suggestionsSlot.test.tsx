@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 // Validation 1 (fix 4): the suggestions panel is rendered in the page flow (a slot at the top of the main
 // column), so it pushes the list down instead of floating over it.
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render, screen } from '@testing-library/react';
 import { SuggestionsPortal, SuggestionsSlot } from '@/components/search/SuggestionsSlot';
 
@@ -45,5 +45,27 @@ describe('SuggestionsSlot', () => {
       </SuggestionsPortal>,
     );
     expect(screen.queryByTestId('panel')).toBeNull();
+  });
+
+  // Validation 1 review, H1: the panel must not move the scroll position of the column it pushes down.
+  it('never scrolls the page when it opens: it sticks to the top of the column instead', () => {
+    const scrollIntoView = vi.fn();
+    Element.prototype.scrollIntoView = scrollIntoView;
+    render(
+      <div>
+        <SuggestionsPortal>
+          <div data-testid="panel">panel</div>
+        </SuggestionsPortal>
+        <SuggestionsSlot />
+      </div>,
+    );
+    expect(screen.getByTestId('panel')).toBeTruthy();
+    expect(scrollIntoView).not.toHaveBeenCalled();
+    const cls = screen.getByTestId('search-suggestions-slot').className;
+    expect(cls).toMatch(/\bsticky\b/);
+    expect(cls).toMatch(/\btop-0\b/);
+    expect(cls).toMatch(/\bbg-bg\b/); // rows pass under it while the column is scrolled
+    // @ts-expect-error cleanup of the stub
+    delete Element.prototype.scrollIntoView;
   });
 });

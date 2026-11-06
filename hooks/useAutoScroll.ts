@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useRef, useState, type RefObject } from 'react';
 import { endBelowFold, isAtBottom, stepScroll } from '@/lib/reader/autoScroll';
+import { fixedBottomBarsHeight } from '@/lib/reader/readingArea';
 
 /** Touches inside an element marked with this attribute (the reading tools) do not pause the scroll. */
 export const AUTOSCROLL_KEEP_ATTR = 'data-autoscroll-keep';
@@ -25,6 +26,8 @@ export function findScrollParent(from: Element | null): HTMLElement | null {
  * Validation 1 (fix 1): is the end of the lyrics below the fold? Auto-scroll is only offered then.
  * Measured on every commit and again whenever the lyrics, their surroundings or the viewport change size
  * (text size, chords switch, version switch, content load, rotation): `ResizeObserver` plus `resize`.
+ * `endRef` is the lyric text itself (no padding below it) and the fold is the bottom of what the reader can
+ * see: the window above the bars fixed to its bottom edge (review round, H2).
  * False while the lyrics are not on the page yet.
  */
 export function useLyricsBelowFold(endRef: RefObject<Element | null>, anchorRef?: RefObject<Element | null>): boolean {
@@ -36,6 +39,7 @@ export function useLyricsBelowFold(endRef: RefObject<Element | null>, anchorRef?
     if (!end) return setBelow(false);
     const scroller = findScrollParent(anchorRef?.current ?? end);
     const endBottom = end.getBoundingClientRect().bottom;
+    const reservedBottom = fixedBottomBarsHeight();
     if (scroller) {
       setBelow(
         endBelowFold({
@@ -43,10 +47,11 @@ export function useLyricsBelowFold(endRef: RefObject<Element | null>, anchorRef?
           viewportTop: scroller.getBoundingClientRect().top,
           viewportHeight: scroller.clientHeight,
           scrollTop: scroller.scrollTop,
+          reservedBottom,
         }),
       );
     } else {
-      setBelow(endBelowFold({ endBottom, viewportTop: 0, viewportHeight: window.innerHeight, scrollTop: window.scrollY }));
+      setBelow(endBelowFold({ endBottom, viewportTop: 0, viewportHeight: window.innerHeight, scrollTop: window.scrollY, reservedBottom }));
     }
   }, [endRef, anchorRef]);
 
@@ -72,8 +77,12 @@ export function useLyricsBelowFold(endRef: RefObject<Element | null>, anchorRef?
   useEffect(() => {
     const state = observed.current;
     window.addEventListener('resize', measure);
+    // The mini player and the bars reserve their room through CSS variables on <html>: a change means a bar came or went.
+    const mo = typeof MutationObserver !== 'undefined' ? new MutationObserver(measure) : null;
+    mo?.observe(document.documentElement, { attributes: true, attributeFilter: ['style'] });
     return () => {
       window.removeEventListener('resize', measure);
+      mo?.disconnect();
       state.ro?.disconnect();
       state.ro = null;
       state.el = null;
@@ -126,7 +135,8 @@ export function useAutoScroll(
         const atBottom = scroller
           ? isAtBottom(scroller.scrollTop, scroller.clientHeight, scroller.scrollHeight)
           : isAtBottom(window.scrollY, window.innerHeight, document.documentElement.scrollHeight);
-        const viewportBottom = scroller ? scroller.getBoundingClientRect().bottom : window.innerHeight;
+        // The end of the lyrics counts as reached when it is clear of the bars at the bottom of the window.
+        const viewportBottom = (scroller ? scroller.getBoundingClientRect().bottom : window.innerHeight) - fixedBottomBarsHeight();
         const endEl = endRef?.current;
         const lyricsEnded = !!endEl && endEl.getBoundingClientRect().bottom <= viewportBottom + 1;
         if (atBottom || lyricsEnded) {

@@ -256,6 +256,8 @@ export default function Header({ initialUser }: { initialUser?: AuthUser | null 
                         />
                         <span id="search-suggestions-hint" className="sr-only">{t('header.suggestionsHint')}</span>
                         <button
+                            // Tabbing from the field to this button leaves the field: close the suggestions (L4).
+                            onFocus={closeSuggestions}
                             onClick={() => {
                                 closeSuggestions();
                                 setSearchFiltersOpen(!searchFiltersOpen);

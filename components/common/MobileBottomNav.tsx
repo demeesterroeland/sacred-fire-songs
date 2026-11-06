@@ -85,6 +85,7 @@ export default function MobileBottomNav() {
     return (
         <nav
             data-testid="bottom-nav"
+            data-reader-bar=""
             aria-label={t('nav.bottomNavigation')}
             data-hydrated={hydrated ? 'true' : undefined}
             className={`fixed bottom-0 inset-x-0 z-30 lg:hidden motion-safe:transition-transform motion-safe:duration-300 ${!isVisible ? 'translate-y-full' : 'translate-y-0'}`}

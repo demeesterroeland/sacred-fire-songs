@@ -540,14 +540,17 @@ export default function SongDetailPage() {
                     </div>
 
                     {/* Song Content (Lyrics/Chords) */}
-                    <div ref={lyricsRef} className="pt-2 pb-12">
-                        <SongDisplay
-                            content={shownContent}
-                            melodyNotation={currentVersion?.melody_notation || ''}
-                            hasChords={shownHasChords}
-                            sizeStep={readerPrefs.step}
-                            showChords={readerPrefs.chords}
-                        />
+                    <div className="pt-2 pb-12">
+                        {/* The fold is measured on the lyric text itself, not on the padding below it (review H2). */}
+                        <div ref={lyricsRef}>
+                            <SongDisplay
+                                content={shownContent}
+                                melodyNotation={currentVersion?.melody_notation || ''}
+                                hasChords={shownHasChords}
+                                sizeStep={readerPrefs.step}
+                                showChords={readerPrefs.chords}
+                            />
+                        </div>
                     </div>
 
                     <div className="h-20"></div>

@@ -135,7 +135,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
                     {/* Mobile overlay when sidebar is open */}
                     <SidebarOverlay />
 
-                    <main className="relative min-w-0 overflow-y-visible lg:overflow-y-auto pb-16 lg:pb-0 col-start-2">
+                    <main className="relative min-w-0 overflow-y-visible lg:overflow-y-auto lg:[overflow-anchor:none] pb-16 lg:pb-0 col-start-2">
                       <SuggestionsSlot />
                       {children}
                     </main>
