@@ -1,11 +1,12 @@
 # UX v2: Phone Validation Script
 
-**Version:** 1.30 | **Date:** Nov 6, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
+**Version:** 1.31 | **Date:** Nov 6, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.31 | Nov 6, 2026 | Added #416 (New Playlist: visibility switch and one-line explanation). |
 | 1.30 | Nov 6, 2026 | Added #394 (auto-scroll and transpose in the reader toolbar). |
 | 1.29 | Nov 6, 2026 | Added #404 (recorder level meter, count-in, time left, review buttons); review: rolling no-sound window, bold last 10 s, meter below the clock. |
 | 1.28 | Nov 6, 2026 | Added #409 (auth pages without a fake close button). |
@@ -435,3 +436,16 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 - [ ] 9. Member and guest: the row has the same buttons; the **⋯** sheet has **Auto-scroll** only, no **Transpose**.
 - [ ] 10. Switch to Dutch, Spanish, Italian, Russian, French, Portuguese and Quechua: the buttons' names, the sheet and the speed line are translated and fit; repeat step 2 in dark mode (`…/394/after-dark/mobile/musician/02-tools-sheet.webp`).
 - [ ] 11. Desktop (wide window): the same row; auto-scroll scrolls the main area and the toolbar sticks under the song title while it runs.
+
+### #416 · G8.3 New Playlist explains private vs public
+
+**Preconditions:** signed in as a member on a 390 px phone, English; run once in light and once in dark. A second browser (or a private window) signed out, for step 5.
+
+- [ ] 1. Open **Library → Playlists → + New Playlist** (`/library/playlists/add`). **Expected:** the name field, then a row **Make public** with a switch that is off, then one grey line: *Private: only you can see this playlist unless you make it public.* **Create Playlist** is one wide orange button, paler (disabled) while the name is empty. Screenshot: `docs/ux-research/screenshots/ux-v2/416/after-light/mobile/member/11-playlist-add.webp`. Before: `docs/ux-research/screenshots/ux-v2/416/before-light/mobile/member/11-playlist-add.webp`.
+- [ ] 2. Type a name. **Expected:** **Create Playlist** becomes active.
+- [ ] 3. Tap the switch. **Expected:** it turns orange and the line becomes *Public: anyone can find and open this playlist, with or without an account.* The lock icon becomes a globe. Tap it again: back to the private line.
+- [ ] 4. With the switch off, tap **Create Playlist**. **Expected:** you land on the new playlist; in **Library → Playlists** it is under *My private playlists*.
+- [ ] 5. Make a second playlist with the switch on. **Expected:** it is listed under *Public playlists*; opening its link in the signed-out browser shows it. Opening the private one from step 4 signed out asks to sign in.
+- [ ] 6. Open any song, tap **Playlist** in the bar at the bottom, tap **New playlist**. **Expected:** under the name field: *New playlists are private: only you can see them unless you make them public.*
+- [ ] 7. Switch the language to Dutch, Spanish, Italian, Russian, French, Portuguese and Quechua: the switch label and both lines are translated and fit on the phone. Repeat step 1 in dark mode (`…/416/after-dark/mobile/member/11-playlist-add.webp`).
+- [ ] 8. Clean up: delete the playlists you made in steps 4 and 5 (and the one from step 6).

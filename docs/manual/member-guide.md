@@ -1,11 +1,12 @@
 # Member Guide (draft)
 
-**Version:** 0.13 | **Date:** Nov 6, 2026
+**Version:** 0.14 | **Date:** Nov 6, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.14 | Nov 6, 2026 | New Playlist has a **Make public** switch and one line that says who can see the playlist; a playlist made from the Add to playlist sheet is always private (UX v2, #416). |
 | 0.13 | Nov 6, 2026 | Song page toolbar: **Auto-scroll** (▶) and **⋯ reading tools** with scroll speed; musicians also **Transpose** (UX v2, #394). |
 | 0.12 | Nov 6, 2026 | Settings lists only what works: Profile, Security and Preferences; no "Coming soon" items (UX v2, #389). |
 | 0.11 | Nov 5, 2026 | **Shared with me**: a list of takes others shared with you, in the account menu and under the Library tabs; the bell tells you when a take arrives, and opening the song's Practice panel marks it read (UX v2, #403). |
@@ -58,7 +59,7 @@ Below that: **My private playlists** and **Recently viewed** ("View all" opens t
 
 ## Playlists (setlists)
 
-**Create:** bottom bar **Library → +  → New Playlist**, or **Library → + New Playlist**. Type a name → **Create Playlist**. New playlists are private; you can change that later.
+**Create:** bottom bar **Library → +  → New Playlist**, or **Library → + New Playlist**. Type a name → **Create Playlist**. Under the name, the switch **Make public** is off: *Private: only you can see this playlist unless you make it public.* Switch it on and anyone can find and open the playlist, with or without an account. A new playlist made from the **Add to playlist** sheet is always private; you can change either kind later from the playlist's menu.
 
 **Add songs:**
 - From a song: **Playlist** in the bar at the bottom → pick a playlist.

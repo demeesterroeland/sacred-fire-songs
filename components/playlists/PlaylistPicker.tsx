@@ -176,25 +176,28 @@ export function PlaylistPicker({ compositionId, userId, triggerClassName, iconCl
                         if (row.kind === 'new') {
                             // First row: create a new playlist
                             return creating ? (
-                                <div key="new" data-testid="picker-row" className="flex min-h-tap items-center gap-2 px-4 py-2">
-                                    <input
-                                        autoFocus
-                                        value={newTitle}
-                                        onChange={e => setNewTitle(e.target.value)}
-                                        onKeyDown={e => {
-                                            e.stopPropagation();
-                                            if (e.key === 'Enter') handleCreate();
-                                            if (e.key === 'Escape') setCreating(false);
-                                        }}
-                                        aria-label={t('playlists.picker.newPlaylistName')}
-                                        placeholder={t('playlists.picker.newPlaylistPlaceholder')}
-                                        disabled={isCreating}
-                                        className="h-tap min-w-0 flex-1 rounded-control border border-line-strong bg-bg px-3 text-body text-fg placeholder:text-fg-subtle"
-                                    />
-                                    <Button type="button" onClick={handleCreate} disabled={!newTitle.trim() || isCreating}>
-                                        {isCreating ? <Loader2 aria-hidden="true" className="size-4 motion-safe:animate-spin" /> : null}
-                                        {t('playlists.picker.create')}
-                                    </Button>
+                                <div key="new">
+                                    <div data-testid="picker-row" className="flex min-h-tap items-center gap-2 px-4 py-2">
+                                        <input
+                                            autoFocus
+                                            value={newTitle}
+                                            onChange={e => setNewTitle(e.target.value)}
+                                            onKeyDown={e => {
+                                                e.stopPropagation();
+                                                if (e.key === 'Enter') handleCreate();
+                                                if (e.key === 'Escape') setCreating(false);
+                                            }}
+                                            aria-label={t('playlists.picker.newPlaylistName')}
+                                            placeholder={t('playlists.picker.newPlaylistPlaceholder')}
+                                            disabled={isCreating}
+                                            className="h-tap min-w-0 flex-1 rounded-control border border-line-strong bg-bg px-3 text-body text-fg placeholder:text-fg-subtle"
+                                        />
+                                        <Button type="button" onClick={handleCreate} disabled={!newTitle.trim() || isCreating}>
+                                            {isCreating ? <Loader2 aria-hidden="true" className="size-4 motion-safe:animate-spin" /> : null}
+                                            {t('playlists.picker.create')}
+                                        </Button>
+                                    </div>
+                                    <p className="px-4 pb-2 text-meta text-fg-muted">{t('playlists.picker.newPrivateHint')}</p>
                                 </div>
                             ) : (
                                 <button key="new" type="button" data-testid="picker-row" onClick={() => setCreating(true)} className={ROW}>

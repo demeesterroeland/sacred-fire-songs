@@ -1,6 +1,6 @@
 # E2E Test Overview & Matrix: Sacred Fire Songs
 
-**Version:** 1.16
+**Version:** 1.17
 **Status:** Living Document
 **Date:** Nov 6, 2026
 **Tracking:** GH #142
@@ -25,6 +25,7 @@
 | **1.13** | Nov 4, 2026 | PWA-03: offline fallback page covered by `e2e/tests/offline.spec.ts` (#353); cached pages offline still planned. |
 | **1.14** | Nov 5, 2026 | Story 6.1.26 (#410): guests on members-only screens now get the GuestGate (locked preview, reason, `Sign in` with `next=`) instead of a redirect; ACC-01 updated, new spec `e2e/tests/guest-gate.spec.ts` covers every gated route. |
 | **1.15** | Nov 5, 2026 | LIB-13 follows Story 6.1.24: no `/explore` route; bottom bar spec `ux-v2-bottom-bar.spec.ts`. |
+| **1.17** | Nov 6, 2026 | Story 6.1.32 (#416): PL-01 covers the New Playlist page: private line, Make public switch, Create enabled once named. New spec `ux-v2-new-playlist-visibility.spec.ts`. |
 | **1.16** | Nov 6, 2026 | Story 6.1.5 (#389): ACC-04 (Privacy settings) is hidden behind `FEATURES.privacySettings`; LIB-10 (Albums) answers not-found. New spec `ux-v2-hide-unfinished.spec.ts` asserts no "Coming soon" in Library, Settings and the song form. |
 
 ---
@@ -178,7 +179,7 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 
 | ID | Feature | Scenario | Variants / Edge cases | Roles | Feat | E2E | Pri | Ref |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| PL-01 | Create playlist | Authenticated user creates a playlist inline | empty/duplicate title validation; guest blocked | M | ✅ | 🔲 | P0 | 4.1.x |
+| PL-01 | Create playlist | Authenticated user creates a playlist inline | empty/duplicate title validation; guest blocked | M | ✅ | 🔲 | P0 | `ux-v2-new-playlist-visibility.spec.ts` (private by default, public with the switch) |
 | PL-02 | Add songs via search sheet | Open "+ Add Songs", search, add to playlist | song added at end; duplicate add | M | ✅ | 🔲 | P1 | 4.1.3 |
 | PL-03 | Reorder songs | Drag-drop reorder persists | keyboard reorder; order survives reload | M | ✅ | 🔲 | P1 | PlaylistDetailClient |
 | PL-04 | Remove song | Remove a song from the playlist | last song → empty state | M | ✅ | 🔲 | P2 | PlaylistDetailClient |

@@ -3,10 +3,13 @@
 import { useState, useRef, useEffect, useTransition } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { ArrowLeft, Lock, Loader2 } from 'lucide-react';
+import { ArrowLeft, Globe, Lock, Loader2 } from 'lucide-react';
 import { createPlaylist } from '@/app/actions/playlistActions';
 import { toast } from 'sonner';
 
+import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { NEW_PLAYLIST_IS_PUBLIC, canCreatePlaylist, visibilityExplainKey } from '@/lib/playlists/visibility';
 import { useLocale } from '@/context/LocaleContext';
 
 /** Client half of /library/playlists/add; the page guards auth on the server (#321). */
@@ -14,8 +17,11 @@ export function CreatePlaylistForm() {
     const { t } = useLocale();
     const router = useRouter();
     const [title, setTitle] = useState('');
+    const [isPublic, setIsPublic] = useState(NEW_PLAYLIST_IS_PUBLIC);
     const [isPending, startTransition] = useTransition();
     const inputRef = useRef<HTMLInputElement>(null);
+    // A second Enter before the first request settles must not create a second playlist.
+    const submittingRef = useRef(false);
 
     // Auto-focus the title input
     useEffect(() => {
@@ -25,6 +31,7 @@ export function CreatePlaylistForm() {
     }, []);
 
     const handleCreate = () => {
+        if (submittingRef.current || isPending) return;
         const trimmed = title.trim();
         if (!trimmed) {
             toast.error(t('playlists.add.nameRequired'));
@@ -32,9 +39,11 @@ export function CreatePlaylistForm() {
             return;
         }
 
+        submittingRef.current = true;
         startTransition(async () => {
-            const result = await createPlaylist(trimmed);
+            const result = await createPlaylist(trimmed, isPublic);
             if ('error' in result) {
+                submittingRef.current = false;
                 toast.error(result.error);
             } else {
                 toast.success(t('playlists.add.created'));
@@ -43,53 +52,70 @@ export function CreatePlaylistForm() {
         });
     };
 
+    const explainId = 'new-playlist-visibility-explain';
+
     return (
         <div className="p-6 max-w-2xl mx-auto space-y-6">
             {/* Header */}
-            <div className="space-y-2">
-                <div className="flex items-center gap-3">
-                    <Link
-                        href="/library/playlists"
-                        className="text-gray-500 hover:text-gray-700 dark:hover:text-gray-300 transition-colors shrink-0"
-                        aria-label={t('playlists.detail.back')}
-                    >
-                        <ArrowLeft className="w-5 h-5" />
-                    </Link>
-                    <div className="flex-1 min-w-0">
-                        <input
-                            ref={inputRef}
-                            value={title}
-                            onChange={e => setTitle(e.target.value)}
-                            onKeyDown={e => {
-                                if (e.key === 'Enter') handleCreate();
-                                if (e.key === 'Escape') router.push('/library/playlists');
-                            }}
-                            placeholder={t('playlists.add.namePlaceholder')}
-                            className="w-full bg-transparent text-xl font-bold text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-600 outline-none border-b border-gray-300 dark:border-gray-700 focus:border-amber-500 pb-1 transition-colors"
-                        />
-                        <p className="text-xs text-gray-500 mt-1.5 flex items-center gap-1.5">
-                            <Lock className="w-3 h-3" />
-                            {t('playlists.add.privateHint')}
-                        </p>
-                    </div>
+            <div className="flex items-center gap-1">
+                <Link
+                    href="/library/playlists"
+                    className="-ml-3 flex size-tap shrink-0 items-center justify-center text-fg-muted transition-colors hover:text-fg"
+                    aria-label={t('playlists.detail.back')}
+                >
+                    <ArrowLeft className="size-5" aria-hidden="true" />
+                </Link>
+                <input
+                    ref={inputRef}
+                    value={title}
+                    onChange={e => setTitle(e.target.value)}
+                    onKeyDown={e => {
+                        if (e.key === 'Enter') handleCreate();
+                        if (e.key === 'Escape') router.push('/library/playlists');
+                    }}
+                    placeholder={t('playlists.add.namePlaceholder')}
+                    aria-label={t('playlists.add.namePlaceholder')}
+                    className="min-h-tap min-w-0 flex-1 border-b border-line-strong bg-transparent text-title font-bold text-fg outline-none transition-colors placeholder:text-fg-subtle focus:border-accent"
+                />
+            </div>
+
+            {/* Visibility: one switch, one line that says what it means */}
+            <div className="space-y-1">
+                <div className="flex min-h-tap items-center justify-between gap-4">
+                    <label htmlFor="new-playlist-public" className="flex items-center gap-2 text-body font-semibold text-fg">
+                        {isPublic ? <Globe className="size-4" aria-hidden="true" /> : <Lock className="size-4" aria-hidden="true" />}
+                        {t('playlists.add.visibilityLabel')}
+                    </label>
+                    <Switch
+                        id="new-playlist-public"
+                        checked={isPublic}
+                        onCheckedChange={setIsPublic}
+                        aria-describedby={explainId}
+                        className="shrink-0"
+                    />
                 </div>
+                <p id={explainId} className="text-meta text-fg-muted">
+                    {t(visibilityExplainKey(isPublic))}
+                </p>
             </div>
 
             {/* Create button */}
-            <button
+            <Button
+                type="button"
+                size="lg"
                 onClick={handleCreate}
-                disabled={isPending || !title.trim()}
-                className="w-full bg-red-600 hover:bg-red-500 disabled:opacity-40 disabled:cursor-not-allowed text-white font-bold py-3 rounded-xl shadow-lg shadow-red-500/20 active:scale-[0.98] transition-all flex items-center justify-center gap-2"
+                disabled={!canCreatePlaylist(title, isPending)}
+                className="w-full font-bold"
             >
                 {isPending ? (
                     <>
-                        <Loader2 className="w-5 h-5 animate-spin" />
+                        <Loader2 className="size-5 motion-safe:animate-spin" aria-hidden="true" />
                         {t('playlists.add.creating')}
                     </>
                 ) : (
                     t('playlists.add.submit')
                 )}
-            </button>
+            </Button>
         </div>
     );
 }

@@ -1,6 +1,6 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 1.85
+**Version:** 1.86
 **Status:** Living Document
 **Date:** Nov 6, 2026
 
@@ -60,6 +60,7 @@
 | **1.59** | Nov 5, 2026 | Epic 6.1: Story 6.1.23 (#407, G5.2) implemented on `feat/ux-v2` — Library tabs fit a phone, Albums hidden behind a feature flag (UXD-4). |
 | **1.61** | Nov 5, 2026 | Epic 6.1: Story 6.1.6 (#390, G2.1) implemented on `feat/ux-v2` — `Chords · A− · A+` reader toolbar, size persisted per device. |
 | **1.60** | Nov 5, 2026 | Epic 6.1: Story 6.1.7 (#391, G2.2) implemented on `feat/ux-v2` — song meta and Key · Capo · Tuning on one grey line each. |
+| **1.86** | Nov 6, 2026 | Epic 6.1: Story 6.1.32 (#416, G8.3) implemented on `feat/ux-v2`: New Playlist has a Make public switch (off by default) and one line that says private unless made public / public to anyone; the Add to playlist sheet says new playlists are private. |
 | **1.85** | Nov 6, 2026 | Epic 6.1: Story 6.1.10 (#394, G2.5) implemented on `feat/ux-v2` — auto-scroll (▶ / ⏸ in the toolbar, speed in the ⋯ sheet, pauses on a touch, stops at the end) and musician-only transpose (± semitone, key shown) join the reader toolbar; stay-awake indicator while the screen lock is held. |
 | **1.84** | Nov 6, 2026 | Epic 6.1: Story 6.1.20 (#404, G4.7) implemented on `feat/ux-v2` — recorder level meter, optional 3-2-1 count-in, `m:ss left` in the last minute, Save Take as the single full-width primary in review (review fixes: mic released on failed start, live regions, iOS audio context). |
 | **1.83** | Nov 6, 2026 | Epic 6.1: Story 6.1.25 (#409, G5.4) implemented on `feat/ux-v2`: auth pages without the fake ✕; Back returns to the `next=` target, else Home. |
@@ -1682,7 +1683,7 @@ Owner decision of Nov 4, 2026: sober greyscale interface with one accent, smalle
 | 6.1.29 | #413 | `G7.1` | B | **[Implemented on feat/ux-v2]** As a Guest, I want recent searches and category chips when I focus the search field so that I can repeat or narrow a search in one tap | #386 |
 | 6.1.30 | #414 | `G8.1` | B | As a Member, I want Add to playlist as a bottom sheet with 'New playlist' first and check marks so that I see where the song already is | #385 |
 | 6.1.31 | #415 | `G8.2` | C | As a Member, I want a live chord preview and a visible upload button on Add Song so that I see what I am writing | #385 |
-| 6.1.32 | #416 | `G8.3` | C | As a Member, I want the New Playlist page to explain private vs public in one line so that I know what I am creating | #385 |
+| 6.1.32 | #416 | `G8.3` | C | **[Implemented on feat/ux-v2]** As a Member, I want the New Playlist page to explain private vs public in one line so that I know what I am creating | #385 |
 | 6.1.33 | #417 | `G9.1` | A | **[Implemented on feat/ux-v2]** As a Contributor, I want the demo seed free of E2E and smoke-test playlists so that screenshots and demos show real-looking data | — |
 | 6.1.34 | #418 | `G9.2` | C | As a reader using assistive technology, I want the song page and Practice panel to pass an accessibility audit so that the app works with a screen reader | #393, #401 |
 

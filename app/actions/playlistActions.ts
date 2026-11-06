@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
+import { NEW_PLAYLIST_IS_PUBLIC, toIsPublic } from '@/lib/playlists/visibility';
 import { isSmartPlaylist } from '@/lib/playlists/smartPlaylists';
 import { uuid, playlistTitle, playlistDescription, safeParse } from '@/lib/validation/schemas';
 import { z } from 'zod';
@@ -28,7 +29,8 @@ async function checkPlaylistModifyAccess(
 // ─── Create ───────────────────────────────────────────────────────────────────
 
 export async function createPlaylist(
-    title: string
+    title: string,
+    isPublic: boolean = NEW_PLAYLIST_IS_PUBLIC
 ): Promise<{ id: string } | { error: string }> {
     const parsed = safeParse(playlistTitle, title);
     if ('error' in parsed) return { error: parsed.error };
@@ -39,7 +41,7 @@ export async function createPlaylist(
 
     const { data, error } = await supabase
         .from('setlists')
-        .insert({ owner_id: user.id, title: parsed.data, is_public: false })
+        .insert({ owner_id: user.id, title: parsed.data, is_public: toIsPublic(isPublic) })
         .select('id')
         .maybeSingle();
 
