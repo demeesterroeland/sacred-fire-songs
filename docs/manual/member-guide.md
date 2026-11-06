@@ -1,11 +1,12 @@
 # Member Guide (draft)
 
-**Version:** 0.14 | **Date:** Nov 6, 2026
+**Version:** 0.15 | **Date:** Nov 6, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.15 | Nov 6, 2026 | Adding a song: **Preview** shows your chords above the words as on the song page; **Upload .cho / .txt** is a visible button under the lyrics (UX v2, #415). |
 | 0.14 | Nov 6, 2026 | New Playlist has a **Make public** switch and one line that says who can see the playlist; a playlist made from the Add to playlist sheet is always private (UX v2, #416). |
 | 0.13 | Nov 6, 2026 | Song page toolbar: **Auto-scroll** (▶) and **⋯ reading tools** with scroll speed; musicians also **Transpose** (UX v2, #394). |
 | 0.12 | Nov 6, 2026 | Settings lists only what works: Profile, Security and Preferences; no "Coming soon" items (UX v2, #389). |
@@ -76,8 +77,8 @@ The PDF has one song per section with chords, and a footer with the site address
 Bottom bar **Library → + → Add Song**.
 
 1. **Song Title** (required) and **Original Author / Artist** (optional; you can add several).
-2. **Lyrics & chords:** put chords in square brackets right before the syllable: `[Dm]Abre tus alas [A7]pájaro volar`. Chords written on a line above the lyrics are converted automatically. The **?** shows help.
-3. Or tap **Or upload a file (.cho, .txt)** to import a ChordPro file.
+2. **Lyrics & chords:** put chords in square brackets right before the syllable: `[Dm]Abre tus alas [A7]pájaro volar`. Chords written on a line above the lyrics are converted automatically. Under the field, tap **Preview** to see the chords above the words exactly as on the song page; tap it again to go back to typing.
+3. Or tap **Upload .cho / .txt** under the lyrics to import a ChordPro file.
 4. Lines like `{title: …}`, `{artist: …}`, `{key: E}`, `{capo: 3}` and `{c: comment}` set the song details.
 5. Add YouTube / Spotify / SoundCloud links so others can listen.
 6. Save. Your draft is also kept in the browser while you type.

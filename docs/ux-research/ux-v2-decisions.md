@@ -1,11 +1,12 @@
 # UX v2: Agent Decisions (ADR-lite)
 
-**Version:** 1.29 | **Date:** Nov 6, 2026 | **Epic:** 6.1 (#375)
+**Version:** 1.30 | **Date:** Nov 6, 2026 | **Epic:** 6.1 (#375)
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.30 | Nov 6, 2026 | Added UXA-044 (Add Song preview replaces the editor in place, debounced) and UXA-045 (upload is one visible button; dead help icon and dead second Upload removed; #415). |
 | 1.29 | Nov 6, 2026 | Added UXA-042 and UXA-043 (Home welcome block for guests only, wording; Recently added = 5 newest public songs; #412). |
 | 1.28 | Nov 6, 2026 | Added UXA-046 and UXA-047 (New Playlist visibility switch and wording; Add to playlist sheet stays private; #416). |
 | 1.27 | Nov 6, 2026 | Added UXA-032 (reader tools: where transpose and speed live, who transposes, how a shift is kept) and UXA-033 (auto-scroll: speeds, what pauses it, the sticky toolbar, stay-awake indicator; #394). |
@@ -80,6 +81,8 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 | UXA-039 | Nov 6, 2026 | #409 | Auth pages are plain pages on tokens: Back link above the form, no card on phones, bordered panel from `md`, accent-soft flame badge instead of the orange gradient and glow; sign-up-success and error pages are not touched | no |
 | UXA-042 | Nov 6, 2026 | #412 | Home welcome block (heading, one line, search field, Recently added) is for guests only; members see Your library and nothing else new; the welcome copy is new; on Home the header search field is hidden for guests (one field, not two) | yes |
 | UXA-043 | Nov 6, 2026 | #412 | Recently added = the 5 newest **public** songs (explicit `is_public` filter on top of RLS, no RLS change), newest first, *All songs* link, row hidden when empty; Home search reuses the G7.1 panel | no |
+| UXA-044 | Nov 6, 2026 | #415 | Add Song preview: a toggle swaps the lyrics editor for the song page renderer in the same 400 px box (no layout jump), debounced 200 ms, off by default and not remembered; empty text shows a hint | no |
+| UXA-045 | Nov 6, 2026 | #415 | Add Song upload: one visible secondary button under the lyrics opens the file picker at once; the top link, the info panel with a dead second Upload button and the dead help icon are removed; a failed read shows an error | no |
 | UXA-046 | Nov 6, 2026 | #416 | New Playlist: a Make public switch (off by default) and one line that follows it, worded from what RLS does (private: only you; public: anyone, with or without an account); any member may create public | yes |
 | UXA-047 | Nov 6, 2026 | #416 | Add to playlist sheet keeps creating private only and says so under the name field; the shared `Switch` moves to semantic tokens (affects Settings → Preferences look) | no |
 
@@ -440,6 +443,24 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 - **Consequences:** with the count-in off, recording starts as soon as the microphone answers and the first fraction of a second can contain the microphone start-up pop. The choice does not follow the member to another device. The old side-by-side Discard / Save pair is gone, so Discard is one tap further from the thumb on purpose (it is a destructive action).
 - **Review:** the count-in line (*Starting in n*) is a live region that is mounted empty and filled in, so screen readers announce each step; if capturing cannot start after the count-in, the microphone is released and the error shows instead of an uncaught error; the Dutch count-in reads *Begint over n* and the French time left *Il reste m:ss*.
 - **Confirm:** yes (default on and remembered on the device)
+
+### UXA-044 · Add Song preview: where it shows and when it updates
+
+- **Date / story:** Nov 6, 2026 · #415 (G8.2)
+- **Context:** the story asks for a "Preview toggle under the lyrics field rendering with the ChordPro viewer" and the Gherkin says that after switching Preview on, "Dm" is rendered above "Abre". It does not say whether the preview sits beside, below or instead of the editor, or how it follows typing.
+- **Options:** (a) preview below the editor (the form grows, everything under it jumps); (b) side by side (no room on a 390 px phone and in a 672 px form); (c) the preview replaces the editor in the same fixed-height box.
+- **Choice:** (c). The editor box is 400 px high with or without the preview, so nothing moves when the toggle is switched and no horizontal scroll appears at 390 px. The preview is the same `SongDisplay` the song page uses (default lyric size, chords on when the text has chords), so the output matches the song page. The text is debounced (200 ms) before it is rendered. The editor stays mounted while hidden, so text, undo and the guest draft (G6.2) are untouched; the toggle is not remembered and starts off, so the member opens on the editor.
+- **Consequences:** the member cannot type and see the preview at the same moment on a phone; they toggle between the two with one tap. A wide layout with both side by side can come later. New copy: Preview, the region label and the empty-state hint (8 locales; Quechua to proofread).
+- **Confirm:** no
+
+### UXA-045 · Add Song upload as a visible button
+
+- **Date / story:** Nov 6, 2026 · #415 (G8.2)
+- **Context:** the upload was a small blue link at the top of the form that opened a panel with a drop area and a second **Upload** button that did nothing (choosing a file already imported it).
+- **Options:** (a) keep the panel and make the link bigger; (b) one secondary button under the lyrics that opens the file picker.
+- **Choice:** (b), next to Preview, same width and height (≥ 44 px, `Button` outline). The file input stays in the form for tests and assistive technology. Choosing a file still fills title, author, key, capo and the lyrics; a failed read shows a short error instead of only logging; files above 512 KB are refused with their own message (the browser would otherwise read them whole) and the bytes are decoded as UTF-8, falling back to Windows-1252 for files from older editors. The error clears when the member taps Upload again or edits the lyrics. The input is cleared afterwards so the same file can be chosen again. A single caption under the buttons says that title and author are detected. The decorative `help_outline` icon next to the heading did nothing and is removed. Unused keys (`songForm.cancel`, `songForm.upload.select`, `.chordProOnly`, `.button`) are deleted from all locales.
+- **Consequences:** the large dashed drop area is gone (it did not work as a drop target anyway).
+- **Confirm:** no
 
 ### UXA-046 · New Playlist: visibility switch and one line of explanation
 
