@@ -79,9 +79,12 @@ export default function Header({ initialUser }: { initialUser?: AuthUser | null 
     useEffect(() => {
         if (hideSearch || !pendingSearchFocusRef.current) return;
         pendingSearchFocusRef.current = false;
+        // Only honour it on the song list the tab leads to; any other page (cancelled navigation,
+        // sign-in on Home) drops the request so the field never grabs focus later.
+        if (pathname !== '/songs') return;
         inputRef.current?.focus();
         forceShow();
-    }, [hideSearch, forceShow, inputRef]);
+    }, [hideSearch, pathname, forceShow, inputRef]);
 
     // Close the create menu on outside tap or click (the suggestion panel closes itself)
     useEffect(() => {

@@ -158,4 +158,19 @@ describe('Header search field on Home (UXA-042)', () => {
     expect(document.activeElement).toBe(input);
     expect(await screen.findByTestId('search-suggestions')).toBeTruthy();
   });
+
+  it('a Search tap on guest Home that does not reach the song list does not grab focus later', () => {
+    pathname = '/';
+    authUser = null;
+    const view = wrap(<Header />);
+    act(() => requestSearchFocus()); // tapped, but the navigation to /songs never happened
+    pathname = '/songs/abc'; // the guest opens a song instead
+    view.rerender(
+      <QueryClientProvider client={new QueryClient()}>
+        <Header />
+      </QueryClientProvider>
+    );
+    expect(document.activeElement).not.toBe(screen.getByRole('textbox'));
+    expect(screen.queryByTestId('search-suggestions')).toBeNull();
+  });
 });

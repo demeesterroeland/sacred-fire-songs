@@ -42,10 +42,10 @@ The ☰ menu repeats the main places (Home, Songs, Playlists, Favorites, Drafts,
 
 1. **Start on Home:** a one-line welcome says what the site is, the search field takes you straight to matching songs (tap it to see your recent searches and the main categories), and **Recently added** lists the five newest songs; **All songs** opens the full list.
 2. **Browse by category** on Home: groups such as *The Elements* (Air, Earth, Fire, Water), *Nature*, *Lineage & Tradition*, *Medicine & Healing*. Each tag is a plain link; the grey number after it is how many songs it holds. "+3 more" shows the rest.
-2. **Search:** tap the search field and type a title, a line of the lyrics, an author or a category. Accents do not matter ("aguita" finds "Agüita"). Before you type, the field offers your last 5 searches (tap one to repeat it, **✕** removes one, **Clear all** removes them all; they are kept on this device only) and the main categories as grey buttons (tap one to show only those songs; tap it again to remove the filter). Tap outside the list or press Esc to close it.
-3. **Filters:** the slider button in the search field opens *Search options*: sort order, content type (songs with chords / with melody) and category & tag filters. Tap **Show results**.
-4. **Search** in the bottom bar lists all songs A–Z and is ready for typing. Each row shows the title, a grey line *author · category · language* and the key on the right; tap the row to open the song.
-5. **Library → Artists** lists every author with their number of songs.
+3. **Search:** tap the search field and type a title, a line of the lyrics, an author or a category. Accents do not matter ("aguita" finds "Agüita"). Before you type, the field offers your last 5 searches (tap one to repeat it, **✕** removes one, **Clear all** removes them all; they are kept on this device only) and the main categories as grey buttons (tap one to show only those songs; tap it again to remove the filter). Tap outside the list or press Esc to close it.
+4. **Filters:** the slider button in the search field opens *Search options*: sort order, content type (songs with chords / with melody) and category & tag filters. Tap **Show results**.
+5. **Search** in the bottom bar lists all songs A–Z and is ready for typing. Each row shows the title, a grey line *author · category · language* and the key on the right; tap the row to open the song.
+6. **Library → Artists** lists every author with their number of songs.
 
 ## Reading a song
 
