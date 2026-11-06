@@ -1444,3 +1444,12 @@
 - [x] Wave B sync: lint cap 188 → 177, palette baseline 2252; UX capture scripts look seeded song ids up by title (ids change on every reseed)
 - [ ] Next: preview build `ux-v2-preview`, Wave C (#389, 394, 395, 397, 404, 405, 409, 412, 415, 416), #418 last
 - [ ] Follow-ups: native-speaker check qu (share, shared-with-me copy) and nl/qu action-bar labels; concurrent tabs can add a playlist item twice (no unique constraint); Library sub-pages use h2 while Shared with me has h1; pre-existing security finding on member search reported to the owner privately
+
+## Session November 6, 2026 (Epic 6.1 UX v2, Wave C, #375)
+- [x] #389 unfinished features hidden (#456), #394 auto-scroll and transpose in the reader toolbar (#459), #395 version switch (#464), #397 calm player (#458), #404 recording meter (#460), #405 publish dialog consent and guest public takes (#465), #409 auth pages (#457), #412 guest Home (#462), #415 Add Song preview (#463), #416 New Playlist line (#461), #418 accessibility audit (#471)
+- [x] All 34 stories on `feat/ux-v2`: Wave A 14/14, Wave B 9/9, Wave C 11/11
+- [x] Decisions up to UXA-053, owner checklist #431 updated; validation script sections per story; lint cap 158, palette baseline 1721
+- [x] Whole Playwright suite on a fresh build of `feat/ux-v2`: 274 passed, 5 skipped, 0 failed
+- [ ] Owner: phone validation on the preview, decisions in #431, sign-off of `feat/ux-v2` → `develop`
+- [ ] Owner: manual VoiceOver / TalkBack pass (`docs/ux-research/2026-11-06-a11y-audit.md` section 5); #418 stays open until then
+- [ ] Follow-ups: Quechua native check, Songs / Add Song / Edit nest a second `main`, focus after deleting a song far down the list lands off-screen, `useDeleteSong` English alert, `useToggleFavorite` English toasts, `npm run test:bdd:ci` has 3 failing scenarios about `e2e.yml` and `docker.yml` (not part of CI)

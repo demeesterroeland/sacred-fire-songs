@@ -3236,3 +3236,20 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - **Guests:** `songDraft` keeps the Add song form on the device while the guest signs in.
 - **Tests:** Vitest 837, BDD unit 174 passed / 47 pending, BDD seed 12 / 13 pending, Playwright story specs and smoke green; lint 177 warnings, cap lowered to 177; palette baseline 2252.
 - **Decisions:** UXA-019…029, owner checklist #431.
+
+## November 6, 2026 - Epic 6.1 UX v2, Wave C (#375)
+
+**Goal:** finish the song page, Practice panel and first-use screens, then audit accessibility.
+
+**Key Accomplishments**
+- **Song page:** version switch under the title (`components/ui/segmented.tsx`), auto-scroll and transpose in the reader toolbar.
+- **Publishing:** the Make public dialog names the take and the song and says who will hear it; a take on a private song starts with making the song public. Guests see and play consented public takes on the Listen tab.
+- **First use:** guest Home with welcome line, search and Recently added; Add Song with live chord preview and a visible upload button; New Playlist explains private and public in one line.
+- **Accessibility (#418):** axe-core on the song page and Practice panel, 18 states in light and dark, no violations and no exclusions. The tool found little of what mattered; review in a real browser did.
+
+**Technical Details**
+- **Practice panel:** a modal dialog (`hooks/useModalFocus.ts`): focus trap including iframes, focus return, ARIA tabs. Escape closes the top layer only: a rename or a keyboard drag keeps the panel open (`escapeBusy`).
+- **Dialogs:** `DeleteConfirmationModal` is a Radix alert dialog; `lib/a11y/returnFocusToTake.ts` returns focus after Share, Singer and Make public.
+- **Test reliability:** `killport.sh` uses `ss`, because `lsof` misses `next-server` and a stale server was being tested. Specs for auto-scroll, the action bar rising with the mini player and the playlist sheet were flaky on the base too; their timing is fixed.
+- **Tests:** Vitest 1186, BDD unit 232 passed / 47 pending, BDD seed 12 / 13 pending, Playwright whole suite 274 passed / 5 skipped; lint 158 warnings, cap 158; palette baseline 1721.
+- **Decisions:** up to UXA-053, owner checklist #431.
