@@ -53,6 +53,7 @@ import ServiceWorkerRegistrar from "@/components/providers/ServiceWorkerRegistra
 import SidebarOverlay from "@/components/common/SidebarOverlay";
 import GlobalSearchModal from "@/components/common/GlobalSearchModal";
 import ThemedToaster from "@/components/providers/ThemedToaster";
+import { SuggestionsSlot } from "@/components/search/SuggestionsSlot";
 
 // Inline script to prevent flash of wrong theme on load.
 // Reads the user's preference from localStorage and applies the dark class
@@ -135,6 +136,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
                     <SidebarOverlay />
 
                     <main className="relative min-w-0 overflow-y-visible lg:overflow-y-auto pb-16 lg:pb-0 col-start-2">
+                      <SuggestionsSlot />
                       {children}
                     </main>
                   </div>

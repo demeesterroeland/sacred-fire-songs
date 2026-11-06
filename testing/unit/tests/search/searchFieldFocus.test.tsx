@@ -48,10 +48,12 @@ vi.mock('@/lib/taxonomyUtils', () => ({
 
 import HomeSearch from '@/components/home/HomeSearch';
 import Header from '@/components/common/Header';
+import { SuggestionsSlot } from '@/components/search/SuggestionsSlot';
 
 function wrap(ui: React.ReactElement) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(<QueryClientProvider client={client}>{ui}</QueryClientProvider>);
+  // The page layout holds the slot the header's suggestions panel is rendered into (fix 4).
+  return render(<QueryClientProvider client={client}>{ui}<SuggestionsSlot /></QueryClientProvider>);
 }
 
 beforeEach(() => {
@@ -68,7 +70,21 @@ const fields = [
   { name: 'Header', render: () => wrap(<Header />), role: 'textbox' as const },
 ];
 
-describe.each(fields)('$name suggestion panel', ({ render: mount, role }) => {
+describe.each(fields)('$name suggestion panel', ({ name, render: mount, role }) => {
+  it('is part of the page flow: never positioned out of it, so it pushes the page down', async () => {
+    mount();
+    act(() => screen.getByRole(role).focus());
+    const panel = await screen.findByTestId('search-suggestions');
+    for (let el: HTMLElement | null = panel; el && el !== document.body; el = el.parentElement) {
+      expect(el.className, `${name}: ${el.tagName}`).not.toMatch(/(^|\s)(absolute|fixed)(\s|$)/);
+    }
+    if (name === 'Header') {
+      // rendered in the slot at the top of the main column, not inside the (fixed height) header bar
+      expect(document.getElementById('app-navbar')?.contains(panel)).toBe(false);
+      expect(screen.getByTestId('search-suggestions-slot').contains(panel)).toBe(true);
+    }
+  });
+
   it('closes on Escape inside the panel and does not reopen when the field gets focus back', async () => {
     mount();
     const input = screen.getByRole(role);
@@ -152,6 +168,7 @@ describe('Header search field on Home (UXA-042)', () => {
     view.rerender(
       <QueryClientProvider client={new QueryClient()}>
         <Header />
+        <SuggestionsSlot />
       </QueryClientProvider>
     );
     const input = screen.getByRole('textbox');
@@ -168,6 +185,7 @@ describe('Header search field on Home (UXA-042)', () => {
     view.rerender(
       <QueryClientProvider client={new QueryClient()}>
         <Header />
+        <SuggestionsSlot />
       </QueryClientProvider>
     );
     expect(document.activeElement).not.toBe(screen.getByRole('textbox'));

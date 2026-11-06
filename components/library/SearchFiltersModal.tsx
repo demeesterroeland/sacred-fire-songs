@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { X, SlidersHorizontal, Guitar, Music, Heart, ChevronDown, Search, Mic } from 'lucide-react';
+import { X, SlidersHorizontal, Guitar, Music, Heart, ChevronDown, Search, Mic, Check } from 'lucide-react';
+import { Segmented } from '@/components/ui/segmented';
 import TagSelector from '@/components/library/TagSelector';
 import type { TaxonomyNode } from '@/lib/taxonomyUtils';
 import type { SongFilterState } from '@/lib/songs/filterConfig';
@@ -91,44 +92,45 @@ export default function SearchFiltersModal({
     return (
         <div
             onTransitionEnd={onTransitionEnd}
-            className={`fixed inset-0 z-50 flex items-start justify-center transition-all duration-200 ${isOpen ? 'opacity-100 backdrop-blur-sm' : 'opacity-0 backdrop-blur-none pointer-events-none'}`}
+            className={`fixed inset-0 z-50 flex items-start justify-center transition-all duration-200 ${isOpen ? 'opacity-100' : 'pointer-events-none opacity-0'}`}
         >
             {/* Backdrop */}
             <div
-                className="absolute inset-0 bg-black/60 transition-opacity"
+                className="absolute inset-0 bg-scrim transition-opacity"
                 onClick={onClose}
             />
 
             {/* Modal */}
             <div
-                className={`relative z-10 bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-2xl w-full max-w-lg mx-4 mt-16 md:mt-24 max-h-[calc(100vh-8rem)] flex flex-col transform transition-all duration-200 ${isOpen ? 'scale-100 translate-y-0' : 'scale-95 -translate-y-4'}`}
+                className={`relative z-10 mx-4 mt-16 flex max-h-[calc(100vh-8rem)] w-full max-w-lg transform flex-col rounded-panel border border-line bg-surface shadow-sheet transition-all duration-200 motion-reduce:transition-none md:mt-24 ${isOpen ? 'translate-y-0 scale-100' : '-translate-y-4 scale-95'}`}
             >
                 {/* Header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 dark:border-gray-800 shrink-0">
+                <div className="flex shrink-0 items-center justify-between border-b border-line px-6 py-4">
                     <div className="flex items-center gap-3">
-                        <SlidersHorizontal className="w-5 h-5 text-gray-500" />
-                        <h2 className="text-lg font-bold text-gray-900 dark:text-white">{t('search.title')}</h2>
+                        <SlidersHorizontal aria-hidden className="size-5 text-fg-muted" />
+                        <h2 className="text-title font-bold text-fg">{t('search.title')}</h2>
                     </div>
                     <button
                         onClick={onClose}
-                        className="p-2 rounded-xl text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-900 transition-all"
+                        aria-label={t('common.close')}
+                        className="inline-flex size-tap items-center justify-center rounded-control text-fg-muted transition-colors hover:bg-surface-2 hover:text-fg"
                     >
-                        <X className="w-5 h-5" />
+                        <X aria-hidden className="size-5" />
                     </button>
                 </div>
 
                 {/* Action Panel (Clear All / Show Results) */}
-                <div className="flex items-center gap-3 px-6 py-4 border-b border-gray-200 dark:border-gray-800 shrink-0 bg-gray-50/50 dark:bg-gray-900/50">
+                <div className="flex shrink-0 items-center gap-3 border-b border-line px-6 py-4">
                     <button
                         onClick={handleClearAll}
                         disabled={!hasActiveFilters && !localSearch}
-                        className="flex-1 px-4 py-2.5 rounded-xl font-bold text-xs text-gray-600 dark:text-gray-400 bg-white dark:bg-gray-950 border border-gray-300 dark:border-gray-800 hover:bg-gray-50 dark:hover:bg-gray-900 transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+                        className="min-h-tap flex-1 rounded-control border border-line-strong bg-transparent px-4 text-meta font-semibold text-fg transition-colors hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-40"
                     >
                         {t('search.clearAll')}
                     </button>
                     <button
                         onClick={onSubmit ?? onClose}
-                        className="flex-1 px-4 py-2.5 rounded-xl font-bold text-xs text-white bg-red-600 hover:bg-red-500 shadow-md shadow-red-900/10 transition-all"
+                        className="min-h-tap flex-1 rounded-control bg-accent px-4 text-meta font-semibold text-on-accent transition-colors hover:bg-accent/90"
                     >
                         {t('search.showResults')}
                     </button>
@@ -143,14 +145,14 @@ export default function SearchFiltersModal({
                             {t('search.label')}
                         </label>
                         <div className="relative">
-                            <Search className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                            <Search aria-hidden className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-fg-subtle" />
                             <input
                                 type="text"
                                 value={localSearch}
                                 onChange={(e) => setLocalSearch(e.target.value)}
                                 onKeyDown={(e) => { if (e.key === 'Enter') onSubmit?.(); }}
                                 placeholder={t('search.placeholder', { count: 200 })}
-                                className="w-full bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-xl py-2.5 pl-10 pr-4 text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-red-500/30 focus:border-red-500/40 transition-all"
+                                className="min-h-tap w-full rounded-control border border-line-strong bg-surface py-2.5 pl-10 pr-4 text-body text-fg placeholder:text-fg-subtle"
                             />
                         </div>
                     </section>
@@ -186,13 +188,13 @@ export default function SearchFiltersModal({
                             <select
                                 value={sortBy}
                                 onChange={(e) => setSortBy(e.target.value as SortByType)}
-                                className="w-full bg-gray-100 dark:bg-gray-900 border border-gray-300 dark:border-gray-800 rounded-xl px-4 py-2.5 text-sm font-medium text-gray-700 dark:text-gray-300 outline-none focus:border-gray-400 dark:focus:border-gray-700 appearance-none pr-10 cursor-pointer"
+                                className="min-h-tap w-full cursor-pointer appearance-none rounded-control border border-line-strong bg-surface px-4 py-2.5 pr-10 text-body font-medium text-fg"
                             >
                                 <option value="title">{t('search.sort.titleAZ')}</option>
                                 <option value="author">{t('search.sort.authorAZ')}</option>
                                 <option value="newest">{t('search.sort.newestFirst')}</option>
                             </select>
-                            <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-500 pointer-events-none" />
+                            <ChevronDown aria-hidden className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-fg-muted" />
                         </div>
                     </section>
 
@@ -206,26 +208,24 @@ export default function SearchFiltersModal({
                                 active={!!state.chords}
                                 onClick={() => setFilter('chords', !state.chords)}
                                 disabled={!state.chords && chordsCount === 0}
-                                icon={<Guitar className="w-4 h-4" />}
+                                icon={<Guitar aria-hidden className="size-4" />}
                                 label={t('search.filter.chords')}
                                 count={chordsCount ? chordsCount : undefined}
-                                activeColor="amber"
                             />
                             <ToggleCard
                                 active={!!state.melody}
                                 onClick={() => setFilter('melody', !state.melody)}
                                 disabled={!state.melody && melodyCount === 0}
-                                icon={<Music className="w-4 h-4" />}
+                                icon={<Music aria-hidden className="size-4" />}
                                 label={t('search.filter.melody')}
                                 count={melodyCount ? melodyCount : undefined}
-                                activeColor="emerald"
                             />
                         </div>
                     </section>
 
                     {/* Personalized Options */}
                     {isAuthenticated && (
-                        <section className="pt-4 border-t border-gray-200 dark:border-gray-800/60">
+                        <section className="border-t border-line pt-4">
                             <label className="text-meta font-semibold text-fg-muted mb-3 block">
                                 {t('search.yourLibrary')}
                             </label>
@@ -234,51 +234,35 @@ export default function SearchFiltersModal({
                                 <ToggleCard
                                     active={!!state.favorites}
                                     onClick={() => setFilter('favorites', !state.favorites)}
-                                    icon={<Heart className={`w-4 h-4 ${state.favorites ? 'fill-amber-400' : ''}`} strokeWidth={1.5} />}
+                                    icon={<Heart aria-hidden className={`size-4 ${state.favorites ? 'fill-current' : ''}`} strokeWidth={1.5} />}
                                     label={t('userMenu.favorites')}
                                     count={favoritesCount ? favoritesCount : undefined}
-                                    activeColor="amber"
                                 />
                                 <ToggleCard
                                     active={!!state.mine}
                                     onClick={() => setFilter('mine', !state.mine)}
-                                    icon={<Music className="w-4 h-4" strokeWidth={1.5} />}
+                                    icon={<Music aria-hidden className="size-4" strokeWidth={1.5} />}
                                     label={t('librarySummary.mySongs.title')}
                                     count={mineCount ? mineCount : undefined}
-                                    activeColor="violet"
                                 />
                                 <ToggleCard
                                     active={!!state.myRecordings}
                                     onClick={() => setFilter('myRecordings', !state.myRecordings)}
                                     disabled={!state.myRecordings && recordingsCount === 0}
-                                    icon={<Mic className="w-4 h-4" strokeWidth={1.5} />}
+                                    icon={<Mic aria-hidden className="size-4" strokeWidth={1.5} />}
                                     label={t('search.filter.recordings')}
                                     count={recordingsCount ? recordingsCount : undefined}
-                                    activeColor="violet"
                                 />
-                                <div className="flex items-center justify-end">
-                                    <div className="w-full bg-gray-200/80 dark:bg-gray-900/80 p-1 rounded-xl border border-gray-300 dark:border-gray-800 flex justify-between shadow-inner h-full items-center">
-                                        {(['all', 'public', 'draft'] as const).map((statusOption) => {
-                                            const statusLabels = {
-                                                all: t('search.status.all'),
-                                                public: t('search.status.public'),
-                                                draft: t('search.status.draft'),
-                                            };
-                                            return (
-                                                <button
-                                                    key={statusOption}
-                                                    onClick={() => setFilter('status', statusOption)}
-                                                    className={`flex-1 px-2 py-1.5 text-caption font-semibold rounded-lg transition-all capitalize ${state.status === statusOption
-                                                        ? 'bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm ring-1 ring-gray-200 dark:ring-white/5'
-                                                        : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
-                                                        }`}
-                                                >
-                                                    {statusLabels[statusOption]}
-                                                </button>
-                                            );
-                                        })}
-                                    </div>
-                                </div>
+                                <Segmented
+                                    aria-label={t('search.status.heading')}
+                                    value={state.status ?? 'all'}
+                                    onChange={(v) => setFilter('status', v as SongFilterState['status'])}
+                                    options={[
+                                        { value: 'all', label: t('search.status.all') },
+                                        { value: 'public', label: t('search.status.public') },
+                                        { value: 'draft', label: t('search.status.draft') },
+                                    ]}
+                                />
                             </div>
                         </section>
                     )}
@@ -291,7 +275,7 @@ export default function SearchFiltersModal({
     );
 }
 
-/* Toggle card for filter options */
+/* Toggle card for filter options: neutral like a Chip (selected = inverted + check + aria-pressed). */
 function ToggleCard({
     active,
     onClick,
@@ -299,7 +283,6 @@ function ToggleCard({
     icon,
     label,
     count,
-    activeColor,
 }: {
     active: boolean;
     onClick: () => void;
@@ -307,41 +290,22 @@ function ToggleCard({
     icon: React.ReactNode;
     label: string;
     count?: number;
-    activeColor: 'amber' | 'violet' | 'emerald';
 }) {
-    const colorMap = {
-        amber: {
-            active: 'bg-amber-500/10 border-amber-500/40 text-amber-500',
-            icon: 'text-amber-400',
-        },
-        violet: {
-            active: 'bg-violet-500/10 border-violet-500/40 text-violet-400',
-            icon: 'text-violet-400',
-        },
-        emerald: {
-            active: 'bg-emerald-500/10 border-emerald-500/40 text-emerald-500',
-            icon: 'text-emerald-400',
-        },
-    };
-
-    const colors = colorMap[activeColor];
-
     return (
         <button
+            type="button"
             onClick={onClick}
             disabled={disabled}
-            className={`flex items-center gap-2.5 px-3.5 py-3 rounded-xl border transition-all text-left min-w-0 ${active
-                ? `${colors.active} shadow-sm`
-                : 'bg-gray-50 dark:bg-gray-900/50 border-gray-200 dark:border-gray-800 text-gray-600 dark:text-gray-400 hover:border-gray-300 dark:hover:border-gray-700'
-                } disabled:opacity-40 disabled:cursor-not-allowed`}
+            aria-pressed={active}
+            className={`flex min-h-tap min-w-0 items-center gap-3 rounded-control px-3 py-2 text-left transition-colors disabled:cursor-not-allowed disabled:opacity-40 ${active
+                ? 'bg-chip-active text-on-chip-active'
+                : 'bg-chip text-on-chip hover:bg-surface'
+                }`}
         >
-            <span className={`shrink-0 ${active ? colors.icon : ''}`}>{icon}</span>
-            <span className="text-sm font-semibold truncate leading-tight flex-1">{label}</span>
-            {count !== undefined && (
-                <span className="shrink-0 ml-auto px-1.5 py-0.5 rounded-full bg-gray-200 dark:bg-gray-800 text-gray-500 text-caption font-bold">
-                    {count}
-                </span>
-            )}
+            <span className="shrink-0">{icon}</span>
+            <span className="min-w-0 flex-1 truncate text-meta font-semibold leading-tight">{label}</span>
+            {count !== undefined && <span className="ml-auto shrink-0 text-caption font-semibold tabular-nums opacity-80">{count}</span>}
+            {active && <Check data-testid="toggle-check" aria-hidden className="size-4 shrink-0" />}
         </button>
     );
 }

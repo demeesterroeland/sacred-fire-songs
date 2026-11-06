@@ -44,7 +44,7 @@ export default function HomeSearch() {
   const panelVisible = open && !value && (recent.length > 0 || categories.length > 0);
 
   return (
-    <div ref={wrapperRef} onBlur={closeIfFocusLeaves} className="relative">
+    <div ref={wrapperRef} onBlur={closeIfFocusLeaves}>
       <form
         role="search"
         onSubmit={(e) => {
@@ -72,7 +72,7 @@ export default function HomeSearch() {
             aria-controls={panelVisible ? 'home-search-suggestions' : undefined}
             aria-describedby="home-search-suggestions-hint"
             placeholder={t('home.search.placeholder')}
-            className="min-h-tap w-full rounded-control border border-line bg-surface-2 py-2.5 ps-10 pe-3 text-body text-fg placeholder:text-fg-subtle focus:border-line-strong focus:outline-none focus:ring-2 focus:ring-accent"
+            className="min-h-tap w-full rounded-control border border-line bg-surface-2 py-2.5 ps-10 pe-3 text-body text-fg placeholder:text-fg-subtle"
           />
           <span id="home-search-suggestions-hint" className="sr-only">{t('header.suggestionsHint')}</span>
         </div>
@@ -80,7 +80,7 @@ export default function HomeSearch() {
       </form>
 
       {panelVisible && (
-        <div ref={panelRef} id="home-search-suggestions" className="absolute inset-x-0 top-full z-20 mt-2">
+        <div ref={panelRef} id="home-search-suggestions" className="mt-2">
           <SearchSuggestions
             recent={recent}
             categories={categories}
