@@ -297,6 +297,9 @@ for (const theme of THEMES) {
 
       test(`reading tools sheet and song menu (member, ${theme})`, async ({ page }) => {
         await page.goto(`/songs/${IDS.song}`);
+        // The tools button only exists while the lyrics run below the fold (a short window makes the short fixture do so).
+        await page.setViewportSize({ width: 390, height: 360 });
+        await expect(page.getByTestId('reader-tools-button')).toBeVisible();
         await page.getByTestId('reader-toolbar-wrap').getByRole('button', { name: /more|tools/i }).last().click();
         await expect(page.getByTestId('reader-tools-sheet')).toBeVisible();
         await audit(page, `reading tools sheet / member / ${theme}`);

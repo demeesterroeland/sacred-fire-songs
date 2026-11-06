@@ -3253,3 +3253,21 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - **Test reliability:** `killport.sh` uses `ss`, because `lsof` misses `next-server` and a stale server was being tested. Specs for auto-scroll, the action bar rising with the mini player and the playlist sheet were flaky on the base too; their timing is fixed.
 - **Tests:** Vitest 1186, BDD unit 232 passed / 47 pending, BDD seed 12 / 13 pending, Playwright whole suite 274 passed / 5 skipped; lint 158 warnings, cap 158; palette baseline 1721.
 - **Decisions:** up to UXA-053, owner checklist #431.
+
+## November 6, 2026 - Epic 6.1 UX v2, validation round 1 (#375)
+
+**Goal:** fix the seven defects found in the owner's phone validation, on one branch from `feat/ux-v2`.
+
+**Key Accomplishments**
+- **Auto-scroll:** ▶ and the tools sheet's Auto-scroll section only exist while the end of the lyrics is below the fold; re-measured on text size, Chords switch, version switch, resize and content load; a running scroll that can no longer scroll stops.
+- **Meta line:** expanded = the link list only (underlined) plus the chevron.
+- **Focus:** one focus style for text fields (the unlayered global outline beat `outline-none`); playlist name fields on tokens.
+- **Suggestions:** the panel renders into a slot at the top of `<main>`, in the page flow; Home's panel too.
+- **Search options:** tokens only, one accent, neutral chips, category name instead of slug.
+- **i18n:** favourite toasts, delete error, rename toast, Settings intro in 8 locales.
+- **Song flags:** data migration recomputes `has_chords` / `has_melody` over all versions; the song page's Chords switch and transpose follow the version shown.
+
+**Technical Details**
+- **Tests:** Vitest 1238, BDD unit 236 passed / 47 pending (pre-existing), whole Playwright suite on a production build 281 passed / 5 skipped, 4 failed in the first run (2 a11y specs fixed for the new ▶/⋯ rule, 2 timing flakes under load that pass alone); lint 157 warnings, cap lowered 158 → 157; palette baseline 1721 → 1564.
+- **Migration:** `20261106180000_recompute_song_flags.sql` is idempotent and was only dry-run (rolled back) on the shared local database: 0 rows differ there.
+- **Decisions:** UXA-054…060. Screenshots: `docs/ux-research/screenshots/ux-v2/validation-1/`.
