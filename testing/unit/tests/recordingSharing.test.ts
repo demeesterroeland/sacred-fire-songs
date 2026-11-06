@@ -7,6 +7,7 @@ import {
   makeSongPublic,
   updateSingerAttribution,
   getRecordingDownloadUrl,
+  getSongIsPublic,
 } from '@/lib/actions/rehearsal';
 
 // Mock Supabase client
@@ -40,6 +41,8 @@ describe('Recording Sharing & DRM-lite Permissions', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
+    // clearAllMocks keeps queued once-values: drop them so tests cannot leak into each other.
+    mockFrom.mockReset();
   });
 
   describe('publishRecording with singer consent disclaimer', () => {
@@ -52,21 +55,85 @@ describe('Recording Sharing & DRM-lite Permissions', () => {
       expect(mockFrom).not.toHaveBeenCalled();
     });
 
-    it('succeeds in publishing when consent is confirmed by the owner', async () => {
-      mockGetUser.mockResolvedValue({ data: { user: ownerUser } });
-      const mockUpdate = vi.fn().mockReturnValue({
+    // select("id, song_versions(compositions(is_public))").eq(id).eq(user).maybeSingle()
+    const takeLookup = (row: unknown, error: unknown = null) => ({
+      select: vi.fn().mockReturnValue({
         eq: vi.fn().mockReturnValue({
-          eq: vi.fn().mockResolvedValue({ error: null }),
+          eq: vi.fn().mockReturnValue({ maybeSingle: vi.fn().mockResolvedValue({ data: row, error }) }),
         }),
+      }),
+    });
+    const takeUpdate = () => {
+      const update = vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue({ eq: vi.fn().mockResolvedValue({ error: null }) }),
       });
-      mockFrom.mockReturnValue({ update: mockUpdate });
+      return { update };
+    };
+    const takeOnSong = (isPublic: boolean | null) => ({
+      id: recordingId,
+      song_versions: { compositions: { is_public: isPublic } },
+    });
+
+    it('succeeds in publishing when consent is confirmed by the owner and the song is public', async () => {
+      mockGetUser.mockResolvedValue({ data: { user: ownerUser } });
+      const write = takeUpdate();
+      mockFrom.mockReturnValueOnce(takeLookup(takeOnSong(true))).mockReturnValueOnce(write);
 
       const result = await publishRecording(recordingId, true);
       expect(result.success).toBe(true);
-      expect(mockFrom).toHaveBeenCalledWith('user_recordings');
-      expect(mockUpdate).toHaveBeenCalledWith({
+      expect(mockFrom).toHaveBeenLastCalledWith('user_recordings');
+      expect(write.update).toHaveBeenCalledWith({
         is_public: true,
         singer_consent_confirmed: true,
+      });
+    });
+
+    it.each([
+      ['private', takeOnSong(false)],
+      ['without a visibility value', takeOnSong(null)],
+      ['that the owner cannot read', { id: recordingId, song_versions: null }],
+    ])('refuses to publish a take on a song that is %s, with a friendly message', async (_label, row) => {
+      mockGetUser.mockResolvedValue({ data: { user: ownerUser } });
+      const write = takeUpdate();
+      mockFrom.mockReturnValueOnce(takeLookup(row)).mockReturnValueOnce(write);
+
+      const result = await publishRecording(recordingId, true);
+      expect(result).toMatchObject({ success: false, code: 'song-private' });
+      expect(result.error).toMatch(/make the song public first/i);
+      expect(write.update).not.toHaveBeenCalled();
+    });
+
+    it('refuses a take that is not the caller\'s own', async () => {
+      mockGetUser.mockResolvedValue({ data: { user: ownerUser } });
+      const write = takeUpdate();
+      mockFrom.mockReturnValueOnce(takeLookup(null)).mockReturnValueOnce(write);
+
+      const result = await publishRecording(recordingId, true);
+      expect(result.success).toBe(false);
+      expect(write.update).not.toHaveBeenCalled();
+    });
+
+    describe('getSongIsPublic', () => {
+      const songLookup = (result: { data: unknown; error: unknown }) => ({
+        select: vi.fn().mockReturnValue({
+          eq: vi.fn().mockReturnValue({ maybeSingle: vi.fn().mockResolvedValue(result) }),
+        }),
+      });
+
+      it.each([
+        ['public', { is_public: true }, true],
+        ['private', { is_public: false }, false],
+        ['without a flag', { is_public: null }, false],
+        ['not found', null, false],
+      ])('reads a song that is %s', async (_label, data, expected) => {
+        mockFrom.mockReturnValueOnce(songLookup({ data, error: null }));
+        await expect(getSongIsPublic('comp-1')).resolves.toBe(expected);
+      });
+
+      it('throws when the lookup fails, instead of reading as private', async () => {
+        vi.spyOn(console, 'error').mockImplementation(() => undefined);
+        mockFrom.mockReturnValueOnce(songLookup({ data: null, error: { message: 'network down' } }));
+        await expect(getSongIsPublic('comp-1')).rejects.toThrow('network down');
       });
     });
 

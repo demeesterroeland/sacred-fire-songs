@@ -1,11 +1,12 @@
 # UX v2: Agent Decisions (ADR-lite)
 
-**Version:** 1.31 | **Date:** Nov 6, 2026 | **Epic:** 6.1 (#375)
+**Version:** 1.32 | **Date:** Nov 6, 2026 | **Epic:** 6.1 (#375)
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.32 | Nov 6, 2026 | Added UXA-040 (publish dialog: a take on a private song starts with making the song public) and UXA-041 (publish dialog: header, layout on tokens, reversible line; #405); UXA-012 updated: guests hear public takes on the Listen tab (#405). |
 | 1.31 | Nov 6, 2026 | Added UXA-048 (what the variant slot shows, where, and what a version switch changes; review round 2: a take in progress blocks switching, `?version=` deep link, song flags across versions, playlist uses the oldest version) and UXA-049 (version order: oldest first; #395). |
 | 1.30 | Nov 6, 2026 | Added UXA-044 (Add Song preview replaces the editor in place, debounced) and UXA-045 (upload is one visible button; dead help icon and dead second Upload removed; #415). |
 | 1.29 | Nov 6, 2026 | Added UXA-042 and UXA-043 (Home welcome block for guests only, wording; Recently added = 5 newest public songs; #412). |
@@ -52,7 +53,7 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 | UXA-009 | Nov 5, 2026 | #398 | Internal identifiers keep their legacy names (`myRecordings` URL param, reserved smart-playlist title, `rehearsal.*` / `recording.*` message key names) | no |
 | UXA-010 | Nov 5, 2026 | #396 | Mini player: shows after play, stays on pause, reserves bar + bottom nav, one accent colour || yes |
 | UXA-011 | Nov 5, 2026 | #406 | Generic 404 copy "Page not found" + plain "Go home"; only `/account`, `/admin`, `/users` redirect guests to login | yes |
-| UXA-012 | Nov 5, 2026 | #410 | Guest Listen tab for consented public takes deferred until the Practice drawer restructure; RLS enforces consent now | yes |
+| UXA-012 | Nov 5, 2026 | #410 | Guest Listen tab for consented public takes deferred until the Practice drawer restructure; RLS enforces consent now. Done in #405 (Nov 6): guests see and play public takes on the Listen tab, read only | yes |
 | UXA-013 | Nov 5, 2026 | #410 | Fake demo playlists and per-card locks removed from the guest Library; add-to-playlist becomes a bottom sheet gate | yes |
 | UXA-014 | Nov 5, 2026 | #410 | Signed-in users still see public takes without singer consent; UXD-2 covers guests only | yes |
 | UXA-015 | Nov 5, 2026 | #386 | Song rows drop the chord / melody / take icons and the author/tag links | yes |
@@ -78,6 +79,8 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 | UXA-031 | Nov 6, 2026 | #389 | Two placeholders beyond the story text are hidden too: the three disabled Preferences rows (auto-scroll, default chords, offline mode) and the "Melody notation" section of the song form. | yes |
 | UXA-036 | Nov 6, 2026 | #404 | Recorder: `m:ss left` from 2:00 on (not "2:41 left"), the limit in words before recording, a "No sound yet" hint after 3 s, meter = 8 bars of recent levels | yes |
 | UXA-037 | Nov 6, 2026 | #404 | Recorder: count-in on by default and remembered per device, cancel during the count-in, Save full-width primary with Discard as a text button below | yes |
+| UXA-040 | Nov 6, 2026 | #405 | Publish dialog: a take on a private song has no audience yet, so publishing starts with the song. Private song: the dialog says so and offers no Publish; the song owner or an admin can make the song public from the dialog, and the `publishRecording` action checks it too. Unpublishing stays allowed. Public song: "Everyone visiting this song, including guests, will be able to listen." | yes |
+| UXA-041 | Nov 6, 2026 | #405 | Publish dialog: header = take name + "Song: <title>" (long names wrap, dialog scrolls), reversible line without a link lifetime, audience announced, Cancel locked while publishing, amber box and indigo checkbox replaced by tokens and the shared Button (≥ 44 px) | yes |
 | UXA-038 | Nov 6, 2026 | #409 | Auth pages: "Back" leads to the hardened `next=` target, else Home; a `next` pointing at another auth page counts as none (no loop); the ✕ is removed, not repurposed; forgot-password's Back returns to login and keeps `next` | no |
 | UXA-039 | Nov 6, 2026 | #409 | Auth pages are plain pages on tokens: Back link above the form, no card on phones, bordered panel from `md`, accent-soft flame badge instead of the orange gradient and glow; sign-up-success and error pages are not touched | no |
 | UXA-042 | Nov 6, 2026 | #412 | Home welcome block (heading, one line, search field, Recently added) is for guests only; members see Your library and nothing else new; the welcome copy is new; on Home the header search field is hidden for guests (one field, not two) | yes |
@@ -172,6 +175,7 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 - **Options:** (a) wire a guest takes list into the drawer now; (b) enforce the rule in RLS now and wire the list after the drawer restructure.
 - **Choice:** (b). Migration `20261105120000` makes anon reads (table and storage) require `is_public AND singer_consent_confirmed`, proven by an `@seed` scenario. The guest Listen list is a follow-up on top of the new drawer; until then guests see reference tracks only (unchanged).
 - **Consequences:** the data rule is enforced server-side already; no guest UI exposes takes yet. Follow-up issue: "Guests: list consented public takes in Practice → Listen".
+- **Update (#405, Nov 6, 2026):** done. On a song page a guest opens Practice on the Listen tab (it is also the tab a guest opens on) and sees *Public takes*: the take name, date, duration and singer, with a play button and nothing else (no ⋯ actions, no drag handle). A song without public takes shows *No public takes of this song yet.* The Record tab still shows the sign-in gate. Desktop Practice also opens a guest on Listen. A take link (`?recording=`) opens a guest on Listen with that take highlighted and playable; a link to a take that is not there opens the Record tab with its sign-in prompt, as before. No data rule changed.
 - **Confirm:** yes (permissions)
 
 ### UXA-013 · Removing the fake demo playlists and per-card locks from the guest Library
@@ -446,6 +450,24 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 - **Consequences:** with the count-in off, recording starts as soon as the microphone answers and the first fraction of a second can contain the microphone start-up pop. The choice does not follow the member to another device. The old side-by-side Discard / Save pair is gone, so Discard is one tap further from the thumb on purpose (it is a destructive action).
 - **Review:** the count-in line (*Starting in n*) is a live region that is mounted empty and filled in, so screen readers announce each step; if capturing cannot start after the count-in, the microphone is released and the error shows instead of an uncaught error; the Dutch count-in reads *Begint over n* and the French time left *Il reste m:ss*.
 - **Confirm:** yes (default on and remembered on the device)
+
+### UXA-040 · Publish dialog: a take on a private song starts with the song
+
+- **Date / story:** Nov 6, 2026 · #405 (G4.8; review fixes)
+- **Context:** the story asks for the sentence *Everyone visiting this song, including guests, will be able to listen.* Publishing sets `user_recordings.is_public = true` and `singer_consent_confirmed = true` in one update, and the dialog cannot be confirmed without the singer-consent tick. Guests hear a public take when the singer consented (UXD-2). A song is public while `compositions.is_public = true`; a take on a private song has no audience yet, so the sentence would promise something that cannot happen.
+- **Options:** (a) always show the story sentence; (b) show a different sentence on a private song but still allow publishing; (c) on a private song the take cannot be published until the song is public, and the dialog offers the existing make-song-public step.
+- **Choice:** (c). Product rule: a take on a private song has no audience yet, so publishing starts with the song. Public song: the story sentence, verbatim, the singer-consent tick and Publish. Private song: the header stays (take and song) and the sentence says the song is private and must be made public first; there is no Publish button. The song owner or an admin gets the same make-song-public step as the Share dialog (UXA-028; its copy, plus the line *Takes already public on this song will then be listed for everyone on the song page.*, also added to the Share dialog's confirmation); once the song is public the dialog continues as the normal publish step. Anyone else is asked to ask the song owner. `publishRecording` checks the same thing and answers with a friendly message; unpublishing stays allowed. The dialog reads the visibility of the song again each time it opens (not on every return to the tab) and waits (no confirm) until it is known; an empty flag counts as not public. If the lookup fails, the dialog says it could not check whether the song is public (`recording.publish.checkFailed`) and offers no Publish, instead of calling the song private. The rules live in `lib/songs/publishAudience.ts`.
+- **Consequences:** `recording.publish.description` holds the story sentence, `recording.publish.descriptionPrivateSong` the private-song sentence; new keys `checkingSong`, `checkFailed`, `errorSongPrivate`, `privateSong.notOwner` and `recording.sharing.privateSongPrompt.effectPublicTakes` (all 8 locales, Quechua to proofread by a native speaker). Guests can listen on a public song, on the Listen tab of the Practice panel, read only (UXA-012 update); recording, sharing, download and reordering stay with the signed-in owner of a take and are not repeated in the dialog. A take belongs to one version of a song, so it is heard in that version's Practice panel.
+- **Confirm:** yes (new consent copy; a private-song take cannot be published until the song is public)
+
+### UXA-041 · Publish dialog: header, reversible line, layout on tokens
+
+- **Date / story:** Nov 6, 2026 · #405 (G4.8; review fixes)
+- **Context:** the old dialog showed only the take name under the title and used an amber warning box, a green button and an indigo checkbox (palette classes, small 12 px text, buttons below 44 px).
+- **Options:** (a) keep the layout and add the song title; (b) restyle with the dialog and button primitives while adding it.
+- **Choice:** (b). The header is the title, the take name in bold and *Song: <title>* below it (`recording.publish.songLabel`); both lines wrap anywhere, so a long unbroken name cannot widen the dialog, and the dialog scrolls inside the screen (`max-h-[calc(100dvh-2rem)]`) so Publish stays reachable. The audience sentence sits in a grey panel (globe on a public song, lock on a private one), followed on a public song by *You can make the take private again at any time. New visitors then can't listen, but this can't undo what someone already heard or saved.* (`recording.publish.reversible`: ⋯ → Make Private; no link lifetime is promised). The consent warning keeps its icon and title but uses a strong border instead of an amber fill (colour never alone). Checkbox row and both buttons are at least 44 px; text is 13 px (`text-meta`) instead of 12 px. 38 palette classes removed (`PALETTE_BASELINE` 1853 → 1815). The audience sentence is a status (`role="status"`) that stays in the same place: while the song is checked it reads *Checking whether the song is public…* and the real sentence then replaces it, which is read out; it is also the dialog's description (`aria-describedby`), so opening the dialog may read the checking text first. Cancel and close are unavailable while the take is being published; closing hands focus back to the take's ⋯ button.
+- **Consequences:** the consent text itself and the publish action are unchanged. The props are `songTitle` and a required `songIsPublic` (`null` while unknown); any other caller must pass both.
+- **Confirm:** yes (new reassurance line)
 
 ### UXA-044 · Add Song preview: where it shows and when it updates
 

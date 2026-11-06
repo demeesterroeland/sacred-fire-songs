@@ -206,6 +206,10 @@ export default function RecordingShareModal({
                     {t("recording.sharing.privateSongPrompt.effectTake", { name: recording.recording_name })}
                   </span>
                 </li>
+                <li className="flex items-start gap-2">
+                  <Globe className="w-4 h-4 mt-0.5 shrink-0 text-fg-muted" aria-hidden />
+                  <span>{t("recording.sharing.privateSongPrompt.effectPublicTakes")}</span>
+                </li>
               </ul>
               <p className="text-meta text-fg-muted">{t("recording.sharing.privateSongPrompt.note")}</p>
             </div>

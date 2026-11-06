@@ -1,11 +1,12 @@
 # UX v2: Phone Validation Script
 
-**Version:** 1.34 | **Date:** Nov 6, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
+**Version:** 1.35 | **Date:** Nov 6, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.35 | Nov 6, 2026 | Added #405 (publish dialog names the song and says who will hear the take; a take on a private song starts with making the song public; guests hear public takes on the Listen tab; long names, focus return). |
 | 1.34 | Nov 6, 2026 | Added #395 (version switch under the song title; steps 6, 6b, 6c: `?version=` link, Save returns to the edited version, a take in progress blocks switching). |
 | 1.33 | Nov 6, 2026 | Added #415 (Add Song preview and visible upload button). |
 | 1.32 | Nov 6, 2026 | Added #412 (Home welcome, search field and Recently added for guests). |
@@ -423,6 +424,20 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 - [ ] 9. Start with the count-in on and tap the bin during the count-in. **Expected:** the count-in stops, the recorder is back to *Ready to record* and the browser's microphone indicator goes out.
 - [ ] 10. Turn on *Reduce motion* in the phone's accessibility settings. **Expected:** the microphone icon does not pulse; the bars still change height.
 - [ ] 11. Switch the language to Dutch, Spanish, Italian, Russian, French, Portuguese and Quechua: the limit line, the count-in label, *Starting in n*, *n left*, the meter's name and the silence hint are translated and fit on the phone. Repeat steps 1–7 in dark mode (`…/404/after-dark/…`).
+
+### #405 · G4.8 Publish dialog names the song and says who will hear it
+
+**Preconditions:** member account on a 390 px phone, English. You own a take on a **public** song (call it *Song A*) and a take on a **private** song you own (*Song B*; make one from *Add song* with Private visibility and record or upload a take). Both takes are private. For step 7 also give a take on *Song A* a very long name with no spaces (rename it to 60+ letters in a row). Run once in light and once in dark. Do not tick the consent box in steps 1–5.
+
+- [ ] 1. Open *Song A*, tap **Practice** in the bar at the bottom, tap **⋯** on your take, tap **Make Public**. **Expected:** the dialog *Publish Take Publicly* shows your take name in bold and under it *Song: <title of Song A>*. Screenshot: `docs/ux-research/screenshots/ux-v2/405/after-light/mobile/member/01-publish-public-song.webp` (before: `…/405/before-light/…/01-publish-public-song.webp`, which shows only the take name).
+- [ ] 2. Read the grey panel. **Expected:** in bold *Everyone visiting this song, including guests, will be able to listen.* and below it *You can make the take private again at any time. New visitors then can't listen, but this can't undo what someone already heard or saved.* The audience sentence is a status line: a screen reader reads it out, and when the dialog first says *Checking whether the song is public…* the real sentence is read out when it replaces it.
+- [ ] 3. Read the rest. **Expected:** the box *Singer Consent & Rights* and the checkbox sentence; **Publish Take** is greyed out and cannot be tapped; **Cancel**, the checkbox row and the button are each at least 44 px high.
+- [ ] 4. Tap **Cancel**. **Expected:** the dialog closes; the take row shows no *Public* label (nothing changed) and the keyboard focus (or the next Tab) is on that take's **⋯** button, not at the top of the page.
+- [ ] 5. Open *Song B*, **Practice**, **⋯**, **Make Public**. **Expected:** the header names *Song B*; the panel says *This song is private, so this take has no audience yet. Make the song public first, then publish the take.* — it does **not** mention guests, and there is **no Publish Take button and no checkbox**. Because you own *Song B* you also see *Make song public and continue* with three lines (lyrics become public, takes already public on this song will then be listed for everyone on the song page, nothing changes until you confirm). Screenshot: `…/405/after-light/mobile/member/02-publish-private-song.webp`. Tap **Cancel** (leave *Song B* private), or tap *Make song public and continue* when you want to continue: **Expected:** the panel changes to the guests sentence and **Publish Take** appears greyed out until the checkbox is ticked.
+- [ ] 6. Back on *Song A*: open the dialog again, tick the box, tap **Publish Take**. **Expected:** the toast *Take is now public.*, the row shows **Public**. Sign out (or open a private window) and open *Song A* → **Practice**: **Expected:** it opens on the **Listen** tab; under *Public takes* your take is listed and plays for the guest, with no ⋯ menu, no drag handle, no download or share. On a song without public takes the guest sees *No public takes of this song yet.* The **Record** tab still shows the sign-in gate. Screenshot: `…/405/after-light/mobile/guest/03-guest-listen-public-takes.webp` (dark: `after-dark`). On a desktop-wide window, **Practice** also opens the guest on **Listen**. Copy the take's link (⋯ → **Copy link**) and open it signed out: **Expected:** the song page opens **Practice** on **Listen** with that take highlighted, and it plays.
+- [ ] 7. With the very long take name, open **⋯** → **Make Public** on a small phone (or landscape). **Expected:** the long name wraps inside the dialog, nothing runs off the screen sideways, and you can scroll the dialog to reach the checkbox and **Publish Take**.
+- [ ] 8. As the owner tap **⋯** → **Make Private**. **Expected:** the toast *Take is now private.*; the guest no longer sees the take after a reload.
+- [ ] 9. Switch the language to Dutch, Spanish, Italian, Russian, French, Portuguese and Quechua and open the dialog on *Song A* and *Song B*: the song line, both sentences, the reversible line and the make-song-public lines are translated and wrap inside the dialog without cut-off text (Quechua still needs a native proofreader). Repeat steps 1–3 and 5 in dark mode (`…/405/after-dark/…`).
 
 ### #394 · G2.5 Auto-scroll and transpose in the reader toolbar
 

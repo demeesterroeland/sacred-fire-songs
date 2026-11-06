@@ -1,11 +1,12 @@
 # Guest Guide (draft)
 
-**Version:** 0.20 | **Date:** Nov 6, 2026
+**Version:** 0.21 | **Date:** Nov 6, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.21 | Nov 6, 2026 | Practice opens on the **Listen** tab for guests; under **Public takes** you can play takes that singers made public with their consent (listen only); a link to a public take opens that take on the Listen tab, highlighted (UX v2, #405). |
 | 0.20 | Nov 6, 2026 | Song page: songs with several versions have a switch under the grey lines; a link can open a given version (UX v2, #395). |
 | 0.19 | Nov 6, 2026 | Home now opens with a short welcome, a search field and the five newest songs under **Recently added** (UX v2, #412). Signed-in members still see Your library. |
 | 0.18 | Nov 6, 2026 | Song page: **Auto-scroll** (▶) and **⋯** reading tools in the same toolbar (UX v2, #394). |
@@ -64,6 +65,7 @@ The ☰ menu repeats the main places (Home, Songs, Playlists, Favorites, Drafts,
 Tap **Practice** in the bar at the bottom of the song to open the Practice panel.
 
 - **Listen** tab: choose **YouTube**, **SoundCloud** or **Spotify** (when the song has that link) and play it inside the app.
+- Under **Public takes** on the same tab you can play the takes that singers have made public for this song (listen only: no download, sharing or reordering). If there are none yet you see *No public takes of this song yet.*
 - A small **player bar** (plain background, only the play button is orange; it says *Playing* or *Paused* and what plays) appears above the bottom bar once you press play (a song page never shows it before), so you can keep listening while reading. Use ⟲ / ⟳ to jump back or forward, ✕ to stop. Leaving the song page stops the music.
 - Tip: wear headphones if you sing along while recording later.
 
@@ -71,7 +73,7 @@ The **Record** tab shows what members can do and a **Sign In to Record** button.
 
 ## Things that need an account
 
-Favourites, playlists, recently viewed, adding or editing songs, recording, account settings, singer profiles. Each of these screens shows the same grey preview with a lock, one sentence saying why it is locked and a **Sign in** button; after signing in you land on the screen you came from. Guests will be able to listen to public takes that the singer agreed to publish (Practice → Listen); recording, sharing and downloading stay members-only. The list of takes for guests follows in a later update. You can open the **Add Song** form and start typing as a guest: a grey box at the top says **Draft now — sign in to save**: saving a song needs an account. Your draft stays on this device, so after you sign in (from the box or when you press save) you are back on the form with your text still there.
+Favourites, playlists, recently viewed, adding or editing songs, recording, account settings, singer profiles. Each of these screens shows the same grey preview with a lock, one sentence saying why it is locked and a **Sign in** button; after signing in you land on the screen you came from. You can listen to public takes that the singer agreed to publish (Practice → Listen → **Public takes**); recording, sharing and downloading need an account. You can open the **Add Song** form and start typing as a guest: a grey box at the top says **Draft now — sign in to save**: saving a song needs an account. Your draft stays on this device, so after you sign in (from the box or when you press save) you are back on the form with your text still there.
 
 ## Creating an account
 

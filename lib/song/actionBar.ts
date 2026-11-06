@@ -4,9 +4,12 @@
 
 export type PracticeTab = 'media' | 'recorder';
 
-/** Practice opens on Listen when the song has reference media, otherwise straight on Record. */
-export function practiceTab(hasMedia: boolean): PracticeTab {
-  return hasMedia ? 'media' : 'recorder';
+/**
+ * Practice opens on Listen when the song has reference media, otherwise straight on Record.
+ * A guest cannot record, so a guest always starts on Listen, where the public takes are (#405).
+ */
+export function practiceTab(hasMedia: boolean, signedIn = true): PracticeTab {
+  return hasMedia || !signedIn ? 'media' : 'recorder';
 }
 
 export const ACTION_BAR_CSS_VAR = '--action-bar-h';

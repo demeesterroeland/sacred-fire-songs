@@ -178,10 +178,13 @@ test.describe('Guest @story-6.1.9', () => {
     await expect(page.locator('[data-testid="guest-gate"][data-feature="addToPlaylist"]')).toBeVisible();
   });
 
-  test('Practice opens the drawer; Record shows the recorder gate', async ({ page }) => {
+  test('Practice opens the drawer on Listen; Record shows the recorder gate', async ({ page }) => {
     test.skip(!withoutMedia, 'no public song without media in the seed');
     await openSong(page, withoutMedia);
     await page.getByTestId('song-action-practice').click();
+    // A guest cannot record: Practice opens on Listen (public takes), Record keeps the gate (#405).
+    await expect(page.getByTestId('guest-public-takes')).toBeVisible({ timeout: 10_000 });
+    await page.getByTestId('practice-tab-record').dispatchEvent('click');
     await expect(page.locator('[data-testid="guest-gate"][data-feature="recorder"]')).toBeVisible({ timeout: 10_000 });
   });
 });

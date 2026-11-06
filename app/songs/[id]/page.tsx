@@ -39,7 +39,7 @@ import { useSongRecordings } from '@/hooks/useSongRecordings';
 import { useRecordingsQuery } from '@/hooks/useRecordingsQuery';
 import { useLocale } from '@/context/LocaleContext';
 import { fetchSong, withTimeout } from '@/lib/songs/fetchSong';
-import { parseRecordingParam, RECORDING_PARAM } from '@/lib/songs/recordingLink';
+import { linkedTakeTab, parseRecordingParam, RECORDING_PARAM } from '@/lib/songs/recordingLink';
 
 export default function SongDetailPage() {
     const { t } = useLocale();
@@ -192,35 +192,33 @@ export default function SongDetailPage() {
     const actionBarVisible = useActionBarVisibility(preferences.autoHideBottomNav);
     const hasMedia = !!(currentVersion?.youtube_url || currentVersion?.spotify_url || currentVersion?.soundcloud_url);
     const openPractice = () => {
-        // Listen when there is reference media, otherwise straight to Record. Guests see the gate there.
-        setDrawerRequestedTab(practiceTab(hasMedia));
+        // Listen when there is reference media (or for a guest: public takes), otherwise straight to Record.
+        setDrawerRequestedTab(practiceTab(hasMedia, !!user));
         setIsRehearsalDrawerOpen(true);
     };
 
     // Deep link `/songs/<id>?recording=<recordingId>` (notifications, emails, "Copy link"):
-    // select the recording's version, open the Recordings tab and highlight the take.
+    // select the recording's version, open the tab that lists the takes (Record for a member,
+    // Listen for a guest) and highlight the take.
     useEffect(() => {
         if (!linkedRecordingId || !song || authLoading) return;
         if (handledRecordingLink.current === linkedRecordingId) return;
         handledRecordingLink.current = linkedRecordingId;
         const songVersions = song.song_versions ?? [];
         void (async () => {
-            let index = -1;
-            if (user) {
-                const { data } = await createClient()
-                    .from('user_recordings')
-                    .select('song_version_id')
-                    .eq('id', linkedRecordingId)
-                    .maybeSingle();
-                index = data ? songVersions.findIndex((v: { id: string }) => v.id === data.song_version_id) : -1;
-                if (index < 0) toast.error(t('rehearsal.recording.linkUnavailable'));
-            }
-            // Guests see the sign-in prompt of the Recordings tab.
+            const { data } = await createClient()
+                .from('user_recordings')
+                .select('song_version_id')
+                .eq('id', linkedRecordingId)
+                .maybeSingle();
+            const index = data ? songVersions.findIndex((v: { id: string }) => v.id === data.song_version_id) : -1;
+            // A member is told when the take is not available; a guest is asked to sign in instead.
+            if (index < 0 && user) toast.error(t('rehearsal.recording.linkUnavailable'));
             if (index >= 0) {
                 setVersionChoice({ songId: id, versionId: songVersions[index].id });
                 setHighlightRecordingId(linkedRecordingId);
             }
-            setDrawerRequestedTab('recorder');
+            setDrawerRequestedTab(linkedTakeTab(!!user, index >= 0));
             setIsRehearsalDrawerOpen(true);
         })();
     }, [linkedRecordingId, song, authLoading, user, t, id]);
@@ -376,7 +374,8 @@ export default function SongDetailPage() {
                         {id && (
                             <button
                                 onClick={() => {
-                                    setDrawerRequestedTab("recorder");
+                                    // A guest cannot record: Listen, where the public takes are.
+                                    setDrawerRequestedTab(user ? "recorder" : "media");
                                     setIsRehearsalDrawerOpen(true);
                                 }}
                                 className="flex items-center gap-2 px-3 py-2 bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 rounded-lg text-sm font-bold border border-indigo-500/20 transition-all active:scale-[0.98]"
@@ -644,7 +643,7 @@ export default function SongDetailPage() {
                     youtubeUrl={currentVersion.youtube_url}
                     spotifyUrl={currentVersion.spotify_url}
                     soundcloudUrl={currentVersion.soundcloud_url}
-                    isSongPublic={song.is_public ?? true}
+                    isSongPublic={song.is_public === true}
                     isSongOwner={user?.id === song.owner_id || isAdmin}
                     onMakeSongPublic={handleMakeSongPublic}
                     highlightRecordingId={highlightRecordingId}
