@@ -1,6 +1,6 @@
 # Version: 1.0 | Date: Nov 6, 2026
 # Changelog
-# 1.0 | Nov 6, 2026 | Story 6.1.34 / G9.2 (#418): the song page and the Practice panel pass an axe-core audit (zero violations of any impact); dialogs hold focus and give it back; the delete confirmation is a real dialog; Escape while renaming; the embedded player is reachable; the Practice tabs follow the tab pattern; the recorder announces its state; the delete confirmation is a real dialog.
+# 1.0 | Nov 6, 2026 | Story 6.1.34 / G9.2 (#418): the song page and the Practice panel pass an axe-core audit (zero violations of any impact); dialogs hold focus and give it back; the delete confirmation is a real dialog; Escape while renaming; the embedded player is reachable; the Practice tabs follow the tab pattern; the recorder announces its state; the delete confirmation is a real dialog; Escape during a keyboard drag only cancels the drag; dialogs opened from a menu return focus.
 @story-6.1.34
 Feature: UX v2 accessibility audit of the song page and the Practice panel
   As a reader using assistive technology
@@ -81,6 +81,20 @@ Feature: UX v2 accessibility audit of the song page and the Practice panel
     Given the user is renaming a take in the Practice panel
     When the user presses Escape
     Then the name field closes and the Practice panel stays open
+
+  @e2e
+  Scenario: Escape while moving a take with the keyboard only cancels the move
+    Given the user picked up a take with Space and moved it with an arrow key
+    When the user presses Escape
+    Then the take is back where it was and the Practice panel stays open
+    And the next Escape closes the Practice panel
+
+  @e2e
+  Scenario: Dialogs opened from a menu give focus back to the control that opened the menu
+    Given the user opened Delete from the song menu, or Share or Singer Attribution from a take's actions
+    When the user presses Escape
+    Then only the dialog closes
+    And focus is on the song menu button, or on the take's More actions button
 
   @e2e
   Scenario: Tab goes on to the embedded player and focus never stays outside the panel

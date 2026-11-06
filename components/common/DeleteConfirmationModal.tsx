@@ -23,8 +23,13 @@ interface DeleteConfirmationModalProps {
 /**
  * "Are you sure?" before a destructive action (Story 6.1.34 / G9.2, #418).
  * A real alert dialog (Radix): focus moves to Cancel when it opens, Tab stays inside, Escape closes only
- * this dialog, and focus returns to what opened it. Whatever sits behind it (a page, the Practice panel)
- * is hidden from assistive technology while it is open.
+ * this dialog. Whatever sits behind it (a page, the Practice panel) is hidden from assistive technology
+ * while it is open.
+ *
+ * Focus on close: it goes back to the element that had focus when the dialog opened, if that is still on the
+ * page. When it opened from a menu or sheet that closes in the same moment (the song ⋯ sheet, the playlist
+ * menu) or the opener is gone (a deleted row), that element no longer exists, so the caller passes
+ * `fallbackFocus`. Without one, focus is left to the browser (usually <body>).
  */
 export default function DeleteConfirmationModal({
     isOpen,

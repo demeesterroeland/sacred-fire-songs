@@ -104,7 +104,9 @@ test('tapping a playlist adds or removes the song and flips its check', async ({
   await water.click();
   await expect(water).toHaveAttribute('aria-checked', 'false');
 
-  // The change is stored: reopening the sheet shows the same marks.
+  // The change is stored: reopening the sheet shows the same marks. Let the two requests finish first: a reload
+  // right after the click can cancel the second one under load.
+  await page.waitForLoadState('networkidle');
   await page.keyboard.press('Escape');
   await page.reload();
   const again = await openSheet(page);

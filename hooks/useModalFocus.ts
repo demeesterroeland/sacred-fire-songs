@@ -9,6 +9,13 @@ interface UseModalFocusOptions {
   containerRef: RefObject<HTMLElement | null>;
   onEscape: () => void;
   /**
+   * True while something inside the dialog is using Escape for itself (a keyboard drag in progress: Escape
+   * cancels the drag). The key then does not close the dialog; the next Escape does.
+   * Needed because this hook listens on `document` from the moment the dialog mounts, before such a widget
+   * attaches its own listener and calls `preventDefault`, so `defaultPrevented` cannot tell us.
+   */
+  escapeBusy?: () => boolean;
+  /**
    * Other regions that count as part of the dialog for Tab (e.g. a bar floating above it).
    * Their controls follow the dialog's own in the Tab order.
    */
@@ -23,12 +30,14 @@ interface UseModalFocusOptions {
  * and focus returns to whatever opened it. Other open layers (Radix sheets and dialogs) keep
  * their own focus handling: this hook ignores events that happen while one of them is open.
  */
-export function useModalFocus({ open, containerRef, onEscape, extraScope, fallbackSelector }: UseModalFocusOptions) {
+export function useModalFocus({ open, containerRef, onEscape, escapeBusy, extraScope, fallbackSelector }: UseModalFocusOptions) {
   const opener = useRef<HTMLElement | null>(null);
   const onEscapeRef = useRef(onEscape);
   const extraRef = useRef(extraScope);
+  const escapeBusyRef = useRef(escapeBusy);
   useEffect(() => {
     onEscapeRef.current = onEscape;
+    escapeBusyRef.current = escapeBusy;
     extraRef.current = extraScope;
   });
 
@@ -66,6 +75,7 @@ export function useModalFocus({ open, containerRef, onEscape, extraScope, fallba
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.defaultPrevented) return; // a Radix layer or an inline editor already took the key
       if (e.key === 'Escape') {
+        if (escapeBusyRef.current?.()) return; // the widget that is busy cancels itself
         if (!inScope(document.activeElement) && document.activeElement !== document.body) return;
         e.preventDefault();
         onEscapeRef.current();

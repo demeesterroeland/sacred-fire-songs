@@ -465,6 +465,40 @@ test.describe('keyboard and screen reader behaviour', () => {
       await expect(drawer(page)).toBeHidden();
     });
 
+    test('reordering takes with the keyboard: Escape cancels the drag only, the next Escape closes the panel', async ({ page }) => {
+      await page.goto(`/songs/${IDS.song}`);
+      await openPractice(page, 'record');
+      const rows = drawer(page).locator('[data-recording-id]');
+      await expect(rows).toHaveCount(2, { timeout: 15_000 });
+      const names = () => rows.evaluateAll((els) => els.map((el) => el.getAttribute('data-recording-id')));
+      const before = await names();
+      const handle = rows.first().getByRole('button', { name: 'Drag to reorder' });
+      await expect(handle).toBeVisible();
+      await handle.focus();
+      await page.keyboard.press('Space'); // pick up
+      await expect(handle).toHaveAttribute('aria-pressed', 'true');
+      // dnd-kit starts listening for arrows and Escape one task after the drag starts, so keys pressed at once are
+      // lost. Press ArrowDown until the announcement says the take moved over the *other* take (at the start it
+      // names the take itself).
+      const draggedId = (await rows.first().getAttribute('data-recording-id'))!;
+      const live = page.locator('[id^="DndLiveRegion"]');
+      await expect(async () => {
+        await page.keyboard.press('ArrowDown');
+        await expect(live).toContainText(/was moved over droppable area/i, { timeout: 1_000 });
+        await expect(live).not.toContainText(`droppable area ${draggedId}`, { timeout: 1_000 });
+      }).toPass({ timeout: 10_000 });
+      await page.keyboard.press('Escape'); // cancel the drag
+      await expectPracticeStaysOpen(page); // Escape went to the drag, not to the panel
+      await expect(handle).not.toHaveAttribute('aria-pressed', 'true');
+      await expect(live).toContainText(/cancelled/i);
+      expect(await names()).toEqual(before); // nothing moved
+      // No drag left: Escape closes the panel as before.
+      await handle.focus();
+      await page.keyboard.press('Escape');
+      await expect(drawer(page)).toBeHidden();
+      await expect(page.getByTestId('song-action-practice')).toBeFocused();
+    });
+
     test('Listen: Tab goes on to the embedded player, and leaving it never strands focus outside the panel', async ({ page }) => {
       await page.goto(`/songs/${IDS.playerSong}`);
       await openPractice(page, 'listen');
@@ -526,6 +560,42 @@ test.describe('keyboard and screen reader behaviour', () => {
       await expect(opener).toBeFocused();
     });
 
+    test('song menu → Delete → Escape: focus returns to ⋯ (the song is kept)', async ({ page }) => {
+      await page.goto(`/songs/${IDS.song}`);
+      const opener = page.getByRole('button', { name: 'More actions' }).first();
+      await expect(async () => {
+        await opener.focus();
+        await page.keyboard.press('Enter');
+        await expect(page.getByRole('dialog', { name: SONG_TITLE })).toBeVisible({ timeout: 2_500 });
+      }).toPass({ timeout: 20_000 });
+      await page.getByRole('dialog', { name: SONG_TITLE }).getByRole('button', { name: /delete/i }).click();
+      const confirm = page.getByRole('alertdialog');
+      await expect(confirm).toBeVisible();
+      await expect(confirm.getByRole('button', { name: 'Cancel' })).toBeFocused();
+      await page.keyboard.press('Escape');
+      await expect(confirm).toHaveCount(0);
+      await expect(opener).toBeFocused();
+    });
+
+    test('Share and Singer dialogs: Escape returns focus to the take\'s "More actions" button', async ({ page }) => {
+      await page.goto(`/songs/${IDS.song}`);
+      const { trigger, sheet } = await openTakeActions(page);
+      await sheet.getByRole('button', { name: 'Share', exact: true }).click();
+      const share = page.getByRole('dialog').filter({ hasText: 'Share take' });
+      await expect(share).toBeVisible({ timeout: 10_000 });
+      await page.keyboard.press('Escape');
+      await expect(share).toHaveCount(0);
+      await expect(trigger).toBeFocused();
+
+      await trigger.click();
+      await page.getByRole('dialog', { name: PRIVATE_TAKE }).getByRole('button', { name: 'Singer Attribution' }).click();
+      const singer = page.getByRole('dialog').filter({ hasText: 'Singer Attribution' });
+      await expect(singer).toBeVisible({ timeout: 10_000 });
+      await page.keyboard.press('Escape');
+      await expect(singer).toHaveCount(0);
+      await expect(trigger).toBeFocused();
+    });
+
     test('the heart is a toggle button that announces its state', async ({ page }) => {
       await page.goto(`/songs/${IDS.song}`);
       const heart = page.getByTestId('song-action-favorite');
@@ -572,9 +642,21 @@ test.describe('keyboard and screen reader behaviour', () => {
       await expect(choose).toBeVisible();
       await choose.focus();
       await expect(choose).toBeFocused();
-      const chooser = page.waitForEvent('filechooser');
+      // Watch the hidden file input instead of Chrome's file chooser: Chrome suppresses the chooser when the
+      // window is under 400x300 and can drop it under load, so the chooser event made this check flaky. The
+      // input being clicked is what opens the chooser.
+      await page.evaluate(() => {
+        const input = document.querySelector<HTMLInputElement>('[data-testid="practice-drawer"] input[type="file"]');
+        (window as unknown as { __fileInputClicks: number }).__fileInputClicks = 0;
+        input?.addEventListener('click', (e) => {
+          e.preventDefault();
+          (window as unknown as { __fileInputClicks: number }).__fileInputClicks++;
+        });
+      });
       await page.keyboard.press('Enter');
-      await chooser;
+      await expect
+        .poll(() => page.evaluate(() => (window as unknown as { __fileInputClicks: number }).__fileInputClicks))
+        .toBe(1);
     });
   });
 

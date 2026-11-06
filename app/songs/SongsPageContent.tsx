@@ -314,6 +314,8 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
                 title={t('song.delete.confirm.modalTitle')}
                 message={t('song.delete.confirm.message', { title: deleteTarget?.title || '' })}
                 isDeleting={isDeleting}
+                // The deleted song's row is gone: focus goes to the first song left in the list.
+                fallbackFocus={() => document.querySelector<HTMLElement>('[data-testid="song-list"] a')}
             />
         </main>
     );

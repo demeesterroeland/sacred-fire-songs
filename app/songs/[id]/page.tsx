@@ -53,6 +53,7 @@ export default function SongDetailPage() {
     const [readerPrefs, setReaderPrefs] = useReaderPrefs();
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isOverflowOpen, setIsOverflowOpen] = useState(false);
+    const overflowTriggerRef = useRef<HTMLButtonElement>(null);
     const [isRehearsalDrawerOpen, setIsRehearsalDrawerOpen] = useState(false);
     const [isGuestGateOpen, setIsGuestGateOpen] = useState(false);
     const [drawerRequestedTab, setDrawerRequestedTab] = useState<"media" | "recorder" | "auto">("auto");
@@ -336,6 +337,7 @@ export default function SongDetailPage() {
                     <BottomSheet open={isOverflowOpen} onOpenChange={setIsOverflowOpen}>
                         <BottomSheetTrigger asChild>
                             <button
+                                ref={overflowTriggerRef}
                                 type="button"
                                 className="inline-flex size-tap items-center justify-center rounded-control text-fg-muted hover:text-fg transition-colors"
                                 aria-label={t('common.moreActions')}
@@ -552,6 +554,8 @@ export default function SongDetailPage() {
                     title={t('song.delete.confirm.modalTitle')}
                     message={t('song.delete.confirm.message', { title: song.title })}
                     isDeleting={isDeleting}
+                    // The ⋯ sheet that opened this closes in the same moment: focus goes back to ⋯.
+                    fallbackFocus={() => overflowTriggerRef.current}
                 />
             </div>
 

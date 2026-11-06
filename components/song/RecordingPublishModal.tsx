@@ -14,6 +14,7 @@ import { useLocale } from "@/context/LocaleContext";
 import { toast } from "sonner";
 import { Globe, Lock, AlertTriangle, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { returnFocusToTake } from "@/lib/a11y/returnFocusToTake";
 import {
   SONG_NOT_PUBLIC,
   canPublishTake,
@@ -117,16 +118,7 @@ export default function RecordingPublishModal({
         data-testid="publish-dialog"
         aria-describedby="publish-take-info publish-audience-text"
         showCloseButton={!busy}
-        onCloseAutoFocus={(event) => {
-          // The take's actions sheet that opened this dialog is gone: hand focus back to the row.
-          const opener = document.querySelector<HTMLElement>(
-            `[data-recording-id="${recording.id}"] button[aria-haspopup="dialog"]`
-          );
-          if (opener) {
-            event.preventDefault();
-            opener.focus();
-          }
-        }}
+        onCloseAutoFocus={returnFocusToTake(recording.id)}
         className="max-h-[calc(100dvh-2rem)] max-w-md overflow-y-auto bg-surface border border-line rounded-panel p-6 shadow-sheet"
       >
         <DialogHeader className="min-w-0 text-left space-y-1">

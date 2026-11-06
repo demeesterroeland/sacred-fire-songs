@@ -339,10 +339,19 @@ export default function RehearsalDrawer({
   // dnd-kit renders a live region next to the list. Left inside the panel it counts as "keep visible" for Radix's
   // aria-hidden pass, so the panel stayed readable behind a sheet opened from a take. At <body> it is out of the way.
   const dndAccessibility = useMemo(() => ({ container: typeof document === "undefined" ? undefined : document.body }), []);
+  // Escape during a keyboard (or pointer) drag cancels the drag; it must not also close the panel. dnd-kit's own
+  // Escape listener runs after the panel's, so the panel is told a drag is active, and the flag is cleared one
+  // task after the drag ends so the same Escape keypress still counts as "used by the drag".
+  const dragActiveRef = useRef(false);
+  const dragGuard = useMemo(() => {
+    const release = () => { setTimeout(() => { dragActiveRef.current = false; }, 0); };
+    return { onDragStart: () => { dragActiveRef.current = true; }, onDragCancel: release, onDragEnd: release };
+  }, []);
   useModalFocus({
     open: isOpen,
     containerRef: dialogRef,
     onEscape: onClose,
+    escapeBusy: () => dragActiveRef.current,
     // The mini player floats above the drawer: its controls follow the drawer's in the Tab order.
     extraScope: () => Array.from(document.querySelectorAll<HTMLElement>('[data-testid="bottom-mini-player"]')),
     fallbackSelector: '[data-testid="song-action-practice"], [data-testid="song-header-practice"]',
@@ -1319,7 +1328,7 @@ export default function RehearsalDrawer({
                           </p>
                         </div>
                       ) : (
-                        <DndContext sensors={dndSensors} collisionDetection={closestCenter} accessibility={dndAccessibility} onDragEnd={handleDragEnd}>
+                        <DndContext sensors={dndSensors} collisionDetection={closestCenter} accessibility={dndAccessibility} {...dragGuard} onDragEnd={(event) => { dragGuard.onDragEnd(); handleDragEnd(event); }}>
                           <SortableContext
                             items={myTakes.map((r) => r.id)}
                             strategy={verticalListSortingStrategy}
@@ -1359,7 +1368,7 @@ export default function RehearsalDrawer({
                     ] as const).map((group) => group.takes.length > 0 && (
                       <section key={group.key} className="mt-6 space-y-3" data-testid={group.testId}>
                         <h3 className="text-meta font-semibold text-fg-muted text-left">{group.label}</h3>
-                        <DndContext sensors={dndSensors} collisionDetection={closestCenter} accessibility={dndAccessibility}>
+                        <DndContext sensors={dndSensors} collisionDetection={closestCenter} accessibility={dndAccessibility} {...dragGuard}>
                           <SortableContext items={group.takes.map((r) => r.id)} strategy={verticalListSortingStrategy} disabled>
                             <div className="rounded-panel border border-line bg-surface p-1 space-y-0.5">
                               {group.takes.map((rec) => (
@@ -1508,7 +1517,7 @@ export default function RehearsalDrawer({
                           {t('practice.takes.publicEmptyGuest')}
                         </p>
                       ) : (
-                        <DndContext sensors={dndSensors} collisionDetection={closestCenter} accessibility={dndAccessibility}>
+                        <DndContext sensors={dndSensors} collisionDetection={closestCenter} accessibility={dndAccessibility} {...dragGuard}>
                           <SortableContext items={publicTakes.map((r) => r.id)} strategy={verticalListSortingStrategy} disabled>
                             <div className="rounded-panel border border-line bg-surface p-1 space-y-0.5">
                               {publicTakes.map((rec) => (

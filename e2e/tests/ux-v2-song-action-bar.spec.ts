@@ -103,6 +103,16 @@ test.describe('Member @story-6.1.9', () => {
   test('the bar sits above the bottom nav and rises with the mini player', async ({ page }) => {
     test.skip(!withoutMedia, 'no public song without media in the seed');
     await openSong(page, withoutMedia);
+    // On a song page the bottom nav slides away 3 s after the last touch (auto-hide, on by default) and the bar
+    // then sits lower, so "rises by 56 px" depends on how long the test took: the other cause of this test's
+    // flakiness. Keep the nav on screen (the preference is the supported way).
+    await page.evaluate(() => {
+      const key = 'sacred-fire-songs-preferences';
+      const prefs = JSON.parse(localStorage.getItem(key) ?? '{}');
+      localStorage.setItem(key, JSON.stringify({ ...prefs, autoHideBottomNav: false }));
+    });
+    await page.reload();
+    await expect(page.getByTestId('song-action-bar')).toBeVisible({ timeout: 20_000 });
     const bar = page.getByTestId('song-action-bar');
     const nav = page.getByTestId('bottom-nav');
     await expect(nav).toBeVisible();
@@ -111,11 +121,25 @@ test.describe('Member @story-6.1.9', () => {
     expect(barBox.y + barBox.height).toBeLessThanOrEqual(navBox.y + 1);
 
     // Simulate the mini player (56 px bar on top of the nav): the bar rises above it.
-    const before = barBox.y;
-    await page.evaluate(() => {
-      document.documentElement.style.setProperty('--mini-player-h', 'calc(3.5rem + var(--bottom-nav-height, 3.5rem))');
+    // The Practice panel clears `--mini-player-h` in an effect when it mounts (no player is playing). That runs
+    // after hydration, which can be a second or more after the bar is already visible, and it wipes a value set
+    // earlier: the cause of this test's flakiness. Wait until the panel has hydrated and its effects have run,
+    // then simulate the mini player.
+    await page.waitForFunction(() => {
+      const el = document.querySelector('[data-testid="practice-drawer"]');
+      return !!el && Object.keys(el).some((k) => k.startsWith('__reactFiber'));
     });
-    await expect.poll(async () => (await bar.boundingBox())!.y).toBeLessThanOrEqual(before - 55);
+    await page.evaluate(() => new Promise<void>((done) => requestAnimationFrame(() => requestAnimationFrame(() => done()))));
+    const before = barBox.y;
+    // The value can still be wiped if the effect was late: set it, check the bar rises and stays up, else set it again.
+    await expect(async () => {
+      await page.evaluate(() => {
+        document.documentElement.style.setProperty('--mini-player-h', 'calc(3.5rem + var(--bottom-nav-height, 3.5rem))');
+      });
+      await expect.poll(async () => (await bar.boundingBox())!.y, { timeout: 2_000 }).toBeLessThanOrEqual(before - 55);
+      await page.waitForTimeout(600);
+      expect((await bar.boundingBox())!.y).toBeLessThanOrEqual(before - 55);
+    }).toPass({ timeout: 20_000 });
   });
 
   test('reserves its height on the page so the last lines are not covered', async ({ page }) => {

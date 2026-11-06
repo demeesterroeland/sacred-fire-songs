@@ -1,5 +1,6 @@
 "use client";
 
+import { returnFocusToTake } from "@/lib/a11y/returnFocusToTake";
 import React, { useState, useEffect, useRef } from "react";
 import {
   Dialog,
@@ -172,7 +173,7 @@ export default function RecordingShareModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent data-testid="share-dialog" className="max-w-md bg-surface border border-line rounded-panel p-6 shadow-sheet">
+      <DialogContent data-testid="share-dialog" onCloseAutoFocus={returnFocusToTake(recording?.id ?? "")} className="max-w-md bg-surface border border-line rounded-panel p-6 shadow-sheet">
         <DialogHeader className="text-left space-y-1">
           <DialogTitle className="text-title font-semibold text-fg flex items-center gap-2">
             {step === "search" ? (
