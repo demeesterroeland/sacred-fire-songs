@@ -415,7 +415,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                     <input
                         id="title"
                         {...register('title', { required: t('songForm.field.title.required') })}
-                        className="w-full bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all placeholder:text-gray-400 dark:placeholder:text-[#a19eb7]/50"
+                        className="w-full bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg px-4 py-3 text-gray-900 dark:text-white transition-all placeholder:text-gray-400 dark:placeholder:text-[#a19eb7]/50"
                         placeholder={t('songForm.field.title.placeholder')}
                     />
                     {errors.title && <p className="text-red-400 text-sm">{errors.title.message}</p>}
@@ -611,7 +611,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                             </div>
                             <input
                                 {...register('youtubeLink')}
-                                className="w-full pl-11 bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg h-12 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all placeholder:text-gray-400 dark:placeholder:text-[#a19eb7]/50 text-sm"
+                                className="w-full pl-11 bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg h-12 text-gray-900 dark:text-white transition-all placeholder:text-gray-400 dark:placeholder:text-[#a19eb7]/50 text-sm"
                                 placeholder={t('songForm.field.youtube.placeholder')}
                             />
                         </div>
@@ -622,7 +622,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                             </div>
                             <input
                                 {...register('spotifyLink')}
-                                className="w-full pl-11 bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg h-12 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all placeholder:text-gray-400 dark:placeholder:text-[#a19eb7]/50 text-sm"
+                                className="w-full pl-11 bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg h-12 text-gray-900 dark:text-white transition-all placeholder:text-gray-400 dark:placeholder:text-[#a19eb7]/50 text-sm"
                                 placeholder={t('songForm.field.spotify.placeholder')}
                             />
                         </div>
@@ -635,7 +635,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                             </div>
                             <input
                                 {...register('soundcloudLink')}
-                                className="w-full pl-11 bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg h-12 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all placeholder:text-gray-400 dark:placeholder:text-[#a19eb7]/50 text-sm"
+                                className="w-full pl-11 bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg h-12 text-gray-900 dark:text-white transition-all placeholder:text-gray-400 dark:placeholder:text-[#a19eb7]/50 text-sm"
                                 placeholder={t('songForm.field.soundcloud.placeholder')}
                             />
                         </div>

@@ -187,7 +187,7 @@ export function ArtistTagInput({
           onFocus={() => setIsOpen(true)}
           onKeyDown={handleKeyDown}
           placeholder={selectedArtists.length === 0 ? (placeholder ?? t('songForm.artists.placeholder')) : t('songForm.artists.addAnother')}
-          className="flex-1 min-w-[150px] bg-transparent border-none outline-none text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-[#a19eb7]/50"
+          className="flex-1 min-w-[150px] bg-transparent border-none text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-[#a19eb7]/50"
         />
       </div>
 

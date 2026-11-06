@@ -196,7 +196,7 @@ function SortableRecordingItem({
             onBlur={handleSaveRename}
             onKeyDown={handleKeyDown}
             aria-label={t('rehearsal.recording.edit.ariaLabel')}
-            className="w-full text-sm font-semibold bg-white dark:bg-gray-900 border border-indigo-500 rounded px-2 py-0.5 outline-none text-gray-900 dark:text-white"
+            className="w-full text-sm font-semibold bg-white dark:bg-gray-900 border border-indigo-500 rounded px-2 py-0.5 text-gray-900 dark:text-white"
           />
         ) : (
           <div className="flex items-center gap-1.5 min-w-0">

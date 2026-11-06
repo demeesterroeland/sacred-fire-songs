@@ -198,7 +198,7 @@ export function PlaylistDetailHeader({
                                 if (e.key === 'Escape') setIsRenaming(false);
                             }}
                             autoFocus
-                            className="w-full bg-gray-100 dark:bg-gray-800 border border-amber-500/50 rounded-lg px-2 py-1 text-xl font-bold text-gray-900 dark:text-gray-100 outline-none focus:border-amber-500"
+                            className="min-h-tap w-full px-2 py-1 text-title font-bold rounded-control border border-line-strong bg-surface text-fg placeholder:text-fg-subtle"
                         />
                     ) : (
                         <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 truncate">{optimisticTitle}</h1>
@@ -261,7 +261,7 @@ export function PlaylistDetailHeader({
                         autoFocus
                         rows={2}
                         placeholder={t('playlists.detail.addDescription')}
-                        className="w-full bg-gray-100 dark:bg-gray-800 border border-amber-500/50 rounded-lg px-3 py-2 text-sm text-gray-600 dark:text-gray-300 placeholder-gray-400 dark:placeholder-gray-600 outline-none focus:border-amber-500 resize-none"
+                        className="w-full resize-none px-3 py-2 text-meta rounded-control border border-line-strong bg-surface text-fg placeholder:text-fg-subtle"
                     />
                 ) : (
                     <button

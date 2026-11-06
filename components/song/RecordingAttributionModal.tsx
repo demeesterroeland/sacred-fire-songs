@@ -215,7 +215,7 @@ export default function RecordingAttributionModal({
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder={t("recording.attribution.searchPlaceholder")}
                     aria-label={t("recording.attribution.searchPlaceholder")}
-                    className="w-full pl-9 pr-8 py-2.5 bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-xl text-sm outline-none focus:border-indigo-500 text-gray-900 dark:text-white"
+                    className="w-full pl-9 pr-8 py-2.5 bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-xl text-sm text-gray-900 dark:text-white"
                   />
                   {isSearching && (
                     <Loader2 className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 animate-spin" />
@@ -273,7 +273,7 @@ export default function RecordingAttributionModal({
                 onChange={(e) => setCustomName(e.target.value)}
                 placeholder={t("recording.attribution.namePlaceholder")}
                 aria-label={t("recording.attribution.namePlaceholder")}
-                className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-xl text-sm outline-none focus:border-indigo-500 text-gray-900 dark:text-white"
+                className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-xl text-sm text-gray-900 dark:text-white"
               />
             </div>
             <div>
@@ -286,7 +286,7 @@ export default function RecordingAttributionModal({
                 onChange={(e) => setCustomEmail(e.target.value)}
                 placeholder={t("recording.attribution.emailPlaceholder")}
                 aria-label={t("recording.attribution.emailPlaceholder")}
-                className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-xl text-sm outline-none focus:border-indigo-500 text-gray-900 dark:text-white"
+                className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-xl text-sm text-gray-900 dark:text-white"
               />
             </div>
           </div>

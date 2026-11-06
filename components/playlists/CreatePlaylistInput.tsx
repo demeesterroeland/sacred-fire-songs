@@ -36,7 +36,7 @@ export function CreatePlaylistInput() {
                         onClick: () => { router.push(`/library/playlists/${result.id}`); },
                     },
                     classNames: {
-                        actionButton: 'text-amber-400 text-xs font-bold hover:text-amber-300 transition-colors ml-2',
+                        actionButton: 'ml-2 text-meta font-bold text-fg underline underline-offset-4 transition-colors hover:text-fg-muted',
                     },
                 });
                 router.refresh();
@@ -71,12 +71,12 @@ export function CreatePlaylistInput() {
                 onBlur={submit}
                 placeholder={t('playlists.new.placeholder')}
                 disabled={isPending}
-                className="flex-1 bg-gray-100 dark:bg-gray-800 border border-amber-500/50 rounded-lg px-3 py-1 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-600 outline-none focus:border-amber-500 disabled:opacity-50 min-w-0 w-40"
+                className="min-h-tap w-40 min-w-0 flex-1 px-3 py-1 text-meta disabled:opacity-50 rounded-control border border-line-strong bg-surface text-fg placeholder:text-fg-subtle"
             />
             <button
                 onClick={submit}
                 disabled={isPending || !title.trim()}
-                className="text-xs font-semibold text-amber-400 hover:text-amber-300 disabled:opacity-40 transition-colors px-1 shrink-0"
+                className="inline-flex min-h-tap shrink-0 items-center px-1 text-meta font-semibold text-fg underline underline-offset-4 transition-colors hover:text-fg-muted disabled:opacity-40"
             >
                 {isPending ? '…' : t('playlists.create')}
             </button>

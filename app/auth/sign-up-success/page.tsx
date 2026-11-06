@@ -78,7 +78,7 @@ function SignUpSuccessContent() {
                             placeholder="6-digit code"
                             value={code}
                             onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                            className="w-full bg-transparent border border-gray-200 dark:border-[#2d3545] rounded-xl py-4 pl-12 pr-4 text-gray-900 dark:text-white text-center text-xl tracking-[0.5em] placeholder:text-[#5a657a] placeholder:text-sm placeholder:tracking-normal focus:outline-none focus:border-[#d9481e] transition-all"
+                            className="w-full bg-transparent border border-gray-200 dark:border-[#2d3545] rounded-xl py-4 pl-12 pr-4 text-gray-900 dark:text-white text-center text-xl tracking-[0.5em] placeholder:text-[#5a657a] placeholder:text-sm placeholder:tracking-normal transition-all"
                             required
                         />
                     </div>

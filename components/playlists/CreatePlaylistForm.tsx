@@ -83,7 +83,7 @@ export function CreatePlaylistForm() {
                     }}
                     placeholder={t('playlists.add.namePlaceholder')}
                     aria-label={t('playlists.add.namePlaceholder')}
-                    className="min-h-tap min-w-0 flex-1 border-b border-line-strong bg-transparent text-title font-bold text-fg outline-none transition-colors placeholder:text-fg-subtle focus:border-accent"
+                    className="field-underline min-h-tap min-w-0 flex-1 border-b border-line-strong bg-transparent text-title font-bold text-fg placeholder:text-fg-subtle"
                 />
             </div>
 

@@ -266,7 +266,7 @@ export default function RecordingShareModal({
                   placeholder={t("recording.sharing.searchPlaceholder")}
                   aria-label={t("recording.sharing.searchPlaceholder")}
                   aria-describedby="share-helper"
-                  className="w-full min-h-tap pl-9 pr-9 bg-bg border border-line-strong rounded-control text-body outline-none focus-visible:outline-2 focus-visible:outline-focus text-fg placeholder:text-fg-subtle"
+                  className="w-full min-h-tap pl-9 pr-9 bg-bg border border-line-strong rounded-control text-body text-fg placeholder:text-fg-subtle"
                 />
                 {isSearching && (
                   <Loader2 className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-fg-subtle motion-safe:animate-spin" aria-hidden />

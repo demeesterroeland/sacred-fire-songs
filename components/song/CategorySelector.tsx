@@ -75,7 +75,7 @@ export default function CategorySelector({ selectedIds, onChange }: CategorySele
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder={t('search.tags.placeholder')}
-            className="w-full pl-9 pr-8 py-2 text-xs rounded-lg bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+            className="w-full pl-9 pr-8 py-2 text-xs rounded-lg bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400"
           />
           {searchTerm && (
             <button

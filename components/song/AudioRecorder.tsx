@@ -549,7 +549,7 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved, onDirty
             value={recordingName}
             onChange={(e) => setRecordingName(e.target.value)}
             disabled={isUploading}
-            className="min-h-tap w-full rounded-control border border-line-strong bg-bg px-4 text-body text-fg focus:outline-2 focus:outline-offset-2 focus:outline-focus"
+            className="min-h-tap w-full rounded-control border border-line-strong bg-bg px-4 text-body text-fg"
           />
 
           <div className="flex w-full flex-col gap-1">

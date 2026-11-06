@@ -173,6 +173,30 @@ body {
   outline-offset: 2px;
 }
 
+/*
+ * Text fields have ONE focus style. This rule is unlayered, so it beats Tailwind's utilities: `outline-none`,
+ * `focus:ring-*` and `focus:border-*` on an <input> never replaced it, they only stacked a second cue on top
+ * (underline plus box). Components must not add their own; the lint-style test textFieldFocus.test.ts checks.
+ */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+/*
+ * Fields drawn as a single underline (the New Playlist name): the one focus cue is the underline itself,
+ * 2 px in the accent instead of 1 px grey (a thicker line, not only a colour change), and no outline box.
+ * The shadow adds the second pixel without moving the layout.
+ */
+.field-underline:focus-visible {
+  outline: none;
+  border-bottom-color: var(--focus);
+  box-shadow: 0 1px 0 0 var(--focus);
+}
+
 @layer utilities {
   .hide-scroll::-webkit-scrollbar {
     display: none;
