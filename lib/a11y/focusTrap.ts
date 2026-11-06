@@ -11,6 +11,7 @@ export const TABBABLE_SELECTOR = [
   'select:not([disabled])',
   'textarea:not([disabled])',
   'summary',
+  'iframe:not([tabindex="-1"])',
   '[tabindex]:not([tabindex="-1"])',
   '[contenteditable="true"]',
 ].join(',');

@@ -17,10 +17,18 @@ test('long title in the sticky header shows its beginning and an ellipsis', asyn
     rows: [song],
   } = await client
     .query<{ id: string; title: string }>(
-      'SELECT id, title FROM public.compositions WHERE is_public ORDER BY length(title) DESC LIMIT 1'
+      // A public song with a long title AND enough lyrics to scroll the page (a short song cannot scroll).
+      `SELECT c.id, c.title
+         FROM public.compositions c
+         JOIN public.song_versions v ON v.composition_id = c.id
+        WHERE c.is_public
+          AND length(c.title) >= 40
+          AND cardinality(string_to_array(v.content_chordpro, E'\\n')) >= 40
+        ORDER BY length(c.title) DESC, length(v.content_chordpro) DESC
+        LIMIT 1`
     )
     .finally(() => client.end());
-  test.skip(!song || song.title.length < 40, 'no public song with a long title seeded');
+  test.skip(!song, 'no public song with a long title and enough lyrics to scroll seeded');
 
   await page.goto(`/songs/${song.id}`);
   const header = page.locator('header').filter({ has: page.getByTestId('sticky-song-title') });

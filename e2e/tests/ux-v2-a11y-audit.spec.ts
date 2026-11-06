@@ -2,7 +2,7 @@ import { test, expect, type Locator, type Page } from '@playwright/test';
 import AxeBuilder from '@axe-core/playwright';
 import pg from 'pg';
 import { ROLES } from '../fixtures/roles';
-import { clickPractice } from '../fixtures/songActions';
+import { clickPractice, expectPracticeStaysOpen } from '../fixtures/songActions';
 import { A11Y_AUDIT_FIXTURE_IDS as IDS } from '../fixtures/ids';
 
 /**
@@ -10,8 +10,9 @@ import { A11Y_AUDIT_FIXTURE_IDS as IDS } from '../fixtures/ids';
  * Gherkin: docs/testing/ux-v2-a11y-audit.feature (@e2e).
  *
  * Part 1: axe-core (WCAG 2.0/2.1/2.2 A + AA + best practice) on the song page, the Practice panel
- * (Listen and Record tab) and every sheet or dialog reachable from them, as guest and as member,
- * light and dark, 390 px. Zero serious or critical violations; nothing is excluded.
+ * (Listen and Record tab) and every sheet or dialog opened from the song page or the Practice panel
+ * (take actions, Make public, Share, Singer Attribution, playlist, reading tools, song menu, recorder states
+ * and the delete confirmation), as guest and as member, light and dark, 390 px. Zero serious or critical violations; nothing is excluded.
  * Part 2: keyboard journeys: dialogs hold focus and give it back, controls have names, state
  * changes are announced.
  *
@@ -30,6 +31,7 @@ test.describe.configure({ timeout: 90_000 });
 const DATABASE_URL =
   process.env.DATABASE_URL ?? 'postgresql://postgres:postgres@127.0.0.1:54322/postgres';
 const SONG_TITLE = 'E2E Accessibility Song';
+const PLAYER_SONG_TITLE = 'E2E Accessibility Player Song';
 const PRIVATE_TAKE = 'E2E A11y Private Take';
 const PUBLIC_TAKE = 'E2E A11y Public Take';
 const THEMES = ['light', 'dark'] as const;
@@ -60,6 +62,18 @@ test.beforeAll(async ({}, testInfo) => {
        VALUES ($1, $2, 'E2E Version', $3, $4)
        ON CONFLICT (id) DO UPDATE SET contributor_id = EXCLUDED.contributor_id, content_chordpro = EXCLUDED.content_chordpro`,
       [IDS.version, IDS.song, '{title: E2E Accessibility Song}\n[Am]Fire in the [G]heart of the [C]mountain\n[Am]Sing with the [G]fire tonight', member]
+    );
+    await client.query(
+      `INSERT INTO public.compositions (id, title, original_author, owner_id, is_public)
+       VALUES ($1, $2, 'E2E Author', $3, true)
+       ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, owner_id = EXCLUDED.owner_id, is_public = true`,
+      [IDS.playerSong, PLAYER_SONG_TITLE, member]
+    );
+    await client.query(
+      `INSERT INTO public.song_versions (id, composition_id, version_name, content_chordpro, contributor_id, youtube_url)
+       VALUES ($1, $2, 'E2E Version', $3, $4, 'https://www.youtube.com/watch?v=aqz-KE-bpKQ')
+       ON CONFLICT (id) DO UPDATE SET contributor_id = EXCLUDED.contributor_id, content_chordpro = EXCLUDED.content_chordpro, youtube_url = EXCLUDED.youtube_url`,
+      [IDS.playerVersion, IDS.playerSong, '{title: E2E Accessibility Player Song}\n[Am]Fire in the [G]heart', member]
     );
     const take = (id: string, name: string, isPublic: boolean) =>
       client.query(
@@ -138,6 +152,8 @@ async function openPractice(page: Page, tab?: 'listen' | 'record') {
   });
   return dlg;
 }
+
+const confirmation = (page: Page) => page.getByRole('alertdialog', { name: 'Delete take?' });
 
 const takeRow = (page: Page, name: string) => page.locator('[data-recording-id]', { hasText: name });
 
@@ -263,6 +279,14 @@ for (const theme of THEMES) {
         await audit(page, `singer dialog / member / ${theme}`);
       });
 
+      test(`delete confirmation (member, ${theme})`, async ({ page }) => {
+        await page.goto(`/songs/${IDS.song}`);
+        const { sheet } = await openTakeActions(page);
+        await sheet.getByRole('button', { name: 'Delete take', exact: true }).click();
+        await expect(confirmation(page)).toBeVisible({ timeout: 10_000 });
+        await audit(page, `delete confirmation / member / ${theme}`);
+      });
+
       test(`playlist sheet (member, ${theme})`, async ({ page }) => {
         await page.goto(`/songs/${IDS.song}`);
         await page.getByTestId('song-action-playlist').click();
@@ -332,6 +356,15 @@ test.describe('keyboard and screen reader behaviour', () => {
       await page.getByRole('button', { name: 'Close' }).first().click();
       await expect(drawer(page)).toBeHidden();
       await expect(page.getByTestId('song-action-practice')).toBeFocused();
+
+      // The backdrop: a tap above the panel closes it too.
+      await openPractice(page);
+      const top = await drawer(page).evaluate((el) => el.getBoundingClientRect().top);
+      expect(top).toBeGreaterThan(8);
+      // Playwright refuses the click if something else sits on top of that spot of the backdrop.
+      await page.getByTestId('practice-backdrop').click({ position: { x: 195, y: top - 4 } });
+      await expect(drawer(page)).toBeHidden();
+      await expect(page.getByTestId('song-action-practice')).toBeFocused();
     });
 
     test('the take actions sheet returns focus to its "More actions" button', async ({ page }) => {
@@ -362,6 +395,108 @@ test.describe('keyboard and screen reader behaviour', () => {
       // Focus is back on the take's "More actions" button, not lost on <body>.
       await expect(takeRow(page, PRIVATE_TAKE).locator('button[aria-label="More actions"]')).toBeFocused();
       await expect(drawer(page)).toBeVisible();
+    });
+
+    test('Delete take: the confirmation takes focus, holds it, Escape closes only it and focus returns', async ({ page }) => {
+      await page.goto(`/songs/${IDS.song}`);
+      const { trigger, sheet } = await openTakeActions(page);
+      await sheet.getByRole('button', { name: 'Delete take', exact: true }).click();
+      const dialog = confirmation(page);
+      await expect(dialog).toBeVisible({ timeout: 10_000 });
+      await expect(dialog).toContainText('cannot be undone');
+
+      // Focus starts on Cancel (the safe choice); the Practice panel behind is out of the way for screen readers.
+      await expect(dialog.getByRole('button', { name: 'Cancel' })).toBeFocused();
+      await expect(page.getByRole('dialog', { name: new RegExp(SONG_TITLE) })).toHaveCount(0);
+
+      // Tab reaches Yes, delete and wraps back to Cancel; Shift+Tab goes the other way. Never out of the dialog.
+      await page.keyboard.press('Tab');
+      await expect(dialog.getByRole('button', { name: 'Yes, Delete' })).toBeFocused();
+      await page.keyboard.press('Tab');
+      await expect(dialog.getByRole('button', { name: 'Cancel' })).toBeFocused();
+      await page.keyboard.press('Shift+Tab');
+      await expect(dialog.getByRole('button', { name: 'Yes, Delete' })).toBeFocused();
+      for (let i = 0; i < 6; i++) {
+        await page.keyboard.press('Tab');
+        expect(await activeIn(dialog), `Tab ${i + 1} stays inside the confirmation`).toBe(true);
+      }
+
+      // Escape closes the confirmation only: the Practice panel stays and focus returns to the take's menu button.
+      await page.keyboard.press('Escape');
+      await expect(dialog).toHaveCount(0);
+      await expectPracticeStaysOpen(page);
+      await expect(takeRow(page, PRIVATE_TAKE)).toHaveCount(1);
+      await expect(trigger).toBeFocused();
+    });
+
+    test('Delete take: Cancel and a tap on the backdrop keep the take', async ({ page }) => {
+      await page.goto(`/songs/${IDS.song}`);
+      let { sheet } = await openTakeActions(page);
+      await sheet.getByRole('button', { name: 'Delete take', exact: true }).click();
+      await expect(confirmation(page)).toBeVisible({ timeout: 10_000 });
+      await confirmation(page).getByRole('button', { name: 'Cancel' }).click();
+      await expect(confirmation(page)).toHaveCount(0);
+      await expect(takeRow(page, PRIVATE_TAKE)).toHaveCount(1);
+
+      await takeRow(page, PRIVATE_TAKE).locator('button[aria-label="More actions"]').click();
+      sheet = page.getByRole('dialog', { name: PRIVATE_TAKE });
+      await sheet.getByRole('button', { name: 'Delete take', exact: true }).click();
+      await expect(confirmation(page)).toBeVisible({ timeout: 10_000 });
+      await page.mouse.click(10, 10);
+      await expect(confirmation(page)).toHaveCount(0);
+      await expectPracticeStaysOpen(page);
+      await expect(takeRow(page, PRIVATE_TAKE)).toHaveCount(1);
+    });
+
+    test('renaming a take: Escape ends the edit and keeps the Practice panel open', async ({ page }) => {
+      await page.goto(`/songs/${IDS.song}`);
+      const { sheet } = await openTakeActions(page);
+      await sheet.getByRole('button', { name: 'Edit take name', exact: true }).click();
+      const input = page.locator('input[aria-label="Edit take name"]');
+      await expect(input).toBeFocused();
+      await input.fill('Not saved');
+      await page.keyboard.press('Escape');
+      await expect(input).toHaveCount(0);
+      await expectPracticeStaysOpen(page);
+      await expect(takeRow(page, PRIVATE_TAKE)).toHaveCount(1); // the old name is back; nothing was saved
+      // A second Escape (no edit left) closes the panel.
+      await page.locator('[data-testid="practice-drawer"]').focus();
+      await page.keyboard.press('Escape');
+      await expect(drawer(page)).toBeHidden();
+    });
+
+    test('Listen: Tab goes on to the embedded player, and leaving it never strands focus outside the panel', async ({ page }) => {
+      await page.goto(`/songs/${IDS.playerSong}`);
+      await openPractice(page, 'listen');
+      const dlg = drawer(page);
+      const player = dlg.locator('iframe');
+      await expect(player).toHaveCount(1, { timeout: 15_000 });
+      // The embedded page may take focus itself once it loads (or not, offline): start from a known control.
+      await page.getByTestId('practice-tab-listen').focus();
+
+      // The provider button used to be the last stop: Tab wrapped to Close and the player was never reached.
+      // Now Tab goes past it, into the player. (A player that cannot load, as without a network, has nothing to
+      // focus, so focus may pass straight through it and out of the page.)
+      let pastProvider = false;
+      const trail: string[] = [];
+      for (let i = 0; i < 20 && !pastProvider; i++) {
+        await page.keyboard.press('Tab');
+        const inside = await activeIn(dlg);
+        const onPlayer = await player.evaluate((el) => document.activeElement === el);
+        trail.push(await page.evaluate(() => { const a = document.activeElement; return a ? `${a.tagName}:${a.getAttribute('aria-label') || a.getAttribute('title') || (a.textContent || '').slice(0, 20)}` : 'null'; }));
+        pastProvider = onPlayer || !inside;
+      }
+      expect(pastProvider, `Tab goes past the last control into the player; trail ${trail.join(' > ')}`).toBe(true);
+
+      // Keys pressed inside a third-party player never reach the page, so Tab may carry focus out of it (to the
+      // browser's own toolbar, or the top of the page). Within a few more presses it is back in the panel.
+      let back = false;
+      for (let i = 0; i < 4 && !back; i++) {
+        await page.keyboard.press('Tab');
+        await page.waitForTimeout(100);
+        back = await activeIn(dlg);
+      }
+      expect(back, 'focus is back inside the Practice dialog').toBe(true);
     });
 
     test('the playlist sheet returns focus to Playlist', async ({ page }) => {

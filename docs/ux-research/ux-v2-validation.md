@@ -6,7 +6,7 @@
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
-| 1.36 | Nov 6, 2026 | Added #418 (accessibility audit of the song page and the Practice panel: what to check with a keyboard and a screen reader on a phone; the screen reader pass is still to be done). |
+| 1.36 | Nov 6, 2026 | Added #418 (accessibility audit of the song page and the Practice panel, including the delete confirmation: what to check with a keyboard and a screen reader on a phone; the screen reader pass is still to be done). |
 | 1.35 | Nov 6, 2026 | Added #405 (publish dialog names the song and says who will hear the take; a take on a private song starts with making the song public; guests hear public takes on the Listen tab; long names, focus return). |
 | 1.34 | Nov 6, 2026 | Added #395 (version switch under the song title; steps 6, 6b, 6c: `?version=` link, Save returns to the edited version, a take in progress blocks switching). |
 | 1.33 | Nov 6, 2026 | Added #415 (Add Song preview and visible upload button). |
@@ -520,6 +520,7 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 - [ ] 3. Signed out: with focus on the **Listen** tab press **→**. **Expected:** the **Record** tab is selected and focused (the sign-in prompt shows); **←** goes back; **Home** and **End** jump to the first and last tab.
 - [ ] 4. Press **Escape**. **Expected:** the panel closes and the focus ring is back on **Practice**. Repeat with the close button (✕).
 - [ ] 5. Signed in as a member: open a take's **⋯** (More actions), press **Escape**. **Expected:** the sheet closes and focus is back on that **⋯** button. Open **Playlist** and the song menu (**⋯** top right) and close each with Escape: focus returns to the button you used. In the Record tab, choose **Upload File**: the big dashed area is reachable with Tab and **Enter** opens the file picker.
+- [ ] 5b. With a keyboard: in a take's **⋯** sheet choose **Delete take**. **Expected:** a dialog *Delete take?* opens with focus on **Cancel**; **Tab** moves between **Cancel** and **Yes, Delete** and nowhere else; **Escape** closes only the dialog (the Practice panel stays, the take stays) and focus is back on that **⋯** button. Also: choose **Edit take name**, press **Escape**: the name field closes and the panel stays open.
 - [ ] 6. **VoiceOver or TalkBack, song page and Practice panel** (steps 1 to 12 of `docs/ux-research/2026-11-06-a11y-audit.md` §5): the panel is announced as a dialog named *Practice, <song>*; Listen and Record are read as tabs with *selected*; the recorder says *Recording...* and *Recording paused* when you start and pause; each sheet and dialog is announced with its title and closes with focus back where it was. Write the result per step in the audit file.
 - [ ] 7. Switch the language to Dutch and repeat the recorder part of step 6: the announcements are in Dutch.
 - [ ] 8. Turn on reduced motion in the phone's settings and open the site on a laptop-width window: the bars in the **Practice** button of a playing song do not move.

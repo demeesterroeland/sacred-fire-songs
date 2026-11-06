@@ -422,6 +422,7 @@ export default function SongDetailPage() {
                                 className="flex items-center gap-2 px-3 py-2 bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 rounded-lg text-sm font-bold border border-indigo-500/20 transition-all active:scale-[0.98]"
                                 title={t('practice.title')}
                                 aria-label={t('practice.title')}
+                                data-testid="song-header-practice"
                             >
                                 {isAudioPlaying ? (
                                     <div aria-hidden className="flex items-end gap-[2px] h-4 w-4 overflow-hidden">

@@ -1,4 +1,4 @@
-import { clickPractice } from '../fixtures/songActions';
+import { clickPractice, expectPracticeStaysOpen } from '../fixtures/songActions';
 import { test, expect, type Page } from '@playwright/test';
 import pg from 'pg';
 import { ROLES } from '../fixtures/roles';
@@ -148,6 +148,10 @@ test('choosing Edit take name closes the sheet and focuses the rename field', as
   const input = page.locator('input[aria-label="Edit take name"]');
   await expect(input).toBeFocused();
   await page.keyboard.press('Escape'); // leave the name unchanged
+  // Escape ends the edit only: the Practice panel stays open (Story 6.1.34 / #418).
+  await expect(input).toHaveCount(0);
+  await expectPracticeStaysOpen(page);
+  await expect(page.locator('[data-recording-id]', { hasText: TAKE })).toHaveCount(1);
 });
 
 test('Delete still asks for confirmation; cancelling keeps the take', async ({ page }) => {

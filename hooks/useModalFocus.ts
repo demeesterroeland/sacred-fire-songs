@@ -21,7 +21,7 @@ interface UseModalFocusOptions {
  * Focus management for a hand-built modal (the Practice drawer; Radix dialogs do this themselves):
  * focus moves into the dialog when it opens, Tab and Shift+Tab stay inside, Escape closes it,
  * and focus returns to whatever opened it. Other open layers (Radix sheets and dialogs) keep
- * their own focus handling: this hook ignores events that happen inside them.
+ * their own focus handling: this hook ignores events that happen while one of them is open.
  */
 export function useModalFocus({ open, containerRef, onEscape, extraScope, fallbackSelector }: UseModalFocusOptions) {
   const opener = useRef<HTMLElement | null>(null);
@@ -46,6 +46,23 @@ export function useModalFocus({ open, containerRef, onEscape, extraScope, fallba
     const scope = () => [containerRef.current, ...(extraRef.current?.() ?? [])].filter((el): el is HTMLElement => !!el);
     const inScope = (node: Node | null) => !!node && scope().some((el) => el.contains(node));
 
+    // Another modal layer (a Radix sheet or dialog opened from the panel) has its own focus guards in the page.
+    const otherLayerOpen = () => !!document.querySelector('[data-radix-focus-guard]');
+
+    // Focus that lands outside the dialog without a Tab key press we can see: Tab leaving a cross-origin
+    // player iframe (its keys go to the iframe, not to this page) or coming back from the browser's own toolbar.
+    // Pull it back in, to the end the user was heading for.
+    const onFocusIn = (e: FocusEvent) => {
+      const target = e.target;
+      if (!(target instanceof Node) || inScope(target) || otherLayerOpen()) return;
+      if (target instanceof Element && target.closest('[data-sonner-toaster]')) return;
+      const list = scope().flatMap((el) => tabbablesIn(el));
+      if (list.length === 0) return;
+      const from = e.relatedTarget;
+      const backwards = from instanceof Node && !!(from.compareDocumentPosition(target) & Node.DOCUMENT_POSITION_PRECEDING);
+      list[backwards ? list.length - 1 : 0].focus();
+    };
+
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.defaultPrevented) return; // a Radix layer or an inline editor already took the key
       if (e.key === 'Escape') {
@@ -57,7 +74,7 @@ export function useModalFocus({ open, containerRef, onEscape, extraScope, fallba
       if (e.key !== 'Tab' || e.ctrlKey || e.altKey || e.metaKey) return;
       const current = document.activeElement;
       // Focus inside another layer (a Radix sheet): that layer traps its own focus.
-      if (current && current !== document.body && !inScope(current)) return;
+      if (current && current !== document.body && !inScope(current) && otherLayerOpen()) return;
 
       const list = scope().flatMap((el) => tabbablesIn(el));
       const index = current ? list.indexOf(current as HTMLElement) : -1;
@@ -73,9 +90,11 @@ export function useModalFocus({ open, containerRef, onEscape, extraScope, fallba
       }
     };
     document.addEventListener('keydown', onKeyDown);
+    document.addEventListener('focusin', onFocusIn);
     return () => {
       cancelAnimationFrame(raf);
       document.removeEventListener('keydown', onKeyDown);
+      document.removeEventListener('focusin', onFocusIn);
       // Closing: the dialog turns hidden, so focus would fall to <body>. Give it back to the opener.
       const restore = () => {
         const target =

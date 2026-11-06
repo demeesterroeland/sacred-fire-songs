@@ -102,7 +102,13 @@ function SortableRecordingItem({
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") handleSaveRename();
-    if (e.key === "Escape") { e.stopPropagation(); setEditValue(rec.recording_name); setIsEditing(false); }
+    if (e.key === "Escape") {
+      // preventDefault, not only stopPropagation: the Practice panel listens on `document` and skips keys that are already handled.
+      e.preventDefault();
+      e.stopPropagation();
+      setEditValue(rec.recording_name);
+      setIsEditing(false);
+    }
   };
 
   const {
@@ -339,7 +345,7 @@ export default function RehearsalDrawer({
     onEscape: onClose,
     // The mini player floats above the drawer: its controls follow the drawer's in the Tab order.
     extraScope: () => Array.from(document.querySelectorAll<HTMLElement>('[data-testid="bottom-mini-player"]')),
-    fallbackSelector: '[data-testid="song-action-practice"], button[title="Practice"]',
+    fallbackSelector: '[data-testid="song-action-practice"], [data-testid="song-header-practice"]',
   });
   const [selectedMedia, setSelectedMedia] = useState<"youtube" | "spotify" | "soundcloud" | null>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
@@ -1151,6 +1157,7 @@ export default function RehearsalDrawer({
     <>
       {/* Backdrop */}
       <motion.div
+        data-testid="practice-backdrop"
         initial={{ opacity: 0, pointerEvents: "none" }}
         animate={{ 
           opacity: isOpen ? 1 : 0,
@@ -1777,6 +1784,8 @@ export default function RehearsalDrawer({
         title={t('rehearsal.recording.delete.confirmTitle')}
         message={t('rehearsal.recording.delete.confirmMessage', { name: pendingDelete?.recording_name ?? '' })}
         isDeleting={!!pendingDelete && deletingId === pendingDelete.id}
+        // The deleted take's menu button is gone afterwards: focus goes back to the Practice panel.
+        fallbackFocus={() => dialogRef.current}
       />
 
       {/* Singer Attribution Modal */}

@@ -115,4 +115,7 @@ export const A11Y_AUDIT_FIXTURE_IDS = {
   version: 'eeeeeeee-3634-4000-a000-000000000002',
   privateTake: 'eeeeeeee-3634-4000-a000-000000000003',
   publicTake: 'eeeeeeee-3634-4000-a000-000000000004',
+  /** A second song with a reference video, so the Listen tab shows the embedded player. */
+  playerSong: 'eeeeeeee-3634-4000-a000-000000000005',
+  playerVersion: 'eeeeeeee-3634-4000-a000-000000000006',
 } as const;

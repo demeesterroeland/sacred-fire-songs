@@ -1,6 +1,6 @@
 # Version: 1.0 | Date: Nov 6, 2026
 # Changelog
-# 1.0 | Nov 6, 2026 | Story 6.1.34 / G9.2 (#418): the song page and the Practice panel pass an axe-core audit (zero serious or critical violations); dialogs hold focus and give it back; the Practice tabs follow the tab pattern; the recorder announces its state.
+# 1.0 | Nov 6, 2026 | Story 6.1.34 / G9.2 (#418): the song page and the Practice panel pass an axe-core audit (zero violations of any impact); dialogs hold focus and give it back; the delete confirmation is a real dialog; Escape while renaming; the embedded player is reachable; the Practice tabs follow the tab pattern; the recorder announces its state; the delete confirmation is a real dialog.
 @story-6.1.34
 Feature: UX v2 accessibility audit of the song page and the Practice panel
   As a reader using assistive technology
@@ -41,7 +41,7 @@ Feature: UX v2 accessibility audit of the song page and the Practice panel
   Scenario: Every state a guest or member can reach is audited, light and dark
     Given a guest and a member on a phone, in light and in dark
     When axe-core runs on the song page, the Practice Listen tab, the Practice Record tab and the recorder
-    And axe-core runs on the take actions sheet, the playlist sheet, the Make public dialog, the share and singer dialogs, the reading tools sheet and the song menu
+    And axe-core runs on the take actions sheet, the playlist sheet, the Make public dialog, the share and singer dialogs, the delete confirmation, the reading tools sheet and the song menu
     Then there are no serious, critical, moderate or minor violations and no rule is excluded
 
   @e2e
@@ -65,3 +65,26 @@ Feature: UX v2 accessibility audit of the song page and the Practice panel
     When the user starts, pauses, resumes and stops a take
     Then a status message announces each state
     And every control has an accessible name
+
+  @e2e
+  Scenario: The delete confirmation is a real dialog
+    Given the Practice panel is open on the Record tab with a take
+    When the user chooses Delete take from the take's actions sheet
+    Then an alert dialog named "Delete take?" opens and focus is on Cancel
+    And Tab and Shift+Tab move between Cancel and Yes, Delete and never leave the dialog
+    When the user presses Escape
+    Then only the confirmation closes, the Practice panel stays open and the take is kept
+    And focus is back on the take's More actions button
+
+  @e2e
+  Scenario: Escape while renaming a take only ends the edit
+    Given the user is renaming a take in the Practice panel
+    When the user presses Escape
+    Then the name field closes and the Practice panel stays open
+
+  @e2e
+  Scenario: Tab goes on to the embedded player and focus never stays outside the panel
+    Given the Listen tab shows a reference video
+    When the user presses Tab past the last control
+    Then focus goes on to the player instead of wrapping to the first control
+    And within a few more presses focus is back inside the Practice panel
