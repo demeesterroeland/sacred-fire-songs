@@ -1,11 +1,12 @@
 # Guest Guide (draft)
 
-**Version:** 0.19 | **Date:** Nov 6, 2026
+**Version:** 0.20 | **Date:** Nov 6, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.20 | Nov 6, 2026 | Song page: songs with several versions have a switch under the grey lines; a link can open a given version (UX v2, #395). |
 | 0.19 | Nov 6, 2026 | Home now opens with a short welcome, a search field and the five newest songs under **Recently added** (UX v2, #412). Signed-in members still see Your library. |
 | 0.18 | Nov 6, 2026 | Song page: **Auto-scroll** (▶) and **⋯** reading tools in the same toolbar (UX v2, #394). |
 | 0.17 | Nov 6, 2026 | Sign-in and sign-up pages have a **Back** link instead of a ✕; it returns to the page you came from, else Home (UX v2, #409). |
@@ -51,6 +52,7 @@ The ☰ menu repeats the main places (Home, Songs, Playlists, Favorites, Drafts,
 
 - The title is at the top. Under it, one grey line shows the author and the tags (category, tradition, language); tap it to see them all as links.
 - A second line shows **Key**, **Capo** and **Tuning**, e.g. `Key E · Capo 3 · Standard`.
+- If the song exists in more than one version (for example *Original* and *Simplified*), a grey switch with the version names appears under those lines; tap a name to read that version. The app opens the first version each time. Songs with one version show no switch.
 - Under those lines: **Chords** switches the chords on or off, **A−** / **A+** make the text smaller or larger. The app remembers your choice on this device.
 - **▶** scrolls the song for you, hands free; touch the screen to pause it, or press **⏸**. **⋯** (*More reading tools*) sets the scroll speed (five steps). While the scroll runs the toolbar stays under the title. A small sun next to **⋯** means the screen stays on while you sing.
 - Chords are printed above the word where they change.

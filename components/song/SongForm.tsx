@@ -23,6 +23,8 @@ import { parseArtists, formatArtists, ensureArtistCategoryIds } from '@/lib/song
 import { useLocale } from '@/context/LocaleContext';
 import { safeNextPath } from '@/lib/auth/safeNext';
 import { FEATURES } from '@/lib/features';
+import { songFlags } from '@/lib/songs/versionFlags';
+import { songVersionHref } from '@/lib/songs/versionOrder';
 
 type SongFormData = {
     title: string;
@@ -297,14 +299,34 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                 const supabase = createClient();
                 if (!songId || !versionId) throw new Error('Missing ID for update');
 
+                // has_chords / has_melody describe the whole song: the edited version's new values replace its
+                // old ones, the other versions keep theirs (UXA-048). Saving a lyrics-only version must not
+                // clear the chords of another.
+                const { data: otherVersions, error: othersError } = await supabase
+                    .from('song_versions')
+                    .select('content_chordpro, youtube_url, spotify_url, soundcloud_url, melody_notation')
+                    .eq('composition_id', songId)
+                    .neq('id', versionId);
+                if (othersError) throw othersError;
+                const flags = songFlags([
+                    {
+                        content_chordpro: data.content,
+                        youtube_url: data.youtubeLink,
+                        spotify_url: data.spotifyLink,
+                        soundcloud_url: data.soundcloudLink,
+                        melody_notation: data.melodyNotation,
+                    },
+                    ...(otherVersions ?? []),
+                ]);
+
                 const { error: compError } = await supabase
                     .from('compositions')
                     .update({
                         title: data.title,
                         original_author: data.author,
                         is_public: data.isPublic,
-                        has_chords: hasChords(data.content),
-                        has_melody: !!(data.youtubeLink || data.spotifyLink || data.soundcloudLink || data.melodyNotation),
+                        has_chords: flags.has_chords,
+                        has_melody: flags.has_melody,
                     })
                     .eq('id', songId);
 
@@ -361,7 +383,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
             queryClient.invalidateQueries({ queryKey: SONG_KEYS.detail(id) });
             // Bust global filter counts (chords/melody/mine may have changed)
             queryClient.invalidateQueries({ queryKey: SONG_KEYS.globalFilterCounts() });
-            const returnTo = mode === 'create' ? safeNextPath(searchParams.get('next')) : `/songs/${id}`;
+            const returnTo = mode === 'create' ? safeNextPath(searchParams.get('next')) : songVersionHref(id, versionId);
             router.refresh();
             router.push(returnTo);
         },
@@ -646,7 +668,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                 <button
                     type="submit"
                     onClick={() => setValue('isPublic', false)}
-                    disabled={mutation.isPending}
+                    disabled={mutation.isPending || authLoading}
                     className="flex-1 bg-transparent border-2 border-gray-300 dark:border-[#3f3d52] text-gray-500 dark:text-[#a19eb7] hover:text-gray-900 dark:hover:text-white hover:border-gray-400 dark:hover:border-white/20 font-bold py-3 rounded-xl active:scale-[0.98] transition-all disabled:opacity-50 flex justify-center items-center gap-2"
                 >
                     {mutation.isPending && watch('isPublic') === false ? (
@@ -661,7 +683,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                 <button
                     type="submit"
                     onClick={() => setValue('isPublic', true)}
-                    disabled={mutation.isPending}
+                    disabled={mutation.isPending || authLoading}
                     className="flex-1 bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-xl shadow-lg shadow-red-500/20 active:scale-[0.98] transition-transform disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2"
                 >
                     {mutation.isPending && watch('isPublic') === true ? (

@@ -225,7 +225,8 @@ export async function addSongToPlaylist(
         .from('song_versions')
         .select('id')
         .eq('composition_id', compositionParsed.data)
-        .order('created_at', { ascending: true });
+        .order('created_at', { ascending: true })
+        .order('id', { ascending: true }); // same tiebreak as lib/songs/versionOrder.ts
 
     const version = versions?.[0];
     if (!version) return { added: false, error: 'Song version not found' };

@@ -1,11 +1,12 @@
 # Design Tokens & Component Sheet (UX v2, "sober" style)
 
-**Version:** 1.0 | **Date:** Nov 5, 2026 | **Story:** 6.1.1 / G1.1 (#385) | **Epic:** 6.1 (#375)
+**Version:** 1.1 | **Date:** Nov 6, 2026 | **Story:** 6.1.1 / G1.1 (#385) | **Epic:** 6.1 (#375)
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.1 | Nov 6, 2026 | Component sheet: Segmented (variant / language slot under the song title, Story 6.1.11 / G2.6, #395) and its design note. |
 | 1.0 | Nov 5, 2026 | First version: semantic colour tokens (light + dark), type scale, spacing, radius, size and elevation; Tailwind utility map; component sheet; rules from report §5 and ADR 0007. |
 
 ## 1. Principles
@@ -115,6 +116,9 @@ Primitives in `components/ui/` (React) and the visual sheet `docs/design/screens
 | **Chip** | `components/ui/chip.tsx` | Filter-only. `rounded-pill`, `bg-chip`; selected = inverted (`bg-chip-active`) **plus** a check icon and `aria-pressed`. Never decorative. |
 | **BottomSheet** | `components/ui/bottom-sheet.tsx` | Radix Dialog at the bottom on mobile (centered dialog ≥ `sm`), `bg-surface`, `rounded-t-sheet`, `shadow-sheet`, `bg-scrim` overlay, grab handle, title, safe-area padding; reserves space for the mini player (`--mini-player-h`). One sheet component for menus, pickers and action sheets. |
 | **Toolbar** | `components/ui/toolbar.tsx` | `role="toolbar"` with a required translated `aria-label`, `bg-surface rounded-panel`, items are 44 px `ToolbarButton`s with text or icon + `aria-label`; toggles use `aria-pressed` **and** a visible cue (raised background + underline). Buttons stay in the tab order. Used for `Chords · A− · A+`. |
+| **Segmented** | `components/ui/segmented.tsx` | `role="radiogroup"` with a required translated `aria-label`; `bg-surface rounded-panel` strip of 44 px `role="radio"` buttons with `aria-checked` and a roving `tabindex` (one tab stop; Arrow Left/Right/Up/Down move and select with wrap-around, Home/End jump; text only, `text-meta`, no `title`); checked = raised `bg-bg` with a `ring-1 ring-line` hairline **plus** underline, never colour alone; scrolls sideways instead of widening the page. Used for the song page's version switch (`SongVersionSwitch`). |
+
+**Variant / language slot (Story 6.1.11, `screen21_song_page.html`).** One slot under the title, meta and key lines and above the reader toolbar holds up to two `Segmented` groups: *version* (`Original · Simplified · Live`, from `song_versions`) and later *language* (`ES · EN`, from the translation layer). The slot exists only when there is something to choose: a song with one version and no translations renders nothing and reserves no space, so it never shifts the layout and never shows a dead control. Today only the version group exists; the language group is not drawn until translations do. The slot does not stick during auto-scroll (the reader toolbar does), so the two never collide.
 
 ## 6. Migration rule for restyle stories
 

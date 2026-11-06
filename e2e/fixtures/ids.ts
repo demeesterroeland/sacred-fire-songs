@@ -61,3 +61,20 @@ export const SHARED_WITH_ME_FIXTURE_IDS = {
   version: 'eeeeeeee-3619-4000-a000-000000000002',
   take: 'eeeeeeee-3619-4000-a000-000000000003',
 } as const;
+
+/**
+ * Story 6.1.11 / G2.6 (#395): a public song with two versions (Original, Simplified) and a public
+ * song with a single version, for the version switch under the title. Removed by
+ * e2e/global-teardown.ts.
+ */
+export const VARIANT_SLOT_FIXTURE_IDS = {
+  song: 'eeeeeeee-3611-4000-a000-000000000001',
+  original: 'eeeeeeee-3611-4000-a000-000000000002',
+  simplified: 'eeeeeeee-3611-4000-a000-000000000003',
+  singleSong: 'eeeeeeee-3611-4000-a000-000000000004',
+  singleVersion: 'eeeeeeee-3611-4000-a000-000000000005',
+  // Edit round trip: "Original" has chords, "Simplified" is lyrics only.
+  flagsSong: 'eeeeeeee-3611-4000-a000-000000000006',
+  flagsOriginal: 'eeeeeeee-3611-4000-a000-000000000007',
+  flagsSimplified: 'eeeeeeee-3611-4000-a000-000000000008',
+} as const;

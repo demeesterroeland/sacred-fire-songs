@@ -83,7 +83,8 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-const setup = () => render(<AudioRecorder songVersionId="v1" onRecordingSaved={vi.fn()} />);
+const setup = (props: { onDirtyChange?: (dirty: boolean) => void } = {}) =>
+  render(<AudioRecorder songVersionId="v1" onRecordingSaved={vi.fn()} {...props} />);
 const tick = async (ms: number) => { await act(async () => { vi.advanceTimersByTime(ms); }); };
 const press = async (name: string) => { await act(async () => { fireEvent.click(screen.getByTitle(name)); }); };
 
@@ -362,6 +363,59 @@ describe('discard during recording', () => {
     await press('Stop recording');
     unmount();
     expect(URL.revokeObjectURL).toHaveBeenCalledWith('blob:take');
+  });
+});
+
+describe('dirty state (a version tap must not drop a take, #395)', () => {
+  const lastDirty = (fn: ReturnType<typeof vi.fn>) => fn.mock.calls.at(-1)?.[0];
+
+  it('is clean while idle and reports nothing dirty on mount', () => {
+    const onDirtyChange = vi.fn();
+    setup({ onDirtyChange });
+    expect(lastDirty(onDirtyChange)).toBe(false);
+  });
+
+  it('is dirty during the count-in, while recording and paused', async () => {
+    const onDirtyChange = vi.fn();
+    setup({ onDirtyChange });
+    await press('Start recording');
+    expect(lastDirty(onDirtyChange)).toBe(true); // count-in
+    await tick(3000);
+    expect(screen.getByText('Recording...')).toBeTruthy();
+    expect(lastDirty(onDirtyChange)).toBe(true);
+    await act(async () => { fireEvent.click(screen.getByTitle('Pause recording')); });
+    expect(lastDirty(onDirtyChange)).toBe(true);
+  });
+
+  it('is dirty for a stopped, unsaved take and clean again after Discard', async () => {
+    const onDirtyChange = vi.fn();
+    setup({ onDirtyChange });
+    fireEvent.click(screen.getByRole('switch'));
+    await press('Start recording');
+    await tick(2000);
+    await press('Stop recording');
+    expect(lastDirty(onDirtyChange)).toBe(true);
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: 'Discard' })); });
+    expect(lastDirty(onDirtyChange)).toBe(false);
+  });
+
+  it('is dirty once an upload file is picked', async () => {
+    const onDirtyChange = vi.fn();
+    const { container } = setup({ onDirtyChange });
+    await act(async () => { fireEvent.click(screen.getByRole('button', { name: /Upload/ })); });
+    const input = container.querySelector('input[type="file"]') as HTMLInputElement;
+    const file = new File(['x'], 'riff.wav', { type: 'audio/wav' });
+    await act(async () => { fireEvent.change(input, { target: { files: [file] } }); });
+    expect(lastDirty(onDirtyChange)).toBe(true);
+  });
+
+  it('is clean again after the recorder unmounts, so a stale flag cannot block the next version', async () => {
+    const onDirtyChange = vi.fn();
+    const { unmount } = setup({ onDirtyChange });
+    await press('Start recording');
+    expect(lastDirty(onDirtyChange)).toBe(true);
+    unmount();
+    expect(lastDirty(onDirtyChange)).toBe(false);
   });
 });
 

@@ -26,6 +26,9 @@ import { useUserPreferences } from '@/context/UserPreferencesContext';
 import { practiceTab } from '@/lib/song/actionBar';
 import { SongMetaLines } from '@/components/song/SongMetaLines';
 import { ReaderToolbar } from '@/components/song/ReaderToolbar';
+import { SongVersionSwitch } from '@/components/song/SongVersionSwitch';
+import { EDIT_VERSION_PARAM, editSongHref } from '@/lib/songs/versionOrder';
+import { blocksVersionSwitch, linkedVersionChoice, resolveVersionIndex, type VersionChoice } from '@/lib/songs/versionSwitch';
 import { ReadingToolsSheet } from '@/components/song/ReadingToolsSheet';
 import { useReaderPrefs } from '@/lib/reader/useReaderPrefs';
 import { speedBy } from '@/lib/reader/autoScroll';
@@ -43,7 +46,9 @@ export default function SongDetailPage() {
     const params = useParams();
     const id = typeof params.id === 'string' ? params.id : params.id?.[0]; // Safe type handling
 
-    const [selectedVersionIndex, setSelectedVersionIndex] = useState(0);
+    // The chosen version belongs to the song it was chosen on (like the transpose shift), so opening
+    // another song, or a version that is gone, falls back to the first one (UXA-049).
+    const [versionChoice, setVersionChoice] = useState<VersionChoice | null>(null);
     const [readerPrefs, setReaderPrefs] = useReaderPrefs();
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     const [isOverflowOpen, setIsOverflowOpen] = useState(false);
@@ -52,7 +57,13 @@ export default function SongDetailPage() {
     const [drawerRequestedTab, setDrawerRequestedTab] = useState<"media" | "recorder" | "auto">("auto");
     const [isAudioPlaying, setIsAudioPlaying] = useState(false);
     const [highlightRecordingId, setHighlightRecordingId] = useState<string | null>(null);
-    const linkedRecordingId = parseRecordingParam(useSearchParams().get(RECORDING_PARAM));
+    const searchParams = useSearchParams();
+    const linkedRecordingId = parseRecordingParam(searchParams.get(RECORDING_PARAM));
+    // `/songs/<id>?version=<versionId>` (where Save on the edit form returns to) is the initial choice;
+    // a tap on the switch or a linked take overrides it. Unknown versions fall back to the first one.
+    const linkedVersion = linkedVersionChoice(id, searchParams.get(EDIT_VERSION_PARAM));
+    // The recorder holds a take that is not saved yet: a version tap must not remount (and empty) the drawer.
+    const recorderDirtyRef = useRef(false);
     const handledRecordingLink = useRef<string | null>(null);
     const { isDeleting, deleteSong } = useDeleteSong();
 
@@ -149,7 +160,23 @@ export default function SongDetailPage() {
     const hasPersonalRecording = !!id && userRecordingCompositionIds.has(id);
 
     const versions = song?.song_versions || [];
+    const selectedVersionIndex = resolveVersionIndex(versions, versionChoice?.songId === id ? versionChoice : linkedVersion, id);
     const currentVersion = versions[selectedVersionIndex];
+    const selectVersion = (index: number) => {
+        const next = versions[index];
+        if (!next) return;
+        // A take in progress (or recorded but not saved) belongs to the version it was made on; switching would
+        // remount the drawer and drop it. Bring the recorder back instead, and say why (UXA-048).
+        if (blocksVersionSwitch(recorderDirtyRef.current, currentVersion?.id, next.id)) {
+            toast.info(t('song.version.takeInProgress'));
+            setDrawerRequestedTab('recorder');
+            setIsRehearsalDrawerOpen(true);
+            return;
+        }
+        setVersionChoice({ songId: id, versionId: next.id });
+        // A take linked from a notification belongs to the version it was opened on.
+        setHighlightRecordingId(null);
+    };
     const { data: recordings } = useSongRecordings(currentVersion?.id);
     const mayTranspose = canTranspose(user?.role) && !!song?.has_chords;
     const shownContent = useMemo(
@@ -190,13 +217,13 @@ export default function SongDetailPage() {
             }
             // Guests see the sign-in prompt of the Recordings tab.
             if (index >= 0) {
-                setSelectedVersionIndex(index);
+                setVersionChoice({ songId: id, versionId: songVersions[index].id });
                 setHighlightRecordingId(linkedRecordingId);
             }
             setDrawerRequestedTab('recorder');
             setIsRehearsalDrawerOpen(true);
         })();
-    }, [linkedRecordingId, song, authLoading, user, t]);
+    }, [linkedRecordingId, song, authLoading, user, t, id]);
 
     if (songLoading || authLoading) {
         if (skeletonTimedOut) {
@@ -340,7 +367,7 @@ export default function SongDetailPage() {
                             </button>
                         )}
                         {(song.owner_id === user?.id || isAdmin) && (
-                            <Link href={`/songs/${id}/edit`}>
+                            <Link href={editSongHref(id, currentVersion?.id)}>
                                 <button className="flex items-center gap-2 px-3 py-2 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg text-sm font-bold border border-gray-300 dark:border-gray-700 transition-all">
                                     <Edit2 className="w-4 h-4" /> <span className="hidden xl:inline">{t('common.edit')}</span>
                                 </button>
@@ -422,6 +449,15 @@ export default function SongDetailPage() {
                         hasChords={song.has_chords}
                         hasMelody={song.has_melody}
                         hasPersonalRecording={hasPersonalRecording}
+                    />
+
+                    {/* Story 6.1.11 (#395): version switch (Original · Simplified), only when the song has more
+                        than one version; nothing (and no space) otherwise. */}
+                    <SongVersionSwitch
+                        className="mb-2"
+                        versions={versions}
+                        selectedIndex={selectedVersionIndex}
+                        onSelect={selectVersion}
                     />
 
                     {/* Story 6.1.6 (#390): Chords · A− · A+, remembered on this device.
@@ -557,7 +593,7 @@ export default function SongDetailPage() {
                             {/* Edit */}
                             {(song.owner_id === user?.id || isAdmin) && (
                                 <Link
-                                    href={`/songs/${id}/edit`}
+                                    href={editSongHref(id, currentVersion?.id)}
                                     onClick={() => setIsOverflowOpen(false)}
                                     className="flex items-center gap-4 px-6 py-4 hover:bg-gray-100 dark:hover:bg-gray-800/50 transition-colors text-gray-700 dark:text-gray-300"
                                 >
@@ -586,7 +622,10 @@ export default function SongDetailPage() {
 
             {/* Rehearsal Drawer Sheet */}
             {currentVersion && (
+                // One drawer per version: switching versions unmounts the old one, which stops its take and
+                // drops its reference-track state, so no audio keeps playing without its mini player.
                 <RehearsalDrawer
+                    key={currentVersion.id}
                     isOpen={isRehearsalDrawerOpen}
                     onClose={() => {
                         setIsRehearsalDrawerOpen(false);
@@ -609,6 +648,7 @@ export default function SongDetailPage() {
                     isSongOwner={user?.id === song.owner_id || isAdmin}
                     onMakeSongPublic={handleMakeSongPublic}
                     highlightRecordingId={highlightRecordingId}
+                    onRecorderDirtyChange={(dirty) => { recorderDirtyRef.current = dirty; }}
                 />
             )}
         </div>
