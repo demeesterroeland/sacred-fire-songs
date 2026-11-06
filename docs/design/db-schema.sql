@@ -1,11 +1,12 @@
 /*
- **Version:** 2.9
+ **Version:** 3.0
  **Status:** Current
- **Date:** Nov 6, 2026
+ **Date:** Nov 7, 2026
  
  ## Usage
  This script provides a complete setup for the "Sacred Fire Songs" database. 
  It consolidates the initial schema and all subsequent migrations up to Nov 6, 2026.
+ (v3.0: Song and version read and write rules now match the migrations).
  (v2.9: Write rules for profile fields, categories, playlist owner and song versions; fn_guard_profile_fields, fn_check_song_manage_access).
  (v2.8: Profile and playlist item access rules, public_profiles view, fn_can_edit_setlist;
  installs without errors again: added missing columns, song_views, new-user trigger).
@@ -325,10 +326,33 @@ alter table public.user_recordings enable row level security;
 -- Public Read Policies
 create policy "Allow public read access" on public.categories for
 select to public using (true);
-create policy "Public compositions are viewable by everyone" on public.compositions for
-select using (true);
-create policy "Public versions are viewable by everyone" on public.song_versions for
-select using (true);
+create policy "Public songs are viewable by everyone" on public.compositions for
+select to public using (is_public = true);
+create policy "Authenticated users can view appropriate songs" on public.compositions for
+select to authenticated using (
+    is_public = true
+    or owner_id = (select auth.uid())
+    or (select role from public.profiles where id = (select auth.uid())) = 'admin'
+  );
+create policy "Respect composition privacy for versions" on public.song_versions for
+select to public using (
+    exists (
+      select 1 from public.compositions c
+      where c.id = song_versions.composition_id and c.is_public = true
+    )
+  );
+create policy "Authenticated users can view appropriate versions" on public.song_versions for
+select to authenticated using (
+    exists (
+      select 1 from public.compositions c
+      where c.id = song_versions.composition_id
+        and (
+          c.is_public = true
+          or c.owner_id = (select auth.uid())
+          or (select role from public.profiles where id = (select auth.uid())) = 'admin'
+        )
+    )
+  );
 -- Admin/Member Policies (Simplified for MVP)
 -- Admin/Member Policies (Optimized: Split actions, cached auth)
 -- admin manages categories. Signed-in users may add an artist sub-category, and the
@@ -351,8 +375,11 @@ insert to authenticated with check (
 -- Compositions: Authenticated creation, Owner Edit, Admin Edit
 -- Compositions: Public creation (Mock Mode compatibility)
 -- create policy "Authenticated users can create compositions" on public.compositions for insert to authenticated with check ((select auth.role()) = 'authenticated');
-create policy "Allow public insert compositions" on public.compositions for
-insert to public with check (true);
+create policy "Owners can manage their songs" on public.compositions for all to authenticated
+  using (owner_id = (select auth.uid()))
+  with check (owner_id = (select auth.uid()));
+create policy "Admins can manage all songs" on public.compositions for all to authenticated
+  using ((select role from public.profiles where id = (select auth.uid())) = 'admin');
 create policy "Owners can update their songs" on public.compositions for
 update to authenticated using (
     owner_id = (
@@ -370,9 +397,6 @@ update to authenticated using (
     ) = 'admin'
   );
 -- create policy "Admins can delete songs" on public.compositions for delete to authenticated using ((select role from public.profiles where id = (select auth.uid())) = 'admin');
-create policy "Allow public update compositions" on public.compositions for
-update to public using (true);
-create policy "Allow public delete compositions" on public.compositions for delete to public using (true);
 -- Song Versions: Strict contributor check + Admin Override
 -- create policy "Users can insert versions" on public.song_versions for insert with check ((select auth.uid()) = contributor_id);
 create or replace function public.fn_check_song_manage_access(target_song_id uuid) returns boolean as $$
@@ -416,10 +440,11 @@ update to authenticated using (
         )
     ) = 'admin'
   );
-create policy "Allow public update versions" on public.song_versions for
-update to public using (true);
 -- create policy "Admins can delete versions" on public.song_versions for delete to authenticated using ((select role from public.profiles where id = (select auth.uid())) = 'admin');
-create policy "Allow public delete versions" on public.song_versions for delete to public using (true);
+create policy "Allow contributors and admins to delete versions" on public.song_versions for delete to authenticated using (
+    contributor_id = (select auth.uid())
+    or (select role from public.profiles where id = (select auth.uid())) = 'admin'
+  );
 -- Setlist Policies (RLS enabled)
 create policy "Public setlists visible" on public.setlists for
 select to public using (is_public = true);
