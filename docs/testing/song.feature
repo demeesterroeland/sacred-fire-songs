@@ -1,5 +1,5 @@
 # Sacred Fire Songs – Song behaviour catalogue
-# Version: 1.2 | Date: Nov 5, 2026
+# Version: 1.3 | Date: Nov 6, 2026
 #
 # Living Gherkin description of every song situation that the automated tests
 # exercise. Each scenario names the test that covers it (unit = vitest files in
@@ -11,6 +11,7 @@
 # supabase/seeds/03_songs_random_generated.sql (regenerate: npm run seed:generate).
 #
 # Changelog
+#   1.3 – Nov 6, 2026 – Story 6.1.21 (#405): a guest opens Practice on Listen, so the sign-in gate covers the Record tab (not the first thing a guest sees).
 #   1.2 – Nov 5, 2026 – Story 6.1.14 (#398): the rehearsal feature is called "Practice" everywhere (drawer, menu, tabs Listen / Record, badge, guest card).
 #   1.1 – Oct 31, 2026 – Seeder path is now scripts/db/random-seeder.mjs (#274); unit tests live only in testing/unit/tests.
 #   1.0 – Oct 30, 2026 – Initial catalogue derived from the unit, e2e and manual tests.
@@ -355,7 +356,7 @@ Feature: Songs
 
     @e2e @recording
     Scenario: A guest cannot record
-      When a guest opens the Practice drawer
+      When a guest opens the Record tab of the Practice drawer
       Then the "Sign in to record" gate covers the recorder
 
     @e2e @media-player

@@ -4,6 +4,8 @@ import {
   recordingPermalink,
   songRecordingPath,
   RECORDING_PARAM,
+  linkedTakeTab,
+  takeListTab,
 } from '@/lib/songs/recordingLink';
 import { notificationLink } from '@/lib/notifications/email';
 
@@ -93,5 +95,25 @@ describe('/recordings/[id]', () => {
   it('is not found for malformed ids', async () => {
     await expect(open('not-a-uuid')).rejects.toThrow('NOT_FOUND');
     expect(mockMaybeSingle).not.toHaveBeenCalled();
+  });
+});
+
+describe('takeListTab', () => {
+  it('lists the takes on Record for a member and on Listen for a guest', () => {
+    expect(takeListTab(true)).toBe('recorder');
+    expect(takeListTab(false)).toBe('media');
+  });
+});
+
+describe('linkedTakeTab', () => {
+  it('opens a member on Record, found or not', () => {
+    expect(linkedTakeTab(true, true)).toBe('recorder');
+    expect(linkedTakeTab(true, false)).toBe('recorder');
+  });
+  it('opens a guest on Listen when the take is there to hear', () => {
+    expect(linkedTakeTab(false, true)).toBe('media');
+  });
+  it('keeps the sign-in prompt for a guest when the take is not there', () => {
+    expect(linkedTakeTab(false, false)).toBe('recorder');
   });
 });

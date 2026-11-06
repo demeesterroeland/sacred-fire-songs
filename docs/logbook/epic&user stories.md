@@ -1,6 +1,6 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 1.89
+**Version:** 1.90
 **Status:** Living Document
 **Date:** Nov 6, 2026
 
@@ -60,6 +60,7 @@
 | **1.59** | Nov 5, 2026 | Epic 6.1: Story 6.1.23 (#407, G5.2) implemented on `feat/ux-v2` — Library tabs fit a phone, Albums hidden behind a feature flag (UXD-4). |
 | **1.61** | Nov 5, 2026 | Epic 6.1: Story 6.1.6 (#390, G2.1) implemented on `feat/ux-v2` — `Chords · A− · A+` reader toolbar, size persisted per device. |
 | **1.60** | Nov 5, 2026 | Epic 6.1: Story 6.1.7 (#391, G2.2) implemented on `feat/ux-v2` — song meta and Key · Capo · Tuning on one grey line each. |
+| **1.90** | Nov 6, 2026 | Epic 6.1: Story 6.1.21 (#405, G4.8) implemented on `feat/ux-v2` — the Make public dialog names the take and the song and says who will hear it (everyone visiting a public song, including guests); a take on a private song starts with making the song public (the owner can do it from the dialog) and cannot be published before; a line says the take can be made private again without undoing what was heard; guests hear public takes on the Listen tab (UXD-2). |
 | **1.89** | Nov 6, 2026 | Epic 6.1: Story 6.1.11 (#395, G2.6) implemented on `feat/ux-v2` — a segmented version switch under the song title, shown only when the song has more than one version (nothing for single-version songs); the language switch stays a documented slot until translations exist. `/songs/<id>?version=<id>` opens that version (Save on the edit form returns there), and a take in progress blocks switching until it is saved or discarded. |
 | **1.88** | Nov 6, 2026 | Epic 6.1: Story 6.1.31 (#415, G8.2) implemented on `feat/ux-v2`: Preview toggle and visible Upload .cho / .txt button on Add Song. |
 | **1.87** | Nov 6, 2026 | Epic 6.1: Story 6.1.28 (#412, G6.3) implemented on `feat/ux-v2` — guests see a one-line welcome, a search field and a *Recently added* row on Home (the header search field is hidden there for guests); members keep Your library. |
@@ -1673,7 +1674,7 @@ Owner decision of Nov 4, 2026: sober greyscale interface with one accent, smalle
 | 6.1.18 | #402 | `G4.5` | B | As a recording owner, I want the Share dialog to explain who can be found and what happens with a private song so that sharing has no surprises | #398 |
 | 6.1.19 | #403 | `G4.6` | B | **[Implemented on feat/ux-v2]** As a Member, I want to be told when someone shares a take with me so that I do not have to guess which song to open | #399 |
 | 6.1.20 | #404 | `G4.7` | C | **[Implemented on feat/ux-v2]** As a Member, I want a level meter, count-in and remaining time while recording so that I know the microphone works and when the 3-minute limit comes | #385 |
-| 6.1.21 | #405 | `G4.8` | C | As a recording owner, I want the publish dialog to name the song and say who will hear it so that consent is informed | #402 |
+| 6.1.21 | #405 | `G4.8` | C | **[Implemented on feat/ux-v2]** As a recording owner, I want the publish dialog to name the song and say who will hear it so that consent is informed | #402 |
 | 6.1.22 | #406 | `G5.1` | A | **[Implemented on feat/ux-v2]** As a Guest, I want an unknown URL to show a 404 page so that I am not sent to a login screen for content that does not exist | — |
 | 6.1.23 | #407 | `G5.2` | A | **[Implemented on feat/ux-v2]** As a Member, I want the Library tab row to fit my phone with no dead tab so that every tab I see works | — |
 | 6.1.24 | #408 | `G5.3` | B | **[Implemented on feat/ux-v2]** As the Owner, I want a decision on the bottom bar (Home · Songs · Library · Create vs Home · Search · Library) so that Explore, Home and Search stop overlapping | — |

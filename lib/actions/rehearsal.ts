@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/client";
 import { sendRecordingShareEmail } from "@/lib/actions/notifications";
 import { sharedByName } from "@/lib/songs/partitionTakes";
+import { SONG_NOT_PUBLIC, songIsPublicOfTake } from "@/lib/songs/publishAudience";
 
 export interface UserProfileSummary {
   id: string;
@@ -84,7 +85,9 @@ export async function getUserRecordings(songVersionId: string): Promise<UserReco
   if (singerProfileIds.length > 0) {
     const { data: profiles } = await supabase
       .from("profiles")
-      .select("id, email, full_name, avatar_url, role")
+      // Only what the rows use: the name, whether the singer is a musician (role) and the e-mail the
+      // attribution dialog keeps when the owner saves again. The avatar is not shown on a row.
+      .select("id, email, full_name, role")
       .in("id", singerProfileIds);
 
     if (profiles) {
@@ -95,7 +98,7 @@ export async function getUserRecordings(songVersionId: string): Promise<UserReco
             id: p.id,
             email: p.email,
             full_name: p.full_name,
-            avatar_url: p.avatar_url,
+            avatar_url: null,
             role: p.role,
             is_musician: p.role === "musician" || p.role === "expert",
           },
@@ -590,11 +593,13 @@ export async function makeSongPublic(
   return { success: true };
 }
 
-// 10. Publish recording publicly with singer consent confirmation (owner only)
+// 10. Publish recording publicly with singer consent confirmation (owner only).
+// A take on a private song has no audience yet, so it can only be published once the song
+// is public; unpublishing is always allowed.
 export async function publishRecording(
   recordingId: string,
   consentConfirmed: boolean
-): Promise<{ success: boolean; error?: string }> {
+): Promise<{ success: boolean; error?: string; code?: typeof SONG_NOT_PUBLIC }> {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) {
@@ -605,6 +610,28 @@ export async function publishRecording(
     return {
       success: false,
       error: "Singer consent must be explicitly confirmed before publishing publicly.",
+    };
+  }
+
+  const { data: take, error: lookupError } = await supabase
+    .from("user_recordings")
+    .select("id, song_versions(compositions(is_public))")
+    .eq("id", recordingId)
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (lookupError) {
+    console.error("[rehearsal] Error reading recording before publishing:", lookupError);
+    return { success: false, error: lookupError.message };
+  }
+  if (!take) {
+    return { success: false, error: "Take not found." };
+  }
+  if (!songIsPublicOfTake(take)) {
+    return {
+      success: false,
+      code: SONG_NOT_PUBLIC,
+      error: "This song is private, so this take has no audience yet. Make the song public first, then publish the take.",
     };
   }
 
@@ -623,6 +650,23 @@ export async function publishRecording(
   }
 
   return { success: true };
+}
+
+// Visibility of a song right now (the Make public dialog asks when it opens).
+// A song without an explicit public flag is not public; a failed lookup throws, so the caller
+// can say it could not check instead of reporting the song as private.
+export async function getSongIsPublic(compositionId: string): Promise<boolean> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("compositions")
+    .select("is_public")
+    .eq("id", compositionId)
+    .maybeSingle();
+  if (error) {
+    console.error("[rehearsal] Error reading song visibility:", error);
+    throw new Error(error.message);
+  }
+  return data?.is_public === true;
 }
 
 // 10. Unpublish recording back to private (owner only)

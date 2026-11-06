@@ -167,20 +167,26 @@ test('Keyboard: arrow keys move through the versions', async ({ page }) => {
   await expect(original).toBeChecked();
 });
 
-test('Practice follows the chosen version', async ({ page }) => {
-  await page.goto(`/songs/${IDS.song}`);
-  const control = page.getByRole('radiogroup', { name: 'Song version' });
-  // Original has no reference track: Practice opens on Record (no Listen tab).
-  await clickPractice(page);
-  await expect(page.locator('h3:has-text("Practice")')).toBeVisible();
-  await expect(page.getByTestId('practice-tab-listen')).toHaveCount(0);
-  await page.locator('button[aria-label="Close"]').first().click();
-  await drawerSettled(page, false);
+// A guest always has the Listen tab (public takes live there, #405), so this runs as a member:
+// the Listen tab is there only when the chosen version has a reference track.
+test.describe('Practice follows the chosen version', () => {
+  test.use({ storageState: ROLES.member.storage });
 
-  // Simplified has one: the Listen tab appears.
-  await control.getByRole('radio', { name: 'Simplified' }).click();
-  await clickPractice(page);
-  await expect(page.getByTestId('practice-tab-listen')).toBeVisible();
+  test('the Listen tab follows the version', async ({ page }) => {
+    await page.goto(`/songs/${IDS.song}`);
+    const control = page.getByRole('radiogroup', { name: 'Song version' });
+    // Original has no reference track: Practice opens on Record (no Listen tab).
+    await clickPractice(page);
+    await expect(page.locator('h3:has-text("Practice")')).toBeVisible();
+    await expect(page.getByTestId('practice-tab-listen')).toHaveCount(0);
+    await page.locator('button[aria-label="Close"]').first().click();
+    await drawerSettled(page, false);
+
+    // Simplified has one: the Listen tab appears.
+    await control.getByRole('radio', { name: 'Simplified' }).click();
+    await clickPractice(page);
+    await expect(page.getByTestId('practice-tab-listen')).toBeVisible();
+  });
 });
 
 test('Deep link: ?version= opens that version, unknown versions fall back to the first', async ({ page }) => {

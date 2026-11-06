@@ -78,3 +78,29 @@ export const VARIANT_SLOT_FIXTURE_IDS = {
   flagsOriginal: 'eeeeeeee-3611-4000-a000-000000000007',
   flagsSimplified: 'eeeeeeee-3611-4000-a000-000000000008',
 } as const;
+
+/**
+ * Story 6.1.21 / G4.8 (#405): songs and takes of the member for the "Make public" consent dialog
+ * and for guests hearing public takes. The specs reset the takes first. Removed by
+ * e2e/global-teardown.ts.
+ * - song/version/take: public song, private take.
+ * - longTake: a take with a very long unbroken name on the same public song.
+ * - privateSong/privateVersion/privateTake: a private song with a private take.
+ * - guestSong/guestVersion/guestTake: public song, public take with the singer consent (audio
+ *   uploaded by the spec under the member's own storage folder).
+ * - emptySong/emptyVersion: public song without takes.
+ */
+export const PUBLISH_CONSENT_FIXTURE_IDS = {
+  song: 'eeeeeeee-3621-4000-a000-000000000001',
+  version: 'eeeeeeee-3621-4000-a000-000000000002',
+  take: 'eeeeeeee-3621-4000-a000-000000000003',
+  longTake: 'eeeeeeee-3621-4000-a000-000000000004',
+  privateSong: 'eeeeeeee-3621-4000-a000-000000000005',
+  privateVersion: 'eeeeeeee-3621-4000-a000-000000000006',
+  privateTake: 'eeeeeeee-3621-4000-a000-000000000007',
+  guestSong: 'eeeeeeee-3621-4000-a000-000000000008',
+  guestVersion: 'eeeeeeee-3621-4000-a000-000000000009',
+  guestTake: 'eeeeeeee-3621-4000-a000-00000000000a',
+  emptySong: 'eeeeeeee-3621-4000-a000-00000000000b',
+  emptyVersion: 'eeeeeeee-3621-4000-a000-00000000000c',
+} as const;

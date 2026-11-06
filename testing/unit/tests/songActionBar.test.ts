@@ -17,6 +17,11 @@ describe('practiceTab', () => {
   });
   it('opens Record when there is no media', () => {
     expect(practiceTab(false)).toBe('recorder');
+    expect(practiceTab(false, true)).toBe('recorder');
+  });
+  it('opens Listen for a guest even without media: the public takes are there, Record is gated (#405)', () => {
+    expect(practiceTab(false, false)).toBe('media');
+    expect(practiceTab(true, false)).toBe('media');
   });
 });
 

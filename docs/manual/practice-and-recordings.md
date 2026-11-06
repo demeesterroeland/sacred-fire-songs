@@ -1,11 +1,12 @@
 # Practice: Listen, Record & Takes (draft)
 
-**Version:** 0.9 | **Date:** Nov 6, 2026
+**Version:** 0.10 | **Date:** Nov 6, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.10 | Nov 6, 2026 | The Make Public dialog names the take and the song and says who will hear it; a take on a private song starts with making the song public; guests hear public takes on the Listen tab (a link to a public take opens it there); the dialog says you can make the take private again, but not undo what was heard (#405). |
 | 0.9 | Nov 6, 2026 | Recorder: level meter, optional 3-2-1 count-in, time left in the last minute, Save Take as the one big button (#404); the no-sound hint follows the last 3 seconds. |
 | 0.8 | Nov 5, 2026 | Listen: one button per available provider (even when there is only one), the player and the Listen tab say in words what plays and whether it is paused; "Control Track" is now **Open player** (UX v2, #397). |
 | 0.7 | Nov 5, 2026 | The Share dialog explains who can be found and, on a private song, what happens before you confirm (#402). |
@@ -83,12 +84,14 @@ Open the same song → **Practice** → **Record**. Takes shared with you are un
 
 ## Making a take public
 
-1. ⋯ → **Make Public**.
-2. Read **Singer Consent & Rights**.
-3. Tick *I confirm that I have obtained explicit consent and permission from the singer/musician to publish this take publicly.*
-4. **Publish Take**. Everyone who visits the song can now listen.
+1. ⋯ → **Make Public**. The dialog shows the name of the take and, under it, the song (*Song: …*).
+2. Read who will hear it. On a public song: *Everyone visiting this song, including guests, will be able to listen.* Guests who are not signed in can listen only, on the **Listen** tab of the song's Practice panel; recording, sharing and downloading stay with you, the owner of the take. A take belongs to one version of a song, so it is heard in that version's Practice panel.
+3. **A take on a private song has no audience yet, so publishing starts with the song.** The dialog then says the song is private and must be made public first, and there is no **Publish Take** button. If you own the song (or are an admin), tap **Make song public and continue**: the lyrics become public, and takes already public on that song will then be listed for everyone on the song page. After that the dialog continues with the steps below. Otherwise ask the song owner to make the song public. If the dialog says it could not check whether the song is public, close it and try again; there is no **Publish Take** button until it can.
+4. Read **Singer Consent & Rights**.
+5. Tick *I confirm that I have obtained explicit consent and permission from the singer/musician to publish this take publicly.*
+6. **Publish Take**. The take is now public.
 
-Without the tick the take stays private. ⋯ → **Make Private** undoes it.
+Without the tick the button stays grey and the take stays private. **Cancel** changes nothing (it is locked for the moment the take is being published). You can make the take private again at any time: ⋯ → **Make Private**. New visitors then can't listen, but this can't undo what someone already heard or saved.
 
 ## Naming the singer (attribution)
 

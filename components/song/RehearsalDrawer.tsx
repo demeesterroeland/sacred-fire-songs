@@ -7,7 +7,7 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 import { toast } from "sonner";
 import AudioRecorder from "./AudioRecorder";
 import { useSongRecordings } from "@/hooks/useSongRecordings";
-import { deleteUserRecording, renameUserRecording, reorderUserRecordings, unpublishRecording, type UserRecording } from "@/lib/actions/rehearsal";
+import { deleteUserRecording, getSongIsPublic, renameUserRecording, reorderUserRecordings, unpublishRecording, type UserRecording } from "@/lib/actions/rehearsal";
 import { getYouTubeEmbedUrl } from "./MediaEmbeds";
 import { useAuth } from "@/hooks/useAuth";
 import { useMarkSongNotificationsRead } from "@/hooks/useMarkSongNotificationsRead";
@@ -15,9 +15,9 @@ import { useAudio } from "./AudioProvider";
 import { applyMiniPlayerHeight, isMiniPlayerVisible, mediaSessionReducer, miniPlayerClose, ownsActiveTake } from "@/lib/player/miniPlayer";
 import { availableProviders, defaultProvider, PROVIDER_NAMES, playStateKey } from "@/lib/player/referenceProviders";
 import Link from "next/link";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocale } from "@/context/LocaleContext";
-import { recordingPermalink } from "@/lib/songs/recordingLink";
+import { recordingPermalink, takeListTab } from "@/lib/songs/recordingLink";
 import { partitionTakes } from "@/lib/songs/partitionTakes";
 import { takeStatusPills } from "@/lib/songs/takeStatus";
 import { TakeStatusPills } from "@/components/song/TakeStatusPills";
@@ -316,7 +316,7 @@ export default function RehearsalDrawer({
   soundcloudUrl,
   onPlayStateChange,
   requestedTab = "auto",
-  isSongPublic = true,
+  isSongPublic = false,
   isSongOwner = false,
   onMakeSongPublic,
   highlightRecordingId = null,
@@ -416,10 +416,11 @@ export default function RehearsalDrawer({
         setActiveTab(requestedTab);
       } else {
         // Contextual default only on first open
-        if (activePlaybackId) setActiveTab("recorder");
+        if (activePlaybackId) setActiveTab(user ? "recorder" : "media");
         else if (isMediaPlaying) setActiveTab("media");
         else if (youtubeUrl || spotifyUrl || soundcloudUrl) setActiveTab("media");
-        else setActiveTab("recorder");
+        // A guest cannot record: the Listen tab (reference track, public takes) comes first.
+        else setActiveTab(user ? "recorder" : "media");
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -427,6 +428,25 @@ export default function RehearsalDrawer({
 
   const { data: fetchedRecordings, isLoading } = useSongRecordings(songVersionId);
   const [recordings, setRecordings] = useState<UserRecording[]>([]);
+  // The Make public dialog asks for the visibility of the song each time it opens, so a song made
+  // private in the meantime is never offered for publishing. Unknown = null (dialog waits).
+  const songVisibility = useQuery({
+    queryKey: ["song-visibility", compositionId],
+    queryFn: () => getSongIsPublic(compositionId!),
+    enabled: !!publishRecording && !!compositionId,
+    staleTime: 0,
+    retry: 1,
+    // Coming back to the tab or the network must not flip the dialog to "checking" and hide Publish under the owner.
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+  // A failed lookup is shown as such (not read as "private"); the dialog then does not offer to publish.
+  const publishVisibilityUnreadable = !!compositionId && songVisibility.isError;
+  const publishSongIsPublic: boolean | null = !compositionId
+    ? isSongPublic
+    : songVisibility.isError || songVisibility.isFetching || songVisibility.data === undefined
+      ? null
+      : songVisibility.data;
   useEffect(() => {
     if (fetchedRecordings) {
       setRecordings(fetchedRecordings);
@@ -468,7 +488,8 @@ export default function RehearsalDrawer({
   const currentPath = search ? `${pathname}?${search}` : pathname;
 
   // Deep link: scroll the linked recording into view once it is rendered.
-  const highlightVisible = isOpen && activeTab === "recorder" && !!highlightRecordingId
+  // The tab that lists the takes depends on who is looking: Record for a member, Listen for a guest.
+  const highlightVisible = isOpen && activeTab === takeListTab(!!user) && !!highlightRecordingId
     && recordings.some((r) => r.id === highlightRecordingId);
   useEffect(() => {
     if (!highlightVisible || !highlightRecordingId) return;
@@ -1155,8 +1176,8 @@ export default function RehearsalDrawer({
               </button>
             </div>
 
-             {/* Tabs Navigation */}
-            {hasMedia && (
+             {/* Tabs Navigation (a guest always has Listen: the public takes live there) */}
+            {(hasMedia || !user) && (
               <div className="flex px-6 border-b border-gray-100 dark:border-gray-800/50 shrink-0">
                 <button
                   data-testid="practice-tab-listen"
@@ -1424,6 +1445,47 @@ export default function RehearsalDrawer({
                     </div>
                   )}
 
+
+                  {/* Guests hear the public takes here, read only (UXD-2): no record, share, download or reorder. */}
+                  {!user && (
+                    <section className="space-y-3" data-testid="guest-public-takes">
+                      <h3 className="text-meta font-semibold text-fg-muted text-left">{t('practice.takes.public')}</h3>
+                      {isLoading ? (
+                        <div className="flex items-center justify-center gap-2 py-6 text-meta text-fg-muted">
+                          <div className="size-4 animate-spin rounded-full border-2 border-accent/30 border-t-accent motion-reduce:animate-none" aria-hidden />
+                          <span>{t('rehearsal.loadingRecordings')}</span>
+                        </div>
+                      ) : publicTakes.length === 0 ? (
+                        <p data-testid="guest-public-takes-empty" className="rounded-panel border border-dashed border-line p-4 text-center text-meta text-fg-muted">
+                          {t('practice.takes.publicEmptyGuest')}
+                        </p>
+                      ) : (
+                        <DndContext sensors={dndSensors} collisionDetection={closestCenter}>
+                          <SortableContext items={publicTakes.map((r) => r.id)} strategy={verticalListSortingStrategy} disabled>
+                            <div className="rounded-panel border border-line bg-surface p-1 space-y-0.5">
+                              {publicTakes.map((rec) => (
+                                <SortableRecordingItem
+                                  key={rec.id}
+                                  rec={rec}
+                                  activePlaybackId={activePlaybackId}
+                                  isRecordingPlaying={isRecordingPlaying}
+                                  deletingId={deletingId}
+                                  downloadingId={downloadingId}
+                                  handleTogglePlay={(id, url) => { const rec = recordings.find(r => r.id === id); if (rec) contextHandleTogglePlay(rec, url); }}
+                                  handleDelete={() => undefined}
+                                  handleRename={handleRename}
+                                  handleDownload={handleDownload}
+                                  formatDate={formatDate}
+                                  isCustomSort={false}
+                                  isHighlighted={rec.id === highlightRecordingId}
+                                />
+                              ))}
+                            </div>
+                          </SortableContext>
+                        </DndContext>
+                      )}
+                    </section>
+                  )}
                 </div>
 
             </div>
@@ -1651,6 +1713,11 @@ export default function RehearsalDrawer({
           isOpen={!!publishRecording}
           onClose={() => setPublishRecording(null)}
           recording={publishRecording}
+          songTitle={songTitle}
+          songIsPublic={publishSongIsPublic}
+          visibilityUnreadable={publishVisibilityUnreadable}
+          canMakeSongPublic={isSongOwner || isAdmin}
+          onMakeSongPublic={onMakeSongPublic}
           onPublished={() => {
             queryClient.invalidateQueries({ queryKey: ["song-recordings", songVersionId] });
           }}
