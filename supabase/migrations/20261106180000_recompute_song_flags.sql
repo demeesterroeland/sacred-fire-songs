@@ -3,8 +3,10 @@
 -- The flags describe the whole song: true when ANY version has them. The rule is the one in
 -- lib/songs/versionFlags.ts:
 --   melody = a version has a YouTube / Spotify / SoundCloud link or a melody notation;
---   chords = a version passes lib/chordProParsing.ts hasChords(): a bracketed chord ("[Am]") or a
---            chords-over-lyrics line (more than half of its tokens are chords or "|").
+--   chords = a version passes lib/chordProParsing.ts hasChords(): a bracketed chord token ("[Am]", "[C#m7/G#]";
+--            a bracketed label such as "[Chorus]", "[Bridge]", "[Coda]" or "[Ending]" is not a chord) or a
+--            chords-over-lyrics line (more than half of its tokens are chords or "|"). Whitespace is the same set
+--            JavaScript uses (so a leading BOM is trimmed and U+0085 is not a separator), whatever the locale.
 -- Songs saved before the "any version" rule (or created by seeds/imports) can disagree with it, e.g. an
 -- "Original" with chords next to a lyrics-only "Simplified" that was the last one saved.
 --
@@ -13,18 +15,26 @@
 
 create or replace function pg_temp.sfs_has_chords(content text) returns boolean
 language sql immutable as $$
-  select coalesce(content, '') ~ '\[[A-G]'
+  select exists (
+    -- a bracketed chord ("[Am]", "[C#m7/G#]"); a bracketed label such as "[Chorus]" is not a chord
+    select 1
+    from regexp_matches(coalesce(content, ''), '\[([^\]\[]*)\]', 'g') as b(m)
+    where b.m[1] ~ '^[A-G][#b]?(maj|min|dim|aug|sus|add|m|M|\+|-|°|ø|[0-9]|#|b|\(|\))*(/[A-G][#b]?)?$'
+  )
   or exists (
     select 1
     from regexp_split_to_table(coalesce(content, ''), E'\n') as raw(line)
     cross join lateral (
+      select regexp_replace(raw.line, '^[\t\n\v\f\r \u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff]+|[\t\n\v\f\r \u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff]+$', '', 'g') as line
+    ) as trimmed
+    cross join lateral (
       select array(
         select tok
-        from regexp_split_to_table(btrim(raw.line, E' \t\r\f\v'), '\s+') as t(tok)
+        from regexp_split_to_table(trimmed.line, '[\t\n\v\f\r \u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff]+') as t(tok)
         where tok <> '' and tok not like '(%' and tok not like '%)'
       ) as toks
     ) as r
-    where btrim(raw.line, E' \t\r\f\v') <> ''
+    where trimmed.line <> ''
       and cardinality(r.toks) > 0
       and (
         select count(*) from unnest(r.toks) as x(tok)

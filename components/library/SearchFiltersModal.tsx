@@ -203,7 +203,7 @@ export default function SearchFiltersModal({
                         <label className="text-meta font-semibold text-fg-muted mb-3 block">
                             {t('search.contentType')}
                         </label>
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                             <ToggleCard
                                 active={!!state.chords}
                                 onClick={() => setFilter('chords', !state.chords)}
@@ -230,7 +230,9 @@ export default function SearchFiltersModal({
                                 {t('search.yourLibrary')}
                             </label>
                             
-                            <div className="grid grid-cols-2 gap-3 mb-4">
+                            {/* One column on a phone: in half a column the labels were cut ("Your Favor…"), and the
+                                Status control showed "All · Public · Dra". Two columns from sm. */}
+                            <div className="mb-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
                                 <ToggleCard
                                     active={!!state.favorites}
                                     onClick={() => setFilter('favorites', !state.favorites)}
@@ -254,6 +256,7 @@ export default function SearchFiltersModal({
                                     count={recordingsCount ? recordingsCount : undefined}
                                 />
                                 <Segmented
+                                    className="sm:col-span-2"
                                     aria-label={t('search.status.heading')}
                                     value={state.status ?? 'all'}
                                     onChange={(v) => setFilter('status', v as SongFilterState['status'])}

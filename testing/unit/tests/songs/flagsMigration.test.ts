@@ -4,6 +4,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import pg from 'pg';
+import { PGlite } from '@electric-sql/pglite';
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { hasChords } from '@/lib/chordProParsing';
 import { songFlags } from '@/lib/songs/versionFlags';
@@ -33,7 +34,27 @@ const SAMPLES = [
   '[Am]Hello [G]world',
   'Hello world',
   '',
-  '[Chorus]\nla la la', // the parser counts "[C" as a chord, and so does the migration
+  // Section labels in brackets are not chords (review M6); real bracketed chords are.
+  '[Chorus]\nla la la',
+  '[Bridge]\nla',
+  '[Coda]\nla',
+  '[Ending]\nla',
+  '[Chorus]\n[Am]la',
+  '[am]la',
+  '[Hm]la',
+  '[Re]la',
+  '[ Am ]la',
+  '[C#m7/G#]la',
+  '[Dsus4]la',
+  '[N.C.]la',
+  'text [] and [x]',
+  // A leading BOM and U+0085: JS and SQL must split a line the same way (review M6).
+  '\uFEFFAm G\nwords',
+  'Am\uFEFFG\nwords',
+  'Am\u0085G\nwords',
+  'Am\u00a0G\nwords',
+  'Am\u2003G\nwords',
+  '\uFEFF[Am]la',
   '{title: x}\nAm   G   F\nSome words here',
   'C  G/B  Am7\nlyrics follow',
   'G (intro)\nwords',
@@ -47,21 +68,24 @@ const SAMPLES = [
   'Am\r\nLyrics',
 ];
 
-describe.skipIf(process.env.CI === 'true')('recompute_song_flags migration', () => {
-  it('the chord rule in SQL gives the same answer as hasChords() on a corpus', async (ctx) => {
-    if (!client) return ctx.skip();
-    await client.query('begin');
+// The chord rule runs in an in-memory Postgres (PGlite, WebAssembly): no database to start, so this runs in CI too.
+describe('recompute_song_flags migration: the chord rule', () => {
+  it('in SQL gives the same answer as hasChords() on a corpus', async () => {
+    const db = new PGlite();
     try {
-      await client.query(SQL.slice(0, SQL.indexOf('with calc as'))); // only the pg_temp helper
+      await db.exec(SQL.slice(0, SQL.indexOf('with calc as'))); // only the pg_temp helper
       for (const text of SAMPLES) {
-        const { rows } = await client.query('select pg_temp.sfs_has_chords($1) as r', [text]);
+        const { rows } = await db.query<{ r: boolean }>('select pg_temp.sfs_has_chords($1) as r', [text]);
         expect(rows[0].r, JSON.stringify(text)).toBe(hasChords(text));
       }
     } finally {
-      await client.query('rollback');
+      await db.close();
     }
   });
+});
 
+// The rest needs the local Supabase stack (tables); it is skipped when that is not running.
+describe.skipIf(process.env.CI === 'true')('recompute_song_flags migration', () => {
   it('fixes a song whose flags disagree with its versions, leaves the others alone, and is idempotent', async (ctx) => {
     if (!client) return ctx.skip();
     await client.query('begin');

@@ -129,3 +129,14 @@ export const A11Y_AUDIT_FIXTURE_IDS = {
   playerSong: 'eeeeeeee-3634-4000-a000-000000000005',
   playerVersion: 'eeeeeeee-3634-4000-a000-000000000006',
 } as const;
+
+/**
+ * UX v2 validation round 1, review round (e2e/tests/ux-v2-validation-1-review.spec.ts): a public song with
+ * a chord Original of eight lines and a lyrics-only "Labels" version whose only brackets are section labels
+ * ("[Chorus]"). Removed by e2e/global-teardown.ts.
+ */
+export const VALIDATION_1_REVIEW_FIXTURE_IDS = {
+  song: 'eeeeeeee-3700-4000-a000-000000000001',
+  original: 'eeeeeeee-3700-4000-a000-000000000002',
+  labels: 'eeeeeeee-3700-4000-a000-000000000003',
+} as const;

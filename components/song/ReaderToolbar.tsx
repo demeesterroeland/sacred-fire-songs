@@ -91,7 +91,7 @@ export function ReaderToolbar({
           role="switch"
           aria-checked={chords}
           onClick={() => onChange({ step, chords: !chords, speed })}
-          className="inline-flex min-h-tap items-center gap-2 rounded-control px-2 text-meta font-medium text-fg hover:bg-surface-2 transition-colors"
+          className="-ms-2 inline-flex min-h-tap items-center gap-2 rounded-control px-2 text-meta font-medium text-fg hover:bg-surface-2 transition-colors"
         >
           <span
             aria-hidden

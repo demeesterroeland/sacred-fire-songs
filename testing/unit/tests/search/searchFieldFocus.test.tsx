@@ -151,6 +151,23 @@ describe.each(fields)('$name suggestion panel', ({ name, render: mount, role }) 
     outside.remove();
   });
 
+  it('on a touch screen focus moves to the link after the finger lifts, before the click: the panel still holds', async () => {
+    mount();
+    const outside = document.createElement('a');
+    outside.href = '/songs/abc';
+    document.body.appendChild(outside);
+    act(() => screen.getByRole(role).focus());
+    await screen.findByTestId('search-suggestions');
+    fireEvent.pointerDown(outside);
+    fireEvent.pointerUp(outside);
+    await act(async () => { await new Promise((r) => setTimeout(r, 20)); }); // timers run between pointerup and the mouse events
+    act(() => outside.focus());
+    expect(screen.getByTestId('search-suggestions')).toBeTruthy();
+    fireEvent.click(outside);
+    expect(screen.queryByTestId('search-suggestions')).toBeNull();
+    outside.remove();
+  });
+
   it('a press that is cancelled does not leave the panel stuck: the next Tab out still closes it', async () => {
     mount();
     const outside = document.createElement('button');
@@ -159,7 +176,7 @@ describe.each(fields)('$name suggestion panel', ({ name, render: mount, role }) 
     await screen.findByTestId('search-suggestions');
     fireEvent.pointerDown(outside);
     fireEvent.pointerCancel(outside);
-    await act(async () => { await new Promise((r) => setTimeout(r, 5)); });
+    await act(async () => { await new Promise((r) => setTimeout(r, 600)); });
     act(() => outside.focus());
     expect(screen.queryByTestId('search-suggestions')).toBeNull();
     outside.remove();

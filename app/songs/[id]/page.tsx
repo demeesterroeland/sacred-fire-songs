@@ -524,7 +524,8 @@ export default function SongDetailPage() {
                         style={{ '--desktop-header-h': `${desktopHeaderH}px` } as React.CSSProperties}
                         data-scrolling={autoScroll.playing ? 'true' : 'false'}
                         className={cn(
-                            '-mx-6 mb-2 px-4 md:-mx-10 md:px-8',
+                            // Same side padding as the page, so the first control lines up with the lyrics (the Chords switch pulls its own padding back).
+                            '-mx-6 mb-2 px-6 md:-mx-10 md:px-10',
                             autoScroll.playing && 'sticky top-[calc(var(--env-banner-height,0px)+var(--bar-h))] z-20 border-b border-line bg-bg lg:top-[var(--desktop-header-h)]',
                         )}
                     >

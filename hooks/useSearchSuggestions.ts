@@ -6,6 +6,9 @@ import { fetchCategoryTree } from '@/lib/taxonomyUtils';
 import { sortCategories } from '@/lib/categoryOrder';
 import { readRecentSearches } from '@/lib/search/history';
 
+/** How long a press that never turns into a click (a drag, a cancelled touch) keeps the panel from closing on focus. */
+const PRESS_GRACE_MS = 500;
+
 /**
  * The behaviour both search fields (header and Home, Stories 6.1.28/6.1.29) share around the G7.1
  * suggestion panel: when it opens, which data it loads, and how it closes.
@@ -66,16 +69,21 @@ export function useSearchSuggestions() {
   useEffect(() => {
     if (!open) return;
     const isOutside = (target: Node) => !wrapperRef.current?.contains(target) && !panelRef.current?.contains(target);
+    let forget: ReturnType<typeof setTimeout> | undefined;
     const onDown = () => {
+      clearTimeout(forget);
       pressingRef.current = true;
     };
     const onUp = () => {
-      // The click follows the release in the same turn; forget the press right after it.
-      setTimeout(() => {
+      // On a touch screen the browser moves focus to the pressed link AFTER the finger lifts, a moment before
+      // the click: keep the press alive until that click (which ends it), or for a short while if none comes.
+      clearTimeout(forget);
+      forget = setTimeout(() => {
         pressingRef.current = false;
-      }, 0);
+      }, PRESS_GRACE_MS);
     };
     const onClick = (e: MouseEvent) => {
+      clearTimeout(forget);
       pressingRef.current = false;
       if (isOutside(e.target as Node)) setOpen(false);
     };
@@ -88,6 +96,7 @@ export function useSearchSuggestions() {
       document.removeEventListener('pointerup', onUp, true);
       document.removeEventListener('pointercancel', onUp, true);
       document.removeEventListener('click', onClick, true);
+      clearTimeout(forget);
       pressingRef.current = false;
     };
   }, [open]);

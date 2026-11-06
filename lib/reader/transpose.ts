@@ -1,4 +1,4 @@
-import { convertChordsOverLyricsToChordPro, isChordLine } from '@/lib/chordProParsing';
+import { convertChordsOverLyricsToChordPro, isChordLine, isChordToken } from '@/lib/chordProParsing';
 
 /**
  * Transpose for the reader toolbar (Epic 6.1, Story 6.1.10 / G2.5, #394).
@@ -24,16 +24,7 @@ export function canTranspose(role: string | null | undefined): boolean {
   return role === 'musician' || role === 'expert' || role === 'admin';
 }
 
-/**
- * What counts as a chord: root A–G, optional #/b, then only chord-quality pieces
- * (m, maj, min, dim, aug, sus, add, M, +, −, °, ø, digits, #/b, brackets), then an optional /bass.
- * Section labels such as `Chorus`, `Coro` or `Coda` do not match, so they are never shifted.
- */
-const CHORD_TOKEN = /^[A-G][#b]?(?:maj|min|dim|aug|sus|add|m|M|\+|-|°|ø|\d|#|b|\(|\))*(?:\/[A-G][#b]?)?$/;
-
-export function isChordToken(token: string): boolean {
-  return CHORD_TOKEN.test(token);
-}
+export { isChordToken };
 
 type Accidental = 'b' | '#';
 
