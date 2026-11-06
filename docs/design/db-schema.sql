@@ -1,11 +1,13 @@
 /*
- **Version:** 2.7
+ **Version:** 2.8
  **Status:** Current
- **Date:** July 15, 2026
+ **Date:** Nov 6, 2026
  
  ## Usage
  This script provides a complete setup for the "Sacred Fire Songs" database. 
- It consolidates the initial schema and all subsequent migrations up to July 15, 2026.
+ It consolidates the initial schema and all subsequent migrations up to Nov 6, 2026.
+ (v2.8: Profile and playlist item access rules, public_profiles view, fn_can_edit_setlist;
+ installs without errors again: added missing columns, song_views, new-user trigger).
  (v2.7: Added Guaraní and Camino Rojo categories).
  (v2.6: Added partial indexes for is_public and alphabetical title index).
  (v2.4: Added tuning to song_versions).
@@ -23,7 +25,8 @@ create table public.profiles (
   role user_role default 'member',
   full_name text,
   avatar_url text,
-  created_at timestamp with time zone default timezone('utc'::text, now()) not null
+  created_at timestamp with time zone default timezone('utc'::text, now()) not null,
+  last_seen_at timestamp with time zone
 );
 -- CATEGORIES (Recursive Structure)
 create table public.categories (
@@ -32,6 +35,7 @@ create table public.categories (
   slug text not null unique,
   emoji text,
   flavour_text text,
+  icon_name text,
   parent_id uuid references public.categories(id),
   created_at timestamptz default now()
 );
@@ -41,6 +45,9 @@ create table public.compositions (
   title text not null,
   original_author text,
   owner_id uuid references public.profiles(id),
+  is_public boolean default true,
+  has_chords boolean default false,
+  has_melody boolean default false,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 -- SONG_CATEGORY_MAP (Join Table)
@@ -96,15 +103,25 @@ create table public.user_recordings (
   song_version_id uuid references public.song_versions(id) on delete cascade not null,
   recording_name text not null,
   storage_path text not null unique,
-  position integer default 0,
+  position integer default 0 not null,
   file_size_bytes bigint default 0,
+  duration_seconds integer default 0,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+-- SONG VIEWS (Recently Viewed)
+create table public.song_views (
+  id uuid default uuid_generate_v4() primary key,
+  user_id uuid references public.profiles(id) on delete cascade not null,
+  song_id uuid references public.compositions(id) on delete cascade not null,
+  viewed_at timestamp with time zone default now() not null,
+  unique (user_id, song_id)
 );
 -- 3. Indexes
 -- Partial indexes for public content optimization
 CREATE INDEX IF NOT EXISTS idx_compositions_is_public_true ON public.compositions (created_at DESC) WHERE is_public = true;
 CREATE INDEX IF NOT EXISTS idx_setlists_is_public_true ON public.setlists (created_at DESC) WHERE is_public = true;
 CREATE INDEX IF NOT EXISTS idx_compositions_title_alphabetical ON public.compositions (title ASC);
+CREATE INDEX IF NOT EXISTS idx_song_views_user_viewed ON public.song_views (user_id, viewed_at DESC);
 
 -- 4. Triggers & Functions
 -- Trigger to prevent linking songs to parent groups (only subcategories allowed)
@@ -122,9 +139,20 @@ create trigger trg_check_subcategory before
 insert
   or
 update on public.song_category_map for each row execute function public.check_is_subcategory();
+-- Create a profile for every new auth user
+create or replace function public.handle_new_user() returns trigger as $$
+begin
+  insert into public.profiles (id, email, role)
+  values (new.id, new.email, 'member');
+  return new;
+end;
+$$ language plpgsql security definer;
+drop trigger if exists on_auth_user_created on auth.users;
+create trigger on_auth_user_created
+after insert on auth.users for each row execute function public.handle_new_user();
 -- 5. Views
 -- View: Category Details (for UI display)
-create or replace view public.category_details as
+create or replace view public.category_details with (security_invoker = true) as
 select child.id as subcategory_id,
   child.name as subcategory_name,
   child.slug as subcategory_slug,
@@ -144,7 +172,7 @@ select child.id as subcategory_id,
   ) as full_display_name
 from public.categories child
   join public.categories parent on child.parent_id = parent.id
-where child.parent_id is not null with (security_invoker = true);
+where child.parent_id is not null;
 -- View: Songs with Categories
 create or replace view public.song_with_categories with (security_invoker = true) as
 select s.id as song_id,
@@ -195,6 +223,21 @@ select to authenticated using (public.fn_is_admin());
 
 create policy "Users can update own profile" on public.profiles for
 update to authenticated using (id = auth.uid()) with check (id = auth.uid());
+
+-- anon has no row access and no privilege on the email column. id and role stay
+-- granted because row-level policies on other tables look up the caller's role.
+revoke all on public.profiles from anon;
+grant select (id, role) on public.profiles to anon;
+
+-- Runs with the owner's rights, so it lists only fields that are safe for anyone.
+-- Privileges are replaced because a simple view is writable by default.
+create or replace view public.public_profiles
+with (security_invoker = false, security_barrier = true) as
+select id, full_name, avatar_url
+from public.profiles;
+
+revoke all on public.public_profiles from public, anon, authenticated;
+grant select on public.public_profiles to anon, authenticated, service_role;
 
 -- Song Category Map Policies
 create policy "Public read access for song_category_map" on public.song_category_map for
@@ -351,25 +394,66 @@ update to authenticated using (
     ) in ('admin'::public.user_role, 'gatekeeper'::public.user_role)
   );
 -- Setlist Items Policies
-create policy "Allow public read access" on public.setlist_items for
-select to public using (true);
-create policy "Auth users can insert setlist items" on public.setlist_items for
-insert to authenticated with check (
-    (
-      select auth.role()
-    ) = 'authenticated'
+-- Read: parent playlist is public, or the caller owns it, or the caller is admin.
+-- Write: caller owns the parent playlist, or is admin, or is gatekeeper and the
+-- parent playlist is public. Checked for the old and the new row.
+create or replace function public.fn_can_edit_setlist(p_setlist_id uuid)
+returns boolean
+language sql
+stable
+security definer
+set search_path = ''
+as $$
+  select exists (
+    select 1
+    from public.setlists s
+    left join public.profiles p on p.id = auth.uid()
+    where s.id = p_setlist_id
+      and (
+        s.owner_id = auth.uid()
+        or p.role = 'admin'::public.user_role
+        or (s.is_public and p.role = 'gatekeeper'::public.user_role)
+      )
   );
-create policy "Auth users can update setlist items" on public.setlist_items for
-update to authenticated using (
-    (
-      select auth.role()
-    ) = 'authenticated'
+$$;
+
+revoke all on function public.fn_can_edit_setlist(uuid) from public, anon;
+grant execute on function public.fn_can_edit_setlist(uuid) to authenticated, service_role;
+
+create policy "Guests can read items of public setlists" on public.setlist_items for
+select to anon using (
+    exists (
+      select 1 from public.setlists s
+      where s.id = setlist_items.setlist_id
+        and s.is_public = true
+    )
   );
-create policy "Auth users can delete setlist items" on public.setlist_items for delete to authenticated using (
-  (
-    select auth.role()
-  ) = 'authenticated'
-);
+create policy "Users can read items of visible setlists" on public.setlist_items for
+select to authenticated using (
+    exists (
+      select 1 from public.setlists s
+      where s.id = setlist_items.setlist_id
+        and (
+          s.is_public = true
+          or s.owner_id = (select auth.uid())
+          or (select public.fn_is_admin())
+        )
+    )
+  );
+create policy "Editors can insert setlist items" on public.setlist_items for
+insert to authenticated with check (public.fn_can_edit_setlist(setlist_id));
+create policy "Editors can update setlist items" on public.setlist_items for
+update to authenticated using (public.fn_can_edit_setlist(setlist_id))
+  with check (public.fn_can_edit_setlist(setlist_id));
+create policy "Editors can delete setlist items" on public.setlist_items for delete to authenticated using (public.fn_can_edit_setlist(setlist_id));
+-- Song Views Policies
+alter table public.song_views enable row level security;
+create policy "Users can read own song views" on public.song_views for
+select using (auth.uid() = user_id);
+create policy "Users can upsert own song views" on public.song_views for
+insert with check (auth.uid() = user_id);
+create policy "Users can update own song views" on public.song_views for
+update using (auth.uid() = user_id);
 -- User Recordings Policies
 create policy "Allow users to read their own recordings" on public.user_recordings for
 select to authenticated using (auth.uid() = user_id);

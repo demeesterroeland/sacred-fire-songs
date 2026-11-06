@@ -1,8 +1,8 @@
 # Project Analysis & Design Document: Song Sharing Application (Sacred Fire Songs)
 
-**Version:** 1.52
+**Version:** 1.53
 **Status:** Living Document
-**Date:** Nov 3, 2026
+**Date:** Nov 6, 2026
 
 ## Changelog
 
@@ -45,6 +45,7 @@
 | **1.50** | Oct 31, 2026 | §6.6: staging continuous deployment from `develop` (`docker.yml` develop images, no `:latest`; `deploy-staging.yml` → SSH forced command `<server-deploy-script>` in <infra-repo>) (Epic 5.1 Phase 3, #284). |
 | **1.51** | Oct 31, 2026 | Added §6.7 Client Auth State (#321): `useAuth()` without a server user starts with `loading = true` until the session resolves (`initialUser` `undefined` = unknown, `null` = server-confirmed guest); `/library/playlists/add` guards auth on the server (`redirect('/auth/login?next=/library/playlists/add')`) with the form in `components/playlists/CreatePlaylistForm.tsx`. Fixes logged-in users being redirected to `/` from "New Playlist". Lint cap lowered to 181. |
 | **1.52** | Nov 3, 2026 | Public-repo isolation: removed `deploy-staging.yml` (deployment is out of scope for this public repo; CI only publishes images to GHCR), added `isolation` CI job + `scripts/dev/isolation-guard.sh` (pre-commit, commit-msg, Claude Code hook), `performance.yml` takes its target from input/`PERF_BASE_URL`. Root `AGENTS.md` is now the canonical agent instruction file (`CLAUDE.md` imports it, `GEMINI.md` symlinks it). |
+| **1.53** | Nov 6, 2026 | Added profile and playlist item access rules (`public.public_profiles`, `public.fn_can_edit_setlist`), migration `20261106120000`, `docs/testing/access-policies.feature`. |
 
 
 ## 1. Introduction
@@ -145,6 +146,8 @@ The application is a **Progressive Web App (PWA)** optimized for mobile use duri
 * **`public.fn_is_admin()`** (migration `20261009194500_admin_profiles_policy.sql`): `SECURITY DEFINER` helper returning whether `auth.uid()` has role `admin`, used in RLS without recursing into `profiles` policies.
 * **Policies:** "Admins can read all profiles" (`profiles`, SELECT) and "Admins can view all setlists" (`setlists`, SELECT, so private playlists are counted and listed). Admins already read all `compositions` / `song_versions` via the existing admin-aware SELECT policies.
 * **Queries:** `lib/admin/userQueries.ts` holds the queries with the Supabase client injected (`fetchAdminAccess`, `fetchAdminUsersList`, `fetchAdminUserDetails`); `lib/admin/serverQueries.ts` wraps them with the server client (`checkAdminAccess`, `getAdminUsersList`, `getAdminUserDetails`). Both list and detail queries return `null` for non-admin callers. Pure presentation logic (activity status, role labels, search/filter/sort, totals) lives in `lib/admin/userOverview.ts`.
+* **Profile access:** a signed-in user reads their own full profile; an admin reads every profile. Guests have no row access to `profiles` and no privilege on `profiles.email`. The fields anyone may read (`id`, `full_name`, `avatar_url`) come from the read-only view `public.public_profiles`.
+* **Playlist item access (`setlist_items`):** readable when the parent playlist is public, owned by the caller, or the caller is admin. Writable (old and new row) through `public.fn_can_edit_setlist()`: owner, admin, or gatekeeper on a public playlist.
 * **Activity status:** `active` when `profiles.last_seen_at` is within 30 days, `inactive` when older, `never` when null.
 * **Not modelled yet:** comments and flags (named as example contributions in Story 3.6.1) have no tables, so they are not shown.
 
