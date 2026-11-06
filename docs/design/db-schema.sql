@@ -1,11 +1,12 @@
 /*
- **Version:** 3.3
+ **Version:** 3.4
  **Status:** Current
- **Date:** November 6, 2026
+ **Date:** November 7, 2026
  
  ## Usage
  This script provides a complete setup for the "Sacred Fire Songs" database. 
- It consolidates the initial schema and all subsequent migrations up to November 6, 2026.
+ It consolidates the initial schema and all subsequent migrations up to November 7, 2026.
+ (v3.4: the chord rule of the recompute at the end of the script counts a bracketed chord token ("[Am]"), not a bracketed word that starts with A-G ("[Chorus]"), and uses the same whitespace set as JavaScript (leading BOM, U+0085); migration 20261106180000_recompute_song_flags.sql, review round on PR #474, M6).
  (v3.3: compositions.has_chords / has_melody are declared in the table and recomputed for every song at the end of the script (true when ANY version has chords / a melody, the rule of lib/songs/versionFlags.ts); migration 20261106180000_recompute_song_flags.sql; UX v2 validation 1, fix 7).
  (v3.2: compositions SELECT/ALL policies now mirror the migrations (anon sees is_public = true only; owner/admin policies); the superseded "Public compositions are viewable by everyone" USING (true) and mock-mode public insert/update/delete policies are gone; Story 6.1.28, #412).
  (v3.1: Anon (guest) reads of public takes now also require singer_consent_confirmed; UXD-2, Story 6.1.26).

@@ -3271,3 +3271,21 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - **Tests:** Vitest 1238, BDD unit 236 passed / 47 pending (pre-existing), whole Playwright suite on a production build 281 passed / 5 skipped, 4 failed in the first run (2 a11y specs fixed for the new ▶/⋯ rule, 2 timing flakes under load that pass alone); lint 157 warnings, cap lowered 158 → 157; palette baseline 1721 → 1564.
 - **Migration:** `20261106180000_recompute_song_flags.sql` is idempotent and was only dry-run (rolled back) on the shared local database: 0 rows differ there.
 - **Decisions:** UXA-054…060. Screenshots: `docs/ux-research/screenshots/ux-v2/validation-1/`.
+
+## November 7, 2026 - Epic 6.1 UX v2, review round on validation round 1 (PR #474)
+
+**Goal:** fix the findings of the Opus review of the validation round 1 branch (1 blocker, 2 high, 6 medium, 3 small); every finding reproduced before it was changed.
+
+**Key Accomplishments**
+- **B1:** the suggestions panel closes on the click, not the press (the list moved before the release); a focus move during a press is ignored, also for 500 ms after a touch release. Reproduced on phone, desktop and guest Home with press-and-hold specs.
+- **H1:** the slot is `sticky top-0`, `scrollIntoView` is gone, the desktop column has `overflow-anchor: none`: `scrollTop` is identical after open and close.
+- **H2:** the fold compares the lyric text (no padding) with the window above the fixed bars (`data-reader-bar`).
+- **M1:** the tools sheet closes by itself when empty; focus goes to A+ when ▶ or ⋯ goes away.
+- **M2/M3:** `.field-composite`, selects without rings, readable chip counts; `textFieldFocus.test.ts` reads `<Input>`, `<select>` and `focus-within:`.
+- **M4:** `actionErrorMessage`; no toast prints raw server or database text (static test).
+- **M5/M6/L4/L6/L7:** Search options in one column on phones; `hasChords()` counts chord tokens only, SQL identical, PGlite parity test in CI; focus leaves the panel on Tab to the filter button; toolbar aligned with the lyrics; favourites toasts use the menu's word.
+
+**Technical Details**
+- **Tests:** Vitest 1321 passed (113 files), BDD unit 240 passed / 47 pending (pre-existing), whole Playwright suite on a production build (port 4431, `setup` + `mobile-chrome-headless`) 303 passed / 5 skipped / 2 failed; both failures pass alone (and 88 of 88 under load for the bottom-bar and suggestions specs): a focus timing flake and an axe test timeout while 4 workers were busy.
+- **Migration:** `20261106180000_recompute_song_flags.sql` edited in place (not applied anywhere but local dev; stays idempotent); `db-schema.sql` v3.4 in step. The local copy was not re-run.
+- **Decisions:** UXA-061…066. Screenshots refreshed, plus 07 to 09 in `docs/ux-research/screenshots/ux-v2/validation-1/`.

@@ -7,6 +7,8 @@ const pg = createRequire_pg();
 const DATABASE_URL = process.env.DATABASE_URL ?? 'postgresql://postgres:postgres@127.0.0.1:54322/postgres';
 const FIXTURE_TITLE = 'UX validation 1 fixture';
 const vp = 'mobile';
+// Review-round states (07 to 09) have no "before": they only exist after the fixes.
+const reviewRound = process.env.UX_PHASE !== 'before';
 
 async function withFixture(fn) {
   const client = new pg.Client({ connectionString: DATABASE_URL });
@@ -85,6 +87,18 @@ async function step(label, fn) {
       await shot(page, vp, 'guest', '06-simplified-no-chords-switch', { fullPage: false });
     });
   });
+  if (reviewRound) {
+    await step('07 auto-scroll offered on a short window (lyrics run behind the bars)', async () => {
+      await page.setViewportSize({ width: 390, height: 1400 });
+      await page.goto(`${BASE}/songs/${SONGS.musicianSong}`, { waitUntil: 'domcontentloaded' });
+      await settle(page);
+      // A window just under the end of the text: the last lines sit behind the Practice and bottom bars.
+      const end = await page.evaluate(() => document.querySelector('[data-testid="song-display"]').getBoundingClientRect().bottom + scrollY);
+      await page.setViewportSize({ width: 390, height: Math.max(360, Math.floor(end - 40)) });
+      await page.getByTestId('autoscroll-toggle').waitFor({ timeout: 8000 });
+      await shot(page, vp, 'guest', '07-autoscroll-offered-short-window', { fullPage: false });
+    });
+  }
   await context.close();
 }
 
@@ -98,6 +112,35 @@ async function step(label, fn) {
     await page.getByRole('textbox', { name: /Playlist name/ }).focus();
     await page.waitForTimeout(400);
     await shot(page, vp, 'member', '03-playlist-name-focus', { fullPage: false });
+  });
+  if (reviewRound) {
+    await step('08 search options, member view (one column, full labels)', async () => {
+      await page.goto(`${BASE}/songs`, { waitUntil: 'domcontentloaded' });
+      await settle(page);
+      await page.getByRole('button', { name: /Search options/ }).first().click();
+      await page.getByRole('heading', { name: 'Search options' }).waitFor();
+      await page.getByRole('button', { name: /Your Favorites/ }).first().scrollIntoViewIfNeeded();
+      await page.waitForTimeout(700);
+      await shot(page, vp, 'member', '08-search-options-member', { fullPage: false });
+    });
+  }
+  await context.close();
+}
+
+// Desktop (review round, H1) --------------------------------------------------------------------------
+if (reviewRound) {
+  const context = await newContext(browser, 'desktop', 'guest');
+  const page = await context.newPage();
+  await step('09 desktop: list scrolled, suggestions open at the top, place kept', async () => {
+    await page.goto(`${BASE}/songs`, { waitUntil: 'domcontentloaded' });
+    await settle(page);
+    await page.getByTestId('song-row').first().waitFor();
+    await page.locator('main').first().evaluate((el) => { el.scrollTop = 1395; });
+    await page.waitForTimeout(300);
+    await page.getByPlaceholder(/Search \d+\+ songs/).click();
+    await page.getByTestId('search-suggestions').waitFor();
+    await page.waitForTimeout(700);
+    await shot(page, 'desktop', 'guest', '09-suggestions-scrolled-list', { fullPage: false });
   });
   await context.close();
 }

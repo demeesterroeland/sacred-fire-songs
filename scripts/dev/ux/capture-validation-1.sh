@@ -7,7 +7,7 @@ phase="${1:?before|after}"; base="${2:?base url}"
 here="$(cd "$(dirname "$0")" && pwd)"
 for scheme in light dark; do
   out="docs/ux-research/screenshots/ux-v2/validation-1/${phase}-${scheme}"
-  UX_BASE_URL="$base" UX_OUT="$out" UX_SCHEME="$scheme" node "$here/capture-validation-1.mjs"
+  UX_PHASE="$phase" UX_BASE_URL="$base" UX_OUT="$out" UX_SCHEME="$scheme" node "$here/capture-validation-1.mjs"
 done
 find "docs/ux-research/screenshots/ux-v2/validation-1" -path "*${phase}-*" -name '*.webp' -print0 |
   while IFS= read -r -d '' f; do

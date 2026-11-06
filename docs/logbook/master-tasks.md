@@ -1460,3 +1460,10 @@
 - [x] Lint cap 158 → 157, palette baseline 1721 → 1564
 - [ ] Owner: re-run the *Validation round 1* section of `docs/ux-research/ux-v2-validation.md` on a phone; decide whether to apply `20261106180000_recompute_song_flags.sql` where data is older than the any-version rule
 - [ ] Follow-ups: server-action error strings shown as toasts are still English; `PlaylistDetailHeader` still has palette classes outside its edit fields
+
+## Session November 7, 2026 (Epic 6.1 UX v2, review round on validation round 1, PR #474, #375)
+- [x] B1 press on a song under the open suggestions opens that song (close on click); H1 desktop column keeps its scroll position (sticky slot, no `scrollIntoView`); H2 auto-scroll fold = lyric text above the fixed bars; M1 tools sheet closes when empty, focus to A+; M2 one focus cue per field (`.field-composite`, selects, `<Input>`); M3 tag counts AA; M4 localised error toasts (`lib/errors/actionError.ts`); M5 Search options one column on phones; M6 chord token rule in JS and SQL (+ BOM, U+0085); L4, L6, L7
+- [x] Parity test SQL versus JS runs in an in-memory Postgres (PGlite, new devDependency), so it also runs in CI
+- [x] Palette baseline 1564 → 1559; lint cap stays 157 (157 warnings)
+- [ ] Owner: decide whether lower case, German and solfège chord spellings (`[am]`, `[Hm]`, `[Re]`) should count as chords (UXA-066)
+- [ ] Follow-ups: auth forms still show the authentication service's message; `qu` has the generic sentence for every `errors.*` key; the song page button still says "Add to Liked Songs"; two nested `<main>` elements on some pages

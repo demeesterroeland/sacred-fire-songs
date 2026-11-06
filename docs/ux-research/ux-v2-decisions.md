@@ -1,11 +1,12 @@
 # UX v2: Agent Decisions (ADR-lite)
 
-**Version:** 1.34 | **Date:** Nov 6, 2026 | **Epic:** 6.1 (#375)
+**Version:** 1.35 | **Date:** Nov 7, 2026 | **Epic:** 6.1 (#375)
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.35 | Nov 7, 2026 | Added UXA-061 to UXA-066 (review round on PR #474: the suggestions panel closes on the click and stays visible without moving the column, the auto-scroll fold counts the fixed bars, the tools sheet and focus when the song starts to fit, one focus cue per field and readable tag counts, translated error toasts, what counts as a chord; Part of #375). |
 | 1.34 | Nov 6, 2026 | Added UXA-054 to UXA-060 (validation round 1: when auto-scroll is offered, the expanded meta line, one focus style for text fields, where the search suggestions panel lives, search options on tokens, translated feedback, song flags versus the reader; Part of #375). |
 | 1.33 | Nov 6, 2026 | Added UXA-050 to UXA-053 (accessibility audit of the song page and Practice panel: Practice is a modal dialog with its own focus handling, every layer on top of it is a Radix dialog including the delete confirmation; heading levels; what the fixes change on screen; audit scope and what it cannot show; #418). |
 | 1.32 | Nov 6, 2026 | Added UXA-040 (publish dialog: a take on a private song starts with making the song public) and UXA-041 (publish dialog: header, layout on tokens, reversible line; #405); UXA-012 updated: guests hear public takes on the Listen tab (#405). |
@@ -631,3 +632,49 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 - **Choice:** (1) a data migration (`20261106180000_recompute_song_flags.sql`) recomputes both flags for every song with the same rule: melody = a media link or a notation, chords = `hasChords()` (a bracketed chord or a chords-over-lyrics line, reproduced in SQL by a `pg_temp` helper that leaves nothing behind); it only writes rows that differ, so it is idempotent. A test runs it in a rolled-back transaction and compares the SQL rule with `hasChords()` on a corpus. No database-side upkeep (a trigger) was added. (2) The song page asks `versionHasChords(currentVersion)` for the Chords switch, the lyric rendering and transpose; lists, filters, cards and the meta links keep the song-level flag. Showing *Simplified* (lyrics only) therefore has no Chords switch, while the Chords filter still finds the song.
 - **Confirm:** no.
 - **Consequences:** `docs/design/db-schema.sql` declares both columns and ends with the same recompute (v3.3).
+
+### UXA-061 · Suggestions close on the click; the panel stays visible without moving the column
+
+- **Date / story:** Nov 7, 2026 · review round on PR #474, B1, H1, L4
+- **Context:** the panel sits in the page flow (UXA-057). It closed on `pointerdown` outside, so the list jumped up before the click was released and the click landed on another song (or nothing). Opening it also called `scrollIntoView`, which scrolled the desktop column to the top and lost the reader's place.
+- **Options:** (a) keep closing on press and freeze the layout until release; (b) close on the click, and ignore the focus change a browser makes when a link is pressed; (c) take the panel out of the flow again.
+- **Choice:** (b). The document listens for `click` (capture) and closes when it lands outside the field and the panel; a focus move while a press is down (and for 500 ms after a touch release, because a touch screen focuses the link between the release and the click) does not close it. The slot is `sticky top-0` in `<main>`: still in the flow, visible wherever the column is scrolled, and the desktop column has `overflow-anchor: none` so its `scrollTop` is exactly what it was. Tabbing from the field to the search options button closes the panel.
+- **Consequences:** a drag that starts outside the panel no longer closes it (only a click does). While the column is scrolled, the panel covers nothing: the rows below it are pushed down.
+- **Confirm:** yes (open the suggestions on a scrolled list and press a song).
+
+### UXA-062 · The auto-scroll fold is the end of the lyric text above the fixed bars
+
+- **Date / story:** Nov 7, 2026 · review round on PR #474, H2
+- **Context:** the fold compared the lyrics block (with 48 px of padding under it) with the whole window, ignoring the Practice bar, the bottom bar and the mini player on phones.
+- **Choice:** the ref is on the lyric text itself; the visible height is the window minus the full-width bars marked `data-reader-bar` that are fixed to the bottom edge (their layout height, so a bar that slides away on scroll does not make ▶ appear and disappear). A floating card (the desktop mini player) and hidden bars (`lg:hidden`) count for 0. A running auto-scroll stops when the end of the text is clear of those bars.
+- **Confirm:** no.
+
+### UXA-063 · The tools sheet never stays open empty; focus never falls to the page
+
+- **Date / story:** Nov 7, 2026 · review round on PR #474, M1
+- **Choice:** the sheet closes by itself when neither transpose nor auto-scroll is left (the window grew and the song fits). When a focused ▶ or ⋯ disappears, focus moves to A+ (`ReaderToolbar`); when the sheet closes and ⋯ is gone, focus goes to A+ too (`ReadingToolsSheet`). A+ is always there and is the neighbour the finger was next to.
+- **Confirm:** no.
+
+### UXA-064 · One focus cue per field, also for fields drawn as a container
+
+- **Date / story:** Nov 7, 2026 · review round on PR #474, M2, M3
+- **Choice:** a container around an input (selected tags plus a typing area) has the class `.field-composite`: the container shows the one 2 px token outline while the input inside has focus, the input shows none, and nothing changes the border or adds a ring. The selects of the song form lose `focus:ring`. `textFieldFocus.test.ts` reads `<Input>`, `<Textarea>`, `<select>` and any `focus-within:` ring or border (the first version only read lowercase `<input>` and `<textarea>`). The count inside a tag chip inherits the chip colour: the old grey at 80 % opacity was 2.3:1 to 3.4:1.
+- **Consequences:** the orange icon colour change on the finish-registration name field is gone with its border change (one cue). The header search icon still turns slightly darker on focus; it is not a second outline.
+- **Confirm:** no.
+
+### UXA-065 · People never read what the server or the database sent
+
+- **Date / story:** Nov 7, 2026 · review round on PR #474, M4
+- **Context:** server actions answer with English strings ("Playlist not found") and sometimes a raw database message; twelve toasts in the playlist components, the profile and password settings and the take dialogs printed them.
+- **Choice:** `lib/errors/actionError.ts` maps the known answers to `errors.*` keys (8 languages) and anything else to the call site's own message or `errors.generic`; the raw text goes to the console only. A test fails when a toast prints `result.error`, `res.error` or `error.message`. `playlists.picker.createdButNotAdded` no longer carries `{error}`; the add-songs toasts are translated.
+- **Left as is:** the sign-in, sign-up, forgot-password, update-password and finish-registration forms still show the message of the authentication service (a separate mapping of its error codes). Runasimi (`qu`) shows its generic sentence for every `errors.*` key until a speaker translates them.
+- **Confirm:** no.
+
+### UXA-066 · What counts as a chord; Search options on a phone; toolbar edge; favourites wording
+
+- **Date / story:** Nov 7, 2026 · review round on PR #474, M5, M6, L6, L7
+- **Chord rule:** a bracket holds a chord when its text is a chord token: root A-G (upper case), `#`/`b`, then only chord-quality pieces, then an optional bass (`isChordToken`, the transposer's grammar). `[Chorus]`, `[Bridge]`, `[Coda]`, `[Ending]`, `[Dance]`, `[Fine]` are labels. `[am]`, `[Hm]`, `[Re]` and `[Do]` stay as they were: not chords. The renderer (ChordSheetJS) prints every bracket in the chord row, so it cannot tell them apart, and the transposer cannot shift them; counting them would be a notation feature (lower case, German, solfège), not a fix. The SQL helper uses the same grammar and JavaScript's whitespace set; a Vitest test runs both over one corpus in an in-memory Postgres (PGlite), so it also runs in CI.
+- **Search options:** one column below `sm` for Content type and Your Library; the Status control takes the full row. At 390 px every label is whole in all 8 languages (a test).
+- **Toolbar:** the reader toolbar has the page's side padding, and the Chords switch pulls its own padding back, so A− or the switch's track lines up with the lyrics.
+- **Favourites:** the toasts say "your Favorites" like the user menu (en, nl, es, it, ru, fr, pt); Runasimi untouched. The song page button still says "Add to Liked Songs" (`song.addToFavorites`): not changed here.
+- **Confirm:** yes: lower case, German and solfège chord spellings (`[am]`, `[Hm]`, `[Re]`) are not chords; say if songs in those notations should get the Chords switch and transpose.

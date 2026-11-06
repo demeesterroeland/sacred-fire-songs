@@ -5,24 +5,27 @@ import { endBelowFold } from '../../../lib/reader/autoScroll';
 import { categoryDisplayName } from '../../../lib/taxonomy/categoryName';
 import { songFlags, versionHasChords } from '../../../lib/songs/versionFlags';
 import { DICTIONARIES, SUPPORTED_LOCALES } from '../../../lib/i18n';
+import { actionErrorMessage } from '../../../lib/errors/actionError';
+import { hasChords } from '../../../lib/chordProParsing';
 
 interface State {
   viewport: number;
   endBottom: number;
   versions: Array<{ content_chordpro: string }>;
+  reserved: number;
 }
 const state = new WeakMap<object, State>();
 const get = (w: object): State => {
   let s = state.get(w);
   if (!s) {
-    s = { viewport: 800, endBottom: 0, versions: [] };
+    s = { viewport: 800, endBottom: 0, versions: [], reserved: 0 };
     state.set(w, s);
   }
   return s;
 };
 const offered = (w: object) => {
   const s = get(w);
-  return endBelowFold({ endBottom: s.endBottom, viewportTop: 0, viewportHeight: s.viewport, scrollTop: 0 });
+  return endBelowFold({ endBottom: s.endBottom, viewportTop: 0, viewportHeight: s.viewport, scrollTop: 0, reservedBottom: s.reserved });
 };
 
 Given('a screen {int} px high', function (this: object, h: number) {
@@ -68,4 +71,40 @@ Then('the Original offers the Chords switch and transpose', function (this: obje
 });
 Then('the Simplified offers neither', function (this: object) {
   assert.equal(versionHasChords(get(this).versions[1]), false);
+});
+
+// Review round -------------------------------------------------------------------------------------------
+Given('a screen {int} px high with {int} px of fixed bars', function (this: object, h: number, bars: number) {
+  get(this).viewport = h;
+  get(this).reserved = bars;
+});
+
+Given('a server answer {string} and a raw database message', function (answer: string) {
+  assert.equal(answer, 'Playlist not found'); // both answers are checked in the Then step
+});
+Then('the first is shown as its translated message and the second as the generic message', function () {
+  const t = (k: string) => `T:${k}`;
+  assert.equal(actionErrorMessage('Playlist not found', t), 'T:errors.playlistNotFound');
+  assert.equal(actionErrorMessage('duplicate key value violates unique constraint "setlists_pkey"', t), 'T:errors.generic');
+});
+
+Given('the versions {string} with lyrics, {string} with lyrics and {string} with lyrics', function (this: object, a: string, b: string, c: string) {
+  get(this).versions = [a, b, c].map((tag) => ({ content_chordpro: `${tag}la la` }));
+});
+Then('only the version with {string} has chords', function (this: object, tag: string) {
+  const has = get(this).versions.map((v) => hasChords(v.content_chordpro));
+  assert.deepEqual(
+    get(this).versions.map((v) => v.content_chordpro.startsWith(tag)),
+    has,
+  );
+});
+
+Then('in every language but Runasimi the favourite toasts name the favourites like the user menu does', function () {
+  const stem: Record<string, string> = { en: 'favorites', nl: 'favorieten', es: 'favoritas', it: 'preferiti', ru: 'избран', fr: 'favoris', pt: 'favoritas' };
+  for (const [locale, word] of Object.entries(stem)) {
+    const dict = DICTIONARIES[locale as keyof typeof DICTIONARIES] as Record<string, string>;
+    for (const k of ['userMenu.favorites', 'favorites.toast.added', 'favorites.toast.removed', 'favorites.toast.view']) {
+      assert.ok(dict[k].toLowerCase().includes(word), `${locale}: ${k}`);
+    }
+  }
 });
