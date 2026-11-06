@@ -1,11 +1,12 @@
 # UX v2: Phone Validation Script
 
-**Version:** 1.32 | **Date:** Nov 6, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
+**Version:** 1.33 | **Date:** Nov 6, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.33 | Nov 6, 2026 | Added #415 (Add Song preview and visible upload button). |
 | 1.32 | Nov 6, 2026 | Added #412 (Home welcome, search field and Recently added for guests). |
 | 1.31 | Nov 6, 2026 | Added #416 (New Playlist: visibility switch and one-line explanation). |
 | 1.30 | Nov 6, 2026 | Added #394 (auto-scroll and transpose in the reader toolbar). |
@@ -463,3 +464,17 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 - [ ] 6. Check size: the search field, **Search**, **All songs** and every row are at least 44 px tall; no text is smaller than the grey captions.
 - [ ] 7. Sign in as a member and open Home. **Expected:** **Your library** (favourites, drafts, my songs, new songs) and the categories; no welcome block, no Recently added; the top bar shows its search field.
 - [ ] 8. Switch the language to Dutch, Spanish, Italian, Russian, French, Portuguese and Quechua: the welcome sentence, field label, button and the **Recently added** heading are translated and fit.
+
+### #415 · G8.2 Add Song: live chord preview and visible upload
+
+**Preconditions:** member account on a 390 px phone, English. Run once in light and once in dark.
+
+- [ ] 1. Open **Library → + → Add Song**. **Expected:** directly under the lyrics box two buttons side by side on one row, **Preview** and **Upload .cho / .txt**, each at least 44 px high (the Upload label may take two lines inside its button); no small link at the top of the form. Screenshot: `docs/ux-research/screenshots/ux-v2/415/after-light/mobile/member/06-song-add.webp`.
+- [ ] 2. In **Lyrics & chords** type `[Dm]Abre tus alas [A7]pajaro volar`. Tap **Preview**. **Expected:** the box keeps its size; **Dm** is shown above **Abre** and **A7** above **pajaro** in the chord colour, like on a song page. The button looks pressed. Screenshot: `…/415/after-light/mobile/member/06-song-add-preview.webp`.
+- [ ] 3. Tap **Preview** again. **Expected:** the editor is back with your text unchanged and nothing below the box moved.
+- [ ] 4. Clear the text and tap **Preview**. **Expected:** the hint *Nothing to preview yet. Type or paste your lyrics and chords.*
+- [ ] 5. Tap **Upload .cho / .txt** and pick a ChordPro file. **Expected:** title, author and lyrics are filled in; turn **Preview** on to check the chords.
+- [ ] 6. Pick a file that cannot be read (e.g. a folder or an empty permission-denied file). **Expected:** the red line *Could not read that file…* (if the phone refuses to select it, skip). A text file larger than 512 KB shows *That file is too large (limit 512 KB)…* instead. Tap **Upload** again: the red line goes away.
+- [ ] 7. Switch **Preview** on, leave the title empty and tap **Publish Song**. **Expected:** the editor comes back and the first empty required field is focused with its message.
+- [ ] 8. Reload the page (signed out first if you like): the typed title and lyrics are still there (draft), and Preview is off.
+- [ ] 9. Scroll to the end of the form. **Expected:** no Melody notation section. Switch the language to Dutch, Spanish, Italian, Russian, French, Portuguese and Quechua: both buttons and the hint are translated and the two buttons stay on one row and long labels wrap inside them. Repeat in dark mode.

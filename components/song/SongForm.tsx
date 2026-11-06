@@ -5,7 +5,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { SONG_KEYS } from '@/lib/songs/queryKeys';
 import { createClient } from "@/lib/supabase/client";
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { flushSync } from 'react-dom';
 import { parseChordPro, hasChords } from '@/lib/chordProParsing';
 import { useAuth } from '@/hooks/useAuth';
@@ -14,6 +14,9 @@ import { signInHref } from '@/lib/auth/guestGate';
 import GuestDraftBanner from '@/components/song/GuestDraftBanner';
 import CategorySelector from './CategorySelector';
 import ChordProEditor from './ChordProEditor';
+import ChordPreview from './ChordPreview';
+import { Button } from '@/components/ui/button';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 
 import { ArtistTagInput } from './ArtistTagInput';
 import { parseArtists, formatArtists, ensureArtistCategoryIds } from '@/lib/songs/artistUtils';
@@ -44,6 +47,18 @@ interface SongFormProps {
 }
 
 const ADD_SONG_PATH = '/songs/add';
+const PREVIEW_DEBOUNCE_MS = 200;
+/** Largest song file we read in the browser (512 KB is far above any chord sheet). */
+const MAX_UPLOAD_BYTES = 512 * 1024;
+
+/** UTF-8 first; files saved by older editors in Windows-1252 still read right. */
+function decodeSongFile(buffer: ArrayBuffer): string {
+    try {
+        return new TextDecoder('utf-8', { fatal: true }).decode(buffer);
+    } catch {
+        return new TextDecoder('windows-1252').decode(buffer);
+    }
+}
 
 const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
     const { t } = useLocale();
@@ -74,7 +89,9 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
     const router = useRouter();
     const searchParams = useSearchParams();
     const [serverError, setServerError] = useState<string | null>(null);
-    const [showUpload, setShowUpload] = useState(false);
+    const [showPreview, setShowPreview] = useState(false);
+    const [uploadError, setUploadError] = useState<'read' | 'tooLarge' | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Auto-expand metadata if fields are populated (Edit Mode or after Parsing)
     const hasMetadata = !!(initialData?.key || initialData?.capo || (initialData?.tuning && initialData.tuning !== 'Standard'));
@@ -91,6 +108,8 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
 
     // Watch fields for UI updates
     const currentCategoryIds = watch('categoryIds') || [];
+    const liveContent = watch('content') || '';
+    const [previewContent, flushPreview] = useDebouncedValue(liveContent, PREVIEW_DEBOUNCE_MS);
 
 
     // Persistence Logic (Create Mode): the draft survives a sign-in round trip (#411)
@@ -119,25 +138,33 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
     }, [mode, setValue, watch]);
 
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
+        const input = e.target;
+        const file = input.files?.[0];
         if (!file) return;
 
+        setUploadError(null);
+        if (file.size > MAX_UPLOAD_BYTES) {
+            setUploadError('tooLarge');
+            input.value = '';
+            return;
+        }
+
         try {
-            const text = await file.text();
+            const text = decodeSongFile(await file.arrayBuffer());
             const { title, author, key, capo, cleanContent } = parseChordPro(text);
             if (title) setValue('title', title);
             if (author) setValue('author', author);
-            if (key) setValue('key', key);
             if (key) setValue('key', key);
             if (capo) setValue('capo', capo);
 
             if (key || capo) expandMetadata(true);
             setValue('content', cleanContent);
-
-            // Auto-collapse after success
-            setShowUpload(false);
         } catch (err) {
             console.error('Failed to read file', err);
+            setUploadError('read');
+        } finally {
+            // Let the same file be chosen again.
+            input.value = '';
         }
     };
 
@@ -151,6 +178,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
         if (!hasMeta && !isMultiLine) return; // Let single-line pastes go through normally
 
         e.preventDefault();
+        setUploadError(null); // setValue below skips the field's onChange, which clears it otherwise
 
         const { title, author, key, capo, cleanContent } = parseChordPro(text);
 
@@ -355,74 +383,8 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
     return (
         <>
         {mode === 'create' && !user && !authLoading && <GuestDraftBanner next={ADD_SONG_PATH} />}
-        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 p-4 sm:p-6 rounded-2xl w-full max-w-2xl mx-auto shadow-xl min-w-0">
+        <form onSubmit={handleSubmit(handleFormSubmit, () => flushSync(() => setShowPreview(false)))} className="space-y-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 p-4 sm:p-6 rounded-2xl w-full max-w-2xl mx-auto shadow-xl min-w-0">
             <div className="space-y-4">
-                {/* File Upload Toggle Section */}
-                {/* File Upload Section */}
-                {showUpload && (
-                    <div className="bg-blue-900/20 border border-blue-500/30 rounded-xl p-4 relative">
-                        {/* Upload UI Code */}
-                        <button
-                            type="button"
-                            onClick={() => setShowUpload(false)}
-                            className="absolute top-2 right-2 text-gray-400 hover:text-gray-900 dark:hover:text-white"
-                        >
-                            <span className="material-symbols-outlined text-sm">close</span>
-                        </button>
-                        <div className="flex items-start gap-3 mb-4">
-                            <span className="material-symbols-outlined text-blue-400 mt-0.5">info</span>
-                            <p className="text-blue-100 text-xs leading-relaxed flex-1">
-                                {t('songForm.upload.info')}
-                            </p>
-                        </div>
-                        <label className="w-full border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-indigo-500/50 rounded-2xl p-8 flex flex-col items-center justify-center gap-3 transition-colors cursor-pointer bg-gray-100/50 dark:bg-gray-800/50 group">
-                            <input
-                                type="file"
-                                accept=".cho,.txt,.pro,.chordpro"
-                                className="hidden"
-                                onChange={handleFileUpload}
-                            />
-                            <div className="bg-gray-200/50 dark:bg-gray-700/50 group-hover:bg-gray-300 dark:group-hover:bg-gray-700 p-4 rounded-full transition-colors">
-                                <span className="material-symbols-outlined text-3xl text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white">cloud_upload</span>
-                            </div>
-                            <div className="text-center">
-                                <p className="text-gray-900 dark:text-white font-semibold group-hover:text-indigo-300">{t('songForm.upload.select')}</p>
-                                <p className="text-gray-500 text-xs mt-1">{t('songForm.upload.chordProOnly')}</p>
-                            </div>
-                        </label>
-                        <div className="flex items-center justify-end gap-3 mt-2">
-                            <button
-                                type="button"
-                                onClick={() => setShowUpload(false)}
-                                className="cursor-pointer flex min-w-[100px] items-center justify-center rounded-lg h-11 px-6 border border-slate-300 dark:border-[#674d32] text-slate-600 dark:text-[#c9ad92] text-sm font-bold hover:bg-slate-50 dark:hover:bg-[#332619]"
-                            >
-                                {t('songForm.cancel')}
-                            </button>
-                            <button
-                                type="button"
-                                className="flex min-w-[100px] cursor-pointer items-center justify-center rounded-lg h-11 px-8 bg-primary text-white text-sm font-bold shadow-lg shadow-primary/20 active:bg-primary/90"
-                            >
-                                {t('songForm.upload.button')}
-                            </button>
-                        </div>
-                    </div>
-                )}
-
-
-                {/* Upload file toggle (no "Song Details" heading) */}
-                {!showUpload && (
-                    <div className="flex justify-end pb-2">
-                        <button
-                            type="button"
-                            onClick={() => setShowUpload(true)}
-                            className="text-indigo-400 text-xs font-semibold flex items-center gap-1 opacity-80 hover:opacity-100 transition-opacity"
-                        >
-                            <span className="material-symbols-outlined text-sm">attachment</span>
-                            {t('songForm.upload.toggle')}
-                        </button>
-                    </div>
-                )}
-
                 {/* 1. Title */}
                 <div className="space-y-2">
                     <label htmlFor="title" className="block text-sm font-medium text-gray-600 dark:text-gray-300 p-1">
@@ -449,26 +411,85 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                     />
                 </div>
 
-                {/* 3. Lyrics & Chords (moved up) */}
+                {/* 3. Lyrics & Chords: editor, preview toggle and upload (Story 6.1.31 / G8.2, #415) */}
                 <div className="space-y-2 mt-2">
-                    <div className="flex justify-between items-end pb-2">
-                        <div>
-                            <h3 className="text-gray-900 dark:text-white text-lg font-bold leading-tight tracking-tight">{t('songForm.field.lyrics')}</h3>
-                            <p className="text-[#a19eb7] text-xs font-normal mt-1">{t('songForm.field.lyrics.hint')} <span className="font-mono text-primary">[Dm]</span>Abre tus alas <span className="font-mono text-primary">[A7]</span>pajaro volar <span className="font-mono text-primary">[Dm]</span></p>
-                        </div>
-                        <span className="material-symbols-outlined text-[#a19eb7] cursor-pointer">help_outline</span>
+                    <div className="pb-1">
+                        <h3 className="text-body font-semibold text-fg leading-tight">{t('songForm.field.lyrics')}</h3>
+                        <p className="text-caption text-fg-muted mt-1">{t('songForm.field.lyrics.hint')} <span className="font-mono text-chord">[Dm]</span>Abre tus alas <span className="font-mono text-chord">[A7]</span>pajaro volar <span className="font-mono text-chord">[Dm]</span></p>
                     </div>
 
-                    <div className="w-full min-w-0 max-w-full overflow-hidden bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg focus-within:ring-2 focus-within:ring-primary focus-within:border-primary transition-all h-[400px]">
-                        <ChordProEditor
-                            {...register('content', { required: t('songForm.field.content.required') })}
-                            value={watch('content') || ''}
-                            onPaste={handlePaste}
-                            className="w-full h-full rounded-lg"
-                            placeholder="[Dm]Abre tus alas [A7]pajaro volar [Dm]"
+                    {/* Editor and preview share one fixed-height box, so toggling never moves the form. */}
+                    <div
+                        data-testid="lyrics-box"
+                        className="w-full min-w-0 max-w-full overflow-hidden bg-surface border border-line-strong rounded-control focus-within:outline-2 focus-within:outline-focus transition-colors h-[400px]"
+                    >
+                        <div className={showPreview ? 'hidden' : 'h-full'}>
+                            <ChordProEditor
+                                {...register('content', {
+                                    required: t('songForm.field.content.required'),
+                                    onChange: () => setUploadError(null),
+                                })}
+                                value={watch('content') || ''}
+                                onPaste={handlePaste}
+                                className="w-full h-full rounded-control"
+                                placeholder="[Dm]Abre tus alas [A7]pajaro volar [Dm]"
+                            />
+                        </div>
+                        {showPreview && (
+                            <div
+                                data-testid="song-form-preview"
+                                role="region"
+                                aria-label={t('songForm.preview.label')}
+                                tabIndex={0}
+                                className="h-full overflow-auto focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus"
+                            >
+                                <ChordPreview content={previewContent} />
+                            </div>
+                        )}
+                    </div>
+                    {errors.content && <p className="text-danger text-meta">{errors.content.message}</p>}
+
+                    <div data-testid="lyrics-tools" className="grid grid-cols-2 gap-2">
+                        <Button
+                            type="button"
+                            variant={showPreview ? 'secondary' : 'outline'}
+                            aria-pressed={showPreview}
+                            onClick={() => {
+                                if (!showPreview) flushPreview();
+                                setShowPreview((on) => !on);
+                            }}
+                            className="min-w-0 whitespace-normal text-center"
+                        >
+                            <span className="material-symbols-outlined text-[20px] shrink-0" aria-hidden="true">visibility</span>
+                            {t('songForm.preview.toggle')}
+                        </Button>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                                setUploadError(null);
+                                fileInputRef.current?.click();
+                            }}
+                            className="min-w-0 whitespace-normal text-center"
+                        >
+                            <span className="material-symbols-outlined text-[20px] shrink-0" aria-hidden="true">upload_file</span>
+                            {t('songForm.upload.toggle')}
+                        </Button>
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept=".cho,.txt,.pro,.chordpro"
+                            className="hidden"
+                            data-testid="song-file-input"
+                            onChange={handleFileUpload}
                         />
                     </div>
-                    {errors.content && <p className="text-red-400 text-sm">{errors.content.message}</p>}
+                    <p className="text-caption text-fg-muted">{t('songForm.upload.info')}</p>
+                    {uploadError && (
+                        <p role="alert" className="text-danger text-meta">
+                            {uploadError === 'tooLarge' ? t('songForm.upload.tooLarge') : t('songForm.upload.error')}
+                        </p>
+                    )}
                 </div>
 
                 {/* 4. Key / Capo / Tuning (collapsible, simplified) */}
