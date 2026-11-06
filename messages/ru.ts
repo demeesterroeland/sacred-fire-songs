@@ -483,6 +483,15 @@ const ru: Partial<Record<TranslationKey, string>> = {
   'librarySummary.drafts.description': 'Твои песни в работе',
   'librarySummary.drafts.empty': 'Черновиков пока нет',
 
+  // ─── Home ─────────────────────────────────────────────────────────────────
+  'home.welcome.title': 'Добро пожаловать',
+  'home.welcome.line': 'Общий песенник песен медицины с текстами, аккордами и записями, открытый для всех.',
+  'home.search.label': 'Поиск песен',
+  'home.search.placeholder': 'Поиск песен',
+  'home.search.submit': 'Найти',
+  'home.recent.heading': 'Недавно добавленные',
+  'home.recent.viewAll': 'Все песни',
+
   // ─── Explore ──────────────────────────────────────────────────────────────
   'explore.pageTitle': 'Обзор',
   'explore.categories.heading': 'Обзор по категориям',

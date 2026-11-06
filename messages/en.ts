@@ -478,6 +478,15 @@ const en = {
   'librarySummary.drafts.description': 'Your work-in-progress songs',
   'librarySummary.drafts.empty': 'No drafts yet',
 
+  // ─── Home ─────────────────────────────────────────────────────────────────
+  'home.welcome.title': 'Welcome',
+  'home.welcome.line': 'A shared songbook of medicine songs with lyrics, chords and recordings, free to browse.',
+  'home.search.label': 'Search songs',
+  'home.search.placeholder': 'Search songs',
+  'home.search.submit': 'Search',
+  'home.recent.heading': 'Recently added',
+  'home.recent.viewAll': 'All songs',
+
   // ─── Explore ──────────────────────────────────────────────────────────────
   'explore.pageTitle': 'Explore',
   'explore.categories.heading': 'Explore by category',

@@ -480,6 +480,15 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'librarySummary.drafts.description': 'Jouw liederen in bewerking',
   'librarySummary.drafts.empty': 'Nog geen concepten',
 
+  // ─── Home ─────────────────────────────────────────────────────────────────
+  'home.welcome.title': 'Welkom',
+  'home.welcome.line': 'Een gedeeld liedboek met medicinale liederen, met teksten, akkoorden en opnames, vrij om te bekijken.',
+  'home.search.label': 'Zoek liederen',
+  'home.search.placeholder': 'Zoek liederen',
+  'home.search.submit': 'Zoeken',
+  'home.recent.heading': 'Onlangs toegevoegd',
+  'home.recent.viewAll': 'Alle liederen',
+
   // ─── Explore ──────────────────────────────────────────────────────────────
   'explore.pageTitle': 'Verkennen',
   'explore.categories.heading': 'Ontdek per categorie',

@@ -1,11 +1,12 @@
 # Guest Guide (draft)
 
-**Version:** 0.18 | **Date:** Nov 6, 2026
+**Version:** 0.19 | **Date:** Nov 6, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.19 | Nov 6, 2026 | Home now opens with a short welcome, a search field and the five newest songs under **Recently added** (UX v2, #412). Signed-in members still see Your library. |
 | 0.18 | Nov 6, 2026 | Song page: **Auto-scroll** (▶) and **⋯** reading tools in the same toolbar (UX v2, #394). |
 | 0.17 | Nov 6, 2026 | Sign-in and sign-up pages have a **Back** link instead of a ✕; it returns to the page you came from, else Home (UX v2, #409). |
 | 0.16 | Nov 5, 2026 | The player bar is calm (plain background, orange only on play) and says *Playing* or *Paused* with what plays; the Listen tab shows only the providers the song has (UX v2, #397). |
@@ -39,7 +40,8 @@ The ☰ menu repeats the main places (Home, Songs, Playlists, Favorites, Drafts,
 
 ## Finding a song
 
-1. **Browse by category** on Home: groups such as *The Elements* (Air, Earth, Fire, Water), *Nature*, *Lineage & Tradition*, *Medicine & Healing*. Each tag is a plain link; the grey number after it is how many songs it holds. "+3 more" shows the rest.
+1. **Start on Home:** a one-line welcome says what the site is, the search field takes you straight to matching songs (tap it to see your recent searches and the main categories), and **Recently added** lists the five newest songs; **All songs** opens the full list.
+2. **Browse by category** on Home: groups such as *The Elements* (Air, Earth, Fire, Water), *Nature*, *Lineage & Tradition*, *Medicine & Healing*. Each tag is a plain link; the grey number after it is how many songs it holds. "+3 more" shows the rest.
 2. **Search:** tap the search field and type a title, a line of the lyrics, an author or a category. Accents do not matter ("aguita" finds "Agüita"). Before you type, the field offers your last 5 searches (tap one to repeat it, **✕** removes one, **Clear all** removes them all; they are kept on this device only) and the main categories as grey buttons (tap one to show only those songs; tap it again to remove the filter). Tap outside the list or press Esc to close it.
 3. **Filters:** the slider button in the search field opens *Search options*: sort order, content type (songs with chords / with melody) and category & tag filters. Tap **Show results**.
 4. **Search** in the bottom bar lists all songs A–Z and is ready for typing. Each row shows the title, a grey line *author · category · language* and the key on the right; tap the row to open the song.

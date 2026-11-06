@@ -480,6 +480,15 @@ const es: Partial<Record<TranslationKey, string>> = {
   'librarySummary.drafts.description': 'Tus canciones en proceso',
   'librarySummary.drafts.empty': 'Aún no hay borradores',
 
+  // ─── Home ─────────────────────────────────────────────────────────────────
+  'home.welcome.title': 'Bienvenido',
+  'home.welcome.line': 'Un cancionero compartido de canciones medicina, con letras, acordes y grabaciones, de libre acceso.',
+  'home.search.label': 'Buscar canciones',
+  'home.search.placeholder': 'Buscar canciones',
+  'home.search.submit': 'Buscar',
+  'home.recent.heading': 'Añadidas recientemente',
+  'home.recent.viewAll': 'Todas las canciones',
+
   // ─── Explore ──────────────────────────────────────────────────────────────
   'explore.pageTitle': 'Explorar',
   'explore.categories.heading': 'Explorar por categoría',

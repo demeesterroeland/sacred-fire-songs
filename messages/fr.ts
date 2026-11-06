@@ -480,6 +480,15 @@ const fr: Partial<Record<TranslationKey, string>> = {
   'librarySummary.drafts.description': "Tes chants en cours d'écriture",
   'librarySummary.drafts.empty': "Pas encore de brouillons",
 
+  // ─── Home ─────────────────────────────────────────────────────────────────
+  'home.welcome.title': 'Bienvenue',
+  'home.welcome.line': 'Un recueil partagé de chants médecine, avec paroles, accords et enregistrements, en libre consultation.',
+  'home.search.label': 'Rechercher des chants',
+  'home.search.placeholder': 'Rechercher des chants',
+  'home.search.submit': 'Rechercher',
+  'home.recent.heading': 'Ajoutés récemment',
+  'home.recent.viewAll': 'Tous les chants',
+
   // ─── Explore ──────────────────────────────────────────────────────────────
   'explore.pageTitle': "Explorer",
   'explore.categories.heading': "Explorer par catégorie",

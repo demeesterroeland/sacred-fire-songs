@@ -43,6 +43,39 @@ export function songsQuery(
   return q;
 }
 
+/** Size of the "Recently added" row on Home (Story 6.1.28 / G6.3, #412). */
+export const RECENTLY_ADDED_LIMIT = 5;
+
+/**
+ * Only what a compact song row shows (title, author, public badge, key, "Author · Category · Language"):
+ * no chordpro bodies, no melody notation, no other composition columns.
+ */
+export const RECENTLY_ADDED_SELECT = `
+  id, title, original_author, is_public, created_at,
+  song_versions(key),
+  song_category_map(
+    categories(
+      name,
+      slug,
+      parent:parent_id(name, slug)
+    )
+  )
+`;
+
+/**
+ * The newest public compositions. The `is_public` filter is explicit on top of RLS: a signed-in
+ * owner's drafts must not show up in a row that is the same for every visitor.
+ */
+export function recentlyAddedQuery(client: SupabaseClient, limit = RECENTLY_ADDED_LIMIT) {
+  return client
+    .from('compositions')
+    .select(RECENTLY_ADDED_SELECT)
+    .eq('is_public', true)
+    .order('created_at', { ascending: false })
+    .order('id', { ascending: false })
+    .limit(limit);
+}
+
 /**
  * Maps a raw Supabase composition row (with joins) to a Song object.
  * Single source of truth for field mapping — used by server and client.
@@ -67,17 +100,18 @@ interface SongCategoryMapRow {
   categories: CategoryRow;
 }
 
-interface CompositionRow {
+export interface CompositionRow {
   id: string;
   title: string;
   original_author: string | null;
-  owner_id: string | null;
   is_public: boolean;
   created_at: string;
-  updated_at: string;
-  content_chordpro: string | null;
-  has_chords: boolean | null;
-  has_melody: boolean | null;
+  // Not part of the narrow RECENTLY_ADDED_SELECT, hence optional.
+  owner_id?: string | null;
+  updated_at?: string;
+  content_chordpro?: string | null;
+  has_chords?: boolean | null;
+  has_melody?: boolean | null;
   song_versions: SongVersionRow[] | null;
   song_category_map: SongCategoryMapRow[] | null;
 }

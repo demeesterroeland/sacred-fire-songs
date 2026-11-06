@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import type { Song } from "@/lib/songUtils";
 import type { TaxonomyNode } from "@/lib/taxonomyUtils";
-import { songsQuery, mapCompositionToSong } from './queries';
+import { songsQuery, mapCompositionToSong, recentlyAddedQuery, RECENTLY_ADDED_LIMIT, type CompositionRow } from './queries';
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { normalizeWhitespace, removeDiacritics } from "@/lib/utils";
 import { parseArtists } from "./artistUtils";
@@ -482,4 +482,19 @@ export async function fetchArtistsServer(): Promise<ArtistSummary[]> {
     return result;
 }
 
+/**
+ * The newest public songs, for the "Recently added" row on Home (Story 6.1.28 / G6.3, #412).
+ * Guests only ever receive public songs from RLS; the query also filters on `is_public` so a signed-in
+ * owner's drafts never show up. Only import this from Server Components or Server Actions.
+ */
+export async function getRecentlyAddedSongs(limit = RECENTLY_ADDED_LIMIT): Promise<Song[]> {
+    const supabase = await createClient();
+    const { data, error } = await recentlyAddedQuery(supabase, limit);
 
+    if (error || !data) {
+        console.error('getRecentlyAddedSongs error:', error);
+        return [];
+    }
+    // The select string is a literal, so PostgREST's parser infers nested relations as arrays; the shape is a CompositionRow.
+    return (data as unknown as CompositionRow[]).map(item => mapCompositionToSong(item));
+}

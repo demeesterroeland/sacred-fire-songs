@@ -3,7 +3,6 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { useQuery } from '@tanstack/react-query';
 import { ListMusic, Loader2, Menu, Music, PlusCircle, Search, SlidersHorizontal } from 'lucide-react';
 import { useSidebar } from '@/context/SidebarContext';
 import { useAuth, type AuthUser } from '@/hooks/useAuth';
@@ -12,14 +11,8 @@ import { UserProfile } from './navigation/UserProfile';
 import { NotificationBell } from './navigation/NotificationBell';
 import { useLocale } from '@/context/LocaleContext';
 import { FOCUS_SEARCH_EVENT } from '@/lib/search/focusSearch';
-import {
-    addRecentSearch,
-    clearRecentSearches,
-    readRecentSearches,
-    removeRecentSearch,
-} from '@/lib/search/history';
-import { fetchCategoryTree } from '@/lib/taxonomyUtils';
-import { sortCategories } from '@/lib/categoryOrder';
+import { addRecentSearch, clearRecentSearches, removeRecentSearch } from '@/lib/search/history';
+import { useSearchSuggestions } from '@/hooks/useSearchSuggestions';
 import SearchSuggestions from '@/components/search/SearchSuggestions';
 
 export default function Header({ initialUser }: { initialUser?: AuthUser | null }) {
@@ -29,11 +22,24 @@ export default function Header({ initialUser }: { initialUser?: AuthUser | null 
     const searchParams = useSearchParams();
     const { setIsOpen: setSidebarOpen, searchFiltersOpen, setSearchFiltersOpen, hasActiveSearchFilters, isSearching, setIsSearching } = useSidebar();
     const { user } = useAuth(initialUser);
-    const inputRef = useRef<HTMLInputElement>(null);
-    const searchWrapperRef = useRef<HTMLDivElement>(null);
-    const suggestionsRef = useRef<HTMLDivElement>(null);
-    // Set when focus returns to the field after Escape: that focus must not reopen the panel.
-    const skipOpenRef = useRef(false);
+    // Suggestion panel (Story 6.1.29 / G7.1, #413): shared with the Home search field.
+    const {
+        inputRef,
+        wrapperRef: searchWrapperRef,
+        panelRef: suggestionsRef,
+        open: historyOpen,
+        close: closeSuggestions,
+        show: openSuggestions,
+        forceShow,
+        recent: searchHistory,
+        setRecent: setSearchHistory,
+        categories,
+        closeIfFocusLeaves,
+        closeFromPanel: closeSuggestionsFromPanel,
+        focusFirstSuggestion,
+    } = useSearchSuggestions();
+    // Guests on Home have the inline search field there: a second one in the header would be a duplicate (UXA-042).
+    const hideSearch = pathname === '/' && !user;
     const createMenuRef = useRef<HTMLDivElement>(null);
     const [createMenuOpen, setCreateMenuOpen] = useState(false);
 
@@ -42,34 +48,7 @@ export default function Header({ initialUser }: { initialUser?: AuthUser | null 
     const [searchValue, setSearchValue] = useState(
         isOnSongsPage ? (searchParams.get('search') || '') : ''
     );
-    // Suggestion panel (Story 6.1.29 / G7.1, #413): recent searches + category chips.
-    const [historyOpen, setHistoryOpen] = useState(false);
-    const [hasOpened, setHasOpened] = useState(false);
-    const [searchHistory, setSearchHistory] = useState<string[]>([]);
-    const { data: categoryTree = [] } = useQuery({
-        queryKey: ['taxonomy'],
-        queryFn: fetchCategoryTree,
-        staleTime: 1000 * 60 * 60,
-        enabled: hasOpened,
-    });
-    const categories = sortCategories(categoryTree);
     const activeCategory = isOnSongsPage ? (searchParams.get('category') ?? undefined) : undefined;
-
-    const openSuggestions = useCallback(() => {
-        if (skipOpenRef.current) {
-            skipOpenRef.current = false;
-            return;
-        }
-        setSearchHistory(readRecentSearches());
-        setHasOpened(true);
-        setHistoryOpen(true);
-    }, []);
-
-    // Load history on mount (localStorage is only readable on the client)
-    useEffect(() => {
-        // eslint-disable-next-line react-hooks/set-state-in-effect -- one-time read of an external store
-        setSearchHistory(readRecentSearches());
-    }, []);
 
     // Sync search value when navigating to /songs with a search param
     // Skip sync while user is actively typing (input focused) to avoid overwriting
@@ -77,30 +56,36 @@ export default function Header({ initialUser }: { initialUser?: AuthUser | null 
         if (isOnSongsPage && document.activeElement !== inputRef.current) {
             setSearchValue(searchParams.get('search') || '');
         }
-    }, [isOnSongsPage, searchParams, searchValue]);
+    }, [isOnSongsPage, searchParams, searchValue, inputRef]);
 
     // Bottom bar "Search" tab (Story 6.1.24, #408): focus the field on tap and show the suggestions,
     // also when the field already had focus (no focus event fires then).
+    // On guest Home there is no header field yet: remember the request and honour it when the field appears
+    // (the tab navigates to the song list, and the header outlives the navigation).
+    const pendingSearchFocusRef = useRef(false);
     useEffect(() => {
         const focusInput = () => {
+            if (hideSearch) {
+                pendingSearchFocusRef.current = true;
+                return;
+            }
             inputRef.current?.focus();
-            skipOpenRef.current = false;
-            openSuggestions();
+            forceShow();
         };
         window.addEventListener(FOCUS_SEARCH_EVENT, focusInput);
         return () => window.removeEventListener(FOCUS_SEARCH_EVENT, focusInput);
-    }, [openSuggestions]);
+    }, [forceShow, hideSearch, inputRef]);
 
-    // Close dropdowns on outside tap or click
+    useEffect(() => {
+        if (hideSearch || !pendingSearchFocusRef.current) return;
+        pendingSearchFocusRef.current = false;
+        inputRef.current?.focus();
+        forceShow();
+    }, [hideSearch, forceShow, inputRef]);
+
+    // Close the create menu on outside tap or click (the suggestion panel closes itself)
     useEffect(() => {
         const handleClick = (e: PointerEvent) => {
-            const target = e.target as Node;
-            if (
-                searchWrapperRef.current && !searchWrapperRef.current.contains(target) &&
-                !suggestionsRef.current?.contains(target)
-            ) {
-                setHistoryOpen(false);
-            }
             if (createMenuRef.current && !createMenuRef.current.contains(e.target as Node)) {
                 setCreateMenuOpen(false);
             }
@@ -111,11 +96,11 @@ export default function Header({ initialUser }: { initialUser?: AuthUser | null 
 
     const removeFromHistory = useCallback((term: string) => {
         setSearchHistory(removeRecentSearch(term));
-    }, []);
+    }, [setSearchHistory]);
 
     const clearHistory = useCallback(() => {
         setSearchHistory(clearRecentSearches());
-    }, []);
+    }, [setSearchHistory]);
 
     // Live search: debounce URL updates ONLY when user is actively typing (input focused)
     // This prevents background sync changes or modal commits from scheduling stale URL overrides.
@@ -156,7 +141,7 @@ export default function Header({ initialUser }: { initialUser?: AuthUser | null 
         } else if (isOnSongsPage) {
             router.push('/songs');
         }
-        setHistoryOpen(false);
+        closeSuggestions();
     };
 
     const suggestionsVisible = historyOpen && !searchValue && (searchHistory.length > 0 || categories.length > 0);
@@ -168,16 +153,10 @@ export default function Header({ initialUser }: { initialUser?: AuthUser | null 
         }
         if (e.key === 'Escape') {
             setSearchValue('');
-            setHistoryOpen(false);
+            closeSuggestions();
             inputRef.current?.blur();
         }
-        if (e.key === 'ArrowDown' && historyOpen) {
-            const first = suggestionsRef.current?.querySelector<HTMLElement>('button:not([data-clear-all])');
-            if (first) {
-                e.preventDefault();
-                first.focus();
-            }
-        }
+        if (e.key === 'ArrowDown') focusFirstSuggestion(e);
     };
 
     // Keep a search the person typed and left (the field live-searches, so Enter is optional).
@@ -187,30 +166,13 @@ export default function Header({ initialUser }: { initialUser?: AuthUser | null 
         closeIfFocusLeaves(e);
     };
 
-    // Tabbing out of the field and the panel closes the panel; taps outside are handled above.
-    const closeIfFocusLeaves = (e: React.FocusEvent) => {
-        const next = e.relatedTarget as Node | null;
-        if (!next) return;
-        if (searchWrapperRef.current?.contains(next) || suggestionsRef.current?.contains(next)) return;
-        setHistoryOpen(false);
-    };
-
-    // Escape inside the panel: close it and give the field back its focus without reopening.
-    const closeSuggestionsFromPanel = () => {
-        setHistoryOpen(false);
-        skipOpenRef.current = true;
-        inputRef.current?.focus();
-        // jsdom/old browsers that do not fire focus: do not leave the flag armed
-        setTimeout(() => { skipOpenRef.current = false; }, 0);
-    };
-
     const toggleCategory = (slug: string) => {
         const params = new URLSearchParams(isOnSongsPage ? searchParams.toString() : '');
         if (params.get('category') === slug) params.delete('category');
         else params.set('category', slug);
         params.delete('tag'); // tags belong to the previous category
         params.delete('search');
-        setHistoryOpen(false);
+        closeSuggestions();
         inputRef.current?.blur();
         router.push(params.toString() ? `/songs?${params.toString()}` : '/songs');
     };
@@ -237,7 +199,7 @@ export default function Header({ initialUser }: { initialUser?: AuthUser | null 
         };
         document.addEventListener('keydown', handleGlobalKey);
         return () => document.removeEventListener('keydown', handleGlobalKey);
-    }, []);
+    }, [inputRef]);
 
     return (
         <nav
@@ -264,9 +226,9 @@ export default function Header({ initialUser }: { initialUser?: AuthUser | null 
                     </Link>
                 </div>
 
-                {/* Center: Search bar (visible everywhere) */}
+                {/* Center: Search bar (everywhere, except guests on Home: they have the inline field) */}
                 <div className="flex items-center px-2 lg:px-4 flex-1">
-                    <div ref={searchWrapperRef} className="relative w-full max-w-3xl group">
+                    {!hideSearch && <div ref={searchWrapperRef} className="relative w-full max-w-3xl group">
                         {/* Search icon / loading spinner */}
                         {isSearching && isOnSongsPage && !searchFiltersOpen ? (
                             <Loader2 className="absolute left-4 top-1/2 -translate-y-1/2 w-4 h-4 text-fg-subtle animate-spin pointer-events-none z-10" />
@@ -290,7 +252,7 @@ export default function Header({ initialUser }: { initialUser?: AuthUser | null 
                         <span id="search-suggestions-hint" className="sr-only">{t('header.suggestionsHint')}</span>
                         <button
                             onClick={() => {
-                                setHistoryOpen(false);
+                                closeSuggestions();
                                 setSearchFiltersOpen(!searchFiltersOpen);
                             }}
                             className={`absolute right-1 top-1/2 -translate-y-1/2 size-tap inline-flex items-center justify-center rounded-control transition-colors z-10 ${
@@ -306,7 +268,7 @@ export default function Header({ initialUser }: { initialUser?: AuthUser | null 
                                 <span className="absolute top-2 right-2 w-2 h-2 rounded-full bg-accent" />
                             )}
                         </button>
-                    </div>
+                    </div>}
                 </div>
 
                 {/* Right: Action buttons */}

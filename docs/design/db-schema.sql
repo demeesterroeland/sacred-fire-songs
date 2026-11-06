@@ -1,11 +1,12 @@
 /*
- **Version:** 3.1
+ **Version:** 3.2
  **Status:** Current
- **Date:** November 5, 2026
+ **Date:** November 6, 2026
  
  ## Usage
  This script provides a complete setup for the "Sacred Fire Songs" database. 
- It consolidates the initial schema and all subsequent migrations up to November 5, 2026.
+ It consolidates the initial schema and all subsequent migrations up to November 6, 2026.
+ (v3.2: compositions SELECT/ALL policies now mirror the migrations (anon sees is_public = true only; owner/admin policies); the superseded "Public compositions are viewable by everyone" USING (true) and mock-mode public insert/update/delete policies are gone; Story 6.1.28, #412).
  (v3.1: Anon (guest) reads of public takes now also require singer_consent_confirmed; UXD-2, Story 6.1.26).
  (v3.0: Added notifications inbox with share triggers and profiles.email_notifications opt-out).
  (v2.9: Added is_recording_owner / has_recording_share security definer helpers to prevent RLS recursion).
@@ -325,8 +326,30 @@ alter table public.recording_shares enable row level security;
 -- Public Read Policies
 create policy "Allow public read access" on public.categories for
 select to public using (true);
-create policy "Public compositions are viewable by everyone" on public.compositions for
-select using (true);
+-- Compositions SELECT mirrors migrations 20260128175700 / 20260128175900: guests (anon) see public songs only;
+-- signed-in users also see their own songs, admins see all.
+create policy "Public songs are viewable by everyone" on public.compositions for
+select to public using (is_public = true);
+create policy "Authenticated users can view appropriate songs" on public.compositions for
+select to authenticated using (
+    is_public = true
+    or owner_id = (
+      select auth.uid()
+    )
+    or (
+      select role
+      from public.profiles
+      where id = (
+          select auth.uid()
+        )
+    ) = 'admin'
+  );
+create policy "Owners can view their own songs" on public.compositions for
+select to authenticated using (
+    owner_id = (
+      select auth.uid()
+    )
+  );
 create policy "Public versions are viewable by everyone" on public.song_versions for
 select using (true);
 -- Admin/Member Policies (Simplified for MVP)
@@ -350,10 +373,8 @@ create policy "Admins/Members can delete categories" on public.categories for de
 );
 -- Compositions: Authenticated creation
 -- Compositions: Authenticated creation, Owner Edit, Admin Edit
--- Compositions: Public creation (Mock Mode compatibility)
+-- (The mock-mode "Allow public insert/update/delete compositions" policies were dropped by migration 20260128175900.)
 -- create policy "Authenticated users can create compositions" on public.compositions for insert to authenticated with check ((select auth.role()) = 'authenticated');
-create policy "Allow public insert compositions" on public.compositions for
-insert to public with check (true);
 create policy "Owners can update their songs" on public.compositions for
 update to authenticated using (
     owner_id = (
@@ -371,9 +392,24 @@ update to authenticated using (
     ) = 'admin'
   );
 -- create policy "Admins can delete songs" on public.compositions for delete to authenticated using ((select role from public.profiles where id = (select auth.uid())) = 'admin');
-create policy "Allow public update compositions" on public.compositions for
-update to public using (true);
-create policy "Allow public delete compositions" on public.compositions for delete to public using (true);
+create policy "Owners can manage their songs" on public.compositions for all to authenticated using (
+    owner_id = (
+      select auth.uid()
+    )
+  ) with check (
+    owner_id = (
+      select auth.uid()
+    )
+  );
+create policy "Admins can manage all songs" on public.compositions for all to authenticated using (
+    (
+      select role
+      from public.profiles
+      where id = (
+          select auth.uid()
+        )
+    ) = 'admin'
+  );
 -- Song Versions: Strict contributor check + Admin Override
 -- create policy "Users can insert versions" on public.song_versions for insert with check ((select auth.uid()) = contributor_id);
 create policy "Allow public insert versions" on public.song_versions for
