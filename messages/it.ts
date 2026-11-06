@@ -480,6 +480,15 @@ const it: Partial<Record<TranslationKey, string>> = {
   'librarySummary.drafts.description': 'I tuoi canti in lavorazione',
   'librarySummary.drafts.empty': 'Ancora nessuna bozza',
 
+  // ─── Home ─────────────────────────────────────────────────────────────────
+  'home.welcome.title': 'Benvenuto',
+  'home.welcome.line': 'Un canzoniere condiviso di canti medicina, con testi, accordi e registrazioni, da sfogliare liberamente.',
+  'home.search.label': 'Cerca canti',
+  'home.search.placeholder': 'Cerca canti',
+  'home.search.submit': 'Cerca',
+  'home.recent.heading': 'Aggiunti di recente',
+  'home.recent.viewAll': 'Tutti i canti',
+
   // ─── Explore ──────────────────────────────────────────────────────────────
   'explore.pageTitle': 'Esplora',
   'explore.categories.heading': 'Esplora per categoria',

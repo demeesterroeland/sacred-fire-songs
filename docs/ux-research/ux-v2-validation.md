@@ -1,11 +1,12 @@
 # UX v2: Phone Validation Script
 
-**Version:** 1.31 | **Date:** Nov 6, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
+**Version:** 1.32 | **Date:** Nov 6, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.32 | Nov 6, 2026 | Added #412 (Home welcome, search field and Recently added for guests). |
 | 1.31 | Nov 6, 2026 | Added #416 (New Playlist: visibility switch and one-line explanation). |
 | 1.30 | Nov 6, 2026 | Added #394 (auto-scroll and transpose in the reader toolbar). |
 | 1.29 | Nov 6, 2026 | Added #404 (recorder level meter, count-in, time left, review buttons); review: rolling no-sound window, bold last 10 s, meter below the clock. |
@@ -449,3 +450,16 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 - [ ] 6. Open any song, tap **Playlist** in the bar at the bottom, tap **New playlist**. **Expected:** under the name field: *New playlists are private: only you can see them unless you make them public.*
 - [ ] 7. Switch the language to Dutch, Spanish, Italian, Russian, French, Portuguese and Quechua: the switch label and both lines are translated and fit on the phone. Repeat step 1 in dark mode (`…/416/after-dark/mobile/member/11-playlist-add.webp`).
 - [ ] 8. Clean up: delete the playlists you made in steps 4 and 5 (and the one from step 6).
+
+### #412 · G6.3 Home welcome, search and Recently added
+
+**Preconditions:** signed out (private window), 390 px phone, English; run once in light and once in dark. A second pass signed in as a member.
+
+- [ ] 1. Open Home. **Expected:** the top bar has no search field (only the one on the page); under it: heading **Welcome**, one sentence about the site, a search field with a **Search** button, then **Recently added** with up to five song rows and **All songs** at the right; below that **Explore by category**. Screenshot: `docs/ux-research/screenshots/ux-v2/412/after-light/mobile/guest/01-home.webp` (dark: `…/after-dark/…`). Before (categories only): `…/412/before-light/mobile/guest/01-home.webp`.
+- [ ] 2. Type a word (e.g. *agua*) in the Home search field and tap **Search** (or the keyboard's search key). **Expected:** the song list opens filtered by that word.
+- [ ] 3. Go back to Home and tap the empty search field. **Expected:** the panel with **Recent searches** (the word you just used) and the category chips opens under the field; tapping a chip opens the song list for that category; tapping outside, pressing Escape (also with focus inside the panel) or tabbing away from the field closes the panel. On **Songs** the top bar still has its own search field; tapping **Search** in the bottom bar on Home opens **Songs** with that field focused and the panel open.
+- [ ] 4. Tap a row under **Recently added**. **Expected:** the song opens. Tap the heart on a row: the sign-in sheet appears.
+- [ ] 5. Tap **All songs**. **Expected:** the full song list. No row shows a **Draft** badge.
+- [ ] 6. Check size: the search field, **Search**, **All songs** and every row are at least 44 px tall; no text is smaller than the grey captions.
+- [ ] 7. Sign in as a member and open Home. **Expected:** **Your library** (favourites, drafts, my songs, new songs) and the categories; no welcome block, no Recently added; the top bar shows its search field.
+- [ ] 8. Switch the language to Dutch, Spanish, Italian, Russian, French, Portuguese and Quechua: the welcome sentence, field label, button and the **Recently added** heading are translated and fit.

@@ -484,6 +484,15 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'librarySummary.drafts.description': 'Ruwasqayki takikuna, manaraq tukusqa',
   'librarySummary.drafts.empty': 'Manaraq borradorkuna',
 
+  // ─── Home ─────────────────────────────────────────────────────────────────
+  'home.welcome.title': 'Allin hamuy',
+  'home.welcome.line': 'Qhali takikunapa huñusqa takiyuq libro: simikuna, acordekuna, grabasqakunawan, mana qullqiwan qhawanapaq.',
+  'home.search.label': 'Taki maskay',
+  'home.search.placeholder': 'Taki maskay',
+  'home.search.submit': 'Maskay',
+  'home.recent.heading': 'Mushuq yapasqa',
+  'home.recent.viewAll': 'Llapa taki',
+
   // ─── Explore ──────────────────────────────────────────────────────────────
   'explore.pageTitle': 'Maskay',
   'explore.categories.heading': 'Categoríawan maskay',

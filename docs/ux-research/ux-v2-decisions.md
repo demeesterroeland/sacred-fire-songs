@@ -1,11 +1,12 @@
 # UX v2: Agent Decisions (ADR-lite)
 
-**Version:** 1.28 | **Date:** Nov 6, 2026 | **Epic:** 6.1 (#375)
+**Version:** 1.29 | **Date:** Nov 6, 2026 | **Epic:** 6.1 (#375)
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.29 | Nov 6, 2026 | Added UXA-042 and UXA-043 (Home welcome block for guests only, wording; Recently added = 5 newest public songs; #412). |
 | 1.28 | Nov 6, 2026 | Added UXA-046 and UXA-047 (New Playlist visibility switch and wording; Add to playlist sheet stays private; #416). |
 | 1.27 | Nov 6, 2026 | Added UXA-032 (reader tools: where transpose and speed live, who transposes, how a shift is kept) and UXA-033 (auto-scroll: speeds, what pauses it, the sticky toolbar, stay-awake indicator; #394). |
 | 1.26 | Nov 6, 2026 | Added UXA-036 (recorder: remaining-time rule, limit caption, silent-microphone hint, meter design) and UXA-037 (count-in default and memory, cancel during count-in, review buttons; #404). |
@@ -77,6 +78,8 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 | UXA-037 | Nov 6, 2026 | #404 | Recorder: count-in on by default and remembered per device, cancel during the count-in, Save full-width primary with Discard as a text button below | yes |
 | UXA-038 | Nov 6, 2026 | #409 | Auth pages: "Back" leads to the hardened `next=` target, else Home; a `next` pointing at another auth page counts as none (no loop); the ✕ is removed, not repurposed; forgot-password's Back returns to login and keeps `next` | no |
 | UXA-039 | Nov 6, 2026 | #409 | Auth pages are plain pages on tokens: Back link above the form, no card on phones, bordered panel from `md`, accent-soft flame badge instead of the orange gradient and glow; sign-up-success and error pages are not touched | no |
+| UXA-042 | Nov 6, 2026 | #412 | Home welcome block (heading, one line, search field, Recently added) is for guests only; members see Your library and nothing else new; the welcome copy is new; on Home the header search field is hidden for guests (one field, not two) | yes |
+| UXA-043 | Nov 6, 2026 | #412 | Recently added = the 5 newest **public** songs (explicit `is_public` filter on top of RLS, no RLS change), newest first, *All songs* link, row hidden when empty; Home search reuses the G7.1 panel | no |
 | UXA-046 | Nov 6, 2026 | #416 | New Playlist: a Make public switch (off by default) and one line that follows it, worded from what RLS does (private: only you; public: anyone, with or without an account); any member may create public | yes |
 | UXA-047 | Nov 6, 2026 | #416 | Add to playlist sheet keeps creating private only and says so under the name field; the shared `Switch` moves to semantic tokens (affects Settings → Preferences look) | no |
 
@@ -454,4 +457,21 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 - **Options:** (a) no hint in the sheet; (b) the same switch in the sheet; (c) a one-line hint under the name field, private only.
 - **Choice:** (c): when *New playlist* opens its name field the sheet says *New playlists are private: only you can see them unless you make them public.* (`playlists.picker.newPrivateHint`). Making it public is done from the playlist afterwards. The shared `components/ui/switch.tsx` moved from shadcn defaults (`bg-primary`, `bg-input`, 32×18 px) to semantic tokens (accent when on, `line-strong` when off, 44×24 px, no transition under reduced motion), because the new page needs a token-based switch; Settings → Preferences uses the same component and keeps its own colour override.
 - **Consequences:** the switches in Settings → Preferences are a little larger, use the accent token instead of a hex colour and now have an accessible name (the row label); no other behaviour changes.
+
+### UXA-042 · Home welcome block: guests only, and what it says
+
+- **Date / story:** Nov 6, 2026 · #412 (G6.3)
+- **Context:** the story says "Shown to guests; members keep the Your Library stats", but not whether members also get the search field, or what the welcome line says. The header already has a search field on every page.
+- **Options:** (a) show welcome, search and Recently added to everyone; (b) guests only, members unchanged.
+- **Choice:** (b). Guests get a heading *Welcome* and one sentence: *A shared songbook of medicine songs with lyrics, chords and recordings, free to browse.* (translated in all 8 locales, no marketing tone, no promises beyond what the site does today). Members already know the site and keep Your library plus the category grid; they search from the header. Guests on Home would otherwise see two search fields (header and inline): the header one is hidden there for guests only (`/` and signed out); members and every other page keep it.
+- **Consequences:** a signed-in member never sees the welcome copy and keeps the header field on Home; a guest on Home has one search field, and the bottom bar's Search tab (which opens the song list) is unaffected; if the owner wants a different sentence only the `home.welcome.*` keys change.
+- **Confirm:** yes (new copy, and members get no search/Recently added on Home, and guests lose the header search field on Home)
+
+### UXA-043 · Recently added: what it contains
+
+- **Date / story:** Nov 6, 2026 · #412 (G6.3)
+- **Context:** "Recently added" must only show songs a guest may see, without RLS changes.
+- **Options:** (a) rely on RLS only; (b) RLS plus an explicit `is_public = true` filter; sort by `created_at` (newest added), not `updated_at`.
+- **Choice:** (b), 5 rows, newest first, as G1.2 song rows (heart opens the guest gate; no add-to-playlist for guests), with an *All songs* link to `/songs`. The row is hidden when there are no songs. Home search reuses the G7.1 suggestion panel (recent searches and category chips) and the same recent-search storage as the header field.
+- **Consequences:** one extra query on guest Home loads. The explicit filter keeps the row identical for everyone should it ever be shown to members.
 - **Confirm:** no
