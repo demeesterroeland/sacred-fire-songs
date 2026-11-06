@@ -20,6 +20,12 @@ import {
 interface AudioRecorderProps {
   songVersionId: string;
   onRecordingSaved: (recording: UserRecording) => void;
+  /**
+   * Reports whether the recorder holds a take that is not saved yet (count-in, recording, paused, stopped
+   * or a picked file, with its name). The song page uses it to keep a version tap from remounting the
+   * drawer and dropping the take. Reports `false` again when the recorder unmounts.
+   */
+  onDirtyChange?: (dirty: boolean) => void;
 }
 
 /** Remembers the count-in choice on this device (a convenience, never required). */
@@ -34,7 +40,7 @@ function readCountInPreference(): boolean {
   }
 }
 
-export default function AudioRecorder({ songVersionId, onRecordingSaved }: AudioRecorderProps) {
+export default function AudioRecorder({ songVersionId, onRecordingSaved, onDirtyChange }: AudioRecorderProps) {
   const { t } = useLocale();
   const [activeTab, setActiveTab] = useState<"record" | "upload">("record");
   const [recordingState, setRecordingState] = useState<"idle" | "recording" | "paused" | "stopped">("idle");
@@ -356,6 +362,17 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved }: Audio
       setIsUploading(false);
     }
   };
+
+  // Tell the page when a take is in progress or unsaved (a typed name or a picked file only exist then).
+  const dirty = recordingState !== "idle" || countdown !== null || isUploading;
+  const onDirtyChangeRef = useRef(onDirtyChange);
+  useEffect(() => {
+    onDirtyChangeRef.current = onDirtyChange;
+  }, [onDirtyChange]);
+  useEffect(() => {
+    onDirtyChangeRef.current?.(dirty);
+  }, [dirty]);
+  useEffect(() => () => onDirtyChangeRef.current?.(false), []);
 
   // Clean up on unmount
   useEffect(() => {

@@ -299,6 +299,8 @@ interface RehearsalDrawerProps {
   onMakeSongPublic?: () => Promise<boolean>;
   /** Recording opened through `/songs/<id>?recording=<id>`: highlighted and scrolled into view. */
   highlightRecordingId?: string | null;
+  /** The recorder holds a take that is not saved yet (Story 6.1.11, #395): the page then refuses to switch version. */
+  onRecorderDirtyChange?: (dirty: boolean) => void;
 }
 
 export default function RehearsalDrawer({
@@ -318,6 +320,7 @@ export default function RehearsalDrawer({
   isSongOwner = false,
   onMakeSongPublic,
   highlightRecordingId = null,
+  onRecorderDirtyChange,
 }: RehearsalDrawerProps) {
   const { t } = useLocale();
   const { user } = useAuth();
@@ -568,6 +571,9 @@ export default function RehearsalDrawer({
       const res = await reorderUserRecordings(reordered.map((r) => r.id));
       if (!res.success) {
         toast.error(t('rehearsal.sort.error'));
+      } else {
+        // The list is cached for 60 s: without this a remount would show the old order again.
+        queryClient.invalidateQueries({ queryKey: ["song-recordings", songVersionId] });
       }
     });
   };
@@ -1212,7 +1218,7 @@ export default function RehearsalDrawer({
                           </span>
                         )}
                       </div>
-                      <AudioRecorder songVersionId={songVersionId} onRecordingSaved={handleRecordingSaved} />
+                      <AudioRecorder songVersionId={songVersionId} onRecordingSaved={handleRecordingSaved} onDirtyChange={onRecorderDirtyChange} />
                     </section>
 
                     {/* Saved Practice Takes List */}

@@ -1,11 +1,12 @@
 # Roles & Glossary (draft)
 
-**Version:** 0.4 | **Date:** Nov 6, 2026
+**Version:** 0.5 | **Date:** Nov 6, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.5 | Nov 6, 2026 | Glossary: Version (switch under the song title, #395). |
 | 0.4 | Nov 6, 2026 | Transpose is in the song page's **⋯ reading tools** (musician, expert and admin; UX v2, #394). |
 | 0.1 | Nov 4, 2026 | First draft. Roles summarised from the Roles & Permissions table in `docs/logbook/epic&user stories.md`. |
 | 0.3 | Nov 5, 2026 | Glossary: Shared with me (list of takes shared with you, #399). |
@@ -32,6 +33,7 @@
 | Word in the app | Meaning |
 | :--- | :--- |
 | Practice | Panel on a song with a **Listen** tab (reference tracks) and a **Record** tab (your recorder and **My takes**). Replaces the old names Rehearsal Space, Voice Recorder and Recordings. |
+| Version | One arrangement of a song (for example *Original*, *Simplified*, *Live*) with its own lyrics, key and takes. Songs with several versions show a switch under the title. |
 | Reference Track | YouTube / SoundCloud / Spotify version of the song. |
 | Take | An audio file you recorded or uploaded for a song. Private by default. |
 | Shared with me | The list of takes other members shared with you, under My takes in Practice → Record. Each row says who shared it. Listen only. |

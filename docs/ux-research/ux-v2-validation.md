@@ -1,11 +1,12 @@
 # UX v2: Phone Validation Script
 
-**Version:** 1.33 | **Date:** Nov 6, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
+**Version:** 1.34 | **Date:** Nov 6, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.34 | Nov 6, 2026 | Added #395 (version switch under the song title; steps 6, 6b, 6c: `?version=` link, Save returns to the edited version, a take in progress blocks switching). |
 | 1.33 | Nov 6, 2026 | Added #415 (Add Song preview and visible upload button). |
 | 1.32 | Nov 6, 2026 | Added #412 (Home welcome, search field and Recently added for guests). |
 | 1.31 | Nov 6, 2026 | Added #416 (New Playlist: visibility switch and one-line explanation). |
@@ -439,6 +440,21 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 - [ ] 10. Switch to Dutch, Spanish, Italian, Russian, French, Portuguese and Quechua: the buttons' names, the sheet and the speed line are translated and fit; repeat step 2 in dark mode (`…/394/after-dark/mobile/musician/02-tools-sheet.webp`).
 - [ ] 11. Desktop (wide window): the same row; auto-scroll scrolls the main area and the toolbar sticks under the song title while it runs.
 
+### #395 · G2.6 Version switch under the song title
+
+**Preconditions:** a 390 px phone, English, light and dark; any account (a guest is enough). Songs with several versions are rare in the seed: pick one from the maintainer, or add a second version to a test song in the database and remove it afterwards.
+
+- [ ] 1. Open a song with one version. **Expected:** the grey meta lines are followed directly by the **Chords · A− · A+** row. No switch, no gap, nothing greyed out. Screenshot: `docs/ux-research/screenshots/ux-v2/395/after-light/mobile/guest/01-song-single-version.webp` (before: `…/395/before-light/…`).
+- [ ] 2. Open the song with versions *Original* and *Simplified*. **Expected:** under the grey meta lines a grey strip with two segments, **Original** (raised, underlined) and **Simplified**; both at least 44 px high; the strip fits the screen. Screenshot: `…/395/after-light/mobile/guest/02-song-two-versions.webp`; dark: `…/395/after-dark/…`.
+- [ ] 3. Tap **Simplified**. **Expected:** the lyrics (and key line, if the versions differ) change at once; **Simplified** is now raised and underlined, **Original** is plain. Screenshot: `…/395/after-dark/mobile/guest/03-song-second-version.webp`. Tap **Original**: back.
+- [ ] 4. Tap **A+**, then switch versions. **Expected:** the text size stays. Tap **▶** (auto-scroll): the Chords row sticks under the title bar while the switch scrolls away with the page; nothing overlaps the bar at the bottom.
+- [ ] 5. Member: with *Simplified* shown, tap **Practice**. **Expected:** the takes listed belong to the shown version. Close, switch back to *Original*: the take count follows.
+- [ ] 5b. Member: start a take (Practice → play), close the drawer, then switch versions. **Expected:** the take stops and the mini player disappears; nothing keeps playing. Tap **Edit** (owner): the form shows the version you were reading.
+- [ ] 5c. Keyboard (tab to the switch): **→ / ←** change the version, **Home / End** jump; only one tab stop in the strip.
+- [ ] 6. Reload the page. **Expected:** the first version (*Original*) is shown again (the choice is not remembered). Open the same song with `?version=<id of Simplified>` added to the address: *Simplified* is shown; an unknown id shows *Original*; tapping the switch changes the version but does not rewrite the address.
+- [ ] 6b. Member (song owner): with *Simplified* shown tap **Edit**. **Expected:** the form says *Editing version: Simplified* above the fields (nothing for a one-version song). Change a word, tap **Publish Song**. **Expected:** the song opens on *Simplified* (the address ends in `?version=…`), showing your change. Edit *Simplified* in a song whose *Original* has chords but *Simplified* is lyrics only: afterwards the song still shows chords (Chords toggle, transpose, the *Has chords* filter).
+- [ ] 6c. Member: Practice → **Record**, press the red button (or pick an audio file under *Upload*), close the drawer and tap the other version. **Expected:** the version does **not** switch; a message says *Finish or discard your take before switching version.* and the drawer reopens on **Record** with the take (or file and name) still there. Tap **Discard**, close the drawer, tap the other version: it switches at once.
+- [ ] 7. Switch the language to Dutch, Spanish, Italian, Russian, French, Portuguese and Quechua: the control's accessible name (*Song version*, read by a screen reader) is translated; a version without a name reads *Version 2*, etc. in that language.
 ### #416 · G8.3 New Playlist explains private vs public
 
 **Preconditions:** signed in as a member on a 390 px phone, English; run once in light and once in dark. A second browser (or a private window) signed out, for step 5.

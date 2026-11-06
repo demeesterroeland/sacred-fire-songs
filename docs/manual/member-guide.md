@@ -1,11 +1,12 @@
 # Member Guide (draft)
 
-**Version:** 0.15 | **Date:** Nov 6, 2026
+**Version:** 0.16 | **Date:** Nov 6, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.16 | Nov 6, 2026 | A song that has several versions shows a switch under the title; tap a name to read that version. Edit says which version you are editing and Save brings you back to it. While a practice take is being recorded or not yet saved, the switch asks you to save or discard it first (UX v2, #395). |
 | 0.15 | Nov 6, 2026 | Adding a song: **Preview** shows your chords above the words as on the song page; **Upload .cho / .txt** is a visible button under the lyrics (UX v2, #415). |
 | 0.14 | Nov 6, 2026 | New Playlist has a **Make public** switch and one line that says who can see the playlist; a playlist made from the Add to playlist sheet is always private (UX v2, #416). |
 | 0.13 | Nov 6, 2026 | Song page toolbar: **Auto-scroll** (▶) and **⋯ reading tools** with scroll speed; musicians also **Transpose** (UX v2, #394). |

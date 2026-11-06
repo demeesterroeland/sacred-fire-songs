@@ -23,6 +23,8 @@ import { parseArtists, formatArtists, ensureArtistCategoryIds } from '@/lib/song
 import { useLocale } from '@/context/LocaleContext';
 import { safeNextPath } from '@/lib/auth/safeNext';
 import { FEATURES } from '@/lib/features';
+import { songFlags } from '@/lib/songs/versionFlags';
+import { songVersionHref } from '@/lib/songs/versionOrder';
 
 type SongFormData = {
     title: string;
@@ -297,14 +299,34 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                 const supabase = createClient();
                 if (!songId || !versionId) throw new Error('Missing ID for update');
 
+                // has_chords / has_melody describe the whole song: the edited version's new values replace its
+                // old ones, the other versions keep theirs (UXA-048). Saving a lyrics-only version must not
+                // clear the chords of another.
+                const { data: otherVersions, error: othersError } = await supabase
+                    .from('song_versions')
+                    .select('content_chordpro, youtube_url, spotify_url, soundcloud_url, melody_notation')
+                    .eq('composition_id', songId)
+                    .neq('id', versionId);
+                if (othersError) throw othersError;
+                const flags = songFlags([
+                    {
+                        content_chordpro: data.content,
+                        youtube_url: data.youtubeLink,
+                        spotify_url: data.spotifyLink,
+                        soundcloud_url: data.soundcloudLink,
+                        melody_notation: data.melodyNotation,
+                    },
+                    ...(otherVersions ?? []),
+                ]);
+
                 const { error: compError } = await supabase
                     .from('compositions')
                     .update({
                         title: data.title,
                         original_author: data.author,
                         is_public: data.isPublic,
-                        has_chords: hasChords(data.content),
-                        has_melody: !!(data.youtubeLink || data.spotifyLink || data.soundcloudLink || data.melodyNotation),
+                        has_chords: flags.has_chords,
+                        has_melody: flags.has_melody,
                     })
                     .eq('id', songId);
 
@@ -361,7 +383,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
             queryClient.invalidateQueries({ queryKey: SONG_KEYS.detail(id) });
             // Bust global filter counts (chords/melody/mine may have changed)
             queryClient.invalidateQueries({ queryKey: SONG_KEYS.globalFilterCounts() });
-            const returnTo = mode === 'create' ? safeNextPath(searchParams.get('next')) : `/songs/${id}`;
+            const returnTo = mode === 'create' ? safeNextPath(searchParams.get('next')) : songVersionHref(id, versionId);
             router.refresh();
             router.push(returnTo);
         },

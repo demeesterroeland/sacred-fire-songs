@@ -1,12 +1,13 @@
 <!--
-**Version:** 1.0
+**Version:** 1.1
 **Status:** Accepted reference (Story 6.1.1 / G1.1 #385, G2.1–G2.4 #390–#393, G2.6 #395, G3.1 #396)
-**Date:** Nov 5, 2026
+**Date:** Nov 6, 2026
 
 ## Changelog
 
 | Version | Date | Description of Changes |
 | ----- | ----- | ----- |
+| **1.1** | Nov 6, 2026 | Variant / language slot (G2.6, #395) made implementable: 44 px segments, pressed = raised background + underline (never colour alone), design note that the slot renders only when the song has more than one version (language switch follows with the translation layer; nothing is shown for it today). |
 | **1.0** | Nov 5, 2026 | Accepted as the UX v2 reference (#385); token names aligned with `app/styles/sober.css` (`--text-muted`, `--text-subtle`, `--r-control/panel/sheet`, `--elev-sheet`). |
 | **0.1** | Nov 4, 2026 | First mobile song-page mockup on the v2 tokens: three variants (Quiet, Ruled, Stage), `Chords · A− · A+` toolbar, one-line meta, bottom action bar, more-actions sheet, reserved variant/language slot, optional mini player. |
 -->
@@ -93,11 +94,15 @@ h1 { margin: 0; font-size: var(--fs-title); line-height: var(--lh-tight); font-w
 .music { font-size: var(--fs-meta); color: var(--text-subtle); font-variant-numeric: tabular-nums; }
 .music b { color: var(--text-muted); font-weight: var(--fw-medium); }
 
-/* reserved slot: variants + translations (G2.6) */
+/* reserved slot: variants + translations (G2.6, #395).
+   Design note: the slot sits under the title, meta and key lines and above the reader toolbar. It renders only
+   when there is something to choose: the version switch when the song has more than one version, the language
+   switch once translations exist. A song with neither has no slot and no reserved space (no layout shift).
+   Segments are 44 px; the pressed segment is a raised background plus underline, never colour alone. */
 .slot { display: flex; flex-wrap: wrap; gap: var(--s-2); padding-top: var(--s-2); }
 .seg { display: inline-flex; background: var(--surface); border-radius: var(--r-panel); padding: 3px; gap: 2px; }
-.seg button { min-height: 32px; padding: 0 var(--s-3); border-radius: 7px; font-size: var(--fs-meta); color: var(--text-muted); }
-.seg button[aria-pressed="true"] { background: var(--bg); color: var(--text); font-weight: var(--fw-medium); box-shadow: 0 0 0 1px var(--line); }
+.seg button { min-height: var(--tap); padding: 0 var(--s-3); border-radius: 7px; font-size: var(--fs-meta); color: var(--text-muted); }
+.seg button[aria-pressed="true"] { background: var(--bg); color: var(--text); font-weight: var(--fw-medium); box-shadow: 0 0 0 1px var(--line); text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 4px; }
 
 /* ---------- viewer toolbar ---------- */
 .toolbar {
