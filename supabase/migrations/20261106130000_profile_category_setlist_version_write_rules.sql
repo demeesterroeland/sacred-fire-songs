@@ -18,6 +18,11 @@
 -- public.song_versions
 --   * Versions are added to songs the caller owns or, as admin, manages.
 --   * A version stays on its song and keeps its contributor.
+--
+-- The explicit transaction keeps this file atomic: the migrator treats a line starting
+-- with BEGIN as an explicit block, and the function bodies below have such lines.
+
+BEGIN;
 
 -- 1. Profiles: fields per role. A trigger is used because admin and member share
 --    the authenticated database role, so column privileges cannot tell them apart.
@@ -167,3 +172,5 @@ GRANT UPDATE (
   youtube_url,
   spotify_url
 ) ON public.song_versions TO authenticated;
+
+COMMIT;
