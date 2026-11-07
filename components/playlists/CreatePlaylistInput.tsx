@@ -51,7 +51,7 @@ export function CreatePlaylistInput() {
         return (
             <button
                 onClick={open}
-                className="flex items-center gap-1 text-meta font-semibold text-fg border border-line-strong bg-surface hover:bg-surface-2 rounded-pill px-3 py-1 transition-all"
+                className="flex items-center gap-1 text-meta font-semibold text-fg border border-line-strong bg-surface hover:bg-surface-2 rounded-control px-3 py-1 transition-all"
             >
                 <Plus className="w-3.5 h-3.5" />
                 {t('playlists.newButton')}

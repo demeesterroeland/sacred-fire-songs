@@ -169,12 +169,12 @@ export function PlaylistDetailClient({
         return (
             <>
                 <div className="flex flex-col items-center justify-center py-16 text-center gap-4">
-                    <Music className="w-10 h-10 text-gray-700" />
-                    <p className="text-gray-500 text-sm max-w-xs">{t('playlists.detail.noSongs')}</p>
+                    <Music className="w-10 h-10 text-fg-muted" />
+                    <p className="text-fg-muted text-meta max-w-xs">{t('playlists.detail.noSongs')}</p>
                     {canEdit && (
                         <button
                             onClick={() => setSheetOpen(true)}
-                            className="flex items-center gap-1.5 text-sm font-semibold text-amber-400 border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 rounded-full px-4 py-1.5 transition-all"
+                            className="flex items-center gap-1.5 text-meta font-medium text-fg border border-line bg-surface hover:bg-surface-2 rounded-control px-3.5 py-1.5 transition-colors"
                         >
                             <Plus className="w-4 h-4" />
                             {t('playlists.detail.addSongs')}
@@ -216,7 +216,7 @@ export function PlaylistDetailClient({
                     <div className="flex justify-center pt-4">
                         <button
                             onClick={() => setSheetOpen(true)}
-                            className="flex items-center gap-1.5 text-sm font-semibold text-amber-400 border border-amber-500/30 bg-amber-500/10 hover:bg-amber-500/20 rounded-full px-4 py-1.5 transition-all"
+                            className="flex items-center gap-1.5 text-meta font-medium text-fg border border-line bg-surface hover:bg-surface-2 rounded-control px-3.5 py-1.5 transition-colors"
                         >
                             <Plus className="w-4 h-4" />
                             {t('playlists.detail.addSongs')}

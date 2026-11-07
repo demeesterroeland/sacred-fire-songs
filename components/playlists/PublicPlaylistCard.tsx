@@ -45,9 +45,9 @@ export function PublicPlaylistCard({ id, title, description, isOwner, songCount 
                 className="block w-full min-w-0"
                 onClick={e => isRenaming && e.preventDefault()}
             >
-                <div className="bg-white/60 dark:bg-gray-900/40 p-4 rounded-2xl border border-gray-200 dark:border-gray-800 hover:bg-gray-100/60 dark:hover:bg-gray-800/60 hover:border-gray-300 dark:hover:border-gray-700 hover:-translate-y-0.5 transition-all flex items-center gap-4 group pr-12 w-full min-w-0">
-                    <div className="w-12 h-12 bg-emerald-900/30 rounded-xl flex items-center justify-center shrink-0">
-                        <Globe className="w-6 h-6 text-emerald-400" />
+                <div className="bg-surface p-4 rounded-panel border border-line hover:bg-surface-2 hover:-translate-y-0.5 transition-all flex items-center gap-4 group pr-12 w-full min-w-0">
+                    <div className="w-12 h-12 bg-surface-2 rounded-control flex items-center justify-center shrink-0 text-fg-muted group-hover:text-fg transition-colors">
+                        <Globe className="w-6 h-6 text-fg-muted group-hover:text-fg" />
                     </div>
                     {isOwner && isRenaming ? (
                         <div className="flex-1 min-w-0">

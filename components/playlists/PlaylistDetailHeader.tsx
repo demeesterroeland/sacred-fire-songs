@@ -218,11 +218,11 @@ export function PlaylistDetailHeader({
                             onClick={handleToggleVisibility}
                             aria-label={isPublic ? t('playlists.context.makePrivate') : t('playlists.context.makePublic')}
                             title={isPublic ? 'Public — click to make private' : 'Private — click to make public'}
-                            className="p-1.5 rounded-lg text-gray-600 hover:text-gray-800 dark:hover:text-gray-300 hover:bg-gray-200/60 dark:hover:bg-gray-700/60 transition-colors"
+                            className="p-1.5 rounded-control text-fg-muted hover:text-fg hover:bg-surface-2 transition-colors"
                         >
                             {isPublic
-                                ? <Globe className="w-4 h-4 text-emerald-400" />
-                                : <Lock className="w-4 h-4" />
+                                ? <Globe className="w-4 h-4 text-fg-muted" />
+                                : <Lock className="w-4 h-4 text-fg-muted" />
                             }
                         </button>
                     )}
