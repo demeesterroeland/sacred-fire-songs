@@ -157,11 +157,11 @@ function SignUpFormContent({
       <div className="mt-8 text-center md:text-left">
         <p className="text-caption leading-relaxed text-fg-muted">
           {t('auth.tos.signUp')}{" "}
-          <Link href="#" className="font-bold text-fg hover:underline">
+          <Link href="/terms" className="font-bold text-fg hover:underline">
             {t('auth.tos.terms')}
           </Link>{" "}
           {t('auth.tos.and')}{" "}
-          <Link href="#" className="font-bold text-fg hover:underline">
+          <Link href="/privacy" className="font-bold text-fg hover:underline">
             {t('auth.tos.privacy')}
           </Link>
         </p>
