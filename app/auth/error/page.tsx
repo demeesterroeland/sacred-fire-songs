@@ -4,11 +4,13 @@ import Link from 'next/link';
 import { useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
 import { useLocale } from '@/context/LocaleContext';
+import { errorKeyForCode } from '@/lib/auth/notice';
 
 function ErrorContent() {
     const { t } = useLocale();
     const searchParams = useSearchParams();
-    const error = searchParams.get('error') || t('auth.error.default');
+    // A code from the redirect, never text: unknown values give the default sentence.
+    const text = t(errorKeyForCode(searchParams.get('code')));
 
     return (
         <div className="flex-1 flex flex-col items-center justify-center min-h-[80vh] px-4 text-center">
@@ -18,7 +20,7 @@ function ErrorContent() {
                 </div>
                 <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">{t('auth.error.title')}</h1>
                 <p className="text-gray-500 dark:text-gray-400 mb-8 whitespace-pre-wrap">
-                    {error}
+                    {text}
                 </p>
                 <Link
                     href="/auth/login"

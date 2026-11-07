@@ -14,19 +14,18 @@ vi.mock('@/context/LocaleContext', () => ({
 afterEach(cleanup);
 
 describe('SongMetaLines — Takes chip', () => {
-  it('shows the link "Takes" (not "Recording") when the member has a take, and links to the filter', () => {
+  it('shows the link "Recordings" when the member has a take, and links to the filter', () => {
     render(<SongMetaLines originalAuthor="Anna" hasChords hasPersonalRecording />);
     fireEvent.click(screen.getByTestId('song-meta-line'));
-    const link = screen.getByRole('link', { name: 'Takes' });
+    const link = screen.getByRole('link', { name: 'Recordings' });
     expect(link.getAttribute('href')).toBe('/songs?myRecordings=true');
-    expect(screen.queryByText(/recording/i)).toBeNull();
     expect(screen.getByRole('link', { name: 'Chords' })).toBeTruthy();
   });
 
   it('omits the chip when the member has no take', () => {
     render(<SongMetaLines originalAuthor="Anna" />);
     fireEvent.click(screen.getByTestId('song-meta-line'));
-    expect(screen.queryByRole('link', { name: 'Takes' })).toBeNull();
+    expect(screen.queryByRole('link', { name: 'Recordings' })).toBeNull();
   });
 });
 

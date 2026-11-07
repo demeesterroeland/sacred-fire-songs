@@ -115,7 +115,7 @@ test('a song without public takes shows an empty state to a guest', async ({ pag
   await page.goto(`/songs/${IDS.emptySong}`);
   await clickPractice(page);
   await expect(page.getByTestId('practice-drawer')).toBeVisible({ timeout: 10_000 });
-  await expect(page.getByTestId('guest-public-takes-empty')).toHaveText('No public takes of this song yet.', { timeout: 15_000 });
+  await expect(page.getByTestId('guest-public-takes-empty')).toHaveText('No public recordings of this song yet.', { timeout: 15_000 });
 });
 
 test('a take link opens a guest on Listen with that take highlighted, in view and playable', async ({ page }) => {

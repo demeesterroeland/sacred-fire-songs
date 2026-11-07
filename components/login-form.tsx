@@ -10,6 +10,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState, Suspense } from "react";
 import { Mail, Lock, Sparkles, Flame, ArrowRight } from "lucide-react";
 import { useLocale } from "@/context/LocaleContext";
+import { authNoticeKey } from "@/lib/auth/notice";
+import { errorMessage } from "@/lib/errors/errorCode";
 import { safeNextPath } from '@/lib/auth/safeNext';
 import { authPageHref } from '@/lib/auth/authBack';
 import {
@@ -45,7 +47,8 @@ function LoginFormContent({
   const router = useRouter();
   const searchParams = useSearchParams();
   const next = searchParams.get("next");
-  const message = searchParams.get("message");
+  // A code from the redirect (never text from the address): known codes give a sentence, others the default one.
+  const messageKey = authNoticeKey(searchParams.get("message"));
 
   const handleMagicLink = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -64,7 +67,7 @@ function LoginFormContent({
       if (error) throw error;
       setSuccess(t('auth.login.magicLinkSent'));
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : t('common.errorOccurred'));
+      setError(errorMessage(error, t, 'common.errorOccurred'));
     } finally {
       setIsLoading(false);
     }
@@ -86,7 +89,7 @@ function LoginFormContent({
       window.dispatchEvent(new Event("auth-role-change"));
       router.push(safeNextPath(next));
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : t('common.errorOccurred'));
+      setError(errorMessage(error, t, 'common.errorOccurred'));
     } finally {
       setIsLoading(false);
     }
@@ -100,9 +103,9 @@ function LoginFormContent({
         description={mode === 'magic-link' ? t('auth.login.magicLinkHint') : t('auth.login.passwordHint')}
       />
 
-      {(message || success) && (
+      {(messageKey || success) && (
         <div className="mb-6">
-          <AuthNotice tone="info">{message || success}</AuthNotice>
+          <AuthNotice tone="info">{messageKey ? t(messageKey) : success}</AuthNotice>
         </div>
       )}
 
@@ -195,11 +198,11 @@ function LoginFormContent({
       <div className="mt-8 text-center md:text-left">
         <p className="text-caption leading-relaxed text-fg-muted">
           {t('auth.tos.signIn')}{" "}
-          <Link href="#" className="font-bold text-fg hover:underline">
+          <Link href="/terms" className="font-bold text-fg hover:underline">
             {t('auth.tos.terms')}
           </Link>{" "}
           {t('auth.tos.and')}{" "}
-          <Link href="#" className="font-bold text-fg hover:underline">
+          <Link href="/privacy" className="font-bold text-fg hover:underline">
             {t('auth.tos.privacy')}
           </Link>
         </p>

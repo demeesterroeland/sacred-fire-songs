@@ -81,7 +81,8 @@ describe('recompute_song_flags migration: the chord rule', () => {
     } finally {
       await db.close();
     }
-  });
+    // Starting the in-memory Postgres takes seconds, and more on a busy machine.
+  }, 30_000);
 });
 
 // The rest needs the local Supabase stack (tables); it is skipped when that is not running.

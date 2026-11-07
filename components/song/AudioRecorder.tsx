@@ -414,7 +414,7 @@ export default function AudioRecorder({ songVersionId, onRecordingSaved, onDirty
             className={tabClass(activeTab === "record")}
           >
             <Mic className="size-4" />
-            {t('recorder.tab.recordAudio')}
+            {t('recorder.tab.record')}
           </button>
           <button
             onClick={() => { setActiveTab("upload"); setErrorMsg(null); }}

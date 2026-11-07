@@ -64,18 +64,18 @@ describe('TakeActionsSheet', () => {
     const labels = within(dialog).getAllByRole('button').map((b) => b.textContent?.trim());
     expect(labels).toEqual([
       'Play',
-      'Edit take name',
-      'Download take',
+      'Edit recording name',
+      'Download recording',
       'Share',
       'Singer Attribution',
       'Make Public',
       'Copy link',
-      'Delete take',
+      'Delete recording',
     ]);
     // Exactly one separator before Delete, and one between the two upper groups.
     const separators = within(dialog).getAllByRole('separator');
     expect(separators).toHaveLength(2);
-    const delBtn = within(dialog).getByRole('button', { name: 'Delete take' });
+    const delBtn = within(dialog).getByRole('button', { name: 'Delete recording' });
     const dangerGroup = delBtn.closest('[role="group"]') as HTMLElement;
     expect(dangerGroup.previousElementSibling).toBe(separators[1]);
     expect(within(dangerGroup).getAllByRole('button')).toEqual([delBtn]);
@@ -86,7 +86,7 @@ describe('TakeActionsSheet', () => {
     for (const b of within(dialog).getAllByRole('button')) {
       expect(b.className, b.textContent ?? '').toContain('min-h-tap');
     }
-    expect(within(dialog).getByRole('button', { name: 'Delete take' }).className).toContain('text-danger');
+    expect(within(dialog).getByRole('button', { name: 'Delete recording' }).className).toContain('text-danger');
     expect(within(dialog).getByRole('button', { name: 'Share' }).className).not.toContain('text-danger');
   });
 
@@ -116,7 +116,7 @@ describe('TakeActionsSheet', () => {
   it('disables Play and Download while the audio file is missing', () => {
     const { dialog } = open({ audioUrl: undefined });
     expect((within(dialog).getByRole('button', { name: /^Play|missing/i }) as HTMLButtonElement).disabled).toBe(true);
-    expect((within(dialog).getByRole('button', { name: 'Download take' }) as HTMLButtonElement).disabled).toBe(true);
+    expect((within(dialog).getByRole('button', { name: 'Download recording' }) as HTMLButtonElement).disabled).toBe(true);
   });
 
   it('closes the sheet, then runs the chosen action once', async () => {
@@ -126,7 +126,7 @@ describe('TakeActionsSheet', () => {
       return <TakeActionsSheet take={take()} open={isOpen} onOpenChange={setOpen} isPlaying={false} on={on} />;
     }
     render(<Harness />);
-    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Delete take' }));
+    fireEvent.click(within(screen.getByRole('dialog')).getByRole('button', { name: 'Delete recording' }));
     expect(screen.queryByRole('dialog')).toBeNull();
     await waitFor(() => expect(on.delete).toHaveBeenCalledTimes(1));
     expect(on.share).not.toHaveBeenCalled();

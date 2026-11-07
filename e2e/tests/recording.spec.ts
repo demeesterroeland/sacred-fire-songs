@@ -184,7 +184,7 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       await stopBtn.click();
 
       // Verify review state
-      const reviewPrompt = page.locator('h3:has-text("Review your take")');
+      const reviewPrompt = page.locator('h3:has-text("Review your recording")');
       await expect(reviewPrompt).toBeVisible();
 
       // Verify native audio preview element is rendered
@@ -192,13 +192,13 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       await expect(audioPreview).toBeVisible();
 
       // Fill in a custom name
-      const nameInput = page.locator('input[placeholder="Take Name (e.g. Take 1)"]');
+      const nameInput = page.locator('input[placeholder="Recording Name (e.g. Recording 1)"]');
       await expect(nameInput).toBeVisible();
       const customName = `E2E Practice - ${Date.now()}`;
       await nameInput.fill(customName);
 
-      // Click "Save Take" to trigger Supabase Upload and Insert
-      const saveBtn = page.locator('button:has-text("Save Take")');
+      // Click "Save Recording" to trigger Supabase Upload and Insert
+      const saveBtn = page.locator('button:has-text("Save Recording")');
       await expect(saveBtn).toBeVisible();
       await saveBtn.click();
 
@@ -245,7 +245,7 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       await expect(page.locator('text="Audio URL is not available"')).toHaveCount(0);
 
       // Verify and click the download button
-      const downloadBtn = await recordingAction(page, cardRow, 'Download take');
+      const downloadBtn = await recordingAction(page, cardRow, 'Download recording');
       await expect(downloadBtn).toBeVisible();
       const downloadPromise = page.waitForEvent('download');
       await downloadBtn.click();
@@ -253,7 +253,7 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       expect(download.suggestedFilename()).toContain('.webm');
 
       // Clean up/Delete the created take to keep database clean
-      const deleteBtn = await recordingAction(page, cardRow, 'Delete take');
+      const deleteBtn = await recordingAction(page, cardRow, 'Delete recording');
       await expect(deleteBtn).toBeVisible();
       await deleteBtn.click();
       await page.getByRole('button', { name: 'Yes, delete' }).click();
@@ -300,7 +300,7 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       await fileChooser.setFiles('e2e/fixtures/dummy-audio.wav');
 
       // 5. Verify the file is loaded into the preview and Save
-      const nameInput = page.locator('input[placeholder="Take Name (e.g. Take 1)"]');
+      const nameInput = page.locator('input[placeholder="Recording Name (e.g. Recording 1)"]');
       await expect(nameInput).toBeVisible();
       await expect(nameInput).toHaveValue(/dummy-audio/i);
       
@@ -308,7 +308,7 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       await nameInput.fill(customName);
 
       // 6. Click Save
-      const saveBtn = page.locator('button:has-text("Save Take")');
+      const saveBtn = page.locator('button:has-text("Save Recording")');
       await expect(saveBtn).toBeVisible();
       await saveBtn.click();
 
@@ -332,7 +332,7 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       await expect(page.locator('text="Audio URL is not available"')).toHaveCount(0);
 
       // Verify and click the download button
-      const downloadBtn = await recordingAction(page, container, 'Download take');
+      const downloadBtn = await recordingAction(page, container, 'Download recording');
       await expect(downloadBtn).toBeVisible();
       const downloadPromise = page.waitForEvent('download');
       await downloadBtn.click();
@@ -340,7 +340,7 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       expect(download.suggestedFilename()).toContain('.wav');
 
       // 8. Delete it to clean up
-      const deleteBtn = await recordingAction(page, container, 'Delete take');
+      const deleteBtn = await recordingAction(page, container, 'Delete recording');
       await deleteBtn.click();
       await page.getByRole('button', { name: 'Yes, delete' }).click();
 
@@ -381,7 +381,7 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       await page.waitForTimeout(3000);
 
       // Verify that it automatically stops and shows the review UI
-      const reviewPrompt = page.locator('h3:has-text("Review your take")');
+      const reviewPrompt = page.locator('h3:has-text("Review your recording")');
       await expect(reviewPrompt).toBeVisible({ timeout: 10000 });
 
       // Verify that the duration shows 03:00
@@ -438,10 +438,10 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       await stopBtn.click();
 
       // Verify review UI is visible
-      await expect(page.locator('h3:has-text("Review your take")')).toBeVisible({ timeout: 10000 });
+      await expect(page.locator('h3:has-text("Review your recording")')).toBeVisible({ timeout: 10000 });
 
       // Try to save the rehearsal
-      const saveBtn = page.locator('button:has-text("Save Take")');
+      const saveBtn = page.locator('button:has-text("Save Recording")');
       await expect(saveBtn).toBeVisible({ timeout: 10000 });
       await saveBtn.click();
 
@@ -475,10 +475,10 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       await fileChooser.setFiles('e2e/fixtures/dummy-audio.wav');
       
       const customName = `E2E Continuity Test - ${Date.now()}`;
-      const nameInput = page.locator('input[placeholder="Take Name (e.g. Take 1)"]');
+      const nameInput = page.locator('input[placeholder="Recording Name (e.g. Recording 1)"]');
       await nameInput.fill(customName);
 
-      const saveBtn = page.locator('button:has-text("Save Take")');
+      const saveBtn = page.locator('button:has-text("Save Recording")');
       await saveBtn.click();
 
       const savedTake = page.locator(`h4:has-text("${customName}")`);
@@ -515,7 +515,7 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       await expect(container.locator('svg.lucide-pause')).toBeVisible({ timeout: 5000 });
       
       // Clean up
-      const deleteBtn = await recordingAction(page, container, 'Delete take');
+      const deleteBtn = await recordingAction(page, container, 'Delete recording');
       await deleteBtn.click();
       await page.getByRole('button', { name: 'Yes, delete' }).click();
       await expect(savedTake).toHaveCount(0, { timeout: 10000 });

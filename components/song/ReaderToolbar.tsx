@@ -1,13 +1,12 @@
 'use client';
 
-import { useLayoutEffect, useRef, type RefObject, type Ref } from 'react';
-import { MoreHorizontal, Pause, Play, Sun } from 'lucide-react';
+import { useLayoutEffect, useRef, type RefObject } from 'react';
+import { Pause, Play, Sun } from 'lucide-react';
 import { Toolbar, ToolbarButton } from '@/components/ui/toolbar';
 import { useLocale } from '@/context/LocaleContext';
 import { LYRIC_STEPS } from '@/lib/design/tokens';
 import { AUTOSCROLL_KEEP_ATTR } from '@/hooks/useAutoScroll';
 import { stepBy, type ReaderPrefs } from '@/lib/reader/readerPrefs';
-import { formatSemitones } from '@/lib/reader/transpose';
 import { cn } from '@/lib/utils';
 
 interface ReaderToolbarProps extends ReaderPrefs {
@@ -17,19 +16,11 @@ interface ReaderToolbarProps extends ReaderPrefs {
   /** Auto-scroll is running (Story 6.1.10, #394). The play button shows when `onToggleScroll` is given. */
   scrolling?: boolean;
   onToggleScroll?: () => void;
-  /** Opens the reading tools sheet (transpose, scroll speed). The ⋯ button shows when given. */
-  onOpenTools?: () => void;
-  /** The tools sheet is open; sets aria-expanded on the ⋯ button. */
-  toolsOpen?: boolean;
-  /** The ⋯ button, so the page can hand focus back to it when the sheet closes. */
-  toolsButtonRef?: Ref<HTMLButtonElement>;
-  /** Current transposition in semitones; shown as text on the ⋯ button when not 0. */
-  semitones?: number;
   /** The screen wake lock is held: show the stay-awake indicator. */
   awake?: boolean;
   /**
-   * The A+ button. When a focused ▶ or ⋯ disappears (the window grew and the song fits), focus moves here
-   * instead of falling to <body>; the tools sheet uses it too when it closes after ⋯ went away.
+   * The A+ button. When a focused ▶ disappears (the window grew and the song fits), focus moves here
+   * instead of falling to <body>.
    */
   fallbackFocusRef?: RefObject<HTMLButtonElement | null>;
   className?: string;
@@ -37,7 +28,8 @@ interface ReaderToolbarProps extends ReaderPrefs {
 
 /**
  * Story 6.1.6 / G2.1 (#390): `Chords · A− · A+` under the song title.
- * Story 6.1.10 / G2.5 (#394): `▶ Auto-scroll` and `⋯` (transpose, scroll speed) join the same row.
+ * Story 6.1.10 / G2.5 (#394): `▶ Auto-scroll` joins the same row. Transpose, scroll speed and the screen switch
+ * live in the song page's one ⋮ menu (validation 2, item 11).
  * Reference: docs/ux-research/references/font-size-control.png.
  */
 export function ReaderToolbar({
@@ -48,10 +40,6 @@ export function ReaderToolbar({
   onChange,
   scrolling = false,
   onToggleScroll,
-  onOpenTools,
-  toolsOpen = false,
-  toolsButtonRef,
-  semitones = 0,
   awake = false,
   fallbackFocusRef,
   className,
@@ -59,7 +47,7 @@ export function ReaderToolbar({
   const { t } = useLocale();
   const ownLargerRef = useRef<HTMLButtonElement>(null);
   const largerRef = fallbackFocusRef ?? ownLargerRef;
-  // Validation 1 review, M1: a button that had focus can leave the toolbar (▶ and ⋯ only show while the lyrics
+  // Validation 1 review, M1: a button that had focus can leave the toolbar (▶ only shows while the lyrics
   // run below the fold). The browser would drop focus to <body>; hand it to A+ instead.
   const lastFocused = useRef<Element | null>(null);
   useLayoutEffect(() => {
@@ -137,28 +125,6 @@ export function ReaderToolbar({
           className={cn('border border-line', scrolling && 'bg-surface-2 text-fg')}
         >
           {scrolling ? <Pause className="size-5 fill-current" aria-hidden /> : <Play className="size-5 fill-current" aria-hidden />}
-        </ToolbarButton>
-      )}
-      {onOpenTools && (
-        <ToolbarButton
-          ref={toolsButtonRef}
-          title={t('viewer.tools')}
-          aria-haspopup="dialog"
-          aria-expanded={toolsOpen}
-          onClick={onOpenTools}
-          data-testid="reader-tools-button"
-          className="border border-line"
-        >
-          <MoreHorizontal className="size-5" aria-hidden />
-          <span className="sr-only">{t('viewer.tools')}</span>
-          {semitones !== 0 && (
-            <>
-              <span aria-hidden className="text-caption font-semibold tabular-nums text-fg">
-                {formatSemitones(semitones)}
-              </span>
-              <span className="sr-only">, {t('viewer.transpose.state', { n: formatSemitones(semitones) })}</span>
-            </>
-          )}
         </ToolbarButton>
       )}
       {awake && (

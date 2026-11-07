@@ -7,6 +7,7 @@
  * translation data exists yet, so nothing is rendered for it.
  */
 import type { TranslateFn } from '@/lib/i18n';
+import { RECORDING_PARAM } from '@/lib/songs/recordingLink';
 
 export interface VersionLike {
   id: string;
@@ -92,4 +93,25 @@ export function versionOptions(
     taken.add(label);
     return { value: v.id, label };
   });
+}
+
+/**
+ * The query part (`?version=<id>`, or '') of the page URL after switching to `versionId`. Parameters this code does not
+ * own are kept. A `recording` link belongs to the version its recording is on, so it is dropped here: otherwise a
+ * reload would open the new version with a recording of the old one.
+ */
+export function versionSearch(currentSearch: string, versionId: string, isDefault: boolean): string {
+  const params = new URLSearchParams(currentSearch);
+  params.delete('version');
+  params.delete(RECORDING_PARAM);
+  if (!isDefault) params.append('version', versionId);
+  const search = params.toString();
+  return search ? `?${search}` : '';
+}
+
+/** The link to share: the current location with the shown version in it (clean for the default version). */
+export function versionShareUrl(href: string, versionId: string, isDefault: boolean): string {
+  const url = new URL(href);
+  url.search = versionSearch(url.search, versionId, isDefault);
+  return url.toString();
 }

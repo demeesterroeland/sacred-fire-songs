@@ -1,5 +1,6 @@
-# Version: 1.0 | Date: Nov 6, 2026
+# Version: 1.1 | Date: Nov 7, 2026
 # Changelog
+# 1.1 | Nov 7, 2026 | Validation round 2, item 8: "Maximum recording length: 3 minutes".
 # 1.0 | Nov 6, 2026 | Story 6.1.20 / G4.7 (#404): input level meter, optional 3-2-1 count-in and remaining time in the Practice recorder; Save as the single primary in review.
 @story-6.1.20
 Feature: Recorder level meter, count-in and remaining time
@@ -16,7 +17,7 @@ Feature: Recorder level meter, count-in and remaining time
   @unit
   Scenario: The limit is stated before recording
     Given the English messages
-    Then the recorder says "Maximum take length: 3 minutes"
+    Then the recorder says "Maximum recording length: 3 minutes"
 
   @unit
   Scenario: Count-in is optional

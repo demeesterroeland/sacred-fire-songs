@@ -1,24 +1,9 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { User } from "@supabase/supabase-js";
-import {
-  User as UserIcon,
-  Settings,
-  Lock,
-  Shield,
-  SlidersHorizontal,
-  Mail,
-  LayoutDashboard,
-  Compass,
-  Library,
-  ListMusic,
-  PlusCircle,
-  Camera,
-  LogOut,
-  Download,
-  Flame
-} from "lucide-react";
+import { User as UserIcon, Lock, Shield, SlidersHorizontal } from "lucide-react";
 import ProfileSettings from "@/components/account/settings/ProfileSettings";
 import SecuritySettings from "@/components/account/settings/SecuritySettings";
 import PrivacySettings from "@/components/account/settings/PrivacySettings";
@@ -52,7 +37,7 @@ export default function AccountSettings({ user, profile, initialTab = "profile" 
   const tabs = visibleSettingsTabs().map((id) => ({ id, ...tabMeta[id] }));
 
   return (
-    <main className="flex-1 p-4 md:p-8 lg:p-12">
+    <div className="flex-1 p-4 md:p-8 lg:p-12">
       <div className="max-w-4xl mx-auto">
         <header className="mb-12">
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2 text-gray-900 dark:text-white">{t("settings.pageTitle")}</h1>
@@ -88,7 +73,17 @@ export default function AccountSettings({ user, profile, initialTab = "profile" 
           {activeTab === "preferences" && <PreferencesSettings />}
           {FEATURES.privacySettings && activeTab === "privacy" && <PrivacySettings user={user} profile={profile} />}
         </div>
+
+        {/* Terms and Privacy: public pages, also linked from the sign-in and sign-up forms. */}
+        <nav aria-label={t("legal.account.title")} className="mt-12 flex flex-wrap gap-x-6 gap-y-1 border-t border-line pt-4 text-meta">
+          <Link href="/terms" className="inline-flex min-h-tap items-center text-fg-muted underline-offset-4 hover:text-fg hover:underline">
+            {t("auth.tos.terms")}
+          </Link>
+          <Link href="/privacy" className="inline-flex min-h-tap items-center text-fg-muted underline-offset-4 hover:text-fg hover:underline">
+            {t("auth.tos.privacy")}
+          </Link>
+        </nav>
       </div>
-    </main>
+    </div>
   );
 }

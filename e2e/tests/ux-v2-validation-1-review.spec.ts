@@ -1,4 +1,5 @@
 import { test, expect, type Browser, type Page } from '@playwright/test';
+import { songMenuButton } from '../fixtures/songMenu';
 import AxeBuilder from '@axe-core/playwright';
 import pg from 'pg';
 import { ROLES } from '../fixtures/roles';
@@ -225,12 +226,11 @@ test('H2 phone: lyrics hidden behind the Practice and bottom bars show ▶; lyri
   // The window is 50 px taller than the text: it fits the window, but the last lines sit behind the bars.
   await page.setViewportSize({ width: 390, height: Math.ceil(bottom + 50) });
   await expect(toggle(page)).toBeVisible();
-  await expect(page.getByTestId('reader-tools-button')).toBeVisible();
+  await expect(songMenuButton(page)).toBeVisible(); // the ⋮ menu is always there
 
   // With room for the text AND the bars: nothing to scroll.
   await page.setViewportSize({ width: 390, height: Math.ceil(bottom + bars + 20) });
   await expect(toggle(page)).toHaveCount(0);
-  await expect(page.getByTestId('reader-tools-button')).toHaveCount(0);
   await ctx.close();
 });
 
@@ -244,34 +244,15 @@ test('H2 desktop: padding below the text is not lyrics; text below the window sh
   // The whole text is visible with 30 px to spare (the 48 px of padding under it would have counted as lyrics).
   await page.setViewportSize({ width: 1280, height: Math.ceil(chromeTop + bottom + 30) });
   await expect(toggle(page)).toHaveCount(0);
-  await expect(page.getByTestId('reader-tools-button')).toHaveCount(0);
 
   // 60 px of text now run below the window.
   await page.setViewportSize({ width: 1280, height: Math.ceil(chromeTop + bottom - 60) });
   await expect(toggle(page)).toBeVisible();
-  await expect(page.getByTestId('reader-tools-button')).toBeVisible();
   await ctx.close();
 });
 
-// ── M1 ─────────────────────────────────────────────────────────────────────────────────────────────────────
-test('M1: the tools sheet closes when the song starts to fit, and focus goes to A+, not <body>', async ({ browser }) => {
-  const ctx = await context(browser, 'phone');
-  const page = await ctx.newPage();
-  await openFixture(page, 390, 1400);
-  const { bottom } = await textBottom(page);
-  await page.setViewportSize({ width: 390, height: Math.ceil(bottom - 200) }); // lyrics run below the fold
-  await page.getByTestId('reader-tools-button').click();
-  const sheet = page.getByRole('dialog', { name: 'Reading tools' });
-  await expect(sheet).toBeVisible();
-
-  await page.setViewportSize({ width: 390, height: 1400 }); // the song fits now
-  await expect(sheet).toHaveCount(0); // no sheet with nothing but "Close"
-  await expect(page.getByTestId('reader-tools-button')).toHaveCount(0);
-  await expect(page.getByRole('button', { name: 'Larger text' })).toBeFocused();
-  await ctx.close();
-});
-
-for (const which of ['autoscroll-toggle', 'reader-tools-button'] as const) {
+// ── M1 ── (the ⋮ menu is never empty now (Share and the Screen stays on switch), so it no longer closes by itself)
+for (const which of ['autoscroll-toggle'] as const) {
   test(`M1: focus on ${which} moves to A+ when it goes away on resize`, async ({ browser }) => {
     const ctx = await context(browser, 'phone');
     const page = await ctx.newPage();
@@ -297,6 +278,8 @@ test('M6: a version whose only brackets are section labels has no Chords switch;
   await page.getByRole('radio', { name: 'Labels' }).click();
   await expect(page.getByRole('radio', { name: 'Labels' })).toHaveAttribute('aria-checked', 'true');
   await expect(page.getByRole('switch', { name: 'Chords' })).toHaveCount(0);
+  // The label is not a chord, but the reader still sees it.
+  await expect(page.getByTestId('song-display')).toContainText('Chorus');
   await expect(page.getByTestId('chord')).toHaveCount(0);
   await page.goto(`/songs?chords=true&search=${encodeURIComponent(FIXTURE_TITLE)}`);
   await expect(page.getByTestId('song-row').filter({ hasText: FIXTURE_TITLE })).toHaveCount(1);
@@ -426,7 +409,7 @@ for (const scheme of ['light', 'dark'] as const) {
     await page.getByPlaceholder(/Search tags or browse categories/).focus();
     await expect(page.getByText('Browse All Tags by Category')).toBeVisible();
     // Select one tag too: counts on selected and unselected chips are both checked.
-    const chip = page.getByRole('button', { pressed: false }).filter({ hasText: /\d+$/ }).first();
+    const chip = page.getByRole('button', { pressed: false }).filter({ hasText: /\(\d+\)$/ }).first();
     await expect(chip).toBeVisible();
     await chip.click();
     await page.getByPlaceholder(/Search tags or browse categories|Add more tags/).focus();
@@ -438,3 +421,41 @@ for (const scheme of ['light', 'dark'] as const) {
     await ctx.close();
   });
 }
+
+test('the song action bar does not cover the suggestions on a low phone window', async ({ browser }) => {
+  const ctx = await browser.newContext({ viewport: { width: 667, height: 375 }, hasTouch: true, isMobile: true });
+  const page = await ctx.newPage();
+  await pinEnglish(page);
+  await page.addInitScript(() =>
+    localStorage.setItem('sacred-fire-songs-search-history', JSON.stringify(Array.from({ length: 12 }, (_, i) => `recent ${i}`))),
+  );
+  await page.goto('/songs');
+  const href = await page.getByTestId('song-row').first().locator('a[href^="/songs/"]').first().getAttribute('href');
+  await page.goto(href!);
+  await expect(page.getByTestId('song-action-bar')).toBeAttached();
+  await searchField(page).click();
+  const panel = page.getByTestId('search-suggestions');
+  await expect(panel.getByRole('button', { name: /^Artists/ })).toBeVisible();
+  await panel.evaluate((el) => { el.scrollTop = el.scrollHeight; });
+  const chip = panel.getByRole('button', { name: /^Artists/ });
+  const hit = await chip.evaluate((el) => {
+    const r = el.getBoundingClientRect();
+    return el.contains(document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2));
+  });
+  expect(hit).toBe(true);
+  await ctx.close();
+});
+
+test('a right-click on a song closes the suggestions once focus has left them', async ({ browser }) => {
+  const ctx = await context(browser, 'desktop');
+  const page = await ctx.newPage();
+  await pinEnglish(page);
+  await page.goto('/songs');
+  await expect(page.getByTestId('song-row').first()).toBeVisible();
+  await searchField(page).click();
+  await expect(page.getByTestId('search-suggestions')).toBeVisible();
+  const target = await rowBelowPanel(page);
+  await page.mouse.click(target.x, target.y, { button: 'right' });
+  await expect(page.getByTestId('search-suggestions')).toHaveCount(0);
+  await ctx.close();
+});

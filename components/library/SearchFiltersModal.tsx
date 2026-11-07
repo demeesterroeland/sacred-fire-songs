@@ -7,6 +7,7 @@ import TagSelector from '@/components/library/TagSelector';
 import type { TaxonomyNode } from '@/lib/taxonomyUtils';
 import type { SongFilterState } from '@/lib/songs/filterConfig';
 import { useLocale } from '@/context/LocaleContext';
+import { formatCount } from '@/lib/format/count';
 
 type SortByType = 'title' | 'author' | 'newest';
 
@@ -307,7 +308,7 @@ function ToggleCard({
         >
             <span className="shrink-0">{icon}</span>
             <span className="min-w-0 flex-1 truncate text-meta font-semibold leading-tight">{label}</span>
-            {count !== undefined && <span className="ml-auto shrink-0 text-caption font-semibold tabular-nums opacity-80">{count}</span>}
+            {count !== undefined && <span className="ml-auto shrink-0 text-caption font-semibold tabular-nums opacity-80">{formatCount(count)}</span>}
             {active && <Check data-testid="toggle-check" aria-hidden className="size-4 shrink-0" />}
         </button>
     );

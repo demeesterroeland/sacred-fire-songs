@@ -1,34 +1,35 @@
 # Member Guide (draft)
 
-**Version:** 0.16 | **Date:** Nov 6, 2026
+**Version:** 0.17 | **Date:** Nov 7, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
-| 0.16 | Nov 6, 2026 | A song that has several versions shows a switch under the title; tap a name to read that version. Edit says which version you are editing and Save brings you back to it. While a practice take is being recorded or not yet saved, the switch asks you to save or discard it first (UX v2, #395). |
+| 0.17 | Nov 7, 2026 | "take" is now **recording**; one ⋮ menu with the reading tools and the Screen stays on switch; Terms Of Service and Privacy Policy pages; the Library "+" floats at the bottom right. |
+| 0.16 | Nov 6, 2026 | A song that has several versions shows a switch under the title; tap a name to read that version. Edit says which version you are editing and Save brings you back to it. While a practice recording is being recorded or not yet saved, the switch asks you to save or discard it first (UX v2, #395). |
 | 0.15 | Nov 6, 2026 | Adding a song: **Preview** shows your chords above the words as on the song page; **Upload .cho / .txt** is a visible button under the lyrics (UX v2, #415). |
 | 0.14 | Nov 6, 2026 | New Playlist has a **Make public** switch and one line that says who can see the playlist; a playlist made from the Add to playlist sheet is always private (UX v2, #416). |
 | 0.13 | Nov 6, 2026 | Song page toolbar: **Auto-scroll** (▶) and **⋯ reading tools** with scroll speed; musicians also **Transpose** (UX v2, #394). |
 | 0.12 | Nov 6, 2026 | Settings lists only what works: Profile, Security and Preferences; no "Coming soon" items (UX v2, #389). |
-| 0.11 | Nov 5, 2026 | **Shared with me**: a list of takes others shared with you, in the account menu and under the Library tabs; the bell tells you when a take arrives, and opening the song's Practice panel marks it read (UX v2, #403). |
+| 0.11 | Nov 5, 2026 | **Shared with me**: a list of recordings others shared with you, in the account menu and under the Library tabs; the bell tells you when a recording arrives, and opening the song's Practice panel marks it read (UX v2, #403). |
 | 0.10 | Nov 5, 2026 | Add to playlist is a sheet from the bottom with **New playlist** first and a check next to playlists that already hold the song (UX v2, #414). |
 | 0.9 | Nov 5, 2026 | Like and Add to playlist moved from the song's ⋮ menu to the bar at the bottom of the song (UX v2, #393). |
 | 0.8 | Nov 5, 2026 | Create moved from the bottom bar to the **+** in Library (UX v2, #408). |
 | 0.7 | Nov 5, 2026 | Section titles and small labels are sentence case and larger (13 px titles, nothing below 12 px) with darker grey (UX v2, #387); "Your Library" reads "Your library". |
 | 0.6 | Nov 5, 2026 | Practising: the player bar appears only after you press play and stops with the song page (UX v2, #396); details on the practice page. |
-| 0.5 | Nov 5, 2026 | Library card renamed to Your takes. |
+| 0.5 | Nov 5, 2026 | Library card renamed to Your recordings. |
 | 0.3 | Nov 5, 2026 | Preferences: large stage font removed; text size is on the song page (UX v2, #390). |
 | 0.2 | Nov 5, 2026 | Library tabs: Albums hidden (UX v2, #407). |
 | 0.1 | Nov 4, 2026 | First draft from the UX research. |
 
-Everything in the [Guest Guide](guest-guide.md) applies. This page covers what an account adds. Practising and recordings have their own page: [practice-and-recordings.md](practice-and-recordings.md) (the player bar shows only after you press play on a reference track or a take).
+Everything in the [Guest Guide](guest-guide.md) applies. This page covers what an account adds. Practising and recordings have their own page: [practice-and-recordings.md](practice-and-recordings.md) (the player bar shows only after you press play on a reference track or a recording).
 
 ## Your account menu
 
 Tap your initial (top right). You see your name and role (e.g. *Member*), and:
 
-- **Account Settings**, **Your Favorites**, **My Drafts**, **My Playlists**, **Shared with me** (with "3 new" when there are new takes), **Recently Viewed**
+- **Account Settings**, **Your Favorites**, **My Drafts**, **My Playlists**, **Shared with me** (with "3 new" when there are new recordings), **Recently Viewed**
 - **Language** and the light / dark / automatic theme switch
 - **Sign Out**
 
@@ -38,15 +39,15 @@ Above the categories, **Your library** shows four counters: **Favorites**, **Dra
 
 ## Favourites
 
-Tap **Like** in the bar at the bottom of the song page. The heart fills and the label reads **Liked**. Remove it the same way ("Remove from Liked Songs"). All favourites are in **Library → Your Favorites**.
+Tap **Favorite** in the bar at the bottom of the song page (on a desktop the heart in the header, "Add to your Favorites"). The heart fills and the label reads **In Favorites**. Remove it the same way ("Remove from your Favorites"). All favourites are in **Library → Your Favorites**.
 
 ## Library
 
-Tabs at the top: **Playlists**, **History**, **Artists**. Under the tabs, the row **Shared with me** opens the takes others shared with you.
+Tabs at the top: **Playlists**, **History**, **Artists**. Under the tabs, the row **Shared with me** opens the recordings others shared with you.
 
 ### Shared with me
 
-When someone shares a take with you, the bell at the top shows a number. **Shared with me** (account menu, or Library) lists every take shared with you: the song, *Shared by* the person's name and the take. A take you have not opened yet says **New**. Tap a row to open the song with that take highlighted. Opening a song's **Practice** panel marks that song's new takes as read, and the number on the bell goes down. Guests are asked to sign in.
+When someone shares a recording with you, the bell at the top shows a number. **Shared with me** (account menu, or Library) lists every recording shared with you: the song, *Shared by* the person's name and the recording. A recording you have not opened yet says **New**. Tap a row to open the song with that recording highlighted. Opening a song's **Practice** panel marks that song's new recordings as read, and the number on the bell goes down. Guests are asked to sign in.
 
 **Smart playlists** are filled automatically:
 
@@ -55,7 +56,7 @@ When someone shares a take with you, the bell at the top shows a number. **Share
 | Your Favorites | Songs you liked |
 | Your Songs | Songs you added |
 | My Drafts | Your songs that are not public yet |
-| Your takes | Songs where you have practice takes |
+| Your recordings | Songs where you have practice recordings |
 
 Below that: **My private playlists** and **Recently viewed** ("View all" opens the full History).
 
@@ -94,7 +95,7 @@ Open your song → ⋮ → **Edit** **(verify label)**. You can only edit songs 
 
 - **Profile:** display name. E-mail changes go via support.
 - **Security:** change password, log out from all devices.
-- **Preferences:** appearance, language, keep screen awake, auto-hide navigation on song pages and e-mail notifications (text size is set on the song page with A− / A+, auto-scroll with ▶ and ⋯ next to them).
+- **Preferences:** appearance, language, keep screen awake, auto-hide navigation on song pages and e-mail notifications (text size is set on the song page with A− / A+, auto-scroll with ▶ next to them; transpose, scroll speed and **Screen stays on** are in the ⋮ menu at the top of the song page).
 
 ## Public profile
 

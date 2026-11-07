@@ -55,17 +55,15 @@ export default function LibraryTabs() {
     // List page — full heading + tabs
     return (
         <>
-            <div className="mb-2 flex items-center justify-between md:hidden">
+            <div className="mb-2 md:hidden">
                 <h1 className="text-title font-semibold tracking-tight text-fg">{t('library.heading')}</h1>
-                <LibraryCreateButton />
             </div>
-            <header className="mb-12 hidden items-start justify-between gap-4 md:flex">
-                <div>
-                    <h1 className="text-display font-semibold tracking-tight mb-2 text-fg">{t('library.heading')}</h1>
-                    <p className="text-body text-fg-muted">{t('library.subtitle')}</p>
-                </div>
-                <LibraryCreateButton />
+            <header className="mb-12 hidden md:block">
+                <h1 className="text-display font-semibold tracking-tight mb-2 text-fg">{t('library.heading')}</h1>
+                <p className="text-body text-fg-muted">{t('library.subtitle')}</p>
             </header>
+            {/* One floating "+" (phones and tablets); from lg the header's Create menu does the same. */}
+            <LibraryCreateButton />
             <nav aria-label={t('nav.library')} className="relative mb-8">
                 <div className="flex gap-2 overflow-x-auto scrollbar-none -mx-4 px-4 md:mx-0 md:px-0">
                     {tabs.map(({ label, href, icon: Icon }) => {

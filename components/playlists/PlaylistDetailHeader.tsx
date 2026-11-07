@@ -25,6 +25,8 @@ import {
     DialogFooter,
 } from '@/components/ui/dialog';
 import { actionErrorMessage } from '@/lib/errors/actionError';
+import { SignInLink } from '@/components/auth/SignInLink';
+import { Button } from '@/components/ui/button';
 
 interface Props {
     playlistId: string;
@@ -295,20 +297,15 @@ export function PlaylistDetailHeader({
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter className="mt-4 flex gap-2 sm:justify-end">
-                        <button
-                            type="button"
-                            onClick={() => setShowLoginModal(false)}
-                            className="px-4 py-2 text-sm font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                        >
+                        <Button type="button" variant="ghost" onClick={() => setShowLoginModal(false)}>
                             {t('playlists.export.login.cancel')}
-                        </button>
-                        <Link
+                        </Button>
+                        <SignInLink
                             href={`/auth/login?next=${encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname : `/library/playlists/${playlistId}`)}`}
-                            className="px-4 py-2 text-sm font-semibold rounded-lg bg-amber-500 hover:bg-amber-600 text-white transition-colors text-center"
                             onClick={() => setShowLoginModal(false)}
                         >
                             {t('playlists.export.login.submit')}
-                        </Link>
+                        </SignInLink>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

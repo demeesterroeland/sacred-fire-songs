@@ -1,4 +1,5 @@
 import { test, expect, type Locator, type Page } from '@playwright/test';
+import { songMenuButton } from '../fixtures/songMenu';
 import AxeBuilder from '@axe-core/playwright';
 import pg from 'pg';
 import { ROLES } from '../fixtures/roles';
@@ -153,7 +154,7 @@ async function openPractice(page: Page, tab?: 'listen' | 'record') {
   return dlg;
 }
 
-const confirmation = (page: Page) => page.getByRole('alertdialog', { name: 'Delete take?' });
+const confirmation = (page: Page) => page.getByRole('alertdialog', { name: 'Delete recording?' });
 
 const takeRow = (page: Page, name: string) => page.locator('[data-recording-id]', { hasText: name });
 
@@ -236,7 +237,7 @@ for (const theme of THEMES) {
 
         await page.getByRole('button', { name: 'Upload File' }).click();
         await audit(page, `recorder upload / member / ${theme}`);
-        await page.getByRole('button', { name: 'Record Audio' }).click();
+        await page.getByRole('button', { name: 'Record', exact: true }).click();
 
         await page.getByRole('switch', { name: 'Count in 3-2-1 before recording' }).uncheck();
         await page.locator('button[title="Start recording"]').click();
@@ -256,7 +257,7 @@ for (const theme of THEMES) {
         await page.goto(`/songs/${IDS.song}`);
         const { sheet } = await openTakeActions(page);
         await sheet.getByRole('button', { name: 'Make Public' }).click();
-        const dialog = page.getByRole('dialog', { name: /Publish Take Publicly/ });
+        const dialog = page.getByRole('dialog', { name: /Publish Recording Publicly/ });
         await expect(dialog).toBeVisible({ timeout: 10_000 });
         await audit(page, `Make public dialog / member / ${theme}`);
       });
@@ -265,7 +266,7 @@ for (const theme of THEMES) {
         await page.goto(`/songs/${IDS.song}`);
         let { sheet } = await openTakeActions(page);
         await sheet.getByRole('button', { name: 'Share', exact: true }).click();
-        const share = page.getByRole('dialog').filter({ hasText: 'Share take' });
+        const share = page.getByRole('dialog').filter({ hasText: 'Share recording' });
         await expect(share).toBeVisible({ timeout: 10_000 });
         await audit(page, `share dialog / member / ${theme}`);
         await page.keyboard.press('Escape');
@@ -282,7 +283,7 @@ for (const theme of THEMES) {
       test(`delete confirmation (member, ${theme})`, async ({ page }) => {
         await page.goto(`/songs/${IDS.song}`);
         const { sheet } = await openTakeActions(page);
-        await sheet.getByRole('button', { name: 'Delete take', exact: true }).click();
+        await sheet.getByRole('button', { name: 'Delete recording', exact: true }).click();
         await expect(confirmation(page)).toBeVisible({ timeout: 10_000 });
         await audit(page, `delete confirmation / member / ${theme}`);
       });
@@ -295,20 +296,14 @@ for (const theme of THEMES) {
         await audit(page, `playlist sheet / member / ${theme}`);
       });
 
-      test(`reading tools sheet and song menu (member, ${theme})`, async ({ page }) => {
+      test(`song menu with the reading tools (member, ${theme})`, async ({ page }) => {
         await page.goto(`/songs/${IDS.song}`);
-        // The tools button only exists while the lyrics run below the fold (a short window makes the short fixture do so).
-        await page.setViewportSize({ width: 390, height: 360 });
-        await expect(page.getByTestId('reader-tools-button')).toBeVisible();
-        await page.getByTestId('reader-toolbar-wrap').getByRole('button', { name: /more|tools/i }).last().click();
-        await expect(page.getByTestId('reader-tools-sheet')).toBeVisible();
-        await audit(page, `reading tools sheet / member / ${theme}`);
-        await page.keyboard.press('Escape');
-        await expect(page.getByTestId('reader-tools-sheet')).toHaveCount(0);
-
-        await page.getByRole('button', { name: 'More actions' }).first().click();
-        await expect(page.getByRole('dialog')).toBeVisible();
+        await expect(songMenuButton(page)).toBeVisible();
+        await songMenuButton(page).click();
+        await expect(page.getByTestId('song-menu-sheet')).toBeVisible();
         await audit(page, `song menu / member / ${theme}`);
+        await page.keyboard.press('Escape');
+        await expect(page.getByTestId('song-menu-sheet')).toHaveCount(0);
       });
     });
   });
@@ -386,7 +381,7 @@ test.describe('keyboard and screen reader behaviour', () => {
       await page.goto(`/songs/${IDS.song}`);
       const { sheet } = await openTakeActions(page);
       await sheet.getByRole('button', { name: 'Make Public' }).click();
-      const dialog = page.getByRole('dialog', { name: /Publish Take Publicly/ });
+      const dialog = page.getByRole('dialog', { name: /Publish Recording Publicly/ });
       await expect(dialog).toBeVisible({ timeout: 10_000 });
       await expect.poll(() => activeIn(dialog)).toBe(true);
       for (let i = 0; i < 8; i++) {
@@ -400,10 +395,10 @@ test.describe('keyboard and screen reader behaviour', () => {
       await expect(drawer(page)).toBeVisible();
     });
 
-    test('Delete take: the confirmation takes focus, holds it, Escape closes only it and focus returns', async ({ page }) => {
+    test('Delete recording: the confirmation takes focus, holds it, Escape closes only it and focus returns', async ({ page }) => {
       await page.goto(`/songs/${IDS.song}`);
       const { trigger, sheet } = await openTakeActions(page);
-      await sheet.getByRole('button', { name: 'Delete take', exact: true }).click();
+      await sheet.getByRole('button', { name: 'Delete recording', exact: true }).click();
       const dialog = confirmation(page);
       await expect(dialog).toBeVisible({ timeout: 10_000 });
       await expect(dialog).toContainText('cannot be undone');
@@ -432,10 +427,10 @@ test.describe('keyboard and screen reader behaviour', () => {
       await expect(trigger).toBeFocused();
     });
 
-    test('Delete take: Cancel and a tap on the backdrop keep the take', async ({ page }) => {
+    test('Delete recording: Cancel and a tap on the backdrop keep the take', async ({ page }) => {
       await page.goto(`/songs/${IDS.song}`);
       let { sheet } = await openTakeActions(page);
-      await sheet.getByRole('button', { name: 'Delete take', exact: true }).click();
+      await sheet.getByRole('button', { name: 'Delete recording', exact: true }).click();
       await expect(confirmation(page)).toBeVisible({ timeout: 10_000 });
       await confirmation(page).getByRole('button', { name: 'Cancel' }).click();
       await expect(confirmation(page)).toHaveCount(0);
@@ -443,7 +438,7 @@ test.describe('keyboard and screen reader behaviour', () => {
 
       await takeRow(page, PRIVATE_TAKE).locator('button[aria-label="More actions"]').click();
       sheet = page.getByRole('dialog', { name: PRIVATE_TAKE });
-      await sheet.getByRole('button', { name: 'Delete take', exact: true }).click();
+      await sheet.getByRole('button', { name: 'Delete recording', exact: true }).click();
       await expect(confirmation(page)).toBeVisible({ timeout: 10_000 });
       await page.mouse.click(10, 10);
       await expect(confirmation(page)).toHaveCount(0);
@@ -454,8 +449,8 @@ test.describe('keyboard and screen reader behaviour', () => {
     test('renaming a take: Escape ends the edit and keeps the Practice panel open', async ({ page }) => {
       await page.goto(`/songs/${IDS.song}`);
       const { sheet } = await openTakeActions(page);
-      await sheet.getByRole('button', { name: 'Edit take name', exact: true }).click();
-      const input = page.locator('input[aria-label="Edit take name"]');
+      await sheet.getByRole('button', { name: 'Edit recording name', exact: true }).click();
+      const input = page.locator('input[aria-label="Edit recording name"]');
       await expect(input).toBeFocused();
       await input.fill('Not saved');
       await page.keyboard.press('Escape');
@@ -584,7 +579,7 @@ test.describe('keyboard and screen reader behaviour', () => {
       await page.goto(`/songs/${IDS.song}`);
       const { trigger, sheet } = await openTakeActions(page);
       await sheet.getByRole('button', { name: 'Share', exact: true }).click();
-      const share = page.getByRole('dialog').filter({ hasText: 'Share take' });
+      const share = page.getByRole('dialog').filter({ hasText: 'Share recording' });
       await expect(share).toBeVisible({ timeout: 10_000 });
       await page.keyboard.press('Escape');
       await expect(share).toHaveCount(0);
@@ -612,7 +607,7 @@ test.describe('keyboard and screen reader behaviour', () => {
       await expect(page.getByText('Ready to record')).toBeVisible({ timeout: 15_000 });
       await page.getByRole('switch', { name: 'Count in 3-2-1 before recording' }).uncheck();
 
-      const status = page.getByRole('status').filter({ hasText: /Ready to record|Recording\.\.\.|Recording paused|Review your take/ });
+      const status = page.getByRole('status').filter({ hasText: /Ready to record|Recording\.\.\.|Recording paused|Review your recording/ });
       await expect(status).toHaveText(/Ready to record/);
       await page.locator('button[title="Start recording"]').click();
       await expect(status).toHaveText(/Recording\.\.\./, { timeout: 5_000 });

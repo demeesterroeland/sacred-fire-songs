@@ -2,7 +2,8 @@ import { test, expect } from '@playwright/test';
 import pg from 'pg';
 
 /**
- * Story 6.1.8 / G2.3 (#392): the sticky song title truncates at the end.
+ * Story 6.1.8 / G2.3 (#392): the sticky song title truncates at the end. Validation 2 (item 6): it is a copy that only
+ * shows once the full, wrapping title in the page has scrolled away.
  * Gherkin: docs/testing/ux-v2-song-header.feature (@e2e).
  */
 const DATABASE_URL =
@@ -10,7 +11,7 @@ const DATABASE_URL =
 
 test.use({ viewport: { width: 390, height: 844 } });
 
-test('long title in the sticky header shows its beginning and an ellipsis', async ({ page }) => {
+test('long title in the sticky bar (after scrolling past the full title) shows its beginning and an ellipsis', async ({ page }) => {
   const client = new pg.Client({ connectionString: DATABASE_URL });
   await client.connect();
   const {
@@ -31,9 +32,10 @@ test('long title in the sticky header shows its beginning and an ellipsis', asyn
   test.skip(!song, 'no public song with a long title and enough lyrics to scroll seeded');
 
   await page.goto(`/songs/${song.id}`);
-  const header = page.locator('header').filter({ has: page.getByTestId('sticky-song-title') });
   const title = page.getByTestId('sticky-song-title');
+  const header = title.locator('xpath=ancestor::div[1]'); // the 56 px bar inside the zero-height sticky header
   await expect(title).toHaveText(song.title);
+  await expect(page.getByTestId('song-title')).toHaveText(song.title); // the full title, in the page
 
   const headerTop = await header.evaluate((el) => el.getBoundingClientRect().top);
   await page.mouse.wheel(0, 800);
@@ -48,6 +50,7 @@ test('long title in the sticky header shows its beginning and an ellipsis', asyn
       )
     )
     .toBeGreaterThan(0);
+  await expect(title).toBeVisible(); // the full title has scrolled away: the copy shows
   await expect(header).toBeInViewport();
   // Sticky: it stays pinned at (or above) where it started instead of scrolling away.
   const pinnedTop = await header.evaluate((el) => el.getBoundingClientRect().top);

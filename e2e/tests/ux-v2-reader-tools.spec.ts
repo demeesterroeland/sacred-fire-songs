@@ -1,5 +1,6 @@
 import { test, expect, type Page } from '@playwright/test';
 import pg from 'pg';
+import { openSongMenu, songMenuButton, songMenuSheet } from '../fixtures/songMenu';
 import { ROLES } from '../fixtures/roles';
 
 /**
@@ -80,8 +81,7 @@ test.describe('Musician @story-6.1.10', () => {
     await expect(page.getByTestId('song-meta-lines')).toContainText('Key E');
     await expect(page.getByTestId('chord').first()).toHaveText('E');
 
-    await page.getByTestId('reader-tools-button').click();
-    const sheet = page.getByRole('dialog', { name: 'Reading tools' });
+    const sheet = await openSongMenu(page);
     const up = sheet.getByRole('button', { name: 'Up a semitone' });
     await up.click();
     await up.click();
@@ -91,13 +91,11 @@ test.describe('Musician @story-6.1.10', () => {
 
     await expect(page.getByTestId('chord').first()).toHaveText('F#');
     await expect(page.getByTestId('song-meta-lines')).toContainText('Key F#');
-    // The shift is visible in text on the ⋯ button.
-    await expect(page.getByTestId('reader-tools-button')).toContainText('+2');
 
     // Original key restores everything.
-    await page.getByTestId('reader-tools-button').click();
+    await openSongMenu(page);
     await page.getByRole('button', { name: 'Original key' }).click();
-    await page.getByRole('dialog', { name: 'Reading tools' }).getByRole('button', { name: 'Close' }).last().click();
+    await songMenuSheet(page).getByRole('button', { name: 'Close' }).last().click();
     await expect(page.getByTestId('chord').first()).toHaveText('E');
     await expect(page.getByTestId('song-meta-lines')).toContainText('Key E');
   });
@@ -109,7 +107,7 @@ test.describe('Musician @story-6.1.10', () => {
     await expect(page.getByTestId('autoscroll-toggle')).toBeVisible();
     const toolbar = page.getByTestId('reader-toolbar');
     const buttons = toolbar.locator('button');
-    expect(await buttons.count()).toBe(5); // Chords · A− · A+ · Auto-scroll · ⋯
+    expect(await buttons.count()).toBe(4); // Chords · A− · A+ · Auto-scroll (the ⋮ menu is in the title bar)
     const rects = await buttons.evaluateAll((els) =>
       els.map((el) => {
         const r = el.getBoundingClientRect();
@@ -149,8 +147,7 @@ test.describe('Musician @story-6.1.10', () => {
     await expect(toggle).toHaveAttribute('aria-pressed', 'false');
 
     // Faster, so the test does not wait long: open the tools, press Faster twice, close.
-    await page.getByTestId('reader-tools-button').click();
-    const sheet = page.getByRole('dialog', { name: 'Reading tools' });
+    const sheet = await openSongMenu(page);
     await sheet.getByRole('button', { name: 'Faster' }).click();
     await sheet.getByRole('button', { name: 'Faster' }).click();
     await expect(sheet.getByTestId('scroll-speed')).toHaveText('Speed 5 of 5');
@@ -165,7 +162,7 @@ test.describe('Musician @story-6.1.10', () => {
     // The strip is only stuck once the page has scrolled it up to the title bar: how far that is depends on the
     // song (a few px more or less), so wait for it to arrive instead of sampling after a fixed distance. Then it
     // must stay there while the page keeps scrolling.
-    const header = page.getByTestId('sticky-song-title').locator('xpath=ancestor::header[1]');
+    const header = page.getByTestId('sticky-song-title').locator('xpath=ancestor::div[1]'); // the 56 px bar inside the zero-height sticky header
     const gap = async () => {
       const headerBox = (await header.boundingBox())!;
       const wrapBox = await box(page, 'reader-toolbar-wrap');
@@ -195,8 +192,7 @@ test.describe('Musician @story-6.1.10', () => {
     test.skip(!longSong, 'no public chord song in the seed');
     await openSong(page, longSong);
     await makeScrollable(page);
-    await page.getByTestId('reader-tools-button').click();
-    const sheet = page.getByRole('dialog', { name: 'Reading tools' });
+    const sheet = await openSongMenu(page);
     await expect(sheet.getByTestId('scroll-speed')).toHaveText('Speed 3 of 5');
     await sheet.getByRole('button', { name: 'Slower' }).click();
     await expect(sheet.getByTestId('scroll-speed')).toHaveText('Speed 2 of 5');
@@ -210,8 +206,8 @@ test.describe('Musician @story-6.1.10', () => {
 
     await page.reload();
     await expect(page.getByTestId('reader-toolbar')).toBeVisible();
-    await page.getByTestId('reader-tools-button').click();
-    await expect(page.getByRole('dialog', { name: 'Reading tools' }).getByTestId('scroll-speed')).toHaveText('Speed 2 of 5');
+    await openSongMenu(page);
+    await expect(songMenuSheet(page).getByTestId('scroll-speed')).toHaveText('Speed 2 of 5');
   });
 
   test('shows the stay-awake indicator while the screen lock is held', async ({ page }) => {
@@ -219,8 +215,9 @@ test.describe('Musician @story-6.1.10', () => {
     await openSong(page, longSong, { wakeLock: true });
     await expect(page.getByTestId('stay-awake-indicator')).toBeVisible();
     await expect(page.getByTestId('stay-awake-indicator')).toHaveAttribute('aria-label', 'Screen stays on');
-    await page.getByTestId('reader-tools-button').click();
-    await expect(page.getByTestId('stay-awake-row')).toContainText('Screen stays on');
+    await openSongMenu(page);
+    await expect(page.getByTestId('keep-awake-row')).toContainText('Screen stays on');
+    await expect(page.getByRole('switch', { name: 'Screen stays on' })).toHaveAttribute('aria-checked', 'true');
   });
 });
 
@@ -232,8 +229,7 @@ test.describe('Member @story-6.1.10', () => {
     await openSong(page, longSong);
     await page.setViewportSize({ width: 390, height: 520 });
     await expect(page.getByTestId('autoscroll-toggle')).toBeVisible();
-    await page.getByTestId('reader-tools-button').click();
-    const sheet = page.getByRole('dialog', { name: 'Reading tools' });
+    const sheet = await openSongMenu(page);
     await expect(sheet.getByRole('group', { name: 'Auto-scroll' })).toBeVisible();
     await expect(sheet.getByRole('group', { name: 'Transpose' })).toHaveCount(0);
   });
@@ -245,24 +241,24 @@ test.describe('Guest @story-6.1.10', () => {
     await openSong(page, longSong);
     await page.setViewportSize({ width: 390, height: 520 });
     await expect(page.getByTestId('autoscroll-toggle')).toBeVisible();
-    await page.getByTestId('reader-tools-button').click();
-    await expect(page.getByRole('dialog', { name: 'Reading tools' }).getByRole('group', { name: 'Transpose' })).toHaveCount(0);
+    await openSongMenu(page);
+    await expect(songMenuSheet(page).getByRole('group', { name: 'Transpose' })).toHaveCount(0);
   });
 });
 
 test.describe('Auto-scroll only when the song does not fit @validation-1', () => {
-  test('a song that fits the screen has no ▶ and no tools button for a guest; shrinking the window brings ▶ back', async ({ page }) => {
+  test('a song that fits the screen has no ▶ for a guest, but still the ⋮ menu; shrinking the window brings ▶ back', async ({ page }) => {
     test.skip(!longSong, 'no public chord song in the seed');
     await page.setViewportSize({ width: 390, height: 5000 });
     await openSong(page, longSong);
     await page.setViewportSize({ width: 390, height: 5000 });
     await expect(page.getByTestId('reader-toolbar')).toBeVisible();
     await expect(page.getByTestId('autoscroll-toggle')).toHaveCount(0);
-    await expect(page.getByTestId('reader-tools-button')).toHaveCount(0); // guest: nothing else in the sheet
+    await expect(songMenuButton(page)).toBeVisible(); // the one ⋮ menu is always there
     // Viewport resize: the end of the lyrics is now below the fold.
     await page.setViewportSize({ width: 390, height: 520 });
     await expect(page.getByTestId('autoscroll-toggle')).toBeVisible();
-    await expect(page.getByTestId('reader-tools-button')).toBeVisible();
+    await expect(songMenuButton(page)).toBeVisible();
     // ...and back: the button leaves again.
     await page.setViewportSize({ width: 390, height: 5000 });
     await expect(page.getByTestId('autoscroll-toggle')).toHaveCount(0);
@@ -288,8 +284,7 @@ test.describe('Auto-scroll only when the song does not fit @validation-1', () =>
     await openSong(page, longSong);
     await page.setViewportSize({ width: 390, height: 5000 });
     await expect(page.getByTestId('autoscroll-toggle')).toHaveCount(0);
-    await page.getByTestId('reader-tools-button').click();
-    const sheet = page.getByRole('dialog', { name: 'Reading tools' });
+    const sheet = await openSongMenu(page);
     await expect(sheet.getByRole('group', { name: 'Transpose' })).toBeVisible();
     await expect(sheet.getByRole('group', { name: 'Auto-scroll' })).toHaveCount(0);
     await ctx.close();

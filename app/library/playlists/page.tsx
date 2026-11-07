@@ -11,12 +11,9 @@ import RecentlyViewed from '@/components/library/RecentlyViewed';
 import NewSinceLastVisit from '@/components/library/NewSinceLastVisit';
 import { getServerT } from '@/lib/i18n/server';
 import GuestGate from '@/components/common/GuestGate';
+import { MY_DRAFTS_HREF } from '@/lib/songs/draftsLink';
+import { fetchLibrarySummary, type RecordingCounts, type SongCounts } from '@/lib/library/summary';
 
-interface SongCounts {
-    total: number;
-    public: number;
-    draft: number;
-}
 
 async function SongCountSubtitle({ counts, emptyLabel }: { counts: SongCounts; emptyLabel: string }) {
     const t = await getServerT();
@@ -28,6 +25,21 @@ async function SongCountSubtitle({ counts, emptyLabel }: { counts: SongCounts; e
             <span>{t('playlists.countPublic', { count: counts.public })}</span>
             {' · '}
             <span>{t('playlists.countDraft', { count: counts.draft })}</span>
+        </span>
+    );
+}
+
+/** The Your recordings card counts recordings, not songs, and says which are public and which stay private. */
+async function RecordingCountSubtitle({ counts, emptyLabel }: { counts: RecordingCounts; emptyLabel: string }) {
+    const t = await getServerT();
+    if (counts.total === 0) return <span className="text-caption text-fg-muted">{emptyLabel}</span>;
+    return (
+        <span className="text-caption text-fg-muted whitespace-nowrap">
+            {counts.total === 1 ? t('librarySummary.recordings.countSingle') : t('librarySummary.recordings.count', { count: counts.total })}
+            {' · '}
+            <span>{t('librarySummary.recordings.public', { count: counts.public })}</span>
+            {' · '}
+            <span>{t('librarySummary.recordings.private', { count: counts.private })}</span>
         </span>
     );
 }
@@ -245,43 +257,16 @@ export default async function PlaylistsPage() {
         : [];
 
     // Fetch My Songs + My Drafts + My Recordings counts and titles, plus personalized sections
-    const [mySongsResult, myDraftsResult, myRecordingsResult, recentlyViewedSongs, recentlyViewedCount, newSongs] = await Promise.all([
-        supabase.from('compositions').select('title, is_public').eq('owner_id', user.id).limit(500),
-        supabase.from('compositions').select('title, is_public').eq('is_public', false).limit(500),
-        supabase.from('user_recordings').select('song_versions(compositions(title, is_public))').eq('user_id', user.id),
+    const [summary, recentlyViewedSongs, recentlyViewedCount, newSongs] = await Promise.all([
+        fetchLibrarySummary(supabase, user.id),
         getRecentlyViewed(user.id, 5),
         getRecentlyViewedCount(user.id),
         getUnviewedSongs(user.id, 5),
     ]);
 
-    const mySongsData = mySongsResult.data ?? [];
-    const mySongsCounts: SongCounts = {
-        total: mySongsData.length,
-        public: mySongsData.filter(s => s.is_public).length,
-        draft: mySongsData.filter(s => !s.is_public).length,
-    };
-    const mySongsTitles = mySongsData.slice(0, 5).map(s => s.title);
-
-    const myDraftsData = myDraftsResult.data ?? [];
-    const myDraftsCounts: SongCounts = {
-        total: myDraftsData.length,
-        public: 0,
-        draft: myDraftsData.length,
-    };
-    const myDraftsTitles = myDraftsData.slice(0, 5).map(s => s.title);
-
-    // Compute My Recordings counts and titles
-    const myRecordingsData = (myRecordingsResult.data ?? []).map(r => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        return (r.song_versions as any)?.compositions;
-    }).filter(Boolean);
-
-    const myRecordingsCounts: SongCounts = {
-        total: myRecordingsData.length,
-        public: myRecordingsData.filter(s => s?.is_public).length,
-        draft: myRecordingsData.filter(s => s && !s.is_public).length,
-    };
-    const myRecordingsTitles = Array.from(new Set(myRecordingsData.map(s => s?.title).filter(Boolean))).slice(0, 5) as string[];
+    const { mySongs: mySongsCounts, drafts: myDraftsCounts, recordings: myRecordings } = summary;
+    const mySongsTitles = mySongsCounts.titles;
+    const myDraftsTitles = myDraftsCounts.titles;
 
     return (
         <div className="space-y-8">
@@ -304,15 +289,15 @@ export default async function PlaylistsPage() {
                     />
                     <SmartPlaylistCard
                         icon={PenLine} title={t('librarySummary.drafts.title')} description={t('librarySummary.drafts.description')} accent="gray"
-                        href="/songs?status=draft"
+                        href={MY_DRAFTS_HREF}
                         subtitle={<SongCountSubtitle counts={myDraftsCounts} emptyLabel={t('librarySummary.drafts.empty')} />}
                         songTitles={myDraftsTitles}
                     />
                     <SmartPlaylistCard
                         icon={Mic} title={t('librarySummary.recordings.title')} description={t('librarySummary.recordings.description')} accent="violet"
                         href="/songs?myRecordings=true"
-                        subtitle={<SongCountSubtitle counts={myRecordingsCounts} emptyLabel={t('librarySummary.recordings.empty')} />}
-                        songTitles={myRecordingsTitles}
+                        subtitle={<RecordingCountSubtitle counts={myRecordings} emptyLabel={t('librarySummary.recordings.empty')} />}
+                        songTitles={myRecordings.titles.slice(0, 5)}
                     />
                 </div>
             </div>

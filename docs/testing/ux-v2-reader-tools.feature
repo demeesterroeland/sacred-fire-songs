@@ -1,5 +1,6 @@
-# Version: 1.0 | Date: Nov 6, 2026
+# Version: 1.1 | Date: Nov 7, 2026
 # Changelog
+# 1.1 | Nov 7, 2026 | Validation round 2, item 11: the toolbar ⋯ is gone; transpose, scroll speed and the Screen stays on switch are in the ⋮ menu (`SongMenuSheet`).
 # 1.0 | Nov 6, 2026 | Story 6.1.10 / G2.5 (#394): auto-scroll and transpose in the reader toolbar, stay-awake indicator.
 @story-6.1.10
 Feature: UX v2 reader tools
@@ -47,13 +48,13 @@ Feature: UX v2 reader tools
   @e2e
   Scenario: Musician transposes from the toolbar on a phone
     Given a musician on a seeded song in key E on a 390 x 844 viewport
-    When they open "More reading tools" and tap "Up a semitone" twice
+    When they open the ⋮ menu and tap "Up a semitone" twice
     Then the chords are two semitones higher and the song page shows "Key F#"
 
   @e2e
   Scenario: One row of 44 px controls that does not cover the lyrics
     Given a seeded song with chords on a 390 x 844 viewport
-    Then the toolbar shows Chords, A−, A+, Auto-scroll and More reading tools in one row
+    Then the toolbar shows Chords, A−, A+ and Auto-scroll in one row, and the ⋮ menu is in the title bar
     And every control is at least 44 px high and inside the viewport
     And the lyrics start below the toolbar and the last line ends above the action bar
 
@@ -68,10 +69,10 @@ Feature: UX v2 reader tools
   @e2e
   Scenario: Members and guests get auto-scroll but no transpose
     Given a member on a seeded song with chords on a 390 x 844 viewport
-    Then "Auto-scroll" is in the toolbar and "Transpose" is not in the reading tools
+    Then "Auto-scroll" is in the toolbar and "Transpose" is not in the ⋮ menu
 
   @e2e
   Scenario: Stay-awake indicator
     Given a browser that grants the screen wake lock
     When I open a seeded song
-    Then the toolbar shows "Screen stays on" and the reading tools say so in words
+    Then the toolbar shows "Screen stays on" and the ⋮ menu has a "Screen stays on" switch that is on

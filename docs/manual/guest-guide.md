@@ -1,12 +1,13 @@
 # Guest Guide (draft)
 
-**Version:** 0.21 | **Date:** Nov 6, 2026
+**Version:** 0.22 | **Date:** Nov 7, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
-| 0.21 | Nov 6, 2026 | Practice opens on the **Listen** tab for guests; under **Public takes** you can play takes that singers made public with their consent (listen only); a link to a public take opens that take on the Listen tab, highlighted (UX v2, #405). |
+| 0.22 | Nov 7, 2026 | "recording" is now **recording**; Terms Of Service and Privacy Policy pages (a draft until approved). |
+| 0.21 | Nov 6, 2026 | Practice opens on the **Listen** tab for guests; under **Public recordings** you can play recordings that singers made public with their consent (listen only); a link to a public recording opens that recording on the Listen tab, highlighted (UX v2, #405). |
 | 0.20 | Nov 6, 2026 | Song page: songs with several versions have a switch under the grey lines; a link can open a given version (UX v2, #395). |
 | 0.19 | Nov 6, 2026 | Home now opens with a short welcome, a search field and the five newest songs under **Recently added** (UX v2, #412). Signed-in members still see Your library. |
 | 0.18 | Nov 6, 2026 | Song page: **Auto-scroll** (▶) and **⋯** reading tools in the same toolbar (UX v2, #394). |
@@ -28,7 +29,7 @@
 
 ## What Sacred Fire Songs is
 
-A songbook of medicine and ceremony songs with lyrics and chords, for singing together in a circle. Anyone can read and listen. With a free account you can also save favourites, make playlists, add songs and record your own practice takes.
+A songbook of medicine and ceremony songs with lyrics and chords, for singing together in a circle. Anyone can read and listen. With a free account you can also save favourites, make playlists, add songs and record your own practice recordings.
 
 ## Finding your way
 
@@ -42,7 +43,7 @@ The ☰ menu repeats the main places (Home, Songs, Playlists, Favorites, Drafts,
 
 ## Finding a song
 
-1. **Start on Home:** a one-line welcome says what the site is, the search field takes you straight to matching songs (tap it to see your recent searches and the main categories), and **Recently added** lists the five newest songs; **All songs** opens the full list.
+1. **Start on Home:** a one-line welcome says what the site is, the search field recordings you straight to matching songs (tap it to see your recent searches and the main categories), and **Recently added** lists the five newest songs; **All songs** opens the full list.
 2. **Browse by category** on Home: groups such as *The Elements* (Air, Earth, Fire, Water), *Nature*, *Lineage & Tradition*, *Medicine & Healing*. Each tag is a plain link; the grey number after it is how many songs it holds. "+3 more" shows the rest.
 3. **Search:** tap the search field and type a title, a line of the lyrics, an author or a category. Accents do not matter ("aguita" finds "Agüita"). Before you type, the field offers your last 5 searches (tap one to repeat it, **✕** removes one, **Clear all** removes them all; they are kept on this device only) and the main categories as grey buttons (tap one to show only those songs; tap it again to remove the filter). Tap outside the list or press Esc to close it.
 4. **Filters:** the slider button in the search field opens *Search options*: sort order, content type (songs with chords / with melody) and category & tag filters. Tap **Show results**.
@@ -55,7 +56,7 @@ The ☰ menu repeats the main places (Home, Songs, Playlists, Favorites, Drafts,
 - A second line shows **Key**, **Capo** and **Tuning**, e.g. `Key E · Capo 3 · Standard`.
 - If the song exists in more than one version (for example *Original* and *Simplified*), a grey switch with the version names appears under those lines; tap a name to read that version. The app opens the first version each time. Songs with one version show no switch.
 - Under those lines: **Chords** switches the chords on or off, **A−** / **A+** make the text smaller or larger. The app remembers your choice on this device.
-- **▶** scrolls the song for you, hands free; touch the screen to pause it, or press **⏸**. **⋯** (*More reading tools*) sets the scroll speed (five steps). While the scroll runs the toolbar stays under the title. A small sun next to **⋯** means the screen stays on while you sing.
+- **▶** scrolls the song for you, hands free; touch the screen to pause it, or press **⏸**. The **⋮** menu (top right) sets the scroll speed (five steps) and has the **Screen stays on** switch. While the scroll runs the toolbar stays under the title. A small sun next to **⋯** means the screen stays on while you sing.
 - Chords are printed above the word where they change.
 - A bar at the bottom of the song has **Practice**, **Playlist** and **Like**. It slides away when you scroll down and comes back when you scroll up. **Playlist** and **Like** need an account and ask you to sign in.
 - ⋮ (top right) opens the song menu: **Share Song**.
@@ -65,7 +66,7 @@ The ☰ menu repeats the main places (Home, Songs, Playlists, Favorites, Drafts,
 Tap **Practice** in the bar at the bottom of the song to open the Practice panel.
 
 - **Listen** tab: choose **YouTube**, **SoundCloud** or **Spotify** (when the song has that link) and play it inside the app.
-- Under **Public takes** on the same tab you can play the takes that singers have made public for this song (listen only: no download, sharing or reordering). If there are none yet you see *No public takes of this song yet.*
+- Under **Public recordings** on the same tab you can play the recordings that singers have made public for this song (listen only: no download, sharing or reordering). If there are none yet you see *No public recordings of this song yet.*
 - A small **player bar** (plain background, only the play button is orange; it says *Playing* or *Paused* and what plays) appears above the bottom bar once you press play (a song page never shows it before), so you can keep listening while reading. Use ⟲ / ⟳ to jump back or forward, ✕ to stop. Leaving the song page stops the music.
 - Tip: wear headphones if you sing along while recording later.
 
@@ -73,11 +74,11 @@ The **Record** tab shows what members can do and a **Sign In to Record** button.
 
 ## Things that need an account
 
-Favourites, playlists, recently viewed, adding or editing songs, recording, account settings, singer profiles. Each of these screens shows the same grey preview with a lock, one sentence saying why it is locked and a **Sign in** button; after signing in you land on the screen you came from. You can listen to public takes that the singer agreed to publish (Practice → Listen → **Public takes**); recording, sharing and downloading need an account. You can open the **Add Song** form and start typing as a guest: a grey box at the top says **Draft now — sign in to save**: saving a song needs an account. Your draft stays on this device, so after you sign in (from the box or when you press save) you are back on the form with your text still there.
+Favourites, playlists, recently viewed, adding or editing songs, recording, account settings, singer profiles. Each of these screens shows the same grey preview with a lock, one sentence saying why it is locked and a **Sign in** button; after signing in you land on the screen you came from. You can listen to public recordings that the singer agreed to publish (Practice → Listen → **Public recordings**); recording, sharing and downloading need an account. You can open the **Add Song** form and start typing as a guest: a grey box at the top says **Draft now — sign in to save**: saving a song needs an account. Your draft stays on this device, so after you sign in (from the box or when you press save) you are back on the form with your text still there.
 
 ## Creating an account
 
-The sign-in and sign-up pages have a **Back** link at the top left. It takes you back to the page you came from (for example the song), or to Home if you opened the page directly.
+The sign-in and sign-up pages have a **Back** link at the top left. It recordings you back to the page you came from (for example the song), or to Home if you opened the page directly.
 
 1. Tap **Sign In** → **Join the Circle** (or go to *Create Account*).
 2. Enter e-mail and a password (twice) → **Create Account**.

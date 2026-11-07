@@ -3289,3 +3289,54 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - **Tests:** Vitest 1321 passed (113 files), BDD unit 240 passed / 47 pending (pre-existing), whole Playwright suite on a production build (port 4431, `setup` + `mobile-chrome-headless`) 303 passed / 5 skipped / 2 failed; both failures pass alone (and 88 of 88 under load for the bottom-bar and suggestions specs): a focus timing flake and an axe test timeout while 4 workers were busy.
 - **Migration:** `20261106180000_recompute_song_flags.sql` edited in place (not applied anywhere but local dev; stays idempotent); `db-schema.sql` v3.4 in step. The local copy was not re-run.
 - **Decisions:** UXA-061…066. Screenshots refreshed, plus 07 to 09 in `docs/ux-research/screenshots/ux-v2/validation-1/`.
+
+## November 7, 2026 - Epic 6.1 UX v2, follow-ups from the re-review of PR #474
+
+**Goal:** fix the re-review findings the owner picked; the failing tests came first.
+
+**Key Accomplishments**
+- **Section labels:** a line of only non-chord brackets (`[Chorus]`) now shows as a comment, with chords on or off, in the reader, the preview and the PDF. `[Chorus]Sing` is unchanged.
+- **Low phone window:** the suggestions slot is `z-40`, so the song action bar no longer covers its last rows.
+- **Right-click:** a press that never clicks closes the panel when focus went outside it (`contextmenu` also ends the press).
+- **Server messages:** 7 new `errors.*` keys in all 8 locales for the remaining specific answers. Runasimi uses its generic text, except the private-song message. The new translations have had no native-speaker check.
+- **Test timeout:** the first PGlite test in `flagsMigration.test.ts` has an explicit 30 s limit.
+
+**Technical Details**
+- **Tests:** Vitest 1340 passed (113 files), BDD unit 240 passed / 47 pending (pre-existing), whole Playwright suite on a production build (`setup` + `mobile-chrome-headless`) 307 passed / 5 skipped / 0 failed.
+- **Not fixed:** the desktop fold when the meta line expands (no decision yet). The iOS touch behaviour of the panel has not been tried on a real iPhone.
+- **Decisions:** UXA-067.
+
+## November 7, 2026 - Epic 6.1 UX v2, validation round 2 (batch 2 of the owner's feedback)
+
+**Goal:** implement 22 findings from the owner's second run; every fix test-first; before/after screenshots at 390 px light and dark.
+
+**Key Accomplishments**
+- **Phone and desktop song page:** one ⋮ menu (`SongMenuSheet`: Share, Edit, Delete, Transpose, Auto-scroll speed, **Screen stays on** switch); the toolbar ⋯ is gone. The full title wraps at the top of the page and a truncated copy shows in the sticky bar after scrolling past it. Switching version replaces the URL (`?version=`) and Share shares it. Desktop buttons are neutral, Practice is the one accent.
+- **One look:** one `SignInLink`, a floating Library `+`, one heading size on History / Artists / Shared with me, counts as `(3)`, one favourites term, one `<main>` per page.
+- **Wording:** "recording" and "Record" in all 8 languages (548 existing strings changed), the Your recordings card counts recordings, own-drafts filter for admins.
+- **Terms and Privacy:** real draft pages, operator from `OPERATOR_NAME` / `OPERATOR_CONTACT_EMAIL` (server, per request).
+- **Follow-ups:** a still tap on empty space closes the suggestions (iPhone), the desktop fold watches every ancestor of the lyrics, error codes of sign-in and the database map to translated messages. Items 16, 17, 19, 20 and the first half of 22 came from the other thread's patch, applied as its own commit.
+
+**Technical Details**
+- **Tests:** Vitest 1485 passed (126 files), BDD unit 247 passed / 47 pending (pre-existing), bats 32 ok, whole Playwright suite on a production build (port 4431, `setup` + `mobile-chrome-headless`) 324 passed / 5 skipped / 1 failed (a focus flake in `ux-v2-bottom-bar`, 3 of 3 on re-run). The first full run had 6 failures, all test strings that still said "take", "Record Audio" or a bare tag count; fixed.
+- **Lint cap** 157 → 143, **palette baseline** 1559 → 1507.
+- **Decisions:** UXA-068. Screenshots: `docs/ux-research/screenshots/ux-v2/validation-2/` (`scripts/dev/ux/capture-validation-2.sh`).
+- **Not done:** the real iPhone check, a native-speaker check of the new translations and of Runasimi, the `docs/design/screens` mockups.
+
+## November 7, 2026 - Epic 6.1 UX v2, validation round 2, review of PR #477
+
+**Goal:** fix the review findings of the batch 2 pull request; tests first where behaviour changes.
+
+**Key Accomplishments**
+- **Auth pages:** translated messages chosen by a code; the pages no longer print text from the address or from a provider answer (`lib/auth/notice.ts`).
+- **Song page:** opening ⋮ no longer stops auto-scroll; a version switch drops a recording link so a reload shows the chosen version.
+- **Library:** "My Drafts" links to the same drafts it counts (`MY_DRAFTS_HREF`).
+- **Chords and search:** a real chord alone on a line (`[B♭]`, `[C6/9]`) stays in the chord row, `[am]`, `[Hm]`, `[Re]`, `[Do]` show as text; a right-click on plain text closes the suggestions.
+- **Translations:** Runasimi strings added in this round are translated (not yet checked by a speaker) except the Terms and Privacy body text.
+- **Clean-up:** operator variables commented out in `.env.example`, the draft banner uses `SignInLink`, the unused `auth-button` and `errors.sharedTakeNoDownload` are gone.
+
+**Technical Details**
+- **Tests:** see the pull request for the numbers of the final run.
+- **Decisions:** UXA-068 and UXA-067 updated.
+- **Favourites for admins:** hearts, list and counts use the signed-in user's own "My Favorites" setlist (`fetchFavoritesSetlistId`); before, an admin who can read every member's setlists got an empty list.
+- **Terms and Privacy (owner review):** Vercel Speed Insights removed from the app and the text; the privacy text names what the operator can reach.

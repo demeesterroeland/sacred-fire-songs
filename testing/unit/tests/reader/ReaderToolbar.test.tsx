@@ -61,43 +61,26 @@ describe('ReaderToolbar', () => {
     expect(screen.queryByRole('switch')).toBeNull();
   });
 
-  // Story 6.1.10 / G2.5 (#394): auto-scroll and the overflow button join the same toolbar.
-  describe('auto-scroll and reading tools', () => {
+  // Story 6.1.10 / G2.5 (#394): auto-scroll joins the same toolbar. Validation 2, item 11: the ⋯ button is gone (the song
+  // page's ⋮ menu holds transpose, speed and the screen switch).
+  describe('auto-scroll', () => {
     const base = { step: 1, chords: true, speed: 3, hasChords: true, onChange: () => {} };
 
-    it('shows an Auto-scroll toggle and a More reading tools button when wired', () => {
-      render(<ReaderToolbar {...base} scrolling={false} onToggleScroll={() => {}} onOpenTools={() => {}} />);
+    it('shows an Auto-scroll toggle when wired, and no second ⋯ menu button', () => {
+      render(<ReaderToolbar {...base} scrolling={false} onToggleScroll={() => {}} />);
       const toggle = screen.getByRole('button', { name: 'Auto-scroll' });
       expect(toggle.getAttribute('aria-pressed')).toBe('false');
-      expect(screen.getByRole('button', { name: /More reading tools/ })).toBeTruthy();
+      expect(screen.queryByRole('button', { name: /More reading tools/ })).toBeNull();
+      expect(screen.queryByTestId('reader-tools-button')).toBeNull();
     });
 
     it('the toggle reflects the playing state and calls back', () => {
       const onToggleScroll = vi.fn();
-      render(<ReaderToolbar {...base} scrolling onToggleScroll={onToggleScroll} onOpenTools={() => {}} />);
+      render(<ReaderToolbar {...base} scrolling onToggleScroll={onToggleScroll} />);
       const toggle = screen.getByRole('button', { name: 'Auto-scroll' });
       expect(toggle.getAttribute('aria-pressed')).toBe('true');
       fireEvent.click(toggle);
       expect(onToggleScroll).toHaveBeenCalledTimes(1);
-    });
-
-    it('the overflow button opens the tools', () => {
-      const onOpenTools = vi.fn();
-      render(<ReaderToolbar {...base} onToggleScroll={() => {}} onOpenTools={onOpenTools} />);
-      fireEvent.click(screen.getByRole('button', { name: /More reading tools/ }));
-      expect(onOpenTools).toHaveBeenCalledTimes(1);
-    });
-
-    it('shows the transposition as text on the overflow button, and names it for screen readers', () => {
-      render(<ReaderToolbar {...base} onOpenTools={() => {}} semitones={2} />);
-      const more = screen.getByRole('button', { name: /More reading tools/ });
-      expect(more.textContent).toContain('+2');
-      expect(more.getAttribute('aria-label') ?? more.textContent).toMatch(/\+2/);
-    });
-
-    it('shows no transposition text at 0', () => {
-      render(<ReaderToolbar {...base} onOpenTools={() => {}} semitones={0} />);
-      expect(screen.getByRole('button', { name: /More reading tools/ }).textContent).not.toMatch(/[+\u2212]\d/);
     });
 
     it('marks itself as a place where touches do not stop auto-scroll', () => {
@@ -113,33 +96,18 @@ describe('ReaderToolbar', () => {
       expect(indicator.getAttribute('aria-label')).toBe('Screen stays on');
     });
 
-    it('the overflow button says whether the tools are open, and hands out its element for focus return', () => {
-      const ref = { current: null as HTMLButtonElement | null };
-      const { rerender } = render(<ReaderToolbar {...base} onOpenTools={() => {}} toolsOpen={false} toolsButtonRef={ref} />);
-      const more = screen.getByRole('button', { name: /More reading tools/ });
-      expect(more.getAttribute('aria-expanded')).toBe('false');
-      expect(ref.current).toBe(more);
-      rerender(<ReaderToolbar {...base} onOpenTools={() => {}} toolsOpen toolsButtonRef={ref} />);
-      expect(screen.getByRole('button', { name: /More reading tools/ }).getAttribute('aria-expanded')).toBe('true');
-    });
-
     it('every control is a 44 px target', () => {
-      render(<ReaderToolbar {...base} onToggleScroll={() => {}} onOpenTools={() => {}} />);
+      render(<ReaderToolbar {...base} onToggleScroll={() => {}} />);
       for (const b of screen.getAllByRole('button')) expect(b.className).toMatch(/min-h-tap/);
     });
   });
 
   // Validation 1 review, M1: a focused button that goes away must not drop focus to <body>.
-  it('moves focus to A+ when the focused ▶ and ⋯ buttons go away (the window grew, the song now fits)', () => {
+  it('moves focus to A+ when the focused ▶ goes away (the window grew, the song now fits)', () => {
     const base = { step: 1, chords: true, speed: 3, hasChords: true, onChange: () => {} };
-    const { rerender } = render(<ReaderToolbar {...base} onToggleScroll={() => {}} onOpenTools={() => {}} />);
+    const { rerender } = render(<ReaderToolbar {...base} onToggleScroll={() => {}} />);
     screen.getByTestId('autoscroll-toggle').focus();
     expect(document.activeElement).toBe(screen.getByTestId('autoscroll-toggle'));
-    rerender(<ReaderToolbar {...base} />);
-    expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Larger text' }));
-
-    rerender(<ReaderToolbar {...base} onOpenTools={() => {}} />);
-    screen.getByTestId('reader-tools-button').focus();
     rerender(<ReaderToolbar {...base} />);
     expect(document.activeElement).toBe(screen.getByRole('button', { name: 'Larger text' }));
   });

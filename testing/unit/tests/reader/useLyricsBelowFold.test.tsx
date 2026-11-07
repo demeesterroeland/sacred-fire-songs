@@ -79,6 +79,28 @@ describe('useLyricsBelowFold', () => {
     l.done();
   });
 
+  // Validation 2, item 21: on desktop the page scrolls inside <main>, so expanding the song's meta line (above the lyrics)
+  // changes no window size. It grows the content around the lyrics: every ancestor up to <body> is watched, not just the parent.
+  it('watches every ancestor of the lyrics, so a meta line that expands above them is noticed (desktop)', () => {
+    const outer = document.createElement('main');
+    const middle = document.createElement('div');
+    const parent = document.createElement('div');
+    const el = document.createElement('div');
+    outer.append(middle);
+    middle.append(parent);
+    parent.append(el);
+    document.body.appendChild(outer);
+    let b = 600;
+    el.getBoundingClientRect = () => ({ bottom: b }) as DOMRect;
+    const { result } = renderHook(() => useLyricsBelowFold({ current: el }));
+    expect(result.current).toBe(false);
+    expect(observed).toEqual(expect.arrayContaining([el, parent, middle, outer]));
+    b = 1500; // the meta line expanded: the lyrics moved down
+    fireObservers();
+    expect(result.current).toBe(true);
+    outer.remove();
+  });
+
   it('recalculates when the viewport is resized', () => {
     const l = lyrics(1000);
     const { result } = renderHook(() => useLyricsBelowFold({ current: l.el }));

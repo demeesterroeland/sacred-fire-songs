@@ -10,6 +10,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState, Suspense } from "react";
 import { Mail, Lock, ShieldCheck, Flame, ArrowRight } from "lucide-react";
 import { useLocale } from "@/context/LocaleContext";
+import { authNoticeKey } from "@/lib/auth/notice";
+import { errorMessage } from "@/lib/errors/errorCode";
 import { authPageHref } from '@/lib/auth/authBack';
 import {
   AuthCard,
@@ -43,7 +45,7 @@ function SignUpFormContent({
   const router = useRouter();
   const searchParams = useSearchParams();
   const next = searchParams.get("next");
-  const message = searchParams.get("message");
+  const messageKey = authNoticeKey(searchParams.get("message"));
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -72,7 +74,7 @@ function SignUpFormContent({
 
       router.push(`/auth/sign-up-success?email=${encodeURIComponent(email)}${next ? `&next=${encodeURIComponent(next)}` : ""}`);
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : t('common.errorOccurred'));
+      setError(errorMessage(error, t, 'common.errorOccurred'));
     } finally {
       setIsLoading(false);
     }
@@ -82,9 +84,9 @@ function SignUpFormContent({
     <AuthCard className={className} {...props}>
       <AuthHeader icon={<Flame className="fill-current" />} title={t('auth.signUp.heading')} description={t('auth.signUp.description')} />
 
-      {message && (
+      {messageKey && (
         <div className="mb-6">
-          <AuthNotice tone="info">{message}</AuthNotice>
+          <AuthNotice tone="info">{t(messageKey)}</AuthNotice>
         </div>
       )}
 
@@ -156,11 +158,11 @@ function SignUpFormContent({
       <div className="mt-8 text-center md:text-left">
         <p className="text-caption leading-relaxed text-fg-muted">
           {t('auth.tos.signUp')}{" "}
-          <Link href="#" className="font-bold text-fg hover:underline">
+          <Link href="/terms" className="font-bold text-fg hover:underline">
             {t('auth.tos.terms')}
           </Link>{" "}
           {t('auth.tos.and')}{" "}
-          <Link href="#" className="font-bold text-fg hover:underline">
+          <Link href="/privacy" className="font-bold text-fg hover:underline">
             {t('auth.tos.privacy')}
           </Link>
         </p>

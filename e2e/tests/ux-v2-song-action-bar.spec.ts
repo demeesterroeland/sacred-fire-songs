@@ -89,11 +89,11 @@ test.describe('Member @story-6.1.9', () => {
     await expect(page.getByRole('button', { name: 'Upload File' })).toBeVisible();
   });
 
-  test('the ⋮ sheet keeps share, edit and delete only', async ({ page }) => {
+  test('the ⋮ menu keeps the song actions and reading tools, but not Practice, Playlist or Favorites', async ({ page }) => {
     test.skip(!withoutMedia, 'no public song without media in the seed');
     await openSong(page, withoutMedia);
     await page.getByRole('button', { name: 'More actions' }).first().click();
-    const sheet = page.getByTestId('song-overflow-sheet');
+    const sheet = page.getByTestId('song-menu-sheet');
     await expect(sheet.getByRole('button', { name: 'Share Song' })).toBeVisible();
     for (const gone of [/practice/i, /playlist/i, /liked songs/i]) {
       await expect(sheet.getByRole('button', { name: gone })).toHaveCount(0);

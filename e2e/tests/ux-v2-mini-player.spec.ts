@@ -54,8 +54,8 @@ test('a playing take shows the bar, never covers the last row, and does not foll
   const name = `E2E Practice - ${Date.now()}`;
   // From here on a take may exist: the finally block always removes it.
   try {
-    await page.locator('input[placeholder="Take Name (e.g. Take 1)"]').fill(name);
-    await page.locator('button:has-text("Save Take")').click();
+    await page.locator('input[placeholder="Recording Name (e.g. Recording 1)"]').fill(name);
+    await page.locator('button:has-text("Save Recording")').click();
     const take = page.locator(`h4:has-text("${name}")`);
     await expect(take).toBeVisible({ timeout: 15_000 });
     // Saving a take is not "play": the bar is still hidden.
@@ -102,7 +102,7 @@ test('a playing take shows the bar, never covers the last row, and does not foll
     if (await leftover.count()) {
       const row = leftover.locator('xpath=ancestor::div[contains(@class, "group")][1]');
       await row.locator('button[aria-label="More actions"]').click();
-      await page.getByRole('dialog').getByRole('button', { name: 'Delete take', exact: true }).click();
+      await page.getByRole('dialog').getByRole('button', { name: 'Delete recording', exact: true }).click();
       await page.getByRole('button', { name: 'Yes, delete' }).click();
       await expect(leftover).toHaveCount(0, { timeout: 10_000 });
     }

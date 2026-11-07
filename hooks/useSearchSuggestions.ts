@@ -9,6 +9,13 @@ import { readRecentSearches } from '@/lib/search/history';
 /** How long a press that never turns into a click (a drag, a cancelled touch) keeps the panel from closing on focus. */
 const PRESS_GRACE_MS = 500;
 
+/** A tap that moves further than this (px) between press and release is a drag or a scroll, not a tap. */
+const TAP_SLOP_PX = 10;
+
+/** Things a tap can land on that get a click and handle it themselves: the click path closes the panel for them. */
+const INTERACTIVE =
+  'a[href], button, input, select, textarea, summary, label, [role="button"], [role="link"], [role="menuitem"], [role="option"], [tabindex], [contenteditable="true"]';
+
 /**
  * The behaviour both search fields (header and Home, Stories 6.1.28/6.1.29) share around the G7.1
  * suggestion panel: when it opens, which data it loads, and how it closes.
@@ -70,9 +77,30 @@ export function useSearchSuggestions() {
     if (!open) return;
     const isOutside = (target: Node) => !wrapperRef.current?.contains(target) && !panelRef.current?.contains(target);
     let forget: ReturnType<typeof setTimeout> | undefined;
-    const onDown = () => {
+    let tapStart: { x: number; y: number; id: number } | null = null;
+    // Where the last press landed: a press that never clicks (right button, long press) is judged by it.
+    let pressTarget: Node | null = null;
+    const onDown = (e: Event) => {
       clearTimeout(forget);
       pressingRef.current = true;
+      pressTarget = e.target as Node | null;
+      const p = e as PointerEvent;
+      tapStart = p.button === 0 || p.button === undefined ? { x: p.clientX, y: p.clientY, id: p.pointerId } : null;
+    };
+    // iOS Safari fires no click for a tap on empty (non-interactive) space and leaves focus in the field, so the
+    // click path below never runs. A still release (same pointer, no movement) on something that is not a link,
+    // button or field closes the panel. A release on anything interactive is left to its click: closing here would
+    // move the list before that click and open the wrong song (validation 1 review, B1).
+    const onTapEnd = (e: Event) => {
+      const start = tapStart;
+      tapStart = null;
+      const p = e as PointerEvent;
+      if (!start || p.pointerId !== start.id) return;
+      if (Math.hypot(p.clientX - start.x, p.clientY - start.y) > TAP_SLOP_PX) return;
+      const target = e.target as Element | null;
+      if (!target || !isOutside(target)) return;
+      if (target.closest?.(INTERACTIVE)) return;
+      setOpen(false);
     };
     const onUp = () => {
       // On a touch screen the browser moves focus to the pressed link AFTER the finger lifts, a moment before
@@ -80,6 +108,13 @@ export function useSearchSuggestions() {
       clearTimeout(forget);
       forget = setTimeout(() => {
         pressingRef.current = false;
+        // No click came (right button, long press, a drag). If the press landed outside the field and the panel and
+        // left focus outside them too (on a link it pressed, or on <body> after a right-click on plain text), the blur
+        // that would have closed the panel has passed already: close it now. A scroll gesture leaves focus in the
+        // field, and a press inside the panel is never "outside", so both keep the panel open.
+        const active = document.activeElement;
+        const focusInside = !!active && active !== document.body && !isOutside(active);
+        if (pressTarget && isOutside(pressTarget) && !focusInside) setOpen(false);
       }, PRESS_GRACE_MS);
     };
     const onClick = (e: MouseEvent) => {
@@ -88,13 +123,18 @@ export function useSearchSuggestions() {
       if (isOutside(e.target as Node)) setOpen(false);
     };
     document.addEventListener('pointerdown', onDown, true);
+    document.addEventListener('pointerup', onTapEnd, true);
     document.addEventListener('pointerup', onUp, true);
     document.addEventListener('pointercancel', onUp, true);
+    // With a context menu open the browser may never report the release.
+    document.addEventListener('contextmenu', onUp, true);
     document.addEventListener('click', onClick, true);
     return () => {
       document.removeEventListener('pointerdown', onDown, true);
+      document.removeEventListener('pointerup', onTapEnd, true);
       document.removeEventListener('pointerup', onUp, true);
       document.removeEventListener('pointercancel', onUp, true);
+      document.removeEventListener('contextmenu', onUp, true);
       document.removeEventListener('click', onClick, true);
       clearTimeout(forget);
       pressingRef.current = false;

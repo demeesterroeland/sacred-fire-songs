@@ -9,6 +9,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, Suspense } from "react";
 import { Flame, User, Compass, CheckCircle } from "lucide-react";
 import { useLocale } from "@/context/LocaleContext";
+import { errorMessage } from "@/lib/errors/errorCode";
 import { safeNextPath } from '@/lib/auth/safeNext';
 
 export function FinishRegistrationForm(props: React.ComponentPropsWithoutRef<"div">) {
@@ -55,7 +56,7 @@ function FinishRegistrationFormContent({
 
       router.push(safeNextPath(next, "/"));
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : t('auth.error.default'));
+      setError(errorMessage(error, t, 'auth.error.default'));
     } finally {
       setIsLoading(false);
     }

@@ -26,6 +26,16 @@ describe('actionErrorMessage', () => {
     ['Description too long', 'errors.descriptionTooLong'],
     ['Please log in to export a PDF songbook', 'errors.notSignedIn'],
     ['Export limit exceeded: maximum 200 songs allowed per PDF export', 'errors.exportLimit'],
+    ['User not logged in. Please sign in again.', 'errors.notSignedIn'],
+    ['Song not found', 'errors.songNotFound'],
+    ['Take not found.', 'errors.takeNotFound'],
+    ['Recording not found', 'errors.takeNotFound'],
+    ['Only the recording owner can share this recording.', 'errors.notTakeOwner'],
+    ['This song is private. You must make the song lyrics public before sharing recordings.', 'errors.shareSongPrivate'],
+    ['Cannot share recording with yourself.', 'errors.shareWithSelf'],
+    ['Only the song owner or an admin can publish this song.', 'errors.notSongOwner'],
+    ['Singer consent must be explicitly confirmed before publishing publicly.', 'errors.consentRequired'],
+    ['This song is private, so this take has no audience yet. Make the song public first, then publish the take.', 'recording.publish.errorSongPrivate'],
   ])('%s → %s', (error, key) => {
     expect(actionErrorMessage(error, t)).toBe(`T:${key}`);
   });
@@ -79,3 +89,15 @@ describe('no raw error text reaches a toast', () => {
     expect(offenders).toEqual([]);
   });
 });
+
+// Review round: `getRecordingDownloadUrl` has no caller, so its answer has no key of its own (it falls back to the
+// generic message if anything ever calls it). The key was removed from every locale.
+describe('unused download message', () => {
+  it('has no key in any language and no mapping', () => {
+    expect(ACTION_ERROR_KEYS['Shared recordings cannot be downloaded']).toBeUndefined();
+    for (const [locale, dictionary] of Object.entries(DICTIONARIES)) {
+      expect(Object.keys(dictionary as object), locale).not.toContain('errors.sharedTakeNoDownload');
+    }
+  });
+});
+

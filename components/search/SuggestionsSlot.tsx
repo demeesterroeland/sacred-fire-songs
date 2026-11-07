@@ -11,7 +11,8 @@ import { createPortal } from 'react-dom';
  * Review round, H1: when the column is scrolled down the panel has to be seen without scrolling the column
  * (that lost the reader's place). So the slot sticks to the top of the column: still in the flow (it takes its
  * own room, pushes the rows down), but visible wherever the column is scrolled to. The layout turns scroll
- * anchoring off on the column, so the scroll position stays exactly where it was.
+ * anchoring off on the column, so the scroll position stays exactly where it was. z-40: above the bars fixed to
+ * the bottom of the window (z-30), which would otherwise cover the panel's last rows on a low window.
  */
 let slotEl: HTMLElement | null = null;
 const listeners = new Set<() => void>();
@@ -35,7 +36,7 @@ export function SuggestionsSlot() {
     <div
       ref={setSlot}
       data-testid="search-suggestions-slot"
-      className="sticky top-0 z-30 border-b border-line bg-bg empty:hidden"
+      className="sticky top-0 z-40 border-b border-line bg-bg empty:hidden"
     />
   );
 }

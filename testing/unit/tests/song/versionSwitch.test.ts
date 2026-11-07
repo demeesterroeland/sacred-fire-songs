@@ -139,3 +139,43 @@ describe('linkedVersionChoice (?version= on the song page)', () => {
     expect(linkedVersionChoice('s1', 'x'.repeat(200))).toBeNull();
   });
 });
+
+// Validation 2, item 5 (#395): a version has its own link.
+import { versionSearch, versionShareUrl } from '@/lib/songs/versionSwitch';
+
+describe('versionSearch', () => {
+  it('sets ?version= for a version that is not the first', () => {
+    expect(versionSearch('', 'v2', false)).toBe('?version=v2');
+  });
+  it('gives a clean URL for the default (first) version', () => {
+    expect(versionSearch('?version=v2', 'v1', true)).toBe('');
+    expect(versionSearch('', 'v1', true)).toBe('');
+  });
+  it('keeps parameters it does not own', () => {
+    expect(versionSearch('?utm=a', 'v2', false)).toBe('?utm=a&version=v2');
+    expect(versionSearch('?utm=a&version=v2', 'v1', true)).toBe('?utm=a');
+  });
+  // A recording link belongs to the version the recording is on. Switching away drops it, so a reload (or a shared
+  // link) cannot open version B with a recording of version A.
+  it('drops the recording parameter when the version changes', () => {
+    expect(versionSearch('?recording=r1', 'v2', false)).toBe('?version=v2');
+    expect(versionSearch('?recording=r1&version=v2', 'v1', true)).toBe('');
+    expect(versionSearch('?utm=a&recording=r1', 'v2', false)).toBe('?utm=a&version=v2');
+  });
+  it('replaces an earlier version value, never repeats the parameter', () => {
+    expect(versionSearch('?version=v2', 'v3', false)).toBe('?version=v3');
+  });
+  it('encodes the id', () => {
+    expect(versionSearch('', 'a b', false)).toBe('?version=a+b');
+  });
+});
+
+describe('versionShareUrl', () => {
+  it('shares the link of the shown version, from the current location', () => {
+    expect(versionShareUrl('https://x.test/songs/s1', 'v2', false)).toBe('https://x.test/songs/s1?version=v2');
+    expect(versionShareUrl('https://x.test/songs/s1?version=v2', 'v1', true)).toBe('https://x.test/songs/s1');
+    expect(versionShareUrl('https://x.test/songs/s1?version=v2#top', 'v2', false)).toBe('https://x.test/songs/s1?version=v2#top');
+    expect(versionShareUrl('https://x.test/songs/s1?recording=r1', 'v2', false)).toBe('https://x.test/songs/s1?version=v2');
+    expect(versionShareUrl('https://x.test/songs/s1?recording=r1&version=v2', 'v1', true)).toBe('https://x.test/songs/s1');
+  });
+});

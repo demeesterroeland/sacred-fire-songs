@@ -1,12 +1,13 @@
 'use client';
 
 import { useState, useRef, useEffect, useMemo } from 'react';
-import { X, Search, ChevronDown } from 'lucide-react';
+import { X, Search } from 'lucide-react';
 import { TaxonomyNode } from '@/lib/taxonomyUtils';
 import { Chip } from '@/components/ui/chip';
 import { categoryDisplayName } from '@/lib/taxonomy/categoryName';
 import { useTaxonomy } from '@/lib/hooks/useTaxonomy';
 import { useLocale } from '@/context/LocaleContext';
+import { formatCount } from '@/lib/format/count';
 
 interface TagSelectorProps {
   category?: string;
@@ -42,11 +43,6 @@ export default function TagSelector({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const { categories, grouped } = useTaxonomy();
-
-  // Selected category objects
-  const selectedTagObjects = useMemo(() => {
-    return categories.filter((c) => tags.includes(c.slug) || tags.includes(c.id));
-  }, [categories, tags]);
 
   // Flattened options for search filter
   const filteredGrouped = useMemo(() => {
@@ -173,8 +169,9 @@ export default function TagSelector({
                     <Chip key={cat.id} selected={isSelected} onClick={() => toggleTagSlug(cat.slug)}>
                       {cat.emoji && <span aria-hidden className="leading-none">{cat.emoji}</span>}
                       {cat.name}
+                      {cat.song_count !== undefined && ' '}
                       {cat.song_count !== undefined && (
-                        <span className="font-normal tabular-nums">{cat.song_count}</span>
+                        <span className="font-normal tabular-nums">{formatCount(cat.song_count)}</span>
                       )}
                     </Chip>
                   );

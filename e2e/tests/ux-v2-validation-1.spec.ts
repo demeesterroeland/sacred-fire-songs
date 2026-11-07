@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import { openSongMenu } from '../fixtures/songMenu';
 import pg from 'pg';
 import { ROLES } from '../fixtures/roles';
 import { VALIDATION_1_FIXTURE_IDS as IDS } from '../fixtures/ids';
@@ -216,15 +217,16 @@ test.describe('song flags @fix-7', () => {
     test('transpose follows the version shown: there with Original, gone with Simplified', async ({ page }) => {
       await page.goto(`/songs/${IDS.song}`);
       await expect(page.getByTestId('reader-toolbar')).toBeVisible();
-      await expect(page.getByTestId('reader-tools-button')).toBeVisible(); // Original has chords: transpose lives there
       await page.getByRole('radio', { name: 'Simplified' }).click();
       await expect(page.getByRole('radio', { name: 'Simplified' })).toHaveAttribute('aria-checked', 'true');
       await expect(page.getByRole('switch', { name: 'Chords' })).toHaveCount(0);
-      // Nothing to transpose, and the short lyrics fit the screen: no tools button either.
-      await expect(page.getByTestId('reader-tools-button')).toHaveCount(0);
+      // Nothing to transpose in a lyrics-only version: the ⋮ menu has no Transpose group.
+      let sheet = await openSongMenu(page);
+      await expect(sheet.getByRole('group', { name: 'Transpose' })).toHaveCount(0);
+      await page.keyboard.press('Escape');
       await page.getByRole('radio', { name: 'Original' }).click();
-      await page.getByTestId('reader-tools-button').click();
-      await expect(page.getByRole('dialog', { name: 'Reading tools' }).getByRole('group', { name: 'Transpose' })).toBeVisible();
+      sheet = await openSongMenu(page);
+      await expect(sheet.getByRole('group', { name: 'Transpose' })).toBeVisible();
     });
   });
 });

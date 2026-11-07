@@ -1,7 +1,7 @@
 'use client';
 
 import { useId } from 'react';
-import Link from 'next/link';
+import { SignInLink } from '@/components/auth/SignInLink';
 import { PencilLine } from 'lucide-react';
 import { useLocale } from '@/context/LocaleContext';
 import { signInHref } from '@/lib/auth/guestGate';
@@ -27,12 +27,9 @@ export default function GuestDraftBanner({ next }: { next: string }) {
         </p>
         <p className="text-meta text-fg-muted">{t('songForm.guestDraft.body')}</p>
       </div>
-      <Link
-        href={signInHref(next)}
-        className="inline-flex min-h-tap shrink-0 items-center rounded-control bg-accent px-4 text-meta font-semibold text-on-accent hover:opacity-90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-      >
+      <SignInLink href={signInHref(next)}>
         {t('songForm.guestDraft.signIn')}
-      </Link>
+      </SignInLink>
     </section>
   );
 }

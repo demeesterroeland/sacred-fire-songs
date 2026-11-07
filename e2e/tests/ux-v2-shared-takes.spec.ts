@@ -90,7 +90,7 @@ test('a take shared with me is listed under "Shared with me", not under "My take
   await expect(sharedRow.getByRole('button', { name: /download|delete|share/i })).toHaveCount(0);
 
   // My takes lists my own take and not the shared one.
-  const mine = body.locator('section', { has: page.getByRole('heading', { name: 'My takes' }) });
+  const mine = body.locator('section', { has: page.getByRole('heading', { name: 'My recordings' }) });
   await expect(mine.locator('[data-recording-id]', { hasText: OWN_TAKE })).toHaveCount(1);
   await expect(mine.locator('[data-recording-id]', { hasText: SHARED_TAKE })).toHaveCount(0);
   // The own row keeps its actions.

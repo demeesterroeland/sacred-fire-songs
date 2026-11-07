@@ -1467,3 +1467,18 @@
 - [x] Palette baseline 1564 → 1559; lint cap stays 157 (157 warnings)
 - [ ] Owner: decide whether lower case, German and solfège chord spellings (`[am]`, `[Hm]`, `[Re]`) should count as chords (UXA-066)
 - [ ] Follow-ups: auth forms still show the authentication service's message; `qu` has the generic sentence for every `errors.*` key; the song page button still says "Add to Liked Songs"; two nested `<main>` elements on some pages
+
+## Session November 7, 2026 (Epic 6.1 UX v2, validation round 2, batch 2, #375)
+- [x] Items 1 to 15 (Sign In button, floating +, heading size, counts in parentheses, version links, full title, neutral desktop buttons, recording wording and the Your recordings card, Screen stays on switch, one song menu, Terms and Privacy pages, own drafts, favourites term, one `<main>`)
+- [x] Items 16, 17, 19, 20, 22 (first part) applied from the other thread's patch; 18, 21 and 22 (second part: auth and form errors by code) done here
+- [x] Tests first per fix, before/after screenshots, validation script section 16 checks, UXA-068, feature file `ux-v2-validation-2.feature`
+- [x] Lint cap 157 → 143, palette baseline 1559 → 1507
+- [ ] Owner: approve the Terms and Privacy wording (remove the Draft note), decide the open points listed in the pull request
+- [ ] Owner: set `OPERATOR_NAME` and `OPERATOR_CONTACT_EMAIL` on every server that runs the image
+- [ ] Follow-ups: native-speaker check (Runasimi uses English for the legal text and a loanword for "recording"), real iPhone check of the empty-space tap, `docs/design/screens` mockups for the song page and Library, `/auth/error` prints the `error` query parameter, the `?status=draft` list still shows every draft to an admin
+
+## Session November 7, 2026 (Epic 6.1 UX v2, validation round 2, review of PR #477)
+- [x] Auth pages: messages by code; auto-scroll with the menu open; version switch and recording link; My Drafts list; Runasimi coverage; `.env.example`; draft banner button; chord-like labels; right-click on plain text; unused message and starter component removed
+- [ ] Owner: Runasimi native-speaker check; approve the Terms and Privacy wording
+- [x] Favourites lookups filter on the owner (admin saw 6 on the card and an empty list)
+- [x] Remove Vercel Speed Insights; privacy text: operator access to stored data

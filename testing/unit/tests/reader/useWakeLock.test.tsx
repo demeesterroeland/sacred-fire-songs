@@ -51,6 +51,20 @@ describe('useWakeLock', () => {
     expect((navigator as unknown as { wakeLock: { request: ReturnType<typeof vi.fn> } }).wakeLock.request).not.toHaveBeenCalled();
   });
 
+  // Validation 2, item 10: the "Screen stays on" switch (per device, in the song menu) really lets go of the lock.
+  it('releases the lock when the preference is switched off, and asks for it again when switched on', async () => {
+    const { sentinel } = stubWakeLock();
+    const { result, rerender } = renderHook(() => useWakeLock());
+    await waitFor(() => expect(result.current.isActive).toBe(true));
+    prefs.keepScreenAwake = false;
+    rerender();
+    await waitFor(() => expect(result.current.isActive).toBe(false));
+    expect(sentinel.release).toHaveBeenCalled();
+    prefs.keepScreenAwake = true;
+    rerender();
+    await waitFor(() => expect(result.current.isActive).toBe(true));
+  });
+
   it('turns inactive when the system releases the lock', async () => {
     const { listeners } = stubWakeLock();
     const { result } = renderHook(() => useWakeLock());

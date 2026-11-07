@@ -6,6 +6,7 @@ import { fetchCategoryTree, type TaxonomyNode } from '@/lib/taxonomyUtils';
 import { sortCategories } from '@/lib/categoryOrder';
 import { renderCategoryIcon } from '@/lib/iconUtils';
 import { useLocale } from '@/context/LocaleContext';
+import { formatCount } from '@/lib/format/count';
 import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
 
@@ -26,12 +27,13 @@ function TagList({ tags }: { tags: TaxonomyNode[] }) {
         <li key={tag.id} className={!expanded && i >= MOBILE_TAG_LIMIT ? 'hidden md:list-item' : ''}>
           <Link
             href={`/songs?tag=${tag.slug}`}
-            className={`inline-flex min-h-tap items-center gap-1 text-meta text-fg-muted hover:text-fg ${PRESSED}`}
+            className={`inline-flex min-h-tap items-center text-meta text-fg-muted hover:text-fg ${PRESSED}`}
           >
             {tag.name}
+            {tag.song_count !== undefined && ' '}
             {tag.song_count !== undefined && (
               <span data-testid="tag-count" className="tabular-nums text-fg-subtle">
-                {tag.song_count}
+                {formatCount(tag.song_count)}
               </span>
             )}
           </Link>
