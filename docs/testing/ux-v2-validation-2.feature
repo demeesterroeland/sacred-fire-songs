@@ -1,5 +1,6 @@
-# Version: 1.1 | Date: Nov 7, 2026
+# Version: 1.2 | Date: Nov 7, 2026
 # Changelog
+# 1.2 | Nov 7, 2026 | An admin's favourites (hearts, list, counts) are their own.
 # 1.1 | Nov 7, 2026 | Review of PR #477: auth messages by code, auto-scroll while the menu is open, version switch drops the recording link, My Drafts lists what it counts, chord-like labels, right-click on plain text.
 # 1.0 | Nov 7, 2026 | UX v2 validation round 2, batch 2 (Part of #375): one Sign In button, floating "+", one heading size, counts in parentheses, version links, full title on a phone, neutral song buttons, "recording" and "Record", the Recordings card, the Screen stays on switch, one song menu, Terms and Privacy pages, own drafts only, one favourites term, one main landmark, specific error messages.
 @validation-2
@@ -198,3 +199,9 @@ Feature: UX v2 validation round 2, batch 2
     Given the search suggestions are open
     When I right-click on text outside them and focus leaves the field
     Then they close, and a right-click inside them does not close them
+
+  @unit @e2e
+  Scenario: An admin sees their own favourites
+    Given several members have a "My Favorites" playlist that an admin can read
+    When the admin opens the favourites list
+    Then the list, the hearts and the counts are the admin's own favourites

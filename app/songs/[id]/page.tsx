@@ -42,6 +42,7 @@ import { useSongRecordings } from '@/hooks/useSongRecordings';
 import { useRecordingsQuery } from '@/hooks/useRecordingsQuery';
 import { useLocale } from '@/context/LocaleContext';
 import { fetchSong, withTimeout } from '@/lib/songs/fetchSong';
+import { fetchFavoritesSetlistId } from '@/lib/playlists/favorites';
 import { linkedTakeTab, parseRecordingParam, RECORDING_PARAM } from '@/lib/songs/recordingLink';
 import { actionErrorMessage } from '@/lib/errors/actionError';
 
@@ -149,16 +150,13 @@ export default function SongDetailPage() {
             const isProd = process.env.NODE_ENV === "production";
             const timeoutMs = isProd ? 4500 : 15000;
             
-            const setlistPromise = supabase
-                .from('setlists').select('id')
-                .eq('title', 'My Favorites').maybeSingle();
-                
-            const { data: setlist } = (await withTimeout(Promise.resolve(setlistPromise), timeoutMs, "Favorites query timed out")) as { data: any };
-            if (!setlist) return new Set<string>();
-            
+            // The signed-in user's own setlist: an admin can read everyone's, so the lookup filters on the owner.
+            const setlistId = await withTimeout(fetchFavoritesSetlistId(supabase, user.id), timeoutMs, "Favorites query timed out");
+            if (!setlistId) return new Set<string>();
+
             const itemsPromise = supabase
                 .from('setlist_items')
-                .select('song_versions(composition_id)').eq('setlist_id', setlist.id);
+                .select('song_versions(composition_id)').eq('setlist_id', setlistId);
                 
             const { data: items } = (await withTimeout(Promise.resolve(itemsPromise), timeoutMs, "Favorites items query timed out")) as { data: any };
             // eslint-disable-next-line @typescript-eslint/no-explicit-any

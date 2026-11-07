@@ -166,3 +166,37 @@ Then('a line holding only {string}, {string}, {string}, {string} shows as text',
     assert.ok(items.every((i) => !i.chords) && items.some((i) => i.comment !== undefined), line);
   }
 });
+
+// Favourites of an admin
+import { fetchFavoritesSetlistId } from '../../../lib/playlists/favorites';
+const setlists = [
+  { id: 's-a', owner_id: 'member-a', title: 'My Favorites' },
+  { id: 's-admin', owner_id: 'admin-1', title: 'My Favorites' },
+  { id: 's-b', owner_id: 'member-b', title: 'My Favorites' },
+];
+const fakeSupabase = {
+  from: () => {
+    const filters: Array<[string, unknown]> = [];
+    const b: Record<string, unknown> = {
+      select: () => b,
+      eq: (k: string, v: unknown) => (filters.push([k, v]), b),
+      order: () => b,
+      limit: () => b,
+      maybeSingle: async () => {
+        const rows = setlists.filter((r) => filters.every(([k, v]) => (r as Record<string, unknown>)[k] === v));
+        return { data: rows.length === 1 ? rows[0] : null, error: rows.length > 1 ? { code: 'PGRST116' } : null };
+      },
+    };
+    return b;
+  },
+};
+let adminSetlist: string | null = null;
+Given('several members have a "My Favorites" playlist that an admin can read', function () {
+  assert.equal(setlists.length, 3);
+});
+When('the admin opens the favourites list', async function () {
+  adminSetlist = await fetchFavoritesSetlistId(fakeSupabase as never, 'admin-1');
+});
+Then("the list, the hearts and the counts are the admin's own favourites", function () {
+  assert.equal(adminSetlist, 's-admin');
+});

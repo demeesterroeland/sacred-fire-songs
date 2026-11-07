@@ -121,7 +121,8 @@ test.describe('member', () => {
     const card = page.getByRole('link', { name: /Your recordings/ });
     await expect(card).toBeVisible();
     await expect(card).not.toContainText(/\btakes?\b|private practice/i);
-    await expect(card).not.toContainText(/\bsongs?\b(?!.*recording)/i);
+    // A count of songs ("23 songs") must not be there; song titles listed on the card may contain the word.
+    await expect(card).not.toContainText(/\d+ songs?\b/i);
     await expect(page.getByText(/Your takes/)).toHaveCount(0);
   });
 });
@@ -373,6 +374,29 @@ test.describe('member', () => {
 
 test.describe('admin', () => {
   test.use({ storageState: ROLES.admin.storage });
+
+  test('11 (review): with every member\'s My Favorites readable, the admin\'s favourites list matches the card and the hearts', async ({ page }) => {
+    const client = new pg.Client({ connectionString: DATABASE_URL });
+    await client.connect();
+    const own = Number(
+      (
+        await client.query(
+          `SELECT count(*) AS n FROM public.setlist_items i
+             JOIN public.setlists s ON s.id = i.setlist_id
+             JOIN public.profiles p ON p.id = s.owner_id
+            WHERE p.email = $1 AND s.title = 'My Favorites'`,
+          [ROLES.admin.email],
+        )
+      ).rows[0].n,
+    );
+    await client.end(); // read-only: nothing is written
+    test.skip(own === 0 || own > 15, 'needs a few own favourites (and fewer than one page) in the seed');
+    await page.goto('/library/playlists');
+    await expect(page.getByRole('link', { name: /Your Favorites/ })).toContainText(own === 1 ? '1 song' : `${own} songs`);
+    await page.getByRole('link', { name: /Your Favorites/ }).click();
+    await expect(page).toHaveURL(/favorites=true/);
+    await expect(page.getByTestId('song-row')).toHaveCount(own);
+  });
 
   test('4 (review): the My Drafts card opens exactly the drafts it counts', async ({ page }) => {
     const client = new pg.Client({ connectionString: DATABASE_URL });
