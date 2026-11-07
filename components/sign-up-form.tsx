@@ -10,6 +10,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState, Suspense } from "react";
 import { Mail, Lock, ShieldCheck, Flame, ArrowRight } from "lucide-react";
 import { useLocale } from "@/context/LocaleContext";
+import { errorMessage } from "@/lib/errors/errorCode";
 import { authPageHref } from '@/lib/auth/authBack';
 import {
   AuthCard,
@@ -72,7 +73,7 @@ function SignUpFormContent({
 
       router.push(`/auth/sign-up-success?email=${encodeURIComponent(email)}${next ? `&next=${encodeURIComponent(next)}` : ""}`);
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : t('common.errorOccurred'));
+      setError(errorMessage(error, t, 'common.errorOccurred'));
     } finally {
       setIsLoading(false);
     }

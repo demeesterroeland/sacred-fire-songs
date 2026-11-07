@@ -960,6 +960,16 @@ const nl: Partial<Record<TranslationKey, string>> = {
   "errors.notSongOwner": "Alleen de eigenaar van het lied of een beheerder kan dit lied publiceren.",
   "errors.consentRequired": "Bevestig eerst de toestemming van de zanger voordat je publiceert.",
   "errors.sharedTakeNoDownload": "Gedeelde opnames kun je niet downloaden.",
+  "errors.auth.invalidCredentials": "Het e-mailadres of wachtwoord klopt niet.",
+  "errors.auth.emailNotConfirmed": "Bevestig eerst je e-mailadres. Kijk in je inbox.",
+  "errors.auth.userExists": "Er bestaat al een account met dit e-mailadres. Probeer in te loggen.",
+  "errors.auth.weakPassword": "Dat wachtwoord is te zwak. Kies een langer wachtwoord.",
+  "errors.auth.samePassword": "Het nieuwe wachtwoord moet anders zijn dan het oude.",
+  "errors.auth.rateLimited": "Te veel pogingen. Wacht even en probeer het opnieuw.",
+  "errors.auth.linkExpired": "Deze link of code is verlopen. Vraag een nieuwe aan.",
+  "errors.auth.signUpAgain": "E-mailadres niet gevonden. Meld je opnieuw aan.",
+  "errors.network": "Geen verbinding. Controleer je internet en probeer het opnieuw.",
+  "errors.alreadyExists": "Dat bestaat al.",
 };
 
 export default nl;

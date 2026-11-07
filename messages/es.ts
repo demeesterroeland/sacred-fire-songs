@@ -961,6 +961,16 @@ const es: Partial<Record<TranslationKey, string>> = {
   "errors.notSongOwner": "Solo quien es dueño de la canción o un administrador puede publicarla.",
   "errors.consentRequired": "Confirma el consentimiento de quien canta antes de publicar.",
   "errors.sharedTakeNoDownload": "Las grabaciones compartidas no se pueden descargar.",
+  "errors.auth.invalidCredentials": "El correo o la contraseña no son correctos.",
+  "errors.auth.emailNotConfirmed": "Confirma primero tu correo. Revisa tu bandeja de entrada.",
+  "errors.auth.userExists": "Ya existe una cuenta con este correo. Prueba a iniciar sesión.",
+  "errors.auth.weakPassword": "Esa contraseña es demasiado débil. Usa una más larga.",
+  "errors.auth.samePassword": "La nueva contraseña debe ser distinta de la anterior.",
+  "errors.auth.rateLimited": "Demasiados intentos. Espera un momento e inténtalo de nuevo.",
+  "errors.auth.linkExpired": "Este enlace o código ha caducado. Pide uno nuevo.",
+  "errors.auth.signUpAgain": "No se encontró el correo. Regístrate de nuevo.",
+  "errors.network": "Sin conexión. Revisa tu internet e inténtalo de nuevo.",
+  "errors.alreadyExists": "Eso ya existe.",
 };
 
 export default es;

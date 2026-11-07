@@ -959,6 +959,16 @@ const en = {
   "errors.notSongOwner": "Only the song's owner or an admin can publish this song.",
   "errors.consentRequired": "Please confirm the singer's consent before publishing.",
   "errors.sharedTakeNoDownload": "Shared recordings cannot be downloaded.",
+  "errors.auth.invalidCredentials": "The email or password is not correct.",
+  "errors.auth.emailNotConfirmed": "Please confirm your email address first. Check your inbox.",
+  "errors.auth.userExists": "An account with this email already exists. Try signing in.",
+  "errors.auth.weakPassword": "That password is too weak. Use a longer one.",
+  "errors.auth.samePassword": "The new password must be different from the old one.",
+  "errors.auth.rateLimited": "Too many attempts. Wait a moment and try again.",
+  "errors.auth.linkExpired": "This link or code has expired. Request a new one.",
+  "errors.auth.signUpAgain": "Email not found. Please sign up again.",
+  "errors.network": "No connection. Check your internet and try again.",
+  "errors.alreadyExists": "That already exists.",
 } as const;
 
 export default en;

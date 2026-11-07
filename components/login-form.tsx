@@ -10,6 +10,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState, Suspense } from "react";
 import { Mail, Lock, Sparkles, Flame, ArrowRight } from "lucide-react";
 import { useLocale } from "@/context/LocaleContext";
+import { errorMessage } from "@/lib/errors/errorCode";
 import { safeNextPath } from '@/lib/auth/safeNext';
 import { authPageHref } from '@/lib/auth/authBack';
 import {
@@ -64,7 +65,7 @@ function LoginFormContent({
       if (error) throw error;
       setSuccess(t('auth.login.magicLinkSent'));
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : t('common.errorOccurred'));
+      setError(errorMessage(error, t, 'common.errorOccurred'));
     } finally {
       setIsLoading(false);
     }
@@ -86,7 +87,7 @@ function LoginFormContent({
       window.dispatchEvent(new Event("auth-role-change"));
       router.push(safeNextPath(next));
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : t('common.errorOccurred'));
+      setError(errorMessage(error, t, 'common.errorOccurred'));
     } finally {
       setIsLoading(false);
     }

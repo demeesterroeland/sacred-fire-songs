@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { AuthCard, AuthHeader, AuthNotice, AuthPage, authFooterClass, authIconClass, authInputClass, authLabelClass, authLinkClass } from '@/components/auth/AuthShell';
 
 import { useLocale } from '@/context/LocaleContext';
+import { errorMessage } from '@/lib/errors/errorCode';
 function UpdatePasswordContent() {
     const { t } = useLocale();
     const [password, setPassword] = useState("");
@@ -43,7 +44,7 @@ function UpdatePasswordContent() {
 
             router.push("/?message=Password updated successfully");
         } catch (error: unknown) {
-            setError(error instanceof Error ? error.message : t('common.errorOccurred'));
+            setError(errorMessage(error, t, 'common.errorOccurred'));
         } finally {
             setIsLoading(false);
         }

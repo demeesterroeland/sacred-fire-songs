@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Mail, KeyRound, ArrowRight, Loader2 } from 'lucide-react';
 import { useLocale } from '@/context/LocaleContext';
+import { errorMessage } from '@/lib/errors/errorCode';
 
 function SignUpSuccessContent() {
     const { t } = useLocale();
@@ -21,7 +22,7 @@ function SignUpSuccessContent() {
     const handleVerify = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!email) {
-            setError('Email not found. Please sign up again.');
+            setError(t('errors.auth.signUpAgain'));
             return;
         }
         setIsVerifying(true);
@@ -34,7 +35,7 @@ function SignUpSuccessContent() {
         });
         setIsVerifying(false);
         if (error) {
-            setError(error.message);
+            setError(errorMessage(error, t, 'common.errorOccurred'));
         } else {
             router.push(`/auth/finish-registration${next ? `?next=${encodeURIComponent(next)}` : ""}`);
         }

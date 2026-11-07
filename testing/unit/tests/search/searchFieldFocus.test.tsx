@@ -141,6 +141,59 @@ describe.each(fields)('$name suggestion panel', ({ name, render: mount, role }) 
     }
   });
 
+  // Validation 2, item 18: iOS Safari fires no click on a tap on empty (non-interactive) space and leaves focus in the
+  // field, so only pointerup can tell. A still release on something that is not a link or button closes the panel.
+  it('a still tap on empty space closes the panel without any click (iPhone)', async () => {
+    mount();
+    const empty = document.createElement('div');
+    document.body.appendChild(empty);
+    act(() => screen.getByRole(role).focus());
+    await screen.findByTestId('search-suggestions');
+    fireEvent.pointerDown(empty, { clientX: 100, clientY: 200, pointerId: 1, button: 0 });
+    expect(screen.getByTestId('search-suggestions')).toBeTruthy(); // not on the press: the page holds still
+    fireEvent.pointerUp(empty, { clientX: 102, clientY: 201, pointerId: 1, button: 0 });
+    expect(screen.queryByTestId('search-suggestions')).toBeNull();
+    empty.remove();
+  });
+
+  it('a release that moved (a drag, a scroll) does not close the panel', async () => {
+    mount();
+    const empty = document.createElement('div');
+    document.body.appendChild(empty);
+    act(() => screen.getByRole(role).focus());
+    await screen.findByTestId('search-suggestions');
+    fireEvent.pointerDown(empty, { clientX: 100, clientY: 200, pointerId: 1, button: 0 });
+    fireEvent.pointerUp(empty, { clientX: 100, clientY: 260, pointerId: 1, button: 0 });
+    expect(screen.getByTestId('search-suggestions')).toBeTruthy();
+    empty.remove();
+  });
+
+  it('a press released on a song row still waits for its click: the pressed song opens, not the one that moves under the finger', async () => {
+    mount();
+    const row = document.createElement('a');
+    row.href = '/songs/abc';
+    const label = document.createElement('span'); // the finger lands on text inside the link
+    row.appendChild(label);
+    document.body.appendChild(row);
+    act(() => screen.getByRole(role).focus());
+    await screen.findByTestId('search-suggestions');
+    fireEvent.pointerDown(label, { clientX: 10, clientY: 10, pointerId: 1, button: 0 });
+    fireEvent.pointerUp(label, { clientX: 10, clientY: 10, pointerId: 1, button: 0 });
+    expect(screen.getByTestId('search-suggestions')).toBeTruthy();
+    fireEvent.click(label);
+    expect(screen.queryByTestId('search-suggestions')).toBeNull();
+    row.remove();
+  });
+
+  it('a still tap inside the field or the panel does not close it', async () => {
+    mount();
+    act(() => screen.getByRole(role).focus());
+    const panel = await screen.findByTestId('search-suggestions');
+    fireEvent.pointerDown(panel, { clientX: 5, clientY: 5, pointerId: 1, button: 0 });
+    fireEvent.pointerUp(panel, { clientX: 5, clientY: 5, pointerId: 1, button: 0 });
+    expect(screen.getByTestId('search-suggestions')).toBeTruthy();
+  });
+
   it('closes when focus tabs out of the field to something outside', async () => {
     const { container } = mount();
     const outside = document.createElement('button');

@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useLocale } from "@/context/LocaleContext";
+import { errorMessage } from "@/lib/errors/errorCode";
 
 export function UpdatePasswordForm({
   className,
@@ -38,7 +39,7 @@ export function UpdatePasswordForm({
       // Update this route to redirect to an authenticated route. The user already has an active session.
       router.push("/protected");
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : t('common.errorOccurred'));
+      setError(errorMessage(error, t, 'common.errorOccurred'));
     } finally {
       setIsLoading(false);
     }

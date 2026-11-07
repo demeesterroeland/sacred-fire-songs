@@ -66,7 +66,9 @@ export function useLyricsBelowFold(endRef: RefObject<Element | null>, anchorRef?
       if (end && typeof ResizeObserver !== 'undefined') {
         const ro = new ResizeObserver(measure);
         ro.observe(end);
-        if (end.parentElement) ro.observe(end.parentElement); // things above the lyrics growing push them down
+        // Things above the lyrics growing (the meta line expanding) push them down without resizing them or the window:
+        // on desktop the page scrolls inside <main>. Every ancestor up to <body> grows with the content, so watch them all.
+        for (let a = end.parentElement; a && a !== document.body; a = a.parentElement) ro.observe(a);
         ro.observe(document.documentElement);
         state.ro = ro;
       }

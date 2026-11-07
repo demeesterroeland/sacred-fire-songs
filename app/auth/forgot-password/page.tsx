@@ -14,6 +14,7 @@ import { authPageHref } from '@/lib/auth/authBack';
 import { safeNextPath } from '@/lib/auth/safeNext';
 
 import { useLocale } from '@/context/LocaleContext';
+import { errorMessage } from '@/lib/errors/errorCode';
 function ForgotPasswordContent() {
     const { t } = useLocale();
     const searchParams = useSearchParams();
@@ -41,7 +42,7 @@ function ForgotPasswordContent() {
             if (error) throw error;
             setSuccessMessage(t('auth.forgotPassword.checkEmail'));
         } catch (error: unknown) {
-            setError(error instanceof Error ? error.message : t('common.errorOccurred'));
+            setError(errorMessage(error, t, 'common.errorOccurred'));
         } finally {
             setIsLoading(false);
         }

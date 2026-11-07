@@ -963,6 +963,16 @@ const ru: Partial<Record<TranslationKey, string>> = {
   "errors.notSongOwner": "Опубликовать эту песню может только её владелец или администратор.",
   "errors.consentRequired": "Перед публикацией подтвердите согласие исполнителя.",
   "errors.sharedTakeNoDownload": "Общие записи нельзя скачать.",
+  "errors.auth.invalidCredentials": "Неверный адрес почты или пароль.",
+  "errors.auth.emailNotConfirmed": "Сначала подтвердите адрес почты. Проверьте входящие.",
+  "errors.auth.userExists": "Аккаунт с этой почтой уже есть. Попробуйте войти.",
+  "errors.auth.weakPassword": "Этот пароль слишком простой. Выберите подлиннее.",
+  "errors.auth.samePassword": "Новый пароль должен отличаться от старого.",
+  "errors.auth.rateLimited": "Слишком много попыток. Подождите немного и повторите.",
+  "errors.auth.linkExpired": "Ссылка или код устарели. Запросите новые.",
+  "errors.auth.signUpAgain": "Адрес почты не найден. Зарегистрируйтесь снова.",
+  "errors.network": "Нет соединения. Проверьте интернет и повторите.",
+  "errors.alreadyExists": "Такая запись уже существует.",
 };
 
 export default ru;

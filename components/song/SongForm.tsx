@@ -21,6 +21,7 @@ import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { ArtistTagInput } from './ArtistTagInput';
 import { parseArtists, formatArtists, ensureArtistCategoryIds } from '@/lib/songs/artistUtils';
 import { useLocale } from '@/context/LocaleContext';
+import { errorMessage } from '@/lib/errors/errorCode';
 import { safeNextPath } from '@/lib/auth/safeNext';
 import { FEATURES } from '@/lib/features';
 import { songFlags } from '@/lib/songs/versionFlags';
@@ -388,7 +389,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
             router.push(returnTo);
         },
         onError: (error: Error) => {
-            setServerError(error.message);
+            setServerError(errorMessage(error, t));
         }
     });
 
