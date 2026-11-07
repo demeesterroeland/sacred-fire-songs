@@ -1,5 +1,6 @@
-# Version: 1.1 | Date: Nov 5, 2026
+# Version: 1.2 | Date: Nov 7, 2026
 # Changelog
+# 1.2 | Nov 7, 2026 | Validation round 2, item 8: one noun, "recording" (Recordings chip, My recordings, Your recordings, Save Recording).
 # 1.1 | Nov 5, 2026 | Review fixes for #398: recorder, dialogs, share e-mail and mini-player say "take"; every literal t('key') exists in en.ts.
 # 1.0 | Nov 5, 2026 | Story 6.1.14 / G4.1 (#398): one name, "Practice", for the rehearsal feature.
 @story-6.1.14

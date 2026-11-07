@@ -76,7 +76,7 @@ const open = async (page, path) => {
   });
   await step('10 reading tools sheet', async () => {
     await open(page, `/songs/${LONG_TITLE_SONG}`);
-    await page.getByTestId('reader-tools-button').click();
+    await page.locator('[data-testid="reader-tools-button"], [data-testid="song-menu-button"]').first().click();
     await page.waitForTimeout(600);
     await shot(page, vp, 'guest', '10-reading-tools-sheet', { fullPage: false });
   });

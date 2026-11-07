@@ -3305,3 +3305,20 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - **Tests:** Vitest 1340 passed (113 files), BDD unit 240 passed / 47 pending (pre-existing), whole Playwright suite on a production build (`setup` + `mobile-chrome-headless`) 307 passed / 5 skipped / 0 failed.
 - **Not fixed:** the desktop fold when the meta line expands (no decision yet). The iOS touch behaviour of the panel has not been tried on a real iPhone.
 - **Decisions:** UXA-067.
+
+## November 7, 2026 - Epic 6.1 UX v2, validation round 2 (batch 2 of the owner's feedback)
+
+**Goal:** implement 22 findings from the owner's second run; every fix test-first; before/after screenshots at 390 px light and dark.
+
+**Key Accomplishments**
+- **Phone and desktop song page:** one ⋮ menu (`SongMenuSheet`: Share, Edit, Delete, Transpose, Auto-scroll speed, **Screen stays on** switch); the toolbar ⋯ is gone. The full title wraps at the top of the page and a truncated copy shows in the sticky bar after scrolling past it. Switching version replaces the URL (`?version=`) and Share shares it. Desktop buttons are neutral, Practice is the one accent.
+- **One look:** one `SignInLink`, a floating Library `+`, one heading size on History / Artists / Shared with me, counts as `(3)`, one favourites term, one `<main>` per page.
+- **Wording:** "recording" and "Record" in all 8 languages (548 existing strings changed), the Your recordings card counts recordings, own-drafts filter for admins.
+- **Terms and Privacy:** real draft pages, operator from `OPERATOR_NAME` / `OPERATOR_CONTACT_EMAIL` (server, per request).
+- **Follow-ups:** a still tap on empty space closes the suggestions (iPhone), the desktop fold watches every ancestor of the lyrics, error codes of sign-in and the database map to translated messages. Items 16, 17, 19, 20 and the first half of 22 came from the other thread's patch, applied as its own commit.
+
+**Technical Details**
+- **Tests:** Vitest 1485 passed (126 files), BDD unit 247 passed / 47 pending (pre-existing), bats 32 ok, whole Playwright suite on a production build (port 4431, `setup` + `mobile-chrome-headless`) 324 passed / 5 skipped / 1 failed (a focus flake in `ux-v2-bottom-bar`, 3 of 3 on re-run). The first full run had 6 failures, all test strings that still said "take", "Record Audio" or a bare tag count; fixed.
+- **Lint cap** 157 → 143, **palette baseline** 1559 → 1507.
+- **Decisions:** UXA-068. Screenshots: `docs/ux-research/screenshots/ux-v2/validation-2/` (`scripts/dev/ux/capture-validation-2.sh`).
+- **Not done:** the real iPhone check, a native-speaker check of the new translations and of Runasimi, the `docs/design/screens` mockups.

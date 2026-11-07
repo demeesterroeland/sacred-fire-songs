@@ -237,7 +237,7 @@ for (const theme of THEMES) {
 
         await page.getByRole('button', { name: 'Upload File' }).click();
         await audit(page, `recorder upload / member / ${theme}`);
-        await page.getByRole('button', { name: 'Record Audio' }).click();
+        await page.getByRole('button', { name: 'Record', exact: true }).click();
 
         await page.getByRole('switch', { name: 'Count in 3-2-1 before recording' }).uncheck();
         await page.locator('button[title="Start recording"]').click();

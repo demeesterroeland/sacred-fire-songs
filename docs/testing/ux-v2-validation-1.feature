@@ -1,5 +1,6 @@
-# Version: 1.2 | Date: Nov 7, 2026
+# Version: 1.3 | Date: Nov 7, 2026
 # Changelog
+# 1.3 | Nov 7, 2026 | Validation round 2: no ⋯ button any more (the ⋮ menu is never empty), so those scenarios speak of the play button only.
 # 1.2 | Nov 7, 2026 | Follow-ups from the re-review of PR #474: section labels shown as text, panel above the bottom bars, right-click closes the panel
 # 1.1 | Nov 7, 2026 | Review round on PR #474: pressing a song under the open suggestions opens that song (B1), the column keeps its scroll position (H1), the auto-scroll fold counts the bars and not the padding (H2), the tools sheet and focus when the song starts to fit (M1), one focus cue per field (M2), tag counts meet AA (M3), localised error toasts (M4), Search options in full on a phone (M5), a bracketed section label is not a chord (M6), toolbar alignment (L6), favourites wording (L7).
 # 1.0 | Nov 6, 2026 | UX v2 validation round 1 (Part of #375): auto-scroll only when the lyrics run below the fold, expanded meta, one focus style for text fields, suggestions panel in the page flow, search options on tokens, translated feedback, song flags across versions.
@@ -22,7 +23,7 @@ Feature: UX v2 validation round 1 fixes
   Scenario: Auto-scroll follows the size of the lyrics and of the window
     Given a guest on a seeded song with chords on a 390 px wide phone
     When the window is tall enough for the whole song
-    Then there is no play button and no reading tools button
+    Then there is no play button
     When the window becomes short again
     Then the play button is back
 
@@ -113,13 +114,14 @@ Scenario: Lyrics behind the fixed bars count as below the fold
 @e2e
 Scenario: Padding below the text is not lyrics
   Given a desktop window where the whole text is visible with 30 px to spare
-  Then there is no play button and no reading tools button
+  Then there is no play button
 
 @e2e
-Scenario: The tools sheet closes when the song starts to fit and focus stays in the toolbar
-  Given the reading tools sheet is open on a song that runs below the fold
+Scenario: Focus on the play button moves to the larger text button when the song starts to fit
+  Given the play button has focus on a song that runs below the fold
   When the window becomes tall enough for the whole song
-  Then the sheet is gone and focus is on the larger text button
+  Then the play button is gone and focus is on the larger text button
+  # Validation round 2 (item 11): the ⋮ menu always holds Share and the Screen stays on switch, so it no longer closes by itself.
 
 @e2e
 Scenario: A field has one focus cue

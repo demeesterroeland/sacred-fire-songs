@@ -1,5 +1,6 @@
-# Version: 1.1 | Date: Nov 5, 2026
+# Version: 1.2 | Date: Nov 7, 2026
 # Changelog
+# 1.2 | Nov 7, 2026 | Validation round 2, item 8: My recordings.
 # 1.1 | Nov 5, 2026 | Review: public takes of others get their own list; no e-mail as sharer name.
 # 1.0 | Nov 5, 2026 | Story 6.1.15 / G4.2 (#399), UXD-3: takes shared with me listed separately from my own takes.
 @story-6.1.15

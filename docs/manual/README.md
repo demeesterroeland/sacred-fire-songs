@@ -1,11 +1,12 @@
 # User Manual (knowledge base)
 
-**Version:** 0.2 | **Date:** Nov 5, 2026 | **Status:** Knowledge collection — not yet the published manual
+**Version:** 0.3 | **Date:** Nov 7, 2026 | **Status:** Knowledge collection — not yet the published manual
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.3 | Nov 7, 2026 | "take" is now "recording" in the topic list. |
 | 0.2 | Nov 5, 2026 | Screenshot note: the mini player now appears only after play (#396). |
 | 0.1 | Nov 4, 2026 | Collected knowledge from the UX research (screens, flows, roles, recording sharing) as the base for a manual for guests and members. |
 
@@ -19,7 +20,7 @@ Raw material for a future end-user manual for **guests** and **members**. Writte
 | :--- | :--- |
 | [guest-guide.md](guest-guide.md) | Visitors without an account. |
 | [member-guide.md](member-guide.md) | Signed-in members: favourites, playlists, adding songs, settings. |
-| [practice-and-recordings.md](practice-and-recordings.md) | Reference tracks, recording takes, sharing, publishing, singer attribution. |
+| [practice-and-recordings.md](practice-and-recordings.md) | Reference tracks, making recordings, sharing, publishing, singer attribution. |
 | [roles-and-glossary.md](roles-and-glossary.md) | Who can do what, and the words the app uses. |
 | `screenshots/` | Final manual screenshots go here (to be selected). |
 

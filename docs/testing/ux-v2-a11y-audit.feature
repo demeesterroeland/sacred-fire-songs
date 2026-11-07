@@ -1,5 +1,6 @@
-# Version: 1.0 | Date: Nov 6, 2026
+# Version: 1.1 | Date: Nov 7, 2026
 # Changelog
+# 1.1 | Nov 7, 2026 | Validation round 2, item 8: quoted UI strings say "recording" instead of "take".
 # 1.0 | Nov 6, 2026 | Story 6.1.34 / G9.2 (#418): the song page and the Practice panel pass an axe-core audit (zero violations of any impact); dialogs hold focus and give it back; the delete confirmation is a real dialog; Escape while renaming; the embedded player is reachable; the Practice tabs follow the tab pattern; the recorder announces its state; the delete confirmation is a real dialog; Escape during a keyboard drag only cancels the drag; dialogs opened from a menu return focus.
 @story-6.1.34
 Feature: UX v2 accessibility audit of the song page and the Practice panel

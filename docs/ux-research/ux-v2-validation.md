@@ -1,11 +1,12 @@
 # UX v2: Phone Validation Script
 
-**Version:** 1.38 | **Date:** Nov 7, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
+**Version:** 1.39 | **Date:** Nov 7, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.39 | Nov 7, 2026 | Validation round 2 (batch 2, PR into `feat/ux-v2`): new section with 16 checks; stale steps fixed (the dead seeded song link, the old ⋮ paths to Practice, Playlist and Like, the Library tab is **History**); "take" is now **recording** in every step that quotes the app. |
 | 1.38 | Nov 7, 2026 | Validation round 1, review round on PR #474: items 8 to 14 (press a song under the open suggestions, the scroll position of the desktop column, auto-scroll behind the bars, the tools sheet and focus on a window that grows, one focus cue per field and readable tag counts, error toasts in your language, Search options in full on a phone, section labels versus chords, toolbar edge); item 6 uses the new favourites wording. |
 | 1.37 | Nov 6, 2026 | Added the **Validation round 1** section (seven fixes after the owner's phone run: auto-scroll only when the lyrics run below the fold, expanded meta line, one focus style for text fields, search suggestions in the page flow, search options on tokens and category names, translated feedback, song flags across versions); #391 step 3, #394 steps 1, 5, 9 and #413 step 1 updated to the new behaviour. |
 | 1.36 | Nov 6, 2026 | Added #418 (accessibility audit of the song page and the Practice panel, including the delete confirmation: what to check with a keyboard and a screen reader on a phone; the screen reader pass is still to be done). |
@@ -86,7 +87,7 @@ Seeded songs: **Danza del Cielo Curandero** (member's song, media + 5 takes, 2 s
 - [ ] 7. Sign in as member. **Library** shows no Albums tab; the tab row fits the screen; a "+" creates a song or playlist.
 - [ ] 8. Open the same song: sticky bar **Practice · Playlist · ♥** in thumb reach.
 - [ ] 9. **Playlist** opens a bottom sheet with "New playlist" first and check marks.
-- [ ] 10. **Practice** → **Record**: lists **My takes** and **Shared with me**; status icons have text labels.
+- [ ] 10. **Practice** → **Record**: lists **My recordings** and **Shared with me**; status icons have text labels.
 
 ### In the circle (song page, low light)
 
@@ -162,20 +163,20 @@ Sections are added per story as it merges into `feat/ux-v2`.
 
 ### #410 · G6.1 One GuestGate on every members-only screen
 
-**Preconditions:** signed out (guest) for steps 1–9; signed in as the seeded member for steps 10–11. Seeded song owned by the musician: `/songs/fb193fc1-8d60-45db-85ab-b076d5985255`.
+**Preconditions:** signed out (guest) for steps 1–9; signed in as the seeded member for steps 10–11. Seeded song owned by the musician: **Morning Sunrise** (find it with Search; the id changes with every reseed, so no link is given here).
 
 Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, and a **Sign in** button at least 44 px high. Screenshots: `docs/ux-research/screenshots/ux-v2/410/`.
 
-- [ ] 1. Open `/library/recently-viewed`. You stay on this URL and see the "Sign in to see your history" gate (no jump to a login page). Screenshot: `…/410/after-light-12-recently-viewed.webp`.
+- [ ] 1. Open `/library/recently-viewed` (the **History** tab). You stay on this URL and see the "Sign in to see your history" gate (no jump to a login page). Screenshot: `…/410/after-light-12-recently-viewed.webp`.
 - [ ] 2. Tap **Sign in**, sign in with the member account. You land on `/library/recently-viewed` with your history.
 - [ ] 3. Open `/library/playlists/add`: "Sign in to create a playlist". Tap **Sign in**: the address bar shows `/auth/login?next=%2Flibrary%2Fplaylists%2Fadd`.
 - [ ] 4. Open `/library/playlists`: one gate "Sign in to see your library", with the public playlists listed below it (no fake "Yage Ceremony" cards). Screenshot: `…/410/after-light-10-playlists.webp`.
 - [ ] 5. Open `/account/settings` and `/account/settings?tab=privacy`: "Sign in to open your settings"; after signing in you return to the same tab.
 - [ ] 6. Open `/users/a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12`: "Sign in to see profiles".
-- [ ] 7. Open `/songs/fb193fc1-8d60-45db-85ab-b076d5985255/edit`: "Sign in to edit songs" (no "Not Yours to Edit"). Screenshot: `…/410/after-light-08-song-edit-other.webp`.
-- [ ] 8. On a song, tap ⋮ → **Add to playlist**: a bottom sheet with the gate "Sign in to add songs to playlists"; **Sign in** returns to the same song.
+- [ ] 7. Open **Morning Sunrise**, copy its address and add `/edit` after the id: "Sign in to edit songs" (no "Not Yours to Edit"). Screenshot: `…/410/after-light-08-song-edit-other.webp`.
+- [ ] 8. On a song, tap **Playlist** (bar at the bottom): a bottom sheet with the gate "Sign in to add songs to playlists"; **Sign in** returns to the same song.
 - [ ] 9. On a song, open Practice (microphone button) → **Record** tab: the blurred recorder is covered by the gate "Sign in to record". Screenshot: `…/410/after-light-63-recorder.webp`.
-- [ ] 10. As the member, open `/songs/fb193fc1-8d60-45db-85ab-b076d5985255/edit` (not your song): the warm "This Medicine is Not Yours to Edit" with **Back to the song** and **Return to the Circle**.
+- [ ] 10. As the member, open the same address with `/edit` (Morning Sunrise is not your song): the warm "This Medicine is Not Yours to Edit" with **Back to the song** and **Return to the Circle**.
 - [ ] 11. As the member, open `/library/recently-viewed`, `/library/playlists/add`, `/account/settings`: no gate, the normal screens.
 - [ ] 12. Dark mode and a 390 px window: every gate readable, no horizontal scroll.
 - [ ] 13. On a song, tap the heart (♥): a bottom sheet with the gate "Sign in to save favourites" (no toast). Add `?ref=heart` to the URL first: **Sign in** leads to `/auth/login?next=%2Fsongs%2F…%3Fref%3Dheart`. The same on a heart in the song list.
@@ -185,25 +186,25 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 
 **Preconditions:** a member account on a song that has at least one YouTube, SoundCloud or Spotify link (so both tabs show). Repeat step 1 as a guest.
 
-- [ ] 1. Open the song, tap ⋮ (top right). The menu entry reads **Practice** (not "Recordings"). Screenshot: `docs/ux-research/screenshots/ux-v2/398/after-light/mobile/member/01-song-menu.webp`.
+- [ ] 1. Open the song. The bar at the bottom reads **Practice** (not "Recordings"); tap ⋮ (top right): Practice is not in that menu any more. Screenshot: `docs/ux-research/screenshots/ux-v2/398/after-light/mobile/member/01-song-menu.webp`.
 - [ ] 2. Tap **Practice**. The panel title reads **Practice** (not "Rehearsal Space"). Screenshot: `docs/ux-research/screenshots/ux-v2/398/after-light/mobile/member/02-drawer.webp`, Record tab: `docs/ux-research/screenshots/ux-v2/398/after-light/mobile/member/03-drawer-record-tab.webp`.
 - [ ] 3. The two tabs read **Listen** and **Record**.
-- [ ] 4. On **Record**, the list under the recorder is headed **My takes**. As a guest, the lock card reads **Practice recorder**.
-- [ ] 5. Close the panel. On the song list, a song where you have takes shows a **Takes** chip.
-- [ ] 6. Open Library. The card reads **Your takes**. Screenshot: `docs/ux-research/screenshots/ux-v2/398/after-light/mobile/member/10-playlists.webp`.
+- [ ] 4. On **Record**, the list under the recorder is headed **My recordings**. As a guest, the lock card reads **Practice recorder**.
+- [ ] 5. Close the panel. On the song list, a song where you have takes shows a **Recordings** chip.
+- [ ] 6. Open Library. The card reads **Your recordings**. Screenshot: `docs/ux-research/screenshots/ux-v2/398/after-light/mobile/member/10-playlists.webp`.
 - [ ] 7. Switch the language (account menu) to Dutch, Spanish, Italian, Russian, French, Portuguese and Quechua. Steps 1–6 show the translated word for Practice, Listen, Record, takes. Nothing says Rehearsal Space, Voice Recorder or Recordings in any language.
-- [ ] 8. On **Record**, start a take and stop it: the review step reads *Review your take*, the name field *Take Name (e.g. Take 1)*, the button **Save Take**. In the list, ⋯ → Delete asks **Delete take?**; Share is titled **Share take**.
-- [ ] 9. With a reference track and a take loaded, tap the mini-player title: the source menu is headed **Listen** (not "Reference Tracks") and **My takes** (not "User Recordings").
+- [ ] 8. On **Record**, start a take and stop it: the review step reads *Review your recording*, the name field *Take Name (e.g. Take 1)*, the button **Save Recording**. In the list, ⋯ → Delete asks **Delete recording?**; Share is titled **Share recording**.
+- [ ] 9. With a reference track and a take loaded, tap the mini-player title: the source menu is headed **Listen** (not "Reference Tracks") and **My recordings** (not "User Recordings").
 
 ### #396 · G3.1 Mini player appears only after play
 
 **Preconditions:** member account; a song with a reference track (YouTube) and at least one saved take; light and dark mode.
 
 - [ ] 1. Open any song, e.g. `/songs/<id>` (do not tap anything). No orange bar above the bottom bar; the last lyric line scrolls fully into view. Screenshot: `docs/ux-research/screenshots/ux-v2/396/after-light/mobile/member/01-song-no-player.webp`.
-- [ ] 2. Tap ⋮ → **Recordings** → **Reference Tracks**, tap play on the YouTube video. The orange player bar appears above the bottom bar with the song title and *YouTube Reference*. Screenshot: `…/396/after-light/mobile/member/02-drawer-player-on-play.webp`.
+- [ ] 2. Tap **Practice** → **Listen**, tap play on the YouTube video. The orange player bar appears above the bottom bar with the song title and *YouTube Reference*. Screenshot: `…/396/after-light/mobile/member/02-drawer-player-on-play.webp`.
 - [ ] 3. Scroll the panel to its end. The last row is fully visible above the bar (nothing hidden behind it).
 - [ ] 4. Tap pause on the bar, then close the panel. The bar stays (paused). Tap ✕ on the bar: the bar disappears.
-- [ ] 5. Reopen ⋮ → **Recordings** → **Voice Recorder**, tap ▶ on the last take, scroll to the end. The last take row is fully visible above the bar. Screenshot: `…/396/after-light/mobile/member/03-drawer-scrolled-to-end.webp`.
+- [ ] 5. Reopen **Practice** → **Record**, tap ▶ on the last recording, scroll to the end. The last take row is fully visible above the bar. Screenshot: `…/396/after-light/mobile/member/03-drawer-scrolled-to-end.webp`.
 - [ ] 6. Open ⋮ (the song menu sheet) while the take plays. The sheet's last action is not covered by the bar.
 - [ ] 7. Play the take, then open another song from Songs (bottom bar). The music stops and no bar shows on the other song (the bar never follows you to another song).
 - [ ] 8. Repeat step 1 in dark mode; with *reduce motion* on, the equalizer bars do not animate.
@@ -220,13 +221,13 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 
 ### #399 · G4.2 Takes shared with me are listed apart
 
-**Preconditions:** two member accounts, A and B. As A, on a song: record (or upload) a take and share it with B (⋯ → Share take). B also has at least one own take on the same song. Run steps 1–6 as B; step 7 as A.
+**Preconditions:** two member accounts, A and B. As A, on a song: record (or upload) a take and share it with B (⋯ → Share recording). B also has at least one own take on the same song. Run steps 1–6 as B; step 7 as A.
 
-- [ ] 1. As B, open the song, tap ⋮ → **Practice** → **Record**. Under the recorder two lists show: **My takes** and **Shared with me**. Screenshot: `docs/ux-research/screenshots/ux-v2/399/after-light/mobile/member/01-record-tab.webp`.
-- [ ] 2. The take A shared is listed under **Shared with me** and not under **My takes**. B's own take is under **My takes** only.
+- [ ] 1. As B, open the song, tap **Practice** (the bar at the bottom) → **Record**. Under the recorder two lists show: **My recordings** and **Shared with me**. Screenshot: `docs/ux-research/screenshots/ux-v2/399/after-light/mobile/member/01-record-tab.webp`.
+- [ ] 2. The take A shared is listed under **Shared with me** and not under **My recordings**. B's own take is under **My recordings** only.
 - [ ] 3. The shared row's grey line reads **Shared by <A's name>** followed by the length (no date on shared rows). Screenshot: `docs/ux-research/screenshots/ux-v2/399/after-dark/mobile/member/01-record-tab.webp`. No tooltip is needed to know it is shared.
 - [ ] 4. The shared row has a play button but no ⋯ menu: no Download, Share or Delete. Double-tapping its name does not start renaming. The own take keeps its ⋯ menu.
-- [ ] 5. Tap play on the shared take: it plays, and the player bar appears (#396). Open the bar's title menu: the takes are grouped under **My takes** and **Shared with me**.
+- [ ] 5. Tap play on the shared take: it plays, and the player bar appears (#396). Open the bar's title menu: the takes are grouped under **My recordings** and **Shared with me**.
 - [ ] 6. Switch the language (account menu) to Dutch, Spanish, Italian, Russian, French, Portuguese and Quechua: the heading and "Shared by" are translated. Repeat step 1 in dark mode.
 - [ ] 7. As A (or as any user with no shared takes), open the Record tab: there is no **Shared with me** heading at all.
 
@@ -248,14 +249,14 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 
 ### #400 · G4.3 Take status in words
 
-**Preconditions:** member account; a song with a take that you made public (⋯ → **Make Public**) and shared with two people (⋯ → **Share take**), and the singer named as a person without an account (⋯ → **Singer Attribution** → *Singer does not have an account yet*); light and dark mode.
+**Preconditions:** member account; a song with a take that you made public (⋯ → **Make Public**) and shared with two people (⋯ → **Share recording**), and the singer named as a person without an account (⋯ → **Singer Attribution** → *Singer does not have an account yet*); light and dark mode.
 
-- [ ] 1. Open the song, tap ⋮ → **Practice** → **Record**. Under the take's name grey labels read **Public**, **Shared · 2** and **Pending invite**, each with a small icon. Screenshot: `docs/ux-research/screenshots/ux-v2/400/after-light/mobile/member/01-take-status.webp`.
+- [ ] 1. Open the song, tap **Practice** (the bar at the bottom) → **Record**. Under the take's name grey labels read **Public**, **Shared · 2** and **Pending invite**, each with a small icon. Screenshot: `docs/ux-research/screenshots/ux-v2/400/after-light/mobile/member/01-take-status.webp`.
 - [ ] 2. Nothing needs a long-press or hover to be understood. Labels are at least as big as the grey date line (12 px) and wrap to a second line on a narrow phone without cutting words.
 - [ ] 3. Make the take private (⋯ → **Make Private**): **Public** disappears, **Shared · 2** stays. Remove both shares: **Shared · 2** disappears. A take that is private and not shared has no label at all.
 - [ ] 4. Name a singer who is a verified musician (⋯ → **Singer Attribution**, pick the musician): the label **Verified musician** shows and the singer's name still links to their profile.
 - [ ] 5. Open the take of another member that is shared with you: the row says **Shared by <name>**, with no share count.
-- [ ] 6. Section titles (**Practice**, **My takes**, **Shared with me**) are normal sentence case, not capitals. Screenshot dark: `…/400/after-dark/mobile/member/01-take-status.webp`.
+- [ ] 6. Section titles (**Practice**, **My recordings**, **Shared with me**) are normal sentence case, not capitals. Screenshot dark: `…/400/after-dark/mobile/member/01-take-status.webp`.
 - [ ] 7. Switch the language to Dutch, Spanish, Italian, Russian, French, Portuguese and Quechua: the labels are translated. Repeat step 1 in dark mode.
 
 ### #388 · G1.4 Calm category grid
@@ -295,14 +296,14 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 
 **Preconditions:** member account; a song with at least one take of your own and one take that someone shared with you; English, 390 px phone; light and dark mode.
 
-- [ ] 1. Open the song, tap ⋮ → **Practice** → **Record**. On a take of **My takes**, the **⋯** button is a comfortable thumb target. Tap it. A sheet slides up from the bottom, titled with the take's name, with a small grey bar at its top. Screenshot: `docs/ux-research/screenshots/ux-v2/401/after-light/mobile/member/01-take-actions.webp`.
-- [ ] 2. Three groups, separated by thin lines: **Play, Edit take name, Download take** · **Share, Singer Attribution, Make Public, Copy link** · **Delete take** alone at the bottom, red text with a bin icon. Delete is not next to Share.
+- [ ] 1. Open the song, tap **Practice** (the bar at the bottom) → **Record**. On a take of **My recordings**, the **⋯** button is a comfortable thumb target. Tap it. A sheet slides up from the bottom, titled with the take's name, with a small grey bar at its top. Screenshot: `docs/ux-research/screenshots/ux-v2/401/after-light/mobile/member/01-take-actions.webp`.
+- [ ] 2. Three groups, separated by thin lines: **Play, Edit recording name, Download recording** · **Share, Singer Attribution, Make Public, Copy link** · **Delete recording** alone at the bottom, red text with a bin icon. Delete is not next to Share.
 - [ ] 3. Every row is easy to hit with a thumb (at least 44 px tall) and reads clearly in dark mode too. Screenshot dark: `…/401/after-dark/mobile/member/01-take-actions.webp`.
-- [ ] 4. Tap **Share**: the sheet closes and the **Share take** dialog opens as before. Close it.
-- [ ] 5. Open the sheet again, tap **Edit take name**: the sheet closes and the name field is ready to type in on the row. Press Esc to leave the name unchanged.
-- [ ] 6. Open the sheet, tap **Delete take**: the sheet closes and the question **Delete take?** appears. Tap **Cancel**: the take is still there.
+- [ ] 4. Tap **Share**: the sheet closes and the **Share recording** dialog opens as before. Close it.
+- [ ] 5. Open the sheet again, tap **Edit recording name**: the sheet closes and the name field is ready to type in on the row. Press Esc to leave the name unchanged.
+- [ ] 6. Open the sheet, tap **Delete recording**: the sheet closes and the question **Delete recording?** appears. Tap **Cancel**: the take is still there.
 - [ ] 7. Open the sheet and drag the grey bar down: the sheet follows your finger and closes when you let go after a long drag. A tap on the bar or a short slow drag leaves it open. Tapping outside the sheet also closes it.
-- [ ] 8. Look at a take under **Shared with me** (or **Public takes**): no **⋯** button — only its play button.
+- [ ] 8. Look at a take under **Shared with me** (or **Public recordings**): no **⋯** button — only its play button.
 - [ ] 9. Switch the language to Dutch, Spanish, Italian, Russian, French, Portuguese and Quechua and open the sheet: all rows are translated and Delete is still alone at the bottom.
 
 ### #413 · G7.1 Recent searches and category chips
@@ -341,11 +342,11 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 
 **Preconditions:** signed in as a member on a 390 px phone, English; run once in light and once in dark. Two private playlists exist, e.g. "Water Ceremony" and "Fire Circle", and "Water Ceremony" already holds the song you open.
 
-- [ ] 1. Open that song and tap ⋮, then **Add to Playlist**. **Expected:** a sheet slides up from the bottom (not a small box over a blurred page) titled **Add to playlist**. The first row is **New playlist**; below it your playlists. **Water Ceremony** has a check on the right, **Fire Circle** has none. Screenshot: `docs/ux-research/screenshots/ux-v2/414/after-light/mobile/member/01-playlist-sheet.webp`. Before: `docs/ux-research/screenshots/ux-v2/414/before-light/mobile/member/01-playlist-sheet.webp`.
+- [ ] 1. Open that song and tap **Playlist** in the bar at the bottom. **Expected:** a sheet slides up from the bottom (not a small box over a blurred page) titled **Add to playlist**. The first row is **New playlist**; below it your playlists. **Water Ceremony** has a check on the right, **Fire Circle** has none. Screenshot: `docs/ux-research/screenshots/ux-v2/414/after-light/mobile/member/01-playlist-sheet.webp`. Before: `docs/ux-research/screenshots/ux-v2/414/before-light/mobile/member/01-playlist-sheet.webp`.
 - [ ] 2. Tap **Fire Circle**. **Expected:** the check appears at once, a message says "Added to Fire Circle" with **Open playlist**; the sheet stays open.
 - [ ] 3. Tap **Water Ceremony**. **Expected:** its check disappears and a message says "Removed from Water Ceremony".
 - [ ] 4. Tap **New playlist**, type a name, tap **Create**. **Expected:** the new playlist is in the list with a check; open **Library → Playlists** later and it holds the song.
-- [ ] 5. Tap **Done** (or the dark area above the sheet, or swipe the grey handle down). **Expected:** the sheet and the ⋮ menu close. Every row is easy to hit with a thumb (at least 44 px).
+- [ ] 5. Tap **Done** (or the dark area above the sheet, or swipe the grey handle down). **Expected:** the sheet closes. Every row is easy to hit with a thumb (at least 44 px).
 - [ ] 6. Switch the language to Dutch, Spanish, Italian, Russian, French, Portuguese and Quechua: **New playlist**, **Create** and **Done** are translated. Repeat step 1 in dark mode (`…/414/after-dark/mobile/member/01-playlist-sheet.webp`).
 - [ ] 7. Clean up: delete the playlists you made in step 4.
 
@@ -392,7 +393,7 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 
 **Preconditions:** a member account on a 390 px phone, English. Run once in light and once in dark.
 
-- [ ] 1. Open **Library**. **Expected:** the tab row shows Playlists, Recently viewed and Artists; no Albums tab and no text "Coming soon" anywhere. Screenshot: `docs/ux-research/screenshots/ux-v2/389/after-light/mobile/member/09-library.webp`.
+- [ ] 1. Open **Library**. **Expected:** the tab row shows Playlists, History and Artists; no Albums tab and no text "Coming soon" anywhere. Screenshot: `docs/ux-research/screenshots/ux-v2/389/after-light/mobile/member/09-library.webp`.
 - [ ] 2. Open the avatar menu → **Account settings**. **Expected:** three tabs: Profile, Security, Preferences; no Privacy & Data. The Profile tab starts with **Display Name** (no grey avatar block, no badge). Screenshot: `…/389/after-light/mobile/member/15-settings.webp`. Before: `…/389/before-light/mobile/member/15-settings.webp`.
 - [ ] 3. Tap **Preferences**. **Expected:** Appearance, Language, Keep Screen Awake, Auto-hide navigation bar and Email notifications; no greyed-out rows, no "Coming soon". Screenshot: `…/389/after-light/mobile/member/16-settings-preferences.webp`.
 - [ ] 4. Open `/account/settings?tab=privacy`. **Expected:** the Profile tab opens (no error page, no privacy toggles).
@@ -422,7 +423,7 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 - [ ] 4. Stay silent for about 5 seconds. **Expected:** after 3 seconds of silence the hint *No sound yet. Check that your microphone is on and not muted.* appears under the meter; it goes away as soon as you make a sound and comes back after another 3 seconds of silence (the count-in and a pause do not count; a muted take shows the hint every time).
 - [ ] 5. Record until **2:00**. **Expected:** the line under the clock changes from the limit to *1:00 left*, counting down; in the last 10 seconds it turns red and also bold (not colour alone). Pause: the bars drop to the bottom and the text stays. Screenshot: `…/404/after-light/mobile/member/04-time-left.webp`.
 - [ ] 6. Let it reach **3:00**. **Expected:** the take stops by itself with the toast about the limit, and the review opens.
-- [ ] 7. In review: **Expected:** the name field, then **Save Take** as one wide orange button and **Discard** as plain text below it; both at least 44 px high. Screenshot: `…/404/after-light/mobile/member/05-review.webp` (before: `…/404/before-light/…/05-review.webp`). Tap **Discard**.
+- [ ] 7. In review: **Expected:** the name field, then **Save Recording** as one wide orange button and **Discard** as plain text below it; both at least 44 px high. Screenshot: `…/404/after-light/mobile/member/05-review.webp` (before: `…/404/before-light/…/05-review.webp`). Tap **Discard**.
 - [ ] 8. Switch **Count in 3-2-1 before recording** off, tap the microphone. **Expected:** recording starts at once. Discard, close the panel, reopen it: the switch is still off.
 - [ ] 9. Start with the count-in on and tap the bin during the count-in. **Expected:** the count-in stops, the recorder is back to *Ready to record* and the browser's microphone indicator goes out.
 - [ ] 10. Turn on *Reduce motion* in the phone's accessibility settings. **Expected:** the microphone icon does not pulse; the bars still change height.
@@ -432,13 +433,13 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 
 **Preconditions:** member account on a 390 px phone, English. You own a take on a **public** song (call it *Song A*) and a take on a **private** song you own (*Song B*; make one from *Add song* with Private visibility and record or upload a take). Both takes are private. For step 7 also give a take on *Song A* a very long name with no spaces (rename it to 60+ letters in a row). Run once in light and once in dark. Do not tick the consent box in steps 1–5.
 
-- [ ] 1. Open *Song A*, tap **Practice** in the bar at the bottom, tap **⋯** on your take, tap **Make Public**. **Expected:** the dialog *Publish Take Publicly* shows your take name in bold and under it *Song: <title of Song A>*. Screenshot: `docs/ux-research/screenshots/ux-v2/405/after-light/mobile/member/01-publish-public-song.webp` (before: `…/405/before-light/…/01-publish-public-song.webp`, which shows only the take name).
+- [ ] 1. Open *Song A*, tap **Practice** in the bar at the bottom, tap **⋯** on your take, tap **Make Public**. **Expected:** the dialog *Publish Recording Publicly* shows your take name in bold and under it *Song: <title of Song A>*. Screenshot: `docs/ux-research/screenshots/ux-v2/405/after-light/mobile/member/01-publish-public-song.webp` (before: `…/405/before-light/…/01-publish-public-song.webp`, which shows only the take name).
 - [ ] 2. Read the grey panel. **Expected:** in bold *Everyone visiting this song, including guests, will be able to listen.* and below it *You can make the take private again at any time. New visitors then can't listen, but this can't undo what someone already heard or saved.* The audience sentence is a status line: a screen reader reads it out, and when the dialog first says *Checking whether the song is public…* the real sentence is read out when it replaces it.
-- [ ] 3. Read the rest. **Expected:** the box *Singer Consent & Rights* and the checkbox sentence; **Publish Take** is greyed out and cannot be tapped; **Cancel**, the checkbox row and the button are each at least 44 px high.
+- [ ] 3. Read the rest. **Expected:** the box *Singer Consent & Rights* and the checkbox sentence; **Publish Recording** is greyed out and cannot be tapped; **Cancel**, the checkbox row and the button are each at least 44 px high.
 - [ ] 4. Tap **Cancel**. **Expected:** the dialog closes; the take row shows no *Public* label (nothing changed) and the keyboard focus (or the next Tab) is on that take's **⋯** button, not at the top of the page.
-- [ ] 5. Open *Song B*, **Practice**, **⋯**, **Make Public**. **Expected:** the header names *Song B*; the panel says *This song is private, so this take has no audience yet. Make the song public first, then publish the take.* — it does **not** mention guests, and there is **no Publish Take button and no checkbox**. Because you own *Song B* you also see *Make song public and continue* with three lines (lyrics become public, takes already public on this song will then be listed for everyone on the song page, nothing changes until you confirm). Screenshot: `…/405/after-light/mobile/member/02-publish-private-song.webp`. Tap **Cancel** (leave *Song B* private), or tap *Make song public and continue* when you want to continue: **Expected:** the panel changes to the guests sentence and **Publish Take** appears greyed out until the checkbox is ticked.
-- [ ] 6. Back on *Song A*: open the dialog again, tick the box, tap **Publish Take**. **Expected:** the toast *Take is now public.*, the row shows **Public**. Sign out (or open a private window) and open *Song A* → **Practice**: **Expected:** it opens on the **Listen** tab; under *Public takes* your take is listed and plays for the guest, with no ⋯ menu, no drag handle, no download or share. On a song without public takes the guest sees *No public takes of this song yet.* The **Record** tab still shows the sign-in gate. Screenshot: `…/405/after-light/mobile/guest/03-guest-listen-public-takes.webp` (dark: `after-dark`). On a desktop-wide window, **Practice** also opens the guest on **Listen**. Copy the take's link (⋯ → **Copy link**) and open it signed out: **Expected:** the song page opens **Practice** on **Listen** with that take highlighted, and it plays.
-- [ ] 7. With the very long take name, open **⋯** → **Make Public** on a small phone (or landscape). **Expected:** the long name wraps inside the dialog, nothing runs off the screen sideways, and you can scroll the dialog to reach the checkbox and **Publish Take**.
+- [ ] 5. Open *Song B*, **Practice**, **⋯**, **Make Public**. **Expected:** the header names *Song B*; the panel says *This song is private, so this take has no audience yet. Make the song public first, then publish the take.* — it does **not** mention guests, and there is **no Publish Recording button and no checkbox**. Because you own *Song B* you also see *Make song public and continue* with three lines (lyrics become public, takes already public on this song will then be listed for everyone on the song page, nothing changes until you confirm). Screenshot: `…/405/after-light/mobile/member/02-publish-private-song.webp`. Tap **Cancel** (leave *Song B* private), or tap *Make song public and continue* when you want to continue: **Expected:** the panel changes to the guests sentence and **Publish Recording** appears greyed out until the checkbox is ticked.
+- [ ] 6. Back on *Song A*: open the dialog again, tick the box, tap **Publish Recording**. **Expected:** the toast *Take is now public.*, the row shows **Public**. Sign out (or open a private window) and open *Song A* → **Practice**: **Expected:** it opens on the **Listen** tab; under *Public recordings* your take is listed and plays for the guest, with no ⋯ menu, no drag handle, no download or share. On a song without public takes the guest sees *No public takes of this song yet.* The **Record** tab still shows the sign-in gate. Screenshot: `…/405/after-light/mobile/guest/03-guest-listen-public-takes.webp` (dark: `after-dark`). On a desktop-wide window, **Practice** also opens the guest on **Listen**. Copy the take's link (⋯ → **Copy link**) and open it signed out: **Expected:** the song page opens **Practice** on **Listen** with that take highlighted, and it plays.
+- [ ] 7. With the very long take name, open **⋯** → **Make Public** on a small phone (or landscape). **Expected:** the long name wraps inside the dialog, nothing runs off the screen sideways, and you can scroll the dialog to reach the checkbox and **Publish Recording**.
 - [ ] 8. As the owner tap **⋯** → **Make Private**. **Expected:** the toast *Take is now private.*; the guest no longer sees the take after a reload.
 - [ ] 9. Switch the language to Dutch, Spanish, Italian, Russian, French, Portuguese and Quechua and open the dialog on *Song A* and *Song B*: the song line, both sentences, the reversible line and the make-song-public lines are translated and wrap inside the dialog without cut-off text (Quechua still needs a native proofreader). Repeat steps 1–3 and 5 in dark mode (`…/405/after-dark/…`).
 
@@ -522,10 +523,31 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 - [ ] 3. Signed out: with focus on the **Listen** tab press **→**. **Expected:** the **Record** tab is selected and focused (the sign-in prompt shows); **←** goes back; **Home** and **End** jump to the first and last tab.
 - [ ] 4. Press **Escape**. **Expected:** the panel closes and the focus ring is back on **Practice**. Repeat with the close button (✕).
 - [ ] 5. Signed in as a member: open a take's **⋯** (More actions), press **Escape**. **Expected:** the sheet closes and focus is back on that **⋯** button. Open **Playlist** and the song menu (**⋯** top right) and close each with Escape: focus returns to the button you used. In the Record tab, choose **Upload File**: the big dashed area is reachable with Tab and **Enter** opens the file picker.
-- [ ] 5b. With a keyboard: in a take's **⋯** sheet choose **Delete take**. **Expected:** a dialog *Delete take?* opens with focus on **Cancel**; **Tab** moves between **Cancel** and **Yes, Delete** and nowhere else; **Escape** closes only the dialog (the Practice panel stays, the take stays) and focus is back on that **⋯** button. Also: choose **Edit take name**, press **Escape**: the name field closes and the panel stays open.
+- [ ] 5b. With a keyboard: in a take's **⋯** sheet choose **Delete recording**. **Expected:** a dialog *Delete recording?* opens with focus on **Cancel**; **Tab** moves between **Cancel** and **Yes, Delete** and nowhere else; **Escape** closes only the dialog (the Practice panel stays, the take stays) and focus is back on that **⋯** button. Also: choose **Edit recording name**, press **Escape**: the name field closes and the panel stays open.
 - [ ] 6. **VoiceOver or TalkBack, song page and Practice panel** (steps 1 to 12 of `docs/ux-research/2026-11-06-a11y-audit.md` §5): the panel is announced as a dialog named *Practice, <song>*; Listen and Record are read as tabs with *selected*; the recorder says *Recording...* and *Recording paused* when you start and pause; each sheet and dialog is announced with its title and closes with focus back where it was. Write the result per step in the audit file.
 - [ ] 7. Switch the language to Dutch and repeat the recorder part of step 6: the announcements are in Dutch.
 - [ ] 8. Turn on reduced motion in the phone's settings and open the site on a laptop-width window: the bars in the **Practice** button of a playing song do not move.
+
+### Validation round 2 · batch 2 after the owner's second run (Part of #375)
+
+**Preconditions:** a 390 px phone (or window), English, light and dark; a guest, the seeded member and the seeded admin. Open the preview image or the dev server. Before and after screenshots are in the pull request (`docs/ux-research/screenshots/ux-v2/validation-2/`).
+
+- [ ] 1. As a guest, look at **Sign In** in the header and at the login form's button. **Expected:** the same orange button with the same corners, no red one.
+- [ ] 2. As the member, open **Library**. **Expected:** one round-cornered orange **+** floats at the bottom right, above the bottom bar (and above the mini player when it shows); it stays there when you scroll; it opens the Create sheet. It is not also in the page header.
+- [ ] 3. Open **History** and **Artists** (Library tabs). **Expected:** both headings are the same size; the counts read **(12)**.
+- [ ] 4. Open the Home page. **Expected:** category tags read **Air (3)**, not a bare number or a chip; the same in Search options and in the Add Song tag grid.
+- [ ] 5. Open a song with two versions, tap the second one. **Expected:** the address ends in `?version=…`; Back leaves the song (one history entry); reload shows the same version; **Share** copies that address; tapping the first version removes `?version`.
+- [ ] 6. Open a song with a very long title (e.g. "Grandmother's Song of the Thousand Rivers …"). **Expected:** the whole title wraps at the top of the page; scroll down: a one-line title with an ellipsis appears in the bar at the top and goes away again at the top of the page.
+- [ ] 7. As the admin on a desktop (1440 px), open a song. **Expected:** **Practice** is the one orange button; **Delete** and **Edit** are grey outlined; Delete turns red only in its confirmation.
+- [ ] 8. Open **Practice → Record**. **Expected:** the words are **Record**, **My recordings**, **Save Recording**; nowhere "take" and no "Record Audio". Library → the card reads **Your recordings** with "N recordings · N public · N private"; it does not say songs.
+- [ ] 9. Tap ⋮. **Expected:** one menu only (the toolbar has no ⋯): Share (and Edit, Delete on your own songs), then Transpose (musicians), Auto-scroll speed (long songs) and the **Screen stays on** switch.
+- [ ] 10. Turn **Screen stays on** off, close the menu: the sun icon next to the toolbar goes away; reload: the switch is still off (this device only).
+- [ ] 11. Sign-up and login pages: **Terms Of Service** and **Privacy Policy** open real pages with a **Draft** note and "Who runs this server". Account → Settings has both links at the bottom.
+- [ ] 12. As the admin, Library → **My Drafts** counts only your own drafts.
+- [ ] 13. The song page's heart reads **Add to your Favorites** (desktop) and **Favorite** (phone bar), the same word as the account menu.
+- [ ] 14. A version with only `[Chorus]`, `[Bridge]`, `[Coda]` lines and no chords still shows those words as text; with chords on, they are not drawn as chords.
+- [ ] 15. On an iPhone, with the suggestions open under the search field, tap an empty part of the page: the suggestions close. Press a song under them: that song opens.
+- [ ] 16. Sign in with a wrong password. **Expected:** a sentence in your language ("The email or password is not correct."), not the service's English text.
 
 ### Validation round 1 · seven fixes after the owner's phone run (Part of #375)
 

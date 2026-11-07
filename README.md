@@ -76,6 +76,7 @@ npm install
 
 # 3. Set up environment variables
 cp .env.example .env.local
+# Self-hosting: set OPERATOR_NAME and OPERATOR_CONTACT_EMAIL (server-side, never NEXT_PUBLIC_) so the /terms and /privacy pages say who runs your server
 # Add your Supabase URL and anon key
 
 # 4. Run locally

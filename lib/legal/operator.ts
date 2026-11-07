@@ -16,7 +16,6 @@ const EMAIL = /^[^\s@<>"']+@[^\s@<>"']+\.[^\s@<>"']+$/;
 type Env = Record<string, string | undefined>;
 
 export function readOperator(env: Env = process.env): Operator {
-  // eslint-disable-next-line no-control-regex
   const name = (env.OPERATOR_NAME ?? '').replace(/[\u0000-\u001f\u007f]/g, ' ').trim().slice(0, MAX_NAME_LENGTH);
   const email = (env.OPERATOR_CONTACT_EMAIL ?? '').trim();
   return { name: name || null, email: EMAIL.test(email) ? email : null };

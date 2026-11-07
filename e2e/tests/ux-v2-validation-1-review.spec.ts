@@ -409,7 +409,7 @@ for (const scheme of ['light', 'dark'] as const) {
     await page.getByPlaceholder(/Search tags or browse categories/).focus();
     await expect(page.getByText('Browse All Tags by Category')).toBeVisible();
     // Select one tag too: counts on selected and unselected chips are both checked.
-    const chip = page.getByRole('button', { pressed: false }).filter({ hasText: /\d+$/ }).first();
+    const chip = page.getByRole('button', { pressed: false }).filter({ hasText: /\(\d+\)$/ }).first();
     await expect(chip).toBeVisible();
     await chip.click();
     await page.getByPlaceholder(/Search tags or browse categories|Add more tags/).focus();

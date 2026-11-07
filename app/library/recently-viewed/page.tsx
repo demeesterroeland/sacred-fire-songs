@@ -19,7 +19,7 @@ export default async function RecentlyViewedPage() {
 
     return (
         <div>
-            <LibrarySubpageHeading icon={Clock} title={t('recentlyViewed.section')} count={songs.length} />
+            <LibrarySubpageHeading icon={Clock} title={t('library.tabs.history')} count={songs.length} />
 
             {songs.length === 0 ? (
                 <p className="text-meta text-fg-muted italic py-8 text-center">

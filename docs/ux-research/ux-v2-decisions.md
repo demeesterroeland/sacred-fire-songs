@@ -1,11 +1,12 @@
 # UX v2: Agent Decisions (ADR-lite)
 
-**Version:** 1.36 | **Date:** Nov 7, 2026 | **Epic:** 6.1 (#375)
+**Version:** 1.37 | **Date:** Nov 7, 2026 | **Epic:** 6.1 (#375)
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.37 | Nov 7, 2026 | Added UXA-068 (validation round 2, batch 2: one song menu, version links, full title on a phone, recording wording, screen switch, Terms and Privacy pages, counts in parentheses, error codes; Part of #375). |
 | 1.36 | Nov 7, 2026 | Added UXA-067 (re-review of PR #474: section labels as text, panel above the bottom bars, right-click closes the panel, specific server messages translated). |
 | 1.35 | Nov 7, 2026 | Added UXA-061 to UXA-066 (review round on PR #474: the suggestions panel closes on the click and stays visible without moving the column, the auto-scroll fold counts the fixed bars, the tools sheet and focus when the song starts to fit, one focus cue per field and readable tag counts, translated error toasts, what counts as a chord; Part of #375). |
 | 1.34 | Nov 6, 2026 | Added UXA-054 to UXA-060 (validation round 1: when auto-scroll is offered, the expanded meta line, one focus style for text fields, where the search suggestions panel lives, search options on tokens, translated feedback, song flags versus the reader; Part of #375). |
@@ -670,6 +671,25 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 - **Choice:** `lib/errors/actionError.ts` maps the known answers to `errors.*` keys (8 languages) and anything else to the call site's own message or `errors.generic`; the raw text goes to the console only. A test fails when a toast prints `result.error`, `res.error` or `error.message`. `playlists.picker.createdButNotAdded` no longer carries `{error}`; the add-songs toasts are translated.
 - **Left as is:** the sign-in, sign-up, forgot-password, update-password and finish-registration forms still show the message of the authentication service (a separate mapping of its error codes). Runasimi (`qu`) shows its generic sentence for every `errors.*` key until a speaker translates them.
 - **Confirm:** no.
+
+### UXA-068 · Validation round 2, batch 2: one song menu, version links, recordings, Terms and Privacy
+
+- **Date / story:** Nov 7, 2026 · owner's second validation run (items 1 to 22), Part of #375
+- **One song menu (11):** the toolbar's ⋯ and the title bar's ⋮ are one menu, `SongMenuSheet` (opened by ⋮): Share, Edit, Delete (from `lg` these are header buttons, so the group is hidden there), Transpose (musicians), Auto-scroll start and speed (while the lyrics run below the fold), and the **Screen stays on** switch. Share and the switch are always there, so the old "close the sheet when it is empty" rule is gone. The desktop header got a ⋮ for the same menu. The toolbar keeps Chords, A−, A+ and ▶ (and the sun icon while the lock is held). *Bottom bar question:* the menu stays in the top bar. After the merge it holds more than one item, a fourth bottom-bar button would crowd Practice · Playlist · Favorite, and the bottom bar slides away on scroll while the top bar is always reachable.
+- **Screen stays on (10):** the switch writes the existing per-device preference `keepScreenAwake` (Settings → Preferences uses the same one), default on; `useWakeLock` releases the lock when it turns off. A browser without a wake lock shows the switch off and disabled, with the reason.
+- **Version links (5):** switching version calls `history.replaceState` (no reload, no history entry), sets `?version=<id>` and removes it for the first version; Share builds its link from the shown version (`versionShareUrl`). Other query parameters are kept.
+- **Full title (6):** below `lg` the page shows the whole title in an `h1` that wraps; the sticky bar is a zero-height sticky header whose 56 px bar holds ⋮ and a truncated copy of the title (`aria-hidden`, a paragraph, not a heading). The copy shows once the `h1` has scrolled under the bar (`useScrolledPast`, IntersectionObserver).
+- **Buttons (7) and Sign In (1):** the desktop header uses `Button`: Practice is the one primary, Delete and Edit are outline, the heart is grey (filled, not amber, when saved). The header's Sign In and the playlist export popup's Sign In are the same `SignInLink` (accent `Button`). Delete is neutral in the menu and the header; the danger colour is in the confirmation.
+- **Floating + (2):** one fixed 56 px accent button, `rounded-panel` (pills are for chips only), at the bottom right above the bottom bar or the mini player (`ACTION_BAR_BOTTOM` + 16 px), `lg:hidden`; removed from the page header.
+- **Counts (4):** one helper, `formatCount`: "Air (3)". Applied to the Home category tags, the Search options tag browser and tag pills (Add Song), and also to the Content type counts in Search options so one dialog does not mix two styles. The Library card subtitles keep their sentence form ("3 songs").
+- **Headings (3):** History, Artists and Shared with me use `LibrarySubpageHeading` (an `h1`, 16 px semibold, the count in parentheses). The History page is headed **History**, like its tab (it said "Recently viewed").
+- **Recording wording (8, 9):** the noun is "recording", the verb "Record", in all 8 languages (537 existing strings changed, plus 5 from the re-review patch reworded; the data key `rehearsal.demo.take*` and code names keep "take"). The toggle in the recorder uses `recorder.tab.record`; `recorder.tab.recordAudio` is deleted. Default names for new recordings read "Recording - date"; saved ones keep their name. The Library card reads "N recordings · N public · N private", counted from the recordings (their own `is_public`), and its description no longer says "private".
+- **Favourites (14):** the heart says "Add to / Remove from your Favorites" (menu term) in every language; Runasimi already used the menu's root. The phone bar says Favorite / In Favorites (en, fr, pt changed).
+- **Terms and Privacy (12):** `/terms` and `/privacy`, public, `force-dynamic`. The operator comes from the server variables `OPERATOR_NAME` and `OPERATOR_CONTACT_EMAIL` (`lib/legal/operator.ts`), never `NEXT_PUBLIC_`; unset, the pages say so. Both pages carry a Draft note. The text describes only what the code does; it states no retention period, legal basis, liability or governing law (open points in the pull request). Runasimi shows the English text.
+- **Own drafts (13):** `.eq('owner_id', userId)` on the Library card and the Home count (an admin reads every draft through RLS). The `?status=draft` list for an admin still shows every draft: it is a status filter, not "mine".
+- **One main (15):** only `app/layout.tsx` renders `<main>`; eight pages and layouts rendered a second one.
+- **Section labels (16), suggestions (18, 19, 20), fold (21), errors (22):** 16, 19, 20 and the first part of 22 came from the other thread's patch (see UXA-067); my own bracket-splitting for 16 was dropped in favour of the patch (whole-line labels as comments; the owner's choice). 18: a still release (≤ 10 px, same pointer) on something that is not a link, button or field closes the panel; releases on interactive things still wait for their click. 21: every ancestor of the lyrics up to `<body>` is observed. 22: `lib/errors/errorCode.ts` maps authentication and database error codes to `errors.*` keys; used by the sign-in, sign-up, forgot-password, update-password, finish-registration forms, the sign-up-success page and the Add Song form. `/auth/error` still prints the `error` query parameter it is given.
+- **Confirm:** yes: the Terms and Privacy wording (Draft), whether the History page should say "History", the Runasimi loanword "grabación" for recording, and whether the Content type counts should stay in parentheses.
 
 ### UXA-067 · Section labels as text; follow-ups from the re-review of PR #474
 

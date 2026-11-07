@@ -58,7 +58,8 @@ Then('the address has no parameters', function (this: object) {
 Given('every interface language', function () {
   assert.equal(SUPPORTED_LOCALES.length, 8);
 });
-Then('no string says {string} or the old word for it', function () {
+Then('no string says {string} or the old word for it', function (word: string) {
+  assert.ok(word); // the quoted word is the English one; every language's own old word is listed below
   const old: Record<string, RegExp> = {
     en: /\btakes?\b/i, nl: /\b(takes?|oefentakes?)\b/i, es: /\btomas?\b/i, it: /\btakes?\b/i,
     ru: /дубл(ь|я|ю|ем|е|и|ей|ям|ями|ях)\b/i, qu: /\btoma(kuna|ykikuna|ta|pa|qa|ykita)?\b/i, fr: /\bprises?\b(?! en charge)/i, pt: /\btakes?\b/i,
@@ -71,7 +72,8 @@ Then('no string says {string} or the old word for it', function () {
 Then('the recorder toggle has the same label as the Practice tab', function () {
   assert.equal(dict('en')['recorder.tab.record'], dict('en')['practice.tab.record']);
 });
-Then('the heart on the song page uses the word of the user menu\'s {string}', function () {
+Then('the heart on the song page uses the word of the user menu\'s {string}', function (menu: string) {
+  assert.ok(menu);
   const stem: Record<string, RegExp> = { en: /favou?rite/i, nl: /favoriet/i, es: /favorit/i, it: /preferit/i, ru: /избранн/i, qu: /munasqa/i, fr: /favori/i, pt: /favorit/i };
   for (const l of SUPPORTED_LOCALES) {
     assert.match(dict(l)['song.addToFavorites'], stem[l], l);

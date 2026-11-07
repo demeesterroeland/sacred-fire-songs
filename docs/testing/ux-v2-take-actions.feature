@@ -1,5 +1,6 @@
-# Version: 1.0 | Date: Nov 5, 2026
+# Version: 1.1 | Date: Nov 7, 2026
 # Changelog
+# 1.1 | Nov 7, 2026 | Validation round 2, item 8: Edit recording name, Download recording, Delete recording.
 # 1.0 | Nov 5, 2026 | Story 6.1.17 / G4.4 (#401): take actions in a grouped bottom action sheet.
 @story-6.1.17
 Feature: Take actions in a grouped bottom sheet

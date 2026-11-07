@@ -1,5 +1,6 @@
-# Version: 1.0 | Date: Nov 5, 2026
+# Version: 1.1 | Date: Nov 7, 2026
 # Changelog
+# 1.1 | Nov 7, 2026 | Validation round 2, item 11: the ⋮ menu is the one song menu (reading tools and the Screen stays on switch added).
 # 1.0 | Nov 5, 2026 | Story 6.1.9 / G2.4 (#393): sticky Practice · Playlist · ♥ action bar on the song page.
 @story-6.1.9
 Feature: Sticky action bar on the song page
@@ -63,8 +64,8 @@ Feature: Sticky action bar on the song page
     Then the sign-in sheet opens with the reason "add to playlist" and the current path in next=
 
   @e2e
-  Scenario: The ⋮ sheet keeps the secondary actions
+  Scenario: The ⋮ menu keeps the song actions and the reading tools
     Given a member who owns a song
     When they open the ⋮ menu on the song page
-    Then it offers "Share Song", "Edit" and "Delete"
+    Then it offers "Share Song", "Edit" and "Delete", then the reading tools and "Screen stays on"
     And it no longer offers Practice, Playlist or the heart

@@ -104,7 +104,7 @@ test('the dialog names the take and the song and says guests can listen', async 
   await expect(dialog).toContainText(SONG_TITLE);
   await expect(dialog.getByTestId('publish-audience')).toHaveText(GUESTS);
   await expect(dialog).toContainText(
-    "You can make the take private again at any time. New visitors then can't listen, but this can't undo what someone already heard or saved."
+    "You can make the recording private again at any time. New visitors then can't listen, but this can't undo what someone already heard or saved."
   );
   // The audience sentence is a status line and the dialog's description.
   await expect(dialog.getByTestId('publish-audience')).toHaveAttribute('role', 'status');

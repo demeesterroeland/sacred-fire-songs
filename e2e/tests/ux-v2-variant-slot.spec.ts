@@ -195,10 +195,11 @@ test('Deep link: ?version= opens that version, unknown versions fall back to the
   await expect(control.getByRole('radio', { name: 'Simplified' })).toBeChecked();
   await expect(page.getByText('Simplified verse for the variant slot')).toBeVisible();
 
-  // Tapping the switch overrides the link; the address bar is not rewritten on every switch.
+  // Tapping the switch overrides the link; the address is replaced in place (validation 2, item 5): the first
+  // version has the clean URL.
   await control.getByRole('radio', { name: 'Original' }).click();
   await expect(page.getByText('Original verse for the variant slot')).toBeVisible();
-  expect(new URL(page.url()).searchParams.get('version')).toBe(IDS.simplified);
+  await expect.poll(() => new URL(page.url()).searchParams.get('version')).toBeNull();
 
   await page.goto(`/songs/${IDS.song}?version=00000000-0000-4000-a000-000000000000`);
   await expect(page.getByRole('radiogroup', { name: 'Song version' }).getByRole('radio', { name: 'Original' })).toBeChecked();
