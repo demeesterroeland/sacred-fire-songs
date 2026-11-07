@@ -1021,12 +1021,12 @@ const es: Partial<Record<TranslationKey, string>> = {
   "legal.privacy.third.p1": "Las canciones pueden enlazar a pistas de referencia en YouTube, Spotify o SoundCloud. Cuando se muestra un reproductor así, tu navegador se conecta a ese servicio, que puede ver tu visita. Se aplican sus propias políticas de privacidad.",
   "legal.privacy.third.p2": "Las páginas cargan una fuente de iconos de Google Fonts, así que tu navegador contacta con Google para ello.",
   "legal.privacy.third.p3": "Si el operador ha configurado el correo, se envía un mensaje cuando alguien comparte una grabación contigo. Puedes desactivarlo en Ajustes, en Preferencias.",
-  "legal.privacy.third.p4": "Las páginas incluyen el script de Vercel Speed Insights, que informa a Vercel de la velocidad de las páginas cuando el servidor está alojado allí.",
   "legal.privacy.choices.title": "Tus opciones",
   "legal.privacy.choices.p1": "Puedes cambiar o eliminar tus canciones, listas y grabaciones en la app, y cambiar tu nombre y foto en Ajustes.",
   "legal.privacy.choices.p2": "Para saber qué se guarda sobre ti, para que se elimine tu cuenta o ante cualquier otra pregunta de privacidad, contacta con el operador (ver arriba). Eliminar la cuenta desde la app aún no es posible.",
   "auth.notice.loginRequired": "Inicia sesión para abrir esa página.",
   "errors.auth.linkInvalid": "Este enlace no es válido. Pide uno nuevo.",
+  "legal.privacy.visible.p5": "Quien tenga acceso directo a la base de datos o al almacenamiento de archivos de este servidor, como el operador, puede acceder a todo lo guardado, incluidas las grabaciones privadas.",
 };
 
 export default es;

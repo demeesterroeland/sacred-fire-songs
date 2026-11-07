@@ -1025,12 +1025,12 @@ const qu: Partial<Record<TranslationKey, string>> = {
   "legal.privacy.third.p1": "Songs can link to reference tracks on YouTube, Spotify or SoundCloud. When such a player is shown, your browser connects to that service, which can see your visit. Their own privacy policies apply.",
   "legal.privacy.third.p2": "Pages load an icon font from Google Fonts, so your browser contacts Google for it.",
   "legal.privacy.third.p3": "If the operator has set up email, a message is sent when someone shares a recording with you. You can switch this off in Settings, under Preferences.",
-  "legal.privacy.third.p4": "The pages include the Vercel Speed Insights script, which reports page speed to Vercel when the server is hosted there.",
   "legal.privacy.choices.title": "Your choices",
   "legal.privacy.choices.p1": "You can change or delete your songs, playlists and recordings in the app, and change your name and picture in Settings.",
   "legal.privacy.choices.p2": "To ask what is stored about you, to have your account removed, or with any other privacy question, contact the operator (see above). Deleting an account from within the app is not available yet.",
   "auth.notice.loginRequired": "Chay p’anqata kichanaykipaq yaykuy.",
   "errors.auth.linkInvalid": "Kay link manam allinchu. Musuqta mañakuy.",
+  "legal.privacy.visible.p5": "Anyone with direct access to the database or the file storage of this server, such as the operator, can reach everything stored on it, private recordings included.",
 };
 
 export default qu;

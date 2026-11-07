@@ -3339,3 +3339,4 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - **Tests:** see the pull request for the numbers of the final run.
 - **Decisions:** UXA-068 and UXA-067 updated.
 - **Favourites for admins:** hearts, list and counts use the signed-in user's own "My Favorites" setlist (`fetchFavoritesSetlistId`); before, an admin who can read every member's setlists got an empty list.
+- **Terms and Privacy (owner review):** Vercel Speed Insights removed from the app and the text; the privacy text names what the operator can reach.

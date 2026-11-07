@@ -1,11 +1,12 @@
 # UX v2: Agent Decisions (ADR-lite)
 
-**Version:** 1.39 | **Date:** Nov 7, 2026 | **Epic:** 6.1 (#375)
+**Version:** 1.40 | **Date:** Nov 7, 2026 | **Epic:** 6.1 (#375)
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.40 | Nov 7, 2026 | UXA-068: Vercel Speed Insights removed; the privacy text names what the operator can reach. |
 | 1.39 | Nov 7, 2026 | UXA-068: an admin's favourites (hearts, list, counts) use their own "My Favorites" setlist (owner filter). |
 | 1.38 | Nov 7, 2026 | UXA-068 and UXA-067 updated after the review of PR #477 (auth pages show translated messages by code, the ⋮ menu keeps auto-scroll running, a version switch drops the recording link, My Drafts lists what it counts, Quechua coverage, chord-like labels, right-click on plain text). |
 | 1.37 | Nov 7, 2026 | Added UXA-068 (validation round 2, batch 2: one song menu, version links, full title on a phone, recording wording, screen switch, Terms and Privacy pages, counts in parentheses, error codes; Part of #375). |
@@ -698,6 +699,7 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 - **Chord-like labels (review round):** a line of only bracket words is shown as text unless a word looks like a chord. `looksLikeChord` in `lib/chordUtils.ts` is wider than `isChordToken` (flat and sharp signs, `C6/9`, a bass note); `isChordToken` itself is unchanged. `[B♭]`, `[C6/9]`, `[F♯m7]` alone stay in the chord row; `[am]`, `[Hm]`, `[Re]`, `[Do]`, `[N.C.]` and section words show as text.
 - **Right-click (review round):** a press that never clicks closes the panel when it landed outside the field and the panel and left focus outside them too (a link it pressed, or the page body after a right-click on plain text). A press inside the panel never closes it.
 - **Favourites for admins (review round):** an admin can read every member's setlists, so a title-only lookup of "My Favorites" found several rows, `.maybeSingle()` returned an error and the hearts, the `/songs?favorites=true` list and the Search options count came back empty while the Home card (owner-filtered) showed a number. All lookups use `fetchFavoritesSetlistId(supabase, userId)` (`lib/playlists/favorites.ts`: owner filter, ordered, limit 1). Checked the others: the server queries, the toggle action and the Library page already filter on the owner.
+- **Owner review of the Terms and Privacy text:** the Vercel Speed Insights script and its package are removed (nothing measures page speed any more), so the privacy text has no paragraph about it. A paragraph was added to "Who can see it": anyone with direct access to the database or the file storage, such as the operator, can reach everything stored, private recordings included. The row-level security policies give the app's admin role no access to other members' private recordings; the text claims no more than the policies show. Open point for the owner: say if the admin role should be described differently.
 - **Removed:** `errors.sharedTakeNoDownload` (no caller of the action) and the unused starter `components/auth-button.tsx`.
 - **Confirm:** yes: the Terms and Privacy wording (Draft), whether the History page should say "History", the Runasimi loanword "grabación" for recording, and whether the Content type counts should stay in parentheses.
 

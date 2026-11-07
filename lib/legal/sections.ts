@@ -31,9 +31,9 @@ export const TERMS_SECTIONS: LegalSection[] = [
 
 export const PRIVACY_SECTIONS: LegalSection[] = [
   section('privacy', 'stored', 5),
-  section('privacy', 'visible', 4),
+  section('privacy', 'visible', 5),
   section('privacy', 'browser', 4),
-  section('privacy', 'third', 4),
+  section('privacy', 'third', 3),
   section('privacy', 'choices', 2),
 ];
 

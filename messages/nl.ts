@@ -1020,12 +1020,12 @@ const nl: Partial<Record<TranslationKey, string>> = {
   "legal.privacy.third.p1": "Liederen kunnen verwijzen naar referentienummers op YouTube, Spotify of SoundCloud. Als zo'n speler wordt getoond, maakt je browser verbinding met die dienst, die je bezoek kan zien. Hun eigen privacybeleid is van toepassing.",
   "legal.privacy.third.p2": "Pagina's laden een pictogramlettertype van Google Fonts, dus je browser neemt daarvoor contact op met Google.",
   "legal.privacy.third.p3": "Heeft de beheerder e-mail ingesteld, dan wordt een bericht gestuurd als iemand een opname met je deelt. Dat kun je uitzetten in Instellingen, bij Voorkeuren.",
-  "legal.privacy.third.p4": "De pagina's bevatten het script van Vercel Speed Insights, dat de laadsnelheid aan Vercel doorgeeft als de server daar draait.",
   "legal.privacy.choices.title": "Jouw keuzes",
   "legal.privacy.choices.p1": "Je kunt je liederen, afspeellijsten en opnames in de app wijzigen of verwijderen, en je naam en foto aanpassen in Instellingen.",
   "legal.privacy.choices.p2": "Wil je weten wat er over jou is opgeslagen, je account laten verwijderen, of heb je een andere privacyvraag, neem dan contact op met de beheerder (zie hierboven). Een account verwijderen vanuit de app kan nog niet.",
   "auth.notice.loginRequired": "Log in om die pagina te openen.",
   "errors.auth.linkInvalid": "Deze link is niet geldig. Vraag een nieuwe aan.",
+  "legal.privacy.visible.p5": "Wie rechtstreeks toegang heeft tot de database of de bestandsopslag van deze server, zoals de beheerder, kan alles lezen wat erin staat, ook privéopnames.",
 };
 
 export default nl;

@@ -1021,12 +1021,12 @@ const fr: Partial<Record<TranslationKey, string>> = {
   "legal.privacy.third.p1": "Les chants peuvent renvoyer à des pistes de référence sur YouTube, Spotify ou SoundCloud. Quand un tel lecteur s’affiche, votre navigateur se connecte à ce service, qui peut voir votre visite. Leurs propres politiques de confidentialité s’appliquent.",
   "legal.privacy.third.p2": "Les pages chargent une police d’icônes depuis Google Fonts : votre navigateur contacte donc Google.",
   "legal.privacy.third.p3": "Si l’opérateur a configuré l’e-mail, un message est envoyé quand quelqu’un partage un enregistrement avec vous. Vous pouvez le désactiver dans Réglages, sous Préférences.",
-  "legal.privacy.third.p4": "Les pages incluent le script Vercel Speed Insights, qui transmet la vitesse des pages à Vercel lorsque le serveur y est hébergé.",
   "legal.privacy.choices.title": "Vos choix",
   "legal.privacy.choices.p1": "Vous pouvez modifier ou supprimer vos chants, playlists et enregistrements dans l’application, et changer votre nom et votre photo dans Réglages.",
   "legal.privacy.choices.p2": "Pour savoir ce qui est conservé à votre sujet, faire supprimer votre compte ou toute autre question de confidentialité, contactez l’opérateur (voir ci-dessus). La suppression du compte depuis l’application n’est pas encore possible.",
   "auth.notice.loginRequired": "Connectez-vous pour ouvrir cette page.",
   "errors.auth.linkInvalid": "Ce lien n’est pas valide. Demandez-en un nouveau.",
+  "legal.privacy.visible.p5": "Toute personne ayant un accès direct à la base de données ou au stockage de fichiers de ce serveur, comme l’opérateur, peut atteindre tout ce qui y est conservé, enregistrements privés compris.",
 };
 
 export default fr;

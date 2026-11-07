@@ -1481,3 +1481,4 @@
 - [x] Auth pages: messages by code; auto-scroll with the menu open; version switch and recording link; My Drafts list; Runasimi coverage; `.env.example`; draft banner button; chord-like labels; right-click on plain text; unused message and starter component removed
 - [ ] Owner: Runasimi native-speaker check; approve the Terms and Privacy wording
 - [x] Favourites lookups filter on the owner (admin saw 6 on the card and an empty list)
+- [x] Remove Vercel Speed Insights; privacy text: operator access to stored data

@@ -134,3 +134,30 @@ describe('links', () => {
     expect(src).toContain('href="/privacy"');
   });
 });
+
+// Owner review: no third-party speed measurement in the app, and the privacy text says what the operator can reach.
+describe('no speed measurement script', () => {
+  it('the layout and package.json do not use Vercel Speed Insights', () => {
+    expect(readFileSync('app/layout.tsx', 'utf8')).not.toMatch(/speed-insights|SpeedInsights/);
+    expect(readFileSync('package.json', 'utf8')).not.toContain('speed-insights');
+  });
+  it.each([...SUPPORTED_LOCALES])('%s privacy text does not mention it', (locale) => {
+    const d = DICTIONARIES[locale as keyof typeof DICTIONARIES] as Record<string, string>;
+    for (const [key, value] of Object.entries(d)) {
+      if (key.startsWith('legal.privacy.')) expect(value, key).not.toMatch(/speed insights|vercel/i);
+    }
+  });
+});
+
+describe('the privacy text names what the operator can reach', () => {
+  it('has a paragraph on direct access to the database and file storage, in every language', () => {
+    const section = PRIVACY_SECTIONS.find((x) => x.id === 'visible')!;
+    expect(section.paragraphKeys).toContain('legal.privacy.visible.p5');
+    for (const locale of SUPPORTED_LOCALES) {
+      const d = DICTIONARIES[locale as keyof typeof DICTIONARIES] as Record<string, string>;
+      expect(d['legal.privacy.visible.p5'], locale).toBeTruthy();
+    }
+    expect(dict['legal.privacy.visible.p5']).toMatch(/private recordings/i);
+  });
+});
+

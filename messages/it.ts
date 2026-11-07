@@ -1021,12 +1021,12 @@ const it: Partial<Record<TranslationKey, string>> = {
   "legal.privacy.third.p1": "I canti possono rimandare a tracce di riferimento su YouTube, Spotify o SoundCloud. Quando un lettore di questo tipo viene mostrato, il tuo browser si collega a quel servizio, che può vedere la tua visita. Valgono le loro informative sulla privacy.",
   "legal.privacy.third.p2": "Le pagine caricano un font di icone da Google Fonts, quindi il tuo browser contatta Google per ottenerlo.",
   "legal.privacy.third.p3": "Se il gestore ha configurato la posta, viene inviato un messaggio quando qualcuno condivide una registrazione con te. Puoi disattivarlo in Impostazioni, sotto Preferenze.",
-  "legal.privacy.third.p4": "Le pagine includono lo script di Vercel Speed Insights, che comunica a Vercel la velocità delle pagine quando il server è ospitato lì.",
   "legal.privacy.choices.title": "Le tue scelte",
   "legal.privacy.choices.p1": "Puoi modificare o eliminare i tuoi canti, le playlist e le registrazioni nell’app, e cambiare nome e foto in Impostazioni.",
   "legal.privacy.choices.p2": "Per sapere che cosa è conservato su di te, per far rimuovere il tuo account o per qualsiasi altra domanda sulla privacy, contatta il gestore (vedi sopra). Eliminare l’account dall’app non è ancora possibile.",
   "auth.notice.loginRequired": "Accedi per aprire quella pagina.",
   "errors.auth.linkInvalid": "Questo link non è valido. Richiedine uno nuovo.",
+  "legal.privacy.visible.p5": "Chi ha accesso diretto al database o all’archiviazione dei file di questo server, come il gestore, può raggiungere tutto ciò che vi è conservato, comprese le registrazioni private.",
 };
 
 export default it;
