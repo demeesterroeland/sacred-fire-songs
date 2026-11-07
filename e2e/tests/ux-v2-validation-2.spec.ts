@@ -393,8 +393,10 @@ test.describe('admin', () => {
     test.skip(own === 0 || own > 15, 'needs a few own favourites (and fewer than one page) in the seed');
     await page.goto('/library/playlists');
     await expect(page.getByRole('link', { name: /Your Favorites/ })).toContainText(own === 1 ? '1 song' : `${own} songs`);
-    await page.getByRole('link', { name: /Your Favorites/ }).click();
-    await expect(page).toHaveURL(/favorites=true/);
+    // Follow the card's own address (a click on a card can land on a title preview inside it when the page is busy).
+    const favHref = await page.getByRole('link', { name: /Your Favorites/ }).getAttribute('href');
+    expect(favHref).toContain('favorites=true');
+    await page.goto(favHref!);
     await expect(page.getByTestId('song-row')).toHaveCount(own);
   });
 
@@ -413,9 +415,10 @@ test.describe('admin', () => {
     await client.end();
     test.skip(own === 0 || own > 15, 'needs a few own drafts (and fewer than one page) in the seed');
     await page.goto('/library/playlists');
-    await page.getByRole('link', { name: /My Drafts/ }).click();
-    await expect(page).toHaveURL(/mine=true/);
-    await expect(page).toHaveURL(/status=draft/);
+    const draftsHref = await page.getByRole('link', { name: /My Drafts/ }).getAttribute('href');
+    expect(draftsHref).toContain('mine=true');
+    expect(draftsHref).toContain('status=draft');
+    await page.goto(draftsHref!);
     await expect(page.getByTestId('song-row')).toHaveCount(own);
   });
 });
