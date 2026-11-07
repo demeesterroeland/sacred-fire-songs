@@ -1,40 +1,38 @@
 'use client';
 
 import Link from 'next/link';
-import { Home, Music2 } from 'lucide-react';
+import { Compass, Music2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useLocale } from '@/context/LocaleContext';
 import type { TranslationKey } from '@/lib/i18n';
 
 interface NotFoundProps {
-  /** Dictionary keys; the defaults are the song-themed copy. */
+  /** Dictionary keys; the defaults are the generic "Page not found" copy. */
   titleKey?: TranslationKey;
   descriptionKey?: TranslationKey;
+  /** Decorative icon by name (server pages cannot pass components to a client component). */
+  icon?: 'compass' | 'music';
 }
 
+const ICONS = { compass: Compass, music: Music2 } as const;
+
 export default function NotFound({
-  titleKey = 'feedback.notFound.title',
-  descriptionKey = 'feedback.notFound.description',
+  titleKey = 'feedback.notFound.page.title',
+  descriptionKey = 'feedback.notFound.page.description',
+  icon = 'compass',
 }: NotFoundProps = {}) {
+  const Icon = ICONS[icon];
   const { t } = useLocale();
   return (
-    <div className="flex-1 flex flex-col items-center justify-center p-8 text-center bg-gray-100 dark:bg-gray-900 h-full min-h-[60vh]">
-      <div className="relative mb-8">
-        <div className="absolute inset-0 bg-red-500/20 blur-3xl rounded-full scale-150 animate-pulse"></div>
-        <Music2 className="w-24 h-24 text-red-500 relative z-10" />
-      </div>
+    <div className="flex h-full min-h-[60vh] flex-1 flex-col items-center justify-center bg-bg p-8 text-center">
+      <Icon aria-hidden="true" className="mb-6 size-16 text-fg-subtle" />
 
-      <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-4">{t(titleKey)}</h1>
-      <p className="text-gray-500 dark:text-gray-400 max-w-[280px] mb-12 leading-relaxed">
-        {t(descriptionKey)}
-      </p>
+      <h1 className="mb-3 text-title font-semibold text-fg">{t(titleKey)}</h1>
+      <p className="mb-8 max-w-xs text-body text-fg-muted">{t(descriptionKey)}</p>
 
-      <Link
-        href="/"
-        className="flex items-center gap-3 px-8 py-4 bg-red-500 hover:bg-red-600 text-white rounded-2xl font-bold transition-all active:scale-95 shadow-xl shadow-red-500/20 group"
-      >
-        <Home className="w-5 h-5 group-hover:-translate-y-0.5 transition-transform" />
-        {t('feedback.notFound.backToHearth')}
-      </Link>
+      <Button asChild size="lg">
+        <Link href="/">{t('feedback.notFound.page.home')}</Link>
+      </Button>
     </div>
   );
 }

@@ -14,19 +14,19 @@ export function CardContent({ title, description, subtitle, songTitles = [] }: C
     return (
         <div className="flex-1 min-w-0">
             <p className="truncate">
-                <span className="font-bold text-gray-900 dark:text-gray-100 group-hover:text-gray-900 dark:group-hover:text-white transition-colors">
+                <span className="font-semibold text-fg transition-colors">
                     {title}
                 </span>
                 {description && (
-                    <span className="ml-2 text-xs font-normal text-gray-500">· {description}</span>
+                    <span className="ml-2 text-caption font-normal text-fg-muted">· {description}</span>
                 )}
             </p>
-            <div className="mt-0.5 text-xs text-gray-500 truncate">
+            <div className="mt-0.5 text-caption text-fg-muted truncate">
                 {subtitle}
                 {songTitles.length > 0 && (
                     <>
-                        <span className="mx-1.5 text-gray-700">|</span>
-                        <span className="text-gray-600">{songTitles.join(', ')}</span>
+                        <span className="mx-1.5 text-fg-subtle">|</span>
+                        <span className="text-fg-muted">{songTitles.join(', ')}</span>
                     </>
                 )}
             </div>

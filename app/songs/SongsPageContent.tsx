@@ -153,7 +153,7 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
             : t('songs.resultsCount', { count: filteredCount });
 
     return (
-        <main className="flex-1 min-h-0 bg-white dark:bg-gray-950">
+        <div className="flex-1 min-h-0 bg-white dark:bg-gray-950">
             <div className="p-4 md:p-8 space-y-3 md:space-y-6 max-w-7xl mx-auto">
                 {/* Results count badge */}
                 <div
@@ -193,23 +193,20 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
                         }`}
                     />
                     <div
-                        className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 transition-opacity duration-200 ${
+                        data-testid="song-list"
+                        className={`grid grid-cols-1 md:grid-cols-2 md:gap-x-6 border-t border-line transition-opacity duration-200 ${
                             isSearching ? 'opacity-60' : 'opacity-100'
                         }`}
                     >
                         {displaySongs.length > 0 ? (
                             displaySongs.map((song) => (
-                                <div key={song.id} className="relative group/card">
+                                <div key={song.id} className="relative">
                                     <SongCard
                                         id={song.id}
                                         title={song.title}
                                         author={song.author}
                                         songKey={song.songKey}
-                                        accentColor={song.color}
                                         isPublic={song.isPublic}
-                                        hasChords={song.hasChords}
-                                        hasMelody={song.hasMelody}
-                                        hasPersonalRecording={userRecordingCompositionIds.has(song.id)}
                                         isFavorite={favoriteIds.has(song.id)}
                                         userId={user?.id}
                                         categories={song.categories}
@@ -317,7 +314,9 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
                 title={t('song.delete.confirm.modalTitle')}
                 message={t('song.delete.confirm.message', { title: deleteTarget?.title || '' })}
                 isDeleting={isDeleting}
+                // The deleted song's row is gone: focus goes to the first song left in the list.
+                fallbackFocus={() => document.querySelector<HTMLElement>('[data-testid="song-list"] a')}
             />
-        </main>
+        </div>
     );
 }

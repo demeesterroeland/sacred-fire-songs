@@ -12,6 +12,7 @@ import { useSidebar } from '@/context/SidebarContext';
 import { getCategoryColor, getCategoryStyles } from '@/lib/uiUtils';
 
 import { renderCategoryIcon } from '@/lib/iconUtils';
+import { useLocale } from '@/context/LocaleContext';
 
 const ColorPill = ({
   slug,
@@ -28,12 +29,13 @@ const ColorPill = ({
   icon_name?: string | null,
   emoji?: string | null
 }) => {
+  const { t } = useLocale();
   const color = getCategoryColor(slug);
   const style = getCategoryStyles(color);
 
   // Header Style
   if (type === 'header') {
-    const baseClass = `flex items-center justify-between text-xs font-bold px-2 py-1.5 mb-3 rounded border uppercase tracking-wider group cursor-pointer transition-all`;
+    const baseClass = `flex items-center justify-between text-meta font-semibold px-2 py-1.5 mb-3 rounded border group cursor-pointer transition-all`;
 
     if (isActive) {
       return (
@@ -42,7 +44,7 @@ const ColorPill = ({
             {renderCategoryIcon(icon_name, emoji, 'w-3.5 h-3.5', 'text-sm')}
             <span>{name}</span>
           </div>
-          <span className="text-[9px] font-normal normal-case bg-gray-300 dark:bg-gray-700 text-gray-900 dark:text-white px-1.5 py-0.5 rounded ml-2 border border-gray-400 dark:border-gray-600">Match Any</span>
+          <span className="text-caption font-normal normal-case bg-gray-300 dark:bg-gray-700 text-gray-900 dark:text-white px-1.5 py-0.5 rounded ml-2 border border-gray-400 dark:border-gray-600">{t('library.matchAny')}</span>
         </div>
       );
     }

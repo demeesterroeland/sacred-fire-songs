@@ -6,6 +6,7 @@ import { createPlaylist } from '@/app/actions/playlistActions';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { useLocale } from '@/context/LocaleContext';
+import { actionErrorMessage } from '@/lib/errors/actionError';
 
 export function CreatePlaylistInput() {
     const { t } = useLocale();
@@ -28,7 +29,7 @@ export function CreatePlaylistInput() {
         startTransition(async () => {
             const result = await createPlaylist(trimmed);
             if ('error' in result) {
-                toast.error(result.error);
+                toast.error(actionErrorMessage(result.error, t));
             } else {
                 toast.success(t('playlists.created', { name: trimmed }), {
                     action: {
@@ -36,7 +37,7 @@ export function CreatePlaylistInput() {
                         onClick: () => { router.push(`/library/playlists/${result.id}`); },
                     },
                     classNames: {
-                        actionButton: 'text-amber-400 text-xs font-bold hover:text-amber-300 transition-colors ml-2',
+                        actionButton: 'ml-2 text-meta font-bold text-fg underline underline-offset-4 transition-colors hover:text-fg-muted',
                     },
                 });
                 router.refresh();
@@ -50,7 +51,7 @@ export function CreatePlaylistInput() {
         return (
             <button
                 onClick={open}
-                className="flex items-center gap-1 text-xs font-semibold text-red-500 border border-red-500/30 bg-red-500/10 hover:bg-red-500/20 hover:border-red-500/50 rounded-full px-3 py-1 transition-all"
+                className="flex items-center gap-1 text-meta font-semibold text-fg border border-line-strong bg-surface hover:bg-surface-2 rounded-pill px-3 py-1 transition-all"
             >
                 <Plus className="w-3.5 h-3.5" />
                 {t('playlists.newButton')}
@@ -71,12 +72,12 @@ export function CreatePlaylistInput() {
                 onBlur={submit}
                 placeholder={t('playlists.new.placeholder')}
                 disabled={isPending}
-                className="flex-1 bg-gray-100 dark:bg-gray-800 border border-amber-500/50 rounded-lg px-3 py-1 text-sm text-gray-900 dark:text-gray-100 placeholder-gray-400 dark:placeholder-gray-600 outline-none focus:border-amber-500 disabled:opacity-50 min-w-0 w-40"
+                className="min-h-tap w-40 min-w-0 flex-1 px-3 py-1 text-meta disabled:opacity-50 rounded-control border border-line-strong bg-surface text-fg placeholder:text-fg-subtle"
             />
             <button
                 onClick={submit}
                 disabled={isPending || !title.trim()}
-                className="text-xs font-semibold text-amber-400 hover:text-amber-300 disabled:opacity-40 transition-colors px-1 shrink-0"
+                className="inline-flex min-h-tap shrink-0 items-center px-1 text-meta font-semibold text-fg underline underline-offset-4 transition-colors hover:text-fg-muted disabled:opacity-40"
             >
                 {isPending ? '…' : t('playlists.create')}
             </button>

@@ -54,3 +54,37 @@ describe('fetchSong', () => {
     await expect(fetchSong('abc')).rejects.toBe(error);
   });
 });
+
+describe('fetchSong version order (Story 6.1.11 / G2.6, #395)', () => {
+  it('returns song_versions oldest first, so the original comes first in the switch', async () => {
+    query.result = {
+      data: {
+        title: 'T',
+        song_versions: [
+          { id: 'late', created_at: '2026-03-01T00:00:00Z' },
+          { id: 'early', created_at: '2026-01-01T00:00:00Z' },
+          { id: 'mid', created_at: '2026-02-01T00:00:00Z' },
+        ],
+      },
+      error: null,
+    };
+    const song = (await fetchSong('x')) as { song_versions: { id: string }[] };
+    expect(song.song_versions.map((v) => v.id)).toEqual(['early', 'mid', 'late']);
+  });
+
+  it('breaks identical timestamps by id (same order on every read)', async () => {
+    const t = '2026-01-01T00:00:00Z';
+    query.result = {
+      data: { title: 'T', song_versions: [{ id: 'b', created_at: t }, { id: 'a', created_at: t }] },
+      error: null,
+    };
+    const song = (await fetchSong('x')) as { song_versions: { id: string }[] };
+    expect(song.song_versions.map((v) => v.id)).toEqual(['a', 'b']);
+  });
+
+  it('leaves a song without versions untouched', async () => {
+    query.result = { data: { title: 'T', song_versions: [] }, error: null };
+    const song = (await fetchSong('x')) as { song_versions: unknown[] };
+    expect(song.song_versions).toEqual([]);
+  });
+});

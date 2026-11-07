@@ -75,7 +75,7 @@ export default function CategorySelector({ selectedIds, onChange }: CategorySele
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder={t('search.tags.placeholder')}
-            className="w-full pl-9 pr-8 py-2 text-xs rounded-lg bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500/50"
+            className="w-full pl-9 pr-8 py-2 text-xs rounded-lg bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400"
           />
           {searchTerm && (
             <button
@@ -107,7 +107,7 @@ export default function CategorySelector({ selectedIds, onChange }: CategorySele
       {/* 2. Selected Tags Bar */}
       {selectedCategories.length > 0 && (
         <div className="p-3 bg-red-50/50 dark:bg-red-950/30 border border-red-200/60 dark:border-red-900/40 rounded-lg space-y-1.5">
-          <span className="text-[10px] font-bold tracking-wider uppercase text-red-600 dark:text-red-400">
+          <span className="text-caption font-semibold text-danger">
             Selected Tags ({selectedCategories.length})
           </span>
           <div className="flex flex-wrap gap-1.5">
@@ -130,7 +130,7 @@ export default function CategorySelector({ selectedIds, onChange }: CategorySele
       <div className="space-y-4 pt-1 max-h-[320px] overflow-y-auto pr-1">
         {filteredGrouped.map(({ parentName, categories: groupCats }) => (
           <div key={parentName} className="space-y-2">
-            <h4 className="text-xs font-bold text-gray-500 uppercase tracking-wider">
+            <h4 className="text-meta font-semibold text-fg-muted">
               {parentName}
             </h4>
             <div className="flex flex-wrap gap-2">

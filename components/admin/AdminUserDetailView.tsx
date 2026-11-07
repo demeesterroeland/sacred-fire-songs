@@ -83,7 +83,7 @@ export default function AdminUserDetailView({ user }: AdminUserDetailViewProps) 
                 <span>{user.email}</span>
               </div>
 
-              <div className="flex items-center gap-2 text-[11px] text-gray-400 dark:text-gray-500 font-mono">
+              <div className="flex items-center gap-2 text-caption text-fg-muted font-mono">
                 <Fingerprint className="w-3.5 h-3.5 shrink-0" />
                 <span className="truncate max-w-[260px] md:max-w-none">{user.id}</span>
               </div>
@@ -115,7 +115,7 @@ export default function AdminUserDetailView({ user }: AdminUserDetailViewProps) 
 
       {/* Contribution Details Tab Content */}
       <section>
-        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">{t('admin.detail.contributions')}</p>
+        <p className="text-caption font-semibold text-fg-muted mb-4">{t('admin.detail.contributions')}</p>
         {/* Pill tabs, same style as app/library/LibraryTabs.tsx */}
         <div
           role="tablist"
@@ -255,11 +255,11 @@ export default function AdminUserDetailView({ user }: AdminUserDetailViewProps) 
                             {playlist.title}
                           </span>
                           {playlist.is_public ? (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
+                            <span className="inline-flex items-center gap-1 text-caption font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
                               <Globe className="w-2.5 h-2.5" /> {t('admin.detail.public')}
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-0.5 rounded-full">
+                            <span className="inline-flex items-center gap-1 text-caption font-semibold text-fg-muted bg-surface-2 px-2 py-0.5 rounded-full">
                               <Lock className="w-2.5 h-2.5" /> {t('admin.detail.private')}
                             </span>
                           )}

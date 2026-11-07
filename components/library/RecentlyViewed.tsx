@@ -1,5 +1,7 @@
 import Link from 'next/link';
-import { Clock, Music } from 'lucide-react';
+import { Clock } from 'lucide-react';
+import { ListRow } from '@/components/ui/list-row';
+import { songRowMeta } from '@/lib/songs/songMeta';
 import type { Song } from '@/lib/songUtils';
 
 import { getServerT } from '@/lib/i18n/server';
@@ -15,34 +17,28 @@ export default async function RecentlyViewed({ songs, total }: RecentlyViewedPro
   return (
     <div>
       <div className="flex items-center gap-2 mb-3">
-        <Clock className="w-3.5 h-3.5 text-gray-500" />
-        <p className="text-[10px] font-bold text-gray-600 uppercase tracking-widest">{t('recentlyViewed.section')}</p>
+        <Clock className="w-3.5 h-3.5 text-fg-subtle" aria-hidden />
+        <p className="text-meta font-semibold text-fg-muted">{t('recentlyViewed.section')}</p>
         {total !== undefined && total > 5 && (
           <Link
             href="/library/recently-viewed"
-            className="ml-auto text-[10px] font-bold text-red-500 hover:text-red-400 uppercase tracking-wider"
+            className="ml-auto inline-flex min-h-tap items-center text-meta font-semibold text-fg hover:text-accent"
           >
             {t('common.viewAll')}
           </Link>
         )}
       </div>
-      <div className="grid grid-cols-1 gap-2">
+      <div className="border-t border-line" data-testid="song-rows">
         {songs.map((song) => (
-          <Link
+          <ListRow
             key={song.id}
-            href={`/songs/${song.id}`}
-            className="flex items-center gap-3 p-3 rounded-xl bg-white/60 dark:bg-gray-900/30 border border-gray-200/50 dark:border-gray-800/50 hover:bg-gray-200/50 dark:hover:bg-gray-800/50 hover:border-gray-300/50 dark:hover:border-gray-700/50 transition-all group"
+            asChild
+            title={song.title}
+            meta={songRowMeta(song.author, song.categories, t)}
+            className="px-0"
           >
-            <div className="w-9 h-9 rounded-lg bg-gray-200/80 dark:bg-gray-800/80 flex items-center justify-center shrink-0 group-hover:bg-gray-300/80 dark:group-hover:bg-gray-700/80 transition-colors">
-              <Music className="w-4 h-4 text-gray-500" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate group-hover:text-gray-900 dark:group-hover:text-white transition-colors">{song.title}</p>
-              {song.author && (
-                <p className="text-xs text-gray-500 truncate">{song.author}</p>
-              )}
-            </div>
-          </Link>
+            <Link href={`/songs/${song.id}`} data-testid="song-row" />
+          </ListRow>
         ))}
       </div>
     </div>

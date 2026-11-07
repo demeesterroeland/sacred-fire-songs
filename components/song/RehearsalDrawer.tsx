@@ -1,29 +1,31 @@
 "use client";
 
-import React, { useState, useEffect, useTransition, useMemo, useRef } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { X, Music, Trash2, Pencil, Play, Pause, Lock, RotateCcw, RotateCw, GripVertical, Download, ChevronUp, ChevronDown, Check, Share2, Globe, Users, Mic, CheckCircle2, Clock, MoreHorizontal, Link2 } from "lucide-react";
+import React, { useState, useEffect, useTransition, useMemo, useId, useRef } from "react";
+import { motion } from "framer-motion";
+import { X, Music, Play, Pause, RotateCcw, RotateCw, GripVertical, ChevronDown, Check, Mic, MoreHorizontal, Volume2 } from "lucide-react";
 import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 import { toast } from "sonner";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/components/ui/dialog";
-import { Loader2 } from "lucide-react";
 import AudioRecorder from "./AudioRecorder";
 import { useSongRecordings } from "@/hooks/useSongRecordings";
-import { getUserRecordings, deleteUserRecording, renameUserRecording, reorderUserRecordings, unpublishRecording, type UserRecording } from "@/lib/actions/rehearsal";
-import { getYouTubeEmbedUrl, getSpotifyEmbedUrl } from "./MediaEmbeds";
+import { deleteUserRecording, getSongIsPublic, renameUserRecording, reorderUserRecordings, unpublishRecording, type UserRecording } from "@/lib/actions/rehearsal";
+import { getYouTubeEmbedUrl } from "./MediaEmbeds";
 import { useAuth } from "@/hooks/useAuth";
+import { useMarkSongNotificationsRead } from "@/hooks/useMarkSongNotificationsRead";
 import { useAudio } from "./AudioProvider";
+import { applyMiniPlayerHeight, isMiniPlayerVisible, mediaSessionReducer, miniPlayerClose, ownsActiveTake } from "@/lib/player/miniPlayer";
+import { availableProviders, defaultProvider, PROVIDER_NAMES, playStateKey } from "@/lib/player/referenceProviders";
 import Link from "next/link";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useLocale } from "@/context/LocaleContext";
-import { recordingPermalink } from "@/lib/songs/recordingLink";
+import { recordingPermalink, takeListTab } from "@/lib/songs/recordingLink";
+import { useModalFocus } from "@/hooks/useModalFocus";
+import { nextTabIndex } from "@/lib/a11y/focusTrap";
+import { partitionTakes } from "@/lib/songs/partitionTakes";
+import { takeStatusPills } from "@/lib/songs/takeStatus";
+import { TakeStatusPills } from "@/components/song/TakeStatusPills";
+import TakeActionsSheet from "@/components/song/TakeActionsSheet";
+import { takeHasActionSheet } from "@/lib/songs/takeActions";
+import GuestGate from "@/components/common/GuestGate";
 import { usePathname, useSearchParams } from "next/navigation";
 import RecordingShareModal from "./RecordingShareModal";
 import RecordingPublishModal from "./RecordingPublishModal";
@@ -46,6 +48,7 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { actionErrorMessage } from '@/lib/errors/actionError';
 
 function SortableRecordingItem({
   rec,
@@ -86,7 +89,7 @@ function SortableRecordingItem({
   const { t } = useLocale();
   const [isEditing, setIsEditing] = useState(false);
   const [editValue, setEditValue] = useState(rec.recording_name);
-  const renameRequested = useRef(false);
+  const [actionsOpen, setActionsOpen] = useState(false);
 
   const isOwner = rec.is_owner !== false;
   const isShared = rec.is_shared === true;
@@ -100,7 +103,13 @@ function SortableRecordingItem({
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (e.key === "Enter") handleSaveRename();
-    if (e.key === "Escape") { setEditValue(rec.recording_name); setIsEditing(false); }
+    if (e.key === "Escape") {
+      // preventDefault, not only stopPropagation: the Practice panel listens on `document` and skips keys that are already handled.
+      e.preventDefault();
+      e.stopPropagation();
+      setEditValue(rec.recording_name);
+      setIsEditing(false);
+    }
   };
 
   const {
@@ -120,13 +129,19 @@ function SortableRecordingItem({
   };
 
   const isPlaying = activePlaybackId === rec.id && isRecordingPlaying;
-  const shareCount = rec.shared_with?.length ?? 0;
   const singerLabel = rec.singer_profile?.full_name || rec.singer_name;
   const duration = rec.duration_seconds
     ? `${Math.floor(rec.duration_seconds / 60)}:${(rec.duration_seconds % 60).toString().padStart(2, "0")}`
     : null;
   const busy = deletingId === rec.id || downloadingId === rec.id;
-  const menuItemClass = "gap-2 text-gray-700 dark:text-gray-200 focus:bg-gray-100 dark:focus:bg-gray-800 cursor-pointer";
+  // Takes of other users say in words who shared them (Story 6.1.15 / G4.2); no colour-only cue.
+  const sharedByLabel = isOwner
+    ? null
+    : rec.shared_by_name
+      ? t('recording.sharing.sharedBy', { name: rec.shared_by_name })
+      : isShared
+        ? t('recording.sharing.badge')
+        : null;
 
   return (
     <div
@@ -182,42 +197,34 @@ function SortableRecordingItem({
             onBlur={handleSaveRename}
             onKeyDown={handleKeyDown}
             aria-label={t('rehearsal.recording.edit.ariaLabel')}
-            className="w-full text-sm font-semibold bg-white dark:bg-gray-900 border border-indigo-500 rounded px-2 py-0.5 outline-none text-gray-900 dark:text-white"
+            className="w-full text-sm font-semibold bg-white dark:bg-gray-900 border border-indigo-500 rounded px-2 py-0.5 text-gray-900 dark:text-white"
           />
         ) : (
           <div className="flex items-center gap-1.5 min-w-0">
             <h4
-              className={`text-sm font-semibold truncate ${!rec.audioUrl ? "text-red-500/80 dark:text-red-400/80" : "text-gray-900 dark:text-white"}`}
+              className={`text-sm font-semibold truncate ${!rec.audioUrl ? "text-fg-muted" : "text-fg"}`}
               onDoubleClick={() => isOwner && setIsEditing(true)}
             >
               {rec.recording_name}
             </h4>
-            {/* Visibility: private is the default and gets no marker */}
-            {rec.is_public ? (
-              <Globe className="w-3.5 h-3.5 text-emerald-500 shrink-0" aria-label={t('recording.publish.badge')}>
-                <title>{t('recording.publish.badge')}</title>
-              </Globe>
-            ) : isShared ? (
-              <Users className="w-3.5 h-3.5 text-indigo-500 shrink-0" aria-label={t('recording.sharing.badge')}>
-                <title>{t('recording.sharing.badge')}</title>
-              </Users>
-            ) : shareCount > 0 ? (
-              <span className="inline-flex items-center gap-0.5 text-[11px] text-indigo-500 shrink-0" title={`${t('recording.sharing.sharedWithTitle')} (${shareCount})`}>
-                <Users className="w-3.5 h-3.5" aria-hidden />
-                {shareCount}
-              </span>
-            ) : null}
             {!rec.audioUrl && (
-              <span className="text-[10px] uppercase font-bold text-red-500 bg-red-500/10 px-1.5 py-0.5 rounded shrink-0">
+              <span className="text-caption font-medium text-on-chip bg-chip px-2 py-0.5 rounded-pill shrink-0">
                 {t('rehearsal.recording.missingBadge')}
               </span>
             )}
           </div>
         )}
 
-        {/* One meta line: date · duration · singer */}
-        <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-1.5 mt-0.5 min-w-0">
-          <span className="shrink-0">{formatDate(rec.created_at)}</span>
+        {/* Status in words: Public, Shared · n, Pending invite, Verified musician (G4.3) */}
+        {!isEditing && <TakeStatusPills pills={takeStatusPills(rec)} />}
+
+        {/* One meta line: [shared by ·] date · duration · singer */}
+        <div className="text-caption text-fg-muted flex items-center gap-1.5 mt-0.5 min-w-0">
+          {sharedByLabel && (
+            <span className="min-w-0 truncate font-medium text-fg-muted" data-testid="shared-by">{sharedByLabel}</span>
+          )}
+          {/* A shared row spends the width on the name; the date is the owner's concern. */}
+          {!sharedByLabel && <span className="shrink-0">{formatDate(rec.created_at)}</span>}
           {duration && <><span aria-hidden className="opacity-50">·</span><span className="shrink-0 tabular-nums">{duration}</span></>}
           {singerLabel && (
             <>
@@ -225,18 +232,15 @@ function SortableRecordingItem({
               {rec.singer_profile_id && rec.singer_profile ? (
                 <Link
                   href={`/users/${rec.singer_profile_id}`}
-                  className="inline-flex items-center gap-1 min-w-0 text-indigo-600 dark:text-indigo-400 hover:underline"
-                  title={rec.singer_profile.is_musician ? t('recording.attribution.badgeVerified') : undefined}
+                  className="inline-flex items-center gap-1 min-w-0 text-fg underline underline-offset-2"
                 >
-                  <Mic className="w-3 h-3 shrink-0" aria-hidden />
+                  <Mic className="size-3 shrink-0" aria-hidden />
                   <span className="truncate">{singerLabel}</span>
-                  {rec.singer_profile.is_musician && <CheckCircle2 className="w-3 h-3 text-amber-500 shrink-0" aria-label={t('recording.attribution.badgeVerified')} />}
                 </Link>
               ) : (
-                <span className="inline-flex items-center gap-1 min-w-0" title={t('recording.attribution.badgePending')}>
-                  <Mic className="w-3 h-3 shrink-0" aria-hidden />
+                <span className="inline-flex items-center gap-1 min-w-0">
+                  <Mic className="size-3 shrink-0" aria-hidden />
                   <span className="truncate">{singerLabel}</span>
-                  <Clock className="w-3 h-3 shrink-0 opacity-60" aria-label={t('recording.attribution.badgePending')} />
                 </span>
               )}
             </>
@@ -244,72 +248,42 @@ function SortableRecordingItem({
         </div>
       </div>
 
-      {/* Owner actions live in one menu; recipients only stream (DRM-lite) */}
-      {isOwner && (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button
-              className="p-1.5 rounded-lg text-gray-400 hover:text-gray-700 dark:hover:text-gray-200 hover:bg-gray-200/60 dark:hover:bg-gray-800 transition-colors shrink-0"
-              aria-label={t('common.moreActions')}
-              title={t('common.moreActions')}
-            >
-              {busy ? (
-                <div className="w-4 h-4 border-2 border-indigo-500/30 border-t-indigo-500 rounded-full animate-spin" />
-              ) : (
-                <MoreHorizontal className="w-4 h-4" />
-              )}
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent
-            align="end"
-            className="w-52 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700"
-            onCloseAutoFocus={(e) => {
-              // Keep focus in the rename input instead of returning it to the trigger
-              if (renameRequested.current) {
-                e.preventDefault();
-                renameRequested.current = false;
-                setIsEditing(true);
-              }
-            }}
+      {/* Owner actions open one grouped bottom sheet; recipients only stream (DRM-lite).
+          Story 6.1.17 / G4.4 (#401): Delete is never one tap from Share. */}
+      {takeHasActionSheet(rec) && (
+        <>
+          <button
+            type="button"
+            onClick={() => setActionsOpen(true)}
+            disabled={busy}
+            className="grid size-tap shrink-0 place-items-center rounded-control text-fg-muted transition-colors hover:bg-surface-2 hover:text-fg disabled:cursor-wait"
+            aria-label={t('common.moreActions')}
+            aria-haspopup="dialog"
+            title={t('common.moreActions')}
           >
-            <DropdownMenuItem className={menuItemClass} onSelect={() => handleShare?.(rec)}>
-              <Share2 className="w-4 h-4" />
-              {t('recording.sharing.button')}
-              {shareCount > 0 && <span className="ml-auto text-xs text-gray-500">{shareCount}</span>}
-            </DropdownMenuItem>
-            <DropdownMenuItem className={menuItemClass} onSelect={() => handlePublish?.(rec)}>
-              {rec.is_public ? <Lock className="w-4 h-4" /> : <Globe className="w-4 h-4" />}
-              {rec.is_public ? t('recording.publish.makePrivate') : t('recording.publish.makePublic')}
-            </DropdownMenuItem>
-            <DropdownMenuItem className={menuItemClass} onSelect={() => handleAttribution?.(rec)}>
-              <Mic className="w-4 h-4" />
-              {t('recording.attribution.button')}
-            </DropdownMenuItem>
-            {handleCopyLink && (
-              <DropdownMenuItem className={menuItemClass} onSelect={() => handleCopyLink(rec)}>
-                <Link2 className="w-4 h-4" />
-                {t('rehearsal.recording.copyLink')}
-              </DropdownMenuItem>
+            {busy ? (
+              <div className="size-4 animate-spin rounded-full border-2 border-accent/30 border-t-accent motion-reduce:animate-none" />
+            ) : (
+              <MoreHorizontal className="size-5" />
             )}
-            <DropdownMenuSeparator className="bg-gray-200 dark:bg-gray-800" />
-            <DropdownMenuItem className={menuItemClass} onSelect={() => { renameRequested.current = true; }}>
-              <Pencil className="w-4 h-4" />
-              {t('rehearsal.recording.edit.ariaLabel')}
-            </DropdownMenuItem>
-            <DropdownMenuItem className={menuItemClass} disabled={!rec.audioUrl} onSelect={() => handleDownload(rec)}>
-              <Download className="w-4 h-4" />
-              {t('rehearsal.recording.download.ariaLabel')}
-            </DropdownMenuItem>
-            <DropdownMenuSeparator className="bg-gray-200 dark:bg-gray-800" />
-            <DropdownMenuItem
-              className="gap-2 text-red-600 dark:text-red-400 focus:bg-red-500/10 focus:text-red-600 cursor-pointer"
-              onSelect={() => handleDelete(rec.id, rec.storage_path)}
-            >
-              <Trash2 className="w-4 h-4" />
-              {t('rehearsal.recording.delete.ariaLabel')}
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+          </button>
+          <TakeActionsSheet
+            take={rec}
+            open={actionsOpen}
+            onOpenChange={setActionsOpen}
+            isPlaying={isPlaying}
+            on={{
+              play: () => handleTogglePlay(rec.id, rec.audioUrl),
+              rename: () => setIsEditing(true),
+              download: () => handleDownload(rec),
+              share: () => handleShare?.(rec),
+              singer: () => handleAttribution?.(rec),
+              visibility: () => handlePublish?.(rec),
+              copyLink: handleCopyLink ? () => handleCopyLink(rec) : undefined,
+              delete: () => handleDelete(rec.id, rec.storage_path),
+            }}
+          />
+        </>
       )}
     </div>
   );
@@ -320,6 +294,8 @@ interface RehearsalDrawerProps {
   onClose: () => void;
   onOpen?: () => void;
   songVersionId: string;
+  /** The song: opening the drawer marks its "shared a take with you" notifications read (Story 6.1.19). */
+  compositionId?: string | null;
   songTitle: string;
   songAuthor: string;
   youtubeUrl?: string | null;
@@ -332,6 +308,8 @@ interface RehearsalDrawerProps {
   onMakeSongPublic?: () => Promise<boolean>;
   /** Recording opened through `/songs/<id>?recording=<id>`: highlighted and scrolled into view. */
   highlightRecordingId?: string | null;
+  /** The recorder holds a take that is not saved yet (Story 6.1.11, #395): the page then refuses to switch version. */
+  onRecorderDirtyChange?: (dirty: boolean) => void;
 }
 
 export default function RehearsalDrawer({
@@ -339,6 +317,7 @@ export default function RehearsalDrawer({
   onClose,
   onOpen,
   songVersionId,
+  compositionId = null,
   songTitle,
   songAuthor,
   youtubeUrl,
@@ -346,24 +325,47 @@ export default function RehearsalDrawer({
   soundcloudUrl,
   onPlayStateChange,
   requestedTab = "auto",
-  isSongPublic = true,
+  isSongPublic = false,
   isSongOwner = false,
   onMakeSongPublic,
   highlightRecordingId = null,
+  onRecorderDirtyChange,
 }: RehearsalDrawerProps) {
   const { t } = useLocale();
   const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<"recorder" | "media">("media");
+  // Dialog semantics (Story 6.1.34 / G9.2, #418): focus moves in, stays in, and returns to the opener.
+  const dialogId = useId();
+  const dialogRef = useRef<HTMLDivElement>(null);
+  // dnd-kit renders a live region next to the list. Left inside the panel it counts as "keep visible" for Radix's
+  // aria-hidden pass, so the panel stayed readable behind a sheet opened from a take. At <body> it is out of the way.
+  const dndAccessibility = useMemo(() => ({ container: typeof document === "undefined" ? undefined : document.body }), []);
+  // Escape during a keyboard (or pointer) drag cancels the drag; it must not also close the panel. dnd-kit's own
+  // Escape listener runs after the panel's, so the panel is told a drag is active, and the flag is cleared one
+  // task after the drag ends so the same Escape keypress still counts as "used by the drag".
+  const dragActiveRef = useRef(false);
+  const dragGuard = useMemo(() => {
+    const release = () => { setTimeout(() => { dragActiveRef.current = false; }, 0); };
+    return { onDragStart: () => { dragActiveRef.current = true; }, onDragCancel: release, onDragEnd: release };
+  }, []);
+  useModalFocus({
+    open: isOpen,
+    containerRef: dialogRef,
+    onEscape: onClose,
+    escapeBusy: () => dragActiveRef.current,
+    // The mini player floats above the drawer: its controls follow the drawer's in the Tab order.
+    extraScope: () => Array.from(document.querySelectorAll<HTMLElement>('[data-testid="bottom-mini-player"]')),
+    fallbackSelector: '[data-testid="song-action-practice"], [data-testid="song-header-practice"]',
+  });
   const [selectedMedia, setSelectedMedia] = useState<"youtube" | "spotify" | "soundcloud" | null>(null);
   const [downloadingId, setDownloadingId] = useState<string | null>(null);
   const [deletingId, setDeletingId] = useState<string | null>(null);
   const [pendingDelete, setPendingDelete] = useState<UserRecording | null>(null);
   const [shareRecording, setShareRecording] = useState<UserRecording | null>(null);
-  const [privateSongPromptRecording, setPrivateSongPromptRecording] = useState<UserRecording | null>(null);
-  const [isPublishingSong, setIsPublishingSong] = useState(false);
   const [publishRecording, setPublishRecording] = useState<UserRecording | null>(null);
   const [attributionRecording, setAttributionRecording] = useState<UserRecording | null>(null);
   const isAdmin = user?.role === 'admin';
+  useMarkSongNotificationsRead({ userId: user?.id, compositionId, isOpen });
   const { activePlaybackId, activeRecording, audioElements, isRecordingPlaying, recordingCurrentTime, recordingDuration, handleTogglePlay: contextHandleTogglePlay, pauseActiveRecording, stopActiveRecording, seekActiveRecording, seekRelativeActiveRecording, clearAudioElements } = useAudio();
 
 
@@ -379,6 +381,16 @@ export default function RehearsalDrawer({
   const [activeDomain, setActiveDomain] = useState<'recording' | 'media' | null>(null);
 
   const hasMedia = !!(youtubeUrl || spotifyUrl || soundcloudUrl);
+  const showTabs = hasMedia || !user;
+  const onTabsKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const order = ["media", "recorder"] as const;
+    const next = nextTabIndex(e.key, order.indexOf(activeTab), order.length);
+    if (next === null) return;
+    e.preventDefault();
+    setActiveTab(order[next]);
+    document.getElementById(`${dialogId}-tab-${order[next]}`)?.focus();
+  };
+  const referenceProviders = availableProviders({ youtubeUrl, soundcloudUrl, spotifyUrl });
 
   // Notify parent of play state change
   useEffect(() => {
@@ -429,10 +441,7 @@ export default function RehearsalDrawer({
 
   // Set default active media source and tab when props change or user changes
   useEffect(() => {
-    if (youtubeUrl) setSelectedMedia("youtube");
-    else if (soundcloudUrl) setSelectedMedia("soundcloud");
-    else if (spotifyUrl) setSelectedMedia("spotify");
-    else setSelectedMedia(null);
+    setSelectedMedia(defaultProvider({ youtubeUrl, soundcloudUrl, spotifyUrl }));
   }, [youtubeUrl, soundcloudUrl, spotifyUrl, user]);
 
   // Only set the tab when the drawer opens or when an explicit tab is requested.
@@ -448,10 +457,11 @@ export default function RehearsalDrawer({
         setActiveTab(requestedTab);
       } else {
         // Contextual default only on first open
-        if (activePlaybackId) setActiveTab("recorder");
+        if (activePlaybackId) setActiveTab(user ? "recorder" : "media");
         else if (isMediaPlaying) setActiveTab("media");
         else if (youtubeUrl || spotifyUrl || soundcloudUrl) setActiveTab("media");
-        else setActiveTab("recorder");
+        // A guest cannot record: the Listen tab (reference track, public takes) comes first.
+        else setActiveTab(user ? "recorder" : "media");
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -459,13 +469,59 @@ export default function RehearsalDrawer({
 
   const { data: fetchedRecordings, isLoading } = useSongRecordings(songVersionId);
   const [recordings, setRecordings] = useState<UserRecording[]>([]);
+  // The Make public dialog asks for the visibility of the song each time it opens, so a song made
+  // private in the meantime is never offered for publishing. Unknown = null (dialog waits).
+  const songVisibility = useQuery({
+    queryKey: ["song-visibility", compositionId],
+    queryFn: () => getSongIsPublic(compositionId!),
+    enabled: !!publishRecording && !!compositionId,
+    staleTime: 0,
+    retry: 1,
+    // Coming back to the tab or the network must not flip the dialog to "checking" and hide Publish under the owner.
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+  });
+  // A failed lookup is shown as such (not read as "private"); the dialog then does not offer to publish.
+  const publishVisibilityUnreadable = !!compositionId && songVisibility.isError;
+  const publishSongIsPublic: boolean | null = !compositionId
+    ? isSongPublic
+    : songVisibility.isError || songVisibility.isFetching || songVisibility.data === undefined
+      ? null
+      : songVisibility.data;
   useEffect(() => {
     if (fetchedRecordings) {
       setRecordings(fetchedRecordings);
     }
   }, [fetchedRecordings]);
 
-  const hasAnyAudioSource = hasMedia || recordings.length > 0;
+  // UXD-5 (#396): the mini player shows only after the user pressed play. A take
+  // of this song is "started" while it is the active playback; a reference track is
+  // latched in `mediaSessionStarted` wherever `setIsMediaPlaying(true)` is called.
+  // `AudioProvider` is global, so `activePlaybackId` may name a take of another song:
+  // `isMiniPlayerVisible` ignores it, and the cleanup below stops it when leaving.
+  const [mediaSessionStarted, dispatchMediaSession] = React.useReducer(mediaSessionReducer, false);
+  // Story 6.1.15 / G4.2 (#399): my own takes and the takes shared with me are listed apart.
+  const { mine: myTakes, shared: sharedTakes, public: publicTakes } = useMemo(() => partitionTakes(recordings), [recordings]);
+  const songRecordingIds = useMemo(() => recordings.map((r) => r.id), [recordings]);
+  const miniPlayerVisible = isMiniPlayerVisible({ mediaSessionStarted, activePlaybackId, songRecordingIds });
+
+  // Leaving the song page: stop a take of this song, so no audio keeps playing without its bar.
+  const leaveRef = React.useRef({ activePlaybackId, songRecordingIds, stopActiveRecording });
+  useEffect(() => {
+    leaveRef.current = { activePlaybackId, songRecordingIds, stopActiveRecording };
+  });
+  useEffect(() => {
+    return () => {
+      const { activePlaybackId: id, songRecordingIds: ids, stopActiveRecording: stop } = leaveRef.current;
+      if (ownsActiveTake(id, ids)) stop();
+    };
+  }, []);
+
+  // Sheets, the drawer and the page pad their bottom by `--mini-player-h` while the bar is visible.
+  useEffect(() => {
+    applyMiniPlayerHeight(miniPlayerVisible, document.documentElement);
+    return () => applyMiniPlayerHeight(false, document.documentElement);
+  }, [miniPlayerVisible]);
 
   // Sign-in from the guest prompt returns to this page, including `?recording=`.
   const pathname = usePathname();
@@ -473,7 +529,8 @@ export default function RehearsalDrawer({
   const currentPath = search ? `${pathname}?${search}` : pathname;
 
   // Deep link: scroll the linked recording into view once it is rendered.
-  const highlightVisible = isOpen && activeTab === "recorder" && !!highlightRecordingId
+  // The tab that lists the takes depends on who is looking: Record for a member, Listen for a guest.
+  const highlightVisible = isOpen && activeTab === takeListTab(!!user) && !!highlightRecordingId
     && recordings.some((r) => r.id === highlightRecordingId);
   useEffect(() => {
     if (!highlightVisible || !highlightRecordingId) return;
@@ -550,6 +607,9 @@ export default function RehearsalDrawer({
     playingSource, isMediaPlaying, mediaCurrentTime, mediaDuration,
     recordings, hasMedia, activeDomain, t,
   ]);
+  // State word (none for Spotify) and the short name for the 390 px bar: brand only for references.
+  const stateKey = playStateKey(nowPlaying.isPlaying, nowPlaying.type === 'media' ? nowPlaying.source : null);
+  const barName = nowPlaying.type === 'media' && nowPlaying.source ? PROVIDER_NAMES[nowPlaying.source] : nowPlaying.label;
   const [isPendingOrder, startOrderTransition] = useTransition();
 
   const dndSensors = useSensors(
@@ -561,16 +621,21 @@ export default function RehearsalDrawer({
     const { active, over } = event;
     if (!over || active.id === over.id) return;
 
-    const oldIndex = recordings.findIndex((r) => r.id === active.id);
-    const newIndex = recordings.findIndex((r) => r.id === over.id);
-    const reordered = arrayMove(recordings, oldIndex, newIndex);
+    // Only my own takes can be reordered; takes shared with me keep the owner's order.
+    const oldIndex = myTakes.findIndex((r) => r.id === active.id);
+    const newIndex = myTakes.findIndex((r) => r.id === over.id);
+    if (oldIndex < 0 || newIndex < 0) return;
+    const reordered = arrayMove(myTakes, oldIndex, newIndex);
 
-    setRecordings(reordered);
+    setRecordings([...reordered, ...sharedTakes, ...publicTakes]);
 
     startOrderTransition(async () => {
       const res = await reorderUserRecordings(reordered.map((r) => r.id));
       if (!res.success) {
         toast.error(t('rehearsal.sort.error'));
+      } else {
+        // The list is cached for 60 s: without this a remount would show the old order again.
+        queryClient.invalidateQueries({ queryKey: ["song-recordings", songVersionId] });
       }
     });
   };
@@ -589,6 +654,7 @@ export default function RehearsalDrawer({
   };
 
   const playYouTube = () => {
+    dispatchMediaSession('playing');
     pauseSoundCloud();
     if (youtubeRef.current?.contentWindow) {
       if (typeof window !== "undefined" && (window as any).__E2E__) {
@@ -640,6 +706,7 @@ export default function RehearsalDrawer({
   };
 
   const playSoundCloud = () => {
+    dispatchMediaSession('playing');
     pauseYouTube();
     if (soundcloudRef.current?.contentWindow) {
       if (typeof window !== "undefined" && (window as any).__E2E__) {
@@ -823,6 +890,7 @@ export default function RehearsalDrawer({
 
     if (recordingJustStarted) {
       setActiveDomain('recording');
+      dispatchMediaSession('take-started');
       if (isMediaPlaying) {
         // Recording just started → pause any active iframe and clear its state
         if (playingSource === "youtube") pauseYouTube();
@@ -856,6 +924,7 @@ export default function RehearsalDrawer({
           const state = Number(data.info);
           if (state === 1 || state === 3) {
             setIsMediaPlaying(true);
+            dispatchMediaSession('playing');
             setPlayingSource("youtube");
             pauseSoundCloud();
           } else if (state === 2 || state === 0 || state === -1) {
@@ -874,6 +943,7 @@ export default function RehearsalDrawer({
         // SoundCloud messages
         if (data.event === "play" || data.method === "play" || data.action === "play") {
           setIsMediaPlaying(true);
+          dispatchMediaSession('playing');
           setPlayingSource("soundcloud");
           pauseYouTube();
         } else if (data.event === "pause" || data.method === "pause" || data.action === "pause") {
@@ -914,6 +984,7 @@ export default function RehearsalDrawer({
           if (selectedMedia === 'spotify' || (iframe.src && iframe.src.includes('spotify.com'))) {
             console.log("[E2E Debug] Spotify matched, pausing others");
             setIsMediaPlaying(true);
+            dispatchMediaSession('playing');
             setPlayingSource("spotify");
             // Pause other controllable sources immediately
             pauseYouTube();
@@ -1058,17 +1129,8 @@ export default function RehearsalDrawer({
     }
   };
 
-  const handleShare = (rec: UserRecording) => {
-    if (isSongPublic === false) {
-      if (isSongOwner || isAdmin) {
-        setPrivateSongPromptRecording(rec);
-      } else {
-        toast.error(t('recording.sharing.privateSongPrompt.notOwner'));
-      }
-      return;
-    }
-    setShareRecording(rec);
-  };
+  // A private song is explained and confirmed inside the Share dialog (Story 6.1.18).
+  const handleShare = (rec: UserRecording) => setShareRecording(rec);
 
   const handlePublish = async (rec: UserRecording) => {
     if (rec.is_public) {
@@ -1080,7 +1142,7 @@ export default function RehearsalDrawer({
         );
         queryClient.invalidateQueries({ queryKey: ["song-recordings", songVersionId] });
       } else {
-        toast.error(res.error || t('recording.publish.error'));
+        toast.error(actionErrorMessage(res.error, t, 'recording.publish.error'));
       }
     } else {
       setPublishRecording(rec);
@@ -1103,26 +1165,9 @@ export default function RehearsalDrawer({
 
   return (
     <>
-      <style>{`
-        @keyframes eq1 {
-          0%, 100% { height: 4px; }
-          50% { height: 16px; }
-        }
-        @keyframes eq2 {
-          0%, 100% { height: 8px; }
-          50% { height: 16px; }
-        }
-        @keyframes eq3 {
-          0%, 100% { height: 6px; }
-          50% { height: 16px; }
-        }
-        .animate-eq-bar-1 { animation: eq1 0.8s ease-in-out infinite; }
-        .animate-eq-bar-2 { animation: eq2 0.5s ease-in-out infinite; }
-        .animate-eq-bar-3 { animation: eq3 0.7s ease-in-out infinite; }
-      `}</style>
-
       {/* Backdrop */}
       <motion.div
+        data-testid="practice-backdrop"
         initial={{ opacity: 0, pointerEvents: "none" }}
         animate={{ 
           opacity: isOpen ? 1 : 0,
@@ -1135,6 +1180,13 @@ export default function RehearsalDrawer({
 
       {/* Bottom Drawer Sheet */}
       <motion.div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={`${dialogId}-kind ${dialogId}-title`}
+        data-testid="practice-drawer"
+        tabIndex={-1}
+        inert={!isOpen}
         initial={{ y: "100%", visibility: "hidden" }}
         animate={isOpen ? {
           y: 0,
@@ -1146,71 +1198,77 @@ export default function RehearsalDrawer({
           }
         }}
         transition={{ type: "spring", damping: 25, stiffness: 200 }}
-        className="fixed bottom-0 inset-x-0 bg-white dark:bg-gray-900 border-t border-gray-200 dark:border-gray-800 rounded-t-3xl shadow-2xl z-50 max-h-[90vh] md:max-h-[80vh] flex flex-col w-full max-w-xl mx-auto border-x pb-safe-bottom"
+        className="fixed bottom-0 inset-x-0 bg-bg text-fg border-t border-line rounded-t-3xl shadow-sheet z-50 max-h-[90vh] md:max-h-[80vh] flex flex-col w-full max-w-xl mx-auto border-x pb-safe-bottom outline-none"
       >
             {/* Header handle */}
-            <div className="w-12 h-1.5 bg-gray-300 dark:bg-gray-700 rounded-full mx-auto my-3 shrink-0 cursor-pointer" onClick={onClose} />
+            <div className="w-12 h-1.5 bg-line-strong rounded-full mx-auto my-3 shrink-0 cursor-pointer" onClick={onClose} />
 
             {/* Header Title bar */}
-            <div className="flex items-center justify-between px-6 pb-4 border-b border-gray-100 dark:border-gray-800/50 shrink-0">
+            <div className="flex items-center justify-between px-6 pb-4 border-b border-line shrink-0">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center text-white shadow-md">
                   <Music className="w-5 h-5" />
                 </div>
                 <div className="text-left">
-                  <h3 className="text-sm font-bold text-gray-400 dark:text-gray-500 uppercase tracking-wider">{t('rehearsal.title')}</h3>
-                  <h2 className="text-base font-extrabold text-gray-900 dark:text-white truncate max-w-[250px] md:max-w-[320px]">
+                  <h2 id={`${dialogId}-kind`} className="text-meta font-semibold text-fg-muted">{t('practice.title')}</h2>
+                  <p id={`${dialogId}-title`} className="text-base font-extrabold text-fg truncate max-w-[250px] md:max-w-[320px]">
                     {songTitle}
-                  </h2>
+                  </p>
                 </div>
               </div>
               <button
                 onClick={onClose}
-                className="p-1.5 rounded-full hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                className="inline-flex size-tap items-center justify-center rounded-control text-fg-muted hover:bg-surface-2 hover:text-fg transition-colors"
                 aria-label={t('common.close')}
               >
-                <X className="w-5 h-5" />
+                <X className="w-5 h-5" aria-hidden />
               </button>
             </div>
 
-             {/* Tabs Navigation */}
-            {hasMedia && (
-              <div className="flex px-6 border-b border-gray-100 dark:border-gray-800/50 shrink-0">
-                <button
-                  onClick={() => setActiveTab("media")}
-                  className={`flex-1 py-3 text-sm font-bold text-center border-b-2 transition-all ${
-                    activeTab === "media"
-                      ? "border-indigo-600 text-indigo-600 dark:text-indigo-400"
-                      : "border-transparent text-gray-500 hover:text-gray-900 dark:hover:text-white"
-                  }`}
-                >
-                  {t('rehearsal.tab.reference')}
-                </button>
-                <button
-                  onClick={() => setActiveTab("recorder")}
-                  className={`flex-1 py-3 text-sm font-bold text-center border-b-2 transition-all ${
-                    activeTab === "recorder"
-                      ? "border-indigo-600 text-indigo-600 dark:text-indigo-400"
-                      : "border-transparent text-gray-500 hover:text-gray-900 dark:hover:text-white"
-                  }`}
-                >
-                  {t('rehearsal.tab.voiceRecorder')}
-                </button>
+              {/* Tabs Navigation (a guest always has Listen: the public takes live there) */}
+            {showTabs && (
+              <div role="tablist" aria-label={t('practice.title')} onKeyDown={onTabsKeyDown} className="flex px-6 border-b border-line shrink-0">
+                {([
+                  { id: "media", testId: "practice-tab-listen", label: t('practice.tab.listen') },
+                  { id: "recorder", testId: "practice-tab-record", label: t('practice.tab.record') },
+                ] as const).map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    role="tab"
+                    id={`${dialogId}-tab-${tab.id}`}
+                    aria-selected={activeTab === tab.id}
+                    aria-controls={`${dialogId}-panel-${tab.id}`}
+                    tabIndex={activeTab === tab.id ? 0 : -1}
+                    data-testid={tab.testId}
+                    onClick={() => setActiveTab(tab.id)}
+                    className={`flex-1 py-3 text-sm font-bold text-center border-b-2 transition-all ${
+                      activeTab === tab.id
+                        ? "border-accent text-accent"
+                        : "border-transparent text-fg-muted hover:text-fg"
+                    }`}
+                  >
+                    {tab.label}
+                  </button>
+                ))}
               </div>
             )}
 
             {/* Content Body */}
-            <div className={`flex-1 overflow-y-auto p-6 space-y-6 ${hasAnyAudioSource ? 'pb-24' : ''}`}>
+            <div data-testid="rehearsal-drawer-body" className="flex-1 overflow-y-auto p-6 pb-[calc(1.5rem+env(safe-area-inset-bottom,0px)+var(--mini-player-h,0px))] space-y-6">
               
-              <div className="relative" style={{ display: activeTab === "recorder" ? "block" : "none" }}>
+              <div
+                className="relative"
+                style={{ display: activeTab === "recorder" ? "block" : "none" }}
+                {...(showTabs ? { role: "tabpanel", id: `${dialogId}-panel-recorder`, "aria-labelledby": `${dialogId}-tab-recorder` } : {})}
+              >
                   {/* Blurred overlay wrapper if guest */}
-                  <div className={!user ? "blur-[4px] pointer-events-none select-none" : ""}>
+                  <div className={!user ? "blur-[4px] pointer-events-none select-none" : ""} inert={!user} aria-hidden={!user || undefined}>
                     {/* Sticky Mini-Player Status Bar */}
                     {hasMedia && selectedMedia && (
-                      <div className="flex items-center justify-between p-3.5 bg-indigo-50/50 dark:bg-indigo-950/20 border border-indigo-100 dark:border-indigo-950/50 rounded-2xl shrink-0">
+                      <div data-testid="reference-status" className="flex items-center justify-between gap-3 p-3.5 bg-surface border border-line rounded-panel shrink-0">
                         <div className="flex items-center gap-2.5 min-w-0">
-                          <span className="w-2 h-2 bg-green-500 rounded-full animate-pulse shrink-0" />
-                          <span className="text-xs font-semibold text-gray-600 dark:text-gray-300 truncate">
+                          <span className="text-meta font-medium text-fg-muted break-words">
                             {selectedMedia === "youtube" && t('rehearsal.reference.loaded.youtube')}
                             {selectedMedia === "soundcloud" && t('rehearsal.reference.loaded.soundcloud')}
                             {selectedMedia === "spotify" && t('rehearsal.reference.loaded.spotify')}
@@ -1218,7 +1276,8 @@ export default function RehearsalDrawer({
                         </div>
                         <button
                           onClick={() => setActiveTab("media")}
-                          className="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:underline shrink-0"
+                          data-testid="reference-open-player"
+                          className="inline-flex min-h-tap items-center px-2 text-meta font-semibold text-fg underline underline-offset-2 shrink-0"
                         >
                           {t('rehearsal.controlTrack')}
                         </button>
@@ -1229,17 +1288,17 @@ export default function RehearsalDrawer({
                     <section className="space-y-2">
                       <div className="flex items-baseline justify-end">
                         {hasMedia && (
-                          <span className="text-[10px] text-indigo-500/80 dark:text-indigo-400/80 font-medium">
+                          <span className="text-caption text-fg-muted font-medium">
                             {t('rehearsal.headphonesHint')}
                           </span>
                         )}
                       </div>
-                      <AudioRecorder songVersionId={songVersionId} onRecordingSaved={handleRecordingSaved} />
+                      <AudioRecorder songVersionId={songVersionId} onRecordingSaved={handleRecordingSaved} onDirtyChange={onRecorderDirtyChange} />
                     </section>
 
                     {/* Saved Practice Takes List */}
                     <section className="mt-6 space-y-3">
-                      <h3 className="text-xs font-semibold text-gray-400 dark:text-gray-500 uppercase tracking-wider text-left">{t('rehearsal.recordings.yourRecordings')}</h3>
+                      <h3 className="text-meta font-semibold text-fg-muted text-left">{t('practice.takes.mine')}</h3>
                       
                       {/* Fake practice takes mock list for guest demo preview */}
                       {!user ? (
@@ -1261,7 +1320,7 @@ export default function RehearsalDrawer({
                           <div className="w-6 h-6 border-2 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin" />
                           <span className="text-xs text-gray-400">{t('rehearsal.loadingRecordings')}</span>
                         </div>
-                      ) : recordings.length === 0 ? (
+                      ) : myTakes.length === 0 ? (
                         <div className="text-center py-10 border border-dashed border-gray-200 dark:border-gray-800 rounded-2xl p-4">
                           <p className="text-2xl mb-1">🎤</p>
                           <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200">{t('rehearsal.recordings.empty')}</h4>
@@ -1270,13 +1329,13 @@ export default function RehearsalDrawer({
                           </p>
                         </div>
                       ) : (
-                        <DndContext sensors={dndSensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                        <DndContext sensors={dndSensors} collisionDetection={closestCenter} accessibility={dndAccessibility} {...dragGuard} onDragEnd={(event) => { dragGuard.onDragEnd(); handleDragEnd(event); }}>
                           <SortableContext
-                            items={recordings.map((r) => r.id)}
+                            items={myTakes.map((r) => r.id)}
                             strategy={verticalListSortingStrategy}
                           >
                             <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-gray-50/60 dark:bg-gray-950 p-1 space-y-0.5">
-                              {recordings.map((rec) => (
+                              {myTakes.map((rec) => (
                                 <SortableRecordingItem
                                   key={rec.id}
                                   rec={rec}
@@ -1293,7 +1352,7 @@ export default function RehearsalDrawer({
                                   handleAttribution={handleAttribution}
                                   handleCopyLink={handleCopyLink}
                                   formatDate={formatDate}
-                                  isCustomSort={recordings.length > 1}
+                                  isCustomSort={myTakes.length > 1}
                                   isHighlighted={rec.id === highlightRecordingId}
                                 />
                               ))}
@@ -1302,73 +1361,91 @@ export default function RehearsalDrawer({
                         </DndContext>
                       )}
                     </section>
+
+                    {/* Takes of others, listen only: shared with me, then public takes; each hidden when empty (Story 6.1.15 / G4.2) */}
+                    {user && !isLoading && ([
+                      { key: 'shared', testId: 'shared-takes', label: t('practice.takes.shared'), takes: sharedTakes },
+                      { key: 'public', testId: 'public-takes', label: t('practice.takes.public'), takes: publicTakes },
+                    ] as const).map((group) => group.takes.length > 0 && (
+                      <section key={group.key} className="mt-6 space-y-3" data-testid={group.testId}>
+                        <h3 className="text-meta font-semibold text-fg-muted text-left">{group.label}</h3>
+                        <DndContext sensors={dndSensors} collisionDetection={closestCenter} accessibility={dndAccessibility} {...dragGuard}>
+                          <SortableContext items={group.takes.map((r) => r.id)} strategy={verticalListSortingStrategy} disabled>
+                            <div className="rounded-panel border border-line bg-surface p-1 space-y-0.5">
+                              {group.takes.map((rec) => (
+                                <SortableRecordingItem
+                                  key={rec.id}
+                                  rec={rec}
+                                  activePlaybackId={activePlaybackId}
+                                  isRecordingPlaying={isRecordingPlaying}
+                                  deletingId={deletingId}
+                                  downloadingId={downloadingId}
+                                  handleTogglePlay={(id, url) => { const rec = recordings.find(r => r.id === id); if (rec) contextHandleTogglePlay(rec, url); }}
+                                  handleDelete={() => undefined}
+                                  handleRename={handleRename}
+                                  handleDownload={handleDownload}
+                                  formatDate={formatDate}
+                                  isCustomSort={false}
+                                  isHighlighted={rec.id === highlightRecordingId}
+                                />
+                              ))}
+                            </div>
+                          </SortableContext>
+                        </DndContext>
+                      </section>
+                    ))}
                   </div>
 
-                  {/* CTA Lock Overlay Card */}
-                  {!user && (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center p-6 text-center z-10 pointer-events-auto">
-                      <div className="bg-white/95 dark:bg-gray-900/95 backdrop-blur-md p-6 rounded-3xl border border-gray-200 dark:border-gray-800 shadow-xl max-w-sm space-y-4">
-                        <div className="w-12 h-12 bg-indigo-500/10 text-indigo-500 rounded-full flex items-center justify-center mx-auto">
-                          <Lock className="w-5 h-5" />
-                        </div>
-                        <div>
-                          <h4 className="text-sm font-bold text-gray-900 dark:text-white">{t('rehearsal.guest.title')}</h4>
-                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 leading-relaxed">
-                            {t('rehearsal.guest.description')}
-                          </p>
-                        </div>
-                        <Link href={`/auth/login?next=${encodeURIComponent(currentPath)}`}>
-                          <button className="w-full py-2.5 bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl text-xs font-bold transition-all shadow-md active:scale-95 cursor-pointer">
-                            {t('rehearsal.guest.signIn')}
-                          </button>
-                        </Link>
-                      </div>
-                    </div>
-                  )}
+                  {/* Unified GuestGate over the blurred preview (Story 6.1.26 / G6.1) */}
+                  {!user && <GuestGate feature="recorder" variant="overlay" next={currentPath} />}
                 </div>
 
-              <div className="space-y-6 text-left" style={activeTab !== "media" ? { visibility: "hidden", height: 0, overflow: "hidden", margin: 0, padding: 0 } : undefined}>
-                  {/* Media Selector Buttons (only if more than 1 media type exists) */}
-                  {((youtubeUrl ? 1 : 0) + (spotifyUrl ? 1 : 0) + (soundcloudUrl ? 1 : 0)) > 1 && (
-                    <div className="flex gap-2 p-1 bg-gray-100 dark:bg-gray-950 rounded-xl">
-                      {youtubeUrl && (
-                        <button
-                          onClick={() => setSelectedMedia("youtube")}
-                          className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                            selectedMedia === "youtube"
-                              ? "bg-white dark:bg-gray-800 text-red-550 shadow-sm border border-gray-200/50 dark:border-gray-700/50"
-                              : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
-                          }`}
-                        >
-                          YouTube
-                        </button>
-                      )}
-                      {soundcloudUrl && (
-                        <button
-                          onClick={() => setSelectedMedia("soundcloud")}
-                          className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                            selectedMedia === "soundcloud"
-                              ? "bg-white dark:bg-gray-800 text-[#ff5500] shadow-sm border border-gray-200/50 dark:border-gray-700/50"
-                              : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
-                          }`}
-                        >
-                          SoundCloud
-                        </button>
-                      )}
-                      {spotifyUrl && (
-                        <button
-                          onClick={() => setSelectedMedia("spotify")}
-                          className={`flex-1 py-1.5 rounded-lg text-xs font-bold transition-all ${
-                            selectedMedia === "spotify"
-                              ? "bg-white dark:bg-gray-800 text-[#1db954] shadow-sm border border-gray-200/50 dark:border-gray-700/50"
-                              : "text-gray-500 hover:text-gray-900 dark:hover:text-white"
-                          }`}
-                        >
-                          Spotify
-                        </button>
-                      )}
+              <div
+                className="space-y-6 text-left"
+                style={activeTab !== "media" ? { visibility: "hidden", height: 0, overflow: "hidden", margin: 0, padding: 0 } : undefined}
+                {...(showTabs ? { role: "tabpanel", id: `${dialogId}-panel-media`, "aria-labelledby": `${dialogId}-tab-media` } : {})}
+              >
+                  {/* Provider buttons: only providers with a link, fixed order; the pressed one is checked (Story 6.1.13 / G3.2) */}
+                  {referenceProviders.length > 0 && (
+                    <div role="group" aria-label={t('practice.tab.listen')} data-testid="reference-providers" className="flex gap-1 p-1 bg-surface-2 rounded-control">
+                      {referenceProviders.map((provider) => {
+                        const selected = selectedMedia === provider;
+                        // The shown provider (check) can differ from the one that plays (speaker).
+                        const playing = nowPlaying.type === 'media' && nowPlaying.source === provider && nowPlaying.isPlaying;
+                        return (
+                          <button
+                            key={provider}
+                            type="button"
+                            data-testid={`reference-provider-${provider}`}
+                            aria-pressed={selected}
+                            onClick={() => setSelectedMedia(provider)}
+                            className={`flex-1 min-h-tap inline-flex items-center justify-center gap-1.5 rounded-control px-2 text-meta font-semibold motion-safe:transition-colors ${
+                              selected
+                                ? "bg-surface text-fg border border-line-strong"
+                                : "text-fg-muted hover:bg-surface"
+                            }`}
+                          >
+                            {selected && <Check aria-hidden="true" className="size-3.5 shrink-0" />}
+                            {PROVIDER_NAMES[provider]}
+                            {playing && (
+                              <>
+                                <Volume2 aria-hidden="true" data-testid={`reference-provider-${provider}-playing`} className="size-3.5 shrink-0" />
+                                <span className="sr-only">{t('miniPlayer.playing')}</span>
+                              </>
+                            )}
+                          </button>
+                        );
+                      })}
                     </div>
                   )}
+
+                  {/* Says in words what plays and whether it is paused (Story 6.1.13 / G3.2) */}
+                  {/* Kept mounted so screen readers announce the first change too */}
+                  <p data-testid="listen-now-playing" role="status" className="text-meta text-fg-muted break-words empty:hidden">
+                    {miniPlayerVisible && (stateKey
+                      ? t('rehearsal.listen.status', { state: t(stateKey), name: nowPlaying.label })
+                      : nowPlaying.label)}
+                  </p>
 
                   {/* YouTube Player */}
                   {youtubeUrl && (
@@ -1426,23 +1503,67 @@ export default function RehearsalDrawer({
                     </div>
                   )}
 
+
+                  {/* Guests hear the public takes here, read only (UXD-2): no record, share, download or reorder. */}
+                  {!user && (
+                    <section className="space-y-3" data-testid="guest-public-takes">
+                      <h3 className="text-meta font-semibold text-fg-muted text-left">{t('practice.takes.public')}</h3>
+                      {isLoading ? (
+                        <div className="flex items-center justify-center gap-2 py-6 text-meta text-fg-muted">
+                          <div className="size-4 animate-spin rounded-full border-2 border-accent/30 border-t-accent motion-reduce:animate-none" aria-hidden />
+                          <span>{t('rehearsal.loadingRecordings')}</span>
+                        </div>
+                      ) : publicTakes.length === 0 ? (
+                        <p data-testid="guest-public-takes-empty" className="rounded-panel border border-dashed border-line p-4 text-center text-meta text-fg-muted">
+                          {t('practice.takes.publicEmptyGuest')}
+                        </p>
+                      ) : (
+                        <DndContext sensors={dndSensors} collisionDetection={closestCenter} accessibility={dndAccessibility} {...dragGuard}>
+                          <SortableContext items={publicTakes.map((r) => r.id)} strategy={verticalListSortingStrategy} disabled>
+                            <div className="rounded-panel border border-line bg-surface p-1 space-y-0.5">
+                              {publicTakes.map((rec) => (
+                                <SortableRecordingItem
+                                  key={rec.id}
+                                  rec={rec}
+                                  activePlaybackId={activePlaybackId}
+                                  isRecordingPlaying={isRecordingPlaying}
+                                  deletingId={deletingId}
+                                  downloadingId={downloadingId}
+                                  handleTogglePlay={(id, url) => { const rec = recordings.find(r => r.id === id); if (rec) contextHandleTogglePlay(rec, url); }}
+                                  handleDelete={() => undefined}
+                                  handleRename={handleRename}
+                                  handleDownload={handleDownload}
+                                  formatDate={formatDate}
+                                  isCustomSort={false}
+                                  isHighlighted={rec.id === highlightRecordingId}
+                                />
+                              ))}
+                            </div>
+                          </SortableContext>
+                        </DndContext>
+                      )}
+                    </section>
+                  )}
                 </div>
 
             </div>
           </motion.div>
 
       {/* Floating Horizontal Bottom Mini Player Widget */}
-      {hasAnyAudioSource && (
+      {miniPlayerVisible && (
 
         <div 
           data-testid="bottom-mini-player"
-          className={`fixed bottom-[calc(var(--bottom-nav-height,3.5rem)+env(safe-area-inset-bottom,0px))] lg:bottom-4 left-0 right-0 lg:left-1/2 lg:-translate-x-1/2 z-[60] w-full lg:max-w-xl lg:rounded-2xl shadow-2xl backdrop-blur-md text-white h-14 flex items-center justify-between px-4 border-t lg:border border-white/10 select-none animate-in slide-in-from-bottom duration-300 ${nowPlaying.type === 'recording' ? 'bg-indigo-600/95' : 'bg-[#FF5500]/95'}`}
+          data-reader-bar=""
+          role="region"
+          aria-label={t('miniPlayer.region')}
+          className="fixed bottom-[calc(var(--bottom-nav-height,3.5rem)+env(safe-area-inset-bottom,0px))] lg:bottom-4 inset-x-0 lg:left-1/2 lg:right-auto lg:-translate-x-1/2 z-[60] w-full lg:max-w-xl lg:rounded-panel shadow-sheet bg-surface text-fg h-bar flex items-center justify-between px-2 border-t lg:border border-line-strong select-none motion-safe:animate-in motion-safe:slide-in-from-bottom motion-safe:duration-300"
         >
           {/* Visual Progress Bar (Clipped to container corners) */}
-          <div className="absolute inset-0 pointer-events-none lg:rounded-2xl overflow-hidden z-0">
-            <div className="absolute top-0 inset-x-0 h-1 bg-white/20">
+          <div className="absolute inset-0 pointer-events-none lg:rounded-panel overflow-hidden z-0">
+            <div className="absolute top-0 inset-x-0 h-1 bg-line">
               <div 
-                className="h-full bg-white"
+                className="h-full bg-fg-muted"
                 style={{ width: `${Math.min(100, (nowPlaying.currentTime / (nowPlaying.duration || 1)) * 100)}%` }}
               />
             </div>
@@ -1455,41 +1576,35 @@ export default function RehearsalDrawer({
             className="absolute top-0 inset-x-0 h-2 -mt-1 cursor-pointer group z-40 flex items-center"
           >
             <div 
-              className="w-3 h-3 bg-white rounded-full absolute opacity-0 group-hover:opacity-100 transition-opacity"
+              className="w-3 h-3 bg-fg rounded-pill absolute opacity-0 group-hover:opacity-100 motion-safe:transition-opacity"
               style={{ left: `calc(${Math.min(100, (nowPlaying.currentTime / (nowPlaying.duration || 1)) * 100)}% - 6px)` }}
             />
           </div>
 
           {/* Equalizer & Source Switcher Dropdown */}
-          <div className="flex items-center gap-3 flex-1 min-w-0 h-full py-2 cursor-pointer" onClick={onOpen}>
-            <div className="flex gap-0.5 items-end h-4 w-4 shrink-0 justify-center cursor-pointer">
-              <span className={`w-[2px] bg-white rounded-full transition-all duration-300 ${nowPlaying.isPlaying ? 'animate-eq-bar-1' : 'h-1.5'}`} />
-              <span className={`w-[2px] bg-white rounded-full transition-all duration-300 ${nowPlaying.isPlaying ? 'animate-eq-bar-2' : 'h-3'}`} />
-              <span className={`w-[2px] bg-white rounded-full transition-all duration-300 ${nowPlaying.isPlaying ? 'animate-eq-bar-3' : 'h-2'}`} />
-            </div>
-            
+          <div className="flex items-center gap-2 flex-1 min-w-0 h-full pl-2 cursor-pointer" onClick={onOpen}>
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <div 
                   data-testid="mini-source-switcher" 
-                  className="flex flex-col text-left min-w-0 cursor-pointer hover:bg-white/10 rounded px-2 -mx-2 transition-colors"
+                  className="flex flex-col justify-center min-h-tap text-left min-w-0 cursor-pointer hover:bg-surface-2 rounded-control px-2 -mx-2"
                   onClick={(e) => e.stopPropagation()}
                 >
                   <div className="flex items-center gap-1">
-                    <span className="text-xs font-black truncate">{songTitle}</span>
+                    <span className="text-meta font-semibold truncate">{songTitle}</span>
                     <ChevronDown className="w-3 h-3 opacity-70 shrink-0" />
                   </div>
-                  <span className="text-[9px] uppercase tracking-widest opacity-80 truncate">
-                    {nowPlaying.label}
+                  <span data-testid="mini-now-playing" className="text-caption text-fg-muted truncate" title={nowPlaying.label}>
+                    {stateKey ? `${t(stateKey)} · ${barName}` : barName}
                   </span>
                 </div>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-56 bg-[#1a1a1e]/95 backdrop-blur-xl border border-white/10 text-white rounded-xl shadow-2xl p-2 z-[60]" data-testid="mini-source-dropdown">
+              <DropdownMenuContent align="start" className="w-56 bg-surface border border-line text-fg rounded-control shadow-sheet p-2 z-[60]" data-testid="mini-source-dropdown">
                 {hasMedia && (
                   <>
-                    <DropdownMenuLabel className="text-[10px] uppercase tracking-wider text-gray-400 font-bold px-2 pb-1">{t('rehearsal.tab.reference')}</DropdownMenuLabel>
+                    <DropdownMenuLabel className="text-caption text-fg-muted font-semibold px-2 pb-1">{t('practice.tab.listen')}</DropdownMenuLabel>
                     {youtubeUrl && (
-                      <DropdownMenuItem className="cursor-pointer focus:bg-white/10 focus:text-white rounded-md transition-colors my-0.5" onClick={() => {
+                      <DropdownMenuItem className="cursor-pointer min-h-tap focus:bg-surface-2 focus:text-fg rounded-control my-0.5" onClick={() => {
                         stopActiveRecording();
                         pauseSoundCloud();
                         setSelectedMedia("youtube");
@@ -1503,7 +1618,7 @@ export default function RehearsalDrawer({
                       </DropdownMenuItem>
                     )}
                     {soundcloudUrl && (
-                      <DropdownMenuItem className="cursor-pointer focus:bg-white/10 focus:text-white rounded-md transition-colors my-0.5" onClick={() => {
+                      <DropdownMenuItem className="cursor-pointer min-h-tap focus:bg-surface-2 focus:text-fg rounded-control my-0.5" onClick={() => {
                         stopActiveRecording();
                         pauseYouTube();
                         setSelectedMedia("soundcloud");
@@ -1517,7 +1632,7 @@ export default function RehearsalDrawer({
                       </DropdownMenuItem>
                     )}
                     {spotifyUrl && (
-                      <DropdownMenuItem className="cursor-pointer focus:bg-white/10 focus:text-white rounded-md transition-colors my-0.5" onClick={() => {
+                      <DropdownMenuItem className="cursor-pointer min-h-tap focus:bg-surface-2 focus:text-fg rounded-control my-0.5" onClick={() => {
                         stopActiveRecording();
                         onOpen?.();
                         setSelectedMedia("spotify");
@@ -1531,12 +1646,16 @@ export default function RehearsalDrawer({
                     )}
                   </>
                 )}
-                {recordings.length > 0 && (
-                  <>
-                    {hasMedia && <DropdownMenuSeparator className="bg-white/10 my-2" />}
-                    <DropdownMenuLabel>{t('miniPlayer.source.userRecordings')}</DropdownMenuLabel>
-                    {recordings.map(rec => (
-                      <DropdownMenuItem key={rec.id} onClick={() => {
+                {([
+                  { key: 'mine', label: t('practice.takes.mine'), takes: myTakes },
+                  { key: 'shared', label: t('practice.takes.shared'), takes: sharedTakes },
+                  { key: 'public', label: t('practice.takes.public'), takes: publicTakes },
+                ] as const).map((group, i, all) => group.takes.length > 0 && (
+                  <React.Fragment key={group.key}>
+                    {(hasMedia || all.slice(0, i).some((g) => g.takes.length > 0)) && <DropdownMenuSeparator className="bg-line my-2" />}
+                    <DropdownMenuLabel>{group.label}</DropdownMenuLabel>
+                    {group.takes.map(rec => (
+                      <DropdownMenuItem key={rec.id} className="min-h-tap" onClick={() => {
                         if (!rec.audioUrl) return;
                         contextHandleTogglePlay(rec, rec.audioUrl);
                       }}>
@@ -1546,21 +1665,22 @@ export default function RehearsalDrawer({
                         </div>
                       </DropdownMenuItem>
                     ))}
-                  </>
-                )}
+                  </React.Fragment>
+                ))}
               </DropdownMenuContent>
             </DropdownMenu>
           </div>
 
           {/* Controls */}
-          <div className="flex items-center gap-1.5 ml-4 shrink-0">
+          <div className="flex items-center ml-2 shrink-0">
             {/* Seek Back */}
             {(nowPlaying.source || nowPlaying.recordingId) && (
               <button 
                 onClick={() => seekRelative(-15)}
                 data-testid="mini-seek-back-btn"
                 title={t('miniPlayer.seekBack')}
-                className="p-2 text-white/80 hover:text-white transition-colors cursor-pointer shrink-0"
+                aria-label={t('miniPlayer.seekBack')}
+                className="size-tap flex items-center justify-center rounded-pill hover:bg-surface-2 cursor-pointer shrink-0"
               >
                 <RotateCcw className="w-[18px] h-[18px]" />
               </button>
@@ -1570,12 +1690,13 @@ export default function RehearsalDrawer({
             <button 
               onClick={handleMiniPlayerPlayPause}
               data-testid="mini-play-pause-btn"
-              className="w-8 h-8 rounded-full bg-black/20 hover:bg-black/35 flex items-center justify-center text-white cursor-pointer transition-transform hover:scale-105 shrink-0"
+              aria-label={nowPlaying.isPlaying ? t('miniPlayer.pause') : t('miniPlayer.play')}
+              className="size-tap flex items-center justify-center rounded-pill bg-accent text-on-accent hover:opacity-90 cursor-pointer shrink-0"
             >
               {nowPlaying.isPlaying ? (
-                <Pause className="w-3.5 h-3.5 fill-white" />
+                <Pause className="w-4 h-4 fill-current" />
               ) : (
-                <Play className="w-3.5 h-3.5 fill-white ml-0.5" />
+                <Play className="w-4 h-4 fill-current ml-0.5" />
               )}
             </button>
 
@@ -1585,20 +1706,22 @@ export default function RehearsalDrawer({
                 onClick={() => seekRelative(15)}
                 data-testid="mini-seek-forward-btn"
                 title={t('miniPlayer.seekForward')}
-                className="p-2 text-white/80 hover:text-white transition-colors cursor-pointer shrink-0"
+                aria-label={t('miniPlayer.seekForward')}
+                className="size-tap flex items-center justify-center rounded-pill hover:bg-surface-2 cursor-pointer shrink-0"
               >
                 <RotateCw className="w-[18px] h-[18px]" />
               </button>
             )}
 
-            <span className="w-px h-6 bg-white/10 mx-1 shrink-0" />
+            <span className="w-px h-6 bg-line mx-1 shrink-0" />
 
             {/* Expand Drawer */}
             <button 
               onClick={onOpen}
               data-testid="mini-expand-btn"
               title={t('miniPlayer.expand')}
-              className="p-2 text-white/85 hover:text-white hover:bg-white/10 rounded transition-colors cursor-pointer shrink-0"
+              aria-label={t('miniPlayer.expand')}
+              className="size-tap flex items-center justify-center rounded-pill hover:bg-surface-2 cursor-pointer shrink-0"
             >
               <Music className="w-4 h-4" />
             </button>
@@ -1607,18 +1730,19 @@ export default function RehearsalDrawer({
             {(playingSource || activePlaybackId) && (
               <button 
                 onClick={() => {
-                  if (activePlaybackId) {
-                    stopActiveRecording();
-                  } else {
-                    pauseYouTube();
-                    pauseSoundCloud();
-                    setPlayingSource(null);
-                    setIsMediaPlaying(false);
-                  }
+                  // ✕ stops everything this song plays and hides the bar (UXD-5): the reference
+                  // track and this song's take, so a paused take cannot take over the bar.
+                  if (miniPlayerClose(activePlaybackId, songRecordingIds).stopTake) stopActiveRecording();
+                  pauseYouTube();
+                  pauseSoundCloud();
+                  setPlayingSource(null);
+                  setIsMediaPlaying(false);
+                  dispatchMediaSession('stopped');
                 }}
                 data-testid="mini-close-btn"
                 title={t('miniPlayer.stop')}
-                className="p-2 text-white/60 hover:text-white hover:bg-white/10 rounded transition-colors cursor-pointer shrink-0"
+                aria-label={t('miniPlayer.stop')}
+                className="size-tap flex items-center justify-center rounded-pill hover:bg-surface-2 cursor-pointer shrink-0"
               >
                 <X className="w-4 h-4" />
               </button>
@@ -1627,71 +1751,15 @@ export default function RehearsalDrawer({
         </div>
       )}
 
-      {/* Private Song Sharing Confirmation Dialog */}
-      {privateSongPromptRecording && (
-        <Dialog open={!!privateSongPromptRecording} onOpenChange={(open) => !open && setPrivateSongPromptRecording(null)}>
-          <DialogContent className="max-w-md bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-white">
-            <DialogHeader>
-              <DialogTitle className="flex items-center gap-2 text-lg font-bold">
-                <Lock className="w-5 h-5 text-amber-500" />
-                {t('recording.sharing.privateSongPrompt.title')}
-              </DialogTitle>
-              <DialogDescription className="text-sm text-gray-500 dark:text-gray-400 pt-2 leading-relaxed">
-                {t('recording.sharing.privateSongPrompt.body')}
-              </DialogDescription>
-            </DialogHeader>
-
-            <DialogFooter className="flex flex-row justify-end gap-2 pt-4 border-t border-gray-100 dark:border-gray-800">
-              <button
-                type="button"
-                onClick={() => setPrivateSongPromptRecording(null)}
-                disabled={isPublishingSong}
-                className="px-4 py-2 text-sm font-medium rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-              >
-                {t('common.cancel')}
-              </button>
-              <button
-                type="button"
-                disabled={isPublishingSong}
-                onClick={async () => {
-                  if (!onMakeSongPublic) return;
-                  setIsPublishingSong(true);
-                  try {
-                    const success = await onMakeSongPublic();
-                    if (success) {
-                      const rec = privateSongPromptRecording;
-                      setPrivateSongPromptRecording(null);
-                      setShareRecording(rec);
-                    }
-                  } finally {
-                    setIsPublishingSong(false);
-                  }
-                }}
-                className="px-4 py-2 text-sm font-medium rounded-lg bg-amber-500 hover:bg-amber-600 text-black font-semibold transition-colors flex items-center gap-2 disabled:opacity-50"
-              >
-                {isPublishingSong ? (
-                  <>
-                    <Loader2 className="w-4 h-4 animate-spin" />
-                    <span>{t('common.loading')}</span>
-                  </>
-                ) : (
-                  <>
-                    <Globe className="w-4 h-4" />
-                    <span>{t('recording.sharing.privateSongPrompt.confirm')}</span>
-                  </>
-                )}
-              </button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      )}
-
       {/* Recording Sharing Modal */}
       {shareRecording && (
         <RecordingShareModal
           isOpen={!!shareRecording}
           onClose={() => setShareRecording(null)}
           recording={shareRecording}
+          songIsPublic={isSongPublic}
+          canMakeSongPublic={isSongOwner || isAdmin}
+          onMakeSongPublic={onMakeSongPublic}
           onSharesUpdated={() => {
             queryClient.invalidateQueries({ queryKey: ["song-recordings", songVersionId] });
           }}
@@ -1704,6 +1772,11 @@ export default function RehearsalDrawer({
           isOpen={!!publishRecording}
           onClose={() => setPublishRecording(null)}
           recording={publishRecording}
+          songTitle={songTitle}
+          songIsPublic={publishSongIsPublic}
+          visibilityUnreadable={publishVisibilityUnreadable}
+          canMakeSongPublic={isSongOwner || isAdmin}
+          onMakeSongPublic={onMakeSongPublic}
           onPublished={() => {
             queryClient.invalidateQueries({ queryKey: ["song-recordings", songVersionId] });
           }}
@@ -1722,6 +1795,8 @@ export default function RehearsalDrawer({
         title={t('rehearsal.recording.delete.confirmTitle')}
         message={t('rehearsal.recording.delete.confirmMessage', { name: pendingDelete?.recording_name ?? '' })}
         isDeleting={!!pendingDelete && deletingId === pendingDelete.id}
+        // The deleted take's menu button is gone afterwards: focus goes back to the Practice panel.
+        fallbackFocus={() => dialogRef.current}
       />
 
       {/* Singer Attribution Modal */}

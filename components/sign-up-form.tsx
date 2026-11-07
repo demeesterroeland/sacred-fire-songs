@@ -3,20 +3,26 @@
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, Suspense } from "react";
-import { Mail, Lock, ShieldCheck, Flame, X, ArrowRight } from "lucide-react";
+import { Mail, Lock, ShieldCheck, Flame, ArrowRight } from "lucide-react";
 import { useLocale } from "@/context/LocaleContext";
+import { authNoticeKey } from "@/lib/auth/notice";
+import { errorMessage } from "@/lib/errors/errorCode";
+import { authPageHref } from '@/lib/auth/authBack';
+import {
+  AuthCard,
+  AuthHeader,
+  AuthNotice,
+  authFooterClass,
+  authIconClass,
+  authInputClass,
+  authLabelClass,
+  authLinkClass,
+} from '@/components/auth/AuthShell';
 
 export function SignUpForm(props: React.ComponentPropsWithoutRef<"div">) {
   const { t } = useLocale();
@@ -39,7 +45,7 @@ function SignUpFormContent({
   const router = useRouter();
   const searchParams = useSearchParams();
   const next = searchParams.get("next");
-  const message = searchParams.get("message");
+  const messageKey = authNoticeKey(searchParams.get("message"));
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -68,48 +74,29 @@ function SignUpFormContent({
 
       router.push(`/auth/sign-up-success?email=${encodeURIComponent(email)}${next ? `&next=${encodeURIComponent(next)}` : ""}`);
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : t('common.errorOccurred'));
+      setError(errorMessage(error, t, 'common.errorOccurred'));
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className={cn("relative w-full max-w-[420px] bg-white dark:bg-[#1c222d] md:border md:border-gray-200 dark:md:border-[#2d3545] md:rounded-3xl p-6 md:p-8 md:shadow-2xl transition-all duration-300", className)} {...props}>
-      {/* Close Button */}
-      <Button
-        variant="ghost"
-        size="icon"
-        className="absolute right-4 top-4 md:right-6 md:top-6 text-[#5a657a] hover:text-gray-900 dark:hover:text-white transition-colors h-10 w-10 p-0"
-        onClick={() => router.push('/')}
-      >
-        <X className="w-6 h-6" />
-      </Button>
+    <AuthCard className={className} {...props}>
+      <AuthHeader icon={<Flame className="fill-current" />} title={t('auth.signUp.heading')} description={t('auth.signUp.description')} />
 
-      {/* Header */}
-      <div className="flex flex-row md:flex-col items-center md:items-center gap-4 md:gap-0 mb-8 md:mb-10 mt-4 md:mt-0">
-        <div className="w-12 h-12 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-[#d9481e] to-[#f45d1a] flex items-center justify-center shadow-[0_0_20px_rgba(217,72,30,0.3)] md:mb-6 flex-shrink-0">
-          <Flame className="text-white w-6 h-6 md:w-10 md:h-10 fill-current" />
-        </div>
-        <div className="text-left md:text-center">
-          <h1 className="text-gray-900 dark:text-white text-xl md:text-3xl font-bold md:mb-2 leading-tight">{t('auth.signUp.heading')}</h1>
-          <p className="text-[#8e99aa] text-xs md:text-sm">{t('auth.signUp.description')}</p>
-        </div>
-      </div>
-
-      {message && (
-        <div className="mb-6 bg-blue-500/10 border border-blue-500/20 p-3 rounded-lg text-blue-400 text-sm text-center">
-          {message}
+      {messageKey && (
+        <div className="mb-6">
+          <AuthNotice tone="info">{t(messageKey)}</AuthNotice>
         </div>
       )}
 
       {/* Signup Form */}
-      <form onSubmit={handleSignUp} className="space-y-4 md:space-y-4">
+      <form onSubmit={handleSignUp} className="space-y-4">
         <div className="space-y-1">
-          <Label className="text-xs font-semibold text-gray-900 dark:text-white ml-1 tracking-wide uppercase opacity-70">{t('field.email.label')}</Label>
-          <div className="relative group">
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5a657a] group-focus-within:text-[#d9481e] transition-colors pointer-events-none">
-              <Mail className="w-5 h-5" />
+          <Label htmlFor="email" className={authLabelClass}>{t('field.email.label')}</Label>
+          <div className="group relative">
+            <div className={authIconClass}>
+              <Mail className="size-5" />
             </div>
             <Input
               id="email"
@@ -118,16 +105,16 @@ function SignUpFormContent({
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-transparent border-gray-200 dark:border-[#2d3545] rounded-xl py-3.5 md:py-4 pl-12 pr-4 text-gray-900 dark:text-white placeholder-[#5a657a] focus:outline-none focus:border-[#d9481e] transition-all text-[14px] md:text-[15px] h-auto"
+              className={authInputClass}
             />
           </div>
         </div>
 
         <div className="space-y-1">
-          <Label className="text-xs font-semibold text-gray-900 dark:text-white ml-1 tracking-wide uppercase opacity-70">{t('field.password')}</Label>
-          <div className="relative group">
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5a657a] group-focus-within:text-[#d9481e] transition-colors pointer-events-none">
-              <Lock className="w-5 h-5" />
+          <Label htmlFor="password" className={authLabelClass}>{t('field.password')}</Label>
+          <div className="group relative">
+            <div className={authIconClass}>
+              <Lock className="size-5" />
             </div>
             <Input
               id="password"
@@ -136,16 +123,16 @@ function SignUpFormContent({
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              className="w-full bg-transparent border-gray-200 dark:border-[#2d3545] rounded-xl py-3.5 md:py-4 pl-12 pr-4 text-gray-900 dark:text-white placeholder-[#5a657a] focus:outline-none focus:border-[#d9481e] transition-all text-[14px] md:text-[15px] h-auto"
+              className={authInputClass}
             />
           </div>
         </div>
 
         <div className="space-y-1">
-          <Label className="text-xs font-semibold text-gray-900 dark:text-white ml-1 tracking-wide uppercase opacity-70">{t('field.repeatPassword')}</Label>
-          <div className="relative group">
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5a657a] group-focus-within:text-[#d9481e] transition-colors pointer-events-none">
-              <ShieldCheck className="w-5 h-5" />
+          <Label htmlFor="repeat-password" className={authLabelClass}>{t('field.repeatPassword')}</Label>
+          <div className="group relative">
+            <div className={authIconClass}>
+              <ShieldCheck className="size-5" />
             </div>
             <Input
               id="repeat-password"
@@ -154,49 +141,42 @@ function SignUpFormContent({
               required
               value={repeatPassword}
               onChange={(e) => setRepeatPassword(e.target.value)}
-              className="w-full bg-transparent border-gray-200 dark:border-[#2d3545] rounded-xl py-3.5 md:py-4 pl-12 pr-4 text-gray-900 dark:text-white placeholder-[#5a657a] focus:outline-none focus:border-[#d9481e] transition-all text-[14px] md:text-[15px] h-auto"
+              className={authInputClass}
             />
           </div>
         </div>
 
-        {error && <p className="text-sm text-red-500 text-center bg-red-500/10 border border-red-500/20 p-2 rounded">{error}</p>}
+        {error && <AuthNotice tone="error">{error}</AuthNotice>}
 
-        <Button
-          type="submit"
-          className="w-full h-auto bg-gradient-to-r from-[#d9481e] to-[#f45d1a] hover:brightness-110 active:scale-[0.98] text-white font-bold py-3.5 md:py-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-[0_4px_15px_rgba(217,72,30,0.4)] mt-2 disabled:opacity-50"
-          disabled={isLoading}
-        >
+        <Button type="submit" className="mt-2 w-full" disabled={isLoading}>
           {isLoading ? t('auth.signUp.submitting') : t('auth.signUp.submit')}
-          <ArrowRight className="w-5 h-5" />
+          <ArrowRight />
         </Button>
       </form>
 
       {/* Terms and Privacy Footer */}
       <div className="mt-8 text-center md:text-left">
-        <p className="text-[#8e99aa] text-[12px] leading-relaxed">
+        <p className="text-caption leading-relaxed text-fg-muted">
           {t('auth.tos.signUp')}{" "}
-          <Link href="#" className="text-gray-900 dark:text-white font-bold hover:underline">
+          <Link href="/terms" className="font-bold text-fg hover:underline">
             {t('auth.tos.terms')}
           </Link>{" "}
           {t('auth.tos.and')}{" "}
-          <Link href="#" className="text-gray-900 dark:text-white font-bold hover:underline">
+          <Link href="/privacy" className="font-bold text-fg hover:underline">
             {t('auth.tos.privacy')}
           </Link>
         </p>
       </div>
 
       {/* Toggle View Link */}
-      <div className="mt-8 text-center pb-4 md:pb-0 border-t border-gray-200 dark:border-[#2d3545] pt-6">
-        <p className="text-[#a0aec0] text-sm">
+      <div className={authFooterClass}>
+        <p>
           {t('auth.signUp.hasAccount')}
-          <Link
-            href={`/auth/login${next ? `?next=${encodeURIComponent(next)}` : ""}`}
-            className="text-[#d9481e] hover:text-[#f45d1a] underline font-medium transition-colors ml-1"
-          >
+          <Link href={authPageHref('login', { next })} className={cn(authLinkClass, 'ml-1')}>
             {t('auth.signUp.signIn')}
           </Link>
         </p>
       </div>
-    </div>
+    </AuthCard>
   );
 }

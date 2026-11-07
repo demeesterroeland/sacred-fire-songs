@@ -4,6 +4,8 @@ import {
   recordingPermalink,
   songRecordingPath,
   RECORDING_PARAM,
+  linkedTakeTab,
+  takeListTab,
 } from '@/lib/songs/recordingLink';
 import { notificationLink } from '@/lib/notifications/email';
 
@@ -80,11 +82,10 @@ describe('/recordings/[id]', () => {
     await expect(open(REC)).rejects.toThrow(`REDIRECT /songs/comp-1?recording=${REC}`);
   });
 
-  it('sends guests to login and back to the recording', async () => {
+  it('shows guests the GuestGate (sign in, then back to the recording)', async () => {
     mockGetUser.mockResolvedValue({ data: { user: null } });
-    await expect(open(REC)).rejects.toThrow(
-      `REDIRECT /auth/login?next=${encodeURIComponent(`/recordings/${REC}`)}`,
-    );
+    const page = (await open(REC)) as { props: { children: { props: { feature: string; next: string } } } };
+    expect(page.props.children.props).toMatchObject({ feature: 'sharing', next: `/recordings/${REC}` });
   });
 
   it('is not found for signed-in users without access, without revealing that it exists', async () => {
@@ -94,5 +95,25 @@ describe('/recordings/[id]', () => {
   it('is not found for malformed ids', async () => {
     await expect(open('not-a-uuid')).rejects.toThrow('NOT_FOUND');
     expect(mockMaybeSingle).not.toHaveBeenCalled();
+  });
+});
+
+describe('takeListTab', () => {
+  it('lists the takes on Record for a member and on Listen for a guest', () => {
+    expect(takeListTab(true)).toBe('recorder');
+    expect(takeListTab(false)).toBe('media');
+  });
+});
+
+describe('linkedTakeTab', () => {
+  it('opens a member on Record, found or not', () => {
+    expect(linkedTakeTab(true, true)).toBe('recorder');
+    expect(linkedTakeTab(true, false)).toBe('recorder');
+  });
+  it('opens a guest on Listen when the take is there to hear', () => {
+    expect(linkedTakeTab(false, true)).toBe('media');
+  });
+  it('keeps the sign-in prompt for a guest when the take is not there', () => {
+    expect(linkedTakeTab(false, false)).toBe('recorder');
   });
 });

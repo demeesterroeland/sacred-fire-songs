@@ -1,7 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useQuery, useQueryClient } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import { Bell, Users } from 'lucide-react';
 import {
   DropdownMenu,
@@ -11,14 +11,13 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { useLocale } from '@/context/LocaleContext';
 import { LOCALE_DATE_TAGS } from '@/lib/i18n';
+import { useNotificationsQuery } from '@/hooks/useNotificationsQuery';
 import {
-  fetchNotifications,
   markNotificationsRead,
+  notificationsKey,
   type AppNotification,
 } from '@/lib/notifications/queries';
 import { recordingPermalink } from '@/lib/songs/recordingLink';
-
-const POLL_MS = 60_000;
 
 function relativeTime(iso: string, localeTag: string): string {
   const seconds = Math.round((new Date(iso).getTime() - Date.now()) / 1000);
@@ -39,15 +38,9 @@ export function NotificationBell({ userId }: { userId: string }) {
   const { t, locale } = useLocale();
   const router = useRouter();
   const queryClient = useQueryClient();
-  const queryKey = ['notifications', userId];
+  const queryKey = notificationsKey(userId);
 
-  const { data: notifications = [] } = useQuery({
-    queryKey,
-    queryFn: fetchNotifications,
-    refetchInterval: POLL_MS,
-    refetchOnWindowFocus: true,
-    staleTime: 15_000,
-  });
+  const { data: notifications = [] } = useNotificationsQuery(userId);
 
   const unread = notifications.filter((n) => !n.read_at);
 
@@ -86,7 +79,7 @@ export function NotificationBell({ userId }: { userId: string }) {
         >
           <Bell className="w-5 h-5" />
           {unread.length > 0 && (
-            <span className="absolute top-1 right-1 min-w-4 h-4 px-1 rounded-full bg-[#f45d1a] text-white text-[10px] font-bold leading-4 text-center">
+            <span className="absolute top-1 right-1 min-w-5 h-5 px-1 rounded-full bg-[#f45d1a] text-white text-caption font-semibold leading-5 text-center">
               {unread.length > 9 ? '9+' : unread.length}
             </span>
           )}

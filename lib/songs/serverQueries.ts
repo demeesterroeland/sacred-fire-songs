@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import type { Song } from "@/lib/songUtils";
 import type { TaxonomyNode } from "@/lib/taxonomyUtils";
-import { songsQuery, mapCompositionToSong } from './queries';
+import { songsQuery, mapCompositionToSong, recentlyAddedQuery, RECENTLY_ADDED_LIMIT, type CompositionRow } from './queries';
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { normalizeWhitespace, removeDiacritics } from "@/lib/utils";
 import { parseArtists } from "./artistUtils";
@@ -209,11 +209,12 @@ export async function getLibrarySummary(userId: string): Promise<LibrarySummary>
         .select('id', { count: 'exact', head: true })
         .eq('owner_id', userId);
 
-    // Drafts count (all non-public songs visible to user via RLS)
+    // Drafts count: my own non-public songs. RLS lets an admin read every draft, so filter on the owner too.
     const { count: draftsCount } = await supabase
         .from('compositions')
         .select('id', { count: 'exact', head: true })
-        .eq('is_public', false);
+        .eq('is_public', false)
+        .eq('owner_id', userId);
 
     // New songs: created in last 30 days, never viewed by this user (RLS handles visibility)
     const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
@@ -482,4 +483,19 @@ export async function fetchArtistsServer(): Promise<ArtistSummary[]> {
     return result;
 }
 
+/**
+ * The newest public songs, for the "Recently added" row on Home (Story 6.1.28 / G6.3, #412).
+ * Guests only ever receive public songs from RLS; the query also filters on `is_public` so a signed-in
+ * owner's drafts never show up. Only import this from Server Components or Server Actions.
+ */
+export async function getRecentlyAddedSongs(limit = RECENTLY_ADDED_LIMIT): Promise<Song[]> {
+    const supabase = await createClient();
+    const { data, error } = await recentlyAddedQuery(supabase, limit);
 
+    if (error || !data) {
+        console.error('getRecentlyAddedSongs error:', error);
+        return [];
+    }
+    // The select string is a literal, so PostgREST's parser infers nested relations as arrays; the shape is a CompositionRow.
+    return (data as unknown as CompositionRow[]).map(item => mapCompositionToSong(item));
+}

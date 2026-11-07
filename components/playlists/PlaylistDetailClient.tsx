@@ -19,11 +19,13 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, X, Music, Plus } from 'lucide-react';
+import { MetaLine } from '@/components/ui/meta-line';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { reorderPlaylistSongs, removeSongFromPlaylist } from '@/app/actions/playlistActions';
 import { AddSongsSheet } from './AddSongsSheet';
 import { useLocale } from '@/context/LocaleContext';
+import { actionErrorMessage } from '@/lib/errors/actionError';
 
 export interface PlaylistItem {
     id: string;
@@ -64,14 +66,15 @@ function SortableRow({
         <div
             ref={setNodeRef}
             style={style}
-            className="flex items-center gap-3 p-3 bg-white/60 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-800 rounded-xl group hover:bg-gray-100/60 dark:hover:bg-gray-800/60 hover:border-gray-300 dark:hover:border-gray-700 transition-colors"
+            data-testid="song-row"
+            className="group flex min-h-tap items-center gap-1 border-b border-line bg-bg py-1 transition-colors hover:bg-surface"
         >
             {/* Drag handle */}
             <button
                 {...attributes}
                 {...(disabled ? {} : listeners)}
                 disabled={disabled}
-                className="text-gray-700 hover:text-gray-500 cursor-grab active:cursor-grabbing touch-none shrink-0 disabled:opacity-30 disabled:cursor-not-allowed"
+                className="inline-flex size-tap items-center justify-center text-fg-subtle hover:text-fg cursor-grab active:cursor-grabbing touch-none shrink-0 disabled:opacity-40 disabled:cursor-not-allowed"
                 aria-label={t('playlists.detail.dragToReorder')}
             >
                 <GripVertical className="w-4 h-4" />
@@ -80,18 +83,18 @@ function SortableRow({
             {/* Song info */}
             <Link
                 href={`/songs/${item.songId}`}
-                className="flex-1 min-w-0 hover:text-amber-400 transition-colors"
+                className="flex min-h-tap flex-1 min-w-0 flex-col justify-center"
                 onClick={e => e.stopPropagation()}
             >
-                <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{item.songTitle}</p>
-                <p className="text-xs text-gray-500 truncate">{item.songAuthor}</p>
+                <p className="truncate text-row font-medium text-fg">{item.songTitle}</p>
+                <MetaLine items={[item.songAuthor]} className="mt-0.5" />
             </Link>
 
             {/* Remove button */}
             <button
                 onClick={() => onRemove(item.id)}
                 disabled={disabled}
-                className="text-gray-700 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100 shrink-0 disabled:pointer-events-none"
+                className="inline-flex size-tap items-center justify-center text-fg-subtle hover:text-danger transition-opacity opacity-0 group-hover:opacity-100 focus-visible:opacity-100 shrink-0 disabled:pointer-events-none"
                 aria-label={t('playlists.detail.removeSong', { title: item.songTitle })}
             >
                 <X className="w-4 h-4" />
@@ -155,7 +158,7 @@ export function PlaylistDetailClient({
             const result = await removeSongFromPlaylist(itemId);
             if (result.error) {
                 setItems(prev); // revert
-                toast.error(result.error);
+                toast.error(actionErrorMessage(result.error, t));
             }
         });
     };
@@ -194,7 +197,7 @@ export function PlaylistDetailClient({
         <>
             <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={canEdit ? handleDragEnd : () => {}}>
                 <SortableContext items={items.map(i => i.id)} strategy={verticalListSortingStrategy}>
-                    <div className="space-y-2">
+                    <div className="border-t border-line">
                         {items.map(item => (
                             <SortableRow
                                 key={item.id}

@@ -6,9 +6,23 @@ export interface ParsedChordPro {
     cleanContent: string;
 }
 
+/**
+ * What counts as a chord: root A–G, optional #/b, then only chord-quality pieces
+ * (m, maj, min, dim, aug, sus, add, M, +, −, °, ø, digits, #/b, brackets), then an optional /bass.
+ * Section labels such as `Chorus`, `Coro` or `Coda` do not match, so they are never shifted, and a bracketed
+ * label like `[Chorus]` does not make a version "have chords". The transposer, the Chords switch and the
+ * data migration `20261106180000_recompute_song_flags.sql` all use this one grammar; keep them in step
+ * (testing/unit/tests/songs/flagsMigration.test.ts compares the SQL with this file).
+ */
+const CHORD_TOKEN = /^[A-G][#b]?(?:maj|min|dim|aug|sus|add|m|M|\+|-|°|ø|\d|#|b|\(|\))*(?:\/[A-G][#b]?)?$/;
+
+export function isChordToken(token: string): boolean {
+    return CHORD_TOKEN.test(token);
+}
+
 // Heuristic to check if a line is a "Chords" line
 // It should mostly contain chord characters and spaces.
-function isChordLine(line: string): boolean {
+export function isChordLine(line: string): boolean {
     const trimmed = line.trim();
     if (trimmed.length === 0) return false;
 
@@ -39,8 +53,10 @@ function isChordLine(line: string): boolean {
 export function hasChords(text: string): boolean {
     if (!text) return false;
 
-    // 1. Check for ChordPro style brackets [Am]
-    if (/\[[A-G]/.test(text)) return true;
+    // 1. Check for ChordPro style brackets [Am]: the bracket must hold a chord, not a word that starts with A-G
+    for (const m of text.matchAll(/\[([^\][]*)\]/g)) {
+        if (isChordToken(m[1])) return true;
+    }
 
     // 2. Check for Chords-over-Lyrics heuristic
     const lines = text.split('\n');

@@ -1,39 +1,21 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { User } from "@supabase/supabase-js";
-import {
-  User as UserIcon,
-  Settings,
-  Lock,
-  Shield,
-  SlidersHorizontal,
-  Mail,
-  LayoutDashboard,
-  Compass,
-  Library,
-  ListMusic,
-  PlusCircle,
-  Camera,
-  LogOut,
-  Download,
-  Flame
-} from "lucide-react";
+import { User as UserIcon, Lock, Shield, SlidersHorizontal } from "lucide-react";
 import ProfileSettings from "@/components/account/settings/ProfileSettings";
 import SecuritySettings from "@/components/account/settings/SecuritySettings";
 import PrivacySettings from "@/components/account/settings/PrivacySettings";
 import PreferencesSettings from "@/components/account/settings/PreferencesSettings";
 import { useLocale } from "@/context/LocaleContext";
+import { parseSettingsTab, visibleSettingsTabs, type SettingsTab } from "@/lib/account/settingsTabs";
+import { FEATURES } from "@/lib/features";
 
-type TabType = "profile" | "account" | "preferences" | "privacy";
+// Re-exported for tests; server code imports it from "@/lib/account/settingsTabs".
+export { parseSettingsTab };
 
-const TAB_IDS: readonly TabType[] = ["profile", "account", "preferences", "privacy"];
-
-/** Maps the `?tab=` query value to a settings tab; unknown values open Profile. */
-export function parseSettingsTab(value: string | string[] | undefined): TabType {
-  const tab = Array.isArray(value) ? value[0] : value;
-  return TAB_IDS.find((id) => id === tab) ?? "profile";
-}
+type TabType = SettingsTab;
 
 interface AccountSettingsProps {
   user: User;
@@ -45,19 +27,21 @@ export default function AccountSettings({ user, profile, initialTab = "profile" 
   const { t } = useLocale();
   const [activeTab, setActiveTab] = useState<TabType>(initialTab);
 
-  const tabs = [
-    { id: "profile" as const,      label: t("settings.tab.profile"),      icon: UserIcon },
-    { id: "account" as const,      label: t("settings.tab.security"),      icon: Lock },
-    { id: "preferences" as const,  label: t("settings.tab.preferences"),  icon: SlidersHorizontal },
-    { id: "privacy" as const,      label: t("settings.tab.privacy"), icon: Shield },
-  ];
+  // Story 6.1.5 (#389): only tabs that work; "Privacy & Data" is hidden while FEATURES.privacySettings is off.
+  const tabMeta = {
+    profile:     { label: t("settings.tab.profile"),     icon: UserIcon },
+    account:     { label: t("settings.tab.security"),    icon: Lock },
+    preferences: { label: t("settings.tab.preferences"), icon: SlidersHorizontal },
+    privacy:     { label: t("settings.tab.privacy"),     icon: Shield },
+  } satisfies Record<TabType, { label: string; icon: typeof Lock }>;
+  const tabs = visibleSettingsTabs().map((id) => ({ id, ...tabMeta[id] }));
 
   return (
-    <main className="flex-1 p-4 md:p-8 lg:p-12">
+    <div className="flex-1 p-4 md:p-8 lg:p-12">
       <div className="max-w-4xl mx-auto">
         <header className="mb-12">
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2 text-gray-900 dark:text-white">{t("settings.pageTitle")}</h1>
-          <p className="text-gray-500 dark:text-slate-400">Manage your profile, account security, and data preferences.</p>
+          <p className="text-gray-500 dark:text-slate-400">{t("settings.pageIntro")}</p>
         </header>
 
         {/* Tabs Navigation — horizontally scrollable on mobile */}
@@ -87,9 +71,19 @@ export default function AccountSettings({ user, profile, initialTab = "profile" 
           {activeTab === "profile" && <ProfileSettings user={user} profile={profile} />}
           {activeTab === "account" && <SecuritySettings user={user} />}
           {activeTab === "preferences" && <PreferencesSettings />}
-          {activeTab === "privacy" && <PrivacySettings user={user} profile={profile} />}
+          {FEATURES.privacySettings && activeTab === "privacy" && <PrivacySettings user={user} profile={profile} />}
         </div>
+
+        {/* Terms and Privacy: public pages, also linked from the sign-in and sign-up forms. */}
+        <nav aria-label={t("legal.account.title")} className="mt-12 flex flex-wrap gap-x-6 gap-y-1 border-t border-line pt-4 text-meta">
+          <Link href="/terms" className="inline-flex min-h-tap items-center text-fg-muted underline-offset-4 hover:text-fg hover:underline">
+            {t("auth.tos.terms")}
+          </Link>
+          <Link href="/privacy" className="inline-flex min-h-tap items-center text-fg-muted underline-offset-4 hover:text-fg hover:underline">
+            {t("auth.tos.privacy")}
+          </Link>
+        </nav>
       </div>
-    </main>
+    </div>
   );
 }

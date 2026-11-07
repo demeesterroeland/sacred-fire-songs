@@ -15,6 +15,7 @@ import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useState } from "react";
 import { useLocale } from "@/context/LocaleContext";
+import { errorMessage } from "@/lib/errors/errorCode";
 
 export function ForgotPasswordForm({
   className,
@@ -40,7 +41,7 @@ export function ForgotPasswordForm({
       if (error) throw error;
       setSuccess(true);
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : t('auth.error.default'));
+      setError(errorMessage(error, t, 'auth.error.default'));
     } finally {
       setIsLoading(false);
     }

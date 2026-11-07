@@ -3,20 +3,27 @@
 import { cn } from "@/lib/utils";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState, Suspense } from "react";
-import { Mail, Lock, Sparkles, Flame, X, ArrowRight } from "lucide-react";
+import { Mail, Lock, Sparkles, Flame, ArrowRight } from "lucide-react";
 import { useLocale } from "@/context/LocaleContext";
+import { authNoticeKey } from "@/lib/auth/notice";
+import { errorMessage } from "@/lib/errors/errorCode";
+import { safeNextPath } from '@/lib/auth/safeNext';
+import { authPageHref } from '@/lib/auth/authBack';
+import {
+  AuthCard,
+  AuthHeader,
+  AuthNotice,
+  authFooterClass,
+  authIconClass,
+  authInputClass,
+  authLabelClass,
+  authLinkClass,
+} from '@/components/auth/AuthShell';
 
 export function LoginForm(props: React.ComponentPropsWithoutRef<"div">) {
   return (
@@ -40,7 +47,8 @@ function LoginFormContent({
   const router = useRouter();
   const searchParams = useSearchParams();
   const next = searchParams.get("next");
-  const message = searchParams.get("message");
+  // A code from the redirect (never text from the address): known codes give a sentence, others the default one.
+  const messageKey = authNoticeKey(searchParams.get("message"));
 
   const handleMagicLink = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -59,7 +67,7 @@ function LoginFormContent({
       if (error) throw error;
       setSuccess(t('auth.login.magicLinkSent'));
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : t('common.errorOccurred'));
+      setError(errorMessage(error, t, 'common.errorOccurred'));
     } finally {
       setIsLoading(false);
     }
@@ -79,54 +87,35 @@ function LoginFormContent({
       if (error) throw error;
 
       window.dispatchEvent(new Event("auth-role-change"));
-      router.push(next || "/");
+      router.push(safeNextPath(next));
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : t('common.errorOccurred'));
+      setError(errorMessage(error, t, 'common.errorOccurred'));
     } finally {
       setIsLoading(false);
     }
   };
 
   return (
-    <div className={cn("relative w-full max-w-[420px] bg-white dark:bg-[#1c222d] md:border md:border-gray-200 dark:md:border-[#2d3545] md:rounded-3xl p-6 md:p-8 md:shadow-2xl transition-all duration-300", className)} {...props}>
-      {/* Close Button */}
-      <Button
-        variant="ghost"
-        size="icon"
-        className="absolute right-4 top-4 md:right-6 md:top-6 text-[#5a657a] hover:text-gray-900 dark:hover:text-white transition-colors h-10 w-10 p-0"
-        onClick={() => router.push('/')}
-      >
-        <X className="w-6 h-6" />
-      </Button>
+    <AuthCard className={className} {...props}>
+      <AuthHeader
+        icon={<Flame className="fill-current" />}
+        title={t('auth.login.heading')}
+        description={mode === 'magic-link' ? t('auth.login.magicLinkHint') : t('auth.login.passwordHint')}
+      />
 
-      {/* Header */}
-      <div className="flex flex-row md:flex-col items-center md:items-center gap-4 md:gap-0 mb-8 md:mb-10 mt-4 md:mt-0">
-        <div className="w-12 h-12 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-[#d9481e] to-[#f45d1a] flex items-center justify-center shadow-[0_0_20px_rgba(217,72,30,0.3)] md:mb-6 flex-shrink-0">
-          <Flame className="text-white w-6 h-6 md:w-10 md:h-10 fill-current" />
-        </div>
-        <div className="text-left md:text-center">
-          <h1 className="text-gray-900 dark:text-white text-xl md:text-3xl font-bold md:mb-2 leading-tight">{t('auth.login.heading')}</h1>
-          <p className="text-[#8e99aa] text-xs md:text-sm">
-            {mode === 'magic-link'
-              ? t('auth.login.magicLinkHint')
-              : t('auth.login.passwordHint')}
-          </p>
-        </div>
-      </div>
-
-      {(message || success) && (
-        <div className="mb-6 bg-emerald-500/10 border border-emerald-500/20 p-3 rounded-lg text-emerald-400 text-sm text-center">
-          {message || success}
+      {(messageKey || success) && (
+        <div className="mb-6">
+          <AuthNotice tone="info">{messageKey ? t(messageKey) : success}</AuthNotice>
         </div>
       )}
 
       {/* Login Form */}
       <form onSubmit={mode === 'magic-link' ? handleMagicLink : handlePasswordLogin} className="space-y-4 md:space-y-6">
         <div className="space-y-2">
-          <Label className="text-xs md:text-sm font-semibold text-gray-900 dark:text-white ml-1 tracking-wide uppercase opacity-70">{t('field.email.label')}</Label>
-          <div className="relative group">
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5a657a] group-focus-within:text-[#d9481e] transition-colors pointer-events-none">
-              <Mail className="w-5 h-5" />
+          <Label htmlFor="email" className={authLabelClass}>{t('field.email.label')}</Label>
+          <div className="group relative">
+            <div className={authIconClass}>
+              <Mail className="size-5" />
             </div>
             <Input
               id="email"
@@ -135,17 +124,17 @@ function LoginFormContent({
               required
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-transparent border-gray-200 dark:border-[#2d3545] rounded-xl py-3.5 md:py-4 pl-12 pr-4 text-gray-900 dark:text-white placeholder-[#5a657a] focus:outline-none focus:border-[#d9481e] transition-all text-[14px] md:text-[15px] h-auto"
+              className={authInputClass}
             />
           </div>
         </div>
 
         {mode === 'password' && (
           <div className="space-y-2">
-            <Label className="text-xs md:text-sm font-semibold text-gray-900 dark:text-white ml-1 tracking-wide uppercase opacity-70">{t('field.password')}</Label>
-            <div className="relative group">
-              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5a657a] group-focus-within:text-[#d9481e] transition-colors pointer-events-none">
-                <Lock className="w-5 h-5" />
+            <Label htmlFor="password" className={authLabelClass}>{t('field.password')}</Label>
+            <div className="group relative">
+              <div className={authIconClass}>
+                <Lock className="size-5" />
               </div>
               <Input
                 id="password"
@@ -154,11 +143,11 @@ function LoginFormContent({
                 placeholder={t('field.password.placeholder')}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="w-full bg-transparent border-gray-200 dark:border-[#2d3545] rounded-xl py-3.5 md:py-4 pl-12 pr-20 text-gray-900 dark:text-white placeholder-[#5a657a] focus:outline-none focus:border-[#d9481e] transition-all text-[14px] md:text-[15px] h-auto"
+                className={cn(authInputClass, 'pr-24')}
               />
               <Link
-                href={`/auth/forgot-password${email ? `?email=${encodeURIComponent(email)}` : ''}`}
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-[#8e99aa] hover:text-[#d9481e] text-xs font-medium transition-colors border-l border-gray-200 dark:border-[#2d3545] pl-4 h-5 flex items-center"
+                href={authPageHref('forgot-password', { next, email })}
+                className="absolute right-0 top-1/2 flex min-h-tap -translate-y-1/2 items-center border-l border-line pl-4 pr-4 text-caption font-medium text-fg-muted hover:text-accent"
               >
                 {t('auth.login.forgotShort')}
               </Link>
@@ -166,42 +155,39 @@ function LoginFormContent({
           </div>
         )}
 
-        {error && <p className="text-sm text-red-500 text-center bg-red-500/10 border border-red-500/20 p-2 rounded">{error}</p>}
+        {error && <AuthNotice tone="error">{error}</AuthNotice>}
 
-        <Button
-          type="submit"
-          className="w-full h-auto bg-gradient-to-r from-[#d9481e] to-[#f45d1a] hover:brightness-110 active:scale-[0.98] text-white font-bold py-3.5 md:py-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-[0_4px_15px_rgba(217,72,30,0.4)] disabled:opacity-50"
-          disabled={isLoading}
-        >
+        <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading
             ? (mode === 'magic-link' ? t('auth.login.submitting.magicLink') : t('auth.login.submitting'))
             : (mode === 'magic-link' ? t('auth.login.sendMagicLink') : t('auth.login.submit'))}
-          {mode === 'magic-link' ? <Sparkles className="w-5 h-5" /> : <ArrowRight className="w-5 h-5" />}
+          {mode === 'magic-link' ? <Sparkles /> : <ArrowRight />}
         </Button>
       </form>
 
       {/* Divider */}
-      <div className="flex items-center my-6 md:my-8 text-gray-200 dark:text-[#2d3545]">
+      <div className="my-6 flex items-center text-line md:my-8">
         <div className="flex-1 border-t border-current"></div>
-        <span className="px-4 text-[#8e99aa] text-[10px] md:text-xs uppercase tracking-widest font-semibold">{t('common.or')}</span>
+        <span className="px-4 text-caption font-semibold text-fg-muted">{t('common.or')}</span>
         <div className="flex-1 border-t border-current"></div>
       </div>
 
       {/* Secondary Actions */}
       <div className="flex flex-col space-y-3">
         <Button
+          type="button"
           variant="outline"
           onClick={() => setMode(mode === 'magic-link' ? 'password' : 'magic-link')}
-          className="w-full h-auto bg-transparent border-gray-200 dark:border-[#2d3545] hover:bg-black/5 dark:hover:bg-white/5 hover:text-gray-900 dark:hover:text-white active:scale-[0.99] transition-all py-3.5 md:py-4 rounded-xl flex items-center justify-center gap-3 text-gray-900 dark:text-white font-semibold text-[14px]"
+          className="w-full"
         >
           {mode === 'magic-link' ? (
             <>
-              <Lock className="w-5 h-5 text-[#8e99aa]" />
+              <Lock />
               {t('auth.login.switchToPassword')}
             </>
           ) : (
             <>
-              <Sparkles className="w-5 h-5 text-[#8e99aa]" />
+              <Sparkles />
               {t('auth.login.switchToMagicLink')}
             </>
           )}
@@ -210,30 +196,27 @@ function LoginFormContent({
 
       {/* Terms and Privacy Footer */}
       <div className="mt-8 text-center md:text-left">
-        <p className="text-[#8e99aa] text-[12px] leading-relaxed">
+        <p className="text-caption leading-relaxed text-fg-muted">
           {t('auth.tos.signIn')}{" "}
-          <Link href="#" className="text-gray-900 dark:text-white font-bold hover:underline">
+          <Link href="/terms" className="font-bold text-fg hover:underline">
             {t('auth.tos.terms')}
           </Link>{" "}
           {t('auth.tos.and')}{" "}
-          <Link href="#" className="text-gray-900 dark:text-white font-bold hover:underline">
+          <Link href="/privacy" className="font-bold text-fg hover:underline">
             {t('auth.tos.privacy')}
           </Link>
         </p>
       </div>
 
       {/* Toggle View Link */}
-      <div className="mt-8 text-center pb-4 md:pb-0 border-t border-gray-200 dark:border-[#2d3545] pt-6">
-        <p className="text-[#a0aec0] text-sm">
+      <div className={authFooterClass}>
+        <p>
           {t('auth.login.noAccount')}
-          <Link
-            href={`/auth/sign-up${next ? `?next=${encodeURIComponent(next)}` : ""}`}
-            className="text-[#d9481e] hover:text-[#f45d1a] underline font-medium transition-colors ml-1"
-          >
+          <Link href={authPageHref('sign-up', { next })} className={cn(authLinkClass, 'ml-1')}>
             {t('auth.login.joinTheCircle')}
           </Link>
         </p>
       </div>
-    </div>
+    </AuthCard>
   );
 }

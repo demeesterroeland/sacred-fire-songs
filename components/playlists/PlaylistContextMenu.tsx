@@ -12,6 +12,7 @@ import { deletePlaylist, togglePlaylistVisibility } from '@/app/actions/playlist
 import { toast } from 'sonner';
 import { useRouter, usePathname } from 'next/navigation';
 import { useLocale } from '@/context/LocaleContext';
+import { actionErrorMessage } from '@/lib/errors/actionError';
 
 interface PlaylistContextMenuProps {
     playlistId: string;
@@ -45,13 +46,14 @@ export function PlaylistContextMenu({
     const router = useRouter();
     const pathname = usePathname();
     const preventFocusReturn = useRef(false);
+    const triggerRef = useRef<HTMLButtonElement>(null);
 
     const handleToggleVisibility = () => {
         const next = !isPublic;
         startVisibilityTransition(async () => {
             const result = await togglePlaylistVisibility(playlistId, next);
             if (result.error) {
-                toast.error(result.error);
+                toast.error(actionErrorMessage(result.error, t));
             } else {
                 toast.success(next ? t('playlists.toast.nowPublic') : t('playlists.toast.nowPrivate'));
                 router.refresh();
@@ -63,7 +65,7 @@ export function PlaylistContextMenu({
         startDeleteTransition(async () => {
             const result = await deletePlaylist(playlistId);
             if (result.error) {
-                toast.error(result.error);
+                toast.error(actionErrorMessage(result.error, t));
             } else {
                 toast.success(t('playlists.toast.deleted', { title: playlistTitle }));
                 setShowDeleteModal(false);
@@ -81,6 +83,7 @@ export function PlaylistContextMenu({
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <button
+                        ref={triggerRef}
                         onClick={e => e.stopPropagation()}
                         className="p-1.5 rounded-lg text-gray-600 hover:text-gray-800 dark:hover:text-gray-300 hover:bg-gray-200/60 dark:hover:bg-gray-700/60 transition-colors"
                         aria-label={t('playlists.optionsAria')}
@@ -190,6 +193,8 @@ export function PlaylistContextMenu({
                 title={t('playlists.deleteModal.title')}
                 message={t('playlists.deleteModal.message', { title: playlistTitle })}
                 isDeleting={isDeleting}
+                // The menu that opened this closed with its Delete item: focus goes back to its trigger.
+                fallbackFocus={() => triggerRef.current}
             />
         </>
     );

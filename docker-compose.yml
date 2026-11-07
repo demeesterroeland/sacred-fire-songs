@@ -22,6 +22,8 @@ services:
       - SMTP_USER=${SMTP_USER:-}
       - SMTP_PASS=${SMTP_PASS:-}
       - SMTP_FROM=${SMTP_FROM:-}
+      - OPERATOR_NAME=${OPERATOR_NAME:-}
+      - OPERATOR_CONTACT_EMAIL=${OPERATOR_CONTACT_EMAIL:-}
 
   migrator:
     image: ghcr.io/demeesterroeland/sacred-fire-songs-migrator:${IMAGE_TAG:-preview}

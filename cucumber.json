@@ -7,7 +7,8 @@
       "docs/testing/setlist-pdf-export.feature",
       "docs/testing/offline.feature",
       "docs/testing/recording-sharing.feature",
-      "docs/testing/share-notifications.feature"
+      "docs/testing/share-notifications.feature",
+      "docs/testing/ux-v2-*.feature"
     ],
     "import": [
       "testing/bdd/support/**/*.ts",
@@ -30,7 +31,8 @@
       "docs/testing/setlist-pdf-export.feature",
       "docs/testing/offline.feature",
       "docs/testing/recording-sharing.feature",
-      "docs/testing/share-notifications.feature"
+      "docs/testing/share-notifications.feature",
+      "docs/testing/ux-v2-*.feature"
     ],
     "import": [
       "testing/bdd/support/**/*.ts",
@@ -52,7 +54,8 @@
       "docs/testing/admin-users.feature",
       "docs/testing/setlist-pdf-export.feature",
       "docs/testing/offline.feature",
-      "docs/testing/share-notifications.feature"
+      "docs/testing/share-notifications.feature",
+      "docs/testing/ux-v2-*.feature"
     ],
     "import": [
       "testing/bdd/support/**/*.ts",

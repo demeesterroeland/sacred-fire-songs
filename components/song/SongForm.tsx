@@ -5,16 +5,27 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { SONG_KEYS } from '@/lib/songs/queryKeys';
 import { createClient } from "@/lib/supabase/client";
 import { useRouter, useSearchParams } from 'next/navigation';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { flushSync } from 'react-dom';
 import { parseChordPro, hasChords } from '@/lib/chordProParsing';
 import { useAuth } from '@/hooks/useAuth';
+import { readSongDraft, writeSongDraft, clearSongDraft } from '@/lib/songs/songDraft';
+import { signInHref } from '@/lib/auth/guestGate';
+import GuestDraftBanner from '@/components/song/GuestDraftBanner';
 import CategorySelector from './CategorySelector';
 import ChordProEditor from './ChordProEditor';
+import ChordPreview from './ChordPreview';
+import { Button } from '@/components/ui/button';
+import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 
 import { ArtistTagInput } from './ArtistTagInput';
 import { parseArtists, formatArtists, ensureArtistCategoryIds } from '@/lib/songs/artistUtils';
 import { useLocale } from '@/context/LocaleContext';
+import { errorMessage } from '@/lib/errors/errorCode';
+import { safeNextPath } from '@/lib/auth/safeNext';
+import { FEATURES } from '@/lib/features';
+import { songFlags } from '@/lib/songs/versionFlags';
+import { songVersionHref } from '@/lib/songs/versionOrder';
 
 type SongFormData = {
     title: string;
@@ -36,6 +47,20 @@ interface SongFormProps {
     initialData?: SongFormData;
     songId?: string;
     versionId?: string; // For updating the specific version
+}
+
+const ADD_SONG_PATH = '/songs/add';
+const PREVIEW_DEBOUNCE_MS = 200;
+/** Largest song file we read in the browser (512 KB is far above any chord sheet). */
+const MAX_UPLOAD_BYTES = 512 * 1024;
+
+/** UTF-8 first; files saved by older editors in Windows-1252 still read right. */
+function decodeSongFile(buffer: ArrayBuffer): string {
+    try {
+        return new TextDecoder('utf-8', { fatal: true }).decode(buffer);
+    } catch {
+        return new TextDecoder('windows-1252').decode(buffer);
+    }
 }
 
 const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
@@ -61,13 +86,15 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
         }
     });
 
-    const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth();
 
     const queryClient = useQueryClient();
     const router = useRouter();
     const searchParams = useSearchParams();
     const [serverError, setServerError] = useState<string | null>(null);
-    const [showUpload, setShowUpload] = useState(false);
+    const [showPreview, setShowPreview] = useState(false);
+    const [uploadError, setUploadError] = useState<'read' | 'tooLarge' | null>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     // Auto-expand metadata if fields are populated (Edit Mode or after Parsing)
     const hasMetadata = !!(initialData?.key || initialData?.capo || (initialData?.tuning && initialData.tuning !== 'Standard'));
@@ -84,67 +111,63 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
 
     // Watch fields for UI updates
     const currentCategoryIds = watch('categoryIds') || [];
+    const liveContent = watch('content') || '';
+    const [previewContent, flushPreview] = useDebouncedValue(liveContent, PREVIEW_DEBOUNCE_MS);
 
 
-    // Persistence Logic (Create Mode)
+    // Persistence Logic (Create Mode): the draft survives a sign-in round trip (#411)
     useEffect(() => {
         if (mode !== 'create') return;
-        const STORAGE_KEY = 'song-form-draft';
 
         // Restore on mount
-        const saved = localStorage.getItem(STORAGE_KEY);
-        if (saved) {
-            try {
-                const parsed = JSON.parse(saved);
-                // Check if draft has meaningful data before restoring (optional, but good UX)
-                const hasData = Object.values(parsed).some(v => Array.isArray(v) ? v.length > 0 : !!v);
+        const parsed = readSongDraft();
+        if (parsed) {
+            Object.keys(parsed).forEach((key) => {
+                setValue(key as keyof SongFormData, parsed[key] as never);
+            });
 
-                if (hasData) {
-                    // Update form values
-                    Object.keys(parsed).forEach((key) => {
-                        setValue(key as keyof SongFormData, parsed[key]);
-                    });
-
-                    // Restore UI states
-                    if (parsed.key || parsed.capo || (parsed.tuning && parsed.tuning !== 'Standard')) {
-                        setIsMetadataExpanded(true);
-                    }
-                    if (parsed.categoryIds && parsed.categoryIds.length > 0) {
-                        setIsTagsExpanded(true);
-                    }
-                }
-            } catch (e) {
-                console.error("Failed to restore draft", e);
+            // Restore UI states
+            if (parsed.key || parsed.capo || (parsed.tuning && parsed.tuning !== 'Standard')) {
+                setIsMetadataExpanded(true);
+            }
+            if (Array.isArray(parsed.categoryIds) && parsed.categoryIds.length > 0) {
+                setIsTagsExpanded(true);
             }
         }
 
         // Save on change
-        const subscription = watch((value) => {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(value));
-        });
+        const subscription = watch((value) => writeSongDraft(value));
         return () => subscription.unsubscribe();
     }, [mode, setValue, watch]);
 
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        const file = e.target.files?.[0];
+        const input = e.target;
+        const file = input.files?.[0];
         if (!file) return;
 
+        setUploadError(null);
+        if (file.size > MAX_UPLOAD_BYTES) {
+            setUploadError('tooLarge');
+            input.value = '';
+            return;
+        }
+
         try {
-            const text = await file.text();
+            const text = decodeSongFile(await file.arrayBuffer());
             const { title, author, key, capo, cleanContent } = parseChordPro(text);
             if (title) setValue('title', title);
             if (author) setValue('author', author);
-            if (key) setValue('key', key);
             if (key) setValue('key', key);
             if (capo) setValue('capo', capo);
 
             if (key || capo) expandMetadata(true);
             setValue('content', cleanContent);
-
-            // Auto-collapse after success
-            setShowUpload(false);
         } catch (err) {
             console.error('Failed to read file', err);
+            setUploadError('read');
+        } finally {
+            // Let the same file be chosen again.
+            input.value = '';
         }
     };
 
@@ -158,6 +181,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
         if (!hasMeta && !isMultiLine) return; // Let single-line pastes go through normally
 
         e.preventDefault();
+        setUploadError(null); // setValue below skips the field's onChange, which clears it otherwise
 
         const { title, author, key, capo, cleanContent } = parseChordPro(text);
 
@@ -276,14 +300,34 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                 const supabase = createClient();
                 if (!songId || !versionId) throw new Error('Missing ID for update');
 
+                // has_chords / has_melody describe the whole song: the edited version's new values replace its
+                // old ones, the other versions keep theirs (UXA-048). Saving a lyrics-only version must not
+                // clear the chords of another.
+                const { data: otherVersions, error: othersError } = await supabase
+                    .from('song_versions')
+                    .select('content_chordpro, youtube_url, spotify_url, soundcloud_url, melody_notation')
+                    .eq('composition_id', songId)
+                    .neq('id', versionId);
+                if (othersError) throw othersError;
+                const flags = songFlags([
+                    {
+                        content_chordpro: data.content,
+                        youtube_url: data.youtubeLink,
+                        spotify_url: data.spotifyLink,
+                        soundcloud_url: data.soundcloudLink,
+                        melody_notation: data.melodyNotation,
+                    },
+                    ...(otherVersions ?? []),
+                ]);
+
                 const { error: compError } = await supabase
                     .from('compositions')
                     .update({
                         title: data.title,
                         original_author: data.author,
                         is_public: data.isPublic,
-                        has_chords: hasChords(data.content),
-                        has_melody: !!(data.youtubeLink || data.spotifyLink || data.soundcloudLink || data.melodyNotation),
+                        has_chords: flags.has_chords,
+                        has_melody: flags.has_melody,
                     })
                     .eq('id', songId);
 
@@ -334,98 +378,36 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
         },
         onSuccess: (id) => {
             if (mode === 'create') {
-                localStorage.removeItem('song-form-draft');
+                clearSongDraft();
             }
             queryClient.invalidateQueries({ queryKey: SONG_KEYS.all() });
             queryClient.invalidateQueries({ queryKey: SONG_KEYS.detail(id) });
             // Bust global filter counts (chords/melody/mine may have changed)
             queryClient.invalidateQueries({ queryKey: SONG_KEYS.globalFilterCounts() });
-            const returnTo = mode === 'create' ? (searchParams.get('next') || '/') : `/songs/${id}`;
+            const returnTo = mode === 'create' ? safeNextPath(searchParams.get('next')) : songVersionHref(id, versionId);
             router.refresh();
             router.push(returnTo);
         },
         onError: (error: Error) => {
-            setServerError(error.message);
+            setServerError(errorMessage(error, t));
         }
     });
 
     const handleFormSubmit = (data: SongFormData) => {
+        if (authLoading) return; // session not known yet: don't bounce a signed-in user to sign-in
         if (!user) {
-            router.push('/auth/login?message=Please log in to save songs');
+            // Keep the way back to this form; the draft is already in storage (#411).
+            router.push(signInHref(ADD_SONG_PATH));
             return;
         }
         mutation.mutate(data);
     };
 
     return (
-        <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 p-4 sm:p-6 rounded-2xl w-full max-w-2xl mx-auto shadow-xl min-w-0">
+        <>
+        {mode === 'create' && !user && !authLoading && <GuestDraftBanner next={ADD_SONG_PATH} />}
+        <form onSubmit={handleSubmit(handleFormSubmit, () => flushSync(() => setShowPreview(false)))} className="space-y-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 p-4 sm:p-6 rounded-2xl w-full max-w-2xl mx-auto shadow-xl min-w-0">
             <div className="space-y-4">
-                {/* File Upload Toggle Section */}
-                {/* File Upload Section */}
-                {showUpload && (
-                    <div className="bg-blue-900/20 border border-blue-500/30 rounded-xl p-4 relative">
-                        {/* Upload UI Code */}
-                        <button
-                            type="button"
-                            onClick={() => setShowUpload(false)}
-                            className="absolute top-2 right-2 text-gray-400 hover:text-gray-900 dark:hover:text-white"
-                        >
-                            <span className="material-symbols-outlined text-sm">close</span>
-                        </button>
-                        <div className="flex items-start gap-3 mb-4">
-                            <span className="material-symbols-outlined text-blue-400 mt-0.5">info</span>
-                            <p className="text-blue-100 text-xs leading-relaxed flex-1">
-                                {t('songForm.upload.info')}
-                            </p>
-                        </div>
-                        <label className="w-full border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-indigo-500/50 rounded-2xl p-8 flex flex-col items-center justify-center gap-3 transition-colors cursor-pointer bg-gray-100/50 dark:bg-gray-800/50 group">
-                            <input
-                                type="file"
-                                accept=".cho,.txt,.pro,.chordpro"
-                                className="hidden"
-                                onChange={handleFileUpload}
-                            />
-                            <div className="bg-gray-200/50 dark:bg-gray-700/50 group-hover:bg-gray-300 dark:group-hover:bg-gray-700 p-4 rounded-full transition-colors">
-                                <span className="material-symbols-outlined text-3xl text-gray-400 group-hover:text-gray-900 dark:group-hover:text-white">cloud_upload</span>
-                            </div>
-                            <div className="text-center">
-                                <p className="text-gray-900 dark:text-white font-semibold group-hover:text-indigo-300">{t('songForm.upload.select')}</p>
-                                <p className="text-gray-500 text-xs mt-1">{t('songForm.upload.chordProOnly')}</p>
-                            </div>
-                        </label>
-                        <div className="flex items-center justify-end gap-3 mt-2">
-                            <button
-                                type="button"
-                                onClick={() => setShowUpload(false)}
-                                className="cursor-pointer flex min-w-[100px] items-center justify-center rounded-lg h-11 px-6 border border-slate-300 dark:border-[#674d32] text-slate-600 dark:text-[#c9ad92] text-sm font-bold hover:bg-slate-50 dark:hover:bg-[#332619]"
-                            >
-                                {t('songForm.cancel')}
-                            </button>
-                            <button
-                                type="button"
-                                className="flex min-w-[100px] cursor-pointer items-center justify-center rounded-lg h-11 px-8 bg-primary text-white text-sm font-bold shadow-lg shadow-primary/20 active:bg-primary/90"
-                            >
-                                {t('songForm.upload.button')}
-                            </button>
-                        </div>
-                    </div>
-                )}
-
-
-                {/* Upload file toggle (no "Song Details" heading) */}
-                {!showUpload && (
-                    <div className="flex justify-end pb-2">
-                        <button
-                            type="button"
-                            onClick={() => setShowUpload(true)}
-                            className="text-indigo-400 text-xs font-semibold flex items-center gap-1 opacity-80 hover:opacity-100 transition-opacity"
-                        >
-                            <span className="material-symbols-outlined text-sm">attachment</span>
-                            {t('songForm.upload.toggle')}
-                        </button>
-                    </div>
-                )}
-
                 {/* 1. Title */}
                 <div className="space-y-2">
                     <label htmlFor="title" className="block text-sm font-medium text-gray-600 dark:text-gray-300 p-1">
@@ -434,7 +416,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                     <input
                         id="title"
                         {...register('title', { required: t('songForm.field.title.required') })}
-                        className="w-full bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg px-4 py-3 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all placeholder:text-gray-400 dark:placeholder:text-[#a19eb7]/50"
+                        className="w-full bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg px-4 py-3 text-gray-900 dark:text-white transition-all placeholder:text-gray-400 dark:placeholder:text-[#a19eb7]/50"
                         placeholder={t('songForm.field.title.placeholder')}
                     />
                     {errors.title && <p className="text-red-400 text-sm">{errors.title.message}</p>}
@@ -452,26 +434,85 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                     />
                 </div>
 
-                {/* 3. Lyrics & Chords (moved up) */}
+                {/* 3. Lyrics & Chords: editor, preview toggle and upload (Story 6.1.31 / G8.2, #415) */}
                 <div className="space-y-2 mt-2">
-                    <div className="flex justify-between items-end pb-2">
-                        <div>
-                            <h3 className="text-gray-900 dark:text-white text-lg font-bold leading-tight tracking-tight">{t('songForm.field.lyrics')}</h3>
-                            <p className="text-[#a19eb7] text-xs font-normal mt-1">{t('songForm.field.lyrics.hint')} <span className="font-mono text-primary">[Dm]</span>Abre tus alas <span className="font-mono text-primary">[A7]</span>pajaro volar <span className="font-mono text-primary">[Dm]</span></p>
-                        </div>
-                        <span className="material-symbols-outlined text-[#a19eb7] cursor-pointer">help_outline</span>
+                    <div className="pb-1">
+                        <h3 className="text-body font-semibold text-fg leading-tight">{t('songForm.field.lyrics')}</h3>
+                        <p className="text-caption text-fg-muted mt-1">{t('songForm.field.lyrics.hint')} <span className="font-mono text-chord">[Dm]</span>Abre tus alas <span className="font-mono text-chord">[A7]</span>pajaro volar <span className="font-mono text-chord">[Dm]</span></p>
                     </div>
 
-                    <div className="w-full min-w-0 max-w-full overflow-hidden bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg focus-within:ring-2 focus-within:ring-primary focus-within:border-primary transition-all h-[400px]">
-                        <ChordProEditor
-                            {...register('content', { required: t('songForm.field.content.required') })}
-                            value={watch('content') || ''}
-                            onPaste={handlePaste}
-                            className="w-full h-full rounded-lg"
-                            placeholder="[Dm]Abre tus alas [A7]pajaro volar [Dm]"
+                    {/* Editor and preview share one fixed-height box, so toggling never moves the form. */}
+                    <div
+                        data-testid="lyrics-box"
+                        className="w-full min-w-0 max-w-full overflow-hidden bg-surface border border-line-strong rounded-control focus-within:outline-2 focus-within:outline-focus transition-colors h-[400px]"
+                    >
+                        <div className={showPreview ? 'hidden' : 'h-full'}>
+                            <ChordProEditor
+                                {...register('content', {
+                                    required: t('songForm.field.content.required'),
+                                    onChange: () => setUploadError(null),
+                                })}
+                                value={watch('content') || ''}
+                                onPaste={handlePaste}
+                                className="w-full h-full rounded-control"
+                                placeholder="[Dm]Abre tus alas [A7]pajaro volar [Dm]"
+                            />
+                        </div>
+                        {showPreview && (
+                            <div
+                                data-testid="song-form-preview"
+                                role="region"
+                                aria-label={t('songForm.preview.label')}
+                                tabIndex={0}
+                                className="h-full overflow-auto focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-focus"
+                            >
+                                <ChordPreview content={previewContent} />
+                            </div>
+                        )}
+                    </div>
+                    {errors.content && <p className="text-danger text-meta">{errors.content.message}</p>}
+
+                    <div data-testid="lyrics-tools" className="grid grid-cols-2 gap-2">
+                        <Button
+                            type="button"
+                            variant={showPreview ? 'secondary' : 'outline'}
+                            aria-pressed={showPreview}
+                            onClick={() => {
+                                if (!showPreview) flushPreview();
+                                setShowPreview((on) => !on);
+                            }}
+                            className="min-w-0 whitespace-normal text-center"
+                        >
+                            <span className="material-symbols-outlined text-[20px] shrink-0" aria-hidden="true">visibility</span>
+                            {t('songForm.preview.toggle')}
+                        </Button>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            onClick={() => {
+                                setUploadError(null);
+                                fileInputRef.current?.click();
+                            }}
+                            className="min-w-0 whitespace-normal text-center"
+                        >
+                            <span className="material-symbols-outlined text-[20px] shrink-0" aria-hidden="true">upload_file</span>
+                            {t('songForm.upload.toggle')}
+                        </Button>
+                        <input
+                            ref={fileInputRef}
+                            type="file"
+                            accept=".cho,.txt,.pro,.chordpro"
+                            className="hidden"
+                            data-testid="song-file-input"
+                            onChange={handleFileUpload}
                         />
                     </div>
-                    {errors.content && <p className="text-red-400 text-sm">{errors.content.message}</p>}
+                    <p className="text-caption text-fg-muted">{t('songForm.upload.info')}</p>
+                    {uploadError && (
+                        <p role="alert" className="text-danger text-meta">
+                            {uploadError === 'tooLarge' ? t('songForm.upload.tooLarge') : t('songForm.upload.error')}
+                        </p>
+                    )}
                 </div>
 
                 {/* 4. Key / Capo / Tuning (collapsible, simplified) */}
@@ -487,7 +528,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                             <div className="relative">
                                 <select
                                     {...register('key')}
-                                    className="w-full bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg px-2 py-2 text-xs text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500 appearance-none"
+                                    className="w-full bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg px-2 py-2 text-xs text-gray-900 dark:text-white appearance-none"
                                 >
                                     <option value="">{t('songForm.field.key.select')}</option>
                                     {['C', 'Cm', 'C#', 'Db', 'D', 'Dm', 'Eb', 'E', 'Em', 'F', 'Fm', 'F#', 'Gb', 'G', 'Gm', 'G#', 'Ab', 'A', 'Am', 'Bb', 'B', 'Bm'].map(k => (
@@ -504,7 +545,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                             <div className="relative">
                                 <select
                                     {...register('capo')}
-                                    className="w-full bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg px-2 py-2 text-xs text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500 appearance-none"
+                                    className="w-full bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg px-2 py-2 text-xs text-gray-900 dark:text-white appearance-none"
                                 >
                                     <option value="">{t('songForm.field.capo.none')}</option>
                                     {Array.from({ length: 12 }, (_, i) => i + 1).map(i => (
@@ -529,7 +570,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                             <div className="relative">
                                 <select
                                     {...register('tuning')}
-                                    className="w-full bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg px-2 py-2 text-xs text-gray-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-blue-500 appearance-none"
+                                    className="w-full bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg px-2 py-2 text-xs text-gray-900 dark:text-white appearance-none"
                                 >
                                     <option value="">{t('songForm.field.tuning.select')}</option>
                                     <option value="Standard">{t('songForm.field.tuning.standard')}</option>
@@ -571,7 +612,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                             </div>
                             <input
                                 {...register('youtubeLink')}
-                                className="w-full pl-11 bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg h-12 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all placeholder:text-gray-400 dark:placeholder:text-[#a19eb7]/50 text-sm"
+                                className="w-full pl-11 bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg h-12 text-gray-900 dark:text-white transition-all placeholder:text-gray-400 dark:placeholder:text-[#a19eb7]/50 text-sm"
                                 placeholder={t('songForm.field.youtube.placeholder')}
                             />
                         </div>
@@ -582,7 +623,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                             </div>
                             <input
                                 {...register('spotifyLink')}
-                                className="w-full pl-11 bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg h-12 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all placeholder:text-gray-400 dark:placeholder:text-[#a19eb7]/50 text-sm"
+                                className="w-full pl-11 bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg h-12 text-gray-900 dark:text-white transition-all placeholder:text-gray-400 dark:placeholder:text-[#a19eb7]/50 text-sm"
                                 placeholder={t('songForm.field.spotify.placeholder')}
                             />
                         </div>
@@ -595,26 +636,27 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                             </div>
                             <input
                                 {...register('soundcloudLink')}
-                                className="w-full pl-11 bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg h-12 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all placeholder:text-gray-400 dark:placeholder:text-[#a19eb7]/50 text-sm"
+                                className="w-full pl-11 bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg h-12 text-gray-900 dark:text-white transition-all placeholder:text-gray-400 dark:placeholder:text-[#a19eb7]/50 text-sm"
                                 placeholder={t('songForm.field.soundcloud.placeholder')}
                             />
                         </div>
                     </div>
                 </details>
 
-                {/* 7. Melody Notation — Coming Soon */}
-                <details className="group opacity-60">
-                    <summary className="w-full flex items-center justify-between py-3 cursor-pointer select-none list-none">
-                        <div className="flex items-center gap-2">
-                            <h3 className="text-gray-400 font-semibold text-sm">{t('songForm.field.melody')}</h3>
-                            <span className="text-[10px] font-bold uppercase tracking-wider text-amber-500/80 bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">{t('common.comingSoon')}</span>
+                {/* 7. Melody Notation — hidden until FEATURES.melodyNotation is on (Story 6.1.5, #389) */}
+                {FEATURES.melodyNotation && (
+                    <details className="group opacity-60">
+                        <summary className="w-full flex items-center justify-between py-3 cursor-pointer select-none list-none">
+                            <div className="flex items-center gap-2">
+                                <h3 className="text-gray-400 font-semibold text-sm">{t('songForm.field.melody')}</h3>
+                            </div>
+                            <span className="material-symbols-outlined text-gray-400 transition-transform group-open:rotate-180">expand_more</span>
+                        </summary>
+                        <div className="py-3">
+                            <p className="text-gray-500 text-xs">{t('songForm.field.melody.hint')}</p>
                         </div>
-                        <span className="material-symbols-outlined text-gray-400 transition-transform group-open:rotate-180">expand_more</span>
-                    </summary>
-                    <div className="py-3">
-                        <p className="text-gray-500 text-xs">{t('songForm.field.melody.hint')}</p>
-                    </div>
-                </details>
+                    </details>
+                )}
             </div>
 
             {serverError && (
@@ -627,7 +669,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                 <button
                     type="submit"
                     onClick={() => setValue('isPublic', false)}
-                    disabled={mutation.isPending}
+                    disabled={mutation.isPending || authLoading}
                     className="flex-1 bg-transparent border-2 border-gray-300 dark:border-[#3f3d52] text-gray-500 dark:text-[#a19eb7] hover:text-gray-900 dark:hover:text-white hover:border-gray-400 dark:hover:border-white/20 font-bold py-3 rounded-xl active:scale-[0.98] transition-all disabled:opacity-50 flex justify-center items-center gap-2"
                 >
                     {mutation.isPending && watch('isPublic') === false ? (
@@ -642,7 +684,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                 <button
                     type="submit"
                     onClick={() => setValue('isPublic', true)}
-                    disabled={mutation.isPending}
+                    disabled={mutation.isPending || authLoading}
                     className="flex-1 bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-xl shadow-lg shadow-red-500/20 active:scale-[0.98] transition-transform disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2"
                 >
                     {mutation.isPending && watch('isPublic') === true ? (
@@ -656,6 +698,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                 </button>
             </div>
         </form>
+        </>
     );
 }
 
