@@ -1,6 +1,6 @@
 'use client';
 
-import type { Ref } from 'react';
+import { useLayoutEffect, useRef, type RefObject, type Ref } from 'react';
 import { MoreHorizontal, Pause, Play, Sun } from 'lucide-react';
 import { Toolbar, ToolbarButton } from '@/components/ui/toolbar';
 import { useLocale } from '@/context/LocaleContext';
@@ -27,6 +27,11 @@ interface ReaderToolbarProps extends ReaderPrefs {
   semitones?: number;
   /** The screen wake lock is held: show the stay-awake indicator. */
   awake?: boolean;
+  /**
+   * The A+ button. When a focused ▶ or ⋯ disappears (the window grew and the song fits), focus moves here
+   * instead of falling to <body>; the tools sheet uses it too when it closes after ⋯ went away.
+   */
+  fallbackFocusRef?: RefObject<HTMLButtonElement | null>;
   className?: string;
 }
 
@@ -48,9 +53,22 @@ export function ReaderToolbar({
   toolsButtonRef,
   semitones = 0,
   awake = false,
+  fallbackFocusRef,
   className,
 }: ReaderToolbarProps) {
   const { t } = useLocale();
+  const ownLargerRef = useRef<HTMLButtonElement>(null);
+  const largerRef = fallbackFocusRef ?? ownLargerRef;
+  // Validation 1 review, M1: a button that had focus can leave the toolbar (▶ and ⋯ only show while the lyrics
+  // run below the fold). The browser would drop focus to <body>; hand it to A+ instead.
+  const lastFocused = useRef<Element | null>(null);
+  useLayoutEffect(() => {
+    const last = lastFocused.current;
+    if (!last || last.isConnected) return;
+    lastFocused.current = null;
+    const active = document.activeElement;
+    if (!active || active === document.body) largerRef.current?.focus();
+  });
   const last = LYRIC_STEPS.length - 1;
   const atMin = step <= 0;
   const atMax = step >= last;
@@ -62,6 +80,9 @@ export function ReaderToolbar({
       aria-label={t('viewer.toolbar')}
       className={cn('flex-wrap bg-transparent p-0', className)}
       data-testid="reader-toolbar"
+      onFocusCapture={(e) => {
+        lastFocused.current = e.target as Element;
+      }}
       {...{ [AUTOSCROLL_KEEP_ATTR]: '' }}
     >
       {hasChords && (
@@ -70,7 +91,7 @@ export function ReaderToolbar({
           role="switch"
           aria-checked={chords}
           onClick={() => onChange({ step, chords: !chords, speed })}
-          className="inline-flex min-h-tap items-center gap-2 rounded-control px-2 text-meta font-medium text-fg hover:bg-surface-2 transition-colors"
+          className="-ms-2 inline-flex min-h-tap items-center gap-2 rounded-control px-2 text-meta font-medium text-fg hover:bg-surface-2 transition-colors"
         >
           <span
             aria-hidden
@@ -98,6 +119,7 @@ export function ReaderToolbar({
         <span className="sr-only">{t('viewer.fontSmaller')}</span>
       </ToolbarButton>
       <ToolbarButton
+        ref={largerRef}
         aria-disabled={atMax}
         onClick={() => !atMax && onChange({ step: stepBy(step, 1), chords, speed })}
         className={cn('border border-line', ends)}

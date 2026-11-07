@@ -1,8 +1,8 @@
 # E2E Test Overview & Matrix: Sacred Fire Songs
 
-**Version:** 1.18
+**Version:** 1.20
 **Status:** Living Document
-**Date:** Nov 6, 2026
+**Date:** Nov 7, 2026
 **Tracking:** GH #142
 
 ## Changelog
@@ -25,6 +25,8 @@
 | **1.13** | Nov 4, 2026 | PWA-03: offline fallback page covered by `e2e/tests/offline.spec.ts` (#353); cached pages offline still planned. |
 | **1.14** | Nov 5, 2026 | Story 6.1.26 (#410): guests on members-only screens now get the GuestGate (locked preview, reason, `Sign in` with `next=`) instead of a redirect; ACC-01 updated, new spec `e2e/tests/guest-gate.spec.ts` covers every gated route. |
 | **1.15** | Nov 5, 2026 | LIB-13 follows Story 6.1.24: no `/explore` route; bottom bar spec `ux-v2-bottom-bar.spec.ts`. |
+| **1.20** | Nov 7, 2026 | UX v2 validation round 1, review round on PR #474: new spec `ux-v2-validation-1-review.spec.ts` (a press on a song under the open suggestions on a phone with touch and on a desktop with a mouse, also on guest Home; the scroll position of the desktop column on the song list, Home and Playlists; auto-scroll behind the fixed bars on a phone and with padding on a desktop; the tools sheet and focus on a window that grows; section labels versus chords; toolbar alignment; one focus cue on the tag field, the artist field and the selects; Search options labels in all 8 languages at 390 px; axe colour contrast on the open tag browser, light and dark; fixture `VALIDATION_1_REVIEW_FIXTURE_IDS`, removed by `e2e/global-teardown.ts`). `ux-v2-validation-1.spec.ts` is unchanged. |
+| **1.19** | Nov 6, 2026 | UX v2 validation round 1 (Part of #375): new spec `ux-v2-validation-1.spec.ts` (one focus style, suggestions panel in the flow on `/songs` and Home, search options tokens and category name, song flags versus the reader; fixed-id fixture `VALIDATION_1_FIXTURE_IDS`, removed by `e2e/global-teardown.ts`); `ux-v2-reader-tools.spec.ts` uses a short window so auto-scroll is offered and tests that it is not on a song that fits; `ux-v2-song-meta.spec.ts` checks the expanded list. |
 | **1.18** | Nov 6, 2026 | Story 6.1.34 (#418): `e2e/tests/ux-v2-a11y-audit.spec.ts` (axe-core on the song page, the Practice panel, the recorder and the sheets and dialogs reachable from them; guest and member; light and dark; keyboard and focus journeys, including the delete confirmation, Escape while renaming and Tab reaching the embedded player; the sticky-title spec now picks a long-titled public song that has enough lyrics to scroll). Fixed fixture ids `A11Y_AUDIT_FIXTURE_IDS` (a second song with a reference video for the player), removed by `e2e/global-teardown.ts`. The Practice panel is now a dialog: specs wait for `data-testid="practice-drawer"` (not the old `h3`), recorder state and share list headings are `h3`, tabs expose `aria-selected`. |
 | **1.17** | Nov 6, 2026 | Story 6.1.32 (#416): PL-01 covers the New Playlist page: private line, Make public switch, Create enabled once named. New spec `ux-v2-new-playlist-visibility.spec.ts`. |
 | **1.16** | Nov 6, 2026 | Story 6.1.5 (#389): ACC-04 (Privacy settings) is hidden behind `FEATURES.privacySettings`; LIB-10 (Albums) answers not-found. New spec `ux-v2-hide-unfinished.spec.ts` asserts no "Coming soon" in Library, Settings and the song form. |

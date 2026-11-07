@@ -77,6 +77,9 @@ export async function login(context, email) {
 }
 
 // UX_SCHEME=light|dark (default dark) sets both the media query and the app's stored theme.
+// The pg client the capture scripts need for fixtures (same module resolution as playwright above).
+export const createRequire_pg = () => require('pg');
+
 export const SCHEME = process.env.UX_SCHEME === 'light' ? 'light' : 'dark';
 
 /** UX_ROUTES=01-home,03-song-detail limits capture to those names (prefix match). */

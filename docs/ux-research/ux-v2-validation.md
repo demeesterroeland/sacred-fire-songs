@@ -1,11 +1,13 @@
 # UX v2: Phone Validation Script
 
-**Version:** 1.36 | **Date:** Nov 6, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
+**Version:** 1.38 | **Date:** Nov 7, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.38 | Nov 7, 2026 | Validation round 1, review round on PR #474: items 8 to 14 (press a song under the open suggestions, the scroll position of the desktop column, auto-scroll behind the bars, the tools sheet and focus on a window that grows, one focus cue per field and readable tag counts, error toasts in your language, Search options in full on a phone, section labels versus chords, toolbar edge); item 6 uses the new favourites wording. |
+| 1.37 | Nov 6, 2026 | Added the **Validation round 1** section (seven fixes after the owner's phone run: auto-scroll only when the lyrics run below the fold, expanded meta line, one focus style for text fields, search suggestions in the page flow, search options on tokens and category names, translated feedback, song flags across versions); #391 step 3, #394 steps 1, 5, 9 and #413 step 1 updated to the new behaviour. |
 | 1.36 | Nov 6, 2026 | Added #418 (accessibility audit of the song page and the Practice panel, including the delete confirmation: what to check with a keyboard and a screen reader on a phone; the screen reader pass is still to be done). |
 | 1.35 | Nov 6, 2026 | Added #405 (publish dialog names the song and says who will hear the take; a take on a private song starts with making the song public; guests hear public takes on the Listen tab; long names, focus return). |
 | 1.34 | Nov 6, 2026 | Added #395 (version switch under the song title; steps 6, 6b, 6c: `?version=` link, Save returns to the edited version, a take in progress blocks switching). |
@@ -133,7 +135,7 @@ Sections are added per story as it merges into `feat/ux-v2`.
 
 - [ ] 1. Open a song with many tags (e.g. "Grandmother's Song of the Thousand Rivers"). Under the title: one grey line `Author · Tag · …` and one line `Key D · Capo 1 · DADGAD`. No coloured chips. Screenshot: `docs/ux-research/screenshots/ux-v2/391/after-dark-song-detail.webp`.
 - [ ] 2. The first lyric line is visible without scrolling.
-- [ ] 3. Tap the meta line. It expands into links (authors, tags, Chords/Melody); tap a tag → the song list filtered by it. Tap the line again to collapse.
+- [ ] 3. Tap the meta line. It is replaced by the list of links (authors, tags, Chords/Melody), each **underlined** so it looks tappable, and a chevron on the right; the author and tags are **not** repeated in a line above. Tap a tag → the song list filtered by it. Tap the chevron to collapse again.
 - [ ] 4. A song without key/capo shows only the meta line.
 
 ### #390 · G2.1 Reader toolbar `Chords · A− · A+`
@@ -307,7 +309,7 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 
 **Preconditions:** signed out (guest) on a 390 px phone, English; light and dark. Clear the site data first so the recent searches start empty. Seed data as in the setup section.
 
-- [ ] 1. Open `/songs` and tap the search field. **Expected:** a panel opens under the top bar with only a **Categories** heading and grey chips (The Elements, Nature, …); no empty "Recent searches" heading.
+- [ ] 1. Open `/songs` and tap the search field. **Expected:** a panel opens right under the top bar, **in the page: the song list moves down** and nothing is covered; it shows only a **Categories** heading and grey chips (The Elements, Nature, …); no empty "Recent searches" heading.
 - [ ] 2. Type `agua`, press Enter on the keyboard. Open `/songs` again and tap the search field. **Expected:** **Recent searches** lists `agua` above **Categories**. Screenshot: `docs/ux-research/screenshots/ux-v2/413/after-light/mobile/guest/01-search-focused.webp`. Before: `docs/ux-research/screenshots/ux-v2/413/before-light/mobile/guest/01-search-focused.webp`.
 - [ ] 3. Search six different words one after another (leave the field after each). **Expected:** only the last 5 are listed, newest on top.
 - [ ] 4. Tap a recent search. **Expected:** the song list shows the results for that word and the panel closes.
@@ -444,7 +446,7 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 
 **Preconditions:** a 390 px phone, English, light and dark; three accounts: **musician** (`…+expert@…`), **member** and a guest (private window); a long song with chords (e.g. *Grandmother's Song of the Thousand Rivers…*) and a song in key **E** (e.g. *Danza del Cielo Curandero*); Settings → Preferences → keep screen awake on (default).
 
-- [ ] 1. Musician: open the long song. Under the grey lines one row shows **Chords**, **A−**, **A+**, a **▶** button and a **⋯** button, all easy to hit (44 px); nothing wraps or runs off the screen. Screenshot: `docs/ux-research/screenshots/ux-v2/394/after-light/mobile/musician/01-toolbar.webp`.
+- [ ] 1. Musician: open the long song. Under the grey lines one row shows **Chords**, **A−**, **A+**, a **▶** button and a **⋯** button, all easy to hit (44 px); nothing wraps or runs off the screen. The **▶** only shows because this song runs below the bottom of the screen (see *Validation round 1*, check 1). Screenshot: `docs/ux-research/screenshots/ux-v2/394/after-light/mobile/musician/01-toolbar.webp`.
 - [ ] 2. Open the song in key **E**, tap **⋯**: a sheet *Reading tools* shows **Transpose** (− 0 +) and **Auto-scroll**. Tap **+** twice. **Expected:** the value reads **+2**, the line under it reads *Key F# (original E)*. Screenshot: `…/394/after-light/mobile/musician/03-tools-transposed.webp`.
 - [ ] 3. Tap **Close**. **Expected:** every chord on the page is two semitones higher (first chord E → F#), the grey line reads **Key F#**, and the **⋯** button shows **+2** as text. Screenshot: `…/394/after-light/mobile/musician/04-song-transposed.webp`.
 - [ ] 4. **⋯** → **Original key**. **Expected:** chords and key are as written again. Leave the song and come back: it opens in its own key (a shift is not remembered).
@@ -452,7 +454,7 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 - [ ] 6. While it scrolls tap **A+**: the text grows and scrolling goes on. Open **⋯**, tap **Faster**: it speeds up (the sheet says *Speed 4 of 5*); tap **Pause** in the sheet: it stops.
 - [ ] 7. Tap **▶** again, then tap on the lyrics. **Expected:** it pauses and the toolbar scrolls away with the page again. Start it once more and let it run to the end of the lyrics: it stops by itself, with the last line still on screen.
 - [ ] 8. On a phone that allows it, the screen stays on and a small sun appears after **⋯** (*Screen stays on*; also a line in the **⋯** sheet). With keep screen awake off in Settings, no sun shows.
-- [ ] 9. Member and guest: the row has the same buttons; the **⋯** sheet has **Auto-scroll** only, no **Transpose**.
+- [ ] 9. Member and guest: the row has the same buttons; the **⋯** sheet has **Auto-scroll** only, no **Transpose**. On a song that fits the screen, a member or guest has neither **▶** nor **⋯**.
 - [ ] 10. Switch to Dutch, Spanish, Italian, Russian, French, Portuguese and Quechua: the buttons' names, the sheet and the speed line are translated and fit; repeat step 2 in dark mode (`…/394/after-dark/mobile/musician/02-tools-sheet.webp`).
 - [ ] 11. Desktop (wide window): the same row; auto-scroll scrolls the main area and the toolbar sticks under the song title while it runs.
 
@@ -524,3 +526,22 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 - [ ] 6. **VoiceOver or TalkBack, song page and Practice panel** (steps 1 to 12 of `docs/ux-research/2026-11-06-a11y-audit.md` §5): the panel is announced as a dialog named *Practice, <song>*; Listen and Record are read as tabs with *selected*; the recorder says *Recording...* and *Recording paused* when you start and pause; each sheet and dialog is announced with its title and closes with focus back where it was. Write the result per step in the audit file.
 - [ ] 7. Switch the language to Dutch and repeat the recorder part of step 6: the announcements are in Dutch.
 - [ ] 8. Turn on reduced motion in the phone's settings and open the site on a laptop-width window: the bars in the **Practice** button of a playing song do not move.
+
+### Validation round 1 · seven fixes after the owner's phone run (Part of #375)
+
+**Preconditions:** a 390 px phone (or window), English, light and dark. Screenshots in `docs/ux-research/screenshots/ux-v2/validation-1/<before|after>-<light|dark>/mobile/<role>/`. A song with two versions (*Original* with chords, *Simplified* lyrics only) is needed for check 7: ask the maintainer or add one and remove it afterwards.
+
+- [ ] 1. **Auto-scroll only when it can scroll.** Open a short song on a tall window or a phone in landscape (the whole song fits): the toolbar shows **Chords · A− · A+** and **no ▶** (and, as a member or guest, no **⋯**). Make the text bigger with **A+** until the song runs below the bottom: **▶** (and **⋯**) appear without anything else moving. Switch **Chords** off or on, switch version, rotate the phone: the button follows the length of the song. Start **▶**, then rotate to a window where the song fits: the scroll stops and the button goes. Screenshots: `…/validation-1/after-light/mobile/guest/01-song-fits-no-autoscroll.webp`, before: `…/before-light/…`.
+- [ ] 2. **Meta line.** Tap the grey meta line of a song with an author and tags. **Expected:** only the links remain (underlined, readable without hovering), the author and tags are not written twice, a chevron at the right collapses the list. Screenshot: `…/after-light/mobile/guest/02-meta-expanded.webp`.
+- [ ] 3. **One focus style for text fields.** Member: **Library → Playlists → New**. Tap the name field. **Expected:** a 2 px orange line under the name and no box around it. Tap the search field at the top: a 2 px orange outline around it and nothing else (no extra ring). Tab through a form (Add Song): every field shows its outline when focused. Screenshot: `…/after-dark/mobile/member/03-playlist-name-focus.webp`.
+- [ ] 4. **Search suggestions in the flow.** Open `/songs` and tap the search field. **Expected:** the panel sits between the top bar and the list, and the first songs are **below** it (pushed down, not covered). Press Esc or tap outside: it closes and the list moves back up. Do the same on **Home** (guest: under the field; member: under the top bar): the content below is pushed down. Screenshot: `…/after-dark/mobile/guest/04-suggestions-song-list.webp`.
+- [ ] 5. **Search options.** Open `/songs?category=spiritual-concepts`, tap the sliders button. **Expected:** the dialog has one orange button (**Show results**), **Clear all** is a plain outlined button, nothing red or amber anywhere; the selected category is a dark chip with a check that reads **Category: Spiritual Concepts** (never the slug); the **Chords** and **Melody** toggles turn dark with a check when on. Screenshot: `…/after-light/mobile/guest/05-search-options.webp`.
+- [ ] 6. **Dutch, no English left.** Switch to Dutch. Tap ♥ on a song: the message and its link are Dutch (*Toegevoegd aan jouw favorieten*, *Bekijk jouw favorieten →*). Rename a playlist: *Afspeellijst hernoemd*. Open **Account settings**: the line under the title is Dutch.
+- [ ] 7. **Song flags follow every version, the reader follows the one shown.** Open the song with *Original* (chords) and *Simplified* (lyrics only). *Original* shows the **Chords** switch (and, as a musician, **⋯ → Transpose**). Tap **Simplified**: the **Chords** switch (and Transpose) is gone. Open `/songs`, switch on the **Chords** filter: the song is still listed. Screenshot: `…/after-light/mobile/guest/06-simplified-no-chords-switch.webp` (before: the switch was still there).
+- [ ] 8. **Press a song under the open suggestions.** On `/songs` (phone, then a desktop window) tap the search field, then press and release a song **below** the panel. **Expected:** that song opens (not another one, not nothing) and the panel is gone. Same on **Home** as a guest. Screenshot: `…/after-<light|dark>/mobile/guest/04-suggestions-song-list.webp`.
+- [ ] 9. **The desktop column keeps its place.** Desktop window, `/songs`, scroll the list far down, click the search field. **Expected:** the panel shows at the top of the list area, the list does **not** jump to the top, and after **Esc** it is scrolled exactly where it was. The panel never covers a song: the rows move down. Screenshot: `…/after-<light|dark>/desktop/guest/09-suggestions-scrolled-list.webp`.
+- [ ] 10. **Auto-scroll behind the bars.** Phone, a song whose last lines sit behind the **Practice** and bottom bars (make the window a little shorter than the text). **Expected:** **▶** is there. Make the window taller than the text **plus the two bars**: **▶** and **⋯** are gone. On a desktop window, text that fits with room below it shows neither (the padding under the text does not count). Screenshot: `…/after-<light|dark>/mobile/guest/07-autoscroll-offered-short-window.webp`.
+- [ ] 11. **The tools sheet on a window that grows.** Guest on a phone, window short: open **⋯**. Make the window tall enough for the whole song. **Expected:** the sheet closes by itself (never a sheet with only "Close"), and focus is on **A+**, not lost. With **▶** or **⋯** focused, grow the window: focus moves to **A+**.
+- [ ] 12. **One focus cue, readable counts.** In **Search options** tap the tags field: **one** 2 px outline around the whole field, nothing on the text inside, no change of the border. Same in the artist field of **Add song** and on the key, capo and tuning selects. Open the tag browser (tap the tags field): the numbers inside the chips are as dark (or light) as the names, in light and dark.
+- [ ] 13. **Error toasts in your language.** In Dutch, rename a playlist you do not own (or a smart playlist) or turn off the network and save a profile: the toast is a Dutch sentence (*Er ging iets mis. Probeer het opnieuw.* or a specific one), never English or database text.
+- [ ] 14. **Search options as a member, in full.** Member, 390 px, **Search options**: Content type and Your Library are one column; **Your Favorites**, **My Songs**, **My recordings** are written in full, and **Status** shows **All · Public · Draft** on its own row. Try Dutch and Russian. Screenshot: `…/after-<light|dark>/mobile/member/08-search-options-member.webp`. Also: a version with only `[Chorus]` labels shows no **Chords** switch; **A−** (or the Chords switch) lines up with the first lyric line.

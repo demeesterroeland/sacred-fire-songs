@@ -25,6 +25,11 @@ export function versionHasMelody(v: VersionFlagSource): boolean {
   return !!(v.youtube_url || v.spotify_url || v.soundcloud_url || v.melody_notation);
 }
 
+/** Does this one version carry chords? The reader (Chords switch, transpose) follows the version being shown. */
+export function versionHasChords(v: Pick<VersionFlagSource, 'content_chordpro'> | null | undefined): boolean {
+  return hasChords(v?.content_chordpro ?? '');
+}
+
 export function songFlags(versions: ReadonlyArray<VersionFlagSource>): SongFlags {
   return {
     has_chords: versions.some((v) => hasChords(v.content_chordpro ?? '')),

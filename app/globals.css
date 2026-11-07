@@ -173,6 +173,45 @@ body {
   outline-offset: 2px;
 }
 
+/*
+ * Text fields have ONE focus style. This rule is unlayered, so it beats Tailwind's utilities: `outline-none`,
+ * `focus:ring-*` and `focus:border-*` on an <input> never replaced it, they only stacked a second cue on top
+ * (underline plus box). Components must not add their own; the lint-style test textFieldFocus.test.ts checks.
+ */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+/*
+ * Fields drawn as a single underline (the New Playlist name): the one focus cue is the underline itself,
+ * 2 px in the accent instead of 1 px grey (a thicker line, not only a colour change), and no outline box.
+ * The shadow adds the second pixel without moving the layout.
+ */
+.field-underline:focus-visible {
+  outline: none;
+  border-bottom-color: var(--focus);
+  box-shadow: 0 1px 0 0 var(--focus);
+}
+
+/*
+ * Fields drawn as a container around their input (selected chips + a typing area: the Search options tags, the
+ * artist field): the container carries the ONE focus cue, in the same 2 px token outline as every other
+ * field. The input inside draws nothing of its own, and the container does not change its border or add a ring.
+ * Only the input counts (`:has(input:focus-visible)`): a chip's remove button keeps its own outline.
+ */
+.field-composite:has(input:focus-visible) {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+.field-composite input:focus-visible {
+  outline: none;
+  box-shadow: none;
+}
+
 @layer utilities {
   .hide-scroll::-webkit-scrollbar {
     display: none;

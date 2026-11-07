@@ -3,7 +3,8 @@
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { X, Search, ChevronDown } from 'lucide-react';
 import { TaxonomyNode } from '@/lib/taxonomyUtils';
-import { TagPill } from '@/components/ui/TagPill';
+import { Chip } from '@/components/ui/chip';
+import { categoryDisplayName } from '@/lib/taxonomy/categoryName';
 import { useTaxonomy } from '@/lib/hooks/useTaxonomy';
 import { useLocale } from '@/context/LocaleContext';
 
@@ -25,6 +26,7 @@ interface TagSelectorProps {
 export default function TagSelector({
   category,
   tags,
+  taxonomy,
   onCategoryChange,
   onTagsChange,
   onClearAll,
@@ -45,10 +47,6 @@ export default function TagSelector({
   const selectedTagObjects = useMemo(() => {
     return categories.filter((c) => tags.includes(c.slug) || tags.includes(c.id));
   }, [categories, tags]);
-
-  const selectedCategoryObject = useMemo(() => {
-    return categories.find((c) => c.slug === category || c.id === category);
-  }, [categories, category]);
 
   // Flattened options for search filter
   const filteredGrouped = useMemo(() => {
@@ -89,45 +87,31 @@ export default function TagSelector({
     <div className="space-y-3 relative w-full" ref={wrapperRef}>
       {/* 1. Search Bar & Active Tag Pills */}
       <div
-        className="flex flex-wrap items-center gap-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-800 rounded-xl py-2 px-3 focus-within:ring-2 focus-within:ring-red-500/50 transition-all cursor-text min-h-[44px]"
+        className="field-composite flex min-h-tap cursor-text flex-wrap items-center gap-2 rounded-control border border-line-strong bg-surface px-3 py-2"
         onClick={() => inputRef.current?.focus()}
       >
-        <Search className="w-4 h-4 text-gray-400 shrink-0" />
+        <Search aria-hidden className="size-4 shrink-0 text-fg-subtle" />
 
-        {/* Selected Category Pill */}
+        {/* Selected filters: neutral chips (inverted + check), tap to remove */}
         {category && (
-          <TagPill
-            label={t('search.tagSelector.categoryPrefix', { category: selectedCategoryObject?.name || category })}
-            categorySlug={category}
-            variant="selectable"
-            selected={true}
-            onClick={() => onCategoryChange(undefined)}
-          />
+          <Chip selected onClick={() => onCategoryChange(undefined)}>
+            {t('search.tagSelector.categoryPrefix', { category: categoryDisplayName(category, taxonomy, categories) })}
+          </Chip>
         )}
 
-        {/* Selected Artist Pill */}
         {artist && (
-          <TagPill
-            label={t('search.tagSelector.artistPrefix', { artist })}
-            variant="selectable"
-            selected={true}
-            onClick={() => onArtistChange?.(undefined)}
-          />
+          <Chip selected onClick={() => onArtistChange?.(undefined)}>
+            {t('search.tagSelector.artistPrefix', { artist })}
+          </Chip>
         )}
 
-        {/* Selected Tag Pills */}
         {tags.map((tagSlug) => {
           const tagObj = categories.find((c) => c.slug === tagSlug || c.id === tagSlug);
           return (
-            <TagPill
-              key={tagSlug}
-              label={tagObj?.name || tagSlug}
-              categorySlug={tagObj?.slug || tagSlug}
-              emoji={tagObj?.emoji}
-              variant="selectable"
-              selected={true}
-              onClick={() => toggleTagSlug(tagSlug)}
-            />
+            <Chip key={tagSlug} selected onClick={() => toggleTagSlug(tagSlug)}>
+              {tagObj?.emoji && <span aria-hidden className="leading-none">{tagObj.emoji}</span>}
+              {tagObj?.name || categoryDisplayName(tagSlug, taxonomy, categories)}
+            </Chip>
           );
         })}
 
@@ -135,7 +119,7 @@ export default function TagSelector({
         <input
           ref={inputRef}
           type="text"
-          className="flex-1 min-w-[140px] bg-transparent border-none outline-none text-xs text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-gray-500"
+          className="min-w-[140px] flex-1 border-none bg-transparent text-meta text-fg placeholder:text-fg-subtle"
           placeholder={
             category || tags.length > 0 || artist
               ? t('search.tagSelector.addMoreTags')
@@ -153,7 +137,7 @@ export default function TagSelector({
           <button
             type="button"
             onClick={onClearAll}
-            className="text-caption font-semibold text-fg-muted hover:text-danger transition-colors shrink-0 ml-auto"
+            className="ml-auto inline-flex min-h-tap shrink-0 items-center px-1 text-caption font-semibold text-fg-muted underline underline-offset-4 transition-colors hover:text-fg"
           >
             {resolvedClearLabel}
           </button>
@@ -162,17 +146,18 @@ export default function TagSelector({
 
       {/* 2. Visual Tag Browser Dropdown */}
       {isOpen && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-xl shadow-2xl z-50 p-4 max-h-[300px] overflow-y-auto space-y-4 animate-in fade-in slide-in-from-top-2 duration-150">
-          <div className="flex items-center justify-between border-b border-gray-100 dark:border-gray-800 pb-2">
+        <div className="absolute left-0 right-0 top-full z-50 mt-2 max-h-[300px] space-y-4 overflow-y-auto rounded-panel border border-line bg-surface p-4 shadow-sheet">
+          <div className="flex items-center justify-between border-b border-line pb-2">
             <span className="text-caption font-semibold text-fg-muted">
               {t('search.tagSelector.browseAll')}
             </span>
             <button
               type="button"
               onClick={() => setIsOpen(false)}
-              className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+              aria-label={t('common.close')}
+              className="inline-flex size-tap items-center justify-center rounded-control text-fg-subtle hover:text-fg"
             >
-              <X className="w-3.5 h-3.5" />
+              <X aria-hidden className="size-4" />
             </button>
           </div>
 
@@ -185,16 +170,13 @@ export default function TagSelector({
                 {groupCats.map((cat) => {
                   const isSelected = tags.includes(cat.slug) || tags.includes(cat.id);
                   return (
-                    <TagPill
-                      key={cat.id}
-                      label={cat.name}
-                      categorySlug={cat.slug}
-                      emoji={cat.emoji}
-                      count={cat.song_count}
-                      variant="selectable"
-                      selected={isSelected}
-                      onClick={() => toggleTagSlug(cat.slug)}
-                    />
+                    <Chip key={cat.id} selected={isSelected} onClick={() => toggleTagSlug(cat.slug)}>
+                      {cat.emoji && <span aria-hidden className="leading-none">{cat.emoji}</span>}
+                      {cat.name}
+                      {cat.song_count !== undefined && (
+                        <span className="font-normal tabular-nums">{cat.song_count}</span>
+                      )}
+                    </Chip>
                   );
                 })}
               </div>
@@ -202,7 +184,7 @@ export default function TagSelector({
           ))}
 
           {filteredGrouped.length === 0 && (
-            <div className="text-center py-4 text-gray-400 text-xs">
+            <div className="py-4 text-center text-meta text-fg-subtle">
               {t('search.tagSelector.noMatchingTags', { query: inputValue })}
             </div>
           )}

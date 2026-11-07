@@ -1453,3 +1453,17 @@
 - [ ] Owner: phone validation on the preview, decisions in #431, sign-off of `feat/ux-v2` → `develop`
 - [ ] Owner: manual VoiceOver / TalkBack pass (`docs/ux-research/2026-11-06-a11y-audit.md` section 5); #418 stays open until then
 - [ ] Follow-ups: Quechua native check, Songs / Add Song / Edit nest a second `main`, focus after deleting a song far down the list lands off-screen, `useDeleteSong` English alert, `useToggleFavorite` English toasts, `npm run test:bdd:ci` has 3 failing scenarios about `e2e.yml` and `docker.yml` (not part of CI)
+
+## Session November 6, 2026 (Epic 6.1 UX v2, validation round 1, #375)
+- [x] Fix 1 auto-scroll only when the lyrics run below the fold; fix 2 expanded meta line; fix 3 one focus style for text fields; fix 4 suggestions panel in the page flow; fix 5 search options on tokens and category names; fix 6 translated hook feedback and Settings intro; fix 7 song flags across versions (migration + page follows the version shown)
+- [x] Tests per fix (unit, component, BDD unit, Playwright), before/after screenshots at 390 px light and dark, validation script section, UXA-054…060, db-schema v3.3
+- [x] Lint cap 158 → 157, palette baseline 1721 → 1564
+- [ ] Owner: re-run the *Validation round 1* section of `docs/ux-research/ux-v2-validation.md` on a phone; decide whether to apply `20261106180000_recompute_song_flags.sql` where data is older than the any-version rule
+- [ ] Follow-ups: server-action error strings shown as toasts are still English; `PlaylistDetailHeader` still has palette classes outside its edit fields
+
+## Session November 7, 2026 (Epic 6.1 UX v2, review round on validation round 1, PR #474, #375)
+- [x] B1 press on a song under the open suggestions opens that song (close on click); H1 desktop column keeps its scroll position (sticky slot, no `scrollIntoView`); H2 auto-scroll fold = lyric text above the fixed bars; M1 tools sheet closes when empty, focus to A+; M2 one focus cue per field (`.field-composite`, selects, `<Input>`); M3 tag counts AA; M4 localised error toasts (`lib/errors/actionError.ts`); M5 Search options one column on phones; M6 chord token rule in JS and SQL (+ BOM, U+0085); L4, L6, L7
+- [x] Parity test SQL versus JS runs in an in-memory Postgres (PGlite, new devDependency), so it also runs in CI
+- [x] Palette baseline 1564 → 1559; lint cap stays 157 (157 warnings)
+- [ ] Owner: decide whether lower case, German and solfège chord spellings (`[am]`, `[Hm]`, `[Re]`) should count as chords (UXA-066)
+- [ ] Follow-ups: auth forms still show the authentication service's message; `qu` has the generic sentence for every `errors.*` key; the song page button still says "Add to Liked Songs"; two nested `<main>` elements on some pages

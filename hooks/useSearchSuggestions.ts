@@ -6,6 +6,9 @@ import { fetchCategoryTree } from '@/lib/taxonomyUtils';
 import { sortCategories } from '@/lib/categoryOrder';
 import { readRecentSearches } from '@/lib/search/history';
 
+/** How long a press that never turns into a click (a drag, a cancelled touch) keeps the panel from closing on focus. */
+const PRESS_GRACE_MS = 500;
+
 /**
  * The behaviour both search fields (header and Home, Stories 6.1.28/6.1.29) share around the G7.1
  * suggestion panel: when it opens, which data it loads, and how it closes.
@@ -57,22 +60,55 @@ export function useSearchSuggestions() {
 
   const close = useCallback(() => setOpen(false), []);
 
-  // A tap outside the field and the panel closes the panel.
+  // True from the moment a pointer goes down until just after its click: a press must not move the page.
+  const pressingRef = useRef(false);
+
+  // A tap outside the field and the panel closes the panel. It closes on the CLICK, not on the press: the panel
+  // sits in the page flow, so closing it moves the list up, and a press on a song would then release on
+  // something else (validation 1 review, B1). The click lands on what was under the finger at press time.
   useEffect(() => {
     if (!open) return;
-    const onDown = (e: PointerEvent) => {
-      const target = e.target as Node;
-      if (!wrapperRef.current?.contains(target) && !panelRef.current?.contains(target)) setOpen(false);
+    const isOutside = (target: Node) => !wrapperRef.current?.contains(target) && !panelRef.current?.contains(target);
+    let forget: ReturnType<typeof setTimeout> | undefined;
+    const onDown = () => {
+      clearTimeout(forget);
+      pressingRef.current = true;
     };
-    document.addEventListener('pointerdown', onDown);
-    return () => document.removeEventListener('pointerdown', onDown);
+    const onUp = () => {
+      // On a touch screen the browser moves focus to the pressed link AFTER the finger lifts, a moment before
+      // the click: keep the press alive until that click (which ends it), or for a short while if none comes.
+      clearTimeout(forget);
+      forget = setTimeout(() => {
+        pressingRef.current = false;
+      }, PRESS_GRACE_MS);
+    };
+    const onClick = (e: MouseEvent) => {
+      clearTimeout(forget);
+      pressingRef.current = false;
+      if (isOutside(e.target as Node)) setOpen(false);
+    };
+    document.addEventListener('pointerdown', onDown, true);
+    document.addEventListener('pointerup', onUp, true);
+    document.addEventListener('pointercancel', onUp, true);
+    document.addEventListener('click', onClick, true);
+    return () => {
+      document.removeEventListener('pointerdown', onDown, true);
+      document.removeEventListener('pointerup', onUp, true);
+      document.removeEventListener('pointercancel', onUp, true);
+      document.removeEventListener('click', onClick, true);
+      clearTimeout(forget);
+      pressingRef.current = false;
+    };
   }, [open]);
 
   /** Focus moved: tabbing out of the field and the panel closes the panel. */
   const closeIfFocusLeaves = useCallback((e: React.FocusEvent) => {
     const next = e.relatedTarget as Node | null;
-    if (!next) return; // a tap on something unfocusable: the pointerdown handler decides
+    if (!next) return; // a tap on something unfocusable: the click handler decides
     if (wrapperRef.current?.contains(next) || panelRef.current?.contains(next)) return;
+    // A browser focuses a link or button on press: the click that follows closes the panel, so that the
+    // page holds still until the press is released.
+    if (pressingRef.current) return;
     setOpen(false);
   }, []);
 

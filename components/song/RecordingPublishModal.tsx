@@ -22,6 +22,7 @@ import {
   publishAudienceKey,
   publishOffer,
 } from "@/lib/songs/publishAudience";
+import { actionErrorMessage } from '@/lib/errors/actionError';
 
 interface RecordingPublishModalProps {
   recording: UserRecording | null;
@@ -87,7 +88,7 @@ export default function RecordingPublishModal({
       } else if (res.code === SONG_NOT_PUBLIC) {
         toast.error(t("recording.publish.errorSongPrivate"));
       } else {
-        toast.error(res.error || t("recording.publish.error"));
+        toast.error(actionErrorMessage(res.error, t, 'recording.publish.error'));
       }
     } catch {
       toast.error(t("recording.publish.error"));

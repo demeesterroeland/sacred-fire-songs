@@ -48,10 +48,12 @@ vi.mock('@/lib/taxonomyUtils', () => ({
 
 import HomeSearch from '@/components/home/HomeSearch';
 import Header from '@/components/common/Header';
+import { SuggestionsSlot } from '@/components/search/SuggestionsSlot';
 
 function wrap(ui: React.ReactElement) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
-  return render(<QueryClientProvider client={client}>{ui}</QueryClientProvider>);
+  // The page layout holds the slot the header's suggestions panel is rendered into (fix 4).
+  return render(<QueryClientProvider client={client}>{ui}<SuggestionsSlot /></QueryClientProvider>);
 }
 
 beforeEach(() => {
@@ -68,7 +70,21 @@ const fields = [
   { name: 'Header', render: () => wrap(<Header />), role: 'textbox' as const },
 ];
 
-describe.each(fields)('$name suggestion panel', ({ render: mount, role }) => {
+describe.each(fields)('$name suggestion panel', ({ name, render: mount, role }) => {
+  it('is part of the page flow: never positioned out of it, so it pushes the page down', async () => {
+    mount();
+    act(() => screen.getByRole(role).focus());
+    const panel = await screen.findByTestId('search-suggestions');
+    for (let el: HTMLElement | null = panel; el && el !== document.body; el = el.parentElement) {
+      expect(el.className, `${name}: ${el.tagName}`).not.toMatch(/(^|\s)(absolute|fixed)(\s|$)/);
+    }
+    if (name === 'Header') {
+      // rendered in the slot at the top of the main column, not inside the (fixed height) header bar
+      expect(document.getElementById('app-navbar')?.contains(panel)).toBe(false);
+      expect(screen.getByTestId('search-suggestions-slot').contains(panel)).toBe(true);
+    }
+  });
+
   it('closes on Escape inside the panel and does not reopen when the field gets focus back', async () => {
     mount();
     const input = screen.getByRole(role);
@@ -100,6 +116,72 @@ describe.each(fields)('$name suggestion panel', ({ render: mount, role }) => {
     expect(container).toBeTruthy();
   });
 
+  // Validation 1 review, B1: the panel is in the page flow, so closing it moves the list. A press that lands on a
+  // song must not move the page before it is released: the panel closes on the click, not on the press.
+  it('stays open while a press is down outside, even when the press moves focus; closes on the click', async () => {
+    mount();
+    const outside = document.createElement('a');
+    outside.href = '/songs/abc';
+    outside.textContent = 'a song';
+    document.body.appendChild(outside);
+    act(() => screen.getByRole(role).focus());
+    await screen.findByTestId('search-suggestions');
+
+    fireEvent.pointerDown(outside);
+    act(() => outside.focus()); // a browser focuses a link on mouse down
+    expect(screen.getByTestId('search-suggestions')).toBeTruthy(); // the page has not moved yet
+
+    fireEvent.pointerUp(outside);
+    fireEvent.click(outside);
+    expect(screen.queryByTestId('search-suggestions')).toBeNull();
+    outside.remove();
+  });
+
+  it('a press on something unfocusable outside also waits for the click', async () => {
+    mount();
+    const outside = document.createElement('div');
+    document.body.appendChild(outside);
+    act(() => screen.getByRole(role).focus());
+    await screen.findByTestId('search-suggestions');
+    fireEvent.pointerDown(outside);
+    expect(screen.getByTestId('search-suggestions')).toBeTruthy();
+    fireEvent.pointerUp(outside);
+    fireEvent.click(outside);
+    expect(screen.queryByTestId('search-suggestions')).toBeNull();
+    outside.remove();
+  });
+
+  it('on a touch screen focus moves to the link after the finger lifts, before the click: the panel still holds', async () => {
+    mount();
+    const outside = document.createElement('a');
+    outside.href = '/songs/abc';
+    document.body.appendChild(outside);
+    act(() => screen.getByRole(role).focus());
+    await screen.findByTestId('search-suggestions');
+    fireEvent.pointerDown(outside);
+    fireEvent.pointerUp(outside);
+    await act(async () => { await new Promise((r) => setTimeout(r, 20)); }); // timers run between pointerup and the mouse events
+    act(() => outside.focus());
+    expect(screen.getByTestId('search-suggestions')).toBeTruthy();
+    fireEvent.click(outside);
+    expect(screen.queryByTestId('search-suggestions')).toBeNull();
+    outside.remove();
+  });
+
+  it('a press that is cancelled does not leave the panel stuck: the next Tab out still closes it', async () => {
+    mount();
+    const outside = document.createElement('button');
+    document.body.appendChild(outside);
+    act(() => screen.getByRole(role).focus());
+    await screen.findByTestId('search-suggestions');
+    fireEvent.pointerDown(outside);
+    fireEvent.pointerCancel(outside);
+    await act(async () => { await new Promise((r) => setTimeout(r, 600)); });
+    act(() => outside.focus());
+    expect(screen.queryByTestId('search-suggestions')).toBeNull();
+    outside.remove();
+  });
+
   it('stays open while focus moves from the field into the panel', async () => {
     mount();
     act(() => screen.getByRole(role).focus());
@@ -115,6 +197,16 @@ describe.each(fields)('$name suggestion panel', ({ render: mount, role }) => {
     await screen.findByTestId('search-suggestions');
     fireEvent.keyDown(input, { key: 'ArrowDown' });
     expect(document.activeElement).toBe(screen.getByRole('button', { name: 'fuego' }));
+  });
+});
+
+describe('Header: tabbing to the search options button leaves the field (L4)', () => {
+  it('closes the suggestions so the page is not left pushed down', async () => {
+    wrap(<Header />);
+    act(() => screen.getByRole('textbox').focus());
+    expect(await screen.findByTestId('search-suggestions')).toBeTruthy();
+    act(() => screen.getByRole('button', { name: DICTIONARIES.en['header.searchOptions'] as string }).focus());
+    expect(screen.queryByTestId('search-suggestions')).toBeNull();
   });
 });
 
@@ -152,6 +244,7 @@ describe('Header search field on Home (UXA-042)', () => {
     view.rerender(
       <QueryClientProvider client={new QueryClient()}>
         <Header />
+        <SuggestionsSlot />
       </QueryClientProvider>
     );
     const input = screen.getByRole('textbox');
@@ -168,6 +261,7 @@ describe('Header search field on Home (UXA-042)', () => {
     view.rerender(
       <QueryClientProvider client={new QueryClient()}>
         <Header />
+        <SuggestionsSlot />
       </QueryClientProvider>
     );
     expect(document.activeElement).not.toBe(screen.getByRole('textbox'));

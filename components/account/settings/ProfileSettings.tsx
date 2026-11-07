@@ -37,7 +37,8 @@ export default function ProfileSettings({ user, profile }: ProfileSettingsProps)
       toast.success(t("settings.profile.success"));
       router.refresh();
     } catch (error: any) {
-      toast.error(error.message || t("settings.profile.error"));
+      console.error('[settings]', error);
+      toast.error(t("settings.profile.error"));
     } finally {
       setIsSaving(false);
     }
@@ -86,7 +87,8 @@ export default function ProfileSettings({ user, profile }: ProfileSettingsProps)
       toast.success(t("settings.profile.avatar.success"));
       router.refresh();
     } catch (error: any) {
-      toast.error(error.message || t("settings.profile.avatar.error"));
+      console.error('[settings]', error);
+      toast.error(t("settings.profile.avatar.error"));
     } finally {
       setIsUploading(false);
     }
@@ -135,7 +137,7 @@ export default function ProfileSettings({ user, profile }: ProfileSettingsProps)
             type="text"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
-            className="flex-1 bg-slate-100/50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/10 px-4 py-3 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:border-[#f45d1a] transition-all"
+            className="flex-1 bg-slate-100/50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/10 px-4 py-3 rounded-xl text-gray-900 dark:text-white transition-all"
           />
           <button
             onClick={handleSave}

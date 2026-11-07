@@ -115,7 +115,7 @@ function FinishRegistrationFormContent({
           <div className="space-y-1">
             <Label className="text-meta font-semibold text-fg-muted ml-1">{t('auth.finishRegistration.nameLabel')}</Label>
             <div className="relative group">
-              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5a657a] group-focus-within:text-[#d9481e] transition-colors pointer-events-none">
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5a657a] pointer-events-none">
                 <User className="w-5 h-5" />
               </div>
               <Input
@@ -125,7 +125,7 @@ function FinishRegistrationFormContent({
                 required
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="w-full bg-transparent border-gray-200 dark:border-[#2d3545] rounded-xl py-3.5 md:py-4 pl-12 pr-4 text-gray-900 dark:text-white placeholder-[#5a657a] focus:outline-none focus:border-[#d9481e] transition-all text-[14px] md:text-[15px] h-auto"
+                className="w-full bg-transparent border-gray-200 dark:border-[#2d3545] rounded-xl py-3.5 md:py-4 pl-12 pr-4 text-gray-900 dark:text-white placeholder-[#5a657a] transition-all text-[14px] md:text-[15px] h-auto"
               />
             </div>
           </div>

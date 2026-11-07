@@ -48,6 +48,7 @@ import {
   arrayMove,
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { actionErrorMessage } from '@/lib/errors/actionError';
 
 function SortableRecordingItem({
   rec,
@@ -196,7 +197,7 @@ function SortableRecordingItem({
             onBlur={handleSaveRename}
             onKeyDown={handleKeyDown}
             aria-label={t('rehearsal.recording.edit.ariaLabel')}
-            className="w-full text-sm font-semibold bg-white dark:bg-gray-900 border border-indigo-500 rounded px-2 py-0.5 outline-none text-gray-900 dark:text-white"
+            className="w-full text-sm font-semibold bg-white dark:bg-gray-900 border border-indigo-500 rounded px-2 py-0.5 text-gray-900 dark:text-white"
           />
         ) : (
           <div className="flex items-center gap-1.5 min-w-0">
@@ -1141,7 +1142,7 @@ export default function RehearsalDrawer({
         );
         queryClient.invalidateQueries({ queryKey: ["song-recordings", songVersionId] });
       } else {
-        toast.error(res.error || t('recording.publish.error'));
+        toast.error(actionErrorMessage(res.error, t, 'recording.publish.error'));
       }
     } else {
       setPublishRecording(rec);
@@ -1553,6 +1554,7 @@ export default function RehearsalDrawer({
 
         <div 
           data-testid="bottom-mini-player"
+          data-reader-bar=""
           role="region"
           aria-label={t('miniPlayer.region')}
           className="fixed bottom-[calc(var(--bottom-nav-height,3.5rem)+env(safe-area-inset-bottom,0px))] lg:bottom-4 inset-x-0 lg:left-1/2 lg:right-auto lg:-translate-x-1/2 z-[60] w-full lg:max-w-xl lg:rounded-panel shadow-sheet bg-surface text-fg h-bar flex items-center justify-between px-2 border-t lg:border border-line-strong select-none motion-safe:animate-in motion-safe:slide-in-from-bottom motion-safe:duration-300"

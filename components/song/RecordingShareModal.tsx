@@ -22,6 +22,7 @@ import { useLocale } from "@/context/LocaleContext";
 import { shareDialogStep } from "@/lib/songs/shareDialogStep";
 import { toast } from "sonner";
 import { Search, UserPlus, Trash2, Loader2, Music, Check, Shield, Lock, Globe } from "lucide-react";
+import { actionErrorMessage } from '@/lib/errors/actionError';
 
 interface RecordingShareModalProps {
   recording: UserRecording | null;
@@ -127,7 +128,7 @@ export default function RecordingShareModal({
         setSearchQuery("");
         onSharesUpdated?.();
       } else {
-        toast.error(res.error || t("recording.sharing.error"));
+        toast.error(actionErrorMessage(res.error, t, 'recording.sharing.error'));
       }
     } catch {
       toast.error(t("recording.sharing.error"));
@@ -162,7 +163,7 @@ export default function RecordingShareModal({
         setCurrentShares((prev) => prev.filter((s) => s.user_id !== targetUserId));
         onSharesUpdated?.();
       } else {
-        toast.error(res.error || t("recording.sharing.error"));
+        toast.error(actionErrorMessage(res.error, t, 'recording.sharing.error'));
       }
     } catch {
       toast.error(t("recording.sharing.error"));
@@ -266,7 +267,7 @@ export default function RecordingShareModal({
                   placeholder={t("recording.sharing.searchPlaceholder")}
                   aria-label={t("recording.sharing.searchPlaceholder")}
                   aria-describedby="share-helper"
-                  className="w-full min-h-tap pl-9 pr-9 bg-bg border border-line-strong rounded-control text-body outline-none focus-visible:outline-2 focus-visible:outline-focus text-fg placeholder:text-fg-subtle"
+                  className="w-full min-h-tap pl-9 pr-9 bg-bg border border-line-strong rounded-control text-body text-fg placeholder:text-fg-subtle"
                 />
                 {isSearching && (
                   <Loader2 className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-fg-subtle motion-safe:animate-spin" aria-hidden />

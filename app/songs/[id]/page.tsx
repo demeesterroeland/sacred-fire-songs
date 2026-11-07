@@ -20,7 +20,7 @@ import { PlaylistPicker } from '@/components/playlists/PlaylistPicker';
 import { useDeleteSong } from '@/hooks/useDeleteSong';
 import { SONG_KEYS } from '@/lib/songs/queryKeys';
 import { useWakeLock } from '@/hooks/useWakeLock';
-import { useAutoScroll } from '@/hooks/useAutoScroll';
+import { useAutoScroll, useLyricsBelowFold } from '@/hooks/useAutoScroll';
 import { SongActionBar } from '@/components/song/SongActionBar';
 import { useActionBarVisibility } from '@/hooks/useActionBarVisibility';
 import { useUserPreferences } from '@/context/UserPreferencesContext';
@@ -33,6 +33,7 @@ import { blocksVersionSwitch, linkedVersionChoice, resolveVersionIndex, type Ver
 import { ReadingToolsSheet } from '@/components/song/ReadingToolsSheet';
 import { useReaderPrefs } from '@/lib/reader/useReaderPrefs';
 import { speedBy } from '@/lib/reader/autoScroll';
+import { versionHasChords } from '@/lib/songs/versionFlags';
 import { canTranspose, shiftSemitones, transposeChordPro, transposeKey } from '@/lib/reader/transpose';
 import { cn } from '@/lib/utils';
 import { recordSongView } from '@/app/actions/recordSongView';
@@ -41,6 +42,7 @@ import { useRecordingsQuery } from '@/hooks/useRecordingsQuery';
 import { useLocale } from '@/context/LocaleContext';
 import { fetchSong, withTimeout } from '@/lib/songs/fetchSong';
 import { linkedTakeTab, parseRecordingParam, RECORDING_PARAM } from '@/lib/songs/recordingLink';
+import { actionErrorMessage } from '@/lib/errors/actionError';
 
 export default function SongDetailPage() {
     const { t } = useLocale();
@@ -80,7 +82,10 @@ export default function SongDetailPage() {
     const toolbarWrapRef = useRef<HTMLDivElement>(null);
     const lyricsRef = useRef<HTMLDivElement>(null);
     const toolsButtonRef = useRef<HTMLButtonElement>(null);
-    const autoScroll = useAutoScroll(readerPrefs.speed, toolbarWrapRef, lyricsRef);
+    const largerButtonRef = useRef<HTMLButtonElement>(null);
+    // Auto-scroll (▶, and its section in the tools sheet) only exists while the end of the lyrics is below the fold.
+    const canAutoScroll = useLyricsBelowFold(lyricsRef, toolbarWrapRef);
+    const autoScroll = useAutoScroll(readerPrefs.speed, toolbarWrapRef, lyricsRef, canAutoScroll);
     // On desktop the page header sticks at the top of the scrolling area; the sticky toolbar sits right under it.
     const [desktopHeader, setDesktopHeader] = useState<HTMLDivElement | null>(null);
     const [desktopHeaderH, setDesktopHeaderH] = useState(0);
@@ -180,7 +185,13 @@ export default function SongDetailPage() {
         setHighlightRecordingId(null);
     };
     const { data: recordings } = useSongRecordings(currentVersion?.id);
-    const mayTranspose = canTranspose(user?.role) && !!song?.has_chords;
+    // The Chords switch and transpose follow the version being SHOWN (a lyrics-only Simplified has none to switch
+    // or shift); lists, filters and the meta links keep using the song-level flag (any version).
+    const shownHasChords = versionHasChords(currentVersion);
+    const mayTranspose = canTranspose(user?.role) && shownHasChords;
+    // Review M1: the sheet holds transpose and auto-scroll only. When neither is left (the window grew and the song
+    // now fits) it closes instead of staying open with nothing but "Close" (adjusting state while rendering).
+    if (isToolsOpen && !mayTranspose && !canAutoScroll) setIsToolsOpen(false);
     const shownContent = useMemo(
         () => transposeChordPro(currentVersion?.content_chordpro || '', mayTranspose ? semitones : 0, { key: currentVersion?.key }),
         [currentVersion?.content_chordpro, currentVersion?.key, mayTranspose, semitones],
@@ -312,7 +323,7 @@ export default function SongDetailPage() {
             toast.success(t('song.publishSuccess'));
             return true;
         } else {
-            toast.error(res.error || t('song.publishError'));
+            toast.error(actionErrorMessage(res.error, t, 'song.publishError'));
             return false;
         }
     };
@@ -513,7 +524,8 @@ export default function SongDetailPage() {
                         style={{ '--desktop-header-h': `${desktopHeaderH}px` } as React.CSSProperties}
                         data-scrolling={autoScroll.playing ? 'true' : 'false'}
                         className={cn(
-                            '-mx-6 mb-2 px-4 md:-mx-10 md:px-8',
+                            // Same side padding as the page, so the first control lines up with the lyrics (the Chords switch pulls its own padding back).
+                            '-mx-6 mb-2 px-6 md:-mx-10 md:px-10',
                             autoScroll.playing && 'sticky top-[calc(var(--env-banner-height,0px)+var(--bar-h))] z-20 border-b border-line bg-bg lg:top-[var(--desktop-header-h)]',
                         )}
                     >
@@ -521,27 +533,31 @@ export default function SongDetailPage() {
                             step={readerPrefs.step}
                             chords={readerPrefs.chords}
                             speed={readerPrefs.speed}
-                            hasChords={song.has_chords}
+                            hasChords={shownHasChords}
                             onChange={setReaderPrefs}
                             scrolling={autoScroll.playing}
-                            onToggleScroll={autoScroll.toggle}
-                            onOpenTools={() => setIsToolsOpen(true)}
+                            onToggleScroll={canAutoScroll ? autoScroll.toggle : undefined}
+                            onOpenTools={mayTranspose || canAutoScroll ? () => setIsToolsOpen(true) : undefined}
                             toolsOpen={isToolsOpen}
                             toolsButtonRef={toolsButtonRef}
+                            fallbackFocusRef={largerButtonRef}
                             semitones={mayTranspose ? semitones : 0}
                             awake={awake}
                         />
                     </div>
 
                     {/* Song Content (Lyrics/Chords) */}
-                    <div ref={lyricsRef} className="pt-2 pb-12">
-                        <SongDisplay
-                            content={shownContent}
-                            melodyNotation={currentVersion?.melody_notation || ''}
-                            hasChords={song.has_chords}
-                            sizeStep={readerPrefs.step}
-                            showChords={readerPrefs.chords}
-                        />
+                    <div className="pt-2 pb-12">
+                        {/* The fold is measured on the lyric text itself, not on the padding below it (review H2). */}
+                        <div ref={lyricsRef}>
+                            <SongDisplay
+                                content={shownContent}
+                                melodyNotation={currentVersion?.melody_notation || ''}
+                                hasChords={shownHasChords}
+                                sizeStep={readerPrefs.step}
+                                showChords={readerPrefs.chords}
+                            />
+                        </div>
                     </div>
 
                     <div className="h-20"></div>
@@ -593,9 +609,10 @@ export default function SongDetailPage() {
                 speed={readerPrefs.speed}
                 onSpeed={(delta) => setReaderPrefs({ ...readerPrefs, speed: speedBy(readerPrefs.speed, delta) })}
                 scrolling={autoScroll.playing}
-                onToggleScroll={autoScroll.toggle}
+                onToggleScroll={canAutoScroll ? autoScroll.toggle : undefined}
                 awake={awake}
                 returnFocusRef={toolsButtonRef}
+                fallbackFocusRef={largerButtonRef}
             />
 
             <GuestGateSheet feature="addToPlaylist" open={isGuestGateOpen} onOpenChange={setIsGuestGateOpen} />

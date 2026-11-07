@@ -58,7 +58,7 @@ const ChordProEditor = forwardRef<HTMLTextAreaElement, ChordProEditorProps>(
           {/* Input Layer */}
           <textarea
             ref={ref}
-            className="absolute top-0 left-0 bg-transparent caret-fg focus:outline-none resize-none selection:bg-accent-soft selection:text-transparent placeholder:text-fg-subtle"
+            className="absolute top-0 left-0 bg-transparent caret-fg resize-none selection:bg-accent-soft selection:text-transparent placeholder:text-fg-subtle"
             style={{
               ...sharedStyles,
               zIndex: 1,

@@ -46,6 +46,7 @@ export function SongActionBar({
     <Toolbar
       aria-label={t('songBar.toolbar')}
       data-testid="song-action-bar"
+      data-reader-bar=""
       data-visible={visible ? 'true' : 'false'}
       style={{ bottom: ACTION_BAR_BOTTOM }}
       className={cn(

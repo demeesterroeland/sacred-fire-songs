@@ -62,7 +62,7 @@ export function PublicPlaylistCard({ id, title, description, isOwner, songCount 
                                 }}
                                 onClick={e => e.preventDefault()}
                                 autoFocus
-                                className="w-[95%] bg-gray-100 dark:bg-gray-800 border border-amber-500/50 rounded-lg px-2 py-1 text-sm font-bold text-gray-900 dark:text-gray-100 outline-none focus:border-amber-500"
+                                className="min-h-tap w-[95%] rounded-control border border-line-strong bg-surface px-2 py-1 text-meta font-bold text-fg placeholder:text-fg-subtle"
                             />
                         </div>
                     ) : (

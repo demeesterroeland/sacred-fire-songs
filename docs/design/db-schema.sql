@@ -1,11 +1,13 @@
 /*
- **Version:** 3.2
+ **Version:** 3.4
  **Status:** Current
- **Date:** November 6, 2026
+ **Date:** November 7, 2026
  
  ## Usage
  This script provides a complete setup for the "Sacred Fire Songs" database. 
- It consolidates the initial schema and all subsequent migrations up to November 6, 2026.
+ It consolidates the initial schema and all subsequent migrations up to November 7, 2026.
+ (v3.4: the chord rule of the recompute at the end of the script counts a bracketed chord token ("[Am]"), not a bracketed word that starts with A-G ("[Chorus]"), and uses the same whitespace set as JavaScript (leading BOM, U+0085); migration 20261106180000_recompute_song_flags.sql, review round on PR #474, M6).
+ (v3.3: compositions.has_chords / has_melody are declared in the table and recomputed for every song at the end of the script (true when ANY version has chords / a melody, the rule of lib/songs/versionFlags.ts); migration 20261106180000_recompute_song_flags.sql; UX v2 validation 1, fix 7).
  (v3.2: compositions SELECT/ALL policies now mirror the migrations (anon sees is_public = true only; owner/admin policies); the superseded "Public compositions are viewable by everyone" USING (true) and mock-mode public insert/update/delete policies are gone; Story 6.1.28, #412).
  (v3.1: Anon (guest) reads of public takes now also require singer_consent_confirmed; UXD-2, Story 6.1.26).
  (v3.0: Added notifications inbox with share triggers and profiles.email_notifications opt-out).
@@ -47,6 +49,8 @@ create table public.compositions (
   title text not null,
   original_author text,
   owner_id uuid references public.profiles(id),
+  has_chords boolean default false,
+  has_melody boolean default false,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 -- SONG_CATEGORY_MAP (Join Table)
@@ -1347,3 +1351,65 @@ SET title = 'Victory Member Song',
 WHERE title = 'Victory Song';
 END IF;
 END $$;
+-- 9. Song flags (any version): recompute compositions.has_chords / has_melody (v3.3)
+-- Recompute compositions.has_chords / has_melody for every song (UX v2 validation 1, fix 7).
+--
+-- The flags describe the whole song: true when ANY version has them. The rule is the one in
+-- lib/songs/versionFlags.ts:
+--   melody = a version has a YouTube / Spotify / SoundCloud link or a melody notation;
+--   chords = a version passes lib/chordProParsing.ts hasChords(): a bracketed chord ("[Am]") or a
+--            chords-over-lyrics line (more than half of its tokens are chords or "|").
+-- Songs saved before the "any version" rule (or created by seeds/imports) can disagree with it, e.g. an
+-- "Original" with chords next to a lyrics-only "Simplified" that was the last one saved.
+--
+-- Idempotent: only rows whose flags differ are written, so a second run changes nothing. No schema change,
+-- no new object is left behind (the helper lives in pg_temp and vanishes with the session).
+
+create or replace function pg_temp.sfs_has_chords(content text) returns boolean
+language sql immutable as $$
+  select exists (
+    -- a bracketed chord ("[Am]", "[C#m7/G#]"); a bracketed label such as "[Chorus]" is not a chord
+    select 1
+    from regexp_matches(coalesce(content, ''), '\[([^\]\[]*)\]', 'g') as b(m)
+    where b.m[1] ~ '^[A-G][#b]?(maj|min|dim|aug|sus|add|m|M|\+|-|°|ø|[0-9]|#|b|\(|\))*(/[A-G][#b]?)?$'
+  )
+  or exists (
+    select 1
+    from regexp_split_to_table(coalesce(content, ''), E'\n') as raw(line)
+    cross join lateral (
+      select regexp_replace(raw.line, '^[\t\n\v\f\r \u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff]+|[\t\n\v\f\r \u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff]+$', '', 'g') as line
+    ) as trimmed
+    cross join lateral (
+      select array(
+        select tok
+        from regexp_split_to_table(trimmed.line, '[\t\n\v\f\r \u00a0\u1680\u2000-\u200a\u2028\u2029\u202f\u205f\u3000\ufeff]+') as t(tok)
+        where tok <> '' and tok not like '(%' and tok not like '%)'
+      ) as toks
+    ) as r
+    where trimmed.line <> ''
+      and cardinality(r.toks) > 0
+      and (
+        select count(*) from unnest(r.toks) as x(tok)
+        where x.tok ~ '^[A-G][#b]?(m|min|maj|dim|aug|sus|add)?[0-9]*(/[A-G][#b]?)?$' or x.tok = '|'
+      ) > cardinality(r.toks) * 0.5
+  );
+$$;
+
+with calc as (
+  select
+    c.id,
+    coalesce(bool_or(pg_temp.sfs_has_chords(v.content_chordpro)), false) as chords,
+    coalesce(bool_or(
+      coalesce(v.youtube_url, '') <> '' or coalesce(v.spotify_url, '') <> ''
+      or coalesce(v.soundcloud_url, '') <> '' or coalesce(v.melody_notation, '') <> ''
+    ), false) as melody
+  from public.compositions c
+  left join public.song_versions v on v.composition_id = c.id
+  group by c.id
+)
+update public.compositions c
+set has_chords = calc.chords,
+    has_melody = calc.melody
+from calc
+where c.id = calc.id
+  and (c.has_chords is distinct from calc.chords or c.has_melody is distinct from calc.melody);

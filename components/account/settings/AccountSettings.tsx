@@ -56,7 +56,7 @@ export default function AccountSettings({ user, profile, initialTab = "profile" 
       <div className="max-w-4xl mx-auto">
         <header className="mb-12">
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2 text-gray-900 dark:text-white">{t("settings.pageTitle")}</h1>
-          <p className="text-gray-500 dark:text-slate-400">Manage your profile, account security, and data preferences.</p>
+          <p className="text-gray-500 dark:text-slate-400">{t("settings.pageIntro")}</p>
         </header>
 
         {/* Tabs Navigation — horizontally scrollable on mobile */}

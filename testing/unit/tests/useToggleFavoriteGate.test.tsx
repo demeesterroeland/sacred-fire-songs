@@ -13,6 +13,7 @@ const { toggleFavorite, toast } = vi.hoisted(() => ({
 }));
 vi.mock('@/app/actions/toggleFavorite', () => ({ toggleFavorite }));
 vi.mock('sonner', () => ({ toast }));
+vi.mock('@/context/LocaleContext', () => ({ useLocale: () => ({ t: (k: string) => k }) }));
 
 import { useToggleFavorite } from '@/hooks/useToggleFavorite';
 

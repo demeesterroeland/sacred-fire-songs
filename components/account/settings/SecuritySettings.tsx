@@ -36,8 +36,8 @@ export default function SecuritySettings({ user }: SecuritySettingsProps) {
       setNewPassword("");
       setConfirmPassword("");
     } catch (error) {
-      const err = error as Error;
-      toast.error(err.message || t("settings.security.error"));
+      console.error('[settings]', error);
+      toast.error(t("settings.security.error"));
     } finally {
       setIsUpdating(false);
     }
@@ -93,7 +93,7 @@ export default function SecuritySettings({ user }: SecuritySettingsProps) {
               placeholder="••••••••"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              className="w-full bg-slate-100/50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/10 px-4 py-3 pr-10 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:border-[#f45d1a] transition-all"
+              className="w-full bg-slate-100/50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/10 px-4 py-3 pr-10 rounded-xl text-gray-900 dark:text-white transition-all"
             />
             <button
               type="button"
@@ -114,7 +114,7 @@ export default function SecuritySettings({ user }: SecuritySettingsProps) {
               placeholder="••••••••"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full bg-slate-100/50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/10 px-4 py-3 pr-10 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:border-[#f45d1a] transition-all"
+              className="w-full bg-slate-100/50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/10 px-4 py-3 pr-10 rounded-xl text-gray-900 dark:text-white transition-all"
             />
             <button
               type="button"

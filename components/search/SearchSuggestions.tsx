@@ -80,7 +80,7 @@ export default function SearchSuggestions({
       tabIndex={-1}
       data-testid="search-suggestions"
       onKeyDown={handleKeyDown}
-      className={`rounded-panel border border-line bg-surface shadow-sheet outline-none ${className}`}
+      className={`rounded-panel border border-line bg-surface outline-none ${className}`}
     >
       {recent.length > 0 && (
         <section aria-labelledby="recent-searches-heading" className="px-4 pt-1">

@@ -1,11 +1,13 @@
 # Design Tokens & Component Sheet (UX v2, "sober" style)
 
-**Version:** 1.1 | **Date:** Nov 6, 2026 | **Story:** 6.1.1 / G1.1 (#385) | **Epic:** 6.1 (#375)
+**Version:** 1.3 | **Date:** Nov 7, 2026 | **Story:** 6.1.1 / G1.1 (#385) | **Epic:** 6.1 (#375)
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.3 | Nov 7, 2026 | Review round: a field drawn as a container around its input (the Search options tag field, the artist field) uses `.field-composite`: the container shows the one 2 px `--focus` outline and the input inside none; no `focus-within:` ring or border, and selects and the shadcn `<Input>` follow the text-field rule (`textFieldFocus.test.ts` now reads `<Input>`, `<select>` and `focus-within:`). Tag counts inside chips inherit the chip colour (4.5:1). |
+| 1.2 | Nov 6, 2026 | Text-field focus rule: one cue per field (token outline for boxed fields, `.field-underline` for underlined ones); components do not add `outline-none`, rings or focus borders (UXA-056). |
 | 1.1 | Nov 6, 2026 | Component sheet: Segmented (variant / language slot under the song title, Story 6.1.11 / G2.6, #395) and its design note. |
 | 1.0 | Nov 5, 2026 | First version: semantic colour tokens (light + dark), type scale, spacing, radius, size and elevation; Tailwind utility map; component sheet; rules from report §5 and ADR 0007. |
 
@@ -54,6 +56,8 @@ Contrast is measured against `--bg` / `--surface` (WCAG 2.2). `—` in Dark mean
 | `--elev-sheet` | `0 -8px 32px rgba(20, 18, 16, 0.16)` | `0 -8px 32px rgba(0, 0, 0, 0.5)` | Shadow of floating layers only |
 
 Accent text is allowed on `--bg` and `--surface`, not on `--surface-2` (4.4 : 1 in light).
+
+**Text fields:** a boxed `<input>`, `<textarea>` or `<select>` shows the `--focus` outline (2 px, offset 2 px) and nothing else: the unlayered `input:focus-visible` rule in `app/globals.css` also resets `box-shadow`, so a Tailwind ring cannot stack on it. An underlined field uses `.field-underline`: a 2 px accent underline and no outline box. Never put `outline-none`, `focus:ring-*` or `focus:border-*` on a text field (`textFieldFocus.test.ts`). A field drawn as a container around its input (`.field-composite`: the Search options tag field, the artist field) shows the same outline on the container and none on the input; there is never a `focus-within` ring or border.
 
 **One accent:** `--accent` is the only accent hue. `--danger` is a status colour, not an accent: it appears only on destructive actions and errors, always next to a text label. The token test enforces "one saturated hue besides `--danger`".
 

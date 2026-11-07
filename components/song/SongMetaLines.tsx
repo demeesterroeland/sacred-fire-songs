@@ -54,33 +54,41 @@ export function SongMetaLines({
 
   return (
     <div className={cn('text-meta text-fg-muted', className)} data-testid="song-meta-lines">
-      <button
-        type="button"
-        onClick={() => setOpen((o) => !o)}
-        aria-expanded={open}
-        aria-controls={listId}
-        className="flex w-full min-h-tap items-center gap-1 text-left hover:text-fg transition-colors"
-        data-testid="song-meta-line"
-      >
-        <span className={cn('min-w-0 flex-1', open ? 'whitespace-normal' : 'truncate')}>{meta}</span>
-        <span className="sr-only">{open ? t('song.meta.hideTags') : t('song.meta.showTags')}</span>
-        <ChevronDown
-          aria-hidden
-          className={cn('size-4 shrink-0 transition-transform motion-reduce:transition-none', open && 'rotate-180')}
-        />
-      </button>
-      {open && (
-        <ul id={listId} className="flex flex-wrap gap-x-1 pb-2">
-          {links.map(({ label, href }, i) => (
-            <li key={`${href}-${i}`}>
-              <Link href={href} className="inline-flex min-h-tap items-center px-1 text-fg underline-offset-4 hover:underline">
-                {label}
-              </Link>
-              {i < links.length - 1 && <span aria-hidden> ·</span>}
-            </li>
-          ))}
-        </ul>
-      )}
+      {/* One row, one button for both states, so keyboard focus stays on it when it toggles.
+          Expanded: only the links (they replace the summary line) and the chevron that collapses again. */}
+      <div className="flex items-start gap-1">
+        {open && (
+          <ul id={listId} className="flex min-w-0 flex-1 flex-wrap gap-x-1">
+            {links.map(({ label, href }, i) => (
+              <li key={`${href}-${i}`}>
+                <Link href={href} className="inline-flex min-h-tap items-center px-1 text-fg underline underline-offset-4">
+                  {label}
+                </Link>
+                {i < links.length - 1 && <span aria-hidden> ·</span>}
+              </li>
+            ))}
+          </ul>
+        )}
+        <button
+          type="button"
+          onClick={() => setOpen((o) => !o)}
+          aria-expanded={open}
+          aria-controls={open ? listId : undefined}
+          aria-label={open ? t('song.meta.hideTags') : undefined}
+          className={cn(
+            'flex min-h-tap items-center gap-1 text-left hover:text-fg transition-colors',
+            open ? 'size-tap shrink-0 justify-center rounded-control' : 'w-full',
+          )}
+          data-testid="song-meta-line"
+        >
+          {!open && <span className="min-w-0 flex-1 truncate">{meta}</span>}
+          {!open && <span className="sr-only">{t('song.meta.showTags')}</span>}
+          <ChevronDown
+            aria-hidden
+            className={cn('size-4 shrink-0 transition-transform motion-reduce:transition-none', open && 'rotate-180')}
+          />
+        </button>
+      </div>
       {technical && (
         <p className="truncate" data-testid="song-technical-line">
           {technical}

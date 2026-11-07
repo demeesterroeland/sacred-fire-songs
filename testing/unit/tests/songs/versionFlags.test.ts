@@ -1,6 +1,6 @@
 // Story 6.1.11 / G2.6 (#395, review round 2): a song's has_chords / has_melody cover ALL its versions.
 import { describe, expect, it } from 'vitest';
-import { songFlags, type VersionFlagSource } from '@/lib/songs/versionFlags';
+import { songFlags, versionHasChords, type VersionFlagSource } from '@/lib/songs/versionFlags';
 
 const withChords: VersionFlagSource = { content_chordpro: '[Am]Hello [G]world' };
 const lyricsOnly: VersionFlagSource = { content_chordpro: 'Hello world' };
@@ -25,5 +25,27 @@ describe('songFlags', () => {
       has_chords: false,
       has_melody: false,
     });
+  });
+});
+
+// Validation 1 (fix 7): the song-level flag drives lists and filters; the reader (Chords switch, transpose)
+// follows the version being SHOWN.
+describe('versionHasChords', () => {
+  const original = withChords;
+  const simplified = lyricsOnly;
+
+  it('Original has chords, Simplified is lyrics-only: the song is flagged, the shown version decides the reader', () => {
+    const versions = [original, simplified];
+    expect(songFlags(versions).has_chords).toBe(true); // lists and filters still find the song
+    expect(versionHasChords(versions[0])).toBe(true); // showing Original: Chords switch and transpose
+    expect(versionHasChords(versions[1])).toBe(false); // showing Simplified: neither
+  });
+  it('is false for a missing version or empty content', () => {
+    expect(versionHasChords(undefined)).toBe(false);
+    expect(versionHasChords(null)).toBe(false);
+    expect(versionHasChords({ content_chordpro: '' })).toBe(false);
+  });
+  it('sees chords-over-lyrics too (same parser as the flag)', () => {
+    expect(versionHasChords({ content_chordpro: 'Am  G\nwords' })).toBe(true);
   });
 });

@@ -25,6 +25,7 @@ import { toast } from 'sonner';
 import { reorderPlaylistSongs, removeSongFromPlaylist } from '@/app/actions/playlistActions';
 import { AddSongsSheet } from './AddSongsSheet';
 import { useLocale } from '@/context/LocaleContext';
+import { actionErrorMessage } from '@/lib/errors/actionError';
 
 export interface PlaylistItem {
     id: string;
@@ -157,7 +158,7 @@ export function PlaylistDetailClient({
             const result = await removeSongFromPlaylist(itemId);
             if (result.error) {
                 setItems(prev); // revert
-                toast.error(result.error);
+                toast.error(actionErrorMessage(result.error, t));
             }
         });
     };

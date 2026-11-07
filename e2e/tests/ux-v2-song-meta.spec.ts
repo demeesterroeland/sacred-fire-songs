@@ -79,5 +79,15 @@ test('the meta line expands into the full tag list', async ({ page }) => {
   await expect(toggle).toHaveAttribute('aria-expanded', 'false');
   await toggle.click();
   await expect(toggle).toHaveAttribute('aria-expanded', 'true');
-  await expect(page.getByTestId('song-meta-lines').getByRole('link').first()).toBeVisible();
+  const links = page.getByTestId('song-meta-lines').getByRole('link');
+  await expect(links.first()).toBeVisible();
+  // Validation 1: the expanded state is the link list only. Nothing is said twice, and links look clickable
+  // without hover (permanent underline).
+  const names = await links.allTextContents();
+  const text = (await page.getByTestId('song-meta-lines').first().innerText()).replace(/\s+/g, ' ');
+  for (const n of names) expect(text.split(n).length - 1, n).toBe(1);
+  expect(await links.first().evaluate((el) => getComputedStyle(el).textDecorationLine)).toContain('underline');
+  await toggle.click(); // the chevron collapses it again
+  await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  await expect(page.getByTestId('song-meta-lines').getByRole('link')).toHaveCount(0);
 });

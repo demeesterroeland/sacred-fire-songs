@@ -14,6 +14,7 @@ import { FOCUS_SEARCH_EVENT } from '@/lib/search/focusSearch';
 import { addRecentSearch, clearRecentSearches, removeRecentSearch } from '@/lib/search/history';
 import { useSearchSuggestions } from '@/hooks/useSearchSuggestions';
 import SearchSuggestions from '@/components/search/SearchSuggestions';
+import { SuggestionsPortal } from '@/components/search/SuggestionsSlot';
 
 export default function Header({ initialUser }: { initialUser?: AuthUser | null }) {
     const { t } = useLocale();
@@ -251,10 +252,12 @@ export default function Header({ initialUser }: { initialUser?: AuthUser | null 
                             aria-controls={suggestionsVisible ? 'search-suggestions' : undefined}
                             aria-describedby="search-suggestions-hint"
                             placeholder={t('songs.searchPlaceholder', { count: 200 })}
-                            className="w-full min-h-tap bg-surface-2 border border-line rounded-control py-2.5 pl-10 pr-14 text-body text-fg placeholder:text-fg-subtle focus:outline-none focus:ring-2 focus:ring-accent focus:border-line-strong transition-all relative z-10"
+                            className="w-full min-h-tap bg-surface-2 border border-line rounded-control py-2.5 pl-10 pr-14 text-body text-fg placeholder:text-fg-subtle transition-all relative z-10"
                         />
                         <span id="search-suggestions-hint" className="sr-only">{t('header.suggestionsHint')}</span>
                         <button
+                            // Tabbing from the field to this button leaves the field: close the suggestions (L4).
+                            onFocus={closeSuggestions}
                             onClick={() => {
                                 closeSuggestions();
                                 setSearchFiltersOpen(!searchFiltersOpen);
@@ -327,27 +330,30 @@ export default function Header({ initialUser }: { initialUser?: AuthUser | null 
                 </div>
             </div>
 
-            {/* Suggestions: recent searches + category chips (Story 6.1.29 / G7.1) */}
+            {/* Suggestions: recent searches + category chips (Story 6.1.29 / G7.1). Rendered into the slot at the
+                top of the main column: in the page flow, so it pushes the page down instead of covering it. */}
             {suggestionsVisible && (
-                <div
-                    id="search-suggestions"
-                    ref={suggestionsRef}
-                    onBlur={closeIfFocusLeaves}
-                    className="absolute inset-x-2 top-full z-50 mt-1 lg:inset-x-auto lg:left-[17rem] lg:w-[min(48rem,calc(100%-21rem))]"
-                >
-                    <SearchSuggestions
-                        recent={searchHistory}
-                        categories={categories}
-                        activeCategory={activeCategory}
-                        onSelectRecent={selectRecent}
-                        onRemoveRecent={removeFromHistory}
-                        onClearRecent={clearHistory}
-                        onToggleCategory={toggleCategory}
-                        onClose={closeSuggestionsFromPanel}
-                        onLeaveTop={() => inputRef.current?.focus()}
-                        className="max-h-[70dvh] overflow-y-auto"
-                    />
-                </div>
+                <SuggestionsPortal>
+                    <div
+                        id="search-suggestions"
+                        ref={suggestionsRef}
+                        onBlur={closeIfFocusLeaves}
+                        className="px-2 pb-2 pt-2 lg:px-6"
+                    >
+                        <SearchSuggestions
+                            recent={searchHistory}
+                            categories={categories}
+                            activeCategory={activeCategory}
+                            onSelectRecent={selectRecent}
+                            onRemoveRecent={removeFromHistory}
+                            onClearRecent={clearHistory}
+                            onToggleCategory={toggleCategory}
+                            onClose={closeSuggestionsFromPanel}
+                            onLeaveTop={() => inputRef.current?.focus()}
+                            className="max-h-[70dvh] max-w-3xl overflow-y-auto"
+                        />
+                    </div>
+                </SuggestionsPortal>
             )}
         </nav>
     );

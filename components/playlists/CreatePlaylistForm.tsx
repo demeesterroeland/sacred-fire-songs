@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { NEW_PLAYLIST_IS_PUBLIC, canCreatePlaylist, visibilityExplainKey } from '@/lib/playlists/visibility';
 import { useLocale } from '@/context/LocaleContext';
+import { actionErrorMessage } from '@/lib/errors/actionError';
 
 /** Client half of /library/playlists/add; the page guards auth on the server (#321). */
 export function CreatePlaylistForm() {
@@ -52,7 +53,7 @@ export function CreatePlaylistForm() {
             }
             if ('error' in result) {
                 submittingRef.current = false;
-                toast.error(result.error);
+                toast.error(actionErrorMessage(result.error, t));
             } else {
                 toast.success(t('playlists.add.created'));
                 router.push(`/library/playlists/${result.id}`);
@@ -83,7 +84,7 @@ export function CreatePlaylistForm() {
                     }}
                     placeholder={t('playlists.add.namePlaceholder')}
                     aria-label={t('playlists.add.namePlaceholder')}
-                    className="min-h-tap min-w-0 flex-1 border-b border-line-strong bg-transparent text-title font-bold text-fg outline-none transition-colors placeholder:text-fg-subtle focus:border-accent"
+                    className="field-underline min-h-tap min-w-0 flex-1 border-b border-line-strong bg-transparent text-title font-bold text-fg placeholder:text-fg-subtle"
                 />
             </div>
 
