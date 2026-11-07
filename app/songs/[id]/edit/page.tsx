@@ -56,7 +56,9 @@ export default function EditSongPage() {
         retry: 1
     });
 
-    if (isLoading) return <div className="p-8 text-gray-900 dark:text-white text-center">{t('common.loading')}</div>;
+    // Wait for auth too: the ownership check below needs the user, and rendering the form
+    // while auth is still resolving would flash the editor before "access denied".
+    if (isLoading || authLoading) return <div className="p-8 text-gray-900 dark:text-white text-center">{t('common.loading')}</div>;
     if (error || !song) {
         console.error("Fetch error:", error);
         return <div className="p-8 text-red-500 text-center">{t('song.edit.loadError')}</div>;
