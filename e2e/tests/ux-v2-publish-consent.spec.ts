@@ -112,7 +112,7 @@ test('the dialog names the take and the song and says guests can listen', async 
   const audienceId = await dialog.getByTestId('publish-audience').getAttribute('id');
   expect(describedBy.split(' ')).toContain(audienceId);
 
-  const publish = dialog.getByRole('button', { name: 'Publish Take' });
+  const publish = dialog.getByRole('button', { name: 'Publish Recording' });
   await expect(publish).toBeDisabled();
   for (const button of await dialog.getByRole('button').all()) {
     const box = await button.boundingBox();
@@ -137,7 +137,7 @@ test('a very long take name stays inside the dialog and Publish stays reachable'
   expect(box.y + box.height).toBeLessThanOrEqual(viewport.height + 0.5);
   expect(await dialog.evaluate((el) => el.scrollWidth <= el.clientWidth + 1)).toBe(true);
   await dialog.getByRole('checkbox').check();
-  await expect(dialog.getByRole('button', { name: 'Publish Take' })).toBeInViewport();
+  await expect(dialog.getByRole('button', { name: 'Publish Recording' })).toBeInViewport();
 });
 
 test('a take on a private song cannot be published until the song is public', async ({ page }) => {
@@ -149,18 +149,18 @@ test('a take on a private song cannot be published until the song is public', as
   await expect(audience).toContainText('private');
   await expect(audience).toContainText('public first');
   await expect(audience).not.toContainText('guests');
-  await expect(dialog.getByRole('button', { name: 'Publish Take' })).toHaveCount(0);
+  await expect(dialog.getByRole('button', { name: 'Publish Recording' })).toHaveCount(0);
   await expect(dialog.getByRole('checkbox')).toHaveCount(0);
 
   // The owner makes the song public from here, then can publish the take.
   await dialog.getByRole('button', { name: 'Make song public and continue' }).click();
   await expect(audience).toHaveText(GUESTS, { timeout: 10_000 });
-  await expect(dialog.getByRole('button', { name: 'Publish Take' })).toBeDisabled();
+  await expect(dialog.getByRole('button', { name: 'Publish Recording' })).toBeDisabled();
   expect(await takeRow(IDS.privateTake)).toEqual({ is_public: false, singer_consent_confirmed: false });
 
   // Ticking the box now publishes the take on the song that has just been made public.
   await dialog.getByRole('checkbox').check();
-  await dialog.getByRole('button', { name: 'Publish Take' }).click();
+  await dialog.getByRole('button', { name: 'Publish Recording' }).click();
   await expect(page.getByTestId('publish-dialog')).toHaveCount(0, { timeout: 10_000 });
   await expect.poll(() => takeRow(IDS.privateTake)).toEqual({ is_public: true, singer_consent_confirmed: true });
 
@@ -174,7 +174,7 @@ test('a take on a private song cannot be published until the song is public', as
 test('confirming the singer consent publishes the take', async ({ page }) => {
   const { dialog } = await openPublishDialog(page, IDS.song, TAKE);
   await dialog.getByRole('checkbox').check();
-  await dialog.getByRole('button', { name: 'Publish Take' }).click();
+  await dialog.getByRole('button', { name: 'Publish Recording' }).click();
   await expect(page.getByTestId('publish-dialog')).toHaveCount(0, { timeout: 10_000 });
   await expect.poll(() => takeRow()).toEqual({ is_public: true, singer_consent_confirmed: true });
 });

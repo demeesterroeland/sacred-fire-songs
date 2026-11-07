@@ -42,7 +42,7 @@ async function openRecorder(page: Page) {
 
 test('count-in is optional, in words, a 44 px target, and states the limit @ux-v2', async ({ page }) => {
   await openRecorder(page);
-  await expect(page.getByText('Maximum take length: 3 minutes')).toBeVisible();
+  await expect(page.getByText('Maximum recording length: 3 minutes')).toBeVisible();
   const toggle = page.getByRole('switch', { name: 'Count in 3-2-1 before recording' });
   await expect(toggle).toBeChecked();
   const box = await toggle.locator('xpath=ancestor::label').boundingBox();
@@ -116,7 +116,7 @@ test('time left shows in the last minute; auto-stop leads to a review with Save 
     }).observe(document.body, { subtree: true, childList: true, characterData: true });
   });
   await page.locator('button[title="Start recording"]').click();
-  await expect(page.getByText('Review your take')).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByText('Review your recording')).toBeVisible({ timeout: 10_000 });
   await expect(page.getByText('03:00')).toBeVisible();
 
   const left = await page.evaluate(() => (window as unknown as { __left: string[] }).__left);
@@ -125,7 +125,7 @@ test('time left shows in the last minute; auto-stop leads to a review with Save 
   expect(left[0]).toMatch(/^(1:00|0:\d\d) left$/);
 
   // Review: Save is the full-width primary, Discard a text button below it, both 44 px high.
-  const save = page.getByRole('button', { name: 'Save Take' });
+  const save = page.getByRole('button', { name: 'Save Recording' });
   const discard = page.getByRole('button', { name: 'Discard' });
   const [s, d] = [await save.boundingBox(), await discard.boundingBox()];
   expect(s!.width).toBeGreaterThan(280);

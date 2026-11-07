@@ -1,5 +1,5 @@
 import { type AuthUser } from '@/hooks/useAuth';
-import { LogOut, ChevronDown, Settings, User, Heart, FileText, ListMusic, Sun, Moon, Monitor, SlidersHorizontal, Clock, Globe, ShieldCheck, Users } from 'lucide-react';
+import { LogOut, ChevronDown, Settings, Heart, FileText, ListMusic, Sun, Moon, Monitor, SlidersHorizontal, Clock, Globe, ShieldCheck, Users } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';

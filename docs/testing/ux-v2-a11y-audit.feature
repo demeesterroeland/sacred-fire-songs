@@ -69,8 +69,8 @@ Feature: UX v2 accessibility audit of the song page and the Practice panel
   @e2e
   Scenario: The delete confirmation is a real dialog
     Given the Practice panel is open on the Record tab with a take
-    When the user chooses Delete take from the take's actions sheet
-    Then an alert dialog named "Delete take?" opens and focus is on Cancel
+    When the user chooses Delete recording from the take's actions sheet
+    Then an alert dialog named "Delete recording?" opens and focus is on Cancel
     And Tab and Shift+Tab move between Cancel and Yes, Delete and never leave the dialog
     When the user presses Escape
     Then only the confirmation closes, the Practice panel stays open and the take is kept

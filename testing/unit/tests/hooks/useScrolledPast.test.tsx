@@ -65,6 +65,26 @@ describe('useScrolledPast', () => {
     expect(screen.getByTestId('past').textContent).toBe('false');
   });
 
+  it('observes an element that mounts after the hook (the song page shows a skeleton first)', () => {
+    vi.stubGlobal('IntersectionObserver', FakeIO);
+    function Late({ show }: { show: boolean }) {
+      const ref = useRef<HTMLHeadingElement>(null);
+      const past = useScrolledPast(ref, 56);
+      return (
+        <>
+          {show && <h1 ref={ref}>Title</h1>}
+          <output data-testid="past">{String(past)}</output>
+        </>
+      );
+    }
+    const { rerender } = render(<Late show={false} />);
+    expect(observed).toBeUndefined();
+    rerender(<Late show />);
+    expect(observed?.tagName).toBe('H1');
+    act(() => callback!([{ isIntersecting: false, boundingClientRect: rect(10) }]));
+    expect(screen.getByTestId('past').textContent).toBe('true');
+  });
+
   it('stays false without IntersectionObserver (the full title is simply always in the page)', () => {
     vi.stubGlobal('IntersectionObserver', undefined);
     render(<Probe />);

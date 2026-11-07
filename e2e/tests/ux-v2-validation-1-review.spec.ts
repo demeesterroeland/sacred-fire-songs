@@ -1,4 +1,5 @@
 import { test, expect, type Browser, type Page } from '@playwright/test';
+import { songMenuButton } from '../fixtures/songMenu';
 import AxeBuilder from '@axe-core/playwright';
 import pg from 'pg';
 import { ROLES } from '../fixtures/roles';
@@ -225,12 +226,11 @@ test('H2 phone: lyrics hidden behind the Practice and bottom bars show ▶; lyri
   // The window is 50 px taller than the text: it fits the window, but the last lines sit behind the bars.
   await page.setViewportSize({ width: 390, height: Math.ceil(bottom + 50) });
   await expect(toggle(page)).toBeVisible();
-  await expect(page.getByTestId('reader-tools-button')).toBeVisible();
+  await expect(songMenuButton(page)).toBeVisible(); // the ⋮ menu is always there
 
   // With room for the text AND the bars: nothing to scroll.
   await page.setViewportSize({ width: 390, height: Math.ceil(bottom + bars + 20) });
   await expect(toggle(page)).toHaveCount(0);
-  await expect(page.getByTestId('reader-tools-button')).toHaveCount(0);
   await ctx.close();
 });
 
@@ -244,34 +244,15 @@ test('H2 desktop: padding below the text is not lyrics; text below the window sh
   // The whole text is visible with 30 px to spare (the 48 px of padding under it would have counted as lyrics).
   await page.setViewportSize({ width: 1280, height: Math.ceil(chromeTop + bottom + 30) });
   await expect(toggle(page)).toHaveCount(0);
-  await expect(page.getByTestId('reader-tools-button')).toHaveCount(0);
 
   // 60 px of text now run below the window.
   await page.setViewportSize({ width: 1280, height: Math.ceil(chromeTop + bottom - 60) });
   await expect(toggle(page)).toBeVisible();
-  await expect(page.getByTestId('reader-tools-button')).toBeVisible();
   await ctx.close();
 });
 
-// ── M1 ─────────────────────────────────────────────────────────────────────────────────────────────────────
-test('M1: the tools sheet closes when the song starts to fit, and focus goes to A+, not <body>', async ({ browser }) => {
-  const ctx = await context(browser, 'phone');
-  const page = await ctx.newPage();
-  await openFixture(page, 390, 1400);
-  const { bottom } = await textBottom(page);
-  await page.setViewportSize({ width: 390, height: Math.ceil(bottom - 200) }); // lyrics run below the fold
-  await page.getByTestId('reader-tools-button').click();
-  const sheet = page.getByRole('dialog', { name: 'Reading tools' });
-  await expect(sheet).toBeVisible();
-
-  await page.setViewportSize({ width: 390, height: 1400 }); // the song fits now
-  await expect(sheet).toHaveCount(0); // no sheet with nothing but "Close"
-  await expect(page.getByTestId('reader-tools-button')).toHaveCount(0);
-  await expect(page.getByRole('button', { name: 'Larger text' })).toBeFocused();
-  await ctx.close();
-});
-
-for (const which of ['autoscroll-toggle', 'reader-tools-button'] as const) {
+// ── M1 ── (the ⋮ menu is never empty now (Share and the Screen stays on switch), so it no longer closes by itself)
+for (const which of ['autoscroll-toggle'] as const) {
   test(`M1: focus on ${which} moves to A+ when it goes away on resize`, async ({ browser }) => {
     const ctx = await context(browser, 'phone');
     const page = await ctx.newPage();

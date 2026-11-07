@@ -90,9 +90,9 @@ test('sharing a take on a private own song explains both effects and changes not
 
   const confirmation = dialog.getByTestId('share-private-confirm');
   await expect(confirmation).toBeVisible({ timeout: 15_000 });
-  await expect(dialog.getByRole('heading', { name: 'Make the song public to share this take?' })).toBeVisible();
+  await expect(dialog.getByRole('heading', { name: 'Make the song public to share this recording?' })).toBeVisible();
   await expect(confirmation).toContainText('The song lyrics become public');
-  await expect(confirmation).toContainText(`The take "${TAKE}" is shared with the members you pick next`);
+  await expect(confirmation).toContainText(`The recording "${TAKE}" is shared with the members you pick next`);
   await expect(confirmation).toContainText('Nothing changes until you confirm');
   await expect(dialog.getByPlaceholder(/Search user/)).toHaveCount(0);
   expect(await songIsPublic()).toBe(false);

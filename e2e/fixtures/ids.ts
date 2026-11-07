@@ -140,3 +140,13 @@ export const VALIDATION_1_REVIEW_FIXTURE_IDS = {
   original: 'eeeeeeee-3700-4000-a000-000000000002',
   labels: 'eeeeeeee-3700-4000-a000-000000000003',
 } as const;
+
+/**
+ * UX v2 validation round 2: a public song with a very long title, an Original with chords and a lyrics-only
+ * Simplified that has section labels ([Chorus], [Bridge], [Coda]). Removed by e2e/global-teardown.ts.
+ */
+export const VALIDATION_2_FIXTURE_IDS = {
+  song: 'eeeeeeee-3620-4000-a000-000000000001',
+  original: 'eeeeeeee-3620-4000-a000-000000000002',
+  simplified: 'eeeeeeee-3620-4000-a000-000000000003',
+} as const;

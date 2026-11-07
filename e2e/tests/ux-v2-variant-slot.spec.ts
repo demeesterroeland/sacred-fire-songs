@@ -229,7 +229,7 @@ test.describe('a take in progress survives a tap on another version', () => {
     const chooser = page.waitForEvent('filechooser');
     await page.locator('text=Click to select an audio file').click();
     await (await chooser).setFiles('e2e/fixtures/dummy-audio.wav');
-    const nameInput = page.locator('input[placeholder="Take Name (e.g. Take 1)"]');
+    const nameInput = page.locator('input[placeholder="Recording Name (e.g. Recording 1)"]');
     await nameInput.fill('E2E keep me');
 
     // Close the drawer (recording would keep going behind it), then tap the other version.
@@ -238,7 +238,7 @@ test.describe('a take in progress survives a tap on another version', () => {
     await control.getByRole('radio', { name: 'Simplified' }).click();
 
     // Refused: still the first version, a toast says why, the drawer is back on Record with the take intact.
-    await expect(page.getByText('Finish or discard your take before switching version.')).toBeVisible();
+    await expect(page.getByText('Finish or discard your recording before switching version.')).toBeVisible();
     await expect(control.getByRole('radio', { name: 'Original' })).toBeChecked();
     await expect(page.getByText('Original verse for the variant slot')).toBeVisible();
     await drawerSettled(page, true);
@@ -314,8 +314,8 @@ test.describe('a playing take does not outlive its version', () => {
     const name = `E2E Practice - ${Date.now()}`;
     let storagePath: string | null = null;
     try {
-      await page.locator('input[placeholder="Take Name (e.g. Take 1)"]').fill(name);
-      await page.locator('button:has-text("Save Take")').click();
+      await page.locator('input[placeholder="Recording Name (e.g. Recording 1)"]').fill(name);
+      await page.locator('button:has-text("Save Recording")').click();
       const take = page.locator(`h4:has-text("${name}")`);
       await expect(take).toBeVisible({ timeout: 15_000 });
       storagePath = await takeStoragePath(name);
@@ -350,7 +350,7 @@ test.describe('a playing take does not outlive its version', () => {
         await expect(leftover).toBeVisible({ timeout: 15_000 });
         const row = leftover.locator('xpath=ancestor::div[contains(@class, "group")][1]');
         await row.locator('button[aria-label="More actions"]').click();
-        await page.getByRole('dialog').getByRole('button', { name: 'Delete take', exact: true }).click();
+        await page.getByRole('dialog').getByRole('button', { name: 'Delete recording', exact: true }).click();
         await page.getByRole('button', { name: 'Yes, delete' }).click();
         await expect(leftover).toHaveCount(0, { timeout: 10_000 });
       }

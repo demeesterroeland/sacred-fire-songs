@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect, useMemo } from 'react';
-import { X, Search, ChevronDown } from 'lucide-react';
+import { X, Search } from 'lucide-react';
 import { TaxonomyNode } from '@/lib/taxonomyUtils';
 import { Chip } from '@/components/ui/chip';
 import { categoryDisplayName } from '@/lib/taxonomy/categoryName';
@@ -43,11 +43,6 @@ export default function TagSelector({
   const inputRef = useRef<HTMLInputElement>(null);
 
   const { categories, grouped } = useTaxonomy();
-
-  // Selected category objects
-  const selectedTagObjects = useMemo(() => {
-    return categories.filter((c) => tags.includes(c.slug) || tags.includes(c.id));
-  }, [categories, tags]);
 
   // Flattened options for search filter
   const filteredGrouped = useMemo(() => {

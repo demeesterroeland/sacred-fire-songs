@@ -107,7 +107,7 @@ describe('count-in toggle', () => {
     setup();
     const toggle = screen.getByRole('switch', { name: 'Count in 3-2-1 before recording' }) as HTMLInputElement;
     expect(toggle.checked).toBe(true);
-    expect(screen.getByText('Maximum take length: 3 minutes')).toBeTruthy();
+    expect(screen.getByText('Maximum recording length: 3 minutes')).toBeTruthy();
   });
 
   it('on: 3-2-1 is announced, then recording starts', async () => {
@@ -239,7 +239,7 @@ describe('remaining time', () => {
     fireEvent.click(screen.getByRole('switch'));
     await press('Start recording');
     for (let i = 0; i < 182; i++) await tick(1000); // second by second, like a real clock
-    expect(screen.getByText('Review your take')).toBeTruthy();
+    expect(screen.getByText('Review your recording')).toBeTruthy();
     expect(screen.getByText('03:00')).toBeTruthy();
   });
 });
@@ -255,7 +255,7 @@ describe('review step', () => {
 
   it('Save is the single full-width primary, Discard a text button below it', async () => {
     await toReview();
-    const save = screen.getByRole('button', { name: 'Save Take' });
+    const save = screen.getByRole('button', { name: 'Save Recording' });
     const discard = screen.getByRole('button', { name: 'Discard' });
     expect(save.className).toContain('w-full');
     expect(save.className).toContain('bg-accent');
@@ -356,7 +356,7 @@ describe('discard during recording', () => {
     expect(recorder.ondataavailable).toBeNull();
     expect(URL.createObjectURL).not.toHaveBeenCalled();
     expect(screen.getByText('Ready to record')).toBeTruthy();
-    expect(screen.queryByText('Review your take')).toBeNull();
+    expect(screen.queryByText('Review your recording')).toBeNull();
   });
 
   it('revokes the old blob URL when the take is discarded or replaced', async () => {

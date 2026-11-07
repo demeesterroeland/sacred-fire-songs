@@ -16,7 +16,7 @@ Feature: Recorder level meter, count-in and remaining time
   @unit
   Scenario: The limit is stated before recording
     Given the English messages
-    Then the recorder says "Maximum take length: 3 minutes"
+    Then the recorder says "Maximum recording length: 3 minutes"
 
   @unit
   Scenario: Count-in is optional

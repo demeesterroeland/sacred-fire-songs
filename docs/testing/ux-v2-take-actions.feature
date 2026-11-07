@@ -11,13 +11,13 @@ Feature: Take actions in a grouped bottom sheet
   Scenario: My own take groups its actions with Delete alone at the bottom
     Given a take that I own
     When I list the actions of the take
-    Then the action groups are "Play, Edit take name, Download take", "Share, Singer Attribution, Make Public, Copy link" and "Delete take"
+    Then the action groups are "Play, Edit recording name, Download recording", "Share, Singer Attribution, Make Public, Copy link" and "Delete recording"
 
   @unit
   Scenario: Delete is never in the same group as Share
     Given a take that I own
     When I list the actions of the take
-    Then "Delete take" is alone in the last group
+    Then "Delete recording" is alone in the last group
 
   @unit
   Scenario: A take shared with me only offers Play
@@ -39,7 +39,7 @@ Feature: Take actions in a grouped bottom sheet
   Scenario: Grouped actions
     Given a member with a take on a song
     When they tap the actions button of the take on a phone
-    Then a bottom sheet opens with "Delete take" in its own group at the bottom
+    Then a bottom sheet opens with "Delete recording" in its own group at the bottom
     And every action row is at least 44 px tall
     And the sheet closes on a swipe down, and on choosing an action
-    And "Delete take" still asks for confirmation
+    And "Delete recording" still asks for confirmation

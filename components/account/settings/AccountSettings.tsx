@@ -3,23 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { User } from "@supabase/supabase-js";
-import {
-  User as UserIcon,
-  Settings,
-  Lock,
-  Shield,
-  SlidersHorizontal,
-  Mail,
-  LayoutDashboard,
-  Compass,
-  Library,
-  ListMusic,
-  PlusCircle,
-  Camera,
-  LogOut,
-  Download,
-  Flame
-} from "lucide-react";
+import { User as UserIcon, Lock, Shield, SlidersHorizontal } from "lucide-react";
 import ProfileSettings from "@/components/account/settings/ProfileSettings";
 import SecuritySettings from "@/components/account/settings/SecuritySettings";
 import PrivacySettings from "@/components/account/settings/PrivacySettings";

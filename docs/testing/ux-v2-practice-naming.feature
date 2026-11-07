@@ -16,11 +16,11 @@ Feature: UX v2 one name for the rehearsal feature
     And the tabs read "Listen" and "Record"
 
   @unit
-  Scenario: Takes, badge, smart playlist and guest card use the same vocabulary
+  Scenario: Recordings, badge, smart playlist and guest card use the same vocabulary
     Given the English messages
-    Then the list heading reads "My takes"
-    And the song badge reads "Takes"
-    And the smart playlist reads "Your takes"
+    Then the list heading reads "My recordings"
+    And the song badge reads "Recordings"
+    And the smart playlist reads "Your recordings"
     And the guest card reads "Sign in to record"
 
   @unit
@@ -30,9 +30,9 @@ Feature: UX v2 one name for the rehearsal feature
     And no English string contains "Rehearsal Space", "Voice Recorder", "Your Recordings" or "Personal Audio Recorder"
 
   @unit
-  Scenario: The recorder, dialogs and e-mail call the audio item a take
+  Scenario: The recorder, dialogs and e-mail call the audio item a recording
     Given the English messages
-    Then the save button reads "Save Take"
-    And the delete confirmation reads "Delete take?"
-    And the shared-take e-mail subject mentions a practice take
-    And the mini-player source groups are headed by the Listen tab and the My takes list
+    Then the save button reads "Save Recording"
+    And the delete confirmation reads "Delete recording?"
+    And the shared-recording e-mail subject mentions a practice recording
+    And the mini-player source groups are headed by the Listen tab and the My recordings list

@@ -41,7 +41,7 @@ Then('the feature is called {string} in every place', function (name: string) {
   assert.equal(en['practice.title' as keyof typeof en], name);
   assert.ok(read('app/songs/[id]/page.tsx').includes("t('practice.title')"), 'song menu');
   assert.ok(read('components/song/RehearsalDrawer.tsx').includes("t('practice.title')"), 'drawer');
-  assert.equal(en['librarySummary.recordings.title' as keyof typeof en], 'Your takes');
+  assert.equal(en['librarySummary.recordings.title' as keyof typeof en], 'Your recordings');
 });
 
 Then('the tabs read {string} and {string}', function (listen: string, record: string) {
@@ -78,10 +78,10 @@ Then('the save button reads {string}', (v: string) => assert.equal((en as Record
 Then('the delete confirmation reads {string}', (v: string) =>
   assert.equal((en as Record<string, string>)['rehearsal.recording.delete.confirmTitle'], v),
 );
-Then('the shared-take e-mail subject mentions a practice take', function () {
-  assert.match((en as Record<string, string>)['email.recordingShared.subject'], /practice take/);
+Then('the shared-recording e-mail subject mentions a practice recording', function () {
+  assert.match((en as Record<string, string>)['email.recordingShared.subject'], /practice recording/);
 });
-Then('the mini-player source groups are headed by the Listen tab and the My takes list', function () {
+Then('the mini-player source groups are headed by the Listen tab and the My recordings list', function () {
   const drawer = read('components/song/RehearsalDrawer.tsx');
   assert.ok(!drawer.includes("t('rehearsal.reference.tracks')"), 'old Reference Tracks heading');
   assert.match(drawer, /DropdownMenuLabel[^>]*>\{t\('practice\.tab\.listen'\)\}/);

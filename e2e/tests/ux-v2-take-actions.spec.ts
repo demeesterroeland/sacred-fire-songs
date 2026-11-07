@@ -99,18 +99,18 @@ test('grouped actions: Delete sits alone at the bottom and every row is at least
   // The fixture has no audio file: Play says why it is disabled, and so does Download.
   await expect(sheet.getByRole('button')).toHaveText([
     'Audio file missing or corrupted',
-    'Edit take name',
-    'Download take',
+    'Edit recording name',
+    'Download recording',
     'Share',
     'Singer Attribution',
     'Make Public',
     'Copy link',
-    'Delete take',
+    'Delete recording',
   ]);
 
   const groups = sheet.locator('[role="group"]');
   await expect(groups).toHaveCount(3);
-  await expect(groups.nth(2).getByRole('button')).toHaveText(['Delete take']);
+  await expect(groups.nth(2).getByRole('button')).toHaveText(['Delete recording']);
   await expect(sheet.getByRole('separator')).toHaveCount(2);
 
   // Every row >= 44 px; Delete is in the danger colour AND says so in words.
@@ -119,7 +119,7 @@ test('grouped actions: Delete sits alone at the bottom and every row is at least
     expect(box.height, await button.innerText()).toBeGreaterThanOrEqual(TAP);
   }
   const share = sheet.getByRole('button', { name: 'Share', exact: true });
-  const del = sheet.getByRole('button', { name: 'Delete take', exact: true });
+  const del = sheet.getByRole('button', { name: 'Delete recording', exact: true });
   const color = (l: typeof del) => l.evaluate((el) => getComputedStyle(el).color);
   expect(await color(del)).not.toBe(await color(share));
 
@@ -154,15 +154,15 @@ test('the sheet closes on a swipe down and on Escape', async ({ page }) => {
 test('choosing Share closes the sheet and opens the share dialog', async ({ page }) => {
   const { sheet } = await openActions(page);
   await sheet.getByRole('button', { name: 'Share', exact: true }).click();
-  await expect(sheets(page).filter({ hasText: 'Share take' })).toBeVisible({ timeout: 10_000 });
-  await expect(page.getByRole('button', { name: 'Delete take' })).toHaveCount(0);
+  await expect(sheets(page).filter({ hasText: 'Share recording' })).toBeVisible({ timeout: 10_000 });
+  await expect(page.getByRole('button', { name: 'Delete recording' })).toHaveCount(0);
 });
 
-test('choosing Edit take name closes the sheet and focuses the rename field', async ({ page }) => {
+test('choosing Edit recording name closes the sheet and focuses the rename field', async ({ page }) => {
   const { sheet } = await openActions(page);
-  await sheet.getByRole('button', { name: 'Edit take name', exact: true }).click();
+  await sheet.getByRole('button', { name: 'Edit recording name', exact: true }).click();
   await expect(sheets(page)).toHaveCount(0);
-  const input = page.locator('input[aria-label="Edit take name"]');
+  const input = page.locator('input[aria-label="Edit recording name"]');
   await expect(input).toBeFocused();
   await page.keyboard.press('Escape'); // leave the name unchanged
   // Escape ends the edit only: the Practice panel stays open (Story 6.1.34 / #418).
@@ -173,10 +173,10 @@ test('choosing Edit take name closes the sheet and focuses the rename field', as
 
 test('Delete still asks for confirmation; cancelling keeps the take', async ({ page }) => {
   const { row, sheet } = await openActions(page);
-  await sheet.getByRole('button', { name: 'Delete take', exact: true }).click();
+  await sheet.getByRole('button', { name: 'Delete recording', exact: true }).click();
   await expect(sheets(page)).toHaveCount(0);
-  await expect(page.getByText('Delete take?')).toBeVisible();
+  await expect(page.getByText('Delete recording?')).toBeVisible();
   await page.getByRole('button', { name: 'Cancel' }).click();
-  await expect(page.getByText('Delete take?')).toHaveCount(0);
+  await expect(page.getByText('Delete recording?')).toHaveCount(0);
   await expect(row).toHaveCount(1);
 });
