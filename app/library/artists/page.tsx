@@ -1,20 +1,17 @@
 import { Mic2 } from 'lucide-react';
 import { fetchArtistsServer } from '@/lib/songs/serverQueries';
+import { getServerT } from '@/lib/i18n/server';
+import { LibrarySubpageHeading } from '@/components/library/LibrarySubpageHeading';
 import ArtistsPageContent from './ArtistsPageContent';
 
 // Aggregates all songs visible to the user (RLS handles visibility)
 export default async function ArtistsPage() {
+    const t = await getServerT();
     const artists = await fetchArtistsServer();
 
     return (
         <div>
-            <div className="flex items-center gap-2 mb-4">
-                <Mic2 className="w-4 h-4 text-gray-500" />
-                <h2 className="text-sm font-semibold text-fg-muted">
-                    Artists
-                </h2>
-                <span className="text-xs text-gray-600 ml-1">({artists.length})</span>
-            </div>
+            <LibrarySubpageHeading icon={Mic2} title={t('artists.pageTitle')} count={artists.length} />
             <ArtistsPageContent artists={artists} />
         </div>
     );

@@ -4,6 +4,7 @@ import { getServerT } from '@/lib/i18n/server';
 import { getSharedWithMe } from '@/lib/notifications/serverQueries';
 import { SharedWithMeList } from '@/components/library/SharedWithMeList';
 import GuestGate from '@/components/common/GuestGate';
+import { LibrarySubpageHeading } from '@/components/library/LibrarySubpageHeading';
 
 /** Story 6.1.19 / G4.6 (#403), UXD-3: takes others shared with me. Members only. */
 export default async function SharedWithMePage() {
@@ -17,11 +18,7 @@ export default async function SharedWithMePage() {
 
     return (
         <div>
-            <div className="flex items-center gap-2 mb-4">
-                <Users className="w-4 h-4 text-fg-subtle" aria-hidden />
-                <h1 className="text-meta font-semibold text-fg-muted">{t('sharedWithMe.title')}</h1>
-                <span className="text-caption text-fg-subtle ml-1">({items.length})</span>
-            </div>
+            <LibrarySubpageHeading icon={Users} title={t('sharedWithMe.title')} count={items.length} />
             <SharedWithMeList items={items} />
         </div>
     );

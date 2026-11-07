@@ -30,7 +30,7 @@ const REMOVED_KEYS = [
   'miniPlayer.source.userRecordings',
 ] as const;
 
-// User-visible copy where the audio item is a noun: "take", never "recording" (UXA-008).
+// User-visible copy where the audio item is a noun: "recording", never "take" (validation 2, item 8; it reverses UXA-008).
 const TAKE_NOUN_KEYS = [
   'miniPlayer.source.userRecording',
   'recorder.btn.save',
@@ -57,22 +57,22 @@ describe('Practice naming (en)', () => {
     expect(en['practice.title']).toBe('Practice');
     expect(en['practice.tab.listen']).toBe('Listen');
     expect(en['practice.tab.record']).toBe('Record');
-    expect(en['practice.takes.mine']).toBe('My takes');
-    expect(en['song.technical.takes']).toBe('Takes');
-    expect(en['librarySummary.recordings.title']).toBe('Your takes');
+    expect(en['practice.takes.mine']).toBe('My recordings');
+    expect(en['song.technical.takes']).toBe('Recordings');
+    expect(en['librarySummary.recordings.title']).toBe('Your recordings');
     expect(en['guestGate.recorder.title']).toBe('Sign in to record');
     expect(en['miniPlayer.expand']).toBe('Expand Practice');
   });
 
-  it('uses \"take\" for the audio item in every rename-listed string', () => {
+  it('uses \"recording\" for the audio item in every rename-listed string, never \"take\"', () => {
     for (const key of TAKE_NOUN_KEYS) {
-      expect(en[key], key).toMatch(/take/i);
-      expect(en[key].replace(/\{[^}]+\}/g, ''), key).not.toMatch(/recording|rehearsal/i);
+      expect(en[key], key).toMatch(/recording/i);
+      expect(en[key].replace(/\{[^}]+\}/g, ''), key).not.toMatch(/\btakes?\b|rehearsal/i);
     }
-    expect(en['miniPlayer.source.userRecording']).toBe('My take');
-    expect(en['recorder.btn.save']).toBe('Save Take');
-    expect(en['rehearsal.recording.delete.confirmTitle']).toBe('Delete take?');
-    expect(en['recording.sharing.privateSongPrompt.effectTake']).toContain('take');
+    expect(en['miniPlayer.source.userRecording']).toBe('My recording');
+    expect(en['recorder.btn.save']).toBe('Save Recording');
+    expect(en['rehearsal.recording.delete.confirmTitle']).toBe('Delete recording?');
+    expect(en['recording.sharing.privateSongPrompt.effectTake']).toContain('recording');
   });
 
   it('keeps none of the six legacy names in any English string', () => {
@@ -121,13 +121,13 @@ describe('Practice naming (usage)', () => {
 });
 
 describe('Practice naming (locale details)', () => {
-  it('ru uses дубль for takes', () => {
-    expect(dict('ru')['practice.takes.mine']).toBe('Мои дубли');
+  it('ru uses запись for recordings', () => {
+    expect(dict('ru')['practice.takes.mine']).toBe('Мои записи');
   });
 
-  it('qu uses one form (Tomakuna) for takes, never Tomaykuna', () => {
-    for (const [key, value] of Object.entries(dict('qu'))) expect(value, key).not.toMatch(/Tomaykuna/i);
-    expect(dict('qu')['practice.takes.mine']).toBe('Tomakuna');
+  it('qu uses one form (Grabaciónkuna) for recordings, never the old Toma forms', () => {
+    for (const [key, value] of Object.entries(dict('qu'))) expect(value, key).not.toMatch(/\bToma(kuna|ykikuna)?\b/i);
+    expect(dict('qu')['practice.takes.mine']).toBe('Grabaciónkuna');
   });
 
   it('every locale heads the mini-player source groups with the tab and list names', () => {

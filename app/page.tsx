@@ -18,7 +18,7 @@ export default async function Home() {
   const recentlyAdded = user ? [] : await getRecentlyAddedSongs();
 
   return (
-    <main className="flex-1 min-h-0 bg-bg overflow-y-auto">
+    <div className="flex-1 min-h-0 bg-bg overflow-y-auto">
       <div className="p-4 md:p-8 lg:p-10 space-y-10 max-w-7xl mx-auto">
         {/* Update last_seen_at after render so "new songs" count uses the old value */}
         {user && <UpdateLastSeen />}
@@ -50,6 +50,6 @@ export default async function Home() {
           <CategoryGrid />
         </section>
       </div>
-    </main>
+    </div>
   );
 }

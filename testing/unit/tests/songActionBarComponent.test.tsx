@@ -32,7 +32,7 @@ describe('SongActionBar', () => {
     expect(bar.getAttribute('role')).toBe('toolbar');
     expect(screen.getByTestId('song-action-practice').textContent).toContain('Practice');
     expect(screen.getByTestId('song-action-playlist').textContent).toContain('Playlist');
-    expect(screen.getByTestId('song-action-favorite').textContent).toContain('Like');
+    expect(screen.getByTestId('song-action-favorite').textContent).toContain('Favorite');
   });
 
   it('Practice calls onPractice (members and guests alike)', () => {
@@ -44,7 +44,7 @@ describe('SongActionBar', () => {
   it('the heart calls onToggleFavorite and reflects the state in words and aria', () => {
     const p = setup({ isFavorite: true });
     const heart = screen.getByTestId('song-action-favorite');
-    expect(heart.textContent).toContain('Liked');
+    expect(heart.textContent).toContain('In Favorites');
     expect(heart.getAttribute('aria-pressed')).toBe('true');
     expect(heart.getAttribute('aria-label')).toBeNull(); // the visible word is the name (WCAG 2.5.3)
     fireEvent.click(heart);

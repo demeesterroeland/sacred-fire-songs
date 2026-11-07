@@ -48,7 +48,7 @@ describe('CategoryGrid', () => {
 
   it('shows tags as plain text links with a grey count, not coloured chips', () => {
     render(<CategoryGrid />);
-    const fire = screen.getByRole('link', { name: /Fire\s*1/ });
+    const fire = screen.getByRole('link', { name: /Fire\s*\(1\)/ });
     expect(fire.getAttribute('href')).toBe('/songs?tag=fire');
     expect(fire.querySelector('[data-testid="tag-count"]')?.className).toContain('text-fg-subtle');
     expect(fire.className).not.toMatch(/rounded-(full|pill)|bg-/);

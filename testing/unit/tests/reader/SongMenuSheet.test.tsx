@@ -1,8 +1,9 @@
 // @vitest-environment jsdom
-// Story 6.1.10 / G2.5 (#394): the overflow sheet with Transpose, auto-scroll speed and stay-awake (L3, English copy).
+// Story 6.1.10 / G2.5 (#394) + validation 2, item 11: the ONE song menu: transpose, auto-scroll speed, the screen-stays-on
+// switch, and the song actions (Share, Edit, Delete) (L3, English copy).
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import { ReadingToolsSheet } from '@/components/song/ReadingToolsSheet';
+import { SongMenuSheet } from '@/components/song/SongMenuSheet';
 import { DICTIONARIES } from '@/lib/i18n';
 
 vi.mock('@/context/LocaleContext', () => ({
@@ -16,23 +17,28 @@ vi.mock('@/context/LocaleContext', () => ({
 
 afterEach(cleanup);
 
-function setup(over: Partial<React.ComponentProps<typeof ReadingToolsSheet>> = {}) {
-  const props: React.ComponentProps<typeof ReadingToolsSheet> = {
+function setup(over: Partial<React.ComponentProps<typeof SongMenuSheet>> = {}) {
+  const props: React.ComponentProps<typeof SongMenuSheet> = {
     open: true,
     onOpenChange: vi.fn(),
     transpose: { semitones: 0, originalKey: 'E', onShift: vi.fn(), onReset: vi.fn() },
+    title: 'River Song',
+    description: 'by Ayla',
+    actions: { onShare: vi.fn() },
     speed: 3,
     onSpeed: vi.fn(),
     scrolling: false,
     onToggleScroll: vi.fn(),
-    awake: false,
+    keepAwake: true,
+    onKeepAwakeChange: vi.fn(),
+    awakeSupported: true,
     ...over,
   };
-  render(<ReadingToolsSheet {...props} />);
+  render(<SongMenuSheet {...props} />);
   return props;
 }
 
-describe('ReadingToolsSheet', () => {
+describe('SongMenuSheet', () => {
   it('has no Auto-scroll section when the song fits the screen (no toggle given)', () => {
     setup({ onToggleScroll: undefined });
     expect(screen.queryByTestId('tools-scroll-toggle')).toBeNull();
@@ -41,9 +47,16 @@ describe('ReadingToolsSheet', () => {
     expect(screen.getByTestId('transpose-group')).toBeTruthy(); // transpose is unaffected
   });
 
-  it('is a dialog titled Reading tools', () => {
+  it('is a dialog named after the song, with the author under it', () => {
     setup();
-    expect(screen.getByRole('dialog', { name: 'Reading tools' })).toBeTruthy();
+    const dialog = screen.getByRole('dialog', { name: 'River Song' });
+    expect(within(dialog).getByText('by Ayla')).toBeTruthy();
+  });
+
+  it('always has something to do: with no transpose and no auto-scroll it still holds Share and the screen switch', () => {
+    setup({ transpose: undefined, onToggleScroll: undefined });
+    expect(screen.getByRole('button', { name: 'Share Song' })).toBeTruthy();
+    expect(screen.getByRole('switch', { name: 'Screen stays on' })).toBeTruthy();
   });
 
   it('transpose + and − shift by one semitone', () => {
@@ -106,12 +119,24 @@ describe('ReadingToolsSheet', () => {
     expect(screen.getByRole('button', { name: 'Faster' }).getAttribute('aria-disabled')).toBe('true');
   });
 
-  it('says in words that the screen stays on when the wake lock is active', () => {
-    setup({ awake: true });
-    expect(screen.getByTestId('stay-awake-row').textContent).toContain('Screen stays on');
-    cleanup();
-    setup({ awake: false });
-    expect(screen.queryByTestId('stay-awake-row')).toBeNull();
+  it('has a real switch for "Screen stays on": on by default, and flipping it reports the new value', () => {
+    const p = setup();
+    const sw = screen.getByRole('switch', { name: 'Screen stays on' });
+    expect(sw.getAttribute('aria-checked')).toBe('true');
+    fireEvent.click(sw);
+    expect(p.onKeepAwakeChange).toHaveBeenLastCalledWith(false);
+  });
+
+  it('shows the switch off when the preference is off', () => {
+    setup({ keepAwake: false });
+    expect(screen.getByRole('switch', { name: 'Screen stays on' }).getAttribute('aria-checked')).toBe('false');
+  });
+
+  it('disables the switch and says why when the browser cannot keep the screen on', () => {
+    setup({ awakeSupported: false });
+    const sw = screen.getByRole('switch', { name: 'Screen stays on' }) as HTMLButtonElement;
+    expect(sw.disabled).toBe(true);
+    expect(screen.getByText('Not supported by your browser')).toBeTruthy();
   });
 
   it('is a place where touches do not stop auto-scroll', () => {
@@ -120,52 +145,61 @@ describe('ReadingToolsSheet', () => {
   });
 });
 
-describe('ReadingToolsSheet focus', () => {
-  it('returns focus to the ⋯ button when it closes', async () => {
-    const ref = { current: null as HTMLButtonElement | null };
-    const base: React.ComponentProps<typeof ReadingToolsSheet> = {
-      open: true,
-      onOpenChange: vi.fn(),
-      speed: 3,
-      onSpeed: vi.fn(),
-      scrolling: false,
-      onToggleScroll: vi.fn(),
-      awake: false,
-      returnFocusRef: ref,
-    };
-    const ui = (open: boolean) => (
-      <>
-        <button ref={ref}>more</button>
-        <ReadingToolsSheet {...base} open={open} />
-      </>
-    );
-    const { rerender } = render(ui(true));
-    rerender(ui(false));
-    await waitFor(() => expect(document.activeElement).toBe(ref.current));
+describe('SongMenuSheet actions', () => {
+  it('Share runs the share action', () => {
+    const p = setup();
+    fireEvent.click(screen.getByRole('button', { name: 'Share Song' }));
+    expect(p.actions.onShare).toHaveBeenCalledTimes(1);
   });
 
-  // Validation 1 review, M1: the ⋯ button can be gone when the sheet closes (the song now fits): focus goes to a neighbour.
-  it('returns focus to the fallback when the ⋯ button no longer exists', async () => {
-    const gone = { current: null as HTMLElement | null };
-    const fallback = { current: null as HTMLElement | null };
+  it('offers Edit (a link to the editor) and Delete only to someone who may change the song', () => {
+    setup();
+    expect(screen.queryByRole('link', { name: 'Edit Song' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Delete Song' })).toBeNull();
+    cleanup();
+    const onDelete = vi.fn();
+    setup({ actions: { onShare: vi.fn(), edit: { href: '/songs/s1/edit?version=v2' }, onDelete } });
+    expect(screen.getByRole('link', { name: 'Edit Song' }).getAttribute('href')).toBe('/songs/s1/edit?version=v2');
+    fireEvent.click(screen.getByRole('button', { name: 'Delete Song' }));
+    expect(onDelete).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps Delete neutral (no red) until the confirmation dialog', () => {
+    setup({ actions: { onShare: vi.fn(), onDelete: vi.fn() } });
+    expect(screen.getByRole('button', { name: 'Delete Song' }).className).not.toMatch(/danger|red-/);
+  });
+
+  it('closing the menu is a request to the page (Close button)', () => {
+    const p = setup();
+    fireEvent.click(screen.getByRole('button', { name: 'Close' }));
+    expect(p.onOpenChange).toHaveBeenCalledWith(false);
+  });
+});
+
+describe('SongMenuSheet focus', () => {
+  it('returns focus to the button that opened it when it closes', async () => {
+    const opener = { current: null as HTMLButtonElement | null };
     const base = {
       onOpenChange: vi.fn(),
-      transpose: { semitones: 0, originalKey: 'E', onShift: vi.fn(), onReset: vi.fn() },
+      title: 'River Song',
+      actions: { onShare: vi.fn() },
       speed: 3,
       onSpeed: vi.fn(),
       scrolling: false,
-      awake: false,
-      returnFocusRef: gone,
-      fallbackFocusRef: fallback,
+      keepAwake: true,
+      onKeepAwakeChange: vi.fn(),
+      awakeSupported: true,
     };
     const ui = (open: boolean) => (
       <>
-        <button ref={(el) => { fallback.current = el; }}>larger</button>
-        <ReadingToolsSheet {...base} open={open} />
+        <button ref={opener}>more</button>
+        <SongMenuSheet {...base} open={open} />
       </>
     );
-    const { rerender } = render(ui(true));
+    const { rerender } = render(ui(false));
+    opener.current!.focus();
+    rerender(ui(true));
     rerender(ui(false));
-    await waitFor(() => expect(document.activeElement).toBe(fallback.current));
+    await waitFor(() => expect(document.activeElement).toBe(opener.current));
   });
 });

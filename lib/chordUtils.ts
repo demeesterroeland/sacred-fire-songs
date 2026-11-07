@@ -1,12 +1,18 @@
 import ChordSheetJS from 'chordsheetjs';
 
-import { convertChordsOverLyricsToChordPro } from './chordProParsing';
+import { convertChordsOverLyricsToChordPro, isChordToken } from './chordProParsing';
 
 export interface ChordProItem {
     chords?: string;
     lyrics?: string;
     comment?: string;  // from {c: text} or {ci: text}
     italic?: boolean;  // true for {ci: text}
+    /**
+     * `comment` is a section label written as a bracket word, `[Chorus]`, `[Bridge]`, `[Coda]`: it is not a chord
+     * (isChordToken says so). The song page shows it as plain section text, never as a chord, whether or not the
+     * version has a chord layer. The PDF export prints it like any comment.
+     */
+    isSectionLabel?: boolean;
 }
 
 export interface ChordProLine {
@@ -74,17 +80,22 @@ export function parseChordProForDisplay(content: string): ChordProSection[] {
             );
 
             if (hasContent) {
-                const items: ChordProItem[] = line.items.map((item: any) => {
+                const items: ChordProItem[] = line.items.flatMap((item: any): ChordProItem[] => {
                     if (isCommentTag(item)) {
-                        return {
+                        return [{
                             comment: item._value || '',
                             italic: item._name === 'ci' || item._name === 'comment_italic'
-                        };
+                        }];
                     }
-                    return {
+                    // A bracket that does not hold a chord is a section label: keep it as text (validation 2, item 16).
+                    if (item.chords && !isChordToken(item.chords)) {
+                        const label: ChordProItem = { comment: item.chords, isSectionLabel: true };
+                        return item.lyrics ? [label, { lyrics: item.lyrics }] : [label];
+                    }
+                    return [{
                         chords: item.chords || undefined,
                         lyrics: item.lyrics || undefined
-                    };
+                    }];
                 });
 
                 const atomizedItems: ChordProItem[] = [];

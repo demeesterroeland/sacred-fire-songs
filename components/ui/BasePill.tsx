@@ -2,6 +2,7 @@
 
 import React from 'react';
 import Link from 'next/link';
+import { formatCount } from '@/lib/format/count';
 
 export interface BasePillProps {
   label: string;
@@ -40,9 +41,7 @@ export function BasePill({
       {icon}
       <span>{label}</span>
       {typeof count === 'number' && (
-        <span className="text-caption px-1.5 py-0.5 rounded-full bg-white/20 dark:bg-gray-700/50">
-          {count}
-        </span>
+        <span className="text-caption tabular-nums">{formatCount(count)}</span>
       )}
       {children}
     </>

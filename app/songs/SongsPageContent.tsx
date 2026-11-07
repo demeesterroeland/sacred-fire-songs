@@ -153,7 +153,7 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
             : t('songs.resultsCount', { count: filteredCount });
 
     return (
-        <main className="flex-1 min-h-0 bg-white dark:bg-gray-950">
+        <div className="flex-1 min-h-0 bg-white dark:bg-gray-950">
             <div className="p-4 md:p-8 space-y-3 md:space-y-6 max-w-7xl mx-auto">
                 {/* Results count badge */}
                 <div
@@ -317,6 +317,6 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
                 // The deleted song's row is gone: focus goes to the first song left in the list.
                 fallbackFocus={() => document.querySelector<HTMLElement>('[data-testid="song-list"] a')}
             />
-        </main>
+        </div>
     );
 }

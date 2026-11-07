@@ -10,9 +10,9 @@ import SongDetailSkeleton from '@/components/song/SongDetailSkeleton';
 import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { Trash2, Edit2, Heart, MoreVertical, ListPlus, Mic, Share2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import GuestGateSheet from '@/components/common/GuestGateSheet';
-import { BottomSheet, BottomSheetContent, BottomSheetTrigger, SheetAction } from '@/components/ui/bottom-sheet';
 import RehearsalDrawer from '@/components/song/RehearsalDrawer';
 import { makeSongPublic } from '@/lib/actions/rehearsal';
 import { useToggleFavorite } from '@/hooks/useToggleFavorite';
@@ -29,8 +29,9 @@ import { SongMetaLines } from '@/components/song/SongMetaLines';
 import { ReaderToolbar } from '@/components/song/ReaderToolbar';
 import { SongVersionSwitch } from '@/components/song/SongVersionSwitch';
 import { EDIT_VERSION_PARAM, editSongHref } from '@/lib/songs/versionOrder';
-import { blocksVersionSwitch, linkedVersionChoice, resolveVersionIndex, type VersionChoice } from '@/lib/songs/versionSwitch';
-import { ReadingToolsSheet } from '@/components/song/ReadingToolsSheet';
+import { blocksVersionSwitch, linkedVersionChoice, resolveVersionIndex, versionSearch, versionShareUrl, type VersionChoice } from '@/lib/songs/versionSwitch';
+import { SongMenuSheet } from '@/components/song/SongMenuSheet';
+import { useScrolledPast } from '@/hooks/useScrolledPast';
 import { useReaderPrefs } from '@/lib/reader/useReaderPrefs';
 import { speedBy } from '@/lib/reader/autoScroll';
 import { versionHasChords } from '@/lib/songs/versionFlags';
@@ -54,8 +55,13 @@ export default function SongDetailPage() {
     const [versionChoice, setVersionChoice] = useState<VersionChoice | null>(null);
     const [readerPrefs, setReaderPrefs] = useReaderPrefs();
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-    const [isOverflowOpen, setIsOverflowOpen] = useState(false);
-    const overflowTriggerRef = useRef<HTMLButtonElement>(null);
+    // The song page's one menu (⋮). It is opened from the bar on a phone and from the header from lg up.
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
+    const phoneTitleRef = useRef<HTMLHeadingElement>(null);
+    const phoneMenuButtonRef = useRef<HTMLButtonElement>(null);
+    const desktopMenuButtonRef = useRef<HTMLButtonElement>(null);
+    // The full title wraps in the page; the truncated copy in the sticky bar shows once it has scrolled under the bar.
+    const titleScrolledPast = useScrolledPast(phoneTitleRef, 56);
     const [isRehearsalDrawerOpen, setIsRehearsalDrawerOpen] = useState(false);
     const [isGuestGateOpen, setIsGuestGateOpen] = useState(false);
     const [drawerRequestedTab, setDrawerRequestedTab] = useState<"media" | "recorder" | "auto">("auto");
@@ -75,13 +81,14 @@ export default function SongDetailPage() {
     const isAdmin = user?.role === 'admin';
     const queryClient = useQueryClient();
 
-    // Enable Screen Wake Lock on Song Detail Page; `awake` feeds the reader's stay-awake indicator (Story 6.1.10, #394).
-    const { isActive: awake } = useWakeLock();
+    // Screen Wake Lock on the song page: held while the per-device "Screen stays on" preference is on (default on).
+    // `awake` feeds the reader's stay-awake indicator (Story 6.1.10, #394); the switch is in the ⋮ menu (validation 2, item 10).
+    const { isActive: awake, isSupported: awakeSupported } = useWakeLock();
+    const { preferences, setPreference } = useUserPreferences();
 
     // Story 6.1.10 / G2.5 (#394): auto-scroll and transpose live in the reader toolbar.
     const toolbarWrapRef = useRef<HTMLDivElement>(null);
     const lyricsRef = useRef<HTMLDivElement>(null);
-    const toolsButtonRef = useRef<HTMLButtonElement>(null);
     const largerButtonRef = useRef<HTMLButtonElement>(null);
     // Auto-scroll (▶, and its section in the tools sheet) only exists while the end of the lyrics is below the fold.
     const canAutoScroll = useLyricsBelowFold(lyricsRef, toolbarWrapRef);
@@ -97,7 +104,6 @@ export default function SongDetailPage() {
         ro.observe(desktopHeader);
         return () => ro.disconnect();
     }, [desktopHeader]);
-    const [isToolsOpen, setIsToolsOpen] = useState(false);
     const [transposeState, setTransposeState] = useState<{ id: string | undefined; n: number }>({ id, n: 0 });
     // The shift belongs to the song it was set on; opening another song starts in its own key.
     const semitones = transposeState.id === id ? transposeState.n : 0;
@@ -183,15 +189,18 @@ export default function SongDetailPage() {
         setVersionChoice({ songId: id, versionId: next.id });
         // A take linked from a notification belongs to the version it was opened on.
         setHighlightRecordingId(null);
+        // Every version has its own link (`?version=`; none for the first one). The address is replaced in place:
+        // no reload, and no history entry per switch, so Back leaves the song instead of stepping through versions.
+        if (typeof window !== 'undefined') {
+            const search = versionSearch(window.location.search, next.id, index === 0);
+            window.history.replaceState(null, '', `${window.location.pathname}${search}${window.location.hash}`);
+        }
     };
     const { data: recordings } = useSongRecordings(currentVersion?.id);
     // The Chords switch and transpose follow the version being SHOWN (a lyrics-only Simplified has none to switch
     // or shift); lists, filters and the meta links keep using the song-level flag (any version).
     const shownHasChords = versionHasChords(currentVersion);
     const mayTranspose = canTranspose(user?.role) && shownHasChords;
-    // Review M1: the sheet holds transpose and auto-scroll only. When neither is left (the window grew and the song
-    // now fits) it closes instead of staying open with nothing but "Close" (adjusting state while rendering).
-    if (isToolsOpen && !mayTranspose && !canAutoScroll) setIsToolsOpen(false);
     const shownContent = useMemo(
         () => transposeChordPro(currentVersion?.content_chordpro || '', mayTranspose ? semitones : 0, { key: currentVersion?.key }),
         [currentVersion?.content_chordpro, currentVersion?.key, mayTranspose, semitones],
@@ -201,7 +210,6 @@ export default function SongDetailPage() {
         : currentVersion;
 
     // Story 6.1.9 (#393): the phone action bar hides on scroll down when the user has auto-hide on.
-    const { preferences } = useUserPreferences();
     const actionBarVisible = useActionBarVisibility(preferences.autoHideBottomNav);
     const hasMedia = !!(currentVersion?.youtube_url || currentVersion?.spotify_url || currentVersion?.soundcloud_url);
     const openPractice = () => {
@@ -287,12 +295,16 @@ export default function SongDetailPage() {
     };
 
     const handleShare = async () => {
+        const shareUrl = currentVersion
+            ? versionShareUrl(window.location.href, currentVersion.id, selectedVersionIndex === 0)
+            : window.location.href;
         const shareData = {
             title: song.title,
             text: song.original_author 
                 ? t('song.share.textWithAuthor', { title: song.title, author: song.original_author })
                 : t('song.share.text', { title: song.title }),
-            url: window.location.href
+            // The link of the version being read (the first version has the clean song URL).
+            url: shareUrl,
         };
 
         if (navigator.share && navigator.canShare && navigator.canShare(shareData)) {
@@ -305,7 +317,7 @@ export default function SongDetailPage() {
             }
         } else {
             try {
-                await navigator.clipboard.writeText(window.location.href);
+                await navigator.clipboard.writeText(shareUrl);
                 toast.success(t('song.share.copied'));
             } catch (err) {
                 console.error('Could not copy text: ', err);
@@ -333,127 +345,117 @@ export default function SongDetailPage() {
 
     return (
         <div className="flex flex-col h-full">
-            {/* Mobile Header (Visible only on mobile < lg) */}
-            <header style={{ top: 'var(--env-banner-height, 0px)', width: '100vw', maxWidth: '100vw' }} className="lg:hidden flex items-center gap-2 pl-4 pr-1 sticky left-0 bg-bg/95 backdrop-blur-md z-30 border-b border-line min-h-bar">
-                {/* Story 6.1.8 (#392): one line, left aligned, ellipsis at the end so the first letters always show. */}
-                <h1
-                    data-testid="sticky-song-title"
-                    title={song.title}
-                    className="flex-1 min-w-0 truncate text-left text-title font-semibold text-fg"
+            {/* Phone bar (< lg): the ⋮ menu, and the title once the full one has scrolled away (#392). The bar has no
+                height of its own (h-0): the full title below sits at the top of the page and the ⋮ sits at its right.
+                Stuck, the bar gets its background and the truncated title (a copy: the h1 below is the heading). */}
+            <header
+                style={{ top: 'var(--env-banner-height, 0px)', width: '100vw', maxWidth: '100vw' }}
+                className="lg:hidden sticky left-0 z-30 h-0"
+                data-testid="song-phone-bar"
+                data-stuck={titleScrolledPast ? 'true' : 'false'}
+            >
+                <div
+                    className={cn(
+                        'pointer-events-none absolute inset-x-0 top-0 flex h-bar items-center gap-2 pl-6 pr-1 transition-colors motion-reduce:transition-none',
+                        titleScrolledPast && 'pointer-events-auto border-b border-line bg-bg/95 backdrop-blur-md',
+                    )}
                 >
-                    {song.title}
-                </h1>
-                {/* 3-dot menu — flex-none so it never shrinks */}
-                <div className="flex-none flex items-center">
-                    <BottomSheet open={isOverflowOpen} onOpenChange={setIsOverflowOpen}>
-                        <BottomSheetTrigger asChild>
-                            <button
-                                ref={overflowTriggerRef}
-                                type="button"
-                                className="inline-flex size-tap items-center justify-center rounded-control text-fg-muted hover:text-fg transition-colors"
-                                aria-label={t('common.moreActions')}
-                            >
-                                <MoreVertical className="w-5 h-5" aria-hidden />
-                            </button>
-                        </BottomSheetTrigger>
-                        {/* Story 6.1.34 (#418): the song menu is a real dialog: named, focus trapped, Escape closes, focus returns to ⋯. */}
-                        <BottomSheetContent
-                            data-testid="song-overflow-sheet"
-                            title={song.title}
-                            description={t('song.by', { author: song.original_author || t('song.traditional') })}
-                            className="lg:hidden"
-                        >
-                            <div className="pb-2">
-                                <SheetAction
-                                    icon={<Share2 />}
-                                    onClick={() => { handleShare(); setIsOverflowOpen(false); }}
-                                >
-                                    {t('song.share')}
-                                </SheetAction>
-                                {(song.owner_id === user?.id || isAdmin) && (
-                                    <Link
-                                        href={editSongHref(id, currentVersion?.id)}
-                                        onClick={() => setIsOverflowOpen(false)}
-                                        className="flex min-h-tap w-full items-center gap-3 px-4 py-3 text-left text-body text-fg transition-colors hover:bg-surface-2"
-                                    >
-                                        <span aria-hidden="true" className="shrink-0 [&_svg]:size-5"><Edit2 /></span>
-                                        <span className="min-w-0 flex-1">{t('song.edit')}</span>
-                                    </Link>
-                                )}
-                                {(song.owner_id === user?.id || isAdmin) && (
-                                    <SheetAction
-                                        tone="danger"
-                                        icon={<Trash2 />}
-                                        onClick={() => { setIsOverflowOpen(false); setIsDeleteModalOpen(true); }}
-                                    >
-                                        {t('song.delete')}
-                                    </SheetAction>
-                                )}
-                            </div>
-                        </BottomSheetContent>
-                    </BottomSheet>
+                    <p
+                        data-testid="sticky-song-title"
+                        aria-hidden="true"
+                        title={song.title}
+                        className={cn(
+                            'min-w-0 flex-1 truncate text-left text-title font-semibold text-fg',
+                            !titleScrolledPast && 'invisible',
+                        )}
+                    >
+                        {song.title}
+                    </p>
+                    <button
+                        ref={phoneMenuButtonRef}
+                        type="button"
+                        data-testid="song-menu-button"
+                        aria-haspopup="dialog"
+                        aria-expanded={isMenuOpen}
+                        onClick={() => setIsMenuOpen(true)}
+                        className="pointer-events-auto inline-flex size-tap flex-none items-center justify-center rounded-control text-fg-muted transition-colors hover:text-fg"
+                        aria-label={t('common.moreActions')}
+                    >
+                        <MoreVertical className="size-5" aria-hidden />
+                    </button>
                 </div>
             </header>
 
-            {/* The layout owns the one <main> landmark. */}
-            <div className="flex-1 min-w-0 bg-white dark:bg-gray-950">
+            {/* The root layout owns the one <main> landmark. */}
+            <div className="flex-1 min-w-0 bg-bg">
+
+                {/* The full title, wrapping, at the top of the page on a phone (#392). */}
+                <h1
+                    ref={phoneTitleRef}
+                    data-testid="song-title"
+                    className="lg:hidden break-words px-6 pb-1 pr-16 pt-3.5 text-title font-semibold text-fg md:px-10 md:pr-16"
+                >
+                    {song.title}
+                </h1>
 
                 {/* Desktop Page Header (Title, Actions) - Visible only on desktop >= lg */}
-                <div ref={setDesktopHeader} className="hidden lg:flex justify-between items-center px-8 py-4 border-b border-gray-200/50 dark:border-gray-800/50 bg-white/50 dark:bg-gray-950/50 sticky top-0 backdrop-blur-md z-10 transition-all">
-                    {/* Title and Artist */}
-                    <div className="flex items-center gap-6">
-                        <div className="flex flex-col gap-1">
-                            <div className="flex items-center gap-3">
-                                <h1 className="text-display font-semibold text-fg tracking-tight">{song.title}</h1>
-                            </div>
-                        </div>
-                    </div>
-                    {/* Action Buttons and User Profile */}
+                <div ref={setDesktopHeader} className="hidden lg:flex justify-between items-center px-8 py-4 border-b border-line bg-bg/50 sticky top-0 backdrop-blur-md z-10">
+                    {/* Title */}
+                    <h1 className="text-display font-semibold text-fg tracking-tight">{song.title}</h1>
+                    {/* Neutral buttons; the one accent is the primary action, Practice (validation 2, item 7).
+                        Delete stays neutral: the red is in the confirmation. */}
                     <div className="flex items-center gap-3">
                         {(song.owner_id === user?.id || isAdmin) && (
-                            <button
+                            <Button
+                                type="button"
+                                variant="outline"
                                 onClick={() => setIsDeleteModalOpen(true)}
-                                className="flex items-center gap-2 px-3 py-2 bg-red-500/10 hover:bg-red-500/20 text-red-500 rounded-lg text-sm font-bold border border-red-500/20 transition-all"
+                                className="px-3 xl:px-4"
+                                data-testid="song-header-delete"
                             >
-                                <Trash2 className="w-4 h-4" /> <span className="hidden xl:inline">{t('common.delete')}</span>
-                            </button>
+                                <Trash2 aria-hidden /> <span className="hidden xl:inline">{t('common.delete')}</span>
+                                <span className="sr-only xl:hidden">{t('common.delete')}</span>
+                            </Button>
                         )}
                         {(song.owner_id === user?.id || isAdmin) && (
-                            <Link href={editSongHref(id, currentVersion?.id)}>
-                                <button className="flex items-center gap-2 px-3 py-2 bg-gray-200 dark:bg-gray-800 hover:bg-gray-300 dark:hover:bg-gray-700 text-gray-800 dark:text-gray-200 rounded-lg text-sm font-bold border border-gray-300 dark:border-gray-700 transition-all">
-                                    <Edit2 className="w-4 h-4" /> <span className="hidden xl:inline">{t('common.edit')}</span>
-                                </button>
-                            </Link>
+                            <Button asChild variant="outline" className="px-3 xl:px-4">
+                                <Link href={editSongHref(id, currentVersion?.id)} data-testid="song-header-edit">
+                                    <Edit2 aria-hidden /> <span className="hidden xl:inline">{t('common.edit')}</span>
+                                    <span className="sr-only xl:hidden">{t('common.edit')}</span>
+                                </Link>
+                            </Button>
                         )}
                         {id && (
-                            <button
+                            <Button
+                                type="button"
+                                variant="primary"
                                 onClick={() => {
                                     // A guest cannot record: Listen, where the public takes are.
                                     setDrawerRequestedTab(user ? "recorder" : "media");
                                     setIsRehearsalDrawerOpen(true);
                                 }}
-                                className="flex items-center gap-2 px-3 py-2 bg-indigo-600/10 hover:bg-indigo-600/20 text-indigo-600 dark:text-indigo-400 rounded-lg text-sm font-bold border border-indigo-500/20 transition-all active:scale-[0.98]"
+                                className="px-3 active:scale-[0.98] xl:px-4"
                                 title={t('practice.title')}
                                 aria-label={t('practice.title')}
                                 data-testid="song-header-practice"
                             >
                                 {isAudioPlaying ? (
-                                    <div aria-hidden className="flex items-end gap-[2px] h-4 w-4 overflow-hidden">
-                                        <div className="h-3/5 w-[3px] bg-accent motion-safe:animate-[equalizer_1s_ease-in-out_infinite]" />
-                                        <div className="h-3/5 w-[3px] bg-accent motion-safe:animate-[equalizer_1.2s_ease-in-out_infinite_0.2s]" />
-                                        <div className="h-3/5 w-[3px] bg-accent motion-safe:animate-[equalizer_0.9s_ease-in-out_infinite_0.4s]" />
-                                        <div className="h-3/5 w-[3px] bg-accent motion-safe:animate-[equalizer_1.1s_ease-in-out_infinite_0.1s]" />
+                                    <div aria-hidden className="flex h-4 w-4 items-end gap-[2px] overflow-hidden">
+                                        <div className="h-3/5 w-[3px] bg-on-accent motion-safe:animate-[equalizer_1s_ease-in-out_infinite]" />
+                                        <div className="h-3/5 w-[3px] bg-on-accent motion-safe:animate-[equalizer_1.2s_ease-in-out_infinite_0.2s]" />
+                                        <div className="h-3/5 w-[3px] bg-on-accent motion-safe:animate-[equalizer_0.9s_ease-in-out_infinite_0.4s]" />
+                                        <div className="h-3/5 w-[3px] bg-on-accent motion-safe:animate-[equalizer_1.1s_ease-in-out_infinite_0.1s]" />
                                     </div>
                                 ) : (
-                                    <Mic className="w-4 h-4" />
+                                    <Mic aria-hidden />
                                 )}
                                 <span className="hidden xl:inline">{t('practice.title')}</span>
                                 {recordings && recordings.length > 0 && (
-                                    <span className="ml-1 px-1.5 py-0.5 rounded-md bg-indigo-600/20 text-caption font-black">
+                                    <span className="rounded-pill bg-on-accent/20 px-1.5 text-caption font-medium">
                                         {recordings.length}
                                     </span>
                                 )}
-                            </button>
+                            </Button>
                         )}
                         {user && id && (
                             <PlaylistPicker
@@ -469,27 +471,43 @@ export default function SongDetailPage() {
                                     setIsGuestGateOpen(true);
                                 }}
                                 aria-label={t('song.addToPlaylist')}
-                                className="p-2 rounded-full transition-all duration-300 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300"
+                                className="inline-flex size-tap items-center justify-center rounded-control text-fg-muted transition-colors hover:bg-surface-2 hover:text-fg"
                             >
-                                <ListPlus className="w-5 h-5" strokeWidth={1.5} />
+                                <ListPlus className="size-5" strokeWidth={1.5} aria-hidden />
                             </button>
                         )}
                         <button
                             onClick={handleToggleFavorite}
                             aria-label={isFav ? t('song.removeFromFavorites') : t('song.addToFavorites')}
-                            className={`p-2 rounded-full transition-all duration-300 ${isFav ? 'text-amber-400 heart-glow' : 'text-gray-500 dark:text-gray-400 hover:text-amber-400/60'}`}
+                            aria-pressed={isFav}
+                            className={cn(
+                                'inline-flex size-tap items-center justify-center rounded-control transition-colors hover:bg-surface-2',
+                                isFav ? 'text-fg' : 'text-fg-muted hover:text-fg',
+                            )}
                         >
-                            <Heart className={`w-5 h-5 transition-all duration-200 ${isFav ? 'fill-amber-400' : ''}`} strokeWidth={1.5} />
+                            <Heart className={cn('size-5', isFav && 'fill-current')} strokeWidth={1.5} aria-hidden />
                         </button>
                         <button
                             onClick={handleShare}
                             aria-label={t('song.share.ariaLabel')}
                             title={t('song.share.ariaLabel')}
-                            className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white transition-colors"
+                            className="inline-flex size-tap items-center justify-center rounded-control text-fg-muted transition-colors hover:bg-surface-2 hover:text-fg"
                         >
-                            <Share2 className="w-5 h-5" strokeWidth={1.5} />
+                            <Share2 className="size-5" strokeWidth={1.5} aria-hidden />
                         </button>
-
+                        {/* The one menu: transpose, scroll speed, screen switch (and the actions on a phone). */}
+                        <button
+                            ref={desktopMenuButtonRef}
+                            type="button"
+                            data-testid="song-menu-button-desktop"
+                            aria-haspopup="dialog"
+                            aria-expanded={isMenuOpen}
+                            onClick={() => setIsMenuOpen(true)}
+                            aria-label={t('common.moreActions')}
+                            className="inline-flex size-tap items-center justify-center rounded-control text-fg-muted transition-colors hover:bg-surface-2 hover:text-fg"
+                        >
+                            <MoreVertical className="size-5" aria-hidden />
+                        </button>
                     </div>
                 </div>
 
@@ -537,11 +555,7 @@ export default function SongDetailPage() {
                             onChange={setReaderPrefs}
                             scrolling={autoScroll.playing}
                             onToggleScroll={canAutoScroll ? autoScroll.toggle : undefined}
-                            onOpenTools={mayTranspose || canAutoScroll ? () => setIsToolsOpen(true) : undefined}
-                            toolsOpen={isToolsOpen}
-                            toolsButtonRef={toolsButtonRef}
                             fallbackFocusRef={largerButtonRef}
-                            semitones={mayTranspose ? semitones : 0}
                             awake={awake}
                         />
                     </div>
@@ -570,8 +584,8 @@ export default function SongDetailPage() {
                     title={t('song.delete.confirm.modalTitle')}
                     message={t('song.delete.confirm.message', { title: song.title })}
                     isDeleting={isDeleting}
-                    // The ⋯ sheet that opened this closes in the same moment: focus goes back to ⋯.
-                    fallbackFocus={() => overflowTriggerRef.current}
+                    // The ⋮ menu that opened this closes in the same moment: focus goes back to the ⋮ that is on screen.
+                    fallbackFocus={() => (phoneMenuButtonRef.current?.offsetParent ? phoneMenuButtonRef.current : desktopMenuButtonRef.current)}
                 />
             </div>
 
@@ -597,9 +611,16 @@ export default function SongDetailPage() {
                 ) : undefined}
             />
 
-            <ReadingToolsSheet
-                open={isToolsOpen}
-                onOpenChange={setIsToolsOpen}
+            <SongMenuSheet
+                open={isMenuOpen}
+                onOpenChange={setIsMenuOpen}
+                title={song.title}
+                description={t('song.by', { author: song.original_author || t('song.traditional') })}
+                actions={{
+                    onShare: () => { void handleShare(); setIsMenuOpen(false); },
+                    edit: song.owner_id === user?.id || isAdmin ? { href: editSongHref(id, currentVersion?.id) } : undefined,
+                    onDelete: song.owner_id === user?.id || isAdmin ? () => { setIsMenuOpen(false); setIsDeleteModalOpen(true); } : undefined,
+                }}
                 transpose={mayTranspose ? {
                     semitones,
                     originalKey: currentVersion?.key,
@@ -610,9 +631,9 @@ export default function SongDetailPage() {
                 onSpeed={(delta) => setReaderPrefs({ ...readerPrefs, speed: speedBy(readerPrefs.speed, delta) })}
                 scrolling={autoScroll.playing}
                 onToggleScroll={canAutoScroll ? autoScroll.toggle : undefined}
-                awake={awake}
-                returnFocusRef={toolsButtonRef}
-                fallbackFocusRef={largerButtonRef}
+                keepAwake={preferences.keepScreenAwake}
+                onKeepAwakeChange={(value) => setPreference('keepScreenAwake', value)}
+                awakeSupported={awakeSupported}
             />
 
             <GuestGateSheet feature="addToPlaylist" open={isGuestGateOpen} onOpenChange={setIsGuestGateOpen} />

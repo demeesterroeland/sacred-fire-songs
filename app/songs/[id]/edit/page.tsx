@@ -121,7 +121,7 @@ export default function EditSongPage() {
     return (
         <div className="min-h-screen bg-bg pb-20">
 
-            <main className="container mx-auto px-4 pt-4 lg:pt-8">
+            <div className="container mx-auto px-4 pt-4 lg:pt-8">
 
 
                 {versionLabel && (
@@ -138,7 +138,7 @@ export default function EditSongPage() {
                     songId={id}
                     versionId={version?.id}
                 />
-            </main>
+            </div>
         </div>
     );
 }

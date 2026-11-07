@@ -52,7 +52,7 @@ export default function AccountSettings({ user, profile, initialTab = "profile" 
   const tabs = visibleSettingsTabs().map((id) => ({ id, ...tabMeta[id] }));
 
   return (
-    <main className="flex-1 p-4 md:p-8 lg:p-12">
+    <div className="flex-1 p-4 md:p-8 lg:p-12">
       <div className="max-w-4xl mx-auto">
         <header className="mb-12">
           <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2 text-gray-900 dark:text-white">{t("settings.pageTitle")}</h1>
@@ -89,6 +89,6 @@ export default function AccountSettings({ user, profile, initialTab = "profile" 
           {FEATURES.privacySettings && activeTab === "privacy" && <PrivacySettings user={user} profile={profile} />}
         </div>
       </div>
-    </main>
+    </div>
   );
 }

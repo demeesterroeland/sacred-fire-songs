@@ -81,7 +81,8 @@ describe('recompute_song_flags migration: the chord rule', () => {
     } finally {
       await db.close();
     }
-  });
+    // PGlite starts a WebAssembly Postgres: on a busy machine that can take longer than the 5 s default.
+  }, 30_000);
 });
 
 // The rest needs the local Supabase stack (tables); it is skipped when that is not running.

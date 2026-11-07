@@ -7,6 +7,7 @@ import Image from 'next/image';
 import { useUserPreferences, type ThemePreference } from '@/context/UserPreferencesContext';
 import { useLocale } from '@/context/LocaleContext';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { SignInLink } from '@/components/auth/SignInLink';
 import { useNotificationsQuery } from '@/hooks/useNotificationsQuery';
 import { unreadSharedCount } from '@/lib/notifications/sharedWithMe';
 
@@ -103,12 +104,9 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true, init
 
   if (!user) {
     return (
-      <Link
-        href={`/auth/login?next=${encodeURIComponent(pathname)}`}
-        className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-sm transition-all shadow-lg shadow-red-900/20 active:scale-95 whitespace-nowrap"
-      >
+      <SignInLink href={`/auth/login?next=${encodeURIComponent(pathname)}`}>
         {t('auth.login.submit')}
-      </Link>
+      </SignInLink>
     );
   }
 

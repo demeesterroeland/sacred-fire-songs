@@ -6,6 +6,7 @@ import { songRowMeta } from '@/lib/songs/songMeta';
 import { getRecentlyViewedLight } from '@/lib/songs/serverQueries';
 import { getServerT } from '@/lib/i18n/server';
 import GuestGate from '@/components/common/GuestGate';
+import { LibrarySubpageHeading } from '@/components/library/LibrarySubpageHeading';
 
 export default async function RecentlyViewedPage() {
     const t = await getServerT();
@@ -18,11 +19,7 @@ export default async function RecentlyViewedPage() {
 
     return (
         <div>
-            <div className="flex items-center gap-2 mb-4">
-                <Clock className="w-4 h-4 text-fg-subtle" aria-hidden />
-                <h2 className="text-meta font-semibold text-fg-muted">{t('recentlyViewed.section')}</h2>
-                <span className="text-caption text-fg-subtle ml-1">({songs.length})</span>
-            </div>
+            <LibrarySubpageHeading icon={Clock} title={t('recentlyViewed.section')} count={songs.length} />
 
             {songs.length === 0 ? (
                 <p className="text-meta text-fg-muted italic py-8 text-center">
