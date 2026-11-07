@@ -956,6 +956,13 @@ const ru: Partial<Record<TranslationKey, string>> = {
   "librarySummary.recordings.private": "Личных: {count}",
   "viewer.awake.description": "Экран не гаснет, пока вы читаете. Настройка хранится на этом устройстве.",
   "song.menu.actions": "Действия с песней",
+  "errors.takeNotFound": "Эта запись не найдена.",
+  "errors.notTakeOwner": "Поделиться этой записью может только её автор.",
+  "errors.shareSongPrivate": "Эта песня приватная. Сначала сделайте песню публичной, затем поделитесь записью.",
+  "errors.shareWithSelf": "Нельзя поделиться записью с самим собой.",
+  "errors.notSongOwner": "Опубликовать эту песню может только её владелец или администратор.",
+  "errors.consentRequired": "Перед публикацией подтвердите согласие исполнителя.",
+  "errors.sharedTakeNoDownload": "Общие записи нельзя скачать.",
 };
 
 export default ru;

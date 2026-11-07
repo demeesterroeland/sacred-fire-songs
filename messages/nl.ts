@@ -953,6 +953,13 @@ const nl: Partial<Record<TranslationKey, string>> = {
   "librarySummary.recordings.private": "{count} privé",
   "viewer.awake.description": "Houdt het scherm aan terwijl je leest. Bewaard op dit apparaat.",
   "song.menu.actions": "Liedacties",
+  "errors.takeNotFound": "Deze opname is niet gevonden.",
+  "errors.notTakeOwner": "Alleen wie deze opname heeft gemaakt, kan hem delen.",
+  "errors.shareSongPrivate": "Dit lied is privé. Maak het lied eerst openbaar en deel daarna de opname.",
+  "errors.shareWithSelf": "Je kunt een opname niet met jezelf delen.",
+  "errors.notSongOwner": "Alleen de eigenaar van het lied of een beheerder kan dit lied publiceren.",
+  "errors.consentRequired": "Bevestig eerst de toestemming van de zanger voordat je publiceert.",
+  "errors.sharedTakeNoDownload": "Gedeelde opnames kun je niet downloaden.",
 };
 
 export default nl;

@@ -1,11 +1,12 @@
 # UX v2: Agent Decisions (ADR-lite)
 
-**Version:** 1.35 | **Date:** Nov 7, 2026 | **Epic:** 6.1 (#375)
+**Version:** 1.36 | **Date:** Nov 7, 2026 | **Epic:** 6.1 (#375)
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.36 | Nov 7, 2026 | Added UXA-067 (re-review of PR #474: section labels as text, panel above the bottom bars, right-click closes the panel, specific server messages translated). |
 | 1.35 | Nov 7, 2026 | Added UXA-061 to UXA-066 (review round on PR #474: the suggestions panel closes on the click and stays visible without moving the column, the auto-scroll fold counts the fixed bars, the tools sheet and focus when the song starts to fit, one focus cue per field and readable tag counts, translated error toasts, what counts as a chord; Part of #375). |
 | 1.34 | Nov 6, 2026 | Added UXA-054 to UXA-060 (validation round 1: when auto-scroll is offered, the expanded meta line, one focus style for text fields, where the search suggestions panel lives, search options on tokens, translated feedback, song flags versus the reader; Part of #375). |
 | 1.33 | Nov 6, 2026 | Added UXA-050 to UXA-053 (accessibility audit of the song page and Practice panel: Practice is a modal dialog with its own focus handling, every layer on top of it is a Radix dialog including the delete confirmation; heading levels; what the fixes change on screen; audit scope and what it cannot show; #418). |
@@ -668,6 +669,14 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 - **Context:** server actions answer with English strings ("Playlist not found") and sometimes a raw database message; twelve toasts in the playlist components, the profile and password settings and the take dialogs printed them.
 - **Choice:** `lib/errors/actionError.ts` maps the known answers to `errors.*` keys (8 languages) and anything else to the call site's own message or `errors.generic`; the raw text goes to the console only. A test fails when a toast prints `result.error`, `res.error` or `error.message`. `playlists.picker.createdButNotAdded` no longer carries `{error}`; the add-songs toasts are translated.
 - **Left as is:** the sign-in, sign-up, forgot-password, update-password and finish-registration forms still show the message of the authentication service (a separate mapping of its error codes). Runasimi (`qu`) shows its generic sentence for every `errors.*` key until a speaker translates them.
+- **Confirm:** no.
+
+### UXA-067 · Section labels as text; follow-ups from the re-review of PR #474
+
+- **Date / story:** Nov 7, 2026 · re-review of PR #474, owner's choice on the section labels
+- **Section labels:** a line holding only bracketed words that are not chords (`[Chorus]`, `[Bridge] [Coda]`) is shown as a comment, the same as `{c: Chorus}`, with chords on or off, in the reader, the preview and the PDF (`lib/chordUtils.ts`). A non-chord bracket in front of lyrics (`[Chorus]Sing`) is unchanged: it shows as a chord, and not at all with chords off.
+- **Suggestions panel:** the slot is `z-40`, above the bottom bars (`z-30`), so the action bar no longer covers its last rows on a low window. A press that never clicks (right button, long press) closes the panel when it took focus outside.
+- **Server messages:** the owner, private-song, share-with-yourself, consent, take-not-found and shared-download messages now map to translated keys. Runasimi uses its generic error text for these, except the private-song message.
 - **Confirm:** no.
 
 ### UXA-066 · What counts as a chord; Search options on a phone; toolbar edge; favourites wording

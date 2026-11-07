@@ -958,6 +958,13 @@ const qu: Partial<Record<TranslationKey, string>> = {
   "librarySummary.recordings.private": "Pakasqa: {count}",
   "viewer.awake.description": "Keeps the screen from dimming while you read. Saved on this device.",
   "song.menu.actions": "Song actions",
+  "errors.takeNotFound": "Pantay tarikurqan. Huk kutita ruway.",
+  "errors.notTakeOwner": "Pantay tarikurqan. Huk kutita ruway.",
+  "errors.shareSongPrivate": "Kay takiqa pakallam. Ñawpaqta takita llapapaq churay.",
+  "errors.shareWithSelf": "Pantay tarikurqan. Huk kutita ruway.",
+  "errors.notSongOwner": "Pantay tarikurqan. Huk kutita ruway.",
+  "errors.consentRequired": "Pantay tarikurqan. Huk kutita ruway.",
+  "errors.sharedTakeNoDownload": "Pantay tarikurqan. Huk kutita ruway.",
 };
 
 export default qu;

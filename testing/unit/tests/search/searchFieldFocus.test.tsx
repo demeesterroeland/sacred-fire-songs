@@ -101,6 +101,46 @@ describe.each(fields)('$name suggestion panel', ({ name, render: mount, role }) 
     expect(await screen.findByTestId('search-suggestions')).toBeTruthy();
   });
 
+  it('closes when a press that never clicks (right button) left focus outside', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    try {
+      mount();
+      const outside = document.createElement('a');
+      outside.href = '#row';
+      outside.textContent = 'a song';
+      document.body.appendChild(outside);
+      const input = screen.getByRole(role);
+      act(() => input.focus());
+      expect(await screen.findByTestId('search-suggestions')).toBeTruthy();
+
+      fireEvent.pointerDown(outside, { button: 2 });
+      act(() => outside.focus());
+      fireEvent.contextMenu(outside, { button: 2 });
+      // the press holds the page still for a moment, then the panel goes: no click is coming
+      act(() => { vi.advanceTimersByTime(600); });
+      expect(screen.queryByTestId('search-suggestions')).toBeNull();
+      outside.remove();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('stays open after a press that never clicks (a scroll gesture) when focus stayed in the field', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    try {
+      mount();
+      const input = screen.getByRole(role);
+      act(() => input.focus());
+      expect(await screen.findByTestId('search-suggestions')).toBeTruthy();
+      fireEvent.pointerDown(document.body);
+      fireEvent.pointerCancel(document.body);
+      act(() => { vi.advanceTimersByTime(600); });
+      expect(screen.queryByTestId('search-suggestions')).not.toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('closes when focus tabs out of the field to something outside', async () => {
     const { container } = mount();
     const outside = document.createElement('button');

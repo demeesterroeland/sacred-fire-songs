@@ -953,6 +953,13 @@ const pt: Partial<Record<TranslationKey, string>> = {
   "librarySummary.recordings.private": "{count} privadas",
   "viewer.awake.description": "Mantém a tela ligada enquanto você lê. Salvo neste dispositivo.",
   "song.menu.actions": "Ações da música",
+  "errors.takeNotFound": "Esta gravação não foi encontrada.",
+  "errors.notTakeOwner": "Só quem fez esta gravação pode partilhá-la.",
+  "errors.shareSongPrivate": "Esta música é privada. Torne a música pública primeiro e depois partilhe a gravação.",
+  "errors.shareWithSelf": "Não pode partilhar uma gravação consigo.",
+  "errors.notSongOwner": "Só o proprietário da música ou um administrador pode publicá-la.",
+  "errors.consentRequired": "Confirme o consentimento de quem canta antes de publicar.",
+  "errors.sharedTakeNoDownload": "As gravações partilhadas não podem ser transferidas.",
 };
 
 export default pt;

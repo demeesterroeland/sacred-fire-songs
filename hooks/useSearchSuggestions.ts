@@ -80,6 +80,11 @@ export function useSearchSuggestions() {
       clearTimeout(forget);
       forget = setTimeout(() => {
         pressingRef.current = false;
+        // No click came (right button, long press, a drag). If that press took focus out of the field and the
+        // panel, the blur that would have closed the panel has passed already: close it now. A scroll gesture
+        // leaves focus where it was, so the panel stays.
+        const active = document.activeElement;
+        if (active && active !== document.body && isOutside(active)) setOpen(false);
       }, PRESS_GRACE_MS);
     };
     const onClick = (e: MouseEvent) => {
@@ -90,11 +95,14 @@ export function useSearchSuggestions() {
     document.addEventListener('pointerdown', onDown, true);
     document.addEventListener('pointerup', onUp, true);
     document.addEventListener('pointercancel', onUp, true);
+    // With a context menu open the browser may never report the release.
+    document.addEventListener('contextmenu', onUp, true);
     document.addEventListener('click', onClick, true);
     return () => {
       document.removeEventListener('pointerdown', onDown, true);
       document.removeEventListener('pointerup', onUp, true);
       document.removeEventListener('pointercancel', onUp, true);
+      document.removeEventListener('contextmenu', onUp, true);
       document.removeEventListener('click', onClick, true);
       clearTimeout(forget);
       pressingRef.current = false;

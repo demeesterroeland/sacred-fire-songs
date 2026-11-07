@@ -954,6 +954,13 @@ const fr: Partial<Record<TranslationKey, string>> = {
   "librarySummary.recordings.private": "{count} privés",
   "viewer.awake.description": "Empêche l’écran de s’éteindre pendant la lecture. Enregistré sur cet appareil.",
   "song.menu.actions": "Actions du chant",
+  "errors.takeNotFound": "Cet enregistrement est introuvable.",
+  "errors.notTakeOwner": "Seule la personne qui a fait cet enregistrement peut le partager.",
+  "errors.shareSongPrivate": "Ce chant est privé. Rendez d’abord le chant public, puis partagez l’enregistrement.",
+  "errors.shareWithSelf": "Vous ne pouvez pas partager un enregistrement avec vous-même.",
+  "errors.notSongOwner": "Seul le propriétaire du chant ou un administrateur peut le publier.",
+  "errors.consentRequired": "Confirmez le consentement de la personne qui chante avant de publier.",
+  "errors.sharedTakeNoDownload": "Les enregistrements partagés ne peuvent pas être téléchargés.",
 };
 
 export default fr;

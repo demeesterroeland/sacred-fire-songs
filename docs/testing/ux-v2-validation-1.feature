@@ -1,5 +1,6 @@
-# Version: 1.1 | Date: Nov 7, 2026
+# Version: 1.2 | Date: Nov 7, 2026
 # Changelog
+# 1.2 | Nov 7, 2026 | Follow-ups from the re-review of PR #474: section labels shown as text, panel above the bottom bars, right-click closes the panel
 # 1.1 | Nov 7, 2026 | Review round on PR #474: pressing a song under the open suggestions opens that song (B1), the column keeps its scroll position (H1), the auto-scroll fold counts the bars and not the padding (H2), the tools sheet and focus when the song starts to fit (M1), one focus cue per field (M2), tag counts meet AA (M3), localised error toasts (M4), Search options in full on a phone (M5), a bracketed section label is not a chord (M6), toolbar alignment (L6), favourites wording (L7).
 # 1.0 | Nov 6, 2026 | UX v2 validation round 1 (Part of #375): auto-scroll only when the lyrics run below the fold, expanded meta, one focus style for text fields, suggestions panel in the page flow, search options on tokens, translated feedback, song flags across versions.
 @validation-1
@@ -146,6 +147,24 @@ Scenario: Search options show full labels on a phone in every language
 Scenario: A bracketed section label is not a chord
   Given the versions "[Chorus]" with lyrics, "[Am]" with lyrics and "[am]" with lyrics
   Then only the version with "[Am]" has chords
+
+@e2e
+Scenario: A bracketed section label stays visible as text
+  Given a version whose only brackets are section labels
+  When I open that version
+  Then there is no Chords switch and the label "Chorus" is shown
+
+@e2e
+Scenario: The song action bar does not cover the suggestions on a low phone window
+  Given a phone held sideways on a song page with a long search history
+  When I scroll the open suggestions to their end
+  Then the last category can be tapped
+
+@e2e
+Scenario: A right-click on a song closes the suggestions once focus has left them
+  Given the suggestions are open on the desktop song list
+  When I right-click a song
+  Then the suggestions close
 
 # Vitest, in an in-memory Postgres (PGlite), also in CI: testing/unit/tests/songs/flagsMigration.test.ts
 @component

@@ -952,6 +952,13 @@ const en = {
   "librarySummary.recordings.private": "{count} private",
   "viewer.awake.description": "Keeps the screen from dimming while you read. Saved on this device.",
   "song.menu.actions": "Song actions",
+  "errors.takeNotFound": "This recording could not be found.",
+  "errors.notTakeOwner": "Only the person who made this recording can share it.",
+  "errors.shareSongPrivate": "This song is private. Make the song public first, then share the recording.",
+  "errors.shareWithSelf": "You can't share a recording with yourself.",
+  "errors.notSongOwner": "Only the song's owner or an admin can publish this song.",
+  "errors.consentRequired": "Please confirm the singer's consent before publishing.",
+  "errors.sharedTakeNoDownload": "Shared recordings cannot be downloaded.",
 } as const;
 
 export default en;

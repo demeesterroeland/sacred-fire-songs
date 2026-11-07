@@ -3289,3 +3289,19 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - **Tests:** Vitest 1321 passed (113 files), BDD unit 240 passed / 47 pending (pre-existing), whole Playwright suite on a production build (port 4431, `setup` + `mobile-chrome-headless`) 303 passed / 5 skipped / 2 failed; both failures pass alone (and 88 of 88 under load for the bottom-bar and suggestions specs): a focus timing flake and an axe test timeout while 4 workers were busy.
 - **Migration:** `20261106180000_recompute_song_flags.sql` edited in place (not applied anywhere but local dev; stays idempotent); `db-schema.sql` v3.4 in step. The local copy was not re-run.
 - **Decisions:** UXA-061…066. Screenshots refreshed, plus 07 to 09 in `docs/ux-research/screenshots/ux-v2/validation-1/`.
+
+## November 7, 2026 - Epic 6.1 UX v2, follow-ups from the re-review of PR #474
+
+**Goal:** fix the re-review findings the owner picked; the failing tests came first.
+
+**Key Accomplishments**
+- **Section labels:** a line of only non-chord brackets (`[Chorus]`) now shows as a comment, with chords on or off, in the reader, the preview and the PDF. `[Chorus]Sing` is unchanged.
+- **Low phone window:** the suggestions slot is `z-40`, so the song action bar no longer covers its last rows.
+- **Right-click:** a press that never clicks closes the panel when focus went outside it (`contextmenu` also ends the press).
+- **Server messages:** 7 new `errors.*` keys in all 8 locales for the remaining specific answers. Runasimi uses its generic text, except the private-song message. The new translations have had no native-speaker check.
+- **Test timeout:** the first PGlite test in `flagsMigration.test.ts` has an explicit 30 s limit.
+
+**Technical Details**
+- **Tests:** Vitest 1340 passed (113 files), BDD unit 240 passed / 47 pending (pre-existing), whole Playwright suite on a production build (`setup` + `mobile-chrome-headless`) 307 passed / 5 skipped / 0 failed.
+- **Not fixed:** the desktop fold when the meta line expands (no decision yet). The iOS touch behaviour of the panel has not been tried on a real iPhone.
+- **Decisions:** UXA-067.

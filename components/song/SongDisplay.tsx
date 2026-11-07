@@ -45,19 +45,6 @@ export default function SongDisplay({ content, melodyNotation, hasChords = false
                             <div key={lineIdx} data-testid="lyric-line">
                                 <div className={`flex flex-wrap pl-4 md:pl-6`}>
                                     {line.items.map((item: ChordProItem, itemIdx) => {
-                                        // Section label ([Chorus], [Bridge], [Coda]): plain text, with or without chords.
-                                        if (item.isSectionLabel) {
-                                            return (
-                                                <span
-                                                    key={itemIdx}
-                                                    data-testid="section-label"
-                                                    className={`self-end text-meta font-semibold text-fg-muted mr-2 ${itemIdx === 0 ? '-ml-4 md:-ml-6' : 'ml-1'}`}
-                                                >
-                                                    {item.comment}
-                                                </span>
-                                            );
-                                        }
-
                                         // Inline comment item — {c:} or {ci:}
                                         if (item.comment !== undefined) {
                                             return (

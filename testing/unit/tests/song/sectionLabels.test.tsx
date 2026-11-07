@@ -1,35 +1,12 @@
 // @vitest-environment jsdom
-// Validation 2, item 16: a bracketed word that is not a chord ([Chorus], [Bridge], [Coda]) is a section label.
-// It shows as plain text in a lyrics-only version (it used to vanish: no chord layer) and never as a chord in a
-// version with real chords. "Not a chord" is the one grammar of isChordToken.
+// Validation 2, item 16 (parser rule: lib/chordUtils.ts, tests in chordUtils.test.ts, from the re-review patch): rendered, a line
+// that holds only [Chorus] / [Bridge] / [Coda] is text in a lyrics-only version and never a chord in a version with chords.
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, render, screen, within } from '@testing-library/react';
-import { parseChordProForDisplay } from '@/lib/chordUtils';
 import SongDisplay from '@/components/song/SongDisplay';
 
 vi.mock('@/context/LocaleContext', () => ({ useLocale: () => ({ t: (k: string) => k }) }));
 afterEach(cleanup);
-
-describe('parseChordProForDisplay: section labels', () => {
-  it('turns [Chorus] into a label item, not a chord', () => {
-    const items = parseChordProForDisplay('[Chorus]\nla la la').flatMap((s) => s.lines.flatMap((l) => l.items));
-    const label = items.find((i) => i.isSectionLabel);
-    expect(label).toMatchObject({ comment: 'Chorus', isSectionLabel: true });
-    expect(items.some((i) => i.chords === 'Chorus')).toBe(false);
-  });
-
-  it('keeps real chords as chords, including ones with a bass note', () => {
-    const items = parseChordProForDisplay('[Am]la [G/B]la').flatMap((s) => s.lines.flatMap((l) => l.items));
-    expect(items.map((i) => i.chords).filter(Boolean)).toEqual(['Am', 'G/B']);
-    expect(items.some((i) => i.isSectionLabel)).toBe(false);
-  });
-
-  it('keeps the lyrics that follow a label on the same line', () => {
-    const items = parseChordProForDisplay('[Coda]slowly home').flatMap((s) => s.lines.flatMap((l) => l.items));
-    expect(items.find((i) => i.isSectionLabel)?.comment).toBe('Coda');
-    expect(items.map((i) => i.lyrics ?? '').join('')).toContain('slowly');
-  });
-});
 
 describe('SongDisplay: section labels', () => {
   const lyricsOnly = '[Verse]\nFire in the night\n[Chorus]\nRise up now\n[Bridge]\nStay with me\n[Coda]\nSlowly home';

@@ -297,6 +297,8 @@ test('M6: a version whose only brackets are section labels has no Chords switch;
   await page.getByRole('radio', { name: 'Labels' }).click();
   await expect(page.getByRole('radio', { name: 'Labels' })).toHaveAttribute('aria-checked', 'true');
   await expect(page.getByRole('switch', { name: 'Chords' })).toHaveCount(0);
+  // The label is not a chord, but the reader still sees it.
+  await expect(page.getByTestId('song-display')).toContainText('Chorus');
   await expect(page.getByTestId('chord')).toHaveCount(0);
   await page.goto(`/songs?chords=true&search=${encodeURIComponent(FIXTURE_TITLE)}`);
   await expect(page.getByTestId('song-row').filter({ hasText: FIXTURE_TITLE })).toHaveCount(1);
@@ -438,3 +440,41 @@ for (const scheme of ['light', 'dark'] as const) {
     await ctx.close();
   });
 }
+
+test('the song action bar does not cover the suggestions on a low phone window', async ({ browser }) => {
+  const ctx = await browser.newContext({ viewport: { width: 667, height: 375 }, hasTouch: true, isMobile: true });
+  const page = await ctx.newPage();
+  await pinEnglish(page);
+  await page.addInitScript(() =>
+    localStorage.setItem('sacred-fire-songs-search-history', JSON.stringify(Array.from({ length: 12 }, (_, i) => `recent ${i}`))),
+  );
+  await page.goto('/songs');
+  const href = await page.getByTestId('song-row').first().locator('a[href^="/songs/"]').first().getAttribute('href');
+  await page.goto(href!);
+  await expect(page.getByTestId('song-action-bar')).toBeAttached();
+  await searchField(page).click();
+  const panel = page.getByTestId('search-suggestions');
+  await expect(panel.getByRole('button', { name: /^Artists/ })).toBeVisible();
+  await panel.evaluate((el) => { el.scrollTop = el.scrollHeight; });
+  const chip = panel.getByRole('button', { name: /^Artists/ });
+  const hit = await chip.evaluate((el) => {
+    const r = el.getBoundingClientRect();
+    return el.contains(document.elementFromPoint(r.left + r.width / 2, r.top + r.height / 2));
+  });
+  expect(hit).toBe(true);
+  await ctx.close();
+});
+
+test('a right-click on a song closes the suggestions once focus has left them', async ({ browser }) => {
+  const ctx = await context(browser, 'desktop');
+  const page = await ctx.newPage();
+  await pinEnglish(page);
+  await page.goto('/songs');
+  await expect(page.getByTestId('song-row').first()).toBeVisible();
+  await searchField(page).click();
+  await expect(page.getByTestId('search-suggestions')).toBeVisible();
+  const target = await rowBelowPanel(page);
+  await page.mouse.click(target.x, target.y, { button: 'right' });
+  await expect(page.getByTestId('search-suggestions')).toHaveCount(0);
+  await ctx.close();
+});

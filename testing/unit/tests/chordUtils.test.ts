@@ -17,3 +17,26 @@ describe('parseChordPro', () => {
         expect(contentLine.items[1].lyrics).toBe('World');
     });
 });
+
+// A bracketed section label alone on its line is text for the reader, not a chord (validation 1 review, M6).
+describe('section labels in brackets', () => {
+  const lineItems = (content: string) => parseChordProForDisplay(content).flatMap((s) => s.lines.map((l) => l.items));
+
+  it('turns a label alone on its line into a comment, so it shows with chords on and off', () => {
+    expect(lineItems('[Chorus]\nSing the morning')[0]).toEqual([{ comment: 'Chorus' }]);
+  });
+
+  it('keeps several labels on one line', () => {
+    expect(lineItems('[Bridge] [Coda]')[0].map((i) => i.comment)).toEqual(['Bridge', 'Coda']);
+  });
+
+  it('leaves a chord alone on its line, and a chord line with one unknown token, as chords', () => {
+    expect(lineItems('[Am]')[0][0]).toMatchObject({ chords: 'Am' });
+    expect(lineItems('[Am] [N.C.]')[0].some((i) => i.chords === 'Am')).toBe(true);
+    expect(lineItems('[Am] [N.C.]')[0].every((i) => i.comment === undefined)).toBe(true);
+  });
+
+  it('leaves a bracket in front of lyrics as it was', () => {
+    expect(lineItems('[Chorus]Sing')[0][0]).toMatchObject({ chords: 'Chorus', lyrics: 'Sing' });
+  });
+});

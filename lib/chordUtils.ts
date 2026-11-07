@@ -7,12 +7,6 @@ export interface ChordProItem {
     lyrics?: string;
     comment?: string;  // from {c: text} or {ci: text}
     italic?: boolean;  // true for {ci: text}
-    /**
-     * `comment` is a section label written as a bracket word, `[Chorus]`, `[Bridge]`, `[Coda]`: it is not a chord
-     * (isChordToken says so). The song page shows it as plain section text, never as a chord, whether or not the
-     * version has a chord layer. The PDF export prints it like any comment.
-     */
-    isSectionLabel?: boolean;
 }
 
 export interface ChordProLine {
@@ -23,6 +17,17 @@ export interface ChordProSection {
     type: 'verse' | 'chorus' | 'bridge' | 'intro' | 'outro' | 'none';
     label?: string;
     lines: ChordProLine[];
+}
+
+/**
+ * A line holding nothing but bracketed words that are not chords ("[Chorus]", "[Bridge] [Coda]") names a section.
+ * It is text for the reader, shown like a {c:} comment, whether chords are on or off. Returns null for any other line.
+ */
+function sectionLabelItems(items: ChordProItem[]): ChordProItem[] | null {
+    const filled = items.filter((i) => i.comment !== undefined || i.chords || i.lyrics?.trim());
+    if (filled.length === 0) return null;
+    const allLabels = filled.every((i) => i.comment === undefined && i.chords && !i.lyrics?.trim() && !isChordToken(i.chords));
+    return allLabels ? filled.map((i) => ({ comment: i.chords })) : null;
 }
 
 export function parseChordProForDisplay(content: string): ChordProSection[] {
@@ -80,22 +85,17 @@ export function parseChordProForDisplay(content: string): ChordProSection[] {
             );
 
             if (hasContent) {
-                const items: ChordProItem[] = line.items.flatMap((item: any): ChordProItem[] => {
+                const items: ChordProItem[] = line.items.map((item: any) => {
                     if (isCommentTag(item)) {
-                        return [{
+                        return {
                             comment: item._value || '',
                             italic: item._name === 'ci' || item._name === 'comment_italic'
-                        }];
+                        };
                     }
-                    // A bracket that does not hold a chord is a section label: keep it as text (validation 2, item 16).
-                    if (item.chords && !isChordToken(item.chords)) {
-                        const label: ChordProItem = { comment: item.chords, isSectionLabel: true };
-                        return item.lyrics ? [label, { lyrics: item.lyrics }] : [label];
-                    }
-                    return [{
+                    return {
                         chords: item.chords || undefined,
                         lyrics: item.lyrics || undefined
-                    }];
+                    };
                 });
 
                 const atomizedItems: ChordProItem[] = [];
@@ -140,7 +140,7 @@ export function parseChordProForDisplay(content: string): ChordProSection[] {
                     }
                 });
 
-                const cleanLine: ChordProLine = { items: atomizedItems };
+                const cleanLine: ChordProLine = { items: sectionLabelItems(atomizedItems) ?? atomizedItems };
                 if (currentSection) {
                     currentSection.lines.push(cleanLine);
                 } else {

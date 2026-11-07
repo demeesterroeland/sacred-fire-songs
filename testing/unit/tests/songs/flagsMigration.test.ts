@@ -81,7 +81,7 @@ describe('recompute_song_flags migration: the chord rule', () => {
     } finally {
       await db.close();
     }
-    // PGlite starts a WebAssembly Postgres: on a busy machine that can take longer than the 5 s default.
+    // Starting the in-memory Postgres takes seconds, and more on a busy machine.
   }, 30_000);
 });
 
