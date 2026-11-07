@@ -960,7 +960,6 @@ const it: Partial<Record<TranslationKey, string>> = {
   "errors.shareWithSelf": "Non puoi condividere una registrazione con te stesso.",
   "errors.notSongOwner": "Solo il proprietario del canto o un amministratore può pubblicarlo.",
   "errors.consentRequired": "Conferma il consenso di chi canta prima di pubblicare.",
-  "errors.sharedTakeNoDownload": "Le registrazioni condivise non si possono scaricare.",
   "errors.auth.invalidCredentials": "L’email o la password non sono corretti.",
   "errors.auth.emailNotConfirmed": "Conferma prima il tuo indirizzo email. Controlla la posta in arrivo.",
   "errors.auth.userExists": "Esiste già un account con questa email. Prova ad accedere.",
@@ -1026,6 +1025,8 @@ const it: Partial<Record<TranslationKey, string>> = {
   "legal.privacy.choices.title": "Le tue scelte",
   "legal.privacy.choices.p1": "Puoi modificare o eliminare i tuoi canti, le playlist e le registrazioni nell’app, e cambiare nome e foto in Impostazioni.",
   "legal.privacy.choices.p2": "Per sapere che cosa è conservato su di te, per far rimuovere il tuo account o per qualsiasi altra domanda sulla privacy, contatta il gestore (vedi sopra). Eliminare l’account dall’app non è ancora possibile.",
+  "auth.notice.loginRequired": "Accedi per aprire quella pagina.",
+  "errors.auth.linkInvalid": "Questo link non è valido. Richiedine uno nuovo.",
 };
 
 export default it;

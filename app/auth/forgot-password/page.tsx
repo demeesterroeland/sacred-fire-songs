@@ -14,11 +14,12 @@ import { authPageHref } from '@/lib/auth/authBack';
 import { safeNextPath } from '@/lib/auth/safeNext';
 
 import { useLocale } from '@/context/LocaleContext';
+import { authNoticeKey } from '@/lib/auth/notice';
 import { errorMessage } from '@/lib/errors/errorCode';
 function ForgotPasswordContent() {
     const { t } = useLocale();
     const searchParams = useSearchParams();
-    const message = searchParams.get('message');
+    const messageKey = authNoticeKey(searchParams.get('message'));
     const rawNext = searchParams.get('next');
     // Back goes to the sign-in page, which keeps the way back to where the guest came from.
     const safeNext = rawNext ? safeNextPath(rawNext) : null;
@@ -48,7 +49,7 @@ function ForgotPasswordContent() {
         }
     };
 
-    const notice = error || successMessage || message;
+    const notice = error || successMessage || (messageKey ? t(messageKey) : null);
 
     return (
         <AuthPage back={<BackButton href={loginHref} testId="auth-back" />}>
@@ -61,7 +62,7 @@ function ForgotPasswordContent() {
 
                 {notice && (
                     <div className="mb-6">
-                        <AuthNotice tone={error || (message && message.includes('Could not')) ? 'error' : 'info'}>{notice}</AuthNotice>
+                        <AuthNotice tone={error ? 'error' : 'info'}>{notice}</AuthNotice>
                     </div>
                 )}
 

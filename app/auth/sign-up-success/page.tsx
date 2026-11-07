@@ -6,13 +6,14 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Mail, KeyRound, ArrowRight, Loader2 } from 'lucide-react';
 import { useLocale } from '@/context/LocaleContext';
+import { safeEmailParam } from '@/lib/auth/notice';
 import { errorMessage } from '@/lib/errors/errorCode';
 
 function SignUpSuccessContent() {
     const { t } = useLocale();
     const router = useRouter();
     const searchParams = useSearchParams();
-    const email = searchParams.get('email') || '';
+    const email = safeEmailParam(searchParams.get('email'));
     const next = searchParams.get('next');
 
     const [code, setCode] = useState('');

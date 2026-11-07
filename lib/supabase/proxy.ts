@@ -1,6 +1,7 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 import { shouldRedirectToLogin } from "@/lib/supabase/routeAccess";
+import { LOGIN_REQUIRED_NOTICE } from "@/lib/auth/notice";
 
 export async function updateSession(request: NextRequest) {
     let supabaseResponse = NextResponse.next({
@@ -45,7 +46,7 @@ export async function updateSession(request: NextRequest) {
     if (shouldRedirectToLogin(request.nextUrl.pathname, !!user)) {
         const url = request.nextUrl.clone();
         url.pathname = "/auth/login";
-        url.searchParams.set('message', 'Please log in to access this page');
+        url.searchParams.set('message', LOGIN_REQUIRED_NOTICE);
         return NextResponse.redirect(url);
     }
 

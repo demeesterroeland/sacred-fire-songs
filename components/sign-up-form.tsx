@@ -10,6 +10,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState, Suspense } from "react";
 import { Mail, Lock, ShieldCheck, Flame, ArrowRight } from "lucide-react";
 import { useLocale } from "@/context/LocaleContext";
+import { authNoticeKey } from "@/lib/auth/notice";
 import { errorMessage } from "@/lib/errors/errorCode";
 import { authPageHref } from '@/lib/auth/authBack';
 import {
@@ -44,7 +45,7 @@ function SignUpFormContent({
   const router = useRouter();
   const searchParams = useSearchParams();
   const next = searchParams.get("next");
-  const message = searchParams.get("message");
+  const messageKey = authNoticeKey(searchParams.get("message"));
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -83,9 +84,9 @@ function SignUpFormContent({
     <AuthCard className={className} {...props}>
       <AuthHeader icon={<Flame className="fill-current" />} title={t('auth.signUp.heading')} description={t('auth.signUp.description')} />
 
-      {message && (
+      {messageKey && (
         <div className="mb-6">
-          <AuthNotice tone="info">{message}</AuthNotice>
+          <AuthNotice tone="info">{t(messageKey)}</AuthNotice>
         </div>
       )}
 

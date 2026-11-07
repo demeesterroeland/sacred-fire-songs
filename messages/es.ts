@@ -960,7 +960,6 @@ const es: Partial<Record<TranslationKey, string>> = {
   "errors.shareWithSelf": "No puedes compartir una grabación contigo.",
   "errors.notSongOwner": "Solo quien es dueño de la canción o un administrador puede publicarla.",
   "errors.consentRequired": "Confirma el consentimiento de quien canta antes de publicar.",
-  "errors.sharedTakeNoDownload": "Las grabaciones compartidas no se pueden descargar.",
   "errors.auth.invalidCredentials": "El correo o la contraseña no son correctos.",
   "errors.auth.emailNotConfirmed": "Confirma primero tu correo. Revisa tu bandeja de entrada.",
   "errors.auth.userExists": "Ya existe una cuenta con este correo. Prueba a iniciar sesión.",
@@ -1026,6 +1025,8 @@ const es: Partial<Record<TranslationKey, string>> = {
   "legal.privacy.choices.title": "Tus opciones",
   "legal.privacy.choices.p1": "Puedes cambiar o eliminar tus canciones, listas y grabaciones en la app, y cambiar tu nombre y foto en Ajustes.",
   "legal.privacy.choices.p2": "Para saber qué se guarda sobre ti, para que se elimine tu cuenta o ante cualquier otra pregunta de privacidad, contacta con el operador (ver arriba). Eliminar la cuenta desde la app aún no es posible.",
+  "auth.notice.loginRequired": "Inicia sesión para abrir esa página.",
+  "errors.auth.linkInvalid": "Este enlace no es válido. Pide uno nuevo.",
 };
 
 export default es;

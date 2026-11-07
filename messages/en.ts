@@ -958,7 +958,6 @@ const en = {
   "errors.shareWithSelf": "You can't share a recording with yourself.",
   "errors.notSongOwner": "Only the song's owner or an admin can publish this song.",
   "errors.consentRequired": "Please confirm the singer's consent before publishing.",
-  "errors.sharedTakeNoDownload": "Shared recordings cannot be downloaded.",
   "errors.auth.invalidCredentials": "The email or password is not correct.",
   "errors.auth.emailNotConfirmed": "Please confirm your email address first. Check your inbox.",
   "errors.auth.userExists": "An account with this email already exists. Try signing in.",
@@ -1024,6 +1023,8 @@ const en = {
   "legal.privacy.choices.title": "Your choices",
   "legal.privacy.choices.p1": "You can change or delete your songs, playlists and recordings in the app, and change your name and picture in Settings.",
   "legal.privacy.choices.p2": "To ask what is stored about you, to have your account removed, or with any other privacy question, contact the operator (see above). Deleting an account from within the app is not available yet.",
+  "auth.notice.loginRequired": "Please sign in to open that page.",
+  "errors.auth.linkInvalid": "This link is not valid. Request a new one.",
 } as const;
 
 export default en;

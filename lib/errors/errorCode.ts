@@ -21,6 +21,8 @@ const CODES: Readonly<Record<string, TranslationKey>> = {
   bad_jwt: 'errors.notSignedIn',
   session_not_found: 'errors.notSignedIn',
   not_authenticated: 'errors.notSignedIn',
+  // Links that came back without what they need (the confirm route reports this code)
+  missing_params: 'errors.auth.linkInvalid',
   // Database (PostgREST / Postgres)
   PGRST301: 'errors.notSignedIn',
   PGRST303: 'errors.notSignedIn',
@@ -48,7 +50,7 @@ interface ErrorLike {
 export function errorKey(error: unknown, fallbackKey: TranslationKey = 'errors.generic'): TranslationKey {
   if (!error || typeof error !== 'object') return fallbackKey;
   const e = error as ErrorLike;
-  if (typeof e.code === 'string' && CODES[e.code]) return CODES[e.code];
+  if (typeof e.code === 'string' && Object.hasOwn(CODES, e.code)) return CODES[e.code];
   if (e.status === 429) return 'errors.auth.rateLimited';
   if (e.name === 'AuthRetryableFetchError') return 'errors.network';
   if (typeof e.message === 'string') {
@@ -60,4 +62,14 @@ export function errorKey(error: unknown, fallbackKey: TranslationKey = 'errors.g
 /** The translated message for an error from the authentication service or the database. */
 export function errorMessage(error: unknown, t: Translate, fallbackKey: TranslationKey = 'errors.generic'): string {
   return t(errorKey(error, fallbackKey));
+}
+
+/** True for a code this app has a translated sentence for. Inherited names ("constructor") are not codes. */
+export function isKnownErrorCode(code: unknown): code is string {
+  return typeof code === 'string' && Object.hasOwn(CODES, code);
+}
+
+/** The key for a code that came from an address: known codes only, anything else gives `auth.error.default`. */
+export function errorKeyForCode(code: unknown): TranslationKey {
+  return isKnownErrorCode(code) ? CODES[code] : 'auth.error.default';
 }

@@ -10,6 +10,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState, Suspense } from "react";
 import { Mail, Lock, Sparkles, Flame, ArrowRight } from "lucide-react";
 import { useLocale } from "@/context/LocaleContext";
+import { authNoticeKey } from "@/lib/auth/notice";
 import { errorMessage } from "@/lib/errors/errorCode";
 import { safeNextPath } from '@/lib/auth/safeNext';
 import { authPageHref } from '@/lib/auth/authBack';
@@ -46,7 +47,8 @@ function LoginFormContent({
   const router = useRouter();
   const searchParams = useSearchParams();
   const next = searchParams.get("next");
-  const message = searchParams.get("message");
+  // A code from the redirect (never text from the address): known codes give a sentence, others the default one.
+  const messageKey = authNoticeKey(searchParams.get("message"));
 
   const handleMagicLink = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -101,9 +103,9 @@ function LoginFormContent({
         description={mode === 'magic-link' ? t('auth.login.magicLinkHint') : t('auth.login.passwordHint')}
       />
 
-      {(message || success) && (
+      {(messageKey || success) && (
         <div className="mb-6">
-          <AuthNotice tone="info">{message || success}</AuthNotice>
+          <AuthNotice tone="info">{messageKey ? t(messageKey) : success}</AuthNotice>
         </div>
       )}
 

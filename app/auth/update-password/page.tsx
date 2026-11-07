@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { AuthCard, AuthHeader, AuthNotice, AuthPage, authFooterClass, authIconClass, authInputClass, authLabelClass, authLinkClass } from '@/components/auth/AuthShell';
 
 import { useLocale } from '@/context/LocaleContext';
+import { authNoticeKey } from '@/lib/auth/notice';
 import { errorMessage } from '@/lib/errors/errorCode';
 function UpdatePasswordContent() {
     const { t } = useLocale();
@@ -21,7 +22,7 @@ function UpdatePasswordContent() {
     const [isLoading, setIsLoading] = useState(false);
     const searchParams = useSearchParams();
     const router = useRouter();
-    const message = searchParams.get('message');
+    const messageKey = authNoticeKey(searchParams.get('message'));
 
     const handleUpdatePassword = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -42,7 +43,7 @@ function UpdatePasswordContent() {
             // Notify other components like Sidebar to refresh auth state
             window.dispatchEvent(new Event("auth-role-change"));
 
-            router.push("/?message=Password updated successfully");
+            router.push("/");
         } catch (error: unknown) {
             setError(errorMessage(error, t, 'common.errorOccurred'));
         } finally {
@@ -59,9 +60,9 @@ function UpdatePasswordContent() {
                     description={t('auth.updatePassword.pageDescription')}
                 />
 
-                {message && (
+                {messageKey && (
                     <div className="mb-6">
-                        <AuthNotice tone="error">{message}</AuthNotice>
+                        <AuthNotice tone="error">{t(messageKey)}</AuthNotice>
                     </div>
                 )}
 

@@ -962,7 +962,6 @@ const ru: Partial<Record<TranslationKey, string>> = {
   "errors.shareWithSelf": "Нельзя поделиться записью с самим собой.",
   "errors.notSongOwner": "Опубликовать эту песню может только её владелец или администратор.",
   "errors.consentRequired": "Перед публикацией подтвердите согласие исполнителя.",
-  "errors.sharedTakeNoDownload": "Общие записи нельзя скачать.",
   "errors.auth.invalidCredentials": "Неверный адрес почты или пароль.",
   "errors.auth.emailNotConfirmed": "Сначала подтвердите адрес почты. Проверьте входящие.",
   "errors.auth.userExists": "Аккаунт с этой почтой уже есть. Попробуйте войти.",
@@ -1028,6 +1027,8 @@ const ru: Partial<Record<TranslationKey, string>> = {
   "legal.privacy.choices.title": "Ваш выбор",
   "legal.privacy.choices.p1": "Вы можете менять или удалять свои песни, плейлисты и записи в приложении, а имя и фото — в Настройках.",
   "legal.privacy.choices.p2": "Чтобы узнать, что хранится о вас, удалить аккаунт или задать любой другой вопрос о конфиденциальности, свяжитесь с оператором (см. выше). Удалить аккаунт из приложения пока нельзя.",
+  "auth.notice.loginRequired": "Войдите, чтобы открыть эту страницу.",
+  "errors.auth.linkInvalid": "Эта ссылка недействительна. Запросите новую.",
 };
 
 export default ru;

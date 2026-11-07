@@ -960,7 +960,6 @@ const fr: Partial<Record<TranslationKey, string>> = {
   "errors.shareWithSelf": "Vous ne pouvez pas partager un enregistrement avec vous-même.",
   "errors.notSongOwner": "Seul le propriétaire du chant ou un administrateur peut le publier.",
   "errors.consentRequired": "Confirmez le consentement de la personne qui chante avant de publier.",
-  "errors.sharedTakeNoDownload": "Les enregistrements partagés ne peuvent pas être téléchargés.",
   "errors.auth.invalidCredentials": "L’adresse e-mail ou le mot de passe est incorrect.",
   "errors.auth.emailNotConfirmed": "Confirmez d’abord votre adresse e-mail. Regardez dans votre boîte de réception.",
   "errors.auth.userExists": "Un compte existe déjà avec cette adresse e-mail. Essayez de vous connecter.",
@@ -1026,6 +1025,8 @@ const fr: Partial<Record<TranslationKey, string>> = {
   "legal.privacy.choices.title": "Vos choix",
   "legal.privacy.choices.p1": "Vous pouvez modifier ou supprimer vos chants, playlists et enregistrements dans l’application, et changer votre nom et votre photo dans Réglages.",
   "legal.privacy.choices.p2": "Pour savoir ce qui est conservé à votre sujet, faire supprimer votre compte ou toute autre question de confidentialité, contactez l’opérateur (voir ci-dessus). La suppression du compte depuis l’application n’est pas encore possible.",
+  "auth.notice.loginRequired": "Connectez-vous pour ouvrir cette page.",
+  "errors.auth.linkInvalid": "Ce lien n’est pas valide. Demandez-en un nouveau.",
 };
 
 export default fr;

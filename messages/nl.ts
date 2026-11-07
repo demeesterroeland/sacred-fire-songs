@@ -959,7 +959,6 @@ const nl: Partial<Record<TranslationKey, string>> = {
   "errors.shareWithSelf": "Je kunt een opname niet met jezelf delen.",
   "errors.notSongOwner": "Alleen de eigenaar van het lied of een beheerder kan dit lied publiceren.",
   "errors.consentRequired": "Bevestig eerst de toestemming van de zanger voordat je publiceert.",
-  "errors.sharedTakeNoDownload": "Gedeelde opnames kun je niet downloaden.",
   "errors.auth.invalidCredentials": "Het e-mailadres of wachtwoord klopt niet.",
   "errors.auth.emailNotConfirmed": "Bevestig eerst je e-mailadres. Kijk in je inbox.",
   "errors.auth.userExists": "Er bestaat al een account met dit e-mailadres. Probeer in te loggen.",
@@ -1025,6 +1024,8 @@ const nl: Partial<Record<TranslationKey, string>> = {
   "legal.privacy.choices.title": "Jouw keuzes",
   "legal.privacy.choices.p1": "Je kunt je liederen, afspeellijsten en opnames in de app wijzigen of verwijderen, en je naam en foto aanpassen in Instellingen.",
   "legal.privacy.choices.p2": "Wil je weten wat er over jou is opgeslagen, je account laten verwijderen, of heb je een andere privacyvraag, neem dan contact op met de beheerder (zie hierboven). Een account verwijderen vanuit de app kan nog niet.",
+  "auth.notice.loginRequired": "Log in om die pagina te openen.",
+  "errors.auth.linkInvalid": "Deze link is niet geldig. Vraag een nieuwe aan.",
 };
 
 export default nl;
