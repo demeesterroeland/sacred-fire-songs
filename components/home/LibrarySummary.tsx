@@ -16,40 +16,24 @@ const stats = [
     icon: Heart,
     labelKey: 'nav.favorites',
     href: '/songs?favorites=true',
-    color: 'text-rose-400',
-    iconFill: 'fill-rose-400',
-    bg: 'bg-rose-500/10',
-    border: 'border-rose-500/20 hover:border-rose-500/40',
   },
   {
     key: 'drafts',
     icon: PenLine,
     labelKey: 'nav.drafts',
     href: MY_DRAFTS_HREF,
-    color: 'text-amber-400',
-    iconFill: '',
-    bg: 'bg-amber-500/10',
-    border: 'border-amber-500/20 hover:border-amber-500/40',
   },
   {
     key: 'mySongs',
     icon: Music,
     labelKey: 'librarySummary.mySongs.title',
     href: '/songs?mine=true',
-    color: 'text-violet-400',
-    iconFill: '',
-    bg: 'bg-violet-500/10',
-    border: 'border-violet-500/20 hover:border-violet-500/40',
   },
   {
     key: 'newSongs',
     icon: Sparkles,
     labelKey: 'librarySummary.newSongs.title',
     href: '/songs?new=true',
-    color: 'text-emerald-400',
-    iconFill: '',
-    bg: 'bg-emerald-500/10',
-    border: 'border-emerald-500/20 hover:border-emerald-500/40',
   },
 ] as const;
 
@@ -73,13 +57,13 @@ export default async function LibrarySummary(props: LibrarySummaryProps) {
             <Link
               key={stat.key}
               href={stat.href}
-              className={`flex items-center gap-3 p-3 md:p-4 rounded-2xl border transition-all hover:-translate-y-0.5 group ${stat.border} bg-white/50 dark:bg-gray-900/30`}
+              className="flex items-center gap-3 p-3 md:p-4 rounded-panel border border-line bg-surface hover:bg-surface-2 transition-all hover:-translate-y-0.5 group"
             >
-              <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${stat.bg}`}>
-                <Icon className={`w-4 h-4 ${stat.color} ${stat.iconFill}`} />
+              <div className="w-9 h-9 rounded-control flex items-center justify-center shrink-0 bg-surface-2 text-fg-muted group-hover:text-fg transition-colors">
+                <Icon className="w-4 h-4" />
               </div>
               <div className="min-w-0">
-                <p className="text-lg font-bold text-gray-900 dark:text-white leading-tight">{count}</p>
+                <p className="text-lg font-bold text-fg leading-tight">{count}</p>
                 <p className="text-caption text-fg-muted truncate">{t(stat.labelKey)}</p>
               </div>
             </Link>

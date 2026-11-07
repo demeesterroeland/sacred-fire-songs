@@ -46,54 +46,21 @@ async function RecordingCountSubtitle({ counts, emptyLabel }: { counts: Recordin
 
 // ─── Shared primitives ────────────────────────────────────────────────────────
 
-const accentClasses = {
-    rose: {
-        card:      'bg-rose-500/8 border-rose-500/20',
-        cardHover: 'hover:bg-rose-500/15 hover:border-rose-500/35',
-        icon:      'bg-rose-500/15',
-        iconHover: 'group-hover:bg-rose-500/25',
-        iconText:  'text-rose-400 fill-rose-400',
-    },
-    amber: {
-        card:      'bg-amber-500/8 border-amber-500/20',
-        cardHover: 'hover:bg-amber-500/15 hover:border-amber-500/35',
-        icon:      'bg-amber-500/15',
-        iconHover: 'group-hover:bg-amber-500/25',
-        iconText:  'text-amber-400',
-    },
-    violet: {
-        card:      'bg-violet-500/8 border-violet-500/20',
-        cardHover: 'hover:bg-violet-500/15 hover:border-violet-500/35',
-        icon:      'bg-violet-500/15',
-        iconHover: 'group-hover:bg-violet-500/25',
-        iconText:  'text-violet-400',
-    },
-    gray: {
-        card:      'bg-gray-200/40 dark:bg-gray-800/40 border-gray-300/40 dark:border-gray-700/40',
-        cardHover: 'hover:bg-gray-200/70 dark:hover:bg-gray-800/70 hover:border-gray-400/60 dark:hover:border-gray-600/60',
-        icon:      'bg-gray-300/40 dark:bg-gray-700/40',
-        iconHover: 'group-hover:bg-gray-300/60 dark:group-hover:bg-gray-700/60',
-        iconText:  'text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors',
-    },
-} as const;
-
 interface SmartPlaylistCardProps {
     icon: LucideIcon;
     title: string;
     description?: string;
     subtitle: React.ReactNode;
     songTitles?: string[];
-    accent: keyof typeof accentClasses;
+    accent?: string;
     href: string;
 }
 
-async function SmartPlaylistCard({ icon: Icon, title, description, subtitle, songTitles = [], accent, href }: SmartPlaylistCardProps) {
-    const c = accentClasses[accent];
-
+async function SmartPlaylistCard({ icon: Icon, title, description, subtitle, songTitles = [], href }: SmartPlaylistCardProps) {
     const inner = (
-        <div className={`border p-4 rounded-2xl flex items-center gap-4 transition-all w-full min-w-0 group ${c.card} ${c.cardHover} hover:-translate-y-0.5`}>
-            <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-colors ${c.icon} ${c.iconHover}`}>
-                <Icon className={`w-6 h-6 ${c.iconText}`} />
+        <div className="border border-line bg-surface hover:bg-surface-2 p-4 rounded-panel flex items-center gap-4 transition-all w-full min-w-0 group hover:-translate-y-0.5">
+            <div className="w-12 h-12 rounded-control flex items-center justify-center shrink-0 bg-surface-2 text-fg-muted group-hover:text-fg transition-colors">
+                <Icon className="w-6 h-6 text-fg-muted group-hover:text-fg" />
             </div>
             <CardContent
                 title={title}

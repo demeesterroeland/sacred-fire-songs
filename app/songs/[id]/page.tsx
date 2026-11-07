@@ -9,7 +9,7 @@ import SongDisplay from '@/components/song/SongDisplay';
 import SongDetailSkeleton from '@/components/song/SongDetailSkeleton';
 import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Trash2, Edit2, Heart, MoreVertical, ListPlus, Mic, Share2 } from 'lucide-react';
+import { Trash2, Edit2, Heart, MoreVertical, ListPlus, Mic, Share2, Globe, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import GuestGateSheet from '@/components/common/GuestGateSheet';
@@ -21,6 +21,7 @@ import { useDeleteSong } from '@/hooks/useDeleteSong';
 import { SONG_KEYS } from '@/lib/songs/queryKeys';
 import { useWakeLock } from '@/hooks/useWakeLock';
 import { useAutoScroll, useLyricsBelowFold, AUTOSCROLL_KEEP_ATTR } from '@/hooks/useAutoScroll';
+import { useSongControlsExpanded } from '@/hooks/useSongControlsExpanded';
 import { SongActionBar } from '@/components/song/SongActionBar';
 import { useActionBarVisibility } from '@/hooks/useActionBarVisibility';
 import { useUserPreferences } from '@/context/UserPreferencesContext';
@@ -55,6 +56,7 @@ export default function SongDetailPage() {
     // another song, or a version that is gone, falls back to the first one (UXA-049).
     const [versionChoice, setVersionChoice] = useState<VersionChoice | null>(null);
     const [readerPrefs, setReaderPrefs] = useReaderPrefs();
+    const [controlsExpanded, setControlsExpanded] = useSongControlsExpanded();
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     // The song page's one menu (⋮). It is opened from the bar on a phone and from the header from lg up.
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -363,11 +365,16 @@ export default function SongDetailPage() {
                         aria-hidden="true"
                         title={song.title}
                         className={cn(
-                            'min-w-0 flex-1 truncate text-left text-title font-semibold text-fg',
+                            'min-w-0 flex-1 truncate text-left text-title font-semibold text-fg flex items-center gap-1.5',
                             !titleScrolledPast && 'invisible',
                         )}
                     >
-                        {song.title}
+                        <span className="truncate">{song.title}</span>
+                        {song.is_public ? (
+                            <Globe className="size-4 shrink-0 text-fg-muted" aria-hidden />
+                        ) : (
+                            <Lock className="size-4 shrink-0 text-fg-muted" aria-hidden />
+                        )}
                     </p>
                     <button
                         ref={phoneMenuButtonRef}
@@ -392,15 +399,27 @@ export default function SongDetailPage() {
                 <h1
                     ref={phoneTitleRef}
                     data-testid="song-title"
-                    className="lg:hidden break-words px-6 pb-1 pr-16 pt-3.5 text-title font-semibold text-fg md:px-10 md:pr-16"
+                    className="lg:hidden break-words px-6 pb-1 pr-16 pt-3.5 text-title font-semibold text-fg md:px-10 md:pr-16 flex items-center gap-2"
                 >
-                    {song.title}
+                    <span>{song.title}</span>
+                    {song.is_public ? (
+                        <Globe className="size-4 shrink-0 text-fg-muted" aria-hidden />
+                    ) : (
+                        <Lock className="size-4 shrink-0 text-fg-muted" aria-hidden />
+                    )}
                 </h1>
 
                 {/* Desktop Page Header (Title, Actions) - Visible only on desktop >= lg */}
                 <div ref={setDesktopHeader} className="hidden lg:flex justify-between items-center px-8 py-4 border-b border-line bg-bg/50 sticky top-0 backdrop-blur-md z-10">
                     {/* Title */}
-                    <h1 className="text-display font-semibold text-fg tracking-tight">{song.title}</h1>
+                    <div className="flex items-center gap-2.5 min-w-0 pr-4">
+                        <h1 className="text-display font-semibold text-fg tracking-tight truncate">{song.title}</h1>
+                        {song.is_public ? (
+                            <Globe className="size-5 shrink-0 text-fg-muted" aria-hidden />
+                        ) : (
+                            <Lock className="size-5 shrink-0 text-fg-muted" aria-hidden />
+                        )}
+                    </div>
                     {/* Neutral buttons; the one accent is the primary action, Practice (validation 2, item 7).
                         Delete stays neutral: the red is in the confirmation. */}
                     <div className="flex items-center gap-3">
@@ -513,7 +532,8 @@ export default function SongDetailPage() {
 
                 <div className="max-w-5xl px-6 md:px-10 pb-[calc(1.5rem+var(--mini-player-h,0px)+var(--action-bar-h,0px))] md:pb-[calc(2.5rem+var(--mini-player-h,0px)+var(--action-bar-h,0px))] lg:pb-[calc(2.5rem+var(--mini-player-h,0px))] pt-4 md:pt-6 space-y-0">
 
-                    {/* Story 6.1.7 (#391): tags on one grey line (tap to expand), Key · Capo · Tuning on another. */}
+                    {/* Story 6.1.7 (#391), Validation 3: tags, Key · Capo · Tuning, and Chords/transpose toolbar
+                        inside expand/collapse. Closed by default, remembered in localStorage. */}
                     <SongMetaLines
                         className="mb-2"
                         originalAuthor={song.original_author}
@@ -522,6 +542,8 @@ export default function SongDetailPage() {
                         hasChords={song.has_chords}
                         hasMelody={song.has_melody}
                         hasPersonalRecording={hasPersonalRecording}
+                        expanded={controlsExpanded}
+                        onToggleExpanded={() => setControlsExpanded((e) => !e)}
                     />
 
                     {/* Story 6.1.11 (#395): version switch (Original · Simplified), only when the song has more
@@ -533,32 +555,33 @@ export default function SongDetailPage() {
                         onSelect={selectVersion}
                     />
 
-                    {/* Story 6.1.6 (#390): Chords · A− · A+, remembered on this device.
-                        Story 6.1.10 (#394): plus auto-scroll and ⋯ (transpose, speed). The strip sticks under the
-                        header only while auto-scroll runs, so it can be paused or slowed without scrolling back. */}
-                    <div
-                        ref={toolbarWrapRef}
-                        data-testid="reader-toolbar-wrap"
-                        style={{ '--desktop-header-h': `${desktopHeaderH}px` } as React.CSSProperties}
-                        data-scrolling={autoScroll.playing ? 'true' : 'false'}
-                        className={cn(
-                            // Same side padding as the page, so the first control lines up with the lyrics (the Chords switch pulls its own padding back).
-                            '-mx-6 mb-2 px-6 md:-mx-10 md:px-10',
-                            autoScroll.playing && 'sticky top-[calc(var(--env-banner-height,0px)+var(--bar-h))] z-20 border-b border-line bg-bg lg:top-[var(--desktop-header-h)]',
-                        )}
-                    >
-                        <ReaderToolbar
-                            step={readerPrefs.step}
-                            chords={readerPrefs.chords}
-                            speed={readerPrefs.speed}
-                            hasChords={shownHasChords}
-                            onChange={setReaderPrefs}
-                            scrolling={autoScroll.playing}
-                            onToggleScroll={canAutoScroll ? autoScroll.toggle : undefined}
-                            fallbackFocusRef={largerButtonRef}
-                            awake={awake}
-                        />
-                    </div>
+                    {/* Story 6.1.6 (#390), Validation 3: Chords · A− · A+ · ▶ row inside expand/collapse,
+                        rendered when expanded or while auto-scroll is actively playing. */}
+                    {(controlsExpanded || autoScroll.playing) && (
+                        <div
+                            ref={toolbarWrapRef}
+                            data-testid="reader-toolbar-wrap"
+                            style={{ '--desktop-header-h': `${desktopHeaderH}px` } as React.CSSProperties}
+                            data-scrolling={autoScroll.playing ? 'true' : 'false'}
+                            className={cn(
+                                // Same side padding as the page, so the first control lines up with the lyrics (the Chords switch pulls its own padding back).
+                                '-mx-6 mb-2 px-6 md:-mx-10 md:px-10',
+                                autoScroll.playing && 'sticky top-[calc(var(--env-banner-height,0px)+var(--bar-h))] z-20 border-b border-line bg-bg lg:top-[var(--desktop-header-h)]',
+                            )}
+                        >
+                            <ReaderToolbar
+                                step={readerPrefs.step}
+                                chords={readerPrefs.chords}
+                                speed={readerPrefs.speed}
+                                hasChords={shownHasChords}
+                                onChange={setReaderPrefs}
+                                scrolling={autoScroll.playing}
+                                onToggleScroll={canAutoScroll ? autoScroll.toggle : undefined}
+                                fallbackFocusRef={largerButtonRef}
+                                awake={awake}
+                            />
+                        </div>
+                    )}
 
                     {/* Song Content (Lyrics/Chords) */}
                     <div className="pt-2 pb-12">

@@ -23,8 +23,8 @@ export default function Sidebar() {
                 fixed lg:sticky top-[var(--navbar-height)] left-0 z-40
                 h-[calc(100dvh-var(--navbar-height))]
                 w-0 lg:w-64 overflow-y-auto overflow-x-hidden
-                pt-8 bg-white dark:bg-gray-950 transition-all duration-200
-                ${isOpen ? 'w-64 shadow-2xl border-r border-gray-200 dark:border-gray-800' : ''}
+                pt-8 bg-bg transition-all duration-200
+                ${isOpen ? 'w-64 shadow-2xl border-r border-line' : ''}
             `}
             onClick={(e) => {
                 // Close on mobile when clicking a link
@@ -60,15 +60,15 @@ export default function Sidebar() {
                                             key={item.href}
                                             href={item.href}
                                             className={`
-                                                flex items-center gap-4 ps-7 pe-4 py-2.5 me-2 rounded-e-full
-                                                text-sm font-medium transition-colors
+                                                flex items-center gap-4 ps-7 pe-4 py-2.5 me-2 rounded-control
+                                                text-meta font-medium transition-colors
                                                 ${active
-                                                    ? 'bg-red-50 dark:bg-red-950/40 text-red-700 dark:text-red-400'
-                                                    : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 hover:text-gray-900 dark:hover:text-white'
+                                                    ? 'bg-surface-2 text-fg font-semibold'
+                                                    : 'text-fg-muted hover:bg-surface-2 hover:text-fg'
                                                 }
                                             `}
                                         >
-                                            <Icon className={`w-5 h-5 shrink-0 ${active ? 'text-red-600 dark:text-red-400' : ''}`} />
+                                            <Icon className={`w-5 h-5 shrink-0 ${active ? 'text-accent' : ''}`} />
                                             <span>{itemLabel}</span>
                                         </Link>
                                     );
@@ -86,29 +86,29 @@ export default function Sidebar() {
                             <Link
                                 href="/admin/users"
                                 className={`
-                                    flex items-center gap-4 ps-7 pe-4 py-2.5 me-2 rounded-e-full
-                                    text-sm font-medium transition-colors
+                                    flex items-center gap-4 ps-7 pe-4 py-2.5 me-2 rounded-control
+                                    text-meta font-medium transition-colors
                                     ${isActive('/admin/users')
-                                        ? 'bg-purple-50 dark:bg-purple-950/40 text-purple-700 dark:text-purple-400 font-bold'
-                                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 hover:text-gray-900 dark:hover:text-white'
+                                        ? 'bg-surface-2 text-fg font-semibold'
+                                        : 'text-fg-muted hover:bg-surface-2 hover:text-fg'
                                     }
                                 `}
                             >
-                                <ShieldCheck className={`w-5 h-5 shrink-0 ${isActive('/admin/users') ? 'text-purple-600 dark:text-purple-400' : ''}`} />
+                                <ShieldCheck className={`w-5 h-5 shrink-0 ${isActive('/admin/users') ? 'text-accent' : ''}`} />
                                 <span>{t('nav.adminUsers')}</span>
                             </Link>
                         </div>
                     )}
                 </div>
 
-                <div className="ps-7 pe-4 pt-6 border-t border-gray-100 dark:border-gray-900/60 mt-auto flex flex-col gap-3">
+                <div className="ps-7 pe-4 pt-6 border-t border-line mt-auto flex flex-col gap-3">
                     {/* Language switcher — also reachable for guests */}
                     <LanguageSwitcher variant="full" className="-ms-2.5" />
 
                     {/* Application SemVer Version Tag */}
                     <div>
                         <span className="inline-flex items-center gap-1.5 text-caption font-medium text-fg-muted hover:text-fg transition-colors">
-                            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500/80 animate-pulse" />
+                            <span className="w-1.5 h-1.5 rounded-full bg-fg-muted" />
                             {process.env.NEXT_PUBLIC_APP_VERSION ? (
                                 <span>
                                     {process.env.NEXT_PUBLIC_APP_VERSION.replace(/-([a-f0-9]{40})$/, (match, p1) => `-${p1.substring(0, 7)}`)}
