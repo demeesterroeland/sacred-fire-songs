@@ -20,7 +20,7 @@ import { PlaylistPicker } from '@/components/playlists/PlaylistPicker';
 import { useDeleteSong } from '@/hooks/useDeleteSong';
 import { SONG_KEYS } from '@/lib/songs/queryKeys';
 import { useWakeLock } from '@/hooks/useWakeLock';
-import { useAutoScroll, useLyricsBelowFold } from '@/hooks/useAutoScroll';
+import { useAutoScroll, useLyricsBelowFold, AUTOSCROLL_KEEP_ATTR } from '@/hooks/useAutoScroll';
 import { SongActionBar } from '@/components/song/SongActionBar';
 import { useActionBarVisibility } from '@/hooks/useActionBarVisibility';
 import { useUserPreferences } from '@/context/UserPreferencesContext';
@@ -375,6 +375,7 @@ export default function SongDetailPage() {
                         ref={phoneMenuButtonRef}
                         type="button"
                         data-testid="song-menu-button"
+                        {...{ [AUTOSCROLL_KEEP_ATTR]: '' }}
                         aria-haspopup="dialog"
                         aria-expanded={isMenuOpen}
                         onClick={() => setIsMenuOpen(true)}
@@ -500,6 +501,7 @@ export default function SongDetailPage() {
                             ref={desktopMenuButtonRef}
                             type="button"
                             data-testid="song-menu-button-desktop"
+                            {...{ [AUTOSCROLL_KEEP_ATTR]: '' }}
                             aria-haspopup="dialog"
                             aria-expanded={isMenuOpen}
                             onClick={() => setIsMenuOpen(true)}

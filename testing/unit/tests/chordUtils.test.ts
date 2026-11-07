@@ -40,3 +40,26 @@ describe('section labels in brackets', () => {
     expect(lineItems('[Chorus]Sing')[0][0]).toMatchObject({ chords: 'Chorus', lyrics: 'Sing' });
   });
 });
+
+// Review round: a label-only line must not swallow a real chord. `isChordToken` (shared with the transposer and a
+// deployed SQL helper) is narrower than what musicians write, so the display rule has its own wider "looks like a chord".
+describe('a chord alone on its line stays a chord', () => {
+  const lineItems = (content: string) => parseChordProForDisplay(content).flatMap((s) => s.lines.map((l) => l.items));
+
+  it.each(['B♭', 'C6/9', 'F♯m7', 'Cmaj7#11', 'G/B', 'Dsus4', 'A7(b9)', 'E♭/G', 'Bb', 'Am'])('[%s] alone is in the chord row', (chord) => {
+    const items = lineItems(`[${chord}]`)[0];
+    expect(items[0]).toMatchObject({ chords: chord });
+    expect(items.every((i) => i.comment === undefined)).toBe(true);
+  });
+
+  it.each(['am', 'Hm', 'Re', 'Do', 'Chorus', 'Coda', 'Bridge', 'Intro', 'N.C.'])('[%s] alone is comment text', (word) => {
+    const items = lineItems(`[${word}]`)[0];
+    expect(items.map((i) => i.comment)).toEqual([word]);
+    expect(items.every((i) => !i.chords)).toBe(true);
+  });
+
+  it('a line of only chords and a label-like word stays chords', () => {
+    expect(lineItems('[B♭] [Chorus]')[0].every((i) => i.comment === undefined)).toBe(true);
+  });
+});
+

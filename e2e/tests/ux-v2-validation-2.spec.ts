@@ -36,6 +36,14 @@ test.beforeAll(async () => {
         [id, IDS.song, name, content, created],
       );
     }
+    // A recording of the member on the Original (the first version).
+    await client.query(
+      `INSERT INTO public.user_recordings (id, user_id, song_version_id, recording_name, storage_path, is_public)
+       SELECT $1::uuid, p.id, $2::uuid, 'E2E Validation 2 Recording', 'e2e-validation-2/' || $1::text || '.webm', false
+         FROM public.profiles p WHERE p.email = $3
+       ON CONFLICT (id) DO NOTHING`,
+      [IDS.recording, IDS.original, ROLES.member.email],
+    );
   } finally {
     await client.end();
   }
@@ -293,3 +301,97 @@ test.describe('admin', () => {
   });
 });
 
+
+// ── Review round ───────────────────────────────────────────────────────────────────────────────────────────
+const ARBITRARY = 'Zebra crossing text 12345';
+
+test.describe('auth pages show translated messages by code', () => {
+  test('the error page never prints text from the address', async ({ page }) => {
+    await page.goto(`/auth/error?error=${encodeURIComponent(ARBITRARY)}&message=${encodeURIComponent(ARBITRARY)}&code=${encodeURIComponent(ARBITRARY)}`);
+    await expect(page.getByText('We encountered an error during authentication')).toBeVisible();
+    await expect(page.getByText(ARBITRARY)).toHaveCount(0);
+    await page.goto('/auth/error?code=otp_expired');
+    await expect(page.getByText('This link or code has expired. Request a new one.')).toBeVisible();
+  });
+
+  test('sign-in shows the sentence of a known code, the default text for anything else', async ({ page }) => {
+    await page.goto(`/auth/login?message=${encodeURIComponent(ARBITRARY)}`);
+    await expect(page.getByText(ARBITRARY)).toHaveCount(0);
+    await expect(page.getByText('We encountered an error during authentication')).toBeVisible();
+    await page.goto('/auth/login?message=login_required');
+    await expect(page.getByText('Please sign in to open that page.')).toBeVisible();
+  });
+
+  test('a guest sent to sign-in from a protected page reads the translated sentence', async ({ page }) => {
+    await page.goto('/admin/users');
+    await expect(page).toHaveURL(/\/auth\/login\?.*message=login_required/);
+    await expect(page.getByText('Please sign in to open that page.')).toBeVisible();
+  });
+
+  test('the confirm route sends a bad link to the error page with a code only', async ({ page }) => {
+    await page.goto(`/auth/confirm?secret_param=${encodeURIComponent(ARBITRARY)}`);
+    await expect(page).toHaveURL(/\/auth\/error\?code=missing_params$/);
+    await expect(page.getByText('This link is not valid. Request a new one.')).toBeVisible();
+  });
+});
+
+test('2 (review): opening the menu does not stop auto-scroll, and the speed changes while it runs', async ({ page }) => {
+  await page.goto(`/songs/${IDS.song}`);
+  await page.setViewportSize({ width: 390, height: 520 });
+  await page.evaluate(() => { document.body.style.minHeight = '6000px'; });
+  const toggle = page.getByTestId('autoscroll-toggle');
+  await expect(toggle).toBeVisible();
+  await toggle.click();
+  await expect(toggle).toHaveAttribute('aria-pressed', 'true');
+  const sheet = await openSongMenu(page);
+  await expect(toggle).toHaveAttribute('aria-pressed', 'true'); // still running with the menu open
+  const speed = sheet.getByTestId('scroll-speed');
+  await expect(speed).toHaveText('Speed 3 of 5');
+  await sheet.getByRole('button', { name: 'Faster' }).click();
+  await expect(speed).toHaveText('Speed 4 of 5');
+  const y0 = await page.evaluate(() => window.scrollY);
+  await expect.poll(() => page.evaluate(() => window.scrollY)).toBeGreaterThan(y0 + 20); // and it keeps moving
+  await expect(toggle).toHaveAttribute('aria-pressed', 'true');
+});
+
+test.describe('member', () => {
+  test.use({ storageState: ROLES.member.storage });
+
+  test('3 (review): switching version drops a recording link, so a reload shows the version that was chosen', async ({ page }) => {
+    await page.goto(`/songs/${IDS.song}?recording=${IDS.recording}`);
+    await expect(page.getByRole('radio', { name: 'Original' })).toHaveAttribute('aria-checked', 'true');
+    await page.getByRole('dialog').getByRole('button', { name: 'Close' }).first().click().catch(() => {});
+    await page.keyboard.press('Escape');
+    await page.getByRole('radio', { name: 'Simplified' }).click();
+    await expect(page.getByRole('radio', { name: 'Simplified' })).toHaveAttribute('aria-checked', 'true');
+    await expect(page).toHaveURL(new RegExp(`\\?version=${IDS.simplified}$`));
+    expect(page.url()).not.toContain('recording=');
+    await page.reload();
+    await expect(page.getByRole('radio', { name: 'Simplified' })).toHaveAttribute('aria-checked', 'true');
+  });
+});
+
+test.describe('admin', () => {
+  test.use({ storageState: ROLES.admin.storage });
+
+  test('4 (review): the My Drafts card opens exactly the drafts it counts', async ({ page }) => {
+    const client = new pg.Client({ connectionString: DATABASE_URL });
+    await client.connect();
+    const own = Number(
+      (
+        await client.query(
+          `SELECT count(*) AS n FROM public.compositions c JOIN public.profiles p ON p.id = c.owner_id
+            WHERE p.email = $1 AND c.is_public = false`,
+          [ROLES.admin.email],
+        )
+      ).rows[0].n,
+    );
+    await client.end();
+    test.skip(own === 0 || own > 15, 'needs a few own drafts (and fewer than one page) in the seed');
+    await page.goto('/library/playlists');
+    await page.getByRole('link', { name: /My Drafts/ }).click();
+    await expect(page).toHaveURL(/mine=true/);
+    await expect(page).toHaveURL(/status=draft/);
+    await expect(page.getByTestId('song-row')).toHaveCount(own);
+  });
+});

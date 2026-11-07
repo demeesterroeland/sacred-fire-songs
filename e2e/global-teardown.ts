@@ -63,6 +63,7 @@ export default async function globalTeardown(): Promise<void> {
     await client.query('DELETE FROM public.song_versions WHERE id = ANY($1)', [[v1r.original, v1r.labels]]);
     await client.query('DELETE FROM public.compositions WHERE id = $1', [v1r.song]);
     const v2 = VALIDATION_2_FIXTURE_IDS;
+    await client.query('DELETE FROM public.user_recordings WHERE id = $1', [v2.recording]);
     await client.query('DELETE FROM public.song_versions WHERE id = ANY($1)', [[v2.original, v2.simplified]]);
     await client.query('DELETE FROM public.compositions WHERE id = $1', [v2.song]);
     const variants = VARIANT_SLOT_FIXTURE_IDS;

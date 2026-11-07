@@ -110,8 +110,11 @@ describe('operator variables', () => {
   });
   it('are in .env.example with neutral placeholders and passed to the container', () => {
     const env = readFileSync('.env.example', 'utf8');
-    expect(env).toMatch(/^OPERATOR_NAME=/m);
-    expect(env).toMatch(/^OPERATOR_CONTACT_EMAIL=/m);
+    // Commented out: a copied file must give the neutral "not configured" sentence, not an example operator.
+    expect(env).toMatch(/^# OPERATOR_NAME=/m);
+    expect(env).toMatch(/^# OPERATOR_CONTACT_EMAIL=/m);
+    expect(env).not.toMatch(/^OPERATOR_NAME=/m);
+    expect(env).not.toMatch(/^OPERATOR_CONTACT_EMAIL=/m);
     const compose = readFileSync('docker-compose.yml', 'utf8');
     expect(compose).toContain('OPERATOR_NAME=');
     expect(compose).toContain('OPERATOR_CONTACT_EMAIL=');

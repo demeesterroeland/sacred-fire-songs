@@ -1,5 +1,6 @@
-# Version: 1.0 | Date: Nov 7, 2026
+# Version: 1.1 | Date: Nov 7, 2026
 # Changelog
+# 1.1 | Nov 7, 2026 | Review of PR #477: auth messages by code, auto-scroll while the menu is open, version switch drops the recording link, My Drafts lists what it counts, chord-like labels, right-click on plain text.
 # 1.0 | Nov 7, 2026 | UX v2 validation round 2, batch 2 (Part of #375): one Sign In button, floating "+", one heading size, counts in parentheses, version links, full title on a phone, neutral song buttons, "recording" and "Record", the Recordings card, the Screen stays on switch, one song menu, Terms and Privacy pages, own drafts only, one favourites term, one main landmark, specific error messages.
 @validation-2
 Feature: UX v2 validation round 2, batch 2
@@ -158,3 +159,42 @@ Feature: UX v2 validation round 2, batch 2
     Given the authentication service answers "invalid_credentials"
     Then the person reads the translated sentence for wrong credentials
     And the raw service message is never shown
+
+  # Review of PR #477 ─────────────────────────────────────────────────────────
+  @unit @e2e
+  Scenario: Auth pages show translated messages by code
+    Given an address with a message parameter that is not a known code
+    Then the page shows the default text and not the parameter
+    When the message parameter is "login_required"
+    Then the page shows the translated sentence
+
+  @e2e
+  Scenario: Opening the menu does not stop auto-scroll
+    Given auto-scroll is running on a long song
+    When I open the menu and press Faster
+    Then the scroll keeps running at the new speed
+
+  @unit @e2e
+  Scenario: A version switch drops the recording link
+    Given a song opened with a recording link
+    When I switch to another version
+    Then the address holds the version and no recording
+    And a reload shows that version
+
+  @e2e
+  Scenario: My Drafts opens the drafts it counts
+    Given an admin who owns some drafts while others own more
+    When they open the My Drafts card
+    Then the list shows exactly the admin's own drafts
+
+  @unit
+  Scenario: A real chord alone on a line stays a chord
+    Given a line holding only "[B♭]" or "[C6/9]"
+    Then it stays in the chord row
+    And a line holding only "[am]", "[Hm]", "[Re]", "[Do]" shows as text
+
+  @component
+  Scenario: A right-click on plain text closes the suggestions
+    Given the search suggestions are open
+    When I right-click on text outside them and focus leaves the field
+    Then they close, and a right-click inside them does not close them

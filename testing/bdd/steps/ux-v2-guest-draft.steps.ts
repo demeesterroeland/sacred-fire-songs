@@ -33,7 +33,9 @@ Then('it says that saving needs an account in every language', function (this: W
 });
 
 Then('its sign-in link is at least 44 px tall and brings the guest back to Add Song', function (this: World) {
-  assert.match(this.source, /<Link[\s\S]*?href=\{signInHref\(next\)\}[\s\S]*?className="[^"]*min-h-tap/);
+  // The shared SignInLink (the accent Button, at least 44 px tall) carries the sign-in link.
+  assert.match(this.source, /<SignInLink[\s\S]*?href=\{signInHref\(next\)\}/);
+  assert.match(read('components/ui/button.tsx'), /min-h-tap/);
   const form = read('components/song/SongForm.tsx');
   assert.match(form, /<GuestDraftBanner next=\{ADD_SONG_PATH\} \/>/);
   assert.match(form, /const ADD_SONG_PATH = '\/songs\/add'/);

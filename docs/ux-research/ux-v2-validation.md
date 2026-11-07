@@ -1,11 +1,12 @@
 # UX v2: Phone Validation Script
 
-**Version:** 1.39 | **Date:** Nov 7, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
+**Version:** 1.40 | **Date:** Nov 7, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.40 | Nov 7, 2026 | Review of PR #477: four more checks in the Validation round 2 section (messages on the sign-in pages, auto-scroll with the menu open, a version switch after a recording link, My Drafts list). |
 | 1.39 | Nov 7, 2026 | Validation round 2 (batch 2, PR into `feat/ux-v2`): new section with 16 checks; stale steps fixed (the dead seeded song link, the old ⋮ paths to Practice, Playlist and Like, the Library tab is **History**); "take" is now **recording** in every step that quotes the app. |
 | 1.38 | Nov 7, 2026 | Validation round 1, review round on PR #474: items 8 to 14 (press a song under the open suggestions, the scroll position of the desktop column, auto-scroll behind the bars, the tools sheet and focus on a window that grows, one focus cue per field and readable tag counts, error toasts in your language, Search options in full on a phone, section labels versus chords, toolbar edge); item 6 uses the new favourites wording. |
 | 1.37 | Nov 6, 2026 | Added the **Validation round 1** section (seven fixes after the owner's phone run: auto-scroll only when the lyrics run below the fold, expanded meta line, one focus style for text fields, search suggestions in the page flow, search options on tokens and category names, translated feedback, song flags across versions); #391 step 3, #394 steps 1, 5, 9 and #413 step 1 updated to the new behaviour. |
@@ -548,6 +549,10 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 - [ ] 14. A version with only `[Chorus]`, `[Bridge]`, `[Coda]` lines and no chords still shows those words as text; with chords on, they are not drawn as chords.
 - [ ] 15. On an iPhone, with the suggestions open under the search field, tap an empty part of the page: the suggestions close. Press a song under them: that song opens.
 - [ ] 16. Sign in with a wrong password. **Expected:** a sentence in your language ("The email or password is not correct."), not the service's English text.
+- [ ] 17. Open `/auth/login?message=anything`: the page shows the standard "We encountered an error during authentication" text, not the words of the address. Open `/admin/users` signed out: the sign-in page says "Please sign in to open that page."
+- [ ] 18. On a long song start **▶**, then tap ⋮: the page keeps scrolling behind the menu. Tap **Faster**: the speed number changes and the scroll goes faster.
+- [ ] 19. Open a link that points to a recording (Notifications → the recording). Switch to the other version: the address shows only `?version=…`; reload: the same version is shown.
+- [ ] 20. As the admin, Library → **My Drafts**: the number on the card equals the number of songs in the list you open.
 
 ### Validation round 1 · seven fixes after the owner's phone run (Part of #375)
 

@@ -1,5 +1,6 @@
 import { Home, Library, ListMusic, Heart, FileText, Clock, Music, Mic2, Disc3, Search } from 'lucide-react';
 import { FEATURES, type Features } from '@/lib/features';
+import { MY_DRAFTS_HREF } from '@/lib/songs/draftsLink';
 import type { LucideIcon } from 'lucide-react';
 import type { TranslationKey } from '@/messages/en';
 
@@ -31,7 +32,7 @@ export const NAV_SECTIONS: readonly NavSection[] = [
     labelKey: 'nav.library',
     items: [
       { label: 'Favorites', labelKey: 'nav.favorites', href: '/songs?favorites=true', icon: Heart },
-      { label: 'Drafts', labelKey: 'nav.drafts', href: '/songs?status=draft', icon: FileText },
+      { label: 'Drafts', labelKey: 'nav.drafts', href: MY_DRAFTS_HREF, icon: FileText },
       { label: 'Recently Viewed', labelKey: 'nav.recentlyViewed', href: '/library/recently-viewed', icon: Clock },
     ],
   },

@@ -125,6 +125,46 @@ describe.each(fields)('$name suggestion panel', ({ name, render: mount, role }) 
     }
   });
 
+  // Review round: a right-click on plain text or empty space moves focus to <body> (no link to focus), and no click comes.
+  it('closes when a right-click on plain text outside leaves focus on the page, not in the field', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    try {
+      mount();
+      const text = document.createElement('p');
+      text.textContent = 'just words';
+      document.body.appendChild(text);
+      const input = screen.getByRole(role);
+      act(() => input.focus());
+      expect(await screen.findByTestId('search-suggestions')).toBeTruthy();
+
+      fireEvent.pointerDown(text, { button: 2, pointerId: 1 });
+      act(() => input.blur()); // the browser takes focus off the field; nothing focusable was pressed
+      expect(document.activeElement).toBe(document.body);
+      fireEvent.contextMenu(text, { button: 2 });
+      act(() => { vi.advanceTimersByTime(600); });
+      expect(screen.queryByTestId('search-suggestions')).toBeNull();
+      text.remove();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it('stays open when the right-click is inside the panel', async () => {
+    vi.useFakeTimers({ shouldAdvanceTime: true });
+    try {
+      mount();
+      act(() => screen.getByRole(role).focus());
+      const panel = await screen.findByTestId('search-suggestions');
+      fireEvent.pointerDown(panel, { button: 2, pointerId: 1 });
+      act(() => (document.activeElement as HTMLElement | null)?.blur()); // focus to <body>
+      fireEvent.contextMenu(panel, { button: 2 });
+      act(() => { vi.advanceTimersByTime(600); });
+      expect(screen.queryByTestId('search-suggestions')).not.toBeNull();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it('stays open after a press that never clicks (a scroll gesture) when focus stayed in the field', async () => {
     vi.useFakeTimers({ shouldAdvanceTime: true });
     try {

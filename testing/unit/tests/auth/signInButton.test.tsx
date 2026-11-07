@@ -18,6 +18,8 @@ vi.mock('@/hooks/useNotificationsQuery', () => ({ useNotificationsQuery: () => (
 
 import { UserProfile } from '@/components/common/navigation/UserProfile';
 import { SignInLink } from '@/components/auth/SignInLink';
+import GuestDraftBanner from '@/components/song/GuestDraftBanner';
+import { existsSync } from 'node:fs';
 
 afterEach(cleanup);
 
@@ -46,5 +48,19 @@ describe('Sign in buttons', () => {
     const src = readFileSync('components/playlists/PlaylistDetailHeader.tsx', 'utf8');
     expect(src).toContain('SignInLink');
     expect(src).not.toMatch(/bg-amber-500/);
+  });
+
+  it('the Add Song draft banner\'s Sign in is the same button', () => {
+    const header = render(<SignInLink href="/auth/login">Sign in</SignInLink>);
+    const expected = screen.getByRole('link', { name: 'Sign in' }).className;
+    header.unmount();
+    render(<GuestDraftBanner next="/songs/add" />);
+    const link = screen.getByRole('link', { name: dict['songForm.guestDraft.signIn'] });
+    expect(link.className).toBe(expected);
+    expect(link.className).toMatch(/bg-accent/);
+  });
+
+  it('no starter sign-in button with its own text is left in components/', () => {
+    expect(existsSync('components/auth-button.tsx')).toBe(false);
   });
 });

@@ -78,9 +78,12 @@ export function useSearchSuggestions() {
     const isOutside = (target: Node) => !wrapperRef.current?.contains(target) && !panelRef.current?.contains(target);
     let forget: ReturnType<typeof setTimeout> | undefined;
     let tapStart: { x: number; y: number; id: number } | null = null;
+    // Where the last press landed: a press that never clicks (right button, long press) is judged by it.
+    let pressTarget: Node | null = null;
     const onDown = (e: Event) => {
       clearTimeout(forget);
       pressingRef.current = true;
+      pressTarget = e.target as Node | null;
       const p = e as PointerEvent;
       tapStart = p.button === 0 || p.button === undefined ? { x: p.clientX, y: p.clientY, id: p.pointerId } : null;
     };
@@ -105,11 +108,13 @@ export function useSearchSuggestions() {
       clearTimeout(forget);
       forget = setTimeout(() => {
         pressingRef.current = false;
-        // No click came (right button, long press, a drag). If that press took focus out of the field and the
-        // panel, the blur that would have closed the panel has passed already: close it now. A scroll gesture
-        // leaves focus where it was, so the panel stays.
+        // No click came (right button, long press, a drag). If the press landed outside the field and the panel and
+        // left focus outside them too (on a link it pressed, or on <body> after a right-click on plain text), the blur
+        // that would have closed the panel has passed already: close it now. A scroll gesture leaves focus in the
+        // field, and a press inside the panel is never "outside", so both keep the panel open.
         const active = document.activeElement;
-        if (active && active !== document.body && isOutside(active)) setOpen(false);
+        const focusInside = !!active && active !== document.body && !isOutside(active);
+        if (pressTarget && isOutside(pressTarget) && !focusInside) setOpen(false);
       }, PRESS_GRACE_MS);
     };
     const onClick = (e: MouseEvent) => {

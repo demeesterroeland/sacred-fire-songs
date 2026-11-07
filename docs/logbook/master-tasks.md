@@ -1476,3 +1476,7 @@
 - [ ] Owner: approve the Terms and Privacy wording (remove the Draft note), decide the open points listed in the pull request
 - [ ] Owner: set `OPERATOR_NAME` and `OPERATOR_CONTACT_EMAIL` on every server that runs the image
 - [ ] Follow-ups: native-speaker check (Runasimi uses English for the legal text and a loanword for "recording"), real iPhone check of the empty-space tap, `docs/design/screens` mockups for the song page and Library, `/auth/error` prints the `error` query parameter, the `?status=draft` list still shows every draft to an admin
+
+## Session November 7, 2026 (Epic 6.1 UX v2, validation round 2, review of PR #477)
+- [x] Auth pages: messages by code; auto-scroll with the menu open; version switch and recording link; My Drafts list; Runasimi coverage; `.env.example`; draft banner button; chord-like labels; right-click on plain text; unused message and starter component removed
+- [ ] Owner: Runasimi native-speaker check; approve the Terms and Privacy wording

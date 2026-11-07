@@ -11,6 +11,7 @@ import RecentlyViewed from '@/components/library/RecentlyViewed';
 import NewSinceLastVisit from '@/components/library/NewSinceLastVisit';
 import { getServerT } from '@/lib/i18n/server';
 import GuestGate from '@/components/common/GuestGate';
+import { MY_DRAFTS_HREF } from '@/lib/songs/draftsLink';
 import { fetchLibrarySummary, type RecordingCounts, type SongCounts } from '@/lib/library/summary';
 
 
@@ -288,7 +289,7 @@ export default async function PlaylistsPage() {
                     />
                     <SmartPlaylistCard
                         icon={PenLine} title={t('librarySummary.drafts.title')} description={t('librarySummary.drafts.description')} accent="gray"
-                        href="/songs?status=draft"
+                        href={MY_DRAFTS_HREF}
                         subtitle={<SongCountSubtitle counts={myDraftsCounts} emptyLabel={t('librarySummary.drafts.empty')} />}
                         songTitles={myDraftsTitles}
                     />

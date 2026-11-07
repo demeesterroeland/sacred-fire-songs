@@ -134,4 +134,5 @@
 | **November 6, 2026 (Part 2)** | **Fix/UX (Epic 6.1, #375)**: UX v2 validation round 1 — seven fixes (auto-scroll visibility, meta line, text-field focus, suggestions in flow, search options tokens, translated feedback, song flags migration), tests, screenshots, docs. (estimate) | ~3.5 Hours | ✅ Completed |
 | **November 7, 2026** | **Fix/UX (Epic 6.1, #375)**: review round on validation round 1 (PR #474) — 12 findings reproduced and fixed, tests, screenshots, docs. (estimate) | ~3.0 Hours | ✅ Completed |
 | **November 7, 2026 (Part 2)** | **Fix/UX (Epic 6.1, #375)**: validation round 2, batch 2 — 22 findings from the owner's second run (one song menu, version links, full title, recording wording, Terms and Privacy pages, error codes, iPhone tap), tests, screenshots, docs. (estimate) | ~6.0 Hours | ✅ Completed |
-| **Total** | **Development + AI Collaboration** | **~247.5 Hours** | |
+| **November 7, 2026 (Part 3)** | **Fix/UX (Epic 6.1, #375)**: review of PR #477 — ten findings fixed, tests, docs. (estimate) | ~2.5 Hours | ✅ Completed |
+| **Total** | **Development + AI Collaboration** | **~250.0 Hours** | |

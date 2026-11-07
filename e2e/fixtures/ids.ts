@@ -149,4 +149,6 @@ export const VALIDATION_2_FIXTURE_IDS = {
   song: 'eeeeeeee-3620-4000-a000-000000000001',
   original: 'eeeeeeee-3620-4000-a000-000000000002',
   simplified: 'eeeeeeee-3620-4000-a000-000000000003',
+  /** A recording of the member on the Original (review round: a recording link follows its version). */
+  recording: 'eeeeeeee-3620-4000-a000-000000000004',
 } as const;

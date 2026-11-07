@@ -3322,3 +3322,19 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - **Lint cap** 157 → 143, **palette baseline** 1559 → 1507.
 - **Decisions:** UXA-068. Screenshots: `docs/ux-research/screenshots/ux-v2/validation-2/` (`scripts/dev/ux/capture-validation-2.sh`).
 - **Not done:** the real iPhone check, a native-speaker check of the new translations and of Runasimi, the `docs/design/screens` mockups.
+
+## November 7, 2026 - Epic 6.1 UX v2, validation round 2, review of PR #477
+
+**Goal:** fix the review findings of the batch 2 pull request; tests first where behaviour changes.
+
+**Key Accomplishments**
+- **Auth pages:** translated messages chosen by a code; the pages no longer print text from the address or from a provider answer (`lib/auth/notice.ts`).
+- **Song page:** opening ⋮ no longer stops auto-scroll; a version switch drops a recording link so a reload shows the chosen version.
+- **Library:** "My Drafts" links to the same drafts it counts (`MY_DRAFTS_HREF`).
+- **Chords and search:** a real chord alone on a line (`[B♭]`, `[C6/9]`) stays in the chord row, `[am]`, `[Hm]`, `[Re]`, `[Do]` show as text; a right-click on plain text closes the suggestions.
+- **Translations:** Runasimi strings added in this round are translated (not yet checked by a speaker) except the Terms and Privacy body text.
+- **Clean-up:** operator variables commented out in `.env.example`, the draft banner uses `SignInLink`, the unused `auth-button` and `errors.sharedTakeNoDownload` are gone.
+
+**Technical Details**
+- **Tests:** see the pull request for the numbers of the final run.
+- **Decisions:** UXA-068 and UXA-067 updated.

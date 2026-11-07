@@ -1,11 +1,12 @@
 # UX v2: Agent Decisions (ADR-lite)
 
-**Version:** 1.37 | **Date:** Nov 7, 2026 | **Epic:** 6.1 (#375)
+**Version:** 1.38 | **Date:** Nov 7, 2026 | **Epic:** 6.1 (#375)
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.38 | Nov 7, 2026 | UXA-068 and UXA-067 updated after the review of PR #477 (auth pages show translated messages by code, the ⋮ menu keeps auto-scroll running, a version switch drops the recording link, My Drafts lists what it counts, Quechua coverage, chord-like labels, right-click on plain text). |
 | 1.37 | Nov 7, 2026 | Added UXA-068 (validation round 2, batch 2: one song menu, version links, full title on a phone, recording wording, screen switch, Terms and Privacy pages, counts in parentheses, error codes; Part of #375). |
 | 1.36 | Nov 7, 2026 | Added UXA-067 (re-review of PR #474: section labels as text, panel above the bottom bars, right-click closes the panel, specific server messages translated). |
 | 1.35 | Nov 7, 2026 | Added UXA-061 to UXA-066 (review round on PR #474: the suggestions panel closes on the click and stays visible without moving the column, the auto-scroll fold counts the fixed bars, the tools sheet and focus when the song starts to fit, one focus cue per field and readable tag counts, translated error toasts, what counts as a chord; Part of #375). |
@@ -686,17 +687,24 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 - **Recording wording (8, 9):** the noun is "recording", the verb "Record", in all 8 languages (537 existing strings changed, plus 5 from the re-review patch reworded; the data key `rehearsal.demo.take*` and code names keep "take"). The toggle in the recorder uses `recorder.tab.record`; `recorder.tab.recordAudio` is deleted. Default names for new recordings read "Recording - date"; saved ones keep their name. The Library card reads "N recordings · N public · N private", counted from the recordings (their own `is_public`), and its description no longer says "private".
 - **Favourites (14):** the heart says "Add to / Remove from your Favorites" (menu term) in every language; Runasimi already used the menu's root. The phone bar says Favorite / In Favorites (en, fr, pt changed).
 - **Terms and Privacy (12):** `/terms` and `/privacy`, public, `force-dynamic`. The operator comes from the server variables `OPERATOR_NAME` and `OPERATOR_CONTACT_EMAIL` (`lib/legal/operator.ts`), never `NEXT_PUBLIC_`; unset, the pages say so. Both pages carry a Draft note. The text describes only what the code does; it states no retention period, legal basis, liability or governing law (open points in the pull request). Runasimi shows the English text.
-- **Own drafts (13):** `.eq('owner_id', userId)` on the Library card and the Home count (an admin reads every draft through RLS). The `?status=draft` list for an admin still shows every draft: it is a status filter, not "mine".
+- **Own drafts (13):** `.eq('owner_id', userId)` on the Library card and the Home count (an admin reads every draft through RLS). The card, the Home counter, the account menu and the sidebar now link to `/songs?mine=true&status=draft` (`MY_DRAFTS_HREF`), so the list shows the same songs the card counts. The Status filter inside Search options still means "any draft".
 - **One main (15):** only `app/layout.tsx` renders `<main>`; eight pages and layouts rendered a second one.
 - **Section labels (16), suggestions (18, 19, 20), fold (21), errors (22):** 16, 19, 20 and the first part of 22 came from the other thread's patch (see UXA-067); my own bracket-splitting for 16 was dropped in favour of the patch (whole-line labels as comments; the owner's choice). 18: a still release (≤ 10 px, same pointer) on something that is not a link, button or field closes the panel; releases on interactive things still wait for their click. 21: every ancestor of the lyrics up to `<body>` is observed. 22: `lib/errors/errorCode.ts` maps authentication and database error codes to `errors.*` keys; used by the sign-in, sign-up, forgot-password, update-password, finish-registration forms, the sign-up-success page and the Add Song form. `/auth/error` still prints the `error` query parameter it is given.
+- **Auth pages (review round):** the pages show a translated message chosen by a code. `?code=` on `/auth/error` and `?message=` on sign-in, sign-up, forgot-password and update-password accept known codes only (`lib/auth/notice.ts`, `lib/errors/errorCode.ts`); any other value shows the default text. The confirm and callback routes redirect with a known code (or none), the proxy redirects with `message=login_required`, and the old `?error=` text parameter is no longer read. The email shown on the sign-up-success page must look like an email address.
+- **Version link and recording link (review round):** `versionSearch` drops the `recording` parameter, so a reload after switching shows the version that was chosen.
+- **Auto-scroll and the menu (review round):** both ⋮ buttons are in the auto-scroll keep zone: opening the menu does not stop the scroll, and the speed can change while it runs.
+- **Runasimi (review round):** all new interface strings are translated (best effort, no speaker has checked them) except the body text of the Terms and Privacy pages, which stays English until the owner approves the wording. The Draft note and the operator lines are translated.
+- **Chord-like labels (review round):** a line of only bracket words is shown as text unless a word looks like a chord. `looksLikeChord` in `lib/chordUtils.ts` is wider than `isChordToken` (flat and sharp signs, `C6/9`, a bass note); `isChordToken` itself is unchanged. `[B♭]`, `[C6/9]`, `[F♯m7]` alone stay in the chord row; `[am]`, `[Hm]`, `[Re]`, `[Do]`, `[N.C.]` and section words show as text.
+- **Right-click (review round):** a press that never clicks closes the panel when it landed outside the field and the panel and left focus outside them too (a link it pressed, or the page body after a right-click on plain text). A press inside the panel never closes it.
+- **Removed:** `errors.sharedTakeNoDownload` (no caller of the action) and the unused starter `components/auth-button.tsx`.
 - **Confirm:** yes: the Terms and Privacy wording (Draft), whether the History page should say "History", the Runasimi loanword "grabación" for recording, and whether the Content type counts should stay in parentheses.
 
 ### UXA-067 · Section labels as text; follow-ups from the re-review of PR #474
 
 - **Date / story:** Nov 7, 2026 · re-review of PR #474, owner's choice on the section labels
-- **Section labels:** a line holding only bracketed words that are not chords (`[Chorus]`, `[Bridge] [Coda]`) is shown as a comment, the same as `{c: Chorus}`, with chords on or off, in the reader, the preview and the PDF (`lib/chordUtils.ts`). A non-chord bracket in front of lyrics (`[Chorus]Sing`) is unchanged: it shows as a chord, and not at all with chords off.
+- **Section labels:** a line holding only bracketed words that are not chords (`[Chorus]`, `[Bridge] [Coda]`) is shown as a comment, the same as `{c: Chorus}`, with chords on or off, in the reader, the preview and the PDF (`lib/chordUtils.ts`). A non-chord bracket in front of lyrics (`[Chorus]Sing`) is unchanged: it shows as a chord, and not at all with chords off. A bracket word that looks like a chord (`[B♭]`, `[C6/9]`) is not a label: see UXA-068.
 - **Suggestions panel:** the slot is `z-40`, above the bottom bars (`z-30`), so the action bar no longer covers its last rows on a low window. A press that never clicks (right button, long press) closes the panel when it took focus outside.
-- **Server messages:** the owner, private-song, share-with-yourself, consent, take-not-found and shared-download messages now map to translated keys. Runasimi uses its generic error text for these, except the private-song message.
+- **Server messages:** the owner, private-song, share-with-yourself, consent and take-not-found messages now map to translated keys (the shared-download message has no caller and no key). Runasimi uses its generic error text for these, except the private-song message.
 - **Confirm:** no.
 
 ### UXA-066 · What counts as a chord; Search options on a phone; toolbar edge; favourites wording
@@ -706,4 +714,4 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 - **Search options:** one column below `sm` for Content type and Your Library; the Status control takes the full row. At 390 px every label is whole in all 8 languages (a test).
 - **Toolbar:** the reader toolbar has the page's side padding, and the Chords switch pulls its own padding back, so A− or the switch's track lines up with the lyrics.
 - **Favourites:** the toasts say "your Favorites" like the user menu (en, nl, es, it, ru, fr, pt); Runasimi untouched. The song page button still says "Add to Liked Songs" (`song.addToFavorites`): not changed here.
-- **Confirm:** yes: lower case, German and solfège chord spellings (`[am]`, `[Hm]`, `[Re]`) are not chords; say if songs in those notations should get the Chords switch and transpose.
+- **Confirm:** yes: lower case, German and solfège chord spellings (`[am]`, `[Hm]`, `[Re]`, `[Do]`) are not chords and a line holding only such words shows as text (UXA-068 lists what still counts as chord-like); say if songs in those notations should get the Chords switch and transpose.

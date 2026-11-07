@@ -7,6 +7,7 @@ import { readOperator } from '../../../lib/legal/operator';
 import { errorKey } from '../../../lib/errors/errorCode';
 import { DICTIONARIES, SUPPORTED_LOCALES } from '../../../lib/i18n';
 import { parseChordProForDisplay } from '../../../lib/chordUtils';
+import { authNoticeKey } from '../../../lib/auth/notice';
 
 interface State {
   count?: number;
@@ -15,6 +16,8 @@ interface State {
   operator?: ReturnType<typeof readOperator>;
   authError?: { code: string; message: string };
   chorusLine: string;
+  param?: string;
+  chordLines?: string[];
 }
 const state = new WeakMap<object, State>();
 const get = (w: object): State => {
@@ -116,4 +119,50 @@ Then('the person reads the translated sentence for wrong credentials', function 
 });
 Then('the raw service message is never shown', function (this: object) {
   for (const l of SUPPORTED_LOCALES) assert.notEqual(dict(l)['errors.auth.invalidCredentials'], get(this).authError?.message);
+});
+
+// Review of PR #477
+Given('an address with a message parameter that is not a known code', function (this: object) {
+  get(this).param = 'Zebra crossing text 12345';
+});
+Then('the page shows the default text and not the parameter', function (this: object) {
+  assert.equal(authNoticeKey(get(this).param), 'auth.error.default');
+});
+When('the message parameter is {string}', function (this: object, value: string) {
+  get(this).param = value;
+});
+Then('the page shows the translated sentence', function (this: object) {
+  assert.equal(authNoticeKey(get(this).param), 'auth.notice.loginRequired');
+  for (const l of SUPPORTED_LOCALES) assert.ok(dict(l)['auth.notice.loginRequired'], l);
+});
+
+Given('a song opened with a recording link', function (this: object) {
+  get(this).search = '?recording=r1';
+});
+When('I switch to another version', function (this: object) {
+  const s = get(this);
+  s.search = versionSearch(s.search, 'v2', false);
+});
+Then('the address holds the version and no recording', function (this: object) {
+  assert.equal(get(this).search, '?version=v2');
+});
+Then('a reload shows that version', function (this: object) {
+  assert.ok(new URLSearchParams(get(this).search).get('version') === 'v2');
+});
+
+Given('a line holding only {string} or {string}', function (this: object, a: string, b: string) {
+  get(this).chordLines = [a, b];
+});
+Then('it stays in the chord row', function (this: object) {
+  for (const line of get(this).chordLines ?? []) {
+    const items = parseChordProForDisplay(line).flatMap((s) => s.lines.flatMap((l) => l.items));
+    assert.ok(items.some((i) => i.chords), line);
+    assert.ok(items.every((i) => i.comment === undefined), line);
+  }
+});
+Then('a line holding only {string}, {string}, {string}, {string} shows as text', function (this: object, a: string, b: string, c: string, d: string) {
+  for (const line of [a, b, c, d]) {
+    const items = parseChordProForDisplay(line).flatMap((s) => s.lines.flatMap((l) => l.items));
+    assert.ok(items.every((i) => !i.chords) && items.some((i) => i.comment !== undefined), line);
+  }
 });

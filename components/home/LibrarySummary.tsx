@@ -2,6 +2,7 @@ import Link from 'next/link';
 import { Heart, PenLine, Music, Sparkles } from 'lucide-react';
 
 import { getServerT } from '@/lib/i18n/server';
+import { MY_DRAFTS_HREF } from '@/lib/songs/draftsLink';
 interface LibrarySummaryProps {
   favoritesCount: number;
   draftsCount: number;
@@ -24,7 +25,7 @@ const stats = [
     key: 'drafts',
     icon: PenLine,
     labelKey: 'nav.drafts',
-    href: '/songs?status=draft',
+    href: MY_DRAFTS_HREF,
     color: 'text-amber-400',
     iconFill: '',
     bg: 'bg-amber-500/10',

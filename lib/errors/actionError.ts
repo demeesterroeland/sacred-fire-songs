@@ -34,7 +34,6 @@ export const ACTION_ERROR_KEYS: Readonly<Record<string, TranslationKey>> = {
   'Only the song owner or an admin can publish this song.': 'errors.notSongOwner',
   'Singer consent must be explicitly confirmed before publishing publicly.': 'errors.consentRequired',
   'This song is private, so this take has no audience yet. Make the song public first, then publish the take.': 'recording.publish.errorSongPrivate',
-  'Shared recordings cannot be downloaded': 'errors.sharedTakeNoDownload',
 };
 
 type Translate = (key: TranslationKey) => string;

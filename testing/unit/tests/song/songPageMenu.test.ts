@@ -63,3 +63,15 @@ describe('song page: neutral desktop buttons (item 7)', () => {
     expect(desktopHeader.match(/variant="outline"/g)?.length).toBeGreaterThanOrEqual(2); // Delete and Edit
   });
 });
+
+describe('song page: opening the menu does not stop auto-scroll', () => {
+  it('both ⋮ buttons sit in a keep zone, so the touch that opens the menu is not a "take over" gesture', () => {
+    for (const testId of ['song-menu-button"', 'song-menu-button-desktop"']) {
+      const at = page.indexOf(`data-testid="${testId}`);
+      expect(at, testId).toBeGreaterThan(0);
+      const tag = page.slice(page.lastIndexOf('<button', at), page.indexOf('>', at + 200));
+      expect(tag, testId).toContain('AUTOSCROLL_KEEP_ATTR');
+    }
+    expect(page).toContain("import { useAutoScroll, useLyricsBelowFold, AUTOSCROLL_KEEP_ATTR }");
+  });
+});
