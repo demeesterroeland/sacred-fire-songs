@@ -5,6 +5,7 @@ import { songsQuery, mapCompositionToSong, recentlyAddedQuery, RECENTLY_ADDED_LI
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { normalizeWhitespace, removeDiacritics } from "@/lib/utils";
 import { parseArtists } from "./artistUtils";
+import { fetchFavoritesSetlistId } from "@/lib/playlists/favorites";
 
 const PAGE_SIZE = 20;
 
@@ -12,19 +13,14 @@ async function fetchFavoriteIds(supabase: SupabaseClient) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return new Set<string>();
 
-    const { data: setlist } = await supabase
-        .from('setlists')
-        .select('id')
-        .eq('owner_id', user.id)
-        .eq('title', 'My Favorites')
-        .maybeSingle();
+    const setlistId = await fetchFavoritesSetlistId(supabase, user.id);
 
-    if (!setlist) return new Set<string>();
+    if (!setlistId) return new Set<string>();
 
     const { data: items } = await supabase
         .from('setlist_items')
         .select('song_versions(composition_id)')
-        .eq('setlist_id', setlist.id);
+        .eq('setlist_id', setlistId);
 
     return new Set<string>(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -92,14 +88,9 @@ export async function fetchFavoriteSongsServer(): Promise<Song[]> {
 
     if (!user) return [];
 
-    const { data: setlist } = await supabase
-        .from('setlists')
-        .select('id')
-        .eq('owner_id', user.id)
-        .eq('title', 'My Favorites')
-        .maybeSingle();
+    const setlistId = await fetchFavoritesSetlistId(supabase, user.id);
 
-    if (!setlist) return [];
+    if (!setlistId) return [];
 
     const { data, error } = await supabase
         .from('setlist_items')
@@ -128,7 +119,7 @@ export async function fetchFavoriteSongsServer(): Promise<Song[]> {
                 )
             )
         `)
-        .eq('setlist_id', setlist.id)
+        .eq('setlist_id', setlistId)
         .order('order_index');
 
     if (error || !data) return [];
@@ -189,17 +180,12 @@ export async function getLibrarySummary(userId: string): Promise<LibrarySummary>
 
     // Favorites count
     let favoritesCount = 0;
-    const { data: favSetlist } = await supabase
-        .from('setlists')
-        .select('id')
-        .eq('owner_id', userId)
-        .eq('title', 'My Favorites')
-        .maybeSingle();
-    if (favSetlist) {
+    const favSetlistId = await fetchFavoritesSetlistId(supabase, userId);
+    if (favSetlistId) {
         const { count } = await supabase
             .from('setlist_items')
             .select('id', { count: 'exact', head: true })
-            .eq('setlist_id', favSetlist.id);
+            .eq('setlist_id', favSetlistId);
         favoritesCount = count ?? 0;
     }
 

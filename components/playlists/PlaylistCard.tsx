@@ -2,9 +2,9 @@
 'use client';
 
 import Link from 'next/link';
-import { Globe, Lock } from 'lucide-react';
 import { PlaylistContextMenu } from './PlaylistContextMenu';
 import { CardContent } from '@/components/common/CardContent';
+import { VisibilityIcon } from '@/components/common/VisibilityIcon';
 import { toast } from 'sonner';
 import { usePlaylistRename } from '@/hooks/usePlaylistRename';
 import { PLAYLIST_ICON, PLAYLIST_MENU, PLAYLIST_ROW } from './playlistRow';
@@ -45,7 +45,7 @@ export function PlaylistCard({ id, title, subtitle, isPublic = false, descriptio
                 className={`${PLAYLIST_ROW} pr-12`}
                 onClick={e => isRenaming && e.preventDefault()}
             >
-                {isPublic ? <Globe aria-hidden className={PLAYLIST_ICON} /> : <Lock aria-hidden className={PLAYLIST_ICON} />}
+                <VisibilityIcon isPublic={isPublic} className={PLAYLIST_ICON} />
 
                 {isRenaming ? (
                     <div className="flex-1 min-w-0">

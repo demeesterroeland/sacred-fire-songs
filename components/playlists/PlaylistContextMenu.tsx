@@ -85,7 +85,7 @@ export function PlaylistContextMenu({
                     <button
                         ref={triggerRef}
                         onClick={e => e.stopPropagation()}
-                        className="p-1.5 rounded-lg text-gray-600 hover:text-gray-800 dark:hover:text-gray-300 hover:bg-gray-200/60 dark:hover:bg-gray-700/60 transition-colors"
+                        className="flex size-tap items-center justify-center rounded-control text-fg-muted transition-colors hover:bg-surface-2 hover:text-fg"
                         aria-label={t('playlists.optionsAria')}
                     >
                         <MoreHorizontal className="w-4 h-4" />

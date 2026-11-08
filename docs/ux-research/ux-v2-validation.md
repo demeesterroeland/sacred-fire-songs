@@ -1,11 +1,12 @@
 # UX v2: Phone Validation Script
 
-**Version:** 1.42 | **Date:** Nov 8, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
+**Version:** 1.43 | **Date:** Nov 8, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.43 | Nov 8, 2026 | UXA-070: the song details button reads "Show details"; desktop titles wrap. |
 | 1.42 | Nov 8, 2026 | #388: no cards. Categories are rows with lines between them (UXA-069); the screenshots in steps 1 and 2 still show the earlier look. |
 | 1.41 | Nov 7, 2026 | Check 21: an admin's favourites list matches the Home card. |
 | 1.40 | Nov 7, 2026 | Review of PR #477: four more checks in the Validation round 2 section (messages on the sign-in pages, auto-scroll with the menu open, a version switch after a recording link, My Drafts list). |

@@ -33,7 +33,7 @@ export function authErrorPath(code: string | null): string {
   return code ? `/auth/error?code=${encodeURIComponent(code)}` : '/auth/error';
 }
 
-const EMAIL = /^[^\s@<>"']+@[^\s@<>"']+\.[^\s@<>"']+$/;
+const EMAIL = /^[^\s@<>"]+@[^\s@<>"]+\.[^\s@<>"]+$/;
 
 /** An email address taken from the address bar, or an empty string. */
 export function safeEmailParam(value: string | null | undefined): string {

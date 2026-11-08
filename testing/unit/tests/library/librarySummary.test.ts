@@ -20,6 +20,8 @@ function fakeSupabase(rows: Record<string, unknown[]>) {
           return builder;
         },
         limit: () => builder,
+        order: () => builder,
+        maybeSingle: () => Promise.resolve({ data: null, error: null }),
         then: (resolve: (v: unknown) => unknown) => resolve({ data: rows[table] ?? [], error: null }),
       };
       return builder;
@@ -75,6 +77,8 @@ describe('Home getLibrarySummary', () => {
         select: () => builder,
         eq: (col: string, val: unknown) => (call.filters.push([col, val]), builder),
         gte: () => builder,
+        order: () => builder,
+        limit: () => builder,
         maybeSingle: () => Promise.resolve({ data: null, error: null }),
         then: (resolve: (v: unknown) => unknown) => resolve({ data: [], count: 0, error: null }),
       };

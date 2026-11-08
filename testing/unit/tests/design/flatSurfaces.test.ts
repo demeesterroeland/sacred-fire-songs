@@ -39,8 +39,7 @@ describe('Home and Library rows are flat', () => {
 describe('Private playlists', () => {
   it('show a lock, public ones a globe, and no music icon', () => {
     const card = read('components/playlists/PlaylistCard.tsx');
-    expect(card).toContain('<Lock');
-    expect(card).toContain('<Globe');
+    expect(card).toContain('<VisibilityIcon isPublic={isPublic}');
     expect(card).not.toContain('ListMusic');
   });
 });

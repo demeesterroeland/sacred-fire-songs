@@ -10,8 +10,8 @@ export interface Operator {
 }
 
 const MAX_NAME_LENGTH = 200;
-// One address, no whitespace, no angle brackets or quotes: anything else is treated as not set.
-const EMAIL = /^[^\s@<>"']+@[^\s@<>"']+\.[^\s@<>"']+$/;
+// One address, no whitespace, no angle brackets or double quotes: anything else is treated as not set.
+const EMAIL = /^[^\s@<>"]+@[^\s@<>"]+\.[^\s@<>"]+$/;
 
 type Env = Record<string, string | undefined>;
 

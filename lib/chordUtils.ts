@@ -25,10 +25,12 @@ export interface ChordProSection {
  * Used only to keep a real chord alone on a line in the chord row. It starts with an upper-case A-G and allows only
  * chord-quality pieces after it, so `am`, `Hm`, `Re`, `Do`, `Chorus`, `Coda` and `N.C.` are not chord-like.
  */
-const CHORD_LIKE = /^[A-G][#b♯♭]?(?:maj|min|dim|aug|sus|add|m|M|\d|[#b♯♭+°ø\-(),.]|\/[A-G]?[#b♯♭]?)*$/;
+const CHORD_LIKE = /^[A-G][#b♯♭]?(?:maj|min|dim|aug|sus|add|m|M|\d|[#b♯♭+°ø\-(),.]|\/(?:[A-G][#b♯♭]?)?)*$/;
+/** No chord is longer than this. */
+const MAX_CHORD_LENGTH = 32;
 
 function looksLikeChord(token: string): boolean {
-    return isChordToken(token) || CHORD_LIKE.test(token);
+    return token.length <= MAX_CHORD_LENGTH && (isChordToken(token) || CHORD_LIKE.test(token));
 }
 
 /**

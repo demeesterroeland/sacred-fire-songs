@@ -9,7 +9,7 @@ import SongDisplay from '@/components/song/SongDisplay';
 import SongDetailSkeleton from '@/components/song/SongDetailSkeleton';
 import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { Trash2, Edit2, Heart, MoreVertical, ListPlus, Mic, Share2, Globe, Lock } from 'lucide-react';
+import { Trash2, Edit2, Heart, MoreVertical, ListPlus, Mic, Share2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import GuestGateSheet from '@/components/common/GuestGateSheet';
@@ -27,6 +27,7 @@ import { useActionBarVisibility } from '@/hooks/useActionBarVisibility';
 import { useUserPreferences } from '@/context/UserPreferencesContext';
 import { practiceTab } from '@/lib/song/actionBar';
 import { SongMetaLines } from '@/components/song/SongMetaLines';
+import { VisibilityIcon } from '@/components/common/VisibilityIcon';
 import { ReaderToolbar } from '@/components/song/ReaderToolbar';
 import { SongVersionSwitch } from '@/components/song/SongVersionSwitch';
 import { EDIT_VERSION_PARAM, editSongHref } from '@/lib/songs/versionOrder';
@@ -57,6 +58,7 @@ export default function SongDetailPage() {
     const [versionChoice, setVersionChoice] = useState<VersionChoice | null>(null);
     const [readerPrefs, setReaderPrefs] = useReaderPrefs();
     const [controlsExpanded, setControlsExpanded] = useSongControlsExpanded();
+    const metaToggleRef = useRef<HTMLButtonElement>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     // The song page's one menu (⋮). It is opened from the bar on a phone and from the header from lg up.
     const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -370,11 +372,7 @@ export default function SongDetailPage() {
                         )}
                     >
                         <span className="truncate">{song.title}</span>
-                        {song.is_public ? (
-                            <Globe className="size-4 shrink-0 text-fg-muted" aria-hidden />
-                        ) : (
-                            <Lock className="size-4 shrink-0 text-fg-muted" aria-hidden />
-                        )}
+                        <VisibilityIcon isPublic={!!song.is_public} className="size-4 text-fg-muted" />
                     </p>
                     <button
                         ref={phoneMenuButtonRef}
@@ -402,23 +400,15 @@ export default function SongDetailPage() {
                     className="lg:hidden break-words px-6 pb-1 pr-16 pt-3.5 text-title font-semibold text-fg md:px-10 md:pr-16 flex items-center gap-2"
                 >
                     <span>{song.title}</span>
-                    {song.is_public ? (
-                        <Globe className="size-4 shrink-0 text-fg-muted" aria-hidden />
-                    ) : (
-                        <Lock className="size-4 shrink-0 text-fg-muted" aria-hidden />
-                    )}
+                    <VisibilityIcon isPublic={!!song.is_public} className="size-4 text-fg-muted" />
                 </h1>
 
                 {/* Desktop Page Header (Title, Actions) - Visible only on desktop >= lg */}
                 <div ref={setDesktopHeader} className="hidden lg:flex justify-between items-center px-8 py-4 border-b border-line bg-bg/50 sticky top-0 backdrop-blur-md z-10">
                     {/* Title */}
                     <div className="flex items-center gap-2.5 min-w-0 pr-4">
-                        <h1 className="text-display font-semibold text-fg tracking-tight truncate">{song.title}</h1>
-                        {song.is_public ? (
-                            <Globe className="size-5 shrink-0 text-fg-muted" aria-hidden />
-                        ) : (
-                            <Lock className="size-5 shrink-0 text-fg-muted" aria-hidden />
-                        )}
+                        <h1 className="min-w-0 break-words text-display font-semibold text-fg tracking-tight">{song.title}</h1>
+                        <VisibilityIcon isPublic={!!song.is_public} className="size-5 text-fg-muted" />
                     </div>
                     {/* Neutral buttons; the one accent is the primary action, Practice (validation 2, item 7).
                         Delete stays neutral: the red is in the confirmation. */}
@@ -544,6 +534,7 @@ export default function SongDetailPage() {
                         hasPersonalRecording={hasPersonalRecording}
                         expanded={controlsExpanded}
                         onToggleExpanded={() => setControlsExpanded((e) => !e)}
+                        toggleRef={metaToggleRef}
                     />
 
                     {/* Story 6.1.11 (#395): version switch (Original · Simplified), only when the song has more
@@ -576,7 +567,11 @@ export default function SongDetailPage() {
                                 hasChords={shownHasChords}
                                 onChange={setReaderPrefs}
                                 scrolling={autoScroll.playing}
-                                onToggleScroll={canAutoScroll ? autoScroll.toggle : undefined}
+                                onToggleScroll={canAutoScroll ? () => {
+                                    // With the controls closed, pause removes this toolbar: keep keyboard focus on the page.
+                                    if (autoScroll.playing && !controlsExpanded) metaToggleRef.current?.focus();
+                                    autoScroll.toggle();
+                                } : undefined}
                                 fallbackFocusRef={largerButtonRef}
                                 awake={awake}
                             />
@@ -653,7 +648,11 @@ export default function SongDetailPage() {
                 speed={readerPrefs.speed}
                 onSpeed={(delta) => setReaderPrefs({ ...readerPrefs, speed: speedBy(readerPrefs.speed, delta) })}
                 scrolling={autoScroll.playing}
-                onToggleScroll={canAutoScroll ? autoScroll.toggle : undefined}
+                onToggleScroll={canAutoScroll ? () => {
+                                    // With the controls closed, pause removes this toolbar: keep keyboard focus on the page.
+                                    if (autoScroll.playing && !controlsExpanded) metaToggleRef.current?.focus();
+                                    autoScroll.toggle();
+                                } : undefined}
                 keepAwake={preferences.keepScreenAwake}
                 onKeepAwakeChange={(value) => setPreference('keepScreenAwake', value)}
                 awakeSupported={awakeSupported}

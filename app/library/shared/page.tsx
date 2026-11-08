@@ -18,7 +18,7 @@ export default async function SharedWithMePage() {
 
     return (
         <div>
-            <LibrarySubpageHeading icon={Users} title={t('sharedWithMe.title')} count={items.length} />
+            <LibrarySubpageHeading icon={Users} title={t('sharedWithMe.title')} count={items.length} level={1} />
             <SharedWithMeList items={items} />
         </div>
     );
