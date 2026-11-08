@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
 import { Heart, PenLine, Music, Mic } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { PLAYLIST_ICON, PLAYLIST_LIST, PLAYLIST_ROW } from '@/components/playlists/playlistRow';
 import { CreatePlaylistInput } from '@/components/playlists/CreatePlaylistInput';
 import { PlaylistCard } from '@/components/playlists/PlaylistCard';
 import { PublicPlaylistCard } from '@/components/playlists/PublicPlaylistCard';
@@ -57,21 +58,17 @@ interface SmartPlaylistCardProps {
 }
 
 async function SmartPlaylistCard({ icon: Icon, title, description, subtitle, songTitles = [], href }: SmartPlaylistCardProps) {
-    const inner = (
-        <div className="border border-line bg-surface hover:bg-surface-2 p-4 rounded-panel flex items-center gap-4 transition-all w-full min-w-0 group hover:-translate-y-0.5">
-            <div className="w-12 h-12 rounded-control flex items-center justify-center shrink-0 bg-surface-2 text-fg-muted group-hover:text-fg transition-colors">
-                <Icon className="w-6 h-6 text-fg-muted group-hover:text-fg" />
-            </div>
+    return (
+        <Link href={href} className={PLAYLIST_ROW}>
+            <Icon aria-hidden className={PLAYLIST_ICON} />
             <CardContent
                 title={title}
                 description={description}
                 subtitle={subtitle}
                 songTitles={songTitles}
             />
-        </div>
+        </Link>
     );
-
-    return <Link href={href} className="block w-full min-w-0">{inner}</Link>;
 }
 
 async function PublicPlaylistsSection({
@@ -91,7 +88,7 @@ async function PublicPlaylistsSection({
     return (
         <div>
             <p className="text-meta font-semibold text-fg-muted mb-3">{t('playlists.publicPlaylists')}</p>
-            <div className="grid grid-cols-1 gap-3">
+            <div className={PLAYLIST_LIST}>
                 {playlists.map(setlist => (
                     <PublicPlaylistCard
                         key={setlist.id}
@@ -241,7 +238,7 @@ export default async function PlaylistsPage() {
             {/* Smart Playlists */}
             <div>
                 <p className="text-meta font-semibold text-fg-muted mb-3">{t('playlists.smartPlaylists')}</p>
-                <div className="grid grid-cols-1 gap-3">
+                <div className={PLAYLIST_LIST}>
                     <SmartPlaylistCard
                         icon={Heart} title={t('librarySummary.favorites.title')} description={t('librarySummary.favorites.description')} accent="rose"
                         href="/songs?favorites=true"
@@ -282,7 +279,7 @@ export default async function PlaylistsPage() {
                     <CreatePlaylistInput />
                 </div>
                 {privateSetlists.length > 0 ? (
-                    <div className="grid grid-cols-1 gap-3">
+                    <div className={PLAYLIST_LIST}>
                         {privateSetlists.map(setlist => {
                             const counts = songCounts[setlist.id] ?? { total: 0, public: 0, draft: 0 };
                             return (

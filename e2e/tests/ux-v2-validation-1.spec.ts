@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import { openSongControls } from '../fixtures/songControls';
 import { openSongMenu } from '../fixtures/songMenu';
 import pg from 'pg';
 import { ROLES } from '../fixtures/roles';
@@ -42,6 +43,7 @@ test.beforeAll(async () => {
 });
 
 test.beforeEach(async ({ page }) => {
+  await openSongControls(page);
   await page.addInitScript(() => {
     localStorage.setItem('sacred-fire-songs-locale', 'en');
     localStorage.removeItem('sacred-fire-songs-reader');

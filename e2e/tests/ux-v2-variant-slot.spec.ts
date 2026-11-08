@@ -1,4 +1,5 @@
 import { test, expect as baseExpect, type Page } from '@playwright/test';
+import { openSongControls } from '../fixtures/songControls';
 import pg from 'pg';
 import { ROLES } from '../fixtures/roles';
 import { VARIANT_SLOT_FIXTURE_IDS as IDS } from '../fixtures/ids';
@@ -104,6 +105,7 @@ test.beforeAll(async () => {
 });
 
 test.beforeEach(async ({ page }) => {
+  await openSongControls(page);
   await page.addInitScript(() => localStorage.setItem('sacred-fire-songs-locale', 'en'));
 });
 

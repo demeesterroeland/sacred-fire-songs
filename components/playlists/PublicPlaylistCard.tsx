@@ -6,6 +6,7 @@ import { PlaylistContextMenu } from './PlaylistContextMenu';
 import { CardContent } from '@/components/common/CardContent';
 import { toast } from 'sonner';
 import { usePlaylistRename } from '@/hooks/usePlaylistRename';
+import { PLAYLIST_ICON, PLAYLIST_MENU, PLAYLIST_ROW } from './playlistRow';
 
 import { useLocale } from '@/context/LocaleContext';
 interface PublicPlaylistCardProps {
@@ -36,47 +37,43 @@ export function PublicPlaylistCard({ id, title, description, isOwner, songCount 
         toast.success(t('playlists.toast.linkCopied'));
     };
 
-    const songCountLabel = `${songCount} song${songCount !== 1 ? 's' : ''}`;
+    const songCountLabel = songCount === 1 ? t('playlists.songCountSingle') : t('playlists.songCount', { count: songCount });
 
     return (
         <div className="relative">
             <Link
                 href={`/library/playlists/${id}`}
-                className="block w-full min-w-0"
+                className={`${PLAYLIST_ROW} pr-12`}
                 onClick={e => isRenaming && e.preventDefault()}
             >
-                <div className="bg-surface p-4 rounded-panel border border-line hover:bg-surface-2 hover:-translate-y-0.5 transition-all flex items-center gap-4 group pr-12 w-full min-w-0">
-                    <div className="w-12 h-12 bg-surface-2 rounded-control flex items-center justify-center shrink-0 text-fg-muted group-hover:text-fg transition-colors">
-                        <Globe className="w-6 h-6 text-fg-muted group-hover:text-fg" />
-                    </div>
-                    {isOwner && isRenaming ? (
-                        <div className="flex-1 min-w-0">
-                            <input
-                                ref={inputRef}
-                                value={draftTitle}
-                                onChange={e => setDraftTitle(e.target.value)}
-                                onBlur={handleRenameSave}
-                                onKeyDown={e => {
-                                    if (e.key === 'Enter') handleRenameSave();
-                                    if (e.key === 'Escape') setIsRenaming(false);
-                                }}
-                                onClick={e => e.preventDefault()}
-                                autoFocus
-                                className="min-h-tap w-[95%] rounded-control border border-line-strong bg-surface px-2 py-1 text-meta font-bold text-fg placeholder:text-fg-subtle"
-                            />
-                        </div>
-                    ) : (
-                        <CardContent
-                            title={optimisticTitle}
-                            description={description}
-                            subtitle={<span className="whitespace-nowrap">{songCountLabel}</span>}
-                            songTitles={songTitles}
+                <Globe aria-hidden className={PLAYLIST_ICON} />
+                {isOwner && isRenaming ? (
+                    <div className="flex-1 min-w-0">
+                        <input
+                            ref={inputRef}
+                            value={draftTitle}
+                            onChange={e => setDraftTitle(e.target.value)}
+                            onBlur={handleRenameSave}
+                            onKeyDown={e => {
+                                if (e.key === 'Enter') handleRenameSave();
+                                if (e.key === 'Escape') setIsRenaming(false);
+                            }}
+                            onClick={e => e.preventDefault()}
+                            autoFocus
+                            className="min-h-tap w-[95%] rounded-control border border-line-strong bg-surface px-2 py-1 text-meta font-bold text-fg placeholder:text-fg-subtle"
                         />
-                    )}
-                </div>
+                    </div>
+                ) : (
+                    <CardContent
+                        title={optimisticTitle}
+                        description={description}
+                        subtitle={<span className="whitespace-nowrap">{songCountLabel}</span>}
+                        songTitles={songTitles}
+                    />
+                )}
             </Link>
 
-            <div className="absolute top-3 right-3 z-10">
+            <div className={PLAYLIST_MENU}>
                 <PlaylistContextMenu
                     playlistId={id}
                     playlistTitle={optimisticTitle}

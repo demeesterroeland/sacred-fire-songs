@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import { openSongControls } from '../fixtures/songControls';
 import pg from 'pg';
 import { DEFAULT_LYRIC_STEP, LYRIC_STEPS } from '../../lib/design/tokens';
 
@@ -34,6 +35,7 @@ const lyricPx = (page: Page) =>
   page.getByTestId('lyric').first().evaluate((el) => parseFloat(getComputedStyle(el).fontSize));
 
 test.beforeEach(async ({ page }) => {
+  await openSongControls(page);
   test.skip(!songId, 'no public song with chords in the seed');
   // Start every test from the defaults on this device, in English.
   await page.goto(`/songs/${songId}`);

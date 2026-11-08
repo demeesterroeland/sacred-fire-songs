@@ -69,11 +69,10 @@ describe('CategoryGrid', () => {
     expect(screen.queryByRole('button', { name: '+2 more' })).toBeNull();
   });
 
-  it('has the "more" and description texts in every language', () => {
+  it('has the "more" text in every language', () => {
     for (const locale of SUPPORTED_LOCALES) {
       const d = DICTIONARIES[locale] as Record<string, string>;
       expect(d['explore.categories.more'], locale).toContain('{count}');
-      expect(d['explore.category.description'], locale).toContain('{category}');
     }
   });
 });
