@@ -508,7 +508,6 @@ const fr: Partial<Record<TranslationKey, string>> = {
   'explore.categories.heading': "Explorer par catégorie",
   'explore.categories.description': "Découvre des chants par thème et par tradition",
   'explore.categories.more': '+{count} de plus',
-  'explore.category.description': "Explore les chants liés à {category}.",
 
   // ─── Search / Filter Modal ────────────────────────────────────────────────
   'search.placeholder': "Rechercher parmi {count}+ chants...",

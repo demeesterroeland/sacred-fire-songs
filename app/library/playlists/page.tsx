@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
 import { Heart, PenLine, Music, Mic } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
+import { PLAYLIST_ICON, PLAYLIST_LIST, PLAYLIST_ROW } from '@/components/playlists/playlistRow';
 import { CreatePlaylistInput } from '@/components/playlists/CreatePlaylistInput';
 import { PlaylistCard } from '@/components/playlists/PlaylistCard';
 import { PublicPlaylistCard } from '@/components/playlists/PublicPlaylistCard';
@@ -46,65 +47,28 @@ async function RecordingCountSubtitle({ counts, emptyLabel }: { counts: Recordin
 
 // ─── Shared primitives ────────────────────────────────────────────────────────
 
-const accentClasses = {
-    rose: {
-        card:      'bg-rose-500/8 border-rose-500/20',
-        cardHover: 'hover:bg-rose-500/15 hover:border-rose-500/35',
-        icon:      'bg-rose-500/15',
-        iconHover: 'group-hover:bg-rose-500/25',
-        iconText:  'text-rose-400 fill-rose-400',
-    },
-    amber: {
-        card:      'bg-amber-500/8 border-amber-500/20',
-        cardHover: 'hover:bg-amber-500/15 hover:border-amber-500/35',
-        icon:      'bg-amber-500/15',
-        iconHover: 'group-hover:bg-amber-500/25',
-        iconText:  'text-amber-400',
-    },
-    violet: {
-        card:      'bg-violet-500/8 border-violet-500/20',
-        cardHover: 'hover:bg-violet-500/15 hover:border-violet-500/35',
-        icon:      'bg-violet-500/15',
-        iconHover: 'group-hover:bg-violet-500/25',
-        iconText:  'text-violet-400',
-    },
-    gray: {
-        card:      'bg-gray-200/40 dark:bg-gray-800/40 border-gray-300/40 dark:border-gray-700/40',
-        cardHover: 'hover:bg-gray-200/70 dark:hover:bg-gray-800/70 hover:border-gray-400/60 dark:hover:border-gray-600/60',
-        icon:      'bg-gray-300/40 dark:bg-gray-700/40',
-        iconHover: 'group-hover:bg-gray-300/60 dark:group-hover:bg-gray-700/60',
-        iconText:  'text-gray-500 dark:text-gray-400 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-colors',
-    },
-} as const;
-
 interface SmartPlaylistCardProps {
     icon: LucideIcon;
     title: string;
     description?: string;
     subtitle: React.ReactNode;
     songTitles?: string[];
-    accent: keyof typeof accentClasses;
+    accent?: string;
     href: string;
 }
 
-async function SmartPlaylistCard({ icon: Icon, title, description, subtitle, songTitles = [], accent, href }: SmartPlaylistCardProps) {
-    const c = accentClasses[accent];
-
-    const inner = (
-        <div className={`border p-4 rounded-2xl flex items-center gap-4 transition-all w-full min-w-0 group ${c.card} ${c.cardHover} hover:-translate-y-0.5`}>
-            <div className={`w-12 h-12 rounded-xl flex items-center justify-center shrink-0 transition-colors ${c.icon} ${c.iconHover}`}>
-                <Icon className={`w-6 h-6 ${c.iconText}`} />
-            </div>
+async function SmartPlaylistCard({ icon: Icon, title, description, subtitle, songTitles = [], href }: SmartPlaylistCardProps) {
+    return (
+        <Link href={href} className={PLAYLIST_ROW}>
+            <Icon aria-hidden className={PLAYLIST_ICON} />
             <CardContent
                 title={title}
                 description={description}
                 subtitle={subtitle}
                 songTitles={songTitles}
             />
-        </div>
+        </Link>
     );
-
-    return <Link href={href} className="block w-full min-w-0">{inner}</Link>;
 }
 
 async function PublicPlaylistsSection({
@@ -124,7 +88,7 @@ async function PublicPlaylistsSection({
     return (
         <div>
             <p className="text-meta font-semibold text-fg-muted mb-3">{t('playlists.publicPlaylists')}</p>
-            <div className="grid grid-cols-1 gap-3">
+            <div className={PLAYLIST_LIST}>
                 {playlists.map(setlist => (
                     <PublicPlaylistCard
                         key={setlist.id}
@@ -274,7 +238,7 @@ export default async function PlaylistsPage() {
             {/* Smart Playlists */}
             <div>
                 <p className="text-meta font-semibold text-fg-muted mb-3">{t('playlists.smartPlaylists')}</p>
-                <div className="grid grid-cols-1 gap-3">
+                <div className={PLAYLIST_LIST}>
                     <SmartPlaylistCard
                         icon={Heart} title={t('librarySummary.favorites.title')} description={t('librarySummary.favorites.description')} accent="rose"
                         href="/songs?favorites=true"
@@ -315,7 +279,7 @@ export default async function PlaylistsPage() {
                     <CreatePlaylistInput />
                 </div>
                 {privateSetlists.length > 0 ? (
-                    <div className="grid grid-cols-1 gap-3">
+                    <div className={PLAYLIST_LIST}>
                         {privateSetlists.map(setlist => {
                             const counts = songCounts[setlist.id] ?? { total: 0, public: 0, draft: 0 };
                             return (

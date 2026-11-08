@@ -1,11 +1,12 @@
 # UX v2: Agent Decisions (ADR-lite)
 
-**Version:** 1.40 | **Date:** Nov 7, 2026 | **Epic:** 6.1 (#375)
+**Version:** 1.41 | **Date:** Nov 8, 2026 | **Epic:** 6.1 (#375)
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.41 | Nov 8, 2026 | UXA-069: flat Home and Library, no cards; private playlists show a lock. |
 | 1.40 | Nov 7, 2026 | UXA-068: Vercel Speed Insights removed; the privacy text names what the operator can reach. |
 | 1.39 | Nov 7, 2026 | UXA-068: an admin's favourites (hearts, list, counts) use their own "My Favorites" setlist (owner filter). |
 | 1.38 | Nov 7, 2026 | UXA-068 and UXA-067 updated after the review of PR #477 (auth pages show translated messages by code, the ⋮ menu keeps auto-scroll running, a version switch drops the recording link, My Drafts lists what it counts, Quechua coverage, chord-like labels, right-click on plain text). |
@@ -674,6 +675,16 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 - **Choice:** `lib/errors/actionError.ts` maps the known answers to `errors.*` keys (8 languages) and anything else to the call site's own message or `errors.generic`; the raw text goes to the console only. A test fails when a toast prints `result.error`, `res.error` or `error.message`. `playlists.picker.createdButNotAdded` no longer carries `{error}`; the add-songs toasts are translated.
 - **Left as is:** the sign-in, sign-up, forgot-password, update-password and finish-registration forms still show the message of the authentication service (a separate mapping of its error codes). Runasimi (`qu`) shows its generic sentence for every `errors.*` key until a speaker translates them.
 - **Confirm:** no.
+
+### UXA-069 · Flat Home and Library
+
+- **Date / story:** Nov 8, 2026 · owner validation of #388
+- **Decision (owner):** no cards on Home and Library. Design tokens rule 5 already asked for spacing and `--line`; these screens had kept boxes, icon tiles and a lift on hover.
+- **Rows:** categories, the "Your library" summary and every playlist list are flat rows with lines between them (`components/playlists/playlistRow.ts`). The rename field keeps its box, because it is an input.
+- **Removed:** category icons and the description under a category title, which only repeated the title (`explore.category.description`, all 8 languages). Your library is one row of four numbers on every width.
+- **Playlists:** private shows a lock, public a globe, as songs do. The song count on a public playlist is now translated.
+- **Guard:** `testing/unit/tests/design/flatSurfaces.test.ts`.
+- **Still open:** the mockup `docs/design/screens/v2/screen24_home.html` shows category pills; the build follows this decision.
 
 ### UXA-068 · Validation round 2, batch 2: one song menu, version links, recordings, Terms and Privacy
 

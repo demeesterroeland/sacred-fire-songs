@@ -191,8 +191,10 @@ select:focus-visible {
  * 2 px in the accent instead of 1 px grey (a thicker line, not only a colour change), and no outline box.
  * The shadow adds the second pixel without moving the layout.
  */
+.field-underline:focus,
 .field-underline:focus-visible {
-  outline: none;
+  outline: none !important;
+  outline-offset: 0 !important;
   border-bottom-color: var(--focus);
   box-shadow: 0 1px 0 0 var(--focus);
 }

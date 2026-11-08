@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import { openSongControls } from '../fixtures/songControls';
 import pg from 'pg';
 import { openSongMenu, songMenuButton, songMenuSheet } from '../fixtures/songMenu';
 import { ROLES } from '../fixtures/roles';
@@ -43,6 +44,7 @@ test.beforeAll(async () => {
 });
 
 async function openSong(page: Page, id: string, opts: { wakeLock?: boolean } = {}) {
+  await openSongControls(page);
   if (opts.wakeLock) {
     await page.addInitScript(() => {
       const sentinel = { release: async () => {}, addEventListener: () => {} };

@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Heart, Trash2 } from 'lucide-react';
+import { Heart, Lock, Trash2 } from 'lucide-react';
 import { MetaLine } from '@/components/ui/meta-line';
 import { songRowMeta } from '@/lib/songs/songMeta';
 import { cn } from '@/lib/utils';
@@ -64,8 +64,13 @@ export default function SongCard({
                 <div className="flex items-center gap-2">
                     <h3 className="truncate text-row font-medium text-fg">{title}</h3>
                     {!isPublic && (
-                        <span className="shrink-0 rounded-control border border-line px-1.5 text-caption font-medium text-fg-muted">
-                            {t('song.status.draft')}
+                        <span
+                            className="inline-flex shrink-0 items-center text-fg-muted"
+                            title={t('song.status.draft')}
+                            data-testid="song-row-draft"
+                        >
+                            <Lock className="size-3.5" aria-hidden />
+                            <span className="sr-only">{t('song.status.draft')}</span>
                         </span>
                     )}
                 </div>

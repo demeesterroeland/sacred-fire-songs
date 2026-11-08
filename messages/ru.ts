@@ -511,7 +511,6 @@ const ru: Partial<Record<TranslationKey, string>> = {
   'explore.categories.heading': 'Обзор по категориям',
   'explore.categories.description': 'Находи песни по теме и традиции',
   'explore.categories.more': 'Ещё {count}',
-  'explore.category.description': 'Песни по теме «{category}».',
 
   // ─── Search / Filter Modal ────────────────────────────────────────────────
   'search.placeholder': 'Поиск среди {count}+ песен...',

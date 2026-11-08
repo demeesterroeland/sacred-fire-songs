@@ -508,7 +508,6 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'explore.categories.heading': 'Ontdek per categorie',
   'explore.categories.description': 'Ontdek liederen per thema en traditie',
   'explore.categories.more': '+{count} meer',
-  'explore.category.description': 'Verken liederen gerelateerd aan {category}.',
 
   // ─── Search / Filter Modal ────────────────────────────────────────────────
   'search.placeholder': 'Zoek in {count}+ liederen...',

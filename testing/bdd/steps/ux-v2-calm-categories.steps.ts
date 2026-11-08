@@ -15,7 +15,7 @@ Given('the home page category grid', function (this: World) {
   this.source = fs.readFileSync(path.resolve(__dirname, '../../../components/home/CategoryGrid.tsx'), 'utf8');
 });
 
-Then('category tiles use only greyscale colours except the pressed state', function (this: World) {
+Then('categories use only greyscale colours except the pressed state', function (this: World) {
   assert.equal(countPaletteClasses(this.source), 0, 'no palette colour classes');
   const accents = this.source.match(/[\w:-]*(?:text|bg|border)-accent\b/g) ?? [];
   for (const cls of accents) {

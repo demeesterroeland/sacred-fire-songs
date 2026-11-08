@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import { openSongControls } from '../fixtures/songControls';
 import pg from 'pg';
 import { ROLES } from '../fixtures/roles';
 import { VALIDATION_2_FIXTURE_IDS as IDS } from '../fixtures/ids';
@@ -50,6 +51,7 @@ test.beforeAll(async () => {
 });
 
 test.beforeEach(async ({ page }) => {
+  await openSongControls(page);
   await page.addInitScript(() => {
     localStorage.setItem('sacred-fire-songs-locale', 'en');
     localStorage.removeItem('sacred-fire-songs-reader');
@@ -179,7 +181,8 @@ test('6: the full title wraps at the top of the page; the truncated copy shows o
   await page.evaluate(() => window.scrollBy(0, 700));
   const sticky = page.getByTestId('sticky-song-title');
   await expect(sticky).toBeVisible();
-  const clipped = await sticky.evaluate((el) => ({ over: el.scrollWidth > el.clientWidth, to: getComputedStyle(el).textOverflow }));
+  // The ellipsis is on the text span: the lock or globe sits beside it.
+  const clipped = await sticky.locator('span.truncate').evaluate((el) => ({ over: el.scrollWidth > el.clientWidth, to: getComputedStyle(el).textOverflow }));
   expect(clipped).toEqual({ over: true, to: 'ellipsis' });
   await page.evaluate(() => window.scrollTo(0, 0));
   await expect(sticky).toBeHidden();

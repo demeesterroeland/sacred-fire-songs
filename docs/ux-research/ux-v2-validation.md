@@ -1,11 +1,12 @@
 # UX v2: Phone Validation Script
 
-**Version:** 1.41 | **Date:** Nov 7, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
+**Version:** 1.42 | **Date:** Nov 8, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.42 | Nov 8, 2026 | #388: no cards. Categories are rows with lines between them (UXA-069); the screenshots in steps 1 and 2 still show the earlier look. |
 | 1.41 | Nov 7, 2026 | Check 21: an admin's favourites list matches the Home card. |
 | 1.40 | Nov 7, 2026 | Review of PR #477: four more checks in the Validation round 2 section (messages on the sign-in pages, auto-scroll with the menu open, a version switch after a recording link, My Drafts list). |
 | 1.39 | Nov 7, 2026 | Validation round 2 (batch 2, PR into `feat/ux-v2`): new section with 16 checks; stale steps fixed (the dead seeded song link, the old ⋮ paths to Practice, Playlist and Like, the Library tab is **History**); "take" is now **recording** in every step that quotes the app. |
@@ -265,8 +266,8 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 
 **Preconditions:** signed out (guest) on a 390 px phone, English; run once in light and once in dark. Seed data as in the setup section.
 
-- [ ] 1. Open `/`. **Expected:** under "Explore by category" the tiles are plain grey cards with a grey icon; no blue, green, purple, amber or red tiles and no coloured chips. Screenshot: `docs/ux-research/screenshots/ux-v2/388/after-light/mobile/guest/01-home.webp`. Before: `docs/ux-research/screenshots/ux-v2/388/before-light/mobile/guest/01-home.webp`.
-- [ ] 2. **Expected:** the tags inside a tile (e.g. *Air 7*, *Earth 8*) are plain text with the number in a lighter grey; no emoji or flags.
+- [ ] 1. Open `/`. **Expected:** under "Explore by category" each category is a row with a line below it: a title, then its tags. No cards, no icons, no description under the title, no colour and no coloured chips. Earlier look (no longer current): `docs/ux-research/screenshots/ux-v2/388/before-light/mobile/guest/01-home.webp`.
+- [ ] 2. **Expected:** the tags (e.g. *Air (7)*, *Earth (8)*) are plain text with the number between brackets in a lighter grey, with a space before the bracket; no emoji or flags.
 - [ ] 3. Press and hold a category title or a tag. **Expected:** only then it turns orange (the one accent); releasing opens the songs list for that category or tag.
 - [ ] 4. Tap **+3 more** in a tile. **Expected:** the hidden tags appear in the same tile. Every link is easy to hit with a thumb (at least 44 px tall).
 - [ ] 5. Repeat steps 1–4 in dark mode. Screenshot: `…/388/after-dark/mobile/guest/01-home.webp`.

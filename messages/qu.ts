@@ -512,7 +512,6 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'explore.categories.heading': 'Categoríawan maskay',
   'explore.categories.description': 'Takikunata tarichiy ruwayninwan ñawpa kaywan',
   'explore.categories.more': '+{count} astawan',
-  'explore.category.description': '{category} nisqawan tupaq takikunata maskay.',
 
   // ─── Search / Filter Modal ────────────────────────────────────────────────
   'search.placeholder': '{count}+ taki maskay...',

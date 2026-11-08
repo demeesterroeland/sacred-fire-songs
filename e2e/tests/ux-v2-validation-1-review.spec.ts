@@ -1,4 +1,5 @@
 import { test, expect, type Browser, type Page } from '@playwright/test';
+import { openSongControls } from '../fixtures/songControls';
 import { songMenuButton } from '../fixtures/songMenu';
 import AxeBuilder from '@axe-core/playwright';
 import pg from 'pg';
@@ -205,6 +206,7 @@ async function textBottom(page: Page): Promise<{ bottom: number; chromeTop: numb
 }
 
 async function openFixture(page: Page, width: number, height: number) {
+  await openSongControls(page);
   await page.setViewportSize({ width, height });
   await pinEnglish(page);
   await page.goto(`/songs/${IDS.song}`);
