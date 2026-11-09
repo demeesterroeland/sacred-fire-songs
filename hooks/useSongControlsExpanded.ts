@@ -5,25 +5,16 @@ import { useCallback, useSyncExternalStore } from 'react';
 export const SONG_CONTROLS_EXPANDED_KEY = 'sfs_song_controls_expanded';
 
 const listeners = new Set<() => void>();
-let cachedRaw: string | null = null;
-let cachedValue = false;
-
-function readRaw(): string | null {
-  try {
-    if (typeof window === 'undefined') return null;
-    return window.localStorage.getItem(SONG_CONTROLS_EXPANDED_KEY);
-  } catch {
-    return null;
-  }
-}
+/** Holds the choice for this visit when the browser refuses to store it. Null when storage has it. */
+let unsaved: boolean | null = null;
 
 function getSnapshot(): boolean {
-  const raw = readRaw();
-  if (raw !== cachedRaw) {
-    cachedRaw = raw;
-    cachedValue = raw === 'true';
+  if (unsaved !== null) return unsaved;
+  try {
+    return window.localStorage.getItem(SONG_CONTROLS_EXPANDED_KEY) === 'true';
+  } catch {
+    return false;
   }
-  return cachedValue;
 }
 
 const getServerSnapshot = () => false;
@@ -51,11 +42,10 @@ export function useSongControlsExpanded(): [boolean, (next: boolean | ((prev: bo
     const nextVal = typeof next === 'function' ? next(getSnapshot()) : next;
     try {
       window.localStorage.setItem(SONG_CONTROLS_EXPANDED_KEY, String(nextVal));
+      unsaved = null;
     } catch {
-      // quota or blocked storage
+      unsaved = nextVal; // blocked or full storage: the controls still open, only for this visit
     }
-    cachedRaw = String(nextVal);
-    cachedValue = nextVal;
     listeners.forEach((l) => l());
   }, []);
 

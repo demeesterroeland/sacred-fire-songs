@@ -3,14 +3,15 @@ import { formatCount } from '@/lib/format/count';
 
 /**
  * The heading of a Library sub-page (History, Artists, Shared with me): one size, weight and colour for all of
- * them (validation 2, item 3), an h1 because these pages show only a breadcrumb above it, and the count in
+ * them (validation 2, item 3), an h2 under the Library tabs' h1 (`level={1}` on a page without tabs), and the count in
  * parentheses like every other amount (#388).
  */
-export function LibrarySubpageHeading({ icon: Icon, title, count }: { icon: LucideIcon; title: string; count?: number }) {
+export function LibrarySubpageHeading({ icon: Icon, title, count, level = 2 }: { icon: LucideIcon; title: string; count?: number; level?: 1 | 2 }) {
+  const Heading = level === 1 ? 'h1' : 'h2';
   return (
     <div className="mb-4 flex items-center gap-2">
       <Icon className="size-4 text-fg-subtle" aria-hidden />
-      <h1 data-testid="library-subpage-heading" className="text-body font-semibold text-fg">{title}</h1>
+      <Heading data-testid="library-subpage-heading" className="text-body font-semibold text-fg">{title}</Heading>
       {count !== undefined && <span className="text-meta text-fg-subtle">{formatCount(count)}</span>}
     </div>
   );

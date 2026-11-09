@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 // Validation 2, item 3 (#407): every Library sub-page (History, Artists, Shared with me) heads its list with the
-// same heading: same size, weight and colour, the count between parentheses, and an h1 (the page's only one).
+// same heading: same size, weight and colour, the count between parentheses, and an h2 under the Library tabs' h1.
 import { afterEach, describe, expect, it } from 'vitest';
 import { cleanup, render, screen } from '@testing-library/react';
 import { readFileSync } from 'node:fs';
@@ -10,9 +10,9 @@ import { LibrarySubpageHeading } from '@/components/library/LibrarySubpageHeadin
 afterEach(cleanup);
 
 describe('LibrarySubpageHeading', () => {
-  it('is an h1 with the title and the count in parentheses', () => {
+  it('is an h2 with the title and the count in parentheses', () => {
     render(<LibrarySubpageHeading icon={Clock} title="History" count={4} />);
-    const h = screen.getByRole('heading', { level: 1, name: 'History' });
+    const h = screen.getByRole('heading', { level: 2, name: 'History' });
     expect(h.className).toMatch(/text-body/);
     expect(h.className).toMatch(/font-semibold/);
     expect(screen.getByText('(4)')).toBeTruthy();

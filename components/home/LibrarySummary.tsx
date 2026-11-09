@@ -54,7 +54,7 @@ export default async function LibrarySummary(props: LibrarySummaryProps) {
               className="block min-h-tap min-w-0 px-2 py-1 transition-colors first:ps-0 hover:bg-surface md:px-4"
             >
               <p className="text-lg font-bold text-fg leading-tight">{count}</p>
-              <p className="text-caption text-fg-muted">{t(stat.labelKey)}</p>
+              <p className="text-caption text-fg-muted break-words hyphens-auto">{t(stat.labelKey)}</p>
             </Link>
           );
         })}

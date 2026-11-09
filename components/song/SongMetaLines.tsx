@@ -22,6 +22,7 @@ interface SongMetaLinesProps {
   hasPersonalRecording?: boolean;
   className?: string;
   expanded?: boolean;
+  toggleRef?: React.Ref<HTMLButtonElement>;
   onToggleExpanded?: () => void;
 }
 
@@ -40,6 +41,7 @@ export function SongMetaLines({
   className,
   expanded,
   onToggleExpanded,
+  toggleRef,
 }: SongMetaLinesProps) {
   const { t } = useLocale();
   const tr = t as (key: string, vars?: Record<string, string | number>) => string;
@@ -81,11 +83,12 @@ export function SongMetaLines({
           </ul>
         )}
         <button
+          ref={toggleRef}
           type="button"
           onClick={handleToggle}
           aria-expanded={open}
           aria-controls={open ? listId : undefined}
-          aria-label={open ? t('song.meta.hideTags') : undefined}
+          aria-label={open ? t('song.meta.hideDetails') : undefined}
           className={cn(
             'flex min-h-tap items-center gap-1 text-left hover:text-fg transition-colors',
             open ? 'size-tap shrink-0 justify-center rounded-control' : 'w-full',
@@ -93,7 +96,7 @@ export function SongMetaLines({
           data-testid="song-meta-line"
         >
           {!open && <span className="min-w-0 flex-1 truncate">{meta}</span>}
-          {!open && <span className="sr-only">{t('song.meta.showTags')}</span>}
+          {!open && <span className="sr-only">{t('song.meta.showDetails')}</span>}
           <ChevronDown
             aria-hidden
             className={cn('size-4 shrink-0 transition-transform motion-reduce:transition-none', open && 'rotate-180')}

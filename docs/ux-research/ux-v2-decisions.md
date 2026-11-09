@@ -1,11 +1,12 @@
 # UX v2: Agent Decisions (ADR-lite)
 
-**Version:** 1.41 | **Date:** Nov 8, 2026 | **Epic:** 6.1 (#375)
+**Version:** 1.42 | **Date:** Nov 8, 2026 | **Epic:** 6.1 (#375)
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.42 | Nov 8, 2026 | UXA-070: follow-ups from the cross-review of PRs #477 and #478. |
 | 1.41 | Nov 8, 2026 | UXA-069: flat Home and Library, no cards; private playlists show a lock. |
 | 1.40 | Nov 7, 2026 | UXA-068: Vercel Speed Insights removed; the privacy text names what the operator can reach. |
 | 1.39 | Nov 7, 2026 | UXA-068: an admin's favourites (hearts, list, counts) use their own "My Favorites" setlist (owner filter). |
@@ -675,6 +676,20 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 - **Choice:** `lib/errors/actionError.ts` maps the known answers to `errors.*` keys (8 languages) and anything else to the call site's own message or `errors.generic`; the raw text goes to the console only. A test fails when a toast prints `result.error`, `res.error` or `error.message`. `playlists.picker.createdButNotAdded` no longer carries `{error}`; the add-songs toasts are translated.
 - **Left as is:** the sign-in, sign-up, forgot-password, update-password and finish-registration forms still show the message of the authentication service (a separate mapping of its error codes). Runasimi (`qu`) shows its generic sentence for every `errors.*` key until a speaker translates them.
 - **Confirm:** no.
+
+### UXA-070 · Follow-ups from the cross-review of PRs #477 and #478
+
+- **Date / story:** Nov 8, 2026 · review round on `feat/ux-v2`
+- **Song controls:** they open and close when the browser refuses storage, remembered for that visit only. The button says "Show details". Pressing pause with the controls closed moves focus to that button.
+- **Lock and globe:** one `VisibilityIcon` with the word for screen readers and on hover, on the song page and in playlist rows. Song lists keep their lock and "Draft" label.
+- **Song title:** wraps on desktop as on a phone.
+- **Chord matching:** tokens are matched in bounded time and capped at 32 characters.
+- **Email addresses:** an apostrophe is valid, for the sign-up code and the operator address.
+- **Favourites:** every lookup uses `fetchFavoritesSetlistId`, so a duplicate "My Favorites" cannot split readers and writers.
+- **Headings:** Library sub-pages are an `h2` under the tabs' `h1`; Shared with me has no tabs and keeps `h1`.
+- **Terms and Privacy:** guest favourites are no longer mentioned, because guests have none; the shared recording text says what the app offers instead of promising that a recording cannot be saved.
+- **Targets and tokens:** the playlist ⋯ button is 44 px; `hover:bg-surface-3` did not exist.
+- **Not done:** starting or stopping auto-scroll with the controls closed still moves the lyrics by one toolbar height; focus is not moved when a song reaches its end. A unique index on the favourites setlist needs a data-merging migration and waits for the owner.
 
 ### UXA-069 · Flat Home and Library
 

@@ -90,7 +90,7 @@ export default function UserProfileView({ profile }: { profile: MusicianProfileD
                 {rec.song_id && (
                   <Link
                     href={`/songs/${rec.song_id}`}
-                    className="px-3 py-1.5 rounded-control bg-surface-2 text-fg border border-line hover:bg-surface-3 text-xs font-semibold transition-colors shrink-0"
+                    className="px-3 py-1.5 rounded-control bg-surface-2 text-fg border border-line hover:bg-line text-xs font-semibold transition-colors shrink-0"
                   >
                     {t("user.profile.backToSong")}
                   </Link>

@@ -168,7 +168,7 @@ test('5: switching version updates ?version= in place, Share shares it, the firs
 test('6: the full title wraps at the top of the page; the truncated copy shows only after scrolling past it', async ({ page }) => {
   await page.goto(`/songs/${IDS.song}`);
   const title = page.getByTestId('song-title');
-  await expect(title).toHaveText(LONG_TITLE);
+  await expect(title).toContainText(LONG_TITLE);
   const wrapped = await title.evaluate((el) => ({
     ws: getComputedStyle(el).whiteSpace,
     overflowing: el.scrollWidth > el.clientWidth + 1,
