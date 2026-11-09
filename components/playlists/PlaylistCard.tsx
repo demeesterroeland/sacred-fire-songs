@@ -19,10 +19,9 @@ interface PlaylistCardProps {
     description?: string | null;
     songTitles?: string[];
     /** Songs in the playlist, for the PDF export check. */
-    songCount?: number;
 }
 
-export function PlaylistCard({ id, title, subtitle, isPublic = false, description, songTitles = [], songCount }: PlaylistCardProps) {
+export function PlaylistCard({ id, title, subtitle, isPublic = false, description, songTitles = [] }: PlaylistCardProps) {
     const { t } = useLocale();
     const {
         optimisticTitle,
@@ -35,7 +34,8 @@ export function PlaylistCard({ id, title, subtitle, isPublic = false, descriptio
         handleRenameSave,
     } = usePlaylistRename(id, title);
 
-    const { exportPdf, isExportingPdf } = usePlaylistPdfExport({ playlistId: id, title: optimisticTitle, description, songCount });
+    // No song count here: the row's count can be stale, so the server's list decides (review of PR #482).
+    const { exportPdf, isExportingPdf } = usePlaylistPdfExport({ playlistId: id, title: optimisticTitle, description });
 
     const handleCopyLink = () => {
         const origin = typeof window !== 'undefined' ? window.location.origin : '';

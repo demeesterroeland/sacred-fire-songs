@@ -923,7 +923,7 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'guestGate.profile.title': 'Log in om profielen te zien',
   'guestGate.profile.reason': 'Zangersprofielen en hun opnames zijn alleen zichtbaar voor leden van de kring.',
   'guestGate.smartPlaylists.title': 'Log in om je bibliotheek te zien',
-  'guestGate.smartPlaylists.reason': 'Favorieten, je liederen, concepten en opnames worden bij je account bewaard. Openbare afspeellijsten blijven voor iedereen open.',
+  'guestGate.smartPlaylists.reason': "Favorieten, je liederen en opnames worden bij je account bewaard. Openbare afspeellijsten blijven voor iedereen open.",
   'guestGate.recorder.title': 'Log in om op te nemen',
   "guestGate.recorder.reason": "Neem je eigen oefeningen op, houd ze privé en luister ze altijd terug. Delen en downloaden is ook voor leden.",
   'guestGate.sharing.title': 'Log in om deze gedeelde opname te openen',

@@ -691,7 +691,8 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 - **Tags (owner):** author and tags are links in both states, so the closed and open line no longer differ in what can be tapped. Production has at most 7 tags per song (p95 5 tags and 55 characters), so the links fit on one or two lines. The chevron adds Chords · Melody · Recordings and the technical line.
 - **Library + (owner):** the floating create button is a circle (`rounded-full`), not a rounded square.
 - **Song page order (owner):** Chords · A− · A+ · ▶ comes first, the version switch (Original · Simplified) under it.
-- **Guard:** `testing/unit/tests/review/validationRound4.test.ts`, `flatSurfaces.test.ts`, `songMetaTakesChip.test.tsx`; E2E `ux-v2-library-tabs.spec.ts`, `ux-v2-song-meta.spec.ts`, `ux-v2-variant-slot.spec.ts`.
+- **Review of PR #482 (Sonnet):** the New tab asks for public or own songs only (RLS alone let an admin see other members' drafts); other public playlists exclude your own in the query, so they cannot be crowded out; a guest on the Playlists tab sees the "create a playlist" gate, and the smart playlists gate no longer mentions drafts (8 languages); row menus let the server decide whether a playlist is empty; no empty link list in the song meta.
+- **Guard:** `testing/unit/tests/review/validationRound4.test.ts`, `flatSurfaces.test.ts`, `songMetaTakesChip.test.tsx`, `playlists/usePlaylistPdfExport.test.tsx`, `library/unviewedSongs.test.ts`; E2E `ux-v2-library-tabs.spec.ts`, `ux-v2-song-meta.spec.ts`, `ux-v2-variant-slot.spec.ts`.
 - **Still open:** the sidebar's Drafts item stays; the owner decides whether it follows the "Private" wording.
 
 ### UXA-070 · Follow-ups from the cross-review of PRs #477 and #478

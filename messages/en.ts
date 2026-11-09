@@ -922,7 +922,7 @@ const en = {
   'guestGate.profile.title': 'Sign in to see profiles',
   "guestGate.profile.reason": "Singer profiles and their recordings are shown to members of the circle only.",
   'guestGate.smartPlaylists.title': 'Sign in to see your library',
-  "guestGate.smartPlaylists.reason": "Favourites, your songs, drafts and recordings are saved to your account. Public playlists stay open to everyone.",
+  "guestGate.smartPlaylists.reason": "Favourites, your songs and recordings are saved to your account. Public playlists stay open to everyone.",
   'guestGate.recorder.title': 'Sign in to record',
   "guestGate.recorder.reason": "Record your own practice recordings, keep them private and listen back anytime. Sharing and downloads are for members too.",
   "guestGate.sharing.title": "Sign in to open this shared recording",

@@ -70,3 +70,13 @@ describe('SongMetaLines — collapsed and expanded', () => {
     }
   });
 });
+
+describe('SongMetaLines — nothing to link (review of PR #482)', () => {
+  it('renders no empty list and points the chevron at the details only', () => {
+    render(<SongMetaLines originalAuthor={null} categories={[]} />);
+    // "Traditional" counts as an author link when there is no author; check there is never an empty list.
+    for (const ul of document.querySelectorAll('ul')) expect(ul.children.length).toBeGreaterThan(0);
+    const controls = screen.getByTestId('song-meta-line').getAttribute('aria-controls')!.split(' ');
+    for (const id of controls) expect(document.getElementById(id)).not.toBeNull();
+  });
+});

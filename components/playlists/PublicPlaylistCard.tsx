@@ -32,7 +32,7 @@ export function PublicPlaylistCard({ id, title, description, isOwner, songCount 
         handleRenameSave,
     } = usePlaylistRename(id, title);
 
-    const { exportPdf, isExportingPdf } = usePlaylistPdfExport({ playlistId: id, title: optimisticTitle, description, songCount });
+    const { exportPdf, isExportingPdf } = usePlaylistPdfExport({ playlistId: id, title: optimisticTitle, description }); // the server's list decides
 
     const handleCopyLink = () => {
         const origin = typeof window !== 'undefined' ? window.location.origin : '';

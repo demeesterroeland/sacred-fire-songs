@@ -13,7 +13,7 @@ type PublicPlaylist = { id: string; title: string; description: string | null; o
 type OwnPlaylist = { id: string; title: string; description: string | null; is_public: boolean | null };
 
 /** Section heading on the Playlists tab: grey, small, the same for every section. */
-async function SectionHeading({ children }: { children: React.ReactNode }) {
+function SectionHeading({ children }: { children: React.ReactNode }) {
     return <h2 className="text-meta font-semibold text-fg-muted">{children}</h2>;
 }
 
@@ -77,7 +77,6 @@ async function OwnPlaylists({
                         title={setlist.title}
                         isPublic={setlist.is_public ?? false}
                         description={setlist.description ?? null}
-                        songCount={counts.total}
                         subtitle={<SongCountSubtitle counts={counts} emptyLabel={t('librarySummary.mySongs.empty')} />}
                         songTitles={songTitles[setlist.id] ?? []}
                     />
@@ -96,13 +95,16 @@ export default async function PlaylistsPage() {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
-    const { data: publicSetlists } = await supabase
+    // Other members' public playlists: filtered in the query, so your own recent public lists cannot crowd them out.
+    let publicQuery = supabase
         .from('setlists')
         .select('id, title, description, owner_id')
-        .eq('is_public', true)
+        .eq('is_public', true);
+    if (user) publicQuery = publicQuery.neq('owner_id', user.id);
+    const { data: publicSetlists } = await publicQuery
         .order('created_at', { ascending: false })
         .limit(20);
-    const publicPlaylists: PublicPlaylist[] = (publicSetlists ?? []).filter(p => !user || p.owner_id !== user.id);
+    const publicPlaylists: PublicPlaylist[] = publicSetlists ?? [];
 
     const publicIds = publicPlaylists.map(p => p.id);
     const publicSongCounts: Record<string, number> = {};
@@ -124,7 +126,8 @@ export default async function PlaylistsPage() {
     if (!user) {
         return (
             <div className="space-y-8">
-                <GuestGate feature="smartPlaylists" next="/library/playlists" />
+                {/* Smart playlists live on /library/smart; this tab asks a guest to sign in to make playlists. */}
+                <GuestGate feature="newPlaylist" next="/library/playlists" />
                 <OtherPublicPlaylists title={t('playlists.publicPlaylists')} playlists={publicPlaylists} songCounts={publicSongCounts} songTitles={publicSongTitles} />
             </div>
         );

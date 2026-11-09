@@ -70,6 +70,7 @@ export function SongMetaLines({
     <div className={cn('text-meta text-fg-muted', className)} data-testid="song-meta-lines">
       {/* One button for both states, so keyboard focus stays on it when it toggles. */}
       <div className="flex items-start gap-1">
+        {links.length > 0 ? (
         <ul id={listId} className="flex min-w-0 flex-1 flex-wrap gap-x-1">
           {links.map(({ label, href }, i) => (
             <li key={`${href}-${i}`}>
@@ -80,12 +81,15 @@ export function SongMetaLines({
             </li>
           ))}
         </ul>
+        ) : (
+          <div className="flex-1" />
+        )}
         <button
           ref={toggleRef}
           type="button"
           onClick={handleToggle}
           aria-expanded={open}
-          aria-controls={`${listId} ${detailsId}`}
+          aria-controls={links.length > 0 ? `${listId} ${detailsId}` : detailsId}
           aria-label={open ? t('song.meta.hideDetails') : t('song.meta.showDetails')}
           className="flex size-tap shrink-0 items-center justify-center rounded-control hover:text-fg transition-colors"
           data-testid="song-meta-line"

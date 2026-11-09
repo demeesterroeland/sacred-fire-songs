@@ -924,7 +924,7 @@ const fr: Partial<Record<TranslationKey, string>> = {
   'guestGate.profile.title': 'Connectez-vous pour voir les profils',
   "guestGate.profile.reason": "Les profils des chanteurs et leurs enregistrements ne sont visibles que par les membres du cercle.",
   'guestGate.smartPlaylists.title': 'Connectez-vous pour voir votre bibliothèque',
-  "guestGate.smartPlaylists.reason": "Favoris, vos chants, brouillons et enregistrements sont conservés dans votre compte. Les playlists publiques restent ouvertes à tous.",
+  "guestGate.smartPlaylists.reason": "Favoris, vos chants et enregistrements sont conservés dans votre compte. Les playlists publiques restent ouvertes à tous.",
   'guestGate.recorder.title': 'Connectez-vous pour enregistrer',
   "guestGate.recorder.reason": "Enregistrez vos propres exercices, gardez-les privés et réécoutez-les à tout moment. Partager et télécharger est aussi réservé aux membres.",
   "guestGate.sharing.title": "Connectez-vous pour ouvrir cet enregistrement partagé",

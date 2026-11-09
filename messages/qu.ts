@@ -928,7 +928,7 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'guestGate.profile.title': 'Perfilkuna rikunaykipaq yaykuy',
   'guestGate.profile.reason': 'Takiqkunapa perfilnin, grabasqankunapas muyupi kaqkunallapaqmi rikukun.',
   'guestGate.smartPlaylists.title': 'Bibliotecaykita rikunaykipaq yaykuy',
-  'guestGate.smartPlaylists.reason': 'Munasqakuna, takiykikuna, borradorkuna, grabacionkunapas cuentaykipi waqaychasqa kanku. Llapa runapaq listakunaqa kichasqallam kachkan.',
+  'guestGate.smartPlaylists.reason': "Munasqakuna, takiykikuna, grabacionkunapas cuentaykipi waqaychasqa kanku. Llapa runapaq listakunaqa kichasqallam kachkan.",
   'guestGate.recorder.title': 'Grabanaykipaq yaykuy',
   'guestGate.recorder.reason': 'Kikiyki yachakusqayki grabacionkunata grabay, pakallapi waqaychay, hinaspa kutin uyariy. Rakinapas uraykachinapas kaqkunallapaqmi.',
   'guestGate.sharing.title': 'Kay rakisqa grabacionta kichanaykipaq yaykuy',

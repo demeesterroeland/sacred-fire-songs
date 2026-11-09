@@ -89,7 +89,9 @@ describe('members-only screens render GuestGate instead of redirecting', () => {
     ['app/account/settings/page.tsx', 'settings'],
     ['app/users/[id]/page.tsx', 'profile'],
     ['app/songs/[id]/edit/page.tsx', 'edit'],
-    ['app/library/playlists/page.tsx', 'smartPlaylists'],
+    ['app/library/playlists/page.tsx', 'newPlaylist'],
+    ['app/library/smart/page.tsx', 'smartPlaylists'],
+    ['app/library/new/page.tsx', 'newSongs'],
     ['components/song/RehearsalDrawer.tsx', 'recorder'],
     ['app/recordings/[id]/page.tsx', 'sharing'],
   ];
