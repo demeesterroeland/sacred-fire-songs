@@ -97,6 +97,11 @@ describe('fitTagCount', () => {
     expect(fitTagCount(rights, 1, 10, 151)).toBe(1); // 152 does not, 94 + 14 = 108 does
   });
 
+  it('with Chords/Melody/Recordings behind the chevron, keeps room for "…" even when every tag fits', () => {
+    expect(fitTagCount(rights, 1, 10, 240, true)).toBe(4); // 226 + 14 = 240 fits
+    expect(fitTagCount(rights, 1, 10, 226, true)).toBe(3);
+  });
+
   it('falls back to no tags when even one does not fit, and handles no tags', () => {
     expect(fitTagCount(rights, 1, 10, 60)).toBe(0);
     expect(fitTagCount([50], 1, 10, 20)).toBe(0);
@@ -112,6 +117,12 @@ describe('SongMetaLines — one line when closed', () => {
     expect(document.getElementById(screen.getByTestId('song-meta-line').getAttribute('aria-controls')!.split(' ')[0])!.className).toContain('flex-nowrap');
     for (const c of cats) expect(item(c.name).className).not.toContain('hidden');
     expect(screen.queryByTestId('song-meta-more')).toBeNull();
+  });
+
+  it('shows "…" when the chevron opens Chords, Melody or Recordings links', () => {
+    render(<SongMetaLines originalAuthor="Anna" categories={cats.slice(0, 2)} hasChords />);
+    expect(screen.queryByRole('link', { name: 'Chords' })).toBeNull();
+    expect(screen.getByTestId('song-meta-more')).toBeTruthy();
   });
 
   it('the measuring copy is hidden from screen readers and has no links', () => {

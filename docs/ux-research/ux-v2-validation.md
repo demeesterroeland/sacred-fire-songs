@@ -546,7 +546,7 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 - [ ] 6. **History** tab. **Expected:** the songs you viewed (the old "Recently viewed" block).
 - [ ] 7. Open **Songs** as the member who owns private songs. **Expected:** a private song's title is lighter grey with a lock and the word **Private** (not "Draft"); public songs are unchanged.
 - [ ] 8. Open `/` on a tablet or desktop (768 px or wider). **Expected:** the categories are in two columns, like the song list on Songs. On a phone: one column.
-- [ ] 9. Open a song with many tags. **Expected:** closed, author and tags are underlined links on **one line** with as many tags as fit the width; **…** only when a tag is hidden (no "…" while there is still room). The chevron shows every tag plus Chords/Melody/Recordings links and the key line.
+- [ ] 9. Open a song with many tags. **Expected:** closed, author and tags are underlined links on **one line** with as many tags as fit the width; **…** when a tag is hidden or when the chevron opens Chords/Melody/Recordings links (no "…" otherwise). The chevron shows every tag plus Chords/Melody/Recordings links and the key line.
 - [ ] 10. Open the details (chevron) on a song with two versions. **Expected:** **Chords · A− · A+ · ▶** first, the version switch (Original · Simplified) under it.
 - [ ] 11. Member on a phone: the **+** at the bottom right of the Library is a **circle**.
 - [ ] 12. Playlists and Smart tabs. **Expected:** each section title looks like the History heading: icon, title, count in brackets (lock, globe, people, star). The ⋯ menu's **Export PDF** has the printer icon.

@@ -30,15 +30,22 @@ interface SongMetaLinesProps {
 const ITEM_GAP = 4;
 
 /**
- * Validation 4 (owner): closed, the author and tag links stay on one line and show as many tags as fit; "…" only when
- * tags are hidden. `rights` are the right edges of the items (authors first, then tags) laid out on one line,
- * `moreWidth` the width of "…". Returns how many tags to show. Pure, so it is unit tested.
+ * Validation 4 (owner): closed, the author and tag links stay on one line and show as many tags as fit; "…" marks
+ * that the chevron opens more links (hidden tags, or Chords / Melody / Recordings: `alwaysMore`). `rights` are the
+ * right edges of the items (authors first, then tags) laid out on one line, `moreWidth` the width of "…". Returns how
+ * many tags to show. Pure, so it is unit tested.
  */
-export function fitTagCount(rights: number[], authorCount: number, moreWidth: number, available: number): number {
+export function fitTagCount(
+  rights: number[],
+  authorCount: number,
+  moreWidth: number,
+  available: number,
+  alwaysMore = false,
+): number {
   const tagCount = rights.length - authorCount;
   if (tagCount <= 0) return 0;
-  if (rights[rights.length - 1] <= available) return tagCount;
-  for (let k = tagCount - 1; k > 0; k--) {
+  if (!alwaysMore && rights[rights.length - 1] <= available) return tagCount;
+  for (let k = alwaysMore ? tagCount : tagCount - 1; k > 0; k--) {
     if (rights[authorCount + k - 1] + ITEM_GAP + moreWidth <= available) return k;
   }
   return 0;
@@ -83,6 +90,8 @@ export function SongMetaLines({
   const boxRef = useRef<HTMLDivElement>(null);
   const measureRef = useRef<HTMLUListElement>(null);
   const tagKey = categories.map((c) => c.slug).join('|');
+  // Owner (validation 4): "…" also when the chevron opens Chords / Melody / Recordings links.
+  const hasExtraLinks = Boolean(hasChords || hasMelody || hasPersonalRecording);
   useLayoutEffect(() => {
     const box = boxRef.current;
     const measure = measureRef.current;
@@ -91,7 +100,7 @@ export function SongMetaLines({
       const items = [...measure.children] as HTMLElement[];
       const moreItem = items.pop();
       const rights = items.map((li) => li.offsetLeft + li.offsetWidth);
-      setFit(fitTagCount(rights, authors.length, moreItem?.offsetWidth ?? 0, box.clientWidth));
+      setFit(fitTagCount(rights, authors.length, moreItem?.offsetWidth ?? 0, box.clientWidth, hasExtraLinks));
     };
     update();
     if (typeof ResizeObserver === 'undefined') return;
@@ -99,8 +108,8 @@ export function SongMetaLines({
     observer.observe(box);
     observer.observe(measure);
     return () => observer.disconnect();
-  }, [tagKey, authors.length, open]);
-  const showMore = !open && fit < categories.length;
+  }, [tagKey, authors.length, open, hasExtraLinks]);
+  const showMore = !open && (fit < categories.length || hasExtraLinks);
 
   const handleToggle = () => {
     if (onToggleExpanded) onToggleExpanded();
@@ -108,7 +117,7 @@ export function SongMetaLines({
   };
 
   return (
-    <div className={cn('text-meta text-fg-muted', className)} data-testid="song-meta-lines">
+    <div className={cn('text-meta text-fg-muted', className)} data-testid="song-meta-lines" data-has-extra-links={hasExtraLinks}>
       {/* One button for both states, so keyboard focus stays on it when it toggles. */}
       <div className="flex items-start gap-1">
         {links.length > 0 ? (
