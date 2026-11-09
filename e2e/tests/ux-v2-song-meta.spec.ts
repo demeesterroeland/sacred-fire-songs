@@ -39,7 +39,8 @@ test('Lyrics above the fold on five seeded songs', async ({ page }) => {
     const meta = page.getByTestId('song-meta-lines');
     await expect(meta).toBeVisible();
 
-    // Metadata occupies at most two lines: the 44 px meta-line button + one technical line.
+    // Metadata stays small: author and tag links on at most two 44 px rows (validation 4: production max is
+    // 7 tags, p95 55 characters), plus the technical line when open.
     const { height, techHeight, maxTech } = await meta.evaluate((el) => {
       const tech = el.querySelector('[data-testid="song-technical-line"]');
       const fs = parseFloat(getComputedStyle(el).fontSize);
@@ -50,7 +51,7 @@ test('Lyrics above the fold on five seeded songs', async ({ page }) => {
       };
     });
     expect(techHeight, song.title).toBeLessThanOrEqual(maxTech);
-    expect(height, song.title).toBeLessThanOrEqual(44 + maxTech + 1);
+    expect(height, song.title).toBeLessThanOrEqual(2 * 44 + maxTech + 1);
 
     // First lyric line fully inside the viewport, above the fixed bottom bars.
     const first = page.getByTestId('lyric-line').first();
@@ -72,22 +73,23 @@ test('Lyrics above the fold on five seeded songs', async ({ page }) => {
   }
 });
 
-test('the meta line expands into the full tag list', async ({ page }) => {
+test('author and tags are links in both states; the chevron adds the rest', async ({ page }) => {
   test.skip(!songs.length, 'no public song with lyrics seeded');
   await page.goto(`/songs/${songs[0].id}`);
   const toggle = page.getByTestId('song-meta-line');
+  const links = page.getByTestId('song-meta-lines').getByRole('link');
   await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  await expect(links.first()).toBeVisible();
+  const collapsed = await links.count();
+  expect(await links.first().evaluate((el) => getComputedStyle(el).textDecorationLine)).toContain('underline');
   await toggle.click();
   await expect(toggle).toHaveAttribute('aria-expanded', 'true');
-  const links = page.getByTestId('song-meta-lines').getByRole('link');
-  await expect(links.first()).toBeVisible();
-  // Validation 1: the expanded state is the link list only. Nothing is said twice, and links look clickable
-  // without hover (permanent underline).
+  expect(await links.count()).toBeGreaterThanOrEqual(collapsed);
+  // Nothing is said twice.
   const names = await links.allTextContents();
   const text = (await page.getByTestId('song-meta-lines').first().innerText()).replace(/\s+/g, ' ');
   for (const n of names) expect(text.split(n).length - 1, n).toBe(1);
-  expect(await links.first().evaluate((el) => getComputedStyle(el).textDecorationLine)).toContain('underline');
-  await toggle.click(); // the chevron collapses it again
+  await toggle.click();
   await expect(toggle).toHaveAttribute('aria-expanded', 'false');
-  await expect(page.getByTestId('song-meta-lines').getByRole('link')).toHaveCount(0);
+  await expect(links).toHaveCount(collapsed);
 });

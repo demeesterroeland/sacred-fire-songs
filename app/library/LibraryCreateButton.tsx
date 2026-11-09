@@ -29,7 +29,7 @@ export default function LibraryCreateButton() {
                 data-testid="library-create-fab"
                 onClick={() => setOpen(true)}
                 style={{ bottom: `calc(${ACTION_BAR_BOTTOM} + 1rem)` }}
-                className="fixed right-4 z-30 inline-flex size-14 items-center justify-center rounded-panel bg-accent text-on-accent shadow-sheet transition-[colors,bottom] duration-200 hover:bg-accent/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus motion-reduce:transition-none lg:hidden"
+                className="fixed right-4 z-30 inline-flex size-14 items-center justify-center rounded-full bg-accent text-on-accent shadow-sheet transition-[colors,bottom] duration-200 hover:bg-accent/90 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus motion-reduce:transition-none lg:hidden"
             >
                 <Plus className="size-6" aria-hidden />
             </button>

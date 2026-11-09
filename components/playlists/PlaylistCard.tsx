@@ -7,6 +7,7 @@ import { CardContent } from '@/components/common/CardContent';
 import { VisibilityIcon } from '@/components/common/VisibilityIcon';
 import { toast } from 'sonner';
 import { usePlaylistRename } from '@/hooks/usePlaylistRename';
+import { usePlaylistPdfExport } from '@/hooks/usePlaylistPdfExport';
 import { PLAYLIST_ICON, PLAYLIST_MENU, PLAYLIST_ROW } from './playlistRow';
 
 import { useLocale } from '@/context/LocaleContext';
@@ -17,9 +18,11 @@ interface PlaylistCardProps {
     isPublic?: boolean;
     description?: string | null;
     songTitles?: string[];
+    /** Songs in the playlist, for the PDF export check. */
+    songCount?: number;
 }
 
-export function PlaylistCard({ id, title, subtitle, isPublic = false, description, songTitles = [] }: PlaylistCardProps) {
+export function PlaylistCard({ id, title, subtitle, isPublic = false, description, songTitles = [], songCount }: PlaylistCardProps) {
     const { t } = useLocale();
     const {
         optimisticTitle,
@@ -31,6 +34,8 @@ export function PlaylistCard({ id, title, subtitle, isPublic = false, descriptio
         handleRenameStart,
         handleRenameSave,
     } = usePlaylistRename(id, title);
+
+    const { exportPdf, isExportingPdf } = usePlaylistPdfExport({ playlistId: id, title: optimisticTitle, description, songCount });
 
     const handleCopyLink = () => {
         const origin = typeof window !== 'undefined' ? window.location.origin : '';
@@ -83,6 +88,8 @@ export function PlaylistCard({ id, title, subtitle, isPublic = false, descriptio
                     onRenameStart={handleRenameStart}
                     onGetLink={handleCopyLink}
                     isLinkAvailable={isPublic}
+                    onExportPdf={exportPdf}
+                    isExportingPdf={isExportingPdf}
                 />
             </div>
         </div>

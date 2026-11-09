@@ -537,15 +537,6 @@ export default function SongDetailPage() {
                         toggleRef={metaToggleRef}
                     />
 
-                    {/* Story 6.1.11 (#395): version switch (Original · Simplified), only when the song has more
-                        than one version; nothing (and no space) otherwise. */}
-                    <SongVersionSwitch
-                        className="mb-2"
-                        versions={versions}
-                        selectedIndex={selectedVersionIndex}
-                        onSelect={selectVersion}
-                    />
-
                     {/* Story 6.1.6 (#390), Validation 3: Chords · A− · A+ · ▶ row inside expand/collapse,
                         rendered when expanded or while auto-scroll is actively playing. */}
                     {(controlsExpanded || autoScroll.playing) && (
@@ -577,6 +568,15 @@ export default function SongDetailPage() {
                             />
                         </div>
                     )}
+
+                    {/* Story 6.1.11 (#395), validation 4: version switch below the reader tools (Original · Simplified), only when the song has more
+                        than one version; nothing (and no space) otherwise. */}
+                    <SongVersionSwitch
+                        className="mb-2"
+                        versions={versions}
+                        selectedIndex={selectedVersionIndex}
+                        onSelect={selectVersion}
+                    />
 
                     {/* Song Content (Lyrics/Chords) */}
                     <div className="pt-2 pb-12">

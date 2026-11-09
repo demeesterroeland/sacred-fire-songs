@@ -8,10 +8,8 @@ import { PlaylistContextMenu } from './PlaylistContextMenu';
 import {
     togglePlaylistVisibility,
     updatePlaylistDescription,
-    getPlaylistSongsForExport,
 } from '@/app/actions/playlistActions';
-import { exportPlaylistToPdf, downloadPdf } from '@/lib/export/pdfExport';
-import { browserPdfStore, exportFingerprint, getOrCreatePdf, pdfCacheKey } from '@/lib/export/pdfCache';
+import { usePlaylistPdfExport } from '@/hooks/usePlaylistPdfExport';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { usePlaylistRename } from '@/hooks/usePlaylistRename';
@@ -49,7 +47,7 @@ export function PlaylistDetailHeader({
     isCurator = false,
     isLoggedIn = false,
 }: Props) {
-    const { t, locale } = useLocale();
+    const { t } = useLocale();
     const canEdit = isOwner || isCurator;
     // ─── Title ────────────────────────────────────────────────────────────────
     const {
@@ -115,67 +113,15 @@ export function PlaylistDetailHeader({
     const router = useRouter();
 
     // ─── Export PDF ───────────────────────────────────────────────────────────
-    const [isExportingPdf, setIsExportingPdf] = useState(false);
     const [showLoginModal, setShowLoginModal] = useState(false);
-
-    const handleExportPdf = async () => {
-        if (!isLoggedIn) {
-            setShowLoginModal(true);
-            return;
-        }
-
-        if (songCount > 200) {
-            toast.error(t('playlists.export.limitExceeded', { max: 200 }));
-            return;
-        }
-
-        if (songCount === 0) {
-            toast.info(t('playlists.export.empty'));
-            return;
-        }
-
-        setIsExportingPdf(true);
-        const toastId = toast.loading(t('playlists.export.generating'));
-
-        try {
-            const result = await getPlaylistSongsForExport(playlistId);
-            if (result.error) {
-                toast.error(t('playlists.export.failed'), { id: toastId, description: actionErrorMessage(result.error, t) });
-                return;
-            }
-
-            if (!result.songs || result.songs.length === 0) {
-                toast.info(t('playlists.export.empty'), { id: toastId });
-                return;
-            }
-
-            const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
-            const exportData = {
-                title: result.title || optimisticTitle,
-                description: optimisticDesc || result.description,
-                songs: result.songs,
-                baseUrl,
-                locale,
-            };
-
-            // Reuse the last PDF while the playlist is unchanged (#304).
-            const userId = result.userId ?? 'anonymous';
-            const { blob } = await getOrCreatePdf({
-                store: browserPdfStore(),
-                key: pdfCacheKey(userId, playlistId),
-                fingerprint: await exportFingerprint({ ...exportData, userId, playlistId }),
-                generate: () => exportPlaylistToPdf(exportData),
-            });
-
-            downloadPdf(blob, result.title || optimisticTitle);
-            toast.success(t('playlists.export.downloaded'), { id: toastId });
-        } catch (error) {
-            console.error('Failed to export PDF:', error);
-            toast.error(t('playlists.export.failed'), { id: toastId });
-        } finally {
-            setIsExportingPdf(false);
-        }
-    };
+    const { exportPdf: handleExportPdf, isExportingPdf } = usePlaylistPdfExport({
+        playlistId,
+        title: optimisticTitle,
+        description: optimisticDesc,
+        songCount,
+        isLoggedIn,
+        onNeedLogin: () => setShowLoginModal(true),
+    });
 
     return (
         <div className="space-y-2">

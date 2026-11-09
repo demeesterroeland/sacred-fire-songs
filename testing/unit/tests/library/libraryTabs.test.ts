@@ -8,7 +8,9 @@ describe('libraryTabs', () => {
     expect(FEATURES.albums).toBe(false);
     expect(libraryTabs().map((t) => t.href)).toEqual([
       '/library/playlists',
+      '/library/smart',
       '/library/recently-viewed',
+      '/library/new',
       '/library/artists',
     ]);
   });

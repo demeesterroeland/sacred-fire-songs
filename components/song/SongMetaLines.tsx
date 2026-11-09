@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { ChevronDown } from 'lucide-react';
 import { useLocale } from '@/context/LocaleContext';
 import { joinMeta } from '@/components/ui/meta-line';
-import { songAuthors, songMetaItems, technicalItems, type VersionTechnical } from '@/lib/songs/songMeta';
+import { songAuthors, technicalItems, type VersionTechnical } from '@/lib/songs/songMeta';
 import { cn } from '@/lib/utils';
 
 interface CategoryItem {
@@ -27,9 +27,10 @@ interface SongMetaLinesProps {
 }
 
 /**
- * Story 6.1.7 / G2.2 (#391), Validation 3: two grey lines above the lyrics.
- * Line 1 "Author · Tag · Tag" (tap to expand into links), line 2 "Key E · Capo 3 · Standard"
- * moved inside expand/collapse, closed by default.
+ * Story 6.1.7 / G2.2 (#391), Validation 3 and 4: grey lines above the lyrics.
+ * Line 1: author and tags, always as links (validation 4: production songs have at most 7 tags, p95 55 characters,
+ * so they fit on one or two lines). The chevron at the end opens the rest: Chords · Melody · Recordings links and
+ * the technical line "Key E · Capo 3 · Standard". Closed by default.
  */
 export function SongMetaLines({
   originalAuthor,
@@ -48,16 +49,16 @@ export function SongMetaLines({
   const [internalOpen, setInternalOpen] = useState(false);
   const open = expanded !== undefined ? expanded : internalOpen;
   const listId = useId();
+  const detailsId = useId();
   const authors = songAuthors(originalAuthor, tr);
-  const meta = joinMeta(songMetaItems(originalAuthor, categories, tr));
   const technical = joinMeta(technicalItems(version, tr));
 
   const links: { label: string; href: string }[] = [
     ...authors.map((a) => ({ label: a, href: `/songs?artist=${encodeURIComponent(a)}` })),
     ...categories.map((c) => ({ label: c.name, href: `/songs?tag=${encodeURIComponent(c.slug)}` })),
-    ...(hasChords ? [{ label: t('song.technical.chords'), href: '/songs?chords=true' }] : []),
-    ...(hasMelody ? [{ label: t('song.technical.melody'), href: '/songs?melody=true' }] : []),
-    ...(hasPersonalRecording ? [{ label: t('song.technical.takes'), href: '/songs?myRecordings=true' }] : []),
+    ...(open && hasChords ? [{ label: t('song.technical.chords'), href: '/songs?chords=true' }] : []),
+    ...(open && hasMelody ? [{ label: t('song.technical.melody'), href: '/songs?melody=true' }] : []),
+    ...(open && hasPersonalRecording ? [{ label: t('song.technical.takes'), href: '/songs?myRecordings=true' }] : []),
   ];
 
   const handleToggle = () => {
@@ -67,47 +68,41 @@ export function SongMetaLines({
 
   return (
     <div className={cn('text-meta text-fg-muted', className)} data-testid="song-meta-lines">
-      {/* One row, one button for both states, so keyboard focus stays on it when it toggles.
-          Expanded: only the links (they replace the summary line) and the chevron that collapses again. */}
+      {/* One button for both states, so keyboard focus stays on it when it toggles. */}
       <div className="flex items-start gap-1">
-        {open && (
-          <ul id={listId} className="flex min-w-0 flex-1 flex-wrap gap-x-1">
-            {links.map(({ label, href }, i) => (
-              <li key={`${href}-${i}`}>
-                <Link href={href} className="inline-flex min-h-tap items-center px-1 text-fg underline underline-offset-4">
-                  {label}
-                </Link>
-                {i < links.length - 1 && <span aria-hidden> ·</span>}
-              </li>
-            ))}
-          </ul>
-        )}
+        <ul id={listId} className="flex min-w-0 flex-1 flex-wrap gap-x-1">
+          {links.map(({ label, href }, i) => (
+            <li key={`${href}-${i}`}>
+              <Link href={href} className="inline-flex min-h-tap items-center px-1 text-fg underline underline-offset-4">
+                {label}
+              </Link>
+              {i < links.length - 1 && <span aria-hidden> ·</span>}
+            </li>
+          ))}
+        </ul>
         <button
           ref={toggleRef}
           type="button"
           onClick={handleToggle}
           aria-expanded={open}
-          aria-controls={open ? listId : undefined}
-          aria-label={open ? t('song.meta.hideDetails') : undefined}
-          className={cn(
-            'flex min-h-tap items-center gap-1 text-left hover:text-fg transition-colors',
-            open ? 'size-tap shrink-0 justify-center rounded-control' : 'w-full',
-          )}
+          aria-controls={`${listId} ${detailsId}`}
+          aria-label={open ? t('song.meta.hideDetails') : t('song.meta.showDetails')}
+          className="flex size-tap shrink-0 items-center justify-center rounded-control hover:text-fg transition-colors"
           data-testid="song-meta-line"
         >
-          {!open && <span className="min-w-0 flex-1 truncate">{meta}</span>}
-          {!open && <span className="sr-only">{t('song.meta.showDetails')}</span>}
           <ChevronDown
             aria-hidden
             className={cn('size-4 shrink-0 transition-transform motion-reduce:transition-none', open && 'rotate-180')}
           />
         </button>
       </div>
-      {open && technical && (
-        <p className="truncate mt-1" data-testid="song-technical-line">
-          {technical}
-        </p>
-      )}
+      <div id={detailsId} hidden={!open}>
+        {open && technical && (
+          <p className="truncate mt-1" data-testid="song-technical-line">
+            {technical}
+          </p>
+        )}
+      </div>
     </div>
   );
 }

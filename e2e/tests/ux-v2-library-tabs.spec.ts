@@ -13,41 +13,54 @@ const pinLocale = (page: import('@playwright/test').Page, locale: string) =>
 const tabRow = (page: import('@playwright/test').Page) =>
   page.locator('main nav').filter({ has: page.locator('a[href="/library/playlists"]') }).first().getByRole('link');
 
-test('Library tabs on a phone: every label visible, no "Coming soon" tab', async ({ page }) => {
-  await pinLocale(page, 'en');
-  await page.goto('/library/playlists');
-  const tabs = tabRow(page);
-  await expect(tabs).toHaveCount(3);
-  await expect(page.locator('a[href="/library/albums"]')).toHaveCount(0);
+const TAB_HREFS = ['/library/playlists', '/library/smart', '/library/recently-viewed', '/library/new', '/library/artists'];
 
+/** Validation 4: five tabs are wider than a phone, so the row scrolls. Every tab, once scrolled to, sits inside the screen whole. */
+async function expectReachable(page: import('@playwright/test').Page) {
   const vw = page.viewportSize()!.width;
-  for (const tab of await tabs.all()) {
+  for (const tab of await tabRow(page).all()) {
+    await tab.scrollIntoViewIfNeeded();
     const box = (await tab.boundingBox())!;
     expect(box.x).toBeGreaterThanOrEqual(0);
     expect(box.x + box.width).toBeLessThanOrEqual(vw);
-    expect(box.height).toBeGreaterThanOrEqual(44);
     expect(await tab.evaluate((el) => el.scrollWidth <= el.clientWidth)).toBe(true);
+  }
+}
+
+test('Library tabs on a phone: Playlists | Smart | History | New | Artists, every label reachable, no "Coming soon" tab', async ({ page }) => {
+  await pinLocale(page, 'en');
+  await page.goto('/library/playlists');
+  const tabs = tabRow(page);
+  await expect(tabs).toHaveCount(5);
+  expect(await tabs.evaluateAll((els) => els.map((el) => el.getAttribute('href')))).toEqual(TAB_HREFS);
+  await expect(tabs).toHaveText(['Playlists', 'Smart', 'History', 'New', 'Artists']);
+  await expect(page.locator('a[href="/library/albums"]')).toHaveCount(0);
+
+  await expectReachable(page);
+  for (const tab of await tabs.all()) {
+    const box = (await tab.boundingBox())!;
+    expect(box.height).toBeGreaterThanOrEqual(44);
   }
 
   for (const href of await tabs.evaluateAll((els) => els.map((el) => el.getAttribute('href')!))) {
     await page.goto(href);
     await expect(page.getByText(/coming soon/i)).toHaveCount(0);
+    // The open tab is scrolled into view.
+    const active = page.locator(`main nav a[aria-current="page"][href="${href}"]`);
+    const box = (await active.boundingBox())!;
+    expect(box.x + box.width).toBeLessThanOrEqual(page.viewportSize()!.width);
   }
 });
 
-// The longest labels (ru, qu) must still fit 390 px.
+// The longest labels (ru, qu) are reachable and never cut off on 390 px.
 for (const [locale, playlists] of [['ru', 'Плейлисты'], ['qu', 'Listakuna']] as const) {
-  test(`Library tabs fit 390 px in ${locale}`, async ({ page }) => {
+  test(`Library tabs on 390 px in ${locale}`, async ({ page }) => {
     await pinLocale(page, locale);
     await page.goto('/library/playlists');
     const tabs = tabRow(page);
-    await expect(tabs).toHaveCount(3);
+    await expect(tabs).toHaveCount(5);
     await expect(tabs.first()).toHaveText(playlists);
-    const vw = page.viewportSize()!.width;
-    for (const tab of await tabs.all()) {
-      const box = (await tab.boundingBox())!;
-      expect(box.x + box.width).toBeLessThanOrEqual(vw);
-    }
+    await expectReachable(page);
   });
 }
 

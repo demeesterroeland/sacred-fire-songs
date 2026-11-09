@@ -1,4 +1,4 @@
-import { Home, Library, ListMusic, Heart, FileText, Clock, Music, Mic2, Disc3, Search } from 'lucide-react';
+import { Home, Library, ListMusic, Heart, FileText, Clock, Music, Mic2, Disc3, Search, Sparkles, Inbox } from 'lucide-react';
 import { FEATURES, type Features } from '@/lib/features';
 import { MY_DRAFTS_HREF } from '@/lib/songs/draftsLink';
 import type { LucideIcon } from 'lucide-react';
@@ -84,7 +84,9 @@ export type LibraryTab = { labelKey: TranslationKey; href: string; icon: LucideI
 
 const ALL_LIBRARY_TABS: readonly (LibraryTab & { feature?: keyof Features })[] = [
   { labelKey: 'library.tabs.playlists', href: '/library/playlists', icon: ListMusic },
+  { labelKey: 'library.tabs.smart', href: '/library/smart', icon: Sparkles },
   { labelKey: 'library.tabs.history', href: '/library/recently-viewed', icon: Clock },
+  { labelKey: 'library.tabs.new', href: '/library/new', icon: Inbox },
   { labelKey: 'library.tabs.artists', href: '/library/artists', icon: Mic2 },
   { labelKey: 'library.tabs.albums', href: '/library/albums', icon: Disc3, feature: 'albums' },
 ];

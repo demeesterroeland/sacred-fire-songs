@@ -15,7 +15,6 @@ describe('MY_DRAFTS_HREF', () => {
 
 describe('every entry point to "my drafts" uses it', () => {
   it.each([
-    'app/library/playlists/page.tsx',
     'components/home/LibrarySummary.tsx',
     'components/common/navigation/UserProfile.tsx',
     'lib/navigation.ts',

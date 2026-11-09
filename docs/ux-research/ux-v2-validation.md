@@ -1,11 +1,12 @@
 # UX v2: Phone Validation Script
 
-**Version:** 1.43 | **Date:** Nov 8, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
+**Version:** 1.44 | **Date:** Nov 9, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.44 | Nov 9, 2026 | UXA-071: new section Validation round 4; #407, #391, #388 and #395 steps follow it (five Library tabs, tags always links, two category columns, reader tools above the versions). |
 | 1.43 | Nov 8, 2026 | UXA-070: the song details button reads "Show details"; desktop titles wrap. |
 | 1.42 | Nov 8, 2026 | #388: no cards. Categories are rows with lines between them (UXA-069); the screenshots in steps 1 and 2 still show the earlier look. |
 | 1.41 | Nov 7, 2026 | Check 21: an admin's favourites list matches the Home card. |
@@ -130,7 +131,7 @@ Sections are added per story as it merges into `feat/ux-v2`.
 
 **Preconditions:** member; phone (or 390 px window).
 
-- [ ] 1. Open Library. The tab row shows **Playlists · History · Artists**, all fully visible, no Albums. Screenshot: `docs/ux-research/screenshots/ux-v2/407/after-dark/mobile/member/10-playlists.webp`.
+- [ ] 1. Open Library. The tab row shows **Playlists · Smart · History · New · Artists**, no Albums. On a phone the row scrolls sideways; every label is whole once you scroll to it, and the open tab is in view (validation 4). Screenshot: `docs/ux-research/screenshots/ux-v2/407/after-dark/mobile/member/10-playlists.webp`.
 - [ ] 2. Tap each tab. Every tab opens a working page; none says "Coming soon".
 - [ ] 3. Type `/library/albums` in the address bar. You see the not-found page, not an Albums placeholder.
 
@@ -140,7 +141,7 @@ Sections are added per story as it merges into `feat/ux-v2`.
 
 - [ ] 1. Open a song with many tags (e.g. "Grandmother's Song of the Thousand Rivers"). Under the title: one grey line `Author · Tag · …` and one line `Key D · Capo 1 · DADGAD`. No coloured chips. Screenshot: `docs/ux-research/screenshots/ux-v2/391/after-dark-song-detail.webp`.
 - [ ] 2. The first lyric line is visible without scrolling.
-- [ ] 3. Tap the meta line. It is replaced by the list of links (authors, tags, Chords/Melody), each **underlined** so it looks tappable, and a chevron on the right; the author and tags are **not** repeated in a line above. Tap a tag → the song list filtered by it. Tap the chevron to collapse again.
+- [ ] 3. The author and the tags are **underlined links** whether the details are open or closed (validation 4). Tap the chevron on the right: Chords/Melody links and the key line appear; nothing is repeated. Tap a tag → the song list filtered by it. Tap the chevron to collapse again.
 - [ ] 4. A song without key/capo shows only the meta line.
 
 ### #390 · G2.1 Reader toolbar `Chords · A− · A+`
@@ -270,7 +271,8 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 - [ ] 1. Open `/`. **Expected:** under "Explore by category" each category is a row with a line below it: a title, then its tags. No cards, no icons, no description under the title, no colour and no coloured chips. Earlier look (no longer current): `docs/ux-research/screenshots/ux-v2/388/before-light/mobile/guest/01-home.webp`.
 - [ ] 2. **Expected:** the tags (e.g. *Air (7)*, *Earth (8)*) are plain text with the number between brackets in a lighter grey, with a space before the bracket; no emoji or flags.
 - [ ] 3. Press and hold a category title or a tag. **Expected:** only then it turns orange (the one accent); releasing opens the songs list for that category or tag.
-- [ ] 4. Tap **+3 more** in a tile. **Expected:** the hidden tags appear in the same tile. Every link is easy to hit with a thumb (at least 44 px tall).
+- [ ] 3b. On a tablet or desktop (768 px or wider) the categories sit in **two columns**, like the song list on Songs; on a phone one column (validation 4).
+- [ ] 4. Tap **+3 more** under a category. **Expected:** the hidden tags appear in the same tile. Every link is easy to hit with a thumb (at least 44 px tall).
 - [ ] 5. Repeat steps 1–4 in dark mode. Screenshot: `…/388/after-dark/mobile/guest/01-home.webp`.
 
 ### #408 · G5.3 Bottom bar: Home · Search · Library
@@ -468,7 +470,7 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 **Preconditions:** a 390 px phone, English, light and dark; any account (a guest is enough). Songs with several versions are rare in the seed: pick one from the maintainer, or add a second version to a test song in the database and remove it afterwards.
 
 - [ ] 1. Open a song with one version. **Expected:** the grey meta lines are followed directly by the **Chords · A− · A+** row. No switch, no gap, nothing greyed out. Screenshot: `docs/ux-research/screenshots/ux-v2/395/after-light/mobile/guest/01-song-single-version.webp` (before: `…/395/before-light/…`).
-- [ ] 2. Open the song with versions *Original* and *Simplified*. **Expected:** under the grey meta lines a grey strip with two segments, **Original** (raised, underlined) and **Simplified**; both at least 44 px high; the strip fits the screen. Screenshot: `…/395/after-light/mobile/guest/02-song-two-versions.webp`; dark: `…/395/after-dark/…`.
+- [ ] 2. Open the song with versions *Original* and *Simplified*. **Expected:** under the **Chords · A− · A+** row (open it with the chevron in the meta line; validation 4 put the reader tools first) a grey strip with two segments, **Original** (raised, underlined) and **Simplified**; both at least 44 px high; the strip fits the screen. Screenshot: `…/395/after-light/mobile/guest/02-song-two-versions.webp`; dark: `…/395/after-dark/…`.
 - [ ] 3. Tap **Simplified**. **Expected:** the lyrics (and key line, if the versions differ) change at once; **Simplified** is now raised and underlined, **Original** is plain. Screenshot: `…/395/after-dark/mobile/guest/03-song-second-version.webp`. Tap **Original**: back.
 - [ ] 4. Tap **A+**, then switch versions. **Expected:** the text size stays. Tap **▶** (auto-scroll): the Chords row sticks under the title bar while the switch scrolls away with the page; nothing overlaps the bar at the bottom.
 - [ ] 5. Member: with *Simplified* shown, tap **Practice**. **Expected:** the takes listed belong to the shown version. Close, switch back to *Original*: the take count follows.
@@ -531,6 +533,22 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 - [ ] 6. **VoiceOver or TalkBack, song page and Practice panel** (steps 1 to 12 of `docs/ux-research/2026-11-06-a11y-audit.md` §5): the panel is announced as a dialog named *Practice, <song>*; Listen and Record are read as tabs with *selected*; the recorder says *Recording...* and *Recording paused* when you start and pause; each sheet and dialog is announced with its title and closes with focus back where it was. Write the result per step in the audit file.
 - [ ] 7. Switch the language to Dutch and repeat the recorder part of step 6: the announcements are in Dutch.
 - [ ] 8. Turn on reduced motion in the phone's settings and open the site on a laptop-width window: the bars in the **Practice** button of a playing song do not move.
+
+### Validation round 4 · Library tabs, playlist sections, song page order (Part of #375)
+
+**Preconditions:** a 390 px phone (or window), English, light and dark; a guest and the seeded member. Production build on port `4<issue>` or the preview image.
+
+- [ ] 1. Member: open **Library**. **Expected:** tabs **Playlists · Smart · History · New · Artists**; the row scrolls sideways on a phone and the open tab is always in view. **Smart** has the star icon (from a tablet width up).
+- [ ] 2. **Playlists** tab. **Expected:** three sections: **Your private playlists** (with the field to create one), **Your public playlists** and **Other public playlists** (lists of other members). No smart playlists, no "Recently viewed" block, no "New since last visit" block. "My Favorites" is not listed here.
+- [ ] 3. Open the ⋯ menu of one of your private playlists and of one of your public playlists. **Expected:** **Export PDF** is there; it downloads the same PDF as the button on the playlist page. Other members' playlists have no Export PDF in their menu.
+- [ ] 4. **Smart** tab. **Expected:** Favorites, My Songs and My Recordings, flat rows. **My Drafts** is gone.
+- [ ] 5. **New** tab. **Expected:** the songs added since your last visit, or a short line that there is nothing new. As a guest: a sign-in prompt.
+- [ ] 6. **History** tab. **Expected:** the songs you viewed (the old "Recently viewed" block).
+- [ ] 7. Open **Songs** as the member who owns private songs. **Expected:** a private song's title is lighter grey with a lock and the word **Private** (not "Draft"); public songs are unchanged.
+- [ ] 8. Open `/` on a tablet or desktop (768 px or wider). **Expected:** the categories are in two columns, like the song list on Songs. On a phone: one column.
+- [ ] 9. Open a song with tags. **Expected:** author and tags are underlined links when the details are closed and when they are open. The chevron adds Chords/Melody/Recordings links and the key line.
+- [ ] 10. Open the details (chevron) on a song with two versions. **Expected:** **Chords · A− · A+ · ▶** first, the version switch (Original · Simplified) under it.
+- [ ] 11. Member on a phone: the **+** at the bottom right of the Library is a **circle**.
 
 ### Validation round 2 · batch 2 after the owner's second run (Part of #375)
 

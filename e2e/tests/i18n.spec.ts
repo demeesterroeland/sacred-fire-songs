@@ -206,12 +206,13 @@ test.describe('Interface language @i18n', () => {
       if (!href) throw new Error('No song link found');
 
       await page.goto(href);
-      const titleEn = (await page.locator('h1').first().innerText()).trim();
+      // The h1 also holds the translated Public/Private label, so compare the title line only.
+      const titleEn = (await page.locator('h1').first().innerText()).trim().split('\n')[0];
 
       await presetDutch(context, page, baseURL!);
       await page.goto(href);
       await expect(page.locator('html')).toHaveAttribute('lang', 'nl');
-      await expect(page.locator('h1').first()).toHaveText(titleEn);
+      await expect(page.locator('h1').first()).toContainText(titleEn);
     });
   });
 

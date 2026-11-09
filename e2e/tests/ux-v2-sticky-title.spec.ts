@@ -34,8 +34,8 @@ test('long title in the sticky bar (after scrolling past the full title) shows i
   await page.goto(`/songs/${song.id}`);
   const title = page.getByTestId('sticky-song-title');
   const header = title.locator('xpath=ancestor::div[1]'); // the 56 px bar inside the zero-height sticky header
-  await expect(title).toHaveText(song.title);
-  await expect(page.getByTestId('song-title')).toHaveText(song.title); // the full title, in the page
+  await expect(title.locator('span.truncate')).toHaveText(song.title); // the bar also holds the Public/Private label
+  await expect(page.getByTestId('song-title').locator('span').first()).toHaveText(song.title); // the full title, in the page (the h1 also holds the Public/Private label)
 
   const headerTop = await header.evaluate((el) => el.getBoundingClientRect().top);
   await page.mouse.wheel(0, 800);
@@ -57,7 +57,7 @@ test('long title in the sticky bar (after scrolling past the full title) shows i
   expect(pinnedTop).toBeGreaterThanOrEqual(0);
   expect(pinnedTop).toBeLessThanOrEqual(headerTop);
 
-  const box = await title.evaluate((el) => {
+  const box = await title.locator('span.truncate').evaluate((el) => { // the span clips; the bar also holds the Public/Private icon
     const cs = getComputedStyle(el);
     const r = el.getBoundingClientRect();
     const h = el.closest('header')!.getBoundingClientRect();

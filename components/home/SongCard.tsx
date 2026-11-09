@@ -62,15 +62,15 @@ export default function SongCard({
 
             <div className="min-w-0 flex-1 pr-2">
                 <div className="flex items-center gap-2">
-                    <h3 className="truncate text-row font-medium text-fg">{title}</h3>
+                    <h3 className={cn('truncate text-row font-medium', isPublic ? 'text-fg' : 'text-fg-muted')}>{title}</h3>
                     {!isPublic && (
                         <span
                             className="inline-flex shrink-0 items-center text-fg-muted"
-                            title={t('song.status.draft')}
+                            title={t('song.visibility.private')}
                             data-testid="song-row-draft"
                         >
                             <Lock className="size-3.5" aria-hidden />
-                            <span className="sr-only">{t('song.status.draft')}</span>
+                            <span className="sr-only">{t('song.visibility.private')}</span>
                         </span>
                     )}
                 </div>
