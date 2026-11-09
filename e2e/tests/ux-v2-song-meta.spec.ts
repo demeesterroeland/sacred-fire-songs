@@ -39,7 +39,7 @@ test('Lyrics above the fold on five seeded songs', async ({ page }) => {
     const meta = page.getByTestId('song-meta-lines');
     await expect(meta).toBeVisible();
 
-    // Validation 4 (owner): closed, author and tag links stay on ONE 44 px row (3 tags on a phone, then "…").
+    // Validation 4 (owner): closed, author and tag links stay on ONE 44 px row (as many tags as fit, then "…").
     const { height, techHeight, maxTech } = await meta.evaluate((el) => {
       const tech = el.querySelector('[data-testid="song-technical-line"]');
       const fs = parseFloat(getComputedStyle(el).fontSize);
@@ -51,6 +51,23 @@ test('Lyrics above the fold on five seeded songs', async ({ page }) => {
     });
     expect(techHeight, song.title).toBeLessThanOrEqual(maxTech);
     expect(height, song.title).toBeLessThanOrEqual(44 + maxTech + 1);
+
+    // As many tags as fit: "…" only when a tag is hidden, and then the next tag really would not fit.
+    const fit = await meta.evaluate((el) => {
+      const list = el.querySelector('ul:not([aria-hidden])')!;
+      const box = list.parentElement!.getBoundingClientRect();
+      const shown = [...list.children].filter((li) => getComputedStyle(li).display !== 'none' && li.getAttribute('data-testid') !== 'song-meta-more');
+      const hidden = [...list.children].filter((li) => getComputedStyle(li).display === 'none').length;
+      const more = list.querySelector('[data-testid="song-meta-more"]');
+      const lastRight = shown.length ? shown[shown.length - 1].getBoundingClientRect().right : box.left;
+      const moreRight = more ? more.getBoundingClientRect().right : lastRight;
+      const copy = el.querySelector('ul[aria-hidden]')!;
+      const nextWidth = hidden ? (copy.children[shown.length] as HTMLElement).offsetWidth : 0;
+      return { hidden, hasMore: !!more, moreRight, boxRight: box.right, room: box.right - moreRight, nextWidth };
+    });
+    expect(fit.hasMore, song.title).toBe(fit.hidden > 0);
+    expect(fit.moreRight, song.title).toBeLessThanOrEqual(fit.boxRight + 0.5);
+    if (fit.hidden > 0) expect(fit.room, song.title).toBeLessThan(fit.nextWidth + 4);
 
     // First lyric line fully inside the viewport, above the fixed bottom bars.
     const first = page.getByTestId('lyric-line').first();

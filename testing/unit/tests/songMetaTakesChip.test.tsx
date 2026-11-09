@@ -2,7 +2,7 @@
 // Story 6.1.14 / G4.1 (#398): the renamed "Takes" chip renders in the real English copy (RTL, L3).
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
-import { SongMetaLines } from '@/components/song/SongMetaLines';
+import { SongMetaLines, fitTagCount } from '@/components/song/SongMetaLines';
 import { DICTIONARIES } from '@/lib/i18n';
 
 vi.mock('@/context/LocaleContext', () => ({
@@ -81,27 +81,45 @@ describe('SongMetaLines — nothing to link (review of PR #482)', () => {
   });
 });
 
-// Validation 4 (owner): closed, one line; 3 tags on a phone, 5 from md, 6 from lg, then "…".
+// Validation 4 (owner): closed, one line with as many tags as fit; "…" only when tags are hidden.
+describe('fitTagCount', () => {
+  // Author 0–50, tags of 40 px each with a 4 px gap: right edges 50, 94, 138, 182, 226.
+  const rights = [50, 94, 138, 182, 226];
+
+  it('shows every tag when they all fit, without "…"', () => {
+    expect(fitTagCount(rights, 1, 10, 226)).toBe(4);
+    expect(fitTagCount(rights, 1, 10, 500)).toBe(4);
+  });
+
+  it('shows as many tags as fit next to "…"', () => {
+    expect(fitTagCount(rights, 1, 10, 225)).toBe(3); // 182 + 4 + 10 = 196 fits
+    expect(fitTagCount(rights, 1, 10, 152)).toBe(2); // 138 + 4 + 10 = 152 fits
+    expect(fitTagCount(rights, 1, 10, 151)).toBe(1); // 152 does not, 94 + 14 = 108 does
+  });
+
+  it('falls back to no tags when even one does not fit, and handles no tags', () => {
+    expect(fitTagCount(rights, 1, 10, 60)).toBe(0);
+    expect(fitTagCount([50], 1, 10, 20)).toBe(0);
+  });
+});
+
 describe('SongMetaLines — one line when closed', () => {
   const cats = Array.from({ length: 7 }, (_, i) => ({ name: `Tag ${i + 1}`, slug: `t${i + 1}` }));
   const item = (name: string) => screen.getByRole('link', { name }).closest('li')!;
 
-  it('does not wrap, hides tags past each width and shows "…"', () => {
+  it('does not wrap; with room for every tag there is no "…"', () => {
     render(<SongMetaLines originalAuthor="Anna" categories={cats} />);
     expect(document.getElementById(screen.getByTestId('song-meta-line').getAttribute('aria-controls')!.split(' ')[0])!.className).toContain('flex-nowrap');
-    expect(item('Anna').className).not.toContain('hidden');
-    expect(item('Tag 3').className).not.toContain('hidden');
-    expect(item('Tag 4').className).toContain('hidden md:list-item');
-    expect(item('Tag 6').className).toContain('hidden lg:list-item');
-    expect(screen.getByTestId('song-meta-more').className).not.toMatch(/hidden/); // 7 tags: more than every limit
+    for (const c of cats) expect(item(c.name).className).not.toContain('hidden');
+    expect(screen.queryByTestId('song-meta-more')).toBeNull();
   });
 
-  it('"…" goes away at the width where every tag fits', () => {
-    render(<SongMetaLines originalAuthor="Anna" categories={cats.slice(0, 5)} />);
-    expect(screen.getByTestId('song-meta-more').className).toContain('md:hidden');
-    cleanup();
-    render(<SongMetaLines originalAuthor="Anna" categories={cats.slice(0, 3)} />);
-    expect(screen.queryByTestId('song-meta-more')).toBeNull();
+  it('the measuring copy is hidden from screen readers and has no links', () => {
+    const { container } = render(<SongMetaLines originalAuthor="Anna" categories={cats} />);
+    const copy = container.querySelector('ul[aria-hidden]')!;
+    expect(copy.className).toContain('invisible');
+    expect(copy.querySelectorAll('a')).toHaveLength(0);
+    expect(screen.getAllByRole('link')).toHaveLength(1 + cats.length);
   });
 
   it('open: every tag shows and the list wraps, no "…"', () => {

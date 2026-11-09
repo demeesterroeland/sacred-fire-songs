@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, useState } from 'react';
+import { useId, useLayoutEffect, useRef, useState } from 'react';
 import Link from 'next/link';
 import { ChevronDown } from 'lucide-react';
 import { useLocale } from '@/context/LocaleContext';
@@ -26,31 +26,27 @@ interface SongMetaLinesProps {
   onToggleExpanded?: () => void;
 }
 
+/** Gap between the list items, in px: matches `gap-x-1`. */
+const ITEM_GAP = 4;
+
 /**
- * Validation 4 (owner): closed, the author and tag links stay on one line. A phone shows 3 tags, from md 5, from lg 6;
- * the rest come with the chevron, and "…" says there are more. Class strings are literal for Tailwind.
+ * Validation 4 (owner): closed, the author and tag links stay on one line and show as many tags as fit; "…" only when
+ * tags are hidden. `rights` are the right edges of the items (authors first, then tags) laid out on one line,
+ * `moreWidth` the width of "…". Returns how many tags to show. Pure, so it is unit tested.
  */
-const TAG_LIMITS = { base: 3, md: 5, lg: 6 } as const;
-
-function collapsedTagClass(index: number): string {
-  if (index < TAG_LIMITS.base) return '';
-  if (index < TAG_LIMITS.md) return 'hidden md:list-item';
-  if (index < TAG_LIMITS.lg) return 'hidden lg:list-item';
-  return 'hidden';
-}
-
-/** Where "…" shows: wherever tags are hidden. Empty string = nowhere. */
-function moreMarkClass(tagCount: number): string {
-  if (tagCount > TAG_LIMITS.lg) return 'flex';
-  if (tagCount > TAG_LIMITS.md) return 'flex lg:hidden';
-  if (tagCount > TAG_LIMITS.base) return 'flex md:hidden';
-  return '';
+export function fitTagCount(rights: number[], authorCount: number, moreWidth: number, available: number): number {
+  const tagCount = rights.length - authorCount;
+  if (tagCount <= 0) return 0;
+  if (rights[rights.length - 1] <= available) return tagCount;
+  for (let k = tagCount - 1; k > 0; k--) {
+    if (rights[authorCount + k - 1] + ITEM_GAP + moreWidth <= available) return k;
+  }
+  return 0;
 }
 
 /**
  * Story 6.1.7 / G2.2 (#391), Validation 3 and 4: grey lines above the lyrics.
- * Line 1: author and tags, always as links (validation 4: production songs have at most 7 tags, p95 55 characters,
- * so they fit on one or two lines). The chevron at the end opens the rest: Chords · Melody · Recordings links and
+ * Line 1: author and tags, always as links; closed, as many tags as fit on one line (validation 4). The chevron at the end opens the rest: Chords · Melody · Recordings links and
  * the technical line "Key E · Capo 3 · Standard". Closed by default.
  */
 export function SongMetaLines({
@@ -81,7 +77,30 @@ export function SongMetaLines({
     ...(open && hasMelody ? [{ label: t('song.technical.melody'), href: '/songs?melody=true' }] : []),
     ...(open && hasPersonalRecording ? [{ label: t('song.technical.takes'), href: '/songs?myRecordings=true' }] : []),
   ];
-  const more = open ? '' : moreMarkClass(categories.length);
+  // Validation 4 (owner): measure an invisible one-line copy and show as many tags as fit. Until it is measured
+  // (server render, no ResizeObserver) every tag renders and the closed list clips.
+  const [fit, setFit] = useState(categories.length);
+  const boxRef = useRef<HTMLDivElement>(null);
+  const measureRef = useRef<HTMLUListElement>(null);
+  const tagKey = categories.map((c) => c.slug).join('|');
+  useLayoutEffect(() => {
+    const box = boxRef.current;
+    const measure = measureRef.current;
+    if (!box || !measure) return;
+    const update = () => {
+      const items = [...measure.children] as HTMLElement[];
+      const moreItem = items.pop();
+      const rights = items.map((li) => li.offsetLeft + li.offsetWidth);
+      setFit(fitTagCount(rights, authors.length, moreItem?.offsetWidth ?? 0, box.clientWidth));
+    };
+    update();
+    if (typeof ResizeObserver === 'undefined') return;
+    const observer = new ResizeObserver(update);
+    observer.observe(box);
+    observer.observe(measure);
+    return () => observer.disconnect();
+  }, [tagKey, authors.length, open]);
+  const showMore = !open && fit < categories.length;
 
   const handleToggle = () => {
     if (onToggleExpanded) onToggleExpanded();
@@ -93,24 +112,42 @@ export function SongMetaLines({
       {/* One button for both states, so keyboard focus stays on it when it toggles. */}
       <div className="flex items-start gap-1">
         {links.length > 0 ? (
+        <div ref={boxRef} className="relative min-w-0 flex-1 overflow-hidden">
         <ul
           id={listId}
-          className={cn('flex min-w-0 flex-1 gap-x-1', open ? 'flex-wrap' : 'flex-nowrap overflow-hidden')}
+          className={cn('flex min-w-0 gap-x-1', open ? 'flex-wrap' : 'flex-nowrap')}
         >
           {links.map(({ label, href, tag }, i) => (
-            <li key={`${href}-${i}`} className={cn('shrink-0', !open && tag !== undefined && collapsedTagClass(tag))}>
+            <li key={`${href}-${i}`} className={cn('shrink-0', !open && tag !== undefined && tag >= fit && 'hidden')}>
               {i > 0 && <span aria-hidden>· </span>}
               <Link href={href} className="inline-flex min-h-tap items-center px-1 text-fg underline underline-offset-4">
                 {label}
               </Link>
             </li>
           ))}
-          {more && (
-            <li aria-hidden className={cn('min-h-tap shrink-0 items-center px-1', more)} data-testid="song-meta-more">
+          {showMore && (
+            <li aria-hidden className="flex min-h-tap shrink-0 items-center px-1" data-testid="song-meta-more">
               …
             </li>
           )}
         </ul>
+        {/* Invisible one-line copy of the author and tag links, only to measure them while closed. */}
+        {!open && (
+        <ul
+          ref={measureRef}
+          aria-hidden
+          className="pointer-events-none invisible absolute left-0 top-0 flex w-max flex-nowrap gap-x-1"
+        >
+          {[...authors, ...categories.map((c) => c.name)].map((label, i) => (
+            <li key={i} className="shrink-0">
+              {i > 0 && <span>· </span>}
+              <span className="inline-flex px-1">{label}</span>
+            </li>
+          ))}
+          <li className="shrink-0 px-1">…</li>
+        </ul>
+        )}
+        </div>
         ) : (
           <div className="flex-1" />
         )}
