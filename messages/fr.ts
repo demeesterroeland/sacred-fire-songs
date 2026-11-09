@@ -77,7 +77,7 @@ const fr: Partial<Record<TranslationKey, string>> = {
   'nav.library': "Bibliothèque",
   'nav.playlists': "Playlists",
   'nav.favorites': "Favoris",
-  'nav.drafts': "Brouillons",
+  'nav.drafts': 'Privés',
   'nav.recentlyViewed': "Vus récemment",
   'nav.addSong': "Ajouter un chant",
   'nav.newPlaylist': "Nouvelle playlist",
@@ -90,7 +90,7 @@ const fr: Partial<Record<TranslationKey, string>> = {
   'userMenu.account': "Compte",
   'userMenu.settings': "Paramètres du compte",
   'userMenu.favorites': "Tes favoris",
-  'userMenu.drafts': "Mes brouillons",
+  'userMenu.drafts': "Mes chants privés",
   'userMenu.playlists': "Mes playlists",
   'userMenu.recentlyViewed': "Vus récemment",
   'userMenu.signOut': "Se déconnecter",
@@ -332,6 +332,8 @@ const fr: Partial<Record<TranslationKey, string>> = {
   "settings.prefs.emailNotifications.description": "M’envoyer un e-mail quand quelqu’un partage un enregistrement avec moi.",
   'settings.prefs.emailNotifications.saveError': 'Impossible d’enregistrer votre préférence e-mail.',
 
+  'song.menu.publish': 'Rendre public',
+
   'song.publishSuccess': 'Le chant est désormais public.',
   'song.publishError': 'Échec de la publication du chant.',
 
@@ -494,9 +496,6 @@ const fr: Partial<Record<TranslationKey, string>> = {
   "librarySummary.recordings.title": "Tes enregistrements",
   "librarySummary.recordings.description": "Les enregistrements faits pendant tes exercices",
   "librarySummary.recordings.empty": "Pas encore d’enregistrements",
-  'librarySummary.drafts.title': "Mes brouillons",
-  'librarySummary.drafts.description': "Tes chants en cours d'écriture",
-  'librarySummary.drafts.empty': "Pas encore de brouillons",
 
   // ─── Home ─────────────────────────────────────────────────────────────────
   'home.welcome.title': 'Bienvenue',

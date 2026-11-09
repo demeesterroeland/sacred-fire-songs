@@ -39,8 +39,7 @@ test('Lyrics above the fold on five seeded songs', async ({ page }) => {
     const meta = page.getByTestId('song-meta-lines');
     await expect(meta).toBeVisible();
 
-    // Metadata stays small: author and tag links on at most two 44 px rows (validation 4: production max is
-    // 7 tags, p95 55 characters), plus the technical line when open.
+    // Validation 4 (owner): closed, author and tag links stay on ONE 44 px row (3 tags on a phone, then "…").
     const { height, techHeight, maxTech } = await meta.evaluate((el) => {
       const tech = el.querySelector('[data-testid="song-technical-line"]');
       const fs = parseFloat(getComputedStyle(el).fontSize);
@@ -51,7 +50,7 @@ test('Lyrics above the fold on five seeded songs', async ({ page }) => {
       };
     });
     expect(techHeight, song.title).toBeLessThanOrEqual(maxTech);
-    expect(height, song.title).toBeLessThanOrEqual(2 * 44 + maxTech + 1);
+    expect(height, song.title).toBeLessThanOrEqual(44 + maxTech + 1);
 
     // First lyric line fully inside the viewport, above the fixed bottom bars.
     const first = page.getByTestId('lyric-line').first();

@@ -81,7 +81,7 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'nav.library': 'Biblioteca',
   'nav.playlists': 'Listakuna',
   'nav.favorites': 'Munasqakuna',
-  'nav.drafts': 'Borradorkuna',
+  'nav.drafts': 'Pakasqakuna',
   'nav.recentlyViewed': 'Qhipa qhawasqakuna',
   'nav.addSong': 'Taki yapay',
   'nav.newPlaylist': 'Musuq lista',
@@ -94,7 +94,7 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'userMenu.account': 'Cuenta',
   'userMenu.settings': 'Cuenta configuración',
   'userMenu.favorites': 'Munasqaykikuna',
-  'userMenu.drafts': 'Borradorniykuna',
+  'userMenu.drafts': "Pakasqa takiykikuna",
   'userMenu.playlists': 'Listaykuna',
   'userMenu.recentlyViewed': 'Qhipa qhawasqakuna',
   'userMenu.signOut': 'Lluqsiy',
@@ -336,6 +336,8 @@ const qu: Partial<Record<TranslationKey, string>> = {
   "settings.prefs.emailNotifications.description": "Pipas grabaciónta ñuqawan rakinakuptin correota apachimuway.",
   'settings.prefs.emailNotifications.saveError': 'Correo akllasqaykita mana waqaychayta atikurqanchu.',
 
+  'song.menu.publish': 'Llapa runapaq kichay',
+
   'song.publishSuccess': 'Takiqa llapapaqñam kachkan.',
   'song.publishError': 'Mana takita llapapaq churayta atikunchu.',
 
@@ -498,9 +500,6 @@ const qu: Partial<Record<TranslationKey, string>> = {
   "librarySummary.recordings.title": "Grabaciónniykikuna",
   "librarySummary.recordings.description": "Yachakuspa grabasqaykikuna",
   "librarySummary.recordings.empty": "Manaraq grabaciónkuna kanchu",
-  'librarySummary.drafts.title': 'Borradorniykuna',
-  'librarySummary.drafts.description': 'Ruwasqayki takikuna, manaraq tukusqa',
-  'librarySummary.drafts.empty': 'Manaraq borradorkuna',
 
   // ─── Home ─────────────────────────────────────────────────────────────────
   'home.welcome.title': 'Allin hamuy',

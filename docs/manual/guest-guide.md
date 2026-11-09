@@ -1,11 +1,12 @@
 # Guest Guide (draft)
 
-**Version:** 0.22 | **Date:** Nov 7, 2026
+**Version:** 0.23 | **Date:** Nov 9, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.23 | Nov 9, 2026 | The ☰ menu's Library section lists the same tabs as the Library page; tags under a song title stay on one line with "…" when there are more. |
 | 0.22 | Nov 7, 2026 | "recording" is now **recording**; Terms Of Service and Privacy Policy pages (a draft until approved). |
 | 0.21 | Nov 6, 2026 | Practice opens on the **Listen** tab for guests; under **Public recordings** you can play recordings that singers made public with their consent (listen only); a link to a public recording opens that recording on the Listen tab, highlighted (UX v2, #405). |
 | 0.20 | Nov 6, 2026 | Song page: songs with several versions have a switch under the grey lines; a link can open a given version (UX v2, #395). |
@@ -39,7 +40,7 @@ The screen has three fixed parts:
 - **Content** in the middle.
 - **Bottom bar:** **Home**, **Search**, **Library**. **Search** opens the song list and puts the cursor in the search field.
 
-The ☰ menu repeats the main places (Home, Songs, Playlists, Favorites, Drafts, Recently Viewed, Add Song, New Playlist) and has the **language switch** at the bottom.
+The ☰ menu repeats the main places (Home, Songs; under Library the same tabs as the Library page: Playlists, Smart, History, New, Artists; Add Song, New Playlist) and has the **language switch** at the bottom.
 
 ## Finding a song
 

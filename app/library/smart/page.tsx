@@ -1,4 +1,5 @@
-import { Heart, Music, Mic } from 'lucide-react';
+import { Heart, Music, Mic, Sparkles } from 'lucide-react';
+import { LibrarySubpageHeading } from '@/components/library/LibrarySubpageHeading';
 import { createClient } from '@/lib/supabase/server';
 import { getServerT } from '@/lib/i18n/server';
 import GuestGate from '@/components/common/GuestGate';
@@ -43,7 +44,8 @@ export default async function SmartPlaylistsPage() {
 
     return (
         <section data-testid="smart-playlists">
-            <h2 className="text-meta font-semibold text-fg-muted mb-3">{t('playlists.smartPlaylists')}</h2>
+            {/* Same heading as History, New and Artists, with the Smart tab's star (validation 4). */}
+            <LibrarySubpageHeading icon={Sparkles} title={t('playlists.smartPlaylists')} count={3} />
             <div className={PLAYLIST_LIST}>
                 <SmartPlaylistCard
                     icon={Heart} title={t('librarySummary.favorites.title')} description={t('librarySummary.favorites.description')}

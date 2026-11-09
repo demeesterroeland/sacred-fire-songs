@@ -61,6 +61,6 @@ describe('SongCard row', () => {
   it('marks a private song with a translated label and a lighter title (validation 4)', () => {
     render(<SongCard id="s1" title="Draft song" author="X" isPublic={false} />);
     expect(screen.getByText('Private')).toBeTruthy();
-    expect(screen.getByText('Draft song').className).toContain('text-fg-muted');
+    expect(screen.getByText('Draft song').className).toContain('text-fg-subtle');
   });
 });

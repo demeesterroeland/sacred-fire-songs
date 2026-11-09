@@ -80,7 +80,7 @@ const ru: Partial<Record<TranslationKey, string>> = {
   'nav.library': 'Библиотека',
   'nav.playlists': 'Плейлисты',
   'nav.favorites': 'Избранное',
-  'nav.drafts': 'Черновики',
+  'nav.drafts': 'Личные',
   'nav.recentlyViewed': 'Недавно просмотренные',
   'nav.addSong': 'Добавить песню',
   'nav.newPlaylist': 'Новый плейлист',
@@ -93,7 +93,7 @@ const ru: Partial<Record<TranslationKey, string>> = {
   'userMenu.account': 'Аккаунт',
   'userMenu.settings': 'Настройки аккаунта',
   'userMenu.favorites': 'Твоё избранное',
-  'userMenu.drafts': 'Мои черновики',
+  'userMenu.drafts': "Мои личные песни",
   'userMenu.playlists': 'Мои плейлисты',
   'userMenu.recentlyViewed': 'Недавно просмотренные',
   'userMenu.signOut': 'Выйти',
@@ -335,6 +335,8 @@ const ru: Partial<Record<TranslationKey, string>> = {
   "settings.prefs.emailNotifications.description": "Присылать письмо, когда кто-то делится со мной записью.",
   'settings.prefs.emailNotifications.saveError': 'Не удалось сохранить настройку почты.',
 
+  'song.menu.publish': 'Сделать публичной',
+
   'song.publishSuccess': 'Песня теперь публичная.',
   'song.publishError': 'Не удалось сделать песню публичной.',
 
@@ -497,9 +499,6 @@ const ru: Partial<Record<TranslationKey, string>> = {
   "librarySummary.recordings.title": "Твои записи",
   "librarySummary.recordings.description": "Записи, сделанные во время практики",
   "librarySummary.recordings.empty": "Записей пока нет",
-  'librarySummary.drafts.title': 'Мои черновики',
-  'librarySummary.drafts.description': 'Твои песни в работе',
-  'librarySummary.drafts.empty': 'Черновиков пока нет',
 
   // ─── Home ─────────────────────────────────────────────────────────────────
   'home.welcome.title': 'Добро пожаловать',

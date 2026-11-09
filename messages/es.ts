@@ -77,7 +77,7 @@ const es: Partial<Record<TranslationKey, string>> = {
   'nav.library': 'Biblioteca',
   'nav.playlists': 'Listas',
   'nav.favorites': 'Favoritas',
-  'nav.drafts': 'Borradores',
+  'nav.drafts': 'Privadas',
   'nav.recentlyViewed': 'Vistas recientemente',
   'nav.addSong': 'Añadir canción',
   'nav.newPlaylist': 'Nueva lista',
@@ -90,7 +90,7 @@ const es: Partial<Record<TranslationKey, string>> = {
   'userMenu.account': 'Cuenta',
   'userMenu.settings': 'Ajustes de la cuenta',
   'userMenu.favorites': 'Tus favoritas',
-  'userMenu.drafts': 'Mis borradores',
+  'userMenu.drafts': "Mis canciones privadas",
   'userMenu.playlists': 'Mis listas',
   'userMenu.recentlyViewed': 'Vistas recientemente',
   'userMenu.signOut': 'Cerrar sesión',
@@ -332,6 +332,8 @@ const es: Partial<Record<TranslationKey, string>> = {
   "settings.prefs.emailNotifications.description": "Envíame un correo cuando alguien comparta una grabación conmigo.",
   'settings.prefs.emailNotifications.saveError': 'No se pudo guardar tu preferencia de correo.',
 
+  'song.menu.publish': 'Hacer pública',
+
   'song.publishSuccess': 'La canción ahora es pública.',
   'song.publishError': 'Error al hacer pública la canción.',
 
@@ -494,9 +496,6 @@ const es: Partial<Record<TranslationKey, string>> = {
   "librarySummary.recordings.title": "Tus grabaciones",
   "librarySummary.recordings.description": "Grabaciones hechas durante tu práctica",
   "librarySummary.recordings.empty": "Aún no hay grabaciones",
-  'librarySummary.drafts.title': 'Mis borradores',
-  'librarySummary.drafts.description': 'Tus canciones en proceso',
-  'librarySummary.drafts.empty': 'Aún no hay borradores',
 
   // ─── Home ─────────────────────────────────────────────────────────────────
   'home.welcome.title': 'Bienvenido',

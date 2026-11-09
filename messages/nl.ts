@@ -77,7 +77,7 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'nav.library': 'Bibliotheek',
   'nav.playlists': 'Afspeellijsten',
   'nav.favorites': 'Favorieten',
-  'nav.drafts': 'Concepten',
+  'nav.drafts': 'Privé',
   'nav.recentlyViewed': 'Recent bekeken',
   'nav.addSong': 'Lied toevoegen',
   'nav.newPlaylist': 'Nieuwe afspeellijst',
@@ -90,7 +90,7 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'userMenu.account': 'Account',
   'userMenu.settings': 'Accountinstellingen',
   'userMenu.favorites': 'Jouw favorieten',
-  'userMenu.drafts': 'Mijn concepten',
+  'userMenu.drafts': "Mijn privéliederen",
   'userMenu.playlists': 'Mijn afspeellijsten',
   'userMenu.recentlyViewed': 'Recent bekeken',
   'userMenu.signOut': 'Afmelden',
@@ -332,6 +332,8 @@ const nl: Partial<Record<TranslationKey, string>> = {
   "settings.prefs.emailNotifications.description": "Stuur me een e-mail wanneer iemand een opname met me deelt.",
   'settings.prefs.emailNotifications.saveError': 'Je e-mailvoorkeur kon niet worden opgeslagen.',
 
+  'song.menu.publish': 'Openbaar maken',
+
   'song.publishSuccess': 'Lied is nu openbaar.',
   'song.publishError': 'Kon lied niet openbaar maken.',
 
@@ -494,9 +496,6 @@ const nl: Partial<Record<TranslationKey, string>> = {
   "librarySummary.recordings.title": "Jouw opnames",
   "librarySummary.recordings.description": "Opnames die je maakte tijdens het oefenen",
   "librarySummary.recordings.empty": "Nog geen opnames",
-  'librarySummary.drafts.title': 'Mijn concepten',
-  'librarySummary.drafts.description': 'Jouw liederen in bewerking',
-  'librarySummary.drafts.empty': 'Nog geen concepten',
 
   // ─── Home ─────────────────────────────────────────────────────────────────
   'home.welcome.title': 'Welkom',

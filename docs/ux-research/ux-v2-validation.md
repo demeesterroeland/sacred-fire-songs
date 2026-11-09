@@ -546,9 +546,12 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 - [ ] 6. **History** tab. **Expected:** the songs you viewed (the old "Recently viewed" block).
 - [ ] 7. Open **Songs** as the member who owns private songs. **Expected:** a private song's title is lighter grey with a lock and the word **Private** (not "Draft"); public songs are unchanged.
 - [ ] 8. Open `/` on a tablet or desktop (768 px or wider). **Expected:** the categories are in two columns, like the song list on Songs. On a phone: one column.
-- [ ] 9. Open a song with tags. **Expected:** author and tags are underlined links when the details are closed and when they are open. The chevron adds Chords/Melody/Recordings links and the key line.
+- [ ] 9. Open a song with many tags. **Expected:** closed, author and tags are underlined links on **one line**: 3 tags on a phone (5 on a tablet, 6 on a desktop), then **…** when there are more. The chevron shows every tag plus Chords/Melody/Recordings links and the key line.
 - [ ] 10. Open the details (chevron) on a song with two versions. **Expected:** **Chords · A− · A+ · ▶** first, the version switch (Original · Simplified) under it.
 - [ ] 11. Member on a phone: the **+** at the bottom right of the Library is a **circle**.
+- [ ] 12. Playlists and Smart tabs. **Expected:** each section title looks like the History heading: icon, title, count in brackets (lock, globe, people, star). The ⋯ menu's **Export PDF** has the printer icon.
+- [ ] 13. Open ☰. **Expected:** under Library the same five items as the Library tabs; "Drafts" is gone. Home's count and the account menu say **Private** / **My private songs**.
+- [ ] 14. Member: open one of your private songs. **Expected:** the title is lighter grey; ⋮ has **Make public**; tap it: a message says the song is public and the title turns dark. Another member's or a public song has no **Make public**.
 
 ### Validation round 2 · batch 2 after the owner's second run (Part of #375)
 

@@ -80,3 +80,34 @@ describe('SongMetaLines — nothing to link (review of PR #482)', () => {
     for (const id of controls) expect(document.getElementById(id)).not.toBeNull();
   });
 });
+
+// Validation 4 (owner): closed, one line; 3 tags on a phone, 5 from md, 6 from lg, then "…".
+describe('SongMetaLines — one line when closed', () => {
+  const cats = Array.from({ length: 7 }, (_, i) => ({ name: `Tag ${i + 1}`, slug: `t${i + 1}` }));
+  const item = (name: string) => screen.getByRole('link', { name }).closest('li')!;
+
+  it('does not wrap, hides tags past each width and shows "…"', () => {
+    render(<SongMetaLines originalAuthor="Anna" categories={cats} />);
+    expect(document.getElementById(screen.getByTestId('song-meta-line').getAttribute('aria-controls')!.split(' ')[0])!.className).toContain('flex-nowrap');
+    expect(item('Anna').className).not.toContain('hidden');
+    expect(item('Tag 3').className).not.toContain('hidden');
+    expect(item('Tag 4').className).toContain('hidden md:list-item');
+    expect(item('Tag 6').className).toContain('hidden lg:list-item');
+    expect(screen.getByTestId('song-meta-more').className).not.toMatch(/hidden/); // 7 tags: more than every limit
+  });
+
+  it('"…" goes away at the width where every tag fits', () => {
+    render(<SongMetaLines originalAuthor="Anna" categories={cats.slice(0, 5)} />);
+    expect(screen.getByTestId('song-meta-more').className).toContain('md:hidden');
+    cleanup();
+    render(<SongMetaLines originalAuthor="Anna" categories={cats.slice(0, 3)} />);
+    expect(screen.queryByTestId('song-meta-more')).toBeNull();
+  });
+
+  it('open: every tag shows and the list wraps, no "…"', () => {
+    render(<SongMetaLines originalAuthor="Anna" categories={cats} />);
+    fireEvent.click(screen.getByTestId('song-meta-line'));
+    for (const c of cats) expect(item(c.name).className).not.toContain('hidden');
+    expect(screen.queryByTestId('song-meta-more')).toBeNull();
+  });
+});

@@ -1,4 +1,6 @@
+import { Globe, Lock, Users } from 'lucide-react';
 import { createClient } from '@/lib/supabase/server';
+import { LibrarySubpageHeading } from '@/components/library/LibrarySubpageHeading';
 import { CreatePlaylistInput } from '@/components/playlists/CreatePlaylistInput';
 import { PlaylistCard } from '@/components/playlists/PlaylistCard';
 import { PublicPlaylistCard } from '@/components/playlists/PublicPlaylistCard';
@@ -12,29 +14,23 @@ import type { SongCounts } from '@/lib/library/summary';
 type PublicPlaylist = { id: string; title: string; description: string | null; owner_id: string };
 type OwnPlaylist = { id: string; title: string; description: string | null; is_public: boolean | null };
 
-/** Section heading on the Playlists tab: grey, small, the same for every section. */
-function SectionHeading({ children }: { children: React.ReactNode }) {
-    return <h2 className="text-meta font-semibold text-fg-muted">{children}</h2>;
-}
 
 /** Public playlists of other people (or every public playlist, for a guest). */
 async function OtherPublicPlaylists({
     title,
     playlists,
-    userId,
     songCounts,
     songTitles,
 }: {
     title: string;
     playlists: PublicPlaylist[];
-    userId?: string;
     songCounts: Record<string, number>;
     songTitles: Record<string, string[]>;
 }) {
     if (playlists.length === 0) return null;
     return (
         <section data-testid="other-public-playlists">
-            <div className="mb-3"><SectionHeading>{title}</SectionHeading></div>
+            <LibrarySubpageHeading icon={Users} title={title} count={playlists.length} />
             <div className={PLAYLIST_LIST}>
                 {playlists.map(setlist => (
                     <PublicPlaylistCard
@@ -44,7 +40,6 @@ async function OtherPublicPlaylists({
                         description={setlist.description}
                         songCount={songCounts[setlist.id] ?? 0}
                         songTitles={songTitles[setlist.id] ?? []}
-                        isOwner={userId === setlist.owner_id}
                     />
                 ))}
             </div>
@@ -165,22 +160,21 @@ export default async function PlaylistsPage() {
     return (
         <div className="space-y-8">
             <section data-testid="your-private-playlists">
-                <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-                    <SectionHeading>{t('playlists.myPrivatePlaylists')}</SectionHeading>
+                <div className="flex flex-wrap items-center justify-between gap-2 mb-4">
+                    <LibrarySubpageHeading icon={Lock} title={t('playlists.myPrivatePlaylists')} count={privatePlaylists.length} className="" />
                     <CreatePlaylistInput />
                 </div>
                 <OwnPlaylists playlists={privatePlaylists} songCounts={songCounts} songTitles={songTitles} emptyLabel={t('playlists.emptyPrivateHint')} />
             </section>
 
             <section data-testid="your-public-playlists">
-                <div className="mb-3"><SectionHeading>{t('playlists.myPublicPlaylists')}</SectionHeading></div>
+                <LibrarySubpageHeading icon={Globe} title={t('playlists.myPublicPlaylists')} count={ownPublicPlaylists.length} />
                 <OwnPlaylists playlists={ownPublicPlaylists} songCounts={songCounts} songTitles={songTitles} emptyLabel={t('playlists.emptyPublicHint')} />
             </section>
 
             <OtherPublicPlaylists
                 title={t('playlists.otherPublicPlaylists')}
                 playlists={publicPlaylists}
-                userId={user.id}
                 songCounts={publicSongCounts}
                 songTitles={publicSongTitles}
             />

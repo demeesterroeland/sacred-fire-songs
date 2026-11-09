@@ -342,8 +342,8 @@ export default function SongDetailPage() {
         }
     };
 
-    // Helper for badge colors (could be moved to utils or globals)
-    // REMOVED: local getCategoryColor - imported from uiUtils
+    // Validation 4: a private song's title is lighter grey, as in song lists.
+    const titleColour = song.is_public ? 'text-fg' : 'text-fg-subtle';
 
     return (
         <div className="flex flex-col h-full">
@@ -367,7 +367,8 @@ export default function SongDetailPage() {
                         aria-hidden="true"
                         title={song.title}
                         className={cn(
-                            'min-w-0 flex-1 truncate text-left text-title font-semibold text-fg flex items-center gap-1.5',
+                            'min-w-0 flex-1 truncate text-left text-title font-semibold flex items-center gap-1.5',
+                            titleColour,
                             !titleScrolledPast && 'invisible',
                         )}
                     >
@@ -397,7 +398,7 @@ export default function SongDetailPage() {
                 <h1
                     ref={phoneTitleRef}
                     data-testid="song-title"
-                    className="lg:hidden break-words px-6 pb-1 pr-16 pt-3.5 text-title font-semibold text-fg md:px-10 md:pr-16 flex items-center gap-2"
+                    className={cn("lg:hidden break-words px-6 pb-1 pr-16 pt-3.5 text-title font-semibold md:px-10 md:pr-16 flex items-center gap-2", titleColour)}
                 >
                     <span>{song.title}</span>
                     <VisibilityIcon isPublic={!!song.is_public} className="size-4 text-fg-muted" />
@@ -407,7 +408,7 @@ export default function SongDetailPage() {
                 <div ref={setDesktopHeader} className="hidden lg:flex justify-between items-center px-8 py-4 border-b border-line bg-bg/50 sticky top-0 backdrop-blur-md z-10">
                     {/* Title */}
                     <div className="flex items-center gap-2.5 min-w-0 pr-4">
-                        <h1 className="min-w-0 break-words text-display font-semibold text-fg tracking-tight">{song.title}</h1>
+                        <h1 className={cn("min-w-0 break-words text-display font-semibold tracking-tight", titleColour)}>{song.title}</h1>
                         <VisibilityIcon isPublic={!!song.is_public} className="size-5 text-fg-muted" />
                     </div>
                     {/* Neutral buttons; the one accent is the primary action, Practice (validation 2, item 7).
@@ -638,6 +639,9 @@ export default function SongDetailPage() {
                     onShare: () => { void handleShare(); setIsMenuOpen(false); },
                     edit: song.owner_id === user?.id || isAdmin ? { href: editSongHref(id, currentVersion?.id) } : undefined,
                     onDelete: song.owner_id === user?.id || isAdmin ? () => { setIsMenuOpen(false); setIsDeleteModalOpen(true); } : undefined,
+                    onPublish: !song.is_public && (song.owner_id === user?.id || isAdmin)
+                        ? () => { setIsMenuOpen(false); void handleMakeSongPublic(); }
+                        : undefined,
                 }}
                 transpose={mayTranspose ? {
                     semitones,

@@ -57,7 +57,7 @@ async function openSidebar(page: Page, dict: Dict) {
 
 async function expectSidebarLanguage(page: Page, dict: Dict) {
   await openSidebar(page, dict);
-  await expect(sidebar(page).getByRole('link', { name: dict['nav.recentlyViewed'] })).toBeVisible();
+  await expect(sidebar(page).getByRole('link', { name: dict['library.tabs.history'] })).toBeVisible();
 }
 
 async function presetDutch(context: BrowserContext, page: Page, baseURL: string) {
@@ -84,7 +84,7 @@ test.describe('Interface language @i18n', () => {
       expect(res.ok()).toBeTruthy();
       const html = await res.text();
       expect(html).toMatch(/<html[^>]*lang="nl"/);
-      expect(html).toContain(nl['nav.recentlyViewed']);
+      expect(html).toContain(nl['library.tabs.history']);
     });
 
     test('browser default is used but not stored as a choice', async ({ page, context }) => {
@@ -109,7 +109,7 @@ test.describe('Interface language @i18n', () => {
       const switcher = sidebar(page).getByTestId('language-switcher');
       await chooseInSidebar(page, en, 'nl');
 
-      await expect(sidebar(page).getByRole('link', { name: nl['nav.recentlyViewed'] })).toBeVisible();
+      await expect(sidebar(page).getByRole('link', { name: nl['library.tabs.history'] })).toBeVisible();
       await expect(page.locator('html')).toHaveAttribute('lang', 'nl');
       await expect(switcher).toContainText('Nederlands');
       await switcher.click();
@@ -225,7 +225,7 @@ test.describe('Interface language @i18n', () => {
         await page.goto('/songs');
         await chooseInSidebar(page, en, code as keyof typeof LABELS);
         await expect(page.locator('html')).toHaveAttribute('lang', code);
-        await expect(sidebar(page).getByRole('link', { name: dict['nav.recentlyViewed'] })).toBeVisible();
+        await expect(sidebar(page).getByRole('link', { name: dict['library.tabs.history'] })).toBeVisible();
         await page.reload();
         await expect(page.locator('html')).toHaveAttribute('lang', code);
         await expectSidebarLanguage(page, dict);
@@ -257,7 +257,7 @@ test.describe('Interface language @i18n', () => {
       await page.keyboard.press('Enter');
       await expect(page.locator('html')).toHaveAttribute('lang', 'nl');
       await expect(switcher).toBeFocused();
-      await expect(sidebar(page).getByRole('link', { name: nl['nav.recentlyViewed'] })).toBeVisible();
+      await expect(sidebar(page).getByRole('link', { name: nl['library.tabs.history'] })).toBeVisible();
     });
 
     test.describe('signed in', () => {

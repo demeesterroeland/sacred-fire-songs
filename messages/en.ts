@@ -75,7 +75,7 @@ const en = {
   'nav.library': 'Library',
   'nav.playlists': 'Playlists',
   'nav.favorites': 'Favorites',
-  'nav.drafts': 'Drafts',
+  'nav.drafts': 'Private',
   'nav.recentlyViewed': 'Recently Viewed',
   'nav.addSong': 'Add Song',
   'nav.newPlaylist': 'New Playlist',
@@ -88,7 +88,7 @@ const en = {
   'userMenu.account': 'Account',
   'userMenu.settings': 'Account Settings',
   'userMenu.favorites': 'Your Favorites',
-  'userMenu.drafts': 'My Drafts',
+  'userMenu.drafts': "My private songs",
   'userMenu.playlists': 'My Playlists',
   'userMenu.recentlyViewed': 'Recently Viewed',
   'userMenu.signOut': 'Sign Out',
@@ -330,6 +330,8 @@ const en = {
   "settings.prefs.emailNotifications.description": "Email me when someone shares a recording with me.",
   'settings.prefs.emailNotifications.saveError': 'Could not save your email preference.',
 
+  'song.menu.publish': 'Make public',
+
   'song.publishSuccess': 'Song is now public.',
   'song.publishError': 'Failed to make song public.',
 
@@ -492,9 +494,6 @@ const en = {
   "librarySummary.recordings.title": "Your recordings",
   "librarySummary.recordings.description": "Recordings you made while practising",
   "librarySummary.recordings.empty": "No recordings yet",
-  'librarySummary.drafts.title': 'My Drafts',
-  'librarySummary.drafts.description': 'Your work-in-progress songs',
-  'librarySummary.drafts.empty': 'No drafts yet',
 
   // ─── Home ─────────────────────────────────────────────────────────────────
   'home.welcome.title': 'Welcome',

@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Edit2, Minus, Pause, Play, Plus, Share2, Trash2 } from 'lucide-react';
+import { Edit2, Globe, Minus, Pause, Play, Plus, Share2, Trash2 } from 'lucide-react';
 import { BottomSheet, BottomSheetClose, BottomSheetContent, SheetAction } from '@/components/ui/bottom-sheet';
 import { Switch } from '@/components/ui/switch';
 import { ToolbarButton } from '@/components/ui/toolbar';
@@ -25,6 +25,8 @@ export interface SongMenuActions {
   edit?: { href: string };
   /** Owner or admin: asks for the delete confirmation (the page closes the menu). */
   onDelete?: () => void;
+  /** Owner or admin, private song only (validation 4): make the song public from the menu. */
+  onPublish?: () => void;
 }
 
 interface SongMenuSheetProps {
@@ -101,6 +103,15 @@ export function SongMenuSheet({
               </SheetAction>
             )}
           </div>
+
+          {/* On every width: the desktop header has no publish button. */}
+          {actions.onPublish && (
+            <div className="py-2">
+              <SheetAction icon={<Globe />} onClick={actions.onPublish}>
+                {t('song.menu.publish')}
+              </SheetAction>
+            </div>
+          )}
 
           {transpose && (
             <div role="group" aria-label={t('viewer.transpose')} className="flex flex-col gap-2 px-4 py-3" data-testid="transpose-group">

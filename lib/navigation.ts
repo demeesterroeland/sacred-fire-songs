@@ -1,6 +1,5 @@
-import { Home, Library, ListMusic, Heart, FileText, Clock, Music, Mic2, Disc3, Search, Sparkles, Inbox } from 'lucide-react';
+import { Home, Library, ListMusic, Clock, Music, Mic2, Disc3, Search, Sparkles, Inbox } from 'lucide-react';
 import { FEATURES, type Features } from '@/lib/features';
-import { MY_DRAFTS_HREF } from '@/lib/songs/draftsLink';
 import type { LucideIcon } from 'lucide-react';
 import type { TranslationKey } from '@/messages/en';
 
@@ -19,22 +18,36 @@ export type NavSection = {
   items: readonly NavItem[];
 };
 
+export type LibraryTab = { labelKey: TranslationKey; href: string; icon: LucideIcon };
+
+const ALL_LIBRARY_TABS: readonly (LibraryTab & { feature?: keyof Features })[] = [
+  { labelKey: 'library.tabs.playlists', href: '/library/playlists', icon: ListMusic },
+  { labelKey: 'library.tabs.smart', href: '/library/smart', icon: Sparkles },
+  { labelKey: 'library.tabs.history', href: '/library/recently-viewed', icon: Clock },
+  { labelKey: 'library.tabs.new', href: '/library/new', icon: Inbox },
+  { labelKey: 'library.tabs.artists', href: '/library/artists', icon: Mic2 },
+  { labelKey: 'library.tabs.albums', href: '/library/albums', icon: Disc3, feature: 'albums' },
+];
+
+/** Library tab row (Story 6.1.23, #407): only tabs whose feature is switched on. */
+export function libraryTabs(features: Features = FEATURES): LibraryTab[] {
+  return ALL_LIBRARY_TABS.filter((t) => !t.feature || features[t.feature]).map(
+    ({ labelKey, href, icon }) => ({ labelKey, href, icon })
+  );
+}
+
 export const NAV_SECTIONS: readonly NavSection[] = [
   {
     items: [
       { label: 'Home', labelKey: 'nav.home', href: '/', icon: Home, exact: true },
       { label: 'Songs', labelKey: 'nav.songs', href: '/songs', icon: Library, exclude: ['/songs/add'] },
-      { label: 'Playlists', labelKey: 'nav.playlists', href: '/library/playlists', icon: ListMusic },
     ],
   },
   {
+    // Validation 4 (owner): the sidebar's Library section is the Library tab row, nothing more and nothing less.
     label: 'Library',
     labelKey: 'nav.library',
-    items: [
-      { label: 'Favorites', labelKey: 'nav.favorites', href: '/songs?favorites=true', icon: Heart },
-      { label: 'Drafts', labelKey: 'nav.drafts', href: MY_DRAFTS_HREF, icon: FileText },
-      { label: 'Recently Viewed', labelKey: 'nav.recentlyViewed', href: '/library/recently-viewed', icon: Clock },
-    ],
+    items: libraryTabs(),
   },
   {
     label: 'Create',
@@ -80,20 +93,3 @@ export function isBottomNavActive(pathname: string | null | undefined, item: Bot
   return pathname === prefix || pathname.startsWith(`${prefix}/`);
 }
 
-export type LibraryTab = { labelKey: TranslationKey; href: string; icon: LucideIcon };
-
-const ALL_LIBRARY_TABS: readonly (LibraryTab & { feature?: keyof Features })[] = [
-  { labelKey: 'library.tabs.playlists', href: '/library/playlists', icon: ListMusic },
-  { labelKey: 'library.tabs.smart', href: '/library/smart', icon: Sparkles },
-  { labelKey: 'library.tabs.history', href: '/library/recently-viewed', icon: Clock },
-  { labelKey: 'library.tabs.new', href: '/library/new', icon: Inbox },
-  { labelKey: 'library.tabs.artists', href: '/library/artists', icon: Mic2 },
-  { labelKey: 'library.tabs.albums', href: '/library/albums', icon: Disc3, feature: 'albums' },
-];
-
-/** Library tab row (Story 6.1.23, #407): only tabs whose feature is switched on. */
-export function libraryTabs(features: Features = FEATURES): LibraryTab[] {
-  return ALL_LIBRARY_TABS.filter((t) => !t.feature || features[t.feature]).map(
-    ({ labelKey, href, icon }) => ({ labelKey, href, icon })
-  );
-}

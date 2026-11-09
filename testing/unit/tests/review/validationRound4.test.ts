@@ -39,12 +39,24 @@ describe('Library', () => {
 
   it('own playlist rows offer Export PDF in their menu', () => {
     expect(read('components/playlists/PlaylistCard.tsx')).toMatch(/onExportPdf=\{exportPdf\}/);
-    expect(read('components/playlists/PublicPlaylistCard.tsx')).toMatch(/onExportPdf=\{isOwner \? exportPdf : undefined\}/);
+    // Other members' public playlists: no export, no rename (they are never yours on this page).
+    expect(read('components/playlists/PublicPlaylistCard.tsx')).not.toMatch(/onExportPdf|onRenameStart/);
   });
 });
 
 describe('Song rows', () => {
   it('private songs are a little lighter so they stand out in any list', () => {
-    expect(read('components/home/SongCard.tsx')).toMatch(/isPublic \? 'text-fg' : 'text-fg-muted'/);
+    expect(read('components/home/SongCard.tsx')).toMatch(/isPublic \? 'text-fg' : 'text-fg-subtle'/);
+  });
+});
+
+describe('Song page, private song (validation 4)', () => {
+  const page = read('app/songs/[id]/page.tsx');
+  it('draws the title lighter when the song is private, in every title copy', () => {
+    expect(page).toMatch(/const titleColour = song\.is_public \? 'text-fg' : 'text-fg-subtle'/);
+    expect(page.match(/titleColour/g)!.length).toBeGreaterThanOrEqual(4); // declaration + sticky + phone h1 + desktop h1
+  });
+  it('offers Make public only to the owner or an admin of a private song', () => {
+    expect(page).toMatch(/onPublish: !song\.is_public && \(song\.owner_id === user\?\.id \|\| isAdmin\)/);
   });
 });
