@@ -30,22 +30,15 @@ interface SongMetaLinesProps {
 const ITEM_GAP = 4;
 
 /**
- * Validation 4 (owner): closed, the author and tag links stay on one line and show as many tags as fit; "…" marks
- * that the chevron opens more links (hidden tags, or Chords / Melody / Recordings: `alwaysMore`). `rights` are the
- * right edges of the items (authors first, then tags) laid out on one line, `moreWidth` the width of "…". Returns how
- * many tags to show. Pure, so it is unit tested.
+ * Validation 4 (owner): closed, the links stay on one line: authors always, then tags and Chords / Melody / Recordings
+ * as many as fit; "…" only when one is hidden. `rights` are the right edges of the items laid out on one line
+ * (authors first), `moreWidth` the width of "…". Returns how many items after the authors to show. Pure, unit tested.
  */
-export function fitTagCount(
-  rights: number[],
-  authorCount: number,
-  moreWidth: number,
-  available: number,
-  alwaysMore = false,
-): number {
-  const tagCount = rights.length - authorCount;
-  if (tagCount <= 0) return 0;
-  if (!alwaysMore && rights[rights.length - 1] <= available) return tagCount;
-  for (let k = alwaysMore ? tagCount : tagCount - 1; k > 0; k--) {
+export function fitLinkCount(rights: number[], authorCount: number, moreWidth: number, available: number): number {
+  const count = rights.length - authorCount;
+  if (count <= 0) return 0;
+  if (rights[rights.length - 1] <= available) return count;
+  for (let k = count - 1; k > 0; k--) {
     if (rights[authorCount + k - 1] + ITEM_GAP + moreWidth <= available) return k;
   }
   return 0;
@@ -53,8 +46,9 @@ export function fitTagCount(
 
 /**
  * Story 6.1.7 / G2.2 (#391), Validation 3 and 4: grey lines above the lyrics.
- * Line 1: author and tags, always as links; closed, as many tags as fit on one line (validation 4). The chevron at the end opens the rest: Chords · Melody · Recordings links and
- * the technical line "Key E · Capo 3 · Standard". Closed by default.
+ * Line 1: author, tags and Chords · Melody · Recordings, always as links; closed, as many as fit on one line
+ * (validation 4). The chevron at the end opens the rest and the technical line "Key E · Capo 3 · Standard".
+ * Closed by default.
  */
 export function SongMetaLines({
   originalAuthor,
@@ -77,21 +71,23 @@ export function SongMetaLines({
   const authors = songAuthors(originalAuthor, tr);
   const technical = joinMeta(technicalItems(version, tr));
 
-  const links: { label: string; href: string; tag?: number }[] = [
-    ...authors.map((a) => ({ label: a, href: `/songs?artist=${encodeURIComponent(a)}` })),
-    ...categories.map((c, i) => ({ label: c.name, href: `/songs?tag=${encodeURIComponent(c.slug)}`, tag: i })),
-    ...(open && hasChords ? [{ label: t('song.technical.chords'), href: '/songs?chords=true' }] : []),
-    ...(open && hasMelody ? [{ label: t('song.technical.melody'), href: '/songs?melody=true' }] : []),
-    ...(open && hasPersonalRecording ? [{ label: t('song.technical.takes'), href: '/songs?myRecordings=true' }] : []),
+  // Authors always show; tags and Chords / Melody / Recordings (`fitIndex`) only as far as they fit while closed.
+  const optional = [
+    ...categories.map((c) => ({ label: c.name, href: `/songs?tag=${encodeURIComponent(c.slug)}` })),
+    ...(hasChords ? [{ label: t('song.technical.chords'), href: '/songs?chords=true' }] : []),
+    ...(hasMelody ? [{ label: t('song.technical.melody'), href: '/songs?melody=true' }] : []),
+    ...(hasPersonalRecording ? [{ label: t('song.technical.takes'), href: '/songs?myRecordings=true' }] : []),
   ];
-  // Validation 4 (owner): measure an invisible one-line copy and show as many tags as fit. Until it is measured
-  // (server render, no ResizeObserver) every tag renders and the closed list clips.
-  const [fit, setFit] = useState(categories.length);
+  const links: { label: string; href: string; fitIndex?: number }[] = [
+    ...authors.map((a) => ({ label: a, href: `/songs?artist=${encodeURIComponent(a)}` })),
+    ...optional.map((l, i) => ({ ...l, fitIndex: i })),
+  ];
+  // Validation 4 (owner): measure an invisible one-line copy and show as many links as fit. Until it is measured
+  // (server render, no ResizeObserver) every link renders and the closed list clips.
+  const [fit, setFit] = useState(optional.length);
   const boxRef = useRef<HTMLDivElement>(null);
   const measureRef = useRef<HTMLUListElement>(null);
-  const tagKey = categories.map((c) => c.slug).join('|');
-  // Owner (validation 4): "…" also when the chevron opens Chords / Melody / Recordings links.
-  const hasExtraLinks = Boolean(hasChords || hasMelody || hasPersonalRecording);
+  const linkKey = links.map((l) => l.label).join('|');
   useLayoutEffect(() => {
     const box = boxRef.current;
     const measure = measureRef.current;
@@ -100,7 +96,7 @@ export function SongMetaLines({
       const items = [...measure.children] as HTMLElement[];
       const moreItem = items.pop();
       const rights = items.map((li) => li.offsetLeft + li.offsetWidth);
-      setFit(fitTagCount(rights, authors.length, moreItem?.offsetWidth ?? 0, box.clientWidth, hasExtraLinks));
+      setFit(fitLinkCount(rights, authors.length, moreItem?.offsetWidth ?? 0, box.clientWidth));
     };
     update();
     if (typeof ResizeObserver === 'undefined') return;
@@ -108,8 +104,8 @@ export function SongMetaLines({
     observer.observe(box);
     observer.observe(measure);
     return () => observer.disconnect();
-  }, [tagKey, authors.length, open, hasExtraLinks]);
-  const showMore = !open && (fit < categories.length || hasExtraLinks);
+  }, [linkKey, authors.length, open]);
+  const showMore = !open && fit < optional.length;
 
   const handleToggle = () => {
     if (onToggleExpanded) onToggleExpanded();
@@ -117,7 +113,7 @@ export function SongMetaLines({
   };
 
   return (
-    <div className={cn('text-meta text-fg-muted', className)} data-testid="song-meta-lines" data-has-extra-links={hasExtraLinks}>
+    <div className={cn('text-meta text-fg-muted', className)} data-testid="song-meta-lines">
       {/* One button for both states, so keyboard focus stays on it when it toggles. */}
       <div className="flex items-start gap-1">
         {links.length > 0 ? (
@@ -126,8 +122,8 @@ export function SongMetaLines({
           id={listId}
           className={cn('flex min-w-0 gap-x-1', open ? 'flex-wrap' : 'flex-nowrap')}
         >
-          {links.map(({ label, href, tag }, i) => (
-            <li key={`${href}-${i}`} className={cn('shrink-0', !open && tag !== undefined && tag >= fit && 'hidden')}>
+          {links.map(({ label, href, fitIndex }, i) => (
+            <li key={`${href}-${i}`} className={cn('shrink-0', !open && fitIndex !== undefined && fitIndex >= fit && 'hidden')}>
               {i > 0 && <span aria-hidden>· </span>}
               <Link href={href} className="inline-flex min-h-tap items-center px-1 text-fg underline underline-offset-4">
                 {label}
@@ -140,14 +136,14 @@ export function SongMetaLines({
             </li>
           )}
         </ul>
-        {/* Invisible one-line copy of the author and tag links, only to measure them while closed. */}
+        {/* Invisible one-line copy of the links, only to measure them while closed. */}
         {!open && (
         <ul
           ref={measureRef}
           aria-hidden
           className="pointer-events-none invisible absolute left-0 top-0 flex w-max flex-nowrap gap-x-1"
         >
-          {[...authors, ...categories.map((c) => c.name)].map((label, i) => (
+          {links.map(({ label }, i) => (
             <li key={i} className="shrink-0">
               {i > 0 && <span>· </span>}
               <span className="inline-flex px-1">{label}</span>

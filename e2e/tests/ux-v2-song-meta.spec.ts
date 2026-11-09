@@ -52,8 +52,8 @@ test('Lyrics above the fold on five seeded songs', async ({ page }) => {
     expect(techHeight, song.title).toBeLessThanOrEqual(maxTech);
     expect(height, song.title).toBeLessThanOrEqual(44 + maxTech + 1);
 
-    // As many tags as fit; "…" when a tag is hidden (and then the next tag really would not fit) or the chevron
-    // opens Chords / Melody / Recordings links.
+    // As many links (tags, Chords, Melody, Recordings) as fit; "…" only when one is hidden, and then it really would
+    // not fit.
     const fit = await meta.evaluate((el) => {
       const list = el.querySelector('ul:not([aria-hidden])')!;
       const box = list.parentElement!.getBoundingClientRect();
@@ -64,10 +64,9 @@ test('Lyrics above the fold on five seeded songs', async ({ page }) => {
       const moreRight = more ? more.getBoundingClientRect().right : lastRight;
       const copy = el.querySelector('ul[aria-hidden]')!;
       const nextWidth = hidden ? (copy.children[shown.length] as HTMLElement).offsetWidth : 0;
-      const extras = el.getAttribute('data-has-extra-links') === 'true';
-      return { hidden, extras, hasMore: !!more, moreRight, boxRight: box.right, room: box.right - moreRight, nextWidth };
+      return { hidden, hasMore: !!more, moreRight, boxRight: box.right, room: box.right - moreRight, nextWidth };
     });
-    expect(fit.hasMore, song.title).toBe(fit.hidden > 0 || fit.extras);
+    expect(fit.hasMore, song.title).toBe(fit.hidden > 0);
     expect(fit.moreRight, song.title).toBeLessThanOrEqual(fit.boxRight + 0.5);
     if (fit.hidden > 0) expect(fit.room, song.title).toBeLessThan(fit.nextWidth + 4);
 
