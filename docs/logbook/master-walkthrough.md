@@ -3359,3 +3359,10 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - **Song versions**: insert for the song owner or an admin, with the caller as contributor. Column privileges list the content fields, so a version stays on its song.
 - **Schema**: `docs/design/db-schema.sql` v2.9; `fn_check_song_manage_access` added. Other policy differences between this file and the migrations stay for the separate sync.
 - **Tests**: `docs/testing/access-policies.feature` v1.1 runs 104 `@seed` scenarios as the real database roles.
+
+## Session November 10, 2026 — Story 6.1.36 (#488), Home grid for guests
+
+- *Recently added* moved out of the narrow welcome column and uses the grid of `/songs` and the category grid. 10 songs, filled row by row; below `md` the first 5 (`RECENTLY_ADDED_PHONE_LIMIT`).
+- Category sections, the section labels and *Your library* got the 16 px inset of `SongCard` (`ps-4`), so titles, headings and links share one left edge.
+- Home uses `p-4 md:p-8` like `/songs` (was `lg:p-10`), so both pages put the columns at the same x.
+- Tests: `e2e/tests/ux-v2-home-grid.spec.ts` measures the x positions at 390, 768 and 1280 px (red before, green after); unit and BDD limit 10.

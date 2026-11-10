@@ -1484,3 +1484,8 @@
 - [x] Favourites lookups filter on the owner (admin saw 6 on the card and an empty list)
 - [x] Remove Vercel Speed Insights; privacy text: operator access to stored data
 - [x] Write rules for profile fields, categories, playlists and song versions: migration `20261106130000`, trigger `trg_guard_profile_fields`, column privileges on `setlists` and `song_versions`, `db-schema.sql` v2.9, `access-policies.feature` v1.1 (104 `@seed` scenarios).
+
+## Session November 10, 2026 (Story 6.1.36, #488, Home grid)
+- [x] Recently added in the /songs and category grid: 10 songs row by row, 5 on a phone; titles, category headings, links and labels on one 16 px inset; Home padding as /songs
+- [x] E2E `ux-v2-home-grid.spec.ts` (390, 768, 1280 px), feature `ux-v2-home-grid.feature`, before/after screenshots
+

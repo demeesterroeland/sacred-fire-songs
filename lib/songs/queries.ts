@@ -45,7 +45,9 @@ export function songsQuery(
 }
 
 /** Size of the "Recently added" row on Home (Story 6.1.28 / G6.3, #412). */
-export const RECENTLY_ADDED_LIMIT = 5;
+export const RECENTLY_ADDED_LIMIT = 10;
+/** Below `md` (one column) Home shows only the first rows, so the categories stay close (Story 6.1.36, #488). */
+export const RECENTLY_ADDED_PHONE_LIMIT = 5;
 
 /**
  * Only what a compact song row shows (title, author, public badge, key, "Author · Category · Language"):

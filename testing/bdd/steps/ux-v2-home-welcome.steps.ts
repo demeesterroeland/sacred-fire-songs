@@ -57,10 +57,10 @@ When('the Recently added row is built', async function () {
   await recentlyAddedQuery({ from: () => b } as never);
 });
 
-Then('the query asks for public songs only, newest first, at most 5', function () {
+Then('the query asks for public songs only, newest first, at most 10', function () {
   assert.ok(calls.some((c) => c[0] === 'eq' && c[1] === 'is_public' && c[2] === true));
   assert.ok(calls.some((c) => c[0] === 'order' && c[1] === 'created_at' && (c[2] as { ascending: boolean }).ascending === false));
-  assert.ok(calls.some((c) => c[0] === 'limit' && c[1] === 5));
+  assert.ok(calls.some((c) => c[0] === 'limit' && c[1] === 10));
 });
 
 let sources: string[] = [];

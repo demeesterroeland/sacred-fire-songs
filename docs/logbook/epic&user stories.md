@@ -1,8 +1,8 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 1.94
+**Version:** 1.95
 **Status:** Living Document
-**Date:** Nov 7, 2026
+**Date:** Nov 10, 2026
 
 ## Changelog
 
@@ -63,6 +63,7 @@
 | **1.92** | Nov 6, 2026 | Epic 6.1: validation round 1 after the owner's phone run (Part of #375): auto-scroll only when the lyrics run below the fold (Story 6.1.10 / #394), expanded meta line (6.1.7 / #391), one focus style for text fields, the search suggestions in the page flow (6.1.29 / #413), search options on tokens, translated feedback and song flags across versions (6.1.11 / #395). Acceptance criteria of those stories now read as in `docs/testing/ux-v2-validation-1.feature`. |
 | **1.93** | Nov 7, 2026 | Epic 6.1: review round on the validation round 1 PR (#474, Part of #375): acceptance criteria of Stories 6.1.10 (auto-scroll offered only when the lyric text runs below the visible area above the fixed bars), 6.1.29 (suggestions close on the click and keep the scroll position), 6.1.1 (one focus cue per field, readable chip counts), 6.1.11 (a lyrics-only version has no Chords switch; a bracketed section label is not a chord) and the i18n policy (no raw server or database text in a toast) verified against the code; decisions UXA-061 to UXA-066. |
 | **1.94** | Nov 7, 2026 | Epic 6.1: validation round 2, batch 2 (Part of #375): acceptance criteria updated for Story 6.1.4 (#388: amounts between parentheses, "Air (3)"), 6.1.8 (#392: the full title wraps at the top of the page on a phone, the truncated copy shows only after scrolling past it), 6.1.10 (#394: transpose, scroll speed and a Screen stays on switch live in the one ⋮ menu; the toolbar has no ⋯), 6.1.11 (#395: every version has a `?version=` link, replaced in place, shared by Share), 6.1.23 (#407: History, Artists and Shared with me share one heading size) and 6.1.24 (#408: the Library "+" floats at the bottom right). New: Terms and Privacy pages (draft) with the operator from the server environment. |
+| **1.95** | Nov 10, 2026 | Epic 6.1: Story 6.1.36 (#488) added: guests see Recently added on Home in the columns of the categories and of /songs (10 songs, 5 on a phone). |
 | **1.91** | Nov 6, 2026 | Epic 6.1: Story 6.1.34 (#418, G9.2) implemented on `feat/ux-v2` — the song page and the Practice panel pass an axe-core audit (no violation of any impact, guest and member, light and dark, 390 px); the Practice panel is a modal dialog with focus handling and ARIA tabs; sheets return focus to their opener; the recorder announces its state. The manual VoiceOver and TalkBack pass is **not done**: a checklist for the owner is in `docs/ux-research/2026-11-06-a11y-audit.md`. Acceptance (*Automated audit*) is covered by `e2e/tests/ux-v2-a11y-audit.spec.ts`; the story's manual item stays open until the owner has run the checklist. |
 | **1.90** | Nov 6, 2026 | Epic 6.1: Story 6.1.21 (#405, G4.8) implemented on `feat/ux-v2` — the Make public dialog names the take and the song and says who will hear it (everyone visiting a public song, including guests); a take on a private song starts with making the song public (the owner can do it from the dialog) and cannot be published before; a line says the take can be made private again without undoing what was heard; guests hear public takes on the Listen tab (UXD-2). |
 | **1.89** | Nov 6, 2026 | Epic 6.1: Story 6.1.11 (#395, G2.6) implemented on `feat/ux-v2` — a segmented version switch under the song title, shown only when the song has more than one version (nothing for single-version songs); the language switch stays a documented slot until translations exist. `/songs/<id>?version=<id>` opens that version (Save on the edit form returns there), and a take in progress blocks switching until it is saved or discarded. |
@@ -1694,6 +1695,7 @@ Owner decision of Nov 4, 2026: sober greyscale interface with one accent, smalle
 | 6.1.32 | #416 | `G8.3` | C | **[Implemented on feat/ux-v2]** As a Member, I want the New Playlist page to explain private vs public in one line so that I know what I am creating | #385 |
 | 6.1.33 | #417 | `G9.1` | A | **[Implemented on feat/ux-v2]** As a Contributor, I want the demo seed free of E2E and smoke-test playlists so that screenshots and demos show real-looking data | — |
 | 6.1.34 | #418 | `G9.2` | C | **[Implemented on feat/ux-v2; manual screen reader pass still open]** As a reader using assistive technology, I want the song page and Practice panel to pass an accessibility audit so that the app works with a screen reader | #393, #401 |
+| 6.1.36 | #488 | — | C | **[In review]** As a Guest, I want the recently added songs on Home in the same columns as the categories and the song list so that the page reads as one tidy grid | #412 |
 
 Priority **A** = quick wins (one sprint together), **B** = flow work, **C** = backlog. Acceptance criteria (Gherkin) live in each GitHub issue and move to `docs/testing/*.feature` when a story starts.
 

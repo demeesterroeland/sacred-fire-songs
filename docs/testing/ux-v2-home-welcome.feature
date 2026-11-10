@@ -1,5 +1,6 @@
-# Version: 1.0 | Date: Nov 6, 2026
+# Version: 1.1 | Date: Nov 10, 2026
 # Changelog
+# 1.1 | Nov 10, 2026 | Story 6.1.36 (#488): Recently added holds 10 songs (5 on a phone); layout in ux-v2-home-grid.feature.
 # 1.0 | Nov 6, 2026 | Story 6.1.28 / G6.3 (#412): guests see a one-line welcome, a search field and a "Recently added" row on Home; members keep Your library.
 @story-6.1.28
 Feature: UX v2 Home welcome for first-time visitors
@@ -16,7 +17,7 @@ Feature: UX v2 Home welcome for first-time visitors
   Scenario: Recently added shows only public songs
     Given a library with public songs and a private draft
     When the Recently added row is built
-    Then the query asks for public songs only, newest first, at most 5
+    Then the query asks for public songs only, newest first, at most 10
 
   @unit
   Scenario: The Home welcome block is calm and easy to tap

@@ -19,15 +19,18 @@ export default async function Home() {
 
   return (
     <div className="flex-1 min-h-0 bg-bg overflow-y-auto">
-      <div className="p-4 md:p-8 lg:p-10 space-y-10 max-w-7xl mx-auto">
+      {/* Same outer padding as /songs, so the two-column grids sit at the same x on both pages (#488). */}
+      <div className="p-4 md:p-8 space-y-10 max-w-7xl mx-auto">
         {/* Update last_seen_at after render so "new songs" count uses the old value */}
         {user && <UpdateLastSeen />}
 
         {/* Guests: what this is, a way in, and something to open */}
         {!user && (
-          <div className="max-w-2xl space-y-6">
-            <HomeWelcome />
-            <HomeSearch />
+          <div className="space-y-6">
+            <div className="max-w-2xl space-y-6">
+              <HomeWelcome />
+              <HomeSearch />
+            </div>
             <RecentlyAdded songs={recentlyAdded} />
           </div>
         )}
@@ -46,7 +49,7 @@ export default async function Home() {
 
         {/* Explore by Category */}
         <section>
-          <p className="text-meta font-semibold text-fg-muted mb-4">{t('explore.categories.heading')}</p>
+          <p className="text-meta font-semibold text-fg-muted mb-4 ps-4">{t('explore.categories.heading')}</p>
           <CategoryGrid />
         </section>
       </div>
