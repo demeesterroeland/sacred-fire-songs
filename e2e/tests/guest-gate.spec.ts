@@ -15,7 +15,10 @@ async function firstPublicSongId(page: Page): Promise<string> {
 const GATED: Array<{ path: string; feature: string }> = [
   { path: '/library/recently-viewed', feature: 'history' },
   { path: '/library/playlists/add', feature: 'newPlaylist' },
-  { path: '/library/playlists', feature: 'smartPlaylists' },
+  // Validation 4: the Playlists tab asks a guest to sign in to make playlists; Smart and New have their own tabs.
+  { path: '/library/playlists', feature: 'newPlaylist' },
+  { path: '/library/smart', feature: 'smartPlaylists' },
+  { path: '/library/new', feature: 'newSongs' },
   { path: '/account/settings', feature: 'settings' },
   { path: '/account/settings?tab=preferences', feature: 'settings' },
   { path: '/users/a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12', feature: 'profile' },
