@@ -65,6 +65,22 @@ export async function queryAsAnon<T extends pg.QueryResultRow>(sql: string, para
   }
 }
 
+/** Runs `sql` as the `service_role` role, the trusted server context. */
+export async function queryAsServiceRole<T extends pg.QueryResultRow>(
+  sql: string,
+  params: unknown[] = []
+): Promise<T[]> {
+  const db = await seedDb();
+  await db.query('SAVEPOINT as_service');
+  try {
+    await db.query('SET LOCAL ROLE service_role');
+    const { rows } = await db.query<T>(sql, params);
+    return rows;
+  } finally {
+    await db.query('ROLLBACK TO SAVEPOINT as_service');
+  }
+}
+
 /** Seeded profile id for an e-mail address (see supabase/seeds/02_profiles.sql). */
 export async function profileIdByEmail(email: string): Promise<string> {
   const db = await seedDb();

@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.1](https://github.com/demeesterroeland/sacred-fire-songs/compare/v1.7.0...v1.7.1) (2026-11-06)
+
+
+### 🐛 Bug fixes
+
+* **db:** correct data access rules ([#473](https://github.com/demeesterroeland/sacred-fire-songs/issues/473)) ([a8bf780](https://github.com/demeesterroeland/sacred-fire-songs/commit/a8bf7800efbd24ffefe8f3e2ea87ee512099fb29))
+
 ## [1.7.0](https://github.com/demeesterroeland/sacred-fire-songs/compare/v1.6.0...v1.7.0) (2026-11-04)
 
 

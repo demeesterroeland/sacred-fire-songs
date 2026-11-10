@@ -1376,6 +1376,7 @@
 - [x] #347 app fix: `RehearsalDrawer` invalidates `song-recordings` after save/delete
 - [x] #347 config: local `DATABASE_URL` default, `@headed` grep split, `E2E_FORCE_HEADLESS`; lint cap 202
 - [x] #348: isolation guard passes commits without added lines (message-only amend, deletion-only); bats contract tests
+- [x] Profile and playlist item access rules: migration `20261106120000`, `public_profiles` view, `fn_can_edit_setlist`, `db-schema.sql` installs cleanly (v2.8), `@seed` role scenarios in `access-policies.feature`
 - [ ] Owner: per-role E2E password secrets in CI; release v1.7.0 (`develop` → `main`)
 - [ ] Follow-up: offline navigation shows "page not found" instead of an offline message
 
@@ -1482,3 +1483,4 @@
 - [ ] Owner: Runasimi native-speaker check; approve the Terms and Privacy wording
 - [x] Favourites lookups filter on the owner (admin saw 6 on the card and an empty list)
 - [x] Remove Vercel Speed Insights; privacy text: operator access to stored data
+- [x] Write rules for profile fields, categories, playlists and song versions: migration `20261106130000`, trigger `trg_guard_profile_fields`, column privileges on `setlists` and `song_versions`, `db-schema.sql` v2.9, `access-policies.feature` v1.1 (104 `@seed` scenarios).
