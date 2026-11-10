@@ -3340,3 +3340,22 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - **Decisions:** UXA-068 and UXA-067 updated.
 - **Favourites for admins:** hearts, list and counts use the signed-in user's own "My Favorites" setlist (`fetchFavoritesSetlistId`); before, an admin who can read every member's setlists got an empty list.
 - **Terms and Privacy (owner review):** Vercel Speed Insights removed from the app and the text; the privacy text names what the operator can reach.
+## Profile and playlist item access (Nov 6, 2026)
+**Goal:** Define who reads profile fields and who reads or changes playlist items.
+
+**Technical Details**
+- **Profiles**: own row for signed-in users, every row for admins; guests have no row access and no privilege on `email`. Public fields come from the read-only view `public.public_profiles`.
+- **Playlist items**: read when the parent playlist is public, owned by the caller, or the caller is admin; write through `public.fn_can_edit_setlist()` (owner, admin, gatekeeper on public playlists), checked for the old and the new row.
+- **Schema**: `docs/design/db-schema.sql` v2.8 installs without errors on a fresh database.
+- **Tests**: `docs/testing/access-policies.feature` runs 54 `@seed` scenarios as the real database roles.
+
+## Write rules for profiles, categories, playlists and song versions (Nov 6, 2026)
+**Goal:** Define who writes which profile fields, categories, playlists and song versions.
+
+**Technical Details**
+- **Profiles**: a `BEFORE UPDATE` trigger keeps `id`, `email` and `created_at` for API callers and lets only admins change `role`. A trigger fits because admin and member share the `authenticated` database role, so column privileges cannot tell them apart. New columns stay editable by default. `INSERT` and `DELETE` are not granted to `authenticated`; `handle_new_user` sets the default role.
+- **Categories**: admins manage; signed-in users add artist sub-categories, as `SongForm` creates them in the user's session.
+- **Playlists**: `WITH CHECK` on both update policies and column privileges (`title`, `description`, `is_public`), so `owner_id` stays fixed.
+- **Song versions**: insert for the song owner or an admin, with the caller as contributor. Column privileges list the content fields, so a version stays on its song.
+- **Schema**: `docs/design/db-schema.sql` v2.9; `fn_check_song_manage_access` added. Other policy differences between this file and the migrations stay for the separate sync.
+- **Tests**: `docs/testing/access-policies.feature` v1.1 runs 104 `@seed` scenarios as the real database roles.

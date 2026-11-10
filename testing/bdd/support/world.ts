@@ -4,6 +4,7 @@ import type { ParsedChordPro } from '@/lib/chordProParsing';
 import type { AdminBddState } from '../steps/admin-users.steps';
 import type { CiBddState } from '../steps/gitflow-cicd.steps';
 import type { RecordingSharingBddState } from '../steps/recording-sharing.steps';
+import type { AccessBddState } from '../steps/access-policies.steps';
 
 export class SongBddWorld extends World {
   public rawContent = '';
@@ -16,6 +17,8 @@ export class SongBddWorld extends World {
   public ci?: CiBddState;
   /** Scenario state for docs/testing/recording-sharing.feature. */
   public recordingSharing?: RecordingSharingBddState;
+  /** Scenario state for docs/testing/access-policies.feature (see access-policies.steps.ts). */
+  public access?: AccessBddState;
 
   constructor(options: IWorldOptions) {
     super(options);
