@@ -54,6 +54,9 @@ describe('Song page, private song (validation 4)', () => {
   const page = read('app/songs/[id]/page.tsx');
   it('draws the title lighter when the song is private, in every title copy', () => {
     expect(page).toMatch(/const titleColour = song\.is_public \? 'text-fg' : 'text-fg-subtle'/);
+    // Owner (third round): only a private song gets an icon after the title (lock); a public one gets no globe.
+    expect(page).not.toMatch(/<VisibilityIcon isPublic=\{!!song\.is_public\}/);
+    expect(page.match(/\{!song\.is_public && <VisibilityIcon isPublic=\{false\}/g)).toHaveLength(3);
     expect(page.match(/titleColour/g)!.length).toBeGreaterThanOrEqual(4); // declaration + sticky + phone h1 + desktop h1
   });
   it('offers Make public only to the owner or an admin of a private song', () => {

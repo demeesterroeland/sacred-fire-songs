@@ -373,7 +373,7 @@ export default function SongDetailPage() {
                         )}
                     >
                         <span className="truncate">{song.title}</span>
-                        <VisibilityIcon isPublic={!!song.is_public} className="size-4 text-fg-muted" />
+                        {!song.is_public && <VisibilityIcon isPublic={false} className="size-4 text-fg-muted" />}
                     </p>
                     <button
                         ref={phoneMenuButtonRef}
@@ -401,7 +401,7 @@ export default function SongDetailPage() {
                     className={cn("lg:hidden break-words px-6 pb-1 pr-16 pt-3.5 text-title font-semibold md:px-10 md:pr-16 flex items-center gap-2", titleColour)}
                 >
                     <span>{song.title}</span>
-                    <VisibilityIcon isPublic={!!song.is_public} className="size-4 text-fg-muted" />
+                    {!song.is_public && <VisibilityIcon isPublic={false} className="size-4 text-fg-muted" />}
                 </h1>
 
                 {/* Desktop Page Header (Title, Actions) - Visible only on desktop >= lg */}
@@ -409,7 +409,7 @@ export default function SongDetailPage() {
                     {/* Title */}
                     <div className="flex items-center gap-2.5 min-w-0 pr-4">
                         <h1 className={cn("min-w-0 break-words text-display font-semibold tracking-tight", titleColour)}>{song.title}</h1>
-                        <VisibilityIcon isPublic={!!song.is_public} className="size-5 text-fg-muted" />
+                        {!song.is_public && <VisibilityIcon isPublic={false} className="size-5 text-fg-muted" />}
                     </div>
                     {/* Neutral buttons; the one accent is the primary action, Practice (validation 2, item 7).
                         Delete stays neutral: the red is in the confirmation. */}

@@ -699,7 +699,7 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 
 - **Date / story:** Nov 8, 2026 · review round on `feat/ux-v2`
 - **Song controls:** they open and close when the browser refuses storage, remembered for that visit only. The button says "Show details". Pressing pause with the controls closed moves focus to that button.
-- **Lock and globe:** one `VisibilityIcon` with the word for screen readers and on hover, on the song page and in playlist rows. Song lists keep their lock and "Draft" label (UXA-071: now "Private").
+- **Lock and globe:** one `VisibilityIcon` with the word for screen readers and on hover, in playlist rows; on the song page only a private song gets the lock after its title (owner, validation 4: no globe for public songs). Song lists keep their lock and "Draft" label (UXA-071: now "Private").
 - **Song title:** wraps on desktop as on a phone.
 - **Chord matching:** tokens are matched in bounded time and capped at 32 characters.
 - **Email addresses:** an apostrophe is valid, for the sign-up code and the operator address.
