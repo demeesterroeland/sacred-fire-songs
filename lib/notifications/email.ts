@@ -61,7 +61,8 @@ function escapeHtml(value: string): string {
 }
 
 export interface RecordingSharedEmailInput {
-  actorName: string;
+  /** The sharer's name; null falls back to a neutral label (never an e-mail address). */
+  actorName: string | null;
   songTitle: string;
   recordingName: string;
   recipientName: string | null;
@@ -77,7 +78,8 @@ export interface EmailContent {
 }
 
 export function buildRecordingSharedEmail(input: RecordingSharedEmailInput, locale: Locale): EmailContent {
-  const params = { actor: input.actorName, song: input.songTitle, recording: input.recordingName };
+  const actor = input.actorName?.trim() || tWithLocale(locale, 'user.unnamed');
+  const params = { actor, song: input.songTitle, recording: input.recordingName };
   const subject = tWithLocale(locale, 'email.recordingShared.subject', params);
   const greeting = input.recipientName
     ? tWithLocale(locale, 'email.recordingShared.greeting', { name: input.recipientName })

@@ -1,11 +1,12 @@
 # Practice: Listen, Record & Recordings (draft)
 
-**Version:** 0.12 | **Date:** Nov 7, 2026
+**Version:** 0.13 | **Date:** Nov 10, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.13 | Nov 10, 2026 | The Share and Singer dialogs find a member by name, or by their complete e-mail address; they show names only, never e-mail addresses. |
 | 0.12 | Nov 7, 2026 | The audio item is a **recording** everywhere (validation round 2, item 8): Save Recording, Delete recording, My recordings, Recordings chip, Your recordings; the toggle in the recorder is **Record**; the ⋮ menu on the song page is the one menu (Share, Edit, Delete, Transpose, Auto-scroll speed, Screen stays on). |
 | 0.11 | Nov 6, 2026 | Keyboard and screen reader notes for the Practice panel; the recorder says its state out loud; the delete question works with the keyboard (#418). |
 | 0.10 | Nov 6, 2026 | The Make Public dialog names the recording and the song and says who will hear it; a recording on a private song starts with making the song public; guests hear public recordings on the Listen tab (a link to a public recording opens it there); the dialog says you can make the recording private again, but not undo what was heard (#405). |
@@ -77,7 +78,7 @@ Choose an action and the sheet closes. To close it without choosing, swipe the b
 ## Sharing a recording with someone
 
 1. ⋯ → **Share**.
-2. Search a **registered member** by e-mail or name and add them. The dialog says it under the search box: *You can share with registered members only. Someone without an account needs to sign up first.* If nobody matches, it says so and repeats that hint.
+2. Search a **registered member** by name, or type their complete e-mail address, and add them. The list shows names only, never e-mail addresses. The dialog says it under the search box: *You can share with registered members only. Someone without an account needs to sign up first.* If nobody matches, it says so and repeats that hint.
 3. *Shared with (n)* lists everyone; **Revoke** removes access.
 
 Rules (so the singer stays protected):

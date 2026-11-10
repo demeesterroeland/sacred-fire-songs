@@ -10,7 +10,8 @@ import { sendMail } from '@/lib/notifications/mailer';
 interface ShareEmailClaim {
   recipient_email: string;
   recipient_name: string | null;
-  actor_name: string;
+  /** The sharer's profile name; null when the profile has no name. */
+  actor_name: string | null;
   song_title: string;
   recording_name: string;
   composition_id: string;

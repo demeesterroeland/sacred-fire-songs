@@ -1485,6 +1485,10 @@
 - [x] Remove Vercel Speed Insights; privacy text: operator access to stored data
 - [x] Write rules for profile fields, categories, playlists and song versions: migration `20261106130000`, trigger `trg_guard_profile_fields`, column privileges on `setlists` and `song_versions`, `db-schema.sql` v2.9, `access-policies.feature` v1.1 (104 `@seed` scenarios).
 
+## Session November 10, 2026 (profile e-mail privacy)
+- [x] Other members are read through `public_profiles` (new `is_musician` column): Listen tab, share and singer dialogs, `/users/:id`, shared-with-me list
+- [x] User search matches a name or a complete e-mail address and returns names only; singer address readable by the take's owner only (`own_recording_singer_emails`)
+- [x] Sharer named by profile name or *Unnamed member* (`user.unnamed`, 8 locales); migration `20261110120000`, `db-schema.sql` v3.6, `access-policies.feature` v1.2 (new `@seed` scenarios)
 ## Session November 10, 2026 (Story 6.1.36, #488, Home grid)
 - [x] Recently added in the /songs and category grid: 10 songs row by row, 5 on a phone; titles, category headings, links and labels on one 16 px inset; Home padding as /songs
 - [x] E2E `ux-v2-home-grid.spec.ts` (390, 768, 1280 px), feature `ux-v2-home-grid.feature`, before/after screenshots

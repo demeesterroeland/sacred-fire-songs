@@ -114,7 +114,7 @@ export function NotificationBell({ userId }: { userId: string }) {
                 <span className="flex-1 min-w-0">
                   <span className={`block text-sm leading-snug ${n.read_at ? 'text-gray-600 dark:text-gray-400' : 'font-semibold text-gray-900 dark:text-white'}`}>
                     {t('notifications.recordingShared', {
-                      actor: n.metadata.actor_name ?? '',
+                      actor: n.metadata.actor_name || t('user.unnamed'),
                       recording: n.metadata.recording_name ?? '',
                       song: n.metadata.song_title ?? '',
                     })}

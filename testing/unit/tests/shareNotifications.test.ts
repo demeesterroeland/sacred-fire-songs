@@ -96,6 +96,13 @@ describe('buildRecordingSharedEmail', () => {
     expect(mail.html).toContain(`href="${input.settingsLink}"`);
   });
 
+  it('names a sharer without a profile name neutrally, never by address', () => {
+    const mail = buildRecordingSharedEmail({ ...input, actorName: null }, 'en');
+    expect(mail.subject).toContain('Unnamed member');
+    expect(mail.text).toContain('Unnamed member');
+    expect(mail.text).not.toContain('@');
+  });
+
   it('escapes user-controlled names in the html body', () => {
     const mail = buildRecordingSharedEmail({ ...input, actorName: '<script>x</script>' }, 'en');
     expect(mail.html).not.toContain('<script>');

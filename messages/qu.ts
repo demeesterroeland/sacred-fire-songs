@@ -295,7 +295,7 @@ const qu: Partial<Record<TranslationKey, string>> = {
   // ─── Rehearsal Space – Sharing, Public & Singer Attribution ─────────────────
   "recording.sharing.title": "Grabaciónta quy",
   'recording.sharing.button': 'Quy',
-  'recording.sharing.searchPlaceholder': 'Runa maskay chaski utaq sutiwan...',
+  'recording.sharing.searchPlaceholder': "Sutiwan utaq hunt'asqa chaski sutiwan maskay...",
   'recording.sharing.sharedWithTitle': 'Kay runakunawan qusqa',
   'recording.sharing.noShares': 'Manaraq pimanpas qusqachu.',
   'recording.sharing.revoke': 'Qichuy',
@@ -387,6 +387,7 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'user.profile.title': 'Takiqpa kawsaynin',
   'user.profile.verifiedMusician': 'Takyasqa takiq',
   'user.profile.member': 'Ayllupi kaq',
+  'user.unnamed': 'Mana sutiyuq ayllu runa',
   "user.profile.attributedRecordings": "Paypa grabaciónkuna",
   "user.profile.noAttributedRecordings": "Manaraq grabaciónkuna kanchu.",
   'user.profile.backToSong': 'Takiman kutiy',
