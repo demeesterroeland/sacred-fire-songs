@@ -1,8 +1,8 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 1.55
+**Version:** 1.94
 **Status:** Living Document
-**Date:** Nov 5, 2026
+**Date:** Nov 7, 2026
 
 ## Changelog
 
@@ -54,6 +54,43 @@
 | **1.53** | Nov 5, 2026 | Epic 5.1: Story 5.1.8 (#297) re-scoped and implemented — promotion `develop` → `main` via `scripts/cicd/develop2main.sh` (merge commit, no `--admin`) and versioned release images; production deployment lives outside the public repo. Story 5.1.6 (#294) completed (no script uses `--admin`). Stories 5.1.1, 5.1.7 and 5.1.12 closed on GitHub. |
 | **1.54** | Nov 5, 2026 | Story 5.1.9 (#298) implemented: `back-merge.yml` opens the PR `main` → `develop` after every push to `main`, labels conflicts; merged by the owner, never automatically. |
 | **1.55** | Nov 5, 2026 | Story 5.1.13 (#300) implemented: development guide 2.0 (Gitflow, environments, CI vs CD boundary), Gitflow PR template, `/start-story` and `/sync-artifacts` target `develop`, README contributing; documentation contract in `ci-gate`. Story 5.1.10 (#299) code complete; its end-to-end check moves into the 5.1.14 dress rehearsal (owner). |
+| **1.56** | Nov 5, 2026 | Epic 6.1: Story 6.1.1 (#385, G1.1) implemented on the integration branch `feat/ux-v2` — design tokens, component primitives and token tests (`docs/design/design-tokens.md`). |
+| **1.57** | Nov 5, 2026 | Epic 6.1: Story 6.1.33 (#417, G9.1) implemented on `feat/ux-v2` — E2E fixtures removed by a Playwright global teardown; seed hygiene checks. |
+| **1.58** | Nov 5, 2026 | Epic 6.1: Story 6.1.8 (#392, G2.3) implemented on `feat/ux-v2` — sticky song title truncates at the end. |
+| **1.59** | Nov 5, 2026 | Epic 6.1: Story 6.1.23 (#407, G5.2) implemented on `feat/ux-v2` — Library tabs fit a phone, Albums hidden behind a feature flag (UXD-4). |
+| **1.61** | Nov 5, 2026 | Epic 6.1: Story 6.1.6 (#390, G2.1) implemented on `feat/ux-v2` — `Chords · A− · A+` reader toolbar, size persisted per device. |
+| **1.60** | Nov 5, 2026 | Epic 6.1: Story 6.1.7 (#391, G2.2) implemented on `feat/ux-v2` — song meta and Key · Capo · Tuning on one grey line each. |
+| **1.92** | Nov 6, 2026 | Epic 6.1: validation round 1 after the owner's phone run (Part of #375): auto-scroll only when the lyrics run below the fold (Story 6.1.10 / #394), expanded meta line (6.1.7 / #391), one focus style for text fields, the search suggestions in the page flow (6.1.29 / #413), search options on tokens, translated feedback and song flags across versions (6.1.11 / #395). Acceptance criteria of those stories now read as in `docs/testing/ux-v2-validation-1.feature`. |
+| **1.93** | Nov 7, 2026 | Epic 6.1: review round on the validation round 1 PR (#474, Part of #375): acceptance criteria of Stories 6.1.10 (auto-scroll offered only when the lyric text runs below the visible area above the fixed bars), 6.1.29 (suggestions close on the click and keep the scroll position), 6.1.1 (one focus cue per field, readable chip counts), 6.1.11 (a lyrics-only version has no Chords switch; a bracketed section label is not a chord) and the i18n policy (no raw server or database text in a toast) verified against the code; decisions UXA-061 to UXA-066. |
+| **1.94** | Nov 7, 2026 | Epic 6.1: validation round 2, batch 2 (Part of #375): acceptance criteria updated for Story 6.1.4 (#388: amounts between parentheses, "Air (3)"), 6.1.8 (#392: the full title wraps at the top of the page on a phone, the truncated copy shows only after scrolling past it), 6.1.10 (#394: transpose, scroll speed and a Screen stays on switch live in the one ⋮ menu; the toolbar has no ⋯), 6.1.11 (#395: every version has a `?version=` link, replaced in place, shared by Share), 6.1.23 (#407: History, Artists and Shared with me share one heading size) and 6.1.24 (#408: the Library "+" floats at the bottom right). New: Terms and Privacy pages (draft) with the operator from the server environment. |
+| **1.91** | Nov 6, 2026 | Epic 6.1: Story 6.1.34 (#418, G9.2) implemented on `feat/ux-v2` — the song page and the Practice panel pass an axe-core audit (no violation of any impact, guest and member, light and dark, 390 px); the Practice panel is a modal dialog with focus handling and ARIA tabs; sheets return focus to their opener; the recorder announces its state. The manual VoiceOver and TalkBack pass is **not done**: a checklist for the owner is in `docs/ux-research/2026-11-06-a11y-audit.md`. Acceptance (*Automated audit*) is covered by `e2e/tests/ux-v2-a11y-audit.spec.ts`; the story's manual item stays open until the owner has run the checklist. |
+| **1.90** | Nov 6, 2026 | Epic 6.1: Story 6.1.21 (#405, G4.8) implemented on `feat/ux-v2` — the Make public dialog names the take and the song and says who will hear it (everyone visiting a public song, including guests); a take on a private song starts with making the song public (the owner can do it from the dialog) and cannot be published before; a line says the take can be made private again without undoing what was heard; guests hear public takes on the Listen tab (UXD-2). |
+| **1.89** | Nov 6, 2026 | Epic 6.1: Story 6.1.11 (#395, G2.6) implemented on `feat/ux-v2` — a segmented version switch under the song title, shown only when the song has more than one version (nothing for single-version songs); the language switch stays a documented slot until translations exist. `/songs/<id>?version=<id>` opens that version (Save on the edit form returns there), and a take in progress blocks switching until it is saved or discarded. |
+| **1.88** | Nov 6, 2026 | Epic 6.1: Story 6.1.31 (#415, G8.2) implemented on `feat/ux-v2`: Preview toggle and visible Upload .cho / .txt button on Add Song. |
+| **1.87** | Nov 6, 2026 | Epic 6.1: Story 6.1.28 (#412, G6.3) implemented on `feat/ux-v2` — guests see a one-line welcome, a search field and a *Recently added* row on Home (the header search field is hidden there for guests); members keep Your library. |
+| **1.86** | Nov 6, 2026 | Epic 6.1: Story 6.1.32 (#416, G8.3) implemented on `feat/ux-v2`: New Playlist has a Make public switch (off by default) and one line that says private unless made public / public to anyone; the Add to playlist sheet says new playlists are private. |
+| **1.85** | Nov 6, 2026 | Epic 6.1: Story 6.1.10 (#394, G2.5) implemented on `feat/ux-v2` — auto-scroll (▶ / ⏸ in the toolbar, speed in the ⋯ sheet, pauses on a touch, stops at the end) and musician-only transpose (± semitone, key shown) join the reader toolbar; stay-awake indicator while the screen lock is held. |
+| **1.84** | Nov 6, 2026 | Epic 6.1: Story 6.1.20 (#404, G4.7) implemented on `feat/ux-v2` — recorder level meter, optional 3-2-1 count-in, `m:ss left` in the last minute, Save Take as the single full-width primary in review (review fixes: mic released on failed start, live regions, iOS audio context). |
+| **1.83** | Nov 6, 2026 | Epic 6.1: Story 6.1.25 (#409, G5.4) implemented on `feat/ux-v2`: auth pages without the fake ✕; Back returns to the `next=` target, else Home. |
+| **1.82** | Nov 6, 2026 | Epic 6.1: Story 6.1.5 (#389, G1.5) implemented on `feat/ux-v2` — unfinished features hidden behind `lib/features.ts` (Albums already by #407; avatar block, Privacy & Data tab, planned preference rows, melody notation section); "Coming soon" copy removed from all 8 locales. Decisions UXA-030, UXA-031. |
+| **1.81** | Nov 5, 2026 | Epic 6.1: Story 6.1.13 (#397, G3.2) implemented on `feat/ux-v2` — calm mini player (plain bar, accent only on play, state in words), provider buttons only for providers with a link, "Open player", wrapping status line. |
+| **1.80** | Nov 5, 2026 | Epic 6.1: Story 6.1.19 (#403, G4.6) implemented on `feat/ux-v2` — **Shared with me** page (`/library/shared`) listing takes shared with me with the sharer and a **New** marker, entered from the account menu and a Library row (unread count in words); opening a song's Practice drawer marks its notifications read and the bell badge drops (UXD-3, UXA-029). |
+| **1.79** | Nov 5, 2026 | Epic 6.1: Story 6.1.18 (#402, G4.5) implemented on `feat/ux-v2` — the Share dialog says who can be found (registered members) with an empty state and invite hint, and on a private song lists both effects (lyrics become public, take is shared) before anything changes; non-owners get an explanation instead of a toast. |
+| **1.78** | Nov 5, 2026 | Epic 6.1: Story 6.1.30 (#414, G8.1) implemented on `feat/ux-v2` — Add to playlist is a bottom sheet with "New playlist" first, check marks and tap-to-toggle; Story 3.1.4.6 reused (one `createPlaylist` action). |
+| **1.77** | Nov 5, 2026 | Epic 6.1: Story 6.1.9 (#393, G2.4) implemented on the integration branch `feat/ux-v2` — sticky Practice · Playlist · ♥ action bar on the song page (phones). |
+| **1.76** | Nov 5, 2026 | Epic 6.1: Story 6.1.29 (#413, G7.1) implemented on `feat/ux-v2` — focusing the search field shows the last 5 recent searches (clearable) and the top-level categories as chips. |
+| **1.75** | Nov 5, 2026 | Epic 6.1: Story 6.1.17 (#401, G4.4) implemented on `feat/ux-v2` — take actions open as a grouped bottom action sheet (Play / Edit name / Download · Share / Singer / Make public / Copy link · Delete alone in red), rows ≥ 44 px, 32 px swipe handle; shared-with-me takes stay listen only. |
+| **1.74** | Nov 5, 2026 | Epic 6.1: Story 6.1.27 (#411, G6.2) implemented on `feat/ux-v2` — guests on Add Song see "Draft now — sign in to save"; the draft survives the sign-in round trip (E2E). |
+| **1.73** | Nov 5, 2026 | Epic 6.1: Story 6.1.24 (#408, G5.3) implemented on `feat/ux-v2` — bottom bar is Home · Search · Library (UXD-1), Create is a "+" in Library, `/explore` removed; Story 1.1.9 updated. |
+| **1.72** | Nov 5, 2026 | Epic 6.1: Story 6.1.4 (#388, G1.4) implemented on `feat/ux-v2` — calm monochrome category grid: grey tiles, tags as text links with a grey count, 44 px links, accent only when pressed. |
+| **1.71** | Nov 5, 2026 | Epic 6.1: Story 6.1.16 (#400, G4.3) implemented on `feat/ux-v2` — take rows show **Public**, **Shared · n**, **Pending invite** and **Verified musician** as text pills (no tooltip-only icons), in 8 locales. |
+| **1.70** | Nov 5, 2026 | Epic 6.1: Story 6.1.3 (#387, G1.3) implemented on `feat/ux-v2` — small labels readable: sentence-case 13 px section titles, nothing below 12 px, axe-core colour-contrast smoke test. |
+| **1.69** | Nov 5, 2026 | Epic 6.1: Story 6.1.15 (#399, G4.2) implemented on `feat/ux-v2` — Record tab splits **My takes** and **Shared with me**; shared rows say "Shared by {name}" and are listen-only. |
+| **1.68** | Nov 5, 2026 | Epic 6.1: Story 6.1.2 (#386, G1.2) implemented on `feat/ux-v2` — compact song rows with one grey meta line. |
+| **1.67** | Nov 5, 2026 | Epic 6.1: Story 6.1.12 (#396, G3.1) implemented on the integration branch `feat/ux-v2` — the mini player appears only after play (UXD-5); sheets, drawer and page reserve `--mini-player-h`. |
+| **1.66** | Nov 5, 2026 | Epic 6.1: Story 6.1.14 (#398, G4.1) implemented on the integration branch `feat/ux-v2` — one name, Practice, in all 8 locales. |
+| **1.65** | Nov 5, 2026 | Epic 6.1: Story 6.1.26 (#410, G6.1) implemented on `feat/ux-v2` — GuestGate on every members-only screen; guest read of public takes requires singer consent (UXD-2). |
+| **1.64** | Nov 5, 2026 | Epic 6.1: Story 6.1.22 (#406, G5.1) implemented on `feat/ux-v2` — unknown URLs show a real 404 page for every role; the proxy redirects guests to login only for `/account`, `/admin`, `/users`. Spec: `docs/testing/ux-v2-real-404.feature`. |
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
 
@@ -1619,40 +1656,44 @@ Owner decision of Nov 4, 2026: sober greyscale interface with one accent, smalle
 
 | Story | Issue | Code | Pri | Title | Blocked by |
 |---|---|---|---|---|---|
-| 6.1.1 | #385 | `G1.1` | A | As a Contributor, I want design tokens and a component sheet so that every screen is restyled from one sober greyscale system instead of page by page | — |
-| 6.1.2 | #386 | `G1.2` | A | As a Guest, I want song cards and list rows to show a title and one grey meta line so that I can scan a list of songs quickly | #385 |
-| 6.1.3 | #387 | `G1.3` | A | As a Member, I want small labels to be readable so that section headings and meta text are not grey-on-grey | #385 |
-| 6.1.4 | #388 | `G1.4` | B | As a Guest, I want the category grid in a calm monochrome style so that the home page does not shout | #385 |
-| 6.1.5 | #389 | `G1.5` | C | As a Member, I want unfinished features hidden so that I do not meet 'coming soon' placeholders | #407 |
-| 6.1.6 | #390 | `G2.1` | A | As a reader in the circle, I want a `Chords · A− · A+` toolbar on the song page so that I set the text size myself | #385 |
-| 6.1.7 | #391 | `G2.2` | A | As a reader, I want Key, Capo, Tuning and the tags on one grey line each so that the first lyric line is visible without scrolling | #385 |
-| 6.1.8 | #392 | `G2.3` | A | As a reader, I want the sticky song title to truncate at the end so that the first letters are never cut off | — |
-| 6.1.9 | #393 | `G2.4` | B | As a Member, I want a sticky action bar on the song page (Practice · Playlist · ♥) so that the main actions are in thumb reach | #385, #390, #398 |
-| 6.1.10 | #394 | `G2.5` | C | As a Musician, I want auto-scroll and transpose in the same viewer toolbar so that all reading tools live in one place | #390 |
-| 6.1.11 | #395 | `G2.6` | C | As a Contributor, I want a reserved slot for a variant / language switch under the song title so that song variants and translations fit the sober layout later | #391 |
-| 6.1.12 | #396 | `G3.1` | A | As a reader, I want the mini player to appear only after I press play so that it does not cover the lyrics and sheets on every song | — |
-| 6.1.13 | #397 | `G3.2` | C | As a Guest, I want the player and reference tab to be calm and exact so that I know which provider is playing | #385 |
-| 6.1.14 | #398 | `G4.1` | A | As a Member, I want one name — Practice — for the rehearsal feature so that menu, drawer, tabs, badge and library all say the same thing | — |
-| 6.1.15 | #399 | `G4.2` | A | As a Member, I want takes shared with me listed separately from my own takes so that I see who shared what | #398 |
-| 6.1.16 | #400 | `G4.3` | A | As a Member, I want text labels next to take status icons so that I understand 'public', 'shared' and 'pending invite' without a tooltip | #398 |
-| 6.1.17 | #401 | `G4.4` | B | As a Member, I want take actions in a grouped bottom action sheet so that Delete is never one tap from Share | #385, #398 |
+| 6.1.1 | #385 | `G1.1` | A | **[Implemented on feat/ux-v2]** As a Contributor, I want design tokens and a component sheet so that every screen is restyled from one sober greyscale system instead of page by page | — |
+| 6.1.2 | #386 | `G1.2` | A | **[Implemented on feat/ux-v2]** As a Guest, I want song cards and list rows to show a title and one grey meta line so that I can scan a list of songs quickly | #385 |
+| 6.1.3 | #387 | `G1.3` | A | **[Implemented on feat/ux-v2]** As a Member, I want small labels to be readable so that section headings and meta text are not grey-on-grey | #385 |
+| 6.1.4 | #388 | `G1.4` | B | **[Implemented on feat/ux-v2]** As a Guest, I want the category grid in a calm monochrome style so that the home page does not shout (amounts are written between parentheses, "Air (3)") | #385 |
+| 6.1.5 | #389 | `G1.5` | C | **[Implemented on feat/ux-v2]** As a Member, I want unfinished features hidden so that I do not meet 'coming soon' placeholders | #407 |
+| 6.1.6 | #390 | `G2.1` | A | **[Implemented on feat/ux-v2]** As a reader in the circle, I want a `Chords · A− · A+` toolbar on the song page so that I set the text size myself | #385 |
+| 6.1.7 | #391 | `G2.2` | A | **[Implemented on feat/ux-v2]** As a reader, I want Key, Capo, Tuning and the tags on one grey line each so that the first lyric line is visible without scrolling | #385 |
+| 6.1.8 | #392 | `G2.3` | A | **[Implemented on feat/ux-v2]** As a reader, I want the sticky song title to truncate at the end so that the first letters are never cut off (the full title wraps at the top of the page on a phone; the truncated copy shows after scrolling past it) | — |
+| 6.1.9 | #393 | `G2.4` | B | **[Implemented on feat/ux-v2]** As a Member, I want a sticky action bar on the song page (Practice · Playlist · ♥) so that the main actions are in thumb reach | #385, #390, #398 |
+| 6.1.10 | #394 | `G2.5` | C | **[Implemented on feat/ux-v2]** As a Musician, I want auto-scroll and transpose in the same viewer toolbar so that all reading tools live in one place (transpose, scroll speed and the Screen stays on switch are in the song page's one ⋮ menu) | #390 |
+| 6.1.11 | #395 | `G2.6` | C | **[Implemented on feat/ux-v2]** As a Contributor, I want a reserved slot for a variant / language switch under the song title so that song variants and translations fit the sober layout later (each version has its own `?version=` link) | #391 |
+| 6.1.12 | #396 | `G3.1` | A | **[Implemented on feat/ux-v2]** As a reader, I want the mini player to appear only after I press play so that it does not cover the lyrics and sheets on every song | — |
+| 6.1.13 | #397 | `G3.2` | C | **[Implemented on feat/ux-v2]** As a Guest, I want the player and reference tab to be calm and exact so that I know which provider is playing | #385 |
+| 6.1.14 | #398 | `G4.1` | A | **[Implemented on feat/ux-v2]** As a Member, I want one name — Practice — for the rehearsal feature so that menu, drawer, tabs, badge and library all say the same thing | — |
+| 6.1.15 | #399 | `G4.2` | A | **[Implemented on feat/ux-v2]** As a Member, I want takes shared with me listed separately from my own takes so that I see who shared what | #398 |
+| 6.1.16 | #400 | `G4.3` | A | **[Implemented on feat/ux-v2]** As a Member, I want text labels next to take status icons so that I understand 'public', 'shared' and 'pending invite' without a tooltip | #398 |
+| 1.79 | #401 | `G4.4` | B | As a Member, I want take actions in a grouped bottom action sheet so that Delete is never one tap from Share | #385, #398 |
+| 6.1.18 | #402 | `G4.5` | B | **[Implemented on feat/ux-v2]** As a recording owner, I want the Share dialog to explain who can be found and what happens with a private song so that sharing has no surprises | #398 |
+| 6.1.17 | #401 | `G4.4` | B | **[Implemented on feat/ux-v2]** As a Member, I want take actions in a grouped bottom action sheet so that Delete is never one tap from Share | #385, #398 |
 | 6.1.18 | #402 | `G4.5` | B | As a recording owner, I want the Share dialog to explain who can be found and what happens with a private song so that sharing has no surprises | #398 |
-| 6.1.19 | #403 | `G4.6` | B | As a Member, I want to be told when someone shares a take with me so that I do not have to guess which song to open | #399 |
-| 6.1.20 | #404 | `G4.7` | C | As a Member, I want a level meter, count-in and remaining time while recording so that I know the microphone works and when the 3-minute limit comes | #385 |
-| 6.1.21 | #405 | `G4.8` | C | As a recording owner, I want the publish dialog to name the song and say who will hear it so that consent is informed | #402 |
-| 6.1.22 | #406 | `G5.1` | A | As a Guest, I want an unknown URL to show a 404 page so that I am not sent to a login screen for content that does not exist | — |
-| 6.1.23 | #407 | `G5.2` | A | As a Member, I want the Library tab row to fit my phone with no dead tab so that every tab I see works | — |
-| 6.1.24 | #408 | `G5.3` | B | As the Owner, I want a decision on the bottom bar (Home · Songs · Library · Create vs Home · Search · Library) so that Explore, Home and Search stop overlapping | — |
-| 6.1.25 | #409 | `G5.4` | C | As a Guest, I want auth pages without a fake close button so that I always know where I go | #385 |
-| 6.1.26 | #410 | `G6.1` | A | As a Guest, I want every members-only screen to use the same locked preview with a reason and a sign-in button so that gating feels consistent | — |
-| 6.1.27 | #411 | `G6.2` | B | As a Guest, I want to know before typing that saving a song needs an account so that I am not surprised at save | #410 |
-| 6.1.28 | #412 | `G6.3` | C | As a first-time visitor, I want a one-line welcome, a search box and a 'Recently added' row on Home so that I understand the site and find a song fast | #386, #413 |
-| 6.1.29 | #413 | `G7.1` | B | As a Guest, I want recent searches and category chips when I focus the search field so that I can repeat or narrow a search in one tap | #386 |
+| 6.1.19 | #403 | `G4.6` | B | **[Implemented on feat/ux-v2]** As a Member, I want to be told when someone shares a take with me so that I do not have to guess which song to open | #399 |
+| 6.1.20 | #404 | `G4.7` | C | **[Implemented on feat/ux-v2]** As a Member, I want a level meter, count-in and remaining time while recording so that I know the microphone works and when the 3-minute limit comes | #385 |
+| 6.1.21 | #405 | `G4.8` | C | **[Implemented on feat/ux-v2]** As a recording owner, I want the publish dialog to name the song and say who will hear it so that consent is informed | #402 |
+| 6.1.22 | #406 | `G5.1` | A | **[Implemented on feat/ux-v2]** As a Guest, I want an unknown URL to show a 404 page so that I am not sent to a login screen for content that does not exist | — |
+| 6.1.23 | #407 | `G5.2` | A | **[Implemented on feat/ux-v2]** As a Member, I want the Library tab row to fit my phone with no dead tab so that every tab I see works (History, Artists and Shared with me share one heading size) | — |
+| 6.1.24 | #408 | `G5.3` | B | **[Implemented on feat/ux-v2]** As the Owner, I want a decision on the bottom bar (Home · Songs · Library · Create vs Home · Search · Library) so that Explore, Home and Search stop overlapping (the Library "+" floats at the bottom right above the bar) | — |
+| 6.1.25 | #409 | `G5.4` | C | **[Implemented on feat/ux-v2]** As a Guest, I want auth pages without a fake close button so that I always know where I go | #385 |
+| 6.1.26 | #410 | `G6.1` | A | **[Implemented on feat/ux-v2]** As a Guest, I want every members-only screen to use the same locked preview with a reason and a sign-in button so that gating feels consistent | — |
+| 6.1.27 | #411 | `G6.2` | B | **[Implemented on feat/ux-v2]** As a Guest, I want to know before typing that saving a song needs an account so that I am not surprised at save | #410 |
+| 6.1.28 | #412 | `G6.3` | C | **[Implemented on feat/ux-v2]** As a first-time visitor, I want a one-line welcome, a search box and a 'Recently added' row on Home so that I understand the site and find a song fast | #386, #413 |
+| 1.78 | #413 | `G7.1` | B | As a Guest, I want recent searches and category chips when I focus the search field so that I can repeat or narrow a search in one tap | #386 |
+| 6.1.30 | #414 | `G8.1` | B | **[Implemented on feat/ux-v2]** As a Member, I want Add to playlist as a bottom sheet with 'New playlist' first and check marks so that I see where the song already is | #385 |
+| 6.1.29 | #413 | `G7.1` | B | **[Implemented on feat/ux-v2]** As a Guest, I want recent searches and category chips when I focus the search field so that I can repeat or narrow a search in one tap | #386 |
 | 6.1.30 | #414 | `G8.1` | B | As a Member, I want Add to playlist as a bottom sheet with 'New playlist' first and check marks so that I see where the song already is | #385 |
-| 6.1.31 | #415 | `G8.2` | C | As a Member, I want a live chord preview and a visible upload button on Add Song so that I see what I am writing | #385 |
-| 6.1.32 | #416 | `G8.3` | C | As a Member, I want the New Playlist page to explain private vs public in one line so that I know what I am creating | #385 |
-| 6.1.33 | #417 | `G9.1` | A | As a Contributor, I want the demo seed free of E2E and smoke-test playlists so that screenshots and demos show real-looking data | — |
-| 6.1.34 | #418 | `G9.2` | C | As a reader using assistive technology, I want the song page and Practice panel to pass an accessibility audit so that the app works with a screen reader | #393, #401 |
+| 6.1.31 | #415 | `G8.2` | C | **[Implemented on feat/ux-v2]** As a Member, I want a live chord preview and a visible upload button on Add Song so that I see what I am writing | #385 |
+| 6.1.32 | #416 | `G8.3` | C | **[Implemented on feat/ux-v2]** As a Member, I want the New Playlist page to explain private vs public in one line so that I know what I am creating | #385 |
+| 6.1.33 | #417 | `G9.1` | A | **[Implemented on feat/ux-v2]** As a Contributor, I want the demo seed free of E2E and smoke-test playlists so that screenshots and demos show real-looking data | — |
+| 6.1.34 | #418 | `G9.2` | C | **[Implemented on feat/ux-v2; manual screen reader pass still open]** As a reader using assistive technology, I want the song page and Practice panel to pass an accessibility audit so that the app works with a screen reader | #393, #401 |
 
 Priority **A** = quick wins (one sprint together), **B** = flow work, **C** = backlog. Acceptance criteria (Gherkin) live in each GitHub issue and move to `docs/testing/*.feature` when a story starts.
 
@@ -1714,12 +1755,12 @@ Scenario: Restore draft
         *   Submitting the song successfully clears the draft.
         *   Draft persistence only applies to the "Add" mode, not Edit.
 
-**Story 1.1.9: [Implemented]** As a User, I want a Spotify-style mobile bottom navigation bar with Home, Search, Your Library, and Create tabs so that I can navigate the app with one hand.
+**Story 1.1.9: [Implemented]** As a User, I want a Spotify-style mobile bottom navigation bar with Home, Search and Your Library tabs so that I can navigate the app with one hand. (Decision UXD-1, Story 6.1.24: Create is a "+" inside Library, not a fourth tab.)
 
 ```
 Scenario: Bottom bar visible on mobile
   Given I am viewing any page on a mobile device (< md breakpoint)
-  Then I should see a fixed bottom navigation bar with four tabs: Home, Search, Your Library, and Create
+  Then I should see a fixed bottom navigation bar with three tabs: Home, Search and Your Library
   And the bottom bar should not appear on tablet or desktop
 
 Scenario: Navigate via bottom bar
@@ -1730,8 +1771,12 @@ Scenario: Navigate via bottom bar
   Then I should navigate to the songs page with the search field focused
   When I tap "Your Library"
   Then I should navigate to the playlists/library page
-  When I tap "Create"
-  Then I should navigate to the add song page (or show a guest nudge if not authenticated)
+
+Scenario: Create from Library
+  Given I am signed in and on the Library page of a mobile device
+  When I tap "+"
+  Then a sheet offers "Add Song" and "New Playlist"
+  And guests see no "+" (the Library shows its sign-in preview)
 
 Scenario: Active tab indicator
   Given I am on the songs page
@@ -1751,7 +1796,6 @@ Scenario: Top-right avatar hidden on mobile
 
 Scenario: Guest bottom bar
   Given I am not logged in on a mobile device
-  Then the bottom bar should still show Home, Search, and Your Library
-  And "Create" should show a sign-in nudge when tapped
+  Then the bottom bar shows the same three tabs: Home, Search, and Your Library
   And the hamburger icon should remain (no avatar replacement)
 ```

@@ -44,6 +44,24 @@ export async function markNotificationsRead(ids: string[]): Promise<void> {
   if (error) throw error;
 }
 
+/**
+ * Marks every unread notification about one song as read (Story 6.1.19 / G4.6): used when the
+ * song's Practice drawer opens. RLS limits the update to the signed-in user's own rows.
+ */
+export async function markSongNotificationsRead(compositionId: string): Promise<void> {
+  const supabase = createClient();
+  const { error } = await supabase
+    .from('notifications')
+    .update({ read_at: new Date().toISOString() })
+    .eq('composition_id', compositionId)
+    .is('read_at', null);
+  if (error) throw error;
+}
+
+export function notificationsKey(userId: string): readonly ['notifications', string] {
+  return ['notifications', userId];
+}
+
 export async function getEmailNotificationsEnabled(userId: string): Promise<boolean> {
   const supabase = createClient();
   const { data, error } = await supabase

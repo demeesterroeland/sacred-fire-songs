@@ -2,6 +2,7 @@ import { useQuery } from '@tanstack/react-query';
 import { createClient } from '@/lib/supabase/client';
 import { SONG_KEYS } from '@/lib/songs/queryKeys';
 import type { SupabaseClient } from '@supabase/supabase-js';
+import { fetchFavoritesSetlistId } from '@/lib/playlists/favorites';
 
 interface GlobalFilterCounts {
   chordsCount: number | undefined;
@@ -36,18 +37,14 @@ async function fetchMySongsCount(supabase: SupabaseClient, userId: string): Prom
   return count ?? undefined;
 }
 
-async function fetchFavoritesCount(supabase: SupabaseClient): Promise<number | undefined> {
-  const { data: setlist } = await supabase
-    .from('setlists')
-    .select('id')
-    .eq('title', 'My Favorites')
-    .maybeSingle();
-  if (!setlist?.id) return undefined;
+async function fetchFavoritesCount(supabase: SupabaseClient, userId: string): Promise<number | undefined> {
+  const setlistId = await fetchFavoritesSetlistId(supabase, userId);
+  if (!setlistId) return undefined;
 
   const { count } = await supabase
     .from('setlist_items')
     .select('id', { count: 'exact', head: true })
-    .eq('setlist_id', setlist.id);
+    .eq('setlist_id', setlistId);
   return count ?? undefined;
 }
 
@@ -76,7 +73,7 @@ export function useGlobalFilterCounts(userId?: string): GlobalFilterCounts {
         fetchChordsCount(supabase),
         fetchMelodyCount(supabase),
         userId ? fetchMySongsCount(supabase, userId) : Promise.resolve(undefined),
-        userId ? fetchFavoritesCount(supabase)      : Promise.resolve(undefined),
+        userId ? fetchFavoritesCount(supabase, userId) : Promise.resolve(undefined),
       ]);
 
       return { chordsCount, melodyCount, mineCount, favoritesCount };

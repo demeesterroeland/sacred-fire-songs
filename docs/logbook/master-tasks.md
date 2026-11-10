@@ -1424,3 +1424,61 @@
 - [x] Seed audio: `heartbeat-of-the-earth.mp3` (90 s) added; `seed:audio` stores each file's real duration; #371 implementation plan removed
 - [x] Follow-up `fix/373-recording-not-found`: unopenable recording links show "Recording Not Available" (same copy for no access, unknown and malformed ids; `NotFound` takes optional keys), design doc 1.58
 - [ ] Open: #372 (DRM-lite stream route), #420 (personal reordering of shared recordings); pre-existing `docs/design/db-schema.sql` fresh-install failure at `idx_compositions_is_public_true`; emails use the default locale until profiles store a language
+
+## Session November 5, 2026 (Epic 6.1 UX v2, Wave A, #375)
+- [x] Integration branch `feat/ux-v2`; story PRs squash-merged after green CI + cross-review by a different Claude model (UXD-6)
+- [x] #385 type scale + tokens (PR #429), #417 E2E fixture teardown (#430), #392 (#435), #407 (#437), #391 song meta lines (#438), #390 reader toolbar (#440), #406 real 404 (#433)
+- [x] #410 GuestGate on every members-only screen, guest read of public takes needs singer consent (#439)
+- [x] #398 one name, Practice (#436); #396 mini player only after play (#434); #386 compact song rows (#441)
+- [x] #399 My takes / Shared with me / Public takes (#442); #387 readable labels, axe contrast test (#443); #400 take status in words (#444)
+- [x] Decisions UXA-006…018 in `docs/ux-research/ux-v2-decisions.md`, owner checklist in #431; validation script `docs/ux-research/ux-v2-validation.md`
+- [x] Wave A sync: lint cap 201 → 188, palette baseline 2535, UXA-010 now needs owner confirmation
+- [ ] Next: preview build `ux-v2-preview`, Wave B (#388, 393, 401, 402, 403, 408, 411, 413, 414), Wave C, #418 last
+- [ ] Follow-ups: hard-coded English toasts in `useToggleFavorite`; guest Listen list for consented takes (UXA-012); admin/auth/settings pages not axe-covered; unused `YouTubeEmbed.tsx`; native-speaker check qu/ru
+
+## Session November 5, 2026 (Epic 6.1 UX v2, Wave B, #375)
+- [x] #388 (PR #447), #408 bottom bar Home · Search · Library (#446), #411 guest song draft kept through sign-in (#450), #401 take actions bottom sheet (#448), #413 recent searches + category chips (#451)
+- [x] #393 sticky Practice · Playlist · ♥ action bar on the song page (#449), #414 Add to playlist bottom sheet with check marks (#452)
+- [x] #402 Share dialog explains who can be found and what a private song does (#453), #403 Shared with me page, "n new" entries, mark read on Practice (#454)
+- [x] Decisions UXA-019…029, owner checklist #431 updated; validation script sections per story
+- [x] Wave B sync: lint cap 188 → 177, palette baseline 2252; UX capture scripts look seeded song ids up by title (ids change on every reseed)
+- [ ] Next: preview build `ux-v2-preview`, Wave C (#389, 394, 395, 397, 404, 405, 409, 412, 415, 416), #418 last
+- [ ] Follow-ups: native-speaker check qu (share, shared-with-me copy) and nl/qu action-bar labels; concurrent tabs can add a playlist item twice (no unique constraint); Library sub-pages use h2 while Shared with me has h1; pre-existing security finding on member search reported to the owner privately
+
+## Session November 6, 2026 (Epic 6.1 UX v2, Wave C, #375)
+- [x] #389 unfinished features hidden (#456), #394 auto-scroll and transpose in the reader toolbar (#459), #395 version switch (#464), #397 calm player (#458), #404 recording meter (#460), #405 publish dialog consent and guest public takes (#465), #409 auth pages (#457), #412 guest Home (#462), #415 Add Song preview (#463), #416 New Playlist line (#461), #418 accessibility audit (#471)
+- [x] All 34 stories on `feat/ux-v2`: Wave A 14/14, Wave B 9/9, Wave C 11/11
+- [x] Decisions up to UXA-053, owner checklist #431 updated; validation script sections per story; lint cap 158, palette baseline 1721
+- [x] Whole Playwright suite on a fresh build of `feat/ux-v2`: 274 passed, 5 skipped, 0 failed
+- [ ] Owner: phone validation on the preview, decisions in #431, sign-off of `feat/ux-v2` → `develop`
+- [ ] Owner: manual VoiceOver / TalkBack pass (`docs/ux-research/2026-11-06-a11y-audit.md` section 5); #418 stays open until then
+- [ ] Follow-ups: Quechua native check, Songs / Add Song / Edit nest a second `main`, focus after deleting a song far down the list lands off-screen, `useDeleteSong` English alert, `useToggleFavorite` English toasts, `npm run test:bdd:ci` has 3 failing scenarios about `e2e.yml` and `docker.yml` (not part of CI)
+
+## Session November 6, 2026 (Epic 6.1 UX v2, validation round 1, #375)
+- [x] Fix 1 auto-scroll only when the lyrics run below the fold; fix 2 expanded meta line; fix 3 one focus style for text fields; fix 4 suggestions panel in the page flow; fix 5 search options on tokens and category names; fix 6 translated hook feedback and Settings intro; fix 7 song flags across versions (migration + page follows the version shown)
+- [x] Tests per fix (unit, component, BDD unit, Playwright), before/after screenshots at 390 px light and dark, validation script section, UXA-054…060, db-schema v3.3
+- [x] Lint cap 158 → 157, palette baseline 1721 → 1564
+- [ ] Owner: re-run the *Validation round 1* section of `docs/ux-research/ux-v2-validation.md` on a phone; decide whether to apply `20261106180000_recompute_song_flags.sql` where data is older than the any-version rule
+- [ ] Follow-ups: server-action error strings shown as toasts are still English; `PlaylistDetailHeader` still has palette classes outside its edit fields
+
+## Session November 7, 2026 (Epic 6.1 UX v2, review round on validation round 1, PR #474, #375)
+- [x] B1 press on a song under the open suggestions opens that song (close on click); H1 desktop column keeps its scroll position (sticky slot, no `scrollIntoView`); H2 auto-scroll fold = lyric text above the fixed bars; M1 tools sheet closes when empty, focus to A+; M2 one focus cue per field (`.field-composite`, selects, `<Input>`); M3 tag counts AA; M4 localised error toasts (`lib/errors/actionError.ts`); M5 Search options one column on phones; M6 chord token rule in JS and SQL (+ BOM, U+0085); L4, L6, L7
+- [x] Parity test SQL versus JS runs in an in-memory Postgres (PGlite, new devDependency), so it also runs in CI
+- [x] Palette baseline 1564 → 1559; lint cap stays 157 (157 warnings)
+- [ ] Owner: decide whether lower case, German and solfège chord spellings (`[am]`, `[Hm]`, `[Re]`) should count as chords (UXA-066)
+- [ ] Follow-ups: auth forms still show the authentication service's message; `qu` has the generic sentence for every `errors.*` key; the song page button still says "Add to Liked Songs"; two nested `<main>` elements on some pages
+
+## Session November 7, 2026 (Epic 6.1 UX v2, validation round 2, batch 2, #375)
+- [x] Items 1 to 15 (Sign In button, floating +, heading size, counts in parentheses, version links, full title, neutral desktop buttons, recording wording and the Your recordings card, Screen stays on switch, one song menu, Terms and Privacy pages, own drafts, favourites term, one `<main>`)
+- [x] Items 16, 17, 19, 20, 22 (first part) applied from the other thread's patch; 18, 21 and 22 (second part: auth and form errors by code) done here
+- [x] Tests first per fix, before/after screenshots, validation script section 16 checks, UXA-068, feature file `ux-v2-validation-2.feature`
+- [x] Lint cap 157 → 143, palette baseline 1559 → 1507
+- [ ] Owner: approve the Terms and Privacy wording (remove the Draft note), decide the open points listed in the pull request
+- [ ] Owner: set `OPERATOR_NAME` and `OPERATOR_CONTACT_EMAIL` on every server that runs the image
+- [ ] Follow-ups: native-speaker check (Runasimi uses English for the legal text and a loanword for "recording"), real iPhone check of the empty-space tap, `docs/design/screens` mockups for the song page and Library, `/auth/error` prints the `error` query parameter, the `?status=draft` list still shows every draft to an admin
+
+## Session November 7, 2026 (Epic 6.1 UX v2, validation round 2, review of PR #477)
+- [x] Auth pages: messages by code; auto-scroll with the menu open; version switch and recording link; My Drafts list; Runasimi coverage; `.env.example`; draft banner button; chord-like labels; right-click on plain text; unused message and starter component removed
+- [ ] Owner: Runasimi native-speaker check; approve the Terms and Privacy wording
+- [x] Favourites lookups filter on the owner (admin saw 6 on the card and an empty list)
+- [x] Remove Vercel Speed Insights; privacy text: operator access to stored data

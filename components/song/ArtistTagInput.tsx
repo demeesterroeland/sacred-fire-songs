@@ -161,7 +161,7 @@ export function ArtistTagInput({
     <div ref={containerRef} className={`relative w-full ${className}`}>
       {/* Input container with selected pills inline */}
       <div
-        className="flex flex-wrap items-center gap-1.5 min-h-[46px] w-full bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg px-3 py-2 focus-within:ring-2 focus-within:ring-primary focus-within:border-primary transition-all cursor-text"
+        className="field-composite flex flex-wrap items-center gap-1.5 min-h-[46px] w-full bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg px-3 py-2 transition-all cursor-text"
         onClick={() => inputRef.current?.focus()}
       >
         <User className="w-4 h-4 text-gray-400 shrink-0 mr-1" />
@@ -187,7 +187,7 @@ export function ArtistTagInput({
           onFocus={() => setIsOpen(true)}
           onKeyDown={handleKeyDown}
           placeholder={selectedArtists.length === 0 ? (placeholder ?? t('songForm.artists.placeholder')) : t('songForm.artists.addAnother')}
-          className="flex-1 min-w-[150px] bg-transparent border-none outline-none text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-[#a19eb7]/50"
+          className="flex-1 min-w-[150px] bg-transparent border-none text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-[#a19eb7]/50"
         />
       </div>
 
@@ -211,7 +211,7 @@ export function ArtistTagInput({
                   <User className="w-3.5 h-3.5 opacity-60" />
                   <span>{item.name}</span>
                 </div>
-                <span className="text-[10px] text-gray-400 dark:text-gray-500 font-mono">
+                <span className="text-caption text-fg-muted font-mono">
                   {item.song_count} {item.song_count === 1 ? 'song' : 'songs'}
                 </span>
               </div>

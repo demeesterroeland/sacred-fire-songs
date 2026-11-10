@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { User } from "@supabase/supabase-js";
-import { Download, Trash2, Shield, Eye } from "lucide-react";
+import { Download, Trash2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { useLocale } from "@/context/LocaleContext";
@@ -20,15 +20,6 @@ export default function PrivacySettings({ user, profile }: PrivacySettingsProps)
 
   return (
     <section className="space-y-8">
-
-      {/* Coming soon banner */}
-      <div className="flex items-center gap-3 p-3 bg-black/5 dark:bg-white/5 border border-gray-200 dark:border-white/10 rounded-xl">
-        <Shield className="w-4 h-4 text-gray-500 dark:text-slate-400 shrink-0" />
-        <p className="text-sm text-gray-500 dark:text-slate-400">{t("settings.privacy.notActive")}</p>
-        <span className="ml-auto text-[10px] font-bold uppercase tracking-wider text-slate-500 bg-black/5 dark:bg-white/5 border border-gray-200 dark:border-white/10 px-2 py-0.5 rounded-full shrink-0">
-          {t("settings.comingSoon")}
-        </span>
-      </div>
 
       <div className="space-y-6 opacity-50 pointer-events-none select-none">
         <h2 className="text-xl font-bold text-gray-900 dark:text-white">{t("settings.privacy.heading")}</h2>

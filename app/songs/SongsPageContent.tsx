@@ -153,7 +153,7 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
             : t('songs.resultsCount', { count: filteredCount });
 
     return (
-        <main className="flex-1 min-h-0 bg-white dark:bg-gray-950">
+        <div className="flex-1 min-h-0 bg-white dark:bg-gray-950">
             <div className="p-4 md:p-8 space-y-3 md:space-y-6 max-w-7xl mx-auto">
                 {/* Results count badge */}
                 <div
@@ -166,17 +166,17 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
                     aria-atomic="true"
                 >
                     <div className="flex items-center gap-2">
-                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-semibold transition-colors duration-200 ${
+                        <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-control text-xs font-semibold transition-colors duration-200 ${
                             isSearching
-                                ? 'bg-gray-100 dark:bg-gray-900 text-gray-400 dark:text-gray-500'
-                                : 'bg-red-50 dark:bg-red-500/10 text-red-600 dark:text-red-400'
+                                ? 'bg-surface-2 text-fg-muted border border-line'
+                                : 'bg-surface-2 text-fg border border-line'
                         }`}>
                             {resultsLabel}
                         </span>
                         {hasActiveFilters && !isSearching && (
                             <button
                                 onClick={handleResetFilters}
-                                className="text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                                className="text-xs text-fg-muted hover:text-fg transition-colors"
                             >
                                 {t('songs.clearFilters')}
                             </button>
@@ -188,28 +188,25 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
                 <section className="relative">
                     {/* Fade overlay while debounce pending */}
                     <div
-                        className={`absolute inset-0 z-10 bg-white/50 dark:bg-gray-950/50 backdrop-blur-[1px] rounded-xl pointer-events-none transition-opacity duration-200 ${
+                        className={`absolute inset-0 z-10 bg-surface/50 backdrop-blur-[1px] pointer-events-none transition-opacity duration-200 ${
                             isSearching ? 'opacity-100' : 'opacity-0'
                         }`}
                     />
                     <div
-                        className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 transition-opacity duration-200 ${
+                        data-testid="song-list"
+                        className={`grid grid-cols-1 md:grid-cols-2 md:gap-x-6 border-t border-line transition-opacity duration-200 ${
                             isSearching ? 'opacity-60' : 'opacity-100'
                         }`}
                     >
                         {displaySongs.length > 0 ? (
                             displaySongs.map((song) => (
-                                <div key={song.id} className="relative group/card">
+                                <div key={song.id} className="relative">
                                     <SongCard
                                         id={song.id}
                                         title={song.title}
                                         author={song.author}
                                         songKey={song.songKey}
-                                        accentColor={song.color}
                                         isPublic={song.isPublic}
-                                        hasChords={song.hasChords}
-                                        hasMelody={song.hasMelody}
-                                        hasPersonalRecording={userRecordingCompositionIds.has(song.id)}
                                         isFavorite={favoriteIds.has(song.id)}
                                         userId={user?.id}
                                         categories={song.categories}
@@ -222,40 +219,40 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
                             <div className="col-span-full text-center py-20 px-4">
                                 {state.favorites ? (
                                     <>
-                                        <div className="mb-4 inline-flex items-center justify-center w-16 h-16 rounded-full bg-amber-500/10 border border-amber-500/20">
-                                            <Heart className="w-8 h-8 text-amber-400/50" />
+                                        <div className="mb-4 inline-flex items-center justify-center w-16 h-16 rounded-panel bg-surface-2 border border-line">
+                                            <Heart className="w-8 h-8 text-fg-muted" />
                                         </div>
-                                        <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-2">{t('songs.emptyFavorites.title')}</h3>
-                                        <p className="text-gray-400 max-w-xs mx-auto">{t('songs.emptyFavorites.hint')}</p>
+                                        <h3 className="text-xl font-medium text-fg mb-2">{t('songs.emptyFavorites.title')}</h3>
+                                        <p className="text-fg-muted max-w-xs mx-auto">{t('songs.emptyFavorites.hint')}</p>
                                         <Link
                                             href="/songs"
                                             onClick={handleResetFilters}
-                                            className="mt-6 inline-block text-amber-400 hover:text-amber-300 font-medium transition-colors cursor-pointer"
+                                            className="mt-6 inline-block text-accent hover:underline font-medium transition-colors cursor-pointer"
                                         >
                                             {t('songs.emptyFavorites.browse')}
                                         </Link>
                                     </>
                                 ) : state.status === 'draft' ? (
                                     <>
-                                        <div className="mb-4 inline-flex items-center justify-center w-16 h-16 rounded-full bg-indigo-500/10 border border-indigo-500/20">
-                                            <FileText className="w-8 h-8 text-indigo-400/50" />
+                                        <div className="mb-4 inline-flex items-center justify-center w-16 h-16 rounded-panel bg-surface-2 border border-line">
+                                            <FileText className="w-8 h-8 text-fg-muted" />
                                         </div>
-                                        <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-2">{t('songs.emptyDrafts.title')}</h3>
-                                        <p className="text-gray-400 max-w-xs mx-auto">{t('songs.emptyDrafts.hint')}</p>
+                                        <h3 className="text-xl font-medium text-fg mb-2">{t('songs.emptyDrafts.title')}</h3>
+                                        <p className="text-fg-muted max-w-xs mx-auto">{t('songs.emptyDrafts.hint')}</p>
                                         <Link
                                             href="/songs/add"
-                                            className="mt-6 inline-block text-indigo-400 hover:text-indigo-300 font-medium transition-colors cursor-pointer"
+                                            className="mt-6 inline-block text-accent hover:underline font-medium transition-colors cursor-pointer"
                                         >
                                             {t('songs.emptyDrafts.action')}
                                         </Link>
                                     </>
                                 ) : (
                                     <>
-                                        <div className="mb-4 inline-flex items-center justify-center w-16 h-16 rounded-full bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800">
-                                            <Search className="w-8 h-8 text-gray-600" />
+                                        <div className="mb-4 inline-flex items-center justify-center w-16 h-16 rounded-panel bg-surface-2 border border-line">
+                                            <Search className="w-8 h-8 text-fg-muted" />
                                         </div>
-                                        <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-2">{t('songs.noResults')}</h3>
-                                        <p className="text-gray-400 max-w-xs mx-auto">
+                                        <h3 className="text-xl font-medium text-fg mb-2">{t('songs.noResults')}</h3>
+                                        <p className="text-fg-muted max-w-xs mx-auto">
                                             {state.search
                                                 ? t('songs.noResultsSearch', { search: state.search })
                                                 : t('songs.noResultsFilter')}
@@ -263,7 +260,7 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
                                         {hasActiveFilters && (
                                             <button
                                                 onClick={handleResetFilters}
-                                                className="mt-6 text-red-500 hover:text-red-400 font-medium transition-colors"
+                                                className="mt-6 text-accent hover:underline font-medium transition-colors"
                                             >
                                                 {t('songs.clearFilters')}
                                             </button>
@@ -317,7 +314,9 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
                 title={t('song.delete.confirm.modalTitle')}
                 message={t('song.delete.confirm.message', { title: deleteTarget?.title || '' })}
                 isDeleting={isDeleting}
+                // The deleted song's row is gone: focus goes to the first song left in the list.
+                fallbackFocus={() => document.querySelector<HTMLElement>('[data-testid="song-list"] a')}
             />
-        </main>
+        </div>
     );
 }

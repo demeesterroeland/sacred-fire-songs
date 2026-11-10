@@ -2,100 +2,56 @@
 
 import { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { fetchCategoryTree } from '@/lib/taxonomyUtils';
-import { renderCategoryIcon } from '@/lib/iconUtils';
+import { fetchCategoryTree, type TaxonomyNode } from '@/lib/taxonomyUtils';
+import { sortCategories } from '@/lib/categoryOrder';
+import { useLocale } from '@/context/LocaleContext';
+import { formatCount } from '@/lib/format/count';
 import Link from 'next/link';
 import { Loader2 } from 'lucide-react';
 
-import { TagPill } from '@/components/ui/TagPill';
-
 const MOBILE_TAG_LIMIT = 4;
 
-function TagList({ tags }: { tags: { id: string; slug: string; emoji: string | null; name: string; song_count?: number }[] }) {
+/** Pressed / focus feedback is the only place the accent appears (Story 6.1.4 / G1.4, #388). */
+const PRESSED = 'active:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent';
+
+/** Tags as plain text links with a grey count: no coloured chips, no emoji. `gap-1` is the visible gap, because a space inside a flex link collapses; the space keeps the name "Air (3)" for screen readers. */
+function TagList({ tags }: { tags: TaxonomyNode[] }) {
+  const { t } = useLocale();
   const [expanded, setExpanded] = useState(false);
   const overflow = tags.length - MOBILE_TAG_LIMIT;
 
   return (
-    <div className="flex flex-wrap gap-1.5 md:gap-2 relative z-10 mt-auto">
+    <ul className="flex flex-wrap gap-x-3">
       {tags.map((tag, i) => (
-        <TagPill
-          key={tag.id}
-          label={tag.name}
-          categorySlug={tag.slug}
-          emoji={tag.emoji || undefined}
-          count={tag.song_count}
-          variant="badge"
-          href={`/songs?tag=${tag.slug}`}
-          className={!expanded && i >= MOBILE_TAG_LIMIT ? '!hidden md:!inline-flex' : ''}
-        />
+        <li key={tag.id} className={!expanded && i >= MOBILE_TAG_LIMIT ? 'hidden md:list-item' : ''}>
+          <Link
+            href={`/songs?tag=${tag.slug}`}
+            className={`inline-flex min-h-tap items-center gap-1 text-meta text-fg-muted hover:text-fg ${PRESSED}`}
+          >
+            {tag.name}
+            {tag.song_count !== undefined && ' '}
+            {tag.song_count !== undefined && (
+              <span data-testid="tag-count" className="tabular-nums text-fg-subtle">
+                {formatCount(tag.song_count)}
+              </span>
+            )}
+          </Link>
+        </li>
       ))}
       {overflow > 0 && !expanded && (
-        <button
-          onClick={() => setExpanded(true)}
-          className="md:hidden px-2 py-1 rounded-full bg-gray-300/50 dark:bg-gray-700/50 text-gray-600 dark:text-gray-300 text-[10px] font-medium border border-gray-400 dark:border-gray-600 hover:bg-gray-400 dark:hover:bg-gray-600 hover:text-gray-900 dark:hover:text-white transition-all relative z-10"
-        >
-          +{overflow} more
-        </button>
+        <li className="md:hidden">
+          <button
+            type="button"
+            onClick={() => setExpanded(true)}
+            className={`inline-flex min-h-tap items-center text-meta font-medium text-fg-muted hover:text-fg ${PRESSED}`}
+          >
+            {t('explore.categories.more', { count: overflow })}
+          </button>
+        </li>
       )}
-    </div>
+    </ul>
   );
 }
-
-const getColorClasses = (slug: string) => {
-  switch (slug) {
-    case 'the-elements':
-      return {
-        bg: 'hover:border-blue-500/40 shadow-blue-900/10',
-        icon: 'bg-blue-500/10 text-blue-500',
-        text: 'group-hover:text-blue-400',
-      };
-    case 'nature':
-      return {
-        bg: 'hover:border-green-500/40 shadow-green-900/10',
-        icon: 'bg-green-500/10 text-green-500',
-        text: 'group-hover:text-green-400',
-      };
-    case 'languages':
-      return {
-        bg: 'hover:border-purple-500/40 shadow-purple-900/10',
-        icon: 'bg-purple-500/10 text-purple-500',
-        text: 'group-hover:text-purple-400',
-      };
-    case 'lineage-tradition':
-      return {
-        bg: 'hover:border-amber-500/40 shadow-amber-900/10',
-        icon: 'bg-amber-500/10 text-amber-500',
-        text: 'group-hover:text-amber-400',
-      };
-    case 'medicine-healing':
-      return {
-        bg: 'hover:border-red-500/40 shadow-red-900/10',
-        icon: 'bg-red-500/10 text-red-500',
-        text: 'group-hover:text-red-400',
-      };
-    case 'spiritual-concepts':
-      return {
-        bg: 'hover:border-indigo-500/40 shadow-indigo-900/10',
-        icon: 'bg-indigo-500/10 text-indigo-500',
-        text: 'group-hover:text-indigo-400',
-      };
-    default:
-      return {
-        bg: 'hover:border-gray-300 dark:hover:border-gray-700',
-        icon: 'bg-gray-200 dark:bg-gray-800 text-gray-500',
-        text: 'group-hover:text-gray-900 dark:group-hover:text-white',
-      };
-  }
-};
-
-const CATEGORY_ORDER = [
-  'The Elements',
-  'Nature',
-  'Lineage & Tradition',
-  'Medicine & Healing',
-  'Spiritual Concepts',
-  'Languages',
-];
 
 export default function CategoryGrid() {
   const { data: tree = [], isLoading } = useQuery({
@@ -104,58 +60,28 @@ export default function CategoryGrid() {
     staleTime: 1000 * 60 * 60,
   });
 
-  const sortedTree = [...tree].sort((a, b) => {
-    const indexA = CATEGORY_ORDER.indexOf(a.name);
-    const indexB = CATEGORY_ORDER.indexOf(b.name);
-    if (indexA !== -1 && indexB !== -1) return indexA - indexB;
-    if (indexA !== -1) return -1;
-    if (indexB !== -1) return 1;
-    return a.name.localeCompare(b.name);
-  });
+  const sortedTree = sortCategories(tree);
 
   if (isLoading) {
     return (
       <div className="flex items-center justify-center py-20">
-        <Loader2 className="w-8 h-8 animate-spin text-gray-600" />
+        <Loader2 aria-hidden="true" className="size-8 motion-safe:animate-spin text-fg-subtle" />
       </div>
     );
   }
 
   return (
-    <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 md:gap-8">
-      {sortedTree.map((category) => {
-        const colors = getColorClasses(category.slug);
-        return (
-          <div key={category.id} className="category-card group flex flex-col h-full">
-            <div
-              className={`glass-panel relative p-4 md:p-6 rounded-2xl md:rounded-3xl border border-gray-200/50 dark:border-gray-800/50 transition-all h-full shadow-2xl ${colors.bg}`}
-            >
-              <div className="flex items-start justify-center mb-4 md:mb-6">
-                <div
-                  className={`category-icon w-10 h-10 md:w-14 md:h-14 rounded-xl md:rounded-2xl flex items-center justify-center transition-transform duration-300 ${colors.icon}`}
-                >
-                  {renderCategoryIcon(category.icon_name, category.emoji, 'w-6 h-6 md:w-8 md:h-8', 'text-2xl md:text-3xl')}
-                </div>
-              </div>
+    // Validation 4 (#388): two columns from md, like the song list on /songs. One line under every category.
+    <div data-testid="category-grid" className="grid grid-cols-1 border-t border-line md:grid-cols-2 md:gap-x-6">
+      {sortedTree.map((category) => (
+        <section key={category.id} className="border-b border-line py-2">
+          <Link href={`/songs?category=${category.slug}`} className={`group flex min-h-tap items-center ${PRESSED}`}>
+            <h3 className="text-row font-semibold text-fg group-active:text-accent">{category.name}</h3>
+          </Link>
 
-              <Link
-                href={`/songs?category=${category.slug}`}
-                className="before:absolute before:inset-0 z-0 block"
-              >
-                <h3 className={`text-base md:text-xl font-bold text-gray-900 dark:text-white mb-2 md:mb-3 transition-colors ${colors.text}`}>
-                  {category.name}
-                </h3>
-              </Link>
-
-              <p className="hidden md:block text-gray-400 text-sm mb-6 leading-relaxed relative z-0">
-                Explore songs related to {category.name.toLowerCase()}.
-              </p>
-
-              <TagList tags={category.children} />
-            </div>
-          </div>
-        );
-      })}
+          <TagList tags={category.children} />
+        </section>
+      ))}
     </div>
   );
 }

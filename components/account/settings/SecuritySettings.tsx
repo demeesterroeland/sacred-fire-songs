@@ -36,8 +36,8 @@ export default function SecuritySettings({ user }: SecuritySettingsProps) {
       setNewPassword("");
       setConfirmPassword("");
     } catch (error) {
-      const err = error as Error;
-      toast.error(err.message || t("settings.security.error"));
+      console.error('[settings]', error);
+      toast.error(t("settings.security.error"));
     } finally {
       setIsUpdating(false);
     }
@@ -86,14 +86,14 @@ export default function SecuritySettings({ user }: SecuritySettingsProps) {
         </h2>
 
         <div className="space-y-2">
-          <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">{t("settings.security.newPassword")}</label>
+          <label className="text-meta font-semibold text-fg-muted">{t("settings.security.newPassword")}</label>
           <div className="relative">
             <input
               type={showNewPassword ? "text" : "password"}
               placeholder="••••••••"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              className="w-full bg-slate-100/50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/10 px-4 py-3 pr-10 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:border-[#f45d1a] transition-all"
+              className="w-full bg-slate-100/50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/10 px-4 py-3 pr-10 rounded-xl text-gray-900 dark:text-white transition-all"
             />
             <button
               type="button"
@@ -107,14 +107,14 @@ export default function SecuritySettings({ user }: SecuritySettingsProps) {
         </div>
 
         <div className="space-y-2">
-          <label className="text-xs font-semibold text-gray-500 dark:text-slate-400 uppercase tracking-wider">{t("settings.security.confirmPassword")}</label>
+          <label className="text-meta font-semibold text-fg-muted">{t("settings.security.confirmPassword")}</label>
           <div className="relative">
             <input
               type={showConfirmPassword ? "text" : "password"}
               placeholder="••••••••"
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full bg-slate-100/50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/10 px-4 py-3 pr-10 rounded-xl text-gray-900 dark:text-white focus:outline-none focus:border-[#f45d1a] transition-all"
+              className="w-full bg-slate-100/50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/10 px-4 py-3 pr-10 rounded-xl text-gray-900 dark:text-white transition-all"
             />
             <button
               type="button"

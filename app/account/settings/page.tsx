@@ -1,6 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
-import { redirect } from "next/navigation";
-import AccountSettings, { parseSettingsTab } from "@/components/account/settings/AccountSettings";
+import GuestGate from "@/components/common/GuestGate";
+import AccountSettings from "@/components/account/settings/AccountSettings";
+import { parseSettingsTab } from "@/lib/account/settingsTabs";
 
 export default async function SettingsPage({
   searchParams,
@@ -13,7 +14,11 @@ export default async function SettingsPage({
 
   if (!user) {
     const next = initialTab === "profile" ? "/account/settings" : `/account/settings?tab=${initialTab}`;
-    redirect(`/auth/login?next=${encodeURIComponent(next)}`);
+    return (
+      <div className="flex-1 overflow-y-auto p-4">
+        <GuestGate feature="settings" next={next} />
+      </div>
+    );
   }
 
   // Fetch profile data

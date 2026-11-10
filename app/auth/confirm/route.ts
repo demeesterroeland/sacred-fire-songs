@@ -1,6 +1,8 @@
 import { createClient } from "@/lib/supabase/server";
 import { type EmailOtpType } from "@supabase/supabase-js";
 import { type NextRequest, NextResponse } from "next/server";
+import { safeNextPath } from "@/lib/auth/safeNext";
+import { authErrorPath, knownAuthCode } from "@/lib/auth/notice";
 
 export async function GET(request: NextRequest) {
     const { searchParams, origin } = new URL(request.url);
@@ -26,10 +28,20 @@ export async function GET(request: NextRequest) {
     const supabase = await createClient();
 
     // Helper to ensure we have a valid absolute URL for redirection
+    // `next` is untrusted: only same-site paths survive (absolute same-origin URLs are reduced to their path).
     const getRedirectUrl = (baseUrl: string) => {
-        if (next!.startsWith("http")) return next!;
+        let target = next!;
+        if (/^https?:\/\//i.test(target)) {
+            try {
+                const abs = new URL(target);
+                if (abs.origin !== origin && abs.origin !== baseUrl) return `${baseUrl}/`;
+                target = abs.pathname + abs.search + abs.hash;
+            } catch {
+                return `${baseUrl}/`;
+            }
+        }
         // Ensure 'next' starts with /
-        const path = next!.startsWith("/") ? next : `/${next}`;
+        const path = safeNextPath(target.startsWith("/") ? target : `/${target}`);
         return `${baseUrl}${path}`;
     };
 
@@ -52,7 +64,7 @@ export async function GET(request: NextRequest) {
             return NextResponse.redirect(getRedirectUrl(baseUrl));
         }
         console.error(`[Auth Confirm] Code exchange error: ${error.message}`);
-        return NextResponse.redirect(new URL(`/auth/error?error=${encodeURIComponent(error.message)}`, request.url));
+        return NextResponse.redirect(new URL(authErrorPath(knownAuthCode(error)), request.url));
     }
 
     // 2. Handle OTP/Token Hash Verification
@@ -67,14 +79,12 @@ export async function GET(request: NextRequest) {
             return NextResponse.redirect(getRedirectUrl(baseUrl));
         }
         console.error(`[Auth Confirm] OTP verification error: ${error.message}`);
-        return NextResponse.redirect(new URL(`/auth/error?error=${encodeURIComponent(error.message)}`, request.url));
+        return NextResponse.redirect(new URL(authErrorPath(knownAuthCode(error)), request.url));
     }
 
     // 3. Fallback: No valid params found
     const availableParams = Array.from(searchParams.keys()).join(", ");
     console.error(`[Auth Confirm] Missing params. Available: ${availableParams}`);
 
-    return NextResponse.redirect(
-        new URL(`/auth/error?error=No token, code, or type. Params: ${availableParams}`, request.url),
-    );
+    return NextResponse.redirect(new URL(authErrorPath("missing_params"), request.url));
 }

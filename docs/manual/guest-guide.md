@@ -1,16 +1,36 @@
 # Guest Guide (draft)
 
-**Version:** 0.1 | **Date:** Nov 4, 2026
+**Version:** 0.23 | **Date:** Nov 9, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.23 | Nov 9, 2026 | The ☰ menu's Library section lists the same tabs as the Library page; tags under a song title stay on one line with "…" when there are more. |
+| 0.22 | Nov 7, 2026 | "recording" is now **recording**; Terms Of Service and Privacy Policy pages (a draft until approved). |
+| 0.21 | Nov 6, 2026 | Practice opens on the **Listen** tab for guests; under **Public recordings** you can play recordings that singers made public with their consent (listen only); a link to a public recording opens that recording on the Listen tab, highlighted (UX v2, #405). |
+| 0.20 | Nov 6, 2026 | Song page: songs with several versions have a switch under the grey lines; a link can open a given version (UX v2, #395). |
+| 0.19 | Nov 6, 2026 | Home now opens with a short welcome, a search field and the five newest songs under **Recently added** (UX v2, #412). Signed-in members still see Your library. |
+| 0.18 | Nov 6, 2026 | Song page: **Auto-scroll** (▶) and **⋯** reading tools in the same toolbar (UX v2, #394). |
+| 0.17 | Nov 6, 2026 | Sign-in and sign-up pages have a **Back** link instead of a ✕; it returns to the page you came from, else Home (UX v2, #409). |
+| 0.16 | Nov 5, 2026 | The player bar is calm (plain background, orange only on play) and says *Playing* or *Paused* with what plays; the Listen tab shows only the providers the song has (UX v2, #397). |
+| 0.15 | Nov 5, 2026 | Song page: a bar at the bottom with Practice, Playlist and Like; the ⋮ menu keeps Share (UX v2, #393). |
+| 0.14 | Nov 5, 2026 | Search field: recent searches and category chips appear when you tap it (UX v2, #413). |
+| 0.13 | Nov 5, 2026 | Add Song as a guest: a banner says saving needs an account; your draft is kept when you sign in (UX v2, #411). |
+| 0.12 | Nov 5, 2026 | Bottom bar is Home · Search · Library; Songs and Create are gone from it (UX v2, #408). |
+| 0.11 | Nov 5, 2026 | Home categories: grey tiles, tags as plain text with a grey song count (UX v2, #388). |
+| 0.10 | Nov 5, 2026 | Song lists: one row per song with a grey meta line (UX v2, #386). |
+| 0.9 | Nov 5, 2026 | The player bar appears only after you press play (UX v2, #396). |
+| 0.8 | Nov 5, 2026 | Renamed to Practice (menu, Listen / Record tabs). |
+| 0.7 | Nov 5, 2026 | Members-only screens now show one locked preview with the reason and a **Sign in** button that brings you back (Story 6.1.26). |
+| 0.6 | Nov 5, 2026 | Added "A link that does not work" (real 404 page). |
+| 0.3 | Nov 5, 2026 | Song page: `Chords · A− · A+` toolbar (UX v2, #390). |
+| 0.2 | Nov 5, 2026 | Song page: meta on two grey lines (UX v2, #391). |
 | 0.1 | Nov 4, 2026 | First draft from the UX research. |
 
 ## What Sacred Fire Songs is
 
-A songbook of medicine and ceremony songs with lyrics and chords, for singing together in a circle. Anyone can read and listen. With a free account you can also save favourites, make playlists, add songs and record your own practice takes.
+A songbook of medicine and ceremony songs with lyrics and chords, for singing together in a circle. Anyone can read and listen. With a free account you can also save favourites, make playlists, add songs and record your own practice recordings.
 
 ## Finding your way
 
@@ -18,40 +38,48 @@ The screen has three fixed parts:
 
 - **Top bar:** ☰ menu (left), the search field ("Search 200+ songs") with a filter button, and **Sign In** (right).
 - **Content** in the middle.
-- **Bottom bar:** **Home**, **Songs**, **Library**, **Create**.
+- **Bottom bar:** **Home**, **Search**, **Library**. **Search** opens the song list and puts the cursor in the search field.
 
-The ☰ menu repeats the main places (Home, Songs, Playlists, Favorites, Drafts, Recently Viewed, Add Song, New Playlist) and has the **language switch** at the bottom.
+The ☰ menu repeats the main places (Home, Songs; under Library the same tabs as the Library page: Playlists, Smart, History, New, Artists; Add Song, New Playlist) and has the **language switch** at the bottom.
 
 ## Finding a song
 
-1. **Browse by category** on Home: groups such as *The Elements* (Air, Earth, Fire, Water), *Nature*, *Lineage & Tradition*, *Medicine & Healing*. The number on each chip is how many songs it holds. "+3 more" opens the rest.
-2. **Search:** tap the search field and type a title, a line of the lyrics, an author or a category. Accents do not matter ("aguita" finds "Agüita").
-3. **Filters:** the slider button in the search field opens *Search options*: sort order, content type (songs with chords / with melody) and category & tag filters. Tap **Show results**.
-4. **Songs** in the bottom bar lists all songs A–Z.
-5. **Library → Artists** lists every author with their number of songs.
+1. **Start on Home:** a one-line welcome says what the site is, the search field recordings you straight to matching songs (tap it to see your recent searches and the main categories), and **Recently added** lists the five newest songs; **All songs** opens the full list.
+2. **Browse by category** on Home: groups such as *The Elements* (Air, Earth, Fire, Water), *Nature*, *Lineage & Tradition*, *Medicine & Healing*. Each tag is a plain link; the grey number after it is how many songs it holds. "+3 more" shows the rest.
+3. **Search:** tap the search field and type a title, a line of the lyrics, an author or a category. Accents do not matter ("aguita" finds "Agüita"). Before you type, the field offers your last 5 searches (tap one to repeat it, **✕** removes one, **Clear all** removes them all; they are kept on this device only) and the main categories as grey buttons (tap one to show only those songs; tap it again to remove the filter). Tap outside the list or press Esc to close it.
+4. **Filters:** the slider button in the search field opens *Search options*: sort order, content type (songs with chords / with melody) and category & tag filters. Tap **Show results**.
+5. **Search** in the bottom bar lists all songs A–Z and is ready for typing. Each row shows the title, a grey line *author · category · language* and the key on the right; tap the row to open the song.
+6. **Library → Artists** lists every author with their number of songs.
 
 ## Reading a song
 
-- The title is at the top; the coloured chips show author, category, tradition and language.
-- **Key**, **Capo** and **Tuning** are shown above the lyrics.
+- The title is at the top. Under it, one grey line shows the author and the tags (category, tradition, language); tap it to see them all as links.
+- A second line shows **Key**, **Capo** and **Tuning**, e.g. `Key E · Capo 3 · Standard`.
+- If the song exists in more than one version (for example *Original* and *Simplified*), a grey switch with the version names appears under those lines; tap a name to read that version. The app opens the first version each time. Songs with one version show no switch.
+- Under those lines: **Chords** switches the chords on or off, **A−** / **A+** make the text smaller or larger. The app remembers your choice on this device.
+- **▶** scrolls the song for you, hands free; touch the screen to pause it, or press **⏸**. The **⋮** menu (top right) sets the scroll speed (five steps) and has the **Screen stays on** switch. While the scroll runs the toolbar stays under the title. A small sun next to **⋯** means the screen stays on while you sing.
 - Chords are printed above the word where they change.
-- ⋮ (top right) opens the song menu: like, share, add to playlist, recordings. Actions that need an account ask you to sign in.
+- A bar at the bottom of the song has **Practice**, **Playlist** and **Like**. It slides away when you scroll down and comes back when you scroll up. **Playlist** and **Like** need an account and ask you to sign in.
+- ⋮ (top right) opens the song menu: **Share Song**.
 
 ## Listening to the song
 
-Open ⋮ → **Recordings** to open the **Rehearsal Space**.
+Tap **Practice** in the bar at the bottom of the song to open the Practice panel.
 
-- **Reference Tracks** tab: choose **YouTube**, **SoundCloud** or **Spotify** (when the song has that link) and play it inside the app.
-- A small **player bar** stays above the bottom bar so you can keep listening while reading. Use ⟲ / ⟳ to jump back or forward, ✕ to stop. **(planned: the bar will only appear after you press play)**
+- **Listen** tab: choose **YouTube**, **SoundCloud** or **Spotify** (when the song has that link) and play it inside the app.
+- Under **Public recordings** on the same tab you can play the recordings that singers have made public for this song (listen only: no download, sharing or reordering). If there are none yet you see *No public recordings of this song yet.*
+- A small **player bar** (plain background, only the play button is orange; it says *Playing* or *Paused* and what plays) appears above the bottom bar once you press play (a song page never shows it before), so you can keep listening while reading. Use ⟲ / ⟳ to jump back or forward, ✕ to stop. Leaving the song page stops the music.
 - Tip: wear headphones if you sing along while recording later.
 
-The **Voice Recorder** tab shows what members can do and a **Sign In to Record** button.
+The **Record** tab shows what members can do and a **Sign In to Record** button.
 
 ## Things that need an account
 
-Favourites, playlists, recently viewed, adding or editing songs, recording, account settings. You can open the **Add Song** form and start typing as a guest; you are asked to sign in when you save **(verify that the draft is kept after sign-in)**.
+Favourites, playlists, recently viewed, adding or editing songs, recording, account settings, singer profiles. Each of these screens shows the same grey preview with a lock, one sentence saying why it is locked and a **Sign in** button; after signing in you land on the screen you came from. You can listen to public recordings that the singer agreed to publish (Practice → Listen → **Public recordings**); recording, sharing and downloading need an account. You can open the **Add Song** form and start typing as a guest: a grey box at the top says **Draft now — sign in to save**: saving a song needs an account. Your draft stays on this device, so after you sign in (from the box or when you press save) you are back on the form with your text still there.
 
 ## Creating an account
+
+The sign-in and sign-up pages have a **Back** link at the top left. It recordings you back to the page you came from (for example the song), or to Home if you opened the page directly.
 
 1. Tap **Sign In** → **Join the Circle** (or go to *Create Account*).
 2. Enter e-mail and a password (twice) → **Create Account**.
@@ -71,6 +99,10 @@ The site can be installed on your phone's home screen ("Add to Home Screen" / "I
 ## No internet?
 
 If you lose connection you see **You're offline**. The page reloads by itself when you are back online, or tap **Try again**.
+
+## A link that does not work
+
+If a web address does not exist, you see **Page not found** with a **Go home** button. You are not sent to the sign-in page. Pages that need an account (for example Account settings) still ask you to sign in.
 
 ## Language
 

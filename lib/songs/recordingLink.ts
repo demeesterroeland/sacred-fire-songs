@@ -25,3 +25,16 @@ export function songRecordingPath(compositionId: string, recordingId: string): s
 export function parseRecordingParam(value: string | null | undefined): string | null {
   return value && UUID.test(value) ? value : null;
 }
+
+/** The Practice tab that lists the takes: Record for a member, Listen for a guest (who cannot record). */
+export function takeListTab(signedIn: boolean): 'recorder' | 'media' {
+  return signedIn ? 'recorder' : 'media';
+}
+
+/**
+ * The Practice tab a `?recording=` link opens. A guest lands on Listen when the linked take is
+ * there to hear; otherwise (no such take) on Record, which asks them to sign in.
+ */
+export function linkedTakeTab(signedIn: boolean, found: boolean): 'recorder' | 'media' {
+  return signedIn || !found ? 'recorder' : 'media';
+}

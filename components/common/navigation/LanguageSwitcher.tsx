@@ -30,8 +30,8 @@ function Wick({ lit, igniting }: { lit: boolean; igniting?: boolean }) {
       aria-hidden="true"
       className={`inline-block w-2 h-2 rounded-full shrink-0 transition-colors ${
         lit
-          ? `bg-[#f45d1a] shadow-[0_0_0_3px_rgba(244,93,26,0.18),0_0_10px_rgba(244,93,26,0.6)] ${igniting ? 'ember-ignite' : ''}`
-          : 'border border-gray-400 dark:border-gray-600 group-data-[active=true]:border-[#f45d1a]/70'
+          ? `bg-accent ${igniting ? 'opacity-80' : ''}`
+          : 'border border-line-strong'
       }`}
     />
   );
@@ -159,7 +159,7 @@ export function LanguageSwitcher({
         aria-controls={open ? listId : undefined}
         onClick={() => (open ? close(false) : openList())}
         onKeyDown={onTriggerKeyDown}
-        className={`inline-flex items-center rounded-lg font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f45d1a]/60 ${triggerClass} ${className}`}
+        className={`inline-flex items-center rounded-control font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus ${triggerClass} ${className}`}
       >
         {variant === 'full' ? (
           <Globe className="w-4 h-4 shrink-0" aria-hidden="true" />
@@ -189,7 +189,7 @@ export function LanguageSwitcher({
             aria-activedescendant={optionId(ordered[activeIndex])}
             onKeyDown={onListKeyDown}
             style={{ left: position.left, width: position.width, top: position.top, bottom: position.bottom }}
-            className="fixed z-[70] p-1.5 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-[0_16px_40px_-16px_rgba(0,0,0,0.55)] focus:outline-none"
+            className="fixed z-[70] p-1.5 rounded-panel bg-surface border border-line shadow-sheet focus:outline-none"
           >
             {ordered.map((loc, index) => {
               const selected = loc === locale;
@@ -203,12 +203,12 @@ export function LanguageSwitcher({
                   data-active={index === activeIndex}
                   onPointerMove={() => setActiveIndex(index)}
                   onClick={() => choose(loc)}
-                  className={`group flex items-center gap-3 px-3 py-2 rounded-lg text-sm cursor-pointer select-none ${
-                    index === activeIndex ? 'bg-gray-100 dark:bg-gray-800' : ''
+                  className={`group flex items-center gap-3 px-3 py-2 rounded-control text-meta cursor-pointer select-none ${
+                    index === activeIndex ? 'bg-surface-2' : ''
                   } ${
                     selected
-                      ? 'font-semibold text-gray-900 dark:text-white'
-                      : 'text-gray-600 dark:text-gray-300'
+                      ? 'font-semibold text-fg'
+                      : 'text-fg-muted'
                   }`}
                 >
                   <Wick lit={selected} igniting={igniting === loc} />

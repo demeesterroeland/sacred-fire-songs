@@ -1,5 +1,6 @@
 "use client";
 
+import { returnFocusToTake } from "@/lib/a11y/returnFocusToTake";
 import React, { useState, useEffect } from "react";
 import {
   Dialog,
@@ -18,6 +19,7 @@ import {
 import { useLocale } from "@/context/LocaleContext";
 import { toast } from "sonner";
 import { Mic, Search, Music, Loader2, Check, UserX } from "lucide-react";
+import { actionErrorMessage } from '@/lib/errors/actionError';
 
 interface RecordingAttributionModalProps {
   recording: UserRecording | null;
@@ -116,7 +118,7 @@ export default function RecordingAttributionModal({
         onAttributionUpdated?.();
         onClose();
       } else {
-        toast.error(res.error || t("recording.attribution.error"));
+        toast.error(actionErrorMessage(res.error, t, 'recording.attribution.error'));
       }
     } catch {
       toast.error(t("recording.attribution.error"));
@@ -139,7 +141,7 @@ export default function RecordingAttributionModal({
         onAttributionUpdated?.();
         onClose();
       } else {
-        toast.error(res.error || t("recording.attribution.error"));
+        toast.error(actionErrorMessage(res.error, t, 'recording.attribution.error'));
       }
     } catch {
       toast.error(t("recording.attribution.error"));
@@ -150,7 +152,7 @@ export default function RecordingAttributionModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-md bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-3xl p-6 shadow-2xl">
+      <DialogContent onCloseAutoFocus={returnFocusToTake(recording.id)} className="max-w-md bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-3xl p-6 shadow-2xl">
         <DialogHeader className="text-left space-y-1">
           <DialogTitle className="text-lg font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
             <Mic className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
@@ -185,7 +187,7 @@ export default function RecordingAttributionModal({
                       {selectedUser.full_name || selectedUser.email}
                     </span>
                     {selectedUser.is_musician && (
-                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400">
+                      <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-caption font-semibold bg-surface-2 text-fg-muted">
                         <Music className="w-3 h-3" />
                         {t("recording.attribution.badgeVerified")}
                       </span>
@@ -213,7 +215,8 @@ export default function RecordingAttributionModal({
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder={t("recording.attribution.searchPlaceholder")}
-                    className="w-full pl-9 pr-8 py-2.5 bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-xl text-sm outline-none focus:border-indigo-500 text-gray-900 dark:text-white"
+                    aria-label={t("recording.attribution.searchPlaceholder")}
+                    className="w-full pl-9 pr-8 py-2.5 bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-xl text-sm text-gray-900 dark:text-white"
                   />
                   {isSearching && (
                     <Loader2 className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 animate-spin" />
@@ -239,7 +242,7 @@ export default function RecordingAttributionModal({
                               {user.full_name || user.email}
                             </span>
                             {user.is_musician && (
-                              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-[10px] font-bold bg-amber-500/10 text-amber-600 dark:text-amber-400">
+                              <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-caption font-semibold bg-surface-2 text-fg-muted">
                                 <Music className="w-2.5 h-2.5" />
                                 {t("recording.attribution.badgeVerified")}
                               </span>
@@ -270,7 +273,8 @@ export default function RecordingAttributionModal({
                 value={customName}
                 onChange={(e) => setCustomName(e.target.value)}
                 placeholder={t("recording.attribution.namePlaceholder")}
-                className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-xl text-sm outline-none focus:border-indigo-500 text-gray-900 dark:text-white"
+                aria-label={t("recording.attribution.namePlaceholder")}
+                className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-xl text-sm text-gray-900 dark:text-white"
               />
             </div>
             <div>
@@ -282,7 +286,8 @@ export default function RecordingAttributionModal({
                 value={customEmail}
                 onChange={(e) => setCustomEmail(e.target.value)}
                 placeholder={t("recording.attribution.emailPlaceholder")}
-                className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-xl text-sm outline-none focus:border-indigo-500 text-gray-900 dark:text-white"
+                aria-label={t("recording.attribution.emailPlaceholder")}
+                className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-xl text-sm text-gray-900 dark:text-white"
               />
             </div>
           </div>

@@ -1,50 +1,43 @@
 import { createClient } from '@/lib/supabase/server';
-import { redirect } from 'next/navigation';
 import Link from 'next/link';
-import { Clock, Music } from 'lucide-react';
+import { Clock } from 'lucide-react';
+import { ListRow } from '@/components/ui/list-row';
+import { songRowMeta } from '@/lib/songs/songMeta';
 import { getRecentlyViewedLight } from '@/lib/songs/serverQueries';
 import { getServerT } from '@/lib/i18n/server';
+import GuestGate from '@/components/common/GuestGate';
+import { LibrarySubpageHeading } from '@/components/library/LibrarySubpageHeading';
 
 export default async function RecentlyViewedPage() {
     const t = await getServerT();
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 
-    if (!user) redirect('/auth/login?next=/library/recently-viewed');
+    if (!user) return <GuestGate feature="history" next="/library/recently-viewed" />;
 
     const songs = await getRecentlyViewedLight(user.id, 50);
 
     return (
         <div>
-            <div className="flex items-center gap-2 mb-4">
-                <Clock className="w-4 h-4 text-gray-500" />
-                <h2 className="text-sm font-bold text-gray-500 dark:text-gray-400 uppercase tracking-widest">{t('recentlyViewed.section')}</h2>
-                <span className="text-xs text-gray-600 ml-1">({songs.length})</span>
-            </div>
+            <LibrarySubpageHeading icon={Clock} title={t('library.tabs.history')} count={songs.length} />
 
             {songs.length === 0 ? (
-                <p className="text-sm text-gray-600 italic py-8 text-center">
+                <p className="text-meta text-fg-muted italic py-8 text-center">
                     {t('recentlyViewed.emptyWithAction')}
                 </p>
             ) : (
-                <div className="grid grid-cols-1 gap-2">
-                    {songs.map((song) => (
-                        <Link
-                            key={song.id}
-                            href={`/songs/${song.id}`}
-                            className="flex items-center gap-3 p-3 rounded-xl bg-gray-100/30 dark:bg-gray-900/30 border border-gray-200/50 dark:border-gray-800/50 hover:bg-gray-200/50 dark:hover:bg-gray-800/50 hover:border-gray-300/50 dark:hover:border-gray-700/50 transition-all group"
-                        >
-                            <div className="w-9 h-9 rounded-lg bg-gray-200/80 dark:bg-gray-800/80 flex items-center justify-center shrink-0 group-hover:bg-gray-300/80 dark:group-hover:bg-gray-700/80 transition-colors">
-                                <Music className="w-4 h-4 text-gray-500" />
-                            </div>
-                            <div className="min-w-0 flex-1">
-                                <p className="text-sm font-semibold text-gray-800 dark:text-gray-200 truncate group-hover:text-gray-950 dark:group-hover:text-white transition-colors">{song.title}</p>
-                                {song.author && (
-                                    <p className="text-xs text-gray-500 truncate">{song.author}</p>
-                                )}
-                            </div>
-                        </Link>
-                    ))}
+                <div className="border-t border-line" data-testid="song-rows">
+                  {songs.map((song) => (
+                    <ListRow
+                      key={song.id}
+                      asChild
+                      title={song.title}
+                      meta={songRowMeta(song.author, [], t)}
+                      className="px-0"
+                    >
+                      <Link href={`/songs/${song.id}`} data-testid="song-row" />
+                    </ListRow>
+                  ))}
                 </div>
             )}
         </div>

@@ -30,6 +30,18 @@ describe('mapCompositionToSong', () => {
     expect(song.isFavorite).toBe(false);
   });
 
+  it('shows the first (oldest) version on the card, whatever order the rows arrive in (UXA-049)', () => {
+    const song = mapCompositionToSong({
+      ...baseItem,
+      song_versions: [
+        { id: 'v2', created_at: '2026-02-01T00:00:00Z', key: 'G', content_chordpro: '[G]Later', melody_notation: '' },
+        { id: 'v1', created_at: '2026-01-01T00:00:00Z', key: 'Am', content_chordpro: '[Am]First', melody_notation: '' },
+      ],
+    });
+    expect(song.songKey).toBe('Am');
+    expect(song.content).toBe('[Am]First');
+  });
+
   it('handles missing author', () => {
     const song = mapCompositionToSong({ ...baseItem, original_author: null });
     expect(song.author).toBe('');

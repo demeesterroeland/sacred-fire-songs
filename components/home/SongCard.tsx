@@ -1,25 +1,21 @@
 'use client';
 
 import Link from 'next/link';
-import { Music, Guitar, Heart, Mic, Trash2 } from 'lucide-react';
-import { TagPill } from '@/components/ui/TagPill';
-import { AuthorPill } from '@/components/ui/AuthorPill';
-import { parseArtists } from '@/lib/songs/artistUtils';
+import { Heart, Lock, Trash2 } from 'lucide-react';
+import { MetaLine } from '@/components/ui/meta-line';
+import { songRowMeta } from '@/lib/songs/songMeta';
 import { cn } from '@/lib/utils';
 import { useToggleFavorite } from '@/hooks/useToggleFavorite';
+import GuestGateSheet from '@/components/common/GuestGateSheet';
 import { PlaylistPicker } from '@/components/playlists/PlaylistPicker';
-
 import { useLocale } from '@/context/LocaleContext';
+
 interface SongCardProps {
     id: string;
     title: string;
     author: string;
     songKey?: string | null;
-    accentColor?: string;
     isPublic?: boolean;
-    hasChords?: boolean;
-    hasMelody?: boolean;
-    hasPersonalRecording?: boolean;
     isFavorite?: boolean;
     userId?: string;
     canDelete?: boolean;
@@ -32,187 +28,100 @@ interface SongCardProps {
     }[];
 }
 
+/**
+ * Song list row (Story 6.1.2 / G1.2, #386): title, one grey meta line
+ * `Author · Category · Language` and a key badge on the right. No coloured
+ * chips, no glow, no accent bar. The whole row opens the song; heart and
+ * add-to-playlist stay separate 44 px targets.
+ */
 export default function SongCard({
     id,
     title,
     author,
     songKey,
-    accentColor = 'red',
     isPublic = true,
-    hasChords = false,
-    hasMelody = false,
-    hasPersonalRecording = false,
     isFavorite = false,
     userId,
     canDelete = false,
     onDelete,
-    categories = []
+    categories = [],
 }: SongCardProps) {
     const { t } = useLocale();
-    const { isFav, handleToggle } = useToggleFavorite(id, isFavorite);
-
-    // Mapping color name to Tailwind class
-    const borderColors: Record<string, string> = {
-        red: 'bg-red-500',
-        orange: 'bg-orange-500',
-        yellow: 'bg-yellow-500',
-        blue: 'bg-blue-500',
-        purple: 'bg-purple-500',
-        emerald: 'bg-emerald-500',
-        indigo: 'bg-indigo-500',
-        amber: 'bg-amber-500',
-        slate: 'bg-slate-500',
-    };
-
-    const textColors: Record<string, string> = {
-        red: 'group-hover:text-red-400',
-        orange: 'group-hover:text-orange-400',
-        yellow: 'group-hover:text-yellow-400',
-        blue: 'group-hover:text-blue-400',
-        purple: 'group-hover:text-purple-400',
-        emerald: 'group-hover:text-emerald-400',
-        indigo: 'group-hover:text-indigo-400',
-        amber: 'group-hover:text-amber-400',
-    };
+    const { isFav, handleToggle, signInGate } = useToggleFavorite(id, isFavorite);
 
     return (
-        <div className="relative self-start w-full group">
-            <div className={cn(
-                'relative p-5 rounded-2xl transition-all duration-300 backdrop-blur-sm group overflow-hidden flex flex-col justify-between active:scale-[0.98] cursor-pointer',
-                isPublic
-                    ? 'bg-white/60 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-800 hover:border-gray-300 dark:hover:border-white/10 hover:bg-gray-100/60 dark:hover:bg-gray-800/60'
-                    : 'bg-gray-100/60 dark:bg-black/40 border border-dashed border-gray-300 dark:border-white/10 hover:bg-gray-200/60 dark:hover:bg-black/60 opacity-75 hover:opacity-100'
-            )}>
-                {/* Accent Border */}
-                <div
-                    className={`absolute left-0 top-0 bottom-0 w-1 ${borderColors[accentColor] || borderColors.red} rounded-l-2xl opacity-50 group-hover:opacity-100 transition-all duration-300 transform group-hover:scale-y-110`}
-                />
+        <div
+            data-testid="song-row"
+            className={cn(
+                'group relative flex min-h-tap items-center gap-1 border-b border-line py-2 pl-4 pr-1 transition-colors hover:bg-surface',
+                !isPublic && 'border-dashed'
+            )}
+        >
+            {/* Stretched link: the whole row opens the song, without nesting buttons inside it. */}
+            <Link href={`/songs/${id}`} className="absolute inset-0 z-10" aria-label={t('songCard.view', { title })} />
 
-                {/* Stretched Link: covers the whole card without nesting tags */}
-                <Link href={`/songs/${id}`} className="absolute inset-0 z-10" aria-label={t('songCard.view', { title })} />
-
-                <div className="relative flex justify-between items-start z-20 w-full mb-4 pointer-events-none">
-                    <div className="flex-1 min-w-0 pr-20">
-                        <div className="flex items-center gap-2 mb-1">
-                            <h3 className={`text-base font-bold text-gray-900 dark:text-gray-100 leading-tight ${textColors[accentColor] || textColors.red} transition-colors group-hover:translate-x-1 duration-300 truncate`}>
-                                {title}
-                            </h3>
-                            {!isPublic && (
-                                <Link
-                                    href="/songs?status=draft"
-                                    title={t('songs.filter.drafts.title')}
-                                    className="pointer-events-auto text-[9px] font-black bg-gray-200 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200 hover:border-gray-500 px-1.5 py-0.5 rounded border border-gray-400/50 dark:border-gray-700 uppercase tracking-tighter shrink-0 transition-colors"
-                                >
-                                    Draft
-                                </Link>
-                            )}
-                        </div>
-                        <div className="mb-3 flex flex-wrap items-center gap-1.5 pointer-events-auto">
-                            {(parseArtists(author).length > 0 ? parseArtists(author) : ['Traditional']).map((artistName, idx) => (
-                                <AuthorPill
-                                    key={idx}
-                                    author={artistName}
-                                    href={`/songs?artist=${encodeURIComponent(artistName)}`}
-                                />
-                            ))}
-                        </div>
-
-                        {/* Categories/Tags */}
-                        <div className="flex flex-wrap items-center gap-1.5 pointer-events-auto">
-                            {categories
-                                .filter((cat) => cat.parent !== 'Artists' && cat.name !== 'Artists')
-                                .map((cat, idx) => (
-                                    <TagPill
-                                        key={idx}
-                                        label={cat.name}
-                                        categorySlug={cat.slug}
-                                        emoji={cat.emoji}
-                                        variant="badge"
-                                        href={`/songs?tag=${encodeURIComponent(cat.slug)}`}
-                                    />
-                                ))}
-                        </div>
-                    </div>
-
-                    <div className="flex flex-col items-end gap-1.5 shrink-0 ml-4 pointer-events-auto">
-                        {hasChords && (
-                            <Link
-                                href="/songs?chords=true"
-                                className="text-amber-500 hover:text-amber-400 hover:scale-110 transition-all mb-1"
-                                title={t('songs.filter.chords.title')}
-                            >
-                                <Guitar className="w-3.5 h-3.5" />
-                            </Link>
-                        )}
-                        {hasMelody && (
-                            <Link
-                                href="/songs?melody=true"
-                                className="text-emerald-400 hover:text-emerald-300 hover:scale-110 transition-all mb-1"
-                                title={t('songs.filter.melody.title')}
-                            >
-                                <Music className="w-3.5 h-3.5" />
-                            </Link>
-                        )}
-                        {hasPersonalRecording && (
-                            <Link
-                                href="/songs?myRecordings=true"
-                                className="text-violet-400 hover:text-violet-300 hover:scale-110 transition-all mb-1"
-                                title={t('songs.filter.recordings.title')}
-                            >
-                                <Mic className="w-3.5 h-3.5" />
-                            </Link>
-                        )}
-                        {songKey && (
-                            <div className="text-[10px] font-mono text-gray-400">
-                                <span className="text-gray-600 uppercase text-[8px] tracking-wider mr-1">{t('songForm.field.key')}</span>
-                                {songKey}
-                            </div>
-                        )}
-                    </div>
+            <div className="min-w-0 flex-1 pr-2">
+                <div className="flex items-center gap-2">
+                    <h3 className={cn('truncate text-row font-medium', isPublic ? 'text-fg' : 'text-fg-subtle')}>{title}</h3>
+                    {!isPublic && (
+                        <span
+                            className="inline-flex shrink-0 items-center text-fg-muted"
+                            title={t('song.visibility.private')}
+                            data-testid="song-row-private"
+                        >
+                            <Lock className="size-3.5" aria-hidden />
+                            <span className="sr-only">{t('song.visibility.private')}</span>
+                        </span>
+                    )}
                 </div>
+                <MetaLine items={songRowMeta(author, categories, t)} className="mt-0.5" data-testid="song-row-meta" />
             </div>
 
-            {/* Action buttons — bottom-right */}
-            <div className="absolute bottom-3 right-3 z-20 flex items-center gap-1">
+            {songKey && (
+                <span className="shrink-0 rounded-control border border-line px-1.5 font-mono text-caption text-fg-muted" data-testid="song-row-key">
+                    <span aria-hidden>{songKey}</span>
+                    <span className="sr-only">{t('song.meta.key', { key: songKey })}</span>
+                </span>
+            )}
+
+            <div className="relative z-20 flex shrink-0 items-center">
                 {canDelete && onDelete && (
                     <button
+                        type="button"
                         onClick={(e) => {
                             e.preventDefault();
                             e.stopPropagation();
                             onDelete();
                         }}
-                        className="p-1 rounded-full text-gray-400 opacity-0 group-hover:opacity-100 hover:text-red-500 hover:bg-red-500/10 transition-all duration-200"
+                        className="inline-flex size-tap items-center justify-center rounded-pill text-fg-subtle opacity-0 transition-opacity hover:text-danger focus-visible:opacity-100 group-hover:opacity-100 [@media(hover:none)]:opacity-100"
+                        aria-label={t('songCard.delete')}
                         title={t('songCard.delete')}
                     >
-                        <Trash2 className="w-3.5 h-3.5" />
+                        <Trash2 className="h-4 w-4" />
                     </button>
                 )}
                 {userId && (
                     <PlaylistPicker
                         compositionId={id}
                         userId={userId}
+                        triggerClassName="inline-flex size-tap items-center justify-center rounded-pill text-fg-subtle hover:text-fg"
                         iconClassName="w-4 h-4"
                     />
                 )}
                 <button
+                    type="button"
                     onClick={handleToggle}
+                    aria-pressed={isFav}
                     aria-label={isFav ? t('songCard.removeFavorite') : t('songCard.addFavorite')}
                     className={cn(
-                        'p-1 rounded-full transition-all duration-300',
-                        isFav
-                            ? 'text-amber-400 heart-glow'
-                            : 'text-gray-300 dark:text-gray-700 hover:text-amber-400/60'
+                        'inline-flex size-tap items-center justify-center rounded-pill transition-colors',
+                        isFav ? 'text-accent' : 'text-fg-subtle hover:text-fg'
                     )}
                 >
-                    <Heart
-                        className={cn(
-                            'w-3.5 h-3.5 transition-all duration-200',
-                            isFav && 'fill-amber-400 scale-110'
-                        )}
-                        strokeWidth={1.5}
-                    />
+                    <Heart className={cn('h-4 w-4', isFav && 'fill-current')} strokeWidth={1.5} />
                 </button>
             </div>
+            {signInGate.open && <GuestGateSheet feature="favourites" {...signInGate} />}
         </div>
     );
 }
