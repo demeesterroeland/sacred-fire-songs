@@ -68,9 +68,11 @@ describe('Category list', () => {
 });
 
 describe('Your library summary', () => {
-  it('is one row of four with a line between, without icon tiles', () => {
+  // Story 6.1.36 (#488): two groups of three on the two content columns, a line between the counts.
+  it('is two groups of three with a line between, without icon tiles', () => {
     const summary = read('components/home/LibrarySummary.tsx');
-    expect(summary).toMatch(/grid-cols-4[^"]*divide-x divide-line/);
+    expect(summary).toMatch(/md:grid-cols-2/);
+    expect(summary).toMatch(/grid-cols-3[^"]*divide-x divide-line/);
     expect(summary).not.toContain('Icon');
   });
 });

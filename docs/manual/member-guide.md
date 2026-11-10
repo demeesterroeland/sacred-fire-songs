@@ -1,11 +1,12 @@
 # Member Guide (draft)
 
-**Version:** 0.18 | **Date:** Nov 9, 2026
+**Version:** 0.19 | **Date:** Nov 11, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.19 | Nov 11, 2026 | Home looks like it does for guests (**Recently added** and the categories), with **Your library** on top: six counters, **New songs** replaced by **Your recordings**, **Shared with me** and **Shared by me**. New page **Shared by me** (UX v2, #488). |
 | 0.18 | Nov 9, 2026 | A private song's title is lighter (in lists and on the song page) and its ⋮ menu has **Make public**; "Drafts" is now **Private**; the ☰ menu's Library section matches the Library tabs. Library tabs **Playlists · Smart · History · New · Artists**; playlists in three groups; **Export PDF** in a playlist's ⋯ menu; My Drafts is no longer a smart playlist; private songs look lighter; tags are always links; the reading tools come before the version switch. |
 | 0.17 | Nov 7, 2026 | "take" is now **recording**; one ⋮ menu with the reading tools and the Screen stays on switch; Terms Of Service and Privacy Policy pages; the Library "+" floats at the bottom right. |
 | 0.16 | Nov 6, 2026 | A song that has several versions shows a switch under the title; tap a name to read that version. Edit says which version you are editing and Save brings you back to it. While a practice recording is being recorded or not yet saved, the switch asks you to save or discard it first (UX v2, #395). |
@@ -36,7 +37,9 @@ Tap your initial (top right). You see your name and role (e.g. *Member*), and:
 
 ## Home when signed in
 
-Above the categories, **Your library** shows four counters: **Favorites**, **Drafts**, **Your Songs**, **New songs**. Tap one to open that list.
+At the top, **Your library** shows six counters: **Favorites**, **Private**, **Your Songs**, **Your recordings**, **Shared with me** and **Shared by me**. Tap one to open that list. Below it come **Recently added** (the newest songs) and the categories, as for guests.
+
+**Shared by me** lists the recordings you shared: the song, the recording and the names of the members you shared it with. Tap a row to open the song with that recording.
 
 ## Favourites
 

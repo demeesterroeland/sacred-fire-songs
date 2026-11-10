@@ -26,7 +26,10 @@ export default function LibraryTabs() {
     const parentTab = tabs.find(t => pathname?.startsWith(t.href + '/'));
 
     // Story 6.1.19 (#403): "Shared with me" is entered from a row under the tabs, not a tab of its own.
-    if (pathname === '/library/shared') {
+    // Story 6.1.36 (#488): "Shared by me" is entered from Home the same way.
+    const sharedPage = pathname === '/library/shared' ? 'sharedWithMe.title'
+        : pathname === '/library/shared-by-me' ? 'sharedByMe.title' : null;
+    if (sharedPage) {
         return (
             <nav aria-label={t('nav.library')} className="mb-8">
                 <div className="flex items-center gap-1.5 text-meta text-fg-muted">
@@ -35,7 +38,7 @@ export default function LibraryTabs() {
                     </Link>
                     <ChevronRight className="size-3.5 shrink-0" aria-hidden />
                     <span aria-current="page" className="inline-flex min-h-tap items-center text-fg">
-                        {t('sharedWithMe.title')}
+                        {t(sharedPage)}
                     </span>
                 </div>
             </nav>

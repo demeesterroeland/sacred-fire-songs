@@ -1,5 +1,6 @@
-# Version: 1.1 | Date: Nov 10, 2026
+# Version: 1.2 | Date: Nov 11, 2026
 # Changelog
+# 1.2 | Nov 11, 2026 | Story 6.1.36 (#488) review: members also see Recently added, under Your library.
 # 1.1 | Nov 10, 2026 | Story 6.1.36 (#488): Recently added holds 10 songs (5 on a phone); layout in ux-v2-home-grid.feature.
 # 1.0 | Nov 6, 2026 | Story 6.1.28 / G6.3 (#412): guests see a one-line welcome, a search field and a "Recently added" row on Home; members keep Your library.
 @story-6.1.28
@@ -50,3 +51,4 @@ Feature: UX v2 Home welcome for first-time visitors
   Scenario: Members keep Your library
     Given a signed-in member on the home page
     Then "Your library" is shown and the welcome block is not
+    And "Recently added" is shown below "Your library"
