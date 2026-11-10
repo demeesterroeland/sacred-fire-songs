@@ -294,7 +294,7 @@ const ru: Partial<Record<TranslationKey, string>> = {
   // ─── Rehearsal Space – Sharing, Public & Singer Attribution ─────────────────
   "recording.sharing.title": "Поделиться записью",
   'recording.sharing.button': 'Поделиться',
-  'recording.sharing.searchPlaceholder': 'Поиск пользователя по email или имени...',
+  'recording.sharing.searchPlaceholder': 'Поиск по имени или полному адресу email...',
   'recording.sharing.sharedWithTitle': 'Доступно пользователям',
   "recording.sharing.noShares": "Запись пока никому не доступна.",
   'recording.sharing.revoke': 'Отозвать',
@@ -386,6 +386,7 @@ const ru: Partial<Record<TranslationKey, string>> = {
   'user.profile.title': 'Профиль музыканта',
   'user.profile.verifiedMusician': 'Подтверждённый музыкант',
   'user.profile.member': 'Участник сообщества',
+  'user.unnamed': 'Участник без имени',
   "user.profile.attributedRecordings": "Связанные записи",
   "user.profile.noAttributedRecordings": "К этому музыканту пока не привязано записей.",
   'user.profile.backToSong': 'Назад к песне',

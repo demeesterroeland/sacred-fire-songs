@@ -94,7 +94,7 @@ test('sharing a take on a private own song explains both effects and changes not
   await expect(confirmation).toContainText('The song lyrics become public');
   await expect(confirmation).toContainText(`The recording "${TAKE}" is shared with the members you pick next`);
   await expect(confirmation).toContainText('Nothing changes until you confirm');
-  await expect(dialog.getByPlaceholder(/Search user/)).toHaveCount(0);
+  await expect(dialog.getByPlaceholder(/Search by name/)).toHaveCount(0);
   expect(await songIsPublic()).toBe(false);
   expect(await shareCount()).toBe(0);
 
@@ -108,11 +108,11 @@ test('sharing a take on a private own song explains both effects and changes not
   await again.getByRole('button', { name: 'Make song public and continue' }).click();
   await expect(again.getByText('You can share with registered members only. Someone without an account needs to sign up first.')).toBeVisible({ timeout: 15_000 });
   expect(await songIsPublic()).toBe(true);
-  await expect(again.getByPlaceholder(/Search user/)).toBeFocused();
+  await expect(again.getByPlaceholder(/Search by name/)).toBeFocused();
   expect(await shareCount()).toBe(0);
 
   // Empty search state.
-  await again.getByPlaceholder(/Search user/).fill('zzqxjv');
+  await again.getByPlaceholder(/Search by name/).fill('zzqxjv');
   await expect(again.getByTestId('share-no-results')).toContainText('No registered member found for "zzqxjv"');
   await expect(again.getByTestId('share-no-results')).toContainText('Someone without an account needs to sign up first.');
 });

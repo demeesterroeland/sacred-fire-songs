@@ -137,4 +137,5 @@
 | **November 7, 2026 (Part 3)** | **Fix/UX (Epic 6.1, #375)**: review of PR #477 — ten findings fixed, tests, docs. (estimate) | ~2.5 Hours | ✅ Completed |
 | **November 6, 2026** | **Database**: profile and playlist item access rules, fresh-install schema repair, role-based `@seed` scenarios. | ~1.0 Hours | Completed |
 | **November 6, 2026** | **Database**: write rules for profile fields, categories, playlists and song versions, role-based `@seed` scenarios. | ~1.0 Hours | Completed |
-| **Total** | **Development + AI Collaboration** | **~252.0 Hours** | |
+| **November 10, 2026** | **Database/Privacy**: profile e-mail privacy for sharing and singer attribution (migration, app reads through `public_profiles`, search by name or full address, tests, docs). (estimate) | ~2.0 Hours | Completed |
+| **Total** | **Development + AI Collaboration** | **~254.0 Hours** | |

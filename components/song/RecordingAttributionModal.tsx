@@ -13,6 +13,7 @@ import {
 import {
   updateSingerAttribution,
   searchUsersForSharing,
+  getOwnSingerEmail,
   type UserProfileSummary,
   type UserRecording,
 } from "@/lib/actions/rehearsal";
@@ -45,6 +46,7 @@ export default function RecordingAttributionModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
     if (recording) {
       if (recording.singer_profile_id && recording.singer_profile) {
         setSelectedUser(recording.singer_profile);
@@ -55,7 +57,13 @@ export default function RecordingAttributionModal({
         setIsUnregistered(true);
         setSelectedUser(null);
         setCustomName(recording.singer_name);
-        setCustomEmail(recording.singer_email || "");
+        setCustomEmail("");
+        // The address is not part of the take; only the owner may read it back.
+        if (isOpen && recording.is_owner) {
+          getOwnSingerEmail(recording.id).then((email) => {
+            if (!cancelled) setCustomEmail(email || "");
+          });
+        }
       } else {
         setSelectedUser(null);
         setIsUnregistered(false);
@@ -65,6 +73,9 @@ export default function RecordingAttributionModal({
     }
     setSearchQuery("");
     setSearchResults([]);
+    return () => {
+      cancelled = true;
+    };
   }, [recording, isOpen]);
 
   useEffect(() => {
@@ -103,8 +114,8 @@ export default function RecordingAttributionModal({
         singerEmail = customEmail.trim() || null;
       } else if (selectedUser) {
         singerProfileId = selectedUser.id;
-        singerName = selectedUser.full_name || selectedUser.email;
-        singerEmail = selectedUser.email;
+        // A registered singer is named from the profile; no address is stored for them.
+        singerName = selectedUser.full_name || null;
       }
 
       const res = await updateSingerAttribution(recording.id, {
@@ -184,7 +195,7 @@ export default function RecordingAttributionModal({
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-bold text-gray-900 dark:text-white">
-                      {selectedUser.full_name || selectedUser.email}
+                      {selectedUser.full_name || t("user.unnamed")}
                     </span>
                     {selectedUser.is_musician && (
                       <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-caption font-semibold bg-surface-2 text-fg-muted">
@@ -193,11 +204,6 @@ export default function RecordingAttributionModal({
                       </span>
                     )}
                   </div>
-                  {selectedUser.full_name && (
-                    <span className="text-xs text-gray-400 block mt-0.5">
-                      {selectedUser.email}
-                    </span>
-                  )}
                 </div>
                 <button
                   onClick={() => setSelectedUser(null)}
@@ -239,7 +245,7 @@ export default function RecordingAttributionModal({
                         <div className="text-left min-w-0 pr-2">
                           <div className="flex items-center gap-1.5">
                             <span className="text-sm font-semibold text-gray-900 dark:text-white truncate">
-                              {user.full_name || user.email}
+                              {user.full_name || t("user.unnamed")}
                             </span>
                             {user.is_musician && (
                               <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-caption font-semibold bg-surface-2 text-fg-muted">
@@ -248,11 +254,6 @@ export default function RecordingAttributionModal({
                               </span>
                             )}
                           </div>
-                          {user.full_name && (
-                            <span className="text-xs text-gray-400 truncate block">
-                              {user.email}
-                            </span>
-                          )}
                         </div>
                         <Check className="w-4 h-4 text-indigo-500" />
                       </button>

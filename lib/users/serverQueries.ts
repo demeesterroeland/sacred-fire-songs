@@ -11,10 +11,8 @@ export interface AttributedRecordingSummary {
 
 export interface MusicianProfileData {
   id: string;
-  email: string;
   full_name: string | null;
   avatar_url: string | null;
-  role: string;
   is_musician: boolean;
   attributed_recordings: AttributedRecordingSummary[];
 }
@@ -23,8 +21,9 @@ export async function fetchMusicianProfile(userId: string): Promise<MusicianProf
   const supabase = await createClient();
 
   const { data: profile, error } = await supabase
-    .from("profiles")
-    .select("id, email, full_name, avatar_url, role")
+    // The public view: name, avatar and musician badge; never the e-mail address.
+    .from("public_profiles")
+    .select("id, full_name, avatar_url, is_musician")
     .eq("id", userId)
     .maybeSingle();
 
@@ -62,11 +61,9 @@ export async function fetchMusicianProfile(userId: string): Promise<MusicianProf
 
   return {
     id: profile.id,
-    email: profile.email,
     full_name: profile.full_name,
     avatar_url: profile.avatar_url,
-    role: profile.role,
-    is_musician: profile.role === "musician" || profile.role === "expert",
+    is_musician: !!profile.is_musician,
     attributed_recordings: attributedRecordings,
   };
 }

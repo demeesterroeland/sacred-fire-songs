@@ -291,7 +291,7 @@ const nl: Partial<Record<TranslationKey, string>> = {
   // ─── Rehearsal Space – Sharing, Public & Singer Attribution ─────────────────
   "recording.sharing.title": "Opname delen",
   'recording.sharing.button': 'Delen',
-  'recording.sharing.searchPlaceholder': 'Zoek gebruiker op e-mail of naam...',
+  'recording.sharing.searchPlaceholder': 'Zoek op naam of volledig e-mailadres...',
   'recording.sharing.sharedWithTitle': 'Gedeeld met',
   'recording.sharing.noShares': 'Nog met niemand gedeeld.',
   'recording.sharing.revoke': 'Intrekken',
@@ -383,6 +383,7 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'user.profile.title': 'Muzikantenprofiel',
   'user.profile.verifiedMusician': 'Geverifieerde muzikant',
   'user.profile.member': 'Communitylid',
+  'user.unnamed': 'Lid zonder naam',
   "user.profile.attributedRecordings": "Toegeschreven opnames",
   "user.profile.noAttributedRecordings": "Nog geen opnames toegeschreven aan deze muzikant.",
   'user.profile.backToSong': 'Terug naar lied',

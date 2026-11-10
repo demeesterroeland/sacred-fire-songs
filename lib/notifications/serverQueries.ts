@@ -29,7 +29,7 @@ export async function getSharedWithMe(userId: string): Promise<SharedTake[]> {
 
   const [{ data: owners }, { data: notes, error: notesError }] = await Promise.all([
     ownerIds.length > 0
-      ? supabase.from('profiles').select('id, full_name').in('id', ownerIds)
+      ? supabase.from('public_profiles').select('id, full_name').in('id', ownerIds)
       : Promise.resolve({ data: [] as { id: string; full_name: string | null }[] }),
     supabase
       .from('notifications')

@@ -22,13 +22,13 @@ export default function UserProfileView({ profile }: { profile: MusicianProfileD
       {/* Profile Header Card */}
       <div className="p-6 rounded-panel bg-surface border border-line flex flex-col sm:flex-row items-center sm:items-start gap-5 text-center sm:text-left">
         <div className="w-20 h-20 rounded-full bg-surface-2 border border-line flex items-center justify-center text-fg text-2xl font-bold shrink-0">
-          {profile.full_name ? profile.full_name.charAt(0).toUpperCase() : profile.email.charAt(0).toUpperCase()}
+          {(profile.full_name || t("user.unnamed")).charAt(0).toUpperCase()}
         </div>
 
         <div className="flex-1 min-w-0 space-y-2">
           <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2">
             <h1 className="text-xl font-bold text-fg">
-              {profile.full_name || profile.email}
+              {profile.full_name || t("user.unnamed")}
             </h1>
             {profile.is_musician ? (
               <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-control text-xs font-semibold bg-surface-2 text-fg border border-line">
@@ -42,9 +42,6 @@ export default function UserProfileView({ profile }: { profile: MusicianProfileD
               </span>
             )}
           </div>
-          {profile.full_name && (
-            <p className="text-xs text-fg-muted">{profile.email}</p>
-          )}
         </div>
       </div>
 

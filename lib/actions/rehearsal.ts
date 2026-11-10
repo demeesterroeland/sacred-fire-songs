@@ -3,9 +3,10 @@ import { sendRecordingShareEmail } from "@/lib/actions/notifications";
 import { sharedByName } from "@/lib/songs/partitionTakes";
 import { SONG_NOT_PUBLIC, songIsPublicOfTake } from "@/lib/songs/publishAudience";
 
+// Other people's profiles are read through the `public_profiles` view: name, avatar and the
+// musician badge only. E-mail addresses never reach another user's browser.
 export interface UserProfileSummary {
   id: string;
-  email: string;
   full_name: string | null;
   avatar_url: string | null;
   role?: string;
@@ -15,9 +16,14 @@ export interface UserProfileSummary {
 export interface RecordingShareInfo {
   id: string;
   user_id: string;
-  email: string;
   full_name: string | null;
 }
+
+// Every user_recordings column the API may read. `singer_email` is left out on purpose: only the
+// owner reads it, through getOwnSingerEmail().
+const RECORDING_COLUMNS =
+  "id, user_id, song_version_id, recording_name, storage_path, position, created_at, file_size_bytes, " +
+  "duration_seconds, is_public, singer_consent_confirmed, singer_profile_id, singer_name";
 
 export interface UserRecording {
   id: string;
@@ -32,7 +38,6 @@ export interface UserRecording {
   singer_consent_confirmed?: boolean;
   singer_profile_id?: string | null;
   singer_name?: string | null;
-  singer_email?: string | null;
   created_at: string;
   audioUrl?: string; // Resolved temporary signed URL or public URL
   is_owner?: boolean;
@@ -54,7 +59,7 @@ export async function getUserRecordings(songVersionId: string): Promise<UserReco
 
   let query = supabase
     .from("user_recordings")
-    .select("*")
+    .select(RECORDING_COLUMNS)
     .eq("song_version_id", songVersionId);
 
   // If not logged in, only fetch public recordings
@@ -71,7 +76,7 @@ export async function getUserRecordings(songVersionId: string): Promise<UserReco
     return [];
   }
 
-  const rawRecordings = (data || []) as UserRecording[];
+  const rawRecordings = (data || []) as unknown as UserRecording[];
   if (rawRecordings.length === 0) {
     return [];
   }
@@ -84,10 +89,9 @@ export async function getUserRecordings(songVersionId: string): Promise<UserReco
   let singerProfilesMap = new Map<string, UserProfileSummary>();
   if (singerProfileIds.length > 0) {
     const { data: profiles } = await supabase
-      .from("profiles")
-      // Only what the rows use: the name, whether the singer is a musician (role) and the e-mail the
-      // attribution dialog keeps when the owner saves again. The avatar is not shown on a row.
-      .select("id, email, full_name, role")
+      .from("public_profiles")
+      // Only what the rows use: the name and the musician badge. The avatar is not shown on a row.
+      .select("id, full_name, is_musician")
       .in("id", singerProfileIds);
 
     if (profiles) {
@@ -96,11 +100,9 @@ export async function getUserRecordings(songVersionId: string): Promise<UserReco
           p.id,
           {
             id: p.id,
-            email: p.email,
             full_name: p.full_name,
             avatar_url: null,
-            role: p.role,
-            is_musician: p.role === "musician" || p.role === "expert",
+            is_musician: !!p.is_musician,
           },
         ])
       );
@@ -116,19 +118,17 @@ export async function getUserRecordings(songVersionId: string): Promise<UserReco
   if (ownedRecordingIds.length > 0) {
     const { data: shares } = await supabase
       .from("recording_shares")
-      .select("id, recording_id, shared_with_user_id, profiles:shared_with_user_id(id, email, full_name)")
+      .select("id, recording_id, shared_with_user_id")
       .in("recording_id", ownedRecordingIds);
 
-    if (shares) {
+    if (shares && shares.length > 0) {
+      const names = await publicNames(supabase, shares.map((s) => s.shared_with_user_id));
       for (const s of shares) {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        const prof = (s as any).profiles;
         const list = sharesMap.get(s.recording_id) || [];
         list.push({
           id: s.id,
           user_id: s.shared_with_user_id,
-          email: prof?.email || "",
-          full_name: prof?.full_name || null,
+          full_name: names.get(s.shared_with_user_id) ?? null,
         });
         sharesMap.set(s.recording_id, list);
       }
@@ -150,17 +150,14 @@ export async function getUserRecordings(songVersionId: string): Promise<UserReco
   const isSharedWithMe = (rec: { id: string; user_id: string; is_public?: boolean | null }) =>
     !!user && rec.user_id !== user.id && (sharedWithMe.has(rec.id) || !rec.is_public);
 
-  // Owners of takes shared with me: the share policy lets a recipient read the owner's profile.
+  // Owners of takes shared with me, named from their public profile.
   const otherOwnerIds = user
     ? Array.from(new Set(rawRecordings.filter((r) => isSharedWithMe(r)).map((r) => r.user_id)))
     : [];
   const ownerNames = new Map<string, string | null>();
   if (otherOwnerIds.length > 0) {
-    const { data: owners } = await supabase
-      .from("profiles")
-      .select("id, email, full_name")
-      .in("id", otherOwnerIds);
-    for (const o of owners ?? []) ownerNames.set(o.id, sharedByName(o));
+    const names = await publicNames(supabase, otherOwnerIds);
+    for (const id of otherOwnerIds) ownerNames.set(id, sharedByName({ full_name: names.get(id) }));
   }
 
   // Create temporary signed URLs for each recording since the rehearsals bucket is private
@@ -308,7 +305,7 @@ export async function uploadRehearsalRecording(
       is_public: false,
       singer_consent_confirmed: false,
     })
-    .select()
+    .select(RECORDING_COLUMNS)
     .single();
 
   if (dbError) {
@@ -323,7 +320,7 @@ export async function uploadRehearsalRecording(
 
   return {
     recording: {
-      ...(data as UserRecording),
+      ...(data as unknown as UserRecording),
       audioUrl: signedData?.signedUrl,
       is_owner: true,
       is_shared: false,
@@ -767,8 +764,8 @@ export async function getRecordingDownloadUrl(
 export async function getUserProfile(userId: string): Promise<UserProfileSummary | null> {
   const supabase = createClient();
   const { data, error } = await supabase
-    .from("profiles")
-    .select("id, email, full_name, avatar_url, role")
+    .from("public_profiles")
+    .select("id, full_name, avatar_url, is_musician")
     .eq("id", userId)
     .maybeSingle();
 
@@ -776,10 +773,35 @@ export async function getUserProfile(userId: string): Promise<UserProfileSummary
 
   return {
     id: data.id,
-    email: data.email,
     full_name: data.full_name,
     avatar_url: data.avatar_url,
-    role: data.role,
-    is_musician: data.role === "musician" || data.role === "expert",
+    is_musician: !!data.is_musician,
   };
+}
+
+// 14. The e-mail address the owner typed for an unregistered singer (owner only).
+export async function getOwnSingerEmail(recordingId: string): Promise<string | null> {
+  const supabase = createClient();
+  const { data, error } = await supabase.rpc("own_recording_singer_emails", {
+    p_recording_ids: [recordingId],
+  });
+  if (error) {
+    console.error("[rehearsal] RPC own_recording_singer_emails error:", error);
+    return null;
+  }
+  const rows = (data || []) as { recording_id: string; singer_email: string | null }[];
+  return rows[0]?.singer_email ?? null;
+}
+
+// Names from the public profile view, keyed by user id.
+async function publicNames(
+  supabase: ReturnType<typeof createClient>,
+  ids: string[]
+): Promise<Map<string, string | null>> {
+  const unique = Array.from(new Set(ids));
+  const names = new Map<string, string | null>();
+  if (unique.length === 0) return names;
+  const { data } = await supabase.from("public_profiles").select("id, full_name").in("id", unique);
+  for (const p of data ?? []) names.set(p.id, p.full_name);
+  return names;
 }
