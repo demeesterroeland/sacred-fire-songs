@@ -169,7 +169,7 @@ export interface LibrarySummary {
     favoritesCount: number;
     draftsCount: number;
     mySongsCount: number;
-    /** My own takes. */
+    /** Songs I can read that have at least one take of mine (the list /songs?myRecordings=true shows). */
     recordingsCount: number;
     /** Takes other members shared with me. */
     sharedWithMeCount: number;
@@ -207,10 +207,11 @@ export async function getLibrarySummary(userId: string): Promise<LibrarySummary>
             .select('id', { count: 'exact', head: true })
             .eq('is_public', false)
             .eq('owner_id', userId),
-        // My takes. Public takes of others are readable too, so filter on the owner.
+        // Songs with my takes, counted like the list it opens (/songs?myRecordings=true): one per song, and only
+        // songs I can read. Public takes of others are readable too, so filter on the owner.
         supabase
             .from('user_recordings')
-            .select('id', { count: 'exact', head: true })
+            .select('song_versions!inner(composition_id, compositions!inner(id))')
             .eq('user_id', userId),
         // Takes shared with me.
         supabase
@@ -228,7 +229,11 @@ export async function getLibrarySummary(userId: string): Promise<LibrarySummary>
         favoritesCount,
         draftsCount: drafts.count ?? 0,
         mySongsCount: mySongs.count ?? 0,
-        recordingsCount: recordings.count ?? 0,
+        recordingsCount: new Set(
+            ((recordings.data ?? []) as unknown as { song_versions: { composition_id: string } | null }[])
+                .map((r) => r.song_versions?.composition_id)
+                .filter(Boolean),
+        ).size,
         sharedWithMeCount: sharedWithMe.count ?? 0,
         sharedByMeCount: countSharedTakes((sharedByMe.data ?? []) as { recording_id: string }[]),
     };

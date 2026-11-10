@@ -7,7 +7,6 @@ import { ChevronRight } from 'lucide-react';
 import { libraryTabs } from '@/lib/navigation';
 import { useLocale } from '@/context/LocaleContext';
 import LibraryCreateButton from './LibraryCreateButton';
-import { SharedWithMeLink } from '@/components/library/SharedWithMeLink';
 
 export default function LibraryTabs() {
     const { t } = useLocale();
@@ -25,8 +24,8 @@ export default function LibraryTabs() {
     // Detail page = a tab's href + at least one more path segment
     const parentTab = tabs.find(t => pathname?.startsWith(t.href + '/'));
 
-    // Story 6.1.19 (#403): "Shared with me" is entered from a row under the tabs, not a tab of its own.
-    // Story 6.1.36 (#488): "Shared by me" is entered from Home the same way.
+    // "Shared with me" (Story 6.1.19, #403) and "Shared by me" (Story 6.1.36, #488) are entered from Home
+    // and the account menu, not from the Library tabs: their pages show a breadcrumb back to the Library.
     const sharedPage = pathname === '/library/shared' ? 'sharedWithMe.title'
         : pathname === '/library/shared-by-me' ? 'sharedByMe.title' : null;
     if (sharedPage) {
@@ -99,7 +98,6 @@ export default function LibraryTabs() {
                 {/* Edge fade: hints that the row scrolls if a locale's labels are wider than the phone. */}
                 <div aria-hidden className="pointer-events-none absolute inset-y-0 -right-4 w-6 bg-gradient-to-l from-bg to-transparent md:hidden" />
             </nav>
-            <SharedWithMeLink />
         </>
     );
 }

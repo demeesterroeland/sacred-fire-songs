@@ -159,6 +159,17 @@ test.describe('Shared by me', () => {
     if (count === 0) await expect(page.getByTestId('shared-by-me-empty')).toBeVisible();
     else await expect(page.getByTestId('shared-by-me-row')).toHaveCount(count);
   });
+
+  // Owner review: "Your recordings" counts the songs the list it opens shows, not the takes.
+  test('the Your recordings count matches the songs on /songs?myRecordings=true', async ({ page }) => {
+    await pinEnglish(page);
+    await page.goto('/');
+    const stat = page.locator('[data-testid="library-stat"][data-key="recordings"]');
+    const count = Number(await stat.locator('p').first().innerText());
+    await stat.click();
+    await expect(page).toHaveURL(/myRecordings=true/);
+    await expect(page.getByText(new RegExp(`^${count} results?$`))).toBeVisible();
+  });
 });
 
 test.describe('one background in dark mode', () => {

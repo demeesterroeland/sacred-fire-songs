@@ -1,6 +1,6 @@
 # Version: 1.1 | Date: Nov 11, 2026
 # Changelog
-# 1.1 | Nov 11, 2026 | Owner review: section labels at the x of the search field; members get the same layout under six personal counts; one dark background.
+# 1.1 | Nov 11, 2026 | Owner review (incl. validation: recordings count = songs, no Shared with me row on Library pages): section labels at the x of the search field; members get the same layout under six personal counts; one dark background.
 # 1.0 | Nov 10, 2026 | Story 6.1.36 (#488): Recently added on Home in the columns of the category grid and of /songs.
 @story-6.1.36
 Feature: UX v2 Home grid
@@ -39,6 +39,7 @@ Feature: UX v2 Home grid
     And on a screen at least 768 px wide the six counts are one row, three on each song column
     And on a phone they are two rows of three and nothing scrolls sideways
     And the first count of each group starts at the x of the song titles
+    And "Your recordings" counts the songs that /songs?myRecordings=true lists
 
   @e2e
   Scenario: Shared by me

@@ -100,8 +100,15 @@ describe('Home getLibrarySummary', () => {
     const calls: Call[] = [];
     const data: Record<string, unknown> = {
       recording_shares: [{ recording_id: 'r1' }, { recording_id: 'r1' }, { recording_id: 'r2' }],
+      // four takes on three songs: the count is songs, the same list /songs?myRecordings=true opens
+      user_recordings: [
+        { song_versions: { composition_id: 'c1' } },
+        { song_versions: { composition_id: 'c1' } },
+        { song_versions: { composition_id: 'c2' } },
+        { song_versions: { composition_id: 'c3' } },
+      ],
     };
-    const counts: Record<string, number> = { user_recordings: 4 };
+    const counts: Record<string, number> = {};
     const make = (table: string) => {
       const call: Call = { table, filters: [] };
       calls.push(call);
@@ -126,7 +133,7 @@ describe('Home getLibrarySummary', () => {
     const { getLibrarySummary } = await import('@/lib/songs/serverQueries');
     const summary = await getLibrarySummary('user-1');
     expect(summary).not.toHaveProperty('newSongsCount');
-    expect(summary.recordingsCount).toBe(4);
+    expect(summary.recordingsCount).toBe(3);
     expect(summary.sharedWithMeCount).toBe(2);
     expect(summary.sharedByMeCount).toBe(2); // two distinct takes, one shared twice
     expect(calls.some((c) => c.table === 'song_views')).toBe(false);
