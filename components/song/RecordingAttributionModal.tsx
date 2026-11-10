@@ -13,6 +13,7 @@ import {
 import {
   updateSingerAttribution,
   searchUsersForSharing,
+  getOwnSingerEmail,
   type UserProfileSummary,
   type UserRecording,
 } from "@/lib/actions/rehearsal";
@@ -42,9 +43,14 @@ export default function RecordingAttributionModal({
   const [selectedUser, setSelectedUser] = useState<UserProfileSummary | null>(null);
   const [customName, setCustomName] = useState("");
   const [customEmail, setCustomEmail] = useState("");
+  // False while the stored singer address is loading or could not be loaded; then a save
+  // with an empty address field keeps the stored one instead of clearing it.
+  const [emailLoaded, setEmailLoaded] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
+    let cancelled = false;
+    setEmailLoaded(true);
     if (recording) {
       if (recording.singer_profile_id && recording.singer_profile) {
         setSelectedUser(recording.singer_profile);
@@ -55,7 +61,19 @@ export default function RecordingAttributionModal({
         setIsUnregistered(true);
         setSelectedUser(null);
         setCustomName(recording.singer_name);
-        setCustomEmail(recording.singer_email || "");
+        setCustomEmail("");
+        // The address is not part of the take; only the owner may read it back.
+        if (isOpen && recording.is_owner) {
+          setEmailLoaded(false);
+          getOwnSingerEmail(recording.id)
+            .then(({ ok, email }) => {
+              if (cancelled || !ok) return;
+              // Do not overwrite what the owner typed meanwhile.
+              setCustomEmail((typed) => typed || email || "");
+              setEmailLoaded(true);
+            })
+            .catch((e) => console.error("Load singer email error:", e));
+        }
       } else {
         setSelectedUser(null);
         setIsUnregistered(false);
@@ -65,6 +83,9 @@ export default function RecordingAttributionModal({
     }
     setSearchQuery("");
     setSearchResults([]);
+    return () => {
+      cancelled = true;
+    };
   }, [recording, isOpen]);
 
   useEffect(() => {
@@ -96,15 +117,16 @@ export default function RecordingAttributionModal({
     try {
       let singerProfileId: string | null = null;
       let singerName: string | null = null;
-      let singerEmail: string | null = null;
+      let singerEmail: string | null | undefined = null;
 
       if (isUnregistered) {
         singerName = customName.trim();
-        singerEmail = customEmail.trim() || null;
+        const typed = customEmail.trim();
+        singerEmail = typed || (emailLoaded ? null : undefined);
       } else if (selectedUser) {
         singerProfileId = selectedUser.id;
-        singerName = selectedUser.full_name || selectedUser.email;
-        singerEmail = selectedUser.email;
+        // A registered singer is named from the profile; no address is stored for them.
+        singerName = selectedUser.full_name || null;
       }
 
       const res = await updateSingerAttribution(recording.id, {
@@ -184,7 +206,7 @@ export default function RecordingAttributionModal({
                 <div>
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-bold text-gray-900 dark:text-white">
-                      {selectedUser.full_name || selectedUser.email}
+                      {selectedUser.full_name || t("user.unnamed")}
                     </span>
                     {selectedUser.is_musician && (
                       <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-caption font-semibold bg-surface-2 text-fg-muted">
@@ -193,11 +215,6 @@ export default function RecordingAttributionModal({
                       </span>
                     )}
                   </div>
-                  {selectedUser.full_name && (
-                    <span className="text-xs text-gray-400 block mt-0.5">
-                      {selectedUser.email}
-                    </span>
-                  )}
                 </div>
                 <button
                   onClick={() => setSelectedUser(null)}
@@ -239,7 +256,7 @@ export default function RecordingAttributionModal({
                         <div className="text-left min-w-0 pr-2">
                           <div className="flex items-center gap-1.5">
                             <span className="text-sm font-semibold text-gray-900 dark:text-white truncate">
-                              {user.full_name || user.email}
+                              {user.full_name || t("user.unnamed")}
                             </span>
                             {user.is_musician && (
                               <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-caption font-semibold bg-surface-2 text-fg-muted">
@@ -248,11 +265,6 @@ export default function RecordingAttributionModal({
                               </span>
                             )}
                           </div>
-                          {user.full_name && (
-                            <span className="text-xs text-gray-400 truncate block">
-                              {user.email}
-                            </span>
-                          )}
                         </div>
                         <Check className="w-4 h-4 text-indigo-500" />
                       </button>

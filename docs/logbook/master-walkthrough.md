@@ -3359,3 +3359,10 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - **Song versions**: insert for the song owner or an admin, with the caller as contributor. Column privileges list the content fields, so a version stays on its song.
 - **Schema**: `docs/design/db-schema.sql` v2.9; `fn_check_song_manage_access` added. Other policy differences between this file and the migrations stay for the separate sync.
 - **Tests**: `docs/testing/access-policies.feature` v1.1 runs 104 `@seed` scenarios as the real database roles.
+
+## Session November 10, 2026 — Profile e-mail privacy
+
+- **Migration** `20261110120000_profile_email_privacy.sql`: `public_profiles` gains `is_musician`; the profile read policies for singers and share partners are dropped; `search_users_for_sharing` matches a name or a complete address (case and spaces ignored), skips the searcher and returns `id, full_name, avatar_url, is_musician`; `user_recordings` has column SELECT privileges without `singer_email`, which the owner reads with `own_recording_singer_emails()`; the share notification and share e-mail name the sharer by profile name only. Existing rows lose copied addresses (registered singers, notification names).
+- **App**: `lib/actions/rehearsal.ts` selects an explicit column list (`RECORDING_COLUMNS`) and reads other members through `public_profiles`; `getOwnSingerEmail` fills the singer dialog for the owner; the share and singer dialogs and `/users/:id` show names (or *Unnamed member*), never addresses. New key `user.unnamed` and a new search placeholder in all 8 locales.
+- **Tests**: `access-policies.feature` v1.2 (search, address and singer-address scenarios; 135 seed scenarios pass), unit tests for the column lists and the e-mail fallback, `ux-v2-share-explain` placeholder.
+- **Docs**: `db-schema.sql` v3.6, design doc v2.06, manual *Practice* v0.13.

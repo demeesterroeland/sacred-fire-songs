@@ -1484,3 +1484,9 @@
 - [x] Favourites lookups filter on the owner (admin saw 6 on the card and an empty list)
 - [x] Remove Vercel Speed Insights; privacy text: operator access to stored data
 - [x] Write rules for profile fields, categories, playlists and song versions: migration `20261106130000`, trigger `trg_guard_profile_fields`, column privileges on `setlists` and `song_versions`, `db-schema.sql` v2.9, `access-policies.feature` v1.1 (104 `@seed` scenarios).
+
+## Session November 10, 2026 (profile e-mail privacy)
+- [x] Other members are read through `public_profiles` (new `is_musician` column): Listen tab, share and singer dialogs, `/users/:id`, shared-with-me list
+- [x] User search matches a name or a complete e-mail address and returns names only; singer address readable by the take's owner only (`own_recording_singer_emails`)
+- [x] Sharer named by profile name or *Unnamed member* (`user.unnamed`, 8 locales); migration `20261110120000`, `db-schema.sql` v3.6, `access-policies.feature` v1.2 (new `@seed` scenarios)
+

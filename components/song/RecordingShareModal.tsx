@@ -120,7 +120,6 @@ export default function RecordingShareModal({
           {
             id: targetUser.id,
             user_id: targetUser.id,
-            email: targetUser.email,
             full_name: targetUser.full_name,
           },
         ]);
@@ -285,7 +284,7 @@ export default function RecordingShareModal({
                       <div className="text-left min-w-0 pr-2">
                         <div className="flex items-center gap-1.5">
                           <span className="text-body font-semibold text-fg truncate">
-                            {user.full_name || user.email}
+                            {user.full_name || t("user.unnamed")}
                           </span>
                           {user.is_musician && (
                             <span className="inline-flex items-center gap-0.5 px-1.5 py-0.5 rounded text-caption font-semibold bg-surface-2 text-fg-muted">
@@ -294,9 +293,6 @@ export default function RecordingShareModal({
                             </span>
                           )}
                         </div>
-                        {user.full_name && (
-                          <span className="text-meta text-fg-muted truncate block">{user.email}</span>
-                        )}
                       </div>
                       <Button
                         type="button"
@@ -348,11 +344,8 @@ export default function RecordingShareModal({
                     >
                       <div className="text-left min-w-0 pr-2">
                         <span className="text-meta font-semibold text-fg truncate block">
-                          {share.full_name || share.email}
+                          {share.full_name || t("user.unnamed")}
                         </span>
-                        {share.full_name && (
-                          <span className="text-caption text-fg-muted truncate block">{share.email}</span>
-                        )}
                       </div>
                       <button
                         type="button"

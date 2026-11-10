@@ -289,7 +289,7 @@ const en = {
   // ─── Rehearsal Space – Sharing, Public & Singer Attribution ─────────────────
   "recording.sharing.title": "Share recording",
   'recording.sharing.button': 'Share',
-  'recording.sharing.searchPlaceholder': 'Search user by email or name...',
+  'recording.sharing.searchPlaceholder': 'Search by name or full email address...',
   'recording.sharing.sharedWithTitle': 'Shared with',
   'recording.sharing.noShares': 'Not shared with anyone yet.',
   'recording.sharing.revoke': 'Revoke',
@@ -381,6 +381,7 @@ const en = {
   'user.profile.title': 'Musician Profile',
   'user.profile.verifiedMusician': 'Verified Musician',
   'user.profile.member': 'Community Member',
+  'user.unnamed': 'Unnamed member',
   "user.profile.attributedRecordings": "Attributed Recordings",
   "user.profile.noAttributedRecordings": "No recordings attributed to this musician yet.",
   'user.profile.backToSong': 'Back to song',

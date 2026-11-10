@@ -1,11 +1,12 @@
 /*
- **Version:** 3.5
+ **Version:** 3.6
  **Status:** Current
  **Date:** November 10, 2026
  
  ## Usage
  This script provides a complete setup for the "Sacred Fire Songs" database. 
- It consolidates the initial schema and all subsequent migrations up to November 7, 2026.
+ It consolidates the initial schema and all subsequent migrations up to November 10, 2026.
+ (v3.6: profile e-mail privacy, migration 20261110120000_profile_email_privacy.sql: public_profiles gains is_musician; the three profile read policies for singers and share partners are gone; search_users_for_sharing matches a name or an exact address and returns no address; user_recordings.singer_email is no longer selectable, the owner reads it with own_recording_singer_emails(); notifications and share e-mails name the sharer by name only).
  (v3.5: back-merge of release 1.7.1 from main: the access rules of migrations 20261106120000, 20261106130000 and 20261106140000 (public_profiles view, fn_can_edit_setlist, fn_guard_profile_fields, song and version read/write rules), compositions.is_public, profiles.last_seen_at and song_views; combined with the develop line below).
  (v3.4: the chord rule of the recompute at the end of the script counts a bracketed chord token ("[Am]"), not a bracketed word that starts with A-G ("[Chorus]"), and uses the same whitespace set as JavaScript (leading BOM, U+0085); migration 20261106180000_recompute_song_flags.sql, review round on PR #474, M6).
  (v3.3: compositions.has_chords / has_melody are declared in the table and recomputed for every song at the end of the script (true when ANY version has chords / a melody, the rule of lib/songs/versionFlags.ts); migration 20261106180000_recompute_song_flags.sql; UX v2 validation 1, fix 7).
@@ -282,37 +283,6 @@ $$;
 create policy "Users can read own profile" on public.profiles for
 select to authenticated using (id = auth.uid());
 
-create policy "Allow reading singer profiles" on public.profiles for
-select to authenticated using (
-  exists (
-    select 1 from public.user_recordings ur
-    where ur.singer_profile_id = profiles.id
-    and (
-      ur.is_public = true
-      or ur.user_id = auth.uid()
-      or public.has_recording_share(ur.id, auth.uid())
-    )
-  )
-);
-
-create policy "Allow reading shared recording users" on public.profiles for
-select to authenticated using (
-  exists (
-    select 1 from public.recording_shares rs
-    where (rs.shared_with_user_id = profiles.id and public.is_recording_owner(rs.recording_id, auth.uid()))
-       or (rs.shared_with_user_id = auth.uid() and public.is_recording_owner(rs.recording_id, profiles.id))
-  )
-);
-
-create policy "Allow public reading public singer profiles" on public.profiles for
-select to anon using (
-  exists (
-    select 1 from public.user_recordings ur
-    where ur.singer_profile_id = profiles.id
-    and ur.is_public = true
-  )
-);
-
 create policy "Admins can read all profiles" on public.profiles for
 select to authenticated using (public.fn_is_admin());
 
@@ -365,7 +335,7 @@ grant select (id, role) on public.profiles to anon;
 -- Privileges are replaced because a simple view is writable by default.
 create or replace view public.public_profiles
 with (security_invoker = false, security_barrier = true) as
-select id, full_name, avatar_url
+select id, full_name, avatar_url, (role in ('musician', 'expert')) as is_musician
 from public.profiles;
 
 revoke all on public.public_profiles from public, anon, authenticated;
@@ -664,33 +634,50 @@ create policy "Allow owners and recipients to delete shares" on public.recording
   or public.is_recording_owner(recording_id, auth.uid())
 );
 
--- User lookup helper function for sharing and attribution
+-- User lookup for sharing and attribution: a name, or a complete e-mail address. It never
+-- returns an address.
 create or replace function public.search_users_for_sharing(search_term text)
 returns table (
   id uuid,
-  email text,
   full_name text,
   avatar_url text,
-  is_musician boolean,
-  role public.user_role
-) language sql security definer set search_path = public as $$
-  select
-    p.id,
-    p.email,
-    p.full_name,
-    p.avatar_url,
-    p.role in ('musician', 'expert') as is_musician,
-    p.role
-  from public.profiles p
-  where
-    char_length(trim(search_term)) >= 2
-    and (
-      p.email ilike ('%' || trim(search_term) || '%')
-      or p.full_name ilike ('%' || trim(search_term) || '%')
-    )
-  limit 10;
+  is_musician boolean
+) language sql stable security definer set search_path = '' as $$
+  select p.id, p.full_name, p.avatar_url, p.role in ('musician', 'expert')
+    from public.profiles p
+   where auth.uid() is not null
+     and p.id <> auth.uid()
+     and char_length(trim(search_term)) >= 2
+     and (
+       p.full_name ilike ('%' || trim(search_term) || '%')
+       or lower(p.email) = lower(trim(search_term))
+     )
+   order by p.full_name nulls last
+   limit 10;
 $$;
-grant execute on function public.search_users_for_sharing(text) to authenticated;
+revoke all on function public.search_users_for_sharing(text) from public, anon;
+grant execute on function public.search_users_for_sharing(text) to authenticated, service_role;
+
+-- user_recordings.singer_email (an unregistered singer's address) is not selectable through the
+-- API: every other column is. A new user_recordings column must be added to this list.
+revoke select on public.user_recordings from anon, authenticated;
+grant select (
+  id, user_id, song_version_id, recording_name, storage_path, position, created_at,
+  file_size_bytes, duration_seconds, is_public, singer_consent_confirmed, singer_profile_id, singer_name
+) on public.user_recordings to anon, authenticated;
+
+-- The owner reads the singer addresses of their own takes.
+create or replace function public.own_recording_singer_emails(p_recording_ids uuid[])
+returns table (recording_id uuid, singer_email text)
+language sql stable security definer set search_path = '' as $$
+  select ur.id, ur.singer_email
+    from public.user_recordings ur
+   where ur.id = any (p_recording_ids)
+     and ur.user_id = auth.uid()
+     and ur.singer_email is not null;
+$$;
+revoke all on function public.own_recording_singer_emails(uuid[]) from public, anon;
+grant execute on function public.own_recording_singer_emails(uuid[]) to authenticated, service_role;
 -- NOTIFICATIONS inbox (Story 4.6.6). Display text is rendered client-side from `type`
 --    and the `metadata` snapshot, so it follows the reader's locale.
 CREATE TABLE IF NOT EXISTS public.notifications (
@@ -748,7 +735,7 @@ DECLARE
 BEGIN
   BEGIN
     SELECT ur.user_id, ur.recording_name, sv.composition_id, c.title,
-           COALESCE(NULLIF(p.full_name, ''), p.email)
+           NULLIF(p.full_name, '')
       INTO v_owner, v_recording_name, v_composition, v_song_title, v_owner_name
       FROM public.user_recordings ur
       JOIN public.song_versions sv ON sv.id = ur.song_version_id
@@ -826,7 +813,7 @@ AS $$
   )
   SELECT rp.email,
          rp.full_name,
-         COALESCE(NULLIF(op.full_name, ''), op.email),
+         NULLIF(op.full_name, ''),
          c.title,
          ur.recording_name,
          sv.composition_id
