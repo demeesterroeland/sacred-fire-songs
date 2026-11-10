@@ -1493,3 +1493,7 @@
 - [x] Recently added in the /songs and category grid: 10 songs row by row, 5 on a phone; titles, category headings, links and labels on one 16 px inset; Home padding as /songs
 - [x] E2E `ux-v2-home-grid.spec.ts` (390, 768, 1280 px), feature `ux-v2-home-grid.feature`, before/after screenshots
 
+## Session November 11, 2026 (#492, no delete button on song rows)
+- [x] Song rows (`SongCard`) have no delete button; `/songs` has no delete flow; deleting stays in the song page's ⋮ menu
+- [x] Unit test (`SongCard.test.tsx`), E2E (`ux-v2-song-rows.spec.ts`, admin), feature `ux-v2-song-rows.feature` 1.1, test matrix SONG-08; lint cap 141 → 140
+

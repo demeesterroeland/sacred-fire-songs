@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Heart, Lock, Trash2 } from 'lucide-react';
+import { Heart, Lock } from 'lucide-react';
 import { MetaLine } from '@/components/ui/meta-line';
 import { songRowMeta } from '@/lib/songs/songMeta';
 import { cn } from '@/lib/utils';
@@ -18,8 +18,6 @@ interface SongCardProps {
     isPublic?: boolean;
     isFavorite?: boolean;
     userId?: string;
-    canDelete?: boolean;
-    onDelete?: () => void;
     categories?: {
         name: string;
         slug: string;
@@ -32,7 +30,8 @@ interface SongCardProps {
  * Song list row (Story 6.1.2 / G1.2, #386): title, one grey meta line
  * `Author · Category · Language` and a key badge on the right. No coloured
  * chips, no glow, no accent bar. The whole row opens the song; heart and
- * add-to-playlist stay separate 44 px targets.
+ * add-to-playlist stay separate 44 px targets. Deleting is in the song page's ⋮ menu only (#492),
+ * so every row has the same buttons in the same place.
  */
 export default function SongCard({
     id,
@@ -42,8 +41,6 @@ export default function SongCard({
     isPublic = true,
     isFavorite = false,
     userId,
-    canDelete = false,
-    onDelete,
     categories = [],
 }: SongCardProps) {
     const { t } = useLocale();
@@ -85,21 +82,6 @@ export default function SongCard({
             )}
 
             <div className="relative z-20 flex shrink-0 items-center">
-                {canDelete && onDelete && (
-                    <button
-                        type="button"
-                        onClick={(e) => {
-                            e.preventDefault();
-                            e.stopPropagation();
-                            onDelete();
-                        }}
-                        className="inline-flex size-tap items-center justify-center rounded-pill text-fg-subtle opacity-0 transition-opacity hover:text-danger focus-visible:opacity-100 group-hover:opacity-100 [@media(hover:none)]:opacity-100"
-                        aria-label={t('songCard.delete')}
-                        title={t('songCard.delete')}
-                    >
-                        <Trash2 className="h-4 w-4" />
-                    </button>
-                )}
                 {userId && (
                     <PlaylistPicker
                         compositionId={id}

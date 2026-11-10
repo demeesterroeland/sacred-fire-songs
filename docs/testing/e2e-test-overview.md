@@ -1,8 +1,8 @@
 # E2E Test Overview & Matrix: Sacred Fire Songs
 
-**Version:** 1.21
+**Version:** 1.22
 **Status:** Living Document
-**Date:** Nov 9, 2026
+**Date:** Nov 11, 2026
 **Tracking:** GH #142
 
 ## Changelog
@@ -27,6 +27,7 @@
 | **1.15** | Nov 5, 2026 | LIB-13 follows Story 6.1.24: no `/explore` route; bottom bar spec `ux-v2-bottom-bar.spec.ts`. |
 | **1.20** | Nov 7, 2026 | UX v2 validation round 1, review round on PR #474: new spec `ux-v2-validation-1-review.spec.ts` (a press on a song under the open suggestions on a phone with touch and on a desktop with a mouse, also on guest Home; the scroll position of the desktop column on the song list, Home and Playlists; auto-scroll behind the fixed bars on a phone and with padding on a desktop; the tools sheet and focus on a window that grows; section labels versus chords; toolbar alignment; one focus cue on the tag field, the artist field and the selects; Search options labels in all 8 languages at 390 px; axe colour contrast on the open tag browser, light and dark; fixture `VALIDATION_1_REVIEW_FIXTURE_IDS`, removed by `e2e/global-teardown.ts`). `ux-v2-validation-1.spec.ts` is unchanged. |
 | **1.21** | Nov 9, 2026 | Validation 4: LIB-12 is the New tab (`/library/new`); the Library tab row has five tabs and scrolls on a phone (`ux-v2-library-tabs.spec.ts`). |
+| **1.22** | Nov 11, 2026 | #492: SONG-08 now checks that a song row has no delete button (an admin on `/songs`, `ux-v2-song-rows.spec.ts`); deleting is in the song page's ⋮ menu only (SONG-07). |
 | **1.19** | Nov 6, 2026 | UX v2 validation round 1 (Part of #375): new spec `ux-v2-validation-1.spec.ts` (one focus style, suggestions panel in the flow on `/songs` and Home, search options tokens and category name, song flags versus the reader; fixed-id fixture `VALIDATION_1_FIXTURE_IDS`, removed by `e2e/global-teardown.ts`); `ux-v2-reader-tools.spec.ts` uses a short window so auto-scroll is offered and tests that it is not on a song that fits; `ux-v2-song-meta.spec.ts` checks the expanded list. |
 | **1.18** | Nov 6, 2026 | Story 6.1.34 (#418): `e2e/tests/ux-v2-a11y-audit.spec.ts` (axe-core on the song page, the Practice panel, the recorder and the sheets and dialogs reachable from them; guest and member; light and dark; keyboard and focus journeys, including the delete confirmation, Escape while renaming and Tab reaching the embedded player; the sticky-title spec now picks a long-titled public song that has enough lyrics to scroll). Fixed fixture ids `A11Y_AUDIT_FIXTURE_IDS` (a second song with a reference video for the player), removed by `e2e/global-teardown.ts`. The Practice panel is now a dialog: specs wait for `data-testid="practice-drawer"` (not the old `h3`), recorder state and share list headings are `h3`, tabs expose `aria-selected`. |
 | **1.17** | Nov 6, 2026 | Story 6.1.32 (#416): PL-01 covers the New Playlist page: private line, Make public switch, Create enabled once named. New spec `ux-v2-new-playlist-visibility.spec.ts`. |
@@ -135,7 +136,7 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 | SONG-05 | Chords-over-lyrics conversion | Pasted "chords over lyrics" auto-converts to ChordPro | non-chord text not misdetected; key/capo extraction | M/A | ✅ | 🔲 | P1 | 1.1.6 |
 | SONG-06 | Edit song | Owner edits fields and saves | non-owner blocked (RLS); admin override | M(owner)/A | ✅ | 🔲 | P0 | 2.2.1 |
 | SONG-07 | Delete song | Owner/admin deletes a song with confirmation | non-owner has no delete; cancel modal | M(owner)/A | ✅ | 🔲 | P0 | 1.1.3 |
-| SONG-08 | Card delete icon | Hover delete icon on song card (owner/admin) | hidden for non-owner/guest | M(owner)/A | ✅ | 🔲 | P2 | 1.1.4 |
+| SONG-08 | No row delete | A song row has no delete button, also for the owner or an admin (#492) | buttons line up on every row | A | ✅ | ✅ | P2 | 1.1.4 |
 | SONG-09 | Media links | Attach YouTube/Spotify/SoundCloud URLs; embeds render on detail | invalid URL; multiple embeds | M/A | ✅ | 🔲 | P1 | 1.1.7, 1.3.2/1.3.4 |
 | SONG-10 | Draft auto-save | In-progress add form persists to localStorage and restores | clears after submit; create-mode only | M | ✅ | 🔲 | P2 | Story 1.1.8 |
 | SONG-11 | Public/Draft toggle | Set song visibility on create/edit | draft hidden from guests | M/A | ✅ | 🔲 | P1 | SongForm |

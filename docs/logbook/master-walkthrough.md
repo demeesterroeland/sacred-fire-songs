@@ -3373,3 +3373,9 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - Category sections, the section labels and *Your library* got the 16 px inset of `SongCard` (`ps-4`), so titles, headings and links share one left edge.
 - Home uses `p-4 md:p-8` like `/songs` (was `lg:p-10`), so both pages put the columns at the same x.
 - Tests: `e2e/tests/ux-v2-home-grid.spec.ts` measures the x positions at 390, 768 and 1280 px (red before, green after); unit and BDD limit 10.
+
+## Session November 11, 2026 — #492, no delete button on song rows
+
+- The trash button on a song row only showed for songs you may delete, so the row buttons shifted between rows. `SongCard` no longer has a delete button and `/songs` no longer wires a delete flow; deleting a song is done from the song page's ⋮ menu (with confirmation).
+- Tests: `SongCard.test.tsx` (no delete button, no delete wiring), `ux-v2-song-rows.spec.ts` (admin: no delete button, row buttons line up); `ux-v2-song-rows.feature` 1.1; test matrix SONG-08 updated. Lint cap lowered to 140.
+
