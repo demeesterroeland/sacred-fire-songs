@@ -9,7 +9,7 @@ vi.mock('@/context/LocaleContext', () => ({
     t: (k: string, v?: Record<string, string>) =>
       ({
         'song.traditional': 'Traditional',
-        'song.status.draft': 'Draft',
+        'song.visibility.private': 'Private',
         'songCard.addFavorite': 'Add to favorites',
         'songCard.removeFavorite': 'Remove from favorites',
         'songCard.view': `View ${v?.title}`,
@@ -58,8 +58,9 @@ describe('SongCard row', () => {
     expect(screen.getByTestId('song-row-meta').textContent).toBe('Traditional');
   });
 
-  it('marks a draft with a translated label', () => {
+  it('marks a private song with a translated label and a lighter title (validation 4)', () => {
     render(<SongCard id="s1" title="Draft song" author="X" isPublic={false} />);
-    expect(screen.getByText('Draft')).toBeTruthy();
+    expect(screen.getByText('Private')).toBeTruthy();
+    expect(screen.getByText('Draft song').className).toContain('text-fg-subtle');
   });
 });

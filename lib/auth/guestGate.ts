@@ -9,6 +9,7 @@ import { safeNextPath } from '@/lib/auth/safeNext';
 export const GUEST_GATE_FEATURES = [
   'edit',
   'history',
+  'newSongs',
   'newPlaylist',
   'settings',
   'profile',

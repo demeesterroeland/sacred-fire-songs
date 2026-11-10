@@ -77,7 +77,7 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'nav.library': 'Bibliotheek',
   'nav.playlists': 'Afspeellijsten',
   'nav.favorites': 'Favorieten',
-  'nav.drafts': 'Concepten',
+  'nav.drafts': 'Privé',
   'nav.recentlyViewed': 'Recent bekeken',
   'nav.addSong': 'Lied toevoegen',
   'nav.newPlaylist': 'Nieuwe afspeellijst',
@@ -90,7 +90,7 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'userMenu.account': 'Account',
   'userMenu.settings': 'Accountinstellingen',
   'userMenu.favorites': 'Jouw favorieten',
-  'userMenu.drafts': 'Mijn concepten',
+  'userMenu.drafts': "Mijn privéliederen",
   'userMenu.playlists': 'Mijn afspeellijsten',
   'userMenu.recentlyViewed': 'Recent bekeken',
   'userMenu.signOut': 'Afmelden',
@@ -332,6 +332,8 @@ const nl: Partial<Record<TranslationKey, string>> = {
   "settings.prefs.emailNotifications.description": "Stuur me een e-mail wanneer iemand een opname met me deelt.",
   'settings.prefs.emailNotifications.saveError': 'Je e-mailvoorkeur kon niet worden opgeslagen.',
 
+  'song.menu.publish': 'Openbaar maken',
+
   'song.publishSuccess': 'Lied is nu openbaar.',
   'song.publishError': 'Kon lied niet openbaar maken.',
 
@@ -480,6 +482,8 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'recentlyViewed.viewAll': 'Alles bekijken',
 
   'newSinceLastVisit.section': 'Nieuw sinds uw laatste bezoek',
+
+  'newSinceLastVisit.empty': 'Geen nieuwe liederen sinds je laatste bezoek.',
   'newSinceLastVisit.viewAll': 'Alles bekijken',
 
   // ─── Library Summary ──────────────────────────────────────────────────────
@@ -492,9 +496,6 @@ const nl: Partial<Record<TranslationKey, string>> = {
   "librarySummary.recordings.title": "Jouw opnames",
   "librarySummary.recordings.description": "Opnames die je maakte tijdens het oefenen",
   "librarySummary.recordings.empty": "Nog geen opnames",
-  'librarySummary.drafts.title': 'Mijn concepten',
-  'librarySummary.drafts.description': 'Jouw liederen in bewerking',
-  'librarySummary.drafts.empty': 'Nog geen concepten',
 
   // ─── Home ─────────────────────────────────────────────────────────────────
   'home.welcome.title': 'Welkom',
@@ -723,14 +724,19 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'library.heading': 'Jouw bibliotheek',
   'library.subtitle': 'Je afspeellijsten, geschiedenis en artiesten.',
   'library.tabs.history': 'Geschiedenis',
+  'library.tabs.smart': 'Slim',
+  'library.tabs.new': 'Nieuw',
   'playlists.songCount': '{count} liederen',
   'playlists.songCountSingle': '1 lied',
   'playlists.countPublic': '{count} openbaar',
-  'playlists.countDraft': '{count} concept',
+  'playlists.countDraft': '{count} privé',
   'playlists.publicPlaylists': 'Openbare afspeellijsten',
   'playlists.smartPlaylists': 'Slimme afspeellijsten',
-  'playlists.myPrivatePlaylists': 'Mijn privé afspeellijsten',
+  'playlists.myPrivatePlaylists': 'Je privé afspeellijsten',
+  'playlists.myPublicPlaylists': 'Je openbare afspeellijsten',
+  'playlists.otherPublicPlaylists': 'Andere openbare afspeellijsten',
   'playlists.emptyPrivateHint': 'Nog geen privé afspeellijsten — maak hierboven je eerste aan.',
+  'playlists.emptyPublicHint': 'Nog geen openbare afspeellijsten. Open ⋯ bij een afspeellijst om ze openbaar te maken.',
   'recentlyViewed.emptyWithAction': 'Nog geen recent bekeken liederen. Begin met verkennen om je geschiedenis hier te zien.',
   'albums.likedAlbums': 'Bewaarde albums',
   'albums.description': 'Bewaar albums waar je van houdt en ze verschijnen hier.',
@@ -907,6 +913,8 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'guestGate.edit.reason': 'Alleen de bewaarder van een lied kan het wijzigen. Log in om de liederen te bewerken die je hebt toegevoegd.',
   'guestGate.history.title': 'Log in om je geschiedenis te zien',
   'guestGate.history.reason': 'Recent bekeken liederen worden bij je account bewaard, zodat ze van telefoon naar laptop meekomen.',
+  'guestGate.newSongs.title': 'Log in om te zien wat nieuw is',
+  'guestGate.newSongs.reason': 'Nieuwe liederen zijn de liederen die sinds je laatste bezoek zijn toegevoegd, dus de app moet weten welke liederen je al opende.',
   'guestGate.newPlaylist.title': 'Log in om een afspeellijst te maken',
   'guestGate.newPlaylist.reason': 'Afspeellijsten worden bij je account bewaard, zodat je ze op elk apparaat terugvindt.',
   'guestGate.settings.title': 'Log in om je instellingen te openen',
@@ -914,7 +922,7 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'guestGate.profile.title': 'Log in om profielen te zien',
   'guestGate.profile.reason': 'Zangersprofielen en hun opnames zijn alleen zichtbaar voor leden van de kring.',
   'guestGate.smartPlaylists.title': 'Log in om je bibliotheek te zien',
-  'guestGate.smartPlaylists.reason': 'Favorieten, je liederen, concepten en opnames worden bij je account bewaard. Openbare afspeellijsten blijven voor iedereen open.',
+  'guestGate.smartPlaylists.reason': "Favorieten, je liederen en opnames worden bij je account bewaard. Openbare afspeellijsten blijven voor iedereen open.",
   'guestGate.recorder.title': 'Log in om op te nemen',
   "guestGate.recorder.reason": "Neem je eigen oefeningen op, houd ze privé en luister ze altijd terug. Delen en downloaden is ook voor leden.",
   'guestGate.sharing.title': 'Log in om deze gedeelde opname te openen',

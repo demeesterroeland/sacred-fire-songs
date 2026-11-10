@@ -119,7 +119,7 @@ test.describe('member', () => {
   });
 
   test('9: the Your recordings card says recordings, not private songs', async ({ page }) => {
-    await page.goto('/library/playlists');
+    await page.goto('/library/smart');
     const card = page.getByRole('link', { name: /Your recordings/ });
     await expect(card).toBeVisible();
     await expect(card).not.toContainText(/\btakes?\b|private practice/i);
@@ -257,7 +257,7 @@ test('12: the sign-up form links to the Terms and Privacy pages', async ({ page 
 test.describe('admin', () => {
   test.use({ storageState: ROLES.admin.storage });
 
-  test('13: the My Drafts card counts only the admin\'s own drafts', async ({ page }) => {
+  test('13: the Drafts count counts only the admin\'s own drafts', async ({ page }) => {
     const client = new pg.Client({ connectionString: DATABASE_URL });
     await client.connect();
     const own = Number(
@@ -270,11 +270,14 @@ test.describe('admin', () => {
       ).rows[0].n,
     );
     await client.end();
-    await page.goto('/library/playlists');
-    const card = page.getByRole('link', { name: /My Drafts/ });
-    await expect(card).toBeVisible();
-    if (own === 0) await expect(card).toContainText('No drafts yet');
-    else await expect(card).toContainText(own === 1 ? '1 song' : `${own} songs`);
+    // Validation 4: the My Drafts smart playlist is gone; the Home library summary keeps the Drafts count.
+    await page.goto('/library/smart');
+    await expect(page.getByTestId('smart-playlists')).toBeVisible();
+    await expect(page.getByRole('link', { name: /My Drafts/ })).toHaveCount(0);
+    await page.goto('/');
+    const drafts = page.locator('main a[href*="status=draft"]').first();
+    await expect(drafts).toBeVisible();
+    await expect(drafts).toContainText(String(own));
   });
 
   test('7: desktop song buttons: Practice is the one accent, Delete and Edit are neutral', async ({ browser }) => {
@@ -394,7 +397,7 @@ test.describe('admin', () => {
     );
     await client.end(); // read-only: nothing is written
     test.skip(own === 0 || own > 15, 'needs a few own favourites (and fewer than one page) in the seed');
-    await page.goto('/library/playlists');
+    await page.goto('/library/smart');
     await expect(page.getByRole('link', { name: /Your Favorites/ })).toContainText(own === 1 ? '1 song' : `${own} songs`);
     // Follow the card's own address (a click on a card can land on a title preview inside it when the page is busy).
     const favHref = await page.getByRole('link', { name: /Your Favorites/ }).getAttribute('href');
@@ -403,7 +406,7 @@ test.describe('admin', () => {
     await expect(page.getByTestId('song-row')).toHaveCount(own);
   });
 
-  test('4 (review): the My Drafts card opens exactly the drafts it counts', async ({ page }) => {
+  test('4 (review): the Drafts link opens exactly the drafts it counts', async ({ page }) => {
     const client = new pg.Client({ connectionString: DATABASE_URL });
     await client.connect();
     const own = Number(
@@ -417,8 +420,8 @@ test.describe('admin', () => {
     );
     await client.end();
     test.skip(own === 0 || own > 15, 'needs a few own drafts (and fewer than one page) in the seed');
-    await page.goto('/library/playlists');
-    const draftsHref = await page.getByRole('link', { name: /My Drafts/ }).getAttribute('href');
+    await page.goto('/');
+    const draftsHref = await page.locator('main a[href*="status=draft"]').first().getAttribute('href');
     expect(draftsHref).toContain('mine=true');
     expect(draftsHref).toContain('status=draft');
     await page.goto(draftsHref!);

@@ -81,7 +81,7 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'nav.library': 'Biblioteca',
   'nav.playlists': 'Listakuna',
   'nav.favorites': 'Munasqakuna',
-  'nav.drafts': 'Borradorkuna',
+  'nav.drafts': 'Pakasqakuna',
   'nav.recentlyViewed': 'Qhipa qhawasqakuna',
   'nav.addSong': 'Taki yapay',
   'nav.newPlaylist': 'Musuq lista',
@@ -94,7 +94,7 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'userMenu.account': 'Cuenta',
   'userMenu.settings': 'Cuenta configuración',
   'userMenu.favorites': 'Munasqaykikuna',
-  'userMenu.drafts': 'Borradorniykuna',
+  'userMenu.drafts': "Pakasqa takiykikuna",
   'userMenu.playlists': 'Listaykuna',
   'userMenu.recentlyViewed': 'Qhipa qhawasqakuna',
   'userMenu.signOut': 'Lluqsiy',
@@ -336,6 +336,8 @@ const qu: Partial<Record<TranslationKey, string>> = {
   "settings.prefs.emailNotifications.description": "Pipas grabaciónta ñuqawan rakinakuptin correota apachimuway.",
   'settings.prefs.emailNotifications.saveError': 'Correo akllasqaykita mana waqaychayta atikurqanchu.',
 
+  'song.menu.publish': 'Llapa runapaq kichay',
+
   'song.publishSuccess': 'Takiqa llapapaqñam kachkan.',
   'song.publishError': 'Mana takita llapapaq churayta atikunchu.',
 
@@ -484,6 +486,8 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'recentlyViewed.viewAll': 'Llapanta qhaway',
 
   'newSinceLastVisit.section': 'Qhipa hamusqaykimanta musuqkuna',
+
+  'newSinceLastVisit.empty': 'Qhipa hamusqaykimanta mana musuq takikuna kanchu.',
   'newSinceLastVisit.viewAll': 'Llapanta qhaway',
 
   // ─── Library Summary (Home) ───────────────────────────────────────────────
@@ -496,9 +500,6 @@ const qu: Partial<Record<TranslationKey, string>> = {
   "librarySummary.recordings.title": "Grabaciónniykikuna",
   "librarySummary.recordings.description": "Yachakuspa grabasqaykikuna",
   "librarySummary.recordings.empty": "Manaraq grabaciónkuna kanchu",
-  'librarySummary.drafts.title': 'Borradorniykuna',
-  'librarySummary.drafts.description': 'Ruwasqayki takikuna, manaraq tukusqa',
-  'librarySummary.drafts.empty': 'Manaraq borradorkuna',
 
   // ─── Home ─────────────────────────────────────────────────────────────────
   'home.welcome.title': 'Allin hamuy',
@@ -727,14 +728,19 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'library.heading': 'Bibliotecayki',
   'library.subtitle': 'Listaykikuna, ñawpaq qhawasqaykikuna hinaspa takiqkuna.',
   'library.tabs.history': 'Ñawpa ruwasqa',
+  'library.tabs.smart': 'Yachaysapa',
+  'library.tabs.new': 'Musuq',
   'playlists.songCount': 'Takikuna: {count}',
   'playlists.songCountSingle': '1 taki',
   'playlists.countPublic': 'Llapa runapaq: {count}',
-  'playlists.countDraft': 'Borrador: {count}',
+  'playlists.countDraft': 'Pakasqa: {count}',
   'playlists.publicPlaylists': 'Llapa runapaq listakuna',
   'playlists.smartPlaylists': 'Yachaysapa listakuna',
-  'playlists.myPrivatePlaylists': 'Pakasqa listaykuna',
+  'playlists.myPrivatePlaylists': 'Pakasqa listaykikuna',
+  'playlists.myPublicPlaylists': 'Llapa runapaq listaykikuna',
+  'playlists.otherPublicPlaylists': 'Huk llapa runapaq listakuna',
   'playlists.emptyPrivateHint': 'Manaraq pakasqa listakuna kanchu — ñawpaqta hawapi ruway.',
+  'playlists.emptyPublicHint': 'Manaraq llapa runapaq listayki kanchu. ⋯ kichay llapa runapaq ruwanaykipaq.',
   'recentlyViewed.emptyWithAction': 'Manaraq takikuna qhawasqachu. Maskayta qallariy, ñawpa ruwasqaykita kaypi rikunaykipaq.',
   'albums.likedAlbums': 'Munasqa albumkuna',
   'albums.description': 'Munasqa albumkunata waqaychay, kaypi rikurinqa.',
@@ -912,6 +918,8 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'guestGate.edit.reason': 'Takita waqaychaqllan chay takita hukchayta atin. Yaykuy, yapasqayki takikunata allichanaykipaq.',
   'guestGate.history.title': 'Qhawasqaykikuna rikunaykipaq yaykuy',
   'guestGate.history.reason': 'Qhipa qhawasqa takikuna cuentaykipi waqaychasqa kanku, chaymi celularmanta laptopman qatiykusunki.',
+  'guestGate.newSongs.title': 'Musuqkunata rikunaykipaq yaykuy',
+  'guestGate.newSongs.reason': 'Musuq takikunaqa qhipa hamusqaykimanta yapasqa kanku; chaypaqmi app yachanan mayqin takikunata kicharqanki.',
   'guestGate.newPlaylist.title': 'Lista ruwanaykipaq yaykuy',
   'guestGate.newPlaylist.reason': 'Listakuna cuentaykipi waqaychasqa kanku, chaymi ima aparatupipas tarinki.',
   'guestGate.settings.title': 'Allichasqaykikuna kichanaykipaq yaykuy',
@@ -919,7 +927,7 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'guestGate.profile.title': 'Perfilkuna rikunaykipaq yaykuy',
   'guestGate.profile.reason': 'Takiqkunapa perfilnin, grabasqankunapas muyupi kaqkunallapaqmi rikukun.',
   'guestGate.smartPlaylists.title': 'Bibliotecaykita rikunaykipaq yaykuy',
-  'guestGate.smartPlaylists.reason': 'Munasqakuna, takiykikuna, borradorkuna, grabacionkunapas cuentaykipi waqaychasqa kanku. Llapa runapaq listakunaqa kichasqallam kachkan.',
+  'guestGate.smartPlaylists.reason': "Munasqakuna, takiykikuna, grabacionkunapas cuentaykipi waqaychasqa kanku. Llapa runapaq listakunaqa kichasqallam kachkan.",
   'guestGate.recorder.title': 'Grabanaykipaq yaykuy',
   'guestGate.recorder.reason': 'Kikiyki yachakusqayki grabacionkunata grabay, pakallapi waqaychay, hinaspa kutin uyariy. Rakinapas uraykachinapas kaqkunallapaqmi.',
   'guestGate.sharing.title': 'Kay rakisqa grabacionta kichanaykipaq yaykuy',

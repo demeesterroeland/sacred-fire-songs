@@ -299,7 +299,9 @@ export async function getRecentlyViewedCount(userId: string): Promise<number> {
 }
 
 /**
- * Fetch public songs from the last 30 days that the user has never viewed.
+ * Fetch songs from the last 30 days that the user has never viewed: public songs and the user's own.
+ * Filtered explicitly, not by RLS alone: RLS lets an admin read every private song, and the New tab must not list
+ * other members' drafts (review of PR #482).
  */
 export async function getUnviewedSongs(userId: string, limit = 20): Promise<Song[]> {
     const supabase = await createClient();
@@ -312,10 +314,10 @@ export async function getUnviewedSongs(userId: string, limit = 20): Promise<Song
         .eq('user_id', userId);
     const viewedSet = new Set((viewedIds ?? []).map(v => v.song_id));
 
-    // Get recent songs visible to user (RLS handles visibility)
     const { data: recentSongs, error } = await supabase
         .from('compositions')
         .select('id')
+        .or(`is_public.eq.true,owner_id.eq.${userId}`)
         .gte('created_at', thirtyDaysAgo)
         .order('created_at', { ascending: false });
 

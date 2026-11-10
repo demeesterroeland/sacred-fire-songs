@@ -39,7 +39,7 @@ test('Lyrics above the fold on five seeded songs', async ({ page }) => {
     const meta = page.getByTestId('song-meta-lines');
     await expect(meta).toBeVisible();
 
-    // Metadata occupies at most two lines: the 44 px meta-line button + one technical line.
+    // Validation 4 (owner): closed, author and tag links stay on ONE 44 px row (as many tags as fit, then "…").
     const { height, techHeight, maxTech } = await meta.evaluate((el) => {
       const tech = el.querySelector('[data-testid="song-technical-line"]');
       const fs = parseFloat(getComputedStyle(el).fontSize);
@@ -51,6 +51,24 @@ test('Lyrics above the fold on five seeded songs', async ({ page }) => {
     });
     expect(techHeight, song.title).toBeLessThanOrEqual(maxTech);
     expect(height, song.title).toBeLessThanOrEqual(44 + maxTech + 1);
+
+    // As many links (tags, Chords, Melody, Recordings) as fit; "…" only when one is hidden, and then it really would
+    // not fit.
+    const fit = await meta.evaluate((el) => {
+      const list = el.querySelector('ul:not([aria-hidden])')!;
+      const box = list.parentElement!.getBoundingClientRect();
+      const shown = [...list.children].filter((li) => getComputedStyle(li).display !== 'none' && li.getAttribute('data-testid') !== 'song-meta-more');
+      const hidden = [...list.children].filter((li) => getComputedStyle(li).display === 'none').length;
+      const more = list.querySelector('[data-testid="song-meta-more"]');
+      const lastRight = shown.length ? shown[shown.length - 1].getBoundingClientRect().right : box.left;
+      const moreRight = more ? more.getBoundingClientRect().right : lastRight;
+      const copy = el.querySelector('ul[aria-hidden]')!;
+      const nextWidth = hidden ? (copy.children[shown.length] as HTMLElement).offsetWidth : 0;
+      return { hidden, hasMore: !!more, moreRight, boxRight: box.right, room: box.right - moreRight, nextWidth };
+    });
+    expect(fit.hasMore, song.title).toBe(fit.hidden > 0);
+    expect(fit.moreRight, song.title).toBeLessThanOrEqual(fit.boxRight + 0.5);
+    if (fit.hidden > 0) expect(fit.room, song.title).toBeLessThan(fit.nextWidth + 4);
 
     // First lyric line fully inside the viewport, above the fixed bottom bars.
     const first = page.getByTestId('lyric-line').first();
@@ -72,22 +90,23 @@ test('Lyrics above the fold on five seeded songs', async ({ page }) => {
   }
 });
 
-test('the meta line expands into the full tag list', async ({ page }) => {
+test('author and tags are links in both states; the chevron adds the rest', async ({ page }) => {
   test.skip(!songs.length, 'no public song with lyrics seeded');
   await page.goto(`/songs/${songs[0].id}`);
   const toggle = page.getByTestId('song-meta-line');
+  const links = page.getByTestId('song-meta-lines').getByRole('link');
   await expect(toggle).toHaveAttribute('aria-expanded', 'false');
+  await expect(links.first()).toBeVisible();
+  const collapsed = await links.count();
+  expect(await links.first().evaluate((el) => getComputedStyle(el).textDecorationLine)).toContain('underline');
   await toggle.click();
   await expect(toggle).toHaveAttribute('aria-expanded', 'true');
-  const links = page.getByTestId('song-meta-lines').getByRole('link');
-  await expect(links.first()).toBeVisible();
-  // Validation 1: the expanded state is the link list only. Nothing is said twice, and links look clickable
-  // without hover (permanent underline).
+  expect(await links.count()).toBeGreaterThanOrEqual(collapsed);
+  // Nothing is said twice.
   const names = await links.allTextContents();
   const text = (await page.getByTestId('song-meta-lines').first().innerText()).replace(/\s+/g, ' ');
   for (const n of names) expect(text.split(n).length - 1, n).toBe(1);
-  expect(await links.first().evaluate((el) => getComputedStyle(el).textDecorationLine)).toContain('underline');
-  await toggle.click(); // the chevron collapses it again
+  await toggle.click();
   await expect(toggle).toHaveAttribute('aria-expanded', 'false');
-  await expect(page.getByTestId('song-meta-lines').getByRole('link')).toHaveCount(0);
+  await expect(links).toHaveCount(collapsed);
 });

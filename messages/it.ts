@@ -77,7 +77,7 @@ const it: Partial<Record<TranslationKey, string>> = {
   'nav.library': 'Libreria',
   'nav.playlists': 'Playlist',
   'nav.favorites': 'Preferiti',
-  'nav.drafts': 'Bozze',
+  'nav.drafts': 'Private',
   'nav.recentlyViewed': 'Visti di recente',
   'nav.addSong': 'Aggiungi canto',
   'nav.newPlaylist': 'Nuova playlist',
@@ -90,7 +90,7 @@ const it: Partial<Record<TranslationKey, string>> = {
   'userMenu.account': 'Account',
   'userMenu.settings': 'Impostazioni account',
   'userMenu.favorites': 'I tuoi preferiti',
-  'userMenu.drafts': 'Le mie bozze',
+  'userMenu.drafts': "I miei canti privati",
   'userMenu.playlists': 'Le mie playlist',
   'userMenu.recentlyViewed': 'Visti di recente',
   'userMenu.signOut': 'Esci',
@@ -332,6 +332,8 @@ const it: Partial<Record<TranslationKey, string>> = {
   "settings.prefs.emailNotifications.description": "Inviami un’email quando qualcuno condivide una registrazione con me.",
   'settings.prefs.emailNotifications.saveError': 'Impossibile salvare la tua preferenza email.',
 
+  'song.menu.publish': 'Rendi pubblico',
+
   'song.publishSuccess': 'Il canto ora è pubblico.',
   'song.publishError': 'Impossibile rendere pubblico il canto.',
 
@@ -480,6 +482,8 @@ const it: Partial<Record<TranslationKey, string>> = {
   'recentlyViewed.viewAll': 'Vedi tutti',
 
   'newSinceLastVisit.section': "Novità dall'ultima visita",
+
+  'newSinceLastVisit.empty': "Nessun canto nuovo dall'ultima visita.",
   'newSinceLastVisit.viewAll': 'Vedi tutti',
 
   // ─── Library Summary (Home) ───────────────────────────────────────────────
@@ -492,9 +496,6 @@ const it: Partial<Record<TranslationKey, string>> = {
   "librarySummary.recordings.title": "Le tue registrazioni",
   "librarySummary.recordings.description": "Le registrazioni fatte mentre ti eserciti",
   "librarySummary.recordings.empty": "Ancora nessuna registrazione",
-  'librarySummary.drafts.title': 'Le mie bozze',
-  'librarySummary.drafts.description': 'I tuoi canti in lavorazione',
-  'librarySummary.drafts.empty': 'Ancora nessuna bozza',
 
   // ─── Home ─────────────────────────────────────────────────────────────────
   'home.welcome.title': 'Benvenuto',
@@ -723,14 +724,19 @@ const it: Partial<Record<TranslationKey, string>> = {
   'library.heading': 'La tua libreria',
   'library.subtitle': 'Le tue playlist, la cronologia e gli artisti.',
   'library.tabs.history': 'Cronologia',
+  'library.tabs.smart': 'Smart',
+  'library.tabs.new': 'Nuovi',
   'playlists.songCount': '{count} canti',
   'playlists.songCountSingle': '1 canto',
   'playlists.countPublic': '{count} pubbliche',
-  'playlists.countDraft': '{count} in bozza',
+  'playlists.countDraft': '{count} private',
   'playlists.publicPlaylists': 'Playlist pubbliche',
   'playlists.smartPlaylists': 'Playlist smart',
-  'playlists.myPrivatePlaylists': 'Le mie playlist private',
+  'playlists.myPrivatePlaylists': 'Le tue playlist private',
+  'playlists.myPublicPlaylists': 'Le tue playlist pubbliche',
+  'playlists.otherPublicPlaylists': 'Altre playlist pubbliche',
   'playlists.emptyPrivateHint': 'Ancora nessuna playlist privata — crea la prima qui sopra.',
+  'playlists.emptyPublicHint': 'Ancora nessuna playlist pubblica. Apri ⋯ su una playlist per renderla pubblica.',
   'recentlyViewed.emptyWithAction': 'Ancora nessun canto visto di recente. Inizia a esplorare per vedere qui la tua cronologia.',
   'albums.likedAlbums': 'Album che ti piacciono',
   'albums.description': "Salva gli album che ami e compariranno qui.",
@@ -908,6 +914,8 @@ const it: Partial<Record<TranslationKey, string>> = {
   'guestGate.edit.reason': 'Solo il custode di un canto può modificarlo. Accedi per modificare i canti che hai aggiunto.',
   'guestGate.history.title': 'Accedi per vedere la cronologia',
   'guestGate.history.reason': 'I canti visti di recente sono salvati nel tuo account e ti seguono dal telefono al portatile.',
+  'guestGate.newSongs.title': 'Accedi per vedere le novità',
+  'guestGate.newSongs.reason': "I canti nuovi sono quelli aggiunti dopo l'ultima visita, quindi l'app deve sapere quali canti hai già aperto.",
   'guestGate.newPlaylist.title': 'Accedi per creare una playlist',
   'guestGate.newPlaylist.reason': 'Le playlist sono salvate nel tuo account, così le ritrovi su ogni dispositivo.',
   'guestGate.settings.title': 'Accedi per aprire le impostazioni',
@@ -915,7 +923,7 @@ const it: Partial<Record<TranslationKey, string>> = {
   'guestGate.profile.title': 'Accedi per vedere i profili',
   'guestGate.profile.reason': 'I profili dei cantori e le loro registrazioni sono visibili solo ai membri del cerchio.',
   'guestGate.smartPlaylists.title': 'Accedi per vedere la tua libreria',
-  'guestGate.smartPlaylists.reason': 'Preferiti, i tuoi canti, le bozze e le registrazioni sono salvati nel tuo account. Le playlist pubbliche restano aperte a tutti.',
+  'guestGate.smartPlaylists.reason': "Preferiti, i tuoi canti e le registrazioni sono salvati nel tuo account. Le playlist pubbliche restano aperte a tutti.",
   'guestGate.recorder.title': 'Accedi per registrare',
   'guestGate.recorder.reason': 'Registra le tue prove, tienile private e riascoltale quando vuoi. Anche condividere e scaricare è per i membri.',
   'guestGate.sharing.title': 'Accedi per aprire questa registrazione condivisa',

@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { ChevronRight } from 'lucide-react';
@@ -11,6 +12,12 @@ import { SharedWithMeLink } from '@/components/library/SharedWithMeLink';
 export default function LibraryTabs() {
     const { t } = useLocale();
     const pathname = usePathname();
+    const activeRef = useRef<HTMLAnchorElement>(null);
+
+    // Validation 4: five tabs are wider than a phone, so the row scrolls; keep the open tab in view.
+    useEffect(() => {
+        activeRef.current?.scrollIntoView?.({ block: 'nearest', inline: 'nearest' });
+    }, [pathname]);
 
     // Story 6.1.23 (#407): only working tabs; Albums is hidden (UXD-4).
     const tabs = libraryTabs().map((tab) => ({ ...tab, label: t(tab.labelKey) }));
@@ -65,12 +72,13 @@ export default function LibraryTabs() {
             {/* One floating "+" (phones and tablets); from lg the header's Create menu does the same. */}
             <LibraryCreateButton />
             <nav aria-label={t('nav.library')} className="relative mb-8">
-                <div className="flex gap-2 overflow-x-auto scrollbar-none -mx-4 px-4 md:mx-0 md:px-0">
+                <div className="flex gap-2 overflow-x-auto scrollbar-none scroll-px-4 -mx-4 px-4 md:mx-0 md:px-0 md:scroll-px-0">
                     {tabs.map(({ label, href, icon: Icon }) => {
                         const isActive = pathname === href;
                         return (
                             <Link
                                 key={href}
+                                ref={isActive ? activeRef : undefined}
                                 href={href}
                                 aria-current={isActive ? 'page' : undefined}
                                 className={`inline-flex min-h-tap items-center gap-1.5 px-3.5 rounded-pill text-meta font-semibold whitespace-nowrap shrink-0 transition-colors ${

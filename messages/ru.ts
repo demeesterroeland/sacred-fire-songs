@@ -80,7 +80,7 @@ const ru: Partial<Record<TranslationKey, string>> = {
   'nav.library': 'Библиотека',
   'nav.playlists': 'Плейлисты',
   'nav.favorites': 'Избранное',
-  'nav.drafts': 'Черновики',
+  'nav.drafts': 'Личные',
   'nav.recentlyViewed': 'Недавно просмотренные',
   'nav.addSong': 'Добавить песню',
   'nav.newPlaylist': 'Новый плейлист',
@@ -93,7 +93,7 @@ const ru: Partial<Record<TranslationKey, string>> = {
   'userMenu.account': 'Аккаунт',
   'userMenu.settings': 'Настройки аккаунта',
   'userMenu.favorites': 'Твоё избранное',
-  'userMenu.drafts': 'Мои черновики',
+  'userMenu.drafts': "Мои личные песни",
   'userMenu.playlists': 'Мои плейлисты',
   'userMenu.recentlyViewed': 'Недавно просмотренные',
   'userMenu.signOut': 'Выйти',
@@ -335,6 +335,8 @@ const ru: Partial<Record<TranslationKey, string>> = {
   "settings.prefs.emailNotifications.description": "Присылать письмо, когда кто-то делится со мной записью.",
   'settings.prefs.emailNotifications.saveError': 'Не удалось сохранить настройку почты.',
 
+  'song.menu.publish': 'Сделать публичной',
+
   'song.publishSuccess': 'Песня теперь публичная.',
   'song.publishError': 'Не удалось сделать песню публичной.',
 
@@ -483,6 +485,8 @@ const ru: Partial<Record<TranslationKey, string>> = {
   'recentlyViewed.viewAll': 'Показать все',
 
   'newSinceLastVisit.section': 'Новое с прошлого визита',
+
+  'newSinceLastVisit.empty': 'С прошлого визита новых песен нет.',
   'newSinceLastVisit.viewAll': 'Показать все',
 
   // ─── Library Summary (Home) ───────────────────────────────────────────────
@@ -495,9 +499,6 @@ const ru: Partial<Record<TranslationKey, string>> = {
   "librarySummary.recordings.title": "Твои записи",
   "librarySummary.recordings.description": "Записи, сделанные во время практики",
   "librarySummary.recordings.empty": "Записей пока нет",
-  'librarySummary.drafts.title': 'Мои черновики',
-  'librarySummary.drafts.description': 'Твои песни в работе',
-  'librarySummary.drafts.empty': 'Черновиков пока нет',
 
   // ─── Home ─────────────────────────────────────────────────────────────────
   'home.welcome.title': 'Добро пожаловать',
@@ -726,14 +727,19 @@ const ru: Partial<Record<TranslationKey, string>> = {
   'library.heading': 'Твоя библиотека',
   'library.subtitle': 'Твои плейлисты, история и исполнители.',
   'library.tabs.history': 'История',
+  'library.tabs.smart': 'Умные',
+  'library.tabs.new': 'Новое',
   'playlists.songCount': 'Песен: {count}',
   'playlists.songCountSingle': '1 песня',
   'playlists.countPublic': 'Публичных: {count}',
-  'playlists.countDraft': 'Черновиков: {count}',
+  'playlists.countDraft': 'Личных: {count}',
   'playlists.publicPlaylists': 'Публичные плейлисты',
   'playlists.smartPlaylists': 'Умные плейлисты',
-  'playlists.myPrivatePlaylists': 'Мои личные плейлисты',
+  'playlists.myPrivatePlaylists': 'Ваши личные плейлисты',
+  'playlists.myPublicPlaylists': 'Ваши публичные плейлисты',
+  'playlists.otherPublicPlaylists': 'Другие публичные плейлисты',
   'playlists.emptyPrivateHint': 'Личных плейлистов пока нет — создай первый выше.',
+  'playlists.emptyPublicHint': 'Публичных плейлистов пока нет. Откройте ⋯ у плейлиста, чтобы сделать его публичным.',
   'recentlyViewed.emptyWithAction': 'Недавно просмотренных песен пока нет. Начни исследовать, и твоя история появится здесь.',
   'albums.likedAlbums': 'Любимые альбомы',
   'albums.description': 'Сохраняй любимые альбомы, и они появятся здесь.',
@@ -910,6 +916,8 @@ const ru: Partial<Record<TranslationKey, string>> = {
   'guestGate.edit.reason': 'Изменить песню может только её хранитель. Войдите, чтобы редактировать добавленные вами песни.',
   'guestGate.history.title': 'Войдите, чтобы увидеть историю',
   'guestGate.history.reason': 'Недавно просмотренные песни сохраняются в вашем аккаунте и переходят с телефона на ноутбук.',
+  'guestGate.newSongs.title': 'Войдите, чтобы увидеть новое',
+  'guestGate.newSongs.reason': 'Новые песни — это песни, добавленные после вашего прошлого визита, поэтому приложению нужно знать, какие песни вы уже открывали.',
   'guestGate.newPlaylist.title': 'Войдите, чтобы создать плейлист',
   'guestGate.newPlaylist.reason': 'Плейлисты сохраняются в вашем аккаунте, поэтому их можно найти на любом устройстве.',
   'guestGate.settings.title': 'Войдите, чтобы открыть настройки',
@@ -917,7 +925,7 @@ const ru: Partial<Record<TranslationKey, string>> = {
   'guestGate.profile.title': 'Войдите, чтобы смотреть профили',
   'guestGate.profile.reason': 'Профили певцов и их записи видны только участникам круга.',
   'guestGate.smartPlaylists.title': 'Войдите, чтобы увидеть библиотеку',
-  'guestGate.smartPlaylists.reason': 'Избранное, ваши песни, черновики и записи хранятся в вашем аккаунте. Публичные плейлисты по-прежнему открыты для всех.',
+  'guestGate.smartPlaylists.reason': "Избранное, ваши песни и записи хранятся в вашем аккаунте. Публичные плейлисты по-прежнему открыты для всех.",
   'guestGate.recorder.title': 'Войдите, чтобы записывать',
   'guestGate.recorder.reason': 'Записывайте свои репетиции, храните их в тайне и слушайте когда угодно. Делиться и скачивать тоже могут только участники.',
   'guestGate.sharing.title': 'Войдите, чтобы открыть эту запись',

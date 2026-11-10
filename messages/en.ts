@@ -75,7 +75,7 @@ const en = {
   'nav.library': 'Library',
   'nav.playlists': 'Playlists',
   'nav.favorites': 'Favorites',
-  'nav.drafts': 'Drafts',
+  'nav.drafts': 'Private',
   'nav.recentlyViewed': 'Recently Viewed',
   'nav.addSong': 'Add Song',
   'nav.newPlaylist': 'New Playlist',
@@ -88,7 +88,7 @@ const en = {
   'userMenu.account': 'Account',
   'userMenu.settings': 'Account Settings',
   'userMenu.favorites': 'Your Favorites',
-  'userMenu.drafts': 'My Drafts',
+  'userMenu.drafts': "My private songs",
   'userMenu.playlists': 'My Playlists',
   'userMenu.recentlyViewed': 'Recently Viewed',
   'userMenu.signOut': 'Sign Out',
@@ -330,6 +330,8 @@ const en = {
   "settings.prefs.emailNotifications.description": "Email me when someone shares a recording with me.",
   'settings.prefs.emailNotifications.saveError': 'Could not save your email preference.',
 
+  'song.menu.publish': 'Make public',
+
   'song.publishSuccess': 'Song is now public.',
   'song.publishError': 'Failed to make song public.',
 
@@ -478,6 +480,8 @@ const en = {
   'recentlyViewed.viewAll': 'View All',
 
   'newSinceLastVisit.section': 'New since last visit',
+
+  'newSinceLastVisit.empty': 'No new songs since your last visit.',
   'newSinceLastVisit.viewAll': 'View All',
 
   // ─── Library Summary (Home) ───────────────────────────────────────────────
@@ -490,9 +494,6 @@ const en = {
   "librarySummary.recordings.title": "Your recordings",
   "librarySummary.recordings.description": "Recordings you made while practising",
   "librarySummary.recordings.empty": "No recordings yet",
-  'librarySummary.drafts.title': 'My Drafts',
-  'librarySummary.drafts.description': 'Your work-in-progress songs',
-  'librarySummary.drafts.empty': 'No drafts yet',
 
   // ─── Home ─────────────────────────────────────────────────────────────────
   'home.welcome.title': 'Welcome',
@@ -721,14 +722,19 @@ const en = {
   'library.heading': 'Your library',
   'library.subtitle': 'Your playlists, history and artists.',
   'library.tabs.history': 'History',
+  'library.tabs.smart': 'Smart',
+  'library.tabs.new': 'New',
   'playlists.songCount': '{count} songs',
   'playlists.songCountSingle': '1 song',
   'playlists.countPublic': '{count} public',
-  'playlists.countDraft': '{count} draft',
+  'playlists.countDraft': '{count} private',
   'playlists.publicPlaylists': 'Public playlists',
   'playlists.smartPlaylists': 'Smart playlists',
-  'playlists.myPrivatePlaylists': 'My private playlists',
+  'playlists.myPrivatePlaylists': 'Your private playlists',
+  'playlists.myPublicPlaylists': 'Your public playlists',
+  'playlists.otherPublicPlaylists': 'Other public playlists',
   'playlists.emptyPrivateHint': 'No private playlists yet — create your first one above.',
+  'playlists.emptyPublicHint': 'No public playlists yet. Open ⋯ on a playlist to make it public.',
   'recentlyViewed.emptyWithAction': 'No recently viewed songs yet. Start exploring to see your history here.',
   'albums.likedAlbums': 'Liked Albums',
   'albums.description': "Save albums you love and they'll appear here.",
@@ -906,6 +912,8 @@ const en = {
   'guestGate.edit.reason': 'Only a song\'s keeper can change it. Sign in to edit the songs you added.',
   'guestGate.history.title': 'Sign in to see your history',
   'guestGate.history.reason': 'Recently viewed songs are saved to your account, so they follow you from phone to laptop.',
+  'guestGate.newSongs.title': 'Sign in to see what is new',
+  'guestGate.newSongs.reason': 'New songs are the ones added since your last visit, so the app needs to know which songs you have opened.',
   'guestGate.newPlaylist.title': 'Sign in to create a playlist',
   'guestGate.newPlaylist.reason': 'Playlists are saved to your account, so you can find them on any device.',
   'guestGate.settings.title': 'Sign in to open your settings',
@@ -913,7 +921,7 @@ const en = {
   'guestGate.profile.title': 'Sign in to see profiles',
   "guestGate.profile.reason": "Singer profiles and their recordings are shown to members of the circle only.",
   'guestGate.smartPlaylists.title': 'Sign in to see your library',
-  "guestGate.smartPlaylists.reason": "Favourites, your songs, drafts and recordings are saved to your account. Public playlists stay open to everyone.",
+  "guestGate.smartPlaylists.reason": "Favourites, your songs and recordings are saved to your account. Public playlists stay open to everyone.",
   'guestGate.recorder.title': 'Sign in to record',
   "guestGate.recorder.reason": "Record your own practice recordings, keep them private and listen back anytime. Sharing and downloads are for members too.",
   "guestGate.sharing.title": "Sign in to open this shared recording",

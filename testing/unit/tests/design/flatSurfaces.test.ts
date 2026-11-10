@@ -22,10 +22,9 @@ describe('Home and Library rows are flat', () => {
     expect(read(file).replace(/<input[\s\S]*?\/>/g, '')).not.toMatch(CARD);
   });
 
-  it('the smart playlists on the Library page are flat too', () => {
-    const page = read('app/library/playlists/page.tsx');
-    const smart = page.slice(page.indexOf('async function SmartPlaylistCard'), page.indexOf('async function PublicPlaylistsSection'));
-    expect(smart).toContain('async function SmartPlaylistCard');
+  it('the smart playlists are flat too', () => {
+    const smart = read('components/playlists/PlaylistSubtitles.tsx');
+    expect(smart).toContain('function SmartPlaylistCard');
     expect(smart).not.toMatch(CARD);
   });
 
@@ -46,6 +45,11 @@ describe('Private playlists', () => {
 
 describe('Category list', () => {
   const grid = read('components/home/CategoryGrid.tsx');
+
+  it('has two columns from md, like the song list on /songs (validation 4, #388)', () => {
+    expect(grid).toMatch(/data-testid="category-grid"[^>]*grid-cols-1[^"]*md:grid-cols-2/);
+    expect(grid).not.toContain('12rem_1fr');
+  });
 
   it('has no icon tiles and no description that repeats the title', () => {
     expect(grid).not.toContain('renderCategoryIcon');

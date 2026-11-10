@@ -135,7 +135,7 @@ test('Switching versions changes the lyrics', async ({ page }) => {
   await expect(page.getByText('Original verse for the variant slot')).toBeVisible();
   await expect(page.getByTestId('song-meta-lines')).toContainText('Key Am');
 
-  // Under the title and the grey meta lines, above the reader toolbar; 44 px targets; inside 390 px.
+  // Under the title and the grey meta lines (validation 4: below the reader toolbar); 44 px targets; inside 390 px.
   const box = await control.boundingBox();
   const meta = await page.getByTestId('song-meta-lines').boundingBox();
   expect(box && meta && box.y >= meta.y + meta.height - 1).toBe(true);
@@ -151,10 +151,10 @@ test('Switching versions changes the lyrics', async ({ page }) => {
   await expect(page.getByTestId('song-meta-lines')).toContainText('Key C');
   await expect(page.getByTestId('song-meta-lines')).not.toContainText('Key Am');
 
-  // No dead control and no overlap with the reader toolbar.
+  // No dead control and no overlap: validation 4 puts the reader toolbar (Chords · A− · A+) above the versions.
   const toolbar = await page.getByTestId('reader-toolbar').boundingBox();
   const afterBox = await control.boundingBox();
-  expect(afterBox!.y + afterBox!.height).toBeLessThanOrEqual(toolbar!.y);
+  expect(toolbar!.y + toolbar!.height).toBeLessThanOrEqual(afterBox!.y + 1);
 });
 
 test('Keyboard: arrow keys move through the versions', async ({ page }) => {

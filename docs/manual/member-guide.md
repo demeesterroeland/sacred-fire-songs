@@ -1,11 +1,12 @@
 # Member Guide (draft)
 
-**Version:** 0.17 | **Date:** Nov 7, 2026
+**Version:** 0.18 | **Date:** Nov 9, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.18 | Nov 9, 2026 | A private song's title is lighter (in lists and on the song page) and its ⋮ menu has **Make public**; "Drafts" is now **Private**; the ☰ menu's Library section matches the Library tabs. Library tabs **Playlists · Smart · History · New · Artists**; playlists in three groups; **Export PDF** in a playlist's ⋯ menu; My Drafts is no longer a smart playlist; private songs look lighter; tags are always links; the reading tools come before the version switch. |
 | 0.17 | Nov 7, 2026 | "take" is now **recording**; one ⋮ menu with the reading tools and the Screen stays on switch; Terms Of Service and Privacy Policy pages; the Library "+" floats at the bottom right. |
 | 0.16 | Nov 6, 2026 | A song that has several versions shows a switch under the title; tap a name to read that version. Edit says which version you are editing and Save brings you back to it. While a practice recording is being recorded or not yet saved, the switch asks you to save or discard it first (UX v2, #395). |
 | 0.15 | Nov 6, 2026 | Adding a song: **Preview** shows your chords above the words as on the song page; **Upload .cho / .txt** is a visible button under the lyrics (UX v2, #415). |
@@ -29,7 +30,7 @@ Everything in the [Guest Guide](guest-guide.md) applies. This page covers what a
 
 Tap your initial (top right). You see your name and role (e.g. *Member*), and:
 
-- **Account Settings**, **Your Favorites**, **My Drafts**, **My Playlists**, **Shared with me** (with "3 new" when there are new recordings), **Recently Viewed**
+- **Account Settings**, **Your Favorites**, **My private songs**, **My Playlists**, **Shared with me** (with "3 new" when there are new recordings), **Recently Viewed**
 - **Language** and the light / dark / automatic theme switch
 - **Sign Out**
 
@@ -43,22 +44,25 @@ Tap **Favorite** in the bar at the bottom of the song page (on a desktop the hea
 
 ## Library
 
-Tabs at the top: **Playlists**, **History**, **Artists**. Under the tabs, the row **Shared with me** opens the recordings others shared with you.
+Tabs at the top: **Playlists**, **Smart**, **History**, **New**, **Artists** (on a phone, swipe the row sideways). Under the tabs, the row **Shared with me** opens the recordings others shared with you.
 
 ### Shared with me
 
 When someone shares a recording with you, the bell at the top shows a number. **Shared with me** (account menu, or Library) lists every recording shared with you: the song, *Shared by* the person's name and the recording. A recording you have not opened yet says **New**. Tap a row to open the song with that recording highlighted. Opening a song's **Practice** panel marks that song's new recordings as read, and the number on the bell goes down. Guests are asked to sign in.
 
-**Smart playlists** are filled automatically:
+**Playlists** shows **Your private playlists** (with the field to create one), **Your public playlists** and **Other public playlists** from other members. The ⋯ menu of your own playlists has **Export PDF**.
+
+**Smart** playlists are filled automatically:
 
 | Smart playlist | Contains |
 | :--- | :--- |
 | Your Favorites | Songs you liked |
 | Your Songs | Songs you added |
-| My Drafts | Your songs that are not public yet |
 | Your recordings | Songs where you have practice recordings |
 
-Below that: **My private playlists** and **Recently viewed** ("View all" opens the full History).
+Your private songs (not public yet) look lighter in every song list and on the song page, with a lock and the word **Private**; the **Private** count on Home lists them. On a private song you own, ⋮ → **Make public** publishes it.
+
+**History** lists the songs you opened. **New** lists the songs added since your last visit.
 
 ## Playlists (setlists)
 

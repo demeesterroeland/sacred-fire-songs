@@ -32,6 +32,8 @@ describe('Library create button', () => {
     expect(fab.className).toMatch(/text-on-accent/);
     expect(fab.className).toMatch(/lg:hidden/);
     expect(fab.className).not.toMatch(/rounded-pill/); // pills are for chips only
+    expect(fab.className).toMatch(/\brounded-full\b/); // validation 4: a circle, not a rounded square
+    expect(fab.className).toMatch(/\bsize-14\b/);
     // Same distance from the bottom as the song action bar: above the nav, or above the mini player when it shows.
     expect(fab.style.bottom).toContain('--mini-player-h');
     expect(fab.style.bottom).toContain('--bottom-nav-height');

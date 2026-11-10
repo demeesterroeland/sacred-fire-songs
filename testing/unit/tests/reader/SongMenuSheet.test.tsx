@@ -203,3 +203,18 @@ describe('SongMenuSheet focus', () => {
     await waitFor(() => expect(document.activeElement).toBe(opener.current));
   });
 });
+
+// Validation 4: the owner (or an admin) of a private song can make it public from the menu.
+describe('SongMenuSheet — Make public', () => {
+  it('shows "Make public" only when the page passes onPublish, and calls it', () => {
+    const onPublish = vi.fn();
+    setup({ actions: { onShare: vi.fn(), onPublish } });
+    fireEvent.click(screen.getByRole('button', { name: 'Make public' }));
+    expect(onPublish).toHaveBeenCalledOnce();
+  });
+
+  it('has no "Make public" for a public song or a reader who may not publish', () => {
+    setup();
+    expect(screen.queryByRole('button', { name: 'Make public' })).toBeNull();
+  });
+});

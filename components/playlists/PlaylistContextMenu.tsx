@@ -6,7 +6,7 @@ import {
     DropdownMenu, DropdownMenuContent, DropdownMenuItem,
     DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, Pencil, Trash2, Link2, Copy, Globe, Lock, FileText } from 'lucide-react';
+import { MoreHorizontal, Pencil, Trash2, Link2, Copy, Globe, Lock, Printer } from 'lucide-react';
 import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal';
 import { deletePlaylist, togglePlaylistVisibility } from '@/app/actions/playlistActions';
 import { toast } from 'sonner';
@@ -144,7 +144,7 @@ export function PlaylistContextMenu({
                             disabled={isExportingPdf}
                             className="gap-2 text-gray-700 dark:text-gray-200 focus:bg-gray-100 dark:focus:bg-gray-200 dark:bg-gray-800 cursor-pointer disabled:opacity-50"
                         >
-                            <FileText className="w-4 h-4" />
+                            <Printer aria-hidden className="w-4 h-4" /> {/* same icon as the playlist page */}
                             {isExportingPdf ? t('playlists.export.exporting') : t('playlists.export.menu')}
                         </DropdownMenuItem>
                     )}

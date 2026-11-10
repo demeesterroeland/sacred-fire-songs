@@ -71,9 +71,10 @@ export default function CategoryGrid() {
   }
 
   return (
-    <div data-testid="category-grid" className="divide-y divide-line border-y border-line">
+    // Validation 4 (#388): two columns from md, like the song list on /songs. One line under every category.
+    <div data-testid="category-grid" className="grid grid-cols-1 border-t border-line md:grid-cols-2 md:gap-x-6">
       {sortedTree.map((category) => (
-        <section key={category.id} className="py-2 md:grid md:grid-cols-[12rem_1fr] md:gap-4">
+        <section key={category.id} className="border-b border-line py-2">
           <Link href={`/songs?category=${category.slug}`} className={`group flex min-h-tap items-center ${PRESSED}`}>
             <h3 className="text-row font-semibold text-fg group-active:text-accent">{category.name}</h3>
           </Link>

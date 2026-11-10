@@ -37,9 +37,9 @@ describe('signInHref / safeNextPath', () => {
 });
 
 describe('GuestGate reason keys', () => {
-  it('covers add-to-playlist, edit, history, new playlist, settings, profile, smart playlists, recorder, sharing and favourites', () => {
+  it('covers add-to-playlist, edit, history, new playlist, new songs, settings, profile, smart playlists, recorder, sharing and favourites', () => {
     expect([...GUEST_GATE_FEATURES].sort()).toEqual(
-      ['addToPlaylist', 'edit', 'favourites', 'history', 'newPlaylist', 'profile', 'recorder', 'settings', 'sharedWithMe', 'sharing', 'smartPlaylists'],
+      ['addToPlaylist', 'edit', 'favourites', 'history', 'newPlaylist', 'newSongs', 'profile', 'recorder', 'settings', 'sharedWithMe', 'sharing', 'smartPlaylists'],
     );
   });
 
@@ -89,7 +89,9 @@ describe('members-only screens render GuestGate instead of redirecting', () => {
     ['app/account/settings/page.tsx', 'settings'],
     ['app/users/[id]/page.tsx', 'profile'],
     ['app/songs/[id]/edit/page.tsx', 'edit'],
-    ['app/library/playlists/page.tsx', 'smartPlaylists'],
+    ['app/library/playlists/page.tsx', 'newPlaylist'],
+    ['app/library/smart/page.tsx', 'smartPlaylists'],
+    ['app/library/new/page.tsx', 'newSongs'],
     ['components/song/RehearsalDrawer.tsx', 'recorder'],
     ['app/recordings/[id]/page.tsx', 'sharing'],
   ];

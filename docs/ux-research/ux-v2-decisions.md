@@ -1,11 +1,12 @@
 # UX v2: Agent Decisions (ADR-lite)
 
-**Version:** 1.42 | **Date:** Nov 8, 2026 | **Epic:** 6.1 (#375)
+**Version:** 1.43 | **Date:** Nov 9, 2026 | **Epic:** 6.1 (#375)
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.43 | Nov 9, 2026 | UXA-071: validation round 4 (Library tabs, playlist sections, PDF in the row menu, private songs lighter, categories in two columns, tags always links, reader tools above the versions). |
 | 1.42 | Nov 8, 2026 | UXA-070: follow-ups from the cross-review of PRs #477 and #478. |
 | 1.41 | Nov 8, 2026 | UXA-069: flat Home and Library, no cards; private playlists show a lock. |
 | 1.40 | Nov 7, 2026 | UXA-068: Vercel Speed Insights removed; the privacy text names what the operator can reach. |
@@ -677,11 +678,28 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 - **Left as is:** the sign-in, sign-up, forgot-password, update-password and finish-registration forms still show the message of the authentication service (a separate mapping of its error codes). Runasimi (`qu`) shows its generic sentence for every `errors.*` key until a speaker translates them.
 - **Confirm:** no.
 
+### UXA-071 · Validation round 4: Library tabs, playlist sections, song page order
+
+- **Date / story:** Nov 9, 2026 · owner validation of #388, #395 and the Library page, Part of #375
+- **Library tabs (owner):** Playlists | Smart | History | New | Artists (Albums stays hidden). Smart has the star icon (`Sparkles`) that was on "New since last visit"; New uses `Inbox`. Five tabs are wider than a phone in most languages, so the row scrolls, the open tab scrolls into view (`scroll-px-4` keeps the page gutter) and the edge fade stays.
+- **Smart tab (`/library/smart`):** Favorites, My Songs and My Recordings. My Drafts is gone; the Home summary keeps its Drafts count and link.
+- **New tab (`/library/new`):** the songs added since the last visit (up to 50), a guest gate `newSongs` for guests. The block on the Playlists page is gone, and so is the "Recently viewed" block: History holds it.
+- **Playlists tab:** three sections, Your private playlists (with the create field), Your public playlists and Other public playlists (public lists of other members). "My Favorites" is not listed; it lives under Smart.
+- **Export PDF:** the ⋯ menu of your own private and public playlist rows has Export PDF, the same export as the playlist page (`hooks/usePlaylistPdfExport.ts`).
+- **Private songs (owner):** in every song list the title of a private song is lighter (`text-fg-muted`) next to its lock, and the label says "Private" instead of "Draft".
+- **Categories (#388):** two columns from `md`, like the song list on /songs; one column on a phone.
+- **Tags (owner):** author and tags are links in both states, so the closed and open line no longer differ in what can be tapped. Production has at most 7 tags per song (p95 5 tags and 55 characters). The chevron adds Chords · Melody · Recordings and the technical line.
+- **Library + (owner):** the floating create button is a circle (`rounded-full`), not a rounded square.
+- **Song page order (owner):** Chords · A− · A+ · ▶ comes first, the version switch (Original · Simplified) under it.
+- **Review of PR #482 (Sonnet):** the New tab asks for public or own songs only (RLS alone let an admin see other members' drafts); other public playlists exclude your own in the query, so they cannot be crowded out; a guest on the Playlists tab sees the "create a playlist" gate, and the smart playlists gate no longer mentions drafts (8 languages); row menus let the server decide whether a playlist is empty; no empty link list in the song meta.
+- **Guard:** `testing/unit/tests/review/validationRound4.test.ts`, `flatSurfaces.test.ts`, `songMetaTakesChip.test.tsx`, `playlists/usePlaylistPdfExport.test.tsx`, `library/unviewedSongs.test.ts`; E2E `ux-v2-library-tabs.spec.ts`, `ux-v2-song-meta.spec.ts`, `ux-v2-variant-slot.spec.ts`.
+- **Second round (owner):** Playlists sections and Smart use the History/New/Artists heading (icon, title, count): Your private (lock), Your public (globe), Other public (people), Smart playlists (star). Export PDF in the row menu uses the printer icon of the playlist page. "Drafts" reads **Private** (sidebar label, Home count, account menu "My private songs"); the unused My Drafts keys are removed. The sidebar's Library section is the Library tab row (`libraryTabs()`), so Favorites, Drafts and Recently Viewed left it. Private titles use `text-fg-subtle` (about 5.6:1 on the light background, still AA), in lists and on the song page; the song menu has **Make public** for the owner or an admin of a private song (`makeSongPublic` checks this on the server). Closed, the author and tag links stay on one line: the author, then as many tags and Chords/Melody/Recordings links as fit (measured on an invisible one-line copy, re-measured on resize); "…" only when one of them is hidden; the chevron shows all and the key line. A fixed 3/5/6 limit left room unused (owner, third round). Other members' public playlist rows are read-only (no rename, no export).
+
 ### UXA-070 · Follow-ups from the cross-review of PRs #477 and #478
 
 - **Date / story:** Nov 8, 2026 · review round on `feat/ux-v2`
 - **Song controls:** they open and close when the browser refuses storage, remembered for that visit only. The button says "Show details". Pressing pause with the controls closed moves focus to that button.
-- **Lock and globe:** one `VisibilityIcon` with the word for screen readers and on hover, on the song page and in playlist rows. Song lists keep their lock and "Draft" label.
+- **Lock and globe:** one `VisibilityIcon` with the word for screen readers and on hover, in playlist rows; on the song page only a private song gets the lock after its title (owner, validation 4: no globe for public songs). Song lists keep their lock and "Draft" label (UXA-071: now "Private").
 - **Song title:** wraps on desktop as on a phone.
 - **Chord matching:** tokens are matched in bounded time and capped at 32 characters.
 - **Email addresses:** an apostrophe is valid, for the sign-up code and the operator address.

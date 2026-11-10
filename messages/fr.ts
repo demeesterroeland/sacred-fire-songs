@@ -77,7 +77,7 @@ const fr: Partial<Record<TranslationKey, string>> = {
   'nav.library': "Bibliothèque",
   'nav.playlists': "Playlists",
   'nav.favorites': "Favoris",
-  'nav.drafts': "Brouillons",
+  'nav.drafts': 'Privés',
   'nav.recentlyViewed': "Vus récemment",
   'nav.addSong': "Ajouter un chant",
   'nav.newPlaylist': "Nouvelle playlist",
@@ -90,7 +90,7 @@ const fr: Partial<Record<TranslationKey, string>> = {
   'userMenu.account': "Compte",
   'userMenu.settings': "Paramètres du compte",
   'userMenu.favorites': "Tes favoris",
-  'userMenu.drafts': "Mes brouillons",
+  'userMenu.drafts': "Mes chants privés",
   'userMenu.playlists': "Mes playlists",
   'userMenu.recentlyViewed': "Vus récemment",
   'userMenu.signOut': "Se déconnecter",
@@ -332,6 +332,8 @@ const fr: Partial<Record<TranslationKey, string>> = {
   "settings.prefs.emailNotifications.description": "M’envoyer un e-mail quand quelqu’un partage un enregistrement avec moi.",
   'settings.prefs.emailNotifications.saveError': 'Impossible d’enregistrer votre préférence e-mail.',
 
+  'song.menu.publish': 'Rendre public',
+
   'song.publishSuccess': 'Le chant est désormais public.',
   'song.publishError': 'Échec de la publication du chant.',
 
@@ -480,6 +482,8 @@ const fr: Partial<Record<TranslationKey, string>> = {
   'recentlyViewed.viewAll': "Tout voir",
 
   'newSinceLastVisit.section': "Nouveautés depuis ta dernière visite",
+
+  'newSinceLastVisit.empty': 'Aucun nouveau chant depuis ta dernière visite.',
   'newSinceLastVisit.viewAll': "Tout voir",
 
   // ─── Library Summary (Home) ───────────────────────────────────────────────
@@ -492,9 +496,6 @@ const fr: Partial<Record<TranslationKey, string>> = {
   "librarySummary.recordings.title": "Tes enregistrements",
   "librarySummary.recordings.description": "Les enregistrements faits pendant tes exercices",
   "librarySummary.recordings.empty": "Pas encore d’enregistrements",
-  'librarySummary.drafts.title': "Mes brouillons",
-  'librarySummary.drafts.description': "Tes chants en cours d'écriture",
-  'librarySummary.drafts.empty': "Pas encore de brouillons",
 
   // ─── Home ─────────────────────────────────────────────────────────────────
   'home.welcome.title': 'Bienvenue',
@@ -723,14 +724,19 @@ const fr: Partial<Record<TranslationKey, string>> = {
   'library.heading': "Ta bibliothèque",
   'library.subtitle': 'Tes playlists, ton historique et tes artistes.',
   'library.tabs.history': "Historique",
+  'library.tabs.smart': 'Intelligentes',
+  'library.tabs.new': 'Nouveautés',
   'playlists.songCount': "{count} chants",
   'playlists.songCountSingle': "1 chant",
   'playlists.countPublic': "{count} publique(s)",
-  'playlists.countDraft': "{count} brouillon(s)",
+  'playlists.countDraft': '{count} privée(s)',
   'playlists.publicPlaylists': "Playlists publiques",
   'playlists.smartPlaylists': "Playlists intelligentes",
-  'playlists.myPrivatePlaylists': "Mes playlists privées",
+  'playlists.myPrivatePlaylists': 'Tes playlists privées',
+  'playlists.myPublicPlaylists': 'Tes playlists publiques',
+  'playlists.otherPublicPlaylists': 'Autres playlists publiques',
   'playlists.emptyPrivateHint': "Pas encore de playlists privées — crée la première ci-dessus.",
+  'playlists.emptyPublicHint': 'Pas encore de playlist publique. Ouvre ⋯ sur une playlist pour la rendre publique.',
   'recentlyViewed.emptyWithAction': "Aucun chant consulté pour l'instant. Commence à explorer pour retrouver ton historique ici.",
   'albums.likedAlbums': "Albums aimés",
   'albums.description': "Enregistre les albums que tu aimes et ils apparaîtront ici.",
@@ -908,6 +914,8 @@ const fr: Partial<Record<TranslationKey, string>> = {
   'guestGate.edit.reason': 'Seul le gardien d\'un chant peut le modifier. Connectez-vous pour modifier les chants que vous avez ajoutés.',
   'guestGate.history.title': 'Connectez-vous pour voir votre historique',
   'guestGate.history.reason': 'Les chants consultés récemment sont enregistrés dans votre compte et vous suivent du téléphone à l\'ordinateur.',
+  'guestGate.newSongs.title': 'Connectez-vous pour voir les nouveautés',
+  'guestGate.newSongs.reason': "Les nouveaux chants sont ceux ajoutés depuis votre dernière visite : l'application doit donc savoir quels chants vous avez déjà ouverts.",
   'guestGate.newPlaylist.title': 'Connectez-vous pour créer une playlist',
   'guestGate.newPlaylist.reason': 'Les playlists sont enregistrées dans votre compte, vous les retrouvez sur tous vos appareils.',
   'guestGate.settings.title': 'Connectez-vous pour ouvrir vos réglages',
@@ -915,7 +923,7 @@ const fr: Partial<Record<TranslationKey, string>> = {
   'guestGate.profile.title': 'Connectez-vous pour voir les profils',
   "guestGate.profile.reason": "Les profils des chanteurs et leurs enregistrements ne sont visibles que par les membres du cercle.",
   'guestGate.smartPlaylists.title': 'Connectez-vous pour voir votre bibliothèque',
-  "guestGate.smartPlaylists.reason": "Favoris, vos chants, brouillons et enregistrements sont conservés dans votre compte. Les playlists publiques restent ouvertes à tous.",
+  "guestGate.smartPlaylists.reason": "Favoris, vos chants et enregistrements sont conservés dans votre compte. Les playlists publiques restent ouvertes à tous.",
   'guestGate.recorder.title': 'Connectez-vous pour enregistrer',
   "guestGate.recorder.reason": "Enregistrez vos propres exercices, gardez-les privés et réécoutez-les à tout moment. Partager et télécharger est aussi réservé aux membres.",
   "guestGate.sharing.title": "Connectez-vous pour ouvrir cet enregistrement partagé",
