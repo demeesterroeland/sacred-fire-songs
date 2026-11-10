@@ -25,7 +25,7 @@ test.describe('guest', () => {
     await expect(recent(page).getByRole('heading', { name: 'Recently added' })).toBeVisible();
     const rows = recent(page).getByTestId('song-row');
     expect(await rows.count()).toBeGreaterThan(0);
-    expect(await rows.count()).toBeLessThanOrEqual(5);
+    expect(await rows.count()).toBeLessThanOrEqual(10);
     // The welcome block comes before the category grid.
     const field = (await homeSearch(page).boundingBox())!;
     const grid = (await page.getByTestId('category-grid').boundingBox())!;

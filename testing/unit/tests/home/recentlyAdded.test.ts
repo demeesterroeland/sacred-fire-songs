@@ -27,7 +27,7 @@ vi.mock('@/lib/supabase/server', () => ({
 }));
 
 import { getRecentlyAddedSongs } from '@/lib/songs/serverQueries';
-import { RECENTLY_ADDED_LIMIT, RECENTLY_ADDED_SELECT } from '@/lib/songs/queries';
+import { RECENTLY_ADDED_LIMIT, RECENTLY_ADDED_PHONE_LIMIT, RECENTLY_ADDED_SELECT } from '@/lib/songs/queries';
 
 describe('getRecentlyAddedSongs', () => {
   it('asks for the newest public compositions only, limited to the row size', async () => {
@@ -50,7 +50,8 @@ describe('getRecentlyAddedSongs', () => {
     expect(calls).toContainEqual(['eq', 'is_public', true]);
     expect(calls).toContainEqual(['order', 'created_at', { ascending: false }]);
     expect(calls).toContainEqual(['limit', RECENTLY_ADDED_LIMIT]);
-    expect(RECENTLY_ADDED_LIMIT).toBe(5);
+    expect(RECENTLY_ADDED_LIMIT).toBe(10);
+    expect(RECENTLY_ADDED_PHONE_LIMIT).toBe(5);
     expect(songs.map((s) => [s.id, s.title, s.songKey])).toEqual([['s1', 'Agua', 'Am']]);
   });
 

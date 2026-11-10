@@ -3366,3 +3366,10 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - **App**: `lib/actions/rehearsal.ts` selects an explicit column list (`RECORDING_COLUMNS`) and reads other members through `public_profiles`; `getOwnSingerEmail` fills the singer dialog for the owner; the share and singer dialogs and `/users/:id` show names (or *Unnamed member*), never addresses. New key `user.unnamed` and a new search placeholder in all 8 locales.
 - **Tests**: `access-policies.feature` v1.2 (search, address and singer-address scenarios; 135 seed scenarios pass), unit tests for the column lists and the e-mail fallback, `ux-v2-share-explain` placeholder.
 - **Docs**: `db-schema.sql` v3.6, design doc v2.06, manual *Practice* v0.13.
+
+## Session November 10, 2026 — Story 6.1.36 (#488), Home grid for guests
+
+- *Recently added* moved out of the narrow welcome column and uses the grid of `/songs` and the category grid. 10 songs, filled row by row; below `md` the first 5 (`RECENTLY_ADDED_PHONE_LIMIT`).
+- Category sections, the section labels and *Your library* got the 16 px inset of `SongCard` (`ps-4`), so titles, headings and links share one left edge.
+- Home uses `p-4 md:p-8` like `/songs` (was `lg:p-10`), so both pages put the columns at the same x.
+- Tests: `e2e/tests/ux-v2-home-grid.spec.ts` measures the x positions at 390, 768 and 1280 px (red before, green after); unit and BDD limit 10.

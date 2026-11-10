@@ -43,7 +43,7 @@ export default async function LibrarySummary(props: LibrarySummaryProps) {
   const t = await getServerT();
   return (
     <div>
-      <p className="text-meta font-semibold text-fg-muted mb-4">{t('library.heading')}</p>
+      <p className="text-meta font-semibold text-fg-muted mb-4 ps-4">{t('library.heading')}</p>
       <div className="grid grid-cols-4 divide-x divide-line">
         {stats.map((stat) => {
           const count = props[countMap[stat.key]];
@@ -51,7 +51,7 @@ export default async function LibrarySummary(props: LibrarySummaryProps) {
             <Link
               key={stat.key}
               href={stat.href}
-              className="block min-h-tap min-w-0 px-2 py-1 transition-colors first:ps-0 hover:bg-surface md:px-4"
+              className="block min-h-tap min-w-0 px-2 py-1 transition-colors first:ps-4 hover:bg-surface md:px-4"
             >
               <p className="text-lg font-bold text-fg leading-tight">{count}</p>
               <p className="text-caption text-fg-muted break-words hyphens-auto">{t(stat.labelKey)}</p>

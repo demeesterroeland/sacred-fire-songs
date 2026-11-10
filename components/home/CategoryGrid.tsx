@@ -74,7 +74,8 @@ export default function CategoryGrid() {
     // Validation 4 (#388): two columns from md, like the song list on /songs. One line under every category.
     <div data-testid="category-grid" className="grid grid-cols-1 border-t border-line md:grid-cols-2 md:gap-x-6">
       {sortedTree.map((category) => (
-        <section key={category.id} className="border-b border-line py-2">
+        // ps-4: headings and tags start where the song titles start (SongCard pl-4, #488).
+        <section key={category.id} className="border-b border-line py-2 ps-4 pe-1">
           <Link href={`/songs?category=${category.slug}`} className={`group flex min-h-tap items-center ${PRESSED}`}>
             <h3 className="text-row font-semibold text-fg group-active:text-accent">{category.name}</h3>
           </Link>
