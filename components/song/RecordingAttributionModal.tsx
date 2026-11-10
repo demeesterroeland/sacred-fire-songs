@@ -43,10 +43,14 @@ export default function RecordingAttributionModal({
   const [selectedUser, setSelectedUser] = useState<UserProfileSummary | null>(null);
   const [customName, setCustomName] = useState("");
   const [customEmail, setCustomEmail] = useState("");
+  // False while the stored singer address is loading or could not be loaded; then a save
+  // with an empty address field keeps the stored one instead of clearing it.
+  const [emailLoaded, setEmailLoaded] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
+    setEmailLoaded(true);
     if (recording) {
       if (recording.singer_profile_id && recording.singer_profile) {
         setSelectedUser(recording.singer_profile);
@@ -60,9 +64,15 @@ export default function RecordingAttributionModal({
         setCustomEmail("");
         // The address is not part of the take; only the owner may read it back.
         if (isOpen && recording.is_owner) {
-          getOwnSingerEmail(recording.id).then((email) => {
-            if (!cancelled) setCustomEmail(email || "");
-          });
+          setEmailLoaded(false);
+          getOwnSingerEmail(recording.id)
+            .then(({ ok, email }) => {
+              if (cancelled || !ok) return;
+              // Do not overwrite what the owner typed meanwhile.
+              setCustomEmail((typed) => typed || email || "");
+              setEmailLoaded(true);
+            })
+            .catch((e) => console.error("Load singer email error:", e));
         }
       } else {
         setSelectedUser(null);
@@ -107,11 +117,12 @@ export default function RecordingAttributionModal({
     try {
       let singerProfileId: string | null = null;
       let singerName: string | null = null;
-      let singerEmail: string | null = null;
+      let singerEmail: string | null | undefined = null;
 
       if (isUnregistered) {
         singerName = customName.trim();
-        singerEmail = customEmail.trim() || null;
+        const typed = customEmail.trim();
+        singerEmail = typed || (emailLoaded ? null : undefined);
       } else if (selectedUser) {
         singerProfileId = selectedUser.id;
         // A registered singer is named from the profile; no address is stored for them.

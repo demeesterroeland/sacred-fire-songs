@@ -407,14 +407,14 @@ describe('Recording Sharing & DRM-lite Permissions', () => {
       const result = await updateSingerAttribution(recordingId, {
         singerProfileId: 'musician-user-uuid',
         singerName: 'Cari El',
-        singerEmail: 'cari@example.com',
+        singerEmail: null,
       });
 
       expect(result.success).toBe(true);
       expect(mockUpdate).toHaveBeenCalledWith({
         singer_profile_id: 'musician-user-uuid',
         singer_name: 'Cari El',
-        singer_email: 'cari@example.com',
+        singer_email: null,
       });
     });
 
@@ -439,6 +439,20 @@ describe('Recording Sharing & DRM-lite Permissions', () => {
         singer_name: 'Guest Musician Jane',
         singer_email: 'jane@example.com',
       });
+    });
+
+    it('keeps the stored singer address when the address is left out', async () => {
+      mockGetUser.mockResolvedValue({ data: { user: ownerUser } });
+      const mockUpdate = vi.fn().mockReturnValue({
+        eq: vi.fn().mockReturnValue({
+          eq: vi.fn().mockResolvedValue({ error: null }),
+        }),
+      });
+      mockFrom.mockReturnValue({ update: mockUpdate });
+
+      await updateSingerAttribution(recordingId, { singerProfileId: null, singerName: 'Jane' });
+
+      expect(mockUpdate).toHaveBeenCalledWith({ singer_profile_id: null, singer_name: 'Jane' });
     });
   });
 });

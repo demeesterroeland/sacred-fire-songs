@@ -698,6 +698,7 @@ export async function updateSingerAttribution(
   attribution: {
     singerProfileId?: string | null;
     singerName?: string | null;
+    /** Leave out (undefined) to keep the stored address. */
     singerEmail?: string | null;
   }
 ): Promise<{ success: boolean; error?: string }> {
@@ -712,7 +713,9 @@ export async function updateSingerAttribution(
     .update({
       singer_profile_id: attribution.singerProfileId || null,
       singer_name: attribution.singerName?.trim() || null,
-      singer_email: attribution.singerEmail?.trim() || null,
+      ...(attribution.singerEmail === undefined
+        ? {}
+        : { singer_email: attribution.singerEmail?.trim() || null }),
     })
     .eq("id", recordingId)
     .eq("user_id", user.id);
@@ -780,17 +783,18 @@ export async function getUserProfile(userId: string): Promise<UserProfileSummary
 }
 
 // 14. The e-mail address the owner typed for an unregistered singer (owner only).
-export async function getOwnSingerEmail(recordingId: string): Promise<string | null> {
+// `ok` is false when the lookup failed, so the caller can leave the stored address alone.
+export async function getOwnSingerEmail(recordingId: string): Promise<{ ok: boolean; email: string | null }> {
   const supabase = createClient();
   const { data, error } = await supabase.rpc("own_recording_singer_emails", {
     p_recording_ids: [recordingId],
   });
   if (error) {
     console.error("[rehearsal] RPC own_recording_singer_emails error:", error);
-    return null;
+    return { ok: false, email: null };
   }
   const rows = (data || []) as { recording_id: string; singer_email: string | null }[];
-  return rows[0]?.singer_email ?? null;
+  return { ok: true, email: rows[0]?.singer_email ?? null };
 }
 
 // Names from the public profile view, keyed by user id.
