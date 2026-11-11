@@ -3373,3 +3373,9 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - Category sections, the section labels and *Your library* got the 16 px inset of `SongCard` (`ps-4`), so titles, headings and links share one left edge.
 - Home uses `p-4 md:p-8` like `/songs` (was `lg:p-10`), so both pages put the columns at the same x.
 - Tests: `e2e/tests/ux-v2-home-grid.spec.ts` measures the x positions at 390, 768 and 1280 px (red before, green after); unit and BDD limit 10.
+
+## Session November 11, 2026 — Local sample audio for every take
+
+- Most seeded takes had no audio file in local storage, so they could not be played. `scripts/db/upload-sample-recordings.mjs` (`npm run seed:audio`) now uploads a sample only where the file is missing; takes recorded or uploaded in the local app keep their audio, and `--force` replaces every file. Storage time-outs are retried three times.
+- Tests: `testing/unit/tests/scripts/uploadSampleRecordings.test.ts` (missing only, `--force`, the "already exists" error).
+

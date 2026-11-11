@@ -1493,3 +1493,5 @@
 - [x] Recently added in the /songs and category grid: 10 songs row by row, 5 on a phone; titles, category headings, links and labels on one 16 px inset; Home padding as /songs
 - [x] E2E `ux-v2-home-grid.spec.ts` (390, 768, 1280 px), feature `ux-v2-home-grid.feature`, before/after screenshots
 
+## Session November 11, 2026 (local sample audio)
+- [x] `npm run seed:audio` fills only takes whose file is missing (`--force` replaces all), retries storage time-outs; unit test `uploadSampleRecordings.test.ts`
