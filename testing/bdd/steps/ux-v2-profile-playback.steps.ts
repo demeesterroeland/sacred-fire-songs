@@ -35,3 +35,11 @@ Then('{string} has a play URL', function (this: object, path: string) {
 Then('{string} has no play URL', function (this: object, path: string) {
   assert.equal(st(this).urls.get(path), undefined);
 });
+
+Given('the server signed {string} as {string}', function (this: object, path: string, url: string) {
+  st(this).signed = [{ path, signedUrl: url, error: null }];
+});
+
+Then('the play URL of {string} is {string}', function (this: object, path: string, url: string) {
+  assert.equal(st(this).urls.get(path), url);
+});
