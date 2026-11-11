@@ -94,7 +94,8 @@ describe('lock and globe', () => {
     expect(container.querySelector(`[title="${label}"]`)).toBeTruthy();
   });
 
-  it.each(['app/songs/[id]/page.tsx', 'components/playlists/PlaylistCard.tsx', 'components/playlists/PublicPlaylistCard.tsx'])('%s uses it', (file) => {
+  // #488 owner review: playlist rows dropped their leading icon (the section headings say private or public).
+  it.each(['app/songs/[id]/page.tsx'])('%s uses it', (file) => {
     expect(read(file)).toContain('<VisibilityIcon');
   });
 

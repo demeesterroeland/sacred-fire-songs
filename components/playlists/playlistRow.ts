@@ -6,7 +6,5 @@ export const PLAYLIST_LIST = 'divide-y divide-line border-y border-line';
 
 export const PLAYLIST_ROW = 'group flex w-full min-w-0 min-h-tap items-center gap-3 py-3 transition-colors hover:bg-surface';
 
-export const PLAYLIST_ICON = 'size-5 shrink-0 text-fg-muted group-hover:text-fg';
-
 /** The ⋯ menu on a row: centred at the right edge. No transform, so the menu's fixed layers stay on the window. */
 export const PLAYLIST_MENU = 'absolute inset-y-0 right-0 z-10 flex items-center';

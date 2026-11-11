@@ -3,9 +3,8 @@
 import Link from 'next/link';
 import { PlaylistContextMenu } from './PlaylistContextMenu';
 import { CardContent } from '@/components/common/CardContent';
-import { VisibilityIcon } from '@/components/common/VisibilityIcon';
 import { toast } from 'sonner';
-import { PLAYLIST_ICON, PLAYLIST_MENU, PLAYLIST_ROW } from './playlistRow';
+import { PLAYLIST_MENU, PLAYLIST_ROW } from './playlistRow';
 import { useLocale } from '@/context/LocaleContext';
 
 interface PublicPlaylistCardProps {
@@ -34,7 +33,6 @@ export function PublicPlaylistCard({ id, title, description, songCount = 0, song
     return (
         <div className="relative">
             <Link href={`/library/playlists/${id}`} className={`${PLAYLIST_ROW} pr-12`}>
-                <VisibilityIcon isPublic className={PLAYLIST_ICON} />
                 <CardContent
                     title={title}
                     description={description}

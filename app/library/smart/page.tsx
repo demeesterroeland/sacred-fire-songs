@@ -1,4 +1,4 @@
-import { Heart, Music, Mic, Sparkles } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import { LibrarySubpageHeading } from '@/components/library/LibrarySubpageHeading';
 import { createClient } from '@/lib/supabase/server';
 import { getServerT } from '@/lib/i18n/server';
@@ -48,19 +48,19 @@ export default async function SmartPlaylistsPage() {
             <LibrarySubpageHeading icon={Sparkles} title={t('playlists.smartPlaylists')} count={3} />
             <div className={PLAYLIST_LIST}>
                 <SmartPlaylistCard
-                    icon={Heart} title={t('librarySummary.favorites.title')} description={t('librarySummary.favorites.description')}
+                    title={t('librarySummary.favorites.title')} description={t('librarySummary.favorites.description')}
                     href="/songs?favorites=true"
                     subtitle={<SongCountSubtitle counts={favCounts} emptyLabel={t('librarySummary.favorites.empty')} />}
                     songTitles={favTitles}
                 />
                 <SmartPlaylistCard
-                    icon={Music} title={t('librarySummary.mySongs.title')} description={t('librarySummary.mySongs.description')}
+                    title={t('librarySummary.mySongs.title')} description={t('librarySummary.mySongs.description')}
                     href="/songs?mine=true"
                     subtitle={<SongCountSubtitle counts={mySongs} emptyLabel={t('librarySummary.mySongs.empty')} />}
                     songTitles={mySongs.titles}
                 />
                 <SmartPlaylistCard
-                    icon={Mic} title={t('librarySummary.recordings.title')} description={t('librarySummary.recordings.description')}
+                    title={t('librarySummary.recordings.title')} description={t('librarySummary.recordings.description')}
                     href="/songs?myRecordings=true"
                     subtitle={<RecordingCountSubtitle counts={recordings} emptyLabel={t('librarySummary.recordings.empty')} />}
                     songTitles={recordings.titles.slice(0, 5)}
