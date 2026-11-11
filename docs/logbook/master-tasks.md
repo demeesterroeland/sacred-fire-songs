@@ -1508,6 +1508,12 @@
 - [x] Unit test (`SongCard.test.tsx`), E2E (`ux-v2-song-rows.spec.ts`, admin), feature `ux-v2-song-rows.feature` 1.1, test matrix SONG-08; lint cap 141 → 140
 
 
+## Session November 11, 2026 (privacy, share e-mails claimed by the server)
+- [x] Migration `20261111120000_share_email_server_claim.sql`: `claim_recording_share_email` takes the owner and only `service_role` may execute it
+- [x] Server-only client `createAdminClient()` (`lib/supabase/admin.ts`, `SUPABASE_SECRET_KEY`); `sendRecordingShareEmail` passes the signed-in user as owner
+- [x] `.env.example`, `docker-compose.yml`, fresh-install schema 3.7, design doc 2.09, feature `share-notifications.feature` 1.2
+- [x] Unit tests (action, admin client), `@seed` scenario (signed-in user cannot run the claim)
+
 ## Session November 11, 2026 (#490, play recordings from a singer profile)
 - [x] Plan `docs/plans/2026-11-11-profile-recording-playback.md`
 - [x] `fetchMusicianProfile` signs each recording file with the viewer's session; `lib/users/profileRecordings.ts`

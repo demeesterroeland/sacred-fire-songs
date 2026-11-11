@@ -141,5 +141,6 @@
 | **November 10, 2026** | **Feature/UX (Epic 6.1, #488)**: Home grid for guests (Recently added in the category and song list columns), tests, screenshots, docs. (estimate) | ~1.0 Hours | Completed |
 | **November 11, 2026** | **Feature/UX (Epic 6.1, #488)**: owner review of the Home grid (member layout, six personal counts, Shared by me page, one dark background), tests, screenshots, docs. (estimate) | ~2.0 Hours | Completed |
 | **November 11, 2026** | **Fix/UX (Epic 6.1, #492)**: no delete button on song rows (delete from the song menu only), tests, docs. (estimate) | ~0.5 Hours | Completed |
+| **November 11, 2026** | **Privacy**: share e-mails claimed by the app server only (migration, server-only client, tests, docs). (estimate) | ~1.0 Hours | Completed |
 | **November 11, 2026** | **Feature/UX (Epic 6.1, #490)**: play recordings from a singer profile (signed URLs, play button, tests, docs). (estimate) | ~1.5 Hours | Completed |
-| **Total** | **Development + AI Collaboration** | **~259.0 Hours** | |
+| **Total** | **Development + AI Collaboration** | **~260.0 Hours** | |

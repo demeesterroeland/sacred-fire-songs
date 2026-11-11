@@ -1,5 +1,5 @@
 # Sacred Fire Songs – Notifications for Shared Rehearsal Recordings
-# Version: 1.1 | Date: Nov 4, 2026
+# Version: 1.2 | Date: Nov 11, 2026
 #
 # Living Gherkin specification for Story 4.6.6 (GitHub #373).
 # Layering:
@@ -19,6 +19,8 @@
 #   1.1 – Nov 4, 2026 – The share email links to the email notification setting
 #                       (/account/settings?tab=preferences) and to the recording permalink
 #                       (/recordings/<recordingId>, redirects to /songs/<id>?recording=<id>).
+#   1.2 – Nov 11, 2026 – The share email is claimed by the app server only (secret key,
+#                       owner passed in); a signed-in user cannot run the claim.
 
 @shareNotifications
 Feature: Notifications for shared rehearsal recordings
@@ -79,10 +81,11 @@ Feature: Notifications for shared rehearsal recordings
     Then the musician has no notification for that recording
 
   @seed
-  Scenario: The share email is claimed once, by the owner only
+  Scenario: The share email is claimed once, by the server for the owner only
     Given the member owns a recording
     And the member has shared that recording with the musician
-    Then the gatekeeper cannot claim the share email
+    Then a signed-in member cannot run the share email claim
+    And the gatekeeper cannot claim the share email
     And the member claims the share email once with the musician's address
     And a second claim by the member returns nothing
 

@@ -3390,6 +3390,13 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - Tests: `SongCard.test.tsx` (no delete button, no delete wiring), `ux-v2-song-rows.spec.ts` (admin: no delete button, row buttons line up); `ux-v2-song-rows.feature` 1.1; test matrix SONG-08 updated. Lint cap lowered to 140.
 
 
+## Session November 11, 2026 — privacy, share e-mails claimed by the server
+
+- The share e-mail claim (`claim_recording_share_email`) ran with the sharer's session. It now runs on the app server with the project's secret key: the function takes the owner as a parameter, and only `service_role` may execute it. `sendRecordingShareEmail` reads the signed-in user and passes that user as owner.
+- New server-only client `createAdminClient()` in `lib/supabase/admin.ts`, configured with `SUPABASE_SECRET_KEY` (never `NEXT_PUBLIC_`). Without the key no share e-mail is sent; in-app notifications still work. `docker-compose.yml` passes `SERVICE_ROLE_KEY` by default; `.env.example` documents it. Local dev: add the local service role key from `npx supabase status` to `.env.local`.
+- Checked against local Supabase: a signed-in user gets `permission denied`; the server claims once, a second claim and a wrong owner return nothing.
+- Tests: `shareNotifications.test.ts` (owner from the session, claim with the admin client only, no key, no user), `supabaseAdminClient.test.ts` (no key or URL → null, never imported by client code), `share-notifications.feature` 1.2 (`@seed`).
+
 ## Session November 11, 2026 — Story 6.1.37 (#490), play recordings from a singer profile
 
 - A singer profile (`/users/:id`) lists the recordings attributed to that singer that the viewer may read. Each row now has a 44 px ▶ button that plays the recording on the page through the shared `AudioProvider`, so starting another recording stops the first; while it plays the button shows ❚❚ in the accent colour (label "Pause {name}").

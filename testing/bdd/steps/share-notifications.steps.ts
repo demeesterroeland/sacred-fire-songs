@@ -170,21 +170,36 @@ Then('the musician has no notification for that recording', async function (this
   assert.equal(rows.length, 0);
 });
 
-/** Claims as `userId` without rolling back, so a later claim sees the first one. */
-async function claimAs(userId: string, recordingId: string, recipientId: string) {
+/**
+ * Claims as the app server does: role service_role with the owner passed in.
+ * Runs without rolling back, so a later claim sees the first one.
+ */
+async function claimAs(ownerId: string, recordingId: string, recipientId: string) {
   const db = await seedDb();
-  await db.query(`SELECT set_config('request.jwt.claims', $1, true)`, [JSON.stringify({ sub: userId, role: 'authenticated' })]);
-  await db.query('SET LOCAL ROLE authenticated');
+  await db.query(`SELECT set_config('request.jwt.claims', $1, true)`, [JSON.stringify({ role: 'service_role' })]);
+  await db.query('SET LOCAL ROLE service_role');
   try {
     const { rows } = await db.query<{ recipient_email: string }>(
-      'SELECT * FROM public.claim_recording_share_email($1, $2)',
-      [recordingId, recipientId],
+      'SELECT * FROM public.claim_recording_share_email($1, $2, $3)',
+      [recordingId, recipientId, ownerId],
     );
     return rows;
   } finally {
     await db.query('RESET ROLE');
   }
 }
+
+Then('a signed-in member cannot run the share email claim', async function (this: object) {
+  const member = await profileIdByEmail(SEEDED_EMAILS.member);
+  await assert.rejects(
+    queryAsUser(member, 'SELECT * FROM public.claim_recording_share_email($1, $2, $3)', [
+      getState(this).recordingId,
+      await profileIdByEmail(SEEDED_EMAILS.musician),
+      member,
+    ]),
+    /permission denied/,
+  );
+});
 
 Then('the gatekeeper cannot claim the share email', async function (this: object) {
   const rows = await claimAs(
