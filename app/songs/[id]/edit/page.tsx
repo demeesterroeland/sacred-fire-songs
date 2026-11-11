@@ -30,6 +30,8 @@ const fetchSongForEdit = async (id: string) => {
             id,
             created_at,
             version_name,
+            version_kind,
+            song_version_sources (is_primary, songbooks (short_name, title)),
             content_chordpro,
             key,
             capo,
@@ -49,7 +51,7 @@ const fetchSongForEdit = async (id: string) => {
 };
 
 export default function EditSongPage() {
-    const { t } = useLocale();
+    const { t, locale } = useLocale();
     const params = useParams();
     const id = typeof params.id === 'string' ? params.id : params.id?.[0];
     const pathname = usePathname();
@@ -100,7 +102,7 @@ export default function EditSongPage() {
     // The version being read (`?version=`), else the first (oldest) one, like the song page.
     const version = pickVersion(song.song_versions, requestedVersionId);
     // Which version this form saves is only visible when the song has more than one (same labels as the switch).
-    const versionLabel = versionOptions(song.song_versions, t)?.find((o) => o.value === version?.id)?.label;
+    const versionLabel = versionOptions(song.song_versions, t, locale)?.find((o) => o.value === version?.id)?.label;
     const initialData = {
         title: song.title,
         author: song.original_author || '',

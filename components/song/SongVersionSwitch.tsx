@@ -18,8 +18,8 @@ interface SongVersionSwitchProps {
  * switch of the planned translation layer joins this slot later.
  */
 export function SongVersionSwitch({ versions, selectedIndex, onSelect, className }: SongVersionSwitchProps) {
-  const { t } = useLocale();
-  const options = versionOptions(versions, t);
+  const { t, locale } = useLocale();
+  const options = versionOptions(versions, t, locale);
   if (!options) return null;
   const selected = options[selectedIndex] ?? options[0];
   return (

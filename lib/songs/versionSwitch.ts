@@ -6,13 +6,11 @@
  * The language switch of the planned translation layer will sit in the same slot; no
  * translation data exists yet, so nothing is rendered for it.
  */
-import type { TranslateFn } from '@/lib/i18n';
+import { DEFAULT_LOCALE, type Locale, type TranslateFn } from '@/lib/i18n';
+import { versionBaseLabel, type LabelledVersion } from '@/lib/songs/versionLabels';
 import { RECORDING_PARAM } from '@/lib/songs/recordingLink';
 
-export interface VersionLike {
-  id: string;
-  version_name?: string | null;
-}
+export type VersionLike = LabelledVersion;
 
 export interface VersionOption {
   value: string;
@@ -64,17 +62,20 @@ export function linkedVersionChoice(songId: string | undefined, param: string | 
 
 /**
  * Segment options for the song's versions, in the given order, or `null` when there is
- * no choice to offer (0 or 1 version). Blank names become "Version N" (N = position);
+ * no choice to offer (0 or 1 version). A version is named after its songbook (original,
+ * variant) or its language in the app `locale` (translation), else by `version_name`
+ * (`versionBaseLabel`, #509). Blank names become "Version N" (N = position);
  * names used more than once are numbered with the translated `song.version.numbered`
  * ("Standard 1", "Standard 2"), skipping numbers another version already uses, so two
  * segments never share a label.
  */
 export function versionOptions(
   versions: ReadonlyArray<VersionLike> | null | undefined,
-  t: TranslateFn
+  t: TranslateFn,
+  locale: Locale = DEFAULT_LOCALE
 ): VersionOption[] | null {
   if (!versions || versions.length < 2) return null;
-  const names = versions.map((v, i) => v.version_name?.trim() || t('song.version.fallback', { n: i + 1 }));
+  const names = versions.map((v, i) => versionBaseLabel(v, locale) || t('song.version.fallback', { n: i + 1 }));
   const total = new Map<string, number>();
   for (const n of names) total.set(n, (total.get(n) ?? 0) + 1);
   // Names that stay as they are are taken; numbered labels must steer around them.

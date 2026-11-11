@@ -40,6 +40,8 @@ export const fetchSong = async (id: string) => {
           song_versions (
             id,
             version_name,
+            version_kind,
+            song_version_sources (is_primary, songbooks (short_name, title)),
             created_at,
             content_chordpro,
             key,

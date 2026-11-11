@@ -8,7 +8,7 @@ import { firstVersion } from './versionOrder';
  */
 export const SONGS_SELECT = `
   *,
-  song_versions(id, created_at, key, content_chordpro, melody_notation),
+  song_versions(id, created_at, version_kind, key, content_chordpro, melody_notation),
   song_category_map(
     categories(
       name,
@@ -86,6 +86,7 @@ export function recentlyAddedQuery(client: SupabaseClient, limit = RECENTLY_ADDE
 interface SongVersionRow {
   id?: string;
   created_at?: string | null;
+  version_kind?: string | null;
   key: string | null;
   content_chordpro: string | null;
   melody_notation: string | null;

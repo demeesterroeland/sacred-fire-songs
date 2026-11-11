@@ -1,11 +1,12 @@
 # Guest Guide (draft)
 
-**Version:** 0.24 | **Date:** Nov 11, 2026
+**Version:** 0.25 | **Date:** Nov 11, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.25 | Nov 11, 2026 | Song page: the version switch names each version after its songbook (for example *Songbook A*) or, for a translation, its language in your app language; the original comes first, then versions from other books, then translations. On a phone with many versions the switch scrolls sideways inside its own strip (UX v3, #509). |
 | 0.24 | Nov 11, 2026 | Song page: lines the circle sings more than once sit between repeat bars, `‖:` before the first line and `:‖` after the last one, with `×2` when the song says how many times (UX v3, #518). |
 | 0.23 | Nov 9, 2026 | The ☰ menu's Library section lists the same tabs as the Library page; tags under a song title stay on one line with "…" when there are more. |
 | 0.22 | Nov 7, 2026 | "recording" is now **recording**; Terms Of Service and Privacy Policy pages (a draft until approved). |
@@ -56,7 +57,7 @@ The ☰ menu repeats the main places (Home, Songs; under Library the same tabs a
 
 - The title is at the top. Under it, one grey line shows the author and the tags (category, tradition, language); tap it to see them all as links.
 - A second line shows **Key**, **Capo** and **Tuning**, e.g. `Key E · Capo 3 · Standard`.
-- If the song exists in more than one version (for example *Original* and *Simplified*), a grey switch with the version names appears under those lines; tap a name to read that version. The app opens the first version each time. Songs with one version show no switch.
+- If the song exists in more than one version (for example *Original* and *Simplified*, or the same song from two songbooks), a grey switch appears under those lines. A version is named after its songbook, a translation after its language (in your app language); the original comes first, then versions from other books, then translations. Tap a name to read that version; with many versions the switch scrolls sideways inside its own strip. The app opens the first version each time. Songs with one version show no switch.
 - Under those lines: **Chords** switches the chords on or off, **A−** / **A+** make the text smaller or larger. The app remembers your choice on this device.
 - **▶** scrolls the song for you, hands free; touch the screen to pause it, or press **⏸**. The **⋮** menu (top right) sets the scroll speed (five steps) and has the **Screen stays on** switch. While the scroll runs the toolbar stays under the title. A small sun next to **⋯** means the screen stays on while you sing.
 - Chords are printed above the word where they change.
