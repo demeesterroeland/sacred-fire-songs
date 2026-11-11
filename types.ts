@@ -25,6 +25,9 @@ export interface Composition {
   id: string;
   title: string;
   original_author?: string | null; // Optional because often unknown for medicine songs
+  catalog_slug?: string | null; // Stable external id from a songbook catalog (Story 6.2.1)
+  aliases?: string[]; // Other titles the song is known by
+  authors?: string[]; // Every author; original_author stays the display text
   created_at: string;
   // Relations (populated via joins)
   categories?: Category[];
@@ -48,6 +51,49 @@ export interface SongVersion {
   youtube_url?: string | null;
   contributor_id?: string | null; // Foreign Key -> UserProfile
   vote_count: number;
+  catalog_source_id?: string | null; // External id within the song, usually the songbook id (Story 6.2.1)
+  version_kind?: SongVersionKind;
+  beats?: string | null;
+  song_note?: string | null;
+  created_at: string;
+}
+
+/** How a version relates to its song (song_versions.version_kind). */
+export type SongVersionKind = 'original' | 'variant' | 'translation';
+
+/** A printed source book (public.songbooks), keyed by its external id. */
+export interface Songbook {
+  id: string;
+  title: string;
+  short_name?: string | null;
+  compiler?: string | null;
+  community?: string | null;
+  year?: number | null;
+  languages: string[];
+  attribution?: string | null;
+  created_at: string;
+}
+
+/** Where a version was printed (public.song_version_sources). */
+export interface SongVersionSource {
+  id: string;
+  song_version_id: string;
+  songbook_id: string;
+  original_title?: string | null;
+  page?: string | null;
+  source_file?: string | null;
+  is_primary: boolean;
+  created_at: string;
+}
+
+/** A song's translation into one language (public.song_translations). */
+export interface SongTranslation {
+  id: string;
+  composition_id: string;
+  language: string; // BCP 47 tag, e.g. 'nl' or 'pt-BR'
+  title?: string | null;
+  lyrics?: string | null;
+  translator?: string | null;
   created_at: string;
 }
 

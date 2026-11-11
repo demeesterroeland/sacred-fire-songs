@@ -1,6 +1,6 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 1.97
+**Version:** 1.98
 **Status:** Living Document
 **Date:** Nov 11, 2026
 
@@ -63,6 +63,7 @@
 | **1.92** | Nov 6, 2026 | Epic 6.1: validation round 1 after the owner's phone run (Part of #375): auto-scroll only when the lyrics run below the fold (Story 6.1.10 / #394), expanded meta line (6.1.7 / #391), one focus style for text fields, the search suggestions in the page flow (6.1.29 / #413), search options on tokens, translated feedback and song flags across versions (6.1.11 / #395). Acceptance criteria of those stories now read as in `docs/testing/ux-v2-validation-1.feature`. |
 | **1.93** | Nov 7, 2026 | Epic 6.1: review round on the validation round 1 PR (#474, Part of #375): acceptance criteria of Stories 6.1.10 (auto-scroll offered only when the lyric text runs below the visible area above the fixed bars), 6.1.29 (suggestions close on the click and keep the scroll position), 6.1.1 (one focus cue per field, readable chip counts), 6.1.11 (a lyrics-only version has no Chords switch; a bracketed section label is not a chord) and the i18n policy (no raw server or database text in a toast) verified against the code; decisions UXA-061 to UXA-066. |
 | **1.94** | Nov 7, 2026 | Epic 6.1: validation round 2, batch 2 (Part of #375): acceptance criteria updated for Story 6.1.4 (#388: amounts between parentheses, "Air (3)"), 6.1.8 (#392: the full title wraps at the top of the page on a phone, the truncated copy shows only after scrolling past it), 6.1.10 (#394: transpose, scroll speed and a Screen stays on switch live in the one ⋮ menu; the toolbar has no ⋯), 6.1.11 (#395: every version has a `?version=` link, replaced in place, shared by Share), 6.1.23 (#407: History, Artists and Shared with me share one heading size) and 6.1.24 (#408: the Library "+" floats at the bottom right). New: Terms and Privacy pages (draft) with the operator from the server environment. |
+| **1.98** | Nov 11, 2026 | Epic 6.2 (Songbook Data Model & UX v3, #498) added with groups G0–G5; Story 6.2.1 (#504, G0.1) implemented: songbook data model in the database, schema only, executable in `docs/testing/songbook-data-model.feature`. |
 | **1.97** | Nov 11, 2026 | Epic 6.1: Story 6.1.37 (#490) added: recordings on a singer profile play on the page, one at a time, and open the song with that take. |
 | **1.96** | Nov 11, 2026 | Story 6.1.36 (#488) owner review: members get the same Home layout with six personal counts on top (New songs replaced by My recordings, Shared with me, Shared by me); new page Shared by me; one dark background. |
 | **1.95** | Nov 10, 2026 | Epic 6.1: Story 6.1.36 (#488) added: guests see Recently added on Home in the columns of the categories and of /songs (10 songs, 5 on a phone). |
@@ -1701,6 +1702,36 @@ Owner decision of Nov 4, 2026: sober greyscale interface with one accent, smalle
 | 6.1.37 | #490 | — | C | **[Implemented]** As a visitor of a singer's profile, I want to play the recordings listed there, one at a time, so that I can hear the singer without opening every song first | #375 |
 
 Priority **A** = quick wins (one sprint together), **B** = flow work, **C** = backlog. Acceptance criteria (Gherkin) live in each GitHub issue and move to `docs/testing/*.feature` when a story starts.
+
+### Epic 6.2: Songbook Data Model & UX v3
+
+GitHub epic **#498**. Many circles sing from printed songbooks: the same song appears in several books with its own capo, key, beats and note, sometimes with a translation. G0 adds a generic schema so any self-hoster can import a songbook collection (importers live outside this repository); G1–G5 (UX v3, integration branch `feat/ux-v3`) show it.
+
+| Group | Issue | Theme |
+|---|---|---|
+| G0 | #504 | Songbook data model (schema only, straight into `develop`) |
+| G1 | #499 | Versions on the song page (labels, meta, note, link a song as a version of another) |
+| G2 | #500 | Provenance & credits (source line, songbook pages, authors) |
+| G3 | #501 | Translations (language switch, side by side) |
+| G4 | #502 | ChordPro fidelity & export |
+| G5 | #503 | Search, browse & curation (incl. re-import safety) |
+
+| Story | Issue | Code | Pri | Title | Blocked by |
+|---|---|---|---|---|---|
+| 6.2.1 | #504 | `G0.1` | A | **[Implemented, in review]** As a self-hoster, I want the database to store songbooks, per-book variants, capo/key/beats/note per version and translations so that songbook collections can be imported without losing information | — |
+
+**Story 6.2.1 acceptance criteria** (executable: `docs/testing/songbook-data-model.feature`, `@seed`):
+
+```gherkin
+Scenario: Existing songs keep working after the migration
+  Given the current schema plus the new migration
+  When a member opens a song created before the migration
+  Then it renders exactly as before
+
+Scenario: A songbook variant keeps its own musical data
+  Given a version with catalog_source_id "songbook-a", capo 5, beats "8" and a song note
+  Then the row is stored with those values and is unique per song and book
+```
 
 ## Roles & Permissions Summary
 

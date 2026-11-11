@@ -1,11 +1,12 @@
 /*
- **Version:** 3.7
+ **Version:** 3.8
  **Status:** Current
  **Date:** November 11, 2026
  
  ## Usage
  This script provides a complete setup for the "Sacred Fire Songs" database. 
  It consolidates the initial schema and all subsequent migrations up to November 11, 2026.
+ (v3.8: songbook data model, Story 6.2.1, migration 20261111150000_songbook_data_model.sql: compositions.catalog_slug / aliases / authors; song_versions.catalog_source_id / version_kind / beats / song_note, unique per song and catalog source; new tables songbooks, song_version_sources and song_translations, readable when their song is readable and written by admins only).
  (v3.7: share e-mails are claimed by the server only, migration 20261111120000_share_email_server_claim.sql: claim_recording_share_email takes the owner as a parameter and only service_role may execute it).
  (v3.6: profile e-mail privacy, migration 20261110120000_profile_email_privacy.sql: public_profiles gains is_musician; the three profile read policies for singers and share partners are gone; search_users_for_sharing matches a name or an exact address and returns no address; user_recordings.singer_email is no longer selectable, the owner reads it with own_recording_singer_emails(); notifications and share e-mails name the sharer by name only).
  (v3.5: back-merge of release 1.7.1 from main: the access rules of migrations 20261106120000, 20261106130000 and 20261106140000 (public_profiles view, fn_can_edit_setlist, fn_guard_profile_fields, song and version read/write rules), compositions.is_public, profiles.last_seen_at and song_views; combined with the develop line below).
@@ -61,6 +62,11 @@ create table public.compositions (
   is_public boolean default true,
   has_chords boolean default false,
   has_melody boolean default false,
+  -- Songbook catalog data (v3.8, Story 6.2.1): stable external id, other titles, every author.
+  -- original_author stays the display text.
+  catalog_slug text unique check (btrim(catalog_slug) <> ''),
+  aliases text[] not null default '{}',
+  authors text[] not null default '{}',
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 -- SONG_CATEGORY_MAP (Join Table)
@@ -89,6 +95,12 @@ create table public.song_versions (
   -- Added v2.3
   contributor_id uuid references public.profiles(id),
   vote_count integer default 0,
+  -- Songbook catalog data (v3.8, Story 6.2.1): key and capo above hold the per-book values.
+  catalog_source_id text check (btrim(catalog_source_id) <> ''),
+  version_kind text not null default 'original'
+    check (version_kind in ('original', 'variant', 'translation')),
+  beats text,
+  song_note text,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 -- SETLISTS
@@ -143,7 +155,48 @@ create table public.song_views (
   viewed_at timestamp with time zone default now() not null,
   unique (user_id, song_id)
 );
+-- SONGBOOKS (v3.8, Story 6.2.1): one row per source book, keyed by its external id
+create table public.songbooks (
+  id text primary key check (btrim(id) <> ''),
+  title text not null,
+  short_name text,
+  compiler text,
+  community text,
+  year integer check (year between 1 and 9999),
+  languages text[] not null default '{}',
+  attribution text,
+  created_at timestamptz not null default now()
+);
+-- SONG VERSION SOURCES (v3.8): the songbooks a version was printed in
+create table public.song_version_sources (
+  id uuid primary key default gen_random_uuid(),
+  song_version_id uuid not null references public.song_versions(id) on delete cascade,
+  songbook_id text not null references public.songbooks(id) on update cascade on delete cascade,
+  original_title text,
+  page text,
+  source_file text,
+  is_primary boolean not null default false,
+  created_at timestamptz not null default now(),
+  unique (song_version_id, songbook_id)
+);
+-- SONG TRANSLATIONS (v3.8): one translation per song and language
+create table public.song_translations (
+  id uuid primary key default gen_random_uuid(),
+  composition_id uuid not null references public.compositions(id) on delete cascade,
+  language text not null check (language ~ '^[A-Za-z]{2,3}(-[A-Za-z0-9]{1,8})*$'),
+  title text,
+  lyrics text,
+  translator text,
+  created_at timestamptz not null default now(),
+  unique (composition_id, language)
+);
 -- 3. Indexes
+-- Songbook catalog keys (v3.8): an importer upserts versions on (composition_id, catalog_source_id).
+create unique index song_versions_composition_catalog_source_key
+  on public.song_versions (composition_id, catalog_source_id);
+create index idx_song_version_sources_songbook_id on public.song_version_sources (songbook_id);
+create unique index song_version_sources_one_primary
+  on public.song_version_sources (song_version_id) where is_primary;
 -- Partial indexes for public content optimization
 CREATE INDEX IF NOT EXISTS idx_compositions_is_public_true ON public.compositions (created_at DESC) WHERE is_public = true;
 CREATE INDEX IF NOT EXISTS idx_setlists_is_public_true ON public.setlists (created_at DESC) WHERE is_public = true;
@@ -484,7 +537,8 @@ insert to authenticated with check (
 revoke update on public.song_versions from anon, authenticated;
 grant update (
   version_name, content_chordpro, melody_notation, key, capo, tuning,
-  soundcloud_url, youtube_url, spotify_url
+  soundcloud_url, youtube_url, spotify_url,
+  version_kind, beats, song_note
 ) on public.song_versions to authenticated;
 create policy "Contributors can update their versions" on public.song_versions for
 update to authenticated using (
@@ -830,6 +884,59 @@ $$;
 REVOKE ALL ON FUNCTION public.claim_recording_share_email(uuid, uuid, uuid) FROM PUBLIC, anon, authenticated;
 GRANT EXECUTE ON FUNCTION public.claim_recording_share_email(uuid, uuid, uuid) TO service_role;
 
+-- Songbook data model (v3.8, Story 6.2.1, migration 20261111150000_songbook_data_model.sql).
+-- Readable when the song is readable (the subqueries run with the caller's row-level
+-- security), written by admins only. Importers may also use service_role.
+-- Privileges: guests read; signed-in users read and (admins only, by policy) write.
+REVOKE ALL ON public.songbooks, public.song_version_sources, public.song_translations FROM anon, authenticated;
+GRANT SELECT ON public.songbooks, public.song_version_sources, public.song_translations TO anon, authenticated;
+GRANT INSERT, UPDATE, DELETE ON public.songbooks, public.song_version_sources, public.song_translations TO authenticated;
+GRANT ALL ON public.songbooks, public.song_version_sources, public.song_translations TO service_role;
+
+-- Row-level security
+ALTER TABLE public.songbooks ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.song_version_sources ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.song_translations ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Songbooks are readable with a readable version" ON public.songbooks;
+CREATE POLICY "Songbooks are readable with a readable version"
+ON public.songbooks FOR SELECT
+TO public
+USING (EXISTS (SELECT 1 FROM public.song_version_sources s WHERE s.songbook_id = songbooks.id));
+-- Admins also read songbooks no version cites yet, through the policy below.
+
+DROP POLICY IF EXISTS "Admins can manage songbooks" ON public.songbooks;
+CREATE POLICY "Admins can manage songbooks"
+ON public.songbooks FOR ALL
+TO authenticated
+USING ((select public.fn_is_admin()))
+WITH CHECK ((select public.fn_is_admin()));
+
+DROP POLICY IF EXISTS "Version sources follow version privacy" ON public.song_version_sources;
+CREATE POLICY "Version sources follow version privacy"
+ON public.song_version_sources FOR SELECT
+TO public
+USING (EXISTS (SELECT 1 FROM public.song_versions v WHERE v.id = song_version_sources.song_version_id));
+
+DROP POLICY IF EXISTS "Admins can manage version sources" ON public.song_version_sources;
+CREATE POLICY "Admins can manage version sources"
+ON public.song_version_sources FOR ALL
+TO authenticated
+USING ((select public.fn_is_admin()))
+WITH CHECK ((select public.fn_is_admin()));
+
+DROP POLICY IF EXISTS "Translations follow song privacy" ON public.song_translations;
+CREATE POLICY "Translations follow song privacy"
+ON public.song_translations FOR SELECT
+TO public
+USING (EXISTS (SELECT 1 FROM public.compositions c WHERE c.id = song_translations.composition_id));
+
+DROP POLICY IF EXISTS "Admins can manage translations" ON public.song_translations;
+CREATE POLICY "Admins can manage translations"
+ON public.song_translations FOR ALL
+TO authenticated
+USING ((select public.fn_is_admin()))
+WITH CHECK ((select public.fn_is_admin()));
 -- 7. SEED DATA (Categories)
 with groups as (
   insert into public.categories (name, slug, emoji)

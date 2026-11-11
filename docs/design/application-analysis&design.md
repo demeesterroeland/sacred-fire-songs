@@ -69,6 +69,7 @@
 | **2.07** | Nov 10, 2026 | Story 6.1.36 (#488, Part of #375): Home grid for guests. *Recently added* spans the content width in the grid of `/songs` and the category grid (`grid-cols-1 md:grid-cols-2 md:gap-x-6`), 10 songs filled row by row (`RECENTLY_ADDED_LIMIT`), the first 5 below `md` (`RECENTLY_ADDED_PHONE_LIMIT`); the welcome text and search field stay `max-w-2xl`. Category headings and links, the section labels and *Your library* start at the 16 px inset of the song titles (`ps-4`). Home uses the outer padding of `/songs` (`p-4 md:p-8`), so the columns sit at the same x on both pages. Specs: `ux-v2-home-grid.feature`, `e2e/tests/ux-v2-home-grid.spec.ts`. |
 | **2.08** | Nov 11, 2026 | Story 6.1.36 (#488) owner review: Home section labels (*Recently added*, *Explore by category*, *Your library*) start at the x of the search field (no inset). Members get the guest layout: *Your library* on top, then *Recently added* and the categories. `LibrarySummary` shows six personal counts in two groups of three on the two content columns (one row from `md`, two rows of three on a phone): favorites, private, my songs, my recordings (songs I can read with at least one take of mine, the same list `/songs?myRecordings=true` shows), shared with me, shared by me; *New songs* and the `song_views` read are gone from `getLibrarySummary`. The *Shared with me* row under the Library tabs is removed (`SharedWithMeLink` deleted). Playlist and smart playlist rows have no leading icon (`PLAYLIST_ICON` removed), and every Library list row (`PLAYLIST_ROW`, the `ListRow`s of History, New, Artists, Shared with me and Shared by me) has the 16 px inset of the song rows on `/songs` and Home (`ps-4`), so every Library tab starts its row titles at the same x; the section headings say private or public. New page `/library/shared-by-me` (`getSharedByMe` in `lib/library/serverQueries.ts`, grouping in `lib/library/sharedByMe.ts`, `SharedByMeList`, GuestGate `sharedByMe`; names from `public_profiles`). `/songs`, `/library/*` and `/admin` use `bg-bg` instead of `bg-white dark:bg-gray-950`, so dark mode has one background. |
 | **2.09** | Nov 11, 2026 | Share e-mails are claimed by the app server only (§6.9): migration `20261111120000_share_email_server_claim.sql` gives `claim_recording_share_email` an owner parameter and lets only `service_role` execute it; `sendRecordingShareEmail` passes the signed-in user as owner and calls it with the server-only client `createAdminClient()` (`lib/supabase/admin.ts`, new server env `SUPABASE_SECRET_KEY`; without it no share e-mail is sent). Spec: `docs/testing/share-notifications.feature` 1.2. |
+| **2.11** | Nov 11, 2026 | Story 6.2.1 (#504, Epic 6.2 G0.1): songbook data model, schema only (no screen, query or copy changes). Migration `20261111150000_songbook_data_model.sql` adds `compositions.catalog_slug` (unique), `aliases`, `authors`; `song_versions.catalog_source_id` (unique per song), `version_kind` (`original` / `variant` / `translation`), `beats`, `song_note`; new tables `songbooks`, `song_version_sources` and `song_translations` (sections 5.1 D–F). Read follows the song's read rules, writes are admin only (section 5.2). `db-schema.sql` v3.8; TypeScript types in `types.ts`; importer notes in `docs/guides/importing-songbooks.md`. Tests: `docs/testing/songbook-data-model.feature` (`@seed`), `testing/unit/tests/schemaSongbookTables.test.ts`. |
 | **2.10** | Nov 11, 2026 | Story 6.1.37 (#490): recordings on a singer profile (`/users/:id`) play on the page. `fetchMusicianProfile` signs each file with the viewer's session (`createSignedUrls`, 1 h; the storage read policy decides), `lib/users/profileRecordings.ts` maps the results; `ProfileRecordingRow` has a 44 px ▶/❚❚ button ("Play {name}" / "Pause {name}") that plays through the shared `AudioProvider` (one recording at a time) and a row link to the recording permalink (replaces the per-row "Back to song" button). A file that cannot be signed gets no play button. Spec: `docs/testing/ux-v2-profile-playback.feature`. |
 | **2.11** | Nov 11, 2026 | #490 follow-up: the signed URLs on a singer profile are made on the server, which may only know Supabase by an internal address (self-hosted Docker). `toBrowserStorageUrl` now routes them through the same-origin `/supabase-api` proxy, like the browser client, so playback works on self-hosted servers. E2E checks the audio loads from the app origin. |
 | **2.03** | Nov 7, 2026 | Owner review of the Terms and Privacy text: the Vercel Speed Insights script and its dependency are removed from the app (`app/layout.tsx`, `package.json`), the privacy text no longer mentions it, and it says that anyone with direct access to the database or file storage (the operator) can reach everything stored, private recordings included. |
@@ -173,6 +174,9 @@ The application is a **Progressive Web App (PWA)** optimized for mobile use duri
 * `is_public`: boolean
 * `has_chords`: boolean
 * `has_melody`: boolean
+* `catalog_slug`: text, unique when set (stable external id of a song imported from a songbook catalog; Story 6.2.1)
+* `aliases`: text[] (other titles; default empty)
+* `authors`: text[] (every author; default empty. `original_author` stays the display text)
 * `created_at`: timestamptz
 
 #### **B. song_versions** (The Content)
@@ -186,7 +190,10 @@ The application is a **Progressive Web App (PWA)** optimized for mobile use duri
 * `youtube_url`: text
 * `spotify_url`: text
 * `contributor_id`: uuid
-* `created_at`: timestamptz
+* `catalog_source_id`: text (external id of the version within its song, usually the songbook id; unique per `composition_id`, so importers upsert on `(composition_id, catalog_source_id)`)
+* `version_kind`: text, `original` (default) | `variant` | `translation`. A translation may arrive as a `translation` version until the language switch (#516) reads `song_translations`
+* `beats`: text, `song_note`: text (per-book musical data; key and capo use `key` / `capo`)
+* `created_at`: timestamptz (versions are ordered oldest first, `id` tiebreak: `lib/songs/versionOrder.ts`)
 
 #### **C. user_recordings** (Private Rehearsal Metadata)
 * `id`: uuid (PK)
@@ -195,6 +202,27 @@ The application is a **Progressive Web App (PWA)** optimized for mobile use duri
 * `recording_name`: text
 * `storage_path`: text (Unique path in 'rehearsals' private storage bucket)
 * `created_at`: timestamptz
+
+#### **D. songbooks** (Printed source books, Story 6.2.1)
+* `id`: text (PK, the book's stable external id)
+* `title`: text, `short_name`: text, `compiler`: text, `community`: text, `year`: integer
+* `languages`: text[], `attribution`: text (licence or credit line)
+* `created_at`: timestamptz
+
+#### **E. song_version_sources** (Where a version was printed)
+* `id`: uuid (PK)
+* `song_version_id`: uuid (FK -> song_versions.id, cascade delete)
+* `songbook_id`: text (FK -> songbooks.id, cascade update/delete)
+* `original_title`: text, `page`: text, `source_file`: text
+* `is_primary`: boolean (at most one primary source per version)
+* Unique `(song_version_id, songbook_id)`
+
+#### **F. song_translations** (One translation per song and language)
+* `id`: uuid (PK)
+* `composition_id`: uuid (FK -> compositions.id, cascade delete)
+* `language`: text (BCP 47 tag such as `nl` or `pt-BR`)
+* `title`: text, `lyrics`: text, `translator`: text
+* Unique `(composition_id, language)`
 
 *(Categories and Setlists tables are designing but not yet implemented).*
 
@@ -208,7 +236,8 @@ The application is a **Progressive Web App (PWA)** optimized for mobile use duri
 * **Profile writes:** a signed-in user changes their own profile fields (name, avatar, last seen). `id`, `email` and `created_at` change only in a trusted server context (service role, auth triggers), through the trigger `trg_guard_profile_fields`. `role` changes only there or through an admin. Signed-in users have no `INSERT` or `DELETE` privilege on `profiles`; `handle_new_user` creates a new profile with the default role `member`.
 * **Category writes (`categories`):** admins insert, update and delete. Signed-in users may insert only artist sub-categories (`artist-*` under `artists`) and the `Artists` parent if it does not exist yet, because saving a song creates these through the user's session.
 * **Playlist writes (`setlists`):** owners update their own playlists; admins and gatekeepers update public playlists, which stay public. `owner_id` is not updatable through the API (column privileges allow `title`, `description` and `is_public`).
-* **Song version writes (`song_versions`):** insert requires `contributor_id` to be the caller and the caller to own the song or be admin (`public.fn_check_song_manage_access`). `composition_id`, `contributor_id` and `vote_count` are not updatable through the API. New editable columns need an addition to the column privileges.
+* **Song version writes (`song_versions`):** insert requires `contributor_id` to be the caller and the caller to own the song or be admin (`public.fn_check_song_manage_access`). `composition_id`, `contributor_id` and `vote_count` are not updatable through the API. New editable columns need an addition to the column privileges; `version_kind`, `beats` and `song_note` are editable like `key` and `capo`, `catalog_source_id` is not (it belongs to the importer).
+* **Songbook data (`songbooks`, `song_version_sources`, `song_translations`, Story 6.2.1):** readable when the song is readable. The read policies only ask whether the linked `compositions` / `song_versions` row (or, for a songbook, a citing source row) is visible to the caller, so they follow those tables' rules automatically. Admins read and write everything; nobody else writes. Importers that upsert use the service role (see `docs/guides/importing-songbooks.md`).
 * **Activity status:** `active` when `profiles.last_seen_at` is within 30 days, `inactive` when older, `never` when null.
 * **Not modelled yet:** comments and flags (named as example contributions in Story 3.6.1) have no tables, so they are not shown.
 
