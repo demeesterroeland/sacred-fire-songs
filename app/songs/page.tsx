@@ -20,7 +20,7 @@ export default async function SongsPage() {
 
   return (
     <Suspense fallback={
-      <div className="flex-1 min-h-0 bg-white dark:bg-gray-950 flex items-center justify-center">
+      <div className="flex-1 min-h-0 bg-bg flex items-center justify-center">
         <div className="text-gray-500">{t('common.loading')}</div>
       </div>
     }>

@@ -15,7 +15,7 @@ export default async function RecentlyAdded({ songs }: { songs: Song[] }) {
   const t = await getServerT();
   return (
     <section aria-labelledby="recently-added-heading" data-testid="recently-added">
-      <div className="mb-1 flex min-h-tap items-center justify-between ps-4">
+      <div className="mb-1 flex min-h-tap items-center justify-between">
         <h2 id="recently-added-heading" className="text-meta font-semibold text-fg-muted">
           {t('home.recent.heading')}
         </h2>

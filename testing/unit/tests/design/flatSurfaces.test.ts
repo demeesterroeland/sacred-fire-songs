@@ -35,11 +35,16 @@ describe('Home and Library rows are flat', () => {
   });
 });
 
-describe('Private playlists', () => {
-  it('show a lock, public ones a globe, and no music icon', () => {
-    const card = read('components/playlists/PlaylistCard.tsx');
-    expect(card).toContain('<VisibilityIcon isPublic={isPublic}');
-    expect(card).not.toContain('ListMusic');
+// #488 owner review: playlist and smart playlist rows have no leading icon, so their titles start at the
+// x of the other Library tabs' rows; the section headings say private or public.
+describe('Playlist rows', () => {
+  it('have no leading icon', () => {
+    for (const f of ['components/playlists/PlaylistCard.tsx', 'components/playlists/PublicPlaylistCard.tsx', 'components/playlists/PlaylistSubtitles.tsx']) {
+      const src = read(f);
+      expect(src, f).not.toContain('<VisibilityIcon');
+      expect(src, f).not.toContain('PLAYLIST_ICON');
+      expect(src, f).not.toContain('ListMusic');
+    }
   });
 });
 
@@ -68,9 +73,11 @@ describe('Category list', () => {
 });
 
 describe('Your library summary', () => {
-  it('is one row of four with a line between, without icon tiles', () => {
+  // Story 6.1.36 (#488): two groups of three on the two content columns, a line between the counts.
+  it('is two groups of three with a line between, without icon tiles', () => {
     const summary = read('components/home/LibrarySummary.tsx');
-    expect(summary).toMatch(/grid-cols-4[^"]*divide-x divide-line/);
+    expect(summary).toMatch(/md:grid-cols-2/);
+    expect(summary).toMatch(/grid-cols-3[^"]*divide-x divide-line/);
     expect(summary).not.toContain('Icon');
   });
 });

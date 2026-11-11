@@ -93,4 +93,53 @@ describe('Home getLibrarySummary', () => {
     expect(drafts[0].filters).toContainEqual(['owner_id', 'user-1']);
     vi.doUnmock('@/lib/supabase/server');
   });
+
+  // Story 6.1.36 (#488): six personal counts; "New songs" is not personal and is gone.
+  it('counts recordings, shares with me and shares by me, and no longer reads song views', async () => {
+    const { vi } = await import('vitest');
+    const calls: Call[] = [];
+    const data: Record<string, unknown> = {
+      recording_shares: [{ recording_id: 'r1' }, { recording_id: 'r1' }, { recording_id: 'r2' }],
+      // four takes on three songs: the count is songs, the same list /songs?myRecordings=true opens
+      user_recordings: [
+        { song_versions: { composition_id: 'c1' } },
+        { song_versions: { composition_id: 'c1' } },
+        { song_versions: { composition_id: 'c2' } },
+        { song_versions: { composition_id: 'c3' } },
+      ],
+    };
+    const counts: Record<string, number> = {};
+    const make = (table: string) => {
+      const call: Call = { table, filters: [] };
+      calls.push(call);
+      const builder: Record<string, unknown> = {
+        select: () => builder,
+        eq: (col: string, val: unknown) => (call.filters.push([col, val]), builder),
+        gte: () => builder,
+        order: () => builder,
+        limit: () => builder,
+        maybeSingle: () => Promise.resolve({ data: null, error: null }),
+        then: (resolve: (v: unknown) => unknown) =>
+          resolve({
+            data: call.filters.some(([c]) => c === 'shared_with_user_id') ? [{ id: 'a' }, { id: 'b' }] : data[table] ?? [],
+            count: call.filters.some(([c]) => c === 'shared_with_user_id') ? 2 : counts[table] ?? 0,
+            error: null,
+          }),
+      };
+      return builder;
+    };
+    vi.resetModules();
+    vi.doMock('@/lib/supabase/server', () => ({ createClient: async () => ({ from: make }) }));
+    const { getLibrarySummary } = await import('@/lib/songs/serverQueries');
+    const summary = await getLibrarySummary('user-1');
+    expect(summary).not.toHaveProperty('newSongsCount');
+    expect(summary.recordingsCount).toBe(3);
+    expect(summary.sharedWithMeCount).toBe(2);
+    expect(summary.sharedByMeCount).toBe(2); // two distinct takes, one shared twice
+    expect(calls.some((c) => c.table === 'song_views')).toBe(false);
+    expect(calls).toContainEqual({ table: 'user_recordings', filters: [['user_id', 'user-1']] });
+    expect(calls).toContainEqual({ table: 'recording_shares', filters: [['shared_with_user_id', 'user-1']] });
+    expect(calls).toContainEqual({ table: 'recording_shares', filters: [['user_recordings.user_id', 'user-1']] });
+    vi.doUnmock('@/lib/supabase/server');
+  });
 });

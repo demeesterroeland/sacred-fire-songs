@@ -25,7 +25,7 @@ export default async function NewSongsPage() {
             ) : (
                 <div className="border-t border-line" data-testid="song-rows">
                     {songs.map((song) => (
-                        <ListRow key={song.id} asChild title={song.title} meta={songRowMeta(song.author, song.categories, t)} className="px-0">
+                        <ListRow key={song.id} asChild title={song.title} meta={songRowMeta(song.author, song.categories, t)} className="ps-4 pe-1">
                             <Link href={`/songs/${song.id}`} data-testid="song-row" />
                         </ListRow>
                     ))}
