@@ -1,11 +1,12 @@
 # Member Guide (draft)
 
-**Version:** 0.21 | **Date:** Nov 11, 2026
+**Version:** 0.22 | **Date:** Nov 11, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.22 | Nov 11, 2026 | Song page: a grey line under the lyrics names the songbook, page and compiler of the version you are reading, when the song comes from a printed book (UX v3, #513). The guest guide describes it. |
 | 0.21 | Nov 11, 2026 | Add Song: `{start_of_repeat}` … `{end_of_repeat}` (optionally `{end_of_repeat: x2}`) put repeat bars around the lines between them, on the song page and in the preview (UX v3, #518). |
 | 0.20 | Nov 11, 2026 | A singer's profile plays its recordings: tap ▶ to listen there (one at a time), tap the row to open the song with that recording (UX v2, #490). |
 | 0.19 | Nov 11, 2026 | Home looks like it does for guests (**Recently added** and the categories), with **Your library** on top: six counters, **New songs** replaced by **Your recordings**, **Shared with me** and **Shared by me**. New page **Shared by me**; the **Shared with me** row under the Library tabs is gone (UX v2, #488). |

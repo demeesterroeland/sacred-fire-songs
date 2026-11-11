@@ -1529,3 +1529,10 @@
 - [x] `db-schema.sql` v3.8 (fresh install verified), design doc 2.12, epics 1.98 (Epic 6.2 + story 6.2.1), `types.ts`, `docs/guides/importing-songbooks.md`
 - [x] Cross-review by another Claude model (orchestrator, #498)
 - [x] Review fixes (PR #527): `trg_guard_catalog_slug` / `trg_guard_catalog_source_id` (only service role and admins set catalog keys), keys without surrounding spaces, lowercase translation languages, `song_version_sources.songbook_id` `on delete restrict`, guide: explicit increasing `created_at` and a write-rights table; `@seed` scenarios for the guards, ordering and runtime privileges
+
+## Session November 11, 2026 (Story 6.2.10, #513, songbook source line)
+
+- [x] Failing tests first: formatter, component, `fetchSong` select, BDD `ux-v3-songbook-source.feature`
+- [x] `lib/songs/versionSources.ts`, `components/song/SongSourceLine.tsx`, `fetchSong` embed, song page, 5 keys in 8 locales
+- [x] Docs: design doc 2.14, epics 1.100 (story 6.2.10), guest guide 0.25, member guide 0.22
+- [ ] Cross-review by another Claude model (orchestrator, #498)

@@ -1,11 +1,12 @@
 # Guest Guide (draft)
 
-**Version:** 0.24 | **Date:** Nov 11, 2026
+**Version:** 0.25 | **Date:** Nov 11, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.25 | Nov 11, 2026 | Song page: when a song comes from a printed songbook, a grey line under the lyrics says which book, which page and who compiled it (UX v3, #513). |
 | 0.24 | Nov 11, 2026 | Song page: lines the circle sings more than once sit between repeat bars, `‖:` before the first line and `:‖` after the last one, with `×2` when the song says how many times (UX v3, #518). |
 | 0.23 | Nov 9, 2026 | The ☰ menu's Library section lists the same tabs as the Library page; tags under a song title stay on one line with "…" when there are more. |
 | 0.22 | Nov 7, 2026 | "recording" is now **recording**; Terms Of Service and Privacy Policy pages (a draft until approved). |
@@ -60,6 +61,7 @@ The ☰ menu repeats the main places (Home, Songs; under Library the same tabs a
 - Under those lines: **Chords** switches the chords on or off, **A−** / **A+** make the text smaller or larger. The app remembers your choice on this device.
 - **▶** scrolls the song for you, hands free; touch the screen to pause it, or press **⏸**. The **⋮** menu (top right) sets the scroll speed (five steps) and has the **Screen stays on** switch. While the scroll runs the toolbar stays under the title. A small sun next to **⋯** means the screen stays on while you sing.
 - Chords are printed above the word where they change.
+- Under the lyrics a grey line says where the version you are reading was printed, e.g. `Songbook A · p. 38 · compiled by Compiler A`. When the book printed the song under another title, `Original title: …` follows. A song printed in several books has one line per book, the main book first; the line follows the version you chose. Songs without a known source show no line.
 - Lines that are sung more than once stand between repeat bars: `‖:` before the first line and `:‖` after the last one; the repeated lines are slightly indented so they line up behind the start bar. When the song says how many times, you also see it, e.g. `:‖ ×2`. The bars stay when the chords are switched off.
 - A bar at the bottom of the song has **Practice**, **Playlist** and **Like**. It slides away when you scroll down and comes back when you scroll up. **Playlist** and **Like** need an account and ask you to sign in.
 - ⋮ (top right) opens the song menu: **Share Song**.
