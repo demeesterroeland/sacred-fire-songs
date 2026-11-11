@@ -64,3 +64,20 @@ describe('SongCard row', () => {
     expect(screen.getByText('Draft song').className).toContain('text-fg-subtle');
   });
 });
+
+// #492: deleting a song is not a row action; it lives in the song page's ⋮ menu only.
+describe('SongCard has no delete button', () => {
+  it('renders no delete button, even for the owner', () => {
+    const props = { id: 's1', title: 'Madre Tierra', author: 'X', userId: 'u1', canDelete: true, onDelete: vi.fn() };
+    render(<SongCard {...(props as never)} />);
+    expect(screen.queryByRole('button', { name: /delete/i })).toBeNull();
+  });
+
+  it('the song list wires no delete flow into its rows', async () => {
+    const { readFileSync } = await import('node:fs');
+    const src = readFileSync('app/songs/SongsPageContent.tsx', 'utf8');
+    expect(src).not.toMatch(/onDelete=|canDelete=|useDeleteSong/);
+    expect(readFileSync('components/home/SongCard.tsx', 'utf8')).not.toMatch(/Trash2|onDelete/);
+  });
+});
+

@@ -2,14 +2,12 @@
 
 import Link from "next/link";
 import SongCard from "@/components/home/SongCard";
-import DeleteConfirmationModal from "@/components/common/DeleteConfirmationModal";
 import SearchFiltersModal from "@/components/library/SearchFiltersModal";
-import { Search, Trash2, Heart, FileText } from "lucide-react";
+import { Search, Heart, FileText } from "lucide-react";
 import { useSidebar } from "@/context/SidebarContext";
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "@/hooks/useAuth";
 import { useSearchParams, useRouter } from 'next/navigation';
-import { useDeleteSong } from "@/hooks/useDeleteSong";
 import { type TaxonomyNode } from "@/lib/taxonomyUtils";
 import type { Song } from "@/lib/songUtils";
 import { useSongsQuery } from "@/hooks/useSongsQuery";
@@ -33,11 +31,8 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
     const router = useRouter();
     const { user } = useAuth();
     const { setHeaderCount, searchFiltersOpen, setSearchFiltersOpen, setHasActiveSearchFilters, isSearching } = useSidebar();
-    const { isDeleting, deleteSong } = useDeleteSong();
     const [localSearch, setLocalSearch] = useState(searchParams.get('search') || '');
-    const [deleteTarget, setDeleteTarget] = useState<{ id: string; title: string } | null>(null);
 
-    const isAdmin = user?.role === 'admin';
     const sortBy = (searchParams.get('sort') as SortByType) || 'title';
 
     // Draft state for the advanced search modal — nothing commits until "Show results"
@@ -89,12 +84,6 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
         hasActiveFilters,
         filteredCount
     } = useSongsFilter({ songs, userId: user?.id, favoriteIds, userRecordingCompositionIds, viewedSongIds, sortBy });
-
-    const handleDelete = async () => {
-        if (!deleteTarget) return;
-        const success = await deleteSong(deleteTarget.id);
-        if (success) setDeleteTarget(null);
-    };
 
     const setSortBy = (val: SortByType) => {
         const params = new URLSearchParams(searchParams.toString());
@@ -210,8 +199,6 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
                                         isFavorite={favoriteIds.has(song.id)}
                                         userId={user?.id}
                                         categories={song.categories}
-                                        canDelete={Boolean(user && (isAdmin || song.ownerId === user.id))}
-                                        onDelete={() => setDeleteTarget({ id: song.id, title: song.title })}
                                     />
                                 </div>
                             ))
@@ -305,17 +292,6 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
                 isAuthenticated={!!user}
                 localSearch={localSearch}
                 setLocalSearch={setLocalSearch}
-            />
-
-            <DeleteConfirmationModal
-                isOpen={deleteTarget !== null}
-                onClose={() => setDeleteTarget(null)}
-                onConfirm={handleDelete}
-                title={t('song.delete.confirm.modalTitle')}
-                message={t('song.delete.confirm.message', { title: deleteTarget?.title || '' })}
-                isDeleting={isDeleting}
-                // The deleted song's row is gone: focus goes to the first song left in the list.
-                fallbackFocus={() => document.querySelector<HTMLElement>('[data-testid="song-list"] a')}
             />
         </div>
     );

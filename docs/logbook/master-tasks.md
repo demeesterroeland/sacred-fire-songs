@@ -1502,3 +1502,8 @@
 - [x] Validation: no "Shared with me" row on the Library pages; "Your recordings" counts the songs that /songs?myRecordings=true lists
 - [x] Validation: Playlists and Smart rows lose their leading icon, so all five Library tabs start their rows at the same x, 16 px in like /songs
 - [x] E2E home grid (member layout, Shared by me count, dark background), unit tests for the summary and the grouping, docs
+
+## Session November 11, 2026 (#492, no delete button on song rows)
+- [x] Song rows (`SongCard`) have no delete button; `/songs` has no delete flow; deleting stays in the song page's ⋮ menu
+- [x] Unit test (`SongCard.test.tsx`), E2E (`ux-v2-song-rows.spec.ts`, admin), feature `ux-v2-song-rows.feature` 1.1, test matrix SONG-08; lint cap 141 → 140
+

@@ -3383,3 +3383,9 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - Playlists and Smart rows had a leading icon (lock, globe, heart), so their titles started 32 px further right than on History, New and Artists. The icons are gone, and all Library rows got the 16 px inset of the song rows on `/songs` (they had `px-0`); `ux-v2-library-tabs.spec.ts` checks the first row title x on all five tabs.
 - Dark mode had two backgrounds on `/songs`, `/library` and `/admin` (old `bg-white dark:bg-gray-950`); they use `bg-bg` now.
 - Tests: `ux-v2-home-grid.spec.ts` (labels, member layout at 390 and 1280 px, Shared by me count, dark background), `librarySummary.test.ts`, `sharedByMe.test.ts`, `guestGate.test.ts`; feature files `ux-v2-home-grid.feature` 1.1 and `ux-v2-home-welcome.feature` 1.2.
+
+## Session November 11, 2026 — #492, no delete button on song rows
+
+- The trash button on a song row only showed for songs you may delete, so the row buttons shifted between rows. `SongCard` no longer has a delete button and `/songs` no longer wires a delete flow; deleting a song is done from the song page's ⋮ menu (with confirmation).
+- Tests: `SongCard.test.tsx` (no delete button, no delete wiring), `ux-v2-song-rows.spec.ts` (admin: no delete button, row buttons line up); `ux-v2-song-rows.feature` 1.1; test matrix SONG-08 updated. Lint cap lowered to 140.
+
