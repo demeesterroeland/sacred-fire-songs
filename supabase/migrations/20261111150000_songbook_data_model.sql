@@ -23,16 +23,25 @@
 -- below run with the caller's row-level security, so they follow the compositions and
 -- song_versions read rules) and are written by admins only. Importers may also use
 -- service_role, which bypasses row-level security.
+-- Catalog keys: only service_role (or another trusted role) and admins may set
+-- compositions.catalog_slug (insert or change) or insert song_versions.catalog_source_id
+-- (triggers trg_guard_catalog_slug / trg_guard_catalog_source_id); catalog_source_id is
+-- not updatable through the API at all (no column privilege). Keys have no surrounding
+-- spaces, translation languages are lowercase, and a songbook that a version source
+-- cites cannot be deleted (delete the sources first).
 
 -- 1. Songs
 ALTER TABLE public.compositions
-  ADD COLUMN IF NOT EXISTS catalog_slug text UNIQUE CHECK (btrim(catalog_slug) <> ''),
+  ADD COLUMN IF NOT EXISTS catalog_slug text UNIQUE
+    CONSTRAINT compositions_catalog_slug_check CHECK (catalog_slug <> '' AND catalog_slug = btrim(catalog_slug)),
   ADD COLUMN IF NOT EXISTS aliases text[] NOT NULL DEFAULT '{}',
   ADD COLUMN IF NOT EXISTS authors text[] NOT NULL DEFAULT '{}';
 
 -- 2. Versions
 ALTER TABLE public.song_versions
-  ADD COLUMN IF NOT EXISTS catalog_source_id text CHECK (btrim(catalog_source_id) <> ''),
+  ADD COLUMN IF NOT EXISTS catalog_source_id text
+    CONSTRAINT song_versions_catalog_source_id_check
+    CHECK (catalog_source_id <> '' AND catalog_source_id = btrim(catalog_source_id)),
   ADD COLUMN IF NOT EXISTS version_kind text NOT NULL DEFAULT 'original'
     CHECK (version_kind IN ('original', 'variant', 'translation')),
   ADD COLUMN IF NOT EXISTS beats text,
@@ -45,9 +54,80 @@ CREATE UNIQUE INDEX IF NOT EXISTS song_versions_composition_catalog_source_key
 -- key stays with whoever imports (admins insert it, service_role may change it).
 GRANT UPDATE (version_kind, beats, song_note) ON public.song_versions TO authenticated;
 
+-- 2b. Catalog keys are set by importers and admins only. Song owners may insert and
+-- update their songs and versions, so without these guards a member could pre-claim a
+-- catalog_slug (or a catalog_source_id) that an importer later needs.
+CREATE OR REPLACE FUNCTION public.fn_guard_catalog_slug() RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = ''
+AS $$
+DECLARE
+  sets_key boolean;
+BEGIN
+  -- API callers run as anon or authenticated. Every other role (service_role, the
+  -- database owner) is a trusted importer context.
+  IF current_user NOT IN ('anon', 'authenticated') THEN
+    RETURN NEW;
+  END IF;
+
+  IF TG_OP = 'INSERT' THEN
+    sets_key := NEW.catalog_slug IS NOT NULL;
+  ELSE
+    sets_key := NEW.catalog_slug IS DISTINCT FROM OLD.catalog_slug;
+  END IF;
+
+  IF sets_key AND NOT public.fn_is_admin() THEN
+    RAISE EXCEPTION 'Only admins can set the catalog slug' USING ERRCODE = '42501';
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+REVOKE ALL ON FUNCTION public.fn_guard_catalog_slug() FROM PUBLIC, anon, authenticated;
+
+DROP TRIGGER IF EXISTS trg_guard_catalog_slug ON public.compositions;
+CREATE TRIGGER trg_guard_catalog_slug
+BEFORE INSERT OR UPDATE ON public.compositions
+FOR EACH ROW EXECUTE FUNCTION public.fn_guard_catalog_slug();
+
+CREATE OR REPLACE FUNCTION public.fn_guard_catalog_source_id() RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = ''
+AS $$
+DECLARE
+  sets_key boolean;
+BEGIN
+  -- API callers run as anon or authenticated. Every other role (service_role, the
+  -- database owner) is a trusted importer context.
+  IF current_user NOT IN ('anon', 'authenticated') THEN
+    RETURN NEW;
+  END IF;
+
+  -- Updates are already refused by the column privileges (catalog_source_id has no
+  -- UPDATE grant); the check also covers them should such a grant ever be added.
+  IF TG_OP = 'INSERT' THEN
+    sets_key := NEW.catalog_source_id IS NOT NULL;
+  ELSE
+    sets_key := NEW.catalog_source_id IS DISTINCT FROM OLD.catalog_source_id;
+  END IF;
+
+  IF sets_key AND NOT public.fn_is_admin() THEN
+    RAISE EXCEPTION 'Only admins can set the catalog source id' USING ERRCODE = '42501';
+  END IF;
+
+  RETURN NEW;
+END;
+$$;
+REVOKE ALL ON FUNCTION public.fn_guard_catalog_source_id() FROM PUBLIC, anon, authenticated;
+
+DROP TRIGGER IF EXISTS trg_guard_catalog_source_id ON public.song_versions;
+CREATE TRIGGER trg_guard_catalog_source_id
+BEFORE INSERT OR UPDATE ON public.song_versions
+FOR EACH ROW EXECUTE FUNCTION public.fn_guard_catalog_source_id();
+
 -- 3. Songbooks
 CREATE TABLE IF NOT EXISTS public.songbooks (
-  id text PRIMARY KEY CHECK (btrim(id) <> ''),
+  id text PRIMARY KEY CONSTRAINT songbooks_id_check CHECK (id <> '' AND id = btrim(id)),
   title text NOT NULL,
   short_name text,
   compiler text,
@@ -58,11 +138,12 @@ CREATE TABLE IF NOT EXISTS public.songbooks (
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
--- 4. Version sources
+-- 4. Version sources (a songbook that a source cites cannot be deleted: delete the
+--    sources first, so provenance never disappears silently)
 CREATE TABLE IF NOT EXISTS public.song_version_sources (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   song_version_id uuid NOT NULL REFERENCES public.song_versions(id) ON DELETE CASCADE,
-  songbook_id text NOT NULL REFERENCES public.songbooks(id) ON UPDATE CASCADE ON DELETE CASCADE,
+  songbook_id text NOT NULL REFERENCES public.songbooks(id) ON UPDATE CASCADE ON DELETE RESTRICT,
   original_title text,
   page text,
   source_file text,
@@ -79,7 +160,9 @@ CREATE UNIQUE INDEX IF NOT EXISTS song_version_sources_one_primary
 CREATE TABLE IF NOT EXISTS public.song_translations (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   composition_id uuid NOT NULL REFERENCES public.compositions(id) ON DELETE CASCADE,
-  language text NOT NULL CHECK (language ~ '^[A-Za-z]{2,3}(-[A-Za-z0-9]{1,8})*$'),
+  -- Lowercase BCP 47-style tag ('nl', 'pt-br'), so one language has one spelling.
+  language text NOT NULL CONSTRAINT song_translations_language_check
+    CHECK (language = lower(language) AND language ~ '^[a-z]{2,3}(-[a-z0-9]{1,8})*$'),
   title text,
   lyrics text,
   translator text,

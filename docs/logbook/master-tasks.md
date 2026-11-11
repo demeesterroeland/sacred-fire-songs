@@ -1525,6 +1525,7 @@
 
 ## Session November 11, 2026 (Story 6.2.1, #504, songbook data model)
 - [x] Migration `20261111150000_songbook_data_model.sql`: catalog columns on `compositions` / `song_versions`, tables `songbooks`, `song_version_sources`, `song_translations`, RLS (read follows the song, admins write), column privileges
-- [x] `@seed` feature `songbook-data-model.feature` (14 scenarios), unit test `schemaSongbookTables.test.ts`
+- [x] `@seed` feature `songbook-data-model.feature` (18 scenario definitions: 15 scenarios and 3 outlines; 25 executed scenarios), unit test `schemaSongbookTables.test.ts`
 - [x] `db-schema.sql` v3.8 (fresh install verified), design doc 2.12, epics 1.98 (Epic 6.2 + story 6.2.1), `types.ts`, `docs/guides/importing-songbooks.md`
-- [ ] Cross-review by another Claude model (orchestrator, #498)
+- [x] Cross-review by another Claude model (orchestrator, #498)
+- [x] Review fixes (PR #527): `trg_guard_catalog_slug` / `trg_guard_catalog_source_id` (only service role and admins set catalog keys), keys without surrounding spaces, lowercase translation languages, `song_version_sources.songbook_id` `on delete restrict`, guide: explicit increasing `created_at` and a write-rights table; `@seed` scenarios for the guards, ordering and runtime privileges

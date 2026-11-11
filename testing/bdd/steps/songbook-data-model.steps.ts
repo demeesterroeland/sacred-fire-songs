@@ -2,7 +2,8 @@ import assert from 'node:assert/strict';
 import { Given, Then, When } from '@cucumber/cucumber';
 import type { QueryResultRow } from 'pg';
 import type { SongBddWorld } from '../support/world';
-import { profileIdByEmail, queryAsAnon, queryAsUser, seedDb } from '../support/db';
+import { profileIdByEmail, queryAsAnon, queryAsServiceRole, queryAsUser, seedDb } from '../support/db';
+import { sortVersions } from '../../../lib/songs/versionOrder';
 import { OTHER_MEMBER_ID, SEEDED_EMAILS } from './access-policies.steps';
 
 /**
@@ -19,10 +20,15 @@ export interface SongbookBddState {
   legacySongId?: string;
   legacyVersionId?: string;
   variantVersionId?: string;
+  memberSongId?: string;
+  memberVersionId?: string;
+  orderSongId?: string;
 }
 
 const UNIQUE_VIOLATION = '23505';
 const CHECK_VIOLATION = '23514';
+const FOREIGN_KEY_VIOLATION = '23503';
+const INSUFFICIENT_PRIVILEGE = '42501';
 const PRIVATE_BOOK = 'bdd-private-book';
 
 function state(world: SongBddWorld): SongbookBddState {
@@ -59,6 +65,15 @@ async function assertRejectedWith(code: string, sql: string, params: unknown[], 
   } finally {
     await db.query('ROLLBACK TO SAVEPOINT expect_error');
   }
+}
+
+/** Runs `sql` as `account` and expects the database to refuse it with insufficient privilege. */
+async function assertRefusedFor(account: string, sql: string, params: unknown[], message: string): Promise<void> {
+  await assert.rejects(
+    queryAs(account, sql, params),
+    (error: { code?: string }) => error.code === INSUFFICIENT_PRIVILEGE,
+    message
+  );
 }
 
 async function insertVersion(compositionId: string, fields: Record<string, unknown> = {}): Promise<string> {
@@ -442,3 +457,257 @@ Then(
     assert.equal(allowed, result === 'can', `${account} adding a translation`);
   }
 );
+
+
+// ── Strict keys ───────────────────────────────────────────────────────────────
+
+Then(/^a song with catalog slug "([^"]+)" is refused$/, async function (slug: string) {
+  await assertRejectedWith(
+    CHECK_VIOLATION,
+    `INSERT INTO public.compositions (title, catalog_slug) VALUES ('Padded', $1)`,
+    [slug],
+    `catalog slug "${slug}"`
+  );
+});
+
+Then(/^a version with catalog_source_id "([^"]+)" is refused$/, async function (this: SongBddWorld, sourceId: string) {
+  await assertRejectedWith(
+    CHECK_VIOLATION,
+    `INSERT INTO public.song_versions (composition_id, content_chordpro, catalog_source_id) VALUES ($1, 'x', $2)`,
+    [state(this).catalogSongId, sourceId],
+    `catalog_source_id "${sourceId}"`
+  );
+});
+
+Then(/^a songbook with id "([^"]+)" is refused$/, async function (id: string) {
+  await assertRejectedWith(
+    CHECK_VIOLATION,
+    `INSERT INTO public.songbooks (id, title) VALUES ($1, 'Padded')`,
+    [id],
+    `songbook id "${id}"`
+  );
+});
+
+Then(/^a translation with language "([^"]+)" can be added$/, async function (this: SongBddWorld, language: string) {
+  const db = await seedDb();
+  const { rows } = await db.query(
+    `INSERT INTO public.song_translations (composition_id, language) VALUES ($1, $2) RETURNING language`,
+    [state(this).catalogSongId, language]
+  );
+  assert.deepEqual(rows, [{ language }]);
+});
+
+// ── Songbook deletion ─────────────────────────────────────────────────────────
+
+Then(/^deleting the songbook "([^"]+)" is refused$/, async function (book: string) {
+  await assertRejectedWith(
+    FOREIGN_KEY_VIOLATION,
+    `DELETE FROM public.songbooks WHERE id = $1`,
+    [book],
+    `deleting cited songbook ${book}`
+  );
+});
+
+When(/^the sources citing "([^"]+)" are deleted$/, async function (book: string) {
+  const db = await seedDb();
+  await db.query(`DELETE FROM public.song_version_sources WHERE songbook_id = $1`, [book]);
+});
+
+Then(/^the songbook "([^"]+)" can be deleted$/, async function (book: string) {
+  const db = await seedDb();
+  const { rows } = await db.query(`DELETE FROM public.songbooks WHERE id = $1 RETURNING id`, [book]);
+  assert.deepEqual(rows, [{ id: book }]);
+});
+
+// ── Version order ─────────────────────────────────────────────────────────────
+
+async function insertOrderSong(world: SongBddWorld): Promise<string> {
+  const db = await seedDb();
+  const { rows } = await db.query<{ id: string }>(
+    `INSERT INTO public.compositions (title, is_public) VALUES ('BDD Ordered Song', true) RETURNING id`
+  );
+  state(world).orderSongId = rows[0].id;
+  return rows[0].id;
+}
+
+/** The song's versions as the app reads them (PostgREST serialises timestamps with to_json), in the app's order. */
+async function orderedVersionNames(songId: string): Promise<string[]> {
+  const rows = await queryAsAnon<{ id: string; created_at: string; version_name: string }>(
+    `SELECT id, to_json(created_at) #>> '{}' AS created_at, version_name
+       FROM public.song_versions WHERE composition_id = $1`,
+    [songId]
+  );
+  return sortVersions(rows).map((v) => v.version_name);
+}
+
+Given(
+  /^a new song with the versions "([^"]+)" and "([^"]+)" inserted in one statement without created_at$/,
+  async function (this: SongBddWorld, first: string, second: string) {
+    const songId = await insertOrderSong(this);
+    const db = await seedDb();
+    await db.query(
+      `INSERT INTO public.song_versions (composition_id, version_name, content_chordpro)
+       VALUES ($1, $2, '[C]Sing'), ($1, $3, '[C]Sing')`,
+      [songId, first, second]
+    );
+  }
+);
+
+Then('both versions have the same created_at', async function (this: SongBddWorld) {
+  const db = await seedDb();
+  const { rows } = await db.query<{ n: string }>(
+    `SELECT count(DISTINCT created_at) AS n FROM public.song_versions WHERE composition_id = $1`,
+    [state(this).orderSongId]
+  );
+  assert.equal(Number(rows[0].n), 1, 'created_at defaults to the transaction start, so the id decides the order');
+});
+
+Given(
+  /^a new song with the versions "([^"]+)", "([^"]+)" and "([^"]+)" inserted in one statement, with created_at increasing from "([^"]+)" to "([^"]+)" to "([^"]+)"$/,
+  async function (this: SongBddWorld, a: string, b: string, c: string, oldest: string, middle: string, newest: string) {
+    const songId = await insertOrderSong(this);
+    const offset: Record<string, number> = { [oldest]: 0, [middle]: 1, [newest]: 2 };
+    const db = await seedDb();
+    await db.query(
+      `INSERT INTO public.song_versions (composition_id, version_name, content_chordpro, created_at)
+       SELECT $1, name, '[C]Sing', timestamptz '2026-01-01T00:00:00Z' + make_interval(secs => step)
+         FROM unnest($2::text[], $3::int[]) AS t(name, step)`,
+      [songId, [a, b, c], [a, b, c].map((name) => offset[name])]
+    );
+  }
+);
+
+Then(
+  /^the app orders the versions "([^"]+)", "([^"]+)", "([^"]+)"$/,
+  async function (this: SongBddWorld, first: string, second: string, third: string) {
+    assert.deepEqual(await orderedVersionNames(state(this).orderSongId!), [first, second, third]);
+  }
+);
+
+// ── Catalog key guard ─────────────────────────────────────────────────────────
+
+Given('the member owns a song with a version they contributed', async function (this: SongBddWorld) {
+  const member = await profileIdByEmail(SEEDED_EMAILS.member);
+  const db = await seedDb();
+  const { rows } = await db.query<{ id: string }>(
+    `INSERT INTO public.compositions (title, owner_id, is_public) VALUES ('BDD Member Song', $1, false) RETURNING id`,
+    [member]
+  );
+  const versionId = await insertVersion(rows[0].id, { contributor_id: member });
+  Object.assign(state(this), { memberSongId: rows[0].id, memberVersionId: versionId });
+});
+
+Then(
+  'the member can change the version kind, beats and song note of that version',
+  async function (this: SongBddWorld) {
+    const rows = await queryAs(
+      'member',
+      `UPDATE public.song_versions SET version_kind = 'variant', beats = '6', song_note = 'Slowly'
+        WHERE id = $1 RETURNING version_kind, beats, song_note`,
+      [state(this).memberVersionId]
+    );
+    assert.deepEqual(rows, [{ version_kind: 'variant', beats: '6', song_note: 'Slowly' }]);
+  }
+);
+
+Then('the member cannot change the catalog_source_id of that version', async function (this: SongBddWorld) {
+  await assertRefusedFor(
+    'member',
+    `UPDATE public.song_versions SET catalog_source_id = 'songbook-a' WHERE id = $1 RETURNING id`,
+    [state(this).memberVersionId],
+    'member updating catalog_source_id'
+  );
+});
+
+Then(
+  /^the member (can|cannot) add a version (with|without) a catalog_source_id to that song$/,
+  async function (this: SongBddWorld, result: string, withKey: string) {
+    const member = await profileIdByEmail(SEEDED_EMAILS.member);
+    const sql = `INSERT INTO public.song_versions (composition_id, contributor_id, content_chordpro, catalog_source_id)
+                 VALUES ($1, $2, '[D]Sing', $3) RETURNING id`;
+    const params = [state(this).memberSongId, member, withKey === 'with' ? 'songbook-b' : null];
+    if (result === 'can') {
+      assert.equal((await queryAs('member', sql, params)).length, 1, 'member adding a version');
+    } else {
+      await assertRefusedFor('member', sql, params, 'member inserting catalog_source_id');
+    }
+  }
+);
+
+Then('the member cannot give that song a catalog slug', async function (this: SongBddWorld) {
+  await assertRefusedFor(
+    'member',
+    `UPDATE public.compositions SET catalog_slug = 'bdd-claimed' WHERE id = $1 RETURNING id`,
+    [state(this).memberSongId],
+    'member claiming a catalog slug'
+  );
+});
+
+Then(/^the member (can|cannot) add a song (with|without) a catalog slug$/, async function (result: string, withKey: string) {
+  const member = await profileIdByEmail(SEEDED_EMAILS.member);
+  const sql = `INSERT INTO public.compositions (title, owner_id, catalog_slug) VALUES ('BDD New Song', $1, $2) RETURNING id`;
+  const params = [member, withKey === 'with' ? 'bdd-claimed' : null];
+  if (result === 'can') {
+    assert.equal((await queryAs('member', sql, params)).length, 1, 'member adding a song');
+  } else {
+    await assertRefusedFor('member', sql, params, 'member adding a song with a catalog slug');
+  }
+});
+
+Then('the member can change the aliases and authors of that song', async function (this: SongBddWorld) {
+  const rows = await queryAs(
+    'member',
+    `UPDATE public.compositions SET aliases = ARRAY['Other Title'], authors = ARRAY['Author C']
+      WHERE id = $1 RETURNING aliases, authors`,
+    [state(this).memberSongId]
+  );
+  assert.deepEqual(rows, [{ aliases: ['Other Title'], authors: ['Author C'] }]);
+});
+
+Then('an admin can change the catalog slug of the catalog song', async function (this: SongBddWorld) {
+  const rows = await queryAs(
+    'admin',
+    `UPDATE public.compositions SET catalog_slug = 'bdd-renamed' WHERE id = $1 RETURNING catalog_slug`,
+    [state(this).catalogSongId]
+  );
+  assert.deepEqual(rows, [{ catalog_slug: 'bdd-renamed' }]);
+});
+
+Then('an admin can add a song with a catalog slug', async function () {
+  const admin = await profileIdByEmail(SEEDED_EMAILS.admin);
+  const rows = await queryAs(
+    'admin',
+    `INSERT INTO public.compositions (title, owner_id, catalog_slug) VALUES ('BDD Admin Song', $1, 'bdd-admin-song')
+     RETURNING catalog_slug`,
+    [admin]
+  );
+  assert.deepEqual(rows, [{ catalog_slug: 'bdd-admin-song' }]);
+});
+
+Then('an admin can add a version with a catalog_source_id to the catalog song', async function (this: SongBddWorld) {
+  const admin = await profileIdByEmail(SEEDED_EMAILS.admin);
+  const rows = await queryAs(
+    'admin',
+    `INSERT INTO public.song_versions (composition_id, contributor_id, content_chordpro, catalog_source_id)
+     VALUES ($1, $2, '[E]Sing', 'songbook-b') RETURNING catalog_source_id`,
+    [state(this).catalogSongId, admin]
+  );
+  assert.deepEqual(rows, [{ catalog_source_id: 'songbook-b' }]);
+});
+
+Then('an admin cannot change the catalog_source_id of the catalog version', async function (this: SongBddWorld) {
+  await assertRefusedFor(
+    'admin',
+    `UPDATE public.song_versions SET catalog_source_id = 'songbook-b' WHERE id = $1 RETURNING id`,
+    [state(this).catalogVersionId],
+    'admin updating catalog_source_id (no column privilege)'
+  );
+});
+
+Then('the service role can change the catalog_source_id of the catalog version', async function (this: SongBddWorld) {
+  const rows = await queryAsServiceRole(
+    `UPDATE public.song_versions SET catalog_source_id = 'songbook-b' WHERE id = $1 RETURNING catalog_source_id`,
+    [state(this).catalogVersionId]
+  );
+  assert.deepEqual(rows, [{ catalog_source_id: 'songbook-b' }]);
+});

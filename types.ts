@@ -90,7 +90,7 @@ export interface SongVersionSource {
 export interface SongTranslation {
   id: string;
   composition_id: string;
-  language: string; // BCP 47 tag, e.g. 'nl' or 'pt-BR'
+  language: string; // Lowercase BCP 47-style tag, e.g. 'nl' or 'pt-br'
   title?: string | null;
   lyrics?: string | null;
   translator?: string | null;

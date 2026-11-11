@@ -24,6 +24,19 @@ const on = (sql: string, table: string) => policies(sql).filter((p) => p.include
 
 const NEW_TABLES = ['songbooks', 'song_version_sources', 'song_translations'];
 
+/** The function definition and its trigger, from `create or replace function public.<name>` up to the trigger's `execute function`. */
+const guard = (sql: string, name: string) => {
+  const match = sql.match(
+    new RegExp(`create or replace function public\\.${name}\\(\\)[\\s\\S]*?execute function public\\.${name}\\(\\);`)
+  );
+  return match?.[0];
+};
+
+const CATALOG_GUARDS = [
+  ['fn_guard_catalog_slug', 'trg_guard_catalog_slug', 'compositions', 'catalog_slug'],
+  ['fn_guard_catalog_source_id', 'trg_guard_catalog_source_id', 'song_versions', 'catalog_source_id'],
+];
+
 describe('db-schema.sql: songbook data model (Story 6.2.1)', () => {
   it.each([
     ['compositions', 'catalog_slug text unique'],
@@ -55,5 +68,30 @@ describe('db-schema.sql: songbook data model (Story 6.2.1)', () => {
     const writes = on(schema, table).filter((p) => !/ for select /.test(p));
     expect(writes.length).toBeGreaterThan(0);
     for (const policy of writes) expect(policy).toContain('fn_is_admin()');
+  });
+
+  it.each(CATALOG_GUARDS)('%s guards the catalog key like the migration', (fn, trigger, table, column) => {
+    const definition = guard(schema, fn);
+    expect(definition).toBeDefined();
+    expect(definition).toEqual(guard(migration, fn));
+    expect(definition).toContain(`create trigger ${trigger} before insert or update on public.${table}`);
+    expect(definition).toContain(`new.${column} is not null`);
+    expect(definition).toContain('public.fn_is_admin()');
+  });
+
+  it.each([
+    ['catalog_slug', "catalog_slug <> '' and catalog_slug = btrim(catalog_slug)"],
+    ['catalog_source_id', "catalog_source_id <> '' and catalog_source_id = btrim(catalog_source_id)"],
+    ['songbooks.id', "id <> '' and id = btrim(id)"],
+    ['song_translations.language', 'language = lower(language)'],
+  ])('%s has the strict check of the migration', (_column, check) => {
+    expect(schema).toContain(check);
+    expect(migration).toContain(check);
+  });
+
+  it('a cited songbook cannot be deleted', () => {
+    for (const sql of [schema, migration]) {
+      expect(sql).toContain('references public.songbooks(id) on update cascade on delete restrict');
+    }
   });
 });

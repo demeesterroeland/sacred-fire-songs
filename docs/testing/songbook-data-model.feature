@@ -12,7 +12,10 @@
 # Run: npm run test:bdd:seed
 #
 # Changelog
-#   1.0 – Nov 11, 2026 – Initial catalogue (Story 6.2.1).
+#   1.0 – Nov 11, 2026 – Initial catalogue (Story 6.2.1). Review round on PR #527:
+#         only importers and admins set the catalog keys, keys without surrounding
+#         spaces, lowercase translation languages, a cited songbook cannot be
+#         deleted, versions with increasing created_at open the main version first.
 
 @songbookDataModel
 Feature: Songbook data model
@@ -51,6 +54,12 @@ Feature: Songbook data model
       And songs without a catalog slug can be added side by side
 
     @seed
+    Scenario: Catalog keys have no surrounding spaces
+      Then a song with catalog slug " bdd-padded " is refused
+      And a version with catalog_source_id " songbook-c" is refused
+      And a songbook with id "songbook-c " is refused
+
+    @seed
     Scenario: The catalog song keeps aliases and several authors
       Then the catalog song lists the aliases "Alias One" and "Alias Two"
       And the catalog song lists the authors "Author A" and "Author B"
@@ -68,6 +77,24 @@ Feature: Songbook data model
       When the catalog version is deleted
       Then no source of the catalog version remains
 
+    @seed
+    Scenario: A songbook that versions cite cannot be deleted
+      Then deleting the songbook "songbook-a" is refused
+      When the sources citing "songbook-a" are deleted
+      Then the songbook "songbook-a" can be deleted
+
+  Rule: Versions open in the order the importer gives them
+
+    @seed
+    Scenario: Versions inserted in one transaction without created_at share one timestamp
+      Given a new song with the versions "Main" and "Variant" inserted in one statement without created_at
+      Then both versions have the same created_at
+
+    @seed
+    Scenario: Versions with strictly increasing created_at open the main version first
+      Given a new song with the versions "Variant two", "Main" and "Variant one" inserted in one statement, with created_at increasing from "Main" to "Variant one" to "Variant two"
+      Then the app orders the versions "Main", "Variant one", "Variant two"
+
   Rule: A song has at most one translation per language
 
     @seed
@@ -76,6 +103,8 @@ Feature: Songbook data model
       Then a second Dutch translation of the catalog song is refused
       And an English translation of the catalog song can be added
       And a translation with language "not a language" is refused
+      And a translation with language "pt-BR" is refused
+      And a translation with language "pt-br" can be added
 
   Rule: Songbook data is readable when its song is readable and written by admins only
 
@@ -112,3 +141,29 @@ Feature: Songbook data model
         | guest   | cannot |
         | member  | cannot |
         | admin   | can    |
+
+  Rule: Only importers and admins set the catalog keys
+
+    @seed
+    Scenario: A song manager edits the per-book musical data but not the catalog key
+      Given the member owns a song with a version they contributed
+      Then the member can change the version kind, beats and song note of that version
+      And the member cannot change the catalog_source_id of that version
+      And the member cannot add a version with a catalog_source_id to that song
+      And the member can add a version without a catalog_source_id to that song
+
+    @seed
+    Scenario: A member cannot claim a catalog slug
+      Given the member owns a song with a version they contributed
+      Then the member cannot give that song a catalog slug
+      And the member cannot add a song with a catalog slug
+      And the member can add a song without a catalog slug
+      And the member can change the aliases and authors of that song
+
+    @seed
+    Scenario: An admin and the service role set the catalog keys
+      Then an admin can change the catalog slug of the catalog song
+      And an admin can add a song with a catalog slug
+      And an admin can add a version with a catalog_source_id to the catalog song
+      And an admin cannot change the catalog_source_id of the catalog version
+      And the service role can change the catalog_source_id of the catalog version
