@@ -14,7 +14,8 @@ import { PROFILE_PLAYBACK_FIXTURE_IDS as IDS } from '../fixtures/ids';
  * uploads a sample MP3 for each as the member (own folder); e2e/global-teardown.ts removes the rows.
  */
 test.use({ storageState: ROLES.member.storage, viewport: { width: 390, height: 844 } });
-test.describe.configure({ timeout: 90_000 });
+// Serial: one worker runs beforeAll once, so parallel workers don't race on the fixture inserts.
+test.describe.configure({ mode: 'serial', timeout: 90_000 });
 
 const DATABASE_URL =
   process.env.DATABASE_URL ?? 'postgresql://postgres:postgres@127.0.0.1:54322/postgres';
@@ -84,7 +85,12 @@ test('a recording on a singer profile plays here, one at a time', async ({ page 
   await expect(playFirst).toBeVisible({ timeout: 15_000 });
   await expect(playSecond).toBeVisible();
 
+  // The audio loads through the app's own origin (/supabase-api proxy), never from the address
+  // the server used to sign it, which a self-hosted server may only know internally.
+  const audioRequest = page.waitForRequest((r) => r.url().includes(`/storage/v1/object/sign/rehearsals/`));
   await playFirst.click();
+  expect(new URL((await audioRequest).url()).pathname).toMatch(/^\/supabase-api\/storage\/v1\/object\/sign\//);
+  expect(new URL((await audioRequest).url()).origin).toBe(new URL(page.url()).origin);
   await expect(page.getByRole('button', { name: `Pause ${FIRST}` })).toBeVisible({ timeout: 10_000 });
 
   await playSecond.click();
@@ -94,6 +100,22 @@ test('a recording on a singer profile plays here, one at a time', async ({ page 
 
   await page.getByRole('button', { name: `Pause ${SECOND}` }).click();
   await expect(page.getByRole('button', { name: `Play ${SECOND}` })).toBeVisible();
+});
+
+test('a paused recording plays again from the same button', async ({ page }) => {
+  await page.goto(`/users/${musicianId}`);
+  const play = page.getByRole('button', { name: `Play ${FIRST}` });
+  const pause = page.getByRole('button', { name: `Pause ${FIRST}` });
+  await expect(play).toBeVisible({ timeout: 15_000 });
+
+  await play.click();
+  await expect(pause).toBeVisible({ timeout: 10_000 });
+  await pause.click();
+  await expect(play).toBeVisible();
+
+  // Resume: the same button starts the same take again.
+  await play.click();
+  await expect(pause).toBeVisible({ timeout: 10_000 });
 });
 
 test('the play button is a 44 px target and the row opens the song with that take', async ({ page }) => {
