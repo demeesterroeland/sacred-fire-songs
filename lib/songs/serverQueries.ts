@@ -1,3 +1,4 @@
+import { countSharedTakes } from '@/lib/library/sharedByMe';
 import { createClient } from "@/lib/supabase/server";
 import type { Song } from "@/lib/songUtils";
 import type { TaxonomyNode } from "@/lib/taxonomyUtils";
@@ -168,11 +169,16 @@ export interface LibrarySummary {
     favoritesCount: number;
     draftsCount: number;
     mySongsCount: number;
-    newSongsCount: number;
+    /** Songs I can read that have at least one take of mine (the list /songs?myRecordings=true shows). */
+    recordingsCount: number;
+    /** Takes other members shared with me. */
+    sharedWithMeCount: number;
+    /** My takes that I shared with at least one member. */
+    sharedByMeCount: number;
 }
 
 /**
- * Fetch aggregate counts for the home page "Your Library" summary.
+ * Fetch aggregate counts for the home page "Your Library" summary (Story 6.1.36: personal items only).
  * Only import from Server Components or Server Actions.
  */
 export async function getLibrarySummary(userId: string): Promise<LibrarySummary> {
@@ -189,42 +195,47 @@ export async function getLibrarySummary(userId: string): Promise<LibrarySummary>
         favoritesCount = count ?? 0;
     }
 
-    // My songs count (songs I own)
-    const { count: mySongsCount } = await supabase
-        .from('compositions')
-        .select('id', { count: 'exact', head: true })
-        .eq('owner_id', userId);
-
-    // Drafts count: my own non-public songs. RLS lets an admin read every draft, so filter on the owner too.
-    const { count: draftsCount } = await supabase
-        .from('compositions')
-        .select('id', { count: 'exact', head: true })
-        .eq('is_public', false)
-        .eq('owner_id', userId);
-
-    // New songs: created in last 30 days, never viewed by this user (RLS handles visibility)
-    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-    const { data: viewedIds } = await supabase
-        .from('song_views')
-        .select('song_id')
-        .eq('user_id', userId);
-    const viewedSet = new Set((viewedIds ?? []).map(v => v.song_id));
-
-    // Count unviewed songs from last 30 days (RLS handles visibility)
-    let newSongsCount = 0;
-    const { data: recentSongs } = await supabase
-        .from('compositions')
-        .select('id')
-        .gte('created_at', thirtyDaysAgo);
-    if (recentSongs) {
-        newSongsCount = recentSongs.filter(c => !viewedSet.has(c.id)).length;
-    }
+    const [mySongs, drafts, recordings, sharedWithMe, sharedByMe] = await Promise.all([
+        // My songs count (songs I own)
+        supabase
+            .from('compositions')
+            .select('id', { count: 'exact', head: true })
+            .eq('owner_id', userId),
+        // Drafts count: my own non-public songs. RLS lets an admin read every draft, so filter on the owner too.
+        supabase
+            .from('compositions')
+            .select('id', { count: 'exact', head: true })
+            .eq('is_public', false)
+            .eq('owner_id', userId),
+        // Songs with my takes, counted like the list it opens (/songs?myRecordings=true): one per song, and only
+        // songs I can read. Public takes of others are readable too, so filter on the owner.
+        supabase
+            .from('user_recordings')
+            .select('song_versions!inner(composition_id, compositions!inner(id))')
+            .eq('user_id', userId),
+        // Takes shared with me.
+        supabase
+            .from('recording_shares')
+            .select('id', { count: 'exact', head: true })
+            .eq('shared_with_user_id', userId),
+        // Shares of my own takes; one take shared with several members counts once.
+        supabase
+            .from('recording_shares')
+            .select('recording_id, user_recordings!inner(user_id)')
+            .eq('user_recordings.user_id', userId),
+    ]);
 
     return {
         favoritesCount,
-        draftsCount: draftsCount ?? 0,
-        mySongsCount: mySongsCount ?? 0,
-        newSongsCount,
+        draftsCount: drafts.count ?? 0,
+        mySongsCount: mySongs.count ?? 0,
+        recordingsCount: new Set(
+            ((recordings.data ?? []) as unknown as { song_versions: { composition_id: string } | null }[])
+                .map((r) => r.song_versions?.composition_id)
+                .filter(Boolean),
+        ).size,
+        sharedWithMeCount: sharedWithMe.count ?? 0,
+        sharedByMeCount: countSharedTakes((sharedByMe.data ?? []) as { recording_id: string }[]),
     };
 }
 

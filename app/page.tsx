@@ -13,43 +13,36 @@ export default async function Home() {
   const supabase = await createClient();
   const { data: { user } } = await supabase.auth.getUser();
 
-  const summary = user ? await getLibrarySummary(user.id) : null;
-  // First-time visitors (Story 6.1.28 / G6.3): welcome line, search field and "Recently added".
-  const recentlyAdded = user ? [] : await getRecentlyAddedSongs();
+  // Story 6.1.36 (#488): members see the guest layout ("Recently added" + categories) with their
+  // personal counts on top; guests get the welcome line and search field there instead.
+  const [summary, recentlyAdded] = await Promise.all([
+    user ? getLibrarySummary(user.id) : Promise.resolve(null),
+    getRecentlyAddedSongs(),
+  ]);
 
   return (
     <div className="flex-1 min-h-0 bg-bg overflow-y-auto">
       {/* Same outer padding as /songs, so the two-column grids sit at the same x on both pages (#488). */}
       <div className="p-4 md:p-8 space-y-10 max-w-7xl mx-auto">
-        {/* Update last_seen_at after render so "new songs" count uses the old value */}
+        {/* Update last_seen_at after render (admin user overview) */}
         {user && <UpdateLastSeen />}
 
-        {/* Guests: what this is, a way in, and something to open */}
-        {!user && (
-          <div className="space-y-6">
+        <div className="space-y-6">
+          {summary ? (
+            <LibrarySummary {...summary} />
+          ) : (
+            /* Guests: what this is and a way in */
             <div className="max-w-2xl space-y-6">
               <HomeWelcome />
               <HomeSearch />
             </div>
-            <RecentlyAdded songs={recentlyAdded} />
-          </div>
-        )}
-
-        {/* Library Summary — logged-in users only, shown first */}
-        {summary && (
-          <section>
-            <LibrarySummary
-              favoritesCount={summary.favoritesCount}
-              draftsCount={summary.draftsCount}
-              mySongsCount={summary.mySongsCount}
-              newSongsCount={summary.newSongsCount}
-            />
-          </section>
-        )}
+          )}
+          <RecentlyAdded songs={recentlyAdded} />
+        </div>
 
         {/* Explore by Category */}
         <section>
-          <p className="text-meta font-semibold text-fg-muted mb-4 ps-4">{t('explore.categories.heading')}</p>
+          <p className="text-meta font-semibold text-fg-muted mb-4">{t('explore.categories.heading')}</p>
           <CategoryGrid />
         </section>
       </div>

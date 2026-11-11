@@ -98,15 +98,17 @@ async function bellUnread(page: Page): Promise<number> {
   return Number(/\((\d+) unread\)/.exec(label)?.[1] ?? 0);
 }
 
-test('the bell, the Library row and the account menu all say there is a new shared take', async ({ page }) => {
+test('the bell and the account menu say there is a new shared take; Library pages have no "Shared with me" row', async ({ page }) => {
   await page.goto('/library/playlists');
 
   await expect(bell(page)).toHaveAttribute('aria-label', /\(\d+ unread\)/, { timeout: 15_000 });
 
-  // Library: a row under the tabs, with the count in words.
-  const libraryRow = page.getByTestId('library-shared-link');
-  await expect(libraryRow).toContainText('Shared with me');
-  await expect(page.getByTestId('library-shared-unread')).toHaveText(/^\d+ new$/);
+  // #488 owner review: no row under the Library tabs (Home and the account menu lead there).
+  for (const path of ['/library/playlists', '/library/smart', '/library/recently-viewed', '/library/new', '/library/artists']) {
+    if (path !== '/library/playlists') await page.goto(path);
+    await expect(page.getByRole('navigation', { name: 'Library' }).first()).toBeVisible();
+    await expect(page.getByTestId('library-shared-link'), path).toHaveCount(0);
+  }
 
   // Account menu: the same entry and count; the avatar has no second badge.
   await page.getByRole('button', { name: 'Account menu' }).click();

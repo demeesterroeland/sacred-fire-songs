@@ -390,6 +390,8 @@ const ru: Partial<Record<TranslationKey, string>> = {
   "user.profile.attributedRecordings": "Связанные записи",
   "user.profile.noAttributedRecordings": "К этому музыканту пока не привязано записей.",
   'user.profile.backToSong': 'Назад к песне',
+  'user.profile.play': 'Воспроизвести «{name}»',
+  'user.profile.pause': 'Пауза: «{name}»',
 
   // ─── Rehearsal Space – Mini Player ────────────────────────────────────────
   'miniPlayer.source.youtube': 'Эталон YouTube',
@@ -799,7 +801,6 @@ const ru: Partial<Record<TranslationKey, string>> = {
   'songCard.delete': 'Удалить песню',
   'songCard.addFavorite': 'Добавить в избранное',
   'songCard.removeFavorite': 'Убрать из избранного',
-  'librarySummary.newSongs.title': 'Новые песни',
   'search.tags.loadError': 'Не удалось загрузить теги.',
   'songForm.artists.placeholder': 'Введи имя исполнителя и нажми Enter...',
   'songForm.artists.addAnother': 'Добавить ещё исполнителя...',
@@ -937,6 +938,11 @@ const ru: Partial<Record<TranslationKey, string>> = {
   'guestGate.favourites.reason': 'Избранные песни хранятся в вашем аккаунте и следуют за вами на любом устройстве.',
   'sharedWithMe.unreadCount': 'Новых: {count}',
   'sharedWithMe.title': 'Поделились со мной',
+  "sharedByMe.title": "Мои публикации",
+  "sharedByMe.empty": "Вы ещё не поделились записями. Поделитесь записью песни, и она появится здесь.",
+  "sharedByMe.with": "Доступно: {names}",
+  "guestGate.sharedByMe.title": "Войдите, чтобы увидеть, чем вы поделились",
+  "guestGate.sharedByMe.reason": "Записи, которыми вы делитесь с другими участниками, появятся здесь после входа.",
   'sharedWithMe.empty': 'Пока с вами ничем не поделились. Когда кто-то поделится с вами записью, она появится здесь.',
   'sharedWithMe.new': 'Новая',
   'guestGate.sharedWithMe.title': 'Войдите, чтобы увидеть, чем с вами поделились',

@@ -19,6 +19,7 @@ export const GUEST_GATE_FEATURES = [
   'favourites',
   'addToPlaylist',
   'sharedWithMe',
+  'sharedByMe',
 ] as const;
 
 export type GuestGateFeature = (typeof GUEST_GATE_FEATURES)[number];

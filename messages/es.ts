@@ -387,6 +387,8 @@ const es: Partial<Record<TranslationKey, string>> = {
   "user.profile.attributedRecordings": "Grabaciones atribuidas",
   "user.profile.noAttributedRecordings": "Aún no hay grabaciones atribuidas a este músico.",
   'user.profile.backToSong': 'Volver a la canción',
+  'user.profile.play': 'Reproducir {name}',
+  'user.profile.pause': 'Pausar {name}',
 
   // ─── Rehearsal Space – Mini Player ────────────────────────────────────────
   'miniPlayer.source.youtube': 'Referencia de YouTube',
@@ -796,7 +798,6 @@ const es: Partial<Record<TranslationKey, string>> = {
   'songCard.delete': 'Eliminar canción',
   'songCard.addFavorite': 'Añadir a favoritas',
   'songCard.removeFavorite': 'Quitar de favoritas',
-  'librarySummary.newSongs.title': 'Canciones nuevas',
   'search.tags.loadError': 'No se pudieron cargar las etiquetas.',
   'songForm.artists.placeholder': 'Escribe el nombre del artista y pulsa Enter...',
   'songForm.artists.addAnother': 'Añadir otro artista...',
@@ -935,6 +936,11 @@ const es: Partial<Record<TranslationKey, string>> = {
   'guestGate.favourites.reason': 'Tus canciones favoritas viven en tu cuenta, así te acompañan en cada dispositivo.',
   'sharedWithMe.unreadCount': 'Nuevas: {count}',
   'sharedWithMe.title': 'Compartidas conmigo',
+  "sharedByMe.title": "Compartido por mí",
+  "sharedByMe.empty": "Aún no has compartido ninguna grabación. Comparte una grabación desde una canción y aparecerá aquí.",
+  "sharedByMe.with": "Compartido con {names}",
+  "guestGate.sharedByMe.title": "Inicia sesión para ver lo que compartiste",
+  "guestGate.sharedByMe.reason": "Las grabaciones que compartes con otros miembros aparecen aquí cuando inicias sesión.",
   "sharedWithMe.empty": "Todavía no han compartido nada contigo. Cuando alguien comparta una grabación contigo, aparecerá aquí.",
   'sharedWithMe.new': 'Nueva',
   'guestGate.sharedWithMe.title': 'Inicia sesión para ver lo que comparten contigo',

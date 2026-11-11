@@ -3374,6 +3374,36 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - Home uses `p-4 md:p-8` like `/songs` (was `lg:p-10`), so both pages put the columns at the same x.
 - Tests: `e2e/tests/ux-v2-home-grid.spec.ts` measures the x positions at 390, 768 and 1280 px (red before, green after); unit and BDD limit 10.
 
+## Session November 11, 2026 — Story 6.1.36 (#488), owner review of the Home grid
+
+- The section labels (*Your library*, *Recently added*, *Explore by category*) start at the x of the search field; the song titles, category headings and the first count of each library group keep the 16 px inset.
+- Signed-in members see the guest layout with *Your library* on top. *New songs* is gone (not personal); *Your recordings*, *Shared with me* and *Shared by me* are new. Six counts in two groups of three sit on the two content columns.
+- New page `/library/shared-by-me`: one row per shared recording with the names of the members it is shared with (names from `public_profiles`).
+- Owner validation: the *Shared with me* row under the Library tabs is removed (Home and the account menu lead there). *Your recordings* counted takes (94) while its list shows songs (29); it now counts the songs that list shows. Note for local testing: most seeded takes have no audio file in local storage, so they cannot be played.
+- Playlists and Smart rows had a leading icon (lock, globe, heart), so their titles started 32 px further right than on History, New and Artists. The icons are gone, and all Library rows got the 16 px inset of the song rows on `/songs` (they had `px-0`); `ux-v2-library-tabs.spec.ts` checks the first row title x on all five tabs.
+- Dark mode had two backgrounds on `/songs`, `/library` and `/admin` (old `bg-white dark:bg-gray-950`); they use `bg-bg` now.
+- Tests: `ux-v2-home-grid.spec.ts` (labels, member layout at 390 and 1280 px, Shared by me count, dark background), `librarySummary.test.ts`, `sharedByMe.test.ts`, `guestGate.test.ts`; feature files `ux-v2-home-grid.feature` 1.1 and `ux-v2-home-welcome.feature` 1.2.
+
+## Session November 11, 2026 — #492, no delete button on song rows
+
+- The trash button on a song row only showed for songs you may delete, so the row buttons shifted between rows. `SongCard` no longer has a delete button and `/songs` no longer wires a delete flow; deleting a song is done from the song page's ⋮ menu (with confirmation).
+- Tests: `SongCard.test.tsx` (no delete button, no delete wiring), `ux-v2-song-rows.spec.ts` (admin: no delete button, row buttons line up); `ux-v2-song-rows.feature` 1.1; test matrix SONG-08 updated. Lint cap lowered to 140.
+
+
+## Session November 11, 2026 — privacy, share e-mails claimed by the server
+
+- The share e-mail claim (`claim_recording_share_email`) ran with the sharer's session. It now runs on the app server with the project's secret key: the function takes the owner as a parameter, and only `service_role` may execute it. `sendRecordingShareEmail` reads the signed-in user and passes that user as owner.
+- New server-only client `createAdminClient()` in `lib/supabase/admin.ts`, configured with `SUPABASE_SECRET_KEY` (never `NEXT_PUBLIC_`). Without the key no share e-mail is sent; in-app notifications still work. `docker-compose.yml` passes `SERVICE_ROLE_KEY` by default; `.env.example` documents it. Local dev: add the local service role key from `npx supabase status` to `.env.local`.
+- Checked against local Supabase: a signed-in user gets `permission denied`; the server claims once, a second claim and a wrong owner return nothing.
+- Tests: `shareNotifications.test.ts` (owner from the session, claim with the admin client only, no key, no user), `supabaseAdminClient.test.ts` (no key or URL → null, never imported by client code), `share-notifications.feature` 1.2 (`@seed`).
+
+## Session November 11, 2026 — Story 6.1.37 (#490), play recordings from a singer profile
+
+- A singer profile (`/users/:id`) lists the recordings attributed to that singer that the viewer may read. Each row now has a 44 px ▶ button that plays the recording on the page through the shared `AudioProvider`, so starting another recording stops the first; while it plays the button shows ❚❚ in the accent colour (label "Pause {name}").
+- The row (title, song · date, ›) opens the song with that take selected (`/recordings/:id`), and replaces the per-row "Back to song" button.
+- Audio URLs are signed server-side in `fetchMusicianProfile` with the viewer's session (`createSignedUrls`, 1 h), so the storage read policy decides; a recording whose file cannot be signed shows no play button. No migration.
+- Tests: `profileRecordings.test.tsx` (mapping, labels, pressed state, link, no file), `ux-v2-profile-playback.feature` (`@unit`, `@e2e`), `ux-v2-profile-playback.spec.ts` (two fixture takes with a real MP3 each).
+
 ## Session November 11, 2026 — Local sample audio for every take
 
 - Most seeded takes had no audio file in local storage, so they could not be played. `scripts/db/upload-sample-recordings.mjs` (`npm run seed:audio`) now uploads a sample only where the file is missing; takes recorded or uploaded in the local app keep their audio, and `--force` replaces every file. Storage time-outs are retried three times.

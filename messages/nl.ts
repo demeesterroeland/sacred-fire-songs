@@ -387,6 +387,8 @@ const nl: Partial<Record<TranslationKey, string>> = {
   "user.profile.attributedRecordings": "Toegeschreven opnames",
   "user.profile.noAttributedRecordings": "Nog geen opnames toegeschreven aan deze muzikant.",
   'user.profile.backToSong': 'Terug naar lied',
+  'user.profile.play': '{name} afspelen',
+  'user.profile.pause': '{name} pauzeren',
 
   // ─── Mini Player ──────────────────────────────────────────────────────────
   'miniPlayer.source.youtube': 'YouTube-referentie',
@@ -796,7 +798,6 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'songCard.delete': 'Lied verwijderen',
   'songCard.addFavorite': 'Toevoegen aan favorieten',
   'songCard.removeFavorite': 'Verwijderen uit favorieten',
-  'librarySummary.newSongs.title': 'Nieuwe liederen',
   'search.tags.loadError': 'Labels konden niet worden geladen.',
   'songForm.artists.placeholder': 'Typ een artiestennaam en druk op Enter...',
   'songForm.artists.addAnother': 'Nog een artiest toevoegen...',
@@ -934,6 +935,11 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'guestGate.favourites.reason': 'Je favoriete liederen staan in je account, zodat ze op elk apparaat met je meekomen.',
   'sharedWithMe.unreadCount': 'Nieuw: {count}',
   'sharedWithMe.title': 'Met mij gedeeld',
+  "sharedByMe.title": "Door mij gedeeld",
+  "sharedByMe.empty": "Je hebt nog geen opnames gedeeld. Deel een opname vanuit een lied en ze verschijnt hier.",
+  "sharedByMe.with": "Gedeeld met {names}",
+  "guestGate.sharedByMe.title": "Log in om te zien wat je deelde",
+  "guestGate.sharedByMe.reason": "Opnames die je met andere leden deelt, staan hier zodra je inlogt.",
   'sharedWithMe.empty': 'Er is nog niets met je gedeeld. Als iemand een opname met je deelt, verschijnt die hier.',
   'sharedWithMe.new': 'Nieuw',
   'guestGate.sharedWithMe.title': 'Log in om te zien wat er met je is gedeeld',

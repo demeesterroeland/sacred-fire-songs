@@ -114,3 +114,21 @@ test.describe('as a member', () => {
     await expect(rows.first()).not.toContainText('Unknown');
   });
 });
+
+// #492: deleting is in the song page's ⋮ menu only; an admin (who may delete every song) sees no
+// delete button on a row, and every row ends in the same buttons at the same x.
+test.describe('as an admin', () => {
+  test.use({ storageState: ROLES.admin.storage });
+
+  test('song rows have no delete button and their buttons line up', async ({ page }) => {
+    await page.goto('/songs');
+    const rows = page.getByTestId('song-row');
+    await expect(rows.first()).toBeVisible();
+    await expect(page.getByTestId('song-list').getByRole('button', { name: /delete/i })).toHaveCount(0);
+    const xs = await rows.evaluateAll((els) =>
+      els.slice(0, 12).map((el) => Math.round(el.querySelector('button')!.getBoundingClientRect().right - el.getBoundingClientRect().left)),
+    );
+    expect(new Set(xs).size).toBe(1);
+  });
+});
+

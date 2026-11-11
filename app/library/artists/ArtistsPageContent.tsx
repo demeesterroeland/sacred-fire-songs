@@ -28,7 +28,7 @@ export default function ArtistsPageContent({ artists }: { artists: ArtistSummary
                         asChild
                         title={artist.name}
                         meta={[songLabel, ...artist.songTitles]}
-                        className="px-0"
+                        className="ps-4 pe-1"
                     >
                         <Link href={`/songs?artist=${encodeURIComponent(artist.name)}`} />
                     </ListRow>

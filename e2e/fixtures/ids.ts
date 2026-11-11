@@ -152,3 +152,14 @@ export const VALIDATION_2_FIXTURE_IDS = {
   /** A recording of the member on the Original (review round: a recording link follows its version). */
   recording: 'eeeeeeee-3620-4000-a000-000000000004',
 } as const;
+
+/**
+ * #490: a public song with two takes of the member, both attributed to the musician, each with a
+ * real MP3 in storage, so the musician's profile can play them. Removed by e2e/global-teardown.ts.
+ */
+export const PROFILE_PLAYBACK_FIXTURE_IDS = {
+  song: 'eeeeeeee-3490-4000-a000-000000000001',
+  version: 'eeeeeeee-3490-4000-a000-000000000002',
+  first: 'eeeeeeee-3490-4000-a000-000000000003',
+  second: 'eeeeeeee-3490-4000-a000-000000000004',
+} as const;

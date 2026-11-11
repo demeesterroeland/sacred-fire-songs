@@ -391,6 +391,8 @@ const qu: Partial<Record<TranslationKey, string>> = {
   "user.profile.attributedRecordings": "Paypa grabaciónkuna",
   "user.profile.noAttributedRecordings": "Manaraq grabaciónkuna kanchu.",
   'user.profile.backToSong': 'Takiman kutiy',
+  'user.profile.play': '{name} uyariy',
+  'user.profile.pause': '{name} sayachiy',
 
   // ─── Rehearsal Space – Mini Player ────────────────────────────────────────
   'miniPlayer.source.youtube': 'YouTube pukllana',
@@ -800,7 +802,6 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'songCard.delete': 'Taki qichuy',
   'songCard.addFavorite': 'Munasqakunaman yapay',
   'songCard.removeFavorite': 'Munasqakunamanta qichuy',
-  'librarySummary.newSongs.title': 'Musuq takikuna',
   'search.tags.loadError': 'Etiquetakuna mana apamusqachu.',
   'songForm.artists.placeholder': 'Takiqpa sutin qillqay, hinaspa Enter ñit’iy...',
   'songForm.artists.addAnother': 'Huk takiq yapay...',
@@ -939,6 +940,11 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'guestGate.favourites.reason': 'Munasqa takiykikuna cuentaykipi kanku, chaymi llapa aparatupi qatiykusunki.',
   'sharedWithMe.unreadCount': 'Mosoq: {count}',
   'sharedWithMe.title': 'Ñoqaman qusqakuna',
+  "sharedByMe.title": "Ñuqap rakisqay",
+  "sharedByMe.empty": "Manaraq ima grabacionta rakinkichu. Huk takimanta huk grabacionta rakiy, kaypim rikhurinqa.",
+  "sharedByMe.with": "{names} nisqakunawan rakisqa",
+  "guestGate.sharedByMe.title": "Yaykuy rakisqaykita rikunaykipaq",
+  "guestGate.sharedByMe.reason": "Huk socios nisqakunawan rakisqayki grabacionkunaqa kaypim rikhurinqa yaykuptiyki.",
   'sharedWithMe.empty': 'Manaraq imapas qusqa kanchu. Pipas grabaciónta qusqaykita, kaypi rikhurinqa.',
   'sharedWithMe.new': 'Mosoq',
   'guestGate.sharedWithMe.title': 'Yaykuy, qusqaykita qhawanaykipaq',

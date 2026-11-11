@@ -387,6 +387,8 @@ const it: Partial<Record<TranslationKey, string>> = {
   "user.profile.attributedRecordings": "Registrazioni attribuite",
   "user.profile.noAttributedRecordings": "Nessuna registrazione ancora attribuita a questo musicista.",
   'user.profile.backToSong': 'Torna al canto',
+  'user.profile.play': 'Riproduci {name}',
+  'user.profile.pause': 'Metti in pausa {name}',
 
   // ─── Rehearsal Space – Mini Player ────────────────────────────────────────
   'miniPlayer.source.youtube': 'Riferimento YouTube',
@@ -796,7 +798,6 @@ const it: Partial<Record<TranslationKey, string>> = {
   'songCard.delete': 'Elimina canto',
   'songCard.addFavorite': 'Aggiungi ai preferiti',
   'songCard.removeFavorite': 'Rimuovi dai preferiti',
-  'librarySummary.newSongs.title': 'Nuovi canti',
   'search.tags.loadError': 'Impossibile caricare i tag.',
   'songForm.artists.placeholder': "Scrivi il nome dell'artista e premi Invio...",
   'songForm.artists.addAnother': "Aggiungi un altro artista...",
@@ -935,6 +936,11 @@ const it: Partial<Record<TranslationKey, string>> = {
   'guestGate.favourites.reason': 'I tuoi canti preferiti vivono nel tuo account, così ti seguono su ogni dispositivo.',
   'sharedWithMe.unreadCount': 'Nuove: {count}',
   'sharedWithMe.title': 'Condivisi con me',
+  "sharedByMe.title": "Condiviso da me",
+  "sharedByMe.empty": "Non hai ancora condiviso registrazioni. Condividi una registrazione da un canto e comparirà qui.",
+  "sharedByMe.with": "Condiviso con {names}",
+  "guestGate.sharedByMe.title": "Accedi per vedere cosa hai condiviso",
+  "guestGate.sharedByMe.reason": "Le registrazioni che condividi con altri membri compaiono qui dopo l'accesso.",
   'sharedWithMe.empty': 'Nessuno ha ancora condiviso qualcosa con te. Quando qualcuno condivide una registrazione con te, compare qui.',
   'sharedWithMe.new': 'Nuova',
   'guestGate.sharedWithMe.title': 'Accedi per vedere cosa è condiviso con te',

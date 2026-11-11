@@ -3,6 +3,7 @@
 import { after } from 'next/server';
 import { headers } from 'next/headers';
 import { createClient } from '@/lib/supabase/server';
+import { createAdminClient } from '@/lib/supabase/admin';
 import { DEFAULT_LOCALE } from '@/lib/i18n';
 import { buildRecordingSharedEmail, emailSettingsLink, notificationLink } from '@/lib/notifications/email';
 import { sendMail } from '@/lib/notifications/mailer';
@@ -27,17 +28,31 @@ async function requestOrigin(): Promise<string> {
 /**
  * Emails the recipient of a new recording share (Story 4.6.6).
  *
- * `claim_recording_share_email` only returns a row for the recording owner, for
- * a share that has not been emailed yet, and when the recipient has email
+ * The owner is the signed-in user of this request. The claim runs with the
+ * server's secret key (`createAdminClient`), never with the user's session:
+ * `claim_recording_share_email` only returns a row when that user owns the
+ * recording, the share has not been emailed yet and the recipient has email
  * notifications on — so this action is idempotent and cannot be used to spam.
+ * Without `SUPABASE_SECRET_KEY` no share e-mail is sent.
  * Sending runs after the response; failures are logged, never thrown.
  */
 export async function sendRecordingShareEmail(recordingId: string, recipientId: string): Promise<void> {
   try {
+    const admin = createAdminClient();
+    if (!admin) {
+      console.warn('[notifications] SUPABASE_SECRET_KEY is not set; skipping share email.');
+      return;
+    }
     const supabase = await createClient();
-    const { data, error } = await supabase.rpc('claim_recording_share_email', {
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+    if (!user) return;
+
+    const { data, error } = await admin.rpc('claim_recording_share_email', {
       p_recording_id: recordingId,
       p_recipient_id: recipientId,
+      p_owner_id: user.id,
     });
     if (error) throw error;
     const claim = (data as ShareEmailClaim[] | null)?.[0];

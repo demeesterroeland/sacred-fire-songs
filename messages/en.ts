@@ -385,6 +385,8 @@ const en = {
   "user.profile.attributedRecordings": "Attributed Recordings",
   "user.profile.noAttributedRecordings": "No recordings attributed to this musician yet.",
   'user.profile.backToSong': 'Back to song',
+  'user.profile.play': 'Play {name}',
+  'user.profile.pause': 'Pause {name}',
 
   // ─── Rehearsal Space – Mini Player ────────────────────────────────────────
   'miniPlayer.source.youtube': 'YouTube Reference',
@@ -794,7 +796,6 @@ const en = {
   'songCard.delete': 'Delete song',
   'songCard.addFavorite': 'Add to favorites',
   'songCard.removeFavorite': 'Remove from favorites',
-  'librarySummary.newSongs.title': 'New songs',
   'search.tags.loadError': 'Failed to load tags.',
   'songForm.artists.placeholder': 'Type artist name and press Enter...',
   'songForm.artists.addAnother': 'Add another artist...',
@@ -933,6 +934,11 @@ const en = {
   "guestGate.favourites.reason": "Your Favorites live in your account, so they follow you to every device.",
   'sharedWithMe.unreadCount': '{count} new',
   'sharedWithMe.title': 'Shared with me',
+  "sharedByMe.title": "Shared by me",
+  "sharedByMe.empty": "You have not shared any recordings yet. Share a recording from a song and it shows up here.",
+  "sharedByMe.with": "Shared with {names}",
+  "guestGate.sharedByMe.title": "Sign in to see what you shared",
+  "guestGate.sharedByMe.reason": "Recordings you share with other members are listed here once you sign in.",
   "sharedWithMe.empty": "Nothing has been shared with you yet. When someone shares a recording with you, it shows up here.",
   'sharedWithMe.new': 'New',
   'guestGate.sharedWithMe.title': 'Sign in to see what is shared with you',
