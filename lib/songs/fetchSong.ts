@@ -45,6 +45,7 @@ export const fetchSong = async (id: string) => {
             key,
             capo,
             tuning,
+            beats,
             youtube_url,
             spotify_url,
             soundcloud_url,

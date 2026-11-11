@@ -26,17 +26,30 @@ export function songMetaItems(
   return [...songAuthors(originalAuthor, t), ...categories.map((c) => c.name)];
 }
 
-export type VersionTechnical = { key?: string | null; capo?: number | null; tuning?: string | null };
+export type VersionTechnical = {
+  key?: string | null;
+  capo?: number | null;
+  tuning?: string | null;
+  /** Songbook beats of the version, free text such as "8" or "8y4" (Story 6.2.7 / #510). */
+  beats?: string | null;
+};
 
-/** "Key E · Capo 3 · Standard"; empty when the version has no key, capo or special tuning. */
+/**
+ * "Key E · Capo 3 · Standard · Beats 8" (Story 6.2.7 / #510: beats added last). Empty when the version has no key,
+ * capo, special tuning or beats. "Standard" is only named next to other technical values, so beats alone show "Beats 8".
+ */
 export function technicalItems(v: VersionTechnical | undefined, t: T): string[] {
   if (!v) return [];
   const special = !!v.tuning && v.tuning !== 'Standard';
-  if (!v.key && !v.capo && !special) return [];
+  const beats = v.beats?.trim() ?? '';
+  const keyCapoOrTuning = !!v.key || !!v.capo || special;
+  if (!keyCapoOrTuning && !beats) return [];
+  const tuning = keyCapoOrTuning ? (special ? v.tuning! : t('song.metadata.standard')) : null;
   return [
     v.key ? t('song.meta.key', { key: v.key }) : null,
     v.capo ? t('song.meta.capo', { capo: v.capo }) : null,
-    special ? v.tuning! : t('song.metadata.standard'),
+    tuning,
+    beats ? t('song.meta.beats', { beats }) : null,
   ].filter((i): i is string => !!i);
 }
 

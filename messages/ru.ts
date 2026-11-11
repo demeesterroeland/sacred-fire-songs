@@ -171,6 +171,7 @@ const ru: Partial<Record<TranslationKey, string>> = {
   'song.metadata.standard': 'Стандартный',
   'song.meta.key': "Тональность {key}",
   'song.meta.capo': "Каподастр {capo}",
+  'song.meta.beats': 'Beats {beats}',
   'song.meta.showDetails': 'Показать подробности',
   'song.meta.hideDetails': 'Скрыть подробности',
   'song.visibility.private': 'Личное',
