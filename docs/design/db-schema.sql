@@ -1,11 +1,12 @@
 /*
- **Version:** 3.6
+ **Version:** 3.7
  **Status:** Current
- **Date:** November 10, 2026
+ **Date:** November 11, 2026
  
  ## Usage
  This script provides a complete setup for the "Sacred Fire Songs" database. 
- It consolidates the initial schema and all subsequent migrations up to November 10, 2026.
+ It consolidates the initial schema and all subsequent migrations up to November 11, 2026.
+ (v3.7: share e-mails are claimed by the server only, migration 20261111120000_share_email_server_claim.sql: claim_recording_share_email takes the owner as a parameter and only service_role may execute it).
  (v3.6: profile e-mail privacy, migration 20261110120000_profile_email_privacy.sql: public_profiles gains is_musician; the three profile read policies for singers and share partners are gone; search_users_for_sharing matches a name or an exact address and returns no address; user_recordings.singer_email is no longer selectable, the owner reads it with own_recording_singer_emails(); notifications and share e-mails name the sharer by name only).
  (v3.5: back-merge of release 1.7.1 from main: the access rules of migrations 20261106120000, 20261106130000 and 20261106140000 (public_profiles view, fn_can_edit_setlist, fn_guard_profile_fields, song and version read/write rules), compositions.is_public, profiles.last_seen_at and song_views; combined with the develop line below).
  (v3.4: the chord rule of the recompute at the end of the script counts a bracketed chord token ("[Am]"), not a bracketed word that starts with A-G ("[Chorus]"), and uses the same whitespace set as JavaScript (leading BOM, U+0085); migration 20261106180000_recompute_song_flags.sql, review round on PR #474, M6).
@@ -785,11 +786,11 @@ CREATE TRIGGER trg_remove_recording_share_notification
   AFTER DELETE ON public.recording_shares
   FOR EACH ROW EXECUTE FUNCTION public.fn_remove_recording_share_notification();
 
--- One transactional email per share. The owner's session claims the share
---    (sets email_sent_at) and gets the recipient's details back only when the
---    claim succeeds and the recipient has not opted out. This keeps the email
---    server action idempotent and owner-only.
-CREATE OR REPLACE FUNCTION public.claim_recording_share_email(p_recording_id uuid, p_recipient_id uuid)
+-- One transactional email per share. The app server (secret key, never a user's
+--    session) claims the share for its owner (sets email_sent_at) and gets the
+--    recipient's details back only when the claim succeeds and the recipient has not
+--    opted out. This keeps the email idempotent and owner-only.
+CREATE OR REPLACE FUNCTION public.claim_recording_share_email(p_recording_id uuid, p_recipient_id uuid, p_owner_id uuid)
 RETURNS TABLE (
   recipient_email text,
   recipient_name text,
@@ -800,7 +801,7 @@ RETURNS TABLE (
 )
 LANGUAGE sql
 SECURITY DEFINER
-SET search_path = public
+SET search_path = ''
 AS $$
   WITH claimed AS (
     UPDATE public.recording_shares rs
@@ -808,7 +809,7 @@ AS $$
      WHERE rs.recording_id = p_recording_id
        AND rs.shared_with_user_id = p_recipient_id
        AND rs.email_sent_at IS NULL
-       AND public.is_recording_owner(rs.recording_id, auth.uid())
+       AND public.is_recording_owner(rs.recording_id, p_owner_id)
     RETURNING rs.recording_id, rs.shared_with_user_id
   )
   SELECT rp.email,
@@ -826,8 +827,9 @@ AS $$
    WHERE rp.email_notifications;
 $$;
 
-REVOKE EXECUTE ON FUNCTION public.claim_recording_share_email(uuid, uuid) FROM PUBLIC, anon;
-GRANT EXECUTE ON FUNCTION public.claim_recording_share_email(uuid, uuid) TO authenticated;
+REVOKE ALL ON FUNCTION public.claim_recording_share_email(uuid, uuid, uuid) FROM PUBLIC, anon, authenticated;
+GRANT EXECUTE ON FUNCTION public.claim_recording_share_email(uuid, uuid, uuid) TO service_role;
+
 -- 7. SEED DATA (Categories)
 with groups as (
   insert into public.categories (name, slug, emoji)

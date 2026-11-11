@@ -119,7 +119,10 @@ describe('buildRecordingSharedEmail', () => {
 // ─── Server action ────────────────────────────────────────────────────────────
 
 const mockRpc = vi.fn();
+const mockUserRpc = vi.fn();
+const mockGetUser = vi.fn();
 const mockSendMail = vi.fn();
+let adminAvailable = true;
 let afterCallbacks: Array<() => Promise<void> | void> = [];
 
 vi.mock('next/server', () => ({
@@ -132,7 +135,10 @@ vi.mock('next/headers', () => ({
   cookies: async () => ({ get: () => undefined }),
 }));
 vi.mock('@/lib/supabase/server', () => ({
-  createClient: async () => ({ rpc: mockRpc }),
+  createClient: async () => ({ rpc: mockUserRpc, auth: { getUser: mockGetUser } }),
+}));
+vi.mock('@/lib/supabase/admin', () => ({
+  createAdminClient: () => (adminAvailable ? { rpc: mockRpc } : null),
 }));
 vi.mock('@/lib/notifications/mailer', () => ({
   sendMail: (...args: unknown[]) => mockSendMail(...args),
@@ -142,6 +148,8 @@ describe('sendRecordingShareEmail', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     afterCallbacks = [];
+    adminAvailable = true;
+    mockGetUser.mockResolvedValue({ data: { user: { id: 'owner-1' } }, error: null });
   });
 
   async function runAfter() {
@@ -169,7 +177,10 @@ describe('sendRecordingShareEmail', () => {
     expect(mockRpc).toHaveBeenCalledWith('claim_recording_share_email', {
       p_recording_id: 'rec-1',
       p_recipient_id: 'user-2',
+      p_owner_id: 'owner-1',
     });
+    // The claim never runs with the user's session.
+    expect(mockUserRpc).not.toHaveBeenCalled();
     expect(mockSendMail).toHaveBeenCalledTimes(1);
     const mail = mockSendMail.mock.calls[0][0];
     expect(mail.to).toBe('ana@example.org');
@@ -185,6 +196,31 @@ describe('sendRecordingShareEmail', () => {
     await runAfter();
 
     expect(mockSendMail).not.toHaveBeenCalled();
+  });
+
+  it('claims nothing and sends nothing without a signed-in user', async () => {
+    const { sendRecordingShareEmail } = await import('@/lib/actions/notifications');
+    mockGetUser.mockResolvedValue({ data: { user: null }, error: null });
+
+    await sendRecordingShareEmail('rec-1', 'user-2');
+    await runAfter();
+
+    expect(mockRpc).not.toHaveBeenCalled();
+    expect(mockSendMail).not.toHaveBeenCalled();
+  });
+
+  it('sends nothing when the server has no secret key', async () => {
+    const { sendRecordingShareEmail } = await import('@/lib/actions/notifications');
+    adminAvailable = false;
+    const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+    await sendRecordingShareEmail('rec-1', 'user-2');
+    await runAfter();
+
+    expect(mockRpc).not.toHaveBeenCalled();
+    expect(mockUserRpc).not.toHaveBeenCalled();
+    expect(mockSendMail).not.toHaveBeenCalled();
+    warn.mockRestore();
   });
 
   it('swallows SMTP failures so the share is never affected', async () => {
