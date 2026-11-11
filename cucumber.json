@@ -9,6 +9,7 @@
       "docs/testing/recording-sharing.feature",
       "docs/testing/share-notifications.feature",
       "docs/testing/ux-v2-*.feature",
+      "docs/testing/ux-v3-*.feature",
       "docs/testing/access-policies.feature"
     ],
     "import": [
@@ -34,6 +35,7 @@
       "docs/testing/recording-sharing.feature",
       "docs/testing/share-notifications.feature",
       "docs/testing/ux-v2-*.feature",
+      "docs/testing/ux-v3-*.feature",
       "docs/testing/access-policies.feature"
     ],
     "import": [
@@ -58,6 +60,7 @@
       "docs/testing/offline.feature",
       "docs/testing/share-notifications.feature",
       "docs/testing/ux-v2-*.feature",
+      "docs/testing/ux-v3-*.feature",
       "docs/testing/access-policies.feature"
     ],
     "import": [
