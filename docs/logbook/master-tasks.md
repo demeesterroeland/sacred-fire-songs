@@ -1489,9 +1489,19 @@
 - [x] Other members are read through `public_profiles` (new `is_musician` column): Listen tab, share and singer dialogs, `/users/:id`, shared-with-me list
 - [x] User search matches a name or a complete e-mail address and returns names only; singer address readable by the take's owner only (`own_recording_singer_emails`)
 - [x] Sharer named by profile name or *Unnamed member* (`user.unnamed`, 8 locales); migration `20261110120000`, `db-schema.sql` v3.6, `access-policies.feature` v1.2 (new `@seed` scenarios)
+
 ## Session November 10, 2026 (Story 6.1.36, #488, Home grid)
 - [x] Recently added in the /songs and category grid: 10 songs row by row, 5 on a phone; titles, category headings, links and labels on one 16 px inset; Home padding as /songs
 - [x] E2E `ux-v2-home-grid.spec.ts` (390, 768, 1280 px), feature `ux-v2-home-grid.feature`, before/after screenshots
+
+## Session November 11, 2026 (Story 6.1.36, #488, owner review)
+- [x] Section labels at the x of the search field; members get the guest layout with Your library on top
+- [x] Your library: six personal counts (New songs out; Your recordings, Shared with me, Shared by me in), two groups of three on the content columns
+- [x] New page Shared by me (`/library/shared-by-me`), GuestGate `sharedByMe`, 5 keys in 8 locales
+- [x] One dark background: `bg-bg` on /songs, /library and /admin
+- [x] Validation: no "Shared with me" row on the Library pages; "Your recordings" counts the songs that /songs?myRecordings=true lists
+- [x] Validation: Playlists and Smart rows lose their leading icon, so all five Library tabs start their rows at the same x, 16 px in like /songs
+- [x] E2E home grid (member layout, Shared by me count, dark background), unit tests for the summary and the grouping, docs
 
 ## Session November 11, 2026 (#492, no delete button on song rows)
 - [x] Song rows (`SongCard`) have no delete button; `/songs` has no delete flow; deleting stays in the song page's ⋮ menu

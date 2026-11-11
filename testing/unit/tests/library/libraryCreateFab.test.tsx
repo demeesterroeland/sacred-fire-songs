@@ -11,7 +11,6 @@ let user: object | null = { id: 'u1' };
 vi.mock('@/context/LocaleContext', () => ({ useLocale: () => ({ t: (k: string) => dict[k] ?? k }) }));
 vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ user }) }));
 vi.mock('@/components/common/CreateSheet', () => ({ default: () => null }));
-vi.mock('@/components/library/SharedWithMeLink', () => ({ SharedWithMeLink: () => null }));
 vi.mock('next/navigation', () => ({ usePathname: () => '/library/playlists' }));
 
 import LibraryCreateButton from '@/app/library/LibraryCreateButton';
@@ -51,3 +50,13 @@ describe('Library create button', () => {
     expect(screen.getAllByRole('button', { name: dict['nav.create'] })).toHaveLength(1);
   });
 });
+
+// #488 owner review: "Shared with me" is reached from Home and the account menu, not from a row on every Library page.
+describe('Library tabs', () => {
+  it('render no "Shared with me" row under the tabs', () => {
+    render(<LibraryTabs />);
+    expect(screen.queryByTestId('library-shared-link')).toBeNull();
+    expect(screen.queryByText('sharedWithMe.title')).toBeNull();
+  });
+});
+

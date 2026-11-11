@@ -3374,6 +3374,16 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - Home uses `p-4 md:p-8` like `/songs` (was `lg:p-10`), so both pages put the columns at the same x.
 - Tests: `e2e/tests/ux-v2-home-grid.spec.ts` measures the x positions at 390, 768 and 1280 px (red before, green after); unit and BDD limit 10.
 
+## Session November 11, 2026 — Story 6.1.36 (#488), owner review of the Home grid
+
+- The section labels (*Your library*, *Recently added*, *Explore by category*) start at the x of the search field; the song titles, category headings and the first count of each library group keep the 16 px inset.
+- Signed-in members see the guest layout with *Your library* on top. *New songs* is gone (not personal); *Your recordings*, *Shared with me* and *Shared by me* are new. Six counts in two groups of three sit on the two content columns.
+- New page `/library/shared-by-me`: one row per shared recording with the names of the members it is shared with (names from `public_profiles`).
+- Owner validation: the *Shared with me* row under the Library tabs is removed (Home and the account menu lead there). *Your recordings* counted takes (94) while its list shows songs (29); it now counts the songs that list shows. Note for local testing: most seeded takes have no audio file in local storage, so they cannot be played.
+- Playlists and Smart rows had a leading icon (lock, globe, heart), so their titles started 32 px further right than on History, New and Artists. The icons are gone, and all Library rows got the 16 px inset of the song rows on `/songs` (they had `px-0`); `ux-v2-library-tabs.spec.ts` checks the first row title x on all five tabs.
+- Dark mode had two backgrounds on `/songs`, `/library` and `/admin` (old `bg-white dark:bg-gray-950`); they use `bg-bg` now.
+- Tests: `ux-v2-home-grid.spec.ts` (labels, member layout at 390 and 1280 px, Shared by me count, dark background), `librarySummary.test.ts`, `sharedByMe.test.ts`, `guestGate.test.ts`; feature files `ux-v2-home-grid.feature` 1.1 and `ux-v2-home-welcome.feature` 1.2.
+
 ## Session November 11, 2026 — #492, no delete button on song rows
 
 - The trash button on a song row only showed for songs you may delete, so the row buttons shifted between rows. `SongCard` no longer has a delete button and `/songs` no longer wires a delete flow; deleting a song is done from the song page's ⋮ menu (with confirmation).

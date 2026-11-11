@@ -19,7 +19,7 @@ export default async function AdminLayout({
   }
 
   return (
-    <div className="flex-1 min-w-0 overflow-y-auto bg-white dark:bg-gray-950 p-4 md:p-8 lg:p-12">
+    <div className="flex-1 min-w-0 overflow-y-auto bg-bg p-4 md:p-8 lg:p-12">
       <div className="max-w-5xl mx-auto w-full min-w-0">
         {authorized ? (
           <>

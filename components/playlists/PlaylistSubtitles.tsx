@@ -1,7 +1,6 @@
 import Link from 'next/link';
-import type { LucideIcon } from 'lucide-react';
 import { CardContent } from '@/components/common/CardContent';
-import { PLAYLIST_ICON, PLAYLIST_ROW } from '@/components/playlists/playlistRow';
+import { PLAYLIST_ROW } from '@/components/playlists/playlistRow';
 import { getServerT } from '@/lib/i18n/server';
 import type { RecordingCounts, SongCounts } from '@/lib/library/summary';
 
@@ -37,7 +36,6 @@ export async function RecordingCountSubtitle({ counts, emptyLabel }: { counts: R
 // ─── Shared primitives ────────────────────────────────────────────────────────
 
 export interface SmartPlaylistCardProps {
-    icon: LucideIcon;
     title: string;
     description?: string;
     subtitle: React.ReactNode;
@@ -46,10 +44,9 @@ export interface SmartPlaylistCardProps {
     href: string;
 }
 
-export async function SmartPlaylistCard({ icon: Icon, title, description, subtitle, songTitles = [], href }: SmartPlaylistCardProps) {
+export async function SmartPlaylistCard({ title, description, subtitle, songTitles = [], href }: SmartPlaylistCardProps) {
     return (
         <Link href={href} className={PLAYLIST_ROW}>
-            <Icon aria-hidden className={PLAYLIST_ICON} />
             <CardContent
                 title={title}
                 description={description}

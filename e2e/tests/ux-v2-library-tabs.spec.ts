@@ -73,3 +73,34 @@ test('the hidden Albums route renders the not-found page', async ({ page }) => {
   await expect(page.locator('meta[name="robots"][content*="noindex"]').first()).toBeAttached();
   await expect(page.getByText(/liked albums|coming soon/i)).toHaveCount(0);
 });
+
+// #488 owner review: every Library tab starts its rows at the same x (Playlists and Smart had a leading icon),
+// with the 16 px inset of the song rows on /songs and Home.
+test('the first row title starts at the same x on all five Library tabs, 16 px in', async ({ page }) => {
+  await pinLocale(page, 'en');
+  const xs: Record<string, number> = {};
+  for (const href of TAB_HREFS) {
+    await page.goto(href);
+    const nav = page.getByRole('navigation', { name: 'Library' }).first();
+    await expect(nav).toBeVisible();
+    xs[href] = await page.evaluate(() => {
+      const tabs = document.querySelector('nav[aria-label="Library"]')!;
+      const link = [...document.querySelectorAll('main a[href]')].find(
+        (a) => !tabs.contains(a) && (tabs.compareDocumentPosition(a) & Node.DOCUMENT_POSITION_FOLLOWING) && a.textContent!.trim(),
+      )!;
+      const walker = document.createTreeWalker(link, NodeFilter.SHOW_TEXT);
+      let n: Node | null;
+      while ((n = walker.nextNode())) {
+        if (!n.textContent!.trim() || (n.parentElement && n.parentElement.closest('.sr-only'))) continue;
+        const r = document.createRange();
+        r.selectNodeContents(n);
+        return Math.round(r.getBoundingClientRect().left);
+      }
+      return -1;
+    });
+  }
+  expect(new Set(Object.values(xs)).size, JSON.stringify(xs)).toBe(1);
+  const contentX = await page.evaluate(() => Math.round(document.querySelector('nav[aria-label="Library"]')!.parentElement!.getBoundingClientRect().left));
+  expect(Object.values(xs)[0]).toBe(contentX + 16);
+});
+

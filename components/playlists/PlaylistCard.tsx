@@ -4,11 +4,10 @@
 import Link from 'next/link';
 import { PlaylistContextMenu } from './PlaylistContextMenu';
 import { CardContent } from '@/components/common/CardContent';
-import { VisibilityIcon } from '@/components/common/VisibilityIcon';
 import { toast } from 'sonner';
 import { usePlaylistRename } from '@/hooks/usePlaylistRename';
 import { usePlaylistPdfExport } from '@/hooks/usePlaylistPdfExport';
-import { PLAYLIST_ICON, PLAYLIST_MENU, PLAYLIST_ROW } from './playlistRow';
+import { PLAYLIST_MENU, PLAYLIST_ROW } from './playlistRow';
 
 import { useLocale } from '@/context/LocaleContext';
 interface PlaylistCardProps {
@@ -50,8 +49,6 @@ export function PlaylistCard({ id, title, subtitle, isPublic = false, descriptio
                 className={`${PLAYLIST_ROW} pr-12`}
                 onClick={e => isRenaming && e.preventDefault()}
             >
-                <VisibilityIcon isPublic={isPublic} className={PLAYLIST_ICON} />
-
                 {isRenaming ? (
                     <div className="flex-1 min-w-0">
                         <input

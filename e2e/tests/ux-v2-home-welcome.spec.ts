@@ -74,11 +74,12 @@ test.describe('guest', () => {
 test.describe('member', () => {
   test.use({ storageState: ROLES.member.storage });
 
+  // Story 6.1.36 (#488): members get the guest layout (Recently added, categories) under Your library.
   test('keeps Your library and gets no welcome block', async ({ page }) => {
     await pinEnglish(page);
     await page.goto('/');
     await expect(page.getByText('Your library')).toBeVisible();
-    await expect(page.getByTestId('recently-added')).toHaveCount(0);
+    await expect(page.getByTestId('recently-added')).toHaveCount(1);
     await expect(page.getByRole('heading', { level: 1, name: 'Welcome' })).toHaveCount(0);
     // members keep the header search field on Home
     await expect(page.locator('#app-navbar').getByRole('textbox')).toHaveCount(1);
