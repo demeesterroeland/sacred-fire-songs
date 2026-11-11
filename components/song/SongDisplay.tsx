@@ -1,6 +1,6 @@
 'use client';
 
-import { parseChordProForDisplay, ChordProSection, ChordProLine, ChordProItem } from '@/lib/chordUtils';
+import { parseChordProForDisplay, ChordProSection, ChordProLine, ChordProItem, ChordProRepeatMark } from '@/lib/chordUtils';
 import { useLocale } from '@/context/LocaleContext';
 import { DEFAULT_LYRIC_STEP } from '@/lib/design/tokens';
 import { chordPx, lyricPx } from '@/lib/reader/readerPrefs';
@@ -12,6 +12,15 @@ interface SongDisplayProps {
     /** Reader toolbar (Story 6.1.6, #390): lyric size step and chords layer. */
     sizeStep?: number;
     showChords?: boolean;
+}
+
+const REPEAT_START = '‖:';
+const REPEAT_END = ':‖';
+
+function repeatState(repeat: ChordProRepeatMark): 'single' | 'start' | 'end' | 'inside' {
+    if (repeat.start && repeat.end) return 'single';
+    if (repeat.start) return 'start';
+    return repeat.end ? 'end' : 'inside';
 }
 
 export default function SongDisplay({ content, melodyNotation, hasChords = false, sizeStep = DEFAULT_LYRIC_STEP, showChords = true }: SongDisplayProps) {
@@ -41,8 +50,8 @@ export default function SongDisplay({ content, melodyNotation, hasChords = false
 
                     {/* Section Content */}
                     <div className={`${chordsOn ? 'space-y-4' : 'space-y-1'} ${section.type === 'chorus' ? 'pl-2' : ''}`}>
-                        {section.lines.map((line: ChordProLine, lineIdx) => (
-                            <div key={lineIdx} data-testid="lyric-line">
+                        {section.lines.map((line: ChordProLine, lineIdx) => {
+                            const row = (
                                 <div className={`flex flex-wrap pl-4 md:pl-6`}>
                                     {line.items.map((item: ChordProItem, itemIdx) => {
                                         // Inline comment item — {c:} or {ci:}
@@ -81,8 +90,43 @@ export default function SongDisplay({ content, melodyNotation, hasChords = false
                                         );
                                     })}
                                 </div>
-                            </div>
-                        ))}
+                            );
+                            const { repeat } = line;
+                            return (
+                                <div key={lineIdx} data-testid="lyric-line" data-repeat={repeat ? repeatState(repeat) : undefined}>
+                                    {repeat ? (
+                                        // ‖: … :‖ around repeated lines (Story 6.2.15): bars in the lyric size, a rail on every line between them
+                                        <div className="flex items-end gap-2 border-l-2 border-fg-muted pl-2">
+                                            {repeat.start && (
+                                                <span
+                                                    data-testid="repeat-start"
+                                                    role="img"
+                                                    aria-label={t('song.repeat.start')}
+                                                    className="shrink-0 font-semibold text-fg-muted whitespace-nowrap"
+                                                    style={{ fontSize: lyricSize, lineHeight: 1.35 }}
+                                                >
+                                                    {REPEAT_START}
+                                                </span>
+                                            )}
+                                            <div className="min-w-0">{row}</div>
+                                            {repeat.end && (
+                                                <span
+                                                    data-testid="repeat-end"
+                                                    role="img"
+                                                    aria-label={repeat.times ? t('song.repeat.endTimes', { count: repeat.times }) : t('song.repeat.end')}
+                                                    className="shrink-0 font-semibold text-fg-muted whitespace-nowrap"
+                                                    style={{ fontSize: lyricSize, lineHeight: 1.35 }}
+                                                >
+                                                    {repeat.times ? `${REPEAT_END} ×${repeat.times}` : REPEAT_END}
+                                                </span>
+                                            )}
+                                        </div>
+                                    ) : (
+                                        row
+                                    )}
+                                </div>
+                            );
+                        })}
                     </div>
                 </div>
             ))}

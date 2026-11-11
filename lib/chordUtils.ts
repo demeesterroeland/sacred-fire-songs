@@ -9,8 +9,20 @@ export interface ChordProItem {
     italic?: boolean;  // true for {ci: text}
 }
 
+/**
+ * A line inside a `{start_of_repeat}` … `{end_of_repeat}` pair (Story 6.2.15). `start` is true on the first line and `end` on
+ * the last one (both on a one-line repeat); lines between carry both as false. `times` is the count given as `x2` / `2x` / `×2`
+ * on either directive, left out when none is given (plain bars). The reader draws ‖: … :‖ from this; the PDF export reads it too.
+ */
+export interface ChordProRepeatMark {
+    start: boolean;
+    end: boolean;
+    times?: number;
+}
+
 export interface ChordProLine {
     items: ChordProItem[];
+    repeat?: ChordProRepeatMark;
 }
 
 export interface ChordProSection {
@@ -44,6 +56,21 @@ function sectionLabelItems(items: ChordProItem[]): ChordProItem[] | null {
     return allLabels ? filled.map((i) => ({ comment: i.chords })) : null;
 }
 
+/** A directive tag as ChordSheetJS parses it: `{name: value}` gives `_name` and `_value`. */
+interface DirectiveItem {
+    _name?: string;
+    _value?: string;
+}
+
+const MAX_REPEAT_TIMES = 99;
+
+/** The count of a repeat directive value: `x2`, `2x`, `×2`, `2`. Only 2..99 counts, so "x1", "twice" and "" give undefined. */
+export function parseRepeatTimes(value: string | undefined): number | undefined {
+    const match = /^\s*(?:[x×]\s*(\d+)|(\d+)\s*[x×]?)\s*$/i.exec(value ?? '');
+    const times = match ? Number(match[1] ?? match[2]) : NaN;
+    return times >= 2 && times <= MAX_REPEAT_TIMES ? times : undefined;
+}
+
 export function parseChordProForDisplay(content: string): ChordProSection[] {
     const parser = new ChordSheetJS.ChordProParser();
     const chordProContent = convertChordsOverLyricsToChordPro(content);
@@ -53,6 +80,16 @@ export function parseChordProForDisplay(content: string): ChordProSection[] {
         const sections: ChordProSection[] = [];
         let currentSection: ChordProSection | null = null;
         let pendingLines: ChordProLine[] = [];
+        // The repeat in progress: the count of its start directive, whether the next line is its first, and its last line so far.
+        let repeat: { times?: number; first: boolean; last?: ChordProLine } | null = null;
+        const closeRepeat = (endValue?: string) => {
+            if (repeat?.last?.repeat) {
+                repeat.last.repeat.end = true;
+                const times = parseRepeatTimes(endValue) ?? repeat.times;
+                if (times) repeat.last.repeat.times = times;
+            }
+            repeat = null;
+        };
 
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         song.lines.forEach((line: any) => {
@@ -64,6 +101,14 @@ export function parseChordProForDisplay(content: string): ChordProSection[] {
             const sectionEndItem = line.items.find((item: any) =>
                 item._name && ['end_of_verse', 'end_of_chorus', 'end_of_bridge'].includes(item._name)
             );
+
+            // Repeat directives mark the lines between them; they never split a section or a stanza.
+            const repeatStartItem = (line.items as DirectiveItem[]).find((item) => item._name === 'start_of_repeat');
+            const repeatEndItem = (line.items as DirectiveItem[]).find((item) => item._name === 'end_of_repeat');
+            if (repeatStartItem) {
+                closeRepeat();
+                repeat = { times: parseRepeatTimes(repeatStartItem._value), first: true };
+            }
 
             // 1. Handle Section Start
             if (sectionStartItem) {
@@ -154,12 +199,17 @@ export function parseChordProForDisplay(content: string): ChordProSection[] {
                 });
 
                 const cleanLine: ChordProLine = { items: sectionLabelItems(atomizedItems) ?? atomizedItems };
+                if (repeat) {
+                    cleanLine.repeat = { start: repeat.first, end: false };
+                    repeat.first = false;
+                    repeat.last = cleanLine;
+                }
                 if (currentSection) {
                     currentSection.lines.push(cleanLine);
                 } else {
                     pendingLines.push(cleanLine);
                 }
-            } else if (!sectionStartItem && !sectionEndItem) {
+            } else if (!sectionStartItem && !sectionEndItem && !repeatStartItem && !repeatEndItem) {
                 // Truly empty line (no content AND no directives): 
                 // Treat as a stanza break to preserve spacing
                 if (currentSection) {
@@ -170,6 +220,8 @@ export function parseChordProForDisplay(content: string): ChordProSection[] {
                     pendingLines = [];
                 }
             }
+
+            if (repeatEndItem) closeRepeat(repeatEndItem._value);
 
             // 3. Handle Section End (AFTER processing line content)
             if (sectionEndItem) {
