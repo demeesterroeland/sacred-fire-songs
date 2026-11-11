@@ -1513,3 +1513,9 @@
 - [x] Server-only client `createAdminClient()` (`lib/supabase/admin.ts`, `SUPABASE_SECRET_KEY`); `sendRecordingShareEmail` passes the signed-in user as owner
 - [x] `.env.example`, `docker-compose.yml`, fresh-install schema 3.7, design doc 2.09, feature `share-notifications.feature` 1.2
 - [x] Unit tests (action, admin client), `@seed` scenario (signed-in user cannot run the claim)
+
+## Session November 11, 2026 (#490, play recordings from a singer profile)
+- [x] Plan `docs/plans/2026-11-11-profile-recording-playback.md`
+- [x] `fetchMusicianProfile` signs each recording file with the viewer's session; `lib/users/profileRecordings.ts`
+- [x] `ProfileRecordingRow`: 44 px ▶/❚❚ through the shared audio player, row opens the song with that take; keys `user.profile.play` / `user.profile.pause` in 8 locales
+- [x] Tests: Vitest/RTL, `@unit` feature `ux-v2-profile-playback.feature`, E2E `ux-v2-profile-playback.spec.ts`; docs (design doc 2.10, epics 1.97 story 6.1.37, member guide 0.20, E2E overview 1.23)

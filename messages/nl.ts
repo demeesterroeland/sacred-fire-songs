@@ -387,6 +387,8 @@ const nl: Partial<Record<TranslationKey, string>> = {
   "user.profile.attributedRecordings": "Toegeschreven opnames",
   "user.profile.noAttributedRecordings": "Nog geen opnames toegeschreven aan deze muzikant.",
   'user.profile.backToSong': 'Terug naar lied',
+  'user.profile.play': '{name} afspelen',
+  'user.profile.pause': '{name} pauzeren',
 
   // ─── Mini Player ──────────────────────────────────────────────────────────
   'miniPlayer.source.youtube': 'YouTube-referentie',

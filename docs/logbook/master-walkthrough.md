@@ -3396,3 +3396,10 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - New server-only client `createAdminClient()` in `lib/supabase/admin.ts`, configured with `SUPABASE_SECRET_KEY` (never `NEXT_PUBLIC_`). Without the key no share e-mail is sent; in-app notifications still work. `docker-compose.yml` passes `SERVICE_ROLE_KEY` by default; `.env.example` documents it. Local dev: add the local service role key from `npx supabase status` to `.env.local`.
 - Checked against local Supabase: a signed-in user gets `permission denied`; the server claims once, a second claim and a wrong owner return nothing.
 - Tests: `shareNotifications.test.ts` (owner from the session, claim with the admin client only, no key, no user), `supabaseAdminClient.test.ts` (no key or URL → null, never imported by client code), `share-notifications.feature` 1.2 (`@seed`).
+
+## Session November 11, 2026 — Story 6.1.37 (#490), play recordings from a singer profile
+
+- A singer profile (`/users/:id`) lists the recordings attributed to that singer that the viewer may read. Each row now has a 44 px ▶ button that plays the recording on the page through the shared `AudioProvider`, so starting another recording stops the first; while it plays the button shows ❚❚ in the accent colour (label "Pause {name}").
+- The row (title, song · date, ›) opens the song with that take selected (`/recordings/:id`), and replaces the per-row "Back to song" button.
+- Audio URLs are signed server-side in `fetchMusicianProfile` with the viewer's session (`createSignedUrls`, 1 h), so the storage read policy decides; a recording whose file cannot be signed shows no play button. No migration.
+- Tests: `profileRecordings.test.tsx` (mapping, labels, pressed state, link, no file), `ux-v2-profile-playback.feature` (`@unit`, `@e2e`), `ux-v2-profile-playback.spec.ts` (two fixture takes with a real MP3 each).
