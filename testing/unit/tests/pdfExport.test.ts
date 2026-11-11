@@ -101,6 +101,33 @@ describe('PDF Export - TDD Suite', () => {
             expect(chords).not.toContain('G');
         });
 
+        it('transposes alternative chords (A7/C7) together and keeps bass notes (#519)', () => {
+            const song: ExportSongData = {
+                title: 'Alternatives',
+                key: 'E',
+                transposition: 2,
+                content: '{key: E}\n[E]Danza [A7/C7]del [E/G#]cielo',
+            };
+
+            const formatted = formatSongForPdf(song);
+            const chords = formatted.sections.flatMap(s => s.lines).flatMap(l => l.items).map(i => i.chords).filter(Boolean);
+
+            expect(chords).toEqual(['F#', 'B7/D7', 'F#/A#']);
+            expect(formatted.key).toBe('F#');
+        });
+
+        it('transposes chords written above the lyrics and the key directive without a key on the song', () => {
+            const formatted = formatSongForPdf({
+                title: 'Over',
+                transposition: 2,
+                content: '{key: C}\nC   A7/C7\nDown to the river',
+            });
+            const chords = formatted.sections.flatMap(s => s.lines).flatMap(l => l.items).map(i => i.chords).filter(Boolean);
+
+            expect(chords).toEqual(['D', 'B7/D7']);
+            expect(formatted.key).toBe('D');
+        });
+
         it('handles songs without chords cleanly (lyrics only)', () => {
             const song: ExportSongData = {
                 title: 'Chant Only',

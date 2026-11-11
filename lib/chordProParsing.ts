@@ -20,6 +20,32 @@ export function isChordToken(token: string): boolean {
     return CHORD_TOKEN.test(token);
 }
 
+/** A chord without any slash: root, then chord-quality pieces only. */
+const PLAIN_CHORD = /^[A-G][#b]?(?:maj|min|dim|aug|sus|add|m|M|\+|-|°|ø|\d|#|b|\(|\))*$/;
+/** A lone note (A–G, optional #/b): after a slash it is a bass note. */
+const BARE_NOTE = /^[A-G][#b]?$/;
+
+/**
+ * Story 6.2.16 (#519): `A7/C7` is two alternative chords (play either), not a slash chord. A slash with a bare note
+ * after it (`C/E`, `Am/C`, `D/F#`) is a bass note and stays one chord; a slash with a full chord on each side, where the
+ * right one has a quality (`A7/C7`, `Am/Em`, `C/G7`, `Asus4/D7`), is an alternative. Returns the two chords, or null.
+ */
+export function splitAlternativeChords(token: string): [string, string] | null {
+    const parts = token.split('/');
+    if (parts.length !== 2) return null;
+    const [left, right] = parts;
+    if (BARE_NOTE.test(right) || !PLAIN_CHORD.test(left) || !PLAIN_CHORD.test(right)) return null;
+    return [left, right];
+}
+
+/**
+ * `isChordToken` plus alternative chords. The transposer, the chord-line heuristic and `hasChords` use this one; the
+ * one-off flags migration `20261106180000_recompute_song_flags.sql` predates alternatives and keeps the narrower rule.
+ */
+export function isChordOrAlternative(token: string): boolean {
+    return isChordToken(token) || splitAlternativeChords(token) !== null;
+}
+
 // Heuristic to check if a line is a "Chords" line
 // It should mostly contain chord characters and spaces.
 export function isChordLine(line: string): boolean {
@@ -42,7 +68,7 @@ export function isChordLine(line: string): boolean {
 
     // If more than 50% of *relevant* tokens look like chords, treat as chord line
     // Also allow common separators like "|"
-    const validChords = relevantTokens.filter(t => chordPattern.test(t) || t === '|').length;
+    const validChords = relevantTokens.filter(t => chordPattern.test(t) || t === '|' || splitAlternativeChords(t) !== null).length;
 
     return validChords > relevantTokens.length * 0.5;
 }
@@ -55,7 +81,7 @@ export function hasChords(text: string): boolean {
 
     // 1. Check for ChordPro style brackets [Am]: the bracket must hold a chord, not a word that starts with A-G
     for (const m of text.matchAll(/\[([^\][]*)\]/g)) {
-        if (isChordToken(m[1])) return true;
+        if (isChordOrAlternative(m[1])) return true;
     }
 
     // 2. Check for Chords-over-Lyrics heuristic

@@ -155,3 +155,41 @@ describe('canTranspose (musicians only)', () => {
     for (const r of ['member', 'gatekeeper', 'guest', undefined, null]) expect(canTranspose(r)).toBe(false);
   });
 });
+
+// Story 6.2.16 / G4.2 (#519): "A7/C7" is two alternative chords, not a slash chord.
+describe('transposeChordPro: alternative chords (A7/C7)', () => {
+  const t = (chord: string, n: number, key?: string) => transposeChordPro(`[${chord}]x`, n, { key }).slice(1, -2);
+
+  it('transposes both chords of an alternative together', () => {
+    expect(t('A7/C7', 2)).toBe('B7/D7');
+    expect(t('C/G7', 2)).toBe('D/A7');
+    expect(t('Am/Em', 2)).toBe('Bm/F#m');
+    expect(t('G/Bm', 2)).toBe('A/C#m');
+    expect(t('Asus4/D7', 2)).toBe('Bsus4/E7');
+  });
+  it('keeps a slash chord with a bare bass note a slash chord', () => {
+    expect(t('C/E', 2)).toBe('D/F#');
+    expect(t('Am/C', 2)).toBe('Bm/D');
+    expect(t('D/F#', 2)).toBe('E/G#');
+    expect(t('G/B', 2)).toBe('A/C#');
+    expect(t('A/Bb', 1, 'E')).toBe('Bb/B');
+  });
+  it('keeps a chord with a quality and a bass note (Am7/D) as one chord', () => {
+    expect(t('Am7/D', 2)).toBe('Bm7/E');
+  });
+  it('spells both halves by the target key', () => {
+    expect(t('A7/C7', 1, 'E')).toBe('Bb7/Db7');
+    expect(t('A7/C7', 3, 'E')).toBe('C7/D#7'); // E → G: a sharp key
+    expect(t('A7/C7', 2, 'E')).toBe('B7/D7');
+  });
+  it('is the original again after an octave', () => {
+    expect(t('A7/C7', 12)).toBe('A7/C7');
+  });
+  it('also reads an alternative on a chord line above the lyrics', () => {
+    const over = 'A7/C7    D\nDanza del cielo';
+    expect(transposeChordPro(over, 2)).toBe('[B7/D7]Danza del[E] cielo');
+  });
+  it('stays out of the way of section labels', () => {
+    expect(t('Chorus/Coda', 2)).toBe('Chorus/Coda');
+  });
+});

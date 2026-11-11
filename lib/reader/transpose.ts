@@ -1,4 +1,4 @@
-import { convertChordsOverLyricsToChordPro, isChordLine, isChordToken } from '@/lib/chordProParsing';
+import { convertChordsOverLyricsToChordPro, isChordLine, isChordOrAlternative, isChordToken, splitAlternativeChords } from '@/lib/chordProParsing';
 
 /**
  * Transpose for the reader toolbar (Epic 6.1, Story 6.1.10 / G2.5, #394).
@@ -97,13 +97,16 @@ export interface TransposeOptions {
 function firstChord(chordPro: string): string | null {
   for (const line of chordPro.split('\n')) {
     const tokens = isChordLine(line) ? line.split(/\s+/) : [...line.matchAll(/\[([^\]\n]+)\]/g)].map((m) => m[1]);
-    const chord = tokens.find((t) => isChordToken(t));
+    const chord = tokens.find((t) => isChordOrAlternative(t));
     if (chord) return chord.split('/')[0];
   }
   return null;
 }
 
+/** `A7/C7` (alternative chords) moves both chords; `C/E` (bass note) and every other chord go through `transposeChord`. */
 function transposeToken(token: string, semitones: number, accidental?: Accidental): string {
+  const alternatives = splitAlternativeChords(token);
+  if (alternatives) return alternatives.map((c) => transposeChord(c, semitones, accidental)).join('/');
   return isChordToken(token) ? transposeChord(token, semitones, accidental) : token;
 }
 

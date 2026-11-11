@@ -1,8 +1,8 @@
-import ChordSheetJS from 'chordsheetjs';
 import { jsPDF } from 'jspdf';
 import QRCode from 'qrcode';
 import { parseChordProForDisplay, ChordProSection } from '@/lib/chordUtils';
-import { parseChordPro, convertChordsOverLyricsToChordPro } from '@/lib/chordProParsing';
+import { parseChordPro } from '@/lib/chordProParsing';
+import { transposeChordPro, transposeKey } from '@/lib/reader/transpose';
 import { DEJAVU_SANS_REGULAR_B64, DEJAVU_SANS_BOLD_B64 } from './dejavuFonts';
 import { DEFAULT_LOCALE, LOCALE_DATE_TAGS, tWithLocale, type Locale, type TranslationKey } from '@/lib/i18n';
 
@@ -135,29 +135,16 @@ export function formatSongForPdf(song: ExportSongData, untitled = 'Untitled Song
     let contentToProcess = song.content || '';
     let songKey = song.key;
 
-    // 1. Apply transposition if specified
+    // 1. Apply transposition if specified. The reader's transposer does it, so the PDF shows the same chords as the
+    // screen, alternative chords such as A7/C7 included (#519). The key directive and the song key move with the chords.
     if (song.transposition && song.transposition !== 0) {
         try {
-            const parser = new ChordSheetJS.ChordProParser();
-            const chordProFormat = convertChordsOverLyricsToChordPro(contentToProcess);
-            const parsedSong = parser.parse(chordProFormat);
-            const transposedSong = parsedSong.transpose(song.transposition);
-            const formatter = new ChordSheetJS.ChordProFormatter();
-            contentToProcess = formatter.format(transposedSong);
-
-            const newMetaKey = transposedSong.metadata.get('key');
-            if (newMetaKey) {
-                songKey = Array.isArray(newMetaKey) ? newMetaKey[0] : newMetaKey;
-            } else if (songKey) {
-                try {
-                    const keyChord = ChordSheetJS.Chord.parse(songKey);
-                    if (keyChord) {
-                        songKey = keyChord.transpose(song.transposition).toString();
-                    }
-                } catch {
-                    // Fall back to original key if chord parsing fails
-                }
-            }
+            const written = parseChordPro(contentToProcess).key || songKey;
+            contentToProcess = transposeChordPro(contentToProcess, song.transposition, { key: written }).replace(
+                /\{(key|k):\s*(.*?)\}/gi,
+                (_m, name: string, value: string) => `{${name}: ${transposeKey(value.trim(), song.transposition!)}}`,
+            );
+            if (songKey) songKey = transposeKey(songKey, song.transposition);
         } catch (err) {
             console.warn('Failed to transpose song for PDF export:', err);
         }
