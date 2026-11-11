@@ -85,15 +85,15 @@ test('a recording on a singer profile plays here, one at a time', async ({ page 
   await expect(playSecond).toBeVisible();
 
   await playFirst.click();
-  const pauseFirst = page.getByRole('button', { name: `Pause ${FIRST}` });
-  await expect(pauseFirst).toHaveAttribute('aria-pressed', 'true', { timeout: 10_000 });
+  await expect(page.getByRole('button', { name: `Pause ${FIRST}` })).toBeVisible({ timeout: 10_000 });
 
   await playSecond.click();
-  await expect(page.getByRole('button', { name: `Pause ${SECOND}` })).toHaveAttribute('aria-pressed', 'true', { timeout: 10_000 });
-  await expect(page.getByRole('button', { name: `Play ${FIRST}` })).toHaveAttribute('aria-pressed', 'false');
+  await expect(page.getByRole('button', { name: `Pause ${SECOND}` })).toBeVisible({ timeout: 10_000 });
+  // Starting the second recording stopped the first.
+  await expect(page.getByRole('button', { name: `Play ${FIRST}` })).toBeVisible();
 
   await page.getByRole('button', { name: `Pause ${SECOND}` }).click();
-  await expect(page.getByRole('button', { name: `Play ${SECOND}` })).toHaveAttribute('aria-pressed', 'false');
+  await expect(page.getByRole('button', { name: `Play ${SECOND}` })).toBeVisible();
 });
 
 test('the play button is a 44 px target and the row opens the song with that take', async ({ page }) => {

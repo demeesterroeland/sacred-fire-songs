@@ -76,8 +76,7 @@ describe('toPlayableRecording', () => {
 describe('UserProfileView recordings', () => {
   it('each row has a play button and links to the recording permalink', () => {
     render(<UserProfileView profile={profile([rec()])} />);
-    const play = screen.getByRole('button', { name: 'Play Tempo check' });
-    expect(play.getAttribute('aria-pressed')).toBe('false');
+    expect(screen.getByRole('button', { name: 'Play Tempo check' })).toBeTruthy();
     const link = screen.getByRole('link', { name: /Tempo check/ });
     expect(link.getAttribute('href')).toBe('/recordings/rec-1');
     expect(link.textContent).toContain('Abuelo Cielo');
@@ -96,8 +95,9 @@ describe('UserProfileView recordings', () => {
     audio.activePlaybackId = 'rec-1';
     audio.isRecordingPlaying = true;
     render(<UserProfileView profile={profile([rec(), rec({ id: 'rec-2', recording_name: 'Second' })])} />);
-    expect(screen.getByRole('button', { name: 'Pause Tempo check' }).getAttribute('aria-pressed')).toBe('true');
-    expect(screen.getByRole('button', { name: 'Play Second' }).getAttribute('aria-pressed')).toBe('false');
+    expect(screen.getByRole('button', { name: 'Pause Tempo check' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Play Second' })).toBeTruthy();
+    expect(screen.queryByRole('button', { name: 'Pause Second' })).toBeNull();
   });
 
   it('a recording without a playable file has no play button but still links to the song', () => {
@@ -108,6 +108,8 @@ describe('UserProfileView recordings', () => {
 
   it('has no "Back to song" button per row any more', () => {
     render(<UserProfileView profile={profile([rec()])} />);
-    expect(screen.queryAllByText('Back to song').length).toBeLessThanOrEqual(1);
+    const row = screen.getByTestId('profile-recording');
+    expect(row.textContent).not.toContain('Back to song');
+    expect(row.querySelectorAll('a')).toHaveLength(1);
   });
 });

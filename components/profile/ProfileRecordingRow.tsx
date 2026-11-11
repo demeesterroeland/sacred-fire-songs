@@ -32,7 +32,6 @@ export function ProfileRecordingRow({ recording }: { recording: ProfileRecording
           type="button"
           onClick={() => handleTogglePlay(toPlayableRecording(recording), recording.audio_url ?? undefined)}
           aria-label={label}
-          aria-pressed={playing}
           title={label}
           className={cn(
             "ms-2 flex size-tap shrink-0 items-center justify-center rounded-full transition-colors",

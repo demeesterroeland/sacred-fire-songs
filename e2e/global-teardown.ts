@@ -28,6 +28,7 @@ export default async function globalTeardown(): Promise<void> {
     const ids = ADMIN_USERS_FIXTURE_IDS;
     const shared = SHARED_TAKES_FIXTURE_IDS;
     await client.query('BEGIN');
+    // #490 profile playback takes (the MP3s stay at fixed paths and are overwritten on the next run).
     const playback = PROFILE_PLAYBACK_FIXTURE_IDS;
     await client.query('DELETE FROM public.user_recordings WHERE id = ANY($1)', [[playback.first, playback.second]]);
     await client.query('DELETE FROM public.song_versions WHERE id = $1', [playback.version]);

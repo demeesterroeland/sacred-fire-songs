@@ -25,7 +25,7 @@ Feature: Play recordings from a singer profile
     Given a singer profile lists a recording I am allowed to hear
     When I press its play button
     Then the recording plays on the profile page
-    And the button shows "Pause <name>" and is pressed
+    And the button reads "Pause <name>"
 
   @e2e
   Scenario: One recording at a time
