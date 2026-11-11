@@ -145,4 +145,6 @@
 | **November 11, 2026** | **Feature/UX (Epic 6.1, #490)**: play recordings from a singer profile (signed URLs, play button, tests, docs). (estimate) | ~1.5 Hours | Completed |
 | **November 11, 2026** | **Chore/Dev**: local sample audio only for takes without a file, retries, test. (estimate) | ~0.5 Hours | Completed |
 | **November 11, 2026** | **Fix (#490)**: singer profile playback on self-hosted servers (same-origin audio URL), regression tests. (estimate) | ~0.5 Hours | Completed |
-| **Total** | **Development + AI Collaboration** | **~261.0 Hours** | |
+| **November 11, 2026** | **Database (Epic 6.2, #504)**: songbook data model (migration, RLS, `@seed` scenarios, fresh-install schema, importer note, docs). (estimate) | ~1.5 Hours | Completed |
+| **November 11, 2026** | **Database (Epic 6.2, #504)**: review fixes on PR #527 (catalog key guards, strict keys, lowercase languages, restrict songbook delete, version order guidance, `@seed` scenarios). (estimate) | ~1.0 Hours | Completed |
+| **Total** | **Development + AI Collaboration** | **~263.5 Hours** | |
