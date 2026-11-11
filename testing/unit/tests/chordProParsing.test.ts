@@ -72,9 +72,18 @@ describe('alternative chords (A7/C7)', () => {
     expect(splitAlternativeChords('Asus4/D7')).toEqual(['Asus4', 'D7']);
   });
   it('does not split a bass note, a 6/9 chord or anything that is no chord', () => {
-    for (const t of ['C/E', 'Am/C', 'D/F#', 'G/Bb', 'C6/9', 'A', 'Chorus/Coda', 'A7/C7/E7', '/C7']) {
+    for (const t of ['C/E', 'Am/C', 'D/F#', 'G/Bb', 'C6/9', 'A', 'Chorus/Coda', '/C7', 'A7/', 'A7//C7']) {
       expect(splitAlternativeChords(t), t).toBeNull();
     }
+  });
+  it('splits three or more alternatives; a bare note at the end is the bass of the last chord', () => {
+    expect(splitAlternativeChords('A7/C7/E7')).toEqual(['A7', 'C7', 'E7']);
+    expect(splitAlternativeChords('A7/C7/E')).toEqual(['A7', 'C7/E']);
+    expect(splitAlternativeChords('A7/C/E7')).toEqual(['A7', 'C', 'E7']);
+  });
+  it('splits alternatives in the wider spellings (mi, ma, alt, Δ, ♭)', () => {
+    expect(splitAlternativeChords('Cmi7/Fma7')).toEqual(['Cmi7', 'Fma7']);
+    expect(splitAlternativeChords('B♭7alt/CΔ7')).toEqual(['B♭7alt', 'CΔ7']);
   });
   it('counts an alternative as a chord token and a chord line', () => {
     expect(isChordOrAlternative('A7/C7')).toBe(true);
@@ -82,5 +91,11 @@ describe('alternative chords (A7/C7)', () => {
     expect(isChordOrAlternative('Chorus')).toBe(false);
     expect(isChordLine('A7/C7  D')).toBe(true);
     expect(hasChords('[A7/C7]la')).toBe(true);
+  });
+  it('a chord line needs both halves of an alternative to be real chords (AM/FM alone is not a chord line)', () => {
+    expect(isChordLine('AM/FM')).toBe(false);
+    expect(isChordLine('Amaj/Fmaj  la la')).toBe(false);
+    expect(isChordLine('A7/C7/E7  D')).toBe(true);
+    expect(isChordLine('A7/C7/E  D')).toBe(true);
   });
 });

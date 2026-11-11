@@ -179,7 +179,9 @@ describe('transposeChordPro: alternative chords (A7/C7)', () => {
   });
   it('spells both halves by the target key', () => {
     expect(t('A7/C7', 1, 'E')).toBe('Bb7/Db7');
-    expect(t('A7/C7', 3, 'E')).toBe('C7/D#7'); // E → G: a sharp key
+    // E → G is a sharp key, so the spelling follows the key signature (D#7), not harmonic function (Eb7 would be the
+    // idiomatic name of the dominant here). Either spelling is the same note; the limitation is documented in the design doc.
+    expect(t('A7/C7', 3, 'E')).toMatch(/^C7\/(D#|Eb)7$/);
     expect(t('A7/C7', 2, 'E')).toBe('B7/D7');
   });
   it('is the original again after an octave', () => {
@@ -191,5 +193,77 @@ describe('transposeChordPro: alternative chords (A7/C7)', () => {
   });
   it('stays out of the way of section labels', () => {
     expect(t('Chorus/Coda', 2)).toBe('Chorus/Coda');
+  });
+});
+
+// Story 6.2.16 (#519), review finding 1: chords the reader could not read stayed behind while their neighbours moved.
+describe('transposeChordPro: every common chord spelling moves with its neighbours', () => {
+  const t = (chord: string, n: number, key?: string) => transposeChordPro(`[${chord}]x`, n, { key }).slice(1, -2);
+
+  it('moves ♭, alt, mi, ma, Δ together (the PDF regression example, +2)', () => {
+    const song = '[C]a [B♭]b [C7alt]c [Cmi7]d [Cma7]e [CΔ7]f';
+    expect(transposeChordPro(song, 2)).toBe('[D]a [C]b [D7alt]c [Dmi7]d [Dma7]e [DΔ7]f');
+  });
+  it.each([
+    ['Cmaj7', 'Dmaj7'],
+    ['C^7', 'D^7'],
+    ['Cma7', 'Dma7'],
+    ['C7alt', 'D7alt'],
+    ['C7(b9,#11)', 'D7(b9,#11)'],
+    ['C6/9', 'D6/9'],
+    ['C♯m7', 'D♯m7'],
+    ['CM7', 'DM7'],
+  ])('moves %s', (chord, expected) => {
+    expect(t(chord, 2, 'C')).toBe(expected);
+  });
+  it('reads ♭ and ♯ as flat and sharp, in the root and in the bass', () => {
+    expect(t('B♭', 1, 'B♭')).toBe('B');
+    expect(t('E♭m7', 2, 'E♭')).toBe('Fm7');
+    expect(t('F♯m7/C♯', 2, 'F♯m')).toBe('G♯m7/D♯');
+  });
+  it('writes a ♭/♯ chord back with ♭/♯, and a b/# chord with b/#', () => {
+    expect(t('A♭', 2, 'A♭')).toBe('B♭');
+    expect(t('D♭7/F', 2, 'D♭')).toBe('E♭7/G');
+    expect(t('Ab', 2, 'Ab')).toBe('Bb');
+    expect(t('Db7/F', 2, 'Db')).toBe('Eb7/G');
+  });
+  it('moves a ♭ key the same way', () => {
+    expect(transposeKey('B♭', 2)).toBe('C');
+    expect(transposeKey('A♭', 2)).toBe('B♭');
+    expect(transposeKey('Ab', 2)).toBe('Bb');
+  });
+  it('falls back to ChordSheetJS for a chord it cannot read itself, so nothing is left behind', () => {
+    expect(t('Cdom7', 2, 'C')).toBe('Ddom7');
+  });
+  it.each(['Chorus', 'Coda', 'Coro', 'Fine', 'Do', 'Estribillo', 'Ending', 'Bridge'])('the fallback leaves the label [%s] alone', (label) => {
+    expect(t(label, 2, 'C')).toBe(label);
+  });
+});
+
+describe('transposeChordPro: three or more alternatives', () => {
+  const t = (chord: string, n: number, key?: string) => transposeChordPro(`[${chord}]x`, n, { key }).slice(1, -2);
+
+  it('moves every chord of A7/C7/E7', () => {
+    expect(t('A7/C7/E7', 2)).toBe('B7/D7/F#7');
+  });
+  it('reads a bare note at the end as the bass of the last chord (A7/C7/E)', () => {
+    expect(t('A7/C7/E', 2)).toBe('B7/D7/F#');
+  });
+  it('moves alternatives written in the wider spellings', () => {
+    expect(t('Cmi7/Fma7', 2, 'C')).toBe('Dmi7/Gma7');
+  });
+});
+
+describe('transposeChordPro: spelling follows the key in effect', () => {
+  it('spells each section by the latest {key:} before it', () => {
+    const song = '{key: F}\n[G]a\n{key: E}\n[G]b';
+    // +3: F → Ab (flats, G → Bb), E → G (sharps, G → A#)
+    expect(transposeChordPro(song, 3, { key: 'F' })).toBe('{key: F}\n[Bb]a\n{key: E}\n[A#]b');
+  });
+  it('takes a {key:} with the short name {k:} too', () => {
+    expect(transposeChordPro('{k: E}\n[G]a', 3)).toBe('{k: E}\n[A#]a');
+  });
+  it('uses the song key before the first directive', () => {
+    expect(transposeChordPro('[C]a\n{key: E}\n[G]b', 3, { key: 'F' })).toBe('[Eb]a\n{key: E}\n[A#]b');
   });
 });

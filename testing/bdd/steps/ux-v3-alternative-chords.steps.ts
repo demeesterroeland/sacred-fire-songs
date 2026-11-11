@@ -1,4 +1,4 @@
-// Story 6.2.16 / G4.2 (#519) — docs/testing/ux-v2-alternative-chords.feature
+// Story 6.2.16 / G4.2 (#519) — docs/testing/ux-v3-alternative-chords.feature
 import { Given, When, Then } from '@cucumber/cucumber';
 import assert from 'node:assert/strict';
 import { splitAlternativeChords } from '../../../lib/chordProParsing';
