@@ -60,7 +60,7 @@ The ☰ menu repeats the main places (Home, Songs; under Library the same tabs a
 - Under those lines: **Chords** switches the chords on or off, **A−** / **A+** make the text smaller or larger. The app remembers your choice on this device.
 - **▶** scrolls the song for you, hands free; touch the screen to pause it, or press **⏸**. The **⋮** menu (top right) sets the scroll speed (five steps) and has the **Screen stays on** switch. While the scroll runs the toolbar stays under the title. A small sun next to **⋯** means the screen stays on while you sing.
 - Chords are printed above the word where they change.
-- Lines that are sung more than once stand between repeat bars: `‖:` before the first line and `:‖` after the last one, with a thin line along the repeated lines. When the song says how many times, you also see it, e.g. `:‖ ×2`. The bars stay when the chords are switched off.
+- Lines that are sung more than once stand between repeat bars: `‖:` before the first line and `:‖` after the last one; the repeated lines are slightly indented so they line up behind the start bar. When the song says how many times, you also see it, e.g. `:‖ ×2`. The bars stay when the chords are switched off.
 - A bar at the bottom of the song has **Practice**, **Playlist** and **Like**. It slides away when you scroll down and comes back when you scroll up. **Playlist** and **Like** need an account and ask you to sign in.
 - ⋮ (top right) opens the song menu: **Share Song**.
 

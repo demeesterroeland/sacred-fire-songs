@@ -15,6 +15,8 @@ describe('parseRepeatTimes', () => {
     ['2×', 2],
     ['3', 3],
     [' x 2 ', 2],
+    ['Chorus x2', 2],
+    ['Refrain 3x', 3],
   ])('reads %j as %i', (value, times) => expect(parseRepeatTimes(value)).toBe(times));
 
   it.each(['', undefined, 'twice', 'x', 'x1', 'x0', 'x100', '2x3', '-2'])('ignores %j', (value) => {
@@ -86,6 +88,18 @@ describe('repeat marks on lines', () => {
     expect(marks('{start_of_repeat}\nOne\n{start_of_repeat}\nTwo\n{end_of_repeat}')).toEqual([
       { start: true, end: true },
       { start: true, end: true },
+    ]);
+  });
+
+  it('reads directive names case-insensitively', () => {
+    expect(marks('{START_OF_REPEAT}\nOne\n{End_Of_Repeat: x2}')).toEqual([{ start: true, end: true, times: 2 }]);
+  });
+
+  it('puts the start bar on the first sung line, not on a label or comment', () => {
+    expect(marks('{start_of_repeat}\n{c: Chorus}\nOne\nTwo\n{end_of_repeat}')).toEqual([
+      null,
+      { start: true, end: false },
+      { start: false, end: true },
     ]);
   });
 

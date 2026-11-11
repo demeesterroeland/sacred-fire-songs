@@ -56,6 +56,18 @@ describe('SongDisplay: repeat bars', () => {
     expect(screen.getAllByTestId('lyric-line').map((r) => r.getAttribute('data-repeat'))).toEqual(['start', 'inside', 'end']);
   });
 
+  it('gives every repeated line the same bar gutter, so the repeated lyrics share one left edge', () => {
+    render(<SongDisplay content={'{start_of_repeat}\nOne\nTwo\nThree\n{end_of_repeat}'} />);
+    const rows = screen.getAllByTestId('lyric-line');
+    const gutters = rows.map((r) => r.firstElementChild?.firstElementChild as HTMLElement);
+    expect(gutters.map((g) => g.getAttribute('data-testid'))).toEqual(['repeat-start', 'repeat-gutter', 'repeat-gutter']);
+    expect(new Set(gutters.map((g) => g.style.width)).size).toBe(1);
+    expect(gutters[0].style.width).not.toBe('');
+    expect(gutters[1].getAttribute('aria-hidden')).toBe('true');
+    // No rail along the lines: a repeat must not look like a chorus.
+    for (const r of rows) expect(r.innerHTML).not.toMatch(/border-l-2|border-s-2/);
+  });
+
   it('draws nothing for a song without a repeat', () => {
     render(<SongDisplay content={'[Am]Hello\nWorld'} hasChords />);
     expect(screen.queryAllByTestId('repeat-start')).toHaveLength(0);

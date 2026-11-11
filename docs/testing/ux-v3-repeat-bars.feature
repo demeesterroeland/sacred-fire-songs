@@ -1,5 +1,6 @@
-# Version: 1.0 | Date: Nov 11, 2026
+# Version: 1.1 | Date: Nov 11, 2026
 # Changelog
+# 1.1 | Nov 11, 2026 | Review fixes: count step checks the parsed count; chords step named for what it checks.
 # 1.0 | Nov 11, 2026 | Story 6.2.15 (#518, G4.1): repeat bars ‖: … :‖ (with ×N) around the lines between {start_of_repeat} and {end_of_repeat}.
 @ux-v3 @repeat-bars
 Feature: Repeat bars in the reader
@@ -15,12 +16,12 @@ Feature: Repeat bars in the reader
   @unit
   Scenario: The count is shown when it is given
     Given a song whose repeat ends with "{end_of_repeat: x2}"
-    Then the closing bar reads ":‖ ×2"
+    Then the repeat is marked to be sung 2 times
 
   @unit
   Scenario: The bars stay when the chords are off or written over the lyrics
     Given a song with a repeat, with its chords written over the lyrics
-    Then the repeated lines are marked, with chords on or off
+    Then the repeated lines are marked, whatever the chord layout
 
   @unit
   Scenario: Every language names the bars for a screen reader

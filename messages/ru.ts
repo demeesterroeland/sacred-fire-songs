@@ -164,7 +164,7 @@ const ru: Partial<Record<TranslationKey, string>> = {
   'song.melodyNotation': 'Нотная запись мелодии',
   'song.repeat.start': 'Повтор отсюда',
   'song.repeat.end': 'Повтор до этого места',
-  'song.repeat.endTimes': 'Повтор до этого места, {count} р.',
+  'song.repeat.endTimes': 'Повтор до этого места, число повторов: {count}',
   'song.technical.chords': 'Аккорды',
   'song.technical.melody': 'Мелодия',
   "song.technical.takes": "Записи",

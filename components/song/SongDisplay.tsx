@@ -16,6 +16,8 @@ interface SongDisplayProps {
 
 const REPEAT_START = '‖:';
 const REPEAT_END = ':‖';
+/** Width of the bar gutter on repeated lines, in the lyric size, so it scales with the reader font size. */
+const REPEAT_GUTTER = '1.25em';
 
 function repeatState(repeat: ChordProRepeatMark): 'single' | 'start' | 'end' | 'inside' {
     if (repeat.start && repeat.end) return 'single';
@@ -95,19 +97,19 @@ export default function SongDisplay({ content, melodyNotation, hasChords = false
                             return (
                                 <div key={lineIdx} data-testid="lyric-line" data-repeat={repeat ? repeatState(repeat) : undefined}>
                                     {repeat ? (
-                                        // ‖: … :‖ around repeated lines (Story 6.2.15): bars in the lyric size, a rail on every line between them
-                                        <div className="flex items-end gap-2 border-l-2 border-fg-muted pl-2">
-                                            {repeat.start && (
-                                                <span
-                                                    data-testid="repeat-start"
-                                                    role="img"
-                                                    aria-label={t('song.repeat.start')}
-                                                    className="shrink-0 font-semibold text-fg-muted whitespace-nowrap"
-                                                    style={{ fontSize: lyricSize, lineHeight: 1.35 }}
-                                                >
-                                                    {REPEAT_START}
-                                                </span>
-                                            )}
+                                        // ‖: … :‖ around repeated lines (Story 6.2.15). Every line of a repeat gets the same
+                                        // fixed-width gutter (the start bar sits in it), so the repeated lyrics share one left edge.
+                                        <div className="flex items-end gap-1">
+                                            <span
+                                                data-testid={repeat.start ? 'repeat-start' : 'repeat-gutter'}
+                                                role={repeat.start ? 'img' : undefined}
+                                                aria-label={repeat.start ? t('song.repeat.start') : undefined}
+                                                aria-hidden={repeat.start ? undefined : true}
+                                                className="shrink-0 font-semibold text-fg-muted whitespace-nowrap"
+                                                style={{ fontSize: lyricSize, lineHeight: 1.35, width: REPEAT_GUTTER }}
+                                            >
+                                                {repeat.start ? REPEAT_START : null}
+                                            </span>
                                             <div className="min-w-0">{row}</div>
                                             {repeat.end && (
                                                 <span

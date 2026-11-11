@@ -64,9 +64,13 @@ interface DirectiveItem {
 
 const MAX_REPEAT_TIMES = 99;
 
-/** The count of a repeat directive value: `x2`, `2x`, `×2`, `2`. Only 2..99 counts, so "x1", "twice" and "" give undefined. */
+/**
+ * The count of a repeat directive value: `x2`, `2x`, `×2`, `2`, or a label ending in one (`Chorus x2`).
+ * Only 2..99 counts, so "x1", "twice" and "" give undefined.
+ */
 export function parseRepeatTimes(value: string | undefined): number | undefined {
-    const match = /^\s*(?:[x×]\s*(\d+)|(\d+)\s*[x×]?)\s*$/i.exec(value ?? '');
+    const text = (value ?? '').trim();
+    const match = /^(\d+)$/.exec(text) ?? /(?:^|\s)(?:[x×]\s*(\d+)|(\d+)\s*[x×])$/i.exec(text);
     const times = match ? Number(match[1] ?? match[2]) : NaN;
     return times >= 2 && times <= MAX_REPEAT_TIMES ? times : undefined;
 }
@@ -103,8 +107,9 @@ export function parseChordProForDisplay(content: string): ChordProSection[] {
             );
 
             // Repeat directives mark the lines between them; they never split a section or a stanza.
-            const repeatStartItem = (line.items as DirectiveItem[]).find((item) => item._name === 'start_of_repeat');
-            const repeatEndItem = (line.items as DirectiveItem[]).find((item) => item._name === 'end_of_repeat');
+            // Directive names compare case-insensitively. Repeats do not nest: a start inside an open repeat closes it first.
+            const repeatStartItem = (line.items as DirectiveItem[]).find((item) => item._name?.toLowerCase() === 'start_of_repeat');
+            const repeatEndItem = (line.items as DirectiveItem[]).find((item) => item._name?.toLowerCase() === 'end_of_repeat');
             if (repeatStartItem) {
                 closeRepeat();
                 repeat = { times: parseRepeatTimes(repeatStartItem._value), first: true };
@@ -199,7 +204,9 @@ export function parseChordProForDisplay(content: string): ChordProSection[] {
                 });
 
                 const cleanLine: ChordProLine = { items: sectionLabelItems(atomizedItems) ?? atomizedItems };
-                if (repeat) {
+                // A label or comment line right after the start is not sung: the start bar goes on the first sung line.
+                const labelOnly = cleanLine.items.every((i) => i.comment !== undefined);
+                if (repeat && !(repeat.first && labelOnly)) {
                     cleanLine.repeat = { start: repeat.first, end: false };
                     repeat.first = false;
                     repeat.last = cleanLine;
