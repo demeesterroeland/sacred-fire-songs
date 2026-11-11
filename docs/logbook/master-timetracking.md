@@ -143,4 +143,5 @@
 | **November 11, 2026** | **Fix/UX (Epic 6.1, #492)**: no delete button on song rows (delete from the song menu only), tests, docs. (estimate) | ~0.5 Hours | Completed |
 | **November 11, 2026** | **Privacy**: share e-mails claimed by the app server only (migration, server-only client, tests, docs). (estimate) | ~1.0 Hours | Completed |
 | **November 11, 2026** | **Feature/UX (Epic 6.1, #490)**: play recordings from a singer profile (signed URLs, play button, tests, docs). (estimate) | ~1.5 Hours | Completed |
-| **Total** | **Development + AI Collaboration** | **~260.0 Hours** | |
+| **November 11, 2026** | **Chore/Dev**: local sample audio only for takes without a file, retries, test. (estimate) | ~0.5 Hours | Completed |
+| **Total** | **Development + AI Collaboration** | **~260.5 Hours** | |

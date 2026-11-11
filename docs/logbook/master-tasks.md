@@ -1519,3 +1519,6 @@
 - [x] `fetchMusicianProfile` signs each recording file with the viewer's session; `lib/users/profileRecordings.ts`
 - [x] `ProfileRecordingRow`: 44 px ▶/❚❚ through the shared audio player, row opens the song with that take; keys `user.profile.play` / `user.profile.pause` in 8 locales
 - [x] Tests: Vitest/RTL, `@unit` feature `ux-v2-profile-playback.feature`, E2E `ux-v2-profile-playback.spec.ts`; docs (design doc 2.10, epics 1.97 story 6.1.37, member guide 0.20, E2E overview 1.23)
+
+## Session November 11, 2026 (local sample audio)
+- [x] `npm run seed:audio` fills only takes whose file is missing (`--force` replaces all), retries storage time-outs; unit test `uploadSampleRecordings.test.ts`
