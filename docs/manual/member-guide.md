@@ -1,12 +1,13 @@
 # Member Guide (draft)
 
-**Version:** 0.21 | **Date:** Nov 11, 2026
+**Version:** 0.22 | **Date:** Nov 11, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
-| 0.21 | Nov 11, 2026 | Transpose moves alternative chords such as **A7/C7** together (B7/D7 at +2); a slash chord such as **C/E** keeps its bass note (D/F#); chords written with ♭, alt, mi, ma or Δ move too. The PDF follows the same rule (#519). |
+| 0.22 | Nov 11, 2026 | Transpose moves alternative chords such as **A7/C7** together (B7/D7 at +2); a slash chord such as **C/E** keeps its bass note (D/F#); chords written with ♭, alt, mi, ma or Δ move too. The PDF follows the same rule (#519). |
+| 0.21 | Nov 11, 2026 | Add Song: `{start_of_repeat}` … `{end_of_repeat}` (optionally `{end_of_repeat: x2}`) put repeat bars around the lines between them, on the song page and in the preview (UX v3, #518). |
 | 0.20 | Nov 11, 2026 | A singer's profile plays its recordings: tap ▶ to listen there (one at a time), tap the row to open the song with that recording (UX v2, #490). |
 | 0.19 | Nov 11, 2026 | Home looks like it does for guests (**Recently added** and the categories), with **Your library** on top: six counters, **New songs** replaced by **Your recordings**, **Shared with me** and **Shared by me**. New page **Shared by me**; the **Shared with me** row under the Library tabs is gone (UX v2, #488). |
 | 0.18 | Nov 9, 2026 | A private song's title is lighter (in lists and on the song page) and its ⋮ menu has **Make public**; "Drafts" is now **Private**; the ☰ menu's Library section matches the Library tabs. Library tabs **Playlists · Smart · History · New · Artists**; playlists in three groups; **Export PDF** in a playlist's ⋯ menu; My Drafts is no longer a smart playlist; private songs look lighter; tags are always links; the reading tools come before the version switch. |
@@ -90,7 +91,7 @@ Bottom bar **Library → + → Add Song**.
 1. **Song Title** (required) and **Original Author / Artist** (optional; you can add several).
 2. **Lyrics & chords:** put chords in square brackets right before the syllable: `[Dm]Abre tus alas [A7]pájaro volar`. Chords written on a line above the lyrics are converted automatically. Under the field, tap **Preview** to see the chords above the words exactly as on the song page; tap it again to go back to typing.
 3. Or tap **Upload .cho / .txt** under the lyrics to import a ChordPro file.
-4. Lines like `{title: …}`, `{artist: …}`, `{key: E}`, `{capo: 3}` and `{c: comment}` set the song details.
+4. Lines like `{title: …}`, `{artist: …}`, `{key: E}`, `{capo: 3}` and `{c: comment}` set the song details. Put `{start_of_repeat}` before the lines the circle sings twice and `{end_of_repeat}` after them (`{end_of_repeat: x2}` shows the count): the song page and the preview show them between repeat bars `‖:` … `:‖`.
 5. Add YouTube / Spotify / SoundCloud links so others can listen.
 6. Save. Your draft is also kept in the browser while you type.
 
