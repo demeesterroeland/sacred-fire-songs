@@ -2,7 +2,7 @@
 import { describe, it, expect, vi, afterEach, beforeEach } from 'vitest';
 import { render, screen, fireEvent, cleanup } from '@testing-library/react';
 import { DICTIONARIES } from '@/lib/i18n';
-import { signedUrlByPath, toPlayableRecording, type ProfileRecording } from '@/lib/users/profileRecordings';
+import { signedUrlByPath, toBrowserStorageUrl, toPlayableRecording, type ProfileRecording } from '@/lib/users/profileRecordings';
 
 const audio = {
   activePlaybackId: null as string | null,
@@ -55,12 +55,28 @@ beforeEach(() => {
 describe('signedUrlByPath', () => {
   it('keeps signed paths and drops failures', () => {
     const map = signedUrlByPath([
-      { path: 'a.mp3', signedUrl: 'https://s/a', error: null },
+      { path: 'a.mp3', signedUrl: 'http://127.0.0.1:54321/storage/v1/object/sign/rehearsals/a.mp3?token=t', error: null },
       { path: 'b.mp3', signedUrl: null, error: 'Object not found' },
       { path: null, signedUrl: null, error: 'x' },
     ]);
-    expect([...map.entries()]).toEqual([['a.mp3', 'https://s/a']]);
+    expect([...map.entries()]).toEqual([['a.mp3', '/supabase-api/storage/v1/object/sign/rehearsals/a.mp3?token=t']]);
     expect(signedUrlByPath(null).size).toBe(0);
+  });
+});
+
+describe('toBrowserStorageUrl', () => {
+  it('routes a server-signed URL through the same-origin proxy, whatever host the server used', () => {
+    // A self-hosted server signs with its internal Supabase address, which the browser cannot resolve.
+    expect(toBrowserStorageUrl('http://kong:8000/storage/v1/object/sign/rehearsals/u/s/t.webm?token=abc')).toBe(
+      '/supabase-api/storage/v1/object/sign/rehearsals/u/s/t.webm?token=abc'
+    );
+    expect(toBrowserStorageUrl('https://db.example.org/storage/v1/object/sign/rehearsals/x.mp3?token=1')).toBe(
+      '/supabase-api/storage/v1/object/sign/rehearsals/x.mp3?token=1'
+    );
+  });
+
+  it('leaves a URL without a storage path untouched', () => {
+    expect(toBrowserStorageUrl('https://cdn.example.org/a.mp3')).toBe('https://cdn.example.org/a.mp3');
   });
 });
 

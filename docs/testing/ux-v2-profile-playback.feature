@@ -1,5 +1,6 @@
-# Version: 1.0 | Date: Nov 11, 2026
+# Version: 1.1 | Date: Nov 11, 2026
 # Changelog
+# 1.1 | Nov 11, 2026 | #490 follow-up: play URLs go through the app's own origin; a paused take plays again.
 # 1.0 | Nov 11, 2026 | Story 6.1.37 (#490): play recordings from a singer profile.
 #
 # Layering:
@@ -19,6 +20,18 @@ Feature: Play recordings from a singer profile
     When the profile recordings get their play URLs
     Then "a.mp3" has a play URL
     And "b.mp3" has no play URL
+
+  @unit
+  Scenario: The play URL works when the server only knows Supabase internally
+    Given the server signed "t.webm" as "http://kong:8000/storage/v1/object/sign/rehearsals/t.webm?token=x"
+    When the profile recordings get their play URLs
+    Then the play URL of "t.webm" is "/supabase-api/storage/v1/object/sign/rehearsals/t.webm?token=x"
+
+  @e2e
+  Scenario: Pause and play again
+    Given a singer profile lists a recording I am allowed to hear
+    When I press its play button, then pause, then play again
+    Then the recording plays again and the button reads "Pause <name>"
 
   @e2e
   Scenario: Play a recording on the profile

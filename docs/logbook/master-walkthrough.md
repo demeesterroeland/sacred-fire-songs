@@ -3409,3 +3409,9 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - Most seeded takes had no audio file in local storage, so they could not be played. `scripts/db/upload-sample-recordings.mjs` (`npm run seed:audio`) now uploads a sample only where the file is missing; takes recorded or uploaded in the local app keep their audio, and `--force` replaces every file. Storage time-outs are retried three times.
 - Tests: `testing/unit/tests/scripts/uploadSampleRecordings.test.ts` (missing only, `--force`, the "already exists" error).
 
+
+## 2026-11-11 – Fix (#490): singer profile playback on self-hosted servers
+
+- On a self-hosted server the profile's play button failed: the server signs the audio URLs with its own Supabase address, which can be an internal Docker host the browser cannot resolve. The practice panel was unaffected because it signs in the browser through the same-origin `/supabase-api` proxy.
+- `toBrowserStorageUrl` (`lib/users/profileRecordings.ts`) rewrites a server-signed URL to `/supabase-api/storage/v1/…`; `signedUrlByPath` uses it.
+- Tests: unit tests for the rewrite; E2E asserts the audio request goes to the app origin and that a paused take plays again; the spec runs serially so parallel workers no longer race on the fixture inserts.
