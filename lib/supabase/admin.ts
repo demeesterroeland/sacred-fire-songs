@@ -10,14 +10,18 @@ type Env = Record<string, string | undefined>;
  * client component: the key bypasses row-level security. Returns null when
  * `SUPABASE_SECRET_KEY` is not set, so those features switch off cleanly.
  */
-export function createAdminClient(env: Env = process.env): SupabaseClient | null {
+export function createAdminClient(env?: Env): SupabaseClient | null {
     if (typeof window !== "undefined") {
         throw new Error("createAdminClient must only run on the server.");
     }
-    const key = env.SUPABASE_SECRET_KEY?.trim();
-    const url = (env.NODE_ENV === "development"
-        ? env.NEXT_PUBLIC_SUPABASE_URL_DEV
-        : env.NEXT_PUBLIC_SUPABASE_URL)?.trim();
+    const key = (env ?? process.env).SUPABASE_SECRET_KEY?.trim();
+    // Without `env`, read the public URL like lib/supabase/server.ts does (literal
+    // process.env.NEXT_PUBLIC_*, which Next.js may inline at build time).
+    const url = (env
+        ? (env.NODE_ENV === "development" ? env.NEXT_PUBLIC_SUPABASE_URL_DEV : env.NEXT_PUBLIC_SUPABASE_URL)
+        : (process.env.NODE_ENV === "development"
+            ? process.env.NEXT_PUBLIC_SUPABASE_URL_DEV
+            : process.env.NEXT_PUBLIC_SUPABASE_URL))?.trim();
     if (!key || !url) return null;
     return createSupabaseClient(url, key, {
         auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },

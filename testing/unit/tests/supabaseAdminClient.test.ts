@@ -28,15 +28,14 @@ describe('createAdminClient', () => {
     expect(createAdminClient({ NODE_ENV: 'development', NEXT_PUBLIC_SUPABASE_URL_DEV: 'http://127.0.0.1:54321', SUPABASE_SECRET_KEY: 'k' })).not.toBeNull();
   });
 
-  it('is never imported by client code', () => {
-    const offenders = ['app', 'components', 'hooks', 'context', 'lib']
+  it('is imported only by the share e-mail server action', () => {
+    // The secret key bypasses row-level security: every new caller needs a review.
+    const importers = ['app', 'components', 'hooks', 'context', 'lib']
       .flatMap((d) => sourceFiles(join(root, d)))
-      .filter((f) => {
-        const src = readFileSync(f, 'utf8');
-        return /^\s*['"]use client['"]/.test(src) && src.includes('@/lib/supabase/admin');
-      })
+      .filter((f) => /from\s+['"](@\/lib\/supabase\/admin|\.{1,2}\/(supabase\/)?admin)['"]/.test(readFileSync(f, 'utf8')))
       .map((f) => relative(root, f));
-    expect(offenders).toEqual([]);
+    expect(importers).toEqual(['lib/actions/notifications.ts']);
+    expect(readFileSync(join(root, 'lib/actions/notifications.ts'), 'utf8')).toMatch(/^'use server';/);
   });
 
   it('the secret key is never a public (NEXT_PUBLIC_) variable', () => {
