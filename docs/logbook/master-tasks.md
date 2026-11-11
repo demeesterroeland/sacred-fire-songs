@@ -1522,3 +1522,9 @@
 
 ## Session November 11, 2026 (local sample audio)
 - [x] `npm run seed:audio` fills only takes whose file is missing (`--force` replaces all), retries storage time-outs; unit test `uploadSampleRecordings.test.ts`
+
+## Session November 11, 2026 (Story 6.2.1, #504, songbook data model)
+- [x] Migration `20261111150000_songbook_data_model.sql`: catalog columns on `compositions` / `song_versions`, tables `songbooks`, `song_version_sources`, `song_translations`, RLS (read follows the song, admins write), column privileges
+- [x] `@seed` feature `songbook-data-model.feature` (14 scenarios), unit test `schemaSongbookTables.test.ts`
+- [x] `db-schema.sql` v3.8 (fresh install verified), design doc 2.12, epics 1.98 (Epic 6.2 + story 6.2.1), `types.ts`, `docs/guides/importing-songbooks.md`
+- [ ] Cross-review by another Claude model (orchestrator, #498)
