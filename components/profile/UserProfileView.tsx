@@ -4,7 +4,8 @@ import React from "react";
 import Link from "next/link";
 import { useLocale } from "@/context/LocaleContext";
 import type { MusicianProfileData } from "@/lib/users/serverQueries";
-import { Music, ArrowLeft, Mic, Calendar, UserCheck } from "lucide-react";
+import { Music, ArrowLeft, Mic, UserCheck } from "lucide-react";
+import { ProfileRecordingRow } from "@/components/profile/ProfileRecordingRow";
 
 export default function UserProfileView({ profile }: { profile: MusicianProfileData }) {
   const { t } = useLocale();
@@ -59,42 +60,11 @@ export default function UserProfileView({ profile }: { profile: MusicianProfileD
             </p>
           </div>
         ) : (
-          <div className="divide-y divide-line border-y border-line">
+          <ul className="border-y border-line">
             {profile.attributed_recordings.map((rec) => (
-              <div
-                key={rec.id}
-                className="flex items-center justify-between py-3 px-2 hover:bg-surface-2 transition-colors"
-              >
-                <div className="min-w-0 pr-3">
-                  <h4 className="text-sm font-bold text-fg truncate">
-                    {rec.recording_name}
-                  </h4>
-                  {rec.song_title && (
-                    <span className="text-xs text-fg-muted font-medium block truncate">
-                      {rec.song_title}
-                    </span>
-                  )}
-                  <div className="text-caption text-fg-muted flex items-center gap-1 mt-1">
-                    <Calendar className="w-3 h-3" />
-                    {new Date(rec.created_at).toLocaleDateString([], {
-                      month: "short",
-                      day: "numeric",
-                      year: "numeric",
-                    })}
-                  </div>
-                </div>
-
-                {rec.song_id && (
-                  <Link
-                    href={`/songs/${rec.song_id}`}
-                    className="px-3 py-1.5 rounded-control bg-surface-2 text-fg border border-line hover:bg-line text-xs font-semibold transition-colors shrink-0"
-                  >
-                    {t("user.profile.backToSong")}
-                  </Link>
-                )}
-              </div>
+              <ProfileRecordingRow key={rec.id} recording={rec} />
             ))}
-          </div>
+          </ul>
         )}
       </div>
     </div>

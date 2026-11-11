@@ -387,6 +387,8 @@ const es: Partial<Record<TranslationKey, string>> = {
   "user.profile.attributedRecordings": "Grabaciones atribuidas",
   "user.profile.noAttributedRecordings": "Aún no hay grabaciones atribuidas a este músico.",
   'user.profile.backToSong': 'Volver a la canción',
+  'user.profile.play': 'Reproducir {name}',
+  'user.profile.pause': 'Pausar {name}',
 
   // ─── Rehearsal Space – Mini Player ────────────────────────────────────────
   'miniPlayer.source.youtube': 'Referencia de YouTube',

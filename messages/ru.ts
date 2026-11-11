@@ -390,6 +390,8 @@ const ru: Partial<Record<TranslationKey, string>> = {
   "user.profile.attributedRecordings": "Связанные записи",
   "user.profile.noAttributedRecordings": "К этому музыканту пока не привязано записей.",
   'user.profile.backToSong': 'Назад к песне',
+  'user.profile.play': 'Воспроизвести «{name}»',
+  'user.profile.pause': 'Пауза: «{name}»',
 
   // ─── Rehearsal Space – Mini Player ────────────────────────────────────────
   'miniPlayer.source.youtube': 'Эталон YouTube',

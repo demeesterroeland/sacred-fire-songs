@@ -391,6 +391,8 @@ const qu: Partial<Record<TranslationKey, string>> = {
   "user.profile.attributedRecordings": "Paypa grabaciónkuna",
   "user.profile.noAttributedRecordings": "Manaraq grabaciónkuna kanchu.",
   'user.profile.backToSong': 'Takiman kutiy',
+  'user.profile.play': '{name} uyariy',
+  'user.profile.pause': '{name} sayachiy',
 
   // ─── Rehearsal Space – Mini Player ────────────────────────────────────────
   'miniPlayer.source.youtube': 'YouTube pukllana',

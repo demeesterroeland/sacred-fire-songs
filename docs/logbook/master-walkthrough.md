@@ -3389,3 +3389,10 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - The trash button on a song row only showed for songs you may delete, so the row buttons shifted between rows. `SongCard` no longer has a delete button and `/songs` no longer wires a delete flow; deleting a song is done from the song page's ⋮ menu (with confirmation).
 - Tests: `SongCard.test.tsx` (no delete button, no delete wiring), `ux-v2-song-rows.spec.ts` (admin: no delete button, row buttons line up); `ux-v2-song-rows.feature` 1.1; test matrix SONG-08 updated. Lint cap lowered to 140.
 
+
+## Session November 11, 2026 — Story 6.1.37 (#490), play recordings from a singer profile
+
+- A singer profile (`/users/:id`) lists the recordings attributed to that singer that the viewer may read. Each row now has a 44 px ▶ button that plays the recording on the page through the shared `AudioProvider`, so starting another recording stops the first; while it plays the button shows ❚❚ in the accent colour ("Pause {name}", `aria-pressed`).
+- The row (title, song · date, ›) opens the song with that take selected (`/recordings/:id`), and replaces the per-row "Back to song" button.
+- Audio URLs are signed server-side in `fetchMusicianProfile` with the viewer's session (`createSignedUrls`, 1 h), so the storage read policy decides; a recording whose file cannot be signed shows no play button. No migration.
+- Tests: `profileRecordings.test.tsx` (mapping, labels, pressed state, link, no file), `ux-v2-profile-playback.feature` (`@unit`, `@e2e`), `ux-v2-profile-playback.spec.ts` (two fixture takes with a real MP3 each).

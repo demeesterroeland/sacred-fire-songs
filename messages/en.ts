@@ -385,6 +385,8 @@ const en = {
   "user.profile.attributedRecordings": "Attributed Recordings",
   "user.profile.noAttributedRecordings": "No recordings attributed to this musician yet.",
   'user.profile.backToSong': 'Back to song',
+  'user.profile.play': 'Play {name}',
+  'user.profile.pause': 'Pause {name}',
 
   // ─── Rehearsal Space – Mini Player ────────────────────────────────────────
   'miniPlayer.source.youtube': 'YouTube Reference',

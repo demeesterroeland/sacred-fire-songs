@@ -1507,3 +1507,9 @@
 - [x] Song rows (`SongCard`) have no delete button; `/songs` has no delete flow; deleting stays in the song page's ⋮ menu
 - [x] Unit test (`SongCard.test.tsx`), E2E (`ux-v2-song-rows.spec.ts`, admin), feature `ux-v2-song-rows.feature` 1.1, test matrix SONG-08; lint cap 141 → 140
 
+
+## Session November 11, 2026 (#490, play recordings from a singer profile)
+- [x] Plan `docs/plans/2026-11-11-profile-recording-playback.md`
+- [x] `fetchMusicianProfile` signs each recording file with the viewer's session; `lib/users/profileRecordings.ts`
+- [x] `ProfileRecordingRow`: 44 px ▶/❚❚ through the shared audio player, row opens the song with that take; keys `user.profile.play` / `user.profile.pause` in 8 locales
+- [x] Tests: Vitest/RTL, `@unit` feature `ux-v2-profile-playback.feature`, E2E `ux-v2-profile-playback.spec.ts`; docs (design doc 2.10, epics 1.97 story 6.1.37, member guide 0.20, E2E overview 1.23)

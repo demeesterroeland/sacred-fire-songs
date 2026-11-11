@@ -1,11 +1,12 @@
 # Member Guide (draft)
 
-**Version:** 0.19 | **Date:** Nov 11, 2026
+**Version:** 0.20 | **Date:** Nov 11, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.20 | Nov 11, 2026 | A singer's profile plays its recordings: tap ▶ to listen there (one at a time), tap the row to open the song with that recording (UX v2, #490). |
 | 0.19 | Nov 11, 2026 | Home looks like it does for guests (**Recently added** and the categories), with **Your library** on top: six counters, **New songs** replaced by **Your recordings**, **Shared with me** and **Shared by me**. New page **Shared by me**; the **Shared with me** row under the Library tabs is gone (UX v2, #488). |
 | 0.18 | Nov 9, 2026 | A private song's title is lighter (in lists and on the song page) and its ⋮ menu has **Make public**; "Drafts" is now **Private**; the ☰ menu's Library section matches the Library tabs. Library tabs **Playlists · Smart · History · New · Artists**; playlists in three groups; **Export PDF** in a playlist's ⋯ menu; My Drafts is no longer a smart playlist; private songs look lighter; tags are always links; the reading tools come before the version switch. |
 | 0.17 | Nov 7, 2026 | "take" is now **recording**; one ⋮ menu with the reading tools and the Screen stays on switch; Terms Of Service and Privacy Policy pages; the Library "+" floats at the bottom right. |
@@ -106,4 +107,4 @@ Open your song → ⋮ → **Edit** **(verify label)**. You can only edit songs 
 
 ## Public profile
 
-Members and musicians have a profile page (`/users/…`). Singer attributions on recordings link to it. Guests are asked to sign in to see profiles.
+Members and musicians have a profile page (`/users/…`). Singer attributions on recordings link to it. The profile lists the recordings of that singer you may hear: tap ▶ to play one right there (starting another stops the first), or tap the row to open the song with that recording. Guests are asked to sign in to see profiles.
