@@ -22,3 +22,4 @@ Feature: UX v2 Library tab row
     Given I am a signed-in member on a phone
     When I open Playlists, Smart, History, New and Artists in turn
     Then the first row title starts at the same x on all five tabs
+    And that x is 16 px in from the content edge, as on the Songs page

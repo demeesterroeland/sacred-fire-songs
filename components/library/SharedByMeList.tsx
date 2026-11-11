@@ -32,7 +32,7 @@ export function SharedByMeList({ items }: { items: ReadonlyArray<SharedByMeTake>
             item.takeName,
             t('sharedByMe.with', { names: item.sharedWith.map((n) => n ?? t('user.unnamed')).join(', ') }),
           ]}
-          className="px-0"
+          className="ps-4 pe-1"
         >
           <Link href={recordingPermalink(item.recordingId)} data-testid="shared-by-me-row" />
         </ListRow>

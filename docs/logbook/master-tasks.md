@@ -1500,5 +1500,5 @@
 - [x] New page Shared by me (`/library/shared-by-me`), GuestGate `sharedByMe`, 5 keys in 8 locales
 - [x] One dark background: `bg-bg` on /songs, /library and /admin
 - [x] Validation: no "Shared with me" row on the Library pages; "Your recordings" counts the songs that /songs?myRecordings=true lists
-- [x] Validation: Playlists and Smart rows lose their leading icon, so all five Library tabs start their rows at the same x
+- [x] Validation: Playlists and Smart rows lose their leading icon, so all five Library tabs start their rows at the same x, 16 px in like /songs
 - [x] E2E home grid (member layout, Shared by me count, dark background), unit tests for the summary and the grouping, docs

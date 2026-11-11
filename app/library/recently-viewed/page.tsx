@@ -33,7 +33,7 @@ export default async function RecentlyViewedPage() {
                       asChild
                       title={song.title}
                       meta={songRowMeta(song.author, [], t)}
-                      className="px-0"
+                      className="ps-4 pe-1"
                     >
                       <Link href={`/songs/${song.id}`} data-testid="song-row" />
                     </ListRow>

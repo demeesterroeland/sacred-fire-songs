@@ -45,7 +45,7 @@ export function SharedWithMeList({ items }: { items: ReadonlyArray<SharedTake> }
               </span>
             ) : null
           }
-          className="px-0"
+          className="ps-4 pe-1"
         >
           <Link href={recordingPermalink(item.recordingId)} data-testid="shared-with-me-row" />
         </ListRow>
