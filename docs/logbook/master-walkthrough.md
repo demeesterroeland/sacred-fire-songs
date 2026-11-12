@@ -3433,3 +3433,11 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - The palette ratchet scans `app/`, `components/` and `lib/` (`PALETTE_DIRS`). `PALETTE_BASELINE` 1232 → 1117; lint cap 140 → 137.
 - Tests: `docs/testing/ux-v2-sober-colours.feature` (`@unit`, `@e2e`), `testing/unit/tests/design/neutralTags.test.tsx`, `paletteRatchet.test.ts` (scans a temporary `lib/`), `e2e/tests/ux-v2-sober-colours.spec.ts` (same computed colours for every tag, inverted when selected, light and dark).
 - Next groups of #485 (one PR each): song form (after the Epic 6.2 song PRs land), practice and recordings, user menu and header, account settings, playlists, auth and feedback pages, admin.
+
+## Session November 12, 2026 — Story 6.1.35 (#485), group 3: Practice and recordings
+
+- The Practice drawer (`RehearsalDrawer`) and the singer attribution dialog (`RecordingAttributionModal`) use semantic tokens only: 137 palette classes removed.
+- Drawer: take rows are neutral; a take's play button is 44 px and turns accent only while it plays, the rename field has an accent border while editing, the deep-linked take has a soft accent ring, the overlay uses the scrim token and the indigo-purple header icon is a grey tile.
+- Dialog: the chosen singer is marked with the soft accent (selected); search results no longer all show a check. Save is the single primary button (the shared `Button`), Cancel is outlined, Remove is a red text button; all 44 px. The button that clears the chosen singer has a 44 px target and a translated name (`recording.attribution.clearSinger`, 8 locales).
+- `PALETTE_BASELINE` 1117 → 980 (rebased on group 1, PR #537, which also scans `lib/`).
+- Tests: `docs/testing/ux-v2-sober-practice.feature` (`@unit`); light and dark contrast stays covered by the axe runs in `ux-v2-a11y-audit.spec.ts`.

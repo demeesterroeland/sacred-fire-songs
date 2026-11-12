@@ -382,6 +382,7 @@ const ru: Partial<Record<TranslationKey, string>> = {
   'recording.attribution.removeSuccess': 'Указание исполнителя удалено.',
   'recording.attribution.error': 'Не удалось сохранить указание исполнителя.',
   'recording.attribution.viewProfile': 'Открыть профиль',
+  'recording.attribution.clearSinger': 'Выбрать другого исполнителя',
 
   'user.profile.title': 'Профиль музыканта',
   'user.profile.verifiedMusician': 'Подтверждённый музыкант',

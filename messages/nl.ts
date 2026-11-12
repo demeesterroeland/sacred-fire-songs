@@ -379,6 +379,7 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'recording.attribution.removeSuccess': 'Zangervermelding verwijderd.',
   'recording.attribution.error': 'Opslaan van zangervermelding mislukt.',
   'recording.attribution.viewProfile': 'Bekijk profiel',
+  'recording.attribution.clearSinger': 'Andere zanger kiezen',
 
   'user.profile.title': 'Muzikantenprofiel',
   'user.profile.verifiedMusician': 'Geverifieerde muzikant',
