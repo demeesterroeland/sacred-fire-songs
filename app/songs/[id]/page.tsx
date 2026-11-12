@@ -259,17 +259,16 @@ export default function SongDetailPage() {
             window.history.replaceState(null, '', `${window.location.pathname}${search}${window.location.hash}`);
         }
     };
-    // `?view=both` without a language the song offers reads the original; drop the view once the song is known, so a
-    // later language tap opens that translation alone instead of straight in Both.
+    // `?view=both` without a language the song offers reads the original; drop the view from the address once the song
+    // is known, so a later language tap opens that translation alone instead of straight in Both. `replaceState` syncs
+    // with `useSearchParams`, so `linkedView` follows (no state to reset).
     const staleView = !!song && reading.staleView;
     useEffect(() => {
-        if (!staleView) return;
-        setViewChoice({ songId: id, view: TRANSLATION_VIEW });
-        if (typeof window !== 'undefined' && new URLSearchParams(window.location.search).has(VIEW_PARAM)) {
-            const search = viewSearch(window.location.search, TRANSLATION_VIEW);
-            window.history.replaceState(null, '', `${window.location.pathname}${search}${window.location.hash}`);
-        }
-    }, [staleView, id]);
+        if (!staleView || typeof window === 'undefined') return;
+        if (!new URLSearchParams(window.location.search).has(VIEW_PARAM)) return;
+        const search = viewSearch(window.location.search, TRANSLATION_VIEW);
+        window.history.replaceState(null, '', `${window.location.pathname}${search}${window.location.hash}`);
+    }, [staleView]);
     // Story 6.2.14 (#517): Translation · Both; `?view=both` (none for the translation alone), replaced in place.
     const selectReadingView = (view: ReadingView) => {
         setViewChoice({ songId: id, view });
