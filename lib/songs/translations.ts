@@ -70,7 +70,7 @@ export function languageOptions(
   const named = readable
     .map((tr) => ({ value: tr.language, label: translationLabel(tr.language, locale) }))
     .sort((a, b) => a.label.localeCompare(b.label, locale) || a.value.localeCompare(b.value));
-  return [{ value: ORIGINAL_LANGUAGE, label: t('song.language.original') }, ...named];
+  return [{ value: ORIGINAL_LANGUAGE, label: t('song.language.originalLanguage') }, ...named];
 }
 
 /** The initial choice from `?lang=<tag>`; case does not matter. It goes through `resolveTranslation`. */

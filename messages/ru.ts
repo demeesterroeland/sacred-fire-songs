@@ -188,7 +188,7 @@ const ru: Partial<Record<TranslationKey, string>> = {
   'song.version.numbered': "{name} {n}",
   'song.version.takeInProgress': "Завершите или удалите запись, прежде чем сменить версию.",
   'song.language.label': "Язык текста",
-  'song.language.original': "Оригинал",
+  'song.language.originalLanguage': "Язык оригинала",
   'song.translation.by': "Перевод: {name}",
   'song.edit.versionCaption': "Вы редактируете версию: {name}",
   'song.error.timeout': 'Слишком долго…',

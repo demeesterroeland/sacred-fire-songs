@@ -37,7 +37,7 @@
 | :--- | :--- |
 | Practice | Panel on a song with a **Listen** tab (reference tracks) and a **Record** tab (your recorder and **My recordings**). Replaces the old names Rehearsal Space, Voice Recorder and Recordings. |
 | Version | One arrangement of a song (for example *Original*, *Simplified*, *Live*) with its own lyrics, key and recordings. Songs with several versions show a switch under the title. |
-| Language switch | Grey switch next to the version switch with **Original** and the languages the song has a translation in. Choosing a language shows that translation of the lyrics under the version you are reading; choosing a version returns to the original language. |
+| Language switch | Grey switch next to the version switch with **Original language** and the languages the song has a translation in. Choosing a language shows that translation of the lyrics under the version you are reading; choosing a version returns to the original language. |
 | Reference Track | YouTube / SoundCloud / Spotify version of the song. |
 | Recording | An audio file you recorded or uploaded for a song. Private by default. |
 | Shared with me | The list of recordings other members shared with you, under My recordings in Practice → Record. Each row says who shared it. Listen only. |

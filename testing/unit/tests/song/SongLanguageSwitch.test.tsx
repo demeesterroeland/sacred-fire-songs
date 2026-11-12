@@ -32,27 +32,27 @@ describe('SongLanguageSwitch', () => {
     expect(container.firstChild).toBeNull();
   });
 
-  it('is a labelled control: Original first, then the languages by name, the current one checked', () => {
+  it('is a labelled control: Original language first, then the languages by name, the current one checked', () => {
     render(<SongLanguageSwitch translations={both} selected="en" onSelect={() => {}} />);
     expect(screen.getByRole('radiogroup', { name: 'Language of the lyrics' })).toBeTruthy();
-    expect(screen.getAllByRole('radio').map((r) => r.textContent)).toEqual(['Original', 'Dutch', 'English']);
+    expect(screen.getAllByRole('radio').map((r) => r.textContent)).toEqual(['Original language', 'Dutch', 'English']);
     expect(screen.getByRole('radio', { name: 'English' }).getAttribute('aria-checked')).toBe('true');
-    expect(screen.getByRole('radio', { name: 'Original' }).getAttribute('aria-checked')).toBe('false');
+    expect(screen.getByRole('radio', { name: 'Original language' }).getAttribute('aria-checked')).toBe('false');
   });
 
-  it('checks Original when no language is selected, or the selected one is not offered', () => {
+  it('checks the original language when no language is selected, or the selected one is not offered', () => {
     const { rerender } = render(<SongLanguageSwitch translations={both} selected={null} onSelect={() => {}} />);
-    expect(screen.getByRole('radio', { name: 'Original' }).getAttribute('aria-checked')).toBe('true');
+    expect(screen.getByRole('radio', { name: 'Original language' }).getAttribute('aria-checked')).toBe('true');
     rerender(<SongLanguageSwitch translations={both} selected="xx" onSelect={() => {}} />);
-    expect(screen.getByRole('radio', { name: 'Original' }).getAttribute('aria-checked')).toBe('true');
+    expect(screen.getByRole('radio', { name: 'Original language' }).getAttribute('aria-checked')).toBe('true');
   });
 
-  it('reports the tag of the tapped language, and null for Original', () => {
+  it('reports the tag of the tapped language, and null for the original language', () => {
     const onSelect = vi.fn();
     render(<SongLanguageSwitch translations={both} selected="en" onSelect={onSelect} />);
     fireEvent.click(screen.getByRole('radio', { name: 'Dutch' }));
     expect(onSelect).toHaveBeenLastCalledWith('nl');
-    fireEvent.click(screen.getByRole('radio', { name: 'Original' }));
+    fireEvent.click(screen.getByRole('radio', { name: 'Original language' }));
     expect(onSelect).toHaveBeenLastCalledWith(null);
   });
 

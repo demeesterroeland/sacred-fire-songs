@@ -14,7 +14,7 @@ import {
   type LanguageChoice,
   type SongTranslation,
 } from '../../../lib/songs/translations';
-import { versionOptions, versionSearch } from '../../../lib/songs/versionSwitch';
+import { versionOptions, versionSearch, type VersionLike } from '../../../lib/songs/versionSwitch';
 import { profileIdByEmail, queryAsAnon, queryAsUser, seedDb } from '../support/db';
 import { SEEDED_EMAILS } from './access-policies.steps';
 import { localApi } from './ux-v3-songbook-source.steps';
@@ -70,15 +70,6 @@ Then('the original lyrics are shown', function (this: object) {
   const s = get(this);
   assert.equal(resolveTranslation(s.translations, s.choice, SONG), null);
 });
-Then('the version switch no longer lists the translation', function () {
-  // After the data migration a song's versions are its original and variants only; the translation is in
-  // song_translations, so the version switch has nothing to list for it (one version: no switch at all).
-  const versions = [{ id: 'a', version_name: 'Standard', version_kind: 'original' as const }];
-  assert.equal(versionOptions(versions, t), null);
-  const two = [...versions, { id: 'b', version_name: 'Live', version_kind: 'variant' as const }];
-  assert.deepEqual(versionOptions(two, t)!.map((o) => o.label), ['Standard', 'Live']);
-});
-
 Then('the language switch offers {string}, {string} and {string}', function (this: object, a: string, b: string, c: string) {
   const s = get(this);
   assert.deepEqual(languageOptions(s.translations, t, s.locale)!.map((o) => o.label), [a, b, c]);
@@ -216,21 +207,48 @@ async function newSong(): Promise<Fixture> {
   );
   return { songId: rows[0].id, originals: [], ownerId };
 }
-async function addVersion(songId: string, kind: string, name: string, lyrics: string, createdAt: string): Promise<string> {
+interface VersionExtras {
+  key?: string | null;
+  capo?: number;
+  tuning?: string;
+}
+async function addVersion(
+  songId: string,
+  kind: string,
+  name: string,
+  lyrics: string,
+  createdAt: string,
+  extras: VersionExtras = {}
+): Promise<string> {
   const db = await seedDb();
   const { rows } = await db.query<{ id: string }>(
-    `INSERT INTO public.song_versions (composition_id, version_name, version_kind, content_chordpro, created_at)
-     VALUES ($1, $2, $3, $4, $5) RETURNING id`,
-    [songId, name, kind, lyrics, createdAt]
+    `INSERT INTO public.song_versions (composition_id, version_name, version_kind, content_chordpro, created_at, key, capo, tuning)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
+    [songId, name, kind, lyrics, createdAt, extras.key ?? null, extras.capo ?? 0, extras.tuning ?? 'Standard']
   );
   return rows[0].id;
 }
-async function addOriginal(f: Fixture, createdAt = '2026-01-01T00:00:00Z') {
-  f.originals.push(await addVersion(f.songId, 'original', 'Standard', '[C]Mother earth', createdAt));
+async function addOriginal(f: Fixture, createdAt = '2026-01-01T00:00:00Z', extras: VersionExtras = {}) {
+  f.originals.push(await addVersion(f.songId, 'original', 'Standard', '[C]Mother earth', createdAt, extras));
 }
-async function addTranslation(f: Fixture, name: string, lyrics = 'Mother earth, I hear you') {
-  f.translationId = await addVersion(f.songId, 'translation', name, lyrics, '2026-01-02T00:00:00Z');
+async function addTranslation(f: Fixture, name: string, lyrics = 'Mother earth, I hear you', extras: VersionExtras = {}) {
+  f.translationId = await addVersion(f.songId, 'translation', name, lyrics, '2026-01-02T00:00:00Z', extras);
 }
+/** A take on `versionId` with an explicit position and age (days old: older = lower number of the day). */
+async function addTake(f: Fixture, versionId: string, name: string, position: number, createdAt: string) {
+  const db = await seedDb();
+  const { rows } = await db.query<{ id: string }>(
+    `INSERT INTO public.user_recordings (user_id, song_version_id, recording_name, storage_path, position, created_at)
+     VALUES ($1, $2, $3, $4, $5, $6) RETURNING id`,
+    [f.ownerId, versionId, name, `bdd/${versionId}/${name}.webm`, position, createdAt]
+  );
+  return rows[0].id;
+}
+const takesOf = async (versionId: string) =>
+  (await (await seedDb()).query<{ recording_name: string; position: number }>(
+    'SELECT recording_name, position FROM public.user_recordings WHERE song_version_id = $1 ORDER BY position, created_at DESC, id',
+    [versionId]
+  )).rows;
 async function addUsage(f: Fixture) {
   const db = await seedDb();
   const rec = await db.query<{ id: string }>(
@@ -313,8 +331,8 @@ Given(
     const db = await seedDb();
     await db.query(`INSERT INTO public.songbooks (id, title) VALUES ('bdd-lang-book', 'BDD Book')`);
     await db.query(
-      `INSERT INTO public.song_version_sources (song_version_id, songbook_id, original_title, is_primary)
-       VALUES ($1, 'bdd-lang-book', $2, true)`,
+      `INSERT INTO public.song_version_sources (song_version_id, songbook_id, original_title, page, is_primary)
+       VALUES ($1, 'bdd-lang-book', $2, '38', true)`,
       [f.translationId, printedTitle]
     );
     fixtures.set(this, f);
@@ -332,8 +350,86 @@ Given(
   }
 );
 
-When('the translation migration runs', async function () {
-  await (await seedDb()).query(readFileSync(MIGRATION, 'utf8'));
+Given(
+  'a song with an original version, a variant and a translation version named {string}',
+  async function (this: object, name: string) {
+    const f = await newSong();
+    await addOriginal(f);
+    await addVersion(f.songId, 'variant', 'Live', '[C]Mother earth, live', '2026-01-01T12:00:00Z');
+    await addTranslation(f, name);
+    fixtures.set(this, f);
+  }
+);
+Given(
+  'a song with an original version in key {string} and a translation version named {string} with chords in key {string}',
+  async function (this: object, originalKey: string, name: string, translationKey: string) {
+    const f = await newSong();
+    await addOriginal(f, undefined, { key: originalKey });
+    await addTranslation(f, name, '[C]Mother earth, I hear you', { key: translationKey });
+    fixtures.set(this, f);
+  }
+);
+Given(
+  'a song with an original version in key {string} and a translation version named {string} with chords and the same key, capo and tuning',
+  async function (this: object, originalKey: string, name: string) {
+    const f = await newSong();
+    await addOriginal(f, undefined, { key: originalKey, capo: 2, tuning: 'DADGAD' });
+    await addTranslation(f, name, '[C]Mother earth, I hear you', { key: originalKey, capo: 2, tuning: 'DADGAD' });
+    fixtures.set(this, f);
+  }
+);
+Given(
+  'a song with an original version in key {string} and a translation version named {string} with chords and capo {int}',
+  async function (this: object, originalKey: string, name: string, capo: number) {
+    const f = await newSong();
+    await addOriginal(f, undefined, { key: originalKey });
+    await addTranslation(f, name, '[C]Mother earth, I hear you', { key: originalKey, capo });
+    fixtures.set(this, f);
+  }
+);
+Given(
+  'a song with an original version in key {string} and a translation version named {string} without chords in key {string}',
+  async function (this: object, originalKey: string, name: string, translationKey: string) {
+    const f = await newSong();
+    await addOriginal(f, undefined, { key: originalKey });
+    await addTranslation(f, name, 'Mother earth, I hear you', { key: translationKey });
+    fixtures.set(this, f);
+  }
+);
+Given('a song with an original version and a translation version named {string} with blank lyrics', async function (this: object, name: string) {
+  const f = await newSong();
+  await addOriginal(f);
+  await addTranslation(f, name, '   ');
+  fixtures.set(this, f);
+});
+Given(
+  'a song whose original version has two takes and whose translation version named {string} has two takes',
+  async function (this: object, name: string) {
+    const f = await newSong();
+    await addOriginal(f);
+    await addTranslation(f, name);
+    await addTake(f, f.originals[0], 'original one', 0, '2026-02-01T00:00:00Z');
+    await addTake(f, f.originals[0], 'original two', 1, '2026-02-02T00:00:00Z');
+    // positions 0 and 0 on the translation: the newer take sorts first (position, then newest first)
+    await addTake(f, f.translationId!, 'translation older', 0, '2026-03-01T00:00:00Z');
+    await addTake(f, f.translationId!, 'translation newer', 0, '2026-03-02T00:00:00Z');
+    fixtures.set(this, f);
+  }
+);
+
+const notices = new WeakMap<object, string[]>();
+
+When('the translation migration runs', async function (this: object) {
+  const db = await seedDb();
+  const log = notices.get(this) ?? [];
+  const onNotice = (n: { message: string }) => log.push(n.message);
+  db.on('notice', onNotice);
+  try {
+    await db.query(readFileSync(MIGRATION, 'utf8'));
+  } finally {
+    db.off('notice', onNotice);
+  }
+  notices.set(this, log);
 });
 
 Then('the song has an {string} translation with the lyrics of that version', async function (this: object, language: string) {
@@ -377,4 +473,31 @@ Then('the translation version is gone', async function (this: object) {
 });
 Then('the translation version is still there', async function (this: object) {
   assert.equal(await versionExists(fx(this).translationId!), true);
+});
+Then('the version switch of the song lists {string} and {string} and no translation', async function (this: object, a: string, b: string) {
+  const f = fx(this);
+  const { rows } = await (await seedDb()).query<{ id: string; version_name: string; version_kind: VersionLike['version_kind'] }>(
+    'SELECT id, version_name, version_kind FROM public.song_versions WHERE composition_id = $1 ORDER BY created_at, id',
+    [f.songId]
+  );
+  // The labels of the real version switch (#509), as the song page builds them after loading the song.
+  const options = versionOptions(rows.map((v) => ({ ...v, song_version_sources: [] })), t, 'en');
+  assert.deepEqual(options?.map((o) => o.label), [a, b]);
+  assert.ok(rows.every((v) => v.version_kind !== 'translation'), 'no translation version is left');
+});
+Then('the original version has the takes {string}, {string}, {string} and {string} in that order', async function (this: object, a: string, b: string, c: string, d: string) {
+  const takes = await takesOf(fx(this).originals[0]);
+  assert.deepEqual(takes.map((r) => r.recording_name), [a, b, c, d]);
+  assert.deepEqual(takes.map((r) => r.position), [0, 1, 2, 3], 'positions do not collide');
+});
+Then('the migration reported the source of the translation version: songbook {string}, page {string}', function (this: object, book: string, page: string) {
+  const log = notices.get(this) ?? [];
+  assert.ok(
+    log.some((m) => m.includes('had source') && m.includes(`songbook ${book}`) && m.includes(`page ${page}`)),
+    `no source notice in: ${log.join(' | ')}`
+  );
+});
+Then('the migration explained why the translation version stayed: {string}', function (this: object, reason: string) {
+  const log = notices.get(this) ?? [];
+  assert.ok(log.some((m) => m.includes('left in place') && m.includes(reason)), `no "${reason}" notice in: ${log.join(' | ')}`);
 });

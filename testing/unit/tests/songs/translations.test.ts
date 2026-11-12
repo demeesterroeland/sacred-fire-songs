@@ -27,11 +27,11 @@ describe('languageOptions', () => {
 
   it('lists Original, then the languages by name in the app language', () => {
     expect(languageOptions([nl, en], t, 'en')).toEqual([
-      { value: ORIGINAL_LANGUAGE, label: 'Original' },
+      { value: ORIGINAL_LANGUAGE, label: 'Original language' },
       { value: 'nl', label: 'Dutch' },
       { value: 'en', label: 'English' },
     ]);
-    expect(languageOptions([en, nl], tNl, 'nl')!.map((o) => o.label)).toEqual(['Origineel', 'Engels', 'Nederlands']);
+    expect(languageOptions([en, nl], tNl, 'nl')!.map((o) => o.label)).toEqual(['Oorspronkelijke taal', 'Engels', 'Nederlands']);
   });
 
   it('labels a regional tag and an unknown tag', () => {
@@ -39,9 +39,9 @@ describe('languageOptions', () => {
     expect(translationLabel('zzz', 'en')).toBe('ZZZ');
   });
 
-  it('every app language has a word for Original', () => {
+  it('every app language has a word for the original language', () => {
     for (const locale of Object.keys(DICTIONARIES) as (keyof typeof DICTIONARIES)[]) {
-      expect((DICTIONARIES[locale] as Record<string, string>)['song.language.original']).toBeTruthy();
+      expect((DICTIONARIES[locale] as Record<string, string>)['song.language.originalLanguage']).toBeTruthy();
     }
   });
 });

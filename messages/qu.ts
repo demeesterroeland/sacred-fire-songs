@@ -189,7 +189,7 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'song.version.numbered': "{name} {n}",
   'song.version.takeInProgress': "Versionta tikrachinaykipaq, ñawpaqta chay grabasqaykita tukuy icha chinkachiy.",
   'song.language.label': "Qillqapa simin",
-  'song.language.original': "Ñawpaq",
+  'song.language.originalLanguage': "Ñawpaq simi",
   'song.translation.by': "{name} tikrasqan",
   'song.edit.versionCaption': "Kay rikch’aytam allinchachkanki: {name}",
   'song.error.timeout': 'Dugllata mulluchkan…',

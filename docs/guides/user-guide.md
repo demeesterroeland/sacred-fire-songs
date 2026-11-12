@@ -18,7 +18,7 @@
 | **2.3** | Jun 27, 2026 | Added step-by-step PWA installation guides for iOS and Android with screenshots. |
 | **2.4** | Nov 12, 2026 | Song page metadata: the meta line also shows the **Beats** of the selected version when its songbook gives them (Story 6.2.7, #510). |
 | **2.5** | Nov 12, 2026 | Song Detail: a version with a note from its songbook shows **About this song** under the metadata line; tap it to read the background (closed at first). |
-| **2.6** | Nov 12, 2026 | Song Detail: a song with translations has a **language switch** next to the version switch (Original plus the languages the song has); tap a language to read that translation without leaving the song (Story 6.2.13, #516). |
+| **2.6** | Nov 12, 2026 | Song Detail: a song with translations has a **language switch** next to the version switch (Original language plus the languages the song has); tap a language to read that translation without leaving the song (Story 6.2.13, #516). |
 
 Welcome to **Sacred Fire Songs**, a digital songbook designed for ceremonial musicians. This guide covers how to browse, learn, and manage medicine songs using our platform.
 
@@ -59,7 +59,7 @@ Use the filter tabs at the top to narrow down your selection:
 Click any song to view its lyrics and musical data:
 - **Badges**: High-visibility badges tell you if a song has Chords or Melody.
 - **Metadata**: See the **Key**, **Capo position**, **Tuning** and, when the songbook gives them, the **Beats** of the selected version at a glance.
-- **Language**: If the song has translations, a second switch next to the version switch lists **Original** and the languages the song is available in (named in your app language). Tap a language to read that translation; tap **Original** to go back. Choosing another version returns to the original language, and a link ending in `?lang=nl` opens the translation. Songs without translations show no language switch.
+- **Language**: If the song has translations, a second switch next to the version switch lists **Original language** and the languages the song is available in (named in your app language). Tap a language to read that translation; tap **Original language** to go back. Choosing another version returns to the original language, and a link ending in `?lang=nl` opens the translation. Songs without translations show no language switch.
 - **About this song**: If the songbook this version was printed in gives a note about the song, tap **About this song** under the metadata to read it. It starts closed and is not shown when there is no note.
 - **Media**: Listen to YouTube, Spotify, or SoundCloud recordings directly on the page.
 

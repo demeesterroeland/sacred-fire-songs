@@ -185,7 +185,7 @@ const fr: Partial<Record<TranslationKey, string>> = {
   'song.version.numbered': "{name} {n}",
   "song.version.takeInProgress": "Terminez ou supprimez votre enregistrement avant de changer de version.",
   "song.language.label": "Langue des paroles",
-  "song.language.original": "Original",
+  "song.language.originalLanguage": "Langue originale",
   "song.translation.by": "Traduit par {name}",
   'song.edit.versionCaption': "Version en cours de modification : {name}",
   'song.error.timeout': "Cela prend trop de temps…",

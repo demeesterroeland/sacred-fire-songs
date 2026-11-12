@@ -6,7 +6,7 @@
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
-| 1.7 | Nov 12, 2026 | Variant / language slot: the language group is drawn (Story 6.2.13, #516): *Original · Dutch · English* from `song_translations`, the same `Segmented`, in one wrapping row next to the version group; a song without translations adds nothing. |
+| 1.7 | Nov 12, 2026 | Variant / language slot: the language group is drawn (Story 6.2.13, #516): *Original language · Dutch · English* from `song_translations`, the same `Segmented`, in one wrapping row next to the version group; a song without translations adds nothing. |
 | 1.6 | Nov 12, 2026 | Segmented: a checked segment outside the visible part of the strip is scrolled into view (the strip's own `scrollLeft`, never `scrollIntoView`); equal translation labels show the songbook (`English · Songbook B`); a label is cut at 10 rem (Story 6.2.6, #509, review of PR #530). Date of 1.5 corrected. |
 | 1.5 | Nov 11, 2026 | Variant / language slot: version labels are the songbook short name, or the language name for a translation; many versions scroll inside the strip (Story 6.2.6, #509). |
 | 1.4 | Nov 8, 2026 | Rule 5 spelled out: lists are flat rows; boxes are for inputs, buttons, sheets and dialogs (UXA-069). |

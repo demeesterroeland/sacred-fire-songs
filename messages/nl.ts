@@ -185,7 +185,7 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'song.version.numbered': "{name} {n}",
   'song.version.takeInProgress': "Rond je opname af of gooi hem weg voordat je van versie wisselt.",
   'song.language.label': "Taal van de tekst",
-  'song.language.original': "Origineel",
+  'song.language.originalLanguage': "Oorspronkelijke taal",
   'song.translation.by': "Vertaald door {name}",
   'song.edit.versionCaption': "Je bewerkt versie: {name}",
   'song.error.timeout': 'Duurt te lang…',

@@ -183,7 +183,7 @@ const en = {
   'song.version.numbered': "{name} {n}",
   "song.version.takeInProgress": "Finish or discard your recording before switching version.",
   "song.language.label": "Language of the lyrics",
-  "song.language.original": "Original",
+  "song.language.originalLanguage": "Original language",
   "song.translation.by": "Translated by {name}",
   'song.edit.versionCaption': "Editing version: {name}",
   'song.error.timeout': 'Taking too long…',
