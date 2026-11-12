@@ -11,37 +11,14 @@ import { useAuth } from '@/hooks/useAuth';
 import { useLocale } from '@/context/LocaleContext';
 import { EDIT_VERSION_PARAM, pickVersion, sortVersions } from '@/lib/songs/versionOrder';
 import { versionOptions } from '@/lib/songs/versionSwitch';
+import { EDIT_SONG_SELECT } from '@/lib/songs/songSelect';
 
 // Similar fetch to detail page, but we just need basic data
 const fetchSongForEdit = async (id: string) => {
     const supabase = createClient();
     const { data, error } = await supabase
         .from('compositions')
-        .select(`
-          id,
-          title,
-          original_author,
-          owner_id,
-          is_public,
-          song_category_map (
-            category_id
-          ),
-          song_versions!inner (
-            id,
-            created_at,
-            version_name,
-            version_kind,
-            song_version_sources (is_primary, songbooks (short_name, title)),
-            content_chordpro,
-            key,
-            capo,
-            tuning,
-            youtube_url,
-            spotify_url,
-            soundcloud_url,
-            melody_notation
-          )
-        `)
+        .select(EDIT_SONG_SELECT)
         .eq('id', id)
         .single();
 

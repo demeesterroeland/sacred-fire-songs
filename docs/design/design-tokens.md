@@ -1,11 +1,12 @@
 # Design Tokens & Component Sheet (UX v2, "sober" style)
 
-**Version:** 1.5 | **Date:** Nov 8, 2026 | **Story:** 6.1.1 / G1.1 (#385) | **Epic:** 6.1 (#375)
+**Version:** 1.6 | **Date:** Nov 12, 2026 | **Story:** 6.1.1 / G1.1 (#385) | **Epic:** 6.1 (#375)
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.6 | Nov 12, 2026 | Segmented: a checked segment outside the visible part of the strip is scrolled into view (the strip's own `scrollLeft`, never `scrollIntoView`); equal translation labels show the songbook (`English · Songbook B`); a label is cut at 10 rem (Story 6.2.6, #509, review of PR #530). Date of 1.5 corrected. |
 | 1.5 | Nov 11, 2026 | Variant / language slot: version labels are the songbook short name, or the language name for a translation; many versions scroll inside the strip (Story 6.2.6, #509). |
 | 1.4 | Nov 8, 2026 | Rule 5 spelled out: lists are flat rows; boxes are for inputs, buttons, sheets and dialogs (UXA-069). |
 | 1.3 | Nov 7, 2026 | Review round: a field drawn as a container around its input (the Search options tag field, the artist field) uses `.field-composite`: the container shows the one 2 px `--focus` outline and the input inside none; no `focus-within:` ring or border, and selects and the shadcn `<Input>` follow the text-field rule (`textFieldFocus.test.ts` now reads `<Input>`, `<select>` and `focus-within:`). Tag counts inside chips inherit the chip colour (4.5:1). |
@@ -122,7 +123,7 @@ Primitives in `components/ui/` (React) and the visual sheet `docs/design/screens
 | **Chip** | `components/ui/chip.tsx` | Filter-only. `rounded-pill`, `bg-chip`; selected = inverted (`bg-chip-active`) **plus** a check icon and `aria-pressed`. Never decorative. |
 | **BottomSheet** | `components/ui/bottom-sheet.tsx` | Radix Dialog at the bottom on mobile (centered dialog ≥ `sm`), `bg-surface`, `rounded-t-sheet`, `shadow-sheet`, `bg-scrim` overlay, grab handle, title, safe-area padding; reserves space for the mini player (`--mini-player-h`). One sheet component for menus, pickers and action sheets. |
 | **Toolbar** | `components/ui/toolbar.tsx` | `role="toolbar"` with a required translated `aria-label`, `bg-surface rounded-panel`, items are 44 px `ToolbarButton`s with text or icon + `aria-label`; toggles use `aria-pressed` **and** a visible cue (raised background + underline). Buttons stay in the tab order. Used for `Chords · A− · A+`. |
-| **Segmented** | `components/ui/segmented.tsx` | `role="radiogroup"` with a required translated `aria-label`; `bg-surface rounded-panel` strip of 44 px `role="radio"` buttons with `aria-checked` and a roving `tabindex` (one tab stop; Arrow Left/Right/Up/Down move and select with wrap-around, Home/End jump; text only, `text-meta`, no `title`); checked = raised `bg-bg` with a `ring-1 ring-line` hairline **plus** underline, never colour alone; scrolls sideways instead of widening the page. Used for the song page's version switch (`SongVersionSwitch`). |
+| **Segmented** | `components/ui/segmented.tsx` | `role="radiogroup"` with a required translated `aria-label`; `bg-surface rounded-panel` strip of 44 px `role="radio"` buttons with `aria-checked` and a roving `tabindex` (one tab stop; Arrow Left/Right/Up/Down move and select with wrap-around, Home/End jump; text only, `text-meta`, no `title`); checked = raised `bg-bg` with a `ring-1 ring-line` hairline **plus** underline, never colour alone; scrolls sideways instead of widening the page and scrolls the checked segment into view (centred, via its own `scrollLeft`); a label is cut at 10 rem with an ellipsis. Used for the song page's version switch (`SongVersionSwitch`). |
 
 **Variant / language slot (Story 6.1.11, `screen21_song_page.html`).** One slot under the title, meta and key lines and above the reader toolbar holds up to two `Segmented` groups: *version* (`Original · Simplified · Live`, or `Songbook A · Songbook B · Dutch` for catalog songs: songbook short name, language name for a translation; original, variants, translations) and later *language* (`ES · EN`, from the translation layer). The slot exists only when there is something to choose: a song with one version and no translations renders nothing and reserves no space, so it never shifts the layout and never shows a dead control. Today only the version group exists; the language group is not drawn until translations do. The slot does not stick during auto-scroll (the reader toolbar does), so the two never collide.
 

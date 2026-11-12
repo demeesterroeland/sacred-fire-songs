@@ -126,7 +126,7 @@ export function mapCompositionToSong(
   item: CompositionRow,
   favoriteIds?: Set<string>
 ): Song {
-  // UXA-049: the card shows the first (oldest) version, the same one the song page opens on.
+  // UXA-049: the card shows the first version (original first, #509), the same one the song page opens on.
   const version = firstVersion(item.song_versions);
 
   const rawCategories = item.song_category_map || [];

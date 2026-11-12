@@ -36,3 +36,33 @@ export const SONG_SELECT = `
             )
           )
         `;
+
+/**
+ * The select of the edit page (`app/songs/[id]/edit/page.tsx`): one song with every version, the sources of each
+ * version for its label in the version switch (#509), from the same `VERSION_SOURCES_SELECT`, so it embeds
+ * `song_version_sources (` once too.
+ */
+export const EDIT_SONG_SELECT = `
+          id,
+          title,
+          original_author,
+          owner_id,
+          is_public,
+          song_category_map (
+            category_id
+          ),
+          song_versions!inner (
+            id,
+            created_at,
+            version_name,
+            version_kind,
+            content_chordpro,
+            key,
+            capo,
+            tuning,
+            youtube_url,
+            spotify_url,
+            soundcloud_url,
+            melody_notation,${VERSION_SOURCES_SELECT}
+          )
+        `;

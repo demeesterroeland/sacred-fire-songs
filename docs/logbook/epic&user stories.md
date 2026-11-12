@@ -63,7 +63,7 @@
 | **1.92** | Nov 6, 2026 | Epic 6.1: validation round 1 after the owner's phone run (Part of #375): auto-scroll only when the lyrics run below the fold (Story 6.1.10 / #394), expanded meta line (6.1.7 / #391), one focus style for text fields, the search suggestions in the page flow (6.1.29 / #413), search options on tokens, translated feedback and song flags across versions (6.1.11 / #395). Acceptance criteria of those stories now read as in `docs/testing/ux-v2-validation-1.feature`. |
 | **1.93** | Nov 7, 2026 | Epic 6.1: review round on the validation round 1 PR (#474, Part of #375): acceptance criteria of Stories 6.1.10 (auto-scroll offered only when the lyric text runs below the visible area above the fixed bars), 6.1.29 (suggestions close on the click and keep the scroll position), 6.1.1 (one focus cue per field, readable chip counts), 6.1.11 (a lyrics-only version has no Chords switch; a bracketed section label is not a chord) and the i18n policy (no raw server or database text in a toast) verified against the code; decisions UXA-061 to UXA-066. |
 | **1.94** | Nov 7, 2026 | Epic 6.1: validation round 2, batch 2 (Part of #375): acceptance criteria updated for Story 6.1.4 (#388: amounts between parentheses, "Air (3)"), 6.1.8 (#392: the full title wraps at the top of the page on a phone, the truncated copy shows only after scrolling past it), 6.1.10 (#394: transpose, scroll speed and a Screen stays on switch live in the one ⋮ menu; the toolbar has no ⋯), 6.1.11 (#395: every version has a `?version=` link, replaced in place, shared by Share), 6.1.23 (#407: History, Artists and Shared with me share one heading size) and 6.1.24 (#408: the Library "+" floats at the bottom right). New: Terms and Privacy pages (draft) with the operator from the server environment. |
-| **2.03** | Nov 12, 2026 | Epic 6.2: Story 6.2.6 (#509, G1.1) implemented on `feat/ux-v3`: each version is labelled with its songbook short name (original, variants) or its language name in the app language (translations), ordered original, variants, translations; four versions fit a 375 px phone. Executable in `docs/testing/ux-v3-version-labels.feature`. |
+| **2.03** | Nov 12, 2026 | Epic 6.2: Story 6.2.6 (#509, G1.1) implemented on `feat/ux-v3`: each version is labelled with its songbook short name (original, variants) or its language name in the app language (translations), ordered original, variants, translations; four versions fit a 375 px phone. Executable in `docs/testing/ux-v3-version-labels.feature`. Review round (PR #530): adding to a playlist and favouriting use the first version of that order (not the oldest row); the switch scrolls the opened version into view on a phone; any language tag names its language; two translations in one language show their songbook; an unrecognised translation shows its songbook; one embed of `song_version_sources` per query (guarded by a unit test). |
 | **2.02** | Nov 12, 2026 | Epic 6.2: Story 6.2.10 (#513, G2.1) implemented on `feat/ux-v3`: the song page shows a grey source line under the lyrics with the songbook, page and compiler of the version being shown (primary source first, several listed, original title when it differs, nothing without sources, guests too). Review round (PR #531): `p.` / `pp.` from the page notation, importer prefixes stripped, original title compared without accents, apostrophe style or trailing punctuation, plural list label, one embed of `song_version_sources` per song query. Acceptance criteria block added. Executable: `docs/testing/ux-v3-songbook-source.feature`. |
 | **2.01** | Nov 12, 2026 | Epic 6.2: Story 6.2.7 (#510, G1.2) implemented on `feat/ux-v3` (PR #529): the meta line shows the beats of the selected version after Key · Capo · Tuning (`docs/testing/ux-v3-beats-meta.feature`). |
 | **2.00** | Nov 11, 2026 | Epic 6.2: Story 6.2.16 (#519, G4.2) implemented on `feat/ux-v3` (PR #528) — alternative chords such as A7/C7 are transposed together (B7/D7 at +2), bass-note slash chords (C/E → D/F#) are unchanged, and the PDF export uses the same rule. Review of PR #528: chords written with ♭/♯, alt, mi, ma or Δ and three or more alternatives move too, spelling follows the key in effect. Spec: `docs/testing/ux-v3-alternative-chords.feature`. |
@@ -1736,6 +1736,18 @@ GitHub epic **#498**. Many circles sing from printed songbooks: the same song ap
 Scenario: Versions are named after their book
   Given a song with versions from "Songbook A" and "Songbook B"
   Then the switch shows both book names
+
+Scenario: A translation in any language tag is named after that language
+  Given a song with an original from "Songbook A" and a translation named "lkt"
+  Then the switch shows "Songbook A" and "Lakota"
+
+Scenario: A translation whose language is not recognised shows its songbook
+  Given a song with an original from "Songbook A" and a translation named "Singable" from "Songbook B"
+  Then the switch shows "Songbook A" and "Songbook B"
+
+Scenario: Two translations in one language are told apart by songbook
+  Given a song with an original from "Songbook A" and two translations named "English" from "Songbook B" and "Songbook C"
+  Then the switch shows "Songbook A", "English · Songbook B" and "English · Songbook C"
 
 Scenario: Many versions fit a phone
   Given a song with 4 versions on a 375 px screen

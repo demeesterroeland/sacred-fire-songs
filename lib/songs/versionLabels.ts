@@ -16,17 +16,10 @@
  */
 import { LOCALE_DATE_TAGS, SUPPORTED_LOCALES, type Locale } from '@/lib/i18n';
 import type { SongVersionKind } from '@/types';
+import { primarySource, type SourceOrderRow } from '@/lib/songs/versionSources';
 
-/** A songbook as embedded in a source row (PostgREST returns one object, or a one-element array). */
-interface SongbookName {
-  short_name?: string | null;
-  title?: string | null;
-}
-
-export interface VersionSourceLike {
-  is_primary?: boolean | null;
-  songbooks?: SongbookName | ReadonlyArray<SongbookName> | null;
-}
+/** A source row as the label needs it: the `VERSION_SOURCES_SELECT` row, or just `is_primary` and the book. */
+export type VersionSourceLike = SourceOrderRow;
 
 export interface LabelledVersion {
   id: string;
@@ -35,26 +28,16 @@ export interface LabelledVersion {
   song_version_sources?: ReadonlyArray<VersionSourceLike> | null;
 }
 
-/** Original first, then the variants printed in other books, then the translations. */
-const KIND_RANK: Record<SongVersionKind, number> = { original: 0, variant: 1, translation: 2 };
-
-/** Position of a kind in the version order; a missing or unknown kind counts as `original`. */
-export function versionKindRank(kind: string | null | undefined): number {
-  return KIND_RANK[kind as SongVersionKind] ?? KIND_RANK.original;
-}
-
 const clean = (s: string | null | undefined) => s?.trim() || null;
 
-function songbookOf(source: VersionSourceLike): SongbookName | null {
-  const book = source.songbooks;
-  return (Array.isArray(book) ? book[0] : book) ?? null;
-}
-
-/** The songbook name of the primary source (else the first source): short name, else title; null without one. */
+/**
+ * The songbook name of the primary source (`primarySource`: the `is_primary` row, else the first after sorting, the
+ * same source the source line under the lyrics names): short name, else title; null without one.
+ */
 export function primarySongbookName(sources: ReadonlyArray<VersionSourceLike> | null | undefined): string | null {
-  if (!sources?.length) return null;
-  const source = sources.find((s) => s.is_primary) ?? sources[0];
-  const book = songbookOf(source);
+  const source = primarySource(sources);
+  if (!source) return null;
+  const book = Array.isArray(source.songbooks) ? source.songbooks[0] : source.songbooks;
   return clean(book?.short_name) ?? clean(book?.title);
 }
 
@@ -64,9 +47,23 @@ const CANDIDATE_TAGS: readonly string[] = [...SUPPORTED_LOCALES, ...EXTRA_LANGUA
 
 const fold = (s: string) => s.normalize('NFD').replace(/\p{M}/gu, '').toLocaleLowerCase('en').trim();
 
+/**
+ * `inLocale` when this runtime has display-name data for it, else English. The same locale can be missing from the
+ * server's ICU data but present in a browser's (or the other way round, `qu` is the likely case), which would give
+ * the server and the browser two different labels for one version; a fixed English fallback keeps the label the same
+ * wherever the runtime lacks the locale, and the label is only ever rendered after the song has loaded in the browser.
+ */
+function namesLocale(inLocale: string): string {
+  try {
+    return Intl.DisplayNames.supportedLocalesOf([inLocale]).length > 0 ? inLocale : 'en';
+  } catch {
+    return 'en';
+  }
+}
+
 function displayName(tag: string, inLocale: string): string | null {
   try {
-    return new Intl.DisplayNames([inLocale], { type: 'language', fallback: 'none' }).of(tag) ?? null;
+    return new Intl.DisplayNames([namesLocale(inLocale)], { type: 'language', fallback: 'none' }).of(tag) ?? null;
   } catch {
     return null;
   }
@@ -88,10 +85,28 @@ function languageIndex(): Map<string, string> {
   return (nameIndex = index);
 }
 
-/** The language tag a translation's `version_name` names ("English", "Engels", "nl"), or null when it names none. */
+/** A language tag as importers write it (`nl`, `lkt`, `pt-BR`); `version_name` text such as "Singable" is not one. */
+const LANGUAGE_TAG = /^[a-z]{2,3}(-[a-z0-9]+)*$/i;
+
+/** The canonical form of a BCP 47 language tag ("LKT" → "lkt", "pt-br" → "pt-BR"), or null when it is not one. */
+function canonicalTag(value: string): string | null {
+  if (!LANGUAGE_TAG.test(value)) return null;
+  try {
+    return Intl.getCanonicalLocales(value)[0] ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * The language tag a translation's `version_name` names, or null when it names none: a language name in any app
+ * language ("English", "Engels"), or any BCP 47 style tag ("nl", "lkt", "pt-BR"; lowercase is preferred, see the
+ * importing guide). A tag the runtime has no name for still counts, the label then falls back (`versionBaseLabel`).
+ */
 export function translationLanguageTag(versionName: string | null | undefined): string | null {
   const name = clean(versionName);
-  return name ? (languageIndex().get(fold(name)) ?? null) : null;
+  if (!name) return null;
+  return languageIndex().get(fold(name)) ?? canonicalTag(name);
 }
 
 function capitalize(text: string, locale: string): string {
@@ -105,13 +120,15 @@ export function languageName(tag: string, locale: Locale): string | null {
 }
 
 /**
- * The label of one version before numbering: songbook short name (original, variant), language
- * name in the app language (translation), else the stored `version_name`; null when all are blank.
+ * The label of one version before numbering: songbook short name (original, variant); language name in the app
+ * language (translation), else, for a translation whose language is not recognised, its songbook, else the stored
+ * `version_name`; null when all are blank.
  */
 export function versionBaseLabel(version: LabelledVersion, locale: Locale): string | null {
+  const book = primarySongbookName(version.song_version_sources);
   if (version.version_kind === 'translation') {
     const tag = translationLanguageTag(version.version_name);
-    return (tag && languageName(tag, locale)) || clean(version.version_name);
+    return (tag && languageName(tag, locale)) || book || clean(version.version_name);
   }
-  return primarySongbookName(version.song_version_sources) ?? clean(version.version_name);
+  return book ?? clean(version.version_name);
 }

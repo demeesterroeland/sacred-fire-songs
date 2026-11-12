@@ -7,7 +7,7 @@
  * translation data exists yet, so nothing is rendered for it.
  */
 import { DEFAULT_LOCALE, type Locale, type TranslateFn } from '@/lib/i18n';
-import { versionBaseLabel, type LabelledVersion } from '@/lib/songs/versionLabels';
+import { primarySongbookName, versionBaseLabel, type LabelledVersion } from '@/lib/songs/versionLabels';
 import { RECORDING_PARAM } from '@/lib/songs/recordingLink';
 
 export type VersionLike = LabelledVersion;
@@ -78,12 +78,23 @@ export function versionOptions(
   const names = versions.map((v, i) => versionBaseLabel(v, locale) || t('song.version.fallback', { n: i + 1 }));
   const total = new Map<string, number>();
   for (const n of names) total.set(n, (total.get(n) ?? 0) + 1);
-  // Names that stay as they are are taken; numbered labels must steer around them.
-  const taken = new Set(names.filter((n) => total.get(n) === 1));
+  // Equal names whose versions come from different songbooks (two English translations) are told apart by the
+  // songbook ("English · Songbook B") instead of by a number; the same book twice still gets numbers.
+  const labels = names.map((name, i) => {
+    if (total.get(name) === 1) return name;
+    const books = versions.flatMap((v, j) => (names[j] === name ? [primarySongbookName(v.song_version_sources)] : []));
+    const book = primarySongbookName(versions[i].song_version_sources);
+    const distinct = books.every((b) => b !== null && b !== name) && new Set(books).size === books.length;
+    return distinct && book ? `${name} · ${book}` : name;
+  });
+  const labelCount = new Map<string, number>();
+  for (const l of labels) labelCount.set(l, (labelCount.get(l) ?? 0) + 1);
+  // Labels that stay as they are are taken; numbered labels must steer around them.
+  const taken = new Set(labels.filter((l) => labelCount.get(l) === 1));
   const counter = new Map<string, number>();
   return versions.map((v, i) => {
-    const name = names[i];
-    if (total.get(name) === 1) return { value: v.id, label: name };
+    const name = labels[i];
+    if (labelCount.get(name) === 1) return { value: v.id, label: name };
     let n = counter.get(name) ?? 0;
     let label: string;
     do {

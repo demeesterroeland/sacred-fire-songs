@@ -173,7 +173,7 @@ Then('a guest reads no source of the private version', async function (this: Son
 // ── @seed contract: the song page's real select against PostgREST ────────────
 
 /** Local API settings: the environment first, then `.env.local` (the `_DEV` pair), then the local stack's default URL. */
-function localApi(): { url: string; key: string } {
+export function localApi(): { url: string; key: string } {
   const fromFile: Record<string, string> = {};
   try {
     for (const line of readFileSync('.env.local', 'utf8').split('\n')) {

@@ -25,7 +25,21 @@ export interface SegmentedProps extends Omit<React.HTMLAttributes<HTMLDivElement
  */
 export function Segmented({ options, value, onChange, className, ...props }: SegmentedProps) {
   const refs = React.useRef<Array<HTMLButtonElement | null>>([]);
+  const stripRef = React.useRef<HTMLDivElement | null>(null);
   const checkedIndex = Math.max(0, options.findIndex((o) => o.value === value));
+
+  // The strip scrolls sideways when the segments do not fit (a phone with four versions). Opening `?version=<4th>`
+  // checks a segment that lies outside the visible part, so bring it in: centred, by setting the strip's own
+  // `scrollLeft` (`scrollIntoView` would scroll the page too). Nothing moves when it is already fully visible.
+  React.useEffect(() => {
+    const strip = stripRef.current;
+    const checked = refs.current[checkedIndex];
+    if (!strip || !checked) return;
+    const box = strip.getBoundingClientRect();
+    const seg = checked.getBoundingClientRect();
+    if (seg.left >= box.left && seg.right <= box.right) return;
+    strip.scrollLeft += seg.left + seg.width / 2 - (box.left + box.width / 2);
+  }, [checkedIndex, options.length]);
 
   const move = (to: number) => {
     const next = options[to];
@@ -60,6 +74,7 @@ export function Segmented({ options, value, onChange, className, ...props }: Seg
 
   return (
     <div
+      ref={stripRef}
       role="radiogroup"
       className={cn("flex max-w-full items-center gap-1 overflow-x-auto rounded-panel bg-surface p-1", className)}
       {...props}

@@ -6,7 +6,7 @@
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
-| 0.27 | Nov 11, 2026 | Song page: the version switch names each version after its songbook (for example *Songbook A*) or, for a translation, its language in your app language; the original comes first, then versions from other books, then translations. On a phone with many versions the switch scrolls sideways inside its own strip (UX v3, #509). |
+| 0.27 | Nov 12, 2026 | Song page: the version switch names each version after its songbook (for example *Songbook A*) or, for a translation, its language in your app language; the original comes first, then versions from other books, then translations. On a phone with many versions the switch scrolls sideways inside its own strip and shows the version you opened. Two translations in the same language show their songbook too (*English · Songbook B*) (UX v3, #509). |
 | 0.26 | Nov 12, 2026 | Song page: when a song comes from a printed songbook, a grey line under the lyrics says which book, which page and who compiled it (UX v3, #513). Review round: pages read right (`p. 38`, `pp. 38–39`), an original title that only differs in accents or punctuation is not repeated, and a song printed in several books has a list labelled "Sources". |
 | 0.25 | Nov 11, 2026 | Song page: the second line also shows **Beats** when the songbook gives them for the version, e.g. `Key E · Capo 5 · Standard · Beats 8`; the line follows the version you pick (UX v3, #510).
 | 0.24 | Nov 11, 2026 | Song page: lines the circle sings more than once sit between repeat bars, `‖:` before the first line and `:‖` after the last one, with `×2` when the song says how many times (UX v3, #518). |

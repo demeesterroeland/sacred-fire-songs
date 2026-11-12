@@ -6,7 +6,7 @@ import {
   versionBaseLabel,
   type LabelledVersion,
 } from '@/lib/songs/versionLabels';
-import { sortVersions } from '@/lib/songs/versionOrder';
+import { sortVersions, versionKindRank } from '@/lib/songs/versionOrder';
 import { versionOptions } from '@/lib/songs/versionSwitch';
 import { DICTIONARIES } from '@/lib/i18n';
 
@@ -47,8 +47,14 @@ describe('translationLanguageTag', () => {
     expect(translationLanguageTag('nl')).toBe('nl');
     expect(translationLanguageTag('Português')).toBe('pt');
   });
+  it('accepts any BCP 47 style tag, so other languages work too (Lakota, Navajo, Guaraní, Aymara, Mapuche)', () => {
+    for (const tag of ['lkt', 'nv', 'gn', 'nah', 'ay', 'arn', 'pt-BR']) expect(translationLanguageTag(tag)).toBe(tag.length > 3 ? 'pt-BR' : tag);
+    expect(translationLanguageTag(' LKT ')).toBe('lkt');
+  });
   it('is null for anything else', () => {
     expect(translationLanguageTag('Simplified')).toBeNull();
+    expect(translationLanguageTag('Singable version')).toBeNull();
+    expect(translationLanguageTag('a')).toBeNull();
     expect(translationLanguageTag('')).toBeNull();
     expect(translationLanguageTag(null)).toBeNull();
   });
@@ -67,6 +73,25 @@ describe('versionBaseLabel', () => {
     expect(versionBaseLabel(v, 'es')).toBe('Inglés');
     expect(versionBaseLabel({ ...v, version_name: 'Engels' }, 'fr')).toBe('Anglais');
   });
+  it('names a translation in another language after that language (lkt, nv, gn, ay, arn)', () => {
+    const name = (tag: string) => versionBaseLabel({ id: 'a', version_name: tag, version_kind: 'translation' }, 'en');
+    expect(name('lkt')).toBe('Lakota');
+    expect(name('nv')).toBe('Navajo');
+    expect(name('gn')).toBe('Guarani');
+    expect(name('ay')).toBe('Aymara');
+    expect(name('arn')).toBe('Mapuche');
+  });
+  it('names the language of a translation the same way in every app language, also in Quechua (qu)', () => {
+    const v: LabelledVersion = { id: 'a', version_name: 'English', version_kind: 'translation' };
+    for (const locale of ['en', 'es', 'fr', 'it', 'nl', 'pt', 'qu', 'ru'] as const) {
+      expect(versionBaseLabel(v, locale)).toMatch(/\S/);
+    }
+  });
+  it('falls back to the songbook name before the version name when the language is not recognised', () => {
+    const v: LabelledVersion = { id: 'a', version_name: 'Singable', version_kind: 'translation', song_version_sources: [src('Songbook B')] };
+    expect(versionBaseLabel(v, 'en')).toBe('Songbook B');
+    expect(versionBaseLabel({ ...v, song_version_sources: [] }, 'en')).toBe('Singable');
+  });
   it('falls back to the version name (translation without a known language, version without a book)', () => {
     expect(versionBaseLabel({ id: 'a', version_name: 'Singable', version_kind: 'translation' }, 'en')).toBe('Singable');
     expect(versionBaseLabel({ id: 'a', version_name: 'Simplified', version_kind: 'variant' }, 'en')).toBe('Simplified');
@@ -78,6 +103,11 @@ describe('versionBaseLabel', () => {
 });
 
 describe('order: original, variants, translations', () => {
+  it('ranks kinds in versionOrder.ts (no dependency on the label dictionaries); a missing or unknown kind is original', () => {
+    expect([versionKindRank('original'), versionKindRank('variant'), versionKindRank('translation')]).toEqual([0, 1, 2]);
+    expect(versionKindRank(null)).toBe(0);
+    expect(versionKindRank('other')).toBe(0);
+  });
   const at = (n: number) => `2026-01-0${n}T00:00:00Z`;
   it('ranks by kind first, then oldest first', () => {
     const sorted = sortVersions([
@@ -95,6 +125,38 @@ describe('order: original, variants, translations', () => {
 });
 
 describe('versionOptions with songbooks and languages', () => {
+  it('tells two translations in the same language apart by their songbook, not by a number', () => {
+    const opts = versionOptions(
+      [
+        { id: 'a', version_kind: 'original', song_version_sources: [src('Songbook A')] },
+        { id: 'b', version_name: 'English', version_kind: 'translation', song_version_sources: [src('Songbook B')] },
+        { id: 'c', version_name: 'English', version_kind: 'translation', song_version_sources: [src('Songbook C')] },
+      ],
+      t
+    );
+    expect(opts!.map((o) => o.label)).toEqual(['Songbook A', 'English · Songbook B', 'English · Songbook C']);
+  });
+  it('numbers two translations in the same language that have no distinct songbook', () => {
+    const opts = versionOptions(
+      [
+        { id: 'a', version_kind: 'original', song_version_sources: [src('Songbook A')] },
+        { id: 'b', version_name: 'English', version_kind: 'translation' },
+        { id: 'c', version_name: 'English', version_kind: 'translation' },
+      ],
+      t
+    );
+    expect(opts!.map((o) => o.label)).toEqual(['Songbook A', 'English 1', 'English 2']);
+  });
+  it('labels an unrecognised translation with its songbook, not its version name', () => {
+    const opts = versionOptions(
+      [
+        { id: 'a', version_kind: 'original', song_version_sources: [src('Songbook A')] },
+        { id: 'b', version_name: 'Singable', version_kind: 'translation', song_version_sources: [src('Songbook B')] },
+      ],
+      t
+    );
+    expect(opts!.map((o) => o.label)).toEqual(['Songbook A', 'Songbook B']);
+  });
   it('shows both book names', () => {
     const opts = versionOptions(
       [

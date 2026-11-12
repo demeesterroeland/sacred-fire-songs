@@ -3,6 +3,9 @@ import { Given, Then, When } from '@cucumber/cucumber';
 import assert from 'node:assert/strict';
 import { DICTIONARIES, type Locale } from '../../../lib/i18n';
 import { sortVersions } from '../../../lib/songs/versionOrder';
+import { createClient } from '@supabase/supabase-js';
+import { EDIT_SONG_SELECT } from '../../../lib/songs/songSelect';
+import { localApi } from './ux-v3-songbook-source.steps';
 import { versionOptions, type VersionLike } from '../../../lib/songs/versionSwitch';
 
 const t = (k: string, vars?: Record<string, string | number>) => {
@@ -70,3 +73,50 @@ Given('a song with a translation, a variant and an original, created in that ord
 Then('the versions are ordered original, variant, translation', function (this: object) {
   assert.deepEqual(sortVersions(get(this).versions as (VersionLike & { created_at?: string })[]).map((v) => v.version_kind), ['original', 'variant', 'translation']);
 });
+
+Given(
+  'a song with an original from {string} and a translation named {string} from {string}',
+  function (this: object, bookName: string, language: string, translationBook: string) {
+    states.set(this, {
+      locale: 'en',
+      versions: [
+        { id: 'a', version_name: 'Standard', version_kind: 'original', song_version_sources: book(bookName) },
+        { id: 'b', version_name: language, version_kind: 'translation', song_version_sources: book(translationBook) },
+      ],
+    });
+  }
+);
+Given(
+  'a song with an original from {string} and two translations named {string} from {string} and {string}',
+  function (this: object, bookName: string, language: string, first: string, second: string) {
+    states.set(this, {
+      locale: 'en',
+      versions: [
+        { id: 'a', version_name: 'Standard', version_kind: 'original', song_version_sources: book(bookName) },
+        { id: 'b', version_name: language, version_kind: 'translation', song_version_sources: book(first) },
+        { id: 'c', version_name: language, version_kind: 'translation', song_version_sources: book(second) },
+      ],
+    });
+  }
+);
+Then('the switch shows {string}, {string} and {string}', function (this: object, a: string, b: string, c: string) {
+  assert.deepEqual(labels(this), [a, b, c]);
+});
+
+Then(
+  'the select of the edit page runs against the local API without error and returns the sources of each version as a list',
+  async function () {
+    // Reads whatever the local database holds (never writes). PostgREST plans the whole embed even with no rows, so a
+    // doubled `song_version_sources` embed (42803) fails here.
+    const { url, key } = localApi();
+    const { data, error } = await createClient(url, key, { auth: { persistSession: false } })
+      .from('compositions')
+      .select(EDIT_SONG_SELECT)
+      .limit(5);
+    assert.equal(error, null, `PostgREST rejected the edit select: ${error?.message}`);
+    assert.ok(Array.isArray(data));
+    for (const song of data as unknown as { song_versions: { song_version_sources?: unknown }[] }[]) {
+      for (const version of song.song_versions) assert.ok(Array.isArray(version.song_version_sources));
+    }
+  }
+);
