@@ -118,7 +118,7 @@ function LinkSongBody({
         autoComplete="off"
         placeholder={t('song.link.searchPlaceholder')}
         onChange={(e) => setQuery(e.target.value)}
-        className="min-h-tap w-full rounded-control border border-line-strong bg-surface px-3 text-body text-fg placeholder:text-fg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-focus"
+        className="min-h-tap w-full rounded-control border border-line-strong bg-surface px-3 text-body text-fg placeholder:text-fg-muted"
       />
       <p className="text-meta text-fg-muted" aria-live="polite">
         {!searchable
