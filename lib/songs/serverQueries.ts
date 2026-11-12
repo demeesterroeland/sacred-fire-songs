@@ -4,8 +4,7 @@ import type { Song } from "@/lib/songUtils";
 import type { TaxonomyNode } from "@/lib/taxonomyUtils";
 import { songsQuery, mapCompositionToSong, recentlyAddedQuery, RECENTLY_ADDED_LIMIT, type CompositionRow } from './queries';
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { normalizeWhitespace, removeDiacritics } from "@/lib/utils";
-import { parseArtists } from "./artistUtils";
+import { aggregateArtists, type ArtistRow, type ArtistSummary } from "./artistIndex";
 import { fetchFavoritesSetlistId } from "@/lib/playlists/favorites";
 
 const PAGE_SIZE = 20;
@@ -395,23 +394,18 @@ export async function fetchCategoryTreeServer(): Promise<TaxonomyNode[]> {
 
 /* ── Artists aggregation ─────────────────────────────────── */
 
-export interface ArtistSummary {
-    name: string;
-    songCount: number;
-    songTitles: string[];
-}
+export type { ArtistSummary } from './artistIndex';
 
 /**
- * Aggregates unique authors from all compositions (public + drafts)
- * with song counts and first 5 song titles.
- * Handles spacing variations (collapses multiple spaces) and casing variations.
+ * Aggregates unique authors from all compositions (public + drafts) with song counts and first 5 song titles.
+ * Names come from `authors` and `original_author`, like the author filter (Story 6.2.12, #515); see `aggregateArtists`.
  */
 export async function fetchArtistsServer(): Promise<ArtistSummary[]> {
     const supabase = await createClient();
 
     const { data: rows, error } = await supabase
         .from('compositions')
-        .select('title, original_author')
+        .select('title, original_author, authors')
         .limit(5000);
 
     if (error) {
@@ -419,67 +413,7 @@ export async function fetchArtistsServer(): Promise<ArtistSummary[]> {
         return [];
     }
 
-    const authorCounts = new Map<string, number>();
-    const authorTitles = new Map<string, string[]>();
-    const authorCanonicalNames = new Map<string, string>(); // lowercased-normalized -> preferred casing
-    let unspecifiedCount = 0;
-    const unspecifiedTitles: string[] = [];
-
-    for (const row of rows || []) {
-        const parsed = parseArtists(row.original_author as string);
-        if (parsed.length === 0) {
-            unspecifiedCount++;
-            if (unspecifiedTitles.length < 5 && row.title) {
-                unspecifiedTitles.push(row.title as string);
-            }
-            continue;
-        }
-
-        for (const artistName of parsed) {
-            const normalized = normalizeWhitespace(artistName);
-            if (!normalized) continue;
-
-            const key = removeDiacritics(normalized).toLowerCase();
-
-            authorCounts.set(key, (authorCounts.get(key) || 0) + 1);
-
-            if (!authorTitles.has(key)) authorTitles.set(key, []);
-            const titles = authorTitles.get(key)!;
-            if (titles.length < 5 && row.title && !titles.includes(row.title as string)) {
-                titles.push(row.title as string);
-            }
-
-            // Keep casing with most uppercase letters, or fall back to the first one seen
-            const existingCanonical = authorCanonicalNames.get(key);
-            if (!existingCanonical) {
-                authorCanonicalNames.set(key, normalized);
-            } else {
-                const existingUppers = (existingCanonical.match(/[A-Z]/g) || []).length;
-                const newUppers = (normalized.match(/[A-Z]/g) || []).length;
-                if (newUppers > existingUppers) {
-                    authorCanonicalNames.set(key, normalized);
-                }
-            }
-        }
-    }
-
-    const result = Array.from(authorCounts.entries())
-        .map(([key, songCount]) => ({
-            name: authorCanonicalNames.get(key) || key,
-            songCount,
-            songTitles: authorTitles.get(key) || [],
-        }))
-        .sort((a, b) => a.name.localeCompare(b.name));
-
-    if (unspecifiedCount > 0) {
-        result.push({
-            name: 'No Artist',
-            songCount: unspecifiedCount,
-            songTitles: unspecifiedTitles,
-        });
-    }
-
-    return result;
+    return aggregateArtists((rows ?? []) as ArtistRow[]);
 }
 
 /**

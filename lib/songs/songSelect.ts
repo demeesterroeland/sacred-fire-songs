@@ -8,6 +8,7 @@ import { VERSION_SOURCES_SELECT } from '@/lib/songs/versionSources';
 export const SONG_SELECT = `
           title,
           original_author,
+          authors,
           owner_id,
           is_public,
           has_chords,
@@ -47,6 +48,7 @@ export const EDIT_SONG_SELECT = `
           id,
           title,
           original_author,
+          authors,
           owner_id,
           is_public,
           song_category_map (

@@ -47,6 +47,18 @@ describe('mapCompositionToSong', () => {
     expect(song.author).toBe('');
   });
 
+  // Story 6.2.12 / G2.3 (#515): every credit travels with the song; original_author stays the display text.
+  it('maps every credit of compositions.authors next to the display author', () => {
+    const song = mapCompositionToSong({ ...baseItem, original_author: 'Anna Lee, Ben Cruz', authors: ['Anna Lee', 'Ben Cruz'] } as typeof baseItem);
+    expect(song.authors).toEqual(['Anna Lee', 'Ben Cruz']);
+    expect(song.author).toBe('Anna Lee, Ben Cruz');
+  });
+
+  it('gives no credits when the row has none', () => {
+    const song = mapCompositionToSong({ ...baseItem, authors: null } as typeof baseItem);
+    expect(song.authors).toEqual([]);
+  });
+
   it('handles missing song_versions', () => {
     const song = mapCompositionToSong({ ...baseItem, song_versions: [] });
     expect(song.songKey).toBeNull();

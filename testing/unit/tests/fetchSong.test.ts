@@ -55,6 +55,13 @@ describe('fetchSong', () => {
     expect(query.select).toBe(SONG_SELECT);
   });
 
+  // Story 6.2.12 (#515): every author of a co-written song is shown, so the song page must select `authors`.
+  it('selects the composition authors[] column next to original_author (#515)', () => {
+    const composition = SONG_SELECT.split('song_versions (')[0];
+    expect(composition).toMatch(/\boriginal_author\b/);
+    expect(composition).toMatch(/\bauthors\b/);
+  });
+
   it('returns null when no song has that id', async () => {
     expect(await fetchSong('missing-id')).toBeNull();
   });
