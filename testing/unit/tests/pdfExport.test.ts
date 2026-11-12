@@ -101,6 +101,62 @@ describe('PDF Export - TDD Suite', () => {
             expect(chords).not.toContain('G');
         });
 
+        it('transposes alternative chords (A7/C7) together and keeps bass notes (#519)', () => {
+            const song: ExportSongData = {
+                title: 'Alternatives',
+                key: 'E',
+                transposition: 2,
+                content: '{key: E}\n[E]Danza [A7/C7]del [E/G#]cielo',
+            };
+
+            const formatted = formatSongForPdf(song);
+            const chords = formatted.sections.flatMap(s => s.lines).flatMap(l => l.items).map(i => i.chords).filter(Boolean);
+
+            expect(chords).toEqual(['F#', 'B7/D7', 'F#/A#']);
+            expect(formatted.key).toBe('F#');
+        });
+
+        it('transposes chords written above the lyrics and the key directive without a key on the song', () => {
+            const formatted = formatSongForPdf({
+                title: 'Over',
+                transposition: 2,
+                content: '{key: C}\nC   A7/C7\nDown to the river',
+            });
+            const chords = formatted.sections.flatMap(s => s.lines).flatMap(l => l.items).map(i => i.chords).filter(Boolean);
+
+            expect(chords).toEqual(['D', 'B7/D7']);
+            expect(formatted.key).toBe('D');
+        });
+
+        it('moves every chord with its neighbours, whatever the spelling (♭, alt, mi, ma, Δ)', () => {
+            const formatted = formatSongForPdf({
+                title: 'Spellings',
+                transposition: 2,
+                content: '{key: C}\n[C]a [B♭]b [C7alt]c [Cmi7]d [Cma7]e [CΔ7]f',
+            });
+            const chords = formatted.sections.flatMap(s => s.lines).flatMap(l => l.items).map(i => i.chords).filter(Boolean);
+
+            expect(chords).toEqual(['D', 'C', 'D7alt', 'Dmi7', 'Dma7', 'DΔ7']);
+        });
+
+        it('spells each section by the key in effect after a mid-song {key:} change', () => {
+            const formatted = formatSongForPdf({
+                title: 'Key change',
+                transposition: 3,
+                content: '{key: F}\n[G]a\n{key: E}\n[G]b',
+            });
+            const chords = formatted.sections.flatMap(s => s.lines).flatMap(l => l.items).map(i => i.chords).filter(Boolean);
+
+            expect(chords).toEqual(['Bb', 'A#']);
+        });
+
+        it('transposes three alternatives together', () => {
+            const formatted = formatSongForPdf({ title: 'Three', transposition: 2, content: '[A7/C7/E7]la' });
+            const chords = formatted.sections.flatMap(s => s.lines).flatMap(l => l.items).map(i => i.chords).filter(Boolean);
+
+            expect(chords).toEqual(['B7/D7/F#7']);
+        });
+
         it('handles songs without chords cleanly (lyrics only)', () => {
             const song: ExportSongData = {
                 title: 'Chant Only',
