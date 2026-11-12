@@ -99,16 +99,55 @@ describe('SongBilingualDisplay', () => {
     expect(sizes()).toEqual(new Set([`${lyricPx(4)}px`]));
   });
 
-  it('marks each column with its language and lets the text set its own direction (RTL-safe), logical spacing only', () => {
-    renderBoth({ translationLanguage: 'he' });
+  // Physical sides (left/right) flip the wrong way in a right-to-left column; only logical ones (start/end) may be used.
+  const PHYSICAL = /(^|\s|:)-?(pl|pr|ml|mr|left|right|border-l|border-r|rounded-l|rounded-r)-/;
+
+  it('marks each column with its language and a direction read from its lyrics (RTL-safe), logical spacing only', () => {
+    renderBoth({ translation: 'אמא [G]אדמה\nחיים\n\n{soc}\nאבא שמש\n{eoc}', translationLanguage: 'he' });
     const translation = screen.getAllByTestId('stanza-translation')[0];
     expect(translation.getAttribute('lang')).toBe('he');
-    expect(translation.getAttribute('dir')).toBe('auto');
-    expect(screen.getAllByTestId('stanza-original')[0].getAttribute('dir')).toBe('auto');
-    const html = screen.getByTestId('song-bilingual').outerHTML;
-    // The wrapper's own classes use logical sides (ps-/border-s), never left/right.
-    for (const el of [translation, ...screen.getAllByTestId('stanza-pair')]) expect(el.className).not.toMatch(/\b(pl|pr|ml|mr|border-l|border-r)-/);
-    expect(html).not.toMatch(/gray-|red-|amber-|#[0-9a-f]{3,6}/i);
+    expect(translation.getAttribute('dir')).toBe('rtl');
+    // The original starts with a chord letter (G), but its lyrics are left to right.
+    expect(screen.getAllByTestId('stanza-original')[0].getAttribute('dir')).toBe('ltr');
+    const root = screen.getByTestId('song-bilingual');
+    // Every element of every stanza (label, chorus rule, line indent, words, comments) uses logical sides.
+    const sections = screen.getAllByTestId('song-section');
+    expect(sections.length).toBeGreaterThan(0);
+    for (const el of [root, ...root.querySelectorAll('*')]) {
+      expect(el.getAttribute('class') ?? '', el.outerHTML.slice(0, 120)).not.toMatch(PHYSICAL);
+    }
+    expect(root.outerHTML).not.toMatch(/gray-|red-|amber-|#[0-9a-f]{3,6}/i);
+  });
+
+  it('pulls the first word of a line into the indent on the start side, so in RTL the second word does not overlap it', () => {
+    renderBoth({ translation: 'אמא אדמה יפה', translationLanguage: 'he' });
+    const words = within(screen.getByTestId('stanza-translation')).getAllByTestId('lyric').map((l) => l.parentElement!);
+    expect(words[0].className).toContain('-ms-4');
+    for (const w of words.slice(1)) expect(w.className).not.toMatch(/-m[se]-/);
+  });
+
+  it('a Hebrew original with chords flows right to left', () => {
+    renderBoth({ original: '[Am]אמא [G]אדמה', translation: 'Mother earth' });
+    expect(screen.getByTestId('stanza-original').getAttribute('dir')).toBe('rtl');
+    expect(screen.getByTestId('stanza-translation').getAttribute('dir')).toBe('ltr');
+  });
+
+  it('a chorus translation on a phone has one rule (its own), not the wrapper rule as well', () => {
+    renderBoth({ original: 'One\n\nTwo', translation: 'Uno\n\n{soc}\nDos\n{eoc}' });
+    const [verse, chorus] = screen.getAllByTestId('stanza-translation');
+    expect(verse.className).toContain('border-s-2');
+    expect(chorus.className).not.toContain('border-s-2');
+    expect(within(chorus).getByTestId('song-section').className).toContain('border-s-2');
+  });
+
+  it('spaces the rows like the normal reader spaces its stanzas', () => {
+    renderBoth();
+    const pairs = screen.getAllByTestId('stanza-pair');
+    expect(pairs[0].className).not.toMatch(/\bmt-/);
+    for (const pair of pairs.slice(1)) expect(pair.className).toContain('mt-8');
+    cleanup();
+    renderBoth({ showChords: false });
+    for (const pair of screen.getAllByTestId('stanza-pair').slice(1)) expect(pair.className).toContain('mt-6');
   });
 
   it('shows the melody of the original once, below both languages', () => {

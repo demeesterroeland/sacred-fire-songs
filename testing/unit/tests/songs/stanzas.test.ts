@@ -1,7 +1,7 @@
 // Story 6.2.14 (#517): stanzas of the original and the translation, paired for the "both" reading view.
 import { describe, expect, it } from 'vitest';
 import type { ChordProSection } from '@/lib/chordUtils';
-import { bilingualRows, bilingualStanzas, isSung, lyricsOnly, pairStanzas, stanzas } from '@/lib/songs/stanzas';
+import { bilingualRows, bilingualStanzas, isSung, lyricsDirection, lyricsOnly, pairStanzas, stanzas } from '@/lib/songs/stanzas';
 import { chordPx, lyricPx } from '@/lib/reader/readerPrefs';
 
 const text = (section: ChordProSection | null) =>
@@ -122,9 +122,24 @@ describe('bilingualRows', () => {
     expect(rows(2, false).every((r) => !r.original?.chordsOn)).toBe(true);
   });
 
-  it('gives every column dir="auto" and the translation its language', () => {
+  it('gives the translation its language and every column the direction of its lyrics', () => {
     const [row] = rows(2);
-    expect(row.original).toMatchObject({ dir: 'auto', lang: undefined });
-    expect(row.translation).toMatchObject({ dir: 'auto', lang: 'he' });
+    expect(row.original).toMatchObject({ dir: 'ltr', lang: undefined });
+    expect(row.translation).toMatchObject({ dir: 'ltr', lang: 'he' });
+    const hebrew = bilingualRows('[Am]אמא [G]אדמה\n\n[G]שמש', '[G]Mother earth\n\nSun', { language: 'en', step: 2, hasChords: true, showChords: true });
+    expect(hebrew.map((r) => [r.original?.dir, r.translation?.dir])).toEqual([
+      ['rtl', 'ltr'],
+      ['rtl', 'ltr'],
+    ]);
+  });
+});
+
+describe('lyricsDirection', () => {
+  it('reads the first letter of the lyrics, not a leading chord or a comment', () => {
+    expect(lyricsDirection(stanzas('[G]אמא אדמה'))).toBe('rtl');
+    expect(lyricsDirection(stanzas('[Am]  \n{c: Intro}\nسلام'))).toBe('rtl');
+    expect(lyricsDirection(stanzas('{c: שיר}\n[G]Mother earth'))).toBe('ltr');
+    expect(lyricsDirection(stanzas('[G] [C]\n\n123'))).toBe('ltr');
+    expect(lyricsDirection([])).toBe('ltr');
   });
 });

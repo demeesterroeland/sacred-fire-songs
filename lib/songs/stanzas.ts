@@ -90,8 +90,8 @@ export interface BilingualColumn {
   chordPx: number;
   /** Language tag of the column (`undefined`: the original, whose language is not stored, inherits the page's). */
   lang: string | undefined;
-  /** Each column sets its own direction from its text, so a right-to-left translation flows right to left. */
-  dir: 'auto';
+  /** Direction of the column, read from its lyrics (`lyricsDirection`), so a right-to-left text flows right to left. */
+  dir: TextDirection;
 }
 
 export interface BilingualRow {
@@ -110,12 +110,41 @@ export interface BilingualOptions {
   showChords: boolean;
 }
 
-/** The rows the "both" view draws: one per stanza pair, each column with its size, chords and language. */
+export type TextDirection = 'ltr' | 'rtl';
+
+/** Letters of the right-to-left scripts (Hebrew, Arabic, Syriac, Thaana, N'Ko, Samaritan, Mandaic and their forms). */
+const RTL_LETTER = /[\u0590-\u08FF\uFB1D-\uFDFF\uFE70-\uFEFF]/;
+
+/**
+ * Direction of a text from the first letter of its lyrics. Not `dir="auto"`: the browser would read the first strong
+ * character in the column, which is a chord name (`[G]`, always Latin) on a song with chords, and turn a Hebrew
+ * original left to right. Chords and comments are skipped; a text without letters reads left to right.
+ */
+export function lyricsDirection(sections: ReadonlyArray<ChordProSection>): TextDirection {
+  for (const section of sections) {
+    for (const line of section.lines) {
+      for (const item of line.items) {
+        if (item.comment !== undefined) continue;
+        const letter = item.lyrics?.match(/\p{L}/u)?.[0];
+        if (letter) return RTL_LETTER.test(letter) ? 'rtl' : 'ltr';
+      }
+    }
+  }
+  return 'ltr';
+}
+
+/** The rows the "both" view draws: one per stanza pair, each column with its size, chords, language and direction. */
 export function bilingualRows(originalContent: string, translationContent: string, options: BilingualOptions): BilingualRow[] {
-  const size = { lyricPx: lyricPx(options.step), chordPx: chordPx(options.step), dir: 'auto' as const };
+  const size = { lyricPx: lyricPx(options.step), chordPx: chordPx(options.step) };
   const chordsOn = options.hasChords && options.showChords;
-  return bilingualStanzas(originalContent, translationContent).map((pair) => ({
-    original: pair.original ? { section: pair.original, chordsOn, lang: undefined, ...size } : null,
-    translation: pair.translation ? { section: pair.translation, chordsOn: false, lang: options.language, ...size } : null,
+  const pairs = bilingualStanzas(originalContent, translationContent);
+  // One direction per column, from all of its stanzas: a chord-only intro or a short line does not flip one row.
+  const originalDir = lyricsDirection(pairs.flatMap((p) => (p.original ? [p.original] : [])));
+  const translationDir = lyricsDirection(pairs.flatMap((p) => (p.translation ? [p.translation] : [])));
+  return pairs.map((pair) => ({
+    original: pair.original ? { section: pair.original, chordsOn, lang: undefined, dir: originalDir, ...size } : null,
+    translation: pair.translation
+      ? { section: pair.translation, chordsOn: false, lang: options.language, dir: translationDir, ...size }
+      : null,
   }));
 }

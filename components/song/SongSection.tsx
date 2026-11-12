@@ -8,6 +8,11 @@ const REPEAT_END = ':‖';
 /** Width of the bar gutter on repeated lines, in the lyric size, so it scales with the reader font size. */
 const REPEAT_GUTTER = '1.25em';
 
+/** Space above every stanza but the first, the same in the normal reader and in the two-language view (#517). */
+export function stanzaGapClass(chordsOn: boolean): string {
+    return chordsOn ? 'mt-8' : 'mt-6';
+}
+
 function repeatState(repeat: ChordProRepeatMark): 'single' | 'start' | 'end' | 'inside' {
     if (repeat.start && repeat.end) return 'single';
     if (repeat.start) return 'start';
@@ -27,19 +32,20 @@ interface SongSectionProps {
 
 /**
  * One stanza (section) of the reader: its label, lines, chords, comments and repeat bars. Shared by `SongDisplay` and the
- * two-language view `SongBilingualDisplay` (Story 6.2.14, #517), so both draw a stanza the same way.
+ * two-language view `SongBilingualDisplay` (Story 6.2.14, #517), so both draw a stanza the same way. Sides are logical
+ * (start / end, never left / right): in a right-to-left column the label, chorus rule, indent and first-word pull flip.
  */
 export default function SongSection({ section, first, chordsOn, lyricSize, chordSize, tone = 'default' }: SongSectionProps) {
     const { t } = useLocale();
     return (
         <div
             data-testid="song-section"
-            className={`relative ${!first ? (chordsOn ? 'mt-8' : 'mt-6') : ''} ${section.type === 'chorus' ? 'border-l-2 border-line-strong pl-3 md:pl-4 py-1 ml-1' : ''}`}
+            className={`relative ${!first ? stanzaGapClass(chordsOn) : ''} ${section.type === 'chorus' ? 'border-s-2 border-line-strong ps-3 md:ps-4 py-1 ms-1' : ''}`}
         >
-            {/* Section Label */}
+            {/* Section Label — logical sides (start), so in a right-to-left column it sits on the right (#517). */}
             {section.label && (
                 <span
-                    className={`absolute -left-2 md:-left-4 top-1/2 -translate-x-full -translate-y-1/2 text-caption font-semibold rotate-180 text-fg-muted`}
+                    className={`absolute -start-2 md:-start-4 top-1/2 -translate-x-full rtl:translate-x-full -translate-y-1/2 text-caption font-semibold rotate-180 text-fg-muted`}
                     style={{ writingMode: 'vertical-rl' }}
                 >
                     {section.label}
@@ -47,10 +53,10 @@ export default function SongSection({ section, first, chordsOn, lyricSize, chord
             )}
 
             {/* Section Content */}
-            <div className={`${chordsOn ? 'space-y-4' : 'space-y-1'} ${section.type === 'chorus' ? 'pl-2' : ''}`}>
+            <div className={`${chordsOn ? 'space-y-4' : 'space-y-1'} ${section.type === 'chorus' ? 'ps-2' : ''}`}>
                 {section.lines.map((line: ChordProLine, lineIdx) => {
                     const row = (
-                        <div className={`flex flex-wrap pl-4 md:pl-6`}>
+                        <div className="flex flex-wrap ps-4 md:ps-6">
                             {line.items.map((item: ChordProItem, itemIdx) => {
                                 // Inline comment item — {c:} or {ci:}
                                 if (item.comment !== undefined) {
@@ -58,7 +64,7 @@ export default function SongSection({ section, first, chordsOn, lyricSize, chord
                                         <span
                                             key={itemIdx}
                                             style={{ marginBottom: chordsOn ? '0.1rem' : '0.15rem' }}
-                                            className={`self-end text-caption text-fg-muted border-l-2 border-line pl-1 mr-2 leading-tight ${item.italic ? 'italic' : ''} ${itemIdx === 0 ? '-ml-4 md:-ml-6' : 'ml-1'}`}
+                                            className={`self-end text-caption text-fg-muted border-s-2 border-line ps-1 me-2 leading-tight ${item.italic ? 'italic' : ''} ${itemIdx === 0 ? '-ms-4 md:-ms-6' : 'ms-1'}`}
                                         >
                                             {item.comment}
                                         </span>
@@ -68,7 +74,7 @@ export default function SongSection({ section, first, chordsOn, lyricSize, chord
                                 return (
                                     <div
                                         key={itemIdx}
-                                        className={`flex flex-col align-top shrink-0 ${itemIdx === 0 ? '-ml-4 md:-ml-6' : ''}`}
+                                        className={`flex flex-col align-top shrink-0 ${itemIdx === 0 ? '-ms-4 md:-ms-6' : ''}`}
                                     >
                                         {/* The Chord (Red and Bold) — only render if song has chords */}
                                         {chordsOn && (

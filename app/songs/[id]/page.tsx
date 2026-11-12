@@ -35,8 +35,8 @@ import { SongVersionSwitch } from '@/components/song/SongVersionSwitch';
 import { SongLanguageSwitch } from '@/components/song/SongLanguageSwitch';
 import { SongReadingViewSwitch } from '@/components/song/SongReadingViewSwitch';
 import SongBilingualDisplay from '@/components/song/SongBilingualDisplay';
-import { BOTH_VIEW, LANGUAGE_PARAM, ORIGINAL_LANGUAGE, TRANSLATION_VIEW, VIEW_PARAM, languageSearch, linkedLanguageChoice, linkedReadingView, resolveTranslation, translationTitle, viewSearch, type LanguageChoice, type ReadingView } from '@/lib/songs/translations';
-import { hasChords } from '@/lib/chordProParsing';
+import { BOTH_VIEW, LANGUAGE_PARAM, ORIGINAL_LANGUAGE, TRANSLATION_VIEW, VIEW_PARAM, linkedLanguageChoice, linkedReadingView, translationTitle, viewSearch, type LanguageChoice, type ReadingView } from '@/lib/songs/translations';
+import { languageChangeSearch, readingState } from '@/lib/songs/readingState';
 import { EDIT_VERSION_PARAM, editSongHref } from '@/lib/songs/versionOrder';
 import { blocksVersionSwitch, linkedVersionChoice, resolveVersionIndex, versionSearch, versionShareUrl, type VersionChoice } from '@/lib/songs/versionSwitch';
 import { SongMenuSheet } from '@/components/song/SongMenuSheet';
@@ -45,8 +45,7 @@ import { canLinkSong, fetchSongRedirect, songRedirectHref, type SongLinkSummary 
 import { useScrolledPast } from '@/hooks/useScrolledPast';
 import { useReaderPrefs } from '@/lib/reader/useReaderPrefs';
 import { speedBy } from '@/lib/reader/autoScroll';
-import { versionHasChords } from '@/lib/songs/versionFlags';
-import { canTranspose, shiftSemitones, transposeChordPro, transposeKey } from '@/lib/reader/transpose';
+import { shiftSemitones, transposeChordPro, transposeKey } from '@/lib/reader/transpose';
 import { cn } from '@/lib/utils';
 import { recordSongView } from '@/app/actions/recordSongView';
 import { useSongRecordings } from '@/hooks/useSongRecordings';
@@ -213,10 +212,19 @@ export default function SongDetailPage() {
     const currentVersion = versions[selectedVersionIndex];
     // A translation belongs to the song: it replaces the lyrics of the version being shown (which stays selected).
     const translations = song?.song_translations ?? [];
-    const translation = resolveTranslation(translations, languageChoice?.songId === id ? languageChoice : linkedLanguage, id);
     // Story 6.2.14 (#517): with a translation chosen, "Both" shows the original next to it (side by side / line under line).
-    const readingView = viewChoice && viewChoice.songId === id ? viewChoice.view : linkedView;
-    const showBoth = !!translation && readingView === BOTH_VIEW;
+    // `readingState` holds the rules (lib/songs/readingState.ts): which text is shown, whether Chords and transpose apply,
+    // the source line and the translator.
+    const reading = readingState({
+        songId: id,
+        translations,
+        languageChoice: languageChoice?.songId === id ? languageChoice : linkedLanguage,
+        view: viewChoice && viewChoice.songId === id ? viewChoice.view : linkedView,
+        version: currentVersion,
+        role: user?.role,
+        semitones,
+    });
+    const { translation, showBoth, shownHasChords, mayTranspose } = reading;
     const selectVersion = (index: number) => {
         const next = versions[index];
         if (!next) return;
@@ -247,11 +255,21 @@ export default function SongDetailPage() {
         setLanguageChoice({ songId: id, language: language ?? ORIGINAL_LANGUAGE });
         if (!language) setViewChoice({ songId: id, view: TRANSLATION_VIEW });
         if (typeof window !== 'undefined') {
-            let search = languageSearch(window.location.search, language);
-            if (!language) search = viewSearch(search, TRANSLATION_VIEW);
+            const { search } = languageChangeSearch(window.location.search, language);
             window.history.replaceState(null, '', `${window.location.pathname}${search}${window.location.hash}`);
         }
     };
+    // `?view=both` without a language the song offers reads the original; drop the view once the song is known, so a
+    // later language tap opens that translation alone instead of straight in Both.
+    const staleView = !!song && reading.staleView;
+    useEffect(() => {
+        if (!staleView) return;
+        setViewChoice({ songId: id, view: TRANSLATION_VIEW });
+        if (typeof window !== 'undefined' && new URLSearchParams(window.location.search).has(VIEW_PARAM)) {
+            const search = viewSearch(window.location.search, TRANSLATION_VIEW);
+            window.history.replaceState(null, '', `${window.location.pathname}${search}${window.location.hash}`);
+        }
+    }, [staleView, id]);
     // Story 6.2.14 (#517): Translation · Both; `?view=both` (none for the translation alone), replaced in place.
     const selectReadingView = (view: ReadingView) => {
         setViewChoice({ songId: id, view });
@@ -265,12 +283,9 @@ export default function SongDetailPage() {
     // or shift); lists, filters and the meta links keep using the song-level flag (any version).
     // A translation is text of the song, not of a key: it is shown as stored and not transposed. In "Both" (#517) the
     // original is on screen with its chords (the translation is lyrics only), so Chords and transpose follow the original.
-    const readsOriginal = !translation || showBoth;
-    const shownHasChords = readsOriginal ? versionHasChords(currentVersion) : hasChords(translation?.lyrics ?? '');
-    const mayTranspose = canTranspose(user?.role) && shownHasChords && readsOriginal;
     const originalContent = useMemo(
-        () => transposeChordPro(currentVersion?.content_chordpro || '', mayTranspose ? semitones : 0, { key: currentVersion?.key }),
-        [currentVersion?.content_chordpro, currentVersion?.key, mayTranspose, semitones],
+        () => transposeChordPro(currentVersion?.content_chordpro || '', reading.shift, { key: currentVersion?.key }),
+        [currentVersion?.content_chordpro, currentVersion?.key, reading.shift],
     );
     const shownContent = translation && !showBoth ? (translation.lyrics ?? '') : originalContent;
     const shownVersion = currentVersion && mayTranspose && semitones !== 0
@@ -681,7 +696,7 @@ export default function SongDetailPage() {
                         {/* Story 6.2.14 (#517): Translation · Both, only while a translation is being read. */}
                         <SongReadingViewSwitch
                             className="min-w-0 max-w-full"
-                            visible={!!translation}
+                            visible={reading.viewSwitchVisible}
                             value={showBoth ? BOTH_VIEW : TRANSLATION_VIEW}
                             onChange={selectReadingView}
                         />
@@ -720,16 +735,16 @@ export default function SongDetailPage() {
                         </div>
                         {/* Story 6.2.10 (#513): where the version being shown was printed (book · page · compiler). In "Both"
                             (#517) the original's source and the translator are both shown. */}
-                        {readsOriginal && (
+                        {reading.showSource && (
                             <SongSourceLine
                                 className="mt-6"
                                 sources={currentVersion?.song_version_sources}
                                 songTitle={song.title}
                             />
                         )}
-                        {translation?.translator?.trim() && (
+                        {reading.translator && (
                             <p data-testid="translation-translator" className="mt-6 text-meta text-fg-muted">
-                                {t('song.translation.by', { name: translation.translator.trim() })}
+                                {t('song.translation.by', { name: reading.translator })}
                             </p>
                         )}
                     </div>

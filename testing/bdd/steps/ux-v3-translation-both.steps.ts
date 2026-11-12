@@ -5,6 +5,7 @@ import { DICTIONARIES } from '../../../lib/i18n';
 import { lyricPx, stepBy } from '../../../lib/reader/readerPrefs';
 import { DEFAULT_LYRIC_STEP } from '../../../lib/design/tokens';
 import { bilingualRows, type BilingualRow } from '../../../lib/songs/stanzas';
+import { languageChangeSearch, readingState, type ReadingState } from '../../../lib/songs/readingState';
 import {
   BOTH_VIEW,
   LANGUAGE_PARAM,
@@ -35,11 +36,25 @@ interface State {
   search: string;
   step: number;
   chords: boolean;
+  role: string | null;
+  semitones: number;
+  translator: string | null;
 }
 const states = new WeakMap<object, State>();
 const get = (w: object): State => {
   if (!states.has(w)) {
-    states.set(w, { original: '', translations: [], choice: null, view: TRANSLATION_VIEW, search: '', step: DEFAULT_LYRIC_STEP, chords: true });
+    states.set(w, {
+      original: '',
+      translations: [],
+      choice: null,
+      view: TRANSLATION_VIEW,
+      search: '',
+      step: DEFAULT_LYRIC_STEP,
+      chords: true,
+      role: null,
+      semitones: 0,
+      translator: null,
+    });
   }
   return states.get(w)!;
 };
@@ -48,16 +63,32 @@ const stanzaText = (lines: string[]) => lines.join('\n\n');
 const QUECHUA = stanzaText(['Pachamama sumaq\nkawsay', 'Inti tayta\nk’anchay']);
 const ENGLISH = stanzaText(['Mother earth, beautiful\nlife', 'Father sun\nlight']);
 
-/** The translation the reader is on (what the page resolves); `null` = the original language. */
-const translationOf = (s: State) => resolveTranslation(s.translations, s.choice, SONG);
-/** The reader shows "Both" only with a translation chosen and the view on Both (the page's `showBoth`). */
+/** What the song page reads, by the page's own rules (`readingState`). */
+const reading = (s: State): ReadingState =>
+  readingState({
+    songId: SONG,
+    translations: s.translations,
+    languageChoice: s.choice,
+    view: s.view,
+    version: { content_chordpro: s.original },
+    role: s.role,
+    semitones: s.semitones,
+  });
+/** The translation the reader is on; `null` = the original language. */
+const translationOf = (s: State) => reading(s).translation;
+/** The rows of "Both", as the page passes them to `SongBilingualDisplay` (the original with its chords flag). */
 const rows = (s: State): BilingualRow[] => {
-  const tr = translationOf(s);
-  assert.ok(tr && s.view === BOTH_VIEW, 'the reader is not on Both');
-  return bilingualRows(s.original, tr.lyrics ?? '', { language: tr.language, step: s.step, hasChords: true, showChords: s.chords });
+  const r = reading(s);
+  assert.ok(r.showBoth && r.translation, 'the reader is not on Both');
+  return bilingualRows(s.original, r.translation.lyrics ?? '', {
+    language: r.translation.language,
+    step: s.step,
+    hasChords: r.shownHasChords,
+    showChords: s.chords,
+  });
 };
 const chooseTranslation = (s: State, translation: SongTranslation) => {
-  s.translations = [translation];
+  s.translations = [{ translator: s.translator, ...translation }];
   s.choice = { songId: SONG, language: translation.language };
   s.search = languageSearch('', translation.language);
 };
@@ -116,9 +147,10 @@ When('I pick {string}', function (this: object, label: string) {
 When('I read the original language', function (this: object) {
   // The page: picking "Original language" resets the view and drops `?view=` with `?lang=`.
   const s = get(this);
+  const { search, resetView } = languageChangeSearch(s.search, null);
   s.choice = { songId: SONG, language: 'original' };
-  s.view = TRANSLATION_VIEW;
-  s.search = viewSearch(languageSearch(s.search, null), TRANSLATION_VIEW);
+  if (resetView) s.view = TRANSLATION_VIEW;
+  s.search = search;
 });
 When('I switch the chords off', function (this: object) {
   get(this).chords = false;
@@ -175,8 +207,8 @@ Then('the intro has a row of its own', function (this: object) {
   assert.ok(first.original.section.lines.every((l) => l.items.every((i) => !i.lyrics?.trim())));
 });
 Then('the reader shows no Translation · Both switch', function (this: object) {
-  // `SongReadingViewSwitch visible={!!translation}`: no translation being read, no switch.
-  assert.equal(translationOf(get(this)), null);
+  // `SongReadingViewSwitch visible={reading.viewSwitchVisible}`: no translation being read, no switch.
+  assert.equal(reading(get(this)).viewSwitchVisible, false);
 });
 const chordsIn = (row: BilingualRow, side: 'original' | 'translation') =>
   !!row[side]?.chordsOn && row[side]!.section.lines.some((l) => l.items.some((i) => i.chords));
@@ -200,11 +232,11 @@ Then('both columns use the larger lyric size', function (this: object) {
     assert.equal(row.translation!.lyricPx, lyricPx(s.step));
   }
 });
-Then('the translation column has language {string} and sets its own direction', function (this: object, lang: string) {
-  for (const row of rows(get(this))) assert.deepEqual([row.translation!.lang, row.translation!.dir], [lang, 'auto']);
+Then('the translation column has language {string} and direction {string}', function (this: object, lang: string, dir: string) {
+  for (const row of rows(get(this))) assert.deepEqual([row.translation!.lang, row.translation!.dir], [lang, dir]);
 });
-Then('the original column sets its own direction', function (this: object) {
-  for (const row of rows(get(this))) assert.equal(row.original!.dir, 'auto');
+Then('the original column has direction {string}', function (this: object, dir: string) {
+  for (const row of rows(get(this))) assert.equal(row.original!.dir, dir);
 });
 Then('the address reads {string}', function (this: object, search: string) {
   assert.equal(get(this).search, search);
@@ -223,6 +255,59 @@ Then('opening {string} shows both languages', function (this: object, search: st
     view: linkedReadingView(params.get(VIEW_PARAM)),
   };
   assert.ok(rows(opened).length > 0);
+});
+
+// Reading state on the page: transpose, source line, translator, a stale `?view=both`.
+Given('a musician reading a song with chords and a translation by {string}', function (this: object, name: string) {
+  const s = get(this);
+  s.role = 'musician';
+  s.translator = name;
+  s.original = '[G]Pachamama [C]sumaq\n\n[D]Inti [G]tayta';
+  chooseTranslation(s, { language: 'en', lyrics: 'Mother earth\n\nFather sun' });
+});
+When('I transpose {int} semitones up', function (this: object, n: number) {
+  get(this).semitones = n;
+});
+Then('the original is transposed {int} semitones and its source line is shown', function (this: object, n: number) {
+  const r = reading(get(this));
+  assert.equal(r.mayTranspose, true);
+  assert.equal(r.shift, n);
+  assert.equal(r.showSource, true);
+});
+Then('the translation alone is not transposed and shows no source line', function (this: object) {
+  const r = reading(get(this));
+  assert.deepEqual([r.showBoth, r.mayTranspose, r.shift, r.showSource], [false, false, 0, false]);
+});
+Then('the reader names the translator {string}', function (this: object, name: string) {
+  assert.equal(reading(get(this)).translator, name);
+});
+Given('a song with a translation opened with {string}', function (this: object, search: string) {
+  const s = get(this);
+  s.original = QUECHUA;
+  s.translations = [{ language: 'en', lyrics: ENGLISH }];
+  const params = new URLSearchParams(search);
+  s.choice = linkedLanguageChoice(SONG, params.get(LANGUAGE_PARAM));
+  s.view = linkedReadingView(params.get(VIEW_PARAM));
+  s.search = search;
+  // The page: a stale `?view=both` (no translation to show) is dropped once the song is loaded.
+  const r = reading(s);
+  if (r.staleView) {
+    s.view = TRANSLATION_VIEW;
+    s.search = viewSearch(s.search, TRANSLATION_VIEW);
+  }
+});
+Then('the reader shows the original language', function (this: object) {
+  const r = reading(get(this));
+  assert.deepEqual([r.translation, r.showBoth, r.readsOriginal], [null, false, true]);
+});
+When('I tap the language {string}', function (this: object, language: string) {
+  const s = get(this);
+  s.choice = { songId: SONG, language };
+  s.search = languageChangeSearch(s.search, language).search;
+});
+Then('the translation is shown alone', function (this: object) {
+  const r = reading(get(this));
+  assert.ok(r.translation && !r.showBoth);
 });
 
 // ── @seed ─────────────────────────────────────────────────────────────────────
