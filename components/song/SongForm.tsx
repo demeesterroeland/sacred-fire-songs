@@ -22,6 +22,7 @@ import { ArtistTagInput } from './ArtistTagInput';
 import { parseArtists, formatArtists, ensureArtistCategoryIds } from '@/lib/songs/artistUtils';
 import { useLocale } from '@/context/LocaleContext';
 import { errorMessage } from '@/lib/errors/errorCode';
+import { authorFieldsForSave } from '@/lib/songs/authors';
 import { safeNextPath } from '@/lib/auth/safeNext';
 import { FEATURES } from '@/lib/features';
 import { songFlags } from '@/lib/songs/versionFlags';
@@ -247,7 +248,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                     .from('compositions')
                     .insert({
                         title: data.title,
-                        original_author: data.author,
+                        ...authorFieldsForSave(data.author),
                         owner_id: user?.id,
                         is_public: data.isPublic,
                         has_chords: hasChords(data.content),
@@ -324,7 +325,9 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                     .from('compositions')
                     .update({
                         title: data.title,
-                        original_author: data.author,
+                        // Only a changed author input rewrites the columns: the input is prefilled from `authors`, so
+                        // saving it untouched would flatten a curated original_author and split a credit like "A & B".
+                        ...(data.author !== (initialData?.author ?? '') ? authorFieldsForSave(data.author) : {}),
                         is_public: data.isPublic,
                         has_chords: flags.has_chords,
                         has_melody: flags.has_melody,
