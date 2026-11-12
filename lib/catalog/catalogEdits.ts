@@ -19,7 +19,8 @@ export type CatalogEditKind = 'song' | 'version';
 
 export interface CatalogSongEdit {
   song_id: string;
-  catalog_slug: string;
+  /** Null when the slug was removed in the app (then `catalog_slug` is among the edited fields). */
+  catalog_slug: string | null;
   title: string;
   edited_at: string | null;
   edited_fields: string[];
@@ -32,11 +33,13 @@ export interface CatalogVersionEdit {
   version_id: string;
   /** The song's catalog slug; null when the version sits on a song without one. */
   catalog_slug: string | null;
-  catalog_source_id: string;
+  /** Null when the catalog source id was removed in the app. */
+  catalog_source_id: string | null;
   title: string;
   version_name: string | null;
   edited_at: string | null;
   edited_fields: string[];
+  /** Current value of every edited field; `composition_id` holds the catalog_slug of the version's song now. */
   values: Record<string, unknown>;
 }
 
@@ -63,7 +66,7 @@ function isSongEdit(row: unknown): row is CatalogSongEdit {
   return (
     isRecord(row) &&
     isString(row.song_id) &&
-    isString(row.catalog_slug) &&
+    isStringOrNull(row.catalog_slug) &&
     isString(row.title) &&
     isStringOrNull(row.edited_at) &&
     isStringList(row.edited_fields) &&
@@ -77,7 +80,7 @@ function isVersionEdit(row: unknown): row is CatalogVersionEdit {
     isString(row.song_id) &&
     isString(row.version_id) &&
     isStringOrNull(row.catalog_slug) &&
-    isString(row.catalog_source_id) &&
+    isStringOrNull(row.catalog_source_id) &&
     isString(row.title) &&
     isStringOrNull(row.version_name) &&
     isStringOrNull(row.edited_at) &&
@@ -120,16 +123,32 @@ export async function fetchCatalogEdits(supabase: CatalogEditsClient): Promise<C
   return parseCatalogEditsExport(data);
 }
 
-/** Clears one marker once the external catalog has the correction. False when refused or not marked. */
+/**
+ * Answer of `fn_clear_catalog_edit`: `cleared`; `changed` (still marked: corrected again after the
+ * download); `not_marked` (nothing to clear, e.g. already cleared); plus `forbidden` (not an admin)
+ * and `error` (anything else) on this side.
+ */
+export type ClearCatalogEditResult = 'cleared' | 'changed' | 'not_marked' | 'forbidden' | 'error';
+
+const CLEAR_ANSWERS: readonly string[] = ['cleared', 'changed', 'not_marked'];
+
+/**
+ * Clears one marker once the external catalog has the correction. `editedAt` is the `edited_at`
+ * the admin downloaded, passed on unchanged (a round trip through `Date` would drop microseconds).
+ */
 export async function clearCatalogEdit(
   supabase: CatalogEditsClient,
   kind: CatalogEditKind,
-  id: string
-): Promise<boolean> {
-  const { data, error } = await supabase.rpc('fn_clear_catalog_edit', { p_kind: kind, p_id: id });
+  id: string,
+  editedAt: string
+): Promise<ClearCatalogEditResult> {
+  const { data, error } = await supabase.rpc('fn_clear_catalog_edit', { p_kind: kind, p_id: id, p_edited_at: editedAt });
   if (error) {
-    if (error.code !== '42501') console.error('[clearCatalogEdit]', error);
-    return false;
+    if (error.code === '42501') return 'forbidden';
+    console.error('[clearCatalogEdit]', error);
+    return 'error';
   }
-  return data === true;
+  if (typeof data === 'string' && CLEAR_ANSWERS.includes(data)) return data as ClearCatalogEditResult;
+  console.error('[clearCatalogEdit] unexpected answer', data);
+  return 'error';
 }

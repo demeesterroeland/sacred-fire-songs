@@ -7,8 +7,11 @@ import {
   catalogVersionKey,
   formatSkippedReport,
   planCatalogImport,
+  resolveCatalogSlug,
   type CatalogEditMarker,
   type CatalogImportPlan,
+  type CatalogSlugRedirect,
+  type CatalogSlugResolution,
 } from '../../../lib/catalog/importContract';
 import {
   buildCatalogEditsFile,
@@ -43,6 +46,11 @@ export interface ProtectEditsBddState {
   report?: string;
   existing?: Map<string, CatalogEditMarker>;
   file?: { name: string; body: string };
+  downloadedAt?: string;
+  clearAnswer?: string;
+  importerMarkers?: Map<string, CatalogEditMarker>;
+  redirects?: CatalogSlugRedirect[];
+  resolutions?: CatalogSlugResolution[];
 }
 
 const ACCOUNT_EMAILS: Record<string, string> = {
@@ -235,11 +243,12 @@ When("the member's app recomputes the chord and melody flags of the catalog song
 });
 
 When(
-  'a security definer function moves the catalog version to another song for the admin',
-  async function (this: SongBddWorld) {
+  /^a security definer function moves the catalog version to song "([^"]+)" for the admin$/,
+  async function (this: SongBddWorld, targetSlug: string) {
     const db = await seedDb();
     const { rows } = await db.query<{ id: string }>(
-      `INSERT INTO public.compositions (title, is_public) VALUES ('BDD Target Song', true) RETURNING id`
+      `INSERT INTO public.compositions (title, is_public, catalog_slug) VALUES ('BDD Target Song', true, $1) RETURNING id`,
+      [targetSlug]
     );
     // Stands in for a function like fn_link_song_as_version: runs as its owner, for a signed-in user.
     await db.query(
@@ -252,6 +261,32 @@ When(
     await writeAs('admin', `SELECT public.bdd_move_version($1, $2)`, [state(this).versionId, rows[0].id]);
   }
 );
+
+When('the admin removes the catalog slug of the catalog song in the app', async function (this: SongBddWorld) {
+  await writeAs('admin', `UPDATE public.compositions SET catalog_slug = NULL WHERE id = $1`, [state(this).songId]);
+});
+
+When('the gatekeeper tries to change the lyrics of the catalog version in the app', async function (this: SongBddWorld) {
+  // Row-level security lets a gatekeeper update only versions they contributed: the update finds no row.
+  const rows = await writeAs<{ id: string }>(
+    'gatekeeper',
+    `UPDATE public.song_versions SET content_chordpro = $2 WHERE id = $1 RETURNING id`,
+    [state(this).versionId, CORRECTED_LYRICS]
+  ).catch((error: { code?: string }) => {
+    assert.equal(error.code, '42501', String(error));
+    return [];
+  });
+  assert.deepEqual(rows, []);
+});
+
+Then('the catalog version still has its imported lyrics', async function (this: SongBddWorld) {
+  const db = await seedDb();
+  const { rows } = await db.query<{ content_chordpro: string }>(
+    `SELECT content_chordpro FROM public.song_versions WHERE id = $1`,
+    [state(this).versionId]
+  );
+  assert.equal(rows[0].content_chordpro, IMPORTED_LYRICS);
+});
 
 // ── Tampering ─────────────────────────────────────────────────────────────────
 
@@ -456,7 +491,7 @@ Then('the export lists no unedited rows', async function (this: SongBddWorld) {
   assert.equal(Number(rows[0].n), 0);
 });
 
-Then(/^the (guest|member|expert|gatekeeper) cannot export the catalog edits$/, async function (account: string) {
+Then(/^the (guest|member|expert|gatekeeper|importer) cannot export the catalog edits$/, async function (account: string) {
   await assert.rejects(
     exportAs(account),
     (error: { code?: string }) => error.code === '42501',
@@ -465,11 +500,102 @@ Then(/^the (guest|member|expert|gatekeeper) cannot export the catalog edits$/, a
 });
 
 When('the admin marks the catalog version as taken over', async function (this: SongBddWorld) {
-  const rows = await writeAs<{ cleared: boolean }>('admin', `SELECT public.fn_clear_catalog_edit('version', $1) AS cleared`, [
+  const version = (await exportAs('admin')).versions.find((v) => v.version_id === state(this).versionId);
+  const rows = await writeAs<{ answer: string }>(
+    'admin',
+    `SELECT public.fn_clear_catalog_edit('version', $1, $2) AS answer`,
+    [state(this).versionId, need(version?.edited_at ?? undefined, 'exported edited_at')]
+  );
+  assert.equal(rows[0].answer, 'cleared');
+});
+
+Then(
+  /^the admin export gives "([^"]+)" as the song the catalog version moved to$/,
+  async function (this: SongBddWorld, targetSlug: string) {
+    const version = (await exportAs('admin')).versions.find((v) => v.version_id === state(this).versionId);
+    assert.ok(version, 'the moved version is listed');
+    assert.equal(version.catalog_slug, targetSlug);
+    assert.equal(version.values.composition_id, targetSlug, 'the slug, not the internal song id');
+  }
+);
+
+Then('the admin export lists the catalog song without a catalog slug', async function (this: SongBddWorld) {
+  const song = (await exportAs('admin')).songs.find((s) => s.song_id === state(this).songId);
+  assert.ok(song, 'the song whose slug was removed is listed');
+  assert.equal(song.catalog_slug, null);
+  assert.deepEqual(song.values, { catalog_slug: null });
+});
+
+Given('the admin downloaded the catalog edits before a later correction', async function (this: SongBddWorld) {
+  // One scenario runs in one transaction, where now() never moves: date the first correction back.
+  const db = await seedDb();
+  await db.query(`UPDATE public.song_versions SET edited_at = edited_at - interval '1 minute' WHERE id = $1`, [
     state(this).versionId,
   ]);
-  assert.equal(rows[0].cleared, true);
+  const version = (await exportAs('admin')).versions.find((v) => v.version_id === state(this).versionId);
+  state(this).downloadedAt = need(version?.edited_at ?? undefined, 'downloaded edited_at');
 });
+
+When(
+  'the admin marks the downloaded correction of the catalog version as taken over',
+  async function (this: SongBddWorld) {
+    const rows = await writeAs<{ answer: string }>(
+      'admin',
+      `SELECT public.fn_clear_catalog_edit('version', $1, $2) AS answer`,
+      [state(this).versionId, need(state(this).downloadedAt, 'download')]
+    );
+    state(this).clearAnswer = rows[0].answer;
+  }
+);
+
+Then('the admin hears that the catalog version changed since the download', function (this: SongBddWorld) {
+  assert.equal(state(this).clearAnswer, 'changed');
+});
+
+Then(/^the catalog version is still marked with its fields "([^"]+)"$/, async function (this: SongBddWorld, list: string) {
+  const row = await marker('song_versions', need(state(this).versionId, 'catalog version'));
+  assert.equal(row.edited_in_app, true);
+  assert.equal(row.is_now, true, 'edited_at is the newer correction');
+  assert.deepEqual(row.edited_fields, fieldList(list));
+});
+
+When('the importer reads the marker of the catalog version as service_role', async function (this: SongBddWorld) {
+  state(this).importerMarkers = await readMarkers('importer', ['bdd-protect-song']);
+});
+
+Then(/^it sees the correction with its edited fields "([^"]+)"$/, function (this: SongBddWorld, list: string) {
+  const row = need(state(this).importerMarkers, 'markers').get(catalogVersionKey('bdd-protect-song', 'songbook-a'));
+  assert.ok(row?.edited_in_app, 'the importer sees the marker');
+  assert.ok(row.edited_at);
+  assert.deepEqual(row.edited_fields, fieldList(list));
+});
+
+Then('the importer cannot use the admin clear function', async function (this: SongBddWorld) {
+  await assert.rejects(
+    writeAs('importer', `SELECT public.fn_clear_catalog_edit('version', $1, now())`, [state(this).versionId]),
+    (error: { code?: string }) => error.code === '42501'
+  );
+});
+
+When(
+  'the importer clears the marker of the catalog version with plain SQL as service_role',
+  async function (this: SongBddWorld) {
+    // The statement documented in docs/guides/importing-songbooks.md, with the edited_at it read.
+    const editedAt = need(
+      state(this).importerMarkers?.get(catalogVersionKey('bdd-protect-song', 'songbook-a'))?.edited_at ?? undefined,
+      'edited_at read by the importer'
+    );
+    await writeAs(
+      'importer',
+      `UPDATE public.song_versions
+          SET edited_in_app = false, edited_at = NULL, edited_fields = '{}'
+        WHERE composition_id = (SELECT id FROM public.compositions WHERE catalog_slug = $1)
+          AND catalog_source_id = $2
+          AND edited_at = $3`,
+      ['bdd-protect-song', 'songbook-a', editedAt]
+    );
+  }
+);
 
 Then('the admin export no longer lists it', async function (this: SongBddWorld) {
   const exported = await exportAs('admin');
@@ -478,7 +604,7 @@ Then('the admin export no longer lists it', async function (this: SongBddWorld) 
 
 Then('the member cannot mark the catalog version as taken over', async function (this: SongBddWorld) {
   await assert.rejects(
-    writeAs('member', `SELECT public.fn_clear_catalog_edit('version', $1)`, [state(this).versionId]),
+    writeAs('member', `SELECT public.fn_clear_catalog_edit('version', $1, now())`, [state(this).versionId]),
     (error: { code?: string }) => error.code === '42501'
   );
 });
@@ -589,3 +715,30 @@ Then(
     );
   }
 );
+
+Given(
+  /^the song "([^"]+)" was linked in the app as a version of another song$/,
+  function (this: SongBddWorld, slug: string) {
+    state(this).redirects = [
+      { old_id: '00000000-0000-4000-8000-00000000000a', new_id: '00000000-0000-4000-8000-00000000000b', catalog_slug: slug },
+    ];
+  }
+);
+
+When(/^an importer resolves the catalog slugs "([^"]+)" and "([^"]+)"$/, function (this: SongBddWorld, a: string, b: string) {
+  const redirects = need(state(this).redirects, 'redirects');
+  state(this).resolutions = [a, b].map((slug) => resolveCatalogSlug(slug, redirects));
+});
+
+Then(
+  /^it does not recreate "([^"]+)" and writes it to the song it was merged into$/,
+  function (this: SongBddWorld, slug: string) {
+    const resolution = need(state(this).resolutions, 'resolutions').find((r) => r.slug === slug);
+    assert.deepEqual(resolution, { action: 'redirect', slug, targetSongId: '00000000-0000-4000-8000-00000000000b' });
+  }
+);
+
+Then(/^it imports "([^"]+)" as usual$/, function (this: SongBddWorld, slug: string) {
+  const resolution = need(state(this).resolutions, 'resolutions').find((r) => r.slug === slug);
+  assert.deepEqual(resolution, { action: 'import', slug });
+});

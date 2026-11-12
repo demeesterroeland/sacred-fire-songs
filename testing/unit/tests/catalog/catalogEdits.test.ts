@@ -70,14 +70,32 @@ describe('catalog edits export', () => {
     await expect(fetchCatalogEdits({ rpc })).resolves.toBeNull();
   });
 
-  it('clears one marker through the admin-only RPC', async () => {
-    const rpc = vi.fn().mockResolvedValue({ data: true, error: null });
-    await expect(clearCatalogEdit({ rpc }, 'version', 'v1')).resolves.toBe(true);
-    expect(rpc).toHaveBeenCalledWith('fn_clear_catalog_edit', { p_kind: 'version', p_id: 'v1' });
+  it('keeps a row whose catalog key was removed in the app (review N5)', () => {
+    const keyless = {
+      songs: [{ ...sample.songs[0], catalog_slug: null, edited_fields: ['catalog_slug'], values: { catalog_slug: null } }],
+      versions: [{ ...sample.versions[0], catalog_source_id: null }],
+    };
+    expect(parseCatalogEditsExport(keyless)).toEqual(keyless);
   });
 
-  it('reports a refused clear as false', async () => {
-    const rpc = vi.fn().mockResolvedValue({ data: null, error: { code: '42501', message: 'Only admins' } });
-    await expect(clearCatalogEdit({ rpc }, 'song', 's1')).resolves.toBe(false);
+  const EDITED_AT = '2026-11-12T11:00:00.123456+00:00';
+
+  it.each(['cleared', 'not_marked', 'changed'] as const)(
+    'passes the downloaded edited_at and returns the %s answer (review S1)',
+    async (answer) => {
+      const rpc = vi.fn().mockResolvedValue({ data: answer, error: null });
+      await expect(clearCatalogEdit({ rpc }, 'version', 'v1', EDITED_AT)).resolves.toBe(answer);
+      expect(rpc).toHaveBeenCalledWith('fn_clear_catalog_edit', { p_kind: 'version', p_id: 'v1', p_edited_at: EDITED_AT });
+    }
+  );
+
+  it('reports a refused clear as forbidden and anything else as an error (review N2)', async () => {
+    vi.spyOn(console, 'error').mockImplementation(() => {});
+    const refused = vi.fn().mockResolvedValue({ data: null, error: { code: '42501', message: 'Only admins' } });
+    await expect(clearCatalogEdit({ rpc: refused }, 'song', 's1', EDITED_AT)).resolves.toBe('forbidden');
+    const failed = vi.fn().mockResolvedValue({ data: null, error: { code: 'XX000', message: 'boom' } });
+    await expect(clearCatalogEdit({ rpc: failed }, 'song', 's1', EDITED_AT)).resolves.toBe('error');
+    const odd = vi.fn().mockResolvedValue({ data: true, error: null });
+    await expect(clearCatalogEdit({ rpc: odd }, 'song', 's1', EDITED_AT)).resolves.toBe('error');
   });
 });

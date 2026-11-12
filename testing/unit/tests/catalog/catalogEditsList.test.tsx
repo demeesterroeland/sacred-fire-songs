@@ -1,13 +1,14 @@
 // @vitest-environment jsdom
 // Story 6.2.21 (#524): the admin list of catalog corrections, in the real English copy (RTL, L3).
-import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
+import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { DICTIONARIES, translateFrom } from '@/lib/i18n';
 import type { CatalogEditsExport } from '@/lib/catalog/catalogEdits';
 
 const clearCatalogEditAction = vi.fn();
 vi.mock('@/app/actions/catalogEdits', () => ({ clearCatalogEditAction: (...a: unknown[]) => clearCatalogEditAction(...a) }));
-vi.mock('sonner', () => ({ toast: { error: vi.fn() } }));
+const toastError = vi.fn();
+vi.mock('sonner', () => ({ toast: { error: (...a: unknown[]) => toastError(...a) } }));
 vi.mock('@/context/LocaleContext', () => ({
   useLocale: () => ({
     locale: 'en',
@@ -64,21 +65,82 @@ describe('CatalogEditsList', () => {
     expect(screen.getByText('No catalog song or version has been corrected in the app.')).toBeTruthy();
   });
 
-  it('marks a correction as taken over after confirming', async () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(true);
-    clearCatalogEditAction.mockResolvedValue({ ok: true });
-    render(<CatalogEditsList edits={edits} />);
-    fireEvent.click(screen.getAllByRole('button', { name: 'Taken over' })[1]);
-    await waitFor(() =>
-      expect(clearCatalogEditAction).toHaveBeenCalledWith('version', '6f9619ff-8b86-4011-b42d-00c04fc964ff')
-    );
+  beforeEach(() => {
+    clearCatalogEditAction.mockReset();
+    toastError.mockReset();
   });
 
-  it('does nothing when the admin cancels', () => {
-    vi.spyOn(window, 'confirm').mockReturnValue(false);
-    clearCatalogEditAction.mockClear();
+  const openConfirm = (index: number) => {
+    const trigger = screen.getAllByRole('button', { name: 'Taken over' })[index];
+    fireEvent.click(trigger);
+    return { trigger, dialog: screen.getByRole('dialog') };
+  };
+
+  it('asks for confirmation in a dialog, not the browser prompt (review N1)', () => {
+    const confirm = vi.spyOn(window, 'confirm');
     render(<CatalogEditsList edits={edits} />);
-    fireEvent.click(screen.getAllByRole('button', { name: 'Taken over' })[0]);
+    const { dialog } = openConfirm(1);
+    expect(confirm).not.toHaveBeenCalled();
+    expect(within(dialog).getByRole('heading', { name: 'Mark as taken over?' })).toBeTruthy();
+    expect(dialog.textContent).toContain('song-a/book-1');
+    expect(within(dialog).getByRole('button', { name: 'Cancel' })).toBeTruthy();
+    expect(within(dialog).getByRole('button', { name: 'Mark as taken over' }).className).toContain('min-h-tap');
     expect(clearCatalogEditAction).not.toHaveBeenCalled();
+  });
+
+  it('marks the downloaded correction as taken over after confirming', async () => {
+    clearCatalogEditAction.mockResolvedValue({ ok: true });
+    render(<CatalogEditsList edits={edits} />);
+    const { dialog } = openConfirm(1);
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Mark as taken over' }));
+    await waitFor(() =>
+      expect(clearCatalogEditAction).toHaveBeenCalledWith(
+        'version',
+        '6f9619ff-8b86-4011-b42d-00c04fc964ff',
+        '2026-11-12T11:00:00+00:00'
+      )
+    );
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    expect(toastError).not.toHaveBeenCalled();
+  });
+
+  it('does nothing when the admin cancels, and returns focus to the row button', async () => {
+    render(<CatalogEditsList edits={edits} />);
+    const { trigger, dialog } = openConfirm(0);
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Cancel' }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).toBeNull());
+    expect(clearCatalogEditAction).not.toHaveBeenCalled();
+    await waitFor(() => expect(document.activeElement).toBe(trigger));
+  });
+
+  it.each([
+    ['changed', 'This row was corrected again after you downloaded it. Download the list again and copy the newer correction into the catalog first.'],
+    ['forbidden', 'Only admins can mark corrections as taken over.'],
+    ['error', 'Could not mark the correction as taken over. Try again.'],
+  ])('explains a %s answer (review S1, N2)', async (reason, message) => {
+    clearCatalogEditAction.mockResolvedValue({ ok: false, reason });
+    render(<CatalogEditsList edits={edits} />);
+    const { dialog } = openConfirm(0);
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Mark as taken over' }));
+    await waitFor(() => expect(toastError).toHaveBeenCalledWith(message));
+  });
+
+  it('explains a failure when the action throws', async () => {
+    clearCatalogEditAction.mockRejectedValue(new Error('network'));
+    render(<CatalogEditsList edits={edits} />);
+    const { dialog } = openConfirm(0);
+    fireEvent.click(within(dialog).getByRole('button', { name: 'Mark as taken over' }));
+    await waitFor(() => expect(toastError).toHaveBeenCalledWith('Could not mark the correction as taken over. Try again.'));
+  });
+
+  it('names a row whose catalog key was removed in the app (review N5)', () => {
+    render(
+      <CatalogEditsList
+        edits={{ songs: [{ ...edits.songs[0], catalog_slug: null, edited_fields: ['catalog_slug'] }], versions: [] }}
+      />
+    );
+    const row = screen.getByTestId('catalog-edit-row').textContent;
+    expect(row).toContain('No catalog key (removed in the app)');
+    expect(row).toContain('Changed: Catalog key');
   });
 });

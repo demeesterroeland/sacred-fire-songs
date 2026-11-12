@@ -2,7 +2,7 @@
 
 **Version:** 1.4
 **Status:** Living Document
-**Date:** Nov 12, 2026
+**Date:** Nov 13, 2026
 
 ## Changelog
 
@@ -12,7 +12,7 @@
 | **1.1** | Nov 11, 2026 | Story 6.2.6 (#509): how the version switch labels versions (songbook short name; language name for a translation, read from its `version_name`) and orders them (original, variants, translations). |
 | **1.2** | Nov 12, 2026 | Review of PR #530: rule 2 says the order is by `created_at` within each kind; rule 4: a translation's `version_name` may be any language tag (the language subtag written lowercase: `lkt`, `nv`, `gn`, `ay`, `arn`, `pt-BR`; `New` or `LKT` count as text), and a translation whose language is not recognised shows its songbook. |
 | **1.3** | Nov 12, 2026 | Story 6.2.13 (#516, language switch): rule 4 changes. Importers write translations to `song_translations` only, no longer as `song_versions` rows with `version_kind = 'translation'`; the language switch reads `song_translations`, and migration `20261112140000_translation_versions_to_translations.sql` moves the interim translation versions there. Review of PR #535: importers must write translations to `song_translations` before that migration runs on real data (deleting a version also deletes its `catalog_source_id`, so an importer that still writes translations as versions would re-create them, and they are not migrated again); the migration leaves a translation version in place when it has chords and its key, capo or tuning differs from the original's, its lyrics are blank, it holds a melody, note, beats, media link or votes of its own, or it is lyrics-only in another key while a playlist transposes it, and it reports the contributor of a version it deletes; a playlist entry that opened the translation opens the original language afterwards. Changelog rows in ascending order. |
-| **1.4** | Nov 12, 2026 | Story 6.2.21 (#524): new section *Corrections made in the app* — the database marks catalog songs and versions corrected in the app (`edited_in_app`, `edited_at`, `edited_fields`; migration `20261112160000_protect_catalog_app_edits.sql`); the importer contract (read the markers, skip and report marked rows, write as the service role), what counts as an app edit, the admin export and how to clear a marker. Rule 5 points there. |
+| **1.4** | Nov 12, 2026 | Story 6.2.21 (#524): new section *Corrections made in the app* — the database marks catalog songs and versions corrected in the app (`edited_in_app`, `edited_at`, `edited_fields`; migration `20261112160000_protect_catalog_app_edits.sql`); the importer contract (read the markers, skip and report marked rows, write as the service role), what counts as an app edit, the admin export and how to clear a marker. Rule 5 points there. Review of PR #540 (Nov 13, 2026): the export and clear RPCs are for signed-in admins only, not the service role (importers read and clear the markers with plain SQL); clearing takes the `edited_at` that was downloaded, so a newer correction stays marked; removing a catalog key in the app counts; a moved version exports its new song's slug; new *What the markers do not protect* (rows deleted in the app, songs merged in the app and their redirects). |
 
 ## Purpose
 
@@ -57,7 +57,7 @@ An importer updates the rows it owns on every run, so a correction made in the a
 
 The trigger `trg_track_catalog_edit` sets them. **A row is marked when all of these hold:**
 
-- it has a catalog key: `compositions.catalog_slug`, or the version's own `song_versions.catalog_source_id` (a version without one is never marked, even on a catalog song);
+- it has a catalog key before or after the write: `compositions.catalog_slug`, or the version's own `song_versions.catalog_source_id` (a version without one is never marked, even on a catalog song);
 - the writer is a signed-in app user: the request's JWT role (`auth.role()`) is `authenticated`. This includes database functions that a signed-in user calls (`SECURITY DEFINER` functions run as their owner, but the request is still the user's): **linking a song as a version of another song** moves catalog versions and merges aliases and authors, and those moves are marked, because they are the gatekeeper's or admin's decision;
 - a tracked column actually changed (saving without a change marks nothing).
 
@@ -67,8 +67,9 @@ The trigger `trg_track_catalog_edit` sets them. **A row is marked when all of th
 
 - `compositions`: `title`, `original_author`, `aliases`, `authors`
 - `song_versions`: `version_name`, `content_chordpro`, `melody_notation`, `key`, `capo`, `tuning`, `soundcloud_url`, `youtube_url`, `spotify_url`, `version_kind`, `beats`, `song_note`, and `composition_id` (the version was moved to another song)
+- the catalog key itself (`catalog_slug`, `catalog_source_id`): only an admin may change or remove it in the app, and doing so marks the row. A row whose key was removed can no longer be found by that key: treat it like a deleted row (see below).
 
-Not tracked: derived or app-only columns (`has_chords`, `has_melody`, `is_public`, `owner_id`, `vote_count`, `contributor_id`), the catalog keys themselves, and the admin-only tables `song_version_sources`, `songbooks` and `song_translations` (an importer that also corrects those should compare them itself). New rows are not marked: a new version is not a correction of an imported one.
+Not tracked: derived or app-only columns (`has_chords`, `has_melody`, `is_public`, `owner_id`, `vote_count`, `contributor_id`) and the admin-only tables `song_version_sources`, `songbooks` and `song_translations` (an importer that also corrects those should compare them itself). New rows are not marked: a new version is not a correction of an imported one.
 
 Signed-in users cannot set or clear the markers: the trigger restores them on every API write (and resets them on insert).
 
@@ -79,6 +80,7 @@ An importer that re-imports the catalog:
 1. **Writes as the service role** (the service role key, or a direct database connection). Writes from an admin's signed-in session count as app edits and would mark the rows.
 2. **Reads the markers** of the rows it is about to write, by their catalog keys: `compositions.edited_in_app` by `catalog_slug`, `song_versions.edited_in_app` by the song's `catalog_slug` and the version's `catalog_source_id`.
 3. **Skips every marked row:** it does not update it (an insert of a new row is fine). A marked song still gets its new versions, and a marked version's song may still be updated.
+   Reading the marker columns directly is the importer's way in: the RPCs below are for signed-in admins and refuse the service role.
 4. **Reports the skipped rows**, with their keys, `edited_at` and `edited_fields`, so the correction can be taken over into the source catalog.
 
 `lib/catalog/importContract.ts` holds the same rules as pure TypeScript helpers (`planCatalogImport`, `formatSkippedReport`, `catalogVersionKey`) for importers written in TypeScript; the behaviour is specified in `docs/testing/ux-v3-protect-app-edits.feature`.
@@ -93,15 +95,21 @@ WHERE v.edited_in_app AND v.catalog_source_id IS NOT NULL;
 
 ### Export and clearing
 
-- **Export:** admins open **Admin → Catalog edits** and download the corrections as JSON (`catalog-edits-YYYY-MM-DD.json`): format `sacred-fire-songs/catalog-edits`, version 1, and per song (`catalog_slug`) and per version (`catalog_slug`, `catalog_source_id`) the `edited_at`, the `edited_fields` and their current `values`. The same rows come from the RPC `fn_catalog_edits_export()`, which only admins (and the service role) may call.
-- **Clear a marker** once the source catalog has the correction, so the next run updates the row again: the admin presses **Taken over** on that row (RPC `fn_clear_catalog_edit('song' | 'version', id)`, admins only), or the importer clears it as the service role:
+- **Export:** admins open **Admin → Catalog edits** and download the corrections as JSON (`catalog-edits-YYYY-MM-DD.json`): format `sacred-fire-songs/catalog-edits`, version 1, and per song (`catalog_slug`) and per version (`catalog_slug`, `catalog_source_id`) the `edited_at`, the `edited_fields` and their current `values`. The same rows come from the RPC `fn_catalog_edits_export()`, which only signed-in admins may call (it checks `fn_is_admin()`, which reads `auth.uid()`; the service role has no execute privilege). A key is `null` when it was removed in the app; for a moved version the value of `composition_id` is the `catalog_slug` of the song it now belongs to.
+- **Clear a marker** once the source catalog has the correction, so the next run updates the row again: the admin presses **Taken over** on that row (RPC `fn_clear_catalog_edit('song' | 'version', id, edited_at)`, signed-in admins only), or the importer clears it as the service role. Both clear only the correction that was downloaded or reported: pass its `edited_at`. If the row was corrected again since, it stays marked (the RPC answers `changed`, the plain SQL updates no row): download or read it again and take the newer correction over first.
 
 ```sql
 UPDATE public.song_versions
 SET edited_in_app = false, edited_at = NULL, edited_fields = '{}'
 WHERE composition_id = (SELECT id FROM public.compositions WHERE catalog_slug = '<song-slug>')
-  AND catalog_source_id = '<source-id>';
+  AND catalog_source_id = '<source-id>'
+  AND edited_at = '<edited_at as read in step 2>';
 ```
+
+### What the markers do not protect
+
+- **Rows deleted in the app.** A deleted catalog song or version leaves no row and no marker, so the next run recreates it. An importer that should respect deletions keeps its own list of the keys it imported and compares it with the database before inserting.
+- **Songs merged in the app.** Linking a song as a version of another song moves its versions (marked, see above) and its aliases and authors to the other song. Once the app records the merge in a `composition_redirects` table (`old_id`, `new_id`, `catalog_slug` of the merged song), an importer that finds that table **must resolve every incoming catalog slug through it** and write the song's content to the song it was merged into instead of recreating the merged song. `resolveCatalogSlug` in `lib/catalog/importContract.ts` does this for the redirects the importer passes in (it follows chains of merges); it reads no table itself.
 
 ## Access
 

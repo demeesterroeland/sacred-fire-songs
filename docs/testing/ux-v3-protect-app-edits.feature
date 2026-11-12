@@ -1,5 +1,5 @@
 # Sacred Fire Songs – Protect in-app edits of catalog songs
-# Version: 1.0 | Date: Nov 12, 2026
+# Version: 1.1 | Date: Nov 13, 2026
 #
 # Living Gherkin description of Story 6.2.21 (#524): a catalog song or version that is
 # corrected in the app is marked (edited_in_app, edited_at, edited_fields) so an importer
@@ -16,6 +16,11 @@
 #
 # Changelog
 #   1.0 – Nov 12, 2026 – Initial catalogue (Story 6.2.21).
+#   1.1 – Nov 13, 2026 – Review of PR #540: "taken over" only clears the correction that was
+#         downloaded; the service role cannot use the admin export or clear function and reads
+#         and clears markers with plain SQL; a gatekeeper cannot edit someone else's catalog
+#         version; removing a catalog key counts; a moved version exports its new song's slug;
+#         the contract follows merge redirects.
 
 @protectAppEdits
 Feature: Protect in-app edits of catalog songs from re-import
@@ -94,9 +99,25 @@ Feature: Protect in-app edits of catalog songs from re-import
     @seed
     Scenario: A database function acting for a signed-in user counts as an app edit
       Given a public catalog song "bdd-protect-song" with version "songbook-a" owned by the member
-      When a security definer function moves the catalog version to another song for the admin
+      When a security definer function moves the catalog version to song "bdd-target-song" for the admin
       Then the catalog version is marked as edited in the app now
       And its edited fields are "composition_id, version_kind"
+      And the admin export gives "bdd-target-song" as the song the catalog version moved to
+
+    @seed
+    Scenario: Removing the catalog slug of a catalog song in the app counts
+      Given a public catalog song "bdd-protect-song" with version "songbook-a" owned by the member
+      When the admin removes the catalog slug of the catalog song in the app
+      Then the catalog song is marked as edited in the app now
+      And its song edited fields are "catalog_slug"
+      And the admin export lists the catalog song without a catalog slug
+
+    @seed
+    Scenario: A gatekeeper cannot edit someone else's catalog version
+      Given a public catalog song "bdd-protect-song" with version "songbook-a" owned by the member
+      When the gatekeeper tries to change the lyrics of the catalog version in the app
+      Then the catalog version still has its imported lyrics
+      And the catalog version is not marked as edited
 
     @seed
     Scenario: Further edits add their fields to the earlier ones
@@ -149,6 +170,7 @@ Feature: Protect in-app edits of catalog songs from re-import
         | member    |
         | expert    |
         | gatekeeper |
+        | importer   |
 
     @seed
     Scenario: An admin clears the marker after the catalog took the correction over
@@ -156,6 +178,24 @@ Feature: Protect in-app edits of catalog songs from re-import
       When the admin marks the catalog version as taken over
       Then the catalog version is not marked as edited
       And the admin export no longer lists it
+
+    @seed
+    Scenario: "Taken over" leaves a correction made after the download
+      Given a catalog version corrected in the app
+      And the admin downloaded the catalog edits before a later correction
+      When the member changes the lyrics, key and capo of the catalog version in the app
+      And the admin marks the downloaded correction of the catalog version as taken over
+      Then the admin hears that the catalog version changed since the download
+      And the catalog version is still marked with its fields "capo, content_chordpro, key"
+
+    @seed
+    Scenario: The importer reads and clears markers with plain SQL
+      Given a catalog version corrected in the app
+      When the importer reads the marker of the catalog version as service_role
+      Then it sees the correction with its edited fields "content_chordpro"
+      And the importer cannot use the admin clear function
+      When the importer clears the marker of the catalog version with plain SQL as service_role
+      Then the catalog version is not marked as edited
 
     @seed
     Scenario: Only admins can clear the marker
@@ -169,3 +209,12 @@ Feature: Protect in-app edits of catalog songs from re-import
       When the admin downloads it
       Then the file is JSON named "catalog-edits-2026-11-12.json"
       And it holds the song "bdd-song" and the version "songbook-a" of "bdd-song" with their changed values
+
+  Rule: An importer does not recreate a song that was merged in the app
+
+    @unit
+    Scenario: A merged catalog slug goes to the song that now holds it
+      Given the song "bdd-merged" was linked in the app as a version of another song
+      When an importer resolves the catalog slugs "bdd-merged" and "bdd-fresh"
+      Then it does not recreate "bdd-merged" and writes it to the song it was merged into
+      And it imports "bdd-fresh" as usual

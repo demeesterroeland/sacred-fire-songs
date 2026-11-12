@@ -1,17 +1,28 @@
 'use client';
 
-import { useState, useTransition } from 'react';
+import { useRef, useState, useTransition } from 'react';
 import { Download } from 'lucide-react';
 import { toast } from 'sonner';
 
 import { useLocale } from '@/context/LocaleContext';
 import { LOCALE_DATE_TAGS, type TranslationKey } from '@/lib/i18n';
-import { clearCatalogEditAction } from '@/app/actions/catalogEdits';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { clearCatalogEditAction, type ClearCatalogEditReason } from '@/app/actions/catalogEdits';
 import { catalogVersionKey } from '@/lib/catalog/importContract';
 import type { CatalogEditKind, CatalogEditsExport } from '@/lib/catalog/catalogEdits';
 
 /** Label of every tracked column (migration 20261112160000); an unknown column shows its name. */
 const FIELD_LABELS: Record<string, TranslationKey> = {
+  catalog_slug: 'admin.catalogEdits.field.catalog_key',
+  catalog_source_id: 'admin.catalogEdits.field.catalog_key',
   title: 'admin.catalogEdits.field.title',
   original_author: 'admin.catalogEdits.field.original_author',
   aliases: 'admin.catalogEdits.field.aliases',
@@ -36,7 +47,8 @@ interface Row {
   id: string;
   title: string;
   subtitle: string | null;
-  catalogKey: string;
+  /** Null when the catalog key was removed in the app. */
+  catalogKey: string | null;
   editedAt: string | null;
   fields: string[];
 }
@@ -57,12 +69,21 @@ function toRows(edits: CatalogEditsExport): { songs: Row[]; versions: Row[] } {
       id: v.version_id,
       title: v.title,
       subtitle: v.version_name,
-      catalogKey: v.catalog_slug ? catalogVersionKey(v.catalog_slug, v.catalog_source_id) : v.catalog_source_id,
+      catalogKey:
+        v.catalog_slug && v.catalog_source_id
+          ? catalogVersionKey(v.catalog_slug, v.catalog_source_id)
+          : v.catalog_source_id,
       editedAt: v.edited_at,
       fields: v.edited_fields,
     })),
   };
 }
+
+const FAILURE_MESSAGES: Record<Exclude<ClearCatalogEditReason, 'not_marked'>, TranslationKey> = {
+  changed: 'admin.catalogEdits.changedSinceDownload',
+  forbidden: 'admin.catalogEdits.forbidden',
+  error: 'admin.catalogEdits.clearFailed',
+};
 
 /**
  * Story 6.2.21 (#524): admin list of catalog songs and versions corrected in the app. An importer
@@ -73,6 +94,10 @@ export default function CatalogEditsList({ edits }: { edits: CatalogEditsExport 
   const { t, locale } = useLocale();
   const [pending, startTransition] = useTransition();
   const [busyId, setBusyId] = useState<string | null>(null);
+  const [confirming, setConfirming] = useState<Row | null>(null);
+  // The row button that opened the dialog gets the focus back when it closes.
+  const triggers = useRef(new Map<string, HTMLButtonElement>());
+  const returnFocusTo = useRef<string | null>(null);
   const { songs, versions } = toRows(edits);
 
   const formatDate = (iso: string | null) =>
@@ -80,14 +105,26 @@ export default function CatalogEditsList({ edits }: { edits: CatalogEditsExport 
       ? new Date(iso).toLocaleDateString(LOCALE_DATE_TAGS[locale], { year: 'numeric', month: 'short', day: 'numeric' })
       : '';
   const fieldLabel = (field: string) => (FIELD_LABELS[field] ? t(FIELD_LABELS[field]) : field);
+  const keyLabel = (row: Row) => row.catalogKey ?? t('admin.catalogEdits.noCatalogKey');
+
+  const askTakeOver = (row: Row) => {
+    returnFocusTo.current = row.id;
+    setConfirming(row);
+  };
 
   const takeOver = (row: Row) => {
-    if (!window.confirm(t('admin.catalogEdits.confirm', { key: row.catalogKey }))) return;
+    setConfirming(null);
     setBusyId(row.id);
     startTransition(async () => {
-      const { ok } = await clearCatalogEditAction(row.kind, row.id);
-      if (!ok) toast.error(t('admin.catalogEdits.clearFailed'));
-      setBusyId(null);
+      try {
+        // edited_at goes back exactly as exported, so a newer correction is not cleared by mistake.
+        const { ok, reason } = await clearCatalogEditAction(row.kind, row.id, row.editedAt);
+        if (!ok) toast.error(t(FAILURE_MESSAGES[reason === 'changed' || reason === 'forbidden' ? reason : 'error']));
+      } catch {
+        toast.error(t(FAILURE_MESSAGES.error));
+      } finally {
+        setBusyId(null);
+      }
     });
   };
 
@@ -111,7 +148,7 @@ export default function CatalogEditsList({ edits }: { edits: CatalogEditsExport 
                 </p>
                 <p className="text-meta text-fg-muted break-all">
                   <span className="sr-only">{t('admin.catalogEdits.catalogKey')} </span>
-                  <code>{row.catalogKey}</code>
+                  {row.catalogKey ? <code>{row.catalogKey}</code> : t('admin.catalogEdits.noCatalogKey')}
                 </p>
                 <p className="text-meta text-fg-muted">
                   {t('admin.catalogEdits.changed', { fields: row.fields.map(fieldLabel).join(', ') })}
@@ -120,7 +157,11 @@ export default function CatalogEditsList({ edits }: { edits: CatalogEditsExport 
               </div>
               <button
                 type="button"
-                onClick={() => takeOver(row)}
+                ref={(node) => {
+                  if (node) triggers.current.set(row.id, node);
+                  else triggers.current.delete(row.id);
+                }}
+                onClick={() => askTakeOver(row)}
                 disabled={pending && busyId === row.id}
                 className="inline-flex min-h-tap shrink-0 items-center justify-center rounded-control border border-line-strong px-4 text-meta font-medium text-fg transition-colors hover:bg-surface-2 disabled:opacity-40"
               >
@@ -156,6 +197,33 @@ export default function CatalogEditsList({ edits }: { edits: CatalogEditsExport 
           {section('admin.catalogEdits.versions', versions)}
         </>
       )}
+      <Dialog open={confirming !== null} onOpenChange={(open) => !open && setConfirming(null)}>
+        <DialogContent
+          className="max-w-md rounded-panel border border-line bg-surface p-6 text-fg shadow-sheet"
+          onCloseAutoFocus={(event) => {
+            const trigger = returnFocusTo.current ? triggers.current.get(returnFocusTo.current) : undefined;
+            if (trigger) {
+              event.preventDefault();
+              trigger.focus();
+            }
+          }}
+        >
+          <DialogHeader>
+            <DialogTitle className="text-row font-semibold text-fg">{t('admin.catalogEdits.confirmTitle')}</DialogTitle>
+            <DialogDescription className="text-body text-fg-muted">
+              {confirming ? t('admin.catalogEdits.confirmBody', { key: keyLabel(confirming) }) : null}
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={() => setConfirming(null)}>
+              {t('common.cancel')}
+            </Button>
+            <Button type="button" onClick={() => confirming && takeOver(confirming)}>
+              {t('admin.catalogEdits.confirmAction')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

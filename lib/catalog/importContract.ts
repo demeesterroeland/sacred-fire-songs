@@ -9,6 +9,12 @@
  *
  * Pure helpers, no database access: an importer reads the markers of the rows it is about to
  * write, plans with `planCatalogImport`, writes `plan.write` and prints `formatSkippedReport`.
+ *
+ * Not protected by the markers: rows deleted in the app (an importer recreates them unless it
+ * checks), and songs merged in the app by linking them as a version of another song. For the
+ * latter, an importer resolves every incoming catalog slug with `resolveCatalogSlug` against the
+ * merge redirects it read (old song id, new song id, the old song's catalog slug), so it does not
+ * recreate a merged song.
  */
 
 /** The marker columns of `compositions` and `song_versions`. */
@@ -67,4 +73,36 @@ export function formatSkippedReport(skipped: readonly SkippedCatalogRow[]): stri
     (row) => `  ${row.key} (edited ${row.editedAt ?? 'unknown'}: ${row.editedFields.join(', ')})`
   );
   return [`Skipped ${skipped.length} ${skipped.length === 1 ? 'row' : 'rows'} edited in the app:`, ...lines].join('\n');
+}
+
+/** A song merged into another one in the app: `catalog_slug` is the slug of the merged (old) song. */
+export interface CatalogSlugRedirect {
+  old_id: string;
+  new_id: string;
+  catalog_slug: string | null;
+}
+
+export type CatalogSlugResolution =
+  /** Not merged: import the song under its slug as usual. */
+  | { action: 'import'; slug: string }
+  /** Merged in the app: do not recreate the song; write its catalog content to `targetSongId`. */
+  | { action: 'redirect'; slug: string; targetSongId: string };
+
+/**
+ * Where an incoming catalog slug goes, given the merge redirects the importer read. A chain of
+ * merges (A into B, then B into C) is followed to the last song; a cycle stops at the last song
+ * not seen before.
+ */
+export function resolveCatalogSlug(slug: string, redirects: readonly CatalogSlugRedirect[]): CatalogSlugResolution {
+  const first = redirects.find((r) => r.catalog_slug === slug);
+  if (!first) return { action: 'import', slug };
+
+  const byOldId = new Map(redirects.map((r) => [r.old_id, r.new_id]));
+  const seen = new Set<string>([first.old_id]);
+  let target = first.new_id;
+  while (byOldId.has(target) && !seen.has(target)) {
+    seen.add(target);
+    target = byOldId.get(target) as string;
+  }
+  return { action: 'redirect', slug, targetSongId: target };
 }

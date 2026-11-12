@@ -49,8 +49,34 @@ describe('db-schema.sql: catalog edit markers (Story 6.2.21)', () => {
   it('only signed-in app users mark rows, and only catalog rows', () => {
     const track = fn(migration, 'fn_track_catalog_edit') ?? '';
     expect(track).toContain("coalesce(auth.role(), '') <> 'authenticated'");
-    expect(track).toContain('new_row ->> tg_argv[0] is null');
     expect(track).toContain("current_user in ('anon', 'authenticated')");
+  });
+
+  it('checks the catalog key on the old row too, so clearing it counts (review N5)', () => {
+    const track = fn(migration, 'fn_track_catalog_edit') ?? '';
+    expect(track).toContain('new.catalog_slug is null and old.catalog_slug is null');
+    expect(track).toContain('new.catalog_source_id is null and old.catalog_source_id is null');
+    expect(track).toContain('for i in 0 .. tg_nargs - 1 loop');
+  });
+
+  it('builds the row snapshots only after the early returns (review N3)', () => {
+    const track = fn(migration, 'fn_track_catalog_edit') ?? '';
+    expect(track).not.toMatch(/new_row jsonb :=/);
+    expect(track.indexOf('new_row := to_jsonb(new)')).toBeGreaterThan(track.indexOf('return new; end if;'));
+  });
+
+  it('exports the slug of the song a moved version now belongs to, not its uuid (review N4)', () => {
+    expect(fn(migration, 'fn_catalog_edits_export')).toContain(
+      "case when f = 'composition_id' then to_jsonb(c.catalog_slug) else to_jsonb(v) -> f end"
+    );
+  });
+
+  it('clears a marker only for the edit the admin downloaded (review S1)', () => {
+    const clear = fn(migration, 'fn_clear_catalog_edit') ?? '';
+    expect(clear).toContain('fn_clear_catalog_edit(p_kind text, p_id uuid, p_edited_at timestamptz) returns text');
+    expect(clear).toContain('where id = p_id and edited_in_app and edited_at = p_edited_at;');
+    expect(clear).toContain("'changed'");
+    expect(clear).toContain("'not_marked'");
   });
 
   it('the export and the clear function are admin-only and closed to guests', () => {
@@ -58,7 +84,15 @@ describe('db-schema.sql: catalog edit markers (Story 6.2.21)', () => {
       expect(fn(migration, name)).toContain('if not public.fn_is_admin() then');
       expect(fn(migration, name)).toContain('security definer');
     }
-    expect(schema).toContain('revoke all on function public.fn_catalog_edits_export() from public, anon;');
-    expect(schema).toContain('revoke all on function public.fn_clear_catalog_edit(text, uuid) from public, anon;');
+    for (const sql of [schema, migration]) {
+      expect(sql).toContain('revoke all on function public.fn_catalog_edits_export() from public, anon, service_role;');
+      expect(sql).toContain('grant execute on function public.fn_catalog_edits_export() to authenticated;');
+      expect(sql).toContain(
+        'revoke all on function public.fn_clear_catalog_edit(text, uuid, timestamptz) from public, anon, service_role;'
+      );
+      expect(sql).toContain('grant execute on function public.fn_clear_catalog_edit(text, uuid, timestamptz) to authenticated;');
+      // fn_is_admin() reads auth.uid(), so the service role would be refused anyway (review S2).
+      expect(sql).not.toMatch(/grant execute on function public\.fn_(catalog_edits_export|clear_catalog_edit)\([^)]*\) to [^;]*service_role/);
+    }
   });
 });
