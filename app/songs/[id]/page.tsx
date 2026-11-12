@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { useParams, notFound, useSearchParams } from 'next/navigation';
+import { useParams, notFound, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -40,6 +40,8 @@ import { hasChords } from '@/lib/chordProParsing';
 import { EDIT_VERSION_PARAM, editSongHref } from '@/lib/songs/versionOrder';
 import { blocksVersionSwitch, linkedVersionChoice, resolveVersionIndex, versionSearch, versionShareUrl, type VersionChoice } from '@/lib/songs/versionSwitch';
 import { SongMenuSheet } from '@/components/song/SongMenuSheet';
+import { LinkSongSheet } from '@/components/song/LinkSongSheet';
+import { canLinkSong, fetchSongRedirect, songRedirectHref, type SongLinkSummary } from '@/lib/songs/linkSong';
 import { useScrolledPast } from '@/hooks/useScrolledPast';
 import { useReaderPrefs } from '@/lib/reader/useReaderPrefs';
 import { speedBy } from '@/lib/reader/autoScroll';
@@ -74,6 +76,9 @@ export default function SongDetailPage() {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     // The song page's one menu (⋮). It is opened from the bar on a phone and from the header from lg up.
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    // Story 6.2.9 (#512): admins, and gatekeepers on their own songs, link this song as a version of another song.
+    const [isLinkOpen, setIsLinkOpen] = useState(false);
+    const router = useRouter();
     const phoneTitleRef = useRef<HTMLHeadingElement>(null);
     const phoneMenuButtonRef = useRef<HTMLButtonElement>(null);
     const desktopMenuButtonRef = useRef<HTMLButtonElement>(null);
@@ -141,6 +146,20 @@ export default function SongDetailPage() {
         queryFn: () => fetchSong(id!),
         enabled: !!id,
     });
+
+    // Story 6.2.9 (#512): a song that was linked as a version of another song is gone; its old link
+    // continues at that song, with the same ?version= / ?recording= (they moved along).
+    const songMissing = !!id && !songLoading && !songError && song === null;
+    const redirectQuery = useQuery({
+        queryKey: SONG_KEYS.redirect(id!),
+        queryFn: () => fetchSongRedirect(createClient(), id!),
+        enabled: songMissing,
+        retry: false,
+    });
+    const redirectTarget = songMissing ? redirectQuery.data : null;
+    useEffect(() => {
+        if (redirectTarget) router.replace(songRedirectHref(redirectTarget, searchParams.toString()));
+    }, [redirectTarget, router, searchParams]);
 
     // Log song fetch errors so they're visible in DevTools
     useEffect(() => {
@@ -332,6 +351,7 @@ export default function SongDetailPage() {
             </div>
         );
     }
+    if (!song && songMissing && (!redirectQuery.isFetched || redirectTarget)) return <SongDetailSkeleton />;
     if (!song) return notFound();
 
     const categories = (song.song_category_map?.map((map: any) => ({
@@ -339,6 +359,17 @@ export default function SongDetailPage() {
         parent: map.categories?.parent?.name ?? null,
     })) || [])
         .filter((cat: any) => cat && cat.parent !== 'Artists' && cat.name !== 'Artists');
+
+    const handleLinked = (summary: SongLinkSummary) => {
+        setIsLinkOpen(false);
+        toast.success(t('song.link.success', { source: summary.source_title, target: summary.target_title }));
+        // Keep ?version=: the version being read moved to the target song.
+        router.replace(songRedirectHref(summary.target_id, searchParams.toString()));
+        void queryClient.invalidateQueries({ queryKey: SONG_KEYS.all() });
+        void queryClient.invalidateQueries({ queryKey: SONG_KEYS.detail(summary.target_id) });
+        void queryClient.invalidateQueries({ queryKey: SONG_KEYS.allFavorites() });
+        router.refresh();
+    };
 
     const handleDelete = async () => {
         if (!id) return;
@@ -752,6 +783,7 @@ export default function SongDetailPage() {
                     onPublish: !song.is_public && (song.owner_id === user?.id || isAdmin)
                         ? () => { setIsMenuOpen(false); void handleMakeSongPublic(); }
                         : undefined,
+                    onLinkAsVersion: canLinkSong(user, song.owner_id) ? () => { setIsMenuOpen(false); setIsLinkOpen(true); } : undefined,
                 }}
                 transpose={mayTranspose ? {
                     semitones,
@@ -771,6 +803,16 @@ export default function SongDetailPage() {
                 onKeepAwakeChange={(value) => setPreference('keepScreenAwake', value)}
                 awakeSupported={awakeSupported}
             />
+
+            {id && canLinkSong(user, song.owner_id) && (
+                <LinkSongSheet
+                    open={isLinkOpen}
+                    onOpenChange={setIsLinkOpen}
+                    sourceId={id}
+                    sourceTitle={song.title}
+                    onLinked={handleLinked}
+                />
+            )}
 
             <GuestGateSheet feature="addToPlaylist" open={isGuestGateOpen} onOpenChange={setIsGuestGateOpen} />
             <GuestGateSheet feature="favourites" open={favouritesGate.open} onOpenChange={favouritesGate.onOpenChange} />
