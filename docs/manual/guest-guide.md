@@ -6,7 +6,7 @@
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
-| 0.26 | Nov 12, 2026 | Song page: when a song comes from a printed songbook, a grey line under the lyrics says which book, which page and who compiled it (UX v3, #513). |
+| 0.26 | Nov 12, 2026 | Song page: when a song comes from a printed songbook, a grey line under the lyrics says which book, which page and who compiled it (UX v3, #513). Review round: pages read right (`p. 38`, `pp. 38–39`), an original title that only differs in accents or punctuation is not repeated, and a song printed in several books has a list labelled "Sources". |
 | 0.25 | Nov 11, 2026 | Song page: the second line also shows **Beats** when the songbook gives them for the version, e.g. `Key E · Capo 5 · Standard · Beats 8`; the line follows the version you pick (UX v3, #510).
 | 0.24 | Nov 11, 2026 | Song page: lines the circle sings more than once sit between repeat bars, `‖:` before the first line and `:‖` after the last one, with `×2` when the song says how many times (UX v3, #518). |
 | 0.23 | Nov 9, 2026 | The ☰ menu's Library section lists the same tabs as the Library page; tags under a song title stay on one line with "…" when there are more. |

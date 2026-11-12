@@ -3430,3 +3430,11 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - `fetchSong` embeds `song_version_sources` with its `songbooks` row (`VERSION_SOURCES_SELECT`, `lib/songs/versionSources.ts`, which also holds the pure `sortSources` / `formatSourceLine` / `formatSourceLines`, reused by #514, #520, #522). Cached song data from before this change has no `song_version_sources` key and renders no line. No migration.
 - `components/song/SongSourceLine.tsx` sits under the lyrics for now; #511 moves it into "About this song". 5 keys `song.source.*` in all 8 locales.
 - Tests: unit (`versionSources.test.ts`, `songSourceLine.test.tsx`, `fetchSong.test.ts`), BDD `docs/testing/ux-v3-songbook-source.feature` (9 `@unit`, 1 `@seed`).
+
+## Session November 12, 2026 — Story 6.2.10 (#513), review round on PR #531
+
+- Cross-review by another Claude model: `fetchSong`'s select is now `SONG_SELECT` (`lib/songs/songSelect.ts`), built from the single `VERSION_SOURCES_SELECT`; a unit test counts `song_version_sources (` (exactly once: a second embed, which #530's version label would have added, fails every song page with PostgREST 42803, reproduced against the local API). `primarySource()` picks the book the line and the version label share.
+- `parsePage` / `normalizeTitle` in `lib/songs/versionSources.ts`: `pp.` only for several pages of one kind (`38–39`, `38 & 40`, `38 y 40`, `38 40`, `iv-vi`), `A-12` / `II-4` / `iv` / `12a` stay `p.`, importer prefixes (`p.`, `pág.`, `S.`, `blz.`, `с.`) stripped; original title compared after NFKC, apostrophe and white-space unification, trailing `.!?` dropped, accent- and case-insensitive.
+- `sortSources` breaks ties by id and sorts in the UI locale; the list is labelled "Sources" (`song.source.labelMany`, 8 locales; Quechua needs a native check); es `pág.` / `págs.`; fr non-breaking space before the colon.
+- `@seed`: the SQL step no longer claims to mirror the select; a new scenario sends `SONG_SELECT` through supabase-js (anon, read-only) to the local API.
+- Docs renumbered after merging `feat/ux-v3` (which had #528 and #529): design doc 2.16, epics 2.02, guest guide 0.26, member guide 0.23.

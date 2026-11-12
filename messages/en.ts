@@ -170,6 +170,7 @@ const en = {
   'song.meta.showDetails': 'Show details',
   'song.meta.hideDetails': 'Hide details',
   'song.source.label': 'Source',
+  'song.source.labelMany': 'Sources',
   'song.source.page': 'p. {page}',
   'song.source.pages': 'pp. {page}',
   'song.source.compiledBy': 'compiled by {compiler}',

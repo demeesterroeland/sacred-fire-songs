@@ -1,10 +1,13 @@
 // Story 6.2.10 (#513) — docs/testing/ux-v3-songbook-source.feature
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
+import { createClient } from '@supabase/supabase-js';
 import { Given, Then, When } from '@cucumber/cucumber';
 import type { SongBddWorld } from '../support/world';
 import { queryAsAnon, seedDb } from '../support/db';
 import { DICTIONARIES, SUPPORTED_LOCALES, translateFrom } from '../../../lib/i18n';
 import { formatSourceLines, type VersionSourceRow } from '../../../lib/songs/versionSources';
+import { SONG_SELECT } from '../../../lib/songs/songSelect';
 import { linkedVersionChoice, resolveVersionIndex } from '../../../lib/songs/versionSwitch';
 
 interface SourceWorld {
@@ -96,6 +99,12 @@ Then(/^with no version chosen the song page shows the line "([^"]+)"$/, function
   assert.deepEqual(linesOf(s), [line]);
 });
 
+Then(/^the list is labelled "([^"]+)"$/, function (this: object, label: string) {
+  const s = w(this);
+  const lines = linesOf(s);
+  assert.equal(t(lines.length > 1 ? 'song.source.labelMany' : 'song.source.label'), label);
+});
+
 Then('the song page shows no source line', function (this: object) {
   assert.deepEqual(linesOf(w(this)), []);
 });
@@ -103,7 +112,7 @@ Then('the song page shows no source line', function (this: object) {
 Then('all languages have text for the source line', function () {
   for (const l of SUPPORTED_LOCALES) {
     const d = DICTIONARIES[l] as Record<string, string>;
-    for (const key of ['song.source.label', 'song.source.page', 'song.source.pages', 'song.source.compiledBy', 'song.source.originalTitle']) {
+    for (const key of ['song.source.label', 'song.source.labelMany', 'song.source.page', 'song.source.pages', 'song.source.compiledBy', 'song.source.originalTitle']) {
       assert.ok(d[key], `${l} ${key}`);
     }
     assert.ok(d['song.source.page'].includes('{page}'), `${l} keeps {page}`);
@@ -146,7 +155,7 @@ Given(/^a private song with a version from "([^"]+)" page "([^"]+)"$/, async fun
   w(this).privateVersionId = await seedSong(false, `bdd-513-private-${book}`, page, null);
 });
 
-// The select of lib/songs/versionSources.ts (VERSION_SOURCES_SELECT) as SQL: the sources of a version with their book.
+// The sources of a version with their book, read as the `anon` role: what row-level security lets a guest see.
 const SOURCES_SQL = `SELECT s.page, s.is_primary, b.title AS book, b.compiler
                      FROM public.song_version_sources s
                      JOIN public.songbooks b ON b.id = s.songbook_id
@@ -160,3 +169,43 @@ Then('a guest reads the book, page and compiler of the public version', async fu
 Then('a guest reads no source of the private version', async function (this: SongBddWorld) {
   assert.deepEqual(await queryAsAnon(SOURCES_SQL, [w(this).privateVersionId]), []);
 });
+
+// ── @seed contract: the song page's real select against PostgREST ────────────
+
+/** Local API settings: the environment first, then `.env.local` (the `_DEV` pair), then the local stack's default URL. */
+function localApi(): { url: string; key: string } {
+  const fromFile: Record<string, string> = {};
+  try {
+    for (const line of readFileSync('.env.local', 'utf8').split('\n')) {
+      const m = /^([A-Z0-9_]+)=(.*)$/.exec(line.trim());
+      if (m) fromFile[m[1]] = m[2].replace(/^["']|["']$/g, '');
+    }
+  } catch {
+    // no .env.local: rely on the environment
+  }
+  const pick = (k: string) => process.env[k] ?? fromFile[k];
+  const url = pick('NEXT_PUBLIC_SUPABASE_URL_DEV') ?? 'http://127.0.0.1:54321';
+  const key = pick('NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY_DEV') ?? pick('NEXT_PUBLIC_SUPABASE_ANON_KEY_DEV');
+  assert.ok(key, 'a local Supabase publishable key (NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY_DEV)');
+  return { url, key };
+}
+
+Then(
+  'the select of the song page runs against the local API without error and returns the sources of each version as a list',
+  async function () {
+    // The scenario's seed transaction is invisible to PostgREST, so this reads (never writes) whatever the local
+    // database holds. PostgREST plans the whole embed even with no rows, so a malformed or doubled embed (42803) fails here.
+    const { url, key } = localApi();
+    const { data, error } = await createClient(url, key, { auth: { persistSession: false } })
+      .from('compositions')
+      .select(SONG_SELECT)
+      .limit(5);
+    assert.equal(error, null, `PostgREST rejected the song select: ${error?.message}`);
+    assert.ok(Array.isArray(data));
+    for (const song of data as unknown as { song_versions: { song_version_sources?: unknown }[] }[]) {
+      for (const version of song.song_versions) {
+        assert.ok(Array.isArray(version.song_version_sources), 'song_version_sources is an array per version');
+      }
+    }
+  }
+);

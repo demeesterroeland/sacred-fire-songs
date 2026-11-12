@@ -176,6 +176,7 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'song.meta.showDetails': 'Astawan rikuchiy',
   'song.meta.hideDetails': 'Pakay',
   'song.source.label': 'Pukyu',
+  'song.source.labelMany': 'Pukyukuna',
   'song.source.page': 'p. {page}',
   'song.source.pages': 'pp. {page}',
   'song.source.compiledBy': 'huñuqniyuq: {compiler}',

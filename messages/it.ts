@@ -172,6 +172,7 @@ const it: Partial<Record<TranslationKey, string>> = {
   'song.meta.showDetails': 'Mostra dettagli',
   'song.meta.hideDetails': 'Nascondi dettagli',
   'song.source.label': 'Fonte',
+  'song.source.labelMany': 'Fonti',
   'song.source.page': 'p. {page}',
   'song.source.pages': 'pp. {page}',
   'song.source.compiledBy': 'a cura di {compiler}',

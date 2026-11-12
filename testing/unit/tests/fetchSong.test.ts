@@ -30,6 +30,7 @@ vi.mock('@/lib/supabase/client', () => ({
 }));
 
 import { fetchSong } from '@/lib/songs/fetchSong';
+import { SONG_SELECT } from '@/lib/songs/songSelect';
 
 describe('fetchSong', () => {
   beforeEach(() => {
@@ -45,6 +46,13 @@ describe('fetchSong', () => {
   it('asks for each version\'s songbook sources, book, page and compiler (Story 6.2.10, #513)', async () => {
     await fetchSong('abc');
     expect(query.select).toMatch(/song_versions \([\s\S]*song_version_sources \([\s\S]*page[\s\S]*songbooks \([\s\S]*compiler/);
+  });
+
+  it('embeds song_version_sources exactly once (a second embed fails every song page with 42803)', async () => {
+    await fetchSong('abc');
+    expect(query.select.match(/song_version_sources\s*\(/g)).toHaveLength(1);
+    expect(SONG_SELECT.match(/song_version_sources\s*\(/g)).toHaveLength(1);
+    expect(query.select).toBe(SONG_SELECT);
   });
 
   it('returns null when no song has that id', async () => {

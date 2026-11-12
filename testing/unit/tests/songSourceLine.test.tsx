@@ -8,6 +8,7 @@ import type { VersionSourceRow } from '@/lib/songs/versionSources';
 
 vi.mock('@/context/LocaleContext', () => ({
   useLocale: () => ({
+    locale: 'en',
     t: (k: string, p?: Record<string, string | number>) => translateFrom(DICTIONARIES.en, DICTIONARIES.en, k, p),
   }),
 }));
@@ -38,6 +39,11 @@ describe('SongSourceLine', () => {
     render(<SongSourceLine songTitle="Rise Up" sources={[row('B', { page: '2' }), row('A', { page: '38', is_primary: true })]} />);
     const items = screen.getAllByRole('listitem').map((li) => li.textContent);
     expect(items).toEqual(['Songbook A · p. 38', 'Songbook B · p. 2']);
+    expect(screen.getByRole('list', { name: 'Sources' })).toBeTruthy();
+  });
+
+  it('labels a single source "Source"', () => {
+    render(<SongSourceLine songTitle="Rise Up" sources={[row('A', { page: '38' })]} />);
     expect(screen.getByRole('list', { name: 'Source' })).toBeTruthy();
   });
 

@@ -1,7 +1,14 @@
 // Story 6.2.10 / G2.1 (#513): the source line under the lyrics — book · p. 38 · compiled by … (L2, pure).
 import { describe, expect, it } from 'vitest';
 import { DICTIONARIES, translateFrom } from '@/lib/i18n';
-import { formatSourceLine, formatSourceLines, sortSources, type VersionSourceRow } from '@/lib/songs/versionSources';
+import {
+  VERSION_SOURCES_SELECT,
+  formatSourceLine,
+  formatSourceLines,
+  primarySource,
+  sortSources,
+  type VersionSourceRow,
+} from '@/lib/songs/versionSources';
 
 const t = (key: string, params?: Record<string, string | number>) =>
   translateFrom(DICTIONARIES.en, DICTIONARIES.en, key, params);
@@ -56,7 +63,75 @@ describe('formatSourceLine', () => {
   });
 });
 
+describe('page: one page or several (finding 4)', () => {
+  const line = (page: string) => formatSourceLine(source({ page }), 'Rise Up', t);
+  it.each(['38–39', '38—39', '38-39', '38/39', '38 & 40', '38 y 40', '38 and 40', '38 und 40', '38 40', '4, 9', '4; 9', 'iv-vi', '12a-13b'])(
+    '"%s" is a list of pages',
+    (page) => expect(line(page)).toBe(`Songbook A · pp. ${page}`)
+  );
+  it.each(['A-12', 'II-4', 'iv', '12a', '38'])('"%s" is one page', (page) => expect(line(page)).toBe(`Songbook A · p. ${page}`));
+  it.each([
+    ['p. 38', 'p. 38'],
+    ['p.38', 'p. 38'],
+    ['pág. 38', 'p. 38'],
+    ['S. 38', 'p. 38'],
+    ['blz. 38', 'p. 38'],
+    ['с. 38', 'p. 38'],
+    ['pp. 38-39', 'pp. 38-39'],
+    ['págs. 38, 40', 'pp. 38, 40'],
+  ])('strips the importer prefix of "%s"', (page, shown) => expect(line(page)).toBe(`Songbook A · ${shown}`));
+  it('drops a page that is only a prefix', () => expect(line('p.')).toBe('Songbook A'));
+});
+
+describe('original title comparison (finding 5)', () => {
+  const line = (original: string, title: string) => formatSourceLine(source({ original_title: original }), title, t);
+  it('ignores accents and case', () => expect(line('Pachamamá', 'Pachamama')).toBe('Songbook A'));
+  it('ignores curly versus straight apostrophes', () => {
+    expect(line('Mother’s', "Mother's")).toBe('Songbook A');
+    expect(line('Mother‘s', "Mother's")).toBe('Songbook A');
+    expect(line('Motherʼs', "Mother's")).toBe('Songbook A');
+  });
+  it('ignores doubled and unusual spaces', () => expect(line('Rise   Up', 'Rise Up')).toBe('Songbook A'));
+  it('ignores trailing punctuation', () => {
+    expect(line('Rise Up!', 'Rise Up')).toBe('Songbook A');
+    expect(line('Rise Up', 'Rise Up?')).toBe('Songbook A');
+    expect(line('Rise Up…', 'Rise Up')).toBe('Songbook A'); // NFKC turns … into ...
+  });
+  it('still shows a real difference', () => expect(line('Subir', 'Rise Up')).toBe('Songbook A · Original title: Subir'));
+});
+
+describe('primarySource (shared with the version label, #530)', () => {
+  it('is the primary row, else the first after sorting', () => {
+    const rows = [source({ id: 'c', songbooks: book('C') }), source({ id: 'b', songbooks: book('B'), is_primary: true }), source({ id: 'a', songbooks: book('A') })];
+    expect(primarySource(rows)?.id).toBe('b');
+    expect(primarySource(rows.filter((r) => !r.is_primary))?.id).toBe('a');
+  });
+  it('is null without sources', () => {
+    expect(primarySource([])).toBeNull();
+    expect(primarySource(undefined)).toBeNull();
+    expect(primarySource(null)).toBeNull();
+  });
+});
+
+describe('VERSION_SOURCES_SELECT', () => {
+  it('has everything the source line and the version label need', () => {
+    const flat = VERSION_SOURCES_SELECT.replace(/\s+/g, ' ');
+    expect(flat).toContain('song_version_sources ( id, is_primary, original_title, page, songbooks ( id, title, short_name, compiler ) )');
+  });
+});
+
 describe('sortSources / formatSourceLines', () => {
+  it('breaks ties between equal book names by id, in a stable order', () => {
+    const rows = [source({ id: 'z', songbooks: book('A') }), source({ id: 'y', songbooks: book('A') })];
+    expect(sortSources(rows).map((r) => r.id)).toEqual(['y', 'z']);
+  });
+
+  it('sorts book names by the given locale', () => {
+    const rows = [source({ id: 'a', songbooks: book('a', { title: 'Zebra' }) }), source({ id: 'b', songbooks: book('b', { title: 'Äpfel' }) })];
+    expect(sortSources(rows, 'sv').map((r) => r.id)).toEqual(['a', 'b']); // Swedish: Ä after Z
+    expect(sortSources(rows, 'de').map((r) => r.id)).toEqual(['b', 'a']);
+  });
+
   it('lists the primary source first, then the others by book title', () => {
     const rows = [
       source({ id: 'c', songbooks: book('C') }),
@@ -84,6 +159,7 @@ describe('source copy in every locale', () => {
   it('has all keys with their placeholders', () => {
     const keys: Record<string, string> = {
       'song.source.label': '',
+      'song.source.labelMany': '',
       'song.source.page': '{page}',
       'song.source.pages': '{page}',
       'song.source.compiledBy': '{compiler}',
@@ -96,5 +172,14 @@ describe('source copy in every locale', () => {
         if (placeholder) expect(value, `${locale} ${key}`).toContain(placeholder);
       }
     }
+  });
+});
+
+describe('locale details', () => {
+  it('writes Spanish pages as pág. / págs. and French keeps a non-breaking space before the colon', () => {
+    const d = DICTIONARIES as Record<string, Record<string, string>>;
+    expect(d.es['song.source.page']).toBe('pág. {page}');
+    expect(d.es['song.source.pages']).toBe('págs. {page}');
+    expect(d.fr['song.source.originalTitle']).toBe('Titre original\u00A0: {title}');
   });
 });

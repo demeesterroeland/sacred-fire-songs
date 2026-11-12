@@ -1534,5 +1534,6 @@
 
 - [x] Failing tests first: formatter, component, `fetchSong` select, BDD `ux-v3-songbook-source.feature`
 - [x] `lib/songs/versionSources.ts`, `components/song/SongSourceLine.tsx`, `fetchSong` embed, song page, 5 keys in 8 locales
-- [x] Docs: design doc 2.14, epics 1.100 (story 6.2.10), guest guide 0.25, member guide 0.22
-- [ ] Cross-review by another Claude model (orchestrator, #498)
+- [x] Docs: design doc 2.16, epics 2.02 (story 6.2.10), guest guide 0.26, member guide 0.23
+- [x] Cross-review by another Claude model (orchestrator, #498)
+- [x] Review fixes (PR #531, Nov 12): one `song_version_sources` embed (`SONG_SELECT`, guard test, `primarySource()` for #530), `@seed` contract on the real select, page notation (`pp.`, `A-12`, importer prefixes), original-title normalisation, `sortSources` tie-break and locale, plural list label (`song.source.labelMany`), es `pág.`, fr no-break space, epic doc acceptance criteria, renumbered docs after merging `feat/ux-v3`

@@ -8,6 +8,9 @@ import type { TranslateFn } from '@/lib/i18n';
 /**
  * Nested select for a version's sources and their books. Embed it inside `song_versions ( … )`. Reading follows the
  * song's row-level security (sources and songbooks are readable exactly when the song is), so guests see it too.
+ *
+ * Use this ONE constant wherever a song query needs a version's sources (the source line, #513, and the version label,
+ * #530): PostgREST fails the whole query with 42803 when `song_version_sources (` is embedded twice in one select.
  */
 export const VERSION_SOURCES_SELECT = `
             song_version_sources (
@@ -46,18 +49,70 @@ function bookOf(row: VersionSourceRow): SourceBook | null {
 }
 
 const clean = (v: string | null | undefined): string => (v ?? '').trim();
+
+/** The name of a book as the source line shows it: the title, else the short name. (The version label, #530, prefers `short_name`.) */
 const bookName = (b: SourceBook): string => clean(b.title) || clean(b.short_name);
 
-/** Primary source first, then the others by book name. Returns a new array. */
-export function sortSources(rows: ReadonlyArray<VersionSourceRow>): VersionSourceRow[] {
+/**
+ * Primary source first, then the others by book name (in `locale`), then by id so the order never depends on the
+ * order PostgREST happened to return. Returns a new array.
+ */
+export function sortSources(rows: ReadonlyArray<VersionSourceRow>, locale?: string): VersionSourceRow[] {
   const name = (r: VersionSourceRow) => {
     const b = bookOf(r);
     return b ? bookName(b) : '';
   };
   return [...rows].sort(
-    (a, b) => Number(b.is_primary) - Number(a.is_primary) || name(a).localeCompare(name(b), undefined, { sensitivity: 'base' })
+    (a, b) =>
+      Number(b.is_primary) - Number(a.is_primary) ||
+      name(a).localeCompare(name(b), locale, { sensitivity: 'base' }) ||
+      a.id.localeCompare(b.id)
   );
 }
+
+/**
+ * The source the version belongs to first: the `is_primary` row, else the first after `sortSources`. The source line
+ * and the version label (#530) both use it, so they name the same book. `null` without sources.
+ */
+export function primarySource(rows: ReadonlyArray<VersionSourceRow> | null | undefined, locale?: string): VersionSourceRow | null {
+  if (!rows?.length) return null;
+  return rows.find((r) => r.is_primary) ?? sortSources(rows, locale)[0] ?? null;
+}
+
+// ── page ────────────────────────────────────────────────────────────────────
+
+/** "p.", "pp.", "pág.", "págs.", "S.", "blz.", "с." that an importer copied from the printed book. */
+const PAGE_PREFIX = /^(?:pp|p|págs|pág|pags|pag|S|blz|с)(?:\.\s*|\s+)(?=\S)/i;
+/** Between two pages: a mark, " y " / " and " / " en " / " et " / " e " / " und ", or just white space. */
+const PAGE_SEPARATOR = /\s*[–—\-/,;&+]\s*|\s+(?:y|and|en|et|e|und)\s+|\s+/i;
+const ARABIC_PAGE = /^\d+[a-z]?$/i;
+const ROMAN_PAGE = /^[ivxlcdm]+$/i;
+
+/** The page as shown: importer prefixes stripped; `plural` when it names several pages ("38–39", "38 & 40", "iv-vi"). */
+function parsePage(raw: string | null | undefined): { page: string; plural: boolean } | null {
+  let page = clean(raw);
+  while (PAGE_PREFIX.test(page)) page = page.replace(PAGE_PREFIX, '').trim();
+  if (/^(?:pp|p|págs|pág|pags|pag|S|blz|с)\.$/i.test(page)) page = '';
+  if (!page) return null;
+  // Several pages: every part is a page of the same kind. "A-12" and "II-4" are one page (section-page numbering).
+  const parts = page.split(PAGE_SEPARATOR).filter(Boolean);
+  const plural = parts.length > 1 && (parts.every((p) => ARABIC_PAGE.test(p)) || parts.every((p) => ROMAN_PAGE.test(p)));
+  return { page, plural };
+}
+
+// ── original title ──────────────────────────────────────────────────────────
+
+/** NFKC, one apostrophe, collapsed white space, no trailing `.!?`, so that cosmetic differences do not count. */
+function normalizeTitle(v: string | null | undefined): string {
+  return clean(v)
+    .normalize('NFKC')
+    .replace(/[’‘ʼ]/g, "'")
+    .replace(/\s+/g, ' ')
+    .replace(/[.!?]+$/, '')
+    .trim();
+}
+
+const sameTitle = (a: string, b: string): boolean => normalizeTitle(a).localeCompare(normalizeTitle(b), undefined, { sensitivity: 'base' }) === 0;
 
 /**
  * "Songbook A · p. 38 · compiled by Compiler A [· Original title: …]". The page, compiler and original title drop out
@@ -67,13 +122,13 @@ export function formatSourceLine(row: VersionSourceRow, songTitle: string, t: Tr
   const book = bookOf(row);
   const name = book ? bookName(book) : '';
   if (!book || !name) return null;
-  const page = clean(row.page);
+  const page = parsePage(row.page);
   const compiler = clean(book.compiler);
   const original = clean(row.original_title);
-  const showOriginal = original !== '' && original.toLowerCase() !== clean(songTitle).toLowerCase();
+  const showOriginal = original !== '' && !sameTitle(original, songTitle);
   return [
     name,
-    page ? t(/[-–,;]/.test(page) ? 'song.source.pages' : 'song.source.page', { page }) : null,
+    page ? t(page.plural ? 'song.source.pages' : 'song.source.page', { page: page.page }) : null,
     compiler ? t('song.source.compiledBy', { compiler }) : null,
     showOriginal ? t('song.source.originalTitle', { title: original }) : null,
   ]
@@ -85,10 +140,11 @@ export function formatSourceLine(row: VersionSourceRow, songTitle: string, t: Tr
 export function formatSourceLines(
   rows: ReadonlyArray<VersionSourceRow> | null | undefined,
   songTitle: string,
-  t: TranslateFn
+  t: TranslateFn,
+  locale?: string
 ): { id: string; text: string }[] {
   if (!rows?.length) return [];
-  return sortSources(rows).flatMap((row) => {
+  return sortSources(rows, locale).flatMap((row) => {
     const text = formatSourceLine(row, songTitle, t);
     return text ? [{ id: row.id, text }] : [];
   });

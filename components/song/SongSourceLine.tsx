@@ -17,11 +17,11 @@ interface SongSourceLineProps {
  * Story 6.2.11 (#511) moves this into the collapsible "About this song".
  */
 export function SongSourceLine({ sources, songTitle, className }: SongSourceLineProps) {
-  const { t } = useLocale();
-  const lines = formatSourceLines(sources, songTitle, t);
+  const { t, locale } = useLocale();
+  const lines = formatSourceLines(sources, songTitle, t, locale);
   if (lines.length === 0) return null;
   return (
-    <ul aria-label={t('song.source.label')} data-testid="song-source-line" className={cn('space-y-1 text-meta text-fg-muted', className)}>
+    <ul aria-label={t(lines.length > 1 ? 'song.source.labelMany' : 'song.source.label')} data-testid="song-source-line" className={cn('space-y-1 text-meta text-fg-muted', className)}>
       {lines.map((line) => (
         <li key={line.id} data-testid="song-source-item">
           {line.text}
