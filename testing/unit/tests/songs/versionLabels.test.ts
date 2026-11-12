@@ -49,7 +49,7 @@ describe('translationLanguageTag', () => {
   });
   it('accepts any BCP 47 style tag, so other languages work too (Lakota, Navajo, Guaraní, Aymara, Mapuche)', () => {
     for (const tag of ['lkt', 'nv', 'gn', 'nah', 'ay', 'arn', 'pt-BR']) expect(translationLanguageTag(tag)).toBe(tag.length > 3 ? 'pt-BR' : tag);
-    expect(translationLanguageTag(' LKT ')).toBe('lkt');
+    expect(translationLanguageTag(' lkt ')).toBe('lkt');
   });
   it('is null for anything else', () => {
     expect(translationLanguageTag('Simplified')).toBeNull();
@@ -57,6 +57,14 @@ describe('translationLanguageTag', () => {
     expect(translationLanguageTag('a')).toBeNull();
     expect(translationLanguageTag('')).toBeNull();
     expect(translationLanguageTag(null)).toBeNull();
+  });
+  it('does not read capitalised words as language tags ("New" is Newari, "Alt" Southern Altai)', () => {
+    for (const word of ['New', 'Alt', 'NEW', 'LKT', 'Old']) expect(translationLanguageTag(word)).toBeNull();
+  });
+  it('returns null, without throwing, for malformed tags', () => {
+    for (const bad of ['en-a', 'zz-', 'en--us']) expect(() => translationLanguageTag(bad)).not.toThrow();
+    expect(translationLanguageTag('en-a')).toBeNull();
+    expect(translationLanguageTag('zz-')).toBeNull();
   });
 });
 

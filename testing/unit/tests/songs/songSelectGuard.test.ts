@@ -6,7 +6,7 @@ import { describe, expect, it } from 'vitest';
 import { EDIT_SONG_SELECT, SONG_SELECT } from '@/lib/songs/songSelect';
 import { VERSION_SOURCES_SELECT } from '@/lib/songs/versionSources';
 
-const embeds = (select: string) => select.match(/song_version_sources\s*\(/g) ?? [];
+const embeds = (select: string) => select.match(/song_version_sources(![\w]+)?\s*\(/g) ?? [];
 
 describe('song selects', () => {
   it('the song page select embeds the sources once and asks for the kind of each version', () => {

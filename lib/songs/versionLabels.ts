@@ -85,8 +85,12 @@ function languageIndex(): Map<string, string> {
   return (nameIndex = index);
 }
 
-/** A language tag as importers write it (`nl`, `lkt`, `pt-BR`); `version_name` text such as "Singable" is not one. */
-const LANGUAGE_TAG = /^[a-z]{2,3}(-[a-z0-9]+)*$/i;
+/**
+ * A language tag as importers write it (`nl`, `lkt`, `pt-BR`); `version_name` text such as "Singable" is not one.
+ * The language subtag must be lowercase as written: capitalised words such as "New" or "Alt" are valid tags too
+ * (Newari, Southern Altai) but here they are words, not languages.
+ */
+const LANGUAGE_TAG = /^[a-z]{2,3}(-[A-Za-z0-9]+)*$/;
 
 /** The canonical form of a BCP 47 language tag ("LKT" → "lkt", "pt-br" → "pt-BR"), or null when it is not one. */
 function canonicalTag(value: string): string | null {
@@ -100,7 +104,7 @@ function canonicalTag(value: string): string | null {
 
 /**
  * The language tag a translation's `version_name` names, or null when it names none: a language name in any app
- * language ("English", "Engels"), or any BCP 47 style tag ("nl", "lkt", "pt-BR"; lowercase is preferred, see the
+ * language ("English", "Engels"), or any BCP 47 style tag ("nl", "lkt", "pt-BR"; written lowercase, see the
  * importing guide). A tag the runtime has no name for still counts, the label then falls back (`versionBaseLabel`).
  */
 export function translationLanguageTag(versionName: string | null | undefined): string | null {

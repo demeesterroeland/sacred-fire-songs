@@ -23,15 +23,20 @@ export interface SegmentedProps extends Omit<React.HTMLAttributes<HTMLDivElement
  * The checked segment is raised, ringed and underlined, so the state is never colour alone.
  * Long lists scroll sideways inside the strip instead of widening the page.
  */
+// Measure before paint in the browser (no visible jump); plain effect on the server, where layout effects warn.
+const useIsomorphicLayoutEffect = typeof window === 'undefined' ? React.useEffect : React.useLayoutEffect;
+
 export function Segmented({ options, value, onChange, className, ...props }: SegmentedProps) {
   const refs = React.useRef<Array<HTMLButtonElement | null>>([]);
   const stripRef = React.useRef<HTMLDivElement | null>(null);
   const checkedIndex = Math.max(0, options.findIndex((o) => o.value === value));
+  // Labels change width on an app-language switch while the count stays the same: re-check then too.
+  const labelsKey = options.map((o) => o.label).join('|');
 
   // The strip scrolls sideways when the segments do not fit (a phone with four versions). Opening `?version=<4th>`
   // checks a segment that lies outside the visible part, so bring it in: centred, by setting the strip's own
   // `scrollLeft` (`scrollIntoView` would scroll the page too). Nothing moves when it is already fully visible.
-  React.useEffect(() => {
+  useIsomorphicLayoutEffect(() => {
     const strip = stripRef.current;
     const checked = refs.current[checkedIndex];
     if (!strip || !checked) return;
@@ -39,7 +44,7 @@ export function Segmented({ options, value, onChange, className, ...props }: Seg
     const seg = checked.getBoundingClientRect();
     if (seg.left >= box.left && seg.right <= box.right) return;
     strip.scrollLeft += seg.left + seg.width / 2 - (box.left + box.width / 2);
-  }, [checkedIndex, options.length]);
+  }, [checkedIndex, labelsKey]);
 
   const move = (to: number) => {
     const next = options[to];
