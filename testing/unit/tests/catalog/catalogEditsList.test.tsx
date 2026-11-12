@@ -1,7 +1,7 @@
 // @vitest-environment jsdom
 // Story 6.2.21 (#524): the admin list of catalog corrections, in the real English copy (RTL, L3).
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import { act, cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { DICTIONARIES, translateFrom } from '@/lib/i18n';
 import type { CatalogEditsExport } from '@/lib/catalog/catalogEdits';
 
@@ -131,6 +131,56 @@ describe('CatalogEditsList', () => {
     const { dialog } = openConfirm(0);
     fireEvent.click(within(dialog).getByRole('button', { name: 'Mark as taken over' }));
     await waitFor(() => expect(toastError).toHaveBeenCalledWith('Could not mark the correction as taken over. Try again.'));
+  });
+
+  describe('focus after a correction is taken over (re-check nit)', () => {
+    const second = { ...edits.versions[0], version_id: 'v2', catalog_source_id: 'book-2', version_name: 'Book 2' };
+    const twoVersions: CatalogEditsExport = { songs: edits.songs, versions: [edits.versions[0], second] };
+
+    const confirmAndRefresh = async (
+      view: ReturnType<typeof render>,
+      index: number,
+      after: CatalogEditsExport
+    ) => {
+      clearCatalogEditAction.mockResolvedValue({ ok: true });
+      const { dialog } = openConfirm(index);
+      fireEvent.click(within(dialog).getByRole('button', { name: 'Mark as taken over' }));
+      await waitFor(() => expect(clearCatalogEditAction).toHaveBeenCalled());
+      await act(async () => {});
+      // The server action revalidates the page: the list comes back without the cleared row.
+      view.rerender(<CatalogEditsList edits={after} />);
+    };
+
+    it('moves focus to the next row once the cleared row is gone', async () => {
+      const view = render(<CatalogEditsList edits={twoVersions} />);
+      await confirmAndRefresh(view, 1, { songs: edits.songs, versions: [second] });
+      const next = screen.getAllByRole('button', { name: 'Taken over' })[1];
+      await waitFor(() => expect(document.activeElement).toBe(next));
+      expect(within(screen.getAllByTestId('catalog-edit-row')[1]).getByText(/Book 2/)).toBeTruthy();
+    });
+
+    it('moves focus to the previous row when the last row was cleared', async () => {
+      const view = render(<CatalogEditsList edits={twoVersions} />);
+      await confirmAndRefresh(view, 2, { songs: edits.songs, versions: [edits.versions[0]] });
+      const previous = screen.getAllByRole('button', { name: 'Taken over' })[1];
+      await waitFor(() => expect(document.activeElement).toBe(previous));
+    });
+
+    it('moves focus to the empty state when nothing is left', async () => {
+      const view = render(<CatalogEditsList edits={{ songs: edits.songs, versions: [] }} />);
+      await confirmAndRefresh(view, 0, { songs: [], versions: [] });
+      const empty = screen.getByText('No catalog song or version has been corrected in the app.');
+      await waitFor(() => expect(document.activeElement).toBe(empty));
+    });
+
+    it('keeps focus on the row button when the clear fails', async () => {
+      clearCatalogEditAction.mockResolvedValue({ ok: false, reason: 'changed' });
+      render(<CatalogEditsList edits={twoVersions} />);
+      const { trigger, dialog } = openConfirm(1);
+      fireEvent.click(within(dialog).getByRole('button', { name: 'Mark as taken over' }));
+      await waitFor(() => expect(toastError).toHaveBeenCalled());
+      await waitFor(() => expect(document.activeElement).toBe(trigger));
+    });
   });
 
   it('names a row whose catalog key was removed in the app (review N5)', () => {

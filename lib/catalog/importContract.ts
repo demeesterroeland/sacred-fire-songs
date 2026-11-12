@@ -11,10 +11,9 @@
  * write, plans with `planCatalogImport`, writes `plan.write` and prints `formatSkippedReport`.
  *
  * Not protected by the markers: rows deleted in the app (an importer recreates them unless it
- * checks), and songs merged in the app by linking them as a version of another song. For the
- * latter, an importer resolves every incoming catalog slug with `resolveCatalogSlug` against the
- * merge redirects it read (old song id, new song id, the old song's catalog slug), so it does not
- * recreate a merged song.
+ * checks). Songs merged in the app by linking them as a version of another song are handled
+ * through the database: an importer looks every incoming catalog slug up with
+ * `fn_song_id_for_catalog_slug` and maps the result with `resolveCatalogSlug`.
  */
 
 /** The marker columns of `compositions` and `song_versions`. */
@@ -75,34 +74,33 @@ export function formatSkippedReport(skipped: readonly SkippedCatalogRow[]): stri
   return [`Skipped ${skipped.length} ${skipped.length === 1 ? 'row' : 'rows'} edited in the app:`, ...lines].join('\n');
 }
 
-/** A song merged into another one in the app: `catalog_slug` is the slug of the merged (old) song. */
-export interface CatalogSlugRedirect {
-  old_id: string;
-  new_id: string;
+/**
+ * The song `fn_song_id_for_catalog_slug(slug)` returned (migration 20261112120000), with that
+ * song's own `catalog_slug`; `null` when the function returned null.
+ */
+export interface CatalogSlugLookup {
+  id: string;
   catalog_slug: string | null;
 }
 
 export type CatalogSlugResolution =
-  /** Not merged: import the song under its slug as usual. */
-  | { action: 'import'; slug: string }
-  /** Merged in the app: do not recreate the song; write its catalog content to `targetSongId`. */
-  | { action: 'redirect'; slug: string; targetSongId: string };
+  /** No song and no redirect knows the slug: insert a new song. */
+  | { action: 'create'; slug: string }
+  /**
+   * The song carries the slug itself: write it as usual, honouring its markers. This includes the
+   * target of a link that took the source's slug ('moved'): the link marked its merged content.
+   */
+  | { action: 'import'; slug: string; songId: string }
+  /**
+   * The slug belongs to a song linked into `songId`, which kept its own slug ('redirect'): write
+   * no song-level content (it would overwrite the surviving song), only upsert the slug's
+   * versions under `songId` on `(composition_id, catalog_source_id)`, honouring their markers.
+   */
+  | { action: 'redirect'; slug: string; songId: string };
 
-/**
- * Where an incoming catalog slug goes, given the merge redirects the importer read. A chain of
- * merges (A into B, then B into C) is followed to the last song; a cycle stops at the last song
- * not seen before.
- */
-export function resolveCatalogSlug(slug: string, redirects: readonly CatalogSlugRedirect[]): CatalogSlugResolution {
-  const first = redirects.find((r) => r.catalog_slug === slug);
-  if (!first) return { action: 'import', slug };
-
-  const byOldId = new Map(redirects.map((r) => [r.old_id, r.new_id]));
-  const seen = new Set<string>([first.old_id]);
-  let target = first.new_id;
-  while (byOldId.has(target) && !seen.has(target)) {
-    seen.add(target);
-    target = byOldId.get(target) as string;
-  }
-  return { action: 'redirect', slug, targetSongId: target };
+/** Maps an incoming catalog slug and its `fn_song_id_for_catalog_slug` lookup to what the importer may write. */
+export function resolveCatalogSlug(slug: string, found: CatalogSlugLookup | null): CatalogSlugResolution {
+  if (!found) return { action: 'create', slug };
+  if (found.catalog_slug === slug) return { action: 'import', slug, songId: found.id };
+  return { action: 'redirect', slug, songId: found.id };
 }

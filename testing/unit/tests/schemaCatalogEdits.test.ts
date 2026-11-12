@@ -95,4 +95,11 @@ describe('db-schema.sql: catalog edit markers (Story 6.2.21)', () => {
       expect(sql).not.toMatch(/grant execute on function public\.fn_(catalog_edits_export|clear_catalog_edit)\([^)]*\) to [^;]*service_role/);
     }
   });
+
+  it('the trigger function is not callable through the API, by the service role neither (re-check nit)', () => {
+    for (const sql of [schema, migration]) {
+      expect(sql).toContain('revoke all on function public.fn_track_catalog_edit() from public, anon, authenticated, service_role;');
+      expect(sql).not.toMatch(/grant execute on function public\.fn_track_catalog_edit\(\)/);
+    }
+  });
 });

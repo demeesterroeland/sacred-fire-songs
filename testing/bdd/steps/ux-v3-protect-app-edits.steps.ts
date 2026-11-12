@@ -10,7 +10,7 @@ import {
   resolveCatalogSlug,
   type CatalogEditMarker,
   type CatalogImportPlan,
-  type CatalogSlugRedirect,
+  type CatalogSlugLookup,
   type CatalogSlugResolution,
 } from '../../../lib/catalog/importContract';
 import {
@@ -49,7 +49,9 @@ export interface ProtectEditsBddState {
   downloadedAt?: string;
   clearAnswer?: string;
   importerMarkers?: Map<string, CatalogEditMarker>;
-  redirects?: CatalogSlugRedirect[];
+  targetSongId?: string;
+  collidingVersionId?: string;
+  lookups?: Map<string, CatalogSlugLookup | null>;
   resolutions?: CatalogSlugResolution[];
 }
 
@@ -242,23 +244,109 @@ When("the member's app recomputes the chord and melody flags of the catalog song
   ]);
 });
 
-When(
-  /^a security definer function moves the catalog version to song "([^"]+)" for the admin$/,
-  async function (this: SongBddWorld, targetSlug: string) {
+Given('the catalog song also has a version "songbook-b"', async function (this: SongBddWorld) {
+  const db = await seedDb();
+  const memberId = await profileIdByEmail(ACCOUNT_EMAILS.member);
+  const { rows } = await db.query<{ id: string }>(
+    `INSERT INTO public.song_versions (composition_id, version_name, content_chordpro, contributor_id,
+                                       catalog_source_id, version_kind)
+     VALUES ($1, 'Book B', '[D]Book B', $2, 'songbook-b', 'variant') RETURNING id`,
+    [state(this).songId, memberId]
+  );
+  state(this).collidingVersionId = rows[0].id;
+});
+
+/** The song a catalog song is linked into: same authors, so only the merged names change. */
+async function createTargetSong(world: SongBddWorld, slug: string | null): Promise<string> {
+  const db = await seedDb();
+  const { rows } = await db.query<{ id: string }>(
+    `INSERT INTO public.compositions (title, original_author, is_public, catalog_slug, authors)
+     VALUES ('BDD Target Song', 'Author A', true, $1, ARRAY['Author A']) RETURNING id`,
+    [slug]
+  );
+  state(world).targetSongId = rows[0].id;
+  return rows[0].id;
+}
+
+Given(
+  /^a public catalog song "([^"]+)" with its own version "([^"]+)"$/,
+  async function (this: SongBddWorld, slug: string, source: string) {
+    const targetId = await createTargetSong(this, slug);
     const db = await seedDb();
-    const { rows } = await db.query<{ id: string }>(
-      `INSERT INTO public.compositions (title, is_public, catalog_slug) VALUES ('BDD Target Song', true, $1) RETURNING id`,
-      [targetSlug]
-    );
-    // Stands in for a function like fn_link_song_as_version: runs as its owner, for a signed-in user.
     await db.query(
-      `CREATE FUNCTION public.bdd_move_version(p_version uuid, p_target uuid) RETURNS void
-       LANGUAGE sql SECURITY DEFINER SET search_path = '' AS $$
-         UPDATE public.song_versions SET composition_id = p_target, version_kind = 'variant' WHERE id = p_version
-       $$`
+      `INSERT INTO public.song_versions (composition_id, version_name, content_chordpro, catalog_source_id)
+       VALUES ($1, 'Target book', '[E]Target', $2)`,
+      [targetId, source]
     );
-    await db.query(`GRANT EXECUTE ON FUNCTION public.bdd_move_version(uuid, uuid) TO authenticated`);
-    await writeAs('admin', `SELECT public.bdd_move_version($1, $2)`, [state(this).versionId, rows[0].id]);
+  }
+);
+
+Given('a public song without a catalog slug', async function (this: SongBddWorld) {
+  await createTargetSong(this, null);
+});
+
+When('the admin links the catalog song as a version of the other song in the app', async function (this: SongBddWorld) {
+  // The real link function (migration 20261112120000), as a signed-in admin: JWT claims plus
+  // SET LOCAL ROLE authenticated; the scenario's transaction rolls it back.
+  const s = state(this);
+  await writeAs('admin', `SELECT public.fn_link_song_as_version($1, $2)`, [
+    need(s.songId, 'catalog song'),
+    need(s.targetSongId, 'other song'),
+  ]);
+});
+
+Then(
+  /^the moved version "([^"]+)" lost its catalog key and its edited fields are "([^"]+)"$/,
+  async function (this: SongBddWorld, _source: string, list: string) {
+    const s = state(this);
+    const db = await seedDb();
+    const { rows } = await db.query<CatalogEditMarker & { catalog_source_id: string | null; composition_id: string }>(
+      `SELECT catalog_source_id, composition_id, edited_in_app, edited_fields FROM public.song_versions WHERE id = $1`,
+      [need(s.collidingVersionId, 'colliding version')]
+    );
+    assert.equal(rows[0].catalog_source_id, null, 'the other song keeps the key');
+    assert.equal(rows[0].composition_id, s.targetSongId);
+    assert.equal(rows[0].edited_in_app, true);
+    assert.deepEqual(rows[0].edited_fields, fieldList(list));
+  }
+);
+
+Then(/^the other song's edited fields are "([^"]+)"$/, async function (this: SongBddWorld, list: string) {
+  const row = await marker('compositions', need(state(this).targetSongId, 'other song'));
+  assert.equal(row.edited_in_app, true);
+  assert.equal(row.is_now, true, 'edited_at is the time of the link');
+  assert.deepEqual(row.edited_fields, fieldList(list));
+});
+
+/** What an importer (service role) sees for a slug: the lookup function, then that song's own slug. */
+async function importerLookup(slug: string): Promise<CatalogSlugLookup | null> {
+  const rows = await writeAs<{ id: string | null; catalog_slug: string | null }>(
+    'importer',
+    `SELECT c.id, c.catalog_slug FROM public.compositions c WHERE c.id = public.fn_song_id_for_catalog_slug($1)`,
+    [slug]
+  );
+  return rows[0]?.id ? { id: rows[0].id, catalog_slug: rows[0].catalog_slug } : null;
+}
+
+Then(
+  /^an importer that looks up "([^"]+)" writes only its versions to the other song$/,
+  async function (this: SongBddWorld, slug: string) {
+    const targetId = need(state(this).targetSongId, 'other song');
+    assert.deepEqual(resolveCatalogSlug(slug, await importerLookup(slug)), { action: 'redirect', slug, songId: targetId });
+  }
+);
+
+Then(
+  /^an importer that looks up "([^"]+)" finds the other song, which carries the slug and is marked$/,
+  async function (this: SongBddWorld, slug: string) {
+    const targetId = need(state(this).targetSongId, 'other song');
+    assert.deepEqual(resolveCatalogSlug(slug, await importerLookup(slug)), { action: 'import', slug, songId: targetId });
+    const markers = await writeAs<CatalogEditMarker>(
+      'importer',
+      `SELECT edited_in_app, edited_fields FROM public.compositions WHERE catalog_slug = $1`,
+      [slug]
+    );
+    assert.equal(markers[0].edited_in_app, true, 'the importer skips its song-level content');
   }
 );
 
@@ -716,29 +804,47 @@ Then(
   }
 );
 
-Given(
-  /^the song "([^"]+)" was linked in the app as a version of another song$/,
-  function (this: SongBddWorld, slug: string) {
-    state(this).redirects = [
-      { old_id: '00000000-0000-4000-8000-00000000000a', new_id: '00000000-0000-4000-8000-00000000000b', catalog_slug: slug },
-    ];
-  }
-);
+const MERGED_INTO = '00000000-0000-4000-8000-00000000000b';
+const MOVED_INTO = '00000000-0000-4000-8000-00000000000c';
 
-When(/^an importer resolves the catalog slugs "([^"]+)" and "([^"]+)"$/, function (this: SongBddWorld, a: string, b: string) {
-  const redirects = need(state(this).redirects, 'redirects');
-  state(this).resolutions = [a, b].map((slug) => resolveCatalogSlug(slug, redirects));
+Given(/^"([^"]+)" was linked in the app into a song that kept its own slug$/, function (this: SongBddWorld, slug: string) {
+  // fn_song_id_for_catalog_slug finds the redirect; the song it returns has a slug of its own.
+  (state(this).lookups ??= new Map()).set(slug, { id: MERGED_INTO, catalog_slug: 'bdd-kept' });
 });
 
-Then(
-  /^it does not recreate "([^"]+)" and writes it to the song it was merged into$/,
+Given(
+  /^"([^"]+)" was linked in the app into a song without a slug, which took it$/,
   function (this: SongBddWorld, slug: string) {
-    const resolution = need(state(this).resolutions, 'resolutions').find((r) => r.slug === slug);
-    assert.deepEqual(resolution, { action: 'redirect', slug, targetSongId: '00000000-0000-4000-8000-00000000000b' });
+    (state(this).lookups ??= new Map()).set(slug, { id: MOVED_INTO, catalog_slug: slug });
   }
 );
 
-Then(/^it imports "([^"]+)" as usual$/, function (this: SongBddWorld, slug: string) {
-  const resolution = need(state(this).resolutions, 'resolutions').find((r) => r.slug === slug);
-  assert.deepEqual(resolution, { action: 'import', slug });
+When(
+  /^an importer resolves the catalog slugs "([^"]+)", "([^"]+)" and "([^"]+)"$/,
+  function (this: SongBddWorld, a: string, b: string, c: string) {
+    const slugs = [a, b, c];
+    const lookups = state(this).lookups ?? new Map<string, CatalogSlugLookup | null>();
+    state(this).resolutions = slugs.map((slug) => resolveCatalogSlug(slug, lookups.get(slug) ?? null));
+  }
+);
+
+const resolutionOf = (world: SongBddWorld, slug: string) =>
+  need(state(world).resolutions, 'resolutions').find((r) => r.slug === slug);
+
+Then(
+  /^it writes no song content for "([^"]+)" and upserts its versions under the song it was merged into$/,
+  function (this: SongBddWorld, slug: string) {
+    assert.deepEqual(resolutionOf(this, slug), { action: 'redirect', slug, songId: MERGED_INTO });
+  }
+);
+
+Then(
+  /^it writes "([^"]+)" to the song that carries that slug now, honouring its markers$/,
+  function (this: SongBddWorld, slug: string) {
+    assert.deepEqual(resolutionOf(this, slug), { action: 'import', slug, songId: MOVED_INTO });
+  }
+);
+
+Then(/^it creates "([^"]+)" as a new song$/, function (this: SongBddWorld, slug: string) {
+  assert.deepEqual(resolutionOf(this, slug), { action: 'create', slug });
 });

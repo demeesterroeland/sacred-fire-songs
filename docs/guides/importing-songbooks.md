@@ -1,6 +1,6 @@
 # Importing Songbooks
 
-**Version:** 1.4
+**Version:** 1.5
 **Status:** Living Document
 **Date:** Nov 13, 2026
 
@@ -13,6 +13,7 @@
 | **1.2** | Nov 12, 2026 | Review of PR #530: rule 2 says the order is by `created_at` within each kind; rule 4: a translation's `version_name` may be any language tag (the language subtag written lowercase: `lkt`, `nv`, `gn`, `ay`, `arn`, `pt-BR`; `New` or `LKT` count as text), and a translation whose language is not recognised shows its songbook. |
 | **1.3** | Nov 12, 2026 | Story 6.2.13 (#516, language switch): rule 4 changes. Importers write translations to `song_translations` only, no longer as `song_versions` rows with `version_kind = 'translation'`; the language switch reads `song_translations`, and migration `20261112140000_translation_versions_to_translations.sql` moves the interim translation versions there. Review of PR #535: importers must write translations to `song_translations` before that migration runs on real data (deleting a version also deletes its `catalog_source_id`, so an importer that still writes translations as versions would re-create them, and they are not migrated again); the migration leaves a translation version in place when it has chords and its key, capo or tuning differs from the original's, its lyrics are blank, it holds a melody, note, beats, media link or votes of its own, or it is lyrics-only in another key while a playlist transposes it, and it reports the contributor of a version it deletes; a playlist entry that opened the translation opens the original language afterwards. Changelog rows in ascending order. |
 | **1.4** | Nov 12, 2026 | Story 6.2.21 (#524): new section *Corrections made in the app* — the database marks catalog songs and versions corrected in the app (`edited_in_app`, `edited_at`, `edited_fields`; migration `20261112160000_protect_catalog_app_edits.sql`); the importer contract (read the markers, skip and report marked rows, write as the service role), what counts as an app edit, the admin export and how to clear a marker. Rule 5 points there. Review of PR #540 (Nov 13, 2026): the export and clear RPCs are for signed-in admins only, not the service role (importers read and clear the markers with plain SQL); clearing takes the `edited_at` that was downloaded, so a newer correction stays marked; removing a catalog key in the app counts; a moved version exports its new song's slug; new *What the markers do not protect* (rows deleted in the app, songs merged in the app and their redirects). |
+| **1.5** | Nov 13, 2026 | Re-check of PR #540 (#524) after the link-song merge (#536): *What the markers do not protect* resolves every slug with `fn_song_id_for_catalog_slug` and covers the 'moved' and 'redirect' cases (no song-level writes for a redirected slug, only its versions under the target; a version whose colliding key was cleared is not findable by it); only `catalog_slug` is editable in the app, `catalog_source_id` changes only through `SECURITY DEFINER` functions; read `edited_at` as text before clearing a marker. |
 
 ## Purpose
 
@@ -67,7 +68,7 @@ The trigger `trg_track_catalog_edit` sets them. **A row is marked when all of th
 
 - `compositions`: `title`, `original_author`, `aliases`, `authors`
 - `song_versions`: `version_name`, `content_chordpro`, `melody_notation`, `key`, `capo`, `tuning`, `soundcloud_url`, `youtube_url`, `spotify_url`, `version_kind`, `beats`, `song_note`, and `composition_id` (the version was moved to another song)
-- the catalog key itself (`catalog_slug`, `catalog_source_id`): only an admin may change or remove it in the app, and doing so marks the row. A row whose key was removed can no longer be found by that key: treat it like a deleted row (see below).
+- the catalog key itself (`catalog_slug`, `catalog_source_id`). Only `catalog_slug` is editable in the app (admins only); changing or removing it marks the song. `catalog_source_id` is not editable by any signed-in user; it changes only through `SECURITY DEFINER` database functions, such as linking a song as a version of another song, which clears a moved version's key when the other song already has it (that marks the version). A row whose key was removed can no longer be found by that key: treat it like a deleted row (see below).
 
 Not tracked: derived or app-only columns (`has_chords`, `has_melody`, `is_public`, `owner_id`, `vote_count`, `contributor_id`) and the admin-only tables `song_version_sources`, `songbooks` and `song_translations` (an importer that also corrects those should compare them itself). New rows are not marked: a new version is not a correction of an imported one.
 
@@ -87,7 +88,7 @@ An importer that re-imports the catalog:
 
 ```sql
 -- Versions corrected in the app, by their catalog keys (run as the service role).
-SELECT c.catalog_slug, v.catalog_source_id, v.edited_at, v.edited_fields
+SELECT c.catalog_slug, v.catalog_source_id, v.edited_at::text AS edited_at, v.edited_fields
 FROM public.song_versions v
 JOIN public.compositions c ON c.id = v.composition_id
 WHERE v.edited_in_app AND v.catalog_source_id IS NOT NULL;
@@ -97,19 +98,26 @@ WHERE v.edited_in_app AND v.catalog_source_id IS NOT NULL;
 
 - **Export:** admins open **Admin → Catalog edits** and download the corrections as JSON (`catalog-edits-YYYY-MM-DD.json`): format `sacred-fire-songs/catalog-edits`, version 1, and per song (`catalog_slug`) and per version (`catalog_slug`, `catalog_source_id`) the `edited_at`, the `edited_fields` and their current `values`. The same rows come from the RPC `fn_catalog_edits_export()`, which only signed-in admins may call (it checks `fn_is_admin()`, which reads `auth.uid()`; the service role has no execute privilege). A key is `null` when it was removed in the app; for a moved version the value of `composition_id` is the `catalog_slug` of the song it now belongs to.
 - **Clear a marker** once the source catalog has the correction, so the next run updates the row again: the admin presses **Taken over** on that row (RPC `fn_clear_catalog_edit('song' | 'version', id, edited_at)`, signed-in admins only), or the importer clears it as the service role. Both clear only the correction that was downloaded or reported: pass its `edited_at`. If the row was corrected again since, it stays marked (the RPC answers `changed`, the plain SQL updates no row): download or read it again and take the newer correction over first.
+- **Read `edited_at` as text** (`edited_at::text`, as in the query above) and pass it back unchanged. It has microseconds; a JavaScript `Date` keeps only milliseconds, so a value that went through one no longer matches and the clear silently updates no row.
 
 ```sql
 UPDATE public.song_versions
 SET edited_in_app = false, edited_at = NULL, edited_fields = '{}'
 WHERE composition_id = (SELECT id FROM public.compositions WHERE catalog_slug = '<song-slug>')
   AND catalog_source_id = '<source-id>'
-  AND edited_at = '<edited_at as read in step 2>';
+  AND edited_at = '<edited_at::text as read in step 2>';
 ```
 
 ### What the markers do not protect
 
 - **Rows deleted in the app.** A deleted catalog song or version leaves no row and no marker, so the next run recreates it. An importer that should respect deletions keeps its own list of the keys it imported and compares it with the database before inserting.
-- **Songs merged in the app.** Linking a song as a version of another song moves its versions (marked, see above) and its aliases and authors to the other song. Once the app records the merge in a `composition_redirects` table (`old_id`, `new_id`, `catalog_slug` of the merged song), an importer that finds that table **must resolve every incoming catalog slug through it** and write the song's content to the song it was merged into instead of recreating the merged song. `resolveCatalogSlug` in `lib/catalog/importContract.ts` does this for the redirects the importer passes in (it follows chains of merges); it reads no table itself.
+- **Songs merged in the app.** Linking a song as a version of another song (migration `20261112120000_link_song_as_version.sql`) deletes the linked song, moves its versions to the other song (marked, see above), merges its title, aliases and authors into the other song (marked) and records the merge in `composition_redirects` (`old_id`, `new_id`, `catalog_slug`). An importer resolves **every incoming catalog slug** with `fn_song_id_for_catalog_slug(slug)` (the service role may call it) instead of looking `compositions.catalog_slug` up directly, then reads the `catalog_slug` of the song it returns:
+  - **No song** (the function returns null): a new song; insert it.
+  - **The song carries the slug itself:** an ordinary catalog song; write it as usual, honouring its markers. This also covers a song linked into a song that had no slug (**'moved'**): the other song took the slug over (the redirect's `catalog_slug` stays null) and the link marked its `aliases` and `catalog_slug`, so the song-level content is skipped and reported like any correction.
+  - **The song carries another slug** (**'redirect'**): the incoming slug belongs to a song that was linked into this one, which kept its own slug; the redirect keeps the old slug. **Write no song-level content** (title, authors, aliases, author): it is the linked song's content and would overwrite the song that stays. Upsert only the slug's versions under the returned song on `(composition_id, catalog_source_id)` and honour their markers (moved versions are marked).
+  - A moved version whose `catalog_source_id` the other song already had lost its key (the other song's version keeps it). It cannot be found by that key any more, by design: the next run updates the other song's version with that key.
+
+  `resolveCatalogSlug(slug, found)` in `lib/catalog/importContract.ts` maps the lookup (`found`: the returned song's `id` and `catalog_slug`, or null) to `create`, `import` or `redirect`; it reads no table itself. Chains of links need no handling: the link function points older redirects at the newest song.
 
 ## Access
 

@@ -59,51 +59,41 @@ describe('planCatalogImport', () => {
 });
 
 /**
- * Review of PR #540 (S3): a song merged in the app by linking it as a version of another song
- * leaves a redirect (old song id, new song id, the old song's catalog slug). The importer must not
- * recreate the old song; it follows the redirects it was given to the song that now holds it.
+ * Re-check of PR #540: an importer looks every incoming catalog slug up with
+ * fn_song_id_for_catalog_slug (migration 20261112120000) and reads that song's own catalog_slug.
+ * `resolveCatalogSlug` maps that lookup to what the importer may write.
  */
 describe('resolveCatalogSlug', () => {
-  const A = '00000000-0000-4000-8000-00000000000a';
   const B = '00000000-0000-4000-8000-00000000000b';
-  const C = '00000000-0000-4000-8000-00000000000c';
 
-  it('imports a slug that was never merged away', () => {
-    expect(resolveCatalogSlug('song-a', [])).toEqual({ action: 'import', slug: 'song-a' });
-    expect(resolveCatalogSlug('song-a', [{ old_id: B, new_id: C, catalog_slug: 'song-b' }])).toEqual({
+  it('creates a song for a slug no song or redirect knows', () => {
+    expect(resolveCatalogSlug('song-a', null)).toEqual({ action: 'create', slug: 'song-a' });
+  });
+
+  it('imports into the song that carries the slug itself', () => {
+    expect(resolveCatalogSlug('song-a', { id: B, catalog_slug: 'song-a' })).toEqual({
       action: 'import',
       slug: 'song-a',
+      songId: B,
     });
   });
 
-  it('sends a merged slug to the song that now holds it and tells the importer not to recreate it', () => {
-    expect(resolveCatalogSlug('song-a', [{ old_id: A, new_id: B, catalog_slug: 'song-a' }])).toEqual({
+  it("imports into the target of a link that took the source's slug ('moved'): its markers protect the merged song content", () => {
+    // After a 'moved' link the target carries the slug itself, so the lookup cannot tell it apart
+    // from a plain catalog song: the target's marker ({aliases, catalog_slug}) makes the importer skip it.
+    expect(resolveCatalogSlug('song-a', { id: B, catalog_slug: 'song-a' })).toMatchObject({ action: 'import', songId: B });
+  });
+
+  it("redirects a slug kept on a redirect ('redirect'): no song-level writes, versions go under the target", () => {
+    expect(resolveCatalogSlug('song-a', { id: B, catalog_slug: 'song-b' })).toEqual({
       action: 'redirect',
       slug: 'song-a',
-      targetSongId: B,
+      songId: B,
     });
-  });
-
-  it('follows a chain of merges to the last song', () => {
-    const redirects = [
-      { old_id: B, new_id: C, catalog_slug: 'song-b' },
-      { old_id: A, new_id: B, catalog_slug: 'song-a' },
-    ];
-    expect(resolveCatalogSlug('song-a', redirects)).toEqual({ action: 'redirect', slug: 'song-a', targetSongId: C });
-  });
-
-  it('stops on a cycle instead of looping', () => {
-    const redirects = [
-      { old_id: A, new_id: B, catalog_slug: 'song-a' },
-      { old_id: B, new_id: A, catalog_slug: 'song-b' },
-    ];
-    expect(resolveCatalogSlug('song-a', redirects)).toEqual({ action: 'redirect', slug: 'song-a', targetSongId: A });
-  });
-
-  it('ignores redirects without a catalog slug', () => {
-    expect(resolveCatalogSlug('song-a', [{ old_id: A, new_id: B, catalog_slug: null }])).toEqual({
-      action: 'import',
+    expect(resolveCatalogSlug('song-a', { id: B, catalog_slug: null })).toEqual({
+      action: 'redirect',
       slug: 'song-a',
+      songId: B,
     });
   });
 });

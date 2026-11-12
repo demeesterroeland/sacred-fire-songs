@@ -1,5 +1,5 @@
 -- Migration: Protect in-app edits of catalog songs from re-import (Story 6.2.21, #524)
--- Date: 2026-11-12 (review of PR #540: 2026-11-13)
+-- Date: 2026-11-12 (review and re-check of PR #540: 2026-11-13)
 --
 -- An importer updates the catalog rows it owns on every run, so a correction made in the app
 -- would be overwritten. This migration marks every catalog song and version that is corrected
@@ -28,9 +28,12 @@
 --   song_versions: version_name, content_chordpro, melody_notation, key, capo, tuning,
 --                  soundcloud_url, youtube_url, spotify_url, version_kind, beats, song_note,
 --                  composition_id (the version was moved to another song)
---   The catalog key itself counts too: only admins may change or remove it (trg_guard_catalog_slug
---   / trg_guard_catalog_source_id), and removing it in the app is a correction the export reports
---   (with the key null; the importer can no longer find the row by it).
+--   The catalog key itself counts too. In the app only catalog_slug is editable, by admins only
+--   (trg_guard_catalog_slug); catalog_source_id changes only through SECURITY DEFINER paths, e.g.
+--   fn_link_song_as_version clearing a moved version's key that the target already has
+--   (trg_guard_catalog_source_id and the column privileges keep every API caller out). Removing a
+--   key is a correction the export reports (with the key null; the importer can no longer find
+--   the row by it).
 --   Not tracked: derived or app-only columns (has_chords, has_melody, is_public, owner_id,
 --   vote_count, contributor_id). Songbook sources and translations are admin-only tables and are
 --   not tracked (see the importer guide). Deleting a row is not tracked either.
@@ -131,7 +134,7 @@ BEGIN
   RETURN NEW;
 END;
 $$;
-REVOKE ALL ON FUNCTION public.fn_track_catalog_edit() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.fn_track_catalog_edit() FROM PUBLIC, anon, authenticated, service_role;
 
 DROP TRIGGER IF EXISTS trg_track_catalog_edit ON public.compositions;
 CREATE TRIGGER trg_track_catalog_edit

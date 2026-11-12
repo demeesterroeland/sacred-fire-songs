@@ -1,5 +1,5 @@
 # Sacred Fire Songs – Protect in-app edits of catalog songs
-# Version: 1.1 | Date: Nov 13, 2026
+# Version: 1.2 | Date: Nov 13, 2026
 #
 # Living Gherkin description of Story 6.2.21 (#524): a catalog song or version that is
 # corrected in the app is marked (edited_in_app, edited_at, edited_fields) so an importer
@@ -21,6 +21,10 @@
 #         and clears markers with plain SQL; a gatekeeper cannot edit someone else's catalog
 #         version; removing a catalog key counts; a moved version exports its new song's slug;
 #         the contract follows merge redirects.
+#   1.2 – Nov 13, 2026 – Re-check of PR #540: linking a catalog song runs the real
+#         fn_link_song_as_version as an admin (no stand-in function) and asserts its markers in
+#         both slug cases; importers resolve slugs with fn_song_id_for_catalog_slug and write no
+#         song content for a redirected slug.
 
 @protectAppEdits
 Feature: Protect in-app edits of catalog songs from re-import
@@ -97,12 +101,27 @@ Feature: Protect in-app edits of catalog songs from re-import
       Then the catalog song is not marked as edited
 
     @seed
-    Scenario: A database function acting for a signed-in user counts as an app edit
+    Scenario: Linking a catalog song into a song that keeps its slug marks what moved
       Given a public catalog song "bdd-protect-song" with version "songbook-a" owned by the member
-      When a security definer function moves the catalog version to song "bdd-target-song" for the admin
+      And the catalog song also has a version "songbook-b"
+      And a public catalog song "bdd-target-song" with its own version "songbook-b"
+      When the admin links the catalog song as a version of the other song in the app
       Then the catalog version is marked as edited in the app now
       And its edited fields are "composition_id, version_kind"
+      And the moved version "songbook-b" lost its catalog key and its edited fields are "catalog_source_id"
+      And the other song's edited fields are "aliases"
       And the admin export gives "bdd-target-song" as the song the catalog version moved to
+      And an importer that looks up "bdd-protect-song" writes only its versions to the other song
+
+    @seed
+    Scenario: Linking a catalog song into a song without a slug moves the slug and marks it
+      Given a public catalog song "bdd-protect-song" with version "songbook-a" owned by the member
+      And a public song without a catalog slug
+      When the admin links the catalog song as a version of the other song in the app
+      Then the catalog version is marked as edited in the app now
+      And its edited fields are "composition_id, version_kind"
+      And the other song's edited fields are "aliases, catalog_slug"
+      And an importer that looks up "bdd-protect-song" finds the other song, which carries the slug and is marked
 
     @seed
     Scenario: Removing the catalog slug of a catalog song in the app counts
@@ -213,8 +232,10 @@ Feature: Protect in-app edits of catalog songs from re-import
   Rule: An importer does not recreate a song that was merged in the app
 
     @unit
-    Scenario: A merged catalog slug goes to the song that now holds it
-      Given the song "bdd-merged" was linked in the app as a version of another song
-      When an importer resolves the catalog slugs "bdd-merged" and "bdd-fresh"
-      Then it does not recreate "bdd-merged" and writes it to the song it was merged into
-      And it imports "bdd-fresh" as usual
+    Scenario: Catalog slugs resolve through the database lookup
+      Given "bdd-merged" was linked in the app into a song that kept its own slug
+      And "bdd-moved" was linked in the app into a song without a slug, which took it
+      When an importer resolves the catalog slugs "bdd-merged", "bdd-moved" and "bdd-fresh"
+      Then it writes no song content for "bdd-merged" and upserts its versions under the song it was merged into
+      And it writes "bdd-moved" to the song that carries that slug now, honouring its markers
+      And it creates "bdd-fresh" as a new song

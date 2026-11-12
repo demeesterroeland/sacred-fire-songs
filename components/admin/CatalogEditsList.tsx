@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState, useTransition } from 'react';
+import { useEffect, useRef, useState, useTransition } from 'react';
 import { Download } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -98,7 +98,19 @@ export default function CatalogEditsList({ edits }: { edits: CatalogEditsExport 
   // The row button that opened the dialog gets the focus back when it closes.
   const triggers = useRef(new Map<string, HTMLButtonElement>());
   const returnFocusTo = useRef<string | null>(null);
+  // After "Taken over" the row leaves the list (the action revalidates the page): focus moves to
+  // the next row, else the previous one, else the empty state, so keyboard users keep their place.
+  const focusAfterClear = useRef<{ clearedId: string; candidates: string[] } | null>(null);
+  const emptyState = useRef<HTMLParagraphElement>(null);
   const { songs, versions } = toRows(edits);
+
+  useEffect(() => {
+    const pendingFocus = focusAfterClear.current;
+    if (!pendingFocus || triggers.current.has(pendingFocus.clearedId)) return;
+    focusAfterClear.current = null;
+    const next = pendingFocus.candidates.map((id) => triggers.current.get(id)).find(Boolean);
+    (next ?? emptyState.current)?.focus();
+  }, [edits]);
 
   const formatDate = (iso: string | null) =>
     iso
@@ -113,14 +125,21 @@ export default function CatalogEditsList({ edits }: { edits: CatalogEditsExport 
   };
 
   const takeOver = (row: Row) => {
+    const ids = [...songs, ...versions].map((r) => r.id);
+    const at = ids.indexOf(row.id);
+    focusAfterClear.current = { clearedId: row.id, candidates: [...ids.slice(at + 1), ...ids.slice(0, at).reverse()] };
     setConfirming(null);
     setBusyId(row.id);
     startTransition(async () => {
       try {
         // edited_at goes back exactly as exported, so a newer correction is not cleared by mistake.
         const { ok, reason } = await clearCatalogEditAction(row.kind, row.id, row.editedAt);
-        if (!ok) toast.error(t(FAILURE_MESSAGES[reason === 'changed' || reason === 'forbidden' ? reason : 'error']));
+        if (!ok) {
+          focusAfterClear.current = null;
+          toast.error(t(FAILURE_MESSAGES[reason === 'changed' || reason === 'forbidden' ? reason : 'error']));
+        }
       } catch {
+        focusAfterClear.current = null;
         toast.error(t(FAILURE_MESSAGES.error));
       } finally {
         setBusyId(null);
@@ -188,7 +207,11 @@ export default function CatalogEditsList({ edits }: { edits: CatalogEditsExport 
         </a>
       </div>
       {songs.length === 0 && versions.length === 0 ? (
-        <p className="rounded-panel border border-line bg-surface p-6 text-body text-fg-muted">
+        <p
+          ref={emptyState}
+          tabIndex={-1}
+          className="rounded-panel border border-line bg-surface p-6 text-body text-fg-muted focus:outline-none"
+        >
           {t('admin.catalogEdits.empty')}
         </p>
       ) : (
