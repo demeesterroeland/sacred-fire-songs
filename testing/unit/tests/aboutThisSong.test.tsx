@@ -70,6 +70,10 @@ describe('AboutThisSong', () => {
     expect(paragraphs).toEqual(['One verse.', 'Two verse.']);
   });
 
+  it('treats Unicode line and paragraph separators as line breaks', () => {
+    expect(songNoteParagraphs('One.\u2029\u2029Two.')).toEqual(['One.', 'Two.']);
+  });
+
   it('renders the note as plain text, never as HTML', () => {
     const { container } = render(<AboutThisSong note={'<img src=x onerror="alert(1)"> <b>bold</b>'} />);
     fireEvent.click(screen.getByRole('button', { name: 'About this song' }));
@@ -78,27 +82,18 @@ describe('AboutThisSong', () => {
     expect(container.textContent).toContain('<b>bold</b>');
   });
 
-  it('the disclosure button is a touch target (min 44 px)', () => {
+  it('the disclosure button uses the min-h-tap token class (44 px touch target)', () => {
     render(<AboutThisSong note="Note." />);
     expect(screen.getByRole('button', { name: 'About this song' }).className).toMatch(/min-h-tap/);
   });
 
-  it('holds extra rows (children slot) inside the panel', () => {
-    render(
-      <AboutThisSong note="Note.">
-        <p>Extra row</p>
-      </AboutThisSong>,
-    );
+  it('starts collapsed again when the version changes (keyed by version id)', () => {
+    const { rerender } = render(<AboutThisSong key="v1" note="Note of version 1." />);
     fireEvent.click(screen.getByRole('button', { name: 'About this song' }));
-    expect(screen.getByText('Extra row')).toBeTruthy();
-  });
-
-  it('shows the panel for extra rows even without a note', () => {
-    render(
-      <AboutThisSong note={null}>
-        <p>Source row</p>
-      </AboutThisSong>,
-    );
-    expect(screen.getByRole('button', { name: 'About this song' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'About this song' }).getAttribute('aria-expanded')).toBe('true');
+    rerender(<AboutThisSong key="v2" note="Note of version 2." />);
+    const button = screen.getByRole('button', { name: 'About this song' });
+    expect(button.getAttribute('aria-expanded')).toBe('false');
+    expect(document.getElementById(button.getAttribute('aria-controls') ?? '')!.hidden).toBe(true);
   });
 });

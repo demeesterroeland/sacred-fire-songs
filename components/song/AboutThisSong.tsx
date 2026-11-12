@@ -1,6 +1,6 @@
 'use client';
 
-import { useId, useState, type ReactNode } from 'react';
+import { useId, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
 import { useLocale } from '@/context/LocaleContext';
 import { songNoteParagraphs } from '@/lib/songs/songNote';
@@ -10,25 +10,19 @@ interface AboutThisSongProps {
   /** The selected version's printed note (`song_versions.song_note`). */
   note?: string | null;
   className?: string;
-  /**
-   * Extra rows shown inside the panel under the note. The source line (#513) can move in here once it lands;
-   * the panel is shown for them even when the note is empty.
-   */
-  children?: ReactNode;
 }
 
 /**
  * Story 6.2.8 / G1.3 (#511): "About this song" under the meta line. Collapsed by default, so the background
- * never pushes the lyrics down. Renders nothing when there is no note (and no extra rows).
+ * never pushes the lyrics down. Renders nothing when there is no note.
  * The disclosure is a button with aria-expanded and aria-controls; the note is plain text, paragraph by paragraph.
  */
-export function AboutThisSong({ note, className, children }: AboutThisSongProps) {
+export function AboutThisSong({ note, className }: AboutThisSongProps) {
   const { t } = useLocale();
   const [open, setOpen] = useState(false);
   const panelId = useId();
   const paragraphs = songNoteParagraphs(note);
-  const hasExtraRows = children !== undefined && children !== null && children !== false;
-  if (paragraphs.length === 0 && !hasExtraRows) return null;
+  if (paragraphs.length === 0) return null;
 
   return (
     <div className={cn('text-fg', className)} data-testid="about-this-song">
@@ -52,7 +46,6 @@ export function AboutThisSong({ note, className, children }: AboutThisSongProps)
             {paragraph}
           </p>
         ))}
-        {children}
       </div>
     </div>
   );

@@ -28,6 +28,7 @@ import { useUserPreferences } from '@/context/UserPreferencesContext';
 import { practiceTab } from '@/lib/song/actionBar';
 import { SongMetaLines } from '@/components/song/SongMetaLines';
 import { AboutThisSong } from '@/components/song/AboutThisSong';
+import { SongSourceLine } from '@/components/song/SongSourceLine';
 import { VisibilityIcon } from '@/components/common/VisibilityIcon';
 import { ReaderToolbar } from '@/components/song/ReaderToolbar';
 import { SongVersionSwitch } from '@/components/song/SongVersionSwitch';
@@ -600,6 +601,12 @@ export default function SongDetailPage() {
                                 showChords={readerPrefs.chords}
                             />
                         </div>
+                        {/* Story 6.2.10 (#513): where the version being shown was printed (book · page · compiler). */}
+                        <SongSourceLine
+                            className="mt-6"
+                            sources={currentVersion?.song_version_sources}
+                            songTitle={song.title}
+                        />
                     </div>
 
                     <div className="h-20"></div>

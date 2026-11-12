@@ -41,7 +41,8 @@ Given('version {string} with the song note {string}', function (this: object, na
 When('I switch to version {string}', function (this: object, name: string) {
   const s = get(this);
   s.current = name;
-  // The page keys the panel by version: every version starts collapsed.
+  // The page keys the panel by version: every version starts collapsed. The real keyed reset is checked at L3
+  // (testing/unit/tests/aboutThisSong.test.tsx, "starts collapsed again when the version changes").
   s.open = false;
 });
 

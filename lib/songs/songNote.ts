@@ -8,7 +8,7 @@
 export function songNoteParagraphs(note: string | null | undefined): string[] {
   if (!note) return [];
   return note
-    .replace(/\r\n?/g, '\n')
+    .replace(/\r\n?|[\u2028\u2029]/g, '\n')
     .split(/\n\s*\n/)
     .map((paragraph) => paragraph.trim())
     .filter((paragraph) => paragraph.length > 0);
