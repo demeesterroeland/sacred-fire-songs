@@ -163,3 +163,18 @@ export const PROFILE_PLAYBACK_FIXTURE_IDS = {
   first: 'eeeeeeee-3490-4000-a000-000000000003',
   second: 'eeeeeeee-3490-4000-a000-000000000004',
 } as const;
+
+/**
+ * Story 6.2.6 (#509): a catalog-like song with an original, two songbook variants and a translation
+ * (labels and the 375 px switch). Removed by e2e/global-teardown.ts.
+ */
+export const VERSION_LABELS_FIXTURE_IDS = {
+  song: 'eeeeeeee-5090-4000-a000-000000000001',
+  original: 'eeeeeeee-5090-4000-a000-000000000002',
+  variantB: 'eeeeeeee-5090-4000-a000-000000000003',
+  variantC: 'eeeeeeee-5090-4000-a000-000000000004',
+  translation: 'eeeeeeee-5090-4000-a000-000000000005',
+  bookA: 'e2e-509-songbook-a',
+  bookB: 'e2e-509-songbook-b',
+  bookC: 'e2e-509-songbook-c',
+} as const;

@@ -1,20 +1,22 @@
 # Importing Songbooks
 
-**Version:** 1.0
+**Version:** 1.2
 **Status:** Living Document
-**Date:** Nov 11, 2026
+**Date:** Nov 12, 2026
 
 ## Changelog
 
 | Version | Date | Description of Changes |
 | ----- | ----- | ----- |
 | **1.0** | Nov 11, 2026 | Initial note for importers (Story 6.2.1, #504): tables, stable keys, version order, translations, access. Review round on PR #527: set `created_at` explicitly for version order; who may write which catalog column; keys without surrounding spaces; lowercase languages; delete sources before their songbook. |
+| **1.2** | Nov 12, 2026 | Review of PR #530: rule 2 says the order is by `created_at` within each kind; rule 4: a translation's `version_name` may be any language tag (the language subtag written lowercase: `lkt`, `nv`, `gn`, `ay`, `arn`, `pt-BR`; `New` or `LKT` count as text), and a translation whose language is not recognised shows its songbook. |
+| **1.1** | Nov 11, 2026 | Story 6.2.6 (#509): how the version switch labels versions (songbook short name; language name for a translation, read from its `version_name`) and orders them (original, variants, translations). |
 
 ## Purpose
 
 Song collections compiled from printed songbooks carry more than a title and lyrics: a stable song id, other titles, several authors, the books a song was printed in (with page numbers), per-book variants with their own capo, key, beats and note, and translations. This note describes where an importer stores each of these. Importers are not part of this repository; they only rely on the schema below (migration `supabase/migrations/20261111150000_songbook_data_model.sql`, fresh install `docs/design/db-schema.sql`).
 
-The app does not show most of these fields yet (UX v3, Epic 6.2). Title, lyrics and chords, key and capo, and every version through the version switch already work.
+The app does not show most of these fields yet (UX v3, Epic 6.2). Title, lyrics and chords, key and capo, and every version through the version switch already work. The switch labels a version with the short name of its primary songbook (`song_version_sources.is_primary`, else the first source; the songbook title when there is no short name), and a translation with its language; without a source it shows `version_name`.
 
 ## Tables
 
@@ -31,9 +33,9 @@ Every new column is nullable or has a default, so songs created in the app keep 
 ## Rules for importers
 
 1. **Use the stable keys.** Upsert songs on `catalog_slug`, versions on `(composition_id, catalog_source_id)`, sources on `(song_version_id, songbook_id)` and translations on `(composition_id, language)`, so a second run updates rows instead of duplicating them. Never key on the generated `id` columns or on titles.
-2. **Version order is oldest first.** The app shows a song's versions ordered by `created_at`, then `id` (`lib/songs/versionOrder.ts`); the first one is the default. `created_at` defaults to the start of the transaction, so every version written in one transaction (a multi-row insert, or a batch in one transaction) gets the same timestamp and the order falls back to the random `id`. Therefore **set `created_at` explicitly, strictly increasing per song: the main version gets the oldest value, then each variant in the order you want** (for example the import time plus 0, 1, 2 … seconds). Alternatively insert each version of a song in its own transaction, main version first. An upsert does not change `created_at`, so later runs keep the order unless you write `created_at` again.
+2. **Version order.** The app shows a song's versions as original, then variants, then translations (`version_kind`), within each kind ordered by `created_at` (oldest first), then `id` (`lib/songs/versionOrder.ts`); the first one is the default. `created_at` defaults to the start of the transaction, so every version written in one transaction (a multi-row insert, or a batch in one transaction) gets the same timestamp and the order falls back to the random `id`. Therefore **set `created_at` explicitly, strictly increasing per song: the main version gets the oldest value, then each variant in the order you want** (for example the import time plus 0, 1, 2 … seconds). Alternatively insert each version of a song in its own transaction, main version first. An upsert does not change `created_at`, so later runs keep the order unless you write `created_at` again.
 3. **Version kinds.** `original` is the main version, `variant` is the same song as printed in another book (its own key, capo, beats, note), `translation` is a version in another language. Any other value is refused.
-4. **Translations.** Store a translation in `song_translations` when it is a translation of the lyrics. Until the language switch (#516) ships, an importer may also (or instead) store it as a `song_versions` row with `version_kind = 'translation'` and a `version_name` that names the language, so members can already read it through the version switch. Both forms are valid.
+4. **Translations.** Store a translation in `song_translations` when it is a translation of the lyrics. Until the language switch (#516) ships, an importer may also (or instead) store it as a `song_versions` row with `version_kind = 'translation'` and a `version_name` that names the language, so members can already read it through the version switch. The switch shows the language in the reader's app language, which it reads from `version_name`: write the language name (`English`, `Nederlands`, …) or its tag with the language part in lowercase (`nl`, `lkt`, `pt-BR`; `LKT` or `New` are read as text); text that names no language is not shown as it is: the version is labelled with its songbook, else with that text. Both forms are valid.
 5. **Edited rows.** Members and admins may correct imported songs in the app. Protecting those corrections from the next run, and reporting them back to the source catalog, is Story 6.2.21 (#524). Until then, an importer that overwrites existing rows also overwrites such corrections.
 6. **Songs linked as versions of another song** (#512) keep their sources and their `catalog_source_id`; because that key is unique per song, give each version of a song a different `catalog_source_id`.
 

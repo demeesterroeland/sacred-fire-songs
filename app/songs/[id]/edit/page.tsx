@@ -11,35 +11,14 @@ import { useAuth } from '@/hooks/useAuth';
 import { useLocale } from '@/context/LocaleContext';
 import { EDIT_VERSION_PARAM, pickVersion, sortVersions } from '@/lib/songs/versionOrder';
 import { versionOptions } from '@/lib/songs/versionSwitch';
+import { EDIT_SONG_SELECT } from '@/lib/songs/songSelect';
 
 // Similar fetch to detail page, but we just need basic data
 const fetchSongForEdit = async (id: string) => {
     const supabase = createClient();
     const { data, error } = await supabase
         .from('compositions')
-        .select(`
-          id,
-          title,
-          original_author,
-          owner_id,
-          is_public,
-          song_category_map (
-            category_id
-          ),
-          song_versions!inner (
-            id,
-            created_at,
-            version_name,
-            content_chordpro,
-            key,
-            capo,
-            tuning,
-            youtube_url,
-            spotify_url,
-            soundcloud_url,
-            melody_notation
-          )
-        `)
+        .select(EDIT_SONG_SELECT)
         .eq('id', id)
         .single();
 
@@ -49,7 +28,7 @@ const fetchSongForEdit = async (id: string) => {
 };
 
 export default function EditSongPage() {
-    const { t } = useLocale();
+    const { t, locale } = useLocale();
     const params = useParams();
     const id = typeof params.id === 'string' ? params.id : params.id?.[0];
     const pathname = usePathname();
@@ -100,7 +79,7 @@ export default function EditSongPage() {
     // The version being read (`?version=`), else the first (oldest) one, like the song page.
     const version = pickVersion(song.song_versions, requestedVersionId);
     // Which version this form saves is only visible when the song has more than one (same labels as the switch).
-    const versionLabel = versionOptions(song.song_versions, t)?.find((o) => o.value === version?.id)?.label;
+    const versionLabel = versionOptions(song.song_versions, t, locale)?.find((o) => o.value === version?.id)?.label;
     const initialData = {
         title: song.title,
         author: song.original_author || '',

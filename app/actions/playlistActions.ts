@@ -6,6 +6,7 @@ import { NEW_PLAYLIST_IS_PUBLIC, toIsPublic } from '@/lib/playlists/visibility';
 import { isSmartPlaylist } from '@/lib/playlists/smartPlaylists';
 import { uuid, playlistTitle, playlistDescription, safeParse } from '@/lib/validation/schemas';
 import { z } from 'zod';
+import { sortVersions } from '@/lib/songs/versionOrder';
 
 // ─── Authorization Helper ──────────────────────────────────────────────────────
 
@@ -219,16 +220,16 @@ export async function addSongToPlaylist(
     const hasAccess = await checkPlaylistModifyAccess(supabase, user, playlist);
     if (!hasAccess) return { added: false, error: 'Access denied: not your playlist or unauthorized' };
 
-    // All versions of the song, oldest first: the playlist "holds the song" when it holds any of
-    // them (same rule as the picker's check marks, #414), and a new add uses the oldest version.
-    const { data: versions } = await supabase
+    // All versions of the song: the playlist "holds the song" when it holds any of them (same rule as the picker's
+    // check marks, #414), and a new add uses the song's FIRST version in the order of the song page (original,
+    // variants, translations; each oldest first, `id` as tiebreak: lib/songs/versionOrder.ts, #509).
+    const { data: versionRows } = await supabase
         .from('song_versions')
-        .select('id')
-        .eq('composition_id', compositionParsed.data)
-        .order('created_at', { ascending: true })
-        .order('id', { ascending: true }); // same tiebreak as lib/songs/versionOrder.ts
+        .select('id, created_at, version_kind')
+        .eq('composition_id', compositionParsed.data);
 
-    const version = versions?.[0];
+    const versions = sortVersions(versionRows);
+    const version = versions[0];
     if (!version) return { added: false, error: 'Song version not found' };
 
     // Already in the playlist (any version) — toggle out: remove every version of this song

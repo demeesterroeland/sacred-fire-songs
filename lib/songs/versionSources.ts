@@ -43,7 +43,14 @@ export interface VersionSourceRow {
   songbooks?: SourceBook | SourceBook[] | null;
 }
 
-function bookOf(row: VersionSourceRow): SourceBook | null {
+/** What ordering the sources needs; a full `VersionSourceRow` fits, and so does the lighter row of a version label. */
+export interface SourceOrderRow {
+  id?: string;
+  is_primary?: boolean | null;
+  songbooks?: SourceBook | SourceBook[] | null;
+}
+
+function bookOf(row: SourceOrderRow): SourceBook | null {
   const b = Array.isArray(row.songbooks) ? row.songbooks[0] : row.songbooks;
   return b ?? null;
 }
@@ -57,16 +64,16 @@ const bookName = (b: SourceBook): string => clean(b.title) || clean(b.short_name
  * Primary source first, then the others by book name (in `locale`), then by id so the order never depends on the
  * order PostgREST happened to return. Returns a new array.
  */
-export function sortSources(rows: ReadonlyArray<VersionSourceRow>, locale?: string): VersionSourceRow[] {
-  const name = (r: VersionSourceRow) => {
+export function sortSources<T extends SourceOrderRow>(rows: ReadonlyArray<T>, locale?: string): T[] {
+  const name = (r: T) => {
     const b = bookOf(r);
     return b ? bookName(b) : '';
   };
   return [...rows].sort(
     (a, b) =>
-      Number(b.is_primary) - Number(a.is_primary) ||
+      Number(!!b.is_primary) - Number(!!a.is_primary) ||
       name(a).localeCompare(name(b), locale, { sensitivity: 'base' }) ||
-      a.id.localeCompare(b.id)
+      (a.id ?? '').localeCompare(b.id ?? '')
   );
 }
 
@@ -74,7 +81,7 @@ export function sortSources(rows: ReadonlyArray<VersionSourceRow>, locale?: stri
  * The source the version belongs to first: the `is_primary` row, else the first after `sortSources`. The source line
  * and the version label (#530) both use it, so they name the same book. `null` without sources.
  */
-export function primarySource(rows: ReadonlyArray<VersionSourceRow> | null | undefined, locale?: string): VersionSourceRow | null {
+export function primarySource<T extends SourceOrderRow>(rows: ReadonlyArray<T> | null | undefined, locale?: string): T | null {
   if (!rows?.length) return null;
   return rows.find((r) => r.is_primary) ?? sortSources(rows, locale)[0] ?? null;
 }
