@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { Edit2, Globe, Minus, Pause, Play, Plus, Share2, Trash2 } from 'lucide-react';
+import { Edit2, Globe, Link2, Minus, Pause, Play, Plus, Share2, Trash2 } from 'lucide-react';
 import { BottomSheet, BottomSheetClose, BottomSheetContent, SheetAction } from '@/components/ui/bottom-sheet';
 import { Switch } from '@/components/ui/switch';
 import { ToolbarButton } from '@/components/ui/toolbar';
@@ -27,6 +27,8 @@ export interface SongMenuActions {
   onDelete?: () => void;
   /** Owner or admin, private song only (validation 4): make the song public from the menu. */
   onPublish?: () => void;
+  /** Gatekeeper or admin (Story 6.2.9, #512): link this song as a version of another song (the page opens the sheet). */
+  onLinkAsVersion?: () => void;
 }
 
 interface SongMenuSheetProps {
@@ -109,6 +111,15 @@ export function SongMenuSheet({
             <div className="py-2">
               <SheetAction icon={<Globe />} onClick={actions.onPublish}>
                 {t('song.menu.publish')}
+              </SheetAction>
+            </div>
+          )}
+
+          {/* Story 6.2.9 (#512): on every width, gatekeepers and admins only. */}
+          {actions.onLinkAsVersion && (
+            <div className="py-2">
+              <SheetAction icon={<Link2 />} onClick={actions.onLinkAsVersion} data-testid="song-menu-link-version">
+                {t('song.menu.linkAsVersion')}
               </SheetAction>
             </div>
           )}
