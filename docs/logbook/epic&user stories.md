@@ -1,6 +1,6 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 2.07
+**Version:** 2.09
 **Status:** Living Document
 **Date:** Nov 13, 2026
 
@@ -63,7 +63,9 @@
 | **1.92** | Nov 6, 2026 | Epic 6.1: validation round 1 after the owner's phone run (Part of #375): auto-scroll only when the lyrics run below the fold (Story 6.1.10 / #394), expanded meta line (6.1.7 / #391), one focus style for text fields, the search suggestions in the page flow (6.1.29 / #413), search options on tokens, translated feedback and song flags across versions (6.1.11 / #395). Acceptance criteria of those stories now read as in `docs/testing/ux-v2-validation-1.feature`. |
 | **1.93** | Nov 7, 2026 | Epic 6.1: review round on the validation round 1 PR (#474, Part of #375): acceptance criteria of Stories 6.1.10 (auto-scroll offered only when the lyric text runs below the visible area above the fixed bars), 6.1.29 (suggestions close on the click and keep the scroll position), 6.1.1 (one focus cue per field, readable chip counts), 6.1.11 (a lyrics-only version has no Chords switch; a bracketed section label is not a chord) and the i18n policy (no raw server or database text in a toast) verified against the code; decisions UXA-061 to UXA-066. |
 | **1.94** | Nov 7, 2026 | Epic 6.1: validation round 2, batch 2 (Part of #375): acceptance criteria updated for Story 6.1.4 (#388: amounts between parentheses, "Air (3)"), 6.1.8 (#392: the full title wraps at the top of the page on a phone, the truncated copy shows only after scrolling past it), 6.1.10 (#394: transpose, scroll speed and a Screen stays on switch live in the one ⋮ menu; the toolbar has no ⋯), 6.1.11 (#395: every version has a `?version=` link, replaced in place, shared by Share), 6.1.23 (#407: History, Artists and Shared with me share one heading size) and 6.1.24 (#408: the Library "+" floats at the bottom right). New: Terms and Privacy pages (draft) with the operator from the server environment. |
-| **2.07** | Nov 13, 2026 | Epic 6.2: Story 6.2.20 (#523, G5.3) implemented on `feat/ux-v3`: the edit form has a *Songbook details* section with the version's **beats** (a count from 1 to 99 or counts joined with `y & + / -` or a comma: `8`, `6`, `8y4`; the format the meta line prints) and **About this song** note (plain text, paragraph breaks kept, at most 4000 characters), and shows the version's **source** read-only; admins get a *Correct source* button for the page and original title of the primary source (the songbook itself is not editable here). Only changed fields are written; a blank beats or note saves NULL. Permissions are unchanged (contributor or admin of the version; catalog keys stay admin-only). 8 locales (`qu` for a native check). Executable: `docs/testing/ux-v3-edit-version-meta.feature` (`@unit`, `@seed`). A write the database filters without an error (no row back: a song owner editing a catalog version, an admin whose source update is refused) is reported with a translated message, never shown as saved; the source correction is the last step of the save, so a refusal says "version saved, source not corrected" and keeps categories and tags. |
+| **2.09** | Nov 13, 2026 | Epic 6.2: Story 6.2.20 (#523, G5.3) implemented on `feat/ux-v3`: the edit form has a *Songbook details* section with the version's **beats** (a count from 1 to 99 or counts joined with `y & + / -` or a comma: `8`, `6`, `8y4`; the format the meta line prints) and **About this song** note (plain text, paragraph breaks kept, at most 4000 characters), and shows the version's **source** read-only; admins get a *Correct source* button for the page and original title of the primary source (the songbook itself is not editable here). Only changed fields are written; a blank beats or note saves NULL. Permissions are unchanged (contributor or admin of the version; catalog keys stay admin-only). 8 locales (`qu` for a native check). Executable: `docs/testing/ux-v3-edit-version-meta.feature` (`@unit`, `@seed`). A write the database filters without an error (no row back: a song owner editing a catalog version, an admin whose source update is refused) is reported with a translated message, never shown as saved; the source correction is the last step of the save, so a refusal says "version saved, source not corrected" and keeps categories and tags. |
+| **2.08** | Nov 13, 2026 | Epic 6.2: Story 6.2.18 (#521, G5.1) implemented on `feat/ux-v3` (PR into `feat/ux-v3`, in review): search finds a song by alias (`compositions.aliases`), any author and the original title in a songbook (`song_version_sources.original_title`, every version), ignoring case and accents; when the title did not match, the row says why ("Matched by alias: …"). One in-memory matcher (`lib/songs/search.ts`) serves the free-text filter and `filterSongs`; `SONGS_SELECT` embeds the sources once. The whole list is fetched in 1000-row pages (PostgREST `max_rows`), title matches are listed first. No migration and no index: nothing searches in the database (see the design doc, 2.20, for when to add `pg_trgm`). Known limit, follow-up story: the **+ Add Songs** sheet of a playlist still matches the title only (it would need the whole catalog or a lighter list fetch there). Spec: `docs/testing/ux-v3-search-aliases.feature`. |
+| **2.07** | Nov 13, 2026 | Epic 6.2: Story 6.2.9 (#512, G1.4) implemented on `feat/ux-v3` (PR into `feat/ux-v3`, in review): admins (any song) and gatekeepers (only songs they own: source and target) link a duplicate song as a version of another song from the song menu (search, preview of what moves, clear confirm; no undo); both songs must be public or both private, for everyone. One database function `fn_link_song_as_version` moves versions (recordings and playlist entries follow), merges categories, aliases, authors and favourites, keeps the catalog slug reachable, leaves a redirect from the old link (chains collapse) and an audit entry (`docs/testing/ux-v3-link-song-version.feature`). |
 | **2.06** | Nov 12, 2026 | Epic 6.2: Story 6.2.13 (#516, G3.1) implemented on `feat/ux-v3`: a language switch (*Original language · Dutch · English*) sits next to the version switch and is fed by `song_translations`; a song without translations shows no switch and takes no space. A translation replaces the lyrics of the version being read (version stays selected, source line hidden, translator and a differing translated title shown); choosing a version returns to the original language, choosing a language keeps the version; `?lang=<tag>` deep link; guests see the translations of public songs only (row-level security). Migration `20261112140000_translation_versions_to_translations.sql` moves the interim `translation` versions to `song_translations` (recordings go to the first original version, appended after the takes already there; playlist items open that version in its original language; rows that cannot move cleanly stay and are reported: language not derivable, no original version, blank lyrics, chords in another key/capo/tuning than the original, lyrics-only in another key while a playlist transposes it, its own melody/note/beats/media link/votes, or a different stored text; dropped sources and the contributor are logged). The importer guide (v1.3) now says translations go to `song_translations`. 8 locales (`qu` for a native check). Executable: `docs/testing/ux-v3-language-switch.feature` (`@unit`, `@seed`). Unblocks #517 (G3.2). |
 | **2.05** | Nov 12, 2026 | Epic 6.2: Story 6.2.12 (#515, G2.3) implemented on `feat/ux-v3` (PR #533): every author of a song is shown, each its own link to the author filter (the meta line, the share text, the ⋮ sheet and the rehearsal drawer). Review round: the Add/Edit form prefills from `authors` and writes it next to `original_author` when the author input is changed (any other edit leaves both columns as stored); the free-text search, the author filter and the artists index use the same names (`authors`, else `original_author` split); the joiner sits after the previous link (no "Anna , Ben"); "Traditional" is plain text, not a link; the link carries the exact name through the URL (`&`, `+`, `#`); `qu` has no conjunction data (plain-list fallback). Spec: `docs/testing/ux-v3-all-authors.feature`. |
 | **2.04** | Nov 12, 2026 | Epic 6.2: Story 6.2.6 (#509, G1.1) implemented on `feat/ux-v3`: each version is labelled with its songbook short name (original, variants) or its language name in the app language (translations), ordered original, variants, translations; four versions fit a 375 px phone. Executable in `docs/testing/ux-v3-version-labels.feature`. Review round (PR #530): adding to a playlist and favouriting use the first version of that order (not the oldest row); the switch scrolls the opened version into view on a phone; any language tag names its language; two translations in one language show their songbook; an unrecognised translation shows its songbook; one embed of `song_version_sources` per query (guarded by a unit test). |
@@ -1731,11 +1733,13 @@ GitHub epic **#498**. Many circles sing from printed songbooks: the same song ap
 | 6.2.6 | #509 | `G1.1` | A | **[Implemented on feat/ux-v3]** As a reader, I want each version labelled with its songbook or language and the switch to fit my phone so that I know which version I am reading | — |
 | 6.2.7 | #510 | `G1.2` | A | **[Implemented on feat/ux-v3, PR #529]** As a Musician, I want the key, capo and beats of the selected version in the meta line so that I play the version as printed in its book | #504 |
 | 6.2.8 | #511 | `G1.3` | B | **[Implemented on feat/ux-v3, in review]** As a reader, I want the note printed with a song in a collapsible "About this song" so that I learn its background without it pushing the lyrics down | — |
+| 6.2.9 | #512 | `G1.4` | B | **[Implemented on feat/ux-v3, in review]** As a Contributor, I want to link a song as a version of another song so that duplicates become one song with several versions (admins on any song, gatekeepers on songs they own; both songs public or both private; ⋮ menu → "Link as a version of…"; preview and confirm; the old link opens the target) | #504 |
 | 6.2.10 | #513 | `G2.1` | A | **[Implemented on feat/ux-v3]** As a reader, I want to see in which songbook and on which page a version appears so that I can find it in the printed book and credit its compiler (grey line under the lyrics: `Songbook A · p. 38 · compiled by Compiler A`; original title when it differs; follows `?version=`; guests too) | #504 |
 | 6.2.12 | #515 | `G2.3` | B | **[Implemented on feat/ux-v3, PR #533]** As a reader, I want all authors of a song shown and tappable so that co-written songs credit everyone | #504 |
 | 6.2.13 | #516 | `G3.1` | B | **[Implemented on feat/ux-v3, in review]** As a reader, I want a language switch next to the version switch so that I read a translation without leaving the song | #504; unblocks #517 |
 | 6.2.15 | #518 | `G4.1` | A | **[Implemented on feat/ux-v3, PR #526]** As a reader, I want repeat bars shown in the lyrics so that I know which lines the circle sings twice (`‖:` … `:‖` and `×2` around the lines between `{start_of_repeat}` and `{end_of_repeat}`; chords on or off) | — |
 | 6.2.16 | #519 | `G4.2` | A | **[Implemented, PR #528]** As a Musician, I want alternative chords like A7/C7 shown and transposed correctly so that the chord line stays right in every key | — |
+| 6.2.18 | #521 | `G5.1` | B | **[Implemented on feat/ux-v3, in review]** As a Guest, I want search to find songs by alias, any author and their title in a songbook so that I find a song by the name I know | #504 |
 | 6.2.20 | #523 | `G5.3` | B | **[Implemented on feat/ux-v3, in review]** As a Contributor, I want to edit beats, note and source of a version in the edit form so that catalog data can be corrected in the app (beats and note are fields; the source is shown read-only with a *Correct source* button for admins) | #510, #511, #513 |
 
 **Story 6.2.6 acceptance criteria** (executable: `docs/testing/ux-v3-version-labels.feature`, `@unit` and `@e2e`):
@@ -1901,6 +1905,29 @@ Scenario: Note is collapsed until opened
 
 Also: a whitespace-only note counts as empty (hidden); switching version shows that version's note and hides the panel when it has none; paragraph breaks are kept and the note is plain text (never HTML); design intent (not yet asserted by an E2E spec): the collapsed panel keeps the first lyric line above the fold at 390 × 844.
 
+**Story 6.2.9 acceptance criteria** (executable: `docs/testing/ux-v3-link-song-version.feature`, `@unit` and `@seed`):
+
+```gherkin
+Scenario: Linking merges two songs
+  Given the gatekeeper's songs "Weyo wey yanna" and "Weyo Wey Yanna (Songbook B)"
+  When a gatekeeper links the second as a version of the first
+  Then the first song has both versions
+  And the old link opens the first song
+  And recordings and playlist entries of the second still work
+
+Scenario: A gatekeeper cannot link another member's song
+  Given the second song belongs to another member
+  When a gatekeeper links the second as a version of the first
+  Then the link is refused as not their own
+
+Scenario: A public song cannot be linked into a private song
+  Given the first song is private
+  When a gatekeeper links the second as a version of the first
+  Then the link is refused as a visibility mismatch
+```
+
+Also: the first song keeps its own version first (a moved `original` becomes a `variant`), gains the old title as an alias and the categories of both songs, and an audit entry names who linked what; the preview changes nothing; members (and every role below gatekeeper) are refused, and so is linking a song to itself; **gatekeepers link only songs they own** — both the source and the target (the menu item is hidden on someone else's song, the search lists only their own songs, the database refuses with *You can only link songs you own.*); admins link any song; **both songs must be public or both private**, for everyone (admins included), and the preview shows that refusal before any confirm; a guest cannot see a redirect to a private song; redirect chains collapse (a song linked earlier into the source now leads to the target; linking the source again is refused as already linked; a target that was itself linked is followed to the song it lives in); catalog slug: the target takes the source's slug when it has none (also in a gatekeeper's link: the link deliberately moves catalog keys past the admin-only catalog guards, the values only ever come from the source song), otherwise keeps its own and the source's slug still resolves to the target (`fn_song_id_for_catalog_slug`); two versions from the same songbook do not collide on `(composition_id, catalog_source_id)` (the moved one keeps its content and loses the key); a member who favourited both songs keeps one favourite, on the target's first version; an old `/songs/<id>?version=…&recording=…` continues at the target with the same query. Undo: none — a clear confirm with the preview instead (reasoning: `application-analysis&design.md` §6.19, "Confirm, not undo").
+
 **Story 6.2.10 acceptance criteria** (executable: `docs/testing/ux-v3-songbook-source.feature`, `@unit` and `@seed`):
 
 ```gherkin
@@ -1936,6 +1963,39 @@ Scenario: A guest reads the source of a public song, not of a private one
 
 Scenario: The song page's real query is accepted by the local API
   Then the select of the song page runs without error and returns the sources of each version as a list
+```
+
+**Story 6.2.18 acceptance criteria** (executable: `docs/testing/ux-v3-search-aliases.feature`, `@unit` and `@seed`):
+
+```gherkin
+Scenario: Found by alias
+  Given a song "Huey Tonantzin" with alias "Gran Venerable Madre Tierra"
+  When I search "Venerable"
+  Then the song is in the results
+
+Scenario: Found by a co-author that is only in the authors list
+  Given a song "Huey Tonantzin" by "Anna Lee" with authors "Anna Lee" and "Ben Cruz"
+  When I search "Ben Cruz"
+  Then the song is in the results
+
+Scenario: Found by the original title in a songbook (any version)
+  Given a song "Huey Tonantzin" printed as "Canto a la Madre Tierra" in a songbook
+  When I search "madre tierra"
+  Then the song is in the results
+
+Scenario Outline: Case and accents do not matter
+  Examples: "venerable" / "VENERABLE" for "Venerable"; "pachamama" for "Pachamamá" and the reverse; "LA NUSTA" for "Ñusta"
+
+Scenario: The hint names why, only when the title did not match
+  Then "Matched by alias: Gran Venerable Madre Tierra", "Matched by songbook title: …" or "Matched by author: Ben Cruz"
+  But no hint when the title matched, even if an alias matches too
+
+Scenario: A song is listed once however many fields match
+  Then the results are the song "Huey Tonantzin" once
+
+Scenario: A guest never finds a private song through its alias or songbook title (RLS)
+  Given a private song of a member with alias "Gran Venerable Secreta" printed as "Canto Secreto"
+  Then a guest's search finds neither; the owner's finds it; a guest finds a public catalog song by alias and by songbook title
 ```
 
 ## Roles & Permissions Summary

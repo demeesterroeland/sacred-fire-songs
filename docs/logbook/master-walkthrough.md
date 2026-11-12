@@ -3439,6 +3439,24 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - `@seed`: the SQL step no longer claims to mirror the select; a new scenario sends `SONG_SELECT` through supabase-js (anon, read-only) to the local API.
 - Docs renumbered after merging `feat/ux-v3` (which had #528 and #529): design doc 2.16, epics 2.02, guest guide 0.26, member guide 0.23.
 
+## Session November 12, 2026 — Story 6.2.9 (#512), link a song as a version of another song
+
+- Gatekeepers and admins open ⋮ → **Link as a version of…** on a duplicate song, search the song it is a version of, see what moves and confirm. No undo: the merge deletes the duplicate and rewrites favourites, so the sheet shows the preview and says it cannot be undone; `song_link_audit` records who linked what.
+- One `SECURITY DEFINER` function does the merge in one transaction (migration `20261112120000_link_song_as_version.sql`, `fn_link_song_as_version`; `fn_preview_song_link` returns the same summary without changes). Versions move (an `original` becomes a `variant`, so the target's own original stays first); recordings and playlist entries follow because they point at versions; categories, views, translations and notifications are merged; aliases gain the old title; favourites are de-duplicated onto the target's first version.
+- Catalog keys: the target keeps its slug or takes the source's; a source slug that is not moved stays on `composition_redirects` and `fn_song_id_for_catalog_slug` resolves it to the target. A moved version whose `catalog_source_id` the target already has loses the key (unique per song).
+- Old links: the song page looks an unknown id up in `composition_redirects` and replaces the URL with the target, keeping `?version=` / `?recording=`. Redirect chains collapse when a target is itself linked later.
+- Tests: `docs/testing/ux-v3-link-song-version.feature` (3 `@unit` incl. a 5-row outline, 11 `@seed` in rolled-back transactions), unit tests for the helpers, the server actions, the sheet and the schema file. 44 keys `song.link.*` / `song.menu.linkAsVersion` in all 8 locales (Quechua needs a native check).
+
+## Session November 12, 2026 — Story 6.2.9 (#512), review fixes
+
+- Owner decisions: admins link any song, gatekeepers only songs they own (source **and** target; 42501 *Gatekeepers can only link songs they own*). The ⋮ item uses `canLinkSong(user, ownerId)` and the target search lists only the gatekeeper's own songs.
+- Both songs must be public or both private, for everyone (22023 *Both songs must be public, or both private*); the preview shows the refusal before any confirm. New keys `song.link.error.notOwner` / `.visibility` in all 8 locales (Quechua needs a native check).
+- Catalog keys: a gatekeeper's link still moves them; the migration header, design doc §6.19 and db-schema now state that the function deliberately bypasses the admin-only catalog guards (it runs as its owner) and why the risk is low (values only come from the source song).
+- `composition_redirects` is readable only when its target song is (RLS `EXISTS` on `compositions`); guests cannot learn about a redirect to a private song.
+- No `service_role` grant on the link / preview functions (they need `auth.uid()`); `fn_link_song_as_version` re-checks after locking both songs, so a link that lost a race reads "already linked" (checked with two concurrent psql sessions).
+- Confirm in the sheet runs the link once even on a double click (ref guard). Undo reasoning moved into design doc §6.19.
+- Tests: 13 new `@seed` scenarios (ownership, visibility outline, redirect privacy, gatekeeper slug move), a `@unit` refusal outline, unit tests for `canLinkSong`, the gatekeeper-only search, the error mapping and the double click.
+
 ## Session November 12, 2026 — Story 6.2.20 (#523): edit beats, note and source of a version
 
 - The edit form (edit mode only) has a *Songbook details* section (`components/song/EditVersionMeta.tsx`): **Beats**, **About this song** (the note) and the version's **Source** as read-only text. `EDIT_SONG_SELECT` selects `beats` and `song_note` (one `song_version_sources (` embed, guard test extended); the edit page prefills them and passes `sources` and the song title.

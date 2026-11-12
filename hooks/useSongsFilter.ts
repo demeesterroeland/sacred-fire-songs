@@ -1,6 +1,7 @@
 import { useMemo } from 'react';
 import { useDeclarativeFilter } from '@/hooks/useDeclarativeFilter';
 import { songFilterConfig, isDraftActive, type SongFilterState } from '@/lib/songs/filterConfig';
+import { rankSongsBySearch } from '@/lib/songs/search';
 import type { Song } from '@/lib/songUtils';
 
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
@@ -80,14 +81,16 @@ export function useSongsFilter({ songs, userId, favoriteIds, userRecordingCompos
     return items;
   }, [filteredItems, state.favorites, state.mine, state.myRecordings, state.new, favoriteIds, userRecordingCompositionIds, viewedSongIds, userId]);
 
-  // Sort
+  // Sort, then (while searching) title matches before the songs found by an alias, author, songbook title, … (#521).
+  // The partition is stable, so the chosen sort order holds inside each group.
   const displaySongs = useMemo(() => {
-    return [...finalFilteredItems].sort((a, b) => {
+    const sorted = [...finalFilteredItems].sort((a, b) => {
       if (sortBy === 'title') return a.title.localeCompare(b.title);
       if (sortBy === 'author') return a.author.localeCompare(b.author);
       return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
     });
-  }, [finalFilteredItems, sortBy]);
+    return rankSongsBySearch(sorted, state.search ?? '') as Song[];
+  }, [finalFilteredItems, sortBy, state.search]);
 
   // Cross-filter-aware counts: each count applies all OTHER active post-filters
   // but excludes its own, so users see "how many would match if I toggled this?"
