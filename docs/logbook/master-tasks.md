@@ -1537,3 +1537,12 @@
 - [x] Docs: design doc 2.16, epics 2.02 (story 6.2.10), guest guide 0.26, member guide 0.23
 - [x] Cross-review by another Claude model (orchestrator, #498)
 - [x] Review fixes (PR #531, Nov 12): one `song_version_sources` embed (`SONG_SELECT`, guard test, `primarySource()` for #530), `@seed` contract on the real select, page notation (`pp.`, `A-12`, importer prefixes), original-title normalisation, `sortSources` tie-break and locale, plural list label (`song.source.labelMany`), es `pág.`, fr no-break space, epic doc acceptance criteria, renumbered docs after merging `feat/ux-v3`
+
+## Session November 13, 2026 (Story 6.2.11, #514, songbook pages)
+
+- [x] Failing tests first: page order and grouping (`songbookPage.test.ts`), selects, components, route files, BDD `ux-v3-songbook-pages.feature`
+- [x] `lib/songbooks/*`, `components/songbooks/*`, `app/songbooks/*`, Library tab, source line link, 8 keys in 8 locales
+- [x] Real page checked against the local API with temporary data (removed again): found and fixed the URL-encoded book id
+- [x] Docs: design doc 2.24 (§6.20), epics 2.10 (story 6.2.11), guest guide 0.32, member guide 0.30, user guide 2.10, e2e overview 1.25
+- [ ] `qu` copy for the songbook pages needs a native check
+- [ ] Cross-review by another Claude model (orchestrator, #498)
