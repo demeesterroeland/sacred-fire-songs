@@ -11,6 +11,8 @@ export interface BasePillProps {
   href?: string;
   onClick?: () => void;
   title?: string;
+  /** Toggle pills (a selectable tag): announced as pressed / not pressed. */
+  pressed?: boolean;
   variantStyles?: string;
   className?: string;
   children?: React.ReactNode;
@@ -23,17 +25,16 @@ export function BasePill({
   href,
   onClick,
   title,
+  pressed,
   variantStyles = '',
   className = '',
   children,
 }: BasePillProps) {
   const baseStyles =
-    'inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-full transition-all duration-200 select-none border';
+    'inline-flex items-center gap-1.5 px-3 py-1 text-xs font-semibold rounded-pill transition-colors duration-200 select-none border';
 
   const isInteractive = Boolean(href || onClick);
   const cursorStyle = isInteractive ? 'cursor-pointer active:scale-95' : '';
-  const computedTitle = title ?? (isInteractive ? `Filter songs by ${label}` : undefined);
-
   const combinedClassName = `${baseStyles} ${cursorStyle} ${variantStyles} ${className}`.trim();
 
   const content = (
@@ -49,7 +50,7 @@ export function BasePill({
 
   if (href) {
     return (
-      <Link href={href} className={combinedClassName} title={computedTitle}>
+      <Link href={href} className={combinedClassName} title={title}>
         {content}
       </Link>
     );
@@ -57,14 +58,14 @@ export function BasePill({
 
   if (onClick) {
     return (
-      <button type="button" onClick={onClick} className={combinedClassName} title={computedTitle}>
+      <button type="button" onClick={onClick} aria-pressed={pressed} className={combinedClassName} title={title}>
         {content}
       </button>
     );
   }
 
   return (
-    <span className={combinedClassName} title={computedTitle}>
+    <span className={combinedClassName} title={title}>
       {content}
     </span>
   );

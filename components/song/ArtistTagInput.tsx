@@ -5,6 +5,7 @@ import { User, Plus } from 'lucide-react';
 import { AuthorPill } from '@/components/ui/AuthorPill';
 import { createClient } from '@/lib/supabase/client';
 import { parseArtists, sortTagSuggestions } from '@/lib/songs/artistUtils';
+import { formatCount } from '@/lib/format/count';
 
 import { useLocale } from '@/context/LocaleContext';
 export interface ArtistSuggestion {
@@ -161,10 +162,10 @@ export function ArtistTagInput({
     <div ref={containerRef} className={`relative w-full ${className}`}>
       {/* Input container with selected pills inline */}
       <div
-        className="field-composite flex flex-wrap items-center gap-1.5 min-h-[46px] w-full bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg px-3 py-2 transition-all cursor-text"
+        className="field-composite flex flex-wrap items-center gap-1.5 min-h-[46px] w-full bg-surface border border-line-strong rounded-control px-3 py-2 cursor-text"
         onClick={() => inputRef.current?.focus()}
       >
-        <User className="w-4 h-4 text-gray-400 shrink-0 mr-1" />
+        <User aria-hidden="true" className="w-4 h-4 text-fg-subtle shrink-0 mr-1" />
 
         {selectedArtists.map((artist, idx) => (
           <AuthorPill
@@ -172,6 +173,7 @@ export function ArtistTagInput({
             author={artist}
             variant="badge"
             onRemove={() => removeArtist(idx)}
+            removeLabel={t('songForm.artists.remove', { name: artist })}
           />
         ))}
 
@@ -187,13 +189,13 @@ export function ArtistTagInput({
           onFocus={() => setIsOpen(true)}
           onKeyDown={handleKeyDown}
           placeholder={selectedArtists.length === 0 ? (placeholder ?? t('songForm.artists.placeholder')) : t('songForm.artists.addAnother')}
-          className="flex-1 min-w-[150px] bg-transparent border-none text-sm text-gray-900 dark:text-white placeholder:text-gray-400 dark:placeholder:text-[#a19eb7]/50"
+          className="flex-1 min-w-[150px] bg-transparent border-none text-sm text-fg placeholder:text-fg-subtle"
         />
       </div>
 
       {/* Autocomplete Dropdown */}
       {isOpen && (suggestions.length > 0 || (inputValue.trim() && !isExactMatch)) && (
-        <div className="absolute top-full left-0 right-0 mt-1 bg-white dark:bg-[#1d1c26] border border-gray-200 dark:border-[#3f3d52] rounded-lg shadow-xl z-50 max-h-60 overflow-y-auto py-1 animate-in fade-in slide-in-from-top-1 duration-150">
+        <div className="absolute top-full left-0 right-0 mt-1 bg-surface border border-line rounded-control shadow-sheet z-50 max-h-60 overflow-y-auto py-1 animate-in fade-in slide-in-from-top-1 duration-150">
           {suggestions.map((item, idx) => {
             const isHighlighted = idx === highlightedIndex;
             return (
@@ -202,18 +204,14 @@ export function ArtistTagInput({
                 onClick={() => addArtist(item.name)}
                 onMouseEnter={() => setHighlightedIndex(idx)}
                 className={`flex items-center justify-between px-3 py-2 text-xs cursor-pointer transition-colors ${
-                  isHighlighted
-                    ? 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300 font-medium'
-                    : 'text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800/60'
+                  isHighlighted ? 'bg-surface-2 text-fg font-medium' : 'text-fg hover:bg-surface-2'
                 }`}
               >
                 <div className="flex items-center gap-2">
-                  <User className="w-3.5 h-3.5 opacity-60" />
+                  <User aria-hidden="true" className="w-3.5 h-3.5 text-fg-subtle" />
                   <span>{item.name}</span>
                 </div>
-                <span className="text-caption text-fg-muted font-mono">
-                  {item.song_count} {item.song_count === 1 ? 'song' : 'songs'}
-                </span>
+                <span className="text-caption text-fg-muted tabular-nums">{formatCount(item.song_count)}</span>
               </div>
             );
           })}
@@ -222,14 +220,12 @@ export function ArtistTagInput({
             <div
               onClick={() => addArtist(inputValue.trim())}
               onMouseEnter={() => setHighlightedIndex(suggestions.length)}
-              className={`flex items-center gap-2 px-3 py-2 text-xs font-semibold cursor-pointer border-t border-gray-100 dark:border-gray-800 transition-colors ${
-                highlightedIndex === suggestions.length
-                  ? 'bg-indigo-50 dark:bg-indigo-950/40 text-indigo-700 dark:text-indigo-300'
-                  : 'text-indigo-600 dark:text-indigo-400 hover:bg-gray-100 dark:hover:bg-gray-800/60'
+              className={`flex items-center gap-2 px-3 py-2 text-xs font-semibold cursor-pointer border-t border-line text-fg transition-colors ${
+                highlightedIndex === suggestions.length ? 'bg-surface-2' : 'hover:bg-surface-2'
               }`}
             >
-              <Plus className="w-3.5 h-3.5" />
-              <span>Add new artist &quot;{inputValue.trim()}&quot;</span>
+              <Plus aria-hidden="true" className="w-3.5 h-3.5" />
+              <span>{t('songForm.artists.addNew', { name: inputValue.trim() })}</span>
             </div>
           )}
         </div>
