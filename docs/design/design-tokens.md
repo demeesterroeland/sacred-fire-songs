@@ -1,11 +1,12 @@
 # Design Tokens & Component Sheet (UX v2, "sober" style)
 
-**Version:** 1.4 | **Date:** Nov 8, 2026 | **Story:** 6.1.1 / G1.1 (#385) | **Epic:** 6.1 (#375)
+**Version:** 1.5 | **Date:** Nov 12, 2026 | **Story:** 6.1.1 / G1.1 (#385) | **Epic:** 6.1 (#375)
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.5 | Nov 12, 2026 | Component sheet: **TagPill / AuthorPill** — one neutral tag style for every category (Story 6.1.35, #485); the per-category colour map is gone. |
 | 1.4 | Nov 8, 2026 | Rule 5 spelled out: lists are flat rows; boxes are for inputs, buttons, sheets and dialogs (UXA-069). |
 | 1.3 | Nov 7, 2026 | Review round: a field drawn as a container around its input (the Search options tag field, the artist field) uses `.field-composite`: the container shows the one 2 px `--focus` outline and the input inside none; no `focus-within:` ring or border, and selects and the shadcn `<Input>` follow the text-field rule (`textFieldFocus.test.ts` now reads `<Input>`, `<select>` and `focus-within:`). Tag counts inside chips inherit the chip colour (4.5:1). |
 | 1.2 | Nov 6, 2026 | Text-field focus rule: one cue per field (token outline for boxed fields, `.field-underline` for underlined ones); components do not add `outline-none`, rings or focus borders (UXA-056). |
@@ -119,6 +120,7 @@ Primitives in `components/ui/` (React) and the visual sheet `docs/design/screens
 | **ListRow** | `components/ui/list-row.tsx` | Title (`text-row`, `text-fg`, up to 2 lines), optional `MetaLine` under it, optional leading icon and trailing slot; divider `border-line`; whole row is the target (≥ 44 px): a `<button>` with `onClick`, or the child link with `asChild` (then `trailing` must not be interactive). No card, no border radius, no glow. |
 | **MetaLine** | `components/ui/meta-line.tsx` | One grey line (`text-meta`, `text-fg-muted`), items joined by " · ", truncates at the end; optional "show all" expand. Replaces coloured tag chips on cards and the song page. |
 | **Chip** | `components/ui/chip.tsx` | Filter-only. `rounded-pill`, `bg-chip`; selected = inverted (`bg-chip-active`) **plus** a check icon and `aria-pressed`. Never decorative. |
+| **TagPill / AuthorPill** | `components/ui/TagPill.tsx`, `components/ui/AuthorPill.tsx` (style: `lib/design/tagStyles.ts`) | One neutral style for every tag, whatever its category: `rounded-pill`, `bg-chip text-on-chip border-line`; hover (`bg-line`) only when the pill is a link or button. Selected (filter / selectable) = inverted `bg-chip-active text-on-chip-active`, **plus** a check (selectable) and `aria-pressed`. No colour per category. |
 | **BottomSheet** | `components/ui/bottom-sheet.tsx` | Radix Dialog at the bottom on mobile (centered dialog ≥ `sm`), `bg-surface`, `rounded-t-sheet`, `shadow-sheet`, `bg-scrim` overlay, grab handle, title, safe-area padding; reserves space for the mini player (`--mini-player-h`). One sheet component for menus, pickers and action sheets. |
 | **Toolbar** | `components/ui/toolbar.tsx` | `role="toolbar"` with a required translated `aria-label`, `bg-surface rounded-panel`, items are 44 px `ToolbarButton`s with text or icon + `aria-label`; toggles use `aria-pressed` **and** a visible cue (raised background + underline). Buttons stay in the tab order. Used for `Chords · A− · A+`. |
 | **Segmented** | `components/ui/segmented.tsx` | `role="radiogroup"` with a required translated `aria-label`; `bg-surface rounded-panel` strip of 44 px `role="radio"` buttons with `aria-checked` and a roving `tabindex` (one tab stop; Arrow Left/Right/Up/Down move and select with wrap-around, Home/End jump; text only, `text-meta`, no `title`); checked = raised `bg-bg` with a `ring-1 ring-line` hairline **plus** underline, never colour alone; scrolls sideways instead of widening the page. Used for the song page's version switch (`SongVersionSwitch`). |

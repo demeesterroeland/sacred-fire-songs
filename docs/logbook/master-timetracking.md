@@ -147,4 +147,5 @@
 | **November 11, 2026** | **Fix (#490)**: singer profile playback on self-hosted servers (same-origin audio URL), regression tests. (estimate) | ~0.5 Hours | Completed |
 | **November 11, 2026** | **Database (Epic 6.2, #504)**: songbook data model (migration, RLS, `@seed` scenarios, fresh-install schema, importer note, docs). (estimate) | ~1.5 Hours | Completed |
 | **November 11, 2026** | **Database (Epic 6.2, #504)**: review fixes on PR #527 (catalog key guards, strict keys, lowercase languages, restrict songbook delete, version order guidance, `@seed` scenarios). (estimate) | ~1.0 Hours | Completed |
-| **Total** | **Development + AI Collaboration** | **~263.5 Hours** | |
+| **November 12, 2026** | **Fix/UX (Epic 6.1, #485)**: sober colours group 1 — one neutral tag style, token-only tag editors, ratchet scans `lib/`, i18n, tests, docs. (estimate) | ~1.5 Hours | Completed |
+| **Total** | **Development + AI Collaboration** | **~265.0 Hours** | |

@@ -53,52 +53,54 @@ export default function CategorySelector({ selectedIds, onChange }: CategorySele
 
   if (isLoading) {
     return (
-      <div className="flex items-center gap-2 text-gray-400 text-sm p-4">
-        <Loader2 className="w-4 h-4 animate-spin" />
-        Loading tags...
+      <div role="status" className="flex items-center gap-2 text-fg-muted text-sm p-4">
+        <Loader2 aria-hidden="true" className="w-4 h-4 animate-spin" />
+        {t('search.tags.loading')}
       </div>
     );
   }
 
   if (error) {
-    return <div className="text-red-400 text-sm">{t('search.tags.loadError')}</div>;
+    return <div role="alert" className="text-danger text-sm">{t('search.tags.loadError')}</div>;
   }
 
   return (
-    <div className="space-y-4 bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-xl p-4 transition-all">
+    <div className="space-y-4 bg-surface border border-line rounded-panel p-4">
       {/* 1. Search Filter & Quick Actions */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div className="relative flex-1">
-          <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+          <Search aria-hidden="true" className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-fg-subtle" />
           <input
             type="text"
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder={t('search.tags.placeholder')}
-            className="w-full pl-9 pr-8 py-2 text-xs rounded-lg bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-400"
+            aria-label={t('search.tags.placeholder')}
+            className="w-full pl-9 pr-8 py-2 text-xs rounded-control bg-bg border border-line-strong text-fg placeholder:text-fg-subtle"
           />
           {searchTerm && (
             <button
               type="button"
               onClick={() => setSearchTerm('')}
-              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200"
+              aria-label={t('search.tags.clearSearch')}
+              className="absolute right-2.5 top-1/2 -translate-y-1/2 text-fg-subtle hover:text-fg"
             >
-              <X className="w-3.5 h-3.5" />
+              <X aria-hidden="true" className="w-3.5 h-3.5" />
             </button>
           )}
         </div>
 
         {selectedIds.length > 0 && (
           <div className="flex items-center justify-between sm:justify-end gap-2 text-xs shrink-0">
-            <span className="text-gray-500 dark:text-gray-400 font-medium">
-              {selectedIds.length} {selectedIds.length === 1 ? 'tag' : 'tags'} selected
+            <span className="text-fg-muted font-medium">
+              {t('search.tags.selectedCount', { count: selectedIds.length })}
             </span>
             <button
               type="button"
               onClick={clearAll}
-              className="text-red-600 dark:text-red-400 hover:underline text-xs font-medium"
+              className="text-fg underline-offset-2 hover:underline text-xs font-medium"
             >
-              Clear all
+              {t('search.clearAll')}
             </button>
           </div>
         )}
@@ -106,16 +108,15 @@ export default function CategorySelector({ selectedIds, onChange }: CategorySele
 
       {/* 2. Selected Tags Bar */}
       {selectedCategories.length > 0 && (
-        <div className="p-3 bg-red-50/50 dark:bg-red-950/30 border border-red-200/60 dark:border-red-900/40 rounded-lg space-y-1.5">
-          <span className="text-caption font-semibold text-danger">
-            Selected Tags ({selectedCategories.length})
+        <div className="p-3 bg-surface-2 border border-line rounded-control space-y-1.5">
+          <span className="text-caption font-semibold text-fg-muted">
+            {t('search.tags.selected', { count: selectedCategories.length })}
           </span>
           <div className="flex flex-wrap gap-1.5">
             {selectedCategories.map((cat) => (
               <TagPill
                 key={`selected-${cat.id}`}
                 label={cat.name}
-                categorySlug={cat.slug}
                 emoji={cat.emoji}
                 variant="selectable"
                 selected={true}
@@ -138,7 +139,6 @@ export default function CategorySelector({ selectedIds, onChange }: CategorySele
                 <TagPill
                   key={cat.id}
                   label={cat.name}
-                  categorySlug={cat.slug}
                   emoji={cat.emoji}
                   count={cat.song_count}
                   variant="selectable"
@@ -151,8 +151,8 @@ export default function CategorySelector({ selectedIds, onChange }: CategorySele
         ))}
 
         {filteredGrouped.length === 0 && (
-          <div className="text-center py-6 text-gray-400 text-xs">
-            No tags found matching &quot;{searchTerm}&quot;.
+          <div className="text-center py-6 text-fg-muted text-xs">
+            {t('search.tags.noMatch', { term: searchTerm })}
           </div>
         )}
       </div>

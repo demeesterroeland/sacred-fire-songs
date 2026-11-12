@@ -2,6 +2,7 @@
 
 import React from 'react';
 import { User, X } from 'lucide-react';
+import { tagPillClasses } from '@/lib/design/tagStyles';
 import { BasePill } from './BasePill';
 
 export interface AuthorPillProps {
@@ -11,11 +12,14 @@ export interface AuthorPillProps {
   count?: number;
   onClick?: () => void;
   onRemove?: () => void;
+  /** Accessible name of the remove control, e.g. t('songForm.artists.remove', { name }). Required with onRemove. */
+  removeLabel?: string;
   href?: string;
   title?: string;
   className?: string;
 }
 
+/** Author pill (Story 6.1.35, #485): the same neutral style as a tag pill. */
 export function AuthorPill({
   author,
   variant = 'badge',
@@ -23,57 +27,49 @@ export function AuthorPill({
   count,
   onClick,
   onRemove,
+  removeLabel,
   href,
   title,
   className = '',
 }: AuthorPillProps) {
-  const displayAuthor = author?.trim() || 'Traditional';
-
-  let variantStyles = '';
-  if (variant === 'badge') {
-    variantStyles =
-      'bg-indigo-500/10 dark:bg-indigo-500/20 text-indigo-700 dark:text-indigo-300 border-indigo-500/30 hover:bg-indigo-500/20 dark:hover:bg-indigo-500/30 shadow-xs';
-  } else if (selected) {
-    variantStyles =
-      'bg-indigo-600 text-white border-indigo-600 shadow-md ring-1 ring-indigo-500/50';
-  } else {
-    variantStyles =
-      'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300 border-gray-200 dark:border-gray-700 hover:bg-gray-200 dark:hover:bg-gray-700';
-  }
+  const displayAuthor = author?.trim() ?? '';
+  if (!displayAuthor) return null;
+  const isInteractive = Boolean(href || onClick);
+  const isToggle = variant === 'filter';
+  const variantStyles = tagPillClasses({ selected: isToggle && selected, interactive: isInteractive });
 
   const removeButton = onRemove ? (
     <span
       role="button"
       tabIndex={0}
+      aria-label={removeLabel}
       onClick={(e) => {
         e.stopPropagation();
         onRemove();
       }}
       onKeyDown={(e) => {
         if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
           e.stopPropagation();
           onRemove();
         }
       }}
-      className="ml-0.5 -mr-1 p-0.5 rounded-full hover:bg-indigo-500/20 dark:hover:bg-indigo-400/30 text-indigo-600 dark:text-indigo-300 transition-colors"
-      title={`Remove ${displayAuthor}`}
+      className="ml-0.5 -mr-1 p-0.5 rounded-pill text-fg-muted hover:bg-line hover:text-fg transition-colors"
+      title={removeLabel}
     >
-      <X className="w-3 h-3" />
+      <X aria-hidden="true" className="w-3 h-3" />
     </span>
   ) : undefined;
-
-  const isInteractive = Boolean(href || onClick);
-  const computedTitle =
-    title ?? (isInteractive ? `Filter songs by artist "${displayAuthor}"` : undefined);
 
   return (
     <BasePill
       label={displayAuthor}
-      icon={<User className="w-3 h-3 shrink-0 opacity-80" />}
+      icon={<User aria-hidden="true" className="w-3 h-3 shrink-0 opacity-80" />}
       count={count}
       href={href}
       onClick={onClick}
-      title={computedTitle}
+      title={title}
+      pressed={isToggle && onClick ? selected : undefined}
       variantStyles={variantStyles}
       className={className}
     >
