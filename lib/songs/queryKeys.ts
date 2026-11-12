@@ -15,6 +15,9 @@ export const SONG_KEYS = {
     /** Individual song detail */
     detail: (id: string) => ['song', id] as const,
 
+    /** Where an old song id leads after it was linked as a version of another song (Story 6.2.9) */
+    redirect: (id: string) => ['song', id, 'redirect'] as const,
+
     /** Song edit form */
     edit: (id: string) => ['song', id, 'edit'] as const,
 
