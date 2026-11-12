@@ -1,11 +1,12 @@
 # Roles & Glossary (draft)
 
-**Version:** 0.7 | **Date:** Nov 11, 2026
+**Version:** 0.8 | **Date:** Nov 12, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.8 | Nov 12, 2026 | Roles: gatekeepers and admins link a duplicate song as a version of another song (song page → ⋮ → **Link as a version of…**; UX v3, #512). Glossary: Linked song. |
 | 0.7 | Nov 11, 2026 | Glossary: Beats, the songbook beats of a version on the song page (UX v3, #510). |
 | 0.6 | Nov 7, 2026 | Glossary: "recording" is now **recording**. |
 | 0.5 | Nov 6, 2026 | Glossary: Version (switch under the song title, #395). |
@@ -28,6 +29,7 @@
 | Record, share, publish own recordings | — | ✅ | ✅ | ✅ |
 | Transpose (song page → ⋮), sheet music | — | musician | musician | ✅ |
 | Edit details & links of any song, curate public playlists | — | — | ✅ | ✅ |
+| Link a duplicate song as a version of another song (song page → ⋮ → **Link as a version of…**) | — | — | ✅ | ✅ |
 | Admin portal (users overview) | — | — | — | ✅ |
 
 ## Glossary
@@ -36,6 +38,7 @@
 | :--- | :--- |
 | Practice | Panel on a song with a **Listen** tab (reference tracks) and a **Record** tab (your recorder and **My recordings**). Replaces the old names Rehearsal Space, Voice Recorder and Recordings. |
 | Version | One arrangement of a song (for example *Original*, *Simplified*, *Live*) with its own lyrics, key and recordings. Songs with several versions show a switch under the title. |
+| Linked song | A duplicate a gatekeeper or admin linked as a version of another song: its versions, recordings and playlist entries now live in that song, its title became an other title of it, and its old link opens it. The sheet shows what moves before you confirm; it cannot be undone. |
 | Reference Track | YouTube / SoundCloud / Spotify version of the song. |
 | Recording | An audio file you recorded or uploaded for a song. Private by default. |
 | Shared with me | The list of recordings other members shared with you, under My recordings in Practice → Record. Each row says who shared it. Listen only. |

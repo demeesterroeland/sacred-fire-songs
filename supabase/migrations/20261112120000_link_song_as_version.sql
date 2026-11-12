@@ -5,8 +5,9 @@
 -- A gatekeeper or admin links the duplicate (source) as a version of the song that stays
 -- (target). One SECURITY DEFINER function does the whole merge in one transaction:
 --
---   * the source's versions move to the target; recordings and playlist items point at
---     versions, so they follow without changes
+--   * the source's versions move to the target (an 'original' becomes a 'variant', so the
+--     target's original stays first); recordings and playlist items point at versions, so
+--     they follow without changes
 --   * categories, song views and translations are merged; notifications are re-pointed
 --   * the target's aliases gain the source title (and its aliases); authors are merged
 --   * favourites are song level: every "My Favorites" item of the target points at the
@@ -261,7 +262,12 @@ BEGIN
       SELECT 1 FROM public.song_versions tv
       WHERE tv.composition_id = v_target AND tv.catalog_source_id = sv.catalog_source_id
     );
-  UPDATE public.song_versions SET composition_id = v_target WHERE composition_id = p_source;
+  -- The moved versions are versions of the target now: an 'original' becomes a 'variant', so the
+  -- target's own original stays the first version (lib/songs/versionOrder.ts); translations stay translations.
+  UPDATE public.song_versions
+  SET composition_id = v_target,
+      version_kind = CASE WHEN version_kind = 'original' THEN 'variant' ELSE version_kind END
+  WHERE composition_id = p_source;
 
   -- Categories, views, translations, notifications.
   INSERT INTO public.song_category_map (song_id, category_id)
@@ -309,9 +315,11 @@ BEGIN
   WHERE c.id = v_target;
 
   -- Favourites are per song: one item per member, on the target's first version (the one
-  -- the heart toggles).
+  -- the heart toggles: original, variants, translations; each oldest first, lib/songs/versionOrder.ts).
   SELECT id INTO v_first_version FROM public.song_versions
-  WHERE composition_id = v_target ORDER BY created_at, id LIMIT 1;
+  WHERE composition_id = v_target
+  ORDER BY CASE version_kind WHEN 'variant' THEN 1 WHEN 'translation' THEN 2 ELSE 0 END, created_at NULLS LAST, id
+  LIMIT 1;
 
   DELETE FROM public.setlist_items si
   USING (

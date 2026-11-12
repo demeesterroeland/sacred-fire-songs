@@ -58,6 +58,7 @@ Feature: Link a song as a version of another song
       Given the second song has a take and is in a playlist
       When a gatekeeper links the second as a version of the first
       Then the first song has both versions
+      And its own version stays first and the moved one is a variant
       And the old link opens the first song
       And recordings and playlist entries of the second still work
       And the first song's aliases include "Weyo Wey Yanna (Songbook B)"

@@ -7,6 +7,7 @@ import assert from 'node:assert/strict';
 import { Given, Then, When } from '@cucumber/cucumber';
 import { profileIdByEmail, queryAsUser, seedDb } from '../support/db';
 import { DICTIONARIES, translateFrom } from '../../../lib/i18n';
+import { firstVersion } from '../../../lib/songs/versionOrder';
 import { canLinkSongs, linkPreviewLines, songRedirectHref, type SongLinkSummary } from '../../../lib/songs/linkSong';
 import { OTHER_MEMBER_ID, SEEDED_EMAILS } from './access-policies.steps';
 
@@ -470,12 +471,25 @@ Then('the member has the first song once in their favourites', async function ()
 Then("the favourite points at the first song's first version", async function () {
   const s = w(this);
   const db = await seedDb();
-  const { rows } = await db.query<{ song_version_id: string; first_id: string }>(
-    `SELECT i.song_version_id,
-            (SELECT id FROM public.song_versions WHERE composition_id = $2 ORDER BY created_at, id LIMIT 1) AS first_id
-     FROM public.setlist_items i
-     WHERE i.setlist_id = $1`,
-    [s.favouritesId, s.first]
+  const { rows: versions } = await db.query<{ id: string; created_at: string; version_kind: string }>(
+    'SELECT id, created_at::text, version_kind FROM public.song_versions WHERE composition_id = $1',
+    [s.first]
   );
-  assert.equal(rows[0].song_version_id, rows[0].first_id);
+  const { rows } = await db.query<{ song_version_id: string }>(
+    'SELECT song_version_id FROM public.setlist_items WHERE setlist_id = $1',
+    [s.favouritesId]
+  );
+  // The same "first version" the heart toggles (lib/songs/versionOrder.ts).
+  assert.equal(rows[0].song_version_id, firstVersion(versions)?.id);
+});
+
+Then('its own version stays first and the moved one is a variant', async function () {
+  const s = w(this);
+  const db = await seedDb();
+  const { rows } = await db.query<{ id: string; created_at: string; version_kind: string }>(
+    'SELECT id, created_at::text, version_kind FROM public.song_versions WHERE composition_id = $1',
+    [s.first]
+  );
+  assert.equal(firstVersion(rows)?.id, s.firstVersion);
+  assert.equal(rows.find((r) => r.id === s.secondVersion)?.version_kind, 'variant');
 });
