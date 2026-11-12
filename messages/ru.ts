@@ -173,6 +173,7 @@ const ru: Partial<Record<TranslationKey, string>> = {
   'song.meta.capo': "Каподастр {capo}",
   'song.meta.showDetails': 'Показать подробности',
   'song.meta.hideDetails': 'Скрыть подробности',
+  'song.about.title': 'О песне',
   'song.visibility.private': 'Личное',
   'song.visibility.public': 'Публичное',
   'song.version.label': "Версия песни",

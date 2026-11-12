@@ -48,7 +48,8 @@ export const fetchSong = async (id: string) => {
             youtube_url,
             spotify_url,
             soundcloud_url,
-            melody_notation
+            melody_notation,
+            song_note
           ),
           song_category_map (
             categories (

@@ -170,6 +170,7 @@ const es: Partial<Record<TranslationKey, string>> = {
   'song.meta.capo': "Cejilla {capo}",
   'song.meta.showDetails': 'Mostrar detalles',
   'song.meta.hideDetails': 'Ocultar detalles',
+  'song.about.title': 'Sobre esta canción',
   'song.visibility.private': 'Privado',
   'song.visibility.public': 'Público',
   'song.version.label': "Versión de la canción",

@@ -174,6 +174,7 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'song.meta.capo': "Capo {capo}",
   'song.meta.showDetails': 'Astawan rikuchiy',
   'song.meta.hideDetails': 'Pakay',
+  'song.about.title': 'Kay taki kaqmanta',
   'song.visibility.private': 'Pakasqa',
   'song.visibility.public': 'Llapa runapaq',
   'song.version.label': "Takipa rikch’aynin",

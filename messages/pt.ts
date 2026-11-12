@@ -170,6 +170,7 @@ const pt: Partial<Record<TranslationKey, string>> = {
   'song.meta.capo': "Capotraste {capo}",
   'song.meta.showDetails': 'Mostrar detalhes',
   'song.meta.hideDetails': 'Ocultar detalhes',
+  'song.about.title': 'Sobre esta música',
   'song.visibility.private': 'Privado',
   'song.visibility.public': 'Público',
   'song.version.label': "Versão da canção",

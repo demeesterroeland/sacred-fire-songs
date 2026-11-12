@@ -170,6 +170,7 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'song.meta.capo': "Capo {capo}",
   'song.meta.showDetails': 'Details tonen',
   'song.meta.hideDetails': 'Details verbergen',
+  'song.about.title': 'Over dit lied',
   'song.visibility.private': 'Privé',
   'song.visibility.public': 'Openbaar',
   'song.version.label': "Versie van het lied",

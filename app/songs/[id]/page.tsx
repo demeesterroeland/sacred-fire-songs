@@ -27,6 +27,7 @@ import { useActionBarVisibility } from '@/hooks/useActionBarVisibility';
 import { useUserPreferences } from '@/context/UserPreferencesContext';
 import { practiceTab } from '@/lib/song/actionBar';
 import { SongMetaLines } from '@/components/song/SongMetaLines';
+import { AboutThisSong } from '@/components/song/AboutThisSong';
 import { VisibilityIcon } from '@/components/common/VisibilityIcon';
 import { ReaderToolbar } from '@/components/song/ReaderToolbar';
 import { SongVersionSwitch } from '@/components/song/SongVersionSwitch';
@@ -536,6 +537,14 @@ export default function SongDetailPage() {
                         expanded={controlsExpanded}
                         onToggleExpanded={() => setControlsExpanded((e) => !e)}
                         toggleRef={metaToggleRef}
+                    />
+
+                    {/* Story 6.2.8 / G1.3 (#511): the selected version's printed note, collapsed under the meta line and
+                        hidden when empty. Keyed by version, so every version starts collapsed. */}
+                    <AboutThisSong
+                        key={currentVersion?.id}
+                        className="mb-2"
+                        note={currentVersion?.song_note}
                     />
 
                     {/* Story 6.1.6 (#390), Validation 3: Chords · A− · A+ · ▶ row inside expand/collapse,

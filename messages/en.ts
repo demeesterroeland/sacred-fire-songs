@@ -168,6 +168,7 @@ const en = {
   'song.meta.capo': "Capo {capo}",
   'song.meta.showDetails': 'Show details',
   'song.meta.hideDetails': 'Hide details',
+  'song.about.title': 'About this song',
   'song.visibility.private': 'Private',
   'song.visibility.public': 'Public',
   'song.version.label': "Song version",

@@ -5,12 +5,15 @@
  */
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 
-const query = vi.hoisted(() => ({ result: { data: null as unknown, error: null as unknown }, terminal: '' }));
+const query = vi.hoisted(() => ({ result: { data: null as unknown, error: null as unknown }, terminal: '', columns: '' }));
 
 vi.mock('@/lib/supabase/client', () => ({
   createClient: () => {
     const builder = {
-      select: () => builder,
+      select: (columns: string) => {
+        query.columns = columns;
+        return builder;
+      },
       eq: () => builder,
       single: () => {
         query.terminal = 'single';
@@ -46,6 +49,13 @@ describe('fetchSong', () => {
   it('returns the song row when it exists', async () => {
     query.result = { data: { id: 'abc', title: 'Morning Sunrise' }, error: null };
     expect(await fetchSong('abc')).toEqual({ id: 'abc', title: 'Morning Sunrise' });
+  });
+
+  // Story 6.2.8 (#511): each version carries its printed note, so the song page can show "About this song".
+  it('selects each version\'s song_note', async () => {
+    query.result = { data: null, error: null };
+    await fetchSong('abc');
+    expect(query.columns).toMatch(/\bsong_note\b/);
   });
 
   it('throws real errors, so the page can offer Retry', async () => {
