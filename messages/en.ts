@@ -169,6 +169,7 @@ const en = {
   'song.meta.beats': 'Beats {beats}',
   'song.meta.showDetails': 'Show details',
   'song.meta.hideDetails': 'Hide details',
+  'song.about.title': 'About this song',
   'song.source.label': 'Source',
   'song.source.labelMany': 'Sources',
   'song.source.page': 'p. {page}',

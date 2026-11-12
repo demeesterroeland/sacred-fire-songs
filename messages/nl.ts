@@ -171,6 +171,7 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'song.meta.beats': 'Tellen {beats}',
   'song.meta.showDetails': 'Details tonen',
   'song.meta.hideDetails': 'Details verbergen',
+  'song.about.title': 'Over dit lied',
   'song.source.label': 'Bron',
   'song.source.labelMany': 'Bronnen',
   'song.source.page': 'p. {page}',

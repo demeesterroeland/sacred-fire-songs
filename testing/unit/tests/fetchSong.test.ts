@@ -64,6 +64,13 @@ describe('fetchSong', () => {
     expect(await fetchSong('abc')).toEqual({ id: 'abc', title: 'Morning Sunrise' });
   });
 
+  // Story 6.2.8 (#511): each version carries its printed note, so the song page can show "About this song".
+  it('selects each version\'s song_note', async () => {
+    query.result = { data: null, error: null };
+    await fetchSong('abc');
+    expect(query.select).toMatch(/\bsong_note\b/);
+  });
+
   it('throws real errors, so the page can offer Retry', async () => {
     const error = { message: 'Failed to fetch' };
     query.result = { data: null, error };

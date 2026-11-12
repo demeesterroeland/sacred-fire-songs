@@ -25,7 +25,8 @@ export const SONG_SELECT = `
             youtube_url,
             spotify_url,
             soundcloud_url,
-            melody_notation,${VERSION_SOURCES_SELECT}
+            melody_notation,
+            song_note,${VERSION_SOURCES_SELECT}
           ),
           song_category_map (
             categories (
