@@ -3438,3 +3438,12 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - `sortSources` breaks ties by id and sorts in the UI locale; the list is labelled "Sources" (`song.source.labelMany`, 8 locales; Quechua needs a native check); es `pág.` / `págs.`; fr non-breaking space before the colon.
 - `@seed`: the SQL step no longer claims to mirror the select; a new scenario sends `SONG_SELECT` through supabase-js (anon, read-only) to the local API.
 - Docs renumbered after merging `feat/ux-v3` (which had #528 and #529): design doc 2.16, epics 2.02, guest guide 0.26, member guide 0.23.
+
+## Session November 12, 2026 — Story 6.2.20 (#523): edit beats, note and source of a version
+
+- The edit form (edit mode only) has a *Songbook details* section (`components/song/EditVersionMeta.tsx`): **Beats**, **About this song** (the note) and the version's **Source** as read-only text. `EDIT_SONG_SELECT` selects `beats` and `song_note` (one `song_version_sources (` embed, guard test extended); the edit page prefills them and passes `sources` and the song title.
+- Rules live in `lib/songs/versionMeta.ts`: beats are a count from 1 to 99 or counts joined with `y & + / -` or a comma (what the meta line prints after "Beats", #510, and what importers write), the note is plain text (line endings unified, control characters such as NUL dropped, paragraph breaks kept, at most 4000 characters), blank saves NULL. Only changed fields are written (the principle of #533), so an untouched form never rewrites an importer's value, even one that fails the format check.
+- One save path: `lib/songs/versionUpdate.ts` builds the whole `song_versions` update; #524 (an "edited in the app" stamp) hooks in there.
+- Source: read-only for everyone; admins get **Correct source** for the page and original title of the primary source (`song_version_sources` update, admin-only by policy, only changed fields). The songbook itself has no admin screen yet and is not editable here.
+- No migration, no change to who may save: the `song_versions` update policy (contributor or admin) and the column privileges decide, so a catalog version (no `contributor_id`) is in practice changed by admins only.
+- Tests: `versionMeta.test.ts` (L2), `songFormVersionMeta.test.tsx` (L3), `songSelectGuard.test.ts`, BDD `docs/testing/ux-v3-edit-version-meta.feature` (9 `@unit`, 5 `@seed`). 14 new keys in 8 locales (`qu` needs a native check).
