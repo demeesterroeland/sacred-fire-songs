@@ -1,6 +1,6 @@
 # E2E Test Overview & Matrix: Sacred Fire Songs
 
-**Version:** 1.23
+**Version:** 1.24
 **Status:** Living Document
 **Date:** Nov 11, 2026
 **Tracking:** GH #142
@@ -27,6 +27,7 @@
 | **1.15** | Nov 5, 2026 | LIB-13 follows Story 6.1.24: no `/explore` route; bottom bar spec `ux-v2-bottom-bar.spec.ts`. |
 | **1.20** | Nov 7, 2026 | UX v2 validation round 1, review round on PR #474: new spec `ux-v2-validation-1-review.spec.ts` (a press on a song under the open suggestions on a phone with touch and on a desktop with a mouse, also on guest Home; the scroll position of the desktop column on the song list, Home and Playlists; auto-scroll behind the fixed bars on a phone and with padding on a desktop; the tools sheet and focus on a window that grows; section labels versus chords; toolbar alignment; one focus cue on the tag field, the artist field and the selects; Search options labels in all 8 languages at 390 px; axe colour contrast on the open tag browser, light and dark; fixture `VALIDATION_1_REVIEW_FIXTURE_IDS`, removed by `e2e/global-teardown.ts`). `ux-v2-validation-1.spec.ts` is unchanged. |
 | **1.21** | Nov 9, 2026 | Validation 4: LIB-12 is the New tab (`/library/new`); the Library tab row has five tabs and scrolls on a phone (`ux-v2-library-tabs.spec.ts`). |
+| **1.24** | Nov 11, 2026 | Story 6.2.6 (#509): new spec `ux-v3-version-labels.spec.ts` (a song with an original, two songbook variants and a translation: labels are the songbook short names and the language, original first, and at 375 px every option is reachable with no sideways page scroll; fixture `VERSION_LABELS_FIXTURE_IDS`, removed by `e2e/global-teardown.ts`). |
 | **1.23** | Nov 11, 2026 | #490: `ux-v2-profile-playback.spec.ts` (member): recordings on a singer profile play there one at a time, the play button is a 44 px target and the row opens the song with that take. |
 | **1.22** | Nov 11, 2026 | #492: SONG-08 now checks that a song row has no delete button (an admin on `/songs`, `ux-v2-song-rows.spec.ts`); deleting is in the song page's ⋮ menu only (SONG-07). |
 | **1.19** | Nov 6, 2026 | UX v2 validation round 1 (Part of #375): new spec `ux-v2-validation-1.spec.ts` (one focus style, suggestions panel in the flow on `/songs` and Home, search options tokens and category name, song flags versus the reader; fixed-id fixture `VALIDATION_1_FIXTURE_IDS`, removed by `e2e/global-teardown.ts`); `ux-v2-reader-tools.spec.ts` uses a short window so auto-scroll is offered and tests that it is not on a song that fits; `ux-v2-song-meta.spec.ts` checks the expanded list. |
