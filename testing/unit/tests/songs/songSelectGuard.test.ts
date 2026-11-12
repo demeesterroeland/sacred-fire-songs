@@ -22,6 +22,16 @@ describe('song selects', () => {
     expect(EDIT_SONG_SELECT).toMatch(/song_versions!inner/);
   });
 
+  // Story 6.2.12 (#515): a naive merge of the select would silently drop `authors`, and every co-author with it.
+  it.each([
+    ['SONG_SELECT', SONG_SELECT],
+    ['EDIT_SONG_SELECT', EDIT_SONG_SELECT],
+  ])('%s selects the composition authors[] column next to original_author', (_name, select) => {
+    const composition = select.split(/song_versions(!inner)?\s*\(/)[0];
+    expect(composition).toMatch(/\boriginal_author\b/);
+    expect(composition).toMatch(/\bauthors\b/);
+  });
+
   it('the edit page and fetchSong carry no inline copy of the embed', () => {
     for (const file of ['app/songs/[id]/edit/page.tsx', 'lib/songs/fetchSong.ts']) {
       expect(embeds(readFileSync(file, 'utf8')), file).toHaveLength(0);

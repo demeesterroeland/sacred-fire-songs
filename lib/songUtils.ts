@@ -1,6 +1,7 @@
 import { createClient } from "./supabase/client";
 import { songsQuery, mapCompositionToSong } from './songs/queries';
 import { normalizeWhitespace } from "./utils";
+import { cleanAuthors } from "./songs/authors";
 
 export const PAGE_SIZE = 20;
 
@@ -10,6 +11,8 @@ export interface Song {
     id: string;
     title: string;
     author: string;
+    /** Every credit of the song (`compositions.authors`); `author` stays the display text. */
+    authors?: string[];
     songKey: string | null;
     color: string;
     ownerId?: string;
@@ -39,11 +42,11 @@ export function filterSongs(songs: Song[], query: string, activeFilter: 'all' | 
     let filtered = songs.filter(song => {
         // 1. Text Search
         const cleanTitle = normalizeWhitespace(song.title).toLowerCase();
-        const cleanAuthor = normalizeWhitespace(song.author).toLowerCase();
+        const cleanAuthor = [song.author, ...cleanAuthors(song.authors)].map(a => normalizeWhitespace(a).toLowerCase());
         const cleanContent = song.content ? normalizeWhitespace(song.content).toLowerCase() : "";
 
         const matchesText = cleanTitle.includes(cleanQuery) ||
-            cleanAuthor.includes(cleanQuery) ||
+            cleanAuthor.some(a => a.includes(cleanQuery)) ||
             cleanContent.includes(cleanQuery);
 
         return matchesText;

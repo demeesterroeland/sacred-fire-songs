@@ -110,6 +110,8 @@ export interface CompositionRow {
   id: string;
   title: string;
   original_author: string | null;
+  /** Every credit (`compositions.authors`); selected by `SONGS_SELECT` (`*`). */
+  authors?: string[] | null;
   is_public: boolean;
   created_at: string;
   // Not part of the narrow RECENTLY_ADDED_SELECT, hence optional.
@@ -145,6 +147,7 @@ export function mapCompositionToSong(
     id: item.id,
     title: item.title,
     author: item.original_author || '',
+    authors: item.authors ?? [],
     songKey: version?.key || null,
     content: version?.content_chordpro || '',
     melodyNotation: version?.melody_notation || '',

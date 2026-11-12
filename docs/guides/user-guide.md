@@ -1,6 +1,6 @@
 # User Guide: Sacred Fire Songs
 
-**Version:** 2.5
+**Version:** 2.6
 **Status:** Published
 **Date:** Nov 12, 2026
 
@@ -18,6 +18,7 @@
 | **2.3** | Jun 27, 2026 | Added step-by-step PWA installation guides for iOS and Android with screenshots. |
 | **2.4** | Nov 12, 2026 | Song page metadata: the meta line also shows the **Beats** of the selected version when its songbook gives them (Story 6.2.7, #510). |
 | **2.5** | Nov 12, 2026 | Song Detail: a version with a note from its songbook shows **About this song** under the metadata line; tap it to read the background (closed at first). |
+| **2.6** | Nov 12, 2026 | Song page: every author of a co-written song is shown as its own link and opens that author's songs; the share text names all authors. The search box finds a song by any of its authors. |
 
 Welcome to **Sacred Fire Songs**, a digital songbook designed for ceremonial musicians. This guide covers how to browse, learn, and manage medicine songs using our platform.
 
@@ -45,7 +46,7 @@ If you prefer, you can also sign up or log in using a tradition **Email & Passwo
 
 ### 2.1 Browsing & Searching
 The **Search Songs** page allows you to find songs quickly:
-- **Search**: Search by title, author, or even words within the lyrics.
+- **Search**: Search by title, author, or even words within the lyrics. A co-written song is found by each of its authors.
 - **Sorting**: Toggle between **Alphabetical** (Title) or **Chronological** (Newest) order.
 
 ### 2.2 Advanced Filters

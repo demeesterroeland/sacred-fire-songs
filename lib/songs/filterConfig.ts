@@ -1,7 +1,7 @@
 import { FilterConfig } from "@/lib/declarative-filter/types";
 import { Song } from "@/lib/songUtils";
 import { normalizeWhitespace, removeDiacritics } from "@/lib/utils";
-import { parseArtists } from "@/lib/songs/artistUtils";
+import { cleanAuthors, songAuthorNames } from "@/lib/songs/authors";
 
 // 1. Define the Filter State (URL Params map to this)
 export interface SongFilterState {
@@ -104,7 +104,10 @@ export const songFilterConfig: FilterConfig<Song, SongFilterState> = {
       if (!query) return true;
       const cleanQuery = removeDiacritics(normalizeWhitespace(query)).toLowerCase();
       const cleanTitle = removeDiacritics(normalizeWhitespace(song.title)).toLowerCase();
-      const cleanAuthor = removeDiacritics(normalizeWhitespace(song.author)).toLowerCase();
+      // Every author counts, from the same source as the author filter and the index (Story 6.2.12, #515)
+      const authorTexts = songAuthorNames({ authors: song.authors, originalAuthor: song.author }).map(
+        (a) => removeDiacritics(normalizeWhitespace(a)).toLowerCase()
+      );
       const cleanContent = song.content ? removeDiacritics(normalizeWhitespace(song.content)).toLowerCase() : "";
       // Also match subcategory names (e.g. "Water") and parent group names (e.g. "Element Songs")
       const matchesCategory = song.categories?.some(c => {
@@ -114,7 +117,7 @@ export const songFilterConfig: FilterConfig<Song, SongFilterState> = {
       }) ?? false;
       return (
         cleanTitle.includes(cleanQuery) ||
-        cleanAuthor.includes(cleanQuery) ||
+        authorTexts.some((a) => a.includes(cleanQuery)) ||
         cleanContent.includes(cleanQuery) ||
         matchesCategory
       );
@@ -141,10 +144,10 @@ export const songFilterConfig: FilterConfig<Song, SongFilterState> = {
       if (!filterArtist) return true;
       const normalizedFilter = removeDiacritics(normalizeWhitespace(filterArtist)).toLowerCase();
       if (normalizedFilter === "no artist" || normalizedFilter === "unspecified") {
-        return !song.author;
+        return !song.author && cleanAuthors(song.authors).length === 0;
       }
-      // Parse multi-artist string and check if ANY individual artist matches
-      const artists = parseArtists(song.author);
+      // ANY individual author may match: authors[], else the display text split (Story 6.2.12, #515); same source as the index
+      const artists = songAuthorNames({ authors: song.authors, originalAuthor: song.author });
       if (artists.length === 0) return false;
       return artists.some(
         artist => removeDiacritics(normalizeWhitespace(artist)).toLowerCase() === normalizedFilter

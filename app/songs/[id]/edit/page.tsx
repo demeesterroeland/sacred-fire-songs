@@ -9,6 +9,7 @@ import GuestGate from '@/components/common/GuestGate';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { useLocale } from '@/context/LocaleContext';
+import { authorInputText } from '@/lib/songs/authors';
 import { EDIT_VERSION_PARAM, pickVersion, sortVersions } from '@/lib/songs/versionOrder';
 import { versionOptions } from '@/lib/songs/versionSwitch';
 import { EDIT_SONG_SELECT } from '@/lib/songs/songSelect';
@@ -82,7 +83,8 @@ export default function EditSongPage() {
     const versionLabel = versionOptions(song.song_versions, t, locale)?.find((o) => o.value === version?.id)?.label;
     const initialData = {
         title: song.title,
-        author: song.original_author || '',
+        // authors[] when the song has them (catalog songs), else original_author: an edit keeps every author.
+        author: authorInputText({ authors: song.authors, originalAuthor: song.original_author }),
         content: version?.content_chordpro || '',
 
         categoryIds: song.song_category_map?.map((m: { category_id: string }) => m.category_id) || [],
