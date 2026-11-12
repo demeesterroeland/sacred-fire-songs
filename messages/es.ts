@@ -379,6 +379,7 @@ const es: Partial<Record<TranslationKey, string>> = {
   'recording.attribution.removeSuccess': 'Atribución del cantante eliminada.',
   'recording.attribution.error': 'Error al guardar la atribución del cantante.',
   'recording.attribution.viewProfile': 'Ver perfil',
+  'recording.attribution.clearSinger': 'Elegir otro cantante',
 
   'user.profile.title': 'Perfil de músico',
   'user.profile.verifiedMusician': 'Músico verificado',

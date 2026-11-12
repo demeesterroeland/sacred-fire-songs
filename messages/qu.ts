@@ -383,6 +383,7 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'recording.attribution.removeSuccess': 'Takiqpa sutin qichusqa.',
   'recording.attribution.error': 'Takiqpa sutin hallchay pantasqa.',
   'recording.attribution.viewProfile': 'Qawariy',
+  'recording.attribution.clearSinger': 'Huk takiqta akllay',
 
   'user.profile.title': 'Takiqpa kawsaynin',
   'user.profile.verifiedMusician': 'Takyasqa takiq',

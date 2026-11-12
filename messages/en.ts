@@ -377,6 +377,7 @@ const en = {
   'recording.attribution.removeSuccess': 'Singer attribution removed.',
   'recording.attribution.error': 'Failed to save singer attribution.',
   'recording.attribution.viewProfile': 'View profile',
+  'recording.attribution.clearSinger': 'Choose another singer',
 
   'user.profile.title': 'Musician Profile',
   'user.profile.verifiedMusician': 'Verified Musician',

@@ -19,8 +19,9 @@ import {
 } from "@/lib/actions/rehearsal";
 import { useLocale } from "@/context/LocaleContext";
 import { toast } from "sonner";
-import { Mic, Search, Music, Loader2, Check, UserX } from "lucide-react";
+import { Mic, Search, Music, Loader2, UserX } from "lucide-react";
 import { actionErrorMessage } from '@/lib/errors/actionError';
+import { Button } from "@/components/ui/button";
 
 interface RecordingAttributionModalProps {
   recording: UserRecording | null;
@@ -174,19 +175,19 @@ export default function RecordingAttributionModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent onCloseAutoFocus={returnFocusToTake(recording.id)} className="max-w-md bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-3xl p-6 shadow-2xl">
+      <DialogContent onCloseAutoFocus={returnFocusToTake(recording.id)} className="max-w-md bg-surface text-fg border border-line rounded-panel p-6 shadow-sheet">
         <DialogHeader className="text-left space-y-1">
-          <DialogTitle className="text-lg font-extrabold text-gray-900 dark:text-white flex items-center gap-2">
-            <Mic className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+          <DialogTitle className="text-lg font-extrabold text-fg flex items-center gap-2">
+            <Mic aria-hidden="true" className="w-5 h-5 text-fg-muted" />
             {t("recording.attribution.title")}
           </DialogTitle>
-          <DialogDescription className="text-xs text-gray-500 dark:text-gray-400">
+          <DialogDescription className="text-xs text-fg-muted">
             {recording.recording_name}
           </DialogDescription>
         </DialogHeader>
 
         {/* Toggle between Registered Musician vs Unregistered Singer */}
-        <label className="flex items-center gap-2.5 p-3 rounded-xl border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950 cursor-pointer text-left text-xs font-semibold text-gray-700 dark:text-gray-300">
+        <label className="flex items-center gap-2.5 p-3 rounded-control border border-line bg-surface-2 cursor-pointer text-left text-xs font-semibold text-fg">
           <input
             type="checkbox"
             checked={isUnregistered}
@@ -194,7 +195,7 @@ export default function RecordingAttributionModal({
               setIsUnregistered(e.target.checked);
               if (e.target.checked) setSelectedUser(null);
             }}
-            className="w-4 h-4 rounded text-indigo-600 border-gray-300 cursor-pointer"
+            className="w-4 h-4 rounded accent-accent cursor-pointer"
           />
           <span>{t("recording.attribution.unregisteredCheckbox")}</span>
         </label>
@@ -202,10 +203,10 @@ export default function RecordingAttributionModal({
         {!isUnregistered ? (
           <div className="space-y-3 text-left">
             {selectedUser ? (
-              <div className="p-3.5 rounded-2xl bg-indigo-50/70 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-900/50 flex items-center justify-between">
+              <div className="p-3.5 rounded-control bg-accent-soft border border-accent flex items-center justify-between">
                 <div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-bold text-gray-900 dark:text-white">
+                    <span className="text-sm font-bold text-fg">
                       {selectedUser.full_name || t("user.unnamed")}
                     </span>
                     {selectedUser.is_musician && (
@@ -217,31 +218,34 @@ export default function RecordingAttributionModal({
                   </div>
                 </div>
                 <button
+                  type="button"
                   onClick={() => setSelectedUser(null)}
-                  className="p-1.5 rounded-lg text-gray-400 hover:text-red-500 hover:bg-red-500/10 transition-colors text-xs font-bold"
+                  aria-label={t("recording.attribution.clearSinger")}
+                  title={t("recording.attribution.clearSinger")}
+                  className="inline-flex size-tap shrink-0 items-center justify-center rounded-control text-fg-muted hover:text-danger hover:bg-surface transition-colors"
                 >
-                  <UserX className="w-4 h-4" />
+                  <UserX aria-hidden="true" className="w-4 h-4" />
                 </button>
               </div>
             ) : (
               <div className="space-y-2">
                 <div className="relative">
-                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                  <Search aria-hidden="true" className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-fg-subtle" />
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder={t("recording.attribution.searchPlaceholder")}
                     aria-label={t("recording.attribution.searchPlaceholder")}
-                    className="w-full pl-9 pr-8 py-2.5 bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-xl text-sm text-gray-900 dark:text-white"
+                    className="w-full pl-9 pr-8 py-2.5 bg-bg border border-line-strong rounded-control text-sm text-fg placeholder:text-fg-subtle"
                   />
                   {isSearching && (
-                    <Loader2 className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 animate-spin" />
+                    <Loader2 aria-hidden="true" className="w-4 h-4 absolute right-3 top-1/2 -translate-y-1/2 text-fg-subtle animate-spin" />
                   )}
                 </div>
 
                 {searchResults.length > 0 && (
-                  <div className="max-h-44 overflow-y-auto rounded-xl border border-gray-200 dark:border-gray-800 divide-y divide-gray-100 dark:divide-gray-800 bg-white dark:bg-gray-950 shadow-md">
+                  <div className="max-h-44 overflow-y-auto rounded-control border border-line divide-y divide-line bg-surface shadow-sheet">
                     {searchResults.map((user) => (
                       <button
                         type="button"
@@ -251,11 +255,11 @@ export default function RecordingAttributionModal({
                           setSearchQuery("");
                           setSearchResults([]);
                         }}
-                        className="w-full flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-900/50 cursor-pointer transition-colors"
+                        className="w-full flex items-center justify-between p-3 min-h-tap hover:bg-surface-2 cursor-pointer transition-colors"
                       >
                         <div className="text-left min-w-0 pr-2">
                           <div className="flex items-center gap-1.5">
-                            <span className="text-sm font-semibold text-gray-900 dark:text-white truncate">
+                            <span className="text-sm font-semibold text-fg truncate">
                               {user.full_name || t("user.unnamed")}
                             </span>
                             {user.is_musician && (
@@ -266,7 +270,6 @@ export default function RecordingAttributionModal({
                             )}
                           </div>
                         </div>
-                        <Check className="w-4 h-4 text-indigo-500" />
                       </button>
                     ))}
                   </div>
@@ -277,7 +280,7 @@ export default function RecordingAttributionModal({
         ) : (
           <div className="space-y-3 text-left">
             <div>
-              <label className="text-xs font-bold text-gray-700 dark:text-gray-300 block mb-1">
+              <label className="text-xs font-bold text-fg block mb-1">
                 {t("recording.attribution.namePlaceholder")}
               </label>
               <input
@@ -286,11 +289,11 @@ export default function RecordingAttributionModal({
                 onChange={(e) => setCustomName(e.target.value)}
                 placeholder={t("recording.attribution.namePlaceholder")}
                 aria-label={t("recording.attribution.namePlaceholder")}
-                className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-xl text-sm text-gray-900 dark:text-white"
+                className="w-full px-3 py-2 bg-bg border border-line-strong rounded-control text-sm text-fg placeholder:text-fg-subtle"
               />
             </div>
             <div>
-              <label className="text-xs font-bold text-gray-700 dark:text-gray-300 block mb-1">
+              <label className="text-xs font-bold text-fg block mb-1">
                 {t("recording.attribution.emailPlaceholder")}
               </label>
               <input
@@ -299,47 +302,46 @@ export default function RecordingAttributionModal({
                 onChange={(e) => setCustomEmail(e.target.value)}
                 placeholder={t("recording.attribution.emailPlaceholder")}
                 aria-label={t("recording.attribution.emailPlaceholder")}
-                className="w-full px-3 py-2 bg-gray-50 dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-xl text-sm text-gray-900 dark:text-white"
+                className="w-full px-3 py-2 bg-bg border border-line-strong rounded-control text-sm text-fg placeholder:text-fg-subtle"
               />
             </div>
           </div>
         )}
 
-        <DialogFooter className="flex justify-between items-center mt-4 pt-4 border-t border-gray-100 dark:border-gray-800">
+        <DialogFooter className="flex justify-between items-center mt-4 pt-4 border-t border-line">
           {(recording.singer_profile_id || recording.singer_name) ? (
-            <button
+            <Button
               type="button"
+              variant="ghost"
+              size="sm"
               onClick={handleRemove}
               disabled={isSubmitting}
-              className="px-3 py-2 rounded-xl text-xs font-bold text-red-500 hover:bg-red-500/10 transition-colors"
+              className="text-danger"
             >
               {t("recording.attribution.removeButton")}
-            </button>
+            </Button>
           ) : (
             <div />
           )}
 
           <div className="flex gap-2">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-800 hover:bg-gray-100 dark:hover:bg-gray-800 text-xs font-bold text-gray-700 dark:text-gray-300 transition-all"
-            >
+            <Button type="button" variant="outline" size="sm" onClick={onClose}>
               {t("common.cancel")}
-            </button>
-            <button
+            </Button>
+            <Button
               type="button"
+              variant="primary"
+              size="sm"
               onClick={handleSave}
               disabled={
                 isSubmitting ||
                 (!isUnregistered && !selectedUser) ||
                 (isUnregistered && !customName.trim())
               }
-              className="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-xs font-bold transition-all shadow-md active:scale-95 flex items-center gap-1.5"
             >
-              {isSubmitting && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
+              {isSubmitting && <Loader2 aria-hidden="true" className="animate-spin" />}
               {t("recording.attribution.saveButton")}
-            </button>
+            </Button>
           </div>
         </DialogFooter>
       </DialogContent>
