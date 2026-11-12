@@ -1,4 +1,4 @@
-import { parseArtists } from '@/lib/songs/artistUtils';
+import { songAuthors } from '@/lib/songs/authors';
 
 /**
  * Song page meta lines (Epic 6.1, Story 6.1.7 / G2.2, #391):
@@ -9,21 +9,13 @@ import type { TranslateFn } from '@/lib/i18n';
 /** Any translate function (the app's typed `t`, or a plain test double). */
 type T = TranslateFn;
 
-/** Display names of the song's authors ("Traditional" when none). */
-export function songAuthors(originalAuthor: string | null | undefined, t: T): string[] {
-  const artists = parseArtists(originalAuthor);
-  return artists.length > 0
-    ? artists.map((a) => (a.toLowerCase() === 'traditional' ? t('song.traditional') : a))
-    : [t('song.traditional')];
-}
-
 /** Authors first, then tag names, for one grey meta line. */
 export function songMetaItems(
   originalAuthor: string | null | undefined,
   categories: ReadonlyArray<{ name: string }>,
   t: T
 ): string[] {
-  return [...songAuthors(originalAuthor, t), ...categories.map((c) => c.name)];
+  return [...songAuthors({ originalAuthor }, t), ...categories.map((c) => c.name)];
 }
 
 export type VersionTechnical = {
@@ -72,7 +64,7 @@ export function songRowMeta(
   const language = tags.find((c) => c.parent === LANGUAGES_PARENT);
   // Server queries fill a missing author with the English placeholder 'Unknown'.
   const author = originalAuthor === 'Unknown' ? null : originalAuthor;
-  return [songAuthors(author, t).join(', '), category?.name, language?.name].filter(
+  return [songAuthors({ originalAuthor: author }, t).join(', '), category?.name, language?.name].filter(
     (i): i is string => !!i
   );
 }

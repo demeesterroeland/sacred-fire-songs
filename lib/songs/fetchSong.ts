@@ -33,6 +33,7 @@ export const fetchSong = async (id: string) => {
         .select(`
           title,
           original_author,
+          authors,
           owner_id,
           is_public,
           has_chords,

@@ -2,6 +2,7 @@ import { FilterConfig } from "@/lib/declarative-filter/types";
 import { Song } from "@/lib/songUtils";
 import { normalizeWhitespace, removeDiacritics } from "@/lib/utils";
 import { parseArtists } from "@/lib/songs/artistUtils";
+import { cleanAuthors } from "@/lib/songs/authors";
 
 // 1. Define the Filter State (URL Params map to this)
 export interface SongFilterState {
@@ -141,10 +142,10 @@ export const songFilterConfig: FilterConfig<Song, SongFilterState> = {
       if (!filterArtist) return true;
       const normalizedFilter = removeDiacritics(normalizeWhitespace(filterArtist)).toLowerCase();
       if (normalizedFilter === "no artist" || normalizedFilter === "unspecified") {
-        return !song.author;
+        return !song.author && cleanAuthors(song.authors).length === 0;
       }
-      // Parse multi-artist string and check if ANY individual artist matches
-      const artists = parseArtists(song.author);
+      // Every credit (authors[]) plus the names in the display text: ANY individual author may match (Story 6.2.12, #515)
+      const artists = [...cleanAuthors(song.authors), ...parseArtists(song.author)];
       if (artists.length === 0) return false;
       return artists.some(
         artist => removeDiacritics(normalizeWhitespace(artist)).toLowerCase() === normalizedFilter

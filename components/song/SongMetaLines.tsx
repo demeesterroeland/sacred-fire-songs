@@ -5,7 +5,8 @@ import Link from 'next/link';
 import { ChevronDown } from 'lucide-react';
 import { useLocale } from '@/context/LocaleContext';
 import { joinMeta } from '@/components/ui/meta-line';
-import { songAuthors, technicalItems, type VersionTechnical } from '@/lib/songs/songMeta';
+import { authorSeparators, songAuthors } from '@/lib/songs/authors';
+import { technicalItems, type VersionTechnical } from '@/lib/songs/songMeta';
 import { cn } from '@/lib/utils';
 
 interface CategoryItem {
@@ -14,6 +15,8 @@ interface CategoryItem {
 }
 
 interface SongMetaLinesProps {
+  /** Every credit of the song (`compositions.authors`); each one links to its author filter. */
+  authors?: ReadonlyArray<string | null | undefined> | null;
   originalAuthor?: string | null;
   categories?: CategoryItem[];
   version?: VersionTechnical;
@@ -51,6 +54,7 @@ export function fitLinkCount(rights: number[], authorCount: number, moreWidth: n
  * Closed by default.
  */
 export function SongMetaLines({
+  authors: authorCredits,
   originalAuthor,
   categories = [],
   version,
@@ -62,14 +66,15 @@ export function SongMetaLines({
   onToggleExpanded,
   toggleRef,
 }: SongMetaLinesProps) {
-  const { t } = useLocale();
-  const tr = t as (key: string, vars?: Record<string, string | number>) => string;
+  const { t, locale } = useLocale();
   const [internalOpen, setInternalOpen] = useState(false);
   const open = expanded !== undefined ? expanded : internalOpen;
   const listId = useId();
   const detailsId = useId();
-  const authors = songAuthors(originalAuthor, tr);
-  const technical = joinMeta(technicalItems(version, tr));
+  const authors = songAuthors({ authors: authorCredits, originalAuthor }, t);
+  // The text between the author links ("and", "y", ","), so each name stays its own link.
+  const authorJoiners = authorSeparators(authors, locale);
+  const technical = joinMeta(technicalItems(version, t));
 
   // Authors always show; tags and Chords / Melody / Recordings (`fitIndex`) only as far as they fit while closed.
   const optional = [
@@ -78,8 +83,12 @@ export function SongMetaLines({
     ...(hasMelody ? [{ label: t('song.technical.melody'), href: '/songs?melody=true' }] : []),
     ...(hasPersonalRecording ? [{ label: t('song.technical.takes'), href: '/songs?myRecordings=true' }] : []),
   ];
-  const links: { label: string; href: string; fitIndex?: number }[] = [
-    ...authors.map((a) => ({ label: a, href: `/songs?artist=${encodeURIComponent(a)}` })),
+  const links: { label: string; href: string; fitIndex?: number; joiner?: string }[] = [
+    ...authors.map((a, i) => ({
+      label: a,
+      href: `/songs?artist=${encodeURIComponent(a)}`,
+      joiner: i > 0 ? authorJoiners[i - 1] : undefined,
+    })),
     ...optional.map((l, i) => ({ ...l, fitIndex: i })),
   ];
   // Validation 4 (owner): measure an invisible one-line copy and show as many links as fit. Until it is measured
@@ -122,9 +131,9 @@ export function SongMetaLines({
           id={listId}
           className={cn('flex min-w-0 gap-x-1', open ? 'flex-wrap' : 'flex-nowrap')}
         >
-          {links.map(({ label, href, fitIndex }, i) => (
+          {links.map(({ label, href, fitIndex, joiner }, i) => (
             <li key={`${href}-${i}`} className={cn('shrink-0', !open && fitIndex !== undefined && fitIndex >= fit && 'hidden')}>
-              {i > 0 && <span aria-hidden>· </span>}
+              {i > 0 && (joiner !== undefined ? <span>{joiner}</span> : <span aria-hidden>· </span>)}
               <Link href={href} className="inline-flex min-h-tap items-center px-1 text-fg underline underline-offset-4">
                 {label}
               </Link>
@@ -143,9 +152,9 @@ export function SongMetaLines({
           aria-hidden
           className="pointer-events-none invisible absolute left-0 top-0 flex w-max flex-nowrap gap-x-1"
         >
-          {links.map(({ label }, i) => (
+          {links.map(({ label, joiner }, i) => (
             <li key={i} className="shrink-0">
-              {i > 0 && <span>· </span>}
+              {i > 0 && <span>{joiner ?? '· '}</span>}
               <span className="inline-flex px-1">{label}</span>
             </li>
           ))}

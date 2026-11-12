@@ -10,6 +10,8 @@ export interface Song {
     id: string;
     title: string;
     author: string;
+    /** Every credit of the song (`compositions.authors`); `author` stays the display text. */
+    authors?: string[];
     songKey: string | null;
     color: string;
     ownerId?: string;

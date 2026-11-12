@@ -44,12 +44,13 @@ import { useSongRecordings } from '@/hooks/useSongRecordings';
 import { useRecordingsQuery } from '@/hooks/useRecordingsQuery';
 import { useLocale } from '@/context/LocaleContext';
 import { fetchSong, withTimeout } from '@/lib/songs/fetchSong';
+import { joinAuthors, songAuthorNames, songAuthors } from '@/lib/songs/authors';
 import { fetchFavoritesSetlistId } from '@/lib/playlists/favorites';
 import { linkedTakeTab, parseRecordingParam, RECORDING_PARAM } from '@/lib/songs/recordingLink';
 import { actionErrorMessage } from '@/lib/errors/actionError';
 
 export default function SongDetailPage() {
-    const { t } = useLocale();
+    const { t, locale } = useLocale();
     const params = useParams();
     const id = typeof params.id === 'string' ? params.id : params.id?.[0]; // Safe type handling
 
@@ -297,13 +298,15 @@ export default function SongDetailPage() {
     };
 
     const handleShare = async () => {
+        const authorNames = songAuthorNames({ authors: song.authors, originalAuthor: song.original_author });
         const shareUrl = currentVersion
             ? versionShareUrl(window.location.href, currentVersion.id, selectedVersionIndex === 0)
             : window.location.href;
         const shareData = {
             title: song.title,
-            text: song.original_author 
-                ? t('song.share.textWithAuthor', { title: song.title, author: song.original_author })
+            // Story 6.2.12 (#515): every author, joined in the UI language.
+            text: authorNames.length > 0
+                ? t('song.share.textWithAuthor', { title: song.title, author: joinAuthors(authorNames, locale) })
                 : t('song.share.text', { title: song.title }),
             // The link of the version being read (the first version has the clean song URL).
             url: shareUrl,
@@ -527,6 +530,7 @@ export default function SongDetailPage() {
                         inside expand/collapse. Closed by default, remembered in localStorage. */}
                     <SongMetaLines
                         className="mb-2"
+                        authors={song.authors}
                         originalAuthor={song.original_author}
                         categories={categories}
                         version={shownVersion}
@@ -634,7 +638,7 @@ export default function SongDetailPage() {
                 open={isMenuOpen}
                 onOpenChange={setIsMenuOpen}
                 title={song.title}
-                description={t('song.by', { author: song.original_author || t('song.traditional') })}
+                description={t('song.by', { author: joinAuthors(songAuthors({ authors: song.authors, originalAuthor: song.original_author }, t), locale) })}
                 actions={{
                     onShare: () => { void handleShare(); setIsMenuOpen(false); },
                     edit: song.owner_id === user?.id || isAdmin ? { href: editSongHref(id, currentVersion?.id) } : undefined,

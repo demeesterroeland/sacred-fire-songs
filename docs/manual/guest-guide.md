@@ -1,11 +1,12 @@
 # Guest Guide (draft)
 
-**Version:** 0.25 | **Date:** Nov 11, 2026
+**Version:** 0.26 | **Date:** Nov 12, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.26 | Nov 12, 2026 | Song page: a song with several authors shows each name as its own link, joined as in your language ("A and B"); tap a name to see that author's songs. The share text names every author. |
 | 0.25 | Nov 11, 2026 | Song page: the second line also shows **Beats** when the songbook gives them for the version, e.g. `Key E · Capo 5 · Standard · Beats 8`; the line follows the version you pick (UX v3, #510).
 | 0.24 | Nov 11, 2026 | Song page: lines the circle sings more than once sit between repeat bars, `‖:` before the first line and `:‖` after the last one, with `×2` when the song says how many times (UX v3, #518). |
 | 0.23 | Nov 9, 2026 | The ☰ menu's Library section lists the same tabs as the Library page; tags under a song title stay on one line with "…" when there are more. |
@@ -55,7 +56,7 @@ The ☰ menu repeats the main places (Home, Songs; under Library the same tabs a
 
 ## Reading a song
 
-- The title is at the top. Under it, one grey line shows the author and the tags (category, tradition, language); tap it to see them all as links.
+- The title is at the top. Under it, one grey line shows the author and the tags (category, tradition, language); tap it to see them all as links. A song with several authors shows each name as its own link.
 - A second line shows **Key**, **Capo**, **Tuning** and, when the songbook gives them, **Beats**, e.g. `Key E · Capo 3 · Standard · Beats 8`. It shows the values of the version you are reading.
 - If the song exists in more than one version (for example *Original* and *Simplified*), a grey switch with the version names appears under those lines; tap a name to read that version. The app opens the first version each time. Songs with one version show no switch.
 - Under those lines: **Chords** switches the chords on or off, **A−** / **A+** make the text smaller or larger. The app remembers your choice on this device.

@@ -140,3 +140,26 @@ describe('songFilterConfig artist matching', () => {
     expect(matchingRule.match(mockSongWithAuthor, 'No Artist')).toBe(false);
   });
 });
+
+// Story 6.2.12 / G2.3 (#515): the author filter finds a co-written song by any of its authors.
+describe('songFilterConfig artist matching across authors[]', () => {
+  const matchingRule = songFilterConfig.artist!;
+
+  it('matches a co-author that is only in authors[]', () => {
+    const coWritten = { author: 'Anna Lee', authors: ['Anna Lee', 'Ben Cruz'] } as unknown as Song;
+    expect(matchingRule.match(coWritten, 'Anna Lee')).toBe(true);
+    expect(matchingRule.match(coWritten, 'Ben Cruz')).toBe(true);
+    expect(matchingRule.match(coWritten, 'Cari El')).toBe(false);
+  });
+
+  it('matches a song whose original_author is empty but whose authors[] has names', () => {
+    const songWithAuthors = { author: '', authors: ['Ben Cruz'] } as unknown as Song;
+    expect(matchingRule.match(songWithAuthors, 'Ben Cruz')).toBe(true);
+    expect(matchingRule.match(songWithAuthors, 'No Artist')).toBe(false);
+  });
+
+  it('still matches a name that only appears in original_author', () => {
+    const legacy = { author: 'Anna Lee, Ben Cruz', authors: ['Anna Lee'] } as unknown as Song;
+    expect(matchingRule.match(legacy, 'Ben Cruz')).toBe(true);
+  });
+});
