@@ -4,6 +4,7 @@
 import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { EDIT_SONG_SELECT, SONG_SELECT } from '@/lib/songs/songSelect';
+import { SONGS_SELECT } from '@/lib/songs/queries';
 import { VERSION_SOURCES_SELECT } from '@/lib/songs/versionSources';
 
 const embeds = (select: string) => select.match(/song_version_sources(![\w]+)?\s*\(/g) ?? [];
@@ -36,6 +37,14 @@ describe('song selects', () => {
     const composition = select.split(/song_versions(!inner)?\s*\(/)[0];
     expect(composition).toMatch(/\boriginal_author\b/);
     expect(composition).toMatch(/\bauthors\b/);
+  });
+
+  // Story 6.2.18 (#521): the list select carries the original titles for the search, still through ONE embed.
+  it('the song list select embeds the sources once and asks only for the original title', () => {
+    expect(embeds(SONGS_SELECT)).toHaveLength(1);
+    expect(SONGS_SELECT).toMatch(/song_version_sources\s*\(\s*original_title\s*\)/);
+    // `*` brings compositions.aliases and compositions.authors with every row
+    expect(SONGS_SELECT.split(/song_versions\s*\(/)[0]).toMatch(/\*/);
   });
 
   it('the edit page and fetchSong carry no inline copy of the embed', () => {

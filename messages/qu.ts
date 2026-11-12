@@ -132,6 +132,9 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'songs.emptyDrafts.action': 'Taki yapay →',
   'songs.noResultsSearch': 'Mana taki tarisqachu “{search}” nisqawan tupaq.',
   'songs.noResultsFilter': 'Kay filtropaq mana takikuna kanchu.',
+  'songs.matchAlias': 'Huk sutinwan tarisqa: {text}',
+  'songs.matchSourceTitle': 'Taki qillqapi sutinwan tarisqa: {text}',
+  'songs.matchAuthor': 'Takichiqwan tarisqa: {text}',
 
   // ─── Songs – Detail Page ──────────────────────────────────────────────────
   'song.by': '{author} ruwasqan',

@@ -54,6 +54,26 @@ describe('mapCompositionToSong', () => {
     expect(song.author).toBe('Anna Lee, Ben Cruz');
   });
 
+  // Story 6.2.18 / G5.1 (#521): what the search reads besides the title and the authors.
+  it('maps the aliases and the original titles of every version for the search', () => {
+    const song = mapCompositionToSong({
+      ...baseItem,
+      aliases: ['Gran Venerable Madre Tierra', '  '],
+      song_versions: [
+        { id: 'v1', created_at: '2026-01-01T00:00:00Z', key: 'Am', content_chordpro: '', melody_notation: '', song_version_sources: [{ original_title: 'Huey Tonantzin' }] },
+        { id: 'v2', created_at: '2026-02-01T00:00:00Z', key: 'G', content_chordpro: '', melody_notation: '', song_version_sources: [{ original_title: 'Madre Tierra' }, { original_title: null }, { original_title: 'huey tonantzin' }] },
+      ],
+    } as typeof baseItem);
+    expect(song.aliases).toEqual(['Gran Venerable Madre Tierra']);
+    expect(song.sourceTitles).toEqual(['Huey Tonantzin', 'Madre Tierra']);
+  });
+
+  it('gives empty alias and title lists when the row has none', () => {
+    const song = mapCompositionToSong({ ...baseItem, aliases: null } as typeof baseItem);
+    expect(song.aliases).toEqual([]);
+    expect(song.sourceTitles).toEqual([]);
+  });
+
   it('gives no credits when the row has none', () => {
     const song = mapCompositionToSong({ ...baseItem, authors: null } as typeof baseItem);
     expect(song.authors).toEqual([]);
