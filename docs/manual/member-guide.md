@@ -1,11 +1,12 @@
 # Member Guide (draft)
 
-**Version:** 0.25 | **Date:** Nov 12, 2026
+**Version:** 0.26 | **Date:** Nov 12, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.26 | Nov 12, 2026 | Song page: a song with translations has a language switch next to the version switch (**Original** and the languages the song has). A translation replaces the lyrics of the version you are reading; its practice recordings, key and playlist entries stay with that version. Choosing another version returns to the original language; a link can end in `?lang=nl`. Old translation versions were moved into this switch, with their recordings and playlist entries going to the song's first original version (UX v3, #516). |
 | 0.25 | Nov 12, 2026 | A song's version switch names each version after its songbook, or its language for a translation; the original comes first, then versions from other books, then translations (UX v3, #509). Two translations in one language show their songbook too. Adding a song to a playlist or to favourites uses the song's first version (the original). Edit names the version the same way. |
 | 0.24 | Nov 12, 2026 | Song page: a version with a songbook note shows **About this song** under the grey lines (closed at first; tap to read it). Empty notes show nothing (UX v3, #511). |
 | 0.23 | Nov 12, 2026 | Song page: a grey line under the lyrics names the songbook, page and compiler of the version you are reading, when the song comes from a printed book (UX v3, #513). The guest guide describes it; a song printed in several books gets one line per book. |

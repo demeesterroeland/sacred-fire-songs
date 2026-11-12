@@ -15,7 +15,7 @@ interface SongVersionSwitchProps {
  * Story 6.1.11 (#395): the slot under the song title for the version switch
  * (Original · Simplified · Live). Renders nothing unless the song has more than one
  * version, so a single-version song gets no control and no extra space. The language
- * switch of the planned translation layer joins this slot later.
+ * switch (`SongLanguageSwitch`, Story 6.2.13, #516) joins it in the same row.
  */
 export function SongVersionSwitch({ versions, selectedIndex, onSelect, className }: SongVersionSwitchProps) {
   const { t, locale } = useLocale();
