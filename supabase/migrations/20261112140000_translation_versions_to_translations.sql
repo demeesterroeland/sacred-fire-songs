@@ -11,23 +11,32 @@
 -- importer that still wrote translations as versions would simply create them again after the migration, and this
 -- migration does not run again to move them (it only runs once). See docs/guides/importing-songbooks.md.
 --
--- Safe to run more than once, and it never loses data: one row at a time, a translation version is deleted only after
--- its text is stored in song_translations and everything that pointed at it points at the song's first original
--- version. A row that cannot be moved cleanly is LEFT IN PLACE and reported with RAISE NOTICE:
+-- Safe to run more than once, and it loses no user content: one row at a time, a translation version is deleted only
+-- after its text is stored in song_translations, everything that pointed at it points at the song's first original
+-- version, and it holds nothing else of its own (see below). What the delete still takes along is reported first with
+-- RAISE NOTICE: its songbook sources and its contributor (song_translations has no column for either).
+-- A row that cannot be moved cleanly is LEFT IN PLACE and reported with RAISE NOTICE:
 --   * the language cannot be derived from version_name,
 --   * the song has no original version to take over its recordings and playlist items,
 --   * the lyrics are blank (nothing to store),
 --   * the version has chords and its key, capo or tuning differs from the original version that would take over: the
 --     chords would no longer match the key shown with them, and a playlist item's transposition was relative to the
 --     translation's key,
---   * song_translations already holds a different text for that language (nothing is overwritten or dropped).
+--   * song_translations already holds a different text for that language (nothing is overwritten or dropped),
+--   * the version holds its own melody_notation, song_note, beats, youtube_url, spotify_url or soundcloud_url (not
+--     blank and different from the original version that would take over; song_translations has no such column),
+--     or it has votes (vote_count > 0),
+--   * its lyrics have no chords, but its key, capo or tuning differs from the original version and a playlist item
+--     on it is transposed (transposition_override <> 0): the playlist would sound in another key.
 --
 -- Language: derived from version_name the way the app does (translationLanguageTag in lib/songs/versionLabels.ts):
 -- a language name in an app language or in the language itself ("English", "Engels", "Nederlands"), or a lowercase
 -- language tag ("nl", "lkt", "pt-BR" -> 'pt-br'). The name list below is GENERATED, folded exactly like the SQL
 -- fold, so SQL and the app agree for every name: regenerate it with
--- `npx tsx scripts/db/generate-translation-language-names.ts` and paste the block between the markers (a unit test
--- fails when it is out of date).
+-- `npx tsx scripts/db/generate-translation-language-names.ts` and paste the block between the markers, and write the
+-- same block to the committed snapshot testing/unit/tests/songs/fixtures/translation-language-names.sql (a unit test
+-- fails when the two differ). Once this migration has been released it is FROZEN: it has run, so never edit it; a
+-- later change to the language list (a new app language, a different ICU name) belongs in a new migration.
 -- Title: the title the primary songbook source printed for the version (song_version_sources.original_title), when
 -- there is one. Translator: not known for a version, so null.
 -- Re-pointed: user_recordings and setlist_items (the only foreign keys to song_versions besides
@@ -49,13 +58,18 @@ DECLARE
   target_key text;
   target_capo integer;
   target_tuning text;
+  target_row record;
+  own_content text[];
+  key_differs boolean;
   printed_title text;
   folded text;
   moved integer := 0;
   kept integer := 0;
 BEGIN
   FOR r IN
-    SELECT v.id, v.composition_id, v.version_name, v.content_chordpro, v.catalog_source_id,
+    SELECT v.id, v.composition_id, v.version_name, v.content_chordpro, v.catalog_source_id, v.contributor_id,
+           v.melody_notation, v.song_note, v.beats, v.youtube_url, v.spotify_url, v.soundcloud_url,
+           coalesce(v.vote_count, 0) AS vote_count,
            nullif(btrim(v.key), '') AS key,
            coalesce(v.capo, 0) AS capo,
            coalesce(nullif(btrim(v.tuning), ''), 'Standard') AS tuning
@@ -262,8 +276,9 @@ BEGIN
     ('latim', 'la')
 -- END generated language names
     ) AS n(name, tag) WHERE n.name = folded;
-    IF lang IS NULL AND btrim(coalesce(r.version_name, '')) ~ '^[a-z]{2,3}(-[A-Za-z0-9]+)*$'
-       AND lower(btrim(r.version_name)) ~ '^[a-z]{2,3}(-[a-z0-9]{1,8})*$' THEN
+    -- A language tag as the app reads it (LANGUAGE_TAG in lib/songs/versionLabels.ts): a lowercase 2-3 letter language
+    -- subtag, then subtags of 2-8 letters or digits.
+    IF lang IS NULL AND btrim(coalesce(r.version_name, '')) ~ '^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$' THEN
       lang := lower(btrim(r.version_name));
     END IF;
     IF lang IS NULL THEN
@@ -275,12 +290,18 @@ BEGIN
 
     -- 2. The version that takes over recordings and playlist items: the song's first original version, in the
     --    order of the app (oldest first, id as tie-break).
-    SELECT o.id, nullif(btrim(o.key), ''), coalesce(o.capo, 0), coalesce(nullif(btrim(o.tuning), ''), 'Standard')
-      INTO target, target_key, target_capo, target_tuning
+    SELECT o.id, nullif(btrim(o.key), '') AS key, coalesce(o.capo, 0) AS capo,
+           coalesce(nullif(btrim(o.tuning), ''), 'Standard') AS tuning,
+           o.melody_notation, o.song_note, o.beats, o.youtube_url, o.spotify_url, o.soundcloud_url
+      INTO target_row
     FROM public.song_versions o
     WHERE o.composition_id = r.composition_id AND o.version_kind = 'original'
     ORDER BY o.created_at, o.id
     LIMIT 1;
+    target := target_row.id;
+    target_key := target_row.key;
+    target_capo := target_row.capo;
+    target_tuning := target_row.tuning;
     IF target IS NULL THEN
       RAISE NOTICE 'translation version % of song % left in place: the song has no original version', r.id, r.composition_id;
       kept := kept + 1;
@@ -295,11 +316,43 @@ BEGIN
     END IF;
 
     -- 2c. Chords are written for a key. They are only moved to the original version when it has the same key, capo
-    --     and tuning; otherwise the page would show the chords with the wrong key.
-    IF r.content_chordpro ~ '\[[^\]]+\]'
-       AND (r.key IS DISTINCT FROM target_key OR r.capo <> target_capo OR r.tuning <> target_tuning) THEN
+    --     and tuning; otherwise the page would show the chords with the wrong key. Lyrics without chords have no
+    --     such problem, except that a playlist item transposed (transposition_override) relative to this version's
+    --     key would sound in another key on the original version.
+    key_differs := r.key IS DISTINCT FROM target_key OR r.capo <> target_capo OR r.tuning <> target_tuning;
+    IF key_differs AND r.content_chordpro ~ '\[[^\]]+\]' THEN
       RAISE NOTICE 'translation version % of song % left in place: it has chords in key "%", capo %, tuning "%", the original version has key "%", capo %, tuning "%"',
         r.id, r.composition_id, r.key, r.capo, r.tuning, target_key, target_capo, target_tuning;
+      kept := kept + 1;
+      CONTINUE;
+    END IF;
+    IF key_differs AND EXISTS (
+      SELECT 1 FROM public.setlist_items i WHERE i.song_version_id = r.id AND coalesce(i.transposition_override, 0) <> 0
+    ) THEN
+      RAISE NOTICE 'translation version % of song % left in place: a playlist item transposes it and its key "%", capo %, tuning "%" differ from the original version (key "%", capo %, tuning "%")',
+        r.id, r.composition_id, r.key, r.capo, r.tuning, target_key, target_capo, target_tuning;
+      kept := kept + 1;
+      CONTINUE;
+    END IF;
+
+    -- 2d. Content of its own: song_translations stores a title and lyrics only. A melody, note, beats, media link or
+    --     vote count that the original version does not already carry would be lost, so the version stays.
+    SELECT array_agg(c.field ORDER BY c.ord) INTO own_content
+    FROM (VALUES
+      (1, 'melody_notation', nullif(btrim(r.melody_notation), ''), nullif(btrim(target_row.melody_notation), '')),
+      (2, 'song_note', nullif(btrim(r.song_note), ''), nullif(btrim(target_row.song_note), '')),
+      (3, 'beats', nullif(btrim(r.beats), ''), nullif(btrim(target_row.beats), '')),
+      (4, 'youtube_url', nullif(btrim(r.youtube_url), ''), nullif(btrim(target_row.youtube_url), '')),
+      (5, 'spotify_url', nullif(btrim(r.spotify_url), ''), nullif(btrim(target_row.spotify_url), '')),
+      (6, 'soundcloud_url', nullif(btrim(r.soundcloud_url), ''), nullif(btrim(target_row.soundcloud_url), ''))
+    ) AS c(ord, field, mine, theirs)
+    WHERE c.mine IS NOT NULL AND c.mine IS DISTINCT FROM c.theirs;
+    IF r.vote_count > 0 THEN
+      own_content := coalesce(own_content, ARRAY[]::text[]) || ('vote_count (' || r.vote_count || ')');
+    END IF;
+    IF own_content IS NOT NULL THEN
+      RAISE NOTICE 'translation version % of song % left in place: it holds content of its own that song_translations cannot store: %',
+        r.id, r.composition_id, array_to_string(own_content, ', ');
       kept := kept + 1;
       CONTINUE;
     END IF;
@@ -335,6 +388,11 @@ BEGIN
       RAISE NOTICE 'translation version % (catalog key "%") of song % had source: songbook %, page %',
         r.id, r.catalog_source_id, r.composition_id, src.songbook_id, src.page;
     END LOOP;
+
+    IF r.contributor_id IS NOT NULL THEN
+      RAISE NOTICE 'translation version % (catalog key "%") of song % was contributed by profile %',
+        r.id, r.catalog_source_id, r.composition_id, r.contributor_id;
+    END IF;
 
     -- The takes of a song version share one order (position, then newest first): append the moved takes after the
     -- ones already on the original version, keeping their order among themselves.

@@ -211,6 +211,8 @@ interface VersionExtras {
   key?: string | null;
   capo?: number;
   tuning?: string;
+  /** Other song_versions columns by name (melody_notation, song_note, beats, youtube_url, ..., vote_count, contributor_id). */
+  columns?: Record<string, string | number | null>;
 }
 async function addVersion(
   songId: string,
@@ -221,10 +223,11 @@ async function addVersion(
   extras: VersionExtras = {}
 ): Promise<string> {
   const db = await seedDb();
+  const columns = Object.entries(extras.columns ?? {});
   const { rows } = await db.query<{ id: string }>(
-    `INSERT INTO public.song_versions (composition_id, version_name, version_kind, content_chordpro, created_at, key, capo, tuning)
-     VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id`,
-    [songId, name, kind, lyrics, createdAt, extras.key ?? null, extras.capo ?? 0, extras.tuning ?? 'Standard']
+    `INSERT INTO public.song_versions (composition_id, version_name, version_kind, content_chordpro, created_at, key, capo, tuning${columns.map(([c]) => `, ${c}`).join('')})
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8${columns.map((_c, i) => `, $${i + 9}`).join('')}) RETURNING id`,
+    [songId, name, kind, lyrics, createdAt, extras.key ?? null, extras.capo ?? 0, extras.tuning ?? 'Standard', ...columns.map(([, v]) => v)]
   );
   return rows[0].id;
 }
@@ -417,6 +420,58 @@ Given(
   }
 );
 
+const OWN_CONTENT: Record<string, string | number> = {
+  melody_notation: 'X:1 K:C abc',
+  song_note: 'Sung slowly',
+  beats: '4/4',
+  youtube_url: 'https://www.youtube.com/watch?v=abc',
+  spotify_url: 'https://open.spotify.com/track/abc',
+  soundcloud_url: 'https://soundcloud.com/a/b',
+  vote_count: 3,
+};
+Given(
+  'a song with an original version and a translation version named {string} with its own {string}',
+  async function (this: object, name: string, field: string) {
+    const f = await newSong();
+    await addOriginal(f);
+    await addTranslation(f, name, undefined, { columns: { [field]: OWN_CONTENT[field] } });
+    fixtures.set(this, f);
+  }
+);
+Given(
+  'a song with an original version and a translation version named {string} with the same melody, note, beats and links as the original',
+  async function (this: object, name: string) {
+    const f = await newSong();
+    const columns = { ...OWN_CONTENT, vote_count: 0 };
+    await addOriginal(f, undefined, { columns });
+    // Whitespace around a value does not make it different.
+    await addTranslation(f, name, undefined, {
+      columns: Object.fromEntries(Object.entries(columns).map(([k, v]) => [k, typeof v === 'string' ? `${v} ` : v])),
+    });
+    fixtures.set(this, f);
+  }
+);
+Given(
+  'a song with an original version and a translation version named {string} contributed by a member',
+  async function (this: object, name: string) {
+    const f = await newSong();
+    await addOriginal(f);
+    await addTranslation(f, name, undefined, { columns: { contributor_id: f.ownerId } });
+    fixtures.set(this, f);
+  }
+);
+Given(
+  'a song with an original version in key {string} and a translation version named {string} without chords in key {string} used in a playlist transposed by {int}',
+  async function (this: object, originalKey: string, name: string, translationKey: string, transposition: number) {
+    const f = await newSong();
+    await addOriginal(f, undefined, { key: originalKey });
+    await addTranslation(f, name, 'Mother earth, I hear you', { key: translationKey });
+    await addUsage(f);
+    await (await seedDb()).query('UPDATE public.setlist_items SET transposition_override = $2 WHERE id = $1', [f.setlistItemId, transposition]);
+    fixtures.set(this, f);
+  }
+);
+
 const notices = new WeakMap<object, string[]>();
 
 When('the translation migration runs', async function (this: object) {
@@ -500,4 +555,12 @@ Then('the migration reported the source of the translation version: songbook {st
 Then('the migration explained why the translation version stayed: {string}', function (this: object, reason: string) {
   const log = notices.get(this) ?? [];
   assert.ok(log.some((m) => m.includes('left in place') && m.includes(reason)), `no "${reason}" notice in: ${log.join(' | ')}`);
+});
+Then('the migration reported the contributor of the translation version', function (this: object) {
+  const log = notices.get(this) ?? [];
+  const f = fx(this);
+  assert.ok(
+    log.some((m) => m.includes('contributed by') && m.includes(f.ownerId)),
+    `no contributor notice in: ${log.join(' | ')}`
+  );
 });

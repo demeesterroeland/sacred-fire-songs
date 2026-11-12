@@ -5,12 +5,17 @@
  *
  * The migration folds a name in SQL (NFD, strip the combining marks U+0300–U+036F and U+0591–U+05C7, lowercase,
  * trim); the app folds in JS (strips every `\p{M}`). This script therefore lists every recognised name SQL-folded,
- * each with the tag the app itself gives that name, so the two cannot disagree. A unit test
- * (testing/unit/tests/songs/translationLanguageSql.test.ts) checks the migration against the app and fails when the
- * list in the migration is out of date.
+ * each with the tag the app itself gives that name, so the two cannot disagree.
+ *
+ * The names come from the ICU data of the running Node, so the output can differ between Node versions. The migration
+ * is frozen once released (never edited after it has run): run this once, before release, paste the block over the one
+ * in the migration AND write it to the committed snapshot
+ * testing/unit/tests/songs/fixtures/translation-language-names.sql. The unit test
+ * (testing/unit/tests/songs/translationLanguageSql.test.ts) compares the migration with that snapshot, not with a
+ * live run, so a Node/ICU upgrade never breaks it.
  *
  * Usage (from the repository root): `npx tsx scripts/db/generate-translation-language-names.ts`
- * prints the block between the BEGIN and END markers; paste it over the block in the migration.
+ * prints the block between the BEGIN and END markers (markers included).
  */
 import { languageNameEntries, translationLanguageTag } from '@/lib/songs/versionLabels';
 

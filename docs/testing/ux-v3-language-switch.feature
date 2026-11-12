@@ -1,6 +1,6 @@
 # Version: 1.1 | Date: Nov 12, 2026
 # Changelog
-# 1.1 | Nov 12, 2026 | Review fixes (#535): migration keeps versions with chords in another key/capo/tuning or blank lyrics, appends moved takes after the original's, reports dropped sources; the version-switch step reads the real labels.
+# 1.1 | Nov 12, 2026 | Review fixes (#535): migration keeps versions with chords in another key/capo/tuning or blank lyrics, appends moved takes after the original's, reports dropped sources; the version-switch step reads the real labels. Re-check: migration keeps a version with its own melody, note, beats, media link or votes, and a lyrics-only version used in a playlist with a transposition when its key differs; reports the contributor; tag fallback needs 2-8 character subtags.
 # 1.0 | Nov 12, 2026 | Story 6.2.13 (#516, G3.1): language switch next to the version switch, fed by song_translations; interim `translation` versions move to song_translations.
 @ux-v3 @language-switch
 Feature: Read a translation without leaving the song
@@ -211,6 +211,60 @@ Feature: Read a translation without leaving the song
       Given a song whose original version has two takes and whose translation version named "English" has two takes
       When the translation migration runs
       Then the original version has the takes "original one", "original two", "translation newer" and "translation older" in that order
+
+    @seed
+    Scenario Outline: A translation version with its own <field> stays where it is
+      Given a song with an original version and a translation version named "English" with its own "<field>"
+      When the translation migration runs
+      Then the song has no translation
+      And the translation version is still there
+      And the migration explained why the translation version stayed: "<field>"
+
+      Examples:
+        | field           |
+        | melody_notation |
+        | song_note       |
+        | beats           |
+        | youtube_url     |
+        | spotify_url     |
+        | soundcloud_url  |
+        | vote_count      |
+
+    @seed
+    Scenario: A translation version with the same melody, note, beats and links as the original moves
+      Given a song with an original version and a translation version named "English" with the same melody, note, beats and links as the original
+      When the translation migration runs
+      Then the song has a "en" translation
+      And the translation version is gone
+
+    @seed
+    Scenario: The contributor of a removed translation version is reported
+      Given a song with an original version and a translation version named "English" contributed by a member
+      When the translation migration runs
+      Then the translation version is gone
+      And the migration reported the contributor of the translation version
+
+    @seed
+    Scenario: A translation without chords in another key stays where a playlist transposes it
+      Given a song with an original version in key "G" and a translation version named "English" without chords in key "C" used in a playlist transposed by 2
+      When the translation migration runs
+      Then the song has no translation
+      And the translation version is still there
+      And the migration explained why the translation version stayed: "playlist"
+
+    @seed
+    Scenario: A translation without chords in another key moves when no playlist transposes it
+      Given a song with an original version in key "G" and a translation version named "English" without chords in key "C" used in a playlist transposed by 0
+      When the translation migration runs
+      Then the song has a "en" translation
+      And the translation version is gone
+
+    @seed
+    Scenario: A version name that is not a valid language tag stays where it is
+      Given a song with an original version and a translation version named "xx-a"
+      When the translation migration runs
+      Then the song has no translation
+      And the translation version is still there
 
     @seed
     Scenario: The songbook and page of a removed translation version are reported

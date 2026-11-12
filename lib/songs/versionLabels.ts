@@ -107,7 +107,7 @@ export function languageNameEntries(): Array<{ name: string; tag: string }> {
  * The language subtag must be lowercase as written: capitalised words such as "New" or "Alt" are valid tags too
  * (Newari, Southern Altai) but here they are words, not languages.
  */
-const LANGUAGE_TAG = /^[a-z]{2,3}(-[A-Za-z0-9]+)*$/;
+const LANGUAGE_TAG = /^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$/;
 
 /** The canonical form of a BCP 47 language tag ("LKT" → "lkt", "pt-br" → "pt-BR"), or null when it is not one. */
 function canonicalTag(value: string): string | null {
