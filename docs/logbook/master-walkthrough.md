@@ -3441,3 +3441,9 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - Dialog: the chosen singer is marked with the soft accent (selected); search results no longer all show a check. Save is the single primary button (the shared `Button`), Cancel is outlined, Remove is a red text button; all 44 px. The button that clears the chosen singer has a 44 px target and a translated name (`recording.attribution.clearSinger`, 8 locales).
 - `PALETTE_BASELINE` 1117 → 980 (rebased on group 1, PR #537, which also scans `lib/`).
 - Tests: `docs/testing/ux-v2-sober-practice.feature` (`@unit`); light and dark contrast stays covered by the axe runs in `ux-v2-a11y-audit.spec.ts`.
+
+## Session November 13, 2026 — Story 6.1.38 (#534): role badge on a profile
+
+- A profile page (`/users/<id>`) shows one badge for the user's role, each with its own icon: admin `Shield`, gatekeeper `KeyRound`, expert `Award`, musician `Music`, member `UserCheck`. Labels reuse `admin.role.*` (all 8 locales).
+- `public.public_profiles` gains `role` (migration `20261113120000_public_profiles_role.sql`): every signed-in member sees every role; a guest reads NULL. `is_musician` stays. An unknown or missing role shows the member badge, never a privileged one.
+- Tests: `docs/testing/ux-v2-profile-role-badge.feature` (`@unit`, `@e2e`), `testing/unit/tests/profile/roleBadge.test.tsx`, a `@seed` scenario in `access-policies.feature`, `e2e/tests/ux-v2-profile-role-badge.spec.ts`.

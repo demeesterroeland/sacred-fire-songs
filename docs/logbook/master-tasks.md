@@ -1529,3 +1529,10 @@
 - [x] `db-schema.sql` v3.8 (fresh install verified), design doc 2.12, epics 1.98 (Epic 6.2 + story 6.2.1), `types.ts`, `docs/guides/importing-songbooks.md`
 - [x] Cross-review by another Claude model (orchestrator, #498)
 - [x] Review fixes (PR #527): `trg_guard_catalog_slug` / `trg_guard_catalog_source_id` (only service role and admins set catalog keys), keys without surrounding spaces, lowercase translation languages, `song_version_sources.songbook_id` `on delete restrict`, guide: explicit increasing `created_at` and a write-rights table; `@seed` scenarios for the guards, ordering and runtime privileges
+
+## Session November 13, 2026 (Story 6.1.38, #534, role badge on a profile)
+- [x] Plan `docs/plans/2026-11-13-role-badges.md`
+- [x] Migration `20261113120000_public_profiles_role.sql`: `public_profiles.role`, NULL for a guest; `db-schema.sql` v3.9
+- [x] `RoleBadge` + `lib/users/roleBadge.ts` (admin Shield, gatekeeper KeyRound, expert Award, musician Music, member UserCheck; labels `admin.role.*`); `user.profile.verifiedMusician` / `user.profile.member` removed from 8 locales
+- [x] Tests: `@unit` feature `ux-v2-profile-role-badge.feature`, Vitest/RTL `roleBadge.test.tsx`, `@seed` role scenario in `access-policies.feature` (v1.3), E2E `ux-v2-profile-role-badge.spec.ts`; docs (design doc 2.15, epics 1.99)
+- [x] Cross-review by another Claude model; review fixes (seed column list, guest/member role scenario, e2e naming)
