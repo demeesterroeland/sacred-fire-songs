@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useMemo, useRef } from 'react';
-import { useParams, notFound, useSearchParams } from 'next/navigation';
+import { useParams, notFound, useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { createClient } from '@/lib/supabase/client';
 import { useAuth } from '@/hooks/useAuth';
@@ -32,9 +32,14 @@ import { SongSourceLine } from '@/components/song/SongSourceLine';
 import { VisibilityIcon } from '@/components/common/VisibilityIcon';
 import { ReaderToolbar } from '@/components/song/ReaderToolbar';
 import { SongVersionSwitch } from '@/components/song/SongVersionSwitch';
+import { SongLanguageSwitch } from '@/components/song/SongLanguageSwitch';
+import { LANGUAGE_PARAM, ORIGINAL_LANGUAGE, languageSearch, linkedLanguageChoice, resolveTranslation, translationTitle, type LanguageChoice } from '@/lib/songs/translations';
+import { hasChords } from '@/lib/chordProParsing';
 import { EDIT_VERSION_PARAM, editSongHref } from '@/lib/songs/versionOrder';
 import { blocksVersionSwitch, linkedVersionChoice, resolveVersionIndex, versionSearch, versionShareUrl, type VersionChoice } from '@/lib/songs/versionSwitch';
 import { SongMenuSheet } from '@/components/song/SongMenuSheet';
+import { LinkSongSheet } from '@/components/song/LinkSongSheet';
+import { canLinkSong, fetchSongRedirect, songRedirectHref, type SongLinkSummary } from '@/lib/songs/linkSong';
 import { useScrolledPast } from '@/hooks/useScrolledPast';
 import { useReaderPrefs } from '@/lib/reader/useReaderPrefs';
 import { speedBy } from '@/lib/reader/autoScroll';
@@ -59,12 +64,17 @@ export default function SongDetailPage() {
     // The chosen version belongs to the song it was chosen on (like the transpose shift), so opening
     // another song, or a version that is gone, falls back to the first one (UXA-049).
     const [versionChoice, setVersionChoice] = useState<VersionChoice | null>(null);
+    // Story 6.2.13 (#516): the language being read; like the version it belongs to the song it was chosen on.
+    const [languageChoice, setLanguageChoice] = useState<LanguageChoice | null>(null);
     const [readerPrefs, setReaderPrefs] = useReaderPrefs();
     const [controlsExpanded, setControlsExpanded] = useSongControlsExpanded();
     const metaToggleRef = useRef<HTMLButtonElement>(null);
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     // The song page's one menu (⋮). It is opened from the bar on a phone and from the header from lg up.
     const [isMenuOpen, setIsMenuOpen] = useState(false);
+    // Story 6.2.9 (#512): admins, and gatekeepers on their own songs, link this song as a version of another song.
+    const [isLinkOpen, setIsLinkOpen] = useState(false);
+    const router = useRouter();
     const phoneTitleRef = useRef<HTMLHeadingElement>(null);
     const phoneMenuButtonRef = useRef<HTMLButtonElement>(null);
     const desktopMenuButtonRef = useRef<HTMLButtonElement>(null);
@@ -80,6 +90,8 @@ export default function SongDetailPage() {
     // `/songs/<id>?version=<versionId>` (where Save on the edit form returns to) is the initial choice;
     // a tap on the switch or a linked take overrides it. Unknown versions fall back to the first one.
     const linkedVersion = linkedVersionChoice(id, searchParams.get(EDIT_VERSION_PARAM));
+    // `/songs/<id>?lang=<tag>` opens a translation; a tap on the language switch overrides it, an unknown tag means the original.
+    const linkedLanguage = linkedLanguageChoice(id, searchParams.get(LANGUAGE_PARAM));
     // The recorder holds a take that is not saved yet: a version tap must not remount (and empty) the drawer.
     const recorderDirtyRef = useRef(false);
     const handledRecordingLink = useRef<string | null>(null);
@@ -129,6 +141,20 @@ export default function SongDetailPage() {
         queryFn: () => fetchSong(id!),
         enabled: !!id,
     });
+
+    // Story 6.2.9 (#512): a song that was linked as a version of another song is gone; its old link
+    // continues at that song, with the same ?version= / ?recording= (they moved along).
+    const songMissing = !!id && !songLoading && !songError && song === null;
+    const redirectQuery = useQuery({
+        queryKey: SONG_KEYS.redirect(id!),
+        queryFn: () => fetchSongRedirect(createClient(), id!),
+        enabled: songMissing,
+        retry: false,
+    });
+    const redirectTarget = songMissing ? redirectQuery.data : null;
+    useEffect(() => {
+        if (redirectTarget) router.replace(songRedirectHref(redirectTarget, searchParams.toString()));
+    }, [redirectTarget, router, searchParams]);
 
     // Log song fetch errors so they're visible in DevTools
     useEffect(() => {
@@ -180,6 +206,9 @@ export default function SongDetailPage() {
     const versions = song?.song_versions || [];
     const selectedVersionIndex = resolveVersionIndex(versions, versionChoice?.songId === id ? versionChoice : linkedVersion, id);
     const currentVersion = versions[selectedVersionIndex];
+    // A translation belongs to the song: it replaces the lyrics of the version being shown (which stays selected).
+    const translations = song?.song_translations ?? [];
+    const translation = resolveTranslation(translations, languageChoice?.songId === id ? languageChoice : linkedLanguage, id);
     const selectVersion = (index: number) => {
         const next = versions[index];
         if (!next) return;
@@ -192,6 +221,8 @@ export default function SongDetailPage() {
             return;
         }
         setVersionChoice({ songId: id, versionId: next.id });
+        // Choosing a version returns to that version's own text: the language goes back to the original.
+        setLanguageChoice({ songId: id, language: ORIGINAL_LANGUAGE });
         // A take linked from a notification belongs to the version it was opened on.
         setHighlightRecordingId(null);
         // Every version has its own link (`?version=`; none for the first one). The address is replaced in place:
@@ -201,14 +232,25 @@ export default function SongDetailPage() {
             window.history.replaceState(null, '', `${window.location.pathname}${search}${window.location.hash}`);
         }
     };
+    // Choosing a language keeps the version; the address gets `?lang=<tag>` (none for the original), replaced in place.
+    const selectLanguage = (language: string | null) => {
+        setLanguageChoice({ songId: id, language: language ?? ORIGINAL_LANGUAGE });
+        if (typeof window !== 'undefined') {
+            const search = languageSearch(window.location.search, language);
+            window.history.replaceState(null, '', `${window.location.pathname}${search}${window.location.hash}`);
+        }
+    };
     const { data: recordings } = useSongRecordings(currentVersion?.id);
     // The Chords switch and transpose follow the version being SHOWN (a lyrics-only Simplified has none to switch
     // or shift); lists, filters and the meta links keep using the song-level flag (any version).
-    const shownHasChords = versionHasChords(currentVersion);
-    const mayTranspose = canTranspose(user?.role) && shownHasChords;
+    // A translation is text of the song, not of a key: it is shown as stored and not transposed.
+    const shownHasChords = translation ? hasChords(translation.lyrics ?? '') : versionHasChords(currentVersion);
+    const mayTranspose = canTranspose(user?.role) && shownHasChords && !translation;
     const shownContent = useMemo(
-        () => transposeChordPro(currentVersion?.content_chordpro || '', mayTranspose ? semitones : 0, { key: currentVersion?.key }),
-        [currentVersion?.content_chordpro, currentVersion?.key, mayTranspose, semitones],
+        () => translation
+            ? (translation.lyrics ?? '')
+            : transposeChordPro(currentVersion?.content_chordpro || '', mayTranspose ? semitones : 0, { key: currentVersion?.key }),
+        [translation, currentVersion?.content_chordpro, currentVersion?.key, mayTranspose, semitones],
     );
     const shownVersion = currentVersion && mayTranspose && semitones !== 0
         ? { ...currentVersion, key: transposeKey(currentVersion.key, semitones) }
@@ -242,6 +284,7 @@ export default function SongDetailPage() {
             if (index < 0 && user) toast.error(t('rehearsal.recording.linkUnavailable'));
             if (index >= 0) {
                 setVersionChoice({ songId: id, versionId: songVersions[index].id });
+                setLanguageChoice({ songId: id, language: ORIGINAL_LANGUAGE });
                 setHighlightRecordingId(linkedRecordingId);
             }
             setDrawerRequestedTab(linkedTakeTab(!!user, index >= 0));
@@ -286,6 +329,7 @@ export default function SongDetailPage() {
             </div>
         );
     }
+    if (!song && songMissing && (!redirectQuery.isFetched || redirectTarget)) return <SongDetailSkeleton />;
     if (!song) return notFound();
 
     const categories = (song.song_category_map?.map((map: any) => ({
@@ -293,6 +337,17 @@ export default function SongDetailPage() {
         parent: map.categories?.parent?.name ?? null,
     })) || [])
         .filter((cat: any) => cat && cat.parent !== 'Artists' && cat.name !== 'Artists');
+
+    const handleLinked = (summary: SongLinkSummary) => {
+        setIsLinkOpen(false);
+        toast.success(t('song.link.success', { source: summary.source_title, target: summary.target_title }));
+        // Keep ?version=: the version being read moved to the target song.
+        router.replace(songRedirectHref(summary.target_id, searchParams.toString()));
+        void queryClient.invalidateQueries({ queryKey: SONG_KEYS.all() });
+        void queryClient.invalidateQueries({ queryKey: SONG_KEYS.detail(summary.target_id) });
+        void queryClient.invalidateQueries({ queryKey: SONG_KEYS.allFavorites() });
+        router.refresh();
+    };
 
     const handleDelete = async () => {
         if (!id) return;
@@ -302,7 +357,7 @@ export default function SongDetailPage() {
     const handleShare = async () => {
         const authorNames = songAuthorNames({ authors: song.authors, originalAuthor: song.original_author });
         const shareUrl = currentVersion
-            ? versionShareUrl(window.location.href, currentVersion.id, selectedVersionIndex === 0)
+            ? versionShareUrl(window.location.href, currentVersion.id, selectedVersionIndex === 0, translation?.language ?? null)
             : window.location.href;
         const shareData = {
             title: song.title,
@@ -585,32 +640,56 @@ export default function SongDetailPage() {
                     )}
 
                     {/* Story 6.1.11 (#395), validation 4: version switch below the reader tools (Original · Simplified), only when the song has more
-                        than one version; nothing (and no space) otherwise. */}
-                    <SongVersionSwitch
-                        className="mb-2"
-                        versions={versions}
-                        selectedIndex={selectedVersionIndex}
-                        onSelect={selectVersion}
-                    />
+                        than one version; nothing (and no space) otherwise. Story 6.2.13 (#516): the language switch
+                        (Original · Dutch · English) shares the slot, only when the song has a translation. The row wraps
+                        on a narrow phone, and an empty row takes no space. */}
+                    <div className="mb-2 flex flex-wrap items-center gap-x-3 gap-y-2 empty:hidden">
+                        <SongVersionSwitch
+                            className="min-w-0 max-w-full"
+                            versions={versions}
+                            selectedIndex={selectedVersionIndex}
+                            onSelect={selectVersion}
+                        />
+                        <SongLanguageSwitch
+                            className="min-w-0 max-w-full"
+                            translations={translations}
+                            selected={translation?.language ?? null}
+                            onSelect={selectLanguage}
+                        />
+                    </div>
 
                     {/* Song Content (Lyrics/Chords) */}
                     <div className="pt-2 pb-12">
                         {/* The fold is measured on the lyric text itself, not on the padding below it (review H2). */}
-                        <div ref={lyricsRef}>
+                        <div ref={lyricsRef} lang={translation?.language}>
+                            {/* Story 6.2.13 (#516): the translated title, only when it differs from the song's title. */}
+                            {translation && translationTitle(song.title, translation) && (
+                                <p data-testid="translation-title" className="mb-3 text-title font-medium text-fg">
+                                    {translationTitle(song.title, translation)}
+                                </p>
+                            )}
                             <SongDisplay
                                 content={shownContent}
-                                melodyNotation={currentVersion?.melody_notation || ''}
+                                melodyNotation={translation ? '' : currentVersion?.melody_notation || ''}
                                 hasChords={shownHasChords}
                                 sizeStep={readerPrefs.step}
                                 showChords={readerPrefs.chords}
                             />
                         </div>
                         {/* Story 6.2.10 (#513): where the version being shown was printed (book · page · compiler). */}
-                        <SongSourceLine
-                            className="mt-6"
-                            sources={currentVersion?.song_version_sources}
-                            songTitle={song.title}
-                        />
+                        {translation ? (
+                            translation.translator?.trim() && (
+                                <p data-testid="translation-translator" className="mt-6 text-meta text-fg-muted">
+                                    {t('song.translation.by', { name: translation.translator.trim() })}
+                                </p>
+                            )
+                        ) : (
+                            <SongSourceLine
+                                className="mt-6"
+                                sources={currentVersion?.song_version_sources}
+                                songTitle={song.title}
+                            />
+                        )}
                     </div>
 
                     <div className="h-20"></div>
@@ -662,6 +741,7 @@ export default function SongDetailPage() {
                     onPublish: !song.is_public && (song.owner_id === user?.id || isAdmin)
                         ? () => { setIsMenuOpen(false); void handleMakeSongPublic(); }
                         : undefined,
+                    onLinkAsVersion: canLinkSong(user, song.owner_id) ? () => { setIsMenuOpen(false); setIsLinkOpen(true); } : undefined,
                 }}
                 transpose={mayTranspose ? {
                     semitones,
@@ -681,6 +761,16 @@ export default function SongDetailPage() {
                 onKeepAwakeChange={(value) => setPreference('keepScreenAwake', value)}
                 awakeSupported={awakeSupported}
             />
+
+            {id && canLinkSong(user, song.owner_id) && (
+                <LinkSongSheet
+                    open={isLinkOpen}
+                    onOpenChange={setIsLinkOpen}
+                    sourceId={id}
+                    sourceTitle={song.title}
+                    onLinked={handleLinked}
+                />
+            )}
 
             <GuestGateSheet feature="addToPlaylist" open={isGuestGateOpen} onOpenChange={setIsGuestGateOpen} />
             <GuestGateSheet feature="favourites" open={favouritesGate.open} onOpenChange={favouritesGate.onOpenChange} />
