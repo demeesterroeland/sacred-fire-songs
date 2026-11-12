@@ -174,6 +174,7 @@ const ru: Partial<Record<TranslationKey, string>> = {
   'song.meta.beats': 'Счёт {beats}',
   'song.meta.showDetails': 'Показать подробности',
   'song.meta.hideDetails': 'Скрыть подробности',
+  'song.about.title': 'О песне',
   'song.source.label': 'Источник',
   'song.source.labelMany': 'Источники',
   'song.source.page': 'с. {page}',

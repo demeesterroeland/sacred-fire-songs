@@ -1,11 +1,12 @@
 # Guest Guide (draft)
 
-**Version:** 0.26 | **Date:** Nov 12, 2026
+**Version:** 0.27 | **Date:** Nov 12, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.27 | Nov 12, 2026 | Song page: a version that has a note from the songbook it was printed in shows **About this song** under the grey lines; tap it to read the background. It starts closed and is hidden when there is no note (UX v3, #511). |
 | 0.26 | Nov 12, 2026 | Song page: when a song comes from a printed songbook, a grey line under the lyrics says which book, which page and who compiled it (UX v3, #513). Review round: pages read right (`p. 38`, `pp. 38–39`), an original title that only differs in accents or punctuation is not repeated, and a song printed in several books has a list labelled "Sources". |
 | 0.25 | Nov 11, 2026 | Song page: the second line also shows **Beats** when the songbook gives them for the version, e.g. `Key E · Capo 5 · Standard · Beats 8`; the line follows the version you pick (UX v3, #510).
 | 0.24 | Nov 11, 2026 | Song page: lines the circle sings more than once sit between repeat bars, `‖:` before the first line and `:‖` after the last one, with `×2` when the song says how many times (UX v3, #518). |
@@ -58,6 +59,7 @@ The ☰ menu repeats the main places (Home, Songs; under Library the same tabs a
 
 - The title is at the top. Under it, one grey line shows the author and the tags (category, tradition, language); tap it to see them all as links.
 - A second line shows **Key**, **Capo**, **Tuning** and, when the songbook gives them, **Beats**, e.g. `Key E · Capo 3 · Standard · Beats 8`. It shows the values of the version you are reading.
+- If this version has a note from the songbook it was printed in, **About this song** sits under those lines. Tap it to read the background; it starts closed, and it is not shown when the version has no note.
 - If the song exists in more than one version (for example *Original* and *Simplified*), a grey switch with the version names appears under those lines; tap a name to read that version. The app opens the first version each time. Songs with one version show no switch.
 - Under those lines: **Chords** switches the chords on or off, **A−** / **A+** make the text smaller or larger. The app remembers your choice on this device.
 - **▶** scrolls the song for you, hands free; touch the screen to pause it, or press **⏸**. The **⋮** menu (top right) sets the scroll speed (five steps) and has the **Screen stays on** switch. While the scroll runs the toolbar stays under the title. A small sun next to **⋯** means the screen stays on while you sing.

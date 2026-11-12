@@ -171,6 +171,7 @@ const it: Partial<Record<TranslationKey, string>> = {
   'song.meta.beats': 'Tempi {beats}',
   'song.meta.showDetails': 'Mostra dettagli',
   'song.meta.hideDetails': 'Nascondi dettagli',
+  'song.about.title': 'Info su questo canto',
   'song.source.label': 'Fonte',
   'song.source.labelMany': 'Fonti',
   'song.source.page': 'p. {page}',
