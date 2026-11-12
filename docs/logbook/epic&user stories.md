@@ -1,8 +1,8 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 2.06
+**Version:** 2.07
 **Status:** Living Document
-**Date:** Nov 12, 2026
+**Date:** Nov 13, 2026
 
 ## Changelog
 
@@ -63,8 +63,9 @@
 | **1.92** | Nov 6, 2026 | Epic 6.1: validation round 1 after the owner's phone run (Part of #375): auto-scroll only when the lyrics run below the fold (Story 6.1.10 / #394), expanded meta line (6.1.7 / #391), one focus style for text fields, the search suggestions in the page flow (6.1.29 / #413), search options on tokens, translated feedback and song flags across versions (6.1.11 / #395). Acceptance criteria of those stories now read as in `docs/testing/ux-v2-validation-1.feature`. |
 | **1.93** | Nov 7, 2026 | Epic 6.1: review round on the validation round 1 PR (#474, Part of #375): acceptance criteria of Stories 6.1.10 (auto-scroll offered only when the lyric text runs below the visible area above the fixed bars), 6.1.29 (suggestions close on the click and keep the scroll position), 6.1.1 (one focus cue per field, readable chip counts), 6.1.11 (a lyrics-only version has no Chords switch; a bracketed section label is not a chord) and the i18n policy (no raw server or database text in a toast) verified against the code; decisions UXA-061 to UXA-066. |
 | **1.94** | Nov 7, 2026 | Epic 6.1: validation round 2, batch 2 (Part of #375): acceptance criteria updated for Story 6.1.4 (#388: amounts between parentheses, "Air (3)"), 6.1.8 (#392: the full title wraps at the top of the page on a phone, the truncated copy shows only after scrolling past it), 6.1.10 (#394: transpose, scroll speed and a Screen stays on switch live in the one ⋮ menu; the toolbar has no ⋯), 6.1.11 (#395: every version has a `?version=` link, replaced in place, shared by Share), 6.1.23 (#407: History, Artists and Shared with me share one heading size) and 6.1.24 (#408: the Library "+" floats at the bottom right). New: Terms and Privacy pages (draft) with the operator from the server environment. |
-| **2.06** | Nov 12, 2026 | Epic 6.2: Story 6.2.9 (#512, G1.4) implemented on `feat/ux-v3` (PR into `feat/ux-v3`, in review): admins (any song) and gatekeepers (only songs they own: source and target) link a duplicate song as a version of another song from the song menu (search, preview of what moves, clear confirm; no undo); both songs must be public or both private, for everyone. One database function `fn_link_song_as_version` moves versions (recordings and playlist entries follow), merges categories, aliases, authors and favourites, keeps the catalog slug reachable, leaves a redirect from the old link (chains collapse) and an audit entry (`docs/testing/ux-v3-link-song-version.feature`). |
-| **2.05** | Nov 12, 2026 | Epic 6.2: Story 6.2.12 (#515, G2.3) implemented on `feat/ux-v3` (PR #533, in review): every author of a song is shown, each its own link to the author filter (the meta line, the share text, the ⋮ sheet and the rehearsal drawer). Review round: the Add/Edit form prefills from `authors` and writes it next to `original_author` when the author input is changed (any other edit leaves both columns as stored); the free-text search, the author filter and the artists index use the same names (`authors`, else `original_author` split); the joiner sits after the previous link (no "Anna , Ben"); "Traditional" is plain text, not a link; the link carries the exact name through the URL (`&`, `+`, `#`); `qu` has no conjunction data (plain-list fallback). Spec: `docs/testing/ux-v3-all-authors.feature`. |
+| **2.07** | Nov 13, 2026 | Epic 6.2: Story 6.2.9 (#512, G1.4) implemented on `feat/ux-v3` (PR into `feat/ux-v3`, in review): admins (any song) and gatekeepers (only songs they own: source and target) link a duplicate song as a version of another song from the song menu (search, preview of what moves, clear confirm; no undo); both songs must be public or both private, for everyone. One database function `fn_link_song_as_version` moves versions (recordings and playlist entries follow), merges categories, aliases, authors and favourites, keeps the catalog slug reachable, leaves a redirect from the old link (chains collapse) and an audit entry (`docs/testing/ux-v3-link-song-version.feature`). |
+| **2.06** | Nov 12, 2026 | Epic 6.2: Story 6.2.13 (#516, G3.1) implemented on `feat/ux-v3`: a language switch (*Original language · Dutch · English*) sits next to the version switch and is fed by `song_translations`; a song without translations shows no switch and takes no space. A translation replaces the lyrics of the version being read (version stays selected, source line hidden, translator and a differing translated title shown); choosing a version returns to the original language, choosing a language keeps the version; `?lang=<tag>` deep link; guests see the translations of public songs only (row-level security). Migration `20261112140000_translation_versions_to_translations.sql` moves the interim `translation` versions to `song_translations` (recordings go to the first original version, appended after the takes already there; playlist items open that version in its original language; rows that cannot move cleanly stay and are reported: language not derivable, no original version, blank lyrics, chords in another key/capo/tuning than the original, lyrics-only in another key while a playlist transposes it, its own melody/note/beats/media link/votes, or a different stored text; dropped sources and the contributor are logged). The importer guide (v1.3) now says translations go to `song_translations`. 8 locales (`qu` for a native check). Executable: `docs/testing/ux-v3-language-switch.feature` (`@unit`, `@seed`). Unblocks #517 (G3.2). |
+| **2.05** | Nov 12, 2026 | Epic 6.2: Story 6.2.12 (#515, G2.3) implemented on `feat/ux-v3` (PR #533): every author of a song is shown, each its own link to the author filter (the meta line, the share text, the ⋮ sheet and the rehearsal drawer). Review round: the Add/Edit form prefills from `authors` and writes it next to `original_author` when the author input is changed (any other edit leaves both columns as stored); the free-text search, the author filter and the artists index use the same names (`authors`, else `original_author` split); the joiner sits after the previous link (no "Anna , Ben"); "Traditional" is plain text, not a link; the link carries the exact name through the URL (`&`, `+`, `#`); `qu` has no conjunction data (plain-list fallback). Spec: `docs/testing/ux-v3-all-authors.feature`. |
 | **2.04** | Nov 12, 2026 | Epic 6.2: Story 6.2.6 (#509, G1.1) implemented on `feat/ux-v3`: each version is labelled with its songbook short name (original, variants) or its language name in the app language (translations), ordered original, variants, translations; four versions fit a 375 px phone. Executable in `docs/testing/ux-v3-version-labels.feature`. Review round (PR #530): adding to a playlist and favouriting use the first version of that order (not the oldest row); the switch scrolls the opened version into view on a phone; any language tag names its language; two translations in one language show their songbook; an unrecognised translation shows its songbook; one embed of `song_version_sources` per query (guarded by a unit test). |
 | **2.03** | Nov 12, 2026 | Epic 6.2: Story 6.2.8 (#511, G1.3) implemented on `feat/ux-v3` (PR into `feat/ux-v3`, in review): "About this song" under the meta line shows the selected version's `song_note`, collapsed by default (button with aria-expanded), hidden when the note is empty or whitespace-only, plain text with paragraph breaks. Spec: `docs/testing/ux-v3-about-this-song.feature`. Review round: keyed per-version collapse tested at L3, unused children slot removed; the fold at 390 × 844 is a design intent (no E2E assertion yet). |
 | **2.02** | Nov 12, 2026 | Epic 6.2: Story 6.2.10 (#513, G2.1) implemented on `feat/ux-v3`: the song page shows a grey source line under the lyrics with the songbook, page and compiler of the version being shown (primary source first, several listed, original title when it differs, nothing without sources, guests too). Review round (PR #531): `p.` / `pp.` from the page notation, importer prefixes stripped, original title compared without accents, apostrophe style or trailing punctuation, plural list label, one embed of `song_version_sources` per song query. Acceptance criteria block added. Executable: `docs/testing/ux-v3-songbook-source.feature`. |
@@ -1732,7 +1733,8 @@ GitHub epic **#498**. Many circles sing from printed songbooks: the same song ap
 | 6.2.8 | #511 | `G1.3` | B | **[Implemented on feat/ux-v3, in review]** As a reader, I want the note printed with a song in a collapsible "About this song" so that I learn its background without it pushing the lyrics down | — |
 | 6.2.9 | #512 | `G1.4` | B | **[Implemented on feat/ux-v3, in review]** As a Contributor, I want to link a song as a version of another song so that duplicates become one song with several versions (admins on any song, gatekeepers on songs they own; both songs public or both private; ⋮ menu → "Link as a version of…"; preview and confirm; the old link opens the target) | #504 |
 | 6.2.10 | #513 | `G2.1` | A | **[Implemented on feat/ux-v3]** As a reader, I want to see in which songbook and on which page a version appears so that I can find it in the printed book and credit its compiler (grey line under the lyrics: `Songbook A · p. 38 · compiled by Compiler A`; original title when it differs; follows `?version=`; guests too) | #504 |
-| 6.2.12 | #515 | `G2.3` | B | **[Implemented on feat/ux-v3, PR #533, in review]** As a reader, I want all authors of a song shown and tappable so that co-written songs credit everyone | #504 |
+| 6.2.12 | #515 | `G2.3` | B | **[Implemented on feat/ux-v3, PR #533]** As a reader, I want all authors of a song shown and tappable so that co-written songs credit everyone | #504 |
+| 6.2.13 | #516 | `G3.1` | B | **[Implemented on feat/ux-v3, in review]** As a reader, I want a language switch next to the version switch so that I read a translation without leaving the song | #504; unblocks #517 |
 | 6.2.15 | #518 | `G4.1` | A | **[Implemented on feat/ux-v3, PR #526]** As a reader, I want repeat bars shown in the lyrics so that I know which lines the circle sings twice (`‖:` … `:‖` and `×2` around the lines between `{start_of_repeat}` and `{end_of_repeat}`; chords on or off) | — |
 | 6.2.16 | #519 | `G4.2` | A | **[Implemented, PR #528]** As a Musician, I want alternative chords like A7/C7 shown and transposed correctly so that the chord line stays right in every key | — |
 
@@ -1759,6 +1761,82 @@ Scenario: Many versions fit a phone
   Given a song with 4 versions on a 375 px screen
   Then every option is reachable without the page scrolling sideways
 ```
+
+**Story 6.2.13 acceptance criteria** (executable: `docs/testing/ux-v3-language-switch.feature`, `@unit` and `@seed`):
+
+```gherkin
+Scenario: Reader switches to the English translation
+  Given a song with an English translation
+  When I pick "English" in the language switch
+  Then the English lyrics are shown
+
+Scenario: A song without translations has no switch and takes no space
+  Given a song without translations
+  Then the song has no language switch
+
+Scenario: Switching version returns to the original language
+  Given a song with an English translation
+  And the address says "?lang=en&recording=r1"
+  When I pick another version
+  Then the address is "?version=v2"
+
+Scenario: Switching language keeps the version
+  Given the address says "?version=v2"
+  When I pick the language "en"
+  Then the address is "?version=v2&lang=en"
+
+Scenario: A deep link opens the translation
+  Given a song with an English translation
+  When I open the song with "?lang=EN"
+  Then the English lyrics are shown
+
+Scenario: A guest reads the translations of a public song only
+  Given a public song and a private song, each with a Dutch translation
+  Then a guest reads the Dutch translation of the public song
+  And a guest reads no translation of the private song
+  And the owner reads the translation of the private song
+
+Scenario: A translation version moves, with its recordings and playlist items, to the original
+  Given a song with an original version and a translation version named "English" with a recording and a playlist item
+  When the translation migration runs
+  Then the song has an "en" translation with the lyrics of that version
+  And the recording and the playlist item are on the original version
+  And the translation version is gone
+
+Scenario: A translation whose language cannot be determined stays where it is
+  Given a song with an original version and a translation version named "Singable"
+  When the translation migration runs
+  Then the song has no translation
+  And the translation version is still there
+
+Scenario: A translation with chords in another key than the original stays where it is
+  Given a song with an original version in key "G" and a translation version named "English" with chords in key "C"
+  When the translation migration runs
+  Then the translation version is still there
+
+Scenario Outline: A translation version with its own <field> stays where it is
+  Given a song with an original version and a translation version named "English" with its own "<field>"
+  When the translation migration runs
+  Then the translation version is still there
+  # <field>: melody_notation, song_note, beats, youtube_url, spotify_url, soundcloud_url, vote_count
+
+Scenario: Moved takes go after the takes of the original version
+  Given a song whose original version has two takes and whose translation version named "English" has two takes
+  When the translation migration runs
+  Then the original version has the takes "original one", "original two", "translation newer" and "translation older" in that order
+
+Scenario: The version switch no longer lists the translation afterwards
+  Given a song with an original version, a variant and a translation version named "English"
+  When the translation migration runs
+  Then the version switch of the song lists "Standard" and "Live" and no translation
+```
+
+**Story 6.2.13 release notes** (read before promoting `feat/ux-v3`):
+
+- Importers must write translations to `song_translations` before migration `20261112140000_translation_versions_to_translations.sql` runs on real data: the migration deletes each moved translation version together with its `catalog_source_id`, so an importer that still upserts translations as versions would create them again, and they would not be migrated again (see `docs/guides/importing-songbooks.md`).
+- Offline copies that refer to a deleted translation version id go stale when the migration runs: a version, playlist entry or take stored offline under that id no longer matches anything until the copy is refreshed online.
+- A playlist entry that opened a translation opens the song's first original version in the original language afterwards (`setlist_items` has no language column); its transposition was relative to the translation's key, which is why a translation with chords in another key, capo or tuning than the original is not moved.
+- Moved takes are appended after the takes already on the original version. The translation's songbook and page are reported with `RAISE NOTICE` and not kept (#517 may add a source to translations).
 
 **Story 6.2.1 acceptance criteria** (executable: `docs/testing/songbook-data-model.feature`, `@seed`):
 

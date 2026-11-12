@@ -1,7 +1,9 @@
 /**
  * The select of the song page's lookup (`fetchSong`), in one place so a unit test can guard it: it must embed
  * `song_version_sources (` exactly once (a second embed fails every song page with PostgREST 42803) and a contract
- * scenario sends this very string to the local API.
+ * scenario sends this very string to the local API. It also embeds `song_translations (` once, for the language
+ * switch (Story 6.2.13, #516): the translations follow the song's row-level security, so guests get those of public
+ * songs only.
  */
 import { VERSION_SOURCES_SELECT } from '@/lib/songs/versionSources';
 
@@ -28,6 +30,13 @@ export const SONG_SELECT = `
             soundcloud_url,
             melody_notation,
             song_note,${VERSION_SOURCES_SELECT}
+          ),
+          song_translations (
+            id,
+            language,
+            title,
+            lyrics,
+            translator
           ),
           song_category_map (
             categories (

@@ -3,12 +3,12 @@
  *
  * A song with more than one `song_versions` row gets a segmented control; a song with
  * zero or one version gets nothing, so single-version songs look exactly as before.
- * The language switch of the planned translation layer will sit in the same slot; no
- * translation data exists yet, so nothing is rendered for it.
+ * The language switch (Story 6.2.13, #516; `lib/songs/translations.ts`) sits next to it.
  */
 import { DEFAULT_LOCALE, type Locale, type TranslateFn } from '@/lib/i18n';
 import { primarySongbookName, versionBaseLabel, type LabelledVersion } from '@/lib/songs/versionLabels';
 import { RECORDING_PARAM } from '@/lib/songs/recordingLink';
+import { LANGUAGE_PARAM } from '@/lib/songs/translations';
 
 export type VersionLike = LabelledVersion;
 
@@ -110,20 +110,28 @@ export function versionOptions(
 /**
  * The query part (`?version=<id>`, or '') of the page URL after switching to `versionId`. Parameters this code does not
  * own are kept. A `recording` link belongs to the version its recording is on, so it is dropped here: otherwise a
- * reload would open the new version with a recording of the old one.
+ * reload would open the new version with a recording of the old one. The language (`?lang=`, #516) is dropped too:
+ * choosing a version returns to that version's own text. Pass `language` to keep one (the share link).
  */
-export function versionSearch(currentSearch: string, versionId: string, isDefault: boolean): string {
+export function versionSearch(
+  currentSearch: string,
+  versionId: string,
+  isDefault: boolean,
+  language: string | null = null
+): string {
   const params = new URLSearchParams(currentSearch);
   params.delete('version');
   params.delete(RECORDING_PARAM);
+  params.delete(LANGUAGE_PARAM);
   if (!isDefault) params.append('version', versionId);
+  if (language) params.append(LANGUAGE_PARAM, language);
   const search = params.toString();
   return search ? `?${search}` : '';
 }
 
-/** The link to share: the current location with the shown version in it (clean for the default version). */
-export function versionShareUrl(href: string, versionId: string, isDefault: boolean): string {
+/** The link to share: the current location with the shown version (clean for the default version) and language in it. */
+export function versionShareUrl(href: string, versionId: string, isDefault: boolean, language: string | null = null): string {
   const url = new URL(href);
-  url.search = versionSearch(url.search, versionId, isDefault);
+  url.search = versionSearch(url.search, versionId, isDefault, language);
   return url.toString();
 }

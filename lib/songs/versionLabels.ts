@@ -86,11 +86,28 @@ function languageIndex(): Map<string, string> {
 }
 
 /**
+ * Every language name the app recognises, as written (not folded): each candidate tag and its name in every app
+ * language and in the language itself. Input of `scripts/db/generate-translation-language-names.ts`, which writes the
+ * name list of the translation data migration; `translationLanguageTag` is the authority on the tag of each name.
+ */
+export function languageNameEntries(): Array<{ name: string; tag: string }> {
+  const entries: Array<{ name: string; tag: string }> = [];
+  for (const tag of CANDIDATE_TAGS) {
+    entries.push({ name: tag, tag });
+    for (const locale of [...Object.values(LOCALE_DATE_TAGS), tag]) {
+      const name = displayName(tag, locale);
+      if (name) entries.push({ name, tag });
+    }
+  }
+  return entries;
+}
+
+/**
  * A language tag as importers write it (`nl`, `lkt`, `pt-BR`); `version_name` text such as "Singable" is not one.
  * The language subtag must be lowercase as written: capitalised words such as "New" or "Alt" are valid tags too
  * (Newari, Southern Altai) but here they are words, not languages.
  */
-const LANGUAGE_TAG = /^[a-z]{2,3}(-[A-Za-z0-9]+)*$/;
+const LANGUAGE_TAG = /^[a-z]{2,3}(-[A-Za-z0-9]{2,8})*$/;
 
 /** The canonical form of a BCP 47 language tag ("LKT" → "lkt", "pt-br" → "pt-BR"), or null when it is not one. */
 function canonicalTag(value: string): string | null {
