@@ -386,6 +386,8 @@ const pt: Partial<Record<TranslationKey, string>> = {
   "song.link.error.forbidden": "Só gatekeepers e administradores podem ligar canções.",
   "song.link.error.self": "Uma canção não pode ser ligada a si mesma.",
   "song.link.error.alreadyLinked": "Esta canção já está ligada a outra canção.",
+  "song.link.error.notOwner": "Só podes ligar canções que são tuas.",
+  "song.link.error.visibility": "As duas canções têm de ser públicas, ou as duas privadas. Muda primeiro uma delas.",
   "song.link.error.notFound": "Canção não encontrada.",
   "song.link.error.invalid": "Escolhe uma canção da lista.",
   "song.link.error.failed": "Não foi possível ligar a canção. Tenta de novo.",

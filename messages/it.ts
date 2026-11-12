@@ -386,6 +386,8 @@ const it: Partial<Record<TranslationKey, string>> = {
   "song.link.error.forbidden": "Solo gatekeeper e amministratori possono collegare canti.",
   "song.link.error.self": "Un canto non può essere collegato a se stesso.",
   "song.link.error.alreadyLinked": "Questo canto è già collegato a un altro canto.",
+  "song.link.error.notOwner": "Puoi collegare solo canti di tua proprietà.",
+  "song.link.error.visibility": "I due canti devono essere entrambi pubblici o entrambi privati. Cambia prima uno dei due.",
   "song.link.error.notFound": "Canto non trovato.",
   "song.link.error.invalid": "Scegli un canto dall’elenco.",
   "song.link.error.failed": "Impossibile collegare il canto. Riprova.",

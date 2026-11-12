@@ -80,6 +80,10 @@ describe('previewSongLink / linkSongAsVersion', () => {
     expect(await linkSongAsVersion(SOURCE, TARGET)).toEqual({ error: 'forbidden' });
     mockRpc.mockResolvedValue({ data: null, error: { code: '22023', message: 'This song is already linked to another song' } });
     expect(await linkSongAsVersion(SOURCE, TARGET)).toEqual({ error: 'alreadyLinked' });
+    mockRpc.mockResolvedValue({ data: null, error: { code: '42501', message: 'Gatekeepers can only link songs they own' } });
+    expect(await linkSongAsVersion(SOURCE, TARGET)).toEqual({ error: 'notOwner' });
+    mockRpc.mockResolvedValue({ data: null, error: { code: '22023', message: 'Both songs must be public, or both private' } });
+    expect(await previewSongLink(SOURCE, TARGET)).toEqual({ error: 'visibility' });
   });
 });
 
@@ -96,6 +100,19 @@ describe('searchSongsToLinkTo', () => {
     expect(result).toEqual({ songs: [{ id: TARGET, title: 'Weyo wey yanna', original_author: null }] });
     expect(searchChain.neq).toHaveBeenCalledWith('id', SOURCE);
     expect(searchChain.ilike).toHaveBeenCalledWith('title', '%weyo%');
+  });
+
+  it("lists only the gatekeeper's own songs (gatekeepers link only songs they own)", async () => {
+    mockSearch.mockReturnValue({ data: [], error: null });
+    await searchSongsToLinkTo('weyo', SOURCE);
+    expect(searchChain.eq).toHaveBeenCalledWith('owner_id', 'u1');
+  });
+
+  it('lists every song for an admin', async () => {
+    mockRole.mockReturnValue({ data: { role: 'admin' }, error: null });
+    mockSearch.mockReturnValue({ data: [], error: null });
+    await searchSongsToLinkTo('weyo', SOURCE);
+    expect(searchChain.eq).not.toHaveBeenCalledWith('owner_id', expect.anything());
   });
 
   it('escapes the wildcards of the search text', async () => {

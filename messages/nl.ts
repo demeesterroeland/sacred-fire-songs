@@ -386,6 +386,8 @@ const nl: Partial<Record<TranslationKey, string>> = {
   "song.link.error.forbidden": "Alleen gatekeepers en beheerders kunnen liederen koppelen.",
   "song.link.error.self": "Een lied kan niet aan zichzelf gekoppeld worden.",
   "song.link.error.alreadyLinked": "Dit lied is al aan een ander lied gekoppeld.",
+  "song.link.error.notOwner": "Je kunt alleen liederen koppelen die van jou zijn.",
+  "song.link.error.visibility": "Beide liederen moeten openbaar zijn, of allebei privé. Pas eerst een van beide aan.",
   "song.link.error.notFound": "Lied niet gevonden.",
   "song.link.error.invalid": "Kies een lied uit de lijst.",
   "song.link.error.failed": "Het lied kon niet gekoppeld worden. Probeer het opnieuw.",

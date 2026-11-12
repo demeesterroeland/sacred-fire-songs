@@ -390,6 +390,8 @@ const qu: Partial<Record<TranslationKey, string>> = {
   "song.link.error.forbidden": "Gatekeeperkuna, administradorkunallam takikunata tinkiyta atinku.",
   "song.link.error.self": "Huk takiqa manam kikinwan tinkiyta atikunchu.",
   "song.link.error.alreadyLinked": "Kay takiqa ñam huk takiwan tinkisqa.",
+  "song.link.error.notOwner": "Qampa takikunallatam tinkiyta atinki.",
+  "song.link.error.visibility": "Iskaynin takikuna llapanpaq kanan, utaq iskayninku sapallaykipaq. Ñawpaqta huk takita tikray.",
   "song.link.error.notFound": "Manam taki tarikunchu.",
   "song.link.error.invalid": "Listamanta huk takita akllay.",
   "song.link.error.failed": "Manam takita tinkiyta atikurqanchu. Huktawan kallpachakuy.",

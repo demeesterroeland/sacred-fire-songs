@@ -27,7 +27,7 @@ export interface SongMenuActions {
   onDelete?: () => void;
   /** Owner or admin, private song only (validation 4): make the song public from the menu. */
   onPublish?: () => void;
-  /** Gatekeeper or admin (Story 6.2.9, #512): link this song as a version of another song (the page opens the sheet). */
+  /** Admin, or gatekeeper on their own song (Story 6.2.9, #512): link this song as a version of another song (the page opens the sheet). */
   onLinkAsVersion?: () => void;
 }
 
@@ -115,7 +115,7 @@ export function SongMenuSheet({
             </div>
           )}
 
-          {/* Story 6.2.9 (#512): on every width, gatekeepers and admins only. */}
+          {/* Story 6.2.9 (#512): on every width, admins and the owning gatekeeper only. */}
           {actions.onLinkAsVersion && (
             <div className="py-2">
               <SheetAction icon={<Link2 />} onClick={actions.onLinkAsVersion} data-testid="song-menu-link-version">

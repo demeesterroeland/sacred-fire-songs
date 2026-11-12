@@ -16,6 +16,18 @@ export function canLinkSongs(role: string | null | undefined): boolean {
   return !!role && (SONG_LINK_ROLES as readonly string[]).includes(role);
 }
 
+/**
+ * Whether the song menu offers "Link as a version of…" on this song: admins on every song, gatekeepers only on the
+ * songs they own (the database refuses a gatekeeper who does not own both songs, fn_assert_can_link_song).
+ */
+export function canLinkSong(
+  user: { id?: string | null; role?: string | null } | null | undefined,
+  ownerId: string | null | undefined
+): boolean {
+  if (!user || !canLinkSongs(user.role)) return false;
+  return user.role === 'admin' || (!!user.id && user.id === ownerId);
+}
+
 /** What fn_preview_song_link / fn_link_song_as_version return. */
 export interface SongLinkSummary {
   source_id: string;
@@ -110,12 +122,22 @@ export function linkPreviewLines(s: SongLinkSummary): PreviewLine[] {
 }
 
 /** Why a link was refused, as the action returns it. */
-export type SongLinkError = 'forbidden' | 'self' | 'alreadyLinked' | 'notFound' | 'invalid' | 'failed';
+export type SongLinkError =
+  | 'forbidden'
+  | 'notOwner'
+  | 'self'
+  | 'alreadyLinked'
+  | 'visibility'
+  | 'notFound'
+  | 'invalid'
+  | 'failed';
 
 export const SONG_LINK_ERROR_KEYS: Readonly<Record<SongLinkError, TranslationKey>> = {
   forbidden: 'song.link.error.forbidden',
+  notOwner: 'song.link.error.notOwner',
   self: 'song.link.error.self',
   alreadyLinked: 'song.link.error.alreadyLinked',
+  visibility: 'song.link.error.visibility',
   notFound: 'song.link.error.notFound',
   invalid: 'song.link.error.invalid',
   failed: 'song.link.error.failed',
@@ -125,11 +147,12 @@ export const SONG_LINK_ERROR_KEYS: Readonly<Record<SongLinkError, TranslationKey
 export function songLinkError(error: { code?: string | null; message?: string | null } | null | undefined): SongLinkError {
   const code = error?.code ?? '';
   const message = error?.message ?? '';
-  if (code === '42501') return 'forbidden';
+  if (code === '42501') return /songs they own/i.test(message) ? 'notOwner' : 'forbidden';
   if (code === 'P0002') return 'notFound';
   if (code === '22023' || code === '22P02') {
     if (/itself/i.test(message)) return 'self';
     if (/already linked/i.test(message)) return 'alreadyLinked';
+    if (/public, or both private/i.test(message)) return 'visibility';
     return 'invalid';
   }
   return 'failed';
@@ -144,7 +167,10 @@ export function songRedirectHref(targetId: string, search: string | URLSearchPar
   return `/songs/${encodeURIComponent(targetId)}${query ? `?${query}` : ''}`;
 }
 
-/** The song an old song id was linked into, or null. composition_redirects is readable by everyone. */
+/**
+ * The song an old song id was linked into, or null. A redirect is readable exactly when its target song is
+ * (composition_redirects RLS), so a guest finds the redirect to a public song and not one to a private song.
+ */
 export async function fetchSongRedirect(supabase: SupabaseClient, oldId: string): Promise<string | null> {
   const { data, error } = await supabase.from('composition_redirects').select('new_id').eq('old_id', oldId).maybeSingle();
   if (error) throw error;

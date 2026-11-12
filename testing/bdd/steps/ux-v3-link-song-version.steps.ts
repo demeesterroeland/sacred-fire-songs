@@ -8,11 +8,20 @@ import { Given, Then, When } from '@cucumber/cucumber';
 import { profileIdByEmail, queryAsUser, seedDb } from '../support/db';
 import { DICTIONARIES, translateFrom } from '../../../lib/i18n';
 import { firstVersion } from '../../../lib/songs/versionOrder';
-import { canLinkSongs, linkPreviewLines, songRedirectHref, type SongLinkSummary } from '../../../lib/songs/linkSong';
+import {
+  SONG_LINK_ERROR_KEYS,
+  canLinkSong,
+  linkPreviewLines,
+  songLinkError,
+  songRedirectHref,
+  type SongLinkSummary,
+} from '../../../lib/songs/linkSong';
 import { OTHER_MEMBER_ID, SEEDED_EMAILS } from './access-policies.steps';
 
 interface LinkWorld {
   role?: string;
+  ownsSong?: boolean;
+  dbError?: { code: string; message: string };
   redirects: Record<string, string>;
   continuedAt?: string;
   summary?: SongLinkSummary;
@@ -43,12 +52,24 @@ const t = (key: string, params?: Record<string, string | number>) =>
 
 // ── @unit ───────────────────────────────────────────────────────────────────
 
-Given('a signed-in {string}', function (role: string) {
-  w(this).role = role === 'guest' ? undefined : role;
+Given(/^a signed-in "([^"]+)" on a song (they own|another member owns)$/, function (role: string, owner: string) {
+  const s = w(this);
+  s.role = role === 'guest' ? undefined : role;
+  s.ownsSong = owner === 'they own';
 });
 
 Then(/^the link action is (shown|not shown) in the song menu$/, function (shown: string) {
-  assert.equal(canLinkSongs(w(this).role), shown === 'shown');
+  const s = w(this);
+  const user = s.role ? { id: 'me', role: s.role } : null;
+  assert.equal(canLinkSong(user, s.ownsSong ? 'me' : 'someone-else'), shown === 'shown');
+});
+
+Given('the database refuses with code {string} and message {string}', function (code: string, message: string) {
+  w(this).dbError = { code, message };
+});
+
+Then('the sheet shows {string}', function (text: string) {
+  assert.equal(t(SONG_LINK_ERROR_KEYS[songLinkError(w(this).dbError)]), text);
 });
 
 Given('the song {string} was linked into {string}', function (oldId: string, newId: string) {
@@ -102,10 +123,11 @@ Then('items with nothing to move are left out', function () {
 
 // ── @seed helpers ───────────────────────────────────────────────────────────
 
+/** A public song owned by the seeded gatekeeper (gatekeepers link only songs they own). */
 async function insertSong(title: string, fields: Record<string, unknown> = {}): Promise<string> {
   const db = await seedDb();
-  const columns = ['title', 'is_public', ...Object.keys(fields)];
-  const values = [title, true, ...Object.values(fields)];
+  const columns = ['title', 'is_public', 'owner_id', ...Object.keys(fields)];
+  const values = [title, true, await accountId('gatekeeper'), ...Object.values(fields)];
   const { rows } = await db.query<{ id: string }>(
     `INSERT INTO public.compositions (${columns.join(', ')})
      VALUES (${columns.map((_, i) => `$${i + 1}`).join(', ')}) RETURNING id`,
@@ -195,7 +217,7 @@ async function redirectOf(oldId: string): Promise<string | undefined> {
 // ── @seed: fixtures ─────────────────────────────────────────────────────────
 
 Given(
-  'songs {string} and {string} with one version each',
+  "the gatekeeper's songs {string} and {string} with one version each",
   async function (firstTitle: string, secondTitle: string) {
     const s = w(this);
     const db = await seedDb();
@@ -244,8 +266,7 @@ Given('the second song has a take and is in a playlist', async function () {
   s.playlistItemId = item[0].id;
 });
 
-Given('the second song is private to another member', async function () {
-  const s = w(this);
+async function ensureOtherMember() {
   const db = await seedDb();
   await db.query(
     `INSERT INTO auth.users (id, email) VALUES ($1, 'other-member@example.invalid') ON CONFLICT (id) DO NOTHING`,
@@ -256,7 +277,41 @@ Given('the second song is private to another member', async function () {
      ON CONFLICT (id) DO NOTHING`,
     [OTHER_MEMBER_ID]
   );
-  await db.query('UPDATE public.compositions SET is_public = false, owner_id = $2 WHERE id = $1', [s.second, OTHER_MEMBER_ID]);
+}
+
+Given(/^the (first|second) song is private to another member$/, async function (which: 'first' | 'second') {
+  await ensureOtherMember();
+  const db = await seedDb();
+  await db.query('UPDATE public.compositions SET is_public = false, owner_id = $2 WHERE id = $1', [
+    songIds(w(this))[which],
+    OTHER_MEMBER_ID,
+  ]);
+});
+
+Given(/^the (first|second) song belongs to another member$/, async function (which: 'first' | 'second') {
+  await ensureOtherMember();
+  const db = await seedDb();
+  await db.query('UPDATE public.compositions SET owner_id = $2 WHERE id = $1', [songIds(w(this))[which], OTHER_MEMBER_ID]);
+});
+
+Given(/^the (first|second) song is (public|private)$/, async function (which: 'first' | 'second', visibility: string) {
+  const db = await seedDb();
+  await db.query('UPDATE public.compositions SET is_public = $2 WHERE id = $1', [
+    songIds(w(this))[which],
+    visibility === 'public',
+  ]);
+});
+
+Given('the gatekeeper cannot set a catalog slug themselves', async function () {
+  // The admin-only catalog guard (trg_guard_catalog_slug) refuses a gatekeeper's own update, so a slug that
+  // moves in the link below moved through fn_link_song_as_version, which runs as its owner.
+  const s = w(this);
+  await assert.rejects(
+    queryAsUser(await accountId('gatekeeper'), "UPDATE public.compositions SET catalog_slug = 'bdd-claimed' WHERE id = $1 RETURNING id", [
+      s.first,
+    ]),
+    (e: { code?: string }) => e.code === '42501'
+  );
 });
 
 Given(
@@ -397,7 +452,9 @@ Then('both songs still exist', async function () {
 });
 
 const REFUSALS: Record<string, { code: string; message?: RegExp }> = {
-  'not allowed': { code: '42501' },
+  'not allowed': { code: '42501', message: /Only gatekeepers and admins/ },
+  'not their own': { code: '42501', message: /songs they own/ },
+  'a visibility mismatch': { code: '22023', message: /public, or both private/ },
   invalid: { code: '22023', message: /itself/ },
   'not found': { code: 'P0002' },
   'already linked': { code: '22023', message: /already linked/ },
@@ -410,8 +467,45 @@ function assertRefused(s: LinkWorld, reason: string) {
   if (expected.message) assert.match(s.outcome.message ?? '', expected.message);
 }
 
-Then(/^the link is refused as (not allowed|invalid|not found)$/, function (reason: string) {
+Then(/^the (?:link|preview) is refused as (not allowed|not their own|a visibility mismatch|invalid|not found)$/, function (reason: string) {
   assertRefused(w(this), reason);
+});
+
+Then(/^the (preview|link) goes ahead$/, async function (what: string) {
+  const s = w(this);
+  assert.ok(s.outcome?.ok, `${what} failed: ${JSON.stringify(s.outcome)}`);
+  if (what === 'link') {
+    assert.equal(await versionCount(s.first!), 2);
+    assert.equal(await songExists(s.second!), false);
+  }
+});
+
+async function redirectVisibleTo(role: 'anon' | 'gatekeeper', oldId: string): Promise<boolean> {
+  if (role === 'gatekeeper') {
+    const rows = await queryAsUser(await accountId('gatekeeper'), 'SELECT new_id FROM public.composition_redirects WHERE old_id = $1', [
+      oldId,
+    ]);
+    return rows.length === 1;
+  }
+  const db = await seedDb();
+  await db.query('SAVEPOINT anon_redirect');
+  try {
+    await db.query('SET LOCAL ROLE anon');
+    const { rows } = await db.query('SELECT new_id FROM public.composition_redirects WHERE old_id = $1', [oldId]);
+    return rows.length === 1;
+  } finally {
+    await db.query('ROLLBACK TO SAVEPOINT anon_redirect');
+  }
+}
+
+Then('a guest cannot list the redirect of the second song', async function () {
+  const s = w(this);
+  assert.ok(s.outcome?.ok, `link failed: ${JSON.stringify(s.outcome)}`);
+  assert.equal(await redirectVisibleTo('anon', s.second!), false);
+});
+
+Then('the gatekeeper can', async function () {
+  assert.equal(await redirectVisibleTo('gatekeeper', w(this).second!), true);
 });
 
 Then('the old link of the third song opens the first song', async function () {

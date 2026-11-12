@@ -389,6 +389,8 @@ const ru: Partial<Record<TranslationKey, string>> = {
   "song.link.error.forbidden": "Связывать песни могут только привратники и администраторы.",
   "song.link.error.self": "Песню нельзя связать с ней самой.",
   "song.link.error.alreadyLinked": "Эта песня уже связана с другой песней.",
+  "song.link.error.notOwner": "Вы можете связывать только свои песни.",
+  "song.link.error.visibility": "Обе песни должны быть публичными или обе личными. Сначала измените одну из них.",
   "song.link.error.notFound": "Песня не найдена.",
   "song.link.error.invalid": "Выберите песню из списка.",
   "song.link.error.failed": "Не удалось связать песню. Попробуйте ещё раз.",

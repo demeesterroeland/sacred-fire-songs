@@ -3,7 +3,15 @@
 --
 -- Imports and members create duplicates: the same song under another title or spelling.
 -- A gatekeeper or admin links the duplicate (source) as a version of the song that stays
--- (target). One SECURITY DEFINER function does the whole merge in one transaction:
+-- (target). Who may link (owner decision, Nov 12, 2026):
+--
+--   * admins link any song; a gatekeeper only links songs they own: the source AND the
+--     target have owner_id = auth.uid() (42501 "Gatekeepers can only link songs they own")
+--   * both songs must have the same visibility, for everyone, admins included: a public
+--     song is never merged into a private one or the other way round (22023 "Both songs
+--     must be public, or both private")
+--
+-- One SECURITY DEFINER function does the whole merge in one transaction:
 --
 --   * the source's versions move to the target (an 'original' becomes a 'variant', so the
 --     target's original stays first); recordings and playlist items point at versions, so
@@ -18,13 +26,22 @@
 --     re-create the source. A moved version whose catalog_source_id the target already has
 --     keeps its content but loses the key (unique per song): the target's version stays
 --     the one the importer updates
+--   * the catalog guard triggers (trg_guard_catalog_slug, trg_guard_catalog_source_id:
+--     admin-only for anon / authenticated callers) do not fire for this function: it runs
+--     as its owner (postgres), which the guards treat as a trusted importer context. So a
+--     gatekeeper's link deliberately moves catalog keys (the source's catalog_slug onto a
+--     target that has none, a colliding catalog_source_id cleared). The risk is low: the
+--     values only ever come from the source song itself (no caller input reaches a
+--     catalog column), so a gatekeeper cannot pre-claim a new key, only keep an existing
+--     one reachable on the song that stays
 --   * the source song is deleted and composition_redirects sends its old id to the target;
 --     redirects that pointed at the source now point at the target (chains collapse)
 --   * song_link_audit records who linked what, with the summary of what moved
 --
 -- fn_preview_song_link returns the same summary without changing anything, for the
--- confirm dialog. There is no undo: the confirm dialog shows the preview first and the
--- audit entry keeps the record.
+-- confirm dialog. There is no undo (docs/design/application-analysis&design.md §6.19,
+-- "Confirm, not undo"): the confirm dialog shows the preview first and the audit entry
+-- keeps the record.
 -- Safe to run more than once.
 
 -- 1. Redirects: old song id -> the song it was linked into
@@ -40,9 +57,13 @@ CREATE TABLE IF NOT EXISTS public.composition_redirects (
 CREATE INDEX IF NOT EXISTS idx_composition_redirects_new_id ON public.composition_redirects (new_id);
 
 ALTER TABLE public.composition_redirects ENABLE ROW LEVEL SECURITY;
+-- A redirect is readable exactly when its target song is (the compositions policies of the
+-- caller apply inside EXISTS): a guest never learns that a private song took over an old id.
 DROP POLICY IF EXISTS "Song redirects are readable by everyone" ON public.composition_redirects;
-CREATE POLICY "Song redirects are readable by everyone" ON public.composition_redirects
-  FOR SELECT TO anon, authenticated USING (true);
+DROP POLICY IF EXISTS "Song redirects follow the target song" ON public.composition_redirects;
+CREATE POLICY "Song redirects follow the target song" ON public.composition_redirects
+  FOR SELECT TO anon, authenticated
+  USING (EXISTS (SELECT 1 FROM public.compositions c WHERE c.id = new_id));
 REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON public.composition_redirects FROM anon, authenticated;
 GRANT SELECT ON public.composition_redirects TO anon, authenticated;
 
@@ -113,12 +134,21 @@ BEGIN
     RAISE EXCEPTION 'Song not found' USING ERRCODE = 'P0002';
   END IF;
 
-  -- Gatekeepers work on the songs they can read (public or their own); admins on every song.
-  IF v_role <> 'admin' AND NOT (
-    (v_source.is_public IS TRUE OR v_source.owner_id = v_uid)
-    AND (v_target_row.is_public IS TRUE OR v_target_row.owner_id = v_uid)
-  ) THEN
-    RAISE EXCEPTION 'Song not found' USING ERRCODE = 'P0002';
+  IF v_role <> 'admin' THEN
+    -- A song the gatekeeper cannot read (private, someone else's) stays "not found".
+    IF NOT ((v_source.is_public IS TRUE OR v_source.owner_id = v_uid)
+            AND (v_target_row.is_public IS TRUE OR v_target_row.owner_id = v_uid)) THEN
+      RAISE EXCEPTION 'Song not found' USING ERRCODE = 'P0002';
+    END IF;
+    -- Gatekeepers only link songs they own, both of them; admins link any song.
+    IF v_source.owner_id IS DISTINCT FROM v_uid OR v_target_row.owner_id IS DISTINCT FROM v_uid THEN
+      RAISE EXCEPTION 'Gatekeepers can only link songs they own' USING ERRCODE = '42501';
+    END IF;
+  END IF;
+
+  -- For everyone: a public song is never merged into a private one, or the other way round.
+  IF coalesce(v_source.is_public, false) <> coalesce(v_target_row.is_public, false) THEN
+    RAISE EXCEPTION 'Both songs must be public, or both private' USING ERRCODE = '22023';
   END IF;
 
   RETURN v_target;
@@ -222,8 +252,11 @@ BEGIN
   RETURN public.fn_song_link_summary(p_source, public.fn_assert_can_link_song(p_source, p_target));
 END;
 $$;
-REVOKE ALL ON FUNCTION public.fn_preview_song_link(uuid, uuid) FROM PUBLIC, anon;
-GRANT EXECUTE ON FUNCTION public.fn_preview_song_link(uuid, uuid) TO authenticated, service_role;
+-- Signed-in callers only: the checks need auth.uid() (a service_role call has none and is
+-- refused with 42501), so there is no service_role grant. Importers do not merge; they
+-- resolve slugs with fn_song_id_for_catalog_slug.
+REVOKE ALL ON FUNCTION public.fn_preview_song_link(uuid, uuid) FROM PUBLIC, anon, service_role;
+GRANT EXECUTE ON FUNCTION public.fn_preview_song_link(uuid, uuid) TO authenticated;
 
 -- 5. The link itself, in one transaction.
 CREATE OR REPLACE FUNCTION public.fn_link_song_as_version(p_source uuid, p_target uuid)
@@ -244,6 +277,11 @@ BEGIN
 
   -- Lock both songs in a stable order, so two links that cross cannot deadlock.
   PERFORM 1 FROM public.compositions WHERE id IN (p_source, v_target) ORDER BY id FOR UPDATE;
+  -- A concurrent link may have committed while this one waited for the locks: check again
+  -- on the rows as they are now, so the caller hears "already linked", not "not found".
+  IF public.fn_assert_can_link_song(p_source, p_target) IS DISTINCT FROM v_target THEN
+    RAISE EXCEPTION 'This song is already linked to another song' USING ERRCODE = '22023';
+  END IF;
   SELECT * INTO v_source FROM public.compositions WHERE id = p_source;
   SELECT * INTO v_target_row FROM public.compositions WHERE id = v_target;
   IF v_source.id IS NULL OR v_target_row.id IS NULL THEN
@@ -343,8 +381,9 @@ BEGIN
   RETURN v_summary;
 END;
 $$;
-REVOKE ALL ON FUNCTION public.fn_link_song_as_version(uuid, uuid) FROM PUBLIC, anon;
-GRANT EXECUTE ON FUNCTION public.fn_link_song_as_version(uuid, uuid) TO authenticated, service_role;
+-- Signed-in callers only (see fn_preview_song_link): no service_role grant.
+REVOKE ALL ON FUNCTION public.fn_link_song_as_version(uuid, uuid) FROM PUBLIC, anon, service_role;
+GRANT EXECUTE ON FUNCTION public.fn_link_song_as_version(uuid, uuid) TO authenticated;
 
 -- 6. Importers: the song a catalog slug stands for, also after it was linked away.
 CREATE OR REPLACE FUNCTION public.fn_song_id_for_catalog_slug(p_slug text)

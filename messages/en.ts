@@ -384,6 +384,8 @@ const en = {
   "song.link.error.forbidden": "Only gatekeepers and admins can link songs.",
   "song.link.error.self": "A song cannot be linked to itself.",
   "song.link.error.alreadyLinked": "This song is already linked to another song.",
+  "song.link.error.notOwner": "You can only link songs you own.",
+  "song.link.error.visibility": "Both songs must be public, or both private. Change one song first.",
   "song.link.error.notFound": "Song not found.",
   "song.link.error.invalid": "Pick a song from the list.",
   "song.link.error.failed": "Could not link the song. Please try again.",

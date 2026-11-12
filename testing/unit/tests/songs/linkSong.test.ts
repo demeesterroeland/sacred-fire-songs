@@ -3,6 +3,7 @@ import { describe, expect, it } from 'vitest';
 import { DICTIONARIES, SUPPORTED_LOCALES, translateFrom } from '@/lib/i18n';
 import {
   SONG_LINK_ERROR_KEYS,
+  canLinkSong,
   canLinkSongs,
   linkPreviewLines,
   parseLinkSummary,
@@ -43,6 +44,20 @@ describe('canLinkSongs', () => {
     [undefined, false],
   ])('%s → %s', (role, expected) => {
     expect(canLinkSongs(role)).toBe(expected);
+  });
+});
+
+describe('canLinkSong (the song menu item)', () => {
+  it.each([
+    [{ id: 'u1', role: 'admin' }, 'someone', true],
+    [{ id: 'u1', role: 'admin' }, null, true],
+    [{ id: 'u1', role: 'gatekeeper' }, 'u1', true],
+    [{ id: 'u1', role: 'gatekeeper' }, 'someone', false],
+    [{ id: 'u1', role: 'gatekeeper' }, null, false],
+    [{ id: 'u1', role: 'member' }, 'u1', false],
+    [null, 'u1', false],
+  ])('%o on a song of %s → %s', (user, owner, expected) => {
+    expect(canLinkSong(user, owner)).toBe(expected);
   });
 });
 
@@ -134,6 +149,8 @@ describe('songLinkError', () => {
     [{ code: 'P0002', message: 'Song not found' }, 'notFound'],
     [{ code: '22023', message: 'A song cannot be linked to itself' }, 'self'],
     [{ code: '22023', message: 'This song is already linked to another song' }, 'alreadyLinked'],
+    [{ code: '42501', message: 'Gatekeepers can only link songs they own' }, 'notOwner'],
+    [{ code: '22023', message: 'Both songs must be public, or both private' }, 'visibility'],
     [{ code: '22023', message: 'Pick the song' }, 'invalid'],
     [{ code: '22P02', message: 'invalid input syntax for type uuid' }, 'invalid'],
     [{ code: '08006', message: 'connection failure' }, 'failed'],

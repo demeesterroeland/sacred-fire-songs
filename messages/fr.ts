@@ -386,6 +386,8 @@ const fr: Partial<Record<TranslationKey, string>> = {
   "song.link.error.forbidden": "Seuls les gatekeepers et les administrateurs peuvent lier des chants.",
   "song.link.error.self": "Un chant ne peut pas être lié à lui-même.",
   "song.link.error.alreadyLinked": "Ce chant est déjà lié à un autre chant.",
+  "song.link.error.notOwner": "Tu ne peux lier que des chants qui t’appartiennent.",
+  "song.link.error.visibility": "Les deux chants doivent être publics, ou tous les deux privés. Modifie d’abord l’un d’eux.",
   "song.link.error.notFound": "Chant introuvable.",
   "song.link.error.invalid": "Choisis un chant dans la liste.",
   "song.link.error.failed": "Impossible de lier le chant. Réessaie.",

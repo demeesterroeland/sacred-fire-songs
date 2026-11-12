@@ -87,6 +87,34 @@ describe('LinkSongSheet', () => {
     await waitFor(() => expect(onLinked).toHaveBeenCalledWith(expect.objectContaining({ target_id: TARGET })));
   });
 
+  it('links once when Confirm is clicked twice before the first click re-renders', async () => {
+    let finish: (v: unknown) => void = () => {};
+    link.mockReturnValue(new Promise((resolve) => (finish = resolve)));
+    setup();
+    await pickTarget();
+    const confirm = await screen.findByRole('button', { name: 'Link song' });
+    // Two clicks in the same tick: the second lands before React has disabled the button.
+    act(() => {
+      confirm.click();
+      confirm.click();
+    });
+    await act(async () => {
+      finish({ summary });
+    });
+    expect(link).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows the visibility refusal in the preview, before any confirm', async () => {
+    preview.mockResolvedValue({ error: 'visibility' });
+    setup();
+    await pickTarget();
+    expect(await screen.findByRole('alert')).toHaveProperty(
+      'textContent',
+      'Both songs must be public, or both private. Change one song first.'
+    );
+    expect(screen.queryByRole('button', { name: 'Link song' })).toBeNull();
+  });
+
   it('shows the reason when the database refuses, and goes back to the search', async () => {
     preview.mockResolvedValue({ error: 'alreadyLinked' });
     setup();

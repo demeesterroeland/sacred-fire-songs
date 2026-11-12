@@ -36,7 +36,7 @@ import { EDIT_VERSION_PARAM, editSongHref } from '@/lib/songs/versionOrder';
 import { blocksVersionSwitch, linkedVersionChoice, resolveVersionIndex, versionSearch, versionShareUrl, type VersionChoice } from '@/lib/songs/versionSwitch';
 import { SongMenuSheet } from '@/components/song/SongMenuSheet';
 import { LinkSongSheet } from '@/components/song/LinkSongSheet';
-import { canLinkSongs, fetchSongRedirect, songRedirectHref, type SongLinkSummary } from '@/lib/songs/linkSong';
+import { canLinkSong, fetchSongRedirect, songRedirectHref, type SongLinkSummary } from '@/lib/songs/linkSong';
 import { useScrolledPast } from '@/hooks/useScrolledPast';
 import { useReaderPrefs } from '@/lib/reader/useReaderPrefs';
 import { speedBy } from '@/lib/reader/autoScroll';
@@ -66,7 +66,7 @@ export default function SongDetailPage() {
     const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
     // The song page's one menu (⋮). It is opened from the bar on a phone and from the header from lg up.
     const [isMenuOpen, setIsMenuOpen] = useState(false);
-    // Story 6.2.9 (#512): gatekeepers and admins link this song as a version of another song.
+    // Story 6.2.9 (#512): admins, and gatekeepers on their own songs, link this song as a version of another song.
     const [isLinkOpen, setIsLinkOpen] = useState(false);
     const router = useRouter();
     const phoneTitleRef = useRef<HTMLHeadingElement>(null);
@@ -689,7 +689,7 @@ export default function SongDetailPage() {
                     onPublish: !song.is_public && (song.owner_id === user?.id || isAdmin)
                         ? () => { setIsMenuOpen(false); void handleMakeSongPublic(); }
                         : undefined,
-                    onLinkAsVersion: canLinkSongs(user?.role) ? () => { setIsMenuOpen(false); setIsLinkOpen(true); } : undefined,
+                    onLinkAsVersion: canLinkSong(user, song.owner_id) ? () => { setIsMenuOpen(false); setIsLinkOpen(true); } : undefined,
                 }}
                 transpose={mayTranspose ? {
                     semitones,
@@ -710,7 +710,7 @@ export default function SongDetailPage() {
                 awakeSupported={awakeSupported}
             />
 
-            {id && canLinkSongs(user?.role) && (
+            {id && canLinkSong(user, song.owner_id) && (
                 <LinkSongSheet
                     open={isLinkOpen}
                     onOpenChange={setIsLinkOpen}

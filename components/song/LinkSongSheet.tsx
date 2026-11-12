@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useId, useState } from 'react';
+import { useEffect, useId, useRef, useState } from 'react';
 import { ChevronLeft, Link2 } from 'lucide-react';
 import { BottomSheet, BottomSheetContent } from '@/components/ui/bottom-sheet';
 import { Button } from '@/components/ui/button';
@@ -26,7 +26,8 @@ type Step =
   | { kind: 'preview'; target: SongLinkCandidate; summary?: SongLinkSummary; error?: SongLinkError; linking?: boolean };
 
 /**
- * Story 6.2.9 / G1.4 (#512): gatekeepers and admins link a duplicate song as a version of another song.
+ * Story 6.2.9 / G1.4 (#512): admins, and gatekeepers on their own songs, link a duplicate song as a version of
+ * another song.
  * Step 1 searches and picks the song it is a version of; step 2 shows what moves (fn_preview_song_link) and asks
  * for a clear confirm. There is no undo: the merge deletes the duplicate, so the confirm step says so.
  */
@@ -51,6 +52,8 @@ function LinkSongBody({
   const { t } = useLocale();
   const searchId = useId();
   const [step, setStep] = useState<Step>({ kind: 'pick' });
+  // A second click on Confirm can land before React re-renders the button as disabled: link once.
+  const linkingRef = useRef(false);
   const [query, setQuery] = useState('');
   // The answer for one search text: results show only while they belong to the text in the field.
   const [found, setFound] = useState<{ text: string; songs: SongLinkCandidate[]; error: SongLinkError | null } | null>(null);
@@ -82,15 +85,22 @@ function LinkSongBody({
   };
 
   const confirm = async () => {
-    if (step.kind !== 'preview' || !step.summary) return;
+    if (step.kind !== 'preview' || !step.summary || linkingRef.current) return;
+    linkingRef.current = true;
     const target = step.target;
     setStep({ ...step, linking: true, error: undefined });
-    const result = await linkSongAsVersion(sourceId, target.id);
-    if ('summary' in result) {
-      onLinked(result.summary);
-      return;
+    try {
+      const result = await linkSongAsVersion(sourceId, target.id);
+      if ('summary' in result) {
+        onLinked(result.summary);
+        return;
+      }
+      setStep((s) => (s.kind === 'preview' ? { ...s, linking: false, error: result.error } : s));
+    } catch {
+      setStep((s) => (s.kind === 'preview' ? { ...s, linking: false, error: 'failed' } : s));
+    } finally {
+      linkingRef.current = false;
     }
-    setStep((s) => (s.kind === 'preview' ? { ...s, linking: false, error: result.error } : s));
   };
 
   if (step.kind === 'preview') {

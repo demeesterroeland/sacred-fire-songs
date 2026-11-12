@@ -3,7 +3,8 @@
 /**
  * Story 6.2.9 / G1.4 (#512): link a song as a version of another song.
  *
- * The checks (gatekeeper or admin, not the same song, both songs readable) and the merge run in the database
+ * The checks (admin, or a gatekeeper who owns both songs; not the same song; both public or both private) and
+ * the merge run in the database
  * (fn_preview_song_link, fn_link_song_as_version: SECURITY DEFINER, one transaction). These actions validate the
  * input, call them with the caller's session, and turn a refusal into a reason the dialog can translate.
  */
@@ -68,7 +69,10 @@ export async function linkSongAsVersion(sourceId: string, targetId: string): Pro
 
 const escapeLike = (text: string) => text.replace(/[\\%_]/g, (c) => `\\${c}`);
 
-/** Songs to link to: title matches the text, the song being linked left out. Gatekeepers and admins only. */
+/**
+ * Songs to link to: title matches the text, the song being linked left out. Gatekeepers and admins only; a
+ * gatekeeper only finds their own songs (they may only link songs they own), an admin every song they can read.
+ */
 export async function searchSongsToLinkTo(
   query: string,
   excludeId: string
@@ -85,13 +89,13 @@ export async function searchSongsToLinkTo(
 
   if (text.length < 2) return { songs: [] };
 
-  const { data, error } = await supabase
+  let search = supabase
     .from('compositions')
     .select('id, title, original_author')
     .neq('id', exclude.data)
-    .ilike('title', `%${escapeLike(text)}%`)
-    .order('title', { ascending: true })
-    .limit(SEARCH_LIMIT);
+    .ilike('title', `%${escapeLike(text)}%`);
+  if (profile?.role !== 'admin') search = search.eq('owner_id', user.id);
+  const { data, error } = await search.order('title', { ascending: true }).limit(SEARCH_LIMIT);
   if (error) {
     console.error('[linkSong] search failed:', error);
     return { error: 'failed' };
