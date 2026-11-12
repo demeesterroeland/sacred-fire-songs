@@ -131,6 +131,9 @@ const ru: Partial<Record<TranslationKey, string>> = {
   'songs.emptyDrafts.action': 'Добавить песню →',
   'songs.noResultsSearch': 'Мы не нашли песен по запросу «{search}».',
   'songs.noResultsFilter': 'Для этого фильтра нет доступных песен.',
+  'songs.matchAlias': 'Найдено по псевдониму: {text}',
+  'songs.matchSourceTitle': 'Найдено по названию в сборнике: {text}',
+  'songs.matchAuthor': 'Найдено по автору: {text}',
 
   // ─── Songs – Detail Page ──────────────────────────────────────────────────
   'song.by': 'автор: {author}',

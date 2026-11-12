@@ -1,6 +1,8 @@
 import type { SupabaseClient } from '@supabase/supabase-js';
 import type { Song } from '../songUtils';
 import { firstVersion } from './versionOrder';
+import { foldForSearch } from './search';
+import { normalizeWhitespace } from '../utils';
 
 /**
  * Shared select string for composition queries.
@@ -8,7 +10,7 @@ import { firstVersion } from './versionOrder';
  */
 export const SONGS_SELECT = `
   *,
-  song_versions(id, created_at, version_kind, key, content_chordpro, melody_notation),
+  song_versions(id, created_at, version_kind, key, content_chordpro, melody_notation, song_version_sources(original_title)),
   song_category_map(
     categories(
       name,
@@ -90,6 +92,8 @@ interface SongVersionRow {
   key: string | null;
   content_chordpro: string | null;
   melody_notation: string | null;
+  /** Where the version was printed: only the title it has there is read, for the search (#521). */
+  song_version_sources?: { original_title?: string | null }[] | null;
 }
 
 interface CategoryRow {
@@ -112,6 +116,8 @@ export interface CompositionRow {
   original_author: string | null;
   /** Every credit (`compositions.authors`); selected by `SONGS_SELECT` (`*`). */
   authors?: string[] | null;
+  /** Other titles of the song (`compositions.aliases`); selected by `SONGS_SELECT` (`*`). */
+  aliases?: string[] | null;
   is_public: boolean;
   created_at: string;
   // Not part of the narrow RECENTLY_ADDED_SELECT, hence optional.
@@ -122,6 +128,20 @@ export interface CompositionRow {
   has_melody?: boolean | null;
   song_versions: SongVersionRow[] | null;
   song_category_map: SongCategoryMapRow[] | null;
+}
+
+/** Trimmed, non-empty values without duplicates (case and accent insensitive, first spelling kept). */
+function distinctTexts(values: ReadonlyArray<string | null | undefined>): string[] {
+  const seen = new Set<string>();
+  const out: string[] = [];
+  for (const raw of values) {
+    const text = normalizeWhitespace(raw ?? '');
+    const key = foldForSearch(text);
+    if (!key || seen.has(key)) continue;
+    seen.add(key);
+    out.push(text);
+  }
+  return out;
 }
 
 export function mapCompositionToSong(
@@ -148,6 +168,11 @@ export function mapCompositionToSong(
     title: item.title,
     author: item.original_author || '',
     authors: item.authors ?? [],
+    aliases: distinctTexts(item.aliases ?? []),
+    // The title each songbook printed it under, over every version (the card shows only the first one).
+    sourceTitles: distinctTexts(
+      (item.song_versions ?? []).flatMap((v) => (v.song_version_sources ?? []).map((src) => src.original_title))
+    ),
     songKey: version?.key || null,
     content: version?.content_chordpro || '',
     melodyNotation: version?.melody_notation || '',

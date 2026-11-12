@@ -17,6 +17,8 @@ interface SongCardProps {
     songKey?: string | null;
     isPublic?: boolean;
     isFavorite?: boolean;
+    /** Why a search found this song when its title did not match: "Matched by alias: …" (Story 6.2.18, #521). */
+    matchHint?: string | null;
     userId?: string;
     categories?: {
         name: string;
@@ -30,7 +32,7 @@ interface SongCardProps {
  * Song list row (Story 6.1.2 / G1.2, #386): title, one grey meta line
  * `Author · Category · Language` and a key badge on the right. No coloured
  * chips, no glow, no accent bar. The whole row opens the song; heart and
- * add-to-playlist stay separate 44 px targets. Deleting is in the song page's ⋮ menu only (#492),
+ * add-to-playlist stay separate 44 px targets. While searching, an optional grey line says why the song matched (#521). Deleting is in the song page's ⋮ menu only (#492),
  * so every row has the same buttons in the same place.
  */
 export default function SongCard({
@@ -40,6 +42,7 @@ export default function SongCard({
     songKey,
     isPublic = true,
     isFavorite = false,
+    matchHint,
     userId,
     categories = [],
 }: SongCardProps) {
@@ -72,6 +75,11 @@ export default function SongCard({
                     )}
                 </div>
                 <MetaLine items={songRowMeta(author, categories, t)} className="mt-0.5" data-testid="song-row-meta" />
+                {matchHint && (
+                    <p className="mt-0.5 truncate text-meta text-fg-muted" data-testid="song-row-match">
+                        {matchHint}
+                    </p>
+                )}
             </div>
 
             {songKey && (

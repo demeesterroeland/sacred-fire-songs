@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import SongCard from "@/components/home/SongCard";
+import { songMatchHintText } from "@/lib/songs/search";
 import SearchFiltersModal from "@/components/library/SearchFiltersModal";
 import { Search, Heart, FileText } from "lucide-react";
 import { useSidebar } from "@/context/SidebarContext";
@@ -199,6 +200,7 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
                                         isFavorite={favoriteIds.has(song.id)}
                                         userId={user?.id}
                                         categories={song.categories}
+                                        matchHint={state.search ? songMatchHintText(song, state.search, t) : null}
                                     />
                                 </div>
                             ))
