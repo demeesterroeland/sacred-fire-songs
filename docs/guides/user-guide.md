@@ -1,6 +1,6 @@
 # User Guide: Sacred Fire Songs
 
-**Version:** 2.9
+**Version:** 2.10
 **Status:** Published
 **Date:** Nov 13, 2026
 
@@ -21,7 +21,8 @@
 | **2.6** | Nov 12, 2026 | Song page: every author of a co-written song is shown as its own link and opens that author's songs; the share text names all authors. The search box finds a song by any of its authors. |
 | **2.7** | Nov 12, 2026 | Song Detail: a song with translations has a **language switch** next to the version switch (Original language plus the languages the song has); tap a language to read that translation without leaving the song (Story 6.2.13, #516). |
 | **2.8** | Nov 13, 2026 | The search box also finds a song by another name it is known by (an alias) and by the title it has in a songbook, ignoring capitals and accents. When the song's own title did not match, the result says why, for example *Matched by alias: …*. Songs whose title matches are listed first. |
-| **2.9** | Nov 13, 2026 | Song Detail: while a translation is shown, **Translation · Both** shows the original and the translation together, verse by verse; a right-to-left translation (Hebrew, Arabic) reads right to left (Story 6.2.14, #517). |
+| **2.9** | Nov 13, 2026 | Editing: the edit form has a **Songbook details** section with the **Beats** and the **About this song** note of the version, and shows its source (songbook, page, compiler) as read-only text; admins can correct the source's page and original title (UX v3, #523). |
+| **2.10** | Nov 13, 2026 | Song Detail: while a translation is shown, **Translation · Both** shows the original and the translation together, verse by verse; a right-to-left translation (Hebrew, Arabic) reads right to left (Story 6.2.14, #517). |
 
 Welcome to **Sacred Fire Songs**, a digital songbook designed for ceremonial musicians. This guide covers how to browse, learn, and manage medicine songs using our platform.
 
@@ -83,7 +84,7 @@ When saving a song, you have two choices:
 
 ### 3.3 Editing & Deleting
 If you own a song (or are an Admin), you will see icons at the top of the detail page:
-- **✏️ Pencil**: Edit the song details, lyrics, or visibility.
+- **✏️ Pencil**: Edit the song details, lyrics, or visibility. For a song from a printed songbook the form also has **Songbook details**: the version's beats and its "About this song" note.
 - **🗑️ Trash**: Permanently remove the song from the library (requires confirmation).
 
 ---

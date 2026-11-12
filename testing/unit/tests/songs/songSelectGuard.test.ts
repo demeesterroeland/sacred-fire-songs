@@ -47,6 +47,14 @@ describe('song selects', () => {
     expect(SONGS_SELECT.split(/song_versions\s*\(/)[0]).toMatch(/\*/);
   });
 
+  // Story 6.2.20 (#523): the edit form is prefilled from these; without them it would show empty fields and a save
+  // of "nothing changed" would look like a change.
+  it('the edit page select asks for the beats and the note of each version', () => {
+    const versions = EDIT_SONG_SELECT.split(/song_versions!inner\s*\(/)[1];
+    expect(versions).toMatch(/\bbeats\b/);
+    expect(versions).toMatch(/\bsong_note\b/);
+  });
+
   it('the edit page and fetchSong carry no inline copy of the embed', () => {
     for (const file of ['app/songs/[id]/edit/page.tsx', 'lib/songs/fetchSong.ts']) {
       expect(embeds(readFileSync(file, 'utf8')), file).toHaveLength(0);

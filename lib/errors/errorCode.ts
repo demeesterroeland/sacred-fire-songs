@@ -28,6 +28,10 @@ const CODES: Readonly<Record<string, TranslationKey>> = {
   PGRST303: 'errors.notSignedIn',
   '42501': 'errors.accessDenied',
   '23505': 'errors.alreadyExists',
+  // The edit form (lib/songs/versionUpdate.ts): a write the database filtered without an error, and a source
+  // correction refused after the rest of the save went through
+  sfs_version_not_saved: 'errors.versionNotSaved',
+  sfs_source_not_corrected: 'errors.sourceNotCorrected',
 };
 
 /** Older answers carry no code, only these texts. */

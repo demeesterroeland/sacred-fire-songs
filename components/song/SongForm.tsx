@@ -27,8 +27,12 @@ import { safeNextPath } from '@/lib/auth/safeNext';
 import { FEATURES } from '@/lib/features';
 import { songFlags } from '@/lib/songs/versionFlags';
 import { songVersionHref } from '@/lib/songs/versionOrder';
+import { primarySource, type VersionSourceRow } from '@/lib/songs/versionSources';
+import { canCorrectSource, sourceFieldsForSave } from '@/lib/songs/versionMeta';
+import { SOURCE_NOT_CORRECTED, SaveRefusedError, updateSourceRow, updateVersionRow, versionUpdateFields } from '@/lib/songs/versionUpdate';
+import { EditVersionMeta } from './EditVersionMeta';
 
-type SongFormData = {
+export type SongFormData = {
     title: string;
     author: string;
     content: string;
@@ -41,6 +45,11 @@ type SongFormData = {
     soundcloudLink: string;
     melodyNotation: string;
     isPublic: boolean;
+    /** Edit form only (Story 6.2.20, #523): beats and note of the version, page and original title of its primary source. */
+    beats?: string;
+    note?: string;
+    sourcePage?: string;
+    sourceOriginalTitle?: string;
 };
 
 interface SongFormProps {
@@ -48,6 +57,10 @@ interface SongFormProps {
     initialData?: SongFormData;
     songId?: string;
     versionId?: string; // For updating the specific version
+    /** Edit mode: the sources of the version being edited, shown read-only (admins may correct the primary one). */
+    sources?: ReadonlyArray<VersionSourceRow> | null;
+    /** Edit mode: the song's title, for the source line (it shows the original title only when it differs). */
+    songTitle?: string;
 }
 
 const ADD_SONG_PATH = '/songs/add';
@@ -64,8 +77,20 @@ function decodeSongFile(buffer: ArrayBuffer): string {
     }
 }
 
-const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
+const SongForm = ({ mode, initialData: liveInitialData, songId, versionId, sources, songTitle }: SongFormProps) => {
     const { t } = useLocale();
+    const { user, loading: authLoading } = useAuth();
+    const mayCorrectSource = canCorrectSource(user?.role);
+    // What the form was prefilled with, frozen at mount. A save writes only what differs from it, and a stored value
+    // the user left alone is never refused; a refetch of the song while the form is open (react-query) must not move
+    // that baseline, or an untouched field would look changed and write a stale value back.
+    const baseline = useRef<{ initialData?: SongFormData; primary: VersionSourceRow | null }>(null);
+    if (baseline.current === null) {
+        baseline.current = { initialData: liveInitialData, primary: mode === 'edit' ? primarySource(sources) : null };
+    }
+    const { initialData, primary } = baseline.current;
+    // The source this edit may correct (admins only; row-level security enforces it too) and what it held on load.
+    const initialSource = { sourcePage: primary?.page ?? '', sourceOriginalTitle: primary?.original_title ?? '' };
     const {
         register,
         handleSubmit,
@@ -84,10 +109,11 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
             soundcloudLink: initialData?.soundcloudLink || '',
             melodyNotation: initialData?.melodyNotation || '',
             isPublic: initialData?.isPublic ?? true,
+            beats: initialData?.beats ?? '',
+            note: initialData?.note ?? '',
+            ...initialSource,
         }
     });
-
-    const { user, loading: authLoading } = useAuth();
 
     const queryClient = useQueryClient();
     const router = useRouter();
@@ -321,6 +347,12 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                     ...(otherVersions ?? []),
                 ]);
 
+                // One builder for the version's columns: beats and note only when changed (Story 6.2.20, #523).
+                // A write that row-level security filters answers without an error: updateVersionRow reports it.
+                // The version goes first: when it is refused, the song's title, author and flags (computed from this
+                // version's content) must not be written either, so "nothing was saved" stays true.
+                await updateVersionRow(supabase, versionId, versionUpdateFields(data, { beats: initialData?.beats, note: initialData?.note }));
+
                 const { error: compError } = await supabase
                     .from('compositions')
                     .update({
@@ -335,22 +367,6 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                     .eq('id', songId);
 
                 if (compError) throw compError;
-
-                const { error: versionError } = await supabase
-                    .from('song_versions')
-                    .update({
-                        content_chordpro: data.content,
-                        key: data.key,
-                        capo: data.capo ? parseInt(data.capo) : 0,
-                        tuning: data.tuning,
-                        youtube_url: data.youtubeLink,
-                        spotify_url: data.spotifyLink,
-                        soundcloud_url: data.soundcloudLink,
-                        melody_notation: data.melodyNotation,
-                    })
-                    .eq('id', versionId);
-
-                if (versionError) throw versionError;
 
                 // 3. Update Categories & Artist Categories
                 const { error: deleteCatError } = await supabase
@@ -376,6 +392,14 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                     if (insertCatError) throw insertCatError;
                 }
 
+                // An admin's correction of the primary source's page or original title (only what changed), the very
+                // last step: a refusal must not cost the categories and tags above. Row-level security allows it to
+                // admins only, so a member's save never sends it.
+                const sourceFields = mayCorrectSource && primary ? sourceFieldsForSave(data, initialSource) : {};
+                if (primary && Object.keys(sourceFields).length > 0) {
+                    await updateSourceRow(supabase, primary.id, sourceFields);
+                }
+
                 return songId;
             }
         },
@@ -392,6 +416,10 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
             router.push(returnTo);
         },
         onError: (error: Error) => {
+            // The version itself was saved, only its source correction was refused: show the saved state.
+            if (error instanceof SaveRefusedError && error.code === SOURCE_NOT_CORRECTED) {
+                queryClient.invalidateQueries({ queryKey: SONG_KEYS.all() });
+            }
             setServerError(errorMessage(error, t));
         }
     });
@@ -587,6 +615,22 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                         </div>
                     </div>
                 </details>
+
+                {/* 4b. Beats, note and source of the version (edit only, Story 6.2.20, #523) */}
+                {mode === 'edit' && (
+                    <EditVersionMeta
+                        register={register}
+                        errors={errors}
+                        initialBeats={initialData?.beats}
+                        initialNote={initialData?.note}
+                        initialSource={initialSource}
+                        sources={sources}
+                        songTitle={songTitle ?? initialData?.title ?? ''}
+                        canCorrectSource={mayCorrectSource}
+                        hasPrimarySource={!!primary}
+                        defaultOpen={!!(initialData?.beats || initialData?.note)}
+                    />
+                )}
 
                 {/* 5. Categories / Tags (collapsible, simplified) */}
                 <details className="group" open={isTagsExpanded} onToggle={(e) => setIsTagsExpanded(e.currentTarget.open)}>
