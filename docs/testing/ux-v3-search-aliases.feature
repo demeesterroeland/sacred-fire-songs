@@ -1,5 +1,6 @@
-# Version: 1.1 | Date: Nov 12, 2026
+# Version: 1.2 | Date: Nov 13, 2026
 # Changelog
+# 1.2 | Nov 13, 2026 | Re-check of #538: keyset pages (created_at, id) until an empty page, so a server with a lower max_rows still yields the whole catalog.
 # 1.1 | Nov 12, 2026 | Review of #538: songs whose title matched are listed before the others; the whole catalog is fetched in pages (PostgREST max_rows).
 # 1.0 | Nov 12, 2026 | Story 6.2.18 / G5.1 (#521): search finds songs by alias, any author and the original title in a songbook; the "matched by ..." hint; guests never find private songs this way.
 @ux-v3 @search-aliases
@@ -106,6 +107,12 @@ Feature: Search finds a song by the name I know
     Given a catalog of 1037 songs behind a server that returns at most 1000 rows per request
     When the whole song list is fetched
     Then all 1037 songs are fetched
+
+  @unit
+  Scenario: The whole catalog is fetched even when the server caps one request at 500 rows (self-hosted)
+    Given a catalog of 1234 songs behind a server that returns at most 500 rows per request
+    When the whole song list is fetched
+    Then all 1234 songs are fetched
 
   @unit
   Scenario: The song list select asks for the original titles through one embed

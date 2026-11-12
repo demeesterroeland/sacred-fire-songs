@@ -114,11 +114,28 @@ Then('the first result is {string}', function (this: object, title: string) {
 Given(
   'a catalog of {int} songs behind a server that returns at most {int} rows per request',
   function (this: object, total: number, cap: number) {
-    const rows = Array.from({ length: total }, (_, i) => ({ id: `row${i}` }));
+    // Newest first on (created_at, id), like songsQuery; the keyset cursor arrives as the `or()` filter.
+    const rows = Array.from({ length: total }, (_, i) => ({
+      id: `row${String(i).padStart(6, '0')}`,
+      created_at: `2026-01-01T00:00:00.${String(total - i).padStart(6, '0')}+00:00`,
+    }));
+    let cursor: [string, string] | null = null;
     const builder = {
-      select: () => builder,
+      select: () => {
+        cursor = null;
+        return builder;
+      },
       order: () => builder,
-      range: (from: number, to: number) => Promise.resolve({ data: rows.slice(from, Math.min(to + 1, from + cap)), error: null }),
+      or: (filter: string) => {
+        const m = /and\(created_at\.eq\.(.+?),id\.lt\.(.+)\)$/.exec(filter)!;
+        cursor = [m[1], m[2]];
+        return builder;
+      },
+      limit: (n: number) => {
+        const c = cursor;
+        const after = rows.filter((r) => !c || r.created_at < c[0] || (r.created_at === c[0] && r.id < c[1]));
+        return Promise.resolve({ data: after.slice(0, Math.min(n, cap)), error: null });
+      },
     };
     world(this).fetched = { client: { from: () => builder }, count: 0 };
   }

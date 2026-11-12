@@ -53,9 +53,12 @@ export function songsQuery(
 export const SONGS_FETCH_PAGE_SIZE = 1000;
 
 /**
- * Every composition the visitor may read, fetched in `range()` pages until a short page. The order
- * (`created_at`, `id`; `id` is unique) is a total order, so pages neither skip nor repeat a row. The one fetch behind
- * every full-list consumer (server render and client refresh), so the search always sees the whole catalog.
+ * Every composition the visitor may read, fetched in keyset pages (the `cursor` of `songsQuery`: `created_at`, `id`,
+ * newest first; `id` is unique, so the order is total). Paging continues until an empty page, not until a short one:
+ * a server whose `max_rows` is below the page size answers with short pages that are not the end. A song added
+ * during the fetch sorts before the cursor and is simply not part of this list; a song deleted during the fetch moves
+ * no other row, so no row is skipped or repeated (rows are still de-duplicated by `id` as a guard). The one fetch
+ * behind every full-list consumer (server render and client refresh), so the search always sees the whole catalog.
  * An error on any page is returned as the error; a partial list is never returned.
  */
 export async function fetchAllSongRows(
@@ -63,12 +66,20 @@ export async function fetchAllSongRows(
   pageSize: number = SONGS_FETCH_PAGE_SIZE
 ): Promise<{ data: CompositionRow[]; error: { message: string } | null }> {
   const rows: CompositionRow[] = [];
-  for (let from = 0; ; from += pageSize) {
-    const { data, error } = await songsQuery(client).range(from, from + pageSize - 1);
+  const seen = new Set<string>();
+  let cursor: string | undefined;
+  for (;;) {
+    const { data, error } = await songsQuery(client, { cursor, limit: pageSize });
     if (error) return { data: [], error };
-    const page = (data ?? []) as CompositionRow[];
-    rows.push(...page);
-    if (page.length < pageSize) break;
+    const page = (data ?? []) as unknown as CompositionRow[];
+    if (page.length === 0) break;
+    for (const row of page) {
+      if (seen.has(row.id)) continue;
+      seen.add(row.id);
+      rows.push(row);
+    }
+    const last = page[page.length - 1];
+    cursor = `${last.created_at}::${last.id}`;
   }
   return { data: rows, error: null };
 }
