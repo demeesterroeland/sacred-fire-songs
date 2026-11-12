@@ -45,7 +45,7 @@ export const fetchSong = async (id: string) => {
     )) as { data: any; error: any };
 
     if (error) throw error;
-    // Story 6.1.11 (#395, UXA-049): one stable order (oldest first, id as tiebreak) for the version switch.
+    // Story 6.1.11 (#395, UXA-049): one stable order (original, variants, translations; each oldest first, id as tiebreak) for the version switch.
     if (data && Array.isArray(data.song_versions)) {
         data.song_versions = sortVersions(data.song_versions);
     }
