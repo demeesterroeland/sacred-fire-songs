@@ -19,6 +19,11 @@ describe('filterSongs', () => {
         expect(result[0].title).toBe('Aguita de la Vida');
     });
 
+    it('filters by a co-author that is only in authors[] (#515)', () => {
+        const songs = [{ ...mockSongs[1], author: 'Danit', authors: ['Danit', 'Ben Cruz'] }, mockSongs[0]];
+        expect(filterSongs(songs, 'ben cruz').map(s => s.title)).toEqual(['Aguita de la Vida']);
+    });
+
     it('returns all songs for an empty query', () => {
         const result = filterSongs(mockSongs, '');
         expect(result).toHaveLength(3);

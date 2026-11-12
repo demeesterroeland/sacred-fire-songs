@@ -6,6 +6,7 @@
  */
 import { createClient } from '@/lib/supabase/client';
 import { sortVersions } from '@/lib/songs/versionOrder';
+import { SONG_SELECT } from '@/lib/songs/songSelect';
 
 // Enforce a timeout on any promise to prevent infinite loading skeletons
 export function withTimeout<T>(promise: Promise<T>, ms: number, errorMessage = "Request timed out"): Promise<T> {
@@ -30,37 +31,7 @@ export const fetchSong = async (id: string) => {
     const supabase = createClient();
     const queryPromise = supabase
         .from('compositions')
-        .select(`
-          title,
-          original_author,
-          authors,
-          owner_id,
-          is_public,
-          has_chords,
-          has_melody,
-          song_versions (
-            id,
-            version_name,
-            created_at,
-            content_chordpro,
-            key,
-            capo,
-            tuning,
-            beats,
-            youtube_url,
-            spotify_url,
-            soundcloud_url,
-            melody_notation
-          ),
-          song_category_map (
-            categories (
-              name,
-              slug,
-              emoji,
-              parent:parent_id(name, slug)
-            )
-          )
-        `)
+        .select(SONG_SELECT)
         .eq('id', id)
         .maybeSingle();
 

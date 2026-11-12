@@ -22,6 +22,7 @@ import { ArtistTagInput } from './ArtistTagInput';
 import { parseArtists, formatArtists, ensureArtistCategoryIds } from '@/lib/songs/artistUtils';
 import { useLocale } from '@/context/LocaleContext';
 import { errorMessage } from '@/lib/errors/errorCode';
+import { authorFieldsForSave } from '@/lib/songs/authors';
 import { safeNextPath } from '@/lib/auth/safeNext';
 import { FEATURES } from '@/lib/features';
 import { songFlags } from '@/lib/songs/versionFlags';
@@ -247,7 +248,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                     .from('compositions')
                     .insert({
                         title: data.title,
-                        original_author: data.author,
+                        ...authorFieldsForSave(data.author),
                         owner_id: user?.id,
                         is_public: data.isPublic,
                         has_chords: hasChords(data.content),
@@ -324,7 +325,7 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                     .from('compositions')
                     .update({
                         title: data.title,
-                        original_author: data.author,
+                        ...authorFieldsForSave(data.author),
                         is_public: data.isPublic,
                         has_chords: flags.has_chords,
                         has_melody: flags.has_melody,

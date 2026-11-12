@@ -1,12 +1,14 @@
 # Member Guide (draft)
 
-**Version:** 0.23 | **Date:** Nov 12, 2026
+**Version:** 0.25 | **Date:** Nov 12, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
-| 0.23 | Nov 12, 2026 | Song page: every author of a co-written song is its own link ("A and B", in your language) and opens that author's songs; the share text names all authors. Songs with several authors also turn up under each of them in the author filter. |
+| 0.25 | Nov 12, 2026 | Song page: every author of a co-written song is its own link ("A and B", in your language) and opens that author's songs; the share text names all authors. A song without an author shows "Traditional" as plain text. Add/Edit Song: the Author field shows every author of the song, and saving keeps them all; the search box and the Artists list find a song under each of its authors (UX v3, #515). |
+| 0.24 | Nov 12, 2026 | Song page: a version with a songbook note shows **About this song** under the grey lines (closed at first; tap to read it). Empty notes show nothing (UX v3, #511). |
+| 0.23 | Nov 12, 2026 | Song page: a grey line under the lyrics names the songbook, page and compiler of the version you are reading, when the song comes from a printed book (UX v3, #513). The guest guide describes it; a song printed in several books gets one line per book. |
 | 0.22 | Nov 11, 2026 | Transpose moves alternative chords such as **A7/C7** together (B7/D7 at +2); a slash chord such as **C/E** keeps its bass note (D/F#); chords written with ♭, alt, mi, ma or Δ move too. The PDF follows the same rule (#519). |
 | 0.21 | Nov 11, 2026 | Add Song: `{start_of_repeat}` … `{end_of_repeat}` (optionally `{end_of_repeat: x2}`) put repeat bars around the lines between them, on the song page and in the preview (UX v3, #518). |
 | 0.20 | Nov 11, 2026 | A singer's profile plays its recordings: tap ▶ to listen there (one at a time), tap the row to open the song with that recording (UX v2, #490). |

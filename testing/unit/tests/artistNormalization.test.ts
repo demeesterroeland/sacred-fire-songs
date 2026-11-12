@@ -163,3 +163,26 @@ describe('songFilterConfig artist matching across authors[]', () => {
     expect(matchingRule.match(legacy, 'Ben Cruz')).toBe(true);
   });
 });
+
+// Story 6.2.12 / G2.3 (#515): the free-text search finds a co-written song by each of its authors.
+describe('songFilterConfig search across authors[]', () => {
+  const search = songFilterConfig.search!;
+
+  it('finds a song by a co-author that is only in authors[]', () => {
+    const coWritten = { title: 'Morning', author: 'Anna Lee', authors: ['Anna Lee', 'Ben Cruz'] } as unknown as Song;
+    expect(search.match(coWritten, 'ben cruz')).toBe(true);
+    expect(search.match(coWritten, 'Cruz')).toBe(true);
+    expect(search.match(coWritten, 'anna')).toBe(true);
+    expect(search.match(coWritten, 'cari')).toBe(false);
+  });
+
+  it('ignores accents and case in authors[]', () => {
+    const song = { title: 'T', author: '', authors: ['José María'] } as unknown as Song;
+    expect(search.match(song, 'jose maria')).toBe(true);
+  });
+
+  it('still works for a song without authors[]', () => {
+    const song = { title: 'T', author: 'Anna Lee' } as unknown as Song;
+    expect(search.match(song, 'anna')).toBe(true);
+  });
+});

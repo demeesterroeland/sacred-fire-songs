@@ -27,6 +27,8 @@ import { useActionBarVisibility } from '@/hooks/useActionBarVisibility';
 import { useUserPreferences } from '@/context/UserPreferencesContext';
 import { practiceTab } from '@/lib/song/actionBar';
 import { SongMetaLines } from '@/components/song/SongMetaLines';
+import { AboutThisSong } from '@/components/song/AboutThisSong';
+import { SongSourceLine } from '@/components/song/SongSourceLine';
 import { VisibilityIcon } from '@/components/common/VisibilityIcon';
 import { ReaderToolbar } from '@/components/song/ReaderToolbar';
 import { SongVersionSwitch } from '@/components/song/SongVersionSwitch';
@@ -44,7 +46,7 @@ import { useSongRecordings } from '@/hooks/useSongRecordings';
 import { useRecordingsQuery } from '@/hooks/useRecordingsQuery';
 import { useLocale } from '@/context/LocaleContext';
 import { fetchSong, withTimeout } from '@/lib/songs/fetchSong';
-import { joinAuthors, songAuthorNames, songAuthors } from '@/lib/songs/authors';
+import { joinAuthors, songAuthorNames, songAuthorsText } from '@/lib/songs/authors';
 import { fetchFavoritesSetlistId } from '@/lib/playlists/favorites';
 import { linkedTakeTab, parseRecordingParam, RECORDING_PARAM } from '@/lib/songs/recordingLink';
 import { actionErrorMessage } from '@/lib/errors/actionError';
@@ -542,6 +544,14 @@ export default function SongDetailPage() {
                         toggleRef={metaToggleRef}
                     />
 
+                    {/* Story 6.2.8 / G1.3 (#511): the selected version's printed note, collapsed under the meta line and
+                        hidden when empty. Keyed by version, so every version starts collapsed. */}
+                    <AboutThisSong
+                        key={currentVersion?.id}
+                        className="mb-2"
+                        note={currentVersion?.song_note}
+                    />
+
                     {/* Story 6.1.6 (#390), Validation 3: Chords · A− · A+ · ▶ row inside expand/collapse,
                         rendered when expanded or while auto-scroll is actively playing. */}
                     {(controlsExpanded || autoScroll.playing) && (
@@ -595,6 +605,12 @@ export default function SongDetailPage() {
                                 showChords={readerPrefs.chords}
                             />
                         </div>
+                        {/* Story 6.2.10 (#513): where the version being shown was printed (book · page · compiler). */}
+                        <SongSourceLine
+                            className="mt-6"
+                            sources={currentVersion?.song_version_sources}
+                            songTitle={song.title}
+                        />
                     </div>
 
                     <div className="h-20"></div>
@@ -638,7 +654,7 @@ export default function SongDetailPage() {
                 open={isMenuOpen}
                 onOpenChange={setIsMenuOpen}
                 title={song.title}
-                description={t('song.by', { author: joinAuthors(songAuthors({ authors: song.authors, originalAuthor: song.original_author }, t), locale) })}
+                description={t('song.by', { author: songAuthorsText({ authors: song.authors, originalAuthor: song.original_author }, t, locale) })}
                 actions={{
                     onShare: () => { void handleShare(); setIsMenuOpen(false); },
                     edit: song.owner_id === user?.id || isAdmin ? { href: editSongHref(id, currentVersion?.id) } : undefined,
@@ -689,7 +705,7 @@ export default function SongDetailPage() {
                     compositionId={id}
                     onPlayStateChange={setIsAudioPlaying}
                     songTitle={song.title}
-                    songAuthor={song.original_author || t('song.traditional')}
+                    songAuthor={songAuthorsText({ authors: song.authors, originalAuthor: song.original_author }, t, locale)}
                     youtubeUrl={currentVersion.youtube_url}
                     spotifyUrl={currentVersion.spotify_url}
                     soundcloudUrl={currentVersion.soundcloud_url}

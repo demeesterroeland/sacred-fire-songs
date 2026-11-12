@@ -105,7 +105,10 @@ export const songFilterConfig: FilterConfig<Song, SongFilterState> = {
       if (!query) return true;
       const cleanQuery = removeDiacritics(normalizeWhitespace(query)).toLowerCase();
       const cleanTitle = removeDiacritics(normalizeWhitespace(song.title)).toLowerCase();
-      const cleanAuthor = removeDiacritics(normalizeWhitespace(song.author)).toLowerCase();
+      // Every credit counts: the display text and each name of authors[] (Story 6.2.12, #515)
+      const authorTexts = [song.author, ...cleanAuthors(song.authors)].map(
+        (a) => removeDiacritics(normalizeWhitespace(a)).toLowerCase()
+      );
       const cleanContent = song.content ? removeDiacritics(normalizeWhitespace(song.content)).toLowerCase() : "";
       // Also match subcategory names (e.g. "Water") and parent group names (e.g. "Element Songs")
       const matchesCategory = song.categories?.some(c => {
@@ -115,7 +118,7 @@ export const songFilterConfig: FilterConfig<Song, SongFilterState> = {
       }) ?? false;
       return (
         cleanTitle.includes(cleanQuery) ||
-        cleanAuthor.includes(cleanQuery) ||
+        authorTexts.some((a) => a.includes(cleanQuery)) ||
         cleanContent.includes(cleanQuery) ||
         matchesCategory
       );

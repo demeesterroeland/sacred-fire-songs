@@ -41,11 +41,11 @@ export function filterSongs(songs: Song[], query: string, activeFilter: 'all' | 
     let filtered = songs.filter(song => {
         // 1. Text Search
         const cleanTitle = normalizeWhitespace(song.title).toLowerCase();
-        const cleanAuthor = normalizeWhitespace(song.author).toLowerCase();
+        const cleanAuthor = [song.author, ...(song.authors ?? [])].map(a => normalizeWhitespace(a).toLowerCase());
         const cleanContent = song.content ? normalizeWhitespace(song.content).toLowerCase() : "";
 
         const matchesText = cleanTitle.includes(cleanQuery) ||
-            cleanAuthor.includes(cleanQuery) ||
+            cleanAuthor.some(a => a.includes(cleanQuery)) ||
             cleanContent.includes(cleanQuery);
 
         return matchesText;

@@ -4,7 +4,7 @@
  * `compositions.authors` holds every credit; `original_author` is the display text and the fallback when
  * `authors` is empty. Pure helpers: the song page, its share text and the meta line all use them.
  */
-import { parseArtists } from '@/lib/songs/artistUtils';
+import { formatArtists, parseArtists } from '@/lib/songs/artistUtils';
 import { normalizeWhitespace } from '@/lib/utils';
 import { LOCALE_DATE_TAGS, type Locale, type TranslateFn } from '@/lib/i18n';
 
@@ -36,13 +36,39 @@ export function songAuthorNames(song: AuthorSource): string[] {
   return names.length > 0 ? names : parseArtists(song.originalAuthor);
 }
 
-/** Display names for the meta line and the menu: every author, or Traditional when there is none. */
-export function songAuthors(song: AuthorSource, t: TranslateFn): string[] {
-  const names = songAuthorNames(song).map((a) => (a.toLowerCase() === 'traditional' ? t('song.traditional') : a));
-  return names.length > 0 ? names : [t('song.traditional')];
+/** One author as the meta line shows it: `label` is the (translated) text, `name` the real name the filter knows. */
+export interface AuthorLabel {
+  name: string;
+  label: string;
 }
 
-/** `Intl.ListFormat` in the UI language (`LOCALE_DATE_TAGS`), conjunction style: "A and B", "A, B y C". */
+/**
+ * The song's real authors with their display label ("traditional" is translated); empty when the song has no
+ * author. The label is what the reader sees, `name` is what `?artist=` must carry so the author filter finds the song.
+ */
+export function songAuthorLabels(song: AuthorSource, t: TranslateFn): AuthorLabel[] {
+  return songAuthorNames(song).map((name) => ({
+    name,
+    label: name.toLowerCase() === 'traditional' ? t('song.traditional') : name,
+  }));
+}
+
+/** Display names for the menu, the share text and the rehearsal drawer: every author, or Traditional when there is none. */
+export function songAuthors(song: AuthorSource, t: TranslateFn): string[] {
+  const labels = songAuthorLabels(song, t).map((a) => a.label);
+  return labels.length > 0 ? labels : [t('song.traditional')];
+}
+
+/** The song list filtered to one author: the one URL format of every author link (name encoded as one value). */
+export function authorFilterHref(name: string): string {
+  return `/songs?artist=${encodeURIComponent(name)}`;
+}
+
+/**
+ * `Intl.ListFormat` in the UI language (`LOCALE_DATE_TAGS`), conjunction style: "A and B", "A, B y C".
+ * Some ICU builds have no conjunction data for a language (Quechua, `qu`, in Node's default ICU): `Intl.ListFormat`
+ * then falls back to a plain comma list ("A, B") and never throws, so every language still gets a joiner.
+ */
 function authorList(locale: Locale | string): Intl.ListFormat {
   return new Intl.ListFormat(LOCALE_DATE_TAGS[locale as Locale] ?? 'en-US', { style: 'long', type: 'conjunction' });
 }
@@ -62,4 +88,26 @@ export function authorSeparators(names: readonly string[], locale: Locale | stri
 /** The names as one phrase in the UI language: "A and B", "A, B y C". */
 export function joinAuthors(names: readonly string[], locale: Locale | string): string {
   return authorList(locale).format([...names]);
+}
+
+/**
+ * The text of the author input on the Add/Edit form: every credit of `authors` joined the way `parseArtists`
+ * splits it again ("A, B, C"), else `original_author`. So a catalog song with three authors shows all three.
+ */
+export function authorInputText(song: AuthorSource): string {
+  return formatArtists(songAuthorNames(song));
+}
+
+/**
+ * The author columns the form saves: `original_author` is the text as typed (display text), `authors` the
+ * individual names (`parseArtists`), so the song page, the author filter and the artist index agree after an edit.
+ * A single credit like "A & B" is split by the input as well.
+ */
+export function authorFieldsForSave(input: string): { original_author: string; authors: string[] } {
+  return { original_author: input, authors: parseArtists(input) };
+}
+
+/** Every author as one phrase in the UI language, or the translated Traditional: the ⋮ sheet's "by" line and the rehearsal drawer. */
+export function songAuthorsText(song: AuthorSource, t: TranslateFn, locale: Locale | string): string {
+  return joinAuthors(songAuthors(song, t), locale);
 }

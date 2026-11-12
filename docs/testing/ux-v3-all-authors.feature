@@ -1,5 +1,6 @@
-# Version: 1.0 | Date: Nov 12, 2026
+# Version: 1.1 | Date: Nov 12, 2026
 # Changelog
+# 1.1 | Nov 12, 2026 | Review round (PR #533): the link carries the exact name through the URL (`&`, `+`, `#`, commas); "Traditional" is plain text, not a link; the free-text search finds a song by each author.
 # 1.0 | Nov 12, 2026 | Story 6.2.12 / G2.3 (#515): every author of a song is shown and opens its author filter; the share text names all authors.
 @ux-v3 @all-authors
 Feature: All authors of a song
@@ -18,6 +19,16 @@ Feature: All authors of a song
     Then the author filter for "Ben Cruz" finds the song
 
   @unit
+  Scenario: Author links carry the exact name, whatever characters it has
+    Given a song with authors "José & María, Jr." and "Ana + Bo #1"
+    Then each author link carries the exact name and opens the author filter
+
+  @unit
+  Scenario: The free-text search finds the song by any of its authors
+    Given a song with authors "Anna Lee" and "Ben Cruz"
+    Then the search for "ben cruz" finds the song
+
+  @unit
   Scenario: Empty and duplicate authors are dropped
     Given a song whose authors are "Anna Lee", " anna lee ", "" and "Ben Cruz"
     Then the song shows the authors "Anna Lee" and "Ben Cruz"
@@ -31,6 +42,7 @@ Feature: All authors of a song
   Scenario: Without any author the song is Traditional
     Given a song with no authors and no original author
     Then the song shows the author "Traditional"
+    And the song shows no author link
 
   @unit
   Scenario: The joiner follows the UI language

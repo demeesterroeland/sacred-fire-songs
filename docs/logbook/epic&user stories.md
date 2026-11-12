@@ -1,6 +1,6 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 2.02
+**Version:** 2.04
 **Status:** Living Document
 **Date:** Nov 12, 2026
 
@@ -63,7 +63,9 @@
 | **1.92** | Nov 6, 2026 | Epic 6.1: validation round 1 after the owner's phone run (Part of #375): auto-scroll only when the lyrics run below the fold (Story 6.1.10 / #394), expanded meta line (6.1.7 / #391), one focus style for text fields, the search suggestions in the page flow (6.1.29 / #413), search options on tokens, translated feedback and song flags across versions (6.1.11 / #395). Acceptance criteria of those stories now read as in `docs/testing/ux-v2-validation-1.feature`. |
 | **1.93** | Nov 7, 2026 | Epic 6.1: review round on the validation round 1 PR (#474, Part of #375): acceptance criteria of Stories 6.1.10 (auto-scroll offered only when the lyric text runs below the visible area above the fixed bars), 6.1.29 (suggestions close on the click and keep the scroll position), 6.1.1 (one focus cue per field, readable chip counts), 6.1.11 (a lyrics-only version has no Chords switch; a bracketed section label is not a chord) and the i18n policy (no raw server or database text in a toast) verified against the code; decisions UXA-061 to UXA-066. |
 | **1.94** | Nov 7, 2026 | Epic 6.1: validation round 2, batch 2 (Part of #375): acceptance criteria updated for Story 6.1.4 (#388: amounts between parentheses, "Air (3)"), 6.1.8 (#392: the full title wraps at the top of the page on a phone, the truncated copy shows only after scrolling past it), 6.1.10 (#394: transpose, scroll speed and a Screen stays on switch live in the one ⋮ menu; the toolbar has no ⋯), 6.1.11 (#395: every version has a `?version=` link, replaced in place, shared by Share), 6.1.23 (#407: History, Artists and Shared with me share one heading size) and 6.1.24 (#408: the Library "+" floats at the bottom right). New: Terms and Privacy pages (draft) with the operator from the server environment. |
-| **2.02** | Nov 12, 2026 | Epic 6.2: Story 6.2.12 (#515, G2.3) implemented on `feat/ux-v3` — every author of a song is shown and opens its author filter (the meta line, the share text and the ⋮ sheet); the author filter also finds a co-written song by any name in `authors`. Spec: `docs/testing/ux-v3-all-authors.feature`. |
+| **2.04** | Nov 12, 2026 | Epic 6.2: Story 6.2.12 (#515, G2.3) implemented on `feat/ux-v3` (PR #533, in review): every author of a song is shown, each its own link to the author filter (the meta line, the share text, the ⋮ sheet and the rehearsal drawer). Review round: the Add/Edit form prefills from and writes `authors` next to `original_author`; the free-text search and the artists index also use `authors`; the joiner sits after the previous link (no "Anna , Ben"); "Traditional" is plain text, not a link; the link carries the exact name through the URL (`&`, `+`, `#`); `qu` has no conjunction data (plain-list fallback). Spec: `docs/testing/ux-v3-all-authors.feature`. |
+| **2.03** | Nov 12, 2026 | Epic 6.2: Story 6.2.8 (#511, G1.3) implemented on `feat/ux-v3` (PR into `feat/ux-v3`, in review): "About this song" under the meta line shows the selected version's `song_note`, collapsed by default (button with aria-expanded), hidden when the note is empty or whitespace-only, plain text with paragraph breaks. Spec: `docs/testing/ux-v3-about-this-song.feature`. Review round: keyed per-version collapse tested at L3, unused children slot removed; the fold at 390 × 844 is a design intent (no E2E assertion yet). |
+| **2.02** | Nov 12, 2026 | Epic 6.2: Story 6.2.10 (#513, G2.1) implemented on `feat/ux-v3`: the song page shows a grey source line under the lyrics with the songbook, page and compiler of the version being shown (primary source first, several listed, original title when it differs, nothing without sources, guests too). Review round (PR #531): `p.` / `pp.` from the page notation, importer prefixes stripped, original title compared without accents, apostrophe style or trailing punctuation, plural list label, one embed of `song_version_sources` per song query. Acceptance criteria block added. Executable: `docs/testing/ux-v3-songbook-source.feature`. |
 | **2.01** | Nov 12, 2026 | Epic 6.2: Story 6.2.7 (#510, G1.2) implemented on `feat/ux-v3` (PR #529): the meta line shows the beats of the selected version after Key · Capo · Tuning (`docs/testing/ux-v3-beats-meta.feature`). |
 | **2.00** | Nov 11, 2026 | Epic 6.2: Story 6.2.16 (#519, G4.2) implemented on `feat/ux-v3` (PR #528) — alternative chords such as A7/C7 are transposed together (B7/D7 at +2), bass-note slash chords (C/E → D/F#) are unchanged, and the PDF export uses the same rule. Review of PR #528: chords written with ♭/♯, alt, mi, ma or Δ and three or more alternatives move too, spelling follows the key in effect. Spec: `docs/testing/ux-v3-alternative-chords.feature`. |
 | **1.99** | Nov 11, 2026 | Epic 6.2: Story 6.2.15 (#518, G4.1) implemented on `feat/ux-v3` (PR #526): the reader shows ‖: … :‖ (with ×N) around the lines between `{start_of_repeat}` and `{end_of_repeat}`. |
@@ -1724,7 +1726,9 @@ GitHub epic **#498**. Many circles sing from printed songbooks: the same song ap
 |---|---|---|---|---|---|
 | 6.2.1 | #504 | `G0.1` | A | **[Implemented, PR #527]** As a self-hoster, I want the database to store songbooks, per-book variants, capo/key/beats/note per version and translations so that songbook collections can be imported without losing information | — |
 | 6.2.7 | #510 | `G1.2` | A | **[Implemented on feat/ux-v3, PR #529]** As a Musician, I want the key, capo and beats of the selected version in the meta line so that I play the version as printed in its book | #504 |
-| 6.2.12 | #515 | `G2.3` | B | **[Implemented on feat/ux-v3]** As a reader, I want all authors of a song shown and tappable so that co-written songs credit everyone | #504 |
+| 6.2.8 | #511 | `G1.3` | B | **[Implemented on feat/ux-v3, in review]** As a reader, I want the note printed with a song in a collapsible "About this song" so that I learn its background without it pushing the lyrics down | — |
+| 6.2.10 | #513 | `G2.1` | A | **[Implemented on feat/ux-v3]** As a reader, I want to see in which songbook and on which page a version appears so that I can find it in the printed book and credit its compiler (grey line under the lyrics: `Songbook A · p. 38 · compiled by Compiler A`; original title when it differs; follows `?version=`; guests too) | #504 |
+| 6.2.12 | #515 | `G2.3` | B | **[Implemented on feat/ux-v3, PR #533, in review]** As a reader, I want all authors of a song shown and tappable so that co-written songs credit everyone | #504 |
 | 6.2.15 | #518 | `G4.1` | A | **[Implemented on feat/ux-v3, PR #526]** As a reader, I want repeat bars shown in the lyrics so that I know which lines the circle sings twice (`‖:` … `:‖` and `×2` around the lines between `{start_of_repeat}` and `{end_of_repeat}`; chords on or off) | — |
 | 6.2.16 | #519 | `G4.2` | A | **[Implemented, PR #528]** As a Musician, I want alternative chords like A7/C7 shown and transposed correctly so that the chord line stays right in every key | — |
 
@@ -1745,6 +1749,55 @@ Scenario: A member cannot claim a catalog slug
   Then the member cannot give that song a catalog slug
   And the member cannot add a version with a catalog_source_id to that song
   But the member can change the version kind, beats and song note of that version
+```
+
+**Story 6.2.8 acceptance criteria** (executable: `docs/testing/ux-v3-about-this-song.feature`, `@unit`; disclosure semantics in `testing/unit/tests/aboutThisSong.test.tsx`):
+
+```gherkin
+Scenario: Note is collapsed until opened
+  Given a version with a song note
+  Then 'About this song' is shown collapsed
+  When I open it
+  Then the note is shown
+```
+
+Also: a whitespace-only note counts as empty (hidden); switching version shows that version's note and hides the panel when it has none; paragraph breaks are kept and the note is plain text (never HTML); design intent (not yet asserted by an E2E spec): the collapsed panel keeps the first lyric line above the fold at 390 × 844.
+
+**Story 6.2.10 acceptance criteria** (executable: `docs/testing/ux-v3-songbook-source.feature`, `@unit` and `@seed`):
+
+```gherkin
+Scenario: Source line credits the book
+  Given a version from "Songbook A" page "38" compiled by "Compiler A"
+  Then the song page shows the line "Songbook A · p. 38 · compiled by Compiler A"
+
+Scenario: Page notation decides between "p." and "pp."
+  Given pages "38–39", "38 & 40" and "38 y 40"
+  Then the line says "pp." for each of them
+  But "A-12", "II-4", "12a" and a "p. 38" copied from the book say "p."
+
+Scenario: The original title shows only when it really differs
+  Given the song "Rise Up" has a version with the original title "Subir"
+  Then the line ends with "Original title: Subir"
+  But "Pachamamá" for "Pachamama", "Mother’s" for "Mother's" and "Rise Up!" for "Rise Up" show nothing
+
+Scenario: Several books are listed, the primary source first
+  Given a version printed in "Songbook B" and as the primary source in "Songbook A"
+  Then the song page lists "Songbook A" first and the list is labelled "Sources"
+
+Scenario: The line follows the selected version
+  When the reader opens the song with "?version=" the second version
+  Then the song page shows the line of that version
+
+Scenario: Nothing is shown without sources
+  Given a version without sources, or cached song data from before the sources existed
+  Then the song page shows no source line and leaves no space
+
+Scenario: A guest reads the source of a public song, not of a private one
+  Then a guest reads the book, page and compiler of the public version
+  And a guest reads no source of the private version
+
+Scenario: The song page's real query is accepted by the local API
+  Then the select of the song page runs without error and returns the sources of each version as a list
 ```
 
 ## Roles & Permissions Summary
