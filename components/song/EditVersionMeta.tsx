@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { FieldErrors, UseFormRegister } from 'react-hook-form';
 import { useLocale } from '@/context/LocaleContext';
 import type { SongFormData } from '@/components/song/SongForm';
@@ -15,6 +15,8 @@ import {
   normalizeNote,
   noteError,
   sourceTextError,
+  normalizeSourceText,
+  type SourceInput,
 } from '@/lib/songs/versionMeta';
 
 interface EditVersionMetaProps {
@@ -23,6 +25,8 @@ interface EditVersionMetaProps {
   /** The values the form was prefilled with: a stored value the user did not touch is never refused. */
   initialBeats?: string | null;
   initialNote?: string | null;
+  /** The page and original title of the primary source the form was prefilled with (same rule). */
+  initialSource?: SourceInput;
   /** The sources of the version being edited (primary first in the list shown). */
   sources?: ReadonlyArray<VersionSourceRow> | null;
   songTitle: string;
@@ -49,6 +53,7 @@ export function EditVersionMeta({
   errors,
   initialBeats,
   initialNote,
+  initialSource,
   sources,
   songTitle,
   canCorrectSource,
@@ -58,6 +63,15 @@ export function EditVersionMeta({
   const { t, locale } = useLocale();
   const [correcting, setCorrecting] = useState(false);
   const lines = formatSourceLines(sources, songTitle, t, locale);
+  // The panel stays closed until asked for, but a refused value must be visible and focusable.
+  const pageInvalid = !!errors.sourcePage;
+  const titleInvalid = !!errors.sourceOriginalTitle;
+  const correctionOpen = correcting || pageInvalid || titleInvalid;
+  useEffect(() => {
+    // Runs after the panel is shown: react-hook-form tried to focus the field while it was still hidden.
+    if (pageInvalid) document.getElementById('source-page')?.focus();
+    else if (titleInvalid) document.getElementById('source-original-title')?.focus();
+  }, [pageInvalid, titleInvalid]);
 
   // A stored value the user left alone is never refused (an importer may have written it in another form).
   const beatsValidate = (value: string | undefined) => {
@@ -70,8 +84,12 @@ export function EditVersionMeta({
     normalizeNote(value) === normalizeNote(initialNote) || noteError(value) === null
       ? true
       : t('songForm.field.note.tooLong', { max: NOTE_MAX_LENGTH });
-  const sourceValidate = (field: 'page' | 'originalTitle', max: number) => (value: string | undefined) =>
-    sourceTextError(field, value) === null ? true : t('songForm.source.tooLong', { max });
+  const sourceValidate = (field: 'page' | 'originalTitle', max: number) => (value: string | undefined) => {
+    const initial = field === 'page' ? initialSource?.sourcePage : initialSource?.sourceOriginalTitle;
+    return normalizeSourceText(value) === normalizeSourceText(initial) || sourceTextError(field, value) === null
+      ? true
+      : t('songForm.source.tooLong', { max });
+  };
 
   return (
     <details className="group" open={defaultOpen} data-testid="edit-version-meta">
@@ -139,14 +157,14 @@ export function EditVersionMeta({
               <>
                 <button
                   type="button"
-                  aria-expanded={correcting}
+                  aria-expanded={correctionOpen}
                   aria-controls="source-correction"
-                  onClick={() => setCorrecting((open) => !open)}
+                  onClick={() => setCorrecting(!correctionOpen)}
                   className="inline-flex min-h-tap items-center text-meta font-semibold text-fg underline underline-offset-2"
                 >
                   {t('songForm.source.correct')}
                 </button>
-                <div id="source-correction" hidden={!correcting} className="space-y-3">
+                <div id="source-correction" hidden={!correctionOpen} className="space-y-3">
                   <p className="text-caption text-fg-muted">{t('songForm.source.correctHint')}</p>
                   <div className="space-y-1.5">
                     <label htmlFor="source-page" className={LABEL}>

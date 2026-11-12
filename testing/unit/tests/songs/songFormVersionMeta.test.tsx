@@ -2,6 +2,7 @@
 // Story 6.2.20 / G5.3 (#523): the edit form changes the beats, the note and (admins) the source of a version (RTL, L3).
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { SOURCE_NOT_CORRECTED, VERSION_NOT_SAVED } from '@/lib/songs/versionUpdate';
 import SongForm from '@/components/song/SongForm';
 import { DICTIONARIES } from '@/lib/i18n';
 import type { VersionSourceRow } from '@/lib/songs/versionSources';
@@ -12,6 +13,10 @@ const hoisted = vi.hoisted(() => ({
   mutationFn: null as null | ((data: unknown) => Promise<unknown>),
   mutate: vi.fn(),
   role: 'member' as string,
+  /** Tables whose update the database filters without an error (row-level security): no row comes back. */
+  refused: new Set<string>(),
+  /** Tables whose update the database answers with an error. */
+  failed: new Set<string>(),
 }));
 
 const t = (k: string, p?: Record<string, string | number>) =>
@@ -38,10 +43,18 @@ vi.mock('@/lib/songs/artistUtils', async (importOriginal) => ({
 vi.mock('@/lib/supabase/client', () => ({
   createClient: () => ({
     from: (table: string) => {
+      let updating = false;
       const chain: unknown = new Proxy(() => undefined, {
         get: (_target, prop: string) => {
-          if (prop === 'then') return (resolve: (v: unknown) => void) => resolve({ data: [], error: null });
+          if (prop === 'then') {
+            return (resolve: (v: unknown) => void) => {
+              if (updating && hoisted.failed.has(table)) return resolve({ data: null, error: { code: '42501', message: 'denied' } });
+              const rows = updating && !hoisted.refused.has(table) ? [{ id: 'row' }] : [];
+              return resolve({ data: rows, error: null });
+            };
+          }
           return (...args: unknown[]) => {
+            if (prop === 'update') updating = true;
             hoisted.calls.push({ table, op: prop, args });
             return chain;
           };
@@ -58,6 +71,8 @@ afterEach(() => {
   hoisted.mutationFn = null;
   hoisted.mutate.mockClear();
   hoisted.role = 'member';
+  hoisted.refused.clear();
+  hoisted.failed.clear();
 });
 
 const initial = {
@@ -198,5 +213,118 @@ describe('SongForm — source of a version', () => {
     renderEdit();
     await hoisted.mutationFn!({ ...initial, sourcePage: '99', sourceOriginalTitle: 'Hacked' });
     expect(sourceUpdate()).toBeUndefined();
+  });
+});
+
+describe('SongForm — a save the database refuses is not a save', () => {
+  it('a version update that changes no row (row-level security) fails with a translated error, not as saved', async () => {
+    hoisted.refused.add('song_versions');
+    renderEdit();
+    await expect(hoisted.mutationFn!({ ...initial, beats: '6' })).rejects.toMatchObject({ code: VERSION_NOT_SAVED });
+  });
+
+  it('an admin whose source update changes no row is told the source was not corrected', async () => {
+    hoisted.role = 'admin';
+    hoisted.refused.add('song_version_sources');
+    renderEdit();
+    await expect(hoisted.mutationFn!({ ...initial, sourcePage: '39', sourceOriginalTitle: 'Titre original' })).rejects.toMatchObject({
+      code: SOURCE_NOT_CORRECTED,
+    });
+  });
+
+  it('a source update the database answers with an error is reported the same way', async () => {
+    hoisted.role = 'admin';
+    hoisted.failed.add('song_version_sources');
+    renderEdit();
+    await expect(hoisted.mutationFn!({ ...initial, sourcePage: '39', sourceOriginalTitle: 'Titre original' })).rejects.toMatchObject({
+      code: SOURCE_NOT_CORRECTED,
+    });
+  });
+
+  it('the source is corrected last: a refused correction still leaves the categories and tags saved', async () => {
+    hoisted.role = 'admin';
+    hoisted.refused.add('song_version_sources');
+    renderEdit();
+    await hoisted.mutationFn!({ ...initial, sourcePage: '39', sourceOriginalTitle: 'Titre original', categoryIds: ['c1'] }).catch(() => undefined);
+    const steps = hoisted.calls.filter((c) => ['update', 'delete', 'insert'].includes(c.op)).map((c) => `${c.table}.${c.op}`);
+    expect(steps).toEqual([
+      'compositions.update',
+      'song_versions.update',
+      'song_category_map.delete',
+      'song_category_map.insert',
+      'song_version_sources.update',
+    ]);
+  });
+
+  it('a version update that is refused stops the save before anything else is written', async () => {
+    hoisted.role = 'admin';
+    hoisted.refused.add('song_versions');
+    renderEdit();
+    await hoisted.mutationFn!({ ...initial, sourcePage: '39', sourceOriginalTitle: 'Titre original' }).catch(() => undefined);
+    expect(sourceUpdate()).toBeUndefined();
+    expect(hoisted.calls.some((c) => c.table === 'song_category_map')).toBe(false);
+  });
+});
+
+describe('SongForm — a stored source value that is too long', () => {
+  const longPage = 'p'.repeat(41);
+  const longSources: VersionSourceRow[] = [{ ...sources[0], page: longPage }];
+  const save = () => fireEvent.click(screen.getByRole('button', { name: dict['songForm.publishSong'] }));
+
+  it('does not block an admin who leaves it alone', async () => {
+    hoisted.role = 'admin';
+    renderEdit({ sources: longSources });
+    save();
+    await waitFor(() => expect(hoisted.mutate).toHaveBeenCalled());
+  });
+
+  it('is still refused when the admin changes it to another value that is too long; the panel opens on the error', async () => {
+    hoisted.role = 'admin';
+    renderEdit({ sources: longSources });
+    expect(document.getElementById('source-correction')!.hidden).toBe(true);
+    fireEvent.change(screen.getByLabelText(dict['songForm.source.page'], { selector: 'input' }), { target: { value: 'q'.repeat(41) } });
+    save();
+    expect(await screen.findByText(t('songForm.source.tooLong', { max: 40 }))).toBeTruthy();
+    expect(hoisted.mutate).not.toHaveBeenCalled();
+    expect(document.getElementById('source-correction')!.hidden).toBe(false);
+    expect(document.activeElement).toBe(document.getElementById('source-page'));
+  });
+
+  it('opens the panel for a too long original title as well', async () => {
+    hoisted.role = 'admin';
+    renderEdit();
+    fireEvent.change(screen.getByLabelText(dict['songForm.source.originalTitle'], { selector: 'input' }), { target: { value: 'x'.repeat(201) } });
+    save();
+    expect(await screen.findByText(t('songForm.source.tooLong', { max: 200 }))).toBeTruthy();
+    expect(document.getElementById('source-correction')!.hidden).toBe(false);
+    expect(document.activeElement).toBe(document.getElementById('source-original-title'));
+  });
+});
+
+describe('SongForm — the baseline of the diff is frozen at mount', () => {
+  it('a refetch with other stored values does not make an untouched field look changed', async () => {
+    const { rerender } = renderEdit();
+    // react-query refetched the song while the form was open: the stored beats and note are now different.
+    rerender(
+      <SongForm
+        mode="edit"
+        songId="s1"
+        versionId="v1"
+        initialData={{ ...initial, beats: '6', note: 'Edited elsewhere.' }}
+        sources={sources}
+        songTitle="Morning Sun"
+      />
+    );
+    // The user never touched beats and note: the form still holds what it was prefilled with.
+    await hoisted.mutationFn!({ ...initial, content: '[Am]La la la' });
+    expect(versionUpdate()).not.toHaveProperty('beats');
+    expect(versionUpdate()).not.toHaveProperty('song_note');
+  });
+
+  it('a refetch does not turn the validation of an untouched stored value into a block', async () => {
+    const { rerender } = renderEdit({ initialData: { ...initial, beats: 'waltz' } });
+    rerender(<SongForm mode="edit" songId="s1" versionId="v1" initialData={{ ...initial, beats: '8' }} sources={sources} songTitle="Morning Sun" />);
+    fireEvent.click(screen.getByRole('button', { name: dict['songForm.publishSong'] }));
+    await waitFor(() => expect(hoisted.mutate).toHaveBeenCalled());
   });
 });

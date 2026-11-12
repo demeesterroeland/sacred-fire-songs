@@ -3,7 +3,7 @@
 // (technicalItems, songNoteParagraphs, formatSourceLines). The rendered form itself is covered at L3 in
 // testing/unit/tests/songs/songFormVersionMeta.test.tsx. @seed: the same payload as SQL, run as the real roles.
 import assert from 'node:assert/strict';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, type SupabaseClient } from '@supabase/supabase-js';
 import { Given, Then, When } from '@cucumber/cucumber';
 import { profileIdByEmail, queryAsAnon, queryAsUser, seedDb } from '../support/db';
 import { OTHER_MEMBER_ID, SEEDED_EMAILS } from './access-policies.steps';
@@ -19,7 +19,14 @@ import {
   sourceFieldsForSave,
   versionMetaFieldsForSave,
 } from '../../../lib/songs/versionMeta';
-import { versionUpdateFields, type VersionFormValues } from '../../../lib/songs/versionUpdate';
+import {
+  SOURCE_NOT_CORRECTED,
+  updateSourceRow,
+  updateVersionRow,
+  versionUpdateFields,
+  type VersionFormValues,
+} from '../../../lib/songs/versionUpdate';
+import { errorMessage } from '../../../lib/errors/errorCode';
 import { EDIT_SONG_SELECT } from '../../../lib/songs/songSelect';
 import { localApi } from './ux-v3-songbook-source.steps';
 
@@ -35,6 +42,7 @@ interface World {
   sources?: VersionSourceRow[];
   sourceInitial?: { sourcePage: string; sourceOriginalTitle: string };
   sourcePayload?: Record<string, unknown>;
+  saveFailure?: unknown;
   // @seed
   songId?: string;
   versionId?: string;
@@ -203,10 +211,33 @@ Then('a member, a gatekeeper and a guest are not', function () {
   }
 });
 
-Then("only an admin's save can write the source", function () {
-  // SongForm sends the source update only when canCorrectSource(role); the database allows it to admins only (@seed).
-  assert.equal(canCorrectSource('admin'), true);
-  assert.equal(canCorrectSource('member'), false);
+/** A client whose update answers `result`, as PostgREST does for a write that row-level security filters. */
+function clientAnswering(result: { data: unknown; error: unknown }): SupabaseClient {
+  const chain: Record<string, unknown> = {};
+  for (const op of ['update', 'eq', 'select']) chain[op] = () => (op === 'select' ? Promise.resolve(result) : chain);
+  return { from: () => chain } as unknown as SupabaseClient;
+}
+
+When('the database accepts the version update but returns no row', async function (this: object) {
+  w(this).saveFailure = await updateVersionRow(clientAnswering({ data: [], error: null }), 'v1', { beats: '6' }).catch((e) => e);
+});
+
+When('the database accepts the source update but returns no row', async function (this: object) {
+  w(this).saveFailure = await updateSourceRow(clientAnswering({ data: [], error: null }), 'src1', { page: '39' }).catch((e) => e);
+});
+
+Then('the save fails as {string} with a translated message', function (this: object, code: string) {
+  const failure = w(this).saveFailure;
+  assert.equal((failure as { code?: string })?.code, code, 'a refused write is an error, not a success');
+  const message = errorMessage(failure, t);
+  assert.notEqual(message, t('errors.generic'));
+  assert.ok(message.length > 0 && !message.startsWith('errors.'), message);
+});
+
+Then('a source update the database answers with an error fails the same way', async function () {
+  const refused = { code: '42501', message: 'denied' };
+  const failure = await updateSourceRow(clientAnswering({ data: null, error: refused }), 'src1', { page: '39' }).catch((e) => e);
+  assert.equal((failure as { code?: string }).code, SOURCE_NOT_CORRECTED);
 });
 
 When('an admin changes the page to {string} and saves', function (this: object, page: string) {
@@ -241,6 +272,8 @@ Then('all languages have text for beats, note and source in the edit form', func
     ['songForm.source.page', []],
     ['songForm.source.originalTitle', []],
     ['songForm.source.tooLong', ['{max}']],
+    ['errors.versionNotSaved', []],
+    ['errors.sourceNotCorrected', []],
   ];
   for (const l of SUPPORTED_LOCALES) {
     const d = DICTIONARIES[l] as Record<string, string>;

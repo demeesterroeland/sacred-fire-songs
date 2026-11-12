@@ -3447,3 +3447,10 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - Source: read-only for everyone; admins get **Correct source** for the page and original title of the primary source (`song_version_sources` update, admin-only by policy, only changed fields). The songbook itself has no admin screen yet and is not editable here.
 - No migration, no change to who may save: the `song_versions` update policy (contributor or admin) and the column privileges decide, so a catalog version (no `contributor_id`) is in practice changed by admins only.
 - Tests: `versionMeta.test.ts` (L2), `songFormVersionMeta.test.tsx` (L3), `songSelectGuard.test.ts`, BDD `docs/testing/ux-v3-edit-version-meta.feature` (9 `@unit`, 5 `@seed`). 14 new keys in 8 locales (`qu` needs a native check).
+
+## Session November 13, 2026 — Story 6.2.20 (#523): review fixes
+
+- A write that row-level security filters answers with success and no row. `updateVersionRow()` / `updateSourceRow()` (`lib/songs/versionUpdate.ts`) ask for the row back (`.select('id')`); an empty answer throws a `SaveRefusedError` that `errorMessage()` shows as "nothing was saved" (`errors.versionNotSaved`) or "version saved, source not corrected" (`errors.sourceNotCorrected`). The permission rules are unchanged (an owner still cannot change a catalog version; the form now says so instead of "saved").
+- The source correction is the last step of the save (after categories and tags). A stored source page or original title over the limit no longer blocks an admin who leaves it alone; the correction panel opens and focuses a refused field.
+- The form's prefilled values (`initialData`, primary source) are frozen at mount: a react-query refetch cannot make an untouched field look changed.
+- The beats message and the member guide name the comma (`8,4`). 2 new keys in 8 locales (`qu` for a native check). Tests: `versionUpdate.test.ts`, 10 new cases in `songFormVersionMeta.test.tsx`, a new `@unit` scenario in the feature (replaces the tautological "only an admin's save can write the source" step).

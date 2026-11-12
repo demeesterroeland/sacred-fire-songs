@@ -1,6 +1,6 @@
-# Version: 1.0 | Date: Nov 12, 2026
+# Version: 1.0 | Date: Nov 13, 2026
 # Changelog
-# 1.0 | Nov 12, 2026 | Story 6.2.20 / G5.3 (#523): the edit form changes the beats, note and (admins) the source page of a version; only changed fields are written, blank saves NULL.
+# 1.0 | Nov 13, 2026 | Story 6.2.20 / G5.3 (#523): the edit form changes the beats, note and (admins) the source page of a version; only changed fields are written, blank saves NULL. A write the database filters without an error (no row back) is reported, never shown as saved; the source correction is the last step of the save.
 @ux-v3 @edit-version-meta
 Feature: Edit the beats, note and source of a version
   As a Contributor
@@ -74,7 +74,15 @@ Feature: Edit the beats, note and source of a version
     Then the edit form shows "Songbook A · p. 38 · compiled by Compiler A" as text
     And an admin is offered the "Correct source" link
     And a member, a gatekeeper and a guest are not
-    And only an admin's save can write the source
+
+  @unit
+  Scenario: A write the database filters without an error is reported, not shown as saved
+    Given a catalog version printed in "Songbook A" on page "38", compiled by "Compiler A"
+    When the database accepts the version update but returns no row
+    Then the save fails as "sfs_version_not_saved" with a translated message
+    When the database accepts the source update but returns no row
+    Then the save fails as "sfs_source_not_corrected" with a translated message
+    And a source update the database answers with an error fails the same way
 
   @unit
   Scenario: An admin's source correction writes only the changed page or original title

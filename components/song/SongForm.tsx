@@ -29,7 +29,7 @@ import { songFlags } from '@/lib/songs/versionFlags';
 import { songVersionHref } from '@/lib/songs/versionOrder';
 import { primarySource, type VersionSourceRow } from '@/lib/songs/versionSources';
 import { canCorrectSource, sourceFieldsForSave } from '@/lib/songs/versionMeta';
-import { versionUpdateFields } from '@/lib/songs/versionUpdate';
+import { SOURCE_NOT_CORRECTED, SaveRefusedError, updateSourceRow, updateVersionRow, versionUpdateFields } from '@/lib/songs/versionUpdate';
 import { EditVersionMeta } from './EditVersionMeta';
 
 export type SongFormData = {
@@ -77,12 +77,19 @@ function decodeSongFile(buffer: ArrayBuffer): string {
     }
 }
 
-const SongForm = ({ mode, initialData, songId, versionId, sources, songTitle }: SongFormProps) => {
+const SongForm = ({ mode, initialData: liveInitialData, songId, versionId, sources, songTitle }: SongFormProps) => {
     const { t } = useLocale();
     const { user, loading: authLoading } = useAuth();
     const mayCorrectSource = canCorrectSource(user?.role);
+    // What the form was prefilled with, frozen at mount. A save writes only what differs from it, and a stored value
+    // the user left alone is never refused; a refetch of the song while the form is open (react-query) must not move
+    // that baseline, or an untouched field would look changed and write a stale value back.
+    const baseline = useRef<{ initialData?: SongFormData; primary: VersionSourceRow | null }>(null);
+    if (baseline.current === null) {
+        baseline.current = { initialData: liveInitialData, primary: mode === 'edit' ? primarySource(sources) : null };
+    }
+    const { initialData, primary } = baseline.current;
     // The source this edit may correct (admins only; row-level security enforces it too) and what it held on load.
-    const primary = mode === 'edit' ? primarySource(sources) : null;
     const initialSource = { sourcePage: primary?.page ?? '', sourceOriginalTitle: primary?.original_title ?? '' };
     const {
         register,
@@ -356,24 +363,8 @@ const SongForm = ({ mode, initialData, songId, versionId, sources, songTitle }: 
                 if (compError) throw compError;
 
                 // One builder for the version's columns: beats and note only when changed (Story 6.2.20, #523).
-                const { error: versionError } = await supabase
-                    .from('song_versions')
-                    .update(versionUpdateFields(data, { beats: initialData?.beats, note: initialData?.note }))
-                    .eq('id', versionId);
-
-                if (versionError) throw versionError;
-
-                // An admin's correction of the primary source's page or original title (only what changed).
-                // Row-level security allows this to admins only, so a member's save never sends it.
-                const sourceFields = mayCorrectSource && primary ? sourceFieldsForSave(data, initialSource) : {};
-                if (primary && Object.keys(sourceFields).length > 0) {
-                    const { error: sourceError } = await supabase
-                        .from('song_version_sources')
-                        .update(sourceFields)
-                        .eq('id', primary.id);
-
-                    if (sourceError) throw sourceError;
-                }
+                // A write that row-level security filters answers without an error: updateVersionRow reports it.
+                await updateVersionRow(supabase, versionId, versionUpdateFields(data, { beats: initialData?.beats, note: initialData?.note }));
 
                 // 3. Update Categories & Artist Categories
                 const { error: deleteCatError } = await supabase
@@ -399,6 +390,14 @@ const SongForm = ({ mode, initialData, songId, versionId, sources, songTitle }: 
                     if (insertCatError) throw insertCatError;
                 }
 
+                // An admin's correction of the primary source's page or original title (only what changed), the very
+                // last step: a refusal must not cost the categories and tags above. Row-level security allows it to
+                // admins only, so a member's save never sends it.
+                const sourceFields = mayCorrectSource && primary ? sourceFieldsForSave(data, initialSource) : {};
+                if (primary && Object.keys(sourceFields).length > 0) {
+                    await updateSourceRow(supabase, primary.id, sourceFields);
+                }
+
                 return songId;
             }
         },
@@ -415,6 +414,10 @@ const SongForm = ({ mode, initialData, songId, versionId, sources, songTitle }: 
             router.push(returnTo);
         },
         onError: (error: Error) => {
+            // The version itself was saved, only its source correction was refused: show the saved state.
+            if (error instanceof SaveRefusedError && error.code === SOURCE_NOT_CORRECTED) {
+                queryClient.invalidateQueries({ queryKey: SONG_KEYS.all() });
+            }
             setServerError(errorMessage(error, t));
         }
     });
@@ -618,6 +621,7 @@ const SongForm = ({ mode, initialData, songId, versionId, sources, songTitle }: 
                         errors={errors}
                         initialBeats={initialData?.beats}
                         initialNote={initialData?.note}
+                        initialSource={initialSource}
                         sources={sources}
                         songTitle={songTitle ?? initialData?.title ?? ''}
                         canCorrectSource={mayCorrectSource}
