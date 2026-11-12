@@ -45,7 +45,8 @@ vi.mock('@/lib/supabase/client', () => ({
         get: (_target, prop: string) => {
           if (prop === 'then') {
             return (resolve: (v: unknown) => void) =>
-              resolve({ data: ops.includes('single') ? { id: 'c1' } : [], error: null });
+              // An update answers with the row it changed (the edit form asks for it, to notice a refused write).
+              resolve({ data: ops.includes('single') ? { id: 'c1' } : ops.includes('update') ? [{ id: 'row' }] : [], error: null });
           }
           return (...args: unknown[]) => {
             ops.push(prop);

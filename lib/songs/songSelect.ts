@@ -72,6 +72,8 @@ export const EDIT_SONG_SELECT = `
             key,
             capo,
             tuning,
+            beats,
+            song_note,
             youtube_url,
             spotify_url,
             soundcloud_url,
