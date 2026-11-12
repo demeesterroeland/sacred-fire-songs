@@ -191,6 +191,10 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'song.language.label': "Qillqapa simin",
   'song.language.originalLanguage': "Ñawpaq simi",
   'song.translation.by': "{name} tikrasqan",
+  // Story 6.2.14 (#517): machine-assisted, needs a native check.
+  'song.translation.view.label': "Rikuchiy",
+  'song.translation.view.translation': "Tikrasqa",
+  'song.translation.view.both': "Iskayninku",
   'song.edit.versionCaption': "Kay rikch’aytam allinchachkanki: {name}",
   'song.error.timeout': 'Dugllata mulluchkan…',
   'song.error.timeoutDescription': "Página mana tiempopi apamusqachu. Red icha conexión problema kanman.",

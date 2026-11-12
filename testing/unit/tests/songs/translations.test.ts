@@ -10,6 +10,11 @@ import {
   resolveTranslation,
   translationLabel,
   translationTitle,
+  linkedReadingView,
+  readingViewOptions,
+  viewSearch,
+  BOTH_VIEW,
+  TRANSLATION_VIEW,
 } from '@/lib/songs/translations';
 import { versionSearch, versionShareUrl } from '@/lib/songs/versionSwitch';
 
@@ -101,5 +106,36 @@ describe('readableTranslations', () => {
   it('drops rows without a tag or lyrics', () => {
     expect(readableTranslations([nl, { language: '', lyrics: 'x' }, { language: 'de', lyrics: null }])).toEqual([nl]);
     expect(readableTranslations(null)).toEqual([]);
+  });
+});
+
+// Story 6.2.14 (#517): the reading view of a translation (translation only, or both languages).
+describe('reading view', () => {
+  it('reads ?view=both, case-insensitively; anything else is the translation alone', () => {
+    expect(linkedReadingView('both')).toBe(BOTH_VIEW);
+    expect(linkedReadingView(' BOTH ')).toBe(BOTH_VIEW);
+    expect(linkedReadingView(null)).toBe(TRANSLATION_VIEW);
+    expect(linkedReadingView('side')).toBe(TRANSLATION_VIEW);
+  });
+
+  it('offers Translation and Both, in the app language', () => {
+    expect(readingViewOptions(t)).toEqual([
+      { value: TRANSLATION_VIEW, label: 'Translation' },
+      { value: BOTH_VIEW, label: 'Both' },
+    ]);
+    expect(readingViewOptions(tNl).map((o) => o.label)).toEqual(['Vertaling', 'Beide']);
+  });
+
+  it('sets ?view=both and keeps the other parameters; the translation alone has no parameter', () => {
+    expect(viewSearch('?version=v2&lang=nl', BOTH_VIEW)).toBe('?version=v2&lang=nl&view=both');
+    expect(viewSearch('?lang=nl&view=both', TRANSLATION_VIEW)).toBe('?lang=nl');
+    expect(viewSearch('?view=both', TRANSLATION_VIEW)).toBe('');
+  });
+
+  it('a version switch drops the view with the language; the share link carries it only with a language', () => {
+    expect(versionSearch('?lang=nl&view=both', 'v2', false)).toBe('?version=v2');
+    expect(versionShareUrl('https://x.test/songs/s?x=1', 'v1', true, 'nl', BOTH_VIEW)).toBe('https://x.test/songs/s?x=1&lang=nl&view=both');
+    expect(versionShareUrl('https://x.test/songs/s', 'v1', true, null, BOTH_VIEW)).toBe('https://x.test/songs/s');
+    expect(versionShareUrl('https://x.test/songs/s', 'v1', true, 'nl', TRANSLATION_VIEW)).toBe('https://x.test/songs/s?lang=nl');
   });
 });

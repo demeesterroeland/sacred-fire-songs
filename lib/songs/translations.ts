@@ -114,3 +114,43 @@ export function languageSearch(currentSearch: string, language: string | null): 
   const search = params.toString();
   return search ? `?${search}` : '';
 }
+
+// ── Story 6.2.14 (#517): the reading view of a translation ────────────────────────────────────────────────────────
+//
+// With a translation chosen, a second switch (Translation · Both) shows the translation alone or next to the original
+// (side by side from md up, line under line on a phone). The language switch keeps the "Original language" segment,
+// so original · translation · both are all one tap away without a second "Original" button.
+//
+// The choice lives in the address (`?view=both`), like `?lang=`: it belongs to the song being read, survives a reload,
+// travels with the share link, and a song read alone today does not open in two languages tomorrow (which a per-device
+// preference would do). Picking another version returns to the original language, so the view goes with it.
+
+/** Query parameter of the reading view (`/songs/<id>?lang=nl&view=both`). */
+export const VIEW_PARAM = 'view';
+/** The translation alone (the default; no parameter). */
+export const TRANSLATION_VIEW = 'translation';
+/** The original and the translation together. */
+export const BOTH_VIEW = 'both';
+export type ReadingView = typeof TRANSLATION_VIEW | typeof BOTH_VIEW;
+
+/** The view from `?view=`: only `both` (any case) opens both languages. */
+export function linkedReadingView(param: string | null | undefined): ReadingView {
+  return param?.trim().toLowerCase() === BOTH_VIEW ? BOTH_VIEW : TRANSLATION_VIEW;
+}
+
+/** Segments of the Translation · Both switch, in the app language. */
+export function readingViewOptions(t: TranslateFn): LanguageOption[] {
+  return [
+    { value: TRANSLATION_VIEW, label: t('song.translation.view.translation') },
+    { value: BOTH_VIEW, label: t('song.translation.view.both') },
+  ];
+}
+
+/** The query part after choosing a view: `view=both` added, or removed for the translation alone. Other parameters stay. */
+export function viewSearch(currentSearch: string, view: ReadingView): string {
+  const params = new URLSearchParams(currentSearch);
+  params.delete(VIEW_PARAM);
+  if (view === BOTH_VIEW) params.append(VIEW_PARAM, BOTH_VIEW);
+  const search = params.toString();
+  return search ? `?${search}` : '';
+}
