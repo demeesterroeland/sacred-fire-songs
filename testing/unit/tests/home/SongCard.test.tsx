@@ -65,6 +65,48 @@ describe('SongCard row', () => {
   });
 });
 
+// Story 6.2.18 (#521): the row says why it matched when the title did not.
+describe('SongCard match hint', () => {
+  it('shows the hint as one more grey line under the meta line', () => {
+    render(<SongCard id="s1" title="Huey Tonantzin" author="Anna Lee" matchHint="Matched by alias: Gran Venerable Madre Tierra" />);
+    const hint = screen.getByTestId('song-row-match');
+    expect(hint.textContent).toBe('Matched by alias: Gran Venerable Madre Tierra');
+    expect(hint.className).toContain('text-fg-muted');
+    expect(hint.className).toContain('truncate');
+  });
+
+  it('describes the stretched link by the hint, so a screen reader hears why the row matched', () => {
+    render(<SongCard id="s1" title="Huey Tonantzin" author="Anna Lee" matchHint="Matched by alias: Gran Venerable Madre Tierra" />);
+    const link = screen.getByRole('link', { name: 'View Huey Tonantzin' });
+    const hint = screen.getByTestId('song-row-match');
+    expect(hint.id).toBeTruthy();
+    expect(link.getAttribute('aria-describedby')).toBe(hint.id);
+  });
+
+  it('gives each row its own hint id', () => {
+    render(
+      <>
+        <SongCard id="s1" title="One" author="" matchHint="Matched by alias: a" />
+        <SongCard id="s2" title="Two" author="" matchHint="Matched by alias: b" />
+      </>
+    );
+    const [a, b] = screen.getAllByTestId('song-row-match');
+    expect(a.id).not.toBe(b.id);
+  });
+
+  it('sets no aria-describedby without a hint', () => {
+    render(<SongCard id="s1" title="Huey Tonantzin" author="Anna Lee" />);
+    expect(screen.getByRole('link', { name: 'View Huey Tonantzin' }).hasAttribute('aria-describedby')).toBe(false);
+  });
+
+  it('shows no hint line without a hint', () => {
+    render(<SongCard id="s1" title="Huey Tonantzin" author="Anna Lee" />);
+    expect(screen.queryByTestId('song-row-match')).toBeNull();
+    render(<SongCard id="s2" title="Other" author="Anna Lee" matchHint={null} />);
+    expect(screen.queryByTestId('song-row-match')).toBeNull();
+  });
+});
+
 // #492: deleting a song is not a row action; it lives in the song page's ⋮ menu only.
 describe('SongCard has no delete button', () => {
   it('renders no delete button, even for the owner', () => {

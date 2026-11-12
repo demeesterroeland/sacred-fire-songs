@@ -91,6 +91,8 @@ export default function EditSongPage() {
         key: version?.key,
         capo: version?.capo,
         tuning: version?.tuning,
+        beats: version?.beats ?? '',
+        note: version?.song_note ?? '',
         youtubeLink: version?.youtube_url || '',
         spotifyLink: version?.spotify_url || '',
         soundcloudLink: version?.soundcloud_url || '',
@@ -118,6 +120,8 @@ export default function EditSongPage() {
                     initialData={initialData}
                     songId={id}
                     versionId={version?.id}
+                    sources={version?.song_version_sources}
+                    songTitle={song.title}
                 />
             </div>
         </div>
