@@ -347,6 +347,12 @@ const SongForm = ({ mode, initialData: liveInitialData, songId, versionId, sourc
                     ...(otherVersions ?? []),
                 ]);
 
+                // One builder for the version's columns: beats and note only when changed (Story 6.2.20, #523).
+                // A write that row-level security filters answers without an error: updateVersionRow reports it.
+                // The version goes first: when it is refused, the song's title, author and flags (computed from this
+                // version's content) must not be written either, so "nothing was saved" stays true.
+                await updateVersionRow(supabase, versionId, versionUpdateFields(data, { beats: initialData?.beats, note: initialData?.note }));
+
                 const { error: compError } = await supabase
                     .from('compositions')
                     .update({
@@ -361,10 +367,6 @@ const SongForm = ({ mode, initialData: liveInitialData, songId, versionId, sourc
                     .eq('id', songId);
 
                 if (compError) throw compError;
-
-                // One builder for the version's columns: beats and note only when changed (Story 6.2.20, #523).
-                // A write that row-level security filters answers without an error: updateVersionRow reports it.
-                await updateVersionRow(supabase, versionId, versionUpdateFields(data, { beats: initialData?.beats, note: initialData?.note }));
 
                 // 3. Update Categories & Artist Categories
                 const { error: deleteCatError } = await supabase

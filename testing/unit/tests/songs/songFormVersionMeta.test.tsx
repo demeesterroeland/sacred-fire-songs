@@ -248,8 +248,8 @@ describe('SongForm — a save the database refuses is not a save', () => {
     await hoisted.mutationFn!({ ...initial, sourcePage: '39', sourceOriginalTitle: 'Titre original', categoryIds: ['c1'] }).catch(() => undefined);
     const steps = hoisted.calls.filter((c) => ['update', 'delete', 'insert'].includes(c.op)).map((c) => `${c.table}.${c.op}`);
     expect(steps).toEqual([
-      'compositions.update',
       'song_versions.update',
+      'compositions.update',
       'song_category_map.delete',
       'song_category_map.insert',
       'song_version_sources.update',
@@ -263,6 +263,13 @@ describe('SongForm — a save the database refuses is not a save', () => {
     await hoisted.mutationFn!({ ...initial, sourcePage: '39', sourceOriginalTitle: 'Titre original' }).catch(() => undefined);
     expect(sourceUpdate()).toBeUndefined();
     expect(hoisted.calls.some((c) => c.table === 'song_category_map')).toBe(false);
+  });
+
+  it('a refused version update leaves the song untouched: title, author and flags are not written either', async () => {
+    hoisted.refused.add('song_versions');
+    renderEdit();
+    await hoisted.mutationFn!({ ...initial, title: 'New title', content: 'La la' }).catch(() => undefined);
+    expect(hoisted.calls.some((c) => c.table === 'compositions' && c.op === 'update')).toBe(false);
   });
 });
 
