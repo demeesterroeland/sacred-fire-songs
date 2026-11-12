@@ -20,6 +20,55 @@ export function isChordToken(token: string): boolean {
     return CHORD_TOKEN.test(token);
 }
 
+/**
+ * The wider spelling a musician may write (review of #528): ♭/♯ next to b/#, and the quality words and signs of the
+ * common chord charts: `maj`, `ma`, `min`, `mi`, `m`, `M`, `Δ`, `^`, `dim`, `aug`, `alt`, `sus`, `add`, `+`, `-`, `−`, `°`,
+ * `ø`, digits, brackets, commas for `C7(b9,#11)` and a digit after a slash for `C6/9`. The transposer and the alternative
+ * chords read this grammar. `isChordToken` stays narrower because the one-off flags migration uses the same rule.
+ */
+const NOTE = '[A-G][#b♯♭]?';
+const QUALITY = '(?:maj|min|mi|ma|dim|aug|alt|sus|add|m|M|Δ|\\^|\\+|-|−|°|ø|\\d|[#b♯♭(),]|\\/\\d)*';
+/** Root, quality, optional /bass. Groups: 1 root letter, 2 root accidental, 3 quality, 4 bass letter, 5 bass accidental. */
+export const READABLE_CHORD = new RegExp(`^([A-G])([#b♯♭]?)(${QUALITY})(?:\\/([A-G])([#b♯♭]?))?$`);
+/** A chord without any slash: root, then chord-quality pieces only. */
+const PLAIN_CHORD = new RegExp(`^${NOTE}${QUALITY}$`);
+/** No chord is longer than this. */
+const MAX_CHORD_LENGTH = 32;
+/** A lone note (A–G, optional #/b): after a slash it is a bass note. */
+const BARE_NOTE = new RegExp(`^${NOTE}$`);
+
+/** Chord the transposer can read itself: `isChordToken` plus the wider spellings above. */
+export function isReadableChord(token: string): boolean {
+    return token.length <= MAX_CHORD_LENGTH && READABLE_CHORD.test(token);
+}
+
+/**
+ * Story 6.2.16 (#519): `A7/C7` is two alternative chords (play either), not a slash chord. A slash with a bare note
+ * after it (`C/E`, `Am/C`, `D/F#`) is a bass note and stays one chord. Otherwise the token is split at every slash into
+ * full chords (`A7/C7/E7` is three): a bare note as the last part is the bass of the chord before it (`A7/C7/E` is `A7`
+ * and `C7/E`). Needs at least two chords, each a plain chord (a bare triad such as `C` counts: `C/G7`).
+ * Returns the chords, or null.
+ */
+export function splitAlternativeChords(token: string): string[] | null {
+    if (token.length > MAX_CHORD_LENGTH || !token.includes('/')) return null;
+    const parts = token.split('/');
+    if (parts.length < 2 || !parts.every((p) => PLAIN_CHORD.test(p))) return null;
+    const last = parts[parts.length - 1];
+    if (BARE_NOTE.test(last)) {
+        parts.pop();
+        parts[parts.length - 1] = `${parts[parts.length - 1]}/${last}`;
+    }
+    return parts.length >= 2 ? parts : null;
+}
+
+/**
+ * `isChordToken` plus alternative chords. The transposer, the chord-line heuristic and `hasChords` use this one; the
+ * one-off flags migration `20261106180000_recompute_song_flags.sql` predates alternatives and keeps the narrower rule.
+ */
+export function isChordOrAlternative(token: string): boolean {
+    return isChordToken(token) || splitAlternativeChords(token) !== null;
+}
+
 // Heuristic to check if a line is a "Chords" line
 // It should mostly contain chord characters and spaces.
 export function isChordLine(line: string): boolean {
@@ -42,7 +91,9 @@ export function isChordLine(line: string): boolean {
 
     // If more than 50% of *relevant* tokens look like chords, treat as chord line
     // Also allow common separators like "|"
-    const validChords = relevantTokens.filter(t => chordPattern.test(t) || t === '|').length;
+    // An alternative (A7/C7) counts when every part is a real chord of the narrow pattern: AM/FM alone is not a chord line.
+    const isAlternative = (t: string) => splitAlternativeChords(t)?.every(p => chordPattern.test(p)) ?? false;
+    const validChords = relevantTokens.filter(t => chordPattern.test(t) || t === '|' || isAlternative(t)).length;
 
     return validChords > relevantTokens.length * 0.5;
 }
@@ -55,7 +106,7 @@ export function hasChords(text: string): boolean {
 
     // 1. Check for ChordPro style brackets [Am]: the bracket must hold a chord, not a word that starts with A-G
     for (const m of text.matchAll(/\[([^\][]*)\]/g)) {
-        if (isChordToken(m[1])) return true;
+        if (isChordOrAlternative(m[1])) return true;
     }
 
     // 2. Check for Chords-over-Lyrics heuristic
