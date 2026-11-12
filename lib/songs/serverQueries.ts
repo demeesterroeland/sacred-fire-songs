@@ -2,7 +2,7 @@ import { countSharedTakes } from '@/lib/library/sharedByMe';
 import { createClient } from "@/lib/supabase/server";
 import type { Song } from "@/lib/songUtils";
 import type { TaxonomyNode } from "@/lib/taxonomyUtils";
-import { songsQuery, mapCompositionToSong, recentlyAddedQuery, RECENTLY_ADDED_LIMIT, type CompositionRow } from './queries';
+import { songsQuery, fetchAllSongRows, mapCompositionToSong, recentlyAddedQuery, RECENTLY_ADDED_LIMIT, type CompositionRow } from './queries';
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { aggregateArtists, type ArtistRow, type ArtistSummary } from "./artistIndex";
 import { fetchFavoritesSetlistId } from "@/lib/playlists/favorites";
@@ -36,7 +36,8 @@ export async function fetchSongsServer(limit?: number): Promise<Song[]> {
     const supabase = await createClient();
 
     const [songsResult, favoriteIds] = await Promise.all([
-        songsQuery(supabase, { limit: limit ?? undefined }),
+        // No limit = the whole catalog, in pages (PostgREST caps one request at max_rows, #521).
+        limit ? songsQuery(supabase, { limit }) : fetchAllSongRows(supabase),
         fetchFavoriteIds(supabase),
     ]);
 
