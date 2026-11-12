@@ -380,8 +380,6 @@ const en = {
   'recording.attribution.clearSinger': 'Choose another singer',
 
   'user.profile.title': 'Musician Profile',
-  'user.profile.verifiedMusician': 'Verified Musician',
-  'user.profile.member': 'Community Member',
   'user.unnamed': 'Unnamed member',
   "user.profile.attributedRecordings": "Attributed Recordings",
   "user.profile.noAttributedRecordings": "No recordings attributed to this musician yet.",

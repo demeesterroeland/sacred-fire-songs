@@ -1,11 +1,12 @@
 /*
- **Version:** 3.8
+ **Version:** 3.9
  **Status:** Current
- **Date:** November 11, 2026
+ **Date:** November 13, 2026
  
  ## Usage
  This script provides a complete setup for the "Sacred Fire Songs" database. 
- It consolidates the initial schema and all subsequent migrations up to November 11, 2026.
+ It consolidates the initial schema and all subsequent migrations up to November 13, 2026.
+ (v3.9: public_profiles gains role (NULL for a guest), Story 6.1.38, migration 20261113120000_public_profiles_role.sql).
  (v3.8: songbook data model, Story 6.2.1, migration 20261111150000_songbook_data_model.sql: compositions.catalog_slug / aliases / authors; song_versions.catalog_source_id / version_kind / beats / song_note, unique per song and catalog source; new tables songbooks, song_version_sources and song_translations, readable when their song is readable and written by admins only. Review round on PR #527: triggers trg_guard_catalog_slug / trg_guard_catalog_source_id let only trusted roles and admins set the catalog keys; keys without surrounding spaces; lowercase translation languages; a cited songbook cannot be deleted (on delete restrict)).
  (v3.7: share e-mails are claimed by the server only, migration 20261111120000_share_email_server_claim.sql: claim_recording_share_email takes the owner as a parameter and only service_role may execute it).
  (v3.6: profile e-mail privacy, migration 20261110120000_profile_email_privacy.sql: public_profiles gains is_musician; the three profile read policies for singers and share partners are gone; search_users_for_sharing matches a name or an exact address and returns no address; user_recordings.singer_email is no longer selectable, the owner reads it with own_recording_singer_emails(); notifications and share e-mails name the sharer by name only).
@@ -395,7 +396,9 @@ grant select (id, role) on public.profiles to anon;
 -- Privileges are replaced because a simple view is writable by default.
 create or replace view public.public_profiles
 with (security_invoker = false, security_barrier = true) as
-select id, full_name, avatar_url, (role in ('musician', 'expert')) as is_musician
+-- role is NULL for a guest: every signed-in member sees every role (Story 6.1.38).
+select id, full_name, avatar_url, (role in ('musician', 'expert')) as is_musician,
+       case when (select auth.uid()) is null then null else role end as role
 from public.profiles;
 
 revoke all on public.public_profiles from public, anon, authenticated;

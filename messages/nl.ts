@@ -382,8 +382,6 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'recording.attribution.clearSinger': 'Andere zanger kiezen',
 
   'user.profile.title': 'Muzikantenprofiel',
-  'user.profile.verifiedMusician': 'Geverifieerde muzikant',
-  'user.profile.member': 'Communitylid',
   'user.unnamed': 'Lid zonder naam',
   "user.profile.attributedRecordings": "Toegeschreven opnames",
   "user.profile.noAttributedRecordings": "Nog geen opnames toegeschreven aan deze muzikant.",
