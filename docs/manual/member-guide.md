@@ -1,11 +1,12 @@
 # Member Guide (draft)
 
-**Version:** 0.26 | **Date:** Nov 12, 2026
+**Version:** 0.27 | **Date:** Nov 12, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.27 | Nov 12, 2026 | Search: the search box also finds a song by another name it is known by and by the title it has in a songbook (accents and capitals do not matter, "pachamama" finds "Pachamamá"). When the song's own title did not match, the row adds a grey line saying why, for example *Matched by alias: Gran Venerable Madre Tierra* (UX v3, #521). The **+ Add Songs** search in a playlist still matches the title only. |
 | 0.26 | Nov 12, 2026 | Song page: every author of a co-written song is its own link ("A and B", in your language) and opens that author's songs; the share text names all authors. A song without an author shows "Traditional" as plain text. Add/Edit Song: the Author field shows every author of the song, and saving keeps them all; the search box and the Artists list find a song under each of its authors (UX v3, #515). |
 | 0.25 | Nov 12, 2026 | A song's version switch names each version after its songbook, or its language for a translation; the original comes first, then versions from other books, then translations (UX v3, #509). Two translations in one language show their songbook too. Adding a song to a playlist or to favourites uses the song's first version (the original). Edit names the version the same way. |
 | 0.24 | Nov 12, 2026 | Song page: a version with a songbook note shows **About this song** under the grey lines (closed at first; tap to read it). Empty notes show nothing (UX v3, #511). |
