@@ -168,6 +168,7 @@ const it: Partial<Record<TranslationKey, string>> = {
   'song.metadata.standard': 'Standard',
   'song.meta.key': "Tonalità {key}",
   'song.meta.capo': "Capotasto {capo}",
+  'song.meta.beats': 'Tempi {beats}',
   'song.meta.showDetails': 'Mostra dettagli',
   'song.meta.hideDetails': 'Nascondi dettagli',
   'song.visibility.private': 'Privato',

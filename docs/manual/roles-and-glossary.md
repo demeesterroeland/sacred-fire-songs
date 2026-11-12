@@ -1,11 +1,12 @@
 # Roles & Glossary (draft)
 
-**Version:** 0.6 | **Date:** Nov 7, 2026
+**Version:** 0.7 | **Date:** Nov 11, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.7 | Nov 11, 2026 | Glossary: Beats, the songbook beats of a version on the song page (UX v3, #510). |
 | 0.6 | Nov 7, 2026 | Glossary: "recording" is now **recording**. |
 | 0.5 | Nov 6, 2026 | Glossary: Version (switch under the song title, #395). |
 | 0.4 | Nov 6, 2026 | Transpose is in the song page's **⋯ reading tools** (musician, expert and admin; UX v2, #394). |
@@ -45,3 +46,4 @@
 | Magic Link | Sign-in link sent by e-mail, no password needed. |
 | ChordPro (.cho) | Text format for songs with chords in brackets. |
 | Capo | Fret where the capo goes; shown above the lyrics. |
+| Beats | The beats of a version as printed in its songbook (e.g. `8`, `8y4`); shown on the song page after Key, Capo and Tuning when the book gives them. |
