@@ -1,8 +1,8 @@
 # User Guide: Sacred Fire Songs
 
-**Version:** 2.3
+**Version:** 2.4
 **Status:** Published
-**Date:** June 27, 2026
+**Date:** Nov 12, 2026
 
 ## Changelog
 
@@ -16,6 +16,7 @@
 | **2.1** | Feb 02, 2026 | Rebranded "Private" songs to "Draft" and added advanced filter combinability. |
 | **2.2** | Feb 23, 2026 | Removed Home page search box and renamed "Library" to "Search Songs". |
 | **2.3** | Jun 27, 2026 | Added step-by-step PWA installation guides for iOS and Android with screenshots. |
+| **2.4** | Nov 12, 2026 | Song page metadata: the meta line also shows the **Beats** of the selected version when its songbook gives them (Story 6.2.7, #510). |
 
 Welcome to **Sacred Fire Songs**, a digital songbook designed for ceremonial musicians. This guide covers how to browse, learn, and manage medicine songs using our platform.
 
@@ -55,7 +56,7 @@ Use the filter tabs at the top to narrow down your selection:
 ### 2.3 Song Detail View
 Click any song to view its lyrics and musical data:
 - **Badges**: High-visibility badges tell you if a song has Chords or Melody.
-- **Metadata**: See the **Key**, **Capo position**, and **Tuning** at a glance.
+- **Metadata**: See the **Key**, **Capo position**, **Tuning** and, when the songbook gives them, the **Beats** of the selected version at a glance.
 - **Media**: Listen to YouTube, Spotify, or SoundCloud recordings directly on the page.
 
 ---
