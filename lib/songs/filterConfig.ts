@@ -2,6 +2,7 @@ import { FilterConfig } from "@/lib/declarative-filter/types";
 import { Song } from "@/lib/songUtils";
 import { normalizeWhitespace, removeDiacritics } from "@/lib/utils";
 import { cleanAuthors, songAuthorNames } from "@/lib/songs/authors";
+import { songMatchesSearch } from "@/lib/songs/search";
 
 // 1. Define the Filter State (URL Params map to this)
 export interface SongFilterState {
@@ -100,28 +101,8 @@ export const songFilterConfig: FilterConfig<Song, SongFilterState> = {
   // --- SEARCH ---
   search: {
     isActive: (val) => !!val && val.trim().length > 0,
-    match: (song, query) => {
-      if (!query) return true;
-      const cleanQuery = removeDiacritics(normalizeWhitespace(query)).toLowerCase();
-      const cleanTitle = removeDiacritics(normalizeWhitespace(song.title)).toLowerCase();
-      // Every author counts, from the same source as the author filter and the index (Story 6.2.12, #515)
-      const authorTexts = songAuthorNames({ authors: song.authors, originalAuthor: song.author }).map(
-        (a) => removeDiacritics(normalizeWhitespace(a)).toLowerCase()
-      );
-      const cleanContent = song.content ? removeDiacritics(normalizeWhitespace(song.content)).toLowerCase() : "";
-      // Also match subcategory names (e.g. "Water") and parent group names (e.g. "Element Songs")
-      const matchesCategory = song.categories?.some(c => {
-        const catName = removeDiacritics(normalizeWhitespace(c.name)).toLowerCase();
-        const parentName = c.parent ? removeDiacritics(normalizeWhitespace(c.parent)).toLowerCase() : "";
-        return catName.includes(cleanQuery) || parentName.includes(cleanQuery);
-      }) ?? false;
-      return (
-        cleanTitle.includes(cleanQuery) ||
-        authorTexts.some((a) => a.includes(cleanQuery)) ||
-        cleanContent.includes(cleanQuery) ||
-        matchesCategory
-      );
-    },
+    // The one song search: title, aliases, songbook titles, every author, categories, lyrics (Story 6.2.18, #521)
+    match: (song, query) => songMatchesSearch(song, query ?? ''),
     // No facets for free-text search usually
   },
 

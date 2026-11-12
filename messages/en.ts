@@ -126,6 +126,9 @@ const en = {
   'songs.emptyDrafts.action': 'Add Song →',
   'songs.noResultsSearch': 'We couldn\'t find any songs matching "{search}".',
   'songs.noResultsFilter': 'There are no songs available for this filter.',
+  'songs.matchAlias': 'Matched by alias: {text}',
+  'songs.matchSourceTitle': 'Matched by songbook title: {text}',
+  'songs.matchAuthor': 'Matched by author: {text}',
 
   // ─── Songs – Detail Page ──────────────────────────────────────────────────
   'song.by': 'by {author}',
