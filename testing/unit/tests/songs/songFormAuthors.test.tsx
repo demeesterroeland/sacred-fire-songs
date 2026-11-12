@@ -107,13 +107,46 @@ describe('SongForm — authors', () => {
     });
   });
 
-  it('an edit that leaves the prefilled author text alone keeps all three authors of a catalog song', async () => {
+  it('an edit that leaves the prefilled author text alone writes neither author column', async () => {
     // The edit page prefills the input from authors[] (3 names), not only original_author (1 name).
     const { authorInputText } = await import('@/lib/songs/authors');
     const prefill = authorInputText({ authors: ['Anna Lee', 'Ben Cruz', 'Cari El'], originalAuthor: 'Anna Lee' });
     render(<SongForm mode="edit" songId="s1" versionId="v1" initialData={formData(prefill)} />);
     expect(screen.getByTestId('artist-input').textContent).toBe('Anna Lee|Ben Cruz|Cari El');
-    await hoisted.mutationFn!(formData(prefill));
-    expect(payload('compositions', 'update')).toMatchObject({ authors: ['Anna Lee', 'Ben Cruz', 'Cari El'] });
+    await hoisted.mutationFn!({ ...formData(prefill), content: '[Am]La la la' });
+    const update = payload('compositions', 'update');
+    expect(update).toMatchObject({ title: 'Morning Sun' });
+    expect(update).not.toHaveProperty('original_author');
+    expect(update).not.toHaveProperty('authors');
+  });
+
+  it('a content-only edit keeps curated original_author and a credit with separators byte for byte', async () => {
+    // Stored: authors = ['José & María, Jr.'], original_author = 'curated text'. Resaving must not flatten or split them.
+    const { authorInputText } = await import('@/lib/songs/authors');
+    const prefill = authorInputText({ authors: ['José & María, Jr.'], originalAuthor: 'curated text' });
+    render(<SongForm mode="edit" songId="s1" versionId="v1" initialData={formData(prefill)} />);
+    await hoisted.mutationFn!({ ...formData(prefill), content: '[Am]Fixed typo' });
+    const update = payload('compositions', 'update');
+    expect(update).not.toHaveProperty('original_author');
+    expect(update).not.toHaveProperty('authors');
+    const versionUpdate = payload('song_versions', 'update');
+    expect(versionUpdate).toMatchObject({ content_chordpro: '[Am]Fixed typo' });
+  });
+
+  it('an edit that changes the author writes both columns', async () => {
+    const { authorInputText } = await import('@/lib/songs/authors');
+    const prefill = authorInputText({ authors: ['Anna Lee', 'Ben Cruz'], originalAuthor: 'Anna Lee & Ben Cruz (arr. Cari El)' });
+    render(<SongForm mode="edit" songId="s1" versionId="v1" initialData={formData(prefill)} />);
+    await hoisted.mutationFn!(formData('Anna Lee, Ben Cruz, Cari El'));
+    expect(payload('compositions', 'update')).toMatchObject({
+      original_author: 'Anna Lee, Ben Cruz, Cari El',
+      authors: ['Anna Lee', 'Ben Cruz', 'Cari El'],
+    });
+  });
+
+  it('an edit that clears the author writes empty columns', async () => {
+    render(<SongForm mode="edit" songId="s1" versionId="v1" initialData={formData('Anna Lee')} />);
+    await hoisted.mutationFn!(formData(''));
+    expect(payload('compositions', 'update')).toMatchObject({ original_author: '', authors: [] });
   });
 });

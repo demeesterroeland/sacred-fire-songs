@@ -1,8 +1,7 @@
 import { FilterConfig } from "@/lib/declarative-filter/types";
 import { Song } from "@/lib/songUtils";
 import { normalizeWhitespace, removeDiacritics } from "@/lib/utils";
-import { parseArtists } from "@/lib/songs/artistUtils";
-import { cleanAuthors } from "@/lib/songs/authors";
+import { cleanAuthors, songAuthorNames } from "@/lib/songs/authors";
 
 // 1. Define the Filter State (URL Params map to this)
 export interface SongFilterState {
@@ -105,8 +104,8 @@ export const songFilterConfig: FilterConfig<Song, SongFilterState> = {
       if (!query) return true;
       const cleanQuery = removeDiacritics(normalizeWhitespace(query)).toLowerCase();
       const cleanTitle = removeDiacritics(normalizeWhitespace(song.title)).toLowerCase();
-      // Every credit counts: the display text and each name of authors[] (Story 6.2.12, #515)
-      const authorTexts = [song.author, ...cleanAuthors(song.authors)].map(
+      // Every author counts, from the same source as the author filter and the index (Story 6.2.12, #515)
+      const authorTexts = songAuthorNames({ authors: song.authors, originalAuthor: song.author }).map(
         (a) => removeDiacritics(normalizeWhitespace(a)).toLowerCase()
       );
       const cleanContent = song.content ? removeDiacritics(normalizeWhitespace(song.content)).toLowerCase() : "";
@@ -147,8 +146,8 @@ export const songFilterConfig: FilterConfig<Song, SongFilterState> = {
       if (normalizedFilter === "no artist" || normalizedFilter === "unspecified") {
         return !song.author && cleanAuthors(song.authors).length === 0;
       }
-      // Every credit (authors[]) plus the names in the display text: ANY individual author may match (Story 6.2.12, #515)
-      const artists = [...cleanAuthors(song.authors), ...parseArtists(song.author)];
+      // ANY individual author may match: authors[], else the display text split (Story 6.2.12, #515); same source as the index
+      const artists = songAuthorNames({ authors: song.authors, originalAuthor: song.author });
       if (artists.length === 0) return false;
       return artists.some(
         artist => removeDiacritics(normalizeWhitespace(artist)).toLowerCase() === normalizedFilter

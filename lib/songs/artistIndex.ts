@@ -1,12 +1,11 @@
 /**
  * The artists index (Library → Artists): every author with a song count and the first titles.
  * Pure, so the server query and the unit tests share it. Story 6.2.12 / G2.3 (#515): names come from
- * `compositions.authors` and from `original_author` split by `parseArtists`, the same union and cleaning as the
- * author filter (`songFilterConfig.artist`), so every name listed here finds exactly the songs counted for it.
+ * `compositions.authors` (a single credit is not split), else from `original_author` split by `parseArtists`, the same
+ * source (`songAuthorNames`) and cleaning as the author filter (`songFilterConfig.artist`), so every name listed here finds exactly the songs counted for it.
  */
 import { songAuthorNames } from '@/lib/songs/authors';
 import { normalizeWhitespace, removeDiacritics } from '@/lib/utils';
-import { parseArtists } from '@/lib/songs/artistUtils';
 
 export interface ArtistRow {
   title: string | null;
@@ -22,9 +21,9 @@ export interface ArtistSummary {
 
 const TITLES_PER_ARTIST = 5;
 
-/** Every individual author of a song: `authors[]` plus the names in `original_author`. */
+/** Every individual author of a song: `authors[]`, else `original_author` split. Same source as the author filter. */
 function rowNames(row: ArtistRow): string[] {
-  return [...songAuthorNames({ authors: row.authors }), ...parseArtists(row.original_author)];
+  return songAuthorNames({ authors: row.authors, originalAuthor: row.original_author });
 }
 
 /**

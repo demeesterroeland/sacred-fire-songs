@@ -14,12 +14,18 @@ import {
 } from '@/lib/songs/authors';
 import { parseArtists } from '@/lib/songs/artistUtils';
 import { SUPPORTED_LOCALES } from '@/lib/i18n';
+import { songFilterConfig } from '@/lib/songs/filterConfig';
+import type { Song } from '@/lib/songUtils';
 
 const t = (key: string) => (key === 'song.traditional' ? 'Traditional' : key);
 
 describe('cleanAuthors', () => {
   it('trims, drops blank entries and removes duplicates case-insensitively', () => {
     expect(cleanAuthors(['  Anna Lee ', '', '   ', 'anna  lee', 'Ben Cruz'])).toEqual(['Anna Lee', 'Ben Cruz']);
+  });
+
+  it('also treats accent variants as duplicates, like the filter and the index', () => {
+    expect(cleanAuthors(['José', 'Jose', 'JOSÉ'])).toEqual(['José']);
   });
 
   it('returns an empty list for null, undefined or no entries', () => {
@@ -163,5 +169,12 @@ describe('songAuthorLabels and authorFilterHref', () => {
   it('encodes the name as one query value', () => {
     expect(authorFilterHref('José & María, Jr.')).toBe('/songs?artist=Jos%C3%A9%20%26%20Mar%C3%ADa%2C%20Jr.');
     expect(new URL(authorFilterHref('A+B #1'), 'http://x').searchParams.get('artist')).toBe('A+B #1');
+  });
+
+  it.each(['José & María, Jr.', 'Ana + Bo', 'C# Group #1'])('the link for "%s" round-trips and finds the song', (name) => {
+    const href = authorFilterHref(name);
+    expect(new URL(href, 'http://x').searchParams.get('artist')).toBe(name);
+    const song = { author: 'display text', authors: [name] } as Song;
+    expect(songFilterConfig.artist.match(song, name)).toBe(true);
   });
 });

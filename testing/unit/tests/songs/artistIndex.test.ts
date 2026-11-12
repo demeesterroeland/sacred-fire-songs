@@ -50,6 +50,22 @@ describe('aggregateArtists', () => {
     expect(result[0].songCount).toBe(2);
   });
 
+  it('a single credit in authors[] is not split, and does not also list its parts', () => {
+    const rows = [{ title: 'S1', original_author: 'Earth, Wind & Fire', authors: ['Earth, Wind & Fire'] }];
+    expect(names(rows)).toEqual(['Earth, Wind & Fire']);
+    const rule = songFilterConfig.artist!;
+    const song = { title: 'S1', author: 'Earth, Wind & Fire', authors: ['Earth, Wind & Fire'] } as unknown as Song;
+    expect(rule.match(song, 'Earth, Wind & Fire')).toBe(true);
+    expect(rule.match(song, 'Earth')).toBe(false);
+  });
+
+  it('free-text search uses the same author names as the filter', () => {
+    const song = { title: 'S1', author: 'Anna Lee', authors: ['Anna Lee', 'Ben Cruz'], categories: [] } as unknown as Song;
+    expect(songFilterConfig.search!.match(song, 'ben cruz')).toBe(true);
+    const single = { title: 'S2', author: 'x', authors: ['José & María, Jr.'], categories: [] } as unknown as Song;
+    expect(songFilterConfig.search!.match(single, 'jose & maria, jr')).toBe(true);
+  });
+
   // The index and the filter must agree: every listed name finds exactly the songs counted for it.
   it('every listed artist and its count match the artist filter over the same songs', () => {
     const rows = [
@@ -57,6 +73,7 @@ describe('aggregateArtists', () => {
       { title: 'S2', original_author: 'Ben Cruz, Cari El', authors: [] },
       { title: 'S3', original_author: '', authors: ['Cari El'] },
       { title: 'S4', original_author: null, authors: [] },
+      { title: 'S5', original_author: 'Earth, Wind & Fire', authors: ['Earth, Wind & Fire'] },
     ];
     const rule = songFilterConfig.artist!;
     for (const artist of aggregateArtists(rows)) {

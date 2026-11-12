@@ -5,7 +5,7 @@
  * `authors` is empty. Pure helpers: the song page, its share text and the meta line all use them.
  */
 import { formatArtists, parseArtists } from '@/lib/songs/artistUtils';
-import { normalizeWhitespace } from '@/lib/utils';
+import { normalizeWhitespace, removeDiacritics } from '@/lib/utils';
 import { LOCALE_DATE_TAGS, type Locale, type TranslateFn } from '@/lib/i18n';
 
 export interface AuthorSource {
@@ -15,14 +15,14 @@ export interface AuthorSource {
   originalAuthor?: string | null;
 }
 
-/** Trims, collapses spaces, drops blank entries and removes duplicates (case-insensitive, first spelling kept). */
+/** Trims, collapses spaces, drops blank entries and removes duplicates (case and accent insensitive, first spelling kept). */
 export function cleanAuthors(names: ReadonlyArray<string | null | undefined> | null | undefined): string[] {
   const seen = new Set<string>();
   const result: string[] = [];
   for (const raw of names ?? []) {
     const name = normalizeWhitespace(raw ?? '');
     if (!name) continue;
-    const key = name.toLowerCase();
+    const key = removeDiacritics(name).toLowerCase();
     if (seen.has(key)) continue;
     seen.add(key);
     result.push(name);

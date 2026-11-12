@@ -158,9 +158,11 @@ describe('songFilterConfig artist matching across authors[]', () => {
     expect(matchingRule.match(songWithAuthors, 'No Artist')).toBe(false);
   });
 
-  it('still matches a name that only appears in original_author', () => {
-    const legacy = { author: 'Anna Lee, Ben Cruz', authors: ['Anna Lee'] } as unknown as Song;
+  it('uses original_author only when authors[] has no name (same source as the index)', () => {
+    const legacy = { author: 'Anna Lee, Ben Cruz', authors: [] } as unknown as Song;
     expect(matchingRule.match(legacy, 'Ben Cruz')).toBe(true);
+    const curated = { author: 'Anna Lee, Ben Cruz', authors: ['Anna Lee'] } as unknown as Song;
+    expect(matchingRule.match(curated, 'Ben Cruz')).toBe(false);
   });
 });
 

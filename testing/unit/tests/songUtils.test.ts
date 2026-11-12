@@ -24,6 +24,12 @@ describe('filterSongs', () => {
         expect(filterSongs(songs, 'ben cruz').map(s => s.title)).toEqual(['Aguita de la Vida']);
     });
 
+    it('does not throw on a NULL entry in authors[]', () => {
+        const songs = [{ ...mockSongs[1], author: 'Danit', authors: [null, 'Ben Cruz'] as unknown as string[] }];
+        expect(filterSongs(songs, 'ben cruz')).toHaveLength(1);
+        expect(filterSongs(songs, 'zzz')).toHaveLength(0);
+    });
+
     it('returns all songs for an empty query', () => {
         const result = filterSongs(mockSongs, '');
         expect(result).toHaveLength(3);

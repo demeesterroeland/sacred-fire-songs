@@ -325,7 +325,9 @@ const SongForm = ({ mode, initialData, songId, versionId }: SongFormProps) => {
                     .from('compositions')
                     .update({
                         title: data.title,
-                        ...authorFieldsForSave(data.author),
+                        // Only a changed author input rewrites the columns: the input is prefilled from `authors`, so
+                        // saving it untouched would flatten a curated original_author and split a credit like "A & B".
+                        ...(data.author !== (initialData?.author ?? '') ? authorFieldsForSave(data.author) : {}),
                         is_public: data.isPublic,
                         has_chords: flags.has_chords,
                         has_melody: flags.has_melody,
