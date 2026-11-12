@@ -46,6 +46,33 @@ export function songsQuery(
   return q;
 }
 
+/**
+ * Rows per request when the whole list is fetched. PostgREST silently stops at `max_rows` (1000, supabase/config.toml)
+ * without an error, so one unbounded request would quietly drop every song after the 1000th from the search.
+ */
+export const SONGS_FETCH_PAGE_SIZE = 1000;
+
+/**
+ * Every composition the visitor may read, fetched in `range()` pages until a short page. The order
+ * (`created_at`, `id`; `id` is unique) is a total order, so pages neither skip nor repeat a row. The one fetch behind
+ * every full-list consumer (server render and client refresh), so the search always sees the whole catalog.
+ * An error on any page is returned as the error; a partial list is never returned.
+ */
+export async function fetchAllSongRows(
+  client: SupabaseClient,
+  pageSize: number = SONGS_FETCH_PAGE_SIZE
+): Promise<{ data: CompositionRow[]; error: { message: string } | null }> {
+  const rows: CompositionRow[] = [];
+  for (let from = 0; ; from += pageSize) {
+    const { data, error } = await songsQuery(client).range(from, from + pageSize - 1);
+    if (error) return { data: [], error };
+    const page = (data ?? []) as CompositionRow[];
+    rows.push(...page);
+    if (page.length < pageSize) break;
+  }
+  return { data: rows, error: null };
+}
+
 /** Size of the "Recently added" row on Home (Story 6.1.28 / G6.3, #412). */
 export const RECENTLY_ADDED_LIMIT = 10;
 /** Below `md` (one column) Home shows only the first rows, so the categories stay close (Story 6.1.36, #488). */

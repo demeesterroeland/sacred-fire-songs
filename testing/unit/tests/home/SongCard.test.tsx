@@ -75,6 +75,30 @@ describe('SongCard match hint', () => {
     expect(hint.className).toContain('truncate');
   });
 
+  it('describes the stretched link by the hint, so a screen reader hears why the row matched', () => {
+    render(<SongCard id="s1" title="Huey Tonantzin" author="Anna Lee" matchHint="Matched by alias: Gran Venerable Madre Tierra" />);
+    const link = screen.getByRole('link', { name: 'View Huey Tonantzin' });
+    const hint = screen.getByTestId('song-row-match');
+    expect(hint.id).toBeTruthy();
+    expect(link.getAttribute('aria-describedby')).toBe(hint.id);
+  });
+
+  it('gives each row its own hint id', () => {
+    render(
+      <>
+        <SongCard id="s1" title="One" author="" matchHint="Matched by alias: a" />
+        <SongCard id="s2" title="Two" author="" matchHint="Matched by alias: b" />
+      </>
+    );
+    const [a, b] = screen.getAllByTestId('song-row-match');
+    expect(a.id).not.toBe(b.id);
+  });
+
+  it('sets no aria-describedby without a hint', () => {
+    render(<SongCard id="s1" title="Huey Tonantzin" author="Anna Lee" />);
+    expect(screen.getByRole('link', { name: 'View Huey Tonantzin' }).hasAttribute('aria-describedby')).toBe(false);
+  });
+
   it('shows no hint line without a hint', () => {
     render(<SongCard id="s1" title="Huey Tonantzin" author="Anna Lee" />);
     expect(screen.queryByTestId('song-row-match')).toBeNull();

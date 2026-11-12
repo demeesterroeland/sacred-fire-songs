@@ -1,5 +1,6 @@
-# Version: 1.0 | Date: Nov 12, 2026
+# Version: 1.1 | Date: Nov 12, 2026
 # Changelog
+# 1.1 | Nov 12, 2026 | Review of #538: songs whose title matched are listed before the others; the whole catalog is fetched in pages (PostgREST max_rows).
 # 1.0 | Nov 12, 2026 | Story 6.2.18 / G5.1 (#521): search finds songs by alias, any author and the original title in a songbook; the "matched by ..." hint; guests never find private songs this way.
 @ux-v3 @search-aliases
 Feature: Search finds a song by the name I know
@@ -92,6 +93,19 @@ Feature: Search finds a song by the name I know
     Given a list row of the song "Huey Tonantzin" with alias "Gran Venerable Madre Tierra" printed as "Canto a la Madre Tierra" in a songbook
     When I search "canto"
     Then the song is in the results
+
+  @unit
+  Scenario: Songs whose title matched come before songs found by an alias
+    Given a song "Alpha" with alias "Huey Madre"
+    And a song "Huey Tonantzin" with alias "Nothing"
+    When I search "huey" and rank the results
+    Then the first result is "Huey Tonantzin"
+
+  @unit
+  Scenario: The whole catalog is fetched even when the server caps one request at 1000 rows
+    Given a catalog of 1037 songs behind a server that returns at most 1000 rows per request
+    When the whole song list is fetched
+    Then all 1037 songs are fetched
 
   @unit
   Scenario: The song list select asks for the original titles through one embed

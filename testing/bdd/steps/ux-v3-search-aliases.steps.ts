@@ -6,8 +6,8 @@ import { SEEDED_EMAILS } from './access-policies.steps';
 import { profileIdByEmail, queryAsAnon, queryAsUser, seedDb } from '../support/db';
 import { DICTIONARIES, SUPPORTED_LOCALES, interpolate } from '../../../lib/i18n';
 import { songFilterConfig } from '../../../lib/songs/filterConfig';
-import { SONGS_SELECT, mapCompositionToSong, type CompositionRow } from '../../../lib/songs/queries';
-import { songMatchHintText } from '../../../lib/songs/search';
+import { SONGS_SELECT, fetchAllSongRows, mapCompositionToSong, type CompositionRow } from '../../../lib/songs/queries';
+import { rankSongsBySearch, songMatchHintText } from '../../../lib/songs/search';
 import type { Song } from '../../../lib/songUtils';
 
 const en = DICTIONARIES.en as Record<string, string>;
@@ -18,6 +18,7 @@ interface SearchWorld {
   query: string;
   results: Song[];
   seededSongId?: string;
+  fetched?: { client: unknown; count: number };
 }
 const worlds = new WeakMap<object, SearchWorld>();
 const world = (w: object): SearchWorld => {
@@ -47,6 +48,9 @@ const search = (songs: Song[], query: string) => songs.filter((s) => songFilterC
 
 // ── @unit: the matcher on in-memory songs ─────────────────────────────────────
 
+Given('a song {string}', function (this: object, title: string) {
+  world(this).songs.push(song({ title }));
+});
 Given('a song {string} with alias {string}', function (this: object, title: string, alias: string) {
   world(this).songs.push(song({ title, aliases: [alias] }));
 });
@@ -97,6 +101,36 @@ Given(
     world(this).songs.push(mapCompositionToSong(row));
   }
 );
+
+When('I search {string} and rank the results', function (this: object, query: string) {
+  const w = world(this);
+  w.query = query;
+  w.results = [...rankSongsBySearch(search(w.songs, query), query)];
+});
+Then('the first result is {string}', function (this: object, title: string) {
+  assert.equal(world(this).results[0]?.title, title);
+});
+
+Given(
+  'a catalog of {int} songs behind a server that returns at most {int} rows per request',
+  function (this: object, total: number, cap: number) {
+    const rows = Array.from({ length: total }, (_, i) => ({ id: `row${i}` }));
+    const builder = {
+      select: () => builder,
+      order: () => builder,
+      range: (from: number, to: number) => Promise.resolve({ data: rows.slice(from, Math.min(to + 1, from + cap)), error: null }),
+    };
+    world(this).fetched = { client: { from: () => builder }, count: 0 };
+  }
+);
+When('the whole song list is fetched', async function (this: object) {
+  const w = world(this);
+  const { data } = await fetchAllSongRows(w.fetched!.client as never);
+  w.fetched!.count = data.length;
+});
+Then('all {int} songs are fetched', function (this: object, total: number) {
+  assert.equal(world(this).fetched?.count, total);
+});
 
 When('I search {string}', function (this: object, query: string) {
   const w = world(this);

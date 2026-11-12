@@ -3,7 +3,7 @@
 import { describe, expect, it } from 'vitest';
 import { songFilterConfig } from '@/lib/songs/filterConfig';
 import { filterSongs, type Song } from '@/lib/songUtils';
-import { songMatchHint, songMatchesSearch, songSearchMatch } from '@/lib/songs/search';
+import { rankSongsBySearch, songMatchHint, songMatchesSearch, songSearchMatch } from '@/lib/songs/search';
 
 const song = (over: Partial<Song> = {}): Song =>
   ({
@@ -106,5 +106,36 @@ describe('one search for the filter and the legacy helper', () => {
   it('filterSongs uses the same matcher (accents folded, aliases and songbook titles found)', () => {
     expect(filterSongs(songs, 'VENERABLE').map((s) => s.id)).toEqual(['a', 'b']);
     expect(filterSongs([song({ aliases: ['Pachamamá'] })], 'pachamama')).toHaveLength(1);
+  });
+});
+
+describe('rankSongsBySearch', () => {
+  const list = [
+    song({ id: 'a', title: 'Alpha', aliases: ['Huey Alias'] }),
+    song({ id: 'b', title: 'Huey Beta' }),
+    song({ id: 'c', title: 'Charlie', author: 'Huey Cruz', authors: ['Huey Cruz'] }),
+    song({ id: 'd', title: 'Delta Huey' }),
+  ];
+
+  it('puts title matches first and keeps the list order inside each group', () => {
+    expect(rankSongsBySearch(list, 'huey').map((s) => s.id)).toEqual(['b', 'd', 'a', 'c']);
+  });
+
+  it('leaves the list untouched without a query, and does not mutate the input', () => {
+    const before = list.map((s) => s.id);
+    expect(rankSongsBySearch(list, '  ')).toBe(list);
+    rankSongsBySearch(list, 'huey');
+    expect(list.map((s) => s.id)).toEqual(before);
+  });
+});
+
+describe('repeated searches over the same song', () => {
+  it('give the same answer for every query (the folded texts are built once per song)', () => {
+    const s = song({ aliases: ['Gran Madre'], sourceTitles: ['Canción Ñandú'], content: '[Am]Fuego Sagrado' });
+    expect(songSearchMatch(s, 'madre')?.field).toBe('alias');
+    expect(songSearchMatch(s, 'nandu')?.field).toBe('sourceTitle');
+    expect(songSearchMatch(s, 'fuego')?.field).toBe('content');
+    expect(songSearchMatch(s, 'huey')?.field).toBe('title');
+    expect(songSearchMatch(s, 'nothing here')).toBeNull();
   });
 });

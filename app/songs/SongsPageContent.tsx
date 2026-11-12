@@ -86,6 +86,17 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
         filteredCount
     } = useSongsFilter({ songs, userId: user?.id, favoriteIds, userRecordingCompositionIds, viewedSongIds, sortBy });
 
+    // Why each row matched, worked out once per result list / query / language, not on every render (#521).
+    const matchHints = useMemo(() => {
+        const hints = new Map<string, string>();
+        if (!state.search) return hints;
+        for (const song of displaySongs) {
+            const text = songMatchHintText(song, state.search, t);
+            if (text) hints.set(song.id, text);
+        }
+        return hints;
+    }, [displaySongs, state.search, t]);
+
     const setSortBy = (val: SortByType) => {
         const params = new URLSearchParams(searchParams.toString());
         params.set('sort', val);
@@ -200,7 +211,7 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
                                         isFavorite={favoriteIds.has(song.id)}
                                         userId={user?.id}
                                         categories={song.categories}
-                                        matchHint={state.search ? songMatchHintText(song, state.search, t) : null}
+                                        matchHint={matchHints.get(song.id) ?? null}
                                     />
                                 </div>
                             ))

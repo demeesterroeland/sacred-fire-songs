@@ -1,5 +1,6 @@
 'use client';
 
+import { useId } from 'react';
 import Link from 'next/link';
 import { Heart, Lock } from 'lucide-react';
 import { MetaLine } from '@/components/ui/meta-line';
@@ -48,6 +49,7 @@ export default function SongCard({
 }: SongCardProps) {
     const { t } = useLocale();
     const { isFav, handleToggle, signInGate } = useToggleFavorite(id, isFavorite);
+    const matchHintId = useId();
 
     return (
         <div
@@ -58,7 +60,12 @@ export default function SongCard({
             )}
         >
             {/* Stretched link: the whole row opens the song, without nesting buttons inside it. */}
-            <Link href={`/songs/${id}`} className="absolute inset-0 z-10" aria-label={t('songCard.view', { title })} />
+            <Link
+                href={`/songs/${id}`}
+                className="absolute inset-0 z-10"
+                aria-label={t('songCard.view', { title })}
+                aria-describedby={matchHint ? matchHintId : undefined}
+            />
 
             <div className="min-w-0 flex-1 pr-2">
                 <div className="flex items-center gap-2">
@@ -76,7 +83,7 @@ export default function SongCard({
                 </div>
                 <MetaLine items={songRowMeta(author, categories, t)} className="mt-0.5" data-testid="song-row-meta" />
                 {matchHint && (
-                    <p className="mt-0.5 truncate text-meta text-fg-muted" data-testid="song-row-match">
+                    <p id={matchHintId} className="mt-0.5 truncate text-meta text-fg-muted" data-testid="song-row-match">
                         {matchHint}
                     </p>
                 )}

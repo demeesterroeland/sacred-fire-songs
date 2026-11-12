@@ -1,5 +1,5 @@
 import { createClient } from "./supabase/client";
-import { songsQuery, mapCompositionToSong } from './songs/queries';
+import { songsQuery, fetchAllSongRows, mapCompositionToSong } from './songs/queries';
 import { normalizeWhitespace } from "./utils";
 import { songMatchesSearch } from "./songs/search";
 
@@ -82,11 +82,12 @@ export const fetchSongs = async (limit?: number) => {
 };
 
 /**
- * Fetches all songs without pagination — used for in-memory search.
+ * Fetches all songs (in server-sized pages, joined into one list) — used for in-memory search.
  */
 export const fetchAllSongs = async (): Promise<Song[]> => {
     const supabase = createClient();
-    const { data, error } = await songsQuery(supabase);
+    // In pages: one request is capped at PostgREST's max_rows (1000) without an error (#521).
+    const { data, error } = await fetchAllSongRows(supabase);
     if (error) throw error;
     return data.map(item => mapCompositionToSong(item));
 };
