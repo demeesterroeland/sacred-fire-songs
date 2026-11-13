@@ -14,8 +14,10 @@ const tabRow = (page: import('@playwright/test').Page) =>
   page.locator('main nav').filter({ has: page.locator('a[href="/library/playlists"]') }).first().getByRole('link');
 
 const TAB_HREFS = ['/library/playlists', '/library/smart', '/library/recently-viewed', '/library/new', '/library/artists'];
+// Story 6.2.11 (#514): the Songbooks tab leads to /songbooks, beside the Library pages (its rows depend on the data, so the x test below skips it).
+const ALL_TAB_HREFS = [...TAB_HREFS, '/songbooks'];
 
-/** Validation 4: five tabs are wider than a phone, so the row scrolls. Every tab, once scrolled to, sits inside the screen whole. */
+/** Validation 4: the tabs are wider than a phone, so the row scrolls. Every tab, once scrolled to, sits inside the screen whole. */
 async function expectReachable(page: import('@playwright/test').Page) {
   const vw = page.viewportSize()!.width;
   for (const tab of await tabRow(page).all()) {
@@ -27,13 +29,13 @@ async function expectReachable(page: import('@playwright/test').Page) {
   }
 }
 
-test('Library tabs on a phone: Playlists | Smart | History | New | Artists, every label reachable, no "Coming soon" tab', async ({ page }) => {
+test('Library tabs on a phone: Playlists | Smart | History | New | Artists | Songbooks, every label reachable, no "Coming soon" tab', async ({ page }) => {
   await pinLocale(page, 'en');
   await page.goto('/library/playlists');
   const tabs = tabRow(page);
-  await expect(tabs).toHaveCount(5);
-  expect(await tabs.evaluateAll((els) => els.map((el) => el.getAttribute('href')))).toEqual(TAB_HREFS);
-  await expect(tabs).toHaveText(['Playlists', 'Smart', 'History', 'New', 'Artists']);
+  await expect(tabs).toHaveCount(6);
+  expect(await tabs.evaluateAll((els) => els.map((el) => el.getAttribute('href')))).toEqual(ALL_TAB_HREFS);
+  await expect(tabs).toHaveText(['Playlists', 'Smart', 'History', 'New', 'Artists', 'Songbooks']);
   await expect(page.locator('a[href="/library/albums"]')).toHaveCount(0);
 
   await expectReachable(page);
@@ -58,7 +60,7 @@ for (const [locale, playlists] of [['ru', 'Плейлисты'], ['qu', 'Listaku
     await pinLocale(page, locale);
     await page.goto('/library/playlists');
     const tabs = tabRow(page);
-    await expect(tabs).toHaveCount(5);
+    await expect(tabs).toHaveCount(6);
     await expect(tabs.first()).toHaveText(playlists);
     await expectReachable(page);
   });

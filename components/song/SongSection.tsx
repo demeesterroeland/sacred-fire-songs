@@ -2,9 +2,8 @@
 
 import type { ChordProItem, ChordProLine, ChordProRepeatMark, ChordProSection } from '@/lib/chordUtils';
 import { useLocale } from '@/context/LocaleContext';
+import { REPEAT_START, repeatEndText } from '@/lib/songs/repeatMarks';
 
-const REPEAT_START = '‖:';
-const REPEAT_END = ':‖';
 /** Width of the bar gutter on repeated lines, in the lyric size, so it scales with the reader font size. */
 const REPEAT_GUTTER = '1.25em';
 
@@ -121,7 +120,7 @@ export default function SongSection({ section, first, chordsOn, lyricSize, chord
                                             className="shrink-0 font-semibold text-fg-muted whitespace-nowrap"
                                             style={{ fontSize: lyricSize, lineHeight: 1.35 }}
                                         >
-                                            {repeat.times ? `${REPEAT_END} ×${repeat.times}` : REPEAT_END}
+                                            {repeatEndText(repeat.times)}
                                         </span>
                                     )}
                                 </div>
