@@ -36,7 +36,7 @@ Feature: Sober colours in the header, the user menu and the notifications
     Given the notification bell source
     Then the bell names the unread count
     And every unread item says "unread" to screen readers
-    And the badge uses the inverted greys, not a colour
+    And the badge uses the accent token
 
   @e2e
   Scenario: The user menu and the notifications stay readable in light and dark mode

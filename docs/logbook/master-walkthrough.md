@@ -3458,7 +3458,7 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 
 - `Header`, `UserProfile`, `NotificationBell`, `LanguageSwitcher`, `WickSelect` and `ThemedToaster` use semantic tokens only (221 palette classes fewer; `PALETTE_BASELINE` 980 → 759).
 - User menu: one grey item style for every entry (the Admin Portal is no longer purple, no hover hues per item), a grey avatar disc instead of the gradient, the role translated, the theme switch with 44 px buttons that marks the chosen theme with inverted greys and `aria-pressed`. The hover-only settings cogwheel is gone (it duplicated the Settings item and was unreachable on touch).
-- Notifications: the unread badge is inverted greys, not orange; each unread item says "Unread" to screen readers (`notifications.unread`, 8 locales); the bell, menu button and Create button are 44 px.
+- Notifications: the unread badge uses the accent token (`bg-accent text-on-accent`); each unread item says "Unread" to screen readers (`notifications.unread`, 8 locales); the bell, menu button and Create button are 44 px.
 - Toasts: one neutral surface; errors keep the danger colour next to their words.
 - Removed unused `components/common/navigation/ThemeToggle.tsx`, `components/ui/popover.tsx` and the `@radix-ui/react-popover` dependency.
 - Left for the admin group: `WickSelect` still shows the admin role colours passed by `AdminUsersTable` (light-mode contrast of the coloured label).

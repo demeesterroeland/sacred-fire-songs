@@ -99,7 +99,7 @@ describe('sober user menu', () => {
 });
 
 describe('sober notification bell', () => {
-  it('names the unread count and draws the badge in inverted greys', () => {
+  it('names the unread count and draws the badge in the accent token', () => {
     const { container } = render(
       <QueryClientProvider client={new QueryClient()}>
         <NotificationBell userId="u1" />
@@ -108,7 +108,7 @@ describe('sober notification bell', () => {
     expect(screen.getByRole('button', { name: 'Notifications (2 unread)' })).toBeTruthy();
     const badge = screen.getByTestId('notification-badge');
     expect(badge.textContent).toBe('2');
-    expect(badge.className).toMatch(/\bbg-chip-active\b.*\btext-on-chip-active\b/);
+    expect(badge.className).toMatch(/\bbg-accent\b.*\btext-on-accent\b/);
     expect(countPaletteClasses(container.innerHTML)).toBe(0);
   });
 });

@@ -68,8 +68,8 @@ Then('every unread item says "unread" to screen readers', function () {
   }
 });
 
-Then('the badge uses the inverted greys, not a colour', function () {
+Then('the badge uses the accent token', function () {
   const src = read(BELL);
   assert.equal(countPaletteClasses(src), 0);
-  assert.match(src, /data-testid="notification-badge"[^>]*bg-chip-active text-on-chip-active/);
+  assert.match(src, /data-testid="notification-badge"[^>]*bg-accent text-on-accent/);
 });

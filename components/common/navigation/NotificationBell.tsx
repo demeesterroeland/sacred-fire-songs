@@ -79,7 +79,7 @@ export function NotificationBell({ userId }: { userId: string }) {
         >
           <Bell className="w-5 h-5" aria-hidden="true" />
           {unread.length > 0 && (
-            <span aria-hidden="true" data-testid="notification-badge" className="absolute top-1 right-1 min-w-5 h-5 px-1 rounded-full bg-chip-active text-on-chip-active ring-2 ring-bg text-caption font-semibold leading-5 text-center">
+            <span aria-hidden="true" data-testid="notification-badge" className="absolute top-1 right-1 min-w-5 h-5 px-1 rounded-full bg-accent text-on-accent ring-2 ring-bg text-caption font-semibold leading-5 text-center">
               {unread.length > 9 ? '9+' : unread.length}
             </span>
           )}
