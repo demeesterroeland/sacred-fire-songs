@@ -1,11 +1,12 @@
 /*
- **Version:** 3.10
+ **Version:** 3.11
  **Status:** Current
  **Date:** November 13, 2026
  
  ## Usage
  This script provides a complete setup for the "Sacred Fire Songs" database. 
  It consolidates the initial schema and all subsequent migrations up to November 12, 2026.
+ (v3.11: catalog songs and versions corrected in the app, Story 6.2.21 (#524), migration 20261112160000_protect_catalog_app_edits.sql: compositions and song_versions gain edited_in_app / edited_at / edited_fields, set by trigger trg_track_catalog_edit when a signed-in app user (JWT role authenticated, also through a SECURITY DEFINER function) changes a tracked column of a row with a catalog key; importers (service_role) and data migrations do not mark, and API callers cannot set or clear the markers; admin-only fn_catalog_edits_export() and fn_clear_catalog_edit(). Review of PR #540 (Nov 13, 2026): removing a catalog key in the app counts; the export gives a moved version's new song slug; fn_clear_catalog_edit(kind, id, edited_at) returns 'cleared' / 'changed' / 'not_marked' and leaves a correction made after the download marked; the service role may not execute either function and reads and clears markers with plain SQL; re-check: the service role may not execute fn_track_catalog_edit() either).
  (v3.10: link a song as a version of another song, Story 6.2.9, migration 20261112120000_link_song_as_version.sql: tables composition_redirects (old song id -> target, readable exactly when the target song is; keeps the source's catalog slug when the target kept its own) and song_link_audit (gatekeepers and admins read, nobody writes through the API); SECURITY DEFINER functions fn_link_song_as_version and fn_preview_song_link (signed-in callers only, no service_role grant: the checks need auth.uid(), importers resolve slugs with fn_song_id_for_catalog_slug instead; admins link any song, gatekeepers only songs they own, source and target; both songs public or both private, for everyone; a deliberate bypass of the admin-only catalog guards, the keys only ever come from the source song), helpers fn_assert_can_link_song, fn_song_link_summary, fn_merge_song_names, and fn_song_id_for_catalog_slug for importers).
  (v3.9: migration 20261112140000_translation_versions_to_translations.sql moves the interim song_versions rows with version_kind = 'translation' to song_translations, Story 6.2.13 (#516). It changes data only: the schema is unchanged and a fresh install has no such rows, so this script needs nothing from it. Review of PR #535: the migration also keeps versions with chords in another key/capo/tuning or blank lyrics, appends moved takes after the original's and reports dropped sources; the re-check also keeps versions with their own melody, note, beats, media link or votes, or lyrics-only in another key that a playlist transposes, and reports the contributor.)
  (v3.8: songbook data model, Story 6.2.1, migration 20261111150000_songbook_data_model.sql: compositions.catalog_slug / aliases / authors; song_versions.catalog_source_id / version_kind / beats / song_note, unique per song and catalog source; new tables songbooks, song_version_sources and song_translations, readable when their song is readable and written by admins only. Review round on PR #527: triggers trg_guard_catalog_slug / trg_guard_catalog_source_id let only trusted roles and admins set the catalog keys; keys without surrounding spaces; lowercase translation languages; a cited songbook cannot be deleted (on delete restrict)).
@@ -70,6 +71,10 @@ create table public.compositions (
     constraint compositions_catalog_slug_check check (catalog_slug <> '' and catalog_slug = btrim(catalog_slug)),
   aliases text[] not null default '{}',
   authors text[] not null default '{}',
+  -- Catalog songs corrected in the app (v3.10, Story 6.2.21): set by trg_track_catalog_edit.
+  edited_in_app boolean not null default false,
+  edited_at timestamptz,
+  edited_fields text[] not null default '{}',
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 -- SONG_CATEGORY_MAP (Join Table)
@@ -106,6 +111,10 @@ create table public.song_versions (
     check (version_kind in ('original', 'variant', 'translation')),
   beats text,
   song_note text,
+  -- Catalog versions corrected in the app (v3.10, Story 6.2.21): set by trg_track_catalog_edit.
+  edited_in_app boolean not null default false,
+  edited_at timestamptz,
+  edited_fields text[] not null default '{}',
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 -- SETLISTS
@@ -966,6 +975,199 @@ DROP TRIGGER IF EXISTS trg_guard_catalog_source_id ON public.song_versions;
 CREATE TRIGGER trg_guard_catalog_source_id
 BEFORE INSERT OR UPDATE ON public.song_versions
 FOR EACH ROW EXECUTE FUNCTION public.fn_guard_catalog_source_id();
+
+-- Catalog songs and versions corrected in the app (v3.10, Story 6.2.21, migration
+-- 20261112160000_protect_catalog_app_edits.sql). trg_track_catalog_edit marks a row with a catalog key
+-- (catalog_slug / catalog_source_id) when a signed-in app user (JWT role 'authenticated', also through a
+-- SECURITY DEFINER function) changes a tracked column; importers (service_role) and data migrations do not
+-- mark. API callers cannot set or clear the markers. fn_catalog_edits_export() and fn_clear_catalog_edit()
+-- are for signed-in admins only (not the service role); the clear function only clears the edit the admin
+-- downloaded (review of PR #540, v3.10). Importer contract: docs/guides/importing-songbooks.md.
+CREATE INDEX IF NOT EXISTS idx_compositions_edited_in_app
+  ON public.compositions (edited_at DESC) WHERE edited_in_app;
+CREATE INDEX IF NOT EXISTS idx_song_versions_edited_in_app
+  ON public.song_versions (edited_at DESC) WHERE edited_in_app;
+
+-- Trigger: TG_ARGV[0] is the catalog key column (tracked too), the other arguments the
+-- tracked columns.
+CREATE OR REPLACE FUNCTION public.fn_track_catalog_edit() RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = ''
+AS $$
+DECLARE
+  new_row jsonb;
+  old_row jsonb;
+  changed text[] := '{}';
+  col text;
+  i integer;
+BEGIN
+  -- API callers never write the markers themselves.
+  IF current_user IN ('anon', 'authenticated') THEN
+    IF TG_OP = 'INSERT' THEN
+      NEW.edited_in_app := false;
+      NEW.edited_at := NULL;
+      NEW.edited_fields := '{}';
+    ELSE
+      NEW.edited_in_app := OLD.edited_in_app;
+      NEW.edited_at := OLD.edited_at;
+      NEW.edited_fields := OLD.edited_fields;
+    END IF;
+  END IF;
+
+  -- Only updates by a signed-in app user count.
+  IF TG_OP <> 'UPDATE' OR coalesce(auth.role(), '') <> 'authenticated' THEN
+    RETURN NEW;
+  END IF;
+
+  -- Only catalog rows count: the key before or after the write, so removing it is marked too.
+  IF TG_ARGV[0] = 'catalog_slug' THEN
+    IF NEW.catalog_slug IS NULL AND OLD.catalog_slug IS NULL THEN
+      RETURN NEW;
+    END IF;
+  ELSIF TG_ARGV[0] = 'catalog_source_id' THEN
+    IF NEW.catalog_source_id IS NULL AND OLD.catalog_source_id IS NULL THEN
+      RETURN NEW;
+    END IF;
+  ELSE
+    RAISE EXCEPTION 'Unknown catalog key %', TG_ARGV[0] USING ERRCODE = '22023';
+  END IF;
+
+  new_row := to_jsonb(NEW);
+  old_row := to_jsonb(OLD);
+  FOR i IN 0 .. TG_NARGS - 1 LOOP
+    col := TG_ARGV[i];
+    IF (new_row -> col) IS DISTINCT FROM (old_row -> col) THEN
+      changed := changed || col;
+    END IF;
+  END LOOP;
+
+  IF cardinality(changed) = 0 THEN
+    RETURN NEW;
+  END IF;
+
+  NEW.edited_in_app := true;
+  NEW.edited_at := now();
+  NEW.edited_fields := ARRAY(
+    SELECT DISTINCT f FROM unnest(OLD.edited_fields || changed) AS f ORDER BY f
+  );
+  RETURN NEW;
+END;
+$$;
+REVOKE ALL ON FUNCTION public.fn_track_catalog_edit() FROM PUBLIC, anon, authenticated, service_role;
+
+DROP TRIGGER IF EXISTS trg_track_catalog_edit ON public.compositions;
+CREATE TRIGGER trg_track_catalog_edit
+BEFORE INSERT OR UPDATE ON public.compositions
+FOR EACH ROW EXECUTE FUNCTION public.fn_track_catalog_edit(
+  'catalog_slug', 'title', 'original_author', 'aliases', 'authors'
+);
+
+DROP TRIGGER IF EXISTS trg_track_catalog_edit ON public.song_versions;
+CREATE TRIGGER trg_track_catalog_edit
+BEFORE INSERT OR UPDATE ON public.song_versions
+FOR EACH ROW EXECUTE FUNCTION public.fn_track_catalog_edit(
+  'catalog_source_id', 'version_name', 'content_chordpro', 'melody_notation', 'key', 'capo', 'tuning',
+  'soundcloud_url', 'youtube_url', 'spotify_url', 'version_kind', 'beats', 'song_note', 'composition_id'
+);
+
+-- Export (admins only): every marked song and version with its catalog keys and the current
+-- values of its edited fields. A key is null when it was removed in the app; a moved version
+-- gives the catalog_slug of its new song as the value of composition_id, not the internal id.
+CREATE OR REPLACE FUNCTION public.fn_catalog_edits_export() RETURNS jsonb
+LANGUAGE plpgsql
+STABLE
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+BEGIN
+  IF NOT public.fn_is_admin() THEN
+    RAISE EXCEPTION 'Only admins can export catalog edits' USING ERRCODE = '42501';
+  END IF;
+
+  RETURN jsonb_build_object(
+    'songs', coalesce((
+      SELECT jsonb_agg(jsonb_build_object(
+          'song_id', c.id,
+          'catalog_slug', c.catalog_slug,
+          'title', c.title,
+          'edited_at', c.edited_at,
+          'edited_fields', to_jsonb(c.edited_fields),
+          'values', (SELECT coalesce(jsonb_object_agg(f, to_jsonb(c) -> f), '{}'::jsonb)
+                     FROM unnest(c.edited_fields) AS f)
+        ) ORDER BY c.edited_at DESC, c.catalog_slug)
+      FROM public.compositions c
+      WHERE c.edited_in_app
+    ), '[]'::jsonb),
+    'versions', coalesce((
+      SELECT jsonb_agg(jsonb_build_object(
+          'song_id', c.id,
+          'version_id', v.id,
+          'catalog_slug', c.catalog_slug,
+          'catalog_source_id', v.catalog_source_id,
+          'title', c.title,
+          'version_name', v.version_name,
+          'edited_at', v.edited_at,
+          'edited_fields', to_jsonb(v.edited_fields),
+          'values', (SELECT coalesce(jsonb_object_agg(
+                       f, CASE WHEN f = 'composition_id' THEN to_jsonb(c.catalog_slug) ELSE to_jsonb(v) -> f END
+                     ), '{}'::jsonb)
+                     FROM unnest(v.edited_fields) AS f)
+        ) ORDER BY v.edited_at DESC, c.catalog_slug, v.catalog_source_id)
+      FROM public.song_versions v
+      JOIN public.compositions c ON c.id = v.composition_id
+      WHERE v.edited_in_app
+    ), '[]'::jsonb)
+  );
+END;
+$$;
+REVOKE ALL ON FUNCTION public.fn_catalog_edits_export() FROM PUBLIC, anon, service_role;
+GRANT EXECUTE ON FUNCTION public.fn_catalog_edits_export() TO authenticated;
+
+-- Clear a marker (admins only), once the external catalog has taken the correction over.
+-- p_kind is 'song' or 'version'; p_edited_at is the edited_at the admin downloaded, so a
+-- correction made after the download stays marked. Returns 'cleared', 'changed' (still marked,
+-- corrected again since p_edited_at) or 'not_marked' (nothing to clear).
+CREATE OR REPLACE FUNCTION public.fn_clear_catalog_edit(p_kind text, p_id uuid, p_edited_at timestamptz) RETURNS text
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+DECLARE
+  cleared integer;
+  marked boolean;
+BEGIN
+  IF NOT public.fn_is_admin() THEN
+    RAISE EXCEPTION 'Only admins can clear catalog edits' USING ERRCODE = '42501';
+  END IF;
+
+  IF p_kind = 'song' THEN
+    UPDATE public.compositions
+       SET edited_in_app = false, edited_at = NULL, edited_fields = '{}'
+     WHERE id = p_id AND edited_in_app AND edited_at = p_edited_at;
+    GET DIAGNOSTICS cleared = ROW_COUNT;
+    IF cleared = 0 THEN
+      SELECT edited_in_app INTO marked FROM public.compositions WHERE id = p_id;
+    END IF;
+  ELSIF p_kind = 'version' THEN
+    UPDATE public.song_versions
+       SET edited_in_app = false, edited_at = NULL, edited_fields = '{}'
+     WHERE id = p_id AND edited_in_app AND edited_at = p_edited_at;
+    GET DIAGNOSTICS cleared = ROW_COUNT;
+    IF cleared = 0 THEN
+      SELECT edited_in_app INTO marked FROM public.song_versions WHERE id = p_id;
+    END IF;
+  ELSE
+    RAISE EXCEPTION 'Unknown kind %', p_kind USING ERRCODE = '22023';
+  END IF;
+
+  IF cleared > 0 THEN
+    RETURN 'cleared';
+  END IF;
+  RETURN CASE WHEN coalesce(marked, false) THEN 'changed' ELSE 'not_marked' END;
+END;
+$$;
+REVOKE ALL ON FUNCTION public.fn_clear_catalog_edit(text, uuid, timestamptz) FROM PUBLIC, anon, service_role;
+GRANT EXECUTE ON FUNCTION public.fn_clear_catalog_edit(text, uuid, timestamptz) TO authenticated;
 
 -- Privileges: guests read; signed-in users read and (admins only, by policy) write.
 REVOKE ALL ON public.songbooks, public.song_version_sources, public.song_translations FROM anon, authenticated;
