@@ -285,6 +285,7 @@ const qu: Partial<Record<TranslationKey, string>> = {
 
   // ─── Rehearsal Space – Drawer ─────────────────────────────────────────────
   'practice.title': 'Yachakuy',
+  'practice.available': 'Yachakuy: uyarinakuna utaq grabaciónkuna kan',
   'practice.tab.listen': 'Uyariy',
   "rehearsal.recordings.empty": "Manaraq grabaciónkuna kanchu",
   'rehearsal.recordings.emptyHint': 'Grabayta qallariy, yachakusqaykita hap’inaykipaq.',

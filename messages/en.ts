@@ -278,6 +278,7 @@ const en = {
 
   // ─── Rehearsal Space – Drawer ─────────────────────────────────────────────
   'practice.title': 'Practice',
+  'practice.available': 'Practice: media or recordings available',
   'practice.tab.listen': 'Listen',
   "rehearsal.recordings.empty": "No recordings yet",
   'rehearsal.recordings.emptyHint': 'Start recording to capture your practice.',
