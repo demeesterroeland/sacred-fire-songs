@@ -95,31 +95,31 @@ test.describe('Musician @story-6.1.10', () => {
     await expect(page.getByTestId('song-meta-lines')).not.toContainText('Key E');
 
     // Original key restores everything.
-    await openSongMenu(page);
-    await page.getByRole('button', { name: 'Original key' }).click();
-    await songMenuSheet(page).getByRole('button', { name: 'Close' }).last().click();
+    await stepper.getByRole('button', { name: 'Original key' }).click();
+    await expect(stepper.getByTestId('transpose-value')).toHaveText('0');
     await expect(page.getByTestId('chord').first()).toHaveText('E');
     await expect(page.getByTestId('song-meta-lines')).toContainText('Key E');
   });
 
-  test('the toolbar stays one row of 44 px controls on 390 px, clear of the action bar and the lyrics', async ({ page }) => {
+  test('the toolbar keeps 44 px controls inside 390 px (it wraps, never scrolls sideways), clear of the action bar and the lyrics', async ({ page }) => {
     test.skip(!longSong, 'no public chord song in the seed');
     await openSong(page, longSong);
     await page.setViewportSize({ width: 390, height: 600 }); // lyrics run below the fold: ▶ is offered
     await expect(page.getByTestId('autoscroll-toggle')).toBeVisible();
     const toolbar = page.getByTestId('reader-toolbar');
     const buttons = toolbar.locator('button');
-    expect(await buttons.count()).toBe(4); // Chords · A− · A+ · Auto-scroll (the ⋮ menu is in the title bar)
+    // Chords · − · + · A− · A+ · Auto-scroll (#566: the stepper joins the row; its value is plain text at 0; the ⋮ menu is in the title bar)
+    expect(await buttons.count()).toBe(6);
     const rects = await buttons.evaluateAll((els) =>
       els.map((el) => {
         const r = el.getBoundingClientRect();
-        return { top: r.top, height: r.height, right: r.right };
+        return { top: r.top, height: r.height, left: r.left, right: r.right };
       }),
     );
     for (const r of rects) {
       expect(r.height).toBeGreaterThanOrEqual(44);
+      expect(r.left).toBeGreaterThanOrEqual(0);
       expect(r.right).toBeLessThanOrEqual(390);
-      expect(Math.abs(r.top - rects[0].top)).toBeLessThan(2); // one row
     }
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
 

@@ -683,7 +683,6 @@ const en = {
   'viewer.transpose.down': "Down a semitone",
   'viewer.transpose.up': "Up a semitone",
   'viewer.transpose.reset': "Original key",
-  'viewer.transpose.key': "Key {key} (original {original})",
   'viewer.transpose.state': "Transposed {n}",
   'viewer.awake': "Screen stays on",
   'settings.prefs.offlineMode': 'Offline Mode',

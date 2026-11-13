@@ -685,7 +685,6 @@ const es: Partial<Record<TranslationKey, string>> = {
   'viewer.transpose.down': "Un semitono abajo",
   'viewer.transpose.up': "Un semitono arriba",
   'viewer.transpose.reset': "Tono original",
-  'viewer.transpose.key': "Tono {key} (original {original})",
   'viewer.transpose.state': "Transpuesto {n}",
   'viewer.awake': "La pantalla se mantiene encendida",
   'settings.prefs.offlineMode': 'Modo sin conexión',

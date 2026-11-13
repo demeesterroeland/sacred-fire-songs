@@ -688,7 +688,6 @@ const ru: Partial<Record<TranslationKey, string>> = {
   'viewer.transpose.down': "На полутон ниже",
   'viewer.transpose.up': "На полутон выше",
   'viewer.transpose.reset': "Исходная тональность",
-  'viewer.transpose.key': "Тональность {key} (исходная {original})",
   'viewer.transpose.state': "Транспонировано {n}",
   'viewer.awake': "Экран остаётся включённым",
   'settings.prefs.offlineMode': 'Офлайн-режим',

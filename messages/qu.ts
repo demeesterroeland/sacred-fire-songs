@@ -689,7 +689,6 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'viewer.transpose.down': "Hukllaña semitonu uraypi",
   'viewer.transpose.up': "Hukllaña semitonu hanaypi",
   'viewer.transpose.reset': "Ñawpaq tono",
-  'viewer.transpose.key': "Tono {key} (ñawpaq {original})",
   'viewer.transpose.state': "Tikrasqa {n}",
   'viewer.awake': "Pantalla rikch’arisqa kachkan",
   'settings.prefs.offlineMode': 'Mana internet modo',

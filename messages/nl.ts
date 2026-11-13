@@ -685,7 +685,6 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'viewer.transpose.down': "Een halve toon lager",
   'viewer.transpose.up': "Een halve toon hoger",
   'viewer.transpose.reset': "Oorspronkelijke toonsoort",
-  'viewer.transpose.key': "Toonsoort {key} (origineel {original})",
   'viewer.transpose.state': "Getransponeerd {n}",
   'viewer.awake': "Scherm blijft aan",
   'settings.prefs.offlineMode': 'Offline modus',
