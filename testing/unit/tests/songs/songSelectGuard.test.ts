@@ -5,6 +5,7 @@ import { readFileSync } from 'node:fs';
 import { describe, expect, it } from 'vitest';
 import { EDIT_SONG_SELECT, SONG_SELECT } from '@/lib/songs/songSelect';
 import { SONGS_SELECT } from '@/lib/songs/queries';
+import { PLAYLIST_EXPORT_SELECT } from '@/lib/export/exportSong';
 import { VERSION_SOURCES_SELECT } from '@/lib/songs/versionSources';
 
 const embeds = (select: string) => select.match(/song_version_sources(![\w]+)?\s*\(/g) ?? [];
@@ -55,8 +56,15 @@ describe('song selects', () => {
     expect(versions).toMatch(/\bsong_note\b/);
   });
 
-  it('the edit page and fetchSong carry no inline copy of the embed', () => {
-    for (const file of ['app/songs/[id]/edit/page.tsx', 'lib/songs/fetchSong.ts']) {
+  // Story 6.2.17 (#520): the playlist export prints the pinned version's sources; it needs no translations.
+  it('the playlist export select embeds the sources once, from the same constant, and no translations', () => {
+    expect(embeds(PLAYLIST_EXPORT_SELECT)).toHaveLength(1);
+    expect(PLAYLIST_EXPORT_SELECT).toContain(VERSION_SOURCES_SELECT);
+    expect(translationEmbeds(PLAYLIST_EXPORT_SELECT)).toHaveLength(0);
+  });
+
+  it('the edit page, fetchSong and the playlist actions carry no inline copy of the embed', () => {
+    for (const file of ['app/songs/[id]/edit/page.tsx', 'lib/songs/fetchSong.ts', 'app/actions/playlistActions.ts']) {
       expect(embeds(readFileSync(file, 'utf8')), file).toHaveLength(0);
       expect(translationEmbeds(readFileSync(file, 'utf8')), file).toHaveLength(0);
     }

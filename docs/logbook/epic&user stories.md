@@ -1,6 +1,6 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 2.11
+**Version:** 2.12
 **Status:** Living Document
 **Date:** Nov 13, 2026
 
@@ -63,6 +63,7 @@
 | **1.92** | Nov 6, 2026 | Epic 6.1: validation round 1 after the owner's phone run (Part of #375): auto-scroll only when the lyrics run below the fold (Story 6.1.10 / #394), expanded meta line (6.1.7 / #391), one focus style for text fields, the search suggestions in the page flow (6.1.29 / #413), search options on tokens, translated feedback and song flags across versions (6.1.11 / #395). Acceptance criteria of those stories now read as in `docs/testing/ux-v2-validation-1.feature`. |
 | **1.93** | Nov 7, 2026 | Epic 6.1: review round on the validation round 1 PR (#474, Part of #375): acceptance criteria of Stories 6.1.10 (auto-scroll offered only when the lyric text runs below the visible area above the fixed bars), 6.1.29 (suggestions close on the click and keep the scroll position), 6.1.1 (one focus cue per field, readable chip counts), 6.1.11 (a lyrics-only version has no Chords switch; a bracketed section label is not a chord) and the i18n policy (no raw server or database text in a toast) verified against the code; decisions UXA-061 to UXA-066. |
 | **1.94** | Nov 7, 2026 | Epic 6.1: validation round 2, batch 2 (Part of #375): acceptance criteria updated for Story 6.1.4 (#388: amounts between parentheses, "Air (3)"), 6.1.8 (#392: the full title wraps at the top of the page on a phone, the truncated copy shows only after scrolling past it), 6.1.10 (#394: transpose, scroll speed and a Screen stays on switch live in the one ⋮ menu; the toolbar has no ⋯), 6.1.11 (#395: every version has a `?version=` link, replaced in place, shared by Share), 6.1.23 (#407: History, Artists and Shared with me share one heading size) and 6.1.24 (#408: the Library "+" floats at the bottom right). New: Terms and Privacy pages (draft) with the operator from the server environment. |
+| **2.12** | Nov 13, 2026 | Epic 6.2: review of PR #560 (Story 6.2.17 / #520): a wrapped row of a long line never prints in the footer or QR area, the closing repeat bar never lands on the last word (it moves to its own row when the text reaches the margin), an untitled playlist item prints the translated "untitled song" label, and a different database order of the sources does not make the PDF regenerate. Acceptance criteria of Story 6.2.17 extended with four scenarios (`docs/testing/ux-v3-pdf-export.feature` v1.1). |
 | **2.11** | Nov 13, 2026 | Epic 6.2: Story 6.2.17 (#520, G4.3) implemented on `feat/ux-v3` (PR into `feat/ux-v3`, in review): the PDF sheet of a song shows the key, capo, tuning and beats like the song page's meta line, the source credit line under the lyrics, and the repeat bars (`‖:` … `:‖ ×N`); the export prints the version a playlist item is pinned to with the item's transposition; labels follow the exporting user's language (8 locales, existing strings reused). Executable: `docs/testing/ux-v3-pdf-export.feature`. Row and acceptance criteria added. |
 | **2.10** | Nov 13, 2026 | Epic 6.2: Story 6.2.21 (#524, G5.4) implemented on `feat/ux-v3`: catalog songs and versions corrected in the app are marked (`edited_in_app`, `edited_at`, `edited_fields`) by a database trigger, so no app code path can forget it; only signed-in app users mark (also through database functions such as linking a song as a version), importers (service role) and data migrations do not, and nobody can clear a marker from the app except an admin. Importer contract in `docs/guides/importing-songbooks.md` (v1.4): skip marked rows, report them. Admin → Catalog edits lists the corrections, downloads them as JSON (catalog keys, changed fields, current values) and marks each one as taken over. Migration `20261112160000_protect_catalog_app_edits.sql`. 8 locales (`qu` for a native check). Executable: `docs/testing/ux-v3-protect-app-edits.feature` (`@unit`, `@seed`). Review of PR #540 (Nov 13, 2026): *Taken over* clears only the correction that was downloaded (a newer one stays marked and the admin is asked to download again), in a themed confirmation dialog; the export and clear RPCs refuse the service role (importers use plain SQL on the marker columns); removing a catalog key counts; a moved version exports its new song's slug; the contract documents app deletions and merge redirects (`resolveCatalogSlug`). Re-check (Nov 13, 2026, after #536 landed): importers resolve every slug with `fn_song_id_for_catalog_slug` and write no song-level content for a redirected slug, only its versions under the target ('moved' vs 'redirect' documented; `resolveCatalogSlug` is now a thin mapping of that lookup); the real `fn_link_song_as_version` runs in a `@seed` scenario as an admin and its markers are asserted for both slug cases; only `catalog_slug` is editable in the app; read `edited_at` as text; focus moves to the next row after *Taken over*; the service role may not execute the trigger function. |
 | **2.09** | Nov 13, 2026 | Epic 6.2: Story 6.2.20 (#523, G5.3) implemented on `feat/ux-v3`: the edit form has a *Songbook details* section with the version's **beats** (a count from 1 to 99 or counts joined with `y & + / -` or a comma: `8`, `6`, `8y4`; the format the meta line prints) and **About this song** note (plain text, paragraph breaks kept, at most 4000 characters), and shows the version's **source** read-only; admins get a *Correct source* button for the page and original title of the primary source (the songbook itself is not editable here). Only changed fields are written; a blank beats or note saves NULL. Permissions are unchanged (contributor or admin of the version; catalog keys stay admin-only). 8 locales (`qu` for a native check). Executable: `docs/testing/ux-v3-edit-version-meta.feature` (`@unit`, `@seed`). A write the database filters without an error (no row back: a song owner editing a catalog version, an admin whose source update is refused) is reported with a translated message, never shown as saved; the source correction is the last step of the save, so a refusal says "version saved, source not corrected" and keeps categories and tags. |
@@ -2053,6 +2054,24 @@ Scenario: The item's transposition moves the printed key and chords
 Scenario: A translation is never printed
   Given a song that has a translation
   Then the export asks for no translations, so the sheet shows the original lyrics
+
+Scenario: A wrapped row never runs into the footer
+  Given a playlist with a song of 40 short lines followed by one very long line
+  When I export it to PDF
+  Then no lyric is printed below the bottom margin on any page
+
+Scenario: The closing bar never lands on the last word
+  Given a playlist with a song with a repeated line of words that fill the line up to the right margin
+  When I export it to PDF
+  Then the closing bar overlaps no text and stays inside the right margin
+
+Scenario: An item without a title prints the translated untitled-song label
+  Given a playlist item whose song has no title
+  Then the sheet shows the translated untitled-song label in "nl"
+
+Scenario: The order the database returns the sources in does not change the cached PDF
+  When the database returns the sources in another order
+  Then the cached PDF is still reused
 ```
 
 **Story 6.2.18 acceptance criteria** (executable: `docs/testing/ux-v3-search-aliases.feature`, `@unit` and `@seed`):

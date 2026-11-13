@@ -58,7 +58,7 @@ export function exportSongFromItem(item: PlaylistExportItem): ExportPlaylistSong
   const compId = version?.compositions?.id;
   return {
     id: compId || version?.id || undefined,
-    title: version?.compositions?.title || 'Unknown',
+    title: version?.compositions?.title || '', // empty: the sheet falls back to its translated "untitled song" label
     author: version?.compositions?.original_author || undefined,
     key: version?.key || undefined,
     capo: version?.capo ?? undefined,

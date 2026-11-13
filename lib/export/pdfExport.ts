@@ -266,15 +266,20 @@ export async function drawPlaylistPdf(doc: jsPDF, playlist: ExportPlaylistData):
         doc.setTextColor(107, 114, 128);
         doc.text(labels.repeatStart, leftMargin, baseline);
     };
-    /** The closing bar (with its count) after the last text of the line, pulled back in when it would pass the margin. */
-    const drawRepeatEnd = (afterX: number, baseline: number, times?: number) => {
-        const text = labels.repeatEnd(times);
+    /** Width of the closing bar with its count, measured in the bar's own font. */
+    const repeatEndWidth = (times?: number) => {
+        doc.setFont('DejaVuSans', 'bold');
+        doc.setFontSize(9.5);
+        return doc.getTextWidth(labels.repeatEnd(times));
+    };
+    const drawRepeatEnd = (x: number, baseline: number, times?: number) => {
         doc.setFont('DejaVuSans', 'bold');
         doc.setFontSize(9.5);
         doc.setTextColor(107, 114, 128);
-        const x = Math.min(afterX + 4, pageWidth - rightMargin - doc.getTextWidth(text));
-        doc.text(text, x, baseline);
+        doc.text(labels.repeatEnd(times), x, baseline);
     };
+    /** Height of a row that holds only the closing bar. */
+    const BAR_ROW = 13;
 
     // Track which song is active on each page (pageNumber -> { title, url })
     const pageSongMap = new Map<number, { title: string; url?: string }>();
@@ -291,6 +296,30 @@ export async function drawPlaylistPdf(doc: jsPDF, playlist: ExportPlaylistData):
         doc.setTextColor(156, 163, 175);
         doc.text(labels.continued(songTitle), leftMargin, y);
         y += 18;
+    };
+
+    /**
+     * Ends a repeated line's last row: the closing bar (with its count) goes right after the text when it fits before
+     * the margin, else on a row of its own at `lineLeft`, so it never lands on the text. Moves `y` past the line.
+     * `rowStep` is the height of the line's row; `breakPage` starts a continuation page when the bar's row would not fit.
+     */
+    const closeRepeatedLine = (
+        afterX: number,
+        baseline: number,
+        lineLeft: number,
+        rowStep: number,
+        times: number | undefined,
+        breakPage: () => void,
+    ) => {
+        if (afterX + 4 + repeatEndWidth(times) <= pageWidth - rightMargin) {
+            drawRepeatEnd(afterX + 4, baseline, times);
+            y += rowStep;
+            return;
+        }
+        y += rowStep;
+        if (y + BAR_ROW > pageHeight - bottomMargin) breakPage();
+        drawRepeatEnd(lineLeft, y + 9, times);
+        y += BAR_ROW;
     };
 
     // ─── Setlist Header on Page 1 ─────────────────────────────────────────────
@@ -399,7 +428,18 @@ export async function drawPlaylistPdf(doc: jsPDF, playlist: ExportPlaylistData):
                 y += 12;
             }
 
-            const sectionStartY = y;
+            let sectionStartY = y;
+
+            /** Closes the chorus bar on this page, starts a continuation page, and lets the bar go on there. */
+            const breakPage = () => {
+                if (isChorus && y > sectionStartY) {
+                    doc.setDrawColor(194, 65, 12);
+                    doc.setLineWidth(1.5);
+                    doc.line(leftMargin - 8, sectionStartY - 2, leftMargin - 8, y - 2);
+                }
+                addContinuationPage(formattedSong.title, formattedSong.url);
+                sectionStartY = y;
+            };
 
             for (const line of section.lines) {
                 const hasChordsOnLine = line.items.some(it => !!it.chords);
@@ -407,15 +447,7 @@ export async function drawPlaylistPdf(doc: jsPDF, playlist: ExportPlaylistData):
                 const lineHeight = hasChordsOnLine ? 23 : 13;
 
                 // Check page bottom overflow
-                if (y + lineHeight > pageHeight - bottomMargin) {
-                    if (isChorus && y > sectionStartY) {
-                        doc.setDrawColor(194, 65, 12);
-                        doc.setLineWidth(1.5);
-                        doc.line(leftMargin - 8, sectionStartY - 2, leftMargin - 8, y - 2);
-                    }
-
-                    addContinuationPage(formattedSong.title, formattedSong.url);
-                }
+                if (y + lineHeight > pageHeight - bottomMargin) breakPage();
 
                 // Pure comment line
                 if (hasComments && line.items.every(it => it.comment !== undefined || (!it.lyrics && !it.chords))) {
@@ -424,10 +456,12 @@ export async function drawPlaylistPdf(doc: jsPDF, playlist: ExportPlaylistData):
                     doc.setTextColor(107, 114, 128);
                     const commentText = line.items.map(it => it.comment || '').join(' ').trim();
                     const commentX = leftMargin + (line.repeat ? repeatGutter : 0);
+                    // Measured here, in the comment's own font: the opening bar below switches to bold 9.5.
+                    const commentEndX = commentX + doc.getTextWidth(commentText);
                     doc.text(commentText, commentX, y + 8);
                     if (line.repeat?.start) drawRepeatStart(y + 8);
-                    if (line.repeat?.end) drawRepeatEnd(commentX + doc.getTextWidth(commentText), y + 8, line.repeat.times);
-                    y += 14;
+                    if (line.repeat?.end) closeRepeatedLine(commentEndX, y + 8, commentX, 14, line.repeat.times, breakPage);
+                    else y += 14;
                     continue;
                 }
 
@@ -465,6 +499,11 @@ export async function drawPlaylistPdf(doc: jsPDF, playlist: ExportPlaylistData):
                     const itemWidth = Math.max(lyricWidth, chordWidth ? chordWidth + 3 : 0);
                     if (currentX + itemWidth > pageWidth - rightMargin && currentX > lineLeft) {
                         y += lineHeight;
+                        // The wrapped row must clear the footer too, not only the line's first row.
+                        if (y + lineHeight > pageHeight - bottomMargin) {
+                            breakPage();
+                            if (line.repeat?.start) drawRepeatStart(lyricY());
+                        }
                         currentX = lineLeft + 12; // Hanging indent for wrapped lyrics
                     }
 
@@ -488,9 +527,8 @@ export async function drawPlaylistPdf(doc: jsPDF, playlist: ExportPlaylistData):
                 }
 
                 // The closing bar goes on the line's last row (the lyric row of the last wrapped line).
-                if (line.repeat?.end) drawRepeatEnd(currentX, lyricY(), line.repeat.times);
-
-                y += lineHeight;
+                if (line.repeat?.end) closeRepeatedLine(currentX, lyricY(), lineLeft, lineHeight, line.repeat.times, breakPage);
+                else y += lineHeight;
             }
 
             // Draw Chorus border indicator

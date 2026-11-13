@@ -1,5 +1,6 @@
-# Version: 1.0 | Date: Nov 13, 2026
+# Version: 1.1 | Date: Nov 13, 2026
 # Changelog
+# 1.1 | Nov 13, 2026 | Review of PR #560: wrapped rows stay above the footer, the closing bar never lands on text, an untitled item prints the translated label, the cache fingerprint ignores the order of the sources.
 # 1.0 | Nov 13, 2026 | Story 6.2.17 (#520, G4.3): the PDF sheet of a song shows the version's book, capo, beats and repeat bars like the screen; the pinned version and the item's transposition are exported; labels follow the exporting user's language.
 @ux-v3 @pdf-export @story-6.2.17
 Feature: PDF sheets match the screen
@@ -97,6 +98,29 @@ Feature: PDF sheets match the screen
     Given a playlist with a catalog song version with capo 5, beats "8", repeats and the source "Songbook A" page "38" compiled by "Compiler A"
     When the beats or the sources of the song change
     Then the cached PDF is not reused
+
+  @unit
+  Scenario: A wrapped row never runs into the footer
+    Given a playlist with a song of 40 short lines followed by one very long line
+    When I export it to PDF
+    Then no lyric is printed below the bottom margin on any page
+
+  @unit
+  Scenario: The closing bar never lands on the last word
+    Given a playlist with a song with a repeated line of words that fill the line up to the right margin
+    When I export it to PDF
+    Then the closing bar overlaps no text and stays inside the right margin
+
+  @unit
+  Scenario: An item without a title prints the translated untitled-song label
+    Given a playlist item whose song has no title
+    Then the sheet shows the translated untitled-song label in "nl"
+
+  @unit
+  Scenario: The order the database returns the sources in does not change the cached PDF
+    Given a playlist with a catalog song version with capo 5, beats "8", repeats and the source "Songbook A" page "38" compiled by "Compiler A"
+    When the database returns the sources in another order
+    Then the cached PDF is still reused
 
   @seed
   Scenario: The export's real query is accepted by the local API

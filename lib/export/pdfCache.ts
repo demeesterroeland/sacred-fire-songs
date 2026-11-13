@@ -13,6 +13,7 @@
  */
 
 import type { ExportSongData } from './pdfExport';
+import { sortSources } from '@/lib/songs/versionSources';
 
 export interface ExportFingerprintInput {
   userId: string;
@@ -54,8 +55,9 @@ export async function exportFingerprint(input: ExportFingerprintInput): Promise<
       s.transposition ?? null,
       s.tuning ?? '',
       s.beats ?? '',
-      // Source credit lines: book, page, compiler, original title and primary flag of every source.
-      (s.sources ?? []).map((r) => [r.id, r.is_primary, r.page ?? '', r.original_title ?? '', r.songbooks]),
+      // Source credit lines: book, page, compiler, original title and primary flag of every source, in the order the sheet
+      // prints them, so the order the database returns them in does not matter.
+      sortSources(s.sources ?? [], input.locale).map((r) => [r.id, r.is_primary, r.page ?? '', r.original_title ?? '', r.songbooks]),
       s.url ?? '',
       s.content,
     ]),

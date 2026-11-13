@@ -6,6 +6,8 @@ export interface DrawnText {
   x: number;
   y: number;
   size: number;
+  /** Printed width in points, measured in the font that was active when the text was drawn. */
+  width: number;
   page: number;
 }
 
@@ -19,7 +21,7 @@ export async function recordPlaylistPdf(playlist: ExportPlaylistData): Promise<{
   const original = doc.text.bind(doc);
   (doc as unknown as { text: unknown }).text = (text: string | string[], x: number, y: number, ...rest: unknown[]) => {
     for (const part of Array.isArray(text) ? text : [text]) {
-      drawn.push({ text: part, x, y, size: doc.getFontSize(), page: doc.getCurrentPageInfo().pageNumber });
+      drawn.push({ text: part, x, y, size: doc.getFontSize(), width: doc.getTextWidth(part), page: doc.getCurrentPageInfo().pageNumber });
     }
     return (original as (...args: unknown[]) => unknown)(text, x, y, ...rest);
   };

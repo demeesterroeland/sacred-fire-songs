@@ -194,6 +194,51 @@ Then('the cached PDF is not reused', async function (this: object) {
   assert.notEqual(await exportFingerprint({ ...base, songs: [{ ...song, sources: [] }] }), before);
 });
 
+// ── layout of long and repeated lines (review of PR #560) ───────────────────
+const PAGE_BOTTOM = 841.89 - 52;
+const PAGE_RIGHT = 595.28 - 40;
+Given('a playlist with a song of {int} short lines followed by one very long line', function (this: object, count: number) {
+  const words = Array.from({ length: 60 }, () => 'ab').join(' ');
+  const lines = Array.from({ length: count }, (_, i) => `short ${i}`).join('\n');
+  w(this).song = { title: 'Rise Up', content: `${lines}\n${words} ${words} ${words}` };
+});
+Given('a playlist with a song with a repeated line of words that fill the line up to the right margin', function (this: object) {
+  w(this).song = { title: 'Rise Up', content: `{start_of_repeat}\n${'ab '.repeat(65)}\n{end_of_repeat: x3}` };
+});
+Given('a playlist item whose song has no title', function (this: object) {
+  w(this).song = exportSongFromItem({ id: 'i', song_versions: { id: 'v', content_chordpro: '[E]Words', compositions: null } });
+});
+Then('no lyric is printed below the bottom margin on any page', function (this: object) {
+  const low = w(this).sheet!.drawn.filter((d) => d.size === 9.5 && d.y > PAGE_BOTTOM);
+  assert.deepEqual(low.map((d) => `${d.page}:${d.y}:${d.text}`), []);
+});
+Then('the closing bar overlaps no text and stays inside the right margin', function (this: object) {
+  const text = w(this).sheet!.drawn.filter((d) => d.size >= 9 && d.text.trim() !== '');
+  assert.ok(text.some((d) => d.text.startsWith(':‖ ×3')), 'closing bar is printed');
+  for (const a of text) {
+    assert.ok(a.x + a.width <= PAGE_RIGHT + 0.5, `${a.text} passes the margin`);
+    for (const b of text) {
+      if (a === b || a.page !== b.page || Math.abs(a.y - b.y) > 1) continue;
+      assert.ok(Math.min(a.x + a.width, b.x + b.width) - Math.max(a.x, b.x) <= 0.01, `"${a.text}" and "${b.text}" overlap`);
+    }
+  }
+});
+Then('the sheet shows the translated untitled-song label in {string}', async function (this: object, locale: Locale) {
+  const sheet = await recordPlaylistPdf({ title: 'Circle', songs: [w(this).song!], locale });
+  assert.ok(sheet.lines.includes(DICTIONARIES[locale]['pdf.untitledSong']));
+});
+When('the database returns the sources in another order', function () {
+  // handled in the assertion below
+});
+Then('the cached PDF is still reused', async function (this: object) {
+  const base = { userId: 'u', playlistId: 'p', locale: 'en', title: 'T' };
+  const a = source('Songbook A', '38', null, true);
+  const b = source('Songbook B', '2', null, false);
+  const c = source('Songbook C', '9', null, false);
+  const song = (sources: VersionSourceRow[]): ExportSongData => ({ title: 'Rise Up', content: '[C]Rise up', sources });
+  assert.equal(await exportFingerprint({ ...base, songs: [song([c, b, a])] }), await exportFingerprint({ ...base, songs: [song([a, b, c])] }));
+});
+
 // ── @seed ───────────────────────────────────────────────────────────────────
 Then('the select of the playlist export runs against the local API without error', async function () {
   // The scenario's seed transaction is invisible to PostgREST, so this reads whatever the local database holds (a guest
