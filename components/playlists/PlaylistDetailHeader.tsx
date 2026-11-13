@@ -129,7 +129,7 @@ export function PlaylistDetailHeader({
             <div className="flex items-center gap-3">
                 <Link
                     href="/library/playlists"
-                    className="text-gray-500 hover:text-gray-300 transition-colors shrink-0"
+                    className="shrink-0 text-fg-muted transition-colors hover:text-fg"
                     aria-label={t('playlists.detail.back')}
                 >
                     <ArrowLeft className="w-5 h-5" />
@@ -150,9 +150,9 @@ export function PlaylistDetailHeader({
                             className="min-h-tap w-full px-2 py-1 text-title font-bold rounded-control border border-line-strong bg-surface text-fg placeholder:text-fg-subtle"
                         />
                     ) : (
-                        <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 truncate">{optimisticTitle}</h1>
+                        <h1 className="truncate text-xl font-bold text-fg">{optimisticTitle}</h1>
                     )}
-                    <p className="text-xs text-gray-500 mt-0.5">
+                    <p className="mt-0.5 text-xs text-fg-muted">
                         {songCount === 1 ? t('playlists.songCountSingle') : t('playlists.songCount', { count: songCount })}
                     </p>
                 </div>
@@ -163,8 +163,8 @@ export function PlaylistDetailHeader({
                         <button
                             onClick={handleToggleVisibility}
                             aria-label={isPublic ? t('playlists.context.makePrivate') : t('playlists.context.makePublic')}
-                            title={isPublic ? 'Public — click to make private' : 'Private — click to make public'}
-                            className="p-1.5 rounded-control text-fg-muted hover:text-fg hover:bg-surface-2 transition-colors"
+                            title={isPublic ? t('playlists.context.makePrivate') : t('playlists.context.makePublic')}
+                            className="size-tap rounded-control text-fg-muted transition-colors hover:bg-surface-2 hover:text-fg"
                         >
                             {isPublic
                                 ? <Globe className="w-4 h-4 text-fg-muted" />
@@ -177,7 +177,7 @@ export function PlaylistDetailHeader({
                         disabled={isExportingPdf}
                         aria-label={t('playlists.export.menu')}
                         title={songCount === 0 ? t('playlists.export.addSongsFirst') : t('playlists.export.menu')}
-                        className="p-1.5 rounded-lg text-gray-600 hover:text-gray-800 dark:hover:text-gray-300 hover:bg-gray-200/60 dark:hover:bg-gray-700/60 transition-colors disabled:opacity-40"
+                        className="size-tap rounded-control text-fg-muted transition-colors hover:bg-surface-2 hover:text-fg disabled:opacity-40"
                     >
                         <Printer className="w-4 h-4" />
                     </button>
@@ -222,23 +222,23 @@ export function PlaylistDetailHeader({
                         className="text-sm text-left w-full"
                     >
                         {optimisticDesc
-                            ? <span className="text-gray-400">{optimisticDesc}</span>
-                            : <span className="italic text-gray-700 hover:text-gray-600 transition-colors">{t('playlists.detail.addDescription')}</span>
+                            ? <span className="text-fg-muted">{optimisticDesc}</span>
+                            : <span className="italic text-fg-muted transition-colors hover:text-fg">{t('playlists.detail.addDescription')}</span>
                         }
                     </button>
                 )
             ) : (
                 optimisticDesc
-                    ? <p className="text-sm text-gray-400">{optimisticDesc}</p>
+                    ? <p className="text-sm text-fg-muted">{optimisticDesc}</p>
                     : null
             )}
 
             {/* Login Prompt Modal for PDF Export */}
             <Dialog open={showLoginModal} onOpenChange={setShowLoginModal}>
-                <DialogContent className="sm:max-w-md bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 text-gray-900 dark:text-gray-100">
+                <DialogContent className="rounded-panel border-line bg-surface text-fg sm:max-w-md">
                     <DialogHeader>
                         <DialogTitle className="text-xl font-bold">{t('playlists.export.login.title')}</DialogTitle>
-                        <DialogDescription className="text-gray-600 dark:text-gray-400 mt-2">
+                        <DialogDescription className="mt-2 text-fg-muted">
                             {t('playlists.export.login.description')}
                         </DialogDescription>
                     </DialogHeader>

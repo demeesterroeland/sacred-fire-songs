@@ -1559,3 +1559,9 @@
 - [x] `app/songs/[id]/page.tsx` load-error state shows `t('song.error.unexpected')` instead of raw `songError.message` (logged to console)
 - [x] Tests: feature `ux-v2-broken-song-links.feature` (`@unit`, `@e2e`), Vitest `brokenSongLinks.test.ts` + `fetchSong.test.ts`, E2E `ux-v2-broken-song-links.spec.ts`
 - [x] Docs: design doc 2.18, E2E overview 1.27
+
+## Session November 13, 2026 (Story 6.1.35, #485, group 6: playlists)
+- [x] `PlaylistContextMenu`, `AddSongsSheet` and `PlaylistDetailHeader` use semantic colour tokens
+- [x] Removed 85 palette classes; ratchet lowered 581 → 496
+- [x] Tests: `ux-v2-sober-playlists.feature` (`@unit`, `@e2e`), Playwright axe colour-contrast checks in light and dark mode, including the guest export dialog
+- [x] Docs: design doc 2.21, E2E overview 1.30; no new translation keys

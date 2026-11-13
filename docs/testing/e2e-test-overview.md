@@ -1,6 +1,6 @@
 # E2E Test Overview & Matrix: Sacred Fire Songs
 
-**Version:** 1.29
+**Version:** 1.30
 **Status:** Living Document
 **Date:** Nov 13, 2026
 **Tracking:** GH #142
@@ -33,6 +33,7 @@
 | **1.27** | Nov 13, 2026 | LIB-13: `/explore` redirects (308) to `/songs` with its query string (#574), `ux-v2-explore-redirect.spec.ts`. |
 | **1.28** | Nov 13, 2026 | VIEW-09: malformed `[id]` links render not-found and song load failures show the translated message instead of raw `error.message` (#578), `ux-v2-broken-song-links.spec.ts`. |
 | **1.29** | Nov 13, 2026 | #485 group 5: ACC-08 `ux-v2-sober-account.spec.ts` (member): axe colour contrast on the Profile, Security and Preferences tabs of `/account/settings`, light and dark; the active tab and active theme button announce `aria-pressed="true"`. |
+| **1.30** | Nov 13, 2026 | #485 group 6: PL-15 `ux-v2-sober-playlists.spec.ts` (member + guest): axe colour contrast on playlist details, the context menu, Add Songs sheet and export sign-in dialog, light and dark on desktop and mobile. |
 | **1.23** | Nov 11, 2026 | #490: `ux-v2-profile-playback.spec.ts` (member): recordings on a singer profile play there one at a time, the play button is a 44 px target and the row opens the song with that take. |
 | **1.22** | Nov 11, 2026 | #492: SONG-08 now checks that a song row has no delete button (an admin on `/songs`, `ux-v2-song-rows.spec.ts`); deleting is in the song page's ⋮ menu only (SONG-07). |
 | **1.19** | Nov 6, 2026 | UX v2 validation round 1 (Part of #375): new spec `ux-v2-validation-1.spec.ts` (one focus style, suggestions panel in the flow on `/songs` and Home, search options tokens and category name, song flags versus the reader; fixed-id fixture `VALIDATION_1_FIXTURE_IDS`, removed by `e2e/global-teardown.ts`); `ux-v2-reader-tools.spec.ts` uses a short window so auto-scroll is offered and tests that it is not on a song that fits; `ux-v2-song-meta.spec.ts` checks the expanded list. |
@@ -209,6 +210,7 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 | PL-12 | Per-song transpose | Set +/- semitone offset per song in playlist; original unchanged | offset persists on reload | M(musician) | ⚠️ | 🔲 | P2 | 4.1.9 |
 | PL-13 | Cover color/icon | Assign cover color/icon; reflected on card | default grey when unset | M(owner) | ⚠️ | 🔲 | P2 | 4.1.10 |
 | PL-14 | Presentation/ceremony mode | Full-screen present; arrows/swipe advance; wake lock active; Esc exits | mobile swipe vs desktop keys | M | ⚠️ | 🔲 | P1 | 4.1.7 |
+| PL-15 | Sober playlist surfaces | Playlist details, menu, Add Songs sheet and export sign-in dialog pass axe colour-contrast checks | light and dark mode; desktop and mobile | M/G | ✅ | ✅ | P2 | `ux-v2-sober-playlists.spec.ts` (Story 6.1.35) |
 
 ### 4.8 Gatekeeper Tools (Epic 3.4)
 

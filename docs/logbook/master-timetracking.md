@@ -155,4 +155,5 @@
 | **November 13, 2026** | **Fix/Nav (#574)**: permanent redirect from `/explore` to `/songs` with the query string, tests, docs. (estimate) | ~0.25 Hours | Completed |
 | **November 13, 2026** | **Fix/UX (#578)**: non-UUID ids on `[id]` routes render not-found; song load error shows translated message instead of raw `error.message`, tests, docs. (estimate) | ~0.5 Hours | Completed |
 | **November 13, 2026** | **Fix/UI (#485 group 5)**: sober tokens in account settings (Profile, Security, Preferences, Privacy), shared Button primitives, 44 px password visibility toggles, 8-locale i18n, unit + BDD + E2E tests, docs. (estimate) | ~1.0 Hours | Completed |
-| **Total** | **Development + AI Collaboration** | **~272.25 Hours** | |
+| **November 13, 2026** | **Fix/UX (#485 group 6)**: sober tokens in the playlist menu, Add Songs sheet and playlist detail header, palette ratchet, BDD and light/dark contrast E2E tests, docs. (estimate) | ~1.0 Hours | Completed |
+| **Total** | **Development + AI Collaboration** | **~273.25 Hours** | |
