@@ -6,7 +6,7 @@
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
-| 0.11 | Nov 13, 2026 | Glossary: Both (languages), the original and its translation together on the song page (UX v3, #517). |
+| 0.11 | Nov 13, 2026 | Glossary: Both (languages) in the switch **Original · Translation · Both**; the language switch only picks the language of the translation (UX v3, #517). |
 | 0.10 | Nov 13, 2026 | Admin portal: **Catalog edits** (imported songs corrected in the app, kept safe from the next import; UX v3, #524). Glossary: Catalog edit. |
 | 0.9 | Nov 13, 2026 | Roles: admins link a duplicate song as a version of another song; gatekeepers only songs they own (song page → ⋮ → **Link as a version of…**; both songs public or both private; UX v3, #512). Glossary: Linked song. |
 | 0.8 | Nov 12, 2026 | Glossary: Language switch, the switch next to the version switch that shows a translation of the song (UX v3, #516). |
@@ -41,8 +41,8 @@
 | :--- | :--- |
 | Practice | Panel on a song with a **Listen** tab (reference tracks) and a **Record** tab (your recorder and **My recordings**). Replaces the old names Rehearsal Space, Voice Recorder and Recordings. |
 | Version | One arrangement of a song (for example *Original*, *Simplified*, *Live*) with its own lyrics, key and recordings. Songs with several versions show a switch under the title. |
-| Language switch | Grey switch next to the version switch with **Original language** and the languages the song has a translation in. Choosing a language shows that translation of the lyrics under the version you are reading; choosing a version returns to the original language. |
-| Both (languages) | Choice next to the language switch while a translation is shown: each verse of the original with its translation, under it on a phone and side by side on a larger screen. Chords stay on the original. |
+| Language switch | Grey switch next to **Original · Translation · Both** with the languages the song has a translation in, shown while you read **Translation** or **Both** and the song has more than one. Choosing a language shows that translation under the version you are reading; choosing a version returns to the original. |
+| Both (languages) | Choice in the switch **Original · Translation · Both** of a song with a translation: each verse of the original with its translation, under it on a phone and side by side on a larger screen. Chords stay on the original. |
 | Catalog edit | A correction made in the app to a song or version that came from an imported songbook catalog. The next import leaves it alone; admins find it under **Admin → Catalog edits**, download the list as JSON for the catalog, and press **Taken over** once the catalog has the correction. |
 | Linked song | A duplicate an admin, or a gatekeeper who owns both songs, linked as a version of another song (both public or both private): its versions, recordings and playlist entries now live in that song, its title became an other title of it, and its old link opens it. The sheet shows what moves before you confirm; it cannot be undone. |
 | Reference Track | YouTube / SoundCloud / Spotify version of the song. |
