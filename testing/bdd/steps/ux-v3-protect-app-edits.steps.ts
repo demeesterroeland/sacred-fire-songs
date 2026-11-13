@@ -56,10 +56,10 @@ export interface ProtectEditsBddState {
 }
 
 const ACCOUNT_EMAILS: Record<string, string> = {
-  member: 'roel.de.meester+member@gmail.com',
-  expert: 'roel.de.meester+expert@gmail.com',
-  gatekeeper: 'roel.de.meester+gatekeeper@gmail.com',
-  admin: 'roel.de.meester+admin@gmail.com',
+  member: 'member@sfs.example',
+  expert: 'expert@sfs.example',
+  gatekeeper: 'gatekeeper@sfs.example',
+  admin: 'admin@sfs.example',
 };
 
 const CORRECTED_LYRICS = '[G]Corrected in the app';
