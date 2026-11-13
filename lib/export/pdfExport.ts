@@ -76,7 +76,7 @@ export function getPdfLabels(locale: Locale = DEFAULT_LOCALE) {
         page: (page: number, total: number) => tr('pdf.page', { page, total }),
         subtitle: (count: number, date: string) => tr(count === 1 ? 'pdf.subtitle.one' : 'pdf.subtitle.other', { count, date }),
         by: (author: string) => tr('pdf.by', { author }),
-        /** "Key E", "Capo 5", "Standard", "Beats 8": the screen's meta line (`technicalItems`), empty values left out. */
+        /** "Key E", "Capo 5", "Beats 8" (plus non-standard tuning): the screen's meta line (`technicalItems`), empty/standard values left out. */
         technical: (version: VersionTechnical) => technicalItems(version, tr as unknown as TranslateFn),
         /** The source line(s) of the version, primary first, as the song page prints them. */
         sourceLines: (rows: ReadonlyArray<VersionSourceRow> | null | undefined, songTitle: string) =>
@@ -381,7 +381,7 @@ export async function drawPlaylistPdf(doc: jsPDF, playlist: ExportPlaylistData):
         doc.text(formattedSong.title, leftMargin, y);
         y += 16;
 
-        // Meta line, as on the screen: "By Author · Key E · Capo 5 · Standard · Beats 8". Values a version does not have are left out.
+        // Meta line, as on the screen: "By Author · Key E · Capo 5 · Beats 8" (plus non-standard tuning). Values a version does not have (and standard tuning) are left out.
         const metaItems = [
             formattedSong.author ? labels.by(formattedSong.author) : null,
             ...labels.technical({

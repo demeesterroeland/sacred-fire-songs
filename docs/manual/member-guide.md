@@ -1,11 +1,12 @@
 # Member Guide (draft)
 
-**Version:** 0.38 | **Date:** Nov 13, 2026
+**Version:** 0.39 | **Date:** Nov 13, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.39 | Nov 13, 2026 | Song page: musicians transpose with the **− n +** stepper right after the **Chords** switch in the toolbar (it is not in the ⋮ menu any more) and it shows only while chords are on. **Key**, **Capo** and non-standard **Tuning** (named, e.g. `Key E · Tuning: Drop D`) show only while chords are on; after a transpose the line shows the new key; standard tuning is omitted completely (on the song page and in the PDF); the **Beats** stay (UX v3, #566). |
 | 0.38 | Nov 13, 2026 | Search options: **Songbook** and **Language** now also appear when you open Search options from another page, counting all songs you may read (public songs plus your own private songs, or all songs for admins) (UX v3, #570). |
 | 0.37 | Nov 13, 2026 | Search options: languages are chosen only in the **Language** select, no longer under category & tag filters (UX v3, #569); song edit forms keep the *Languages* group unchanged so you can still set a song's language. |
 | 0.36 | Nov 13, 2026 | Search: when a song is found by another name, the grey line under it reads *Also known as …* (in the song list and in **+ Add Songs**). |
@@ -98,7 +99,7 @@ Your private songs (not public yet) look lighter in every song list and on the s
 
 **In a playlist** you can: reorder songs by dragging, add a description, switch **public / private** (lock icon), **print / export PDF** (printer icon) for the ceremony, share the link of a public playlist, and duplicate it via ⋯ **(verify menu labels)**.
 
-The PDF has one song per section with chords, the details of the version in the playlist (key, capo, tuning, beats), its source under the lyrics and the repeat bars, and a footer with the site address and a QR code to each song. Exporting the same unchanged playlist again reuses the earlier PDF, so it is fast.
+The PDF has one song per section with chords, the details of the version in the playlist (key, capo, non-standard tuning, beats), its source under the lyrics and the repeat bars, and a footer with the site address and a QR code to each song. Exporting the same unchanged playlist again reuses the earlier PDF, so it is fast.
 
 ## Adding a song
 
@@ -123,7 +124,7 @@ A song that comes from a printed songbook has a **Songbook details** section (ta
 
 - **Profile:** display name. E-mail changes go via support.
 - **Security:** change password, log out from all devices.
-- **Preferences:** appearance, language, keep screen awake, auto-hide navigation on song pages and e-mail notifications (text size is set on the song page with A− / A+, auto-scroll with ▶ next to them; transpose, scroll speed and **Screen stays on** are in the ⋮ menu at the top of the song page; transpose moves alternative chords such as **A7/C7** together and keeps the bass of a slash chord such as **C/E**).
+- **Preferences:** appearance, language, keep screen awake, auto-hide navigation on song pages and e-mail notifications (text size is set on the song page with A− / A+, auto-scroll with ▶ next to them; musicians transpose with the **− n +** stepper next to the **Chords** switch, and the scroll speed and **Screen stays on** are in the ⋮ menu at the top of the song page; transpose moves alternative chords such as **A7/C7** together and keeps the bass of a slash chord such as **C/E**).
 
 ## Public profile
 

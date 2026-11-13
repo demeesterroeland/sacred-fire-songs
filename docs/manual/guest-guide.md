@@ -1,11 +1,12 @@
 # Guest Guide (draft)
 
-**Version:** 0.38 | **Date:** Nov 13, 2026
+**Version:** 0.39 | **Date:** Nov 13, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.39 | Nov 13, 2026 | Song page: **Key**, **Capo** and non-standard **Tuning** (named, e.g. `Key D · Tuning: Drop D`) show only while the **Chords** switch is on (the **Beats** stay); standard tuning is omitted (`Key E · Capo 3 · Beats 8`). A song without chords has no Chords switch and no key line (UX v3, #566). |
 | 0.38 | Nov 13, 2026 | Search options: the **Songbook** and **Language** choices now also appear when you open Search options from another page (for example Home or a playlist page), showing how many public songs you can view in each book or language and taking you to those songs on the Songs page (UX v3, #570). |
 | 0.37 | Nov 13, 2026 | Search options: languages are now chosen only in the **Language** select, no longer under category & tag filters (UX v3, #569). Old links with a language in `?category=` or `?tag=` still list that language and show it selected in **Language**. |
 | 0.36 | Nov 13, 2026 | Search: when a song is found by another name, the grey line under it reads *Also known as …*. |
@@ -70,7 +71,7 @@ The ☰ menu repeats the main places (Home, Songs; under Library the same tabs a
 ## Reading a song
 
 - The title is at the top. Under it, one grey line shows the author and the tags (category, tradition, language); tap it to see them all as links. A song with several authors shows each name as its own link.
-- A second line shows **Key**, **Capo**, **Tuning** and, when the songbook gives them, **Beats**, e.g. `Key E · Capo 3 · Standard · Beats 8`. It shows the values of the version you are reading.
+- A second line shows **Key**, **Capo**, non-standard **Tuning** (for example `Tuning: Drop D`; standard tuning is omitted) and, when the songbook gives them, **Beats**, e.g. `Key E · Capo 3 · Beats 8`. It shows the values of the version you are reading. **Key**, **Capo** and **Tuning** only show while **Chords** is on; the **Beats** stay.
 - If this version has a note from the songbook it was printed in, **About this song** sits under those lines. Tap it to read the background; it starts closed, and it is not shown when the version has no note.
 - If the song exists in more than one version (for example *Original* and *Simplified*, or the same song from two songbooks), a grey switch appears under those lines. A version is named after its songbook, a translation after its language (in your app language); the original comes first, then versions from other books, then translations. Tap a name to read that version; with many versions the switch scrolls sideways inside its own strip. The app opens the first version each time. Songs with one version show no switch. If the song also has translations, a second grey switch sits next to it: **Original · Translation · Both**. **Translation** shows the translation instead of the original (its own title shows above the lyrics when it differs, and `Translated by …` when the translator is known); **Both** shows each verse of the original with its translation, the translation under the verse on a phone and side by side on a larger screen. Verses that have no partner are shown too. Chords stay on the original, and **A−** / **A+** change both languages. Tap **Original** to go back. When the song has more than one translation, a third switch with the languages (named in your app language) appears next to **Translation** and **Both**: tap a language to read that one; until you do, the first language is shown. Choosing another version returns to the original. Songs without translations show neither switch.
 - Under those lines: **Chords** switches the chords on or off, **A−** / **A+** make the text smaller or larger. The app remembers your choice on this device.

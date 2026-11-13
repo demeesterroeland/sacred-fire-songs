@@ -62,11 +62,16 @@ function cmapCodePoints(ttf: Buffer): Set<number> {
 }
 
 describe('PDF sheet fidelity (#520)', () => {
-  it('prints key, capo, tuning and beats like the screen meta line, and the source line under the lyrics', async () => {
+  it('prints key, capo and beats like the screen meta line (omitting standard tuning), and the source line under the lyrics', async () => {
     const { lines } = await sheet([song()]);
-    expect(lines).toContain('By Author A · Key E · Capo 5 · Standard · Beats 8');
+    expect(lines).toContain('By Author A · Key E · Capo 5 · Beats 8');
     expect(lines).toContain('Songbook A · p. 38 · compiled by Compiler A');
     expect(lines.indexOf('Songbook A · p. 38 · compiled by Compiler A')).toBeGreaterThan(lines.findIndex((l) => l.includes('Amen')));
+  });
+
+  it('prints non-standard tuning with its label', async () => {
+    const { lines } = await sheet([song({ tuning: 'Drop D' })]);
+    expect(lines).toContain('By Author A · Key E · Capo 5 · Tuning: Drop D · Beats 8');
   });
 
   it('prints no empty labels for a song without capo, beats or source', async () => {
@@ -118,7 +123,7 @@ describe('PDF sheet fidelity (#520)', () => {
 
   it('labels follow the exporting user\'s language', async () => {
     const { lines } = await sheet([song()], 'nl');
-    expect(lines.find((l) => l.includes('Capo 5'))).toBe(`Door Author A · ${DICTIONARIES.nl['song.meta.key'].replace('{key}', 'E')} · Capo 5 · ${DICTIONARIES.nl['song.metadata.standard']} · ${DICTIONARIES.nl['song.meta.beats'].replace('{beats}', '8')}`);
+    expect(lines.find((l) => l.includes('Capo 5'))).toBe(`Door Author A · ${DICTIONARIES.nl['song.meta.key'].replace('{key}', 'E')} · Capo 5 · ${DICTIONARIES.nl['song.meta.beats'].replace('{beats}', '8')}`);
     expect(lines.some((l) => l.includes(DICTIONARIES.nl['song.source.compiledBy'].replace('{compiler}', 'Compiler A')))).toBe(true);
   });
 

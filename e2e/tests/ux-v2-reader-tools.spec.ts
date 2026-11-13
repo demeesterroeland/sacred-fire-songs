@@ -83,43 +83,43 @@ test.describe('Musician @story-6.1.10', () => {
     await expect(page.getByTestId('song-meta-lines')).toContainText('Key E');
     await expect(page.getByTestId('chord').first()).toHaveText('E');
 
-    const sheet = await openSongMenu(page);
-    const up = sheet.getByRole('button', { name: 'Up a semitone' });
+    // #566: the stepper sits next to the Chords switch in the toolbar (it is not in the ⋮ menu any more).
+    const stepper = page.getByTestId('transpose-stepper');
+    const up = stepper.getByRole('button', { name: 'Up a semitone' });
     await up.click();
     await up.click();
-    await expect(sheet.getByTestId('transpose-value')).toHaveText('+2');
-    await expect(sheet.getByTestId('transpose-key')).toContainText('F#');
-    await sheet.getByRole('button', { name: 'Close' }).last().click();
+    await expect(stepper.getByTestId('transpose-value')).toHaveText('+2');
 
     await expect(page.getByTestId('chord').first()).toHaveText('F#');
     await expect(page.getByTestId('song-meta-lines')).toContainText('Key F#');
+    await expect(page.getByTestId('song-meta-lines')).not.toContainText('Key E');
 
     // Original key restores everything.
-    await openSongMenu(page);
-    await page.getByRole('button', { name: 'Original key' }).click();
-    await songMenuSheet(page).getByRole('button', { name: 'Close' }).last().click();
+    await stepper.getByRole('button', { name: /Original key/ }).click();
+    await expect(stepper.getByTestId('transpose-value')).toHaveText('0');
     await expect(page.getByTestId('chord').first()).toHaveText('E');
     await expect(page.getByTestId('song-meta-lines')).toContainText('Key E');
   });
 
-  test('the toolbar stays one row of 44 px controls on 390 px, clear of the action bar and the lyrics', async ({ page }) => {
+  test('the toolbar keeps 44 px controls inside 390 px (it wraps, never scrolls sideways), clear of the action bar and the lyrics', async ({ page }) => {
     test.skip(!longSong, 'no public chord song in the seed');
     await openSong(page, longSong);
     await page.setViewportSize({ width: 390, height: 600 }); // lyrics run below the fold: ▶ is offered
     await expect(page.getByTestId('autoscroll-toggle')).toBeVisible();
     const toolbar = page.getByTestId('reader-toolbar');
     const buttons = toolbar.locator('button');
-    expect(await buttons.count()).toBe(4); // Chords · A− · A+ · Auto-scroll (the ⋮ menu is in the title bar)
+    // Chords · − · + · A− · A+ · Auto-scroll (#566: the stepper joins the row; its value is plain text at 0; the ⋮ menu is in the title bar)
+    expect(await buttons.count()).toBe(6);
     const rects = await buttons.evaluateAll((els) =>
       els.map((el) => {
         const r = el.getBoundingClientRect();
-        return { top: r.top, height: r.height, right: r.right };
+        return { top: r.top, height: r.height, left: r.left, right: r.right };
       }),
     );
     for (const r of rects) {
       expect(r.height).toBeGreaterThanOrEqual(44);
+      expect(r.left).toBeGreaterThanOrEqual(0);
       expect(r.right).toBeLessThanOrEqual(390);
-      expect(Math.abs(r.top - rects[0].top)).toBeLessThan(2); // one row
     }
     expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(390);
 
@@ -234,6 +234,7 @@ test.describe('Member @story-6.1.10', () => {
     const sheet = await openSongMenu(page);
     await expect(sheet.getByRole('group', { name: 'Auto-scroll' })).toBeVisible();
     await expect(sheet.getByRole('group', { name: 'Transpose' })).toHaveCount(0);
+    await expect(page.getByTestId('transpose-stepper')).toHaveCount(0);
   });
 });
 
@@ -245,6 +246,7 @@ test.describe('Guest @story-6.1.10', () => {
     await expect(page.getByTestId('autoscroll-toggle')).toBeVisible();
     await openSongMenu(page);
     await expect(songMenuSheet(page).getByRole('group', { name: 'Transpose' })).toHaveCount(0);
+    await expect(page.getByTestId('transpose-stepper')).toHaveCount(0);
   });
 });
 
@@ -279,7 +281,7 @@ test.describe('Auto-scroll only when the song does not fit @validation-1', () =>
     await expect(page.getByTestId('autoscroll-toggle')).toHaveAttribute('aria-pressed', 'false'); // did not restart
   });
 
-  test('the tools sheet of a musician has no Auto-scroll section on a song that fits, but still Transpose', async ({ browser }) => {
+  test('the ⋮ menu of a musician has no Auto-scroll section on a song that fits and never a Transpose; the stepper is in the toolbar', async ({ browser }) => {
     test.skip(!longSong, 'no public chord song in the seed');
     const ctx = await browser.newContext({ storageState: ROLES.musician.storage, viewport: { width: 390, height: 5000 } });
     const page = await ctx.newPage();
@@ -287,8 +289,10 @@ test.describe('Auto-scroll only when the song does not fit @validation-1', () =>
     await page.setViewportSize({ width: 390, height: 5000 });
     await expect(page.getByTestId('autoscroll-toggle')).toHaveCount(0);
     const sheet = await openSongMenu(page);
-    await expect(sheet.getByRole('group', { name: 'Transpose' })).toBeVisible();
+    await expect(sheet.getByRole('group', { name: 'Transpose' })).toHaveCount(0);
     await expect(sheet.getByRole('group', { name: 'Auto-scroll' })).toHaveCount(0);
+    await page.keyboard.press('Escape');
+    await expect(page.getByTestId('transpose-stepper')).toBeVisible();
     await ctx.close();
   });
 });

@@ -176,6 +176,7 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'song.metadata.standard': 'Estándar',
   'song.meta.key': "Tono {key}",
   'song.meta.capo': "Capo {capo}",
+  'song.meta.tuning': "Afinación: {tuning}", // #566: needs a native speaker check (Spanish loanword, as pdf.tuning)
   'song.meta.beats': 'Beats {beats}',
   'song.meta.showDetails': 'Astawan rikuchiy',
   'song.meta.hideDetails': 'Pakay',
@@ -694,7 +695,6 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'viewer.transpose.down': "Hukllaña semitonu uraypi",
   'viewer.transpose.up': "Hukllaña semitonu hanaypi",
   'viewer.transpose.reset': "Ñawpaq tono",
-  'viewer.transpose.key': "Tono {key} (ñawpaq {original})",
   'viewer.transpose.state': "Tikrasqa {n}",
   'viewer.awake': "Pantalla rikch’arisqa kachkan",
   'settings.prefs.offlineMode': 'Mana internet modo',

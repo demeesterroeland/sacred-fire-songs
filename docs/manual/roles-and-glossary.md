@@ -1,11 +1,12 @@
 # Roles & Glossary (draft)
 
-**Version:** 0.11 | **Date:** Nov 13, 2026
+**Version:** 0.12 | **Date:** Nov 13, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.12 | Nov 13, 2026 | Transpose is in the song page toolbar, right after the Chords switch, and shows only while chords are on (no longer in the ⋮ menu; UX v3, #566). |
 | 0.11 | Nov 13, 2026 | Glossary: Both (languages) in the switch **Original · Translation · Both**; the language switch only picks the language of the translation (UX v3, #517). |
 | 0.10 | Nov 13, 2026 | Admin portal: **Catalog edits** (imported songs corrected in the app, kept safe from the next import; UX v3, #524). Glossary: Catalog edit. |
 | 0.9 | Nov 13, 2026 | Roles: admins link a duplicate song as a version of another song; gatekeepers only songs they own (song page → ⋮ → **Link as a version of…**; both songs public or both private; UX v3, #512). Glossary: Linked song. |
@@ -30,7 +31,7 @@
 | Add songs, edit own songs | — | ✅ | ✅ | ✅ |
 | Playlists, PDF export | — | ✅ | ✅ | ✅ |
 | Record, share, publish own recordings | — | ✅ | ✅ | ✅ |
-| Transpose (song page → ⋮), sheet music | — | musician | musician | ✅ |
+| Transpose (song page toolbar, next to Chords), sheet music | — | musician | musician | ✅ |
 | Edit details & links of any song, curate public playlists | — | — | ✅ | ✅ |
 | Link a duplicate song as a version of another song (song page → ⋮ → **Link as a version of…**; both songs public or both private) | — | — | ✅ own songs only (source and target) | ✅ any song |
 | Admin portal (users overview, catalog edits) | — | — | — | ✅ |
