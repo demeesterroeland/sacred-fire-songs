@@ -49,6 +49,12 @@ describe('song selects', () => {
     expect(SONGS_SELECT.split(/song_versions\s*\(/)[0]).toMatch(/\*/);
   });
 
+  // Story 6.2.23 (#547): the list select carries the translated titles for the search, still through ONE embed.
+  it('the song list select embeds the translations once and asks only for language and title', () => {
+    expect(translationEmbeds(SONGS_SELECT)).toHaveLength(1);
+    expect(SONGS_SELECT).toMatch(/song_translations\s*\(\s*language\s*,\s*title\s*\)/);
+  });
+
   // Story 6.2.20 (#523): the edit form is prefilled from these; without them it would show empty fields and a save
   // of "nothing changed" would look like a change.
   it('the edit page select asks for the beats and the note of each version', () => {

@@ -128,6 +128,7 @@ const en = {
   'songs.noResultsFilter': 'There are no songs available for this filter.',
   'songs.matchAlias': 'Matched by alias: {text}',
   'songs.matchSourceTitle': 'Matched by songbook title: {text}',
+  'songs.matchTranslation': '{language}: {text}',
   'songs.matchAuthor': 'Matched by author: {text}',
 
   // ─── Songs – Detail Page ──────────────────────────────────────────────────

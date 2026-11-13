@@ -19,6 +19,8 @@ export interface Song {
     sourceTitles?: string[];
     /** The books any version of the song was printed in (`song_version_sources` → `songbooks`), for the songbook filter (#522). */
     songbooks?: { id: string; name: string }[];
+    /** The title of each translation with its language tag (`song_translations`, #547), searched too; the lyrics are not. */
+    translationTitles?: { language: string; title: string }[];
     songKey: string | null;
     color: string;
     ownerId?: string;

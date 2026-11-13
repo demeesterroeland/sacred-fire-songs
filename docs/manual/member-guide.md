@@ -1,11 +1,12 @@
 # Member Guide (draft)
 
-**Version:** 0.33 | **Date:** Nov 13, 2026
+**Version:** 0.34 | **Date:** Nov 13, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.34 | Nov 13, 2026 | Search: the search box also finds a song by the title of one of its translations; the grey line under the song names the language, for example *Dutch: Moeder Aarde* (UX v3, #547). Only translation titles are searched, not the translated lyrics. The **+ Add Songs** search in a playlist still matches the title only. |
 | 0.33 | Nov 13, 2026 | Search options: **Songbook** and **Language** choices with the number of songs behind each name; see the Guest Guide. They combine with your library toggles (favorites, my songs, recordings, status). |
 | 0.32 | Nov 13, 2026 | Song page: a song with a translation has the switch **Original · Translation · Both**. **Translation** shows the translation alone (not transposed); **Both** shows the original and the translation together, verse by verse (under each other on a phone, side by side on a larger screen), with chords and transpose on the original and the translation as lyrics only. With more than one translation the language switch next to it picks the language (the first one until you pick); it no longer has **Original language**. A link with `?lang=nl&view=both` opens both, `?lang=nl&view=translation` the translation, and Share keeps it; choosing another version returns to the original (UX v3, #517). |
 | 0.31 | Nov 13, 2026 | Playlist PDF: each song shows the same details as the song page: **Key**, **Capo**, tuning and **Beats** of the version in the playlist, the **source** (songbook, page, compiler) under the lyrics, and the repeat bars **‖: … :‖** (with ×2 when it says how often). A value the version does not have is not printed. A transposed song prints its new key and chords. The labels follow your language; a translation is never printed, the sheet always has the song's own lyrics. |

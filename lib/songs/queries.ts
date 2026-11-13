@@ -13,6 +13,7 @@ import type { SourceBook } from './versionSources';
 export const SONGS_SELECT = `
   *,
   song_versions(id, created_at, version_kind, key, content_chordpro, melody_notation, song_version_sources(original_title, songbooks(id, title, short_name))),
+  song_translations(language, title),
   song_category_map(
     categories(
       name,
@@ -170,6 +171,8 @@ export interface CompositionRow {
   has_chords?: boolean | null;
   has_melody?: boolean | null;
   song_versions: SongVersionRow[] | null;
+  /** The translations of the song: only the language and the title are selected, for the search (#547). */
+  song_translations?: { language: string; title?: string | null }[] | null;
   song_category_map: SongCategoryMapRow[] | null;
 }
 
@@ -217,6 +220,11 @@ export function mapCompositionToSong(
       (item.song_versions ?? []).flatMap((v) => (v.song_version_sources ?? []).map((src) => src.original_title))
     ),
     songbooks: songbooksOfVersions(item.song_versions),
+    // Every titled translation is searchable, also one without lyrics yet: its title still names the song (#547).
+    translationTitles: (item.song_translations ?? []).flatMap((tr) => {
+      const title = normalizeWhitespace(tr.title ?? '');
+      return title ? [{ language: tr.language, title }] : [];
+    }),
     songKey: version?.key || null,
     content: version?.content_chordpro || '',
     melodyNotation: version?.melody_notation || '',

@@ -133,6 +133,7 @@ const ru: Partial<Record<TranslationKey, string>> = {
   'songs.noResultsFilter': 'Для этого фильтра нет доступных песен.',
   'songs.matchAlias': 'Найдено по другому названию: {text}',
   'songs.matchSourceTitle': 'Найдено по названию в сборнике: {text}',
+  'songs.matchTranslation': '{language}: {text}',
   'songs.matchAuthor': 'Найдено по автору: {text}',
 
   // ─── Songs – Detail Page ──────────────────────────────────────────────────
