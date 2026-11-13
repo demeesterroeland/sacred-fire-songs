@@ -1,11 +1,12 @@
 # Member Guide (draft)
 
-**Version:** 0.31 | **Date:** Nov 13, 2026
+**Version:** 0.32 | **Date:** Nov 13, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.32 | Nov 13, 2026 | Song page: a song with a translation has the switch **Original · Translation · Both**. **Translation** shows the translation alone (not transposed); **Both** shows the original and the translation together, verse by verse (under each other on a phone, side by side on a larger screen), with chords and transpose on the original and the translation as lyrics only. With more than one translation the language switch next to it picks the language (the first one until you pick); it no longer has **Original language**. A link with `?lang=nl&view=both` opens both, `?lang=nl&view=translation` the translation, and Share keeps it; choosing another version returns to the original (UX v3, #517). |
 | 0.31 | Nov 13, 2026 | Playlist PDF: each song shows the same details as the song page: **Key**, **Capo**, tuning and **Beats** of the version in the playlist, the **source** (songbook, page, compiler) under the lyrics, and the repeat bars **‖: … :‖** (with ×2 when it says how often). A value the version does not have is not printed. A transposed song prints its new key and chords. The labels follow your language; a translation is never printed, the sheet always has the song's own lyrics. |
 | 0.30 | Nov 13, 2026 | Songbooks: **Library → Songbooks** lists the printed songbooks; a book's page lists its songs by page (also your own private songs, marked with a lock, which nobody else sees there). The grey source line on a song page links to its book (UX v3, #514). |
 | 0.29 | Nov 13, 2026 | Edit Song: the **Songbook details** section lets you correct the **Beats** (for example 8, 6, 8y4 or 8,4) and the **About this song** note of the version you are editing; clear a field to remove it. The **Source** (songbook, page, compiler) is shown there but cannot be changed; admins also see **Correct source** to fix its page and original title (UX v3, #523). |

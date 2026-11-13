@@ -1,6 +1,6 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 2.13
+**Version:** 2.14
 **Status:** Living Document
 **Date:** Nov 13, 2026
 
@@ -63,6 +63,7 @@
 | **1.92** | Nov 6, 2026 | Epic 6.1: validation round 1 after the owner's phone run (Part of #375): auto-scroll only when the lyrics run below the fold (Story 6.1.10 / #394), expanded meta line (6.1.7 / #391), one focus style for text fields, the search suggestions in the page flow (6.1.29 / #413), search options on tokens, translated feedback and song flags across versions (6.1.11 / #395). Acceptance criteria of those stories now read as in `docs/testing/ux-v2-validation-1.feature`. |
 | **1.93** | Nov 7, 2026 | Epic 6.1: review round on the validation round 1 PR (#474, Part of #375): acceptance criteria of Stories 6.1.10 (auto-scroll offered only when the lyric text runs below the visible area above the fixed bars), 6.1.29 (suggestions close on the click and keep the scroll position), 6.1.1 (one focus cue per field, readable chip counts), 6.1.11 (a lyrics-only version has no Chords switch; a bracketed section label is not a chord) and the i18n policy (no raw server or database text in a toast) verified against the code; decisions UXA-061 to UXA-066. |
 | **1.94** | Nov 7, 2026 | Epic 6.1: validation round 2, batch 2 (Part of #375): acceptance criteria updated for Story 6.1.4 (#388: amounts between parentheses, "Air (3)"), 6.1.8 (#392: the full title wraps at the top of the page on a phone, the truncated copy shows only after scrolling past it), 6.1.10 (#394: transpose, scroll speed and a Screen stays on switch live in the one ⋮ menu; the toolbar has no ⋯), 6.1.11 (#395: every version has a `?version=` link, replaced in place, shared by Share), 6.1.23 (#407: History, Artists and Shared with me share one heading size) and 6.1.24 (#408: the Library "+" floats at the bottom right). New: Terms and Privacy pages (draft) with the operator from the server environment. |
+| **2.14** | Nov 13, 2026 | Epic 6.2: Story 6.2.14 (#517, G3.2) implemented on `feat/ux-v3`: the reader switch *Original · Translation · Both* (owner decision Nov 13, 2026; songs with a translation with lyrics) — *Translation* / *Both* use the language of the language switch (first by default), which now lists languages only and shows with two or more of them; every state within two taps. *Both* shows each stanza of the original with its translation, side by side from md up and line under line on a phone. Extra stanzas on either side keep their own row (nothing dropped); a chord intro does not shift the pairs; chords on the original only (translation lyrics only); A− / A+ size both columns; each column has its language and a direction read from its lyrics, and stanzas use logical sides (RTL-safe; review round on PR #545). Reading rules (view in effect, default language, which switches show, transpose and source line follow the original in Both, translator, addresses) live in `lib/songs/readingState.ts`. The view is in the address (`?lang=<tag>&view=translation|both`, none for the original; kept in the share link; old `?lang=` links open the translation; stale values replaced; a version switch returns to Original and remembers the language), not a device preference. 8 locales (`qu` for a native check). Executable: `docs/testing/ux-v3-translation-both.feature` (`@unit`, `@seed`). |
 | **2.13** | Nov 13, 2026 | Epic 6.2: review of PR #560 (Story 6.2.17 / #520): a wrapped row of a long line never prints in the footer or QR area, the closing repeat bar never lands on the last word (it moves to its own row when the text reaches the margin), an untitled playlist item prints the translated "untitled song" label, and a different database order of the sources does not make the PDF regenerate. Acceptance criteria of Story 6.2.17 extended with four scenarios (`docs/testing/ux-v3-pdf-export.feature` v1.1). |
 | **2.12** | Nov 13, 2026 | Epic 6.2: Story 6.2.17 (#520, G4.3) implemented on `feat/ux-v3` (PR into `feat/ux-v3`, in review): the PDF sheet of a song shows the key, capo, tuning and beats like the song page's meta line, the source credit line under the lyrics, and the repeat bars (`‖:` … `:‖ ×N`); the export prints the version a playlist item is pinned to with the item's transposition; labels follow the exporting user's language (8 locales, existing strings reused). Executable: `docs/testing/ux-v3-pdf-export.feature`. Row and acceptance criteria added. |
 | **2.11** | Nov 13, 2026 | Epic 6.2: Story 6.2.11 (#514, G2.2) implemented on `feat/ux-v3` (PR in review): `/songbooks` lists the printed books with their song counts and `/songbooks/<id>` lists one book's songs by page (title, compiler, community, year, attribution; open to guests; sixth Library tab *Songbooks*; the source line links to the book at the row of that source). Pages are ordered naturally (`2` before `10`, `12` before `12a`, a missing page last, then title); a song printed on several pages is listed once per page and links to the right version (`?version=`), versions on the same page are one row; guests see public songs only, a book without a readable song is a 404 (and left out of the list). 8 locales (`qu` for a native check). Review fixes: roman pages sort by value after the numbers (`iv, v, ix, x, xii`), the tab shows the book title (not-found title for an unknown or unreadable book), a merged row highlights on its second anchor, the page column keeps `pp. 138–139` on one line. Executable: `docs/testing/ux-v3-songbook-pages.feature` (`@unit`, `@seed`). |
@@ -1742,6 +1743,7 @@ GitHub epic **#498**. Many circles sing from printed songbooks: the same song ap
 | 6.2.11 | #514 | `G2.2` | C | **[Implemented on feat/ux-v3, in review]** As a Guest, I want a page per songbook listing its songs by page so that I can sing along with a printed book (`/songbooks` with song counts and `/songbooks/<id>`: title, compiler, attribution, songs in natural page order, each linking to the version printed there; links from the source line; public songs only for guests; Library tab *Songbooks*) | #504; #513 |
 | 6.2.12 | #515 | `G2.3` | B | **[Implemented on feat/ux-v3, PR #533]** As a reader, I want all authors of a song shown and tappable so that co-written songs credit everyone | #504 |
 | 6.2.13 | #516 | `G3.1` | B | **[Implemented on feat/ux-v3, in review]** As a reader, I want a language switch next to the version switch so that I read a translation without leaving the song | #504; unblocks #517 |
+| 6.2.14 | #517 | `G3.2` | C | **[Implemented on feat/ux-v3, in review]** As a reader, I want the original and the translation side by side or line under line so that I understand what I sing (useful for Quechua, Nahuatl and Portuguese songs in the circle; toggle *Original · Translation · Both*, the language switch picks the translation; respects A− / A+) | #516 |
 | 6.2.15 | #518 | `G4.1` | A | **[Implemented on feat/ux-v3, PR #526]** As a reader, I want repeat bars shown in the lyrics so that I know which lines the circle sings twice (`‖:` … `:‖` and `×2` around the lines between `{start_of_repeat}` and `{end_of_repeat}`; chords on or off) | — |
 | 6.2.16 | #519 | `G4.2` | A | **[Implemented, PR #528]** As a Musician, I want alternative chords like A7/C7 shown and transposed correctly so that the chord line stays right in every key | — |
 | 6.2.17 | #520 | `G4.3` | C | **[Implemented on feat/ux-v3, in review]** As a Member, I want the PDF export to include the version's book, capo, beats and repeat bars so that printed sheets match the screen | — |
@@ -1791,10 +1793,10 @@ Scenario: Switching version returns to the original language
   When I pick another version
   Then the address is "?version=v2"
 
-Scenario: Switching language keeps the version
-  Given the address says "?version=v2"
+Scenario: Switching language keeps the version and the view
+  Given the address says "?version=v2&lang=nl&view=both"
   When I pick the language "en"
-  Then the address is "?version=v2&lang=en"
+  Then the address is "?version=v2&lang=en&view=both"
 
 Scenario: A deep link opens the translation
   Given a song with an English translation
@@ -1841,6 +1843,113 @@ Scenario: The version switch no longer lists the translation afterwards
   When the translation migration runs
   Then the version switch of the song lists "Standard" and "Live" and no translation
 ```
+
+**Story 6.2.14 acceptance criteria** (executable: `docs/testing/ux-v3-translation-both.feature`, `@unit` and `@seed`; layout in `testing/unit/tests/song/SongBilingualDisplay.test.tsx`):
+
+```gherkin
+Scenario: Both languages on a phone
+  Given a song with a translation on a 375 px screen
+  When I pick "Both"
+  Then each stanza is followed by its translation
+
+Scenario: Desktop shows two columns aligned per stanza
+  Given a song with a translation on a desktop screen
+  When I pick "Both"
+  Then stanza 1 of the original and stanza 1 of the translation share a row
+
+Scenario: The original has more stanzas than the translation
+  Given a song whose original has 3 stanzas and whose translation has 2
+  When I pick "Both"
+  Then 3 rows are shown
+  And the last row holds only the original
+
+Scenario: A chord intro does not shift the pairs
+  Given a song whose original starts with a chord intro before 2 stanzas, with a translation of 2 stanzas
+  When I pick "Both"
+  Then the intro has a row of its own
+
+Scenario: A song without a translation shows no reader switch
+  Given a song without a translation
+  Then the reader shows no reader switch
+  And the reader shows no language switch
+
+Scenario: Chords stay on the original
+  Given a song with chords and a translation with chords
+  When I pick "Both"
+  Then the original shows its chords
+  And the translation shows no chords
+
+Scenario: A− and A+ size both columns
+  Given a song with a translation on a desktop screen
+  When I pick "Both"
+  And I press "A+"
+  Then both columns use the larger lyric size
+
+Scenario: A right-to-left translation flows right to left
+  Given a song with a Hebrew translation
+  When I pick "Both"
+  Then the translation column has language "he" and direction "rtl"
+  And the original column has direction "ltr"
+
+Scenario: In Both, transpose and the source line follow the original
+  Given a musician reading a song with chords and a translation by "Ana"
+  When I pick "Both"
+  And I transpose 2 semitones up
+  Then the original is transposed 2 semitones and its source line is shown
+  And the reader names the translator "Ana"
+
+Scenario: A song opens on the original with the three-option switch
+  Given a song with a translation on a 375 px screen
+  Then the reader switch offers "Original", "Translation" and "Both" with "Original" chosen
+  And the reader shows no language switch
+
+Scenario: Translation shows the translation alone
+  Given a song with a translation on a 375 px screen
+  When I pick "Translation"
+  Then the translation "en" is shown alone
+  And the address reads "?lang=en&view=translation"
+
+Scenario: Original goes back to the original and clears the address
+  Given a song with a translation on a 375 px screen
+  When I pick "Both"
+  And I pick "Original"
+  Then the reader shows the original language
+  And the address reads ""
+
+Scenario: Translation and Both use the language of the language switch, the first one by default
+  Given a song with a Dutch and an English translation
+  When I pick "Translation"
+  Then the translation "nl" is shown alone
+  And the language switch lists "Dutch" and "English"
+  When I tap the language "en"
+  And I pick "Both"
+  Then both languages are shown with "en"
+  And the address reads "?lang=en&view=both"
+
+Scenario: The view is kept in the address and in the share link
+  Given a song with a translation on a 375 px screen
+  When I pick "Both"
+  Then the address reads "?lang=en&view=both"
+  And the share link ends with "?lang=en&view=both"
+
+Scenario: Another version returns to the original and remembers the language
+  Given a song with a Dutch and an English translation
+  When I pick "Translation"
+  And I tap the language "en"
+  And I pick "Both"
+  And I read another version of the song
+  Then the address reads "?version=v2"
+  And the reader shows the original language
+
+Scenario Outline: Links open the right view and stale values are cleaned from the address
+  Given a song with a Dutch and an English translation opened with "<link>"
+  Then the reader shows "<view>"
+  And the address reads "<address>"
+  # ?lang=en → translation; ?view=both → both in the first language (nl); ?lang=xx → original, address "";
+  # ?view=original&lang=en → original, address ""; ?lang=en&view=side → translation
+```
+
+Decisions (owner decision Nov 13, 2026): the toggle is *Original · Translation · Both*; *Translation* and *Both* use the language picked in the language switch (its first language by default), which lists languages only (no *Original language*: one "Original" on screen) and shows next to *Translation* / *Both* with two or more languages, so every state is at most two taps away. The view is a URL parameter (`?lang=<tag>&view=translation|both`, none for the original; a `?lang=` link without a view still opens the translation; stale values are replaced), not a device preference, because it belongs to the song being read and travels with the share link; chords stay on the original (they belong to its melody and rarely fit the translated words). There is no print or presentation mode on the reader; the setlist PDF export is unchanged.
 
 **Story 6.2.20 acceptance criteria** (executable: `docs/testing/ux-v3-edit-version-meta.feature`, `@unit` and `@seed`; the rendered form in `testing/unit/tests/songs/songFormVersionMeta.test.tsx`):
 

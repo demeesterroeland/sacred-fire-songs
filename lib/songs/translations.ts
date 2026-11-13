@@ -2,14 +2,16 @@
  * Language switch of the song page (Epic 6.2, Story 6.2.13 / G3.1, #516).
  *
  * A song may have translations in `song_translations` (one per language; lowercase tag, title, lyrics, translator).
- * The switch sits next to the version switch and lists "Original" plus the languages that exist. Pure (no React, no
- * I/O) so the page, the switch and the Gherkin steps share one rule set.
+ * The switch sits next to the version switch and lists the languages that exist; since #517 "Original" is in the view
+ * switch (Original · Translation · Both) and this switch picks the language of the translation. Pure (no React, no
+ * I/O) so the page, the switches and the Gherkin steps share one rule set.
  *
  * Decisions (documented in the design doc):
  *  - A translation belongs to the song, not to one version: it replaces the lyrics of the version being shown, and
  *    that version stays selected. Picking another version returns to the original language; picking a language keeps
  *    the version.
- *  - Deep link `?lang=<tag>`; an unknown tag (or one without lyrics) opens the original language.
+ *  - Deep link `?lang=<tag>` (with `?view=`, #517); without a view an unknown tag (or one without lyrics) opens the
+ *    original language.
  */
 import type { TranslateFn } from '@/lib/i18n';
 import type { Locale } from '@/lib/i18n';
@@ -17,9 +19,6 @@ import { languageName } from '@/lib/songs/versionLabels';
 
 /** Query parameter of the language deep link (`/songs/<id>?lang=nl`). */
 export const LANGUAGE_PARAM = 'lang';
-
-/** Value of the "Original" segment. Never a language tag (a tag has at most 3 letters before a hyphen). */
-export const ORIGINAL_LANGUAGE = 'original';
 
 /** One `song_translations` row as the song page selects it. */
 export interface SongTranslation {
@@ -57,20 +56,31 @@ export function translationLabel(language: string, locale: Locale): string {
 }
 
 /**
- * Segments of the language switch ("Original" first, then the languages by name in the app language), or `null` when
- * the song has no translation to read: the switch and the space it would take are then left out.
+ * The readable translations in the order of the language switch: by name in the app language (then by tag). The first
+ * one is what "Translation" and "Both" open when no language was chosen (#517).
+ */
+export function sortedTranslations(
+  translations: ReadonlyArray<SongTranslation> | null | undefined,
+  locale: Locale
+): SongTranslation[] {
+  return readableTranslations(translations)
+    .map((tr) => ({ tr, label: translationLabel(tr.language, locale) }))
+    .sort((a, b) => a.label.localeCompare(b.label, locale) || a.tr.language.localeCompare(b.tr.language))
+    .map(({ tr }) => tr);
+}
+
+/**
+ * Segments of the language switch: the languages by name in the app language. Since #517 it only picks the language
+ * of "Translation" / "Both" ("Original" is in the view switch), so it is `null`, and left out with the space it would
+ * take, for fewer than two languages: one language is not a choice.
  */
 export function languageOptions(
   translations: ReadonlyArray<SongTranslation> | null | undefined,
-  t: TranslateFn,
   locale: Locale
 ): LanguageOption[] | null {
-  const readable = readableTranslations(translations);
-  if (readable.length === 0) return null;
-  const named = readable
-    .map((tr) => ({ value: tr.language, label: translationLabel(tr.language, locale) }))
-    .sort((a, b) => a.label.localeCompare(b.label, locale) || a.value.localeCompare(b.value));
-  return [{ value: ORIGINAL_LANGUAGE, label: t('song.language.originalLanguage') }, ...named];
+  const sorted = sortedTranslations(translations, locale);
+  if (sorted.length < 2) return null;
+  return sorted.map((tr) => ({ value: tr.language, label: translationLabel(tr.language, locale) }));
 }
 
 /** The initial choice from `?lang=<tag>`; case does not matter. It goes through `resolveTranslation`. */
@@ -103,14 +113,40 @@ export function translationTitle(songTitle: string | null | undefined, translati
   return fold(title) === fold(songTitle ?? '') ? null : title;
 }
 
-/**
- * The query part (`?version=…&lang=…`, or '') after choosing `language` (`null` = original). Other parameters stay,
- * the version included: a language is read on the version being shown.
- */
-export function languageSearch(currentSearch: string, language: string | null): string {
-  const params = new URLSearchParams(currentSearch);
-  params.delete(LANGUAGE_PARAM);
-  if (language) params.append(LANGUAGE_PARAM, language);
-  const search = params.toString();
-  return search ? `?${search}` : '';
+// ── Story 6.2.14 (#517): the reader switch Original · Translation · Both ──────────────────────────────────────────
+//
+// A song with at least one translation gets the view switch Original · Translation · Both. "Translation" and "Both" use
+// the language picked in the language switch (default: its first language); that switch only lists languages and shows
+// only next to Translation / Both with two or more of them, so there is one "Original" on screen. Every state is at
+// most two taps away (a view, then a language).
+//
+// The choice lives in the address (`?lang=nl&view=both`), like `?version=`: it belongs to the song being read, survives
+// a reload, travels with the share link, and a song read alone today does not open in two languages tomorrow (which a
+// per-device preference would do). The original has no parameters (a clean link). The rules are in `readingState.ts`.
+
+/** Query parameter of the reading view (`/songs/<id>?lang=nl&view=both`). */
+export const VIEW_PARAM = 'view';
+
+/** The original alone (the default; no parameter). */
+export const ORIGINAL_VIEW = 'original';
+
+/** The translation alone. */
+export const TRANSLATION_VIEW = 'translation';
+
+/** The original and the translation together. */
+export const BOTH_VIEW = 'both';
+
+export type ReadingView = typeof ORIGINAL_VIEW | typeof TRANSLATION_VIEW | typeof BOTH_VIEW;
+
+const READING_VIEWS: readonly ReadingView[] = [ORIGINAL_VIEW, TRANSLATION_VIEW, BOTH_VIEW];
+
+/** The view from `?view=` (any case), or `null` when there is none or it is not one of the three. */
+export function linkedReadingView(param: string | null | undefined): ReadingView | null {
+  const view = param?.trim().toLowerCase();
+  return READING_VIEWS.find((v) => v === view) ?? null;
+}
+
+/** Segments of the Original · Translation · Both switch, in the app language. */
+export function readingViewOptions(t: TranslateFn): LanguageOption[] {
+  return READING_VIEWS.map((value) => ({ value, label: t(`song.translation.view.${value}`) }));
 }

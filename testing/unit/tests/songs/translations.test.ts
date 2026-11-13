@@ -3,13 +3,16 @@ import { describe, expect, it } from 'vitest';
 import { DICTIONARIES } from '@/lib/i18n';
 import {
   languageOptions,
-  languageSearch,
   linkedLanguageChoice,
-  ORIGINAL_LANGUAGE,
   readableTranslations,
   resolveTranslation,
   translationLabel,
   translationTitle,
+  linkedReadingView,
+  readingViewOptions,
+  BOTH_VIEW,
+  ORIGINAL_VIEW,
+  TRANSLATION_VIEW,
 } from '@/lib/songs/translations';
 import { versionSearch, versionShareUrl } from '@/lib/songs/versionSwitch';
 
@@ -20,18 +23,22 @@ const en = { language: 'en', title: 'Mother Earth', lyrics: 'Sing' };
 
 describe('languageOptions', () => {
   it('is null without readable translations', () => {
-    expect(languageOptions(undefined, t, 'en')).toBeNull();
-    expect(languageOptions([], t, 'en')).toBeNull();
-    expect(languageOptions([{ language: 'nl', lyrics: '' }, { language: 'en', lyrics: null }], t, 'en')).toBeNull();
+    expect(languageOptions(undefined, 'en')).toBeNull();
+    expect(languageOptions([], 'en')).toBeNull();
+    expect(languageOptions([{ language: 'nl', lyrics: '' }, { language: 'en', lyrics: null }], 'en')).toBeNull();
   });
 
-  it('lists Original, then the languages by name in the app language', () => {
-    expect(languageOptions([nl, en], t, 'en')).toEqual([
-      { value: ORIGINAL_LANGUAGE, label: 'Original language' },
+  it('lists the languages by name in the app language; "Original" is in the view switch, not here (#517)', () => {
+    expect(languageOptions([nl, en], 'en')).toEqual([
       { value: 'nl', label: 'Dutch' },
       { value: 'en', label: 'English' },
     ]);
-    expect(languageOptions([en, nl], tNl, 'nl')!.map((o) => o.label)).toEqual(['Oorspronkelijke taal', 'Engels', 'Nederlands']);
+    expect(languageOptions([en, nl], 'nl')!.map((o) => o.label)).toEqual(['Engels', 'Nederlands']);
+  });
+
+  it('is null with one language: "Translation" in the view switch already picks it (#517)', () => {
+    expect(languageOptions([en], 'en')).toBeNull();
+    expect(languageOptions([en, { language: 'nl', lyrics: ' ' }], 'en')).toBeNull();
   });
 
   it('labels a regional tag and an unknown tag', () => {
@@ -39,9 +46,11 @@ describe('languageOptions', () => {
     expect(translationLabel('zzz', 'en')).toBe('ZZZ');
   });
 
-  it('every app language has a word for the original language', () => {
+  it('every app language names the three views and the language switch', () => {
     for (const locale of Object.keys(DICTIONARIES) as (keyof typeof DICTIONARIES)[]) {
-      expect((DICTIONARIES[locale] as Record<string, string>)['song.language.originalLanguage']).toBeTruthy();
+      for (const key of ['song.translation.view.original', 'song.translation.view.translation', 'song.translation.view.both', 'song.language.label']) {
+        expect((DICTIONARIES[locale] as Record<string, string>)[key], `${locale} ${key}`).toBeTruthy();
+      }
     }
   });
 });
@@ -51,7 +60,6 @@ describe('resolveTranslation', () => {
     expect(resolveTranslation([en], null, 's1')).toBeNull();
     expect(resolveTranslation([en], { songId: 's2', language: 'en' }, 's1')).toBeNull();
     expect(resolveTranslation([en], { songId: 's1', language: 'xx' }, 's1')).toBeNull();
-    expect(resolveTranslation([en], { songId: 's1', language: ORIGINAL_LANGUAGE }, 's1')).toBeNull();
   });
 
   it('finds the chosen translation, but not one without lyrics', () => {
@@ -81,13 +89,6 @@ describe('translationTitle', () => {
 });
 
 describe('addresses', () => {
-  it('a language is added next to the version and removed again', () => {
-    expect(languageSearch('?version=v2', 'en')).toBe('?version=v2&lang=en');
-    expect(languageSearch('?version=v2&lang=en', 'nl')).toBe('?version=v2&lang=nl');
-    expect(languageSearch('?version=v2&lang=en', null)).toBe('?version=v2');
-    expect(languageSearch('?lang=en', null)).toBe('');
-  });
-
   it('choosing a version drops the language (and the recording), the share link can keep it', () => {
     expect(versionSearch('?lang=en&recording=r1', 'v2', false)).toBe('?version=v2');
     expect(versionSearch('?lang=en', 'v1', true)).toBe('');
@@ -101,5 +102,34 @@ describe('readableTranslations', () => {
   it('drops rows without a tag or lyrics', () => {
     expect(readableTranslations([nl, { language: '', lyrics: 'x' }, { language: 'de', lyrics: null }])).toEqual([nl]);
     expect(readableTranslations(null)).toEqual([]);
+  });
+});
+
+// Story 6.2.14 (#517): the reading view (Original · Translation · Both).
+describe('reading view', () => {
+  it('reads ?view=original|translation|both, case-insensitively; anything else is no view (null)', () => {
+    expect(linkedReadingView('both')).toBe(BOTH_VIEW);
+    expect(linkedReadingView(' BOTH ')).toBe(BOTH_VIEW);
+    expect(linkedReadingView('Translation')).toBe(TRANSLATION_VIEW);
+    expect(linkedReadingView('original')).toBe(ORIGINAL_VIEW);
+    expect(linkedReadingView(null)).toBeNull();
+    expect(linkedReadingView('side')).toBeNull();
+  });
+
+  it('offers Original, Translation and Both, in the app language', () => {
+    expect(readingViewOptions(t)).toEqual([
+      { value: ORIGINAL_VIEW, label: 'Original' },
+      { value: TRANSLATION_VIEW, label: 'Translation' },
+      { value: BOTH_VIEW, label: 'Both' },
+    ]);
+    expect(readingViewOptions(tNl).map((o) => o.label)).toEqual(['Origineel', 'Vertaling', 'Beide']);
+  });
+
+  it('a version switch drops the language and the view; the share link carries both', () => {
+    expect(versionSearch('?lang=nl&view=both', 'v2', false)).toBe('?version=v2');
+    expect(versionShareUrl('https://x.test/songs/s?x=1', 'v1', true, 'nl', BOTH_VIEW)).toBe('https://x.test/songs/s?x=1&lang=nl&view=both');
+    expect(versionShareUrl('https://x.test/songs/s', 'v1', true, 'nl', TRANSLATION_VIEW)).toBe('https://x.test/songs/s?lang=nl&view=translation');
+    expect(versionShareUrl('https://x.test/songs/s?lang=nl&view=both', 'v1', true, null, ORIGINAL_VIEW)).toBe('https://x.test/songs/s');
+    expect(versionShareUrl('https://x.test/songs/s', 'v1', true, null, BOTH_VIEW)).toBe('https://x.test/songs/s');
   });
 });
