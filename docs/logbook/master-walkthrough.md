@@ -3455,3 +3455,8 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - A song without an author shows **No artist** (new key `song.noArtist`) instead of "Traditional": song rows, recently viewed, the song page meta line (plain text, no link to an empty author filter), the song menu subtitle (no "by No artist") and the admin member page. An author entered as "Traditional" still shows the translated "Traditional".
 - Tests: `docs/testing/ux-v2-private-and-no-artist.feature` (`@unit`: English labels, every locale free of the local word for "draft", "No artist" per locale; `@e2e`), `privateAndNoArtist.test.ts`, `songMetaNoArtist.test.tsx`, `e2e/tests/ux-v2-private-and-no-artist.spec.ts`; `ux-v2-song-rows.feature` 1.2 expects "No artist".
 - Note for `feat/ux-v3`: there `songAuthors()` lives in `lib/songs/authors.ts`; when develop is merged into it, its fallback must use `song.noArtist` too.
+
+## Session November 13, 2026 — #574: old /explore links
+
+- `/explore` (gone since the bottom bar, Story 6.1.24) showed "Page not found". It now redirects permanently (308) to `/songs`, keeping the query string (`/explore?category=ceremony` → `/songs?category=ceremony`), via `redirects()` in `next.config.ts`.
+- Tests: `docs/testing/ux-v2-explore-redirect.feature` (`@unit`, `@e2e`), `exploreRedirect.test.ts`, `e2e/tests/ux-v2-explore-redirect.spec.ts`; the bottom bar spec now expects the song list instead of a 404.

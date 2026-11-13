@@ -1543,3 +1543,8 @@
 - [x] `songAuthors()` falls back to `song.noArtist`; song menu subtitle without "by"; "No artist" is plain text in `SongMetaLines`
 - [x] E2E `ux-v2-private-and-no-artist.spec.ts` (fixture `NO_ARTIST_FIXTURE_IDS`, removed in global teardown); `search.spec.ts` skips "No artist"
 - [x] Docs: design doc 2.16, user guide 2.4, member guide 0.21, glossary 0.7, E2E overview 1.25
+
+## Session November 13, 2026 (#574, /explore redirect)
+- [x] `redirects()` in `next.config.ts`: `/explore` → `/songs`, permanent, query kept
+- [x] Tests: feature `ux-v2-explore-redirect.feature`, Vitest `exploreRedirect.test.ts`, E2E `ux-v2-explore-redirect.spec.ts`; `ux-v2-bottom-bar.spec.ts` updated
+- [x] Docs: design doc 2.17, E2E overview 1.26
