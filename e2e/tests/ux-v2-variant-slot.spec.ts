@@ -177,6 +177,11 @@ test.describe('Practice follows the chosen version', () => {
   test('the Listen tab follows the version', async ({ page }) => {
     await page.goto(`/songs/${IDS.song}`);
     const control = page.getByRole('radiogroup', { name: 'Song version' });
+    const practice = page.getByTestId('song-action-practice');
+    const mediaIndicator = page.getByTestId('practice-media-indicator');
+    await expect(mediaIndicator).toHaveCount(0);
+    await expect(practice).toHaveAccessibleName('Practice');
+
     // Original has no reference track: Practice opens on Record (no Listen tab).
     await clickPractice(page);
     await expect(page.getByTestId('practice-drawer')).toBeVisible();
@@ -186,6 +191,8 @@ test.describe('Practice follows the chosen version', () => {
 
     // Simplified has one: the Listen tab appears.
     await control.getByRole('radio', { name: 'Simplified' }).click();
+    await expect(mediaIndicator).toBeVisible();
+    await expect(practice).toHaveAccessibleName('Practice Listen');
     await clickPractice(page);
     await expect(page.getByTestId('practice-tab-listen')).toBeVisible();
   });

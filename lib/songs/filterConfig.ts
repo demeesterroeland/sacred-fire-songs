@@ -1,7 +1,8 @@
 import { FilterConfig } from "@/lib/declarative-filter/types";
 import { Song } from "@/lib/songUtils";
 import { normalizeWhitespace, removeDiacritics } from "@/lib/utils";
-import { parseArtists } from "@/lib/songs/artistUtils";
+import { cleanAuthors, songAuthorNames } from "@/lib/songs/authors";
+import { songMatchesSearch } from "@/lib/songs/search";
 
 // 1. Define the Filter State (URL Params map to this)
 export interface SongFilterState {
@@ -16,6 +17,10 @@ export interface SongFilterState {
   mine?: boolean;
   new?: boolean;
   artist?: string;
+  /** Songbook id: songs with a version printed in that book (Story 6.2.19, #522). */
+  songbook?: string;
+  /** Language category slug (Story 6.2.19, #522). */
+  language?: string;
 }
 
 /**
@@ -37,11 +42,18 @@ export function isDraftActive(draft: SongFilterState, userId?: string): boolean 
     draft.favorites ||
     draft.mine ||
     draft.new ||
-    draft.artist
+    draft.artist ||
+    draft.songbook ||
+    draft.language
   );
 }
 
 // 2. Define the Configuration
+/*
+ * Songbook and language (Story 6.2.19, #522) are deliberately NOT part of this config: the song list hook applies them
+ * itself (`applyBrowseFilters` in `lib/songs/browseFilters.ts`) on the engine's result, so it also has the list WITHOUT
+ * them, which the counts of the two selects need. The `SongFilterState` fields carry the choice only.
+ */
 export const songFilterConfig: FilterConfig<Song, SongFilterState> = {
   // --- CATEGORY (Parent) ---
   // OR Logic: Matches if song has ANY tag belonging to this parent category
@@ -100,25 +112,8 @@ export const songFilterConfig: FilterConfig<Song, SongFilterState> = {
   // --- SEARCH ---
   search: {
     isActive: (val) => !!val && val.trim().length > 0,
-    match: (song, query) => {
-      if (!query) return true;
-      const cleanQuery = removeDiacritics(normalizeWhitespace(query)).toLowerCase();
-      const cleanTitle = removeDiacritics(normalizeWhitespace(song.title)).toLowerCase();
-      const cleanAuthor = removeDiacritics(normalizeWhitespace(song.author)).toLowerCase();
-      const cleanContent = song.content ? removeDiacritics(normalizeWhitespace(song.content)).toLowerCase() : "";
-      // Also match subcategory names (e.g. "Water") and parent group names (e.g. "Element Songs")
-      const matchesCategory = song.categories?.some(c => {
-        const catName = removeDiacritics(normalizeWhitespace(c.name)).toLowerCase();
-        const parentName = c.parent ? removeDiacritics(normalizeWhitespace(c.parent)).toLowerCase() : "";
-        return catName.includes(cleanQuery) || parentName.includes(cleanQuery);
-      }) ?? false;
-      return (
-        cleanTitle.includes(cleanQuery) ||
-        cleanAuthor.includes(cleanQuery) ||
-        cleanContent.includes(cleanQuery) ||
-        matchesCategory
-      );
-    },
+    // The one song search: title, aliases, songbook titles, every author, categories, lyrics (Story 6.2.18, #521)
+    match: (song, query) => songMatchesSearch(song, query ?? ''),
     // No facets for free-text search usually
   },
 
@@ -141,10 +136,10 @@ export const songFilterConfig: FilterConfig<Song, SongFilterState> = {
       if (!filterArtist) return true;
       const normalizedFilter = removeDiacritics(normalizeWhitespace(filterArtist)).toLowerCase();
       if (normalizedFilter === "no artist" || normalizedFilter === "unspecified") {
-        return !song.author;
+        return !song.author && cleanAuthors(song.authors).length === 0;
       }
-      // Parse multi-artist string and check if ANY individual artist matches
-      const artists = parseArtists(song.author);
+      // ANY individual author may match: authors[], else the display text split (Story 6.2.12, #515); same source as the index
+      const artists = songAuthorNames({ authors: song.authors, originalAuthor: song.author });
       if (artists.length === 0) return false;
       return artists.some(
         artist => removeDiacritics(normalizeWhitespace(artist)).toLowerCase() === normalizedFilter

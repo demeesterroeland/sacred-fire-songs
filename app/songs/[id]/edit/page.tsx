@@ -1,6 +1,6 @@
 'use client';
 
-import { useParams, usePathname, useSearchParams } from 'next/navigation';
+import { notFound, useParams, usePathname, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 
 import SongForm from '@/components/song/SongForm';
@@ -9,39 +9,21 @@ import GuestGate from '@/components/common/GuestGate';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { useLocale } from '@/context/LocaleContext';
+import { authorInputText } from '@/lib/songs/authors';
 import { EDIT_VERSION_PARAM, pickVersion, sortVersions } from '@/lib/songs/versionOrder';
 import { versionOptions } from '@/lib/songs/versionSwitch';
+import { EDIT_SONG_SELECT } from '@/lib/songs/songSelect';
+import { isUuid } from '@/lib/validation/uuid';
 
 // Similar fetch to detail page, but we just need basic data
 const fetchSongForEdit = async (id: string) => {
+    if (!isUuid(id)) return null;
     const supabase = createClient();
     const { data, error } = await supabase
         .from('compositions')
-        .select(`
-          id,
-          title,
-          original_author,
-          owner_id,
-          is_public,
-          song_category_map (
-            category_id
-          ),
-          song_versions!inner (
-            id,
-            created_at,
-            version_name,
-            content_chordpro,
-            key,
-            capo,
-            tuning,
-            youtube_url,
-            spotify_url,
-            soundcloud_url,
-            melody_notation
-          )
-        `)
+        .select(EDIT_SONG_SELECT)
         .eq('id', id)
-        .single();
+        .maybeSingle();
 
     if (error) throw error;
     // UXA-049: the same order as the song page (oldest first), so "the first version" is the same everywhere.
@@ -49,9 +31,10 @@ const fetchSongForEdit = async (id: string) => {
 };
 
 export default function EditSongPage() {
-    const { t } = useLocale();
+    const { t, locale } = useLocale();
     const params = useParams();
-    const id = typeof params.id === 'string' ? params.id : params.id?.[0];
+    const rawId = typeof params.id === 'string' ? params.id : params.id?.[0];
+    const id = isUuid(rawId) ? rawId : undefined;
     const pathname = usePathname();
     const searchParams = useSearchParams();
     const requestedVersionId = searchParams.get(EDIT_VERSION_PARAM);
@@ -65,6 +48,8 @@ export default function EditSongPage() {
         retry: 1
     });
 
+    if (!id) return notFound();
+
     // Guests get the unified GuestGate (Story 6.1.26); the warm "not yours" copy is for signed-in non-owners.
     if (!authLoading && !user) {
         return (
@@ -75,10 +60,11 @@ export default function EditSongPage() {
     }
 
     if (isLoading || authLoading) return <div className="p-8 text-fg text-center">{t('common.loading')}</div>;
-    if (error || !song) {
+    if (error) {
         console.error("Fetch error:", error);
         return <div className="p-8 text-danger text-center">{t('song.edit.loadError')}</div>;
     }
+    if (!song) return notFound();
 
     // Permission Check (Client-side visual check, RLS enforces actual security)
     // We can show a friendly message if mismatch, though RLS would prevent the fetch ideally if using strict policies,
@@ -100,16 +86,19 @@ export default function EditSongPage() {
     // The version being read (`?version=`), else the first (oldest) one, like the song page.
     const version = pickVersion(song.song_versions, requestedVersionId);
     // Which version this form saves is only visible when the song has more than one (same labels as the switch).
-    const versionLabel = versionOptions(song.song_versions, t)?.find((o) => o.value === version?.id)?.label;
+    const versionLabel = versionOptions(song.song_versions, t, locale)?.find((o) => o.value === version?.id)?.label;
     const initialData = {
         title: song.title,
-        author: song.original_author || '',
+        // authors[] when the song has them (catalog songs), else original_author: an edit keeps every author.
+        author: authorInputText({ authors: song.authors, originalAuthor: song.original_author }),
         content: version?.content_chordpro || '',
 
         categoryIds: song.song_category_map?.map((m: { category_id: string }) => m.category_id) || [],
         key: version?.key,
         capo: version?.capo,
         tuning: version?.tuning,
+        beats: version?.beats ?? '',
+        note: version?.song_note ?? '',
         youtubeLink: version?.youtube_url || '',
         spotifyLink: version?.spotify_url || '',
         soundcloudLink: version?.soundcloud_url || '',
@@ -137,6 +126,8 @@ export default function EditSongPage() {
                     initialData={initialData}
                     songId={id}
                     versionId={version?.id}
+                    sources={version?.song_version_sources}
+                    songTitle={song.title}
                 />
             </div>
         </div>

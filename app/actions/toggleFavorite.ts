@@ -3,6 +3,7 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { uuid, safeParse } from '@/lib/validation/schemas';
+import { firstVersion } from '@/lib/songs/versionOrder';
 import { fetchFavoritesSetlistId, FAVORITES_TITLE } from '@/lib/playlists/favorites';
 
 export async function toggleFavorite(
@@ -18,14 +19,14 @@ export async function toggleFavorite(
         return { error: 'Not authenticated' };
     }
 
-    // Find the default (first) song version for this composition
-    const { data: version } = await supabase
+    // The default (first) version of the song, in the order of the song page (original, variants, translations;
+    // each oldest first: lib/songs/versionOrder.ts, #509), not simply the oldest row.
+    const { data: versionRows } = await supabase
         .from('song_versions')
-        .select('id')
-        .eq('composition_id', parsed.data)
-        .order('created_at', { ascending: true })
-        .limit(1)
-        .maybeSingle();
+        .select('id, created_at, version_kind')
+        .eq('composition_id', parsed.data);
+
+    const version = firstVersion(versionRows);
 
     if (!version) {
         return { error: 'Song version not found' };

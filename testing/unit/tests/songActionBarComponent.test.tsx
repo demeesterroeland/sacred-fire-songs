@@ -19,6 +19,7 @@ function setup(over: Partial<React.ComponentProps<typeof SongActionBar>> = {}) {
     onPractice: vi.fn(),
     onToggleFavorite: vi.fn(),
     onGuestPlaylist: vi.fn(),
+    hasReferenceMedia: false,
     ...over,
   };
   render(<SongActionBar {...props} />);
@@ -67,6 +68,24 @@ describe('SongActionBar', () => {
   it('badges Practice with the number of takes when there are any', () => {
     setup({ takeCount: 3 });
     expect(screen.getByTestId('song-action-practice').textContent).toContain('3');
+  });
+
+  it('indicates reference media accessibly without replacing the recording count', () => {
+    setup({ hasReferenceMedia: true, takeCount: 3 });
+    const practice = screen.getByTestId('song-action-practice');
+    const listenLabel = screen.getByText('Listen');
+
+    expect(screen.getByTestId('practice-media-indicator')).toBeTruthy();
+    expect(listenLabel.className).toContain('sr-only');
+    expect(screen.getByRole('button', { name: 'Practice Listen 3' })).toBe(practice);
+    expect(practice.textContent).toContain('3');
+  });
+
+  it('does not indicate reference media when the selected version has none', () => {
+    setup({ hasReferenceMedia: false });
+
+    expect(screen.queryByTestId('practice-media-indicator')).toBeNull();
+    expect(screen.queryByText('Listen')).toBeNull();
   });
 
   it('hidden bar is out of the tab order and the accessibility tree', () => {

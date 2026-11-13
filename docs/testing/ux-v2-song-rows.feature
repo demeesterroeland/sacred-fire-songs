@@ -1,5 +1,6 @@
-# Version: 1.1 | Date: Nov 11, 2026
+# Version: 1.2 | Date: Nov 13, 2026
 # Changelog
+# 1.2 | Nov 13, 2026 | #565: a song without an author reads "No artist", not "Traditional".
 # 1.1 | Nov 11, 2026 | #492: no delete button on a song row; deleting is in the song page's menu only.
 # 1.0 | Nov 5, 2026 | Story 6.1.2 / G1.2 (#386): song cards become compact rows with one grey meta line.
 @story-6.1.2
@@ -18,7 +19,7 @@ Feature: UX v2 compact song rows
   Scenario: A song without author or tags
     Given a song without author or tags
     When the song row meta line is built
-    Then the meta line reads "Traditional"
+    Then the meta line reads "No artist"
 
   @e2e
   Scenario: Compact song rows

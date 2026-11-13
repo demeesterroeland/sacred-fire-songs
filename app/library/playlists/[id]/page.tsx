@@ -2,6 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import { notFound, redirect } from 'next/navigation';
 import { PlaylistDetailClient } from '@/components/playlists/PlaylistDetailClient';
 import { PlaylistDetailHeader } from '@/components/playlists/PlaylistDetailHeader';
+import { isUuid } from '@/lib/validation/uuid';
 
 interface SetlistItemRow {
     id: string;
@@ -20,6 +21,7 @@ interface Props {
 
 export default async function PlaylistDetailPage({ params }: Props) {
     const { id } = await params;
+    if (!isUuid(id)) notFound();
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
 

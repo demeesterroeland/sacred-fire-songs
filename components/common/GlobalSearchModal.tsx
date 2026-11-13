@@ -1,11 +1,14 @@
 'use client';
 
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
 import { useQuery } from '@tanstack/react-query';
 import { useSidebar } from '@/context/SidebarContext';
+import { useLocale } from '@/context/LocaleContext';
 import { useAuth } from '@/hooks/useAuth';
 import { fetchCategoryTree } from '@/lib/taxonomyUtils';
+import { fetchBrowseFilterCounts } from '@/lib/songs/browseCounts';
+import { browseOptionsFromRows } from '@/lib/songs/browseFilters';
 import { SONG_KEYS } from '@/lib/songs/queryKeys';
 import SearchFiltersModal from '@/components/library/SearchFiltersModal';
 import type { SongFilterState } from '@/lib/songs/filterConfig';
@@ -53,6 +56,8 @@ function GlobalSearchModalInner({
     router: ReturnType<typeof useRouter>;
     userId?: string;
 }) {
+    const { locale } = useLocale();
+
     // Fetch taxonomy client-side (cached by React Query)
     const { data: taxonomy = [] } = useQuery({
         queryKey: SONG_KEYS.taxonomy(),
@@ -60,6 +65,19 @@ function GlobalSearchModalInner({
         staleTime: 5 * 60_000,
         enabled: isOpen, // only fetch when modal is open
     });
+
+    // Fetch songbook & language counts only while open (Story 6.2.25 / G5.8, #570)
+    const { data: browseCountRows = [] } = useQuery({
+        queryKey: SONG_KEYS.globalBrowseCounts(userId),
+        queryFn: () => fetchBrowseFilterCounts(),
+        staleTime: 5 * 60_000,
+        enabled: isOpen,
+    });
+
+    const browseOptions = useMemo(
+        () => browseOptionsFromRows(browseCountRows, locale),
+        [browseCountRows, locale]
+    );
 
     // Personal recordings count — lightweight query, just the composition IDs
     const { userRecordingCompositionIds } = useRecordingsQuery(userId);
@@ -83,6 +101,8 @@ function GlobalSearchModalInner({
         mine: false,
         new: false,
         artist: '',
+        songbook: undefined,
+        language: undefined,
     });
 
     const setFilter = useCallback(<K extends keyof SongFilterState>(key: K, value: SongFilterState[K]) => {
@@ -102,12 +122,16 @@ function GlobalSearchModalInner({
             mine: false,
             new: false,
             artist: '',
+            songbook: undefined,
+            language: undefined,
         });
     }, [userId]);
 
     const hasActiveFilters = !!(
         state.category ||
         (state.tags?.length ?? 0) > 0 ||
+        state.songbook ||
+        state.language ||
         state.chords ||
         state.melody ||
         state.myRecordings ||
@@ -123,6 +147,8 @@ function GlobalSearchModalInner({
         if (localSearch.trim()) params.set('search', localSearch.trim());
         if (state.category) params.set('category', state.category);
         if (state.tags?.length) params.set('tag', state.tags.join(','));
+        if (state.songbook) params.set('songbook', state.songbook);
+        if (state.language) params.set('language', state.language);
         if (state.status !== 'all' && state.status !== (userId ? 'all' : 'public')) {
             params.set('status', state.status);
         }
@@ -155,6 +181,7 @@ function GlobalSearchModalInner({
             favoritesCount={favoritesCount}
             mineCount={mineCount}
             recordingsCount={recordingsCount}
+            browseOptions={browseOptions}
             hasActiveFilters={hasActiveFilters}
             isAuthenticated={isAuthenticated}
             localSearch={localSearch}

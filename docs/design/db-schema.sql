@@ -1,12 +1,18 @@
 /*
- **Version:** 3.9
+ **Version:** 3.14
  **Status:** Current
  **Date:** November 13, 2026
  
  ## Usage
  This script provides a complete setup for the "Sacred Fire Songs" database. 
  It consolidates the initial schema and all subsequent migrations up to November 13, 2026.
- (v3.9: public_profiles gains role (NULL for a guest), Story 6.1.38, migration 20261113120000_public_profiles_role.sql).
+ (v3.14: merge of origin/develop into feat/ux-v3; the fresh-install schema already includes the role column from migration 20261113120000_public_profiles_role.sql; no additional schema changes).
+ (v3.13: previous merge sync; the schema of v3.12 is added to v3.11, nothing else changes).
+ (v3.12: public_profiles gains role (NULL for a guest), Story 6.1.38, migration 20261113120000_public_profiles_role.sql; develop 3.9).
+ (v3.12: global search window songbook and language filter counts, Story 6.2.25 (#570), migration 20261113140000_search_filter_counts.sql: read-only SECURITY INVOKER function fn_search_filter_counts() returning (kind, value, label, song_count) for visible songbooks via song_version_sources and language categories under the Languages group via song_category_map JOIN compositions so RLS filters unreadable private songs; executable by anon, authenticated, and service_role).
+ (v3.11: catalog songs and versions corrected in the app, Story 6.2.21 (#524), migration 20261112160000_protect_catalog_app_edits.sql: compositions and song_versions gain edited_in_app / edited_at / edited_fields, set by trigger trg_track_catalog_edit when a signed-in app user (JWT role authenticated, also through a SECURITY DEFINER function) changes a tracked column of a row with a catalog key; importers (service_role) and data migrations do not mark, and API callers cannot set or clear the markers; admin-only fn_catalog_edits_export() and fn_clear_catalog_edit(). Review of PR #540 (Nov 13, 2026): removing a catalog key in the app counts; the export gives a moved version's new song slug; fn_clear_catalog_edit(kind, id, edited_at) returns 'cleared' / 'changed' / 'not_marked' and leaves a correction made after the download marked; the service role may not execute either function and reads and clears markers with plain SQL; re-check: the service role may not execute fn_track_catalog_edit() either).
+ (v3.10: link a song as a version of another song, Story 6.2.9, migration 20261112120000_link_song_as_version.sql: tables composition_redirects (old song id -> target, readable exactly when the target song is; keeps the source's catalog slug when the target kept its own) and song_link_audit (gatekeepers and admins read, nobody writes through the API); SECURITY DEFINER functions fn_link_song_as_version and fn_preview_song_link (signed-in callers only, no service_role grant: the checks need auth.uid(), importers resolve slugs with fn_song_id_for_catalog_slug instead; admins link any song, gatekeepers only songs they own, source and target; both songs public or both private, for everyone; a deliberate bypass of the admin-only catalog guards, the keys only ever come from the source song), helpers fn_assert_can_link_song, fn_song_link_summary, fn_merge_song_names, and fn_song_id_for_catalog_slug for importers).
+ (v3.9: migration 20261112140000_translation_versions_to_translations.sql moves the interim song_versions rows with version_kind = 'translation' to song_translations, Story 6.2.13 (#516). It changes data only: the schema is unchanged and a fresh install has no such rows, so this script needs nothing from it. Review of PR #535: the migration also keeps versions with chords in another key/capo/tuning or blank lyrics, appends moved takes after the original's and reports dropped sources; the re-check also keeps versions with their own melody, note, beats, media link or votes, or lyrics-only in another key that a playlist transposes, and reports the contributor.)
  (v3.8: songbook data model, Story 6.2.1, migration 20261111150000_songbook_data_model.sql: compositions.catalog_slug / aliases / authors; song_versions.catalog_source_id / version_kind / beats / song_note, unique per song and catalog source; new tables songbooks, song_version_sources and song_translations, readable when their song is readable and written by admins only. Review round on PR #527: triggers trg_guard_catalog_slug / trg_guard_catalog_source_id let only trusted roles and admins set the catalog keys; keys without surrounding spaces; lowercase translation languages; a cited songbook cannot be deleted (on delete restrict)).
  (v3.7: share e-mails are claimed by the server only, migration 20261111120000_share_email_server_claim.sql: claim_recording_share_email takes the owner as a parameter and only service_role may execute it).
  (v3.6: profile e-mail privacy, migration 20261110120000_profile_email_privacy.sql: public_profiles gains is_musician; the three profile read policies for singers and share partners are gone; search_users_for_sharing matches a name or an exact address and returns no address; user_recordings.singer_email is no longer selectable, the owner reads it with own_recording_singer_emails(); notifications and share e-mails name the sharer by name only).
@@ -69,6 +75,10 @@ create table public.compositions (
     constraint compositions_catalog_slug_check check (catalog_slug <> '' and catalog_slug = btrim(catalog_slug)),
   aliases text[] not null default '{}',
   authors text[] not null default '{}',
+  -- Catalog songs corrected in the app (v3.10, Story 6.2.21): set by trg_track_catalog_edit.
+  edited_in_app boolean not null default false,
+  edited_at timestamptz,
+  edited_fields text[] not null default '{}',
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 -- SONG_CATEGORY_MAP (Join Table)
@@ -105,6 +115,10 @@ create table public.song_versions (
     check (version_kind in ('original', 'variant', 'translation')),
   beats text,
   song_note text,
+  -- Catalog versions corrected in the app (v3.10, Story 6.2.21): set by trg_track_catalog_edit.
+  edited_in_app boolean not null default false,
+  edited_at timestamptz,
+  edited_fields text[] not null default '{}',
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
 -- SETLISTS
@@ -968,6 +982,199 @@ CREATE TRIGGER trg_guard_catalog_source_id
 BEFORE INSERT OR UPDATE ON public.song_versions
 FOR EACH ROW EXECUTE FUNCTION public.fn_guard_catalog_source_id();
 
+-- Catalog songs and versions corrected in the app (v3.10, Story 6.2.21, migration
+-- 20261112160000_protect_catalog_app_edits.sql). trg_track_catalog_edit marks a row with a catalog key
+-- (catalog_slug / catalog_source_id) when a signed-in app user (JWT role 'authenticated', also through a
+-- SECURITY DEFINER function) changes a tracked column; importers (service_role) and data migrations do not
+-- mark. API callers cannot set or clear the markers. fn_catalog_edits_export() and fn_clear_catalog_edit()
+-- are for signed-in admins only (not the service role); the clear function only clears the edit the admin
+-- downloaded (review of PR #540, v3.10). Importer contract: docs/guides/importing-songbooks.md.
+CREATE INDEX IF NOT EXISTS idx_compositions_edited_in_app
+  ON public.compositions (edited_at DESC) WHERE edited_in_app;
+CREATE INDEX IF NOT EXISTS idx_song_versions_edited_in_app
+  ON public.song_versions (edited_at DESC) WHERE edited_in_app;
+
+-- Trigger: TG_ARGV[0] is the catalog key column (tracked too), the other arguments the
+-- tracked columns.
+CREATE OR REPLACE FUNCTION public.fn_track_catalog_edit() RETURNS trigger
+LANGUAGE plpgsql
+SET search_path = ''
+AS $$
+DECLARE
+  new_row jsonb;
+  old_row jsonb;
+  changed text[] := '{}';
+  col text;
+  i integer;
+BEGIN
+  -- API callers never write the markers themselves.
+  IF current_user IN ('anon', 'authenticated') THEN
+    IF TG_OP = 'INSERT' THEN
+      NEW.edited_in_app := false;
+      NEW.edited_at := NULL;
+      NEW.edited_fields := '{}';
+    ELSE
+      NEW.edited_in_app := OLD.edited_in_app;
+      NEW.edited_at := OLD.edited_at;
+      NEW.edited_fields := OLD.edited_fields;
+    END IF;
+  END IF;
+
+  -- Only updates by a signed-in app user count.
+  IF TG_OP <> 'UPDATE' OR coalesce(auth.role(), '') <> 'authenticated' THEN
+    RETURN NEW;
+  END IF;
+
+  -- Only catalog rows count: the key before or after the write, so removing it is marked too.
+  IF TG_ARGV[0] = 'catalog_slug' THEN
+    IF NEW.catalog_slug IS NULL AND OLD.catalog_slug IS NULL THEN
+      RETURN NEW;
+    END IF;
+  ELSIF TG_ARGV[0] = 'catalog_source_id' THEN
+    IF NEW.catalog_source_id IS NULL AND OLD.catalog_source_id IS NULL THEN
+      RETURN NEW;
+    END IF;
+  ELSE
+    RAISE EXCEPTION 'Unknown catalog key %', TG_ARGV[0] USING ERRCODE = '22023';
+  END IF;
+
+  new_row := to_jsonb(NEW);
+  old_row := to_jsonb(OLD);
+  FOR i IN 0 .. TG_NARGS - 1 LOOP
+    col := TG_ARGV[i];
+    IF (new_row -> col) IS DISTINCT FROM (old_row -> col) THEN
+      changed := changed || col;
+    END IF;
+  END LOOP;
+
+  IF cardinality(changed) = 0 THEN
+    RETURN NEW;
+  END IF;
+
+  NEW.edited_in_app := true;
+  NEW.edited_at := now();
+  NEW.edited_fields := ARRAY(
+    SELECT DISTINCT f FROM unnest(OLD.edited_fields || changed) AS f ORDER BY f
+  );
+  RETURN NEW;
+END;
+$$;
+REVOKE ALL ON FUNCTION public.fn_track_catalog_edit() FROM PUBLIC, anon, authenticated, service_role;
+
+DROP TRIGGER IF EXISTS trg_track_catalog_edit ON public.compositions;
+CREATE TRIGGER trg_track_catalog_edit
+BEFORE INSERT OR UPDATE ON public.compositions
+FOR EACH ROW EXECUTE FUNCTION public.fn_track_catalog_edit(
+  'catalog_slug', 'title', 'original_author', 'aliases', 'authors'
+);
+
+DROP TRIGGER IF EXISTS trg_track_catalog_edit ON public.song_versions;
+CREATE TRIGGER trg_track_catalog_edit
+BEFORE INSERT OR UPDATE ON public.song_versions
+FOR EACH ROW EXECUTE FUNCTION public.fn_track_catalog_edit(
+  'catalog_source_id', 'version_name', 'content_chordpro', 'melody_notation', 'key', 'capo', 'tuning',
+  'soundcloud_url', 'youtube_url', 'spotify_url', 'version_kind', 'beats', 'song_note', 'composition_id'
+);
+
+-- Export (admins only): every marked song and version with its catalog keys and the current
+-- values of its edited fields. A key is null when it was removed in the app; a moved version
+-- gives the catalog_slug of its new song as the value of composition_id, not the internal id.
+CREATE OR REPLACE FUNCTION public.fn_catalog_edits_export() RETURNS jsonb
+LANGUAGE plpgsql
+STABLE
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+BEGIN
+  IF NOT public.fn_is_admin() THEN
+    RAISE EXCEPTION 'Only admins can export catalog edits' USING ERRCODE = '42501';
+  END IF;
+
+  RETURN jsonb_build_object(
+    'songs', coalesce((
+      SELECT jsonb_agg(jsonb_build_object(
+          'song_id', c.id,
+          'catalog_slug', c.catalog_slug,
+          'title', c.title,
+          'edited_at', c.edited_at,
+          'edited_fields', to_jsonb(c.edited_fields),
+          'values', (SELECT coalesce(jsonb_object_agg(f, to_jsonb(c) -> f), '{}'::jsonb)
+                     FROM unnest(c.edited_fields) AS f)
+        ) ORDER BY c.edited_at DESC, c.catalog_slug)
+      FROM public.compositions c
+      WHERE c.edited_in_app
+    ), '[]'::jsonb),
+    'versions', coalesce((
+      SELECT jsonb_agg(jsonb_build_object(
+          'song_id', c.id,
+          'version_id', v.id,
+          'catalog_slug', c.catalog_slug,
+          'catalog_source_id', v.catalog_source_id,
+          'title', c.title,
+          'version_name', v.version_name,
+          'edited_at', v.edited_at,
+          'edited_fields', to_jsonb(v.edited_fields),
+          'values', (SELECT coalesce(jsonb_object_agg(
+                       f, CASE WHEN f = 'composition_id' THEN to_jsonb(c.catalog_slug) ELSE to_jsonb(v) -> f END
+                     ), '{}'::jsonb)
+                     FROM unnest(v.edited_fields) AS f)
+        ) ORDER BY v.edited_at DESC, c.catalog_slug, v.catalog_source_id)
+      FROM public.song_versions v
+      JOIN public.compositions c ON c.id = v.composition_id
+      WHERE v.edited_in_app
+    ), '[]'::jsonb)
+  );
+END;
+$$;
+REVOKE ALL ON FUNCTION public.fn_catalog_edits_export() FROM PUBLIC, anon, service_role;
+GRANT EXECUTE ON FUNCTION public.fn_catalog_edits_export() TO authenticated;
+
+-- Clear a marker (admins only), once the external catalog has taken the correction over.
+-- p_kind is 'song' or 'version'; p_edited_at is the edited_at the admin downloaded, so a
+-- correction made after the download stays marked. Returns 'cleared', 'changed' (still marked,
+-- corrected again since p_edited_at) or 'not_marked' (nothing to clear).
+CREATE OR REPLACE FUNCTION public.fn_clear_catalog_edit(p_kind text, p_id uuid, p_edited_at timestamptz) RETURNS text
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+DECLARE
+  cleared integer;
+  marked boolean;
+BEGIN
+  IF NOT public.fn_is_admin() THEN
+    RAISE EXCEPTION 'Only admins can clear catalog edits' USING ERRCODE = '42501';
+  END IF;
+
+  IF p_kind = 'song' THEN
+    UPDATE public.compositions
+       SET edited_in_app = false, edited_at = NULL, edited_fields = '{}'
+     WHERE id = p_id AND edited_in_app AND edited_at = p_edited_at;
+    GET DIAGNOSTICS cleared = ROW_COUNT;
+    IF cleared = 0 THEN
+      SELECT edited_in_app INTO marked FROM public.compositions WHERE id = p_id;
+    END IF;
+  ELSIF p_kind = 'version' THEN
+    UPDATE public.song_versions
+       SET edited_in_app = false, edited_at = NULL, edited_fields = '{}'
+     WHERE id = p_id AND edited_in_app AND edited_at = p_edited_at;
+    GET DIAGNOSTICS cleared = ROW_COUNT;
+    IF cleared = 0 THEN
+      SELECT edited_in_app INTO marked FROM public.song_versions WHERE id = p_id;
+    END IF;
+  ELSE
+    RAISE EXCEPTION 'Unknown kind %', p_kind USING ERRCODE = '22023';
+  END IF;
+
+  IF cleared > 0 THEN
+    RETURN 'cleared';
+  END IF;
+  RETURN CASE WHEN coalesce(marked, false) THEN 'changed' ELSE 'not_marked' END;
+END;
+$$;
+REVOKE ALL ON FUNCTION public.fn_clear_catalog_edit(text, uuid, timestamptz) FROM PUBLIC, anon, service_role;
+GRANT EXECUTE ON FUNCTION public.fn_clear_catalog_edit(text, uuid, timestamptz) TO authenticated;
+
 -- Privileges: guests read; signed-in users read and (admins only, by policy) write.
 REVOKE ALL ON public.songbooks, public.song_version_sources, public.song_translations FROM anon, authenticated;
 GRANT SELECT ON public.songbooks, public.song_version_sources, public.song_translations TO anon, authenticated;
@@ -1018,6 +1225,417 @@ ON public.song_translations FOR ALL
 TO authenticated
 USING ((select public.fn_is_admin()))
 WITH CHECK ((select public.fn_is_admin()));
+
+-- LINK A SONG AS A VERSION OF ANOTHER SONG (v3.9, Story 6.2.9, migration 20261112120000_link_song_as_version.sql).
+-- fn_link_song_as_version moves the source song's versions, categories, views, translations and notifications
+-- to the target in one transaction, merges aliases, authors and favourites, keeps the catalog slug reachable,
+-- deletes the source, leaves a redirect (chains collapse) and an audit row. fn_preview_song_link: same checks, no change.
+-- Who: admins link any song; gatekeepers only songs they own (source AND target). Both songs must be public or both
+-- private, for everyone. The function runs as its owner, so the admin-only catalog guards do not fire: a gatekeeper's
+-- link deliberately moves catalog keys, whose values only ever come from the source song (see the migration header).
+-- Link 1. Redirects: old song id -> the song it was linked into
+CREATE TABLE IF NOT EXISTS public.composition_redirects (
+  old_id uuid PRIMARY KEY,
+  new_id uuid NOT NULL REFERENCES public.compositions(id) ON DELETE CASCADE,
+  -- The source's catalog slug when the target kept its own (an importer resolves it here).
+  catalog_slug text UNIQUE
+    CONSTRAINT composition_redirects_catalog_slug_check CHECK (catalog_slug <> '' AND catalog_slug = btrim(catalog_slug)),
+  created_at timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT composition_redirects_not_self CHECK (old_id <> new_id)
+);
+CREATE INDEX IF NOT EXISTS idx_composition_redirects_new_id ON public.composition_redirects (new_id);
+
+ALTER TABLE public.composition_redirects ENABLE ROW LEVEL SECURITY;
+-- A redirect is readable exactly when its target song is (the compositions policies of the
+-- caller apply inside EXISTS): a guest never learns that a private song took over an old id.
+DROP POLICY IF EXISTS "Song redirects are readable by everyone" ON public.composition_redirects;
+DROP POLICY IF EXISTS "Song redirects follow the target song" ON public.composition_redirects;
+CREATE POLICY "Song redirects follow the target song" ON public.composition_redirects
+  FOR SELECT TO anon, authenticated
+  USING (EXISTS (SELECT 1 FROM public.compositions c WHERE c.id = new_id));
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON public.composition_redirects FROM anon, authenticated;
+GRANT SELECT ON public.composition_redirects TO anon, authenticated;
+
+-- Link 2. Audit: one row per link, written by fn_link_song_as_version only
+CREATE TABLE IF NOT EXISTS public.song_link_audit (
+  id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  actor_id uuid REFERENCES public.profiles(id) ON DELETE SET NULL,
+  source_id uuid NOT NULL,
+  target_id uuid NOT NULL,
+  source_title text NOT NULL,
+  target_title text NOT NULL,
+  summary jsonb NOT NULL DEFAULT '{}'::jsonb,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+CREATE INDEX IF NOT EXISTS idx_song_link_audit_created ON public.song_link_audit (created_at DESC);
+
+ALTER TABLE public.song_link_audit ENABLE ROW LEVEL SECURITY;
+DROP POLICY IF EXISTS "Gatekeepers and admins read the song link audit" ON public.song_link_audit;
+CREATE POLICY "Gatekeepers and admins read the song link audit" ON public.song_link_audit
+  FOR SELECT TO authenticated
+  USING ((SELECT role::text FROM public.profiles WHERE id = (SELECT auth.uid())) IN ('admin', 'gatekeeper'));
+REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON public.song_link_audit FROM anon, authenticated;
+REVOKE ALL ON public.song_link_audit FROM anon;
+GRANT SELECT ON public.song_link_audit TO authenticated;
+
+-- Link 3. Checks shared by preview and link. Returns the target id after following a redirect.
+CREATE OR REPLACE FUNCTION public.fn_assert_can_link_song(p_source uuid, p_target uuid)
+RETURNS uuid
+LANGUAGE plpgsql
+STABLE
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+DECLARE
+  v_uid uuid := auth.uid();
+  v_role text;
+  v_target uuid;
+  v_source public.compositions%ROWTYPE;
+  v_target_row public.compositions%ROWTYPE;
+BEGIN
+  SELECT role::text INTO v_role FROM public.profiles WHERE id = v_uid;
+  IF v_uid IS NULL OR v_role IS NULL OR v_role NOT IN ('admin', 'gatekeeper') THEN
+    RAISE EXCEPTION 'Only gatekeepers and admins can link songs' USING ERRCODE = '42501';
+  END IF;
+
+  IF p_source IS NULL OR p_target IS NULL THEN
+    RAISE EXCEPTION 'Pick the song to link and the song to link it to' USING ERRCODE = '22023';
+  END IF;
+
+  -- A target that was itself linked earlier stands for the song it now lives in.
+  SELECT r.new_id INTO v_target FROM public.composition_redirects r WHERE r.old_id = p_target;
+  v_target := coalesce(v_target, p_target);
+
+  IF p_source = v_target THEN
+    RAISE EXCEPTION 'A song cannot be linked to itself' USING ERRCODE = '22023';
+  END IF;
+
+  SELECT * INTO v_source FROM public.compositions WHERE id = p_source;
+  IF NOT FOUND THEN
+    IF EXISTS (SELECT 1 FROM public.composition_redirects WHERE old_id = p_source) THEN
+      RAISE EXCEPTION 'This song is already linked to another song' USING ERRCODE = '22023';
+    END IF;
+    RAISE EXCEPTION 'Song not found' USING ERRCODE = 'P0002';
+  END IF;
+
+  SELECT * INTO v_target_row FROM public.compositions WHERE id = v_target;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Song not found' USING ERRCODE = 'P0002';
+  END IF;
+
+  IF v_role <> 'admin' THEN
+    -- A song the gatekeeper cannot read (private, someone else's) stays "not found".
+    IF NOT ((v_source.is_public IS TRUE OR v_source.owner_id = v_uid)
+            AND (v_target_row.is_public IS TRUE OR v_target_row.owner_id = v_uid)) THEN
+      RAISE EXCEPTION 'Song not found' USING ERRCODE = 'P0002';
+    END IF;
+    -- Gatekeepers only link songs they own, both of them; admins link any song.
+    IF v_source.owner_id IS DISTINCT FROM v_uid OR v_target_row.owner_id IS DISTINCT FROM v_uid THEN
+      RAISE EXCEPTION 'Gatekeepers can only link songs they own' USING ERRCODE = '42501';
+    END IF;
+  END IF;
+
+  -- For everyone: a public song is never merged into a private one, or the other way round.
+  IF coalesce(v_source.is_public, false) <> coalesce(v_target_row.is_public, false) THEN
+    RAISE EXCEPTION 'Both songs must be public, or both private' USING ERRCODE = '22023';
+  END IF;
+
+  RETURN v_target;
+END;
+$$;
+REVOKE ALL ON FUNCTION public.fn_assert_can_link_song(uuid, uuid) FROM PUBLIC, anon, authenticated;
+
+-- Titles and aliases without blanks or duplicates (case-insensitive), first spelling wins,
+-- and never the song's own title.
+CREATE OR REPLACE FUNCTION public.fn_merge_song_names(p_names text[], p_exclude text)
+RETURNS text[]
+LANGUAGE sql
+IMMUTABLE
+SET search_path = ''
+AS $$
+  SELECT coalesce(array_agg(nm ORDER BY ord), '{}')
+  FROM (
+    SELECT DISTINCT ON (lower(btrim(u.nm))) btrim(u.nm) AS nm, u.ord
+    FROM unnest(p_names) WITH ORDINALITY AS u(nm, ord)
+    WHERE u.nm IS NOT NULL
+      AND btrim(u.nm) <> ''
+      AND lower(btrim(u.nm)) IS DISTINCT FROM lower(btrim(coalesce(p_exclude, '')))
+    ORDER BY lower(btrim(u.nm)), u.ord
+  ) d;
+$$;
+REVOKE ALL ON FUNCTION public.fn_merge_song_names(text[], text) FROM PUBLIC, anon, authenticated;
+
+-- What a link would move (no checks: callers check first).
+CREATE OR REPLACE FUNCTION public.fn_song_link_summary(p_source uuid, p_target uuid)
+RETURNS jsonb
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+  WITH s AS (SELECT * FROM public.compositions WHERE id = p_source),
+       t AS (SELECT * FROM public.compositions WHERE id = p_target),
+       sv AS (SELECT id, catalog_source_id FROM public.song_versions WHERE composition_id = p_source),
+       fav_items AS (
+         SELECT si.setlist_id, v.composition_id
+         FROM public.setlist_items si
+         JOIN public.setlists sl ON sl.id = si.setlist_id AND sl.title = 'My Favorites'
+         JOIN public.song_versions v ON v.id = si.song_version_id
+         WHERE v.composition_id IN (p_source, p_target)
+       )
+  SELECT jsonb_build_object(
+    'source_id', s.id,
+    'source_title', s.title,
+    'target_id', t.id,
+    'target_title', t.title,
+    'versions', (SELECT count(*) FROM sv),
+    'recordings', (SELECT count(*) FROM public.user_recordings r WHERE r.song_version_id IN (SELECT id FROM sv)),
+    'playlist_items', (
+      SELECT count(*) FROM public.setlist_items si
+      JOIN public.setlists sl ON sl.id = si.setlist_id
+      WHERE si.song_version_id IN (SELECT id FROM sv) AND sl.title <> 'My Favorites'
+    ),
+    'favourites', (SELECT count(DISTINCT setlist_id) FROM fav_items WHERE composition_id = p_source),
+    'favourites_merged', (
+      SELECT count(*) FROM (
+        SELECT setlist_id FROM fav_items GROUP BY setlist_id HAVING count(DISTINCT composition_id) = 2
+      ) both_songs
+    ),
+    'categories_added', (
+      SELECT count(*) FROM public.song_category_map m
+      WHERE m.song_id = p_source
+        AND NOT EXISTS (SELECT 1 FROM public.song_category_map mt WHERE mt.song_id = p_target AND mt.category_id = m.category_id)
+    ),
+    'aliases_added', to_jsonb(ARRAY(
+      SELECT a FROM unnest(public.fn_merge_song_names(t.aliases || s.title || s.aliases, t.title)) AS a
+      WHERE lower(a) NOT IN (SELECT lower(btrim(x)) FROM unnest(t.aliases) AS x WHERE x IS NOT NULL)
+    )),
+    'catalog_slug', CASE
+      WHEN s.catalog_slug IS NULL THEN 'none'
+      WHEN t.catalog_slug IS NULL THEN 'moved'
+      ELSE 'redirect'
+    END,
+    'catalog_keys_cleared', (
+      SELECT count(*) FROM sv
+      WHERE sv.catalog_source_id IS NOT NULL
+        AND EXISTS (
+          SELECT 1 FROM public.song_versions tv
+          WHERE tv.composition_id = p_target AND tv.catalog_source_id = sv.catalog_source_id
+        )
+    ),
+    'translations', (SELECT count(*) FROM public.song_translations tr WHERE tr.composition_id = p_source)
+  )
+  FROM s, t;
+$$;
+REVOKE ALL ON FUNCTION public.fn_song_link_summary(uuid, uuid) FROM PUBLIC, anon, authenticated;
+
+-- Link 4. Preview for the confirm dialog: same checks, nothing changes.
+CREATE OR REPLACE FUNCTION public.fn_preview_song_link(p_source uuid, p_target uuid)
+RETURNS jsonb
+LANGUAGE plpgsql
+STABLE
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+BEGIN
+  RETURN public.fn_song_link_summary(p_source, public.fn_assert_can_link_song(p_source, p_target));
+END;
+$$;
+-- Signed-in callers only: the checks need auth.uid() (a service_role call has none and is
+-- refused with 42501), so there is no service_role grant. Importers do not merge; they
+-- resolve slugs with fn_song_id_for_catalog_slug.
+REVOKE ALL ON FUNCTION public.fn_preview_song_link(uuid, uuid) FROM PUBLIC, anon, service_role;
+GRANT EXECUTE ON FUNCTION public.fn_preview_song_link(uuid, uuid) TO authenticated;
+
+-- Link 5. The link itself, in one transaction.
+CREATE OR REPLACE FUNCTION public.fn_link_song_as_version(p_source uuid, p_target uuid)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+DECLARE
+  v_target uuid;
+  v_source public.compositions%ROWTYPE;
+  v_target_row public.compositions%ROWTYPE;
+  v_summary jsonb;
+  v_first_version uuid;
+  v_slug_moves boolean;
+BEGIN
+  v_target := public.fn_assert_can_link_song(p_source, p_target);
+
+  -- Lock both songs in a stable order, so two links that cross cannot deadlock.
+  PERFORM 1 FROM public.compositions WHERE id IN (p_source, v_target) ORDER BY id FOR UPDATE;
+  -- A concurrent link may have committed while this one waited for the locks: check again
+  -- on the rows as they are now, so the caller hears "already linked", not "not found".
+  IF public.fn_assert_can_link_song(p_source, p_target) IS DISTINCT FROM v_target THEN
+    RAISE EXCEPTION 'This song is already linked to another song' USING ERRCODE = '22023';
+  END IF;
+  SELECT * INTO v_source FROM public.compositions WHERE id = p_source;
+  SELECT * INTO v_target_row FROM public.compositions WHERE id = v_target;
+  IF v_source.id IS NULL OR v_target_row.id IS NULL THEN
+    RAISE EXCEPTION 'Song not found' USING ERRCODE = 'P0002';
+  END IF;
+
+  v_summary := public.fn_song_link_summary(p_source, v_target);
+  v_slug_moves := v_source.catalog_slug IS NOT NULL AND v_target_row.catalog_slug IS NULL;
+
+  -- Versions: a catalog key the target already has stays with the target's version.
+  UPDATE public.song_versions sv
+  SET catalog_source_id = NULL
+  WHERE sv.composition_id = p_source
+    AND sv.catalog_source_id IS NOT NULL
+    AND EXISTS (
+      SELECT 1 FROM public.song_versions tv
+      WHERE tv.composition_id = v_target AND tv.catalog_source_id = sv.catalog_source_id
+    );
+  -- The moved versions are versions of the target now: an 'original' becomes a 'variant', so the
+  -- target's own original stays the first version (lib/songs/versionOrder.ts); translations stay translations.
+  UPDATE public.song_versions
+  SET composition_id = v_target,
+      version_kind = CASE WHEN version_kind = 'original' THEN 'variant' ELSE version_kind END
+  WHERE composition_id = p_source;
+
+  -- Categories, views, translations, notifications.
+  INSERT INTO public.song_category_map (song_id, category_id)
+  SELECT v_target, m.category_id FROM public.song_category_map m WHERE m.song_id = p_source
+  ON CONFLICT DO NOTHING;
+
+  INSERT INTO public.song_views (user_id, song_id, viewed_at)
+  SELECT sv.user_id, v_target, sv.viewed_at FROM public.song_views sv WHERE sv.song_id = p_source
+  ON CONFLICT (user_id, song_id) DO UPDATE
+    SET viewed_at = greatest(public.song_views.viewed_at, EXCLUDED.viewed_at);
+
+  -- A language the target already has keeps the target's text; empty fields are filled in.
+  UPDATE public.song_translations t
+  SET title = coalesce(t.title, s.title),
+      lyrics = coalesce(t.lyrics, s.lyrics),
+      translator = coalesce(t.translator, s.translator)
+  FROM public.song_translations s
+  WHERE t.composition_id = v_target AND s.composition_id = p_source AND s.language = t.language;
+  UPDATE public.song_translations s
+  SET composition_id = v_target
+  WHERE s.composition_id = p_source
+    AND NOT EXISTS (
+      SELECT 1 FROM public.song_translations t WHERE t.composition_id = v_target AND t.language = s.language
+    );
+
+  UPDATE public.notifications SET composition_id = v_target WHERE composition_id = p_source;
+
+  -- Redirects that led to the source now lead to the target (chains collapse), before the
+  -- source is deleted (its redirects would cascade away).
+  UPDATE public.composition_redirects SET new_id = v_target WHERE new_id = p_source;
+
+  -- The source goes (the rows still on it are copies of what moved). Its slug is free now.
+  DELETE FROM public.compositions WHERE id = p_source;
+
+  INSERT INTO public.composition_redirects (old_id, new_id, catalog_slug)
+  VALUES (p_source, v_target, CASE WHEN v_slug_moves THEN NULL ELSE v_source.catalog_slug END);
+
+  UPDATE public.compositions c
+  SET aliases = public.fn_merge_song_names(c.aliases || v_source.title || v_source.aliases, c.title),
+      authors = public.fn_merge_song_names(c.authors || v_source.authors, NULL),
+      original_author = coalesce(nullif(btrim(c.original_author), ''), v_source.original_author),
+      catalog_slug = CASE WHEN v_slug_moves THEN v_source.catalog_slug ELSE c.catalog_slug END,
+      has_chords = coalesce(c.has_chords, false) OR coalesce(v_source.has_chords, false),
+      has_melody = coalesce(c.has_melody, false) OR coalesce(v_source.has_melody, false)
+  WHERE c.id = v_target;
+
+  -- Favourites are per song: one item per member, on the target's first version (the one
+  -- the heart toggles: original, variants, translations; each oldest first, lib/songs/versionOrder.ts).
+  SELECT id INTO v_first_version FROM public.song_versions
+  WHERE composition_id = v_target
+  ORDER BY CASE version_kind WHEN 'variant' THEN 1 WHEN 'translation' THEN 2 ELSE 0 END, created_at NULLS LAST, id
+  LIMIT 1;
+
+  DELETE FROM public.setlist_items si
+  USING (
+    SELECT i.id, row_number() OVER (PARTITION BY i.setlist_id ORDER BY i.order_index, i.created_at, i.id) AS rn
+    FROM public.setlist_items i
+    JOIN public.setlists sl ON sl.id = i.setlist_id AND sl.title = 'My Favorites'
+    JOIN public.song_versions v ON v.id = i.song_version_id AND v.composition_id = v_target
+  ) dup
+  WHERE si.id = dup.id AND dup.rn > 1;
+
+  UPDATE public.setlist_items si
+  SET song_version_id = v_first_version
+  FROM public.setlists sl, public.song_versions v
+  WHERE sl.id = si.setlist_id AND sl.title = 'My Favorites'
+    AND v.id = si.song_version_id AND v.composition_id = v_target
+    AND si.song_version_id <> v_first_version;
+
+  INSERT INTO public.song_link_audit (actor_id, source_id, target_id, source_title, target_title, summary)
+  VALUES (auth.uid(), p_source, v_target, v_source.title, v_target_row.title, v_summary);
+
+  RETURN v_summary;
+END;
+$$;
+-- Signed-in callers only (see fn_preview_song_link): no service_role grant.
+REVOKE ALL ON FUNCTION public.fn_link_song_as_version(uuid, uuid) FROM PUBLIC, anon, service_role;
+GRANT EXECUTE ON FUNCTION public.fn_link_song_as_version(uuid, uuid) TO authenticated;
+
+-- Link 6. Importers: the song a catalog slug stands for, also after it was linked away.
+CREATE OR REPLACE FUNCTION public.fn_song_id_for_catalog_slug(p_slug text)
+RETURNS uuid
+LANGUAGE sql
+STABLE
+SET search_path = ''
+AS $$
+  SELECT coalesce(
+    (SELECT id FROM public.compositions WHERE catalog_slug = p_slug),
+    (SELECT new_id FROM public.composition_redirects WHERE catalog_slug = p_slug)
+  );
+$$;
+REVOKE ALL ON FUNCTION public.fn_song_id_for_catalog_slug(text) FROM PUBLIC, anon;
+GRANT EXECUTE ON FUNCTION public.fn_song_id_for_catalog_slug(text) TO authenticated, service_role;
+
+-- Global search window filter counts (Story 6.2.25 / G5.8, #570)
+CREATE OR REPLACE FUNCTION public.fn_search_filter_counts()
+RETURNS TABLE (
+  kind text,
+  value text,
+  label text,
+  song_count integer
+)
+LANGUAGE sql
+STABLE
+SECURITY INVOKER
+SET search_path = ''
+AS $$
+  SELECT
+    'songbook'::text AS kind,
+    sb.id AS value,
+    COALESCE(NULLIF(btrim(sb.title), ''), NULLIF(btrim(sb.short_name), '')) AS label,
+    COUNT(DISTINCT c.id)::integer AS song_count
+  FROM public.songbooks sb
+  JOIN public.song_version_sources svs ON svs.songbook_id = sb.id
+  JOIN public.song_versions sv ON sv.id = svs.song_version_id
+  JOIN public.compositions c ON c.id = sv.composition_id
+  WHERE COALESCE(NULLIF(btrim(sb.title), ''), NULLIF(btrim(sb.short_name), '')) IS NOT NULL
+  GROUP BY sb.id, sb.title, sb.short_name
+
+  UNION ALL
+
+  SELECT
+    'language'::text AS kind,
+    cat.slug AS value,
+    cat.name AS label,
+    COUNT(DISTINCT c.id)::integer AS song_count
+  FROM public.categories cat
+  JOIN public.categories parent ON parent.id = cat.parent_id
+  JOIN public.song_category_map scm ON scm.category_id = cat.id
+  JOIN public.compositions c ON c.id = scm.song_id
+  WHERE (parent.slug = 'languages' OR parent.name = 'Languages')
+    AND NULLIF(btrim(cat.slug), '') IS NOT NULL
+    AND NULLIF(btrim(cat.name), '') IS NOT NULL
+  GROUP BY cat.id, cat.slug, cat.name
+
+  ORDER BY kind, label, value;
+$$;
+
+REVOKE ALL ON FUNCTION public.fn_search_filter_counts() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.fn_search_filter_counts() TO anon, authenticated, service_role;
+
 -- 7. SEED DATA (Categories)
 with groups as (
   insert into public.categories (name, slug, emoji)

@@ -6,6 +6,7 @@ import type { CiBddState } from '../steps/gitflow-cicd.steps';
 import type { RecordingSharingBddState } from '../steps/recording-sharing.steps';
 import type { AccessBddState } from '../steps/access-policies.steps';
 import type { SongbookBddState } from '../steps/songbook-data-model.steps';
+import type { ProtectEditsBddState } from '../steps/ux-v3-protect-app-edits.steps';
 
 export class SongBddWorld extends World {
   public rawContent = '';
@@ -22,6 +23,8 @@ export class SongBddWorld extends World {
   public access?: AccessBddState;
   /** Scenario state for docs/testing/songbook-data-model.feature (see songbook-data-model.steps.ts). */
   public songbook?: SongbookBddState;
+  /** Scenario state for docs/testing/ux-v3-protect-app-edits.feature (see ux-v3-protect-app-edits.steps.ts). */
+  public protectEdits?: ProtectEditsBddState;
 
   constructor(options: IWorldOptions) {
     super(options);

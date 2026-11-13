@@ -9,6 +9,7 @@ vi.mock('@/context/LocaleContext', () => ({
     t: (k: string, v?: Record<string, string>) =>
       ({
         'song.traditional': 'Traditional',
+        'song.noArtist': 'No artist',
         'song.visibility.private': 'Private',
         'songCard.addFavorite': 'Add to favorites',
         'songCard.removeFavorite': 'Remove from favorites',
@@ -55,13 +56,55 @@ describe('SongCard row', () => {
     expect(heart.className).toContain('size-tap');
     expect(heart.getAttribute('aria-pressed')).toBe('false');
     expect(screen.getByRole('button', { name: 'Add to playlist' })).toBeTruthy();
-    expect(screen.getByTestId('song-row-meta').textContent).toBe('Traditional');
+    expect(screen.getByTestId('song-row-meta').textContent).toBe('No artist'); // #565
   });
 
   it('marks a private song with a translated label and a lighter title (validation 4)', () => {
     render(<SongCard id="s1" title="Draft song" author="X" isPublic={false} />);
     expect(screen.getByText('Private')).toBeTruthy();
     expect(screen.getByText('Draft song').className).toContain('text-fg-subtle');
+  });
+});
+
+// Story 6.2.18 (#521): the row says why it matched when the title did not.
+describe('SongCard match hint', () => {
+  it('shows the hint as one more grey line under the meta line', () => {
+    render(<SongCard id="s1" title="Huey Tonantzin" author="Anna Lee" matchHint="Also known as Gran Venerable Madre Tierra" />);
+    const hint = screen.getByTestId('song-row-match');
+    expect(hint.textContent).toBe('Also known as Gran Venerable Madre Tierra');
+    expect(hint.className).toContain('text-fg-muted');
+    expect(hint.className).toContain('truncate');
+  });
+
+  it('describes the stretched link by the hint, so a screen reader hears why the row matched', () => {
+    render(<SongCard id="s1" title="Huey Tonantzin" author="Anna Lee" matchHint="Also known as Gran Venerable Madre Tierra" />);
+    const link = screen.getByRole('link', { name: 'View Huey Tonantzin' });
+    const hint = screen.getByTestId('song-row-match');
+    expect(hint.id).toBeTruthy();
+    expect(link.getAttribute('aria-describedby')).toBe(hint.id);
+  });
+
+  it('gives each row its own hint id', () => {
+    render(
+      <>
+        <SongCard id="s1" title="One" author="" matchHint="Also known as a" />
+        <SongCard id="s2" title="Two" author="" matchHint="Also known as b" />
+      </>
+    );
+    const [a, b] = screen.getAllByTestId('song-row-match');
+    expect(a.id).not.toBe(b.id);
+  });
+
+  it('sets no aria-describedby without a hint', () => {
+    render(<SongCard id="s1" title="Huey Tonantzin" author="Anna Lee" />);
+    expect(screen.getByRole('link', { name: 'View Huey Tonantzin' }).hasAttribute('aria-describedby')).toBe(false);
+  });
+
+  it('shows no hint line without a hint', () => {
+    render(<SongCard id="s1" title="Huey Tonantzin" author="Anna Lee" />);
+    expect(screen.queryByTestId('song-row-match')).toBeNull();
+    render(<SongCard id="s2" title="Other" author="Anna Lee" matchHint={null} />);
+    expect(screen.queryByTestId('song-row-match')).toBeNull();
   });
 });
 

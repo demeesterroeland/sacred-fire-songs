@@ -1530,6 +1530,24 @@
 - [x] Cross-review by another Claude model (orchestrator, #498)
 - [x] Review fixes (PR #527): `trg_guard_catalog_slug` / `trg_guard_catalog_source_id` (only service role and admins set catalog keys), keys without surrounding spaces, lowercase translation languages, `song_version_sources.songbook_id` `on delete restrict`, guide: explicit increasing `created_at` and a write-rights table; `@seed` scenarios for the guards, ordering and runtime privileges
 
+## Session November 11, 2026 (Story 6.2.10, #513, songbook source line)
+
+- [x] Failing tests first: formatter, component, `fetchSong` select, BDD `ux-v3-songbook-source.feature`
+- [x] `lib/songs/versionSources.ts`, `components/song/SongSourceLine.tsx`, `fetchSong` embed, song page, 5 keys in 8 locales
+- [x] Docs: design doc 2.16, epics 2.02 (story 6.2.10), guest guide 0.26, member guide 0.23
+- [x] Cross-review by another Claude model (orchestrator, #498)
+- [x] Review fixes (PR #531, Nov 12): one `song_version_sources` embed (`SONG_SELECT`, guard test, `primarySource()` for #530), `@seed` contract on the real select, page notation (`pp.`, `A-12`, importer prefixes), original-title normalisation, `sortSources` tie-break and locale, plural list label (`song.source.labelMany`), es `pág.`, fr no-break space, epic doc acceptance criteria, renumbered docs after merging `feat/ux-v3`
+
+## Session November 13, 2026 (Story 6.2.11, #514, songbook pages)
+
+- [x] Failing tests first: page order and grouping (`songbookPage.test.ts`), selects, components, route files, BDD `ux-v3-songbook-pages.feature`
+- [x] `lib/songbooks/*`, `components/songbooks/*`, `app/songbooks/*`, Library tab, source line link, 8 keys in 8 locales
+- [x] Real page checked against the local API with temporary data (removed again): found and fixed the URL-encoded book id
+- [x] Docs: design doc 2.25 (§6.21), epics 2.11 (story 6.2.11), guest guide 0.32, member guide 0.30, user guide 2.10, e2e overview 1.25
+- [ ] `qu` copy for the songbook pages needs a native check
+- [x] Cross-review findings fixed (roman page order, merged-anchor highlight, page column, tab title, wording); merged `feat/ux-v3`
+- [ ] Cross-review by another Claude model (orchestrator, #498)
+
 ## Session November 13, 2026 (Story 6.1.38, #534, role badge on a profile)
 - [x] Plan `docs/plans/2026-11-13-role-badges.md`
 - [x] Migration `20261113120000_public_profiles_role.sql`: `public_profiles.role`, NULL for a guest; `db-schema.sql` v3.9
@@ -1541,3 +1559,31 @@
 - [x] Seeds, E2E fixtures, BDD steps, UX script, feature files (admin-users v1.2, song v1.4), mockups and CHANGELOG use `<role>@sfs.example` and placeholder names
 - [x] `scripts/db/rename-seed-accounts.mjs` + `npm run seed:rename-accounts` + `scripts/README.md` row; unit test `renameSeedAccounts.test.ts`
 - [x] Local stack converted; tsc, lint (137), Vitest, BDD unit + seed and the admin-users / role badge / auth E2E specs green
+
+## Session November 13, 2026 (sync develop into feat/ux-v3)
+- [x] Merge `origin/develop` into `feat/ux-v3` with a merge commit (PR `chore/sync-develop-into-ux-v3`); doc conflicts resolved keeping both sides, develop's clashing version rows renumbered
+- [x] Role badge migration `20261113120000_public_profiles_role.sql` checked in the shared local database
+- [ ] Follow-up: `feat/ux-v3`-only tests and fixtures still use the old seed addresses (develop uses `<role>@sfs.example`)
+## Session November 13, 2026 (#564 / #565, Private and No artist)
+- [x] `@unit`/`@e2e` feature `ux-v2-private-and-no-artist.feature`; Vitest `privateAndNoArtist.test.ts`, `songMetaNoArtist.test.tsx`; song-rows/meta tests now expect "No artist"
+- [x] 8 locales: song-visibility labels say Private (filter, empty state, song form "Save as private", status, `/terms` and `/privacy`); new `song.noArtist`; `admin.detail.unknownArtist` = No artist
+- [x] `songAuthors()` falls back to `song.noArtist`; song menu subtitle without "by"; "No artist" is plain text in `SongMetaLines`
+- [x] E2E `ux-v2-private-and-no-artist.spec.ts` (fixture `NO_ARTIST_FIXTURE_IDS`, removed in global teardown); `search.spec.ts` skips "No artist"
+- [x] Docs: design doc 2.16, user guide 2.4, member guide 0.21, glossary 0.7, E2E overview 1.25
+
+## Session November 13, 2026 (#574, /explore redirect)
+- [x] `redirects()` in `next.config.ts`: `/explore` → `/songs`, permanent, query kept
+- [x] Tests: feature `ux-v2-explore-redirect.feature`, Vitest `exploreRedirect.test.ts`, E2E `ux-v2-explore-redirect.spec.ts`; `ux-v2-bottom-bar.spec.ts` updated
+- [x] Docs: design doc 2.17, E2E overview 1.26
+
+## Session November 13, 2026 (#578, broken song links and load error)
+- [x] `isUuid()` (`lib/validation/uuid.ts`) guards `[id]` routes (`/songs/[id]`, `/songs/[id]/edit`, `/users/[id]`, `/library/playlists/[id]`, `/admin/users/[id]`) and `fetchSong` / `fetchMusicianProfile` / `getAdminUserDetails` so malformed ids render `notFound()`
+- [x] `app/songs/[id]/page.tsx` load-error state shows `t('song.error.unexpected')` instead of raw `songError.message` (logged to console)
+- [x] Tests: feature `ux-v2-broken-song-links.feature` (`@unit`, `@e2e`), Vitest `brokenSongLinks.test.ts` + `fetchSong.test.ts`, E2E `ux-v2-broken-song-links.spec.ts`
+- [x] Docs: design doc 2.18, E2E overview 1.27
+
+## Session November 13, 2026 (Story 6.1.35, #485, group 6: playlists)
+- [x] `PlaylistContextMenu`, `AddSongsSheet` and `PlaylistDetailHeader` use semantic colour tokens
+- [x] Removed 85 palette classes; ratchet lowered 581 → 496
+- [x] Tests: `ux-v2-sober-playlists.feature` (`@unit`, `@e2e`), Playwright axe colour-contrast checks in light and dark mode, including the guest export dialog
+- [x] Docs: design doc 2.21, E2E overview 1.30; no new translation keys
