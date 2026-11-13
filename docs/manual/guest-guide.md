@@ -1,11 +1,12 @@
 # Guest Guide (draft)
 
-**Version:** 0.31 | **Date:** Nov 13, 2026
+**Version:** 0.32 | **Date:** Nov 13, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.32 | Nov 13, 2026 | Songbooks: **Library → Songbooks** lists the printed songbooks with their number of songs; a book's page shows who compiled it, its credits and its songs in page order (`p. 2`, `p. 10`, `p. 12a`, songs without a page last). Tap a song to open the version printed there. On a song page the grey source line is a link to its book (UX v3, #514). |
 | 0.31 | Nov 13, 2026 | Search: the search box also finds a song by another name it is known by and by the title it has in a songbook (accents and capitals do not matter, "pachamama" finds "Pachamamá"). When the song's own title did not match, the row adds a grey line saying why, for example *Matched by alias: Gran Venerable Madre Tierra* (UX v3, #521). Songs whose title matches are listed first. |
 | 0.30 | Nov 12, 2026 | Song page: a song that has a translation shows a second grey switch next to the version switch, with **Original language** and the languages the song has (named in your app language). Tap a language to read that translation without leaving the song; tap **Original language** to go back. Choosing another version also goes back to the original language. A link can end in `?lang=nl` to open a translation (UX v3, #516). Guests see the translations of public songs. |
 | 0.29 | Nov 12, 2026 | Song page: a song with several authors shows each name as its own link, joined as in your language ("A and B"); tap a name to see that author's songs. A song without an author shows "Traditional" as plain text. The share text names every author, and the search box finds the song under each of them (UX v3, #515). |
@@ -48,7 +49,7 @@ The screen has three fixed parts:
 - **Content** in the middle.
 - **Bottom bar:** **Home**, **Search**, **Library**. **Search** opens the song list and puts the cursor in the search field.
 
-The ☰ menu repeats the main places (Home, Songs; under Library the same tabs as the Library page: Playlists, Smart, History, New, Artists; Add Song, New Playlist) and has the **language switch** at the bottom.
+The ☰ menu repeats the main places (Home, Songs; under Library the same tabs as the Library page: Playlists, Smart, History, New, Artists, Songbooks; Add Song, New Playlist) and has the **language switch** at the bottom.
 
 ## Finding a song
 
@@ -58,6 +59,7 @@ The ☰ menu repeats the main places (Home, Songs; under Library the same tabs a
 4. **Filters:** the slider button in the search field opens *Search options*: sort order, content type (songs with chords / with melody) and category & tag filters. Tap **Show results**.
 5. **Search** in the bottom bar lists all songs A–Z and is ready for typing. Each row shows the title, a grey line *author · category · language* and the key on the right; tap the row to open the song.
 6. **Library → Artists** lists every author with their number of songs.
+7. **Library → Songbooks** lists the printed songbooks with their number of songs. Open one to see its songs in the order of its pages, handy when your circle sings from a printed book; each row shows the page and opens the version printed there. Signed out you see the public songs only.
 
 ## Reading a song
 

@@ -1,12 +1,13 @@
 # Member Guide (draft)
 
-**Version:** 0.30 | **Date:** Nov 13, 2026
+**Version:** 0.31 | **Date:** Nov 13, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
-| 0.30 | Nov 13, 2026 | Playlist PDF: each song shows the same details as the song page: **Key**, **Capo**, tuning and **Beats** of the version in the playlist, the **source** (songbook, page, compiler) under the lyrics, and the repeat bars **‖: … :‖** (with ×2 when it says how often). A value the version does not have is not printed. A transposed song prints its new key and chords. The labels follow your language; a translation is never printed, the sheet always has the song's own lyrics. |
+| 0.31 | Nov 13, 2026 | Playlist PDF: each song shows the same details as the song page: **Key**, **Capo**, tuning and **Beats** of the version in the playlist, the **source** (songbook, page, compiler) under the lyrics, and the repeat bars **‖: … :‖** (with ×2 when it says how often). A value the version does not have is not printed. A transposed song prints its new key and chords. The labels follow your language; a translation is never printed, the sheet always has the song's own lyrics. |
+| 0.30 | Nov 13, 2026 | Songbooks: **Library → Songbooks** lists the printed songbooks; a book's page lists its songs by page (also your own private songs, marked with a lock, which nobody else sees there). The grey source line on a song page links to its book (UX v3, #514). |
 | 0.29 | Nov 13, 2026 | Edit Song: the **Songbook details** section lets you correct the **Beats** (for example 8, 6, 8y4 or 8,4) and the **About this song** note of the version you are editing; clear a field to remove it. The **Source** (songbook, page, compiler) is shown there but cannot be changed; admins also see **Correct source** to fix its page and original title (UX v3, #523). |
 | 0.28 | Nov 13, 2026 | Search: the search box also finds a song by another name it is known by and by the title it has in a songbook (accents and capitals do not matter, "pachamama" finds "Pachamamá"). When the song's own title did not match, the row adds a grey line saying why, for example *Matched by alias: Gran Venerable Madre Tierra* (UX v3, #521). Songs whose title matches are listed first. The **+ Add Songs** search in a playlist still matches the title only. |
 | 0.27 | Nov 12, 2026 | Song page: a song with translations has a language switch next to the version switch (**Original language** and the languages the song has). A translation replaces the lyrics of the version you are reading; its practice recordings, key and playlist entries stay with that version. Choosing another version returns to the original language; a link can end in `?lang=nl`. Old translation versions were moved into this switch, with their recordings going to the song's first original version (after the takes already there) and their playlist entries opening the original language of that version from now on (UX v3, #516). A translation with chords in another key, capo or tuning than the original, with blank lyrics, or with its own melody, note, beats, link or votes, is not moved and stays a version. |
