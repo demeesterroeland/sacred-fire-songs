@@ -3463,3 +3463,22 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - Removed unused `components/common/navigation/ThemeToggle.tsx`, `components/ui/popover.tsx` and the `@radix-ui/react-popover` dependency.
 - Left for the admin group: `WickSelect` still shows the admin role colours passed by `AdminUsersTable` (light-mode contrast of the coloured label).
 - Tests: `docs/testing/ux-v2-sober-header.feature`, `testing/unit/tests/design/soberHeader.test.tsx`, `e2e/tests/ux-v2-sober-header.spec.ts` (NAV-07, axe colour contrast light and dark).
+
+## Session November 13, 2026 — #564 / #565: "Private" and "No artist"
+
+- A song that is not public is now **Private** in every user-visible label, never "Draft", in all 8 locales: the Status options in the search filter popup on `/songs` (All · Public · Private), the empty state of the private-songs filter, the Add/Edit Song button **Save as private**, the private badge in **+ Add Songs**, and the visibility sentences on `/terms` and `/privacy`. Only the values changed; key names and `status: 'draft'` stay.
+- Kept on purpose: `songForm.guestDraft.*` (the banner for a guest's unsaved copy of the form, "Draft now — sign in to save") and `legal.draft` (the legal text is not approved yet). Neither is about a song's visibility.
+- A song without an author shows **No artist** (new key `song.noArtist`) instead of "Traditional": song rows, recently viewed, the song page meta line (plain text, no link to an empty author filter), the song menu subtitle (no "by No artist") and the admin member page. An author entered as "Traditional" still shows the translated "Traditional".
+- Tests: `docs/testing/ux-v2-private-and-no-artist.feature` (`@unit`: English labels, every locale free of the local word for "draft", "No artist" per locale; `@e2e`), `privateAndNoArtist.test.ts`, `songMetaNoArtist.test.tsx`, `e2e/tests/ux-v2-private-and-no-artist.spec.ts`; `ux-v2-song-rows.feature` 1.2 expects "No artist".
+- Note for `feat/ux-v3`: there `songAuthors()` lives in `lib/songs/authors.ts`; when develop is merged into it, its fallback must use `song.noArtist` too.
+
+## Session November 13, 2026 — #574: old /explore links
+
+- `/explore` (gone since the bottom bar, Story 6.1.24) showed "Page not found". It now redirects permanently (308) to `/songs`, keeping the query string (`/explore?category=ceremony` → `/songs?category=ceremony`), via `redirects()` in `next.config.ts`.
+- Tests: `docs/testing/ux-v2-explore-redirect.feature` (`@unit`, `@e2e`), `exploreRedirect.test.ts`, `e2e/tests/ux-v2-explore-redirect.spec.ts`; the bottom bar spec now expects the song list instead of a 404.
+
+## Session November 13, 2026 — #578: broken song links and translated load error
+
+- Every `[id]` route (`app/songs/[id]`, `app/songs/[id]/edit`, `app/users/[id]`, `app/recordings/[id]`, `app/library/playlists/[id]`, `app/admin/users/[id]`) and `fetchSong` / `fetchMusicianProfile` / `getAdminUserDetails` checks `isUuid(id)` (`lib/validation/uuid.ts`) before querying PostgreSQL `uuid` columns, so a malformed id like `/songs/xyz` renders `notFound()` instead of the raw database error `invalid input syntax for type uuid`.
+- On `app/songs/[id]/page.tsx`, the generic load-error state shows the translated `t('song.error.unexpected')` with Retry instead of `songError.message` (logged to the console).
+- Tests: `docs/testing/ux-v2-broken-song-links.feature` (`@unit`, `@e2e`), `brokenSongLinks.test.ts`, `fetchSong.test.ts`, `e2e/tests/ux-v2-broken-song-links.spec.ts`.

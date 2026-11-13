@@ -1541,3 +1541,21 @@
 - [x] Seeds, E2E fixtures, BDD steps, UX script, feature files (admin-users v1.2, song v1.4), mockups and CHANGELOG use `<role>@sfs.example` and placeholder names
 - [x] `scripts/db/rename-seed-accounts.mjs` + `npm run seed:rename-accounts` + `scripts/README.md` row; unit test `renameSeedAccounts.test.ts`
 - [x] Local stack converted; tsc, lint (137), Vitest, BDD unit + seed and the admin-users / role badge / auth E2E specs green
+
+## Session November 13, 2026 (#564 / #565, Private and No artist)
+- [x] `@unit`/`@e2e` feature `ux-v2-private-and-no-artist.feature`; Vitest `privateAndNoArtist.test.ts`, `songMetaNoArtist.test.tsx`; song-rows/meta tests now expect "No artist"
+- [x] 8 locales: song-visibility labels say Private (filter, empty state, song form "Save as private", status, `/terms` and `/privacy`); new `song.noArtist`; `admin.detail.unknownArtist` = No artist
+- [x] `songAuthors()` falls back to `song.noArtist`; song menu subtitle without "by"; "No artist" is plain text in `SongMetaLines`
+- [x] E2E `ux-v2-private-and-no-artist.spec.ts` (fixture `NO_ARTIST_FIXTURE_IDS`, removed in global teardown); `search.spec.ts` skips "No artist"
+- [x] Docs: design doc 2.16, user guide 2.4, member guide 0.21, glossary 0.7, E2E overview 1.25
+
+## Session November 13, 2026 (#574, /explore redirect)
+- [x] `redirects()` in `next.config.ts`: `/explore` → `/songs`, permanent, query kept
+- [x] Tests: feature `ux-v2-explore-redirect.feature`, Vitest `exploreRedirect.test.ts`, E2E `ux-v2-explore-redirect.spec.ts`; `ux-v2-bottom-bar.spec.ts` updated
+- [x] Docs: design doc 2.17, E2E overview 1.26
+
+## Session November 13, 2026 (#578, broken song links and load error)
+- [x] `isUuid()` (`lib/validation/uuid.ts`) guards `[id]` routes (`/songs/[id]`, `/songs/[id]/edit`, `/users/[id]`, `/library/playlists/[id]`, `/admin/users/[id]`) and `fetchSong` / `fetchMusicianProfile` / `getAdminUserDetails` so malformed ids render `notFound()`
+- [x] `app/songs/[id]/page.tsx` load-error state shows `t('song.error.unexpected')` instead of raw `songError.message` (logged to console)
+- [x] Tests: feature `ux-v2-broken-song-links.feature` (`@unit`, `@e2e`), Vitest `brokenSongLinks.test.ts` + `fetchSong.test.ts`, E2E `ux-v2-broken-song-links.spec.ts`
+- [x] Docs: design doc 2.18, E2E overview 1.27

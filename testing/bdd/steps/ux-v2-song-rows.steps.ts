@@ -6,7 +6,7 @@ import { songRowMeta } from '../../../lib/songs/songMeta';
 
 type Cat = { name: string; parent: string | null };
 const state = new WeakMap<object, { author: string | null; cats: Cat[]; line?: string }>();
-const t = (k: string) => (k === 'song.traditional' ? 'Traditional' : k);
+const t = (k: string) => ({ 'song.traditional': 'Traditional', 'song.noArtist': 'No artist' })[k] ?? k;
 
 Given(
   'a song by {string} tagged {string} \\(Languages), {string} \\(The Elements) and {string} \\(Artists)',

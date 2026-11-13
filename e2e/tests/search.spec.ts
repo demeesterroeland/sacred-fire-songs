@@ -62,7 +62,7 @@ test.describe('Search Functionality E2E Tests', () => {
     await expect(page.locator(`text=${songTitle}`).first()).toBeVisible();
 
     // 3. Author Search: search using lowercase version of author
-    if (songAuthor && songAuthor !== 'Unknown' && songAuthor !== 'Traditional') {
+    if (songAuthor && songAuthor !== 'Unknown' && songAuthor !== 'Traditional' && songAuthor !== 'No artist') {
       await searchInput.click();
       await searchInput.fill('');
       await searchInput.pressSequentially(songAuthor.toLowerCase(), { delay: 30 });

@@ -1,11 +1,12 @@
 # Roles & Glossary (draft)
 
-**Version:** 0.6 | **Date:** Nov 7, 2026
+**Version:** 0.7 | **Date:** Nov 13, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.7 | Nov 13, 2026 | Glossary: **Private** replaces Draft for a song that is not public (#564); **No artist** (#565); Drafts is no longer a smart playlist. |
 | 0.6 | Nov 7, 2026 | Glossary: "recording" is now **recording**. |
 | 0.5 | Nov 6, 2026 | Glossary: Version (switch under the song title, #395). |
 | 0.4 | Nov 6, 2026 | Transpose is in the song page's **⋯ reading tools** (musician, expert and admin; UX v2, #394). |
@@ -40,8 +41,9 @@
 | Shared with me | The list of recordings other members shared with you, under My recordings in Practice → Record. Each row says who shared it. Listen only. |
 | Public (recording) | Recording everyone can hear, published with singer consent. |
 | Singer Attribution | Who sings on a recording; links to their profile when registered. |
-| Smart playlist | Automatic list (Favorites, Your Songs, Drafts, Your recordings). |
-| Draft | A song you added that is not public yet. |
+| Smart playlist | Automatic list (Favorites, Your Songs, Your recordings). |
+| Private (song) | A song you added that is not public. Only you and admins can see it. Save it with **Save as private**. |
+| No artist | Shown for a song without an author. "Traditional" means the author was entered as Traditional. |
 | Magic Link | Sign-in link sent by e-mail, no password needed. |
 | ChordPro (.cho) | Text format for songs with chords in brackets. |
 | Capo | Fret where the capo goes; shown above the lyrics. |

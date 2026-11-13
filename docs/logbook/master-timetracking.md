@@ -151,4 +151,7 @@
 | **November 12, 2026** | **Fix/UX (Epic 6.1, #485)**: sober colours group 3 — Practice drawer and singer attribution dialog on tokens, one primary action, i18n, tests, docs. (estimate) | ~1.0 Hours | Completed |
 | **November 13, 2026** | **Feature/UX (Epic 6.1, #534)**: role badge per role on a profile page (view column, badge component, i18n, `@unit`/`@seed`/E2E tests, review round, docs). (estimate) | ~1.5 Hours | Completed |
 | **November 13, 2026** | **Fix/UI (#485 group 4)**: sober tokens in the header, user menu, notification bell, language picker, WickSelect and toasts; unused ThemeToggle/popover removed; tests, review fixes. (estimate) | ~1.5 Hours | Completed |
-| **Total** | **Development + AI Collaboration** | **~269.0 Hours** | |
+| **November 13, 2026** | **Fix/i18n (Epic 6.1, #564 / #565)**: "Private" instead of "Draft" for songs that are not public and "No artist" for songs without an author, in 8 locales (messages, song meta, admin, legal text, `@unit`/E2E tests, docs). (estimate) | ~1.5 Hours | Completed |
+| **November 13, 2026** | **Fix/Nav (#574)**: permanent redirect from `/explore` to `/songs` with the query string, tests, docs. (estimate) | ~0.25 Hours | Completed |
+| **November 13, 2026** | **Fix/UX (#578)**: non-UUID ids on `[id]` routes render not-found; song load error shows translated message instead of raw `error.message`, tests, docs. (estimate) | ~0.5 Hours | Completed |
+| **Total** | **Development + AI Collaboration** | **~271.25 Hours** | |

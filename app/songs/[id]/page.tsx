@@ -47,11 +47,13 @@ import { fetchSong, withTimeout } from '@/lib/songs/fetchSong';
 import { fetchFavoritesSetlistId } from '@/lib/playlists/favorites';
 import { linkedTakeTab, parseRecordingParam, RECORDING_PARAM } from '@/lib/songs/recordingLink';
 import { actionErrorMessage } from '@/lib/errors/actionError';
+import { isUuid } from '@/lib/validation/uuid';
 
 export default function SongDetailPage() {
     const { t } = useLocale();
     const params = useParams();
-    const id = typeof params.id === 'string' ? params.id : params.id?.[0]; // Safe type handling
+    const rawId = typeof params.id === 'string' ? params.id : params.id?.[0]; // Safe type handling
+    const id = isUuid(rawId) ? rawId : undefined;
 
     // The chosen version belongs to the song it was chosen on (like the transpose shift), so opening
     // another song, or a version that is gone, falls back to the first one (UXA-049).
@@ -246,6 +248,8 @@ export default function SongDetailPage() {
         })();
     }, [linkedRecordingId, song, authLoading, user, t, id]);
 
+    if (!id) return notFound();
+
     if (songLoading || authLoading) {
         if (skeletonTimedOut) {
             return (
@@ -272,7 +276,7 @@ export default function SongDetailPage() {
                 <p className="text-3xl">🔥</p>
                 <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100">{t('song.error.loadFailed')}</h2>
                 <p className="text-sm text-gray-500 dark:text-gray-400">
-                    {(songError as Error)?.message ?? t('song.error.unexpected')}
+                    {t('song.error.unexpected')}
                 </p>
                 <button
                     onClick={() => window.location.reload()}
@@ -634,7 +638,7 @@ export default function SongDetailPage() {
                 open={isMenuOpen}
                 onOpenChange={setIsMenuOpen}
                 title={song.title}
-                description={t('song.by', { author: song.original_author || t('song.traditional') })}
+                description={song.original_author ? t('song.by', { author: song.original_author }) : t('song.noArtist')}
                 actions={{
                     onShare: () => { void handleShare(); setIsMenuOpen(false); },
                     edit: song.owner_id === user?.id || isAdmin ? { href: editSongHref(id, currentVersion?.id) } : undefined,
@@ -685,7 +689,7 @@ export default function SongDetailPage() {
                     compositionId={id}
                     onPlayStateChange={setIsAudioPlaying}
                     songTitle={song.title}
-                    songAuthor={song.original_author || t('song.traditional')}
+                    songAuthor={song.original_author || t('song.noArtist')}
                     youtubeUrl={currentVersion.youtube_url}
                     spotifyUrl={currentVersion.spotify_url}
                     soundcloudUrl={currentVersion.soundcloud_url}

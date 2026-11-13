@@ -46,10 +46,11 @@ test.describe('guest', () => {
     await expect(bar(page).getByRole('link', { name: 'Search' })).toHaveAttribute('aria-current', 'page');
   });
 
-  test('/explore is a real 404', async ({ page }) => {
-    const response = await page.goto('/explore');
-    expect(response?.status()).toBe(404);
-    await expect(page.getByRole('heading', { name: 'Page not found' })).toBeVisible();
+  // #574: Explore has no page of its own; old links redirect to the song list (ux-v2-explore-redirect.spec.ts).
+  test('/explore opens the song list', async ({ page }) => {
+    await page.goto('/explore');
+    await expect(page).toHaveURL(/\/songs$/);
+    await expect(page.getByRole('heading', { name: 'Page not found' })).toHaveCount(0);
   });
 });
 

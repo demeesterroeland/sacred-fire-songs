@@ -9,12 +9,12 @@ import type { TranslateFn } from '@/lib/i18n';
 /** Any translate function (the app's typed `t`, or a plain test double). */
 type T = TranslateFn;
 
-/** Display names of the song's authors ("Traditional" when none). */
+/** Display names of the song's authors; "No artist" when none (#565). An author entered as "Traditional" is translated. */
 export function songAuthors(originalAuthor: string | null | undefined, t: T): string[] {
   const artists = parseArtists(originalAuthor);
   return artists.length > 0
     ? artists.map((a) => (a.toLowerCase() === 'traditional' ? t('song.traditional') : a))
-    : [t('song.traditional')];
+    : [t('song.noArtist')];
 }
 
 /** Authors first, then tag names, for one grey meta line. */
