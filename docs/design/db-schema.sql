@@ -1,11 +1,12 @@
 /*
- **Version:** 3.11
+ **Version:** 3.12
  **Status:** Current
  **Date:** November 13, 2026
  
  ## Usage
  This script provides a complete setup for the "Sacred Fire Songs" database. 
- It consolidates the initial schema and all subsequent migrations up to November 12, 2026.
+ It consolidates the initial schema and all subsequent migrations up to November 13, 2026.
+ (v3.12: global search window songbook and language filter counts, Story 6.2.25 (#570), migration 20261113140000_search_filter_counts.sql: read-only SECURITY INVOKER function fn_search_filter_counts() returning (kind, value, label, song_count) for visible songbooks via song_version_sources and language categories under the Languages group via song_category_map JOIN compositions so RLS filters unreadable private songs; executable by anon, authenticated, and service_role).
  (v3.11: catalog songs and versions corrected in the app, Story 6.2.21 (#524), migration 20261112160000_protect_catalog_app_edits.sql: compositions and song_versions gain edited_in_app / edited_at / edited_fields, set by trigger trg_track_catalog_edit when a signed-in app user (JWT role authenticated, also through a SECURITY DEFINER function) changes a tracked column of a row with a catalog key; importers (service_role) and data migrations do not mark, and API callers cannot set or clear the markers; admin-only fn_catalog_edits_export() and fn_clear_catalog_edit(). Review of PR #540 (Nov 13, 2026): removing a catalog key in the app counts; the export gives a moved version's new song slug; fn_clear_catalog_edit(kind, id, edited_at) returns 'cleared' / 'changed' / 'not_marked' and leaves a correction made after the download marked; the service role may not execute either function and reads and clears markers with plain SQL; re-check: the service role may not execute fn_track_catalog_edit() either).
  (v3.10: link a song as a version of another song, Story 6.2.9, migration 20261112120000_link_song_as_version.sql: tables composition_redirects (old song id -> target, readable exactly when the target song is; keeps the source's catalog slug when the target kept its own) and song_link_audit (gatekeepers and admins read, nobody writes through the API); SECURITY DEFINER functions fn_link_song_as_version and fn_preview_song_link (signed-in callers only, no service_role grant: the checks need auth.uid(), importers resolve slugs with fn_song_id_for_catalog_slug instead; admins link any song, gatekeepers only songs they own, source and target; both songs public or both private, for everyone; a deliberate bypass of the admin-only catalog guards, the keys only ever come from the source song), helpers fn_assert_can_link_song, fn_song_link_summary, fn_merge_song_names, and fn_song_id_for_catalog_slug for importers).
  (v3.9: migration 20261112140000_translation_versions_to_translations.sql moves the interim song_versions rows with version_kind = 'translation' to song_translations, Story 6.2.13 (#516). It changes data only: the schema is unchanged and a fresh install has no such rows, so this script needs nothing from it. Review of PR #535: the migration also keeps versions with chords in another key/capo/tuning or blank lyrics, appends moved takes after the original's and reports dropped sources; the re-check also keeps versions with their own melody, note, beats, media link or votes, or lyrics-only in another key that a playlist transposes, and reports the contributor.)
@@ -1582,6 +1583,54 @@ AS $$
 $$;
 REVOKE ALL ON FUNCTION public.fn_song_id_for_catalog_slug(text) FROM PUBLIC, anon;
 GRANT EXECUTE ON FUNCTION public.fn_song_id_for_catalog_slug(text) TO authenticated, service_role;
+
+-- Global search window filter counts (Story 6.2.25 / G5.8, #570)
+CREATE OR REPLACE FUNCTION public.fn_search_filter_counts()
+RETURNS TABLE (
+  kind text,
+  value text,
+  label text,
+  song_count integer
+)
+LANGUAGE sql
+STABLE
+SECURITY INVOKER
+SET search_path = ''
+AS $$
+  SELECT
+    'songbook'::text AS kind,
+    sb.id AS value,
+    COALESCE(NULLIF(btrim(sb.title), ''), NULLIF(btrim(sb.short_name), '')) AS label,
+    COUNT(DISTINCT c.id)::integer AS song_count
+  FROM public.songbooks sb
+  JOIN public.song_version_sources svs ON svs.songbook_id = sb.id
+  JOIN public.song_versions sv ON sv.id = svs.song_version_id
+  JOIN public.compositions c ON c.id = sv.composition_id
+  WHERE COALESCE(NULLIF(btrim(sb.title), ''), NULLIF(btrim(sb.short_name), '')) IS NOT NULL
+  GROUP BY sb.id, sb.title, sb.short_name
+
+  UNION ALL
+
+  SELECT
+    'language'::text AS kind,
+    cat.slug AS value,
+    cat.name AS label,
+    COUNT(DISTINCT c.id)::integer AS song_count
+  FROM public.categories cat
+  JOIN public.categories parent ON parent.id = cat.parent_id
+  JOIN public.song_category_map scm ON scm.category_id = cat.id
+  JOIN public.compositions c ON c.id = scm.song_id
+  WHERE (parent.slug = 'languages' OR parent.name = 'Languages')
+    AND NULLIF(btrim(cat.slug), '') IS NOT NULL
+    AND NULLIF(btrim(cat.name), '') IS NOT NULL
+  GROUP BY cat.id, cat.slug, cat.name
+
+  ORDER BY kind, label, value;
+$$;
+
+REVOKE ALL ON FUNCTION public.fn_search_filter_counts() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION public.fn_search_filter_counts() TO anon, authenticated, service_role;
+
 -- 7. SEED DATA (Categories)
 with groups as (
   insert into public.categories (name, slug, emoji)
