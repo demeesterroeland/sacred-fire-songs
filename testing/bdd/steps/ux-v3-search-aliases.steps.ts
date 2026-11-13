@@ -8,6 +8,7 @@ import { DICTIONARIES, SUPPORTED_LOCALES, interpolate } from '../../../lib/i18n'
 import { songFilterConfig } from '../../../lib/songs/filterConfig';
 import { SONGS_SELECT, fetchAllSongRows, mapCompositionToSong, type CompositionRow } from '../../../lib/songs/queries';
 import { rankSongsBySearch, songMatchHintText } from '../../../lib/songs/search';
+import type { Locale } from '../../../lib/i18n';
 import type { Song } from '../../../lib/songUtils';
 
 const en = DICTIONARIES.en as Record<string, string>;
@@ -102,6 +103,53 @@ Given(
   }
 );
 
+// Story 6.2.23 / G5.6 (#547): the title of a translation is searched (docs/testing/ux-v3-search-translations.feature).
+Given('a song {string} with a Dutch translation titled {string}', function (this: object, title: string, translated: string) {
+  world(this).songs.push(song({ title, translationTitles: [{ language: 'nl', title: translated }] }));
+});
+Given('a song {string} with a {string} translation titled {string}', function (this: object, title: string, tag: string, translated: string) {
+  world(this).songs.push(song({ title, translationTitles: [{ language: tag, title: translated }] }));
+});
+Given(
+  'a song {string} with a Dutch translation without a title but with the lyrics {string}',
+  function (this: object, title: string, lyrics: string) {
+    // The same mapping the list uses: only `language` and `title` are selected, so the lyrics never reach the search.
+    const row = {
+      id: 'row', title, original_author: null, is_public: true, created_at: '2026-01-01T00:00:00Z',
+      song_versions: [], song_category_map: [],
+      song_translations: [{ language: 'nl', title: null, lyrics }],
+    } as unknown as CompositionRow;
+    world(this).songs.push(mapCompositionToSong(row));
+  }
+);
+Given(
+  'a list row of the song {string} with a Dutch translation titled {string}',
+  function (this: object, title: string, translated: string) {
+    const row = {
+      id: 'row', title, original_author: null, is_public: true, created_at: '2026-01-01T00:00:00Z',
+      song_versions: [], song_category_map: [],
+      song_translations: [{ language: 'nl', title: translated }],
+    } as CompositionRow;
+    world(this).songs.push(mapCompositionToSong(row));
+  }
+);
+Then('the hint in Dutch reads {string}', function (this: object, text: string) {
+  const nl = DICTIONARIES.nl as Record<string, string>;
+  const tNl = (key: string, params?: Record<string, string | number>) => interpolate(nl[key] ?? key, params);
+  assert.equal(songMatchHintText(world(this).songs[0], world(this).query, tNl as never, 'nl' as Locale), text);
+});
+Then('every language has the translation hint with its language and text placeholders', function () {
+  for (const locale of SUPPORTED_LOCALES) {
+    const dict = DICTIONARIES[locale] as Record<string, string>;
+    assert.ok(dict['songs.matchTranslation']?.includes('{language}'), `${locale}: {language}`);
+    assert.ok(dict['songs.matchTranslation']?.includes('{text}'), `${locale}: {text}`);
+  }
+});
+Then('the song list select embeds the translations once, asking only for language and title', function () {
+  assert.equal(SONGS_SELECT.match(/song_translations(![\w]+)?\s*\(/g)?.length, 1);
+  assert.match(SONGS_SELECT, /song_translations\s*\(\s*language\s*,\s*title\s*\)/);
+});
+
 When('I search {string} and rank the results', function (this: object, query: string) {
   const w = world(this);
   w.query = query;
@@ -192,7 +240,9 @@ const ROWS = `
                      'melody_notation', v.melody_notation,
                      'song_version_sources', COALESCE((SELECT json_agg(json_build_object('original_title', s.original_title))
                                                          FROM public.song_version_sources s WHERE s.song_version_id = v.id), '[]'::json)))
-                    FROM public.song_versions v WHERE v.composition_id = c.id), '[]'::json) AS song_versions
+                    FROM public.song_versions v WHERE v.composition_id = c.id), '[]'::json) AS song_versions,
+         COALESCE((SELECT json_agg(json_build_object('language', t.language, 'title', t.title))
+                    FROM public.song_translations t WHERE t.composition_id = c.id), '[]'::json) AS song_translations
     FROM public.compositions c`;
 
 async function insertSong(
@@ -257,4 +307,21 @@ Then("the private song is not in the guest's results", function (this: SongBddWo
 });
 Then("the private song is in the owner's results", function (this: SongBddWorld) {
   assert.equal(inResults(this), true);
+});
+
+// Story 6.2.23 / G5.6 (#547): translations follow the privacy of their song.
+async function insertTranslatedSong(isPublic: boolean, ownerId: string | null, translated: string, title: string): Promise<string> {
+  const db = await seedDb();
+  const { rows } = await db.query<{ id: string }>(
+    `INSERT INTO public.compositions (title, owner_id, is_public) VALUES ($1, $2, $3) RETURNING id`,
+    [title, ownerId, isPublic]
+  );
+  await db.query(`INSERT INTO public.song_translations (composition_id, language, title, lyrics) VALUES ($1, 'nl', $2, 'Zing')`, [rows[0].id, translated]);
+  return rows[0].id;
+}
+Given('a public catalog song with a Dutch translation titled {string}', async function (this: object, translated: string) {
+  world(this).seededSongId = await insertTranslatedSong(true, null, translated, 'BDD Translation Catalog Song');
+});
+Given('a private song of a member with a Dutch translation titled {string}', async function (this: object, translated: string) {
+  world(this).seededSongId = await insertTranslatedSong(false, await profileIdByEmail(SEEDED_EMAILS.member), translated, 'BDD Translation Private Song');
 });

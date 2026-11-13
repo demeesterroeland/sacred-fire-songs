@@ -4,7 +4,8 @@
  * The song list is fetched whole (row-level security already decides what each visitor may read) and filtered in
  * memory, so this module IS the search: the free-text filter (`songFilterConfig.search`) and `filterSongs` both call
  * it. A query matches, in this order: the title, an alias (`compositions.aliases`), an original title from a songbook
- * (`song_version_sources.original_title`, any version), any author (`songAuthorNames`, #515), a category name, the lyrics
+ * (`song_version_sources.original_title`, any version), the title of a translation (`song_translations.title`, #547; the
+ * translation lyrics are not searched), any author (`songAuthorNames`, #515), a category name, the lyrics
  * of the first version. Case and accents are ignored on both sides. The first field that matches is the reason the
  * song was found; `songMatchHint` turns it into the "matched by …" line when it was not the title.
  *
@@ -15,24 +16,29 @@
 import type { Song } from '@/lib/songUtils';
 import { normalizeWhitespace, removeDiacritics } from '@/lib/utils';
 import { songAuthorNames } from '@/lib/songs/authors';
-import type { TranslateFn, TranslationKey } from '@/lib/i18n';
+import type { Locale, TranslateFn, TranslationKey } from '@/lib/i18n';
+import { translationLabel } from '@/lib/songs/translations';
 
 /** What the matcher reads: the Song fields below; every list may be missing on rows that never selected it. */
 export type SearchableSong = Pick<Song, 'title' | 'author'> &
-  Partial<Pick<Song, 'authors' | 'aliases' | 'sourceTitles' | 'content' | 'categories'>>;
+  Partial<Pick<Song, 'authors' | 'aliases' | 'sourceTitles' | 'translationTitles' | 'content' | 'categories'>>;
 
-export type SearchMatchField = 'title' | 'alias' | 'sourceTitle' | 'author' | 'category' | 'content';
+export type SearchMatchField = 'title' | 'alias' | 'sourceTitle' | 'translationTitle' | 'author' | 'category' | 'content';
 
 export interface SearchMatch {
   field: SearchMatchField;
   /** The text that matched, with its own spelling and accents (what the hint shows). */
   text: string;
+  /** The language tag of the translation whose title matched (`translationTitle` only). */
+  language?: string;
 }
 
 /** Why a song was found when its title did not match. Content and category matches need no explanation. */
 export interface MatchHint {
-  kind: 'alias' | 'sourceTitle' | 'author';
+  kind: 'alias' | 'sourceTitle' | 'translationTitle' | 'author';
   text: string;
+  /** The language tag of the translation whose title matched (`translationTitle` only). */
+  language?: string;
 }
 
 /** Trim, collapse spaces, drop accents, lower-case: both the query and every searched text go through this. */
@@ -51,6 +57,8 @@ interface SearchIndex {
   title: string;
   aliases: FoldedText[];
   sourceTitles: FoldedText[];
+  /** Titles of the translations, each with its language tag (what the hint names). */
+  translationTitles: (FoldedText & { language: string })[];
   /** Every individual author first (the hint names that one), then the display text, so what the row shows is searchable too. */
   authors: FoldedText[];
   categories: { name: string; folded: string }[];
@@ -62,6 +70,17 @@ const foldedTexts = (texts: ReadonlyArray<string | null | undefined> | null | un
   for (const raw of texts ?? []) {
     const text = normalizeWhitespace(raw ?? '');
     if (text) out.push({ text, folded: foldForSearch(text) });
+  }
+  return out;
+};
+
+const foldedTranslationTitles = (
+  translations: ReadonlyArray<{ language: string; title?: string | null }> | null | undefined
+): (FoldedText & { language: string })[] => {
+  const out: (FoldedText & { language: string })[] = [];
+  for (const tr of translations ?? []) {
+    const text = normalizeWhitespace(tr.title ?? '');
+    if (text) out.push({ text, folded: foldForSearch(text), language: tr.language });
   }
   return out;
 };
@@ -79,6 +98,7 @@ function searchIndex(song: SearchableSong): SearchIndex {
     title: foldForSearch(song.title),
     aliases: foldedTexts(song.aliases),
     sourceTitles: foldedTexts(song.sourceTitles),
+    translationTitles: foldedTranslationTitles(song.translationTitles),
     authors: foldedTexts([...songAuthorNames({ authors: song.authors, originalAuthor: song.author }), song.author]),
     categories: (song.categories ?? []).map((c) => ({
       name: c.name,
@@ -104,6 +124,9 @@ export function songSearchMatch(song: SearchableSong, rawQuery: string): SearchM
 
   const sourceTitle = firstContaining(index.sourceTitles, query);
   if (sourceTitle) return { field: 'sourceTitle', text: sourceTitle };
+
+  const translation = index.translationTitles.find((t) => t.folded.includes(query));
+  if (translation) return { field: 'translationTitle', text: translation.text, language: translation.language };
 
   const author = firstContaining(index.authors, query);
   if (author) return { field: 'author', text: author };
@@ -142,6 +165,7 @@ export function songMatchHint(song: SearchableSong, rawQuery: string): MatchHint
   const match = songSearchMatch(song, rawQuery);
   if (!match) return null;
   if (match.field === 'alias' || match.field === 'sourceTitle') return { kind: match.field, text: match.text };
+  if (match.field === 'translationTitle') return { kind: 'translationTitle', text: match.text, language: match.language };
   if (match.field === 'author' && !foldForSearch(song.author).includes(foldForSearch(rawQuery))) {
     return { kind: 'author', text: match.text };
   }
@@ -151,11 +175,19 @@ export function songMatchHint(song: SearchableSong, rawQuery: string): MatchHint
 const HINT_KEYS = {
   alias: 'songs.matchAlias',
   sourceTitle: 'songs.matchSourceTitle',
+  translationTitle: 'songs.matchTranslation',
   author: 'songs.matchAuthor',
 } as const satisfies Record<MatchHint['kind'], TranslationKey>;
 
-/** The hint as the row shows it, in the UI language: "Matched by alias: Gran Venerable Madre Tierra". */
-export function songMatchHintText(song: SearchableSong, rawQuery: string, t: TranslateFn): string | null {
+/**
+ * The hint as the row shows it, in the UI language: "Matched by alias: Gran Venerable Madre Tierra", or for a
+ * translated title "Dutch: Moeder Aarde". `locale` names the language of a translated title (default English).
+ */
+export function songMatchHintText(song: SearchableSong, rawQuery: string, t: TranslateFn, locale: Locale = 'en'): string | null {
   const hint = songMatchHint(song, rawQuery);
-  return hint ? t(HINT_KEYS[hint.kind], { text: hint.text }) : null;
+  if (!hint) return null;
+  if (hint.kind === 'translationTitle') {
+    return t(HINT_KEYS.translationTitle, { language: translationLabel(hint.language ?? '', locale), text: hint.text });
+  }
+  return t(HINT_KEYS[hint.kind], { text: hint.text });
 }

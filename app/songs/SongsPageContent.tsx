@@ -27,7 +27,7 @@ interface SongsPageContentProps {
 }
 
 export default function SongsPageContent({ initialSongs, initialTaxonomy, initialViewedSongIds = [] }: SongsPageContentProps) {
-    const { t } = useLocale();
+    const { t, locale } = useLocale();
     const searchParams = useSearchParams();
     const router = useRouter();
     const { user } = useAuth();
@@ -91,11 +91,11 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
         const hints = new Map<string, string>();
         if (!state.search) return hints;
         for (const song of displaySongs) {
-            const text = songMatchHintText(song, state.search, t);
+            const text = songMatchHintText(song, state.search, t, locale);
             if (text) hints.set(song.id, text);
         }
         return hints;
-    }, [displaySongs, state.search, t]);
+    }, [displaySongs, state.search, t, locale]);
 
     const setSortBy = (val: SortByType) => {
         const params = new URLSearchParams(searchParams.toString());

@@ -11,6 +11,7 @@ import { normalizeWhitespace } from '../utils';
 export const SONGS_SELECT = `
   *,
   song_versions(id, created_at, version_kind, key, content_chordpro, melody_notation, song_version_sources(original_title)),
+  song_translations(language, title),
   song_category_map(
     categories(
       name,
@@ -165,6 +166,8 @@ export interface CompositionRow {
   has_chords?: boolean | null;
   has_melody?: boolean | null;
   song_versions: SongVersionRow[] | null;
+  /** The translations of the song: only the language and the title are selected, for the search (#547). */
+  song_translations?: { language: string; title?: string | null }[] | null;
   song_category_map: SongCategoryMapRow[] | null;
 }
 
@@ -211,6 +214,10 @@ export function mapCompositionToSong(
     sourceTitles: distinctTexts(
       (item.song_versions ?? []).flatMap((v) => (v.song_version_sources ?? []).map((src) => src.original_title))
     ),
+    translationTitles: (item.song_translations ?? []).flatMap((tr) => {
+      const title = normalizeWhitespace(tr.title ?? '');
+      return title ? [{ language: tr.language, title }] : [];
+    }),
     songKey: version?.key || null,
     content: version?.content_chordpro || '',
     melodyNotation: version?.melody_notation || '',

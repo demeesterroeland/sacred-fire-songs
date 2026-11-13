@@ -3,7 +3,7 @@
 import { describe, expect, it } from 'vitest';
 import { songFilterConfig } from '@/lib/songs/filterConfig';
 import { filterSongs, type Song } from '@/lib/songUtils';
-import { rankSongsBySearch, songMatchHint, songMatchesSearch, songSearchMatch } from '@/lib/songs/search';
+import { rankSongsBySearch, songMatchHint, songMatchHintText, songMatchesSearch, songSearchMatch } from '@/lib/songs/search';
 
 const song = (over: Partial<Song> = {}): Song =>
   ({
@@ -137,5 +137,51 @@ describe('repeated searches over the same song', () => {
     expect(songSearchMatch(s, 'fuego')?.field).toBe('content');
     expect(songSearchMatch(s, 'huey')?.field).toBe('title');
     expect(songSearchMatch(s, 'nothing here')).toBeNull();
+  });
+});
+
+// Story 6.2.23 / G5.6 (#547): the title of a translation is searched; the hint names the language.
+describe('translated titles', () => {
+  const translated = (over: Partial<Song> = {}) =>
+    song({ title: 'Madre Tierra', translationTitles: [{ language: 'nl', title: 'Moeder Aarde' }], ...over });
+
+  it('finds a song by the title of a translation, with a hint naming the language', () => {
+    expect(songSearchMatch(translated(), 'moeder aarde')).toEqual({ field: 'translationTitle', text: 'Moeder Aarde', language: 'nl' });
+    expect(songMatchHint(translated(), 'moeder aarde')).toEqual({ kind: 'translationTitle', text: 'Moeder Aarde', language: 'nl' });
+  });
+
+  it('ignores case and accents on both sides', () => {
+    const s = translated({ translationTitles: [{ language: 'fr', title: 'Mère Évangéline' }] });
+    expect(songMatchesSearch(s, 'EVANGELINE')).toBe(true);
+    expect(songMatchesSearch(translated(), 'MOEDER')).toBe(true);
+  });
+
+  it('shows no hint when the title itself matched', () => {
+    const s = translated({ translationTitles: [{ language: 'nl', title: 'Madre Aarde' }] });
+    expect(songMatchHint(s, 'madre')).toBeNull();
+    expect(songSearchMatch(s, 'madre')?.field).toBe('title');
+  });
+
+  it('names the language that matched when several translations exist', () => {
+    const s = translated({ translationTitles: [{ language: 'nl', title: 'Moeder Aarde' }, { language: 'de', title: 'Mutter Erde' }] });
+    expect(songMatchHint(s, 'mutter')).toEqual({ kind: 'translationTitle', text: 'Mutter Erde', language: 'de' });
+  });
+
+  it('skips blank titles and songs without translations', () => {
+    expect(songMatchesSearch(translated({ translationTitles: [{ language: 'nl', title: '  ' }] }), 'nl')).toBe(false);
+    expect(songMatchesSearch(translated({ translationTitles: undefined }), 'aarde')).toBe(false);
+  });
+
+  it('ranks a title match before a song found by a translated title', () => {
+    const byTranslation = translated({ id: 'a', title: 'Alpha' });
+    const byTitle = song({ id: 'b', title: 'Moeder Zon' });
+    expect(rankSongsBySearch([byTranslation, byTitle], 'moeder').map((x) => x.id)).toEqual(['b', 'a']);
+  });
+
+  it('renders the hint as "<language>: <title>" in the app language', () => {
+    const t = (key: string, p?: Record<string, string | number>) =>
+      key === 'songs.matchTranslation' ? `${p?.language}: ${p?.text}` : key;
+    expect(songMatchHintText(translated(), 'aarde', t as never)).toBe('Dutch: Moeder Aarde');
+    expect(songMatchHintText(translated(), 'aarde', t as never, 'nl')).toBe('Nederlands: Moeder Aarde');
   });
 });
