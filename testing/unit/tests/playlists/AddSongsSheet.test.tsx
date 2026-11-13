@@ -6,6 +6,7 @@ import { cleanup, fireEvent, render, screen, waitFor } from '@testing-library/re
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AddSongsSheet } from '@/components/playlists/AddSongsSheet';
 import type { Song } from '@/lib/songUtils';
+import { SONG_KEYS, SONGS_STALE_TIME } from '@/lib/songs/queryKeys';
 
 const messages: Record<string, string> = {
   'playlists.addSongs.title': 'Add Songs to Playlist',
@@ -18,6 +19,8 @@ const messages: Record<string, string> = {
   'songs.matchSourceTitle': 'Matched by songbook title: {text}',
   'songs.matchAuthor': 'Matched by author: {text}',
   'search.status.draft': 'Draft',
+  'playlists.addSongs.done': 'Done',
+  'common.loading': 'Loading…',
   'common.close': 'Close',
 };
 vi.mock('@/context/LocaleContext', () => ({
@@ -136,6 +139,56 @@ describe('AddSongsSheet search', () => {
   });
 });
 
+describe('AddSongsSheet chrome', () => {
+  it('keeps the search box pinned to the top of the scroll area', async () => {
+    renderSheet();
+    await screen.findByText('Madre Tierra');
+    const wrap = screen.getByTestId('add-songs-search');
+    expect(wrap.className).toMatch(/\bsticky\b/);
+    expect(wrap.className).toMatch(/\btop-0\b/);
+    expect(wrap.className).toMatch(/\bbg-surface\b/);
+    expect(wrap.contains(screen.getByPlaceholderText('Search songs…'))).toBe(true);
+  });
+
+  it('has a visible Done button that closes the sheet', async () => {
+    const onClose = vi.fn();
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    render(
+      <QueryClientProvider client={client}>
+        <AddSongsSheet playlistId="p1" existingCompositionIds={[]} open onClose={onClose} />
+      </QueryClientProvider>,
+    );
+    await screen.findByText('Madre Tierra');
+    const done = screen.getByRole('button', { name: 'Done' });
+    expect(screen.getByTestId('add-songs-footer').contains(done)).toBe(true);
+    fireEvent.click(done);
+    expect(onClose).toHaveBeenCalled();
+  });
+
+  it('announces the loading state to screen readers until the songs arrive', async () => {
+    renderSheet();
+    expect(screen.getByRole('status').textContent).toBe('Loading…');
+    await screen.findByText('Madre Tierra');
+    expect(screen.getByRole('status').textContent).toBe('');
+  });
+
+  it('shows no load error when songs are already there and a refetch fails', async () => {
+    const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
+    client.setQueryData(SONG_KEYS.list(), SONGS, { updatedAt: 0 }); // stale, so mounting refetches
+    fetchAllSongs.mockRejectedValue(new Error('boom'));
+    render(
+      <QueryClientProvider client={client}>
+        <AddSongsSheet playlistId="p1" existingCompositionIds={[]} open onClose={() => {}} />
+      </QueryClientProvider>,
+    );
+    await screen.findByText('Madre Tierra');
+    await waitFor(() => expect(fetchAllSongs).toHaveBeenCalled());
+    await waitFor(() => expect(client.getQueryState(SONG_KEYS.list())?.status).toBe('error'));
+    expect(screen.queryByText('Could not load the songs.')).toBeNull();
+    expect(screen.getByText('Madre Tierra')).toBeTruthy();
+  });
+});
+
 describe('AddSongsSheet source', () => {
   // No select of its own: the songs come from fetchAllSongs (fetchAllSongRows / SONGS_SELECT), the one embed of the sources.
   it('has no select of its own, so no second song_version_sources embed', () => {
@@ -143,5 +196,11 @@ describe('AddSongsSheet source', () => {
     expect(source).not.toMatch(/\.from\(\s*['"]compositions['"]/);
     expect(source).not.toMatch(/song_version_sources|song_translations/);
     expect(source).toMatch(/fetchAllSongs/);
+  });
+
+  it('shares the song list staleTime with useSongsQuery instead of repeating it', () => {
+    expect(SONGS_STALE_TIME).toBe(60_000);
+    expect(readFileSync('components/playlists/AddSongsSheet.tsx', 'utf8')).toMatch(/staleTime: SONGS_STALE_TIME/);
+    expect(readFileSync('hooks/useSongsQuery.ts', 'utf8')).toMatch(/staleTime: SONGS_STALE_TIME/);
   });
 });

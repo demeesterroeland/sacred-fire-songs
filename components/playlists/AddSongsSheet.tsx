@@ -10,10 +10,11 @@ import { useRouter } from 'next/navigation';
 import { useLocale } from '@/context/LocaleContext';
 import { actionErrorMessage } from '@/lib/errors/actionError';
 import { fetchAllSongs } from '@/lib/songUtils';
-import { SONG_KEYS } from '@/lib/songs/queryKeys';
+import { SONG_KEYS, SONGS_STALE_TIME } from '@/lib/songs/queryKeys';
 import { songMatchHintText } from '@/lib/songs/search';
 import { addSongsResults } from '@/lib/playlists/addSongsSearch';
-import { BottomSheet, BottomSheetContent } from '@/components/ui/bottom-sheet';
+import { BottomSheet, BottomSheetClose, BottomSheetContent } from '@/components/ui/bottom-sheet';
+import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 
 interface AddSongsSheetProps {
@@ -52,8 +53,11 @@ function AddSongsBody({ playlistId, existingCompositionIds }: Pick<AddSongsSheet
     const { data: songs, isLoading, isError } = useQuery({
         queryKey: SONG_KEYS.list(),
         queryFn: fetchAllSongs,
-        staleTime: 60_000,
+        staleTime: SONGS_STALE_TIME,
     });
+
+    // A failed background refetch keeps the songs already there; the banner is for when there is nothing to show.
+    const showError = isError && !songs;
 
     const existing = useMemo(() => new Set(existingCompositionIds), [existingCompositionIds]);
     const isAdded = (id: string) => toggled.get(id) ?? existing.has(id);
@@ -96,8 +100,8 @@ function AddSongsBody({ playlistId, existingCompositionIds }: Pick<AddSongsSheet
 
     return (
         <>
-            {/* Search input */}
-            <div className="px-4 pb-3">
+            {/* Search input: sticks to the top of the sheet's scroll area, so it stays in reach while the rows scroll. */}
+            <div data-testid="add-songs-search" className="sticky top-0 z-10 bg-surface px-4 pb-3">
                 <div className="field-composite flex min-h-tap items-center gap-2 rounded-control border border-line-strong bg-bg px-3">
                     {isLoading
                         ? <Loader2 aria-hidden="true" className="size-4 shrink-0 text-fg-subtle motion-safe:animate-spin" />
@@ -112,14 +116,15 @@ function AddSongsBody({ playlistId, existingCompositionIds }: Pick<AddSongsSheet
                         className="h-tap min-w-0 flex-1 bg-transparent text-body text-fg placeholder:text-fg-subtle"
                     />
                 </div>
+                <span role="status" className="sr-only">{isLoading ? t('common.loading') : ''}</span>
             </div>
 
             {/* Song list */}
-            <div className="pb-6" role="group" aria-label={t('playlists.addSongs.title')}>
-                {isError && (
+            <div className="pb-2" role="group" aria-label={t('playlists.addSongs.title')}>
+                {showError && (
                     <p role="alert" className="px-4 py-10 text-center text-meta text-fg-muted">{t('playlists.addSongs.loadError')}</p>
                 )}
-                {!isLoading && !isError && results.length === 0 && (
+                {!isLoading && !showError && results.length === 0 && (
                     <p className="px-4 py-10 text-center text-meta text-fg-muted">{t('playlists.addSongs.empty')}</p>
                 )}
                 {results.map((song) => {
@@ -163,6 +168,13 @@ function AddSongsBody({ playlistId, existingCompositionIds }: Pick<AddSongsSheet
                         </button>
                     );
                 })}
+            </div>
+
+            {/* Always-visible way out: the drag handle is phones only, so desktop would have only Escape. */}
+            <div data-testid="add-songs-footer" className="sticky bottom-0 border-t border-line bg-surface p-3">
+                <BottomSheetClose asChild>
+                    <Button type="button" variant="outline" className="w-full">{t('playlists.addSongs.done')}</Button>
+                </BottomSheetClose>
             </div>
         </>
     );

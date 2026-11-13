@@ -86,7 +86,7 @@ Your private songs (not public yet) look lighter in every song list and on the s
 - From a song: **Playlist** in the bar at the bottom → pick a playlist.
 
 - From a song: ⋮ → **Add to Playlist**. A sheet slides up: **New playlist** is the first row, then your playlists. A check shows where the song already is. Tap a playlist to add the song; tap a playlist with a check to take it out again. **Done** closes the sheet.
-- From the playlist: **+ Add Songs** and search. You can search by the song's title, another name it is known by, any of its authors or its title in a songbook; a grey line under the row says why it was found (for example *Matched by alias: Pachamama*). Tap a row to add the song (a check shows it is in the playlist); tap it again to take it out.
+- From the playlist: **+ Add Songs** and search. You can search by the song's title, another name it is known by, any of its authors or its title in a songbook; a grey line under the row says why it was found (for example *Matched by alias: Pachamama*). Tap a row to add the song (a check shows it is in the playlist); tap it again to take it out. The search box stays at the top while you scroll, and **Done** closes the sheet.
 
 **In a playlist** you can: reorder songs by dragging, add a description, switch **public / private** (lock icon), **print / export PDF** (printer icon) for the ceremony, share the link of a public playlist, and duplicate it via ⋯ **(verify menu labels)**.
 
