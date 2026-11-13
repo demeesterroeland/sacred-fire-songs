@@ -228,7 +228,7 @@ Then('every language has the three "matched by" hints with their placeholder', f
 });
 Then('the song list select embeds the songbook sources once', function () {
   assert.equal(SONGS_SELECT.match(/song_version_sources(![\w]+)?\s*\(/g)?.length, 1);
-  assert.match(SONGS_SELECT, /song_version_sources\s*\(\s*original_title\s*\)/);
+  assert.match(SONGS_SELECT, /song_version_sources\s*\(\s*original_title\s*,/);
 });
 
 // ── @seed: what each visitor may read in the real database, then the real search ─

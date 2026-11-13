@@ -17,6 +17,10 @@ export interface SongFilterState {
   mine?: boolean;
   new?: boolean;
   artist?: string;
+  /** Songbook id: songs with a version printed in that book (Story 6.2.19, #522). */
+  songbook?: string;
+  /** Language category slug (Story 6.2.19, #522). */
+  language?: string;
 }
 
 /**
@@ -38,11 +42,18 @@ export function isDraftActive(draft: SongFilterState, userId?: string): boolean 
     draft.favorites ||
     draft.mine ||
     draft.new ||
-    draft.artist
+    draft.artist ||
+    draft.songbook ||
+    draft.language
   );
 }
 
 // 2. Define the Configuration
+/*
+ * Songbook and language (Story 6.2.19, #522) are deliberately NOT part of this config: the song list hook applies them
+ * itself (`applyBrowseFilters` in `lib/songs/browseFilters.ts`) on the engine's result, so it also has the list WITHOUT
+ * them, which the counts of the two selects need. The `SongFilterState` fields carry the choice only.
+ */
 export const songFilterConfig: FilterConfig<Song, SongFilterState> = {
   // --- CATEGORY (Parent) ---
   // OR Logic: Matches if song has ANY tag belonging to this parent category

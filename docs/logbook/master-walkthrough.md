@@ -3473,7 +3473,23 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - The form's prefilled values (`initialData`, primary source) are frozen at mount: a react-query refetch cannot make an untouched field look changed.
 - The beats message and the member guide name the comma (`8,4`). 2 new keys in 8 locales (`qu` for a native check). Tests: `versionUpdate.test.ts`, 10 new cases in `songFormVersionMeta.test.tsx`, a new `@unit` scenario in the feature (replaces the tautological "only an admin's save can write the source" step).
 
+## Session November 13, 2026 — Story 6.2.11 (#514): songbook pages
+
+- New routes `/songbooks` (books with song counts) and `/songbooks/[id]` (title, compiler, community, year, attribution, songs by page). Both are open to guests and sit in the Library frame (`app/songbooks/layout.tsx` re-exports the Library layout); a sixth Library tab **Songbooks** is the entry point (the bottom bar keeps Library active on `/songbooks…` via `alsoPrefixes`). The source line on the song page links each source to its book, at the row of that source (`#source-<song_version_sources.id>`).
+- `lib/songbooks/songbookPage.ts` (pure): natural page order with `Intl.Collator` `numeric` (`2` < `10`, `12` < `12a` < `13`, `A-2` < `A-10`, importer prefix ignored, missing page last, then title, then song id), grouping (a song is listed once per distinct page and links to the version printed there, `?version=`; versions on the same page are one row), counts (songs, not rows), links. `lib/songbooks/songbookSelect.ts` holds the two selects (one `song_version_sources (` embed each, contract-tested against the local API); `lib/songbooks/serverQueries.ts` runs them with the viewer's RLS.
+- Visibility is RLS only: guests read public songs; a book none of whose songs the viewer can read does not exist for them (404, same as an unknown id; left out of the list); an admin can read a book without songs (empty state). No migration: `idx_song_version_sources_songbook_id` already exists.
+- Found by running the page against the local API: the route gives the segment URL-encoded (`a%20b`), so `songbookIdFromParam` decodes it (a book id with a space was a 404 before). Test data was inserted and removed again by hand (shared database).
+- Tests: `songbookPage.test.ts`, `songbookSelect.test.ts`, `songbookComponents.test.tsx`, `songbookPages.test.tsx`, the source line link in `songSourceLine.test.tsx`, nav tests; BDD `docs/testing/ux-v3-songbook-pages.feature` (16 `@unit`, 4 `@seed`). 8 new keys in 8 locales (`qu` needs a native check). The Library tab spec (`e2e/tests/ux-v2-library-tabs.spec.ts`) expects six tabs; E2E not run (shared database).
+
+#### Story 6.2.11 (#514) — cross-review fixes (Nov 13, 2026)
+- Merged `feat/ux-v3` (took design 2.24 / §6.20 and epic 2.10 for #524); this PR is design 2.25 / §6.21 and epic 2.11.
+- `comparePages` sorts roman pages by value after the numbered pages (`iv, v, ix, x, xii`), reusing `ROMAN_PAGE` from `lib/songs/versionSources.ts`; a roman range sorts by its first page.
+- A merged row (two versions on one page) highlights through `has-[:target]` on the `<li>`; every anchor span has `scroll-mt-24`. The page column is `min-w-14 whitespace-nowrap`.
+- `/songbooks/[id]` has `generateMetadata` (book title; the not-found title for an unknown or unreadable book); the read is shared with the page via `React.cache`.
+- Comments and design text: reads are public, own (admins all), nothing through sharing.
+- Left as is: `SONGBOOK_LIST_SELECT` fetches every row it counts (fine at about 1000 songs; RPC or view later if slow).
+
 ## Session November 13, 2026 — Story 6.2.23 (#547): search finds a song by the title of its translation
 - `SONGS_SELECT` embeds `song_translations(language, title)` once (the embed guard allows one); `mapCompositionToSong()` fills `Song.translationTitles`. Guests only get the translations of public songs: the existing `Translations follow song privacy` policy filters through `compositions` RLS, so no policy changed.
 - `lib/songs/search.ts` is extended additively: match field and hint kind `translationTitle` (after the songbook title, before the author), carrying the language tag; `songMatchHintText()` gets an optional `locale` (default `'en'`). The hint is `songs.matchTranslation` = "{language}: {text}" ("Dutch: Moeder Aarde"), the language named by `translationLabel()`. 1 new key in 8 locales (`qu` for a native check).
-- Decision: translation lyrics are not searched, titles only (design doc 2.25). Spec: `docs/testing/ux-v3-search-translations.feature`; unit tests in `search.test.ts` and `songSelectGuard.test.ts`.
+- Decision: translation lyrics are not searched, titles only (design doc 2.30). Spec: `docs/testing/ux-v3-search-translations.feature`; unit tests in `search.test.ts` and `songSelectGuard.test.ts`.

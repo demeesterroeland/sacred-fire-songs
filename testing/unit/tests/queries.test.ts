@@ -68,6 +68,25 @@ describe('mapCompositionToSong', () => {
     expect(song.sourceTitles).toEqual(['Huey Tonantzin', 'Madre Tierra']);
   });
 
+  // Story 6.2.19 / G5.2 (#522): the books a song was printed in, over every version, for the songbook filter.
+  it('maps the songbooks of every version, each once', () => {
+    const song = mapCompositionToSong({
+      ...baseItem,
+      song_versions: [
+        { id: 'v1', created_at: '2026-01-01T00:00:00Z', key: 'Am', content_chordpro: '', melody_notation: '', song_version_sources: [{ original_title: 'A', songbooks: { id: 'bk-a', title: 'Songbook A', short_name: null } }] },
+        { id: 'v2', created_at: '2026-02-01T00:00:00Z', key: 'G', content_chordpro: '', melody_notation: '', song_version_sources: [{ original_title: 'B', songbooks: { id: 'bk-b', title: 'Songbook B', short_name: null } }, { original_title: 'C', songbooks: { id: 'bk-a', title: 'Songbook A', short_name: null } }] },
+      ],
+    } as typeof baseItem);
+    expect(song.songbooks).toEqual([
+      { id: 'bk-a', name: 'Songbook A' },
+      { id: 'bk-b', name: 'Songbook B' },
+    ]);
+  });
+
+  it('gives no songbooks when the versions have no readable source', () => {
+    expect(mapCompositionToSong({ ...baseItem } as typeof baseItem).songbooks).toEqual([]);
+  });
+
   it('gives empty alias and title lists when the row has none', () => {
     const song = mapCompositionToSong({ ...baseItem, aliases: null } as typeof baseItem);
     expect(song.aliases).toEqual([]);

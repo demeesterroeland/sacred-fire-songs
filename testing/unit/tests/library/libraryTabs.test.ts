@@ -12,6 +12,7 @@ describe('libraryTabs', () => {
       '/library/recently-viewed',
       '/library/new',
       '/library/artists',
+      '/songbooks',
     ]);
   });
 
