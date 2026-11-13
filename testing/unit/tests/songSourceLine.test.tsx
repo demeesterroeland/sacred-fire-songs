@@ -35,6 +35,14 @@ describe('SongSourceLine', () => {
     expect(screen.getByTestId('song-source-item').textContent).toBe('Songbook A · p. 38 · compiled by Compiler A');
   });
 
+  it('links each line to the songbook page, at the row of that source (#514)', () => {
+    render(<SongSourceLine songTitle="Rise Up" sources={[row('s1', { page: '38', songbooks: { id: 'book a/1', title: 'Songbook A', compiler: null } }), row('s2')]} />);
+    const links = screen.getAllByRole('link');
+    expect(links.map((a) => a.getAttribute('href'))).toEqual(['/songbooks/book%20a%2F1#source-s1', '/songbooks/s2#source-s2']);
+    expect(links[0].textContent).toBe('Songbook A · p. 38');
+    expect(links[0].className).toContain('min-h-tap');
+  });
+
   it('lists several sources, the primary one first', () => {
     render(<SongSourceLine songTitle="Rise Up" sources={[row('B', { page: '2' }), row('A', { page: '38', is_primary: true })]} />);
     const items = screen.getAllByRole('listitem').map((li) => li.textContent);

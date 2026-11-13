@@ -27,7 +27,7 @@ interface SongsPageContentProps {
 }
 
 export default function SongsPageContent({ initialSongs, initialTaxonomy, initialViewedSongIds = [] }: SongsPageContentProps) {
-    const { t } = useLocale();
+    const { t, locale } = useLocale();
     const searchParams = useSearchParams();
     const router = useRouter();
     const { user } = useAuth();
@@ -59,6 +59,8 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
             mine: false,
             new: false,
             artist: '',
+            songbook: '',
+            language: '',
         });
         setLocalSearch('');
         setDraftSortBy('title');
@@ -70,6 +72,11 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
     const { favoriteIds } = useFavoritesQuery(user?.id);
     const { userRecordingCompositionIds } = useRecordingsQuery(user?.id);
     const viewedSongIds = useMemo(() => new Set(initialViewedSongIds), [initialViewedSongIds]);
+
+    const unknownLabels = useMemo(
+        () => ({ unknownSongbook: t('search.songbook.unknown'), unknownLanguage: t('search.language.unknown') }),
+        [t]
+    );
 
     const {
         displaySongs,
@@ -83,19 +90,27 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
         mineCount,
         recordingsCount,
         hasActiveFilters,
-        filteredCount
-    } = useSongsFilter({ songs, userId: user?.id, favoriteIds, userRecordingCompositionIds, viewedSongIds, sortBy });
+        filteredCount,
+        browseOptionsFor
+    } = useSongsFilter({ songs, userId: user?.id, favoriteIds, userRecordingCompositionIds, viewedSongIds, sortBy, locale, unknownLabels });
+
+    // Songbook and language options of the sheet, counted for everything the sheet shows: the draft and its search text
+    // while it is open, the applied state otherwise
+    const browseOptions = useMemo(
+        () => browseOptionsFor(draft ? { ...draft, search: localSearch } : state),
+        [browseOptionsFor, draft, localSearch, state]
+    );
 
     // Why each row matched, worked out once per result list / query / language, not on every render (#521).
     const matchHints = useMemo(() => {
         const hints = new Map<string, string>();
         if (!state.search) return hints;
         for (const song of displaySongs) {
-            const text = songMatchHintText(song, state.search, t);
+            const text = songMatchHintText(song, state.search, t, locale);
             if (text) hints.set(song.id, text);
         }
         return hints;
-    }, [displaySongs, state.search, t]);
+    }, [displaySongs, state.search, t, locale]);
 
     const setSortBy = (val: SortByType) => {
         const params = new URLSearchParams(searchParams.toString());
@@ -301,6 +316,7 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
                 favoritesCount={favoritesCount}
                 mineCount={mineCount}
                 recordingsCount={recordingsCount}
+                browseOptions={browseOptions}
                 hasActiveFilters={draft ? isDraftActive({ ...draft, search: localSearch }, user?.id) : hasActiveFilters}
                 isAuthenticated={!!user}
                 localSearch={localSearch}

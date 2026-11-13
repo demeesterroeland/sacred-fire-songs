@@ -1,4 +1,4 @@
-import { Home, Library, ListMusic, Clock, Music, Mic2, Disc3, Search, Sparkles, Inbox } from 'lucide-react';
+import { Home, Library, ListMusic, Clock, Music, Mic2, Disc3, Search, Sparkles, Inbox, BookOpen } from 'lucide-react';
 import { FEATURES, type Features } from '@/lib/features';
 import type { LucideIcon } from 'lucide-react';
 import type { TranslationKey } from '@/messages/en';
@@ -26,6 +26,8 @@ const ALL_LIBRARY_TABS: readonly (LibraryTab & { feature?: keyof Features })[] =
   { labelKey: 'library.tabs.history', href: '/library/recently-viewed', icon: Clock },
   { labelKey: 'library.tabs.new', href: '/library/new', icon: Inbox },
   { labelKey: 'library.tabs.artists', href: '/library/artists', icon: Mic2 },
+  // Story 6.2.11 (#514): songbooks live under /songbooks (a page per printed book), reached from this tab.
+  { labelKey: 'library.tabs.songbooks', href: '/songbooks', icon: BookOpen },
   { labelKey: 'library.tabs.albums', href: '/library/albums', icon: Disc3, feature: 'albums' },
 ];
 
@@ -73,6 +75,8 @@ export type BottomNavItem = {
   exact?: boolean;
   /** Active when the path starts with this prefix (default: `href`). */
   prefix?: string;
+  /** More prefixes that also belong to this item (Library: the songbook pages, which sit beside the Library tabs). */
+  alsoPrefixes?: readonly string[];
   /** Paths under `prefix` that belong to another action, not to this item. */
   exclude?: readonly string[];
   /** Tapping the item also focuses the header search field. */
@@ -82,14 +86,13 @@ export type BottomNavItem = {
 export const BOTTOM_NAV_ITEMS: readonly BottomNavItem[] = [
   { id: 'home', labelKey: 'nav.home', href: '/', icon: Home, exact: true },
   { id: 'search', labelKey: 'nav.search', href: '/songs', icon: Search, exclude: ['/songs/add'], focusSearch: true },
-  { id: 'library', labelKey: 'nav.library', href: '/library/playlists', icon: Library, prefix: '/library' },
+  { id: 'library', labelKey: 'nav.library', href: '/library/playlists', icon: Library, prefix: '/library', alsoPrefixes: ['/songbooks'] },
 ];
 
 export function isBottomNavActive(pathname: string | null | undefined, item: BottomNavItem): boolean {
   if (!pathname) return false;
   if (item.exact) return pathname === item.href;
   if (item.exclude?.some((ex) => pathname === ex || pathname.startsWith(`${ex}/`))) return false;
-  const prefix = item.prefix ?? item.href;
-  return pathname === prefix || pathname.startsWith(`${prefix}/`);
+  return [item.prefix ?? item.href, ...(item.alsoPrefixes ?? [])].some((p) => pathname === p || pathname.startsWith(`${p}/`));
 }
 
