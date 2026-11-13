@@ -2,14 +2,22 @@ import { useCallback, useMemo } from 'react';
 import { useDeclarativeFilter } from '@/hooks/useDeclarativeFilter';
 import { songFilterConfig, isDraftActive, type SongFilterState } from '@/lib/songs/filterConfig';
 import { executeFilter } from '@/lib/declarative-filter/engine';
-import { applyBrowseFilters, browseOptions, type BrowseFallbackLabels } from '@/lib/songs/browseFilters';
+import {
+  applyBrowseFilters,
+  browseOptions,
+  knownLanguageSlugs,
+  normalizeLegacyLanguageParams,
+  type BrowseFallbackLabels,
+} from '@/lib/songs/browseFilters';
 import { rankSongsBySearch } from '@/lib/songs/search';
 import type { Song } from '@/lib/songUtils';
+import type { TaxonomyNode } from '@/lib/taxonomyUtils';
 
 const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
 
 interface UseSongsFilterOptions {
   songs: Song[];
+  taxonomy?: TaxonomyNode[];
   userId?: string;
   favoriteIds: Set<string>;
   userRecordingCompositionIds?: Set<string>;
@@ -21,7 +29,7 @@ interface UseSongsFilterOptions {
   unknownLabels?: BrowseFallbackLabels;
 }
 
-export function useSongsFilter({ songs, userId, favoriteIds, userRecordingCompositionIds = new Set(), viewedSongIds, sortBy, locale, unknownLabels }: UseSongsFilterOptions) {
+export function useSongsFilter({ songs, taxonomy, userId, favoriteIds, userRecordingCompositionIds = new Set(), viewedSongIds, sortBy, locale, unknownLabels }: UseSongsFilterOptions) {
   const defaultState: SongFilterState = {
     status: 'all',
     search: '',
@@ -38,26 +46,31 @@ export function useSongsFilter({ songs, userId, favoriteIds, userRecordingCompos
     language: '',
   };
 
+  const languageSlugs = useMemo(() => knownLanguageSlugs(songs, taxonomy), [songs, taxonomy]);
+
   const { filteredItems, state, setFilter, commitFilters, resetFilters } = useDeclarativeFilter(
     songs,
     songFilterConfig,
     defaultState,
     {
-      parseUrl: (params) => ({
-        category: params.get('category') || undefined,
-        tags: params.get('tag') ? params.get('tag')!.split(',').filter(Boolean) : [],
-        status: (params.get('status') as SongFilterState['status']) || ('all'),
-        search: params.get('search') || '',
-        chords: params.get('chords') === 'true',
-        melody: params.get('melody') === 'true',
-        myRecordings: params.get('myRecordings') === 'true',
-        favorites: params.get('favorites') === 'true',
-        mine: params.get('mine') === 'true',
-        new: params.get('new') === 'true',
-        artist: params.get('artist') || '',
-        songbook: params.get('songbook') || '',
-        language: params.get('language') || '',
-      }),
+      parseUrl: (params) => {
+        const { category, tags, language } = normalizeLegacyLanguageParams(params, languageSlugs);
+        return {
+          category,
+          tags,
+          status: (params.get('status') as SongFilterState['status']) || ('all'),
+          search: params.get('search') || '',
+          chords: params.get('chords') === 'true',
+          melody: params.get('melody') === 'true',
+          myRecordings: params.get('myRecordings') === 'true',
+          favorites: params.get('favorites') === 'true',
+          mine: params.get('mine') === 'true',
+          new: params.get('new') === 'true',
+          artist: params.get('artist') || '',
+          songbook: params.get('songbook') || '',
+          language,
+        };
+      },
       serializeUrl: (state) => ({
         category: state.category || '',
         tag: state.tags?.join(',') || '',
