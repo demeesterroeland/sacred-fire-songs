@@ -3,7 +3,6 @@ import { describe, expect, it } from 'vitest';
 import { DICTIONARIES } from '@/lib/i18n';
 import {
   languageOptions,
-  languageSearch,
   linkedLanguageChoice,
   readableTranslations,
   resolveTranslation,
@@ -90,13 +89,6 @@ describe('translationTitle', () => {
 });
 
 describe('addresses', () => {
-  it('a language is added next to the version and removed again', () => {
-    expect(languageSearch('?version=v2', 'en')).toBe('?version=v2&lang=en');
-    expect(languageSearch('?version=v2&lang=en', 'nl')).toBe('?version=v2&lang=nl');
-    expect(languageSearch('?version=v2&lang=en', null)).toBe('?version=v2');
-    expect(languageSearch('?lang=en', null)).toBe('');
-  });
-
   it('choosing a version drops the language (and the recording), the share link can keep it', () => {
     expect(versionSearch('?lang=en&recording=r1', 'v2', false)).toBe('?version=v2');
     expect(versionSearch('?lang=en', 'v1', true)).toBe('');

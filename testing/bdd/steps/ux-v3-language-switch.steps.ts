@@ -5,12 +5,12 @@ import { readFileSync } from 'node:fs';
 import { createClient } from '@supabase/supabase-js';
 import { DICTIONARIES, type Locale } from '../../../lib/i18n';
 import { SONG_SELECT } from '../../../lib/songs/songSelect';
-import { viewChangeSearch } from '../../../lib/songs/readingState';
+import { languageChangeSearch, viewChangeSearch } from '../../../lib/songs/readingState';
 import {
   ORIGINAL_VIEW,
   languageOptions,
-  languageSearch,
   linkedLanguageChoice,
+  linkedReadingView,
   resolveTranslation,
   translationTitle,
   type LanguageChoice,
@@ -96,7 +96,9 @@ When('I pick another version', function (this: object) {
 });
 When('I pick the language {string}', function (this: object, language: string) {
   const s = get(this);
-  s.search = languageSearch(s.search, language);
+  // A tap on the language switch runs the page's rule: the version and the view (Translation / Both) stay.
+  const view = linkedReadingView(new URLSearchParams(s.search).get('view')) ?? ORIGINAL_VIEW;
+  s.search = languageChangeSearch(s.search, language, view).search;
 });
 When('I pick the original', function (this: object) {
   // "Original" in the reader switch (#517): neither `?lang=` nor `?view=`.

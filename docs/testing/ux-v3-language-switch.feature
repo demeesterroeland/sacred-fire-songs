@@ -1,6 +1,6 @@
 # Version: 1.2 | Date: Nov 13, 2026
 # Changelog
-# 1.2 | Nov 13, 2026 | Story 6.2.14 (#517): "Original" moves to the reader switch Original · Translation · Both; the language switch lists the languages only, with two or more of them. Back to the original goes through that switch.
+# 1.2 | Nov 13, 2026 | Story 6.2.14 (#517): "Original" moves to the reader switch Original · Translation · Both; the language switch lists the languages only, with two or more of them. Back to the original goes through that switch; a language tap runs the page's rule and keeps the version and the view.
 # 1.1 | Nov 12, 2026 | Review fixes (#535): migration keeps versions with chords in another key/capo/tuning or blank lyrics, appends moved takes after the original's, reports dropped sources; the version-switch step reads the real labels. Re-check: migration keeps a version with its own melody, note, beats, media link or votes, and a lyrics-only version used in a playlist with a transposition when its key differs; reports the contributor; tag fallback needs 2-8 character subtags.
 # 1.0 | Nov 12, 2026 | Story 6.2.13 (#516, G3.1): language switch next to the version switch, fed by song_translations; interim `translation` versions move to song_translations.
 @ux-v3 @language-switch
@@ -60,10 +60,10 @@ Feature: Read a translation without leaving the song
     Then the address is "?version=v2"
 
   @unit
-  Scenario: Switching language keeps the version
-    Given the address says "?version=v2"
+  Scenario: Switching language keeps the version and the view
+    Given the address says "?version=v2&lang=nl&view=both"
     When I pick the language "en"
-    Then the address is "?version=v2&lang=en"
+    Then the address is "?version=v2&lang=en&view=both"
 
   @unit
   Scenario: Back to the original drops the language from the address

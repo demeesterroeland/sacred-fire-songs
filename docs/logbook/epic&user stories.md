@@ -1788,10 +1788,10 @@ Scenario: Switching version returns to the original language
   When I pick another version
   Then the address is "?version=v2"
 
-Scenario: Switching language keeps the version
-  Given the address says "?version=v2"
+Scenario: Switching language keeps the version and the view
+  Given the address says "?version=v2&lang=nl&view=both"
   When I pick the language "en"
-  Then the address is "?version=v2&lang=en"
+  Then the address is "?version=v2&lang=en&view=both"
 
 Scenario: A deep link opens the translation
   Given a song with an English translation
