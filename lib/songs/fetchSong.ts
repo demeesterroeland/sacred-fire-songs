@@ -6,6 +6,7 @@
  */
 import { createClient } from '@/lib/supabase/client';
 import { sortVersions } from '@/lib/songs/versionOrder';
+import { SONG_SELECT } from '@/lib/songs/songSelect';
 import { isUuid } from '@/lib/validation/uuid';
 
 // Enforce a timeout on any promise to prevent infinite loading skeletons
@@ -32,35 +33,7 @@ export const fetchSong = async (id: string) => {
     const supabase = createClient();
     const queryPromise = supabase
         .from('compositions')
-        .select(`
-          title,
-          original_author,
-          owner_id,
-          is_public,
-          has_chords,
-          has_melody,
-          song_versions (
-            id,
-            version_name,
-            created_at,
-            content_chordpro,
-            key,
-            capo,
-            tuning,
-            youtube_url,
-            spotify_url,
-            soundcloud_url,
-            melody_notation
-          ),
-          song_category_map (
-            categories (
-              name,
-              slug,
-              emoji,
-              parent:parent_id(name, slug)
-            )
-          )
-        `)
+        .select(SONG_SELECT)
         .eq('id', id)
         .maybeSingle();
 
@@ -74,7 +47,7 @@ export const fetchSong = async (id: string) => {
     )) as { data: any; error: any };
 
     if (error) throw error;
-    // Story 6.1.11 (#395, UXA-049): one stable order (oldest first, id as tiebreak) for the version switch.
+    // Story 6.1.11 (#395, UXA-049): one stable order (original, variants, translations; each oldest first, id as tiebreak) for the version switch.
     if (data && Array.isArray(data.song_versions)) {
         data.song_versions = sortVersions(data.song_versions);
     }

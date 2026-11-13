@@ -63,3 +63,17 @@ describe('a chord alone on its line stays a chord', () => {
   });
 });
 
+
+// Story 6.2.16 (#519): a chords-over-lyrics line with an alternative chord is now read as chords.
+describe('alternative chords on a chord line above the lyrics', () => {
+    it('shows A7/C7 as one chord over its syllable, not as lyric text', () => {
+        const sections = parseChordProForDisplay('A7/C7   D\nla la la');
+        const items = sections.flatMap((s) => s.lines).flatMap((l) => l.items);
+        expect(items.map((i) => i.chords).filter(Boolean)).toEqual(['A7/C7', 'D']);
+        expect(items.map((i) => i.lyrics ?? '').join('')).not.toContain('A7/C7');
+    });
+    it('shows a bracketed A7/C7 as written', () => {
+        const items = parseChordProForDisplay('[A7/C7]la la').flatMap((s) => s.lines).flatMap((l) => l.items);
+        expect(items[0].chords).toBe('A7/C7');
+    });
+});

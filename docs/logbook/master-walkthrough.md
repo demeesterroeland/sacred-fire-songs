@@ -3424,6 +3424,71 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - Tests: `docs/testing/songbook-data-model.feature` (`@seed`: 18 scenario definitions, of which 3 are outlines, 25 executed scenarios: additive migration, per-book data, constraints, version order, catalog key guards, read and write access per role), `testing/unit/tests/schemaSongbookTables.test.ts` (fresh-install script matches the migration).
 - Review round (PR #527): song owners could set `compositions.catalog_slug` and insert `song_versions.catalog_source_id`, so a member could pre-claim an importer's key. The triggers `trg_guard_catalog_slug` and `trg_guard_catalog_source_id` (modelled on `trg_guard_profile_fields`) now refuse that with SQLSTATE 42501 unless the caller is a trusted database role (service role) or an admin; `version_kind`, `beats`, `song_note`, `aliases` and `authors` stay editable. A multi-row insert gives every version the same `created_at` (transaction start), so the guide now asks importers for strictly increasing `created_at` per song; a `@seed` scenario proves the app's `sortVersions` then opens the main version first. Also: keys must equal their `btrim`, translation languages are lowercase (`pt-br`), and a cited songbook cannot be deleted (`on delete restrict`).
 
+## Session November 11, 2026 — Story 6.2.10 (#513), songbook source line
+
+- The song page shows where the version being read was printed: a grey `text-meta` list under the lyrics, one line per source, the primary one first: `Songbook A · p. 38 · compiled by Compiler A`, with `· Original title: …` when it differs from the song title. Nothing (and no space) for a version without sources; it follows `?version=`; guests see it through the same RLS as the song.
+- `fetchSong` embeds `song_version_sources` with its `songbooks` row (`VERSION_SOURCES_SELECT`, `lib/songs/versionSources.ts`, which also holds the pure `sortSources` / `formatSourceLine` / `formatSourceLines`, reused by #514, #520, #522). Cached song data from before this change has no `song_version_sources` key and renders no line. No migration.
+- `components/song/SongSourceLine.tsx` sits under the lyrics for now; #511 moves it into "About this song". 5 keys `song.source.*` in all 8 locales.
+- Tests: unit (`versionSources.test.ts`, `songSourceLine.test.tsx`, `fetchSong.test.ts`), BDD `docs/testing/ux-v3-songbook-source.feature` (9 `@unit`, 1 `@seed`).
+
+## Session November 12, 2026 — Story 6.2.10 (#513), review round on PR #531
+
+- Cross-review by another Claude model: `fetchSong`'s select is now `SONG_SELECT` (`lib/songs/songSelect.ts`), built from the single `VERSION_SOURCES_SELECT`; a unit test counts `song_version_sources (` (exactly once: a second embed, which #530's version label would have added, fails every song page with PostgREST 42803, reproduced against the local API). `primarySource()` picks the book the line and the version label share.
+- `parsePage` / `normalizeTitle` in `lib/songs/versionSources.ts`: `pp.` only for several pages of one kind (`38–39`, `38 & 40`, `38 y 40`, `38 40`, `iv-vi`), `A-12` / `II-4` / `iv` / `12a` stay `p.`, importer prefixes (`p.`, `pág.`, `S.`, `blz.`, `с.`) stripped; original title compared after NFKC, apostrophe and white-space unification, trailing `.!?` dropped, accent- and case-insensitive.
+- `sortSources` breaks ties by id and sorts in the UI locale; the list is labelled "Sources" (`song.source.labelMany`, 8 locales; Quechua needs a native check); es `pág.` / `págs.`; fr non-breaking space before the colon.
+- `@seed`: the SQL step no longer claims to mirror the select; a new scenario sends `SONG_SELECT` through supabase-js (anon, read-only) to the local API.
+- Docs renumbered after merging `feat/ux-v3` (which had #528 and #529): design doc 2.16, epics 2.02, guest guide 0.26, member guide 0.23.
+
+## Session November 12, 2026 — Story 6.2.9 (#512), link a song as a version of another song
+
+- Gatekeepers and admins open ⋮ → **Link as a version of…** on a duplicate song, search the song it is a version of, see what moves and confirm. No undo: the merge deletes the duplicate and rewrites favourites, so the sheet shows the preview and says it cannot be undone; `song_link_audit` records who linked what.
+- One `SECURITY DEFINER` function does the merge in one transaction (migration `20261112120000_link_song_as_version.sql`, `fn_link_song_as_version`; `fn_preview_song_link` returns the same summary without changes). Versions move (an `original` becomes a `variant`, so the target's own original stays first); recordings and playlist entries follow because they point at versions; categories, views, translations and notifications are merged; aliases gain the old title; favourites are de-duplicated onto the target's first version.
+- Catalog keys: the target keeps its slug or takes the source's; a source slug that is not moved stays on `composition_redirects` and `fn_song_id_for_catalog_slug` resolves it to the target. A moved version whose `catalog_source_id` the target already has loses the key (unique per song).
+- Old links: the song page looks an unknown id up in `composition_redirects` and replaces the URL with the target, keeping `?version=` / `?recording=`. Redirect chains collapse when a target is itself linked later.
+- Tests: `docs/testing/ux-v3-link-song-version.feature` (3 `@unit` incl. a 5-row outline, 11 `@seed` in rolled-back transactions), unit tests for the helpers, the server actions, the sheet and the schema file. 44 keys `song.link.*` / `song.menu.linkAsVersion` in all 8 locales (Quechua needs a native check).
+
+## Session November 12, 2026 — Story 6.2.9 (#512), review fixes
+
+- Owner decisions: admins link any song, gatekeepers only songs they own (source **and** target; 42501 *Gatekeepers can only link songs they own*). The ⋮ item uses `canLinkSong(user, ownerId)` and the target search lists only the gatekeeper's own songs.
+- Both songs must be public or both private, for everyone (22023 *Both songs must be public, or both private*); the preview shows the refusal before any confirm. New keys `song.link.error.notOwner` / `.visibility` in all 8 locales (Quechua needs a native check).
+- Catalog keys: a gatekeeper's link still moves them; the migration header, design doc §6.19 and db-schema now state that the function deliberately bypasses the admin-only catalog guards (it runs as its owner) and why the risk is low (values only come from the source song).
+- `composition_redirects` is readable only when its target song is (RLS `EXISTS` on `compositions`); guests cannot learn about a redirect to a private song.
+- No `service_role` grant on the link / preview functions (they need `auth.uid()`); `fn_link_song_as_version` re-checks after locking both songs, so a link that lost a race reads "already linked" (checked with two concurrent psql sessions).
+- Confirm in the sheet runs the link once even on a double click (ref guard). Undo reasoning moved into design doc §6.19.
+- Tests: 13 new `@seed` scenarios (ownership, visibility outline, redirect privacy, gatekeeper slug move), a `@unit` refusal outline, unit tests for `canLinkSong`, the gatekeeper-only search, the error mapping and the double click.
+
+## Session November 12, 2026 — Story 6.2.20 (#523): edit beats, note and source of a version
+
+- The edit form (edit mode only) has a *Songbook details* section (`components/song/EditVersionMeta.tsx`): **Beats**, **About this song** (the note) and the version's **Source** as read-only text. `EDIT_SONG_SELECT` selects `beats` and `song_note` (one `song_version_sources (` embed, guard test extended); the edit page prefills them and passes `sources` and the song title.
+- Rules live in `lib/songs/versionMeta.ts`: beats are a count from 1 to 99 or counts joined with `y & + / -` or a comma (what the meta line prints after "Beats", #510, and what importers write), the note is plain text (line endings unified, control characters such as NUL dropped, paragraph breaks kept, at most 4000 characters), blank saves NULL. Only changed fields are written (the principle of #533), so an untouched form never rewrites an importer's value, even one that fails the format check.
+- One save path: `lib/songs/versionUpdate.ts` builds the whole `song_versions` update; #524 (an "edited in the app" stamp) hooks in there.
+- Source: read-only for everyone; admins get **Correct source** for the page and original title of the primary source (`song_version_sources` update, admin-only by policy, only changed fields). The songbook itself has no admin screen yet and is not editable here.
+- No migration, no change to who may save: the `song_versions` update policy (contributor or admin) and the column privileges decide, so a catalog version (no `contributor_id`) is in practice changed by admins only.
+- Tests: `versionMeta.test.ts` (L2), `songFormVersionMeta.test.tsx` (L3), `songSelectGuard.test.ts`, BDD `docs/testing/ux-v3-edit-version-meta.feature` (9 `@unit`, 5 `@seed`). 14 new keys in 8 locales (`qu` needs a native check).
+
+## Session November 13, 2026 — Story 6.2.20 (#523): review fixes
+
+- A write that row-level security filters answers with success and no row. `updateVersionRow()` / `updateSourceRow()` (`lib/songs/versionUpdate.ts`) ask for the row back (`.select('id')`); an empty answer throws a `SaveRefusedError` that `errorMessage()` shows as "nothing was saved" (`errors.versionNotSaved`) or "version saved, source not corrected" (`errors.sourceNotCorrected`). The permission rules are unchanged (an owner still cannot change a catalog version; the form now says so instead of "saved").
+- The source correction is the last step of the save (after categories and tags). A stored source page or original title over the limit no longer blocks an admin who leaves it alone; the correction panel opens and focuses a refused field.
+- The form's prefilled values (`initialData`, primary source) are frozen at mount: a react-query refetch cannot make an untouched field look changed.
+- The beats message and the member guide name the comma (`8,4`). 2 new keys in 8 locales (`qu` for a native check). Tests: `versionUpdate.test.ts`, 10 new cases in `songFormVersionMeta.test.tsx`, a new `@unit` scenario in the feature (replaces the tautological "only an admin's save can write the source" step).
+
+## Session November 13, 2026 — Story 6.2.11 (#514): songbook pages
+
+- New routes `/songbooks` (books with song counts) and `/songbooks/[id]` (title, compiler, community, year, attribution, songs by page). Both are open to guests and sit in the Library frame (`app/songbooks/layout.tsx` re-exports the Library layout); a sixth Library tab **Songbooks** is the entry point (the bottom bar keeps Library active on `/songbooks…` via `alsoPrefixes`). The source line on the song page links each source to its book, at the row of that source (`#source-<song_version_sources.id>`).
+- `lib/songbooks/songbookPage.ts` (pure): natural page order with `Intl.Collator` `numeric` (`2` < `10`, `12` < `12a` < `13`, `A-2` < `A-10`, importer prefix ignored, missing page last, then title, then song id), grouping (a song is listed once per distinct page and links to the version printed there, `?version=`; versions on the same page are one row), counts (songs, not rows), links. `lib/songbooks/songbookSelect.ts` holds the two selects (one `song_version_sources (` embed each, contract-tested against the local API); `lib/songbooks/serverQueries.ts` runs them with the viewer's RLS.
+- Visibility is RLS only: guests read public songs; a book none of whose songs the viewer can read does not exist for them (404, same as an unknown id; left out of the list); an admin can read a book without songs (empty state). No migration: `idx_song_version_sources_songbook_id` already exists.
+- Found by running the page against the local API: the route gives the segment URL-encoded (`a%20b`), so `songbookIdFromParam` decodes it (a book id with a space was a 404 before). Test data was inserted and removed again by hand (shared database).
+- Tests: `songbookPage.test.ts`, `songbookSelect.test.ts`, `songbookComponents.test.tsx`, `songbookPages.test.tsx`, the source line link in `songSourceLine.test.tsx`, nav tests; BDD `docs/testing/ux-v3-songbook-pages.feature` (16 `@unit`, 4 `@seed`). 8 new keys in 8 locales (`qu` needs a native check). The Library tab spec (`e2e/tests/ux-v2-library-tabs.spec.ts`) expects six tabs; E2E not run (shared database).
+
+#### Story 6.2.11 (#514) — cross-review fixes (Nov 13, 2026)
+- Merged `feat/ux-v3` (took design 2.24 / §6.20 and epic 2.10 for #524); this PR is design 2.25 / §6.21 and epic 2.11.
+- `comparePages` sorts roman pages by value after the numbered pages (`iv, v, ix, x, xii`), reusing `ROMAN_PAGE` from `lib/songs/versionSources.ts`; a roman range sorts by its first page.
+- A merged row (two versions on one page) highlights through `has-[:target]` on the `<li>`; every anchor span has `scroll-mt-24`. The page column is `min-w-14 whitespace-nowrap`.
+- `/songbooks/[id]` has `generateMetadata` (book title; the not-found title for an unknown or unreadable book); the read is shared with the page via `React.cache`.
+- Comments and design text: reads are public, own (admins all), nothing through sharing.
+- Left as is: `SONGBOOK_LIST_SELECT` fetches every row it counts (fine at about 1000 songs; RPC or view later if slow).
+
 ## Session November 12, 2026 — Story 6.1.35 (#485), group 1: neutral tags and categories
 
 - Every category tag now has the same neutral style. The per-category colour map (`lib/uiUtils.ts`: `getCategoryColor` / `getCategoryStyles`, 221 palette classes) is replaced by `lib/design/tagStyles.ts` (`tagPillClasses`): chip greys, inverted greys when selected, a hover only on links and buttons. `TagPill` no longer takes `categorySlug`; `AuthorPill` uses the same style.
@@ -3454,6 +3519,15 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - `scripts/db/rename-seed-accounts.mjs` (`npm run seed:rename-accounts`) gives an existing local stack the same addresses without a reset: it matches rows by their fixed seed ids and updates `auth.users`, the `email` identity and `profiles`. Idempotent; refuses any non-localhost database.
 - Tests: `testing/unit/tests/renameSeedAccounts.test.ts` (mapping agrees with the seed files, id-based SQL, local-only guard); `admin-users.spec.ts` searches `gatekeeper@`.
 
+## Session November 13, 2026 — sync develop into feat/ux-v3
+
+- `origin/develop` merged into `feat/ux-v3` (real merge, not squashed). develop brings the neutral tag style (#485 groups 1 and 3), the role badge on a profile page (#534, migration `20261113120000_public_profiles_role.sql`), seed accounts renamed to `<role>@sfs.example`, and dependency bumps (framer-motion, lucide-react, eslint).
+- Conflicts were docs only. Both sides kept; develop's version rows that clashed with `feat/ux-v3` numbers were renumbered (marked "develop x.y") and one sync row was added per document.
+- The old seed addresses in `feat/ux-v3`-only tests are left for a follow-up.
+## Session November 13, 2026 — Story 6.2.23 (#547): search finds a song by the title of its translation
+- `SONGS_SELECT` embeds `song_translations(language, title)` once (the embed guard allows one); `mapCompositionToSong()` fills `Song.translationTitles`. Guests only get the translations of public songs: the existing `Translations follow song privacy` policy filters through `compositions` RLS, so no policy changed.
+- `lib/songs/search.ts` is extended additively: match field and hint kind `translationTitle` (after the songbook title, before the author), carrying the language tag; `songMatchHintText()` gets an optional `locale` (default `'en'`). The hint is `songs.matchTranslation` = "{language}: {text}" ("Dutch: Moeder Aarde"), the language named by `translationLabel()`. 1 new key in 8 locales (`qu` for a native check).
+- Decision: translation lyrics are not searched, titles only (design doc 2.30). Spec: `docs/testing/ux-v3-search-translations.feature`; unit tests in `search.test.ts` and `songSelectGuard.test.ts`.
 ## Session November 13, 2026 — Story 6.1.35 (#485), group 4: header, user menu, notifications
 
 - `Header`, `UserProfile`, `NotificationBell`, `LanguageSwitcher`, `WickSelect` and `ThemedToaster` use semantic tokens only (221 palette classes fewer; `PALETTE_BASELINE` 980 → 759).

@@ -18,9 +18,9 @@ describe('Song page', () => {
 });
 
 describe('Library', () => {
-  it('has the tabs Playlists | Smart | History | New | Artists, in that order', () => {
+  it('has the tabs Playlists | Smart | History | New | Artists | Songbooks, in that order', () => {
     const hrefs = libraryTabs({ ...FEATURES, albums: false }).map((tab) => tab.href);
-    expect(hrefs).toEqual(['/library/playlists', '/library/smart', '/library/recently-viewed', '/library/new', '/library/artists']);
+    expect(hrefs).toEqual(['/library/playlists', '/library/smart', '/library/recently-viewed', '/library/new', '/library/artists', '/songbooks']);
   });
 
   it('the playlists page splits own private, own public and other public playlists, without the old blocks', () => {

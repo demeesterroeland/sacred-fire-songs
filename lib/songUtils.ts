@@ -1,6 +1,7 @@
 import { createClient } from "./supabase/client";
-import { songsQuery, mapCompositionToSong } from './songs/queries';
+import { songsQuery, fetchAllSongRows, mapCompositionToSong } from './songs/queries';
 import { normalizeWhitespace } from "./utils";
+import { songMatchesSearch } from "./songs/search";
 
 export const PAGE_SIZE = 20;
 
@@ -10,6 +11,16 @@ export interface Song {
     id: string;
     title: string;
     author: string;
+    /** Every credit of the song (`compositions.authors`); `author` stays the display text. */
+    authors?: string[];
+    /** Other titles of the song (`compositions.aliases`), searched like the title (#521). */
+    aliases?: string[];
+    /** The title each songbook printed it under (`song_version_sources.original_title`, every version), searched too (#521). */
+    sourceTitles?: string[];
+    /** The books any version of the song was printed in (`song_version_sources` → `songbooks`), for the songbook filter (#522). */
+    songbooks?: { id: string; name: string }[];
+    /** The title of each translation with its language tag (`song_translations`, #547), searched too; the lyrics are not. */
+    translationTitles?: { language: string; title: string }[];
     songKey: string | null;
     color: string;
     ownerId?: string;
@@ -37,16 +48,8 @@ export function filterSongs(songs: Song[], query: string, activeFilter: 'all' | 
     const cleanQuery = normalizeWhitespace(query).toLowerCase();
 
     let filtered = songs.filter(song => {
-        // 1. Text Search
-        const cleanTitle = normalizeWhitespace(song.title).toLowerCase();
-        const cleanAuthor = normalizeWhitespace(song.author).toLowerCase();
-        const cleanContent = song.content ? normalizeWhitespace(song.content).toLowerCase() : "";
-
-        const matchesText = cleanTitle.includes(cleanQuery) ||
-            cleanAuthor.includes(cleanQuery) ||
-            cleanContent.includes(cleanQuery);
-
-        return matchesText;
+        // 1. Text search: the one matcher of the song list (title, aliases, songbook titles, authors, lyrics)
+        return songMatchesSearch(song, cleanQuery);
     });
 
 
@@ -83,11 +86,12 @@ export const fetchSongs = async (limit?: number) => {
 };
 
 /**
- * Fetches all songs without pagination — used for in-memory search.
+ * Fetches all songs (in server-sized pages, joined into one list) — used for in-memory search.
  */
 export const fetchAllSongs = async (): Promise<Song[]> => {
     const supabase = createClient();
-    const { data, error } = await songsQuery(supabase);
+    // In pages: one request is capped at PostgREST's max_rows (1000) without an error (#521).
+    const { data, error } = await fetchAllSongRows(supabase);
     if (error) throw error;
     return data.map(item => mapCompositionToSong(item));
 };

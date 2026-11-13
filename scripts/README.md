@@ -39,6 +39,7 @@ Every script lives in exactly one category folder; only this README sits directl
 | `db/rename-seed-accounts.mjs` | Gives the four seeded accounts (fixed seed ids) their placeholder addresses (`<role>@sfs.example`) in `auth.users`, `auth.identities` and `profiles`, so an existing local stack matches the seed files without a reset. Idempotent. Local stack only; refuses non-localhost database hosts. | `npm run seed:rename-accounts` |
 | `db/clone-prod-to-staging.sh` | Copies production data to the staging database in one transaction (asks for confirmation). | `scripts/db/clone-prod-to-staging.sh [--yes] [--delete-backup]` |
 | `db/supabase_rate_limits.sh` | Reads and updates the Supabase Auth rate limits through the Management API (`SUPABASE_ACCESS_TOKEN`, `SUPABASE_PROJECT_ID` from `.env.local`). | `scripts/db/supabase_rate_limits.sh` |
+| `db/generate-translation-language-names.ts` | Prints the generated language-name list of migration `20261112140000_translation_versions_to_translations.sql` (names folded like the SQL, each with the tag the app's `translationLanguageTag` gives it). Run it once before the migration is released, paste the block into the migration and write it to the snapshot `testing/unit/tests/songs/fixtures/translation-language-names.sql`; `testing/unit/tests/songs/translationLanguageSql.test.ts` compares the two (independent of the Node's ICU data). The migration is frozen once released. | `npx tsx scripts/db/generate-translation-language-names.ts` |
 
 ## `scripts/dev/`: local development helpers
 

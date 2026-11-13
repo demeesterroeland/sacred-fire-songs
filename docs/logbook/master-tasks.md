@@ -1530,6 +1530,24 @@
 - [x] Cross-review by another Claude model (orchestrator, #498)
 - [x] Review fixes (PR #527): `trg_guard_catalog_slug` / `trg_guard_catalog_source_id` (only service role and admins set catalog keys), keys without surrounding spaces, lowercase translation languages, `song_version_sources.songbook_id` `on delete restrict`, guide: explicit increasing `created_at` and a write-rights table; `@seed` scenarios for the guards, ordering and runtime privileges
 
+## Session November 11, 2026 (Story 6.2.10, #513, songbook source line)
+
+- [x] Failing tests first: formatter, component, `fetchSong` select, BDD `ux-v3-songbook-source.feature`
+- [x] `lib/songs/versionSources.ts`, `components/song/SongSourceLine.tsx`, `fetchSong` embed, song page, 5 keys in 8 locales
+- [x] Docs: design doc 2.16, epics 2.02 (story 6.2.10), guest guide 0.26, member guide 0.23
+- [x] Cross-review by another Claude model (orchestrator, #498)
+- [x] Review fixes (PR #531, Nov 12): one `song_version_sources` embed (`SONG_SELECT`, guard test, `primarySource()` for #530), `@seed` contract on the real select, page notation (`pp.`, `A-12`, importer prefixes), original-title normalisation, `sortSources` tie-break and locale, plural list label (`song.source.labelMany`), es `pág.`, fr no-break space, epic doc acceptance criteria, renumbered docs after merging `feat/ux-v3`
+
+## Session November 13, 2026 (Story 6.2.11, #514, songbook pages)
+
+- [x] Failing tests first: page order and grouping (`songbookPage.test.ts`), selects, components, route files, BDD `ux-v3-songbook-pages.feature`
+- [x] `lib/songbooks/*`, `components/songbooks/*`, `app/songbooks/*`, Library tab, source line link, 8 keys in 8 locales
+- [x] Real page checked against the local API with temporary data (removed again): found and fixed the URL-encoded book id
+- [x] Docs: design doc 2.25 (§6.21), epics 2.11 (story 6.2.11), guest guide 0.32, member guide 0.30, user guide 2.10, e2e overview 1.25
+- [ ] `qu` copy for the songbook pages needs a native check
+- [x] Cross-review findings fixed (roman page order, merged-anchor highlight, page column, tab title, wording); merged `feat/ux-v3`
+- [ ] Cross-review by another Claude model (orchestrator, #498)
+
 ## Session November 13, 2026 (Story 6.1.38, #534, role badge on a profile)
 - [x] Plan `docs/plans/2026-11-13-role-badges.md`
 - [x] Migration `20261113120000_public_profiles_role.sql`: `public_profiles.role`, NULL for a guest; `db-schema.sql` v3.9
@@ -1542,6 +1560,10 @@
 - [x] `scripts/db/rename-seed-accounts.mjs` + `npm run seed:rename-accounts` + `scripts/README.md` row; unit test `renameSeedAccounts.test.ts`
 - [x] Local stack converted; tsc, lint (137), Vitest, BDD unit + seed and the admin-users / role badge / auth E2E specs green
 
+## Session November 13, 2026 (sync develop into feat/ux-v3)
+- [x] Merge `origin/develop` into `feat/ux-v3` with a merge commit (PR `chore/sync-develop-into-ux-v3`); doc conflicts resolved keeping both sides, develop's clashing version rows renumbered
+- [x] Role badge migration `20261113120000_public_profiles_role.sql` checked in the shared local database
+- [ ] Follow-up: `feat/ux-v3`-only tests and fixtures still use the old seed addresses (develop uses `<role>@sfs.example`)
 ## Session November 13, 2026 (#564 / #565, Private and No artist)
 - [x] `@unit`/`@e2e` feature `ux-v2-private-and-no-artist.feature`; Vitest `privateAndNoArtist.test.ts`, `songMetaNoArtist.test.tsx`; song-rows/meta tests now expect "No artist"
 - [x] 8 locales: song-visibility labels say Private (filter, empty state, song form "Save as private", status, `/terms` and `/privacy`); new `song.noArtist`; `admin.detail.unknownArtist` = No artist

@@ -1,12 +1,23 @@
 /**
  * One stable order for a song's versions (Epic 6.1, Story 6.1.11 / G2.6, #395, UXA-049):
- * oldest first (`created_at`), identical timestamps broken by `id`. The song page, the
- * edit form and the list cards all go through this, so "the first version" is the same
- * everywhere and never depends on the order the database happens to return.
+ * original, then variants, then translations (`version_kind`, #509), each group oldest first
+ * (`created_at`), identical timestamps broken by `id`. The song page, the edit form, add-to-playlist, favourites and the
+ * list cards all go through this, so "the first version" is the same everywhere and never
+ * depends on the order the database happens to return.
  */
+/** Original first, then the variants printed in other books, then the translations. */
+const KIND_RANK: Record<string, number> = { original: 0, variant: 1, translation: 2 };
+
+/** Position of a kind in the version order; a missing or unknown kind counts as `original`. */
+export function versionKindRank(kind: string | null | undefined): number {
+  return (kind && Object.hasOwn(KIND_RANK, kind) ? KIND_RANK[kind] : undefined) ?? KIND_RANK.original;
+}
+
 export interface OrderedVersion {
   id?: string;
   created_at?: string | null;
+  /** Story 6.2.6 (#509): original first, then variants, then translations; a missing kind counts as original. */
+  version_kind?: string | null;
 }
 
 function instant(value: string | null | undefined): number {
@@ -15,6 +26,8 @@ function instant(value: string | null | undefined): number {
 }
 
 export function compareVersions(a: OrderedVersion, b: OrderedVersion): number {
+  const byKind = versionKindRank(a.version_kind) - versionKindRank(b.version_kind);
+  if (byKind !== 0) return byKind;
   const byTime = instant(a.created_at);
   const other = instant(b.created_at);
   if (byTime !== other) return byTime < other ? -1 : 1;
@@ -29,7 +42,7 @@ export function sortVersions<T extends OrderedVersion>(versions: ReadonlyArray<T
   return [...(versions ?? [])].sort(compareVersions);
 }
 
-/** The first (oldest) version, or `undefined` when there is none. */
+/** The first version of the order (the original, else the oldest variant, …), or `undefined` when there is none. */
 export function firstVersion<T extends OrderedVersion>(versions: ReadonlyArray<T> | null | undefined): T | undefined {
   return sortVersions(versions)[0];
 }

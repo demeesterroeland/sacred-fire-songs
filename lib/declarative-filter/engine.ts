@@ -1,6 +1,6 @@
 import { FilterConfig, FilterFieldDef, FilterResult } from "./types";
 
-export function executeFilter<TItem, TFilterState extends Record<string, unknown>>(
+export function executeFilter<TItem, TFilterState extends object>(
   items: TItem[],
   config: FilterConfig<TItem, TFilterState>,
   state: TFilterState

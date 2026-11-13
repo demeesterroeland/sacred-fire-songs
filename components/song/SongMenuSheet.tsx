@@ -1,23 +1,14 @@
 'use client';
 
 import Link from 'next/link';
-import { Edit2, Globe, Minus, Pause, Play, Plus, Share2, Trash2 } from 'lucide-react';
+import { Edit2, Globe, Link2, Minus, Pause, Play, Plus, Share2, Trash2 } from 'lucide-react';
 import { BottomSheet, BottomSheetClose, BottomSheetContent, SheetAction } from '@/components/ui/bottom-sheet';
 import { Switch } from '@/components/ui/switch';
 import { ToolbarButton } from '@/components/ui/toolbar';
 import { useLocale } from '@/context/LocaleContext';
 import { AUTOSCROLL_KEEP_ATTR } from '@/hooks/useAutoScroll';
 import { SCROLL_SPEEDS, clampSpeed } from '@/lib/reader/autoScroll';
-import { MAX_SEMITONES, MIN_SEMITONES, formatSemitones, transposeKey } from '@/lib/reader/transpose';
 import { cn } from '@/lib/utils';
-
-export interface TransposeControls {
-  semitones: number;
-  /** The key written on the song, if any. */
-  originalKey?: string | null;
-  onShift: (delta: -1 | 1) => void;
-  onReset: () => void;
-}
 
 export interface SongMenuActions {
   onShare: () => void;
@@ -27,6 +18,8 @@ export interface SongMenuActions {
   onDelete?: () => void;
   /** Owner or admin, private song only (validation 4): make the song public from the menu. */
   onPublish?: () => void;
+  /** Admin, or gatekeeper on their own song (Story 6.2.9, #512): link this song as a version of another song (the page opens the sheet). */
+  onLinkAsVersion?: () => void;
 }
 
 interface SongMenuSheetProps {
@@ -36,8 +29,6 @@ interface SongMenuSheetProps {
   title: string;
   description?: string;
   actions: SongMenuActions;
-  /** Musicians only: omit for everyone else (and for versions without chords). */
-  transpose?: TransposeControls;
   speed: number;
   onSpeed: (delta: -1 | 1) => void;
   scrolling: boolean;
@@ -55,8 +46,9 @@ const actionRow = 'flex min-h-tap w-full items-center gap-3 px-4 py-3 text-left 
 
 /**
  * The song page's one menu (validation 2, item 11; it replaces the ⋮ sheet and the toolbar's ⋯ sheet).
- * It holds the song actions (Share, Edit, Delete: from lg the header shows them as buttons), transpose
- * (musicians), auto-scroll start/pause and speed, and the "Screen stays on" switch. Share and the switch are
+ * It holds the song actions (Share, Edit, Delete: from lg the header shows them as buttons), auto-scroll start/pause
+ * and speed, and the "Screen stays on" switch. Transpose is not here: it sits next to the Chords switch in the reader
+ * toolbar (#566, one place only). Share and the switch are
  * always there, so the menu is never empty. Auto-scroll keeps running behind it; touches here do not pause it.
  * Focus returns to the button that opened it (BottomSheet remembers it).
  */
@@ -66,7 +58,6 @@ export function SongMenuSheet({
   title,
   description,
   actions,
-  transpose,
   speed,
   onSpeed,
   scrolling,
@@ -113,53 +104,12 @@ export function SongMenuSheet({
             </div>
           )}
 
-          {transpose && (
-            <div role="group" aria-label={t('viewer.transpose')} className="flex flex-col gap-2 px-4 py-3" data-testid="transpose-group">
-              <div className="flex items-center gap-2">
-                <span className="min-w-0 flex-1 text-body font-medium text-fg">{t('viewer.transpose')}</span>
-                <ToolbarButton
-                  aria-label={t('viewer.transpose.down')}
-                  aria-disabled={transpose.semitones <= MIN_SEMITONES}
-                  onClick={() => transpose.semitones > MIN_SEMITONES && transpose.onShift(-1)}
-                  className={stepButton}
-                  data-testid="transpose-down"
-                >
-                  <Minus className="size-5" aria-hidden />
-                </ToolbarButton>
-                <span
-                  data-testid="transpose-value"
-                  aria-live="polite"
-                  className="min-w-[3ch] text-center text-row font-semibold tabular-nums text-fg"
-                >
-                  {formatSemitones(transpose.semitones)}
-                </span>
-                <ToolbarButton
-                  aria-label={t('viewer.transpose.up')}
-                  aria-disabled={transpose.semitones >= MAX_SEMITONES}
-                  onClick={() => transpose.semitones < MAX_SEMITONES && transpose.onShift(1)}
-                  className={stepButton}
-                  data-testid="transpose-up"
-                >
-                  <Plus className="size-5" aria-hidden />
-                </ToolbarButton>
-              </div>
-              <div className="flex items-center gap-2">
-                <span data-testid="transpose-key" className="min-w-0 flex-1 text-meta text-fg-muted">
-                  {transpose.originalKey
-                    ? transpose.semitones === 0
-                      ? t('song.meta.key', { key: transpose.originalKey })
-                      : t('viewer.transpose.key', {
-                          key: transposeKey(transpose.originalKey, transpose.semitones),
-                          original: transpose.originalKey,
-                        })
-                    : ''}
-                </span>
-                {transpose.semitones !== 0 && (
-                  <ToolbarButton onClick={transpose.onReset} className="border border-line">
-                    {t('viewer.transpose.reset')}
-                  </ToolbarButton>
-                )}
-              </div>
+          {/* Story 6.2.9 (#512): on every width, admins and the owning gatekeeper only. */}
+          {actions.onLinkAsVersion && (
+            <div className="py-2">
+              <SheetAction icon={<Link2 />} onClick={actions.onLinkAsVersion} data-testid="song-menu-link-version">
+                {t('song.menu.linkAsVersion')}
+              </SheetAction>
             </div>
           )}
 

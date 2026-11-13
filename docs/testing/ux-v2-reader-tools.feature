@@ -1,5 +1,6 @@
-# Version: 1.1 | Date: Nov 7, 2026
+# Version: 1.2 | Date: Nov 13, 2026
 # Changelog
+# 1.2 | Nov 13, 2026 | #566: transpose moved from the ⋮ menu to the reader toolbar, next to the Chords switch; see ux-v3-chord-tools.feature.
 # 1.1 | Nov 7, 2026 | Validation round 2, item 11: the toolbar ⋯ is gone; transpose, scroll speed and the Screen stays on switch are in the ⋮ menu (`SongMenuSheet`).
 # 1.0 | Nov 6, 2026 | Story 6.1.10 / G2.5 (#394): auto-scroll and transpose in the reader toolbar, stay-awake indicator.
 @story-6.1.10
@@ -48,7 +49,7 @@ Feature: UX v2 reader tools
   @e2e
   Scenario: Musician transposes from the toolbar on a phone
     Given a musician on a seeded song in key E on a 390 x 844 viewport
-    When they open the ⋮ menu and tap "Up a semitone" twice
+    When they tap "Up a semitone" twice in the toolbar stepper next to the Chords switch
     Then the chords are two semitones higher and the song page shows "Key F#"
 
   @e2e
@@ -69,7 +70,7 @@ Feature: UX v2 reader tools
   @e2e
   Scenario: Members and guests get auto-scroll but no transpose
     Given a member on a seeded song with chords on a 390 x 844 viewport
-    Then "Auto-scroll" is in the toolbar and "Transpose" is not in the ⋮ menu
+    Then "Auto-scroll" is in the toolbar and there is no transpose stepper
 
   @e2e
   Scenario: Stay-awake indicator

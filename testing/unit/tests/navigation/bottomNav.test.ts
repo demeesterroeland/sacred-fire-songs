@@ -42,8 +42,15 @@ describe('isBottomNavActive', () => {
     expect(isBottomNavActive('/songs', item('library'))).toBe(false);
   });
 
+  it('marks Library on the songbook pages, which sit beside the Library tabs (#514)', () => {
+    expect(isBottomNavActive('/songbooks', item('library'))).toBe(true);
+    expect(isBottomNavActive('/songbooks/book-a', item('library'))).toBe(true);
+    expect(isBottomNavActive('/songbooks-x', item('library'))).toBe(false);
+    expect(isBottomNavActive('/songbooks', item('search'))).toBe(false);
+  });
+
   it('marks at most one item on any page (one accent)', () => {
-    for (const p of ['/', '/songs', '/songs/x', '/songs/add', '/library/playlists', '/library/artists', '/account']) {
+    for (const p of ['/', '/songs', '/songs/x', '/songs/add', '/library/playlists', '/library/artists', '/songbooks', '/songbooks/x', '/account']) {
       expect(BOTTOM_NAV_ITEMS.filter((i) => isBottomNavActive(p, i)).length).toBeLessThanOrEqual(1);
     }
   });

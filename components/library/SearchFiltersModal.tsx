@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useId, useState } from 'react';
 import { X, SlidersHorizontal, Guitar, Music, Heart, ChevronDown, Search, Mic, Check } from 'lucide-react';
 import { Segmented } from '@/components/ui/segmented';
 import TagSelector from '@/components/library/TagSelector';
@@ -8,6 +8,7 @@ import type { TaxonomyNode } from '@/lib/taxonomyUtils';
 import type { SongFilterState } from '@/lib/songs/filterConfig';
 import { useLocale } from '@/context/LocaleContext';
 import { formatCount } from '@/lib/format/count';
+import type { BrowseOption } from '@/lib/songs/browseFilters';
 
 type SortByType = 'title' | 'author' | 'newest';
 
@@ -26,6 +27,8 @@ interface SearchFiltersModalProps {
     favoritesCount?: number;
     mineCount?: number;
     recordingsCount?: number;
+    /** Songbook and language choices with their counts (Story 6.2.19, #522). A list that is empty or missing hides its select. */
+    browseOptions?: { songbooks: BrowseOption[]; languages: BrowseOption[] };
     hasActiveFilters: boolean;
     isAuthenticated: boolean;
     localSearch: string;
@@ -47,6 +50,7 @@ export default function SearchFiltersModal({
     favoritesCount,
     mineCount,
     recordingsCount,
+    browseOptions,
     hasActiveFilters,
     isAuthenticated,
     localSearch,
@@ -180,6 +184,30 @@ export default function SearchFiltersModal({
                         />
                     </section>
 
+                    {/* Songbook and language (Story 6.2.19, #522): one choice each, counts follow the other filters */}
+                    {(browseOptions?.songbooks.length || browseOptions?.languages.length) ? (
+                        <section className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                            {browseOptions.songbooks.length > 0 && (
+                                <BrowseSelect
+                                    label={t('search.songbook')}
+                                    allLabel={t('search.songbook.all')}
+                                    value={state.songbook}
+                                    options={browseOptions.songbooks}
+                                    onChange={(v) => setFilter('songbook', v)}
+                                />
+                            )}
+                            {browseOptions.languages.length > 0 && (
+                                <BrowseSelect
+                                    label={t('search.language')}
+                                    allLabel={t('search.language.all')}
+                                    value={state.language}
+                                    options={browseOptions.languages}
+                                    onChange={(v) => setFilter('language', v)}
+                                />
+                            )}
+                        </section>
+                    ) : null}
+
                     {/* Sort */}
                     <section>
                         <label className="text-meta font-semibold text-fg-muted mb-2 block">
@@ -274,6 +302,48 @@ export default function SearchFiltersModal({
                 </div>
 
 
+            </div>
+        </div>
+    );
+}
+
+/* One-choice select with "All …" first and a count behind every option. A native select scales to the many books and
+   languages that imports add, works with a screen reader and needs no extra copy. An option nobody has right now is
+   disabled, unless it is the chosen one. */
+function BrowseSelect({
+    label,
+    allLabel,
+    value,
+    options,
+    onChange,
+}: {
+    label: string;
+    allLabel: string;
+    value: string | undefined;
+    options: BrowseOption[];
+    onChange: (value: string | undefined) => void;
+}) {
+    const id = useId();
+    return (
+        <div className="min-w-0">
+            <label htmlFor={id} className="text-meta font-semibold text-fg-muted mb-2 block">
+                {label}
+            </label>
+            <div className="relative">
+                <select
+                    id={id}
+                    value={value ?? ''}
+                    onChange={(e) => onChange(e.target.value || undefined)}
+                    className="min-h-tap w-full cursor-pointer appearance-none rounded-control border border-line-strong bg-surface px-4 py-2.5 pr-10 text-body font-medium text-fg"
+                >
+                    <option value="">{allLabel}</option>
+                    {options.map((o) => (
+                        <option key={o.value} value={o.value} disabled={o.count === 0 && o.value !== value}>
+                            {`${o.label} ${formatCount(o.count)}`}
+                        </option>
+                    ))}
+                </select>
+                <ChevronDown aria-hidden className="pointer-events-none absolute right-3 top-1/2 size-4 -translate-y-1/2 text-fg-muted" />
             </div>
         </div>
     );

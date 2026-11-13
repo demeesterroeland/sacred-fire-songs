@@ -34,6 +34,7 @@ export const TABLE_COLUMNS: Record<string, string[]> = {
     'key',
     'capo',
     'tuning',
+    'beats',
     'soundcloud_url',
     'youtube_url',
     'spotify_url',

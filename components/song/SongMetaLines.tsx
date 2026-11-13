@@ -5,8 +5,8 @@ import Link from 'next/link';
 import { ChevronDown } from 'lucide-react';
 import { useLocale } from '@/context/LocaleContext';
 import { joinMeta } from '@/components/ui/meta-line';
-import { songAuthors, technicalItems, type VersionTechnical } from '@/lib/songs/songMeta';
-import { parseArtists } from '@/lib/songs/artistUtils';
+import { authorFilterHref, authorSeparators, songAuthorLabels } from '@/lib/songs/authors';
+import { technicalItems, type VersionTechnical } from '@/lib/songs/songMeta';
 import { cn } from '@/lib/utils';
 
 interface CategoryItem {
@@ -15,9 +15,16 @@ interface CategoryItem {
 }
 
 interface SongMetaLinesProps {
+  /** Every credit of the song (`compositions.authors`); each one links to its author filter. */
+  authors?: ReadonlyArray<string | null | undefined> | null;
   originalAuthor?: string | null;
   categories?: CategoryItem[];
   version?: VersionTechnical;
+  /**
+   * Chords are on screen (#566): key, capo and tuning only show then; the beats stay. Default `true`: no Chords
+   * switch, no change.
+   */
+  chordsOn?: boolean;
   hasChords?: boolean;
   hasMelody?: boolean;
   hasPersonalRecording?: boolean;
@@ -27,7 +34,7 @@ interface SongMetaLinesProps {
   onToggleExpanded?: () => void;
 }
 
-/** Gap between the list items, in px: matches `gap-x-1`. */
+/** Safety margin before the "…" item, in px (the list has no flex gap: each item carries its own joiner). */
 const ITEM_GAP = 4;
 
 /**
@@ -48,13 +55,15 @@ export function fitLinkCount(rights: number[], authorCount: number, moreWidth: n
 /**
  * Story 6.1.7 / G2.2 (#391), Validation 3 and 4: grey lines above the lyrics.
  * Line 1: author, tags and Chords · Melody · Recordings, always as links; closed, as many as fit on one line
- * (validation 4). The chevron at the end opens the rest and the technical line "Key E · Capo 3 · Standard".
+ * (validation 4). The chevron at the end opens the rest and the technical line "Key E · Capo 3 · Beats 8" (plus non-standard tuning when set).
  * Closed by default.
  */
 export function SongMetaLines({
+  authors: authorCredits,
   originalAuthor,
   categories = [],
   version,
+  chordsOn = true,
   hasChords,
   hasMelody,
   hasPersonalRecording,
@@ -63,14 +72,17 @@ export function SongMetaLines({
   onToggleExpanded,
   toggleRef,
 }: SongMetaLinesProps) {
-  const { t } = useLocale();
-  const tr = t as (key: string, vars?: Record<string, string | number>) => string;
+  const { t, locale } = useLocale();
   const [internalOpen, setInternalOpen] = useState(false);
   const open = expanded !== undefined ? expanded : internalOpen;
   const listId = useId();
   const detailsId = useId();
-  const authors = songAuthors(originalAuthor, tr);
-  const technical = joinMeta(technicalItems(version, tr));
+  // Real authors only: the no-author label is plain text; it is not an author-filter link.
+  const authorLabels = songAuthorLabels({ authors: authorCredits, originalAuthor }, t);
+  const authors = authorLabels.length > 0 ? authorLabels.map((a) => a.label) : [t('song.noArtist')];
+  // The text between the author links ("and", "y", ","), so each name stays its own link.
+  const authorJoiners = authorSeparators(authors, locale);
+  const technical = joinMeta(technicalItems(version, t, { chordsOn }));
 
   // Authors always show; tags and Chords / Melody / Recordings (`fitIndex`) only as far as they fit while closed.
   const optional = [
@@ -79,12 +91,21 @@ export function SongMetaLines({
     ...(hasMelody ? [{ label: t('song.technical.melody'), href: '/songs?melody=true' }] : []),
     ...(hasPersonalRecording ? [{ label: t('song.technical.takes'), href: '/songs?myRecordings=true' }] : []),
   ];
-  // #565: without an author the line says "No artist" as plain text; a link to ?artist=No artist would find nothing.
-  const hasAuthor = parseArtists(originalAuthor).length > 0;
-  const links: { label: string; href?: string; fitIndex?: number }[] = [
-    ...authors.map((a) => ({ label: a, href: hasAuthor ? `/songs?artist=${encodeURIComponent(a)}` : undefined })),
+  // `joiner` is the text after this item, before the next one ("and", ",", "· "). It sits inside this item's <li>,
+  // right after the link, and only shows when the next item shows (see `joinerAfter`).
+  type MetaLink = { label: string; href?: string; fitIndex?: number; joiner?: string; authorJoiner?: boolean };
+  const links: MetaLink[] = [
+    ...authors.map((label, i) => ({
+      label,
+      href: authorLabels.length > 0 ? authorFilterHref(authorLabels[i].name) : undefined,
+    })),
     ...optional.map((l, i) => ({ ...l, fitIndex: i })),
-  ];
+  ].map((link, i, all) => {
+    if (i === all.length - 1) return link;
+    // Between two authors the locale's list text; anywhere else (author to tag, tag to tag) a dot.
+    const betweenAuthors = i < authors.length - 1 && authorJoiners[i] !== undefined;
+    return { ...link, joiner: betweenAuthors ? authorJoiners[i] : '· ', authorJoiner: betweenAuthors };
+  });
   // Validation 4 (owner): measure an invisible one-line copy and show as many links as fit. Until it is measured
   // (server render, no ResizeObserver) every link renders and the closed list clips.
   const [fit, setFit] = useState(optional.length);
@@ -109,6 +130,8 @@ export function SongMetaLines({
     return () => observer.disconnect();
   }, [linkKey, authors.length, open]);
   const showMore = !open && fit < optional.length;
+  const itemShows = (l: MetaLink | undefined) => !!l && (open || l.fitIndex === undefined || l.fitIndex < fit);
+  const joinerAfter = (i: number) => (itemShows(links[i + 1]) ? links[i].joiner : undefined);
 
   const handleToggle = () => {
     if (onToggleExpanded) onToggleExpanded();
@@ -123,20 +146,25 @@ export function SongMetaLines({
         <div ref={boxRef} className="relative min-w-0 flex-1 overflow-hidden">
         <ul
           id={listId}
-          className={cn('flex min-w-0 gap-x-1', open ? 'flex-wrap' : 'flex-nowrap')}
+          className={cn('flex min-w-0', open ? 'flex-wrap' : 'flex-nowrap')}
         >
-          {links.map(({ label, href, fitIndex }, i) => (
-            <li key={`${href}-${i}`} className={cn('shrink-0', !open && fitIndex !== undefined && fitIndex >= fit && 'hidden')}>
-              {i > 0 && <span aria-hidden>· </span>}
-              {href ? (
-                <Link href={href} className="inline-flex min-h-tap items-center px-1 text-fg underline underline-offset-4">
-                  {label}
-                </Link>
-              ) : (
-                <span className="inline-flex min-h-tap items-center px-1">{label}</span>
-              )}
-            </li>
-          ))}
+          {links.map(({ label, href, fitIndex, authorJoiner }, i) => {
+            const joiner = joinerAfter(i);
+            return (
+              <li key={`${href ?? label}-${i}`} className={cn('shrink-0', !open && fitIndex !== undefined && fitIndex >= fit && 'hidden')}>
+                {href ? (
+                  <Link href={href} className="inline-flex min-h-tap items-center px-1 text-fg underline underline-offset-4">
+                    {label}
+                  </Link>
+                ) : (
+                  <span className="inline-flex min-h-tap items-center px-1 text-fg">{label}</span>
+                )}
+                {joiner !== undefined && (
+                  authorJoiner ? <span className="-ms-1">{joiner}</span> : <span aria-hidden>{joiner}</span>
+                )}
+              </li>
+            );
+          })}
           {showMore && (
             <li aria-hidden className="flex min-h-tap shrink-0 items-center px-1" data-testid="song-meta-more">
               …
@@ -148,12 +176,12 @@ export function SongMetaLines({
         <ul
           ref={measureRef}
           aria-hidden
-          className="pointer-events-none invisible absolute left-0 top-0 flex w-max flex-nowrap gap-x-1"
+          className="pointer-events-none invisible absolute left-0 top-0 flex w-max flex-nowrap"
         >
-          {links.map(({ label }, i) => (
+          {links.map(({ label, joiner, authorJoiner }, i) => (
             <li key={i} className="shrink-0">
-              {i > 0 && <span>· </span>}
               <span className="inline-flex px-1">{label}</span>
+              {joiner !== undefined && <span className={cn(authorJoiner && '-ms-1')}>{joiner}</span>}
             </li>
           ))}
           <li className="shrink-0 px-1">…</li>

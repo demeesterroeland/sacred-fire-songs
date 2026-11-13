@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
-// Story 6.1.10 / G2.5 (#394) + validation 2, item 11: the ONE song menu: transpose, auto-scroll speed, the screen-stays-on
-// switch, and the song actions (Share, Edit, Delete) (L3, English copy).
+// Story 6.1.10 / G2.5 (#394) + validation 2, item 11: the ONE song menu: auto-scroll speed, the screen-stays-on
+// switch, and the song actions (Share, Edit, Delete) (L3, English copy). Transpose is not here: it sits next to the
+// Chords switch in the reader toolbar (#566).
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { cleanup, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { SongMenuSheet } from '@/components/song/SongMenuSheet';
@@ -21,7 +22,6 @@ function setup(over: Partial<React.ComponentProps<typeof SongMenuSheet>> = {}) {
   const props: React.ComponentProps<typeof SongMenuSheet> = {
     open: true,
     onOpenChange: vi.fn(),
-    transpose: { semitones: 0, originalKey: 'E', onShift: vi.fn(), onReset: vi.fn() },
     title: 'River Song',
     description: 'by Ayla',
     actions: { onShare: vi.fn() },
@@ -44,7 +44,6 @@ describe('SongMenuSheet', () => {
     expect(screen.queryByTestId('tools-scroll-toggle')).toBeNull();
     expect(screen.queryByRole('group', { name: 'Auto-scroll' })).toBeNull();
     expect(screen.queryByTestId('scroll-speed')).toBeNull();
-    expect(screen.getByTestId('transpose-group')).toBeTruthy(); // transpose is unaffected
   });
 
   it('is a dialog named after the song, with the author under it', () => {
@@ -53,47 +52,21 @@ describe('SongMenuSheet', () => {
     expect(within(dialog).getByText('by Ayla')).toBeTruthy();
   });
 
-  it('always has something to do: with no transpose and no auto-scroll it still holds Share and the screen switch', () => {
-    setup({ transpose: undefined, onToggleScroll: undefined });
+  it('always has something to do: with no auto-scroll it still holds Share and the screen switch', () => {
+    setup({ onToggleScroll: undefined });
     expect(screen.getByRole('button', { name: 'Share Song' })).toBeTruthy();
     expect(screen.getByRole('switch', { name: 'Screen stays on' })).toBeTruthy();
   });
 
-  it('transpose + and − shift by one semitone', () => {
-    const p = setup();
-    fireEvent.click(screen.getByRole('button', { name: 'Up a semitone' }));
-    expect(p.transpose!.onShift).toHaveBeenLastCalledWith(1);
-    fireEvent.click(screen.getByRole('button', { name: 'Down a semitone' }));
-    expect(p.transpose!.onShift).toHaveBeenLastCalledWith(-1);
-  });
-
-  it('reads out the shift and the new key in words (E +2 → F#)', () => {
-    setup({ transpose: { semitones: 2, originalKey: 'E', onShift: vi.fn(), onReset: vi.fn() } });
-    const group = screen.getByRole('group', { name: 'Transpose' });
-    expect(within(group).getByTestId('transpose-value').textContent).toBe('+2');
-    expect(within(group).getByTestId('transpose-key').textContent).toContain('F#');
-    expect(within(group).getByTestId('transpose-key').textContent).toContain('E');
-  });
-
-  it('offers the original key only after a change', () => {
-    const p = setup();
-    expect(screen.queryByRole('button', { name: 'Original key' })).toBeNull();
-    cleanup();
-    const q = setup({ transpose: { semitones: -3, originalKey: 'E', onShift: vi.fn(), onReset: vi.fn() } });
-    fireEvent.click(screen.getByRole('button', { name: 'Original key' }));
-    expect(q.transpose!.onReset).toHaveBeenCalledTimes(1);
-    expect(p.transpose!.onReset).not.toHaveBeenCalled();
-  });
-
-  it('keeps ± as aria-disabled at the ends of the range', () => {
-    setup({ transpose: { semitones: 11, originalKey: 'E', onShift: vi.fn(), onReset: vi.fn() } });
-    expect(screen.getByRole('button', { name: 'Up a semitone' }).getAttribute('aria-disabled')).toBe('true');
-    expect(screen.getByRole('button', { name: 'Down a semitone' }).getAttribute('aria-disabled')).toBe('false');
-  });
-
-  it('has no Transpose block for readers who cannot transpose', () => {
-    setup({ transpose: undefined });
+  // Chord tools in one place (#566): transpose lives next to the Chords switch, never in this menu.
+  it('has no Transpose item: not a group, not a stepper, not the key line', () => {
+    setup();
     expect(screen.queryByRole('group', { name: 'Transpose' })).toBeNull();
+    expect(screen.queryByText('Transpose')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Up a semitone' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Down a semitone' })).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Original key' })).toBeNull();
+    expect(screen.queryByTestId('transpose-group')).toBeNull();
     expect(screen.getByRole('group', { name: 'Auto-scroll' })).toBeTruthy();
   });
 

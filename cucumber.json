@@ -9,6 +9,7 @@
       "docs/testing/recording-sharing.feature",
       "docs/testing/share-notifications.feature",
       "docs/testing/ux-v2-*.feature",
+      "docs/testing/ux-v3-*.feature",
       "docs/testing/access-policies.feature",
       "docs/testing/songbook-data-model.feature"
     ],
@@ -35,6 +36,7 @@
       "docs/testing/recording-sharing.feature",
       "docs/testing/share-notifications.feature",
       "docs/testing/ux-v2-*.feature",
+      "docs/testing/ux-v3-*.feature",
       "docs/testing/access-policies.feature",
       "docs/testing/songbook-data-model.feature"
     ],
@@ -60,6 +62,7 @@
       "docs/testing/offline.feature",
       "docs/testing/share-notifications.feature",
       "docs/testing/ux-v2-*.feature",
+      "docs/testing/ux-v3-*.feature",
       "docs/testing/access-policies.feature",
       "docs/testing/songbook-data-model.feature"
     ],

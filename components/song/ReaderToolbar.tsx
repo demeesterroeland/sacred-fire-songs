@@ -1,18 +1,31 @@
 'use client';
 
 import { useLayoutEffect, useRef, type RefObject } from 'react';
-import { Pause, Play, Sun } from 'lucide-react';
+import { Minus, Pause, Play, Plus, Sun } from 'lucide-react';
 import { Toolbar, ToolbarButton } from '@/components/ui/toolbar';
 import { useLocale } from '@/context/LocaleContext';
 import { LYRIC_STEPS } from '@/lib/design/tokens';
 import { AUTOSCROLL_KEEP_ATTR } from '@/hooks/useAutoScroll';
 import { stepBy, type ReaderPrefs } from '@/lib/reader/readerPrefs';
+import { MAX_SEMITONES, MIN_SEMITONES, formatSemitones } from '@/lib/reader/transpose';
 import { cn } from '@/lib/utils';
+
+/** The transpose stepper (#566): shown next to the Chords switch, only while chords are on. */
+export interface ReaderTranspose {
+  semitones: number;
+  onShift: (delta: -1 | 1) => void;
+  onReset: () => void;
+}
 
 interface ReaderToolbarProps extends ReaderPrefs {
   /** Song has a chord layer; without it the Chords switch is not shown. */
   hasChords: boolean;
   onChange: (next: ReaderPrefs) => void;
+  /**
+   * Readers who may transpose (and whose text on screen has chords) pass this. The stepper then follows the Chords
+   * switch: it shows while `chords` is on and goes when it is off (#566).
+   */
+  transpose?: ReaderTranspose;
   /** Auto-scroll is running (Story 6.1.10, #394). The play button shows when `onToggleScroll` is given. */
   scrolling?: boolean;
   onToggleScroll?: () => void;
@@ -28,8 +41,10 @@ interface ReaderToolbarProps extends ReaderPrefs {
 
 /**
  * Story 6.1.6 / G2.1 (#390): `Chords · A− · A+` under the song title.
- * Story 6.1.10 / G2.5 (#394): `▶ Auto-scroll` joins the same row. Transpose, scroll speed and the screen switch
- * live in the song page's one ⋮ menu (validation 2, item 11).
+ * Story 6.1.10 / G2.5 (#394): `▶ Auto-scroll` joins the same row. Scroll speed and the screen switch live in the song
+ * page's one ⋮ menu (validation 2, item 11).
+ * #566: `Chords [switch] · [− n +] transpose · A− · A+`: the transpose stepper sits right after the Chords switch and
+ * shows only while chords are on (it used to be in the ⋮ menu). The row wraps on a narrow phone (every control is 44 px).
  * Reference: docs/ux-research/references/font-size-control.png.
  */
 export function ReaderToolbar({
@@ -38,6 +53,7 @@ export function ReaderToolbar({
   speed,
   hasChords,
   onChange,
+  transpose,
   scrolling = false,
   onToggleScroll,
   awake = false,
@@ -98,6 +114,7 @@ export function ReaderToolbar({
           {t('viewer.chords')}
         </button>
       )}
+      {hasChords && chords && transpose && <TransposeStepper {...transpose} />}
       <ToolbarButton
         aria-disabled={atMin}
         onClick={() => !atMin && onChange({ step: stepBy(step, -1), chords, speed })}
@@ -139,5 +156,57 @@ export function ReaderToolbar({
         </span>
       )}
     </Toolbar>
+  );
+}
+
+/** `− n +`: one semitone a tap; the value is a sign in text ("+2"), and tapping it after a change goes back to the original key. */
+function TransposeStepper({ semitones, onShift, onReset }: ReaderTranspose) {
+  const { t } = useLocale();
+  const atMin = semitones <= MIN_SEMITONES;
+  const atMax = semitones >= MAX_SEMITONES;
+  const ends = 'aria-disabled:opacity-40 aria-disabled:cursor-default aria-disabled:hover:bg-transparent';
+  const value = formatSemitones(semitones);
+  const resetLabel = `${value} — ${t('viewer.transpose.reset')}`;
+  return (
+    <div role="group" aria-label={t('viewer.transpose')} className="inline-flex items-center" data-testid="transpose-stepper">
+      <ToolbarButton
+        aria-label={t('viewer.transpose.down')}
+        title={t('viewer.transpose.down')}
+        aria-disabled={atMin}
+        onClick={() => !atMin && onShift(-1)}
+        className={cn('border border-line', ends)}
+        data-testid="transpose-down"
+      >
+        <Minus className="size-5" aria-hidden />
+      </ToolbarButton>
+      {semitones === 0 ? (
+        <span data-testid="transpose-value" className="inline-flex min-h-tap min-w-tap items-center justify-center text-meta font-semibold tabular-nums text-fg">
+          {value}
+        </span>
+      ) : (
+        <ToolbarButton
+          aria-label={resetLabel}
+          title={resetLabel}
+          onClick={onReset}
+          data-testid="transpose-value"
+          className="font-semibold tabular-nums text-fg"
+        >
+          <span aria-hidden>{value}</span>
+        </ToolbarButton>
+      )}
+      <span className="sr-only" aria-live="polite" data-testid="transpose-live">
+        {t('viewer.transpose.state', { n: value })}
+      </span>
+      <ToolbarButton
+        aria-label={t('viewer.transpose.up')}
+        title={t('viewer.transpose.up')}
+        aria-disabled={atMax}
+        onClick={() => !atMax && onShift(1)}
+        className={cn('border border-line', ends)}
+        data-testid="transpose-up"
+      >
+        <Plus className="size-5" aria-hidden />
+      </ToolbarButton>
+    </div>
   );
 }
