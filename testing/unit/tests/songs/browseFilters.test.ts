@@ -3,8 +3,11 @@ import { describe, expect, it } from 'vitest';
 import {
   applyBrowseFilters,
   browseOptions,
+  filterTagSelectorGroups,
+  knownLanguageSlugs,
   matchesLanguage,
   matchesSongbook,
+  normalizeLegacyLanguageParams,
   songLanguages,
   songbooksOfVersions,
 } from '@/lib/songs/browseFilters';
@@ -136,5 +139,61 @@ describe('browseOptions', () => {
   it('keeps a chosen value in the list even when no song has it any more', () => {
     const { songbooks } = browseOptions([a], [a], { songbook: 'gone' });
     expect(songbooks.map((o) => [o.value, o.count])).toContainEqual(['gone', 0]);
+  });
+});
+
+describe('filterTagSelectorGroups (Story 6.2.24, #569)', () => {
+  const groups = [
+    { parentName: 'The Elements', categories: [{ name: 'Fire', slug: 'fire' }] },
+    { parentName: 'Languages', categories: [{ name: 'Dutch', slug: 'dutch' }, { name: 'Spanish', slug: 'spanish' }] },
+  ];
+
+  it('excludes the Languages group when no search query is typed', () => {
+    const res = filterTagSelectorGroups(groups, '');
+    expect(res.map((g) => g.parentName)).toEqual(['The Elements']);
+  });
+
+  it('does not offer languages when typing "dut" or "lang"', () => {
+    expect(filterTagSelectorGroups(groups, 'dut')).toEqual([]);
+    expect(filterTagSelectorGroups(groups, 'lang')).toEqual([]);
+    expect(filterTagSelectorGroups(groups, 'fir').map((g) => g.parentName)).toEqual(['The Elements']);
+  });
+});
+
+describe('knownLanguageSlugs & normalizeLegacyLanguageParams (Story 6.2.24, #569)', () => {
+  const catalog = [
+    song({ categories: [topic('Fire', 'fire'), lang('Dutch', 'dutch')] }),
+    song({ categories: [lang('Spanish', 'spanish')] }),
+  ];
+
+  it('collects language slugs from songs and optional taxonomy without including the "languages" parent slug', () => {
+    const slugs = knownLanguageSlugs(catalog, [
+      { name: 'Languages', slug: 'languages', children: [{ slug: 'quechua' }] },
+      { name: 'The Elements', slug: 'the-elements', children: [{ slug: 'fire' }] },
+    ]);
+    expect(slugs.has('dutch')).toBe(true);
+    expect(slugs.has('spanish')).toBe(true);
+    expect(slugs.has('quechua')).toBe(true);
+    expect(slugs.has('languages')).toBe(false);
+    expect(slugs.has('fire')).toBe(false);
+  });
+
+  it('maps ?category=<lang> and ?tag=<lang> into language', () => {
+    const slugs = knownLanguageSlugs(catalog);
+    expect(normalizeLegacyLanguageParams(new URLSearchParams('category=dutch'), slugs)).toEqual({
+      category: undefined,
+      tags: [],
+      language: 'dutch',
+    });
+    expect(normalizeLegacyLanguageParams(new URLSearchParams('tag=spanish'), slugs)).toEqual({
+      category: undefined,
+      tags: [],
+      language: 'spanish',
+    });
+    expect(normalizeLegacyLanguageParams(new URLSearchParams('tag=fire,dutch'), slugs)).toEqual({
+      category: undefined,
+      tags: ['fire'],
+      language: 'dutch',
+    });
   });
 });

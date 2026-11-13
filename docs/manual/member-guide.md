@@ -1,12 +1,14 @@
 # Member Guide (draft)
 
-**Version:** 0.37 | **Date:** Nov 13, 2026
+**Version:** 0.39 | **Date:** Nov 13, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
-| 0.37 | Nov 13, 2026 | Song page: musicians transpose with the **− n +** stepper right after the **Chords** switch in the toolbar (it is not in the ⋮ menu any more) and it shows only while chords are on. **Key**, **Capo** and non-standard **Tuning** (named, e.g. `Key E · Tuning: Drop D`) show only while chords are on; after a transpose the line shows the new key; standard tuning is omitted completely (on the song page and in the PDF); the **Beats** stay (UX v3, #566). |
+| 0.39 | Nov 13, 2026 | Song page: musicians transpose with the **− n +** stepper right after the **Chords** switch in the toolbar (it is not in the ⋮ menu any more) and it shows only while chords are on. **Key**, **Capo** and non-standard **Tuning** (named, e.g. `Key E · Tuning: Drop D`) show only while chords are on; after a transpose the line shows the new key; standard tuning is omitted completely (on the song page and in the PDF); the **Beats** stay (UX v3, #566). |
+| 0.38 | Nov 13, 2026 | Search options: **Songbook** and **Language** now also appear when you open Search options from another page, counting all songs you may read (public songs plus your own private songs, or all songs for admins) (UX v3, #570). |
+| 0.37 | Nov 13, 2026 | Search options: languages are chosen only in the **Language** select, no longer under category & tag filters (UX v3, #569); song edit forms keep the *Languages* group unchanged so you can still set a song's language. |
 | 0.36 | Nov 13, 2026 | Search: when a song is found by another name, the grey line under it reads *Also known as …* (in the song list and in **+ Add Songs**). |
 | 0.35 | Nov 13, 2026 | Playlists: the **+ Add Songs** search finds a song like the song search does: by its title, by another name it is known by, by any of its authors and by the title it has in a songbook (accents and capitals do not matter). When the song's own title did not match, the row adds a grey line saying why, for example *Also known as Pachamama*; songs whose title matches are listed first (UX v3, #542). |
 | 0.34 | Nov 13, 2026 | Search: the search box also finds a song by the title of one of its translations; the grey line under the song names the language, for example *Dutch: Moeder Aarde* (UX v3, #547). Only translation titles are searched, not the translated lyrics. The **+ Add Songs** search in a playlist still matches the title only. |

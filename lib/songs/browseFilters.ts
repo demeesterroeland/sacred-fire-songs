@@ -160,3 +160,135 @@ export function browseOptions(
   const sort = byLabel(locale);
   return { songbooks: [...songbooks.values()].sort(sort), languages: [...languages.values()].sort(sort) };
 }
+
+/** One row returned by `public.fn_search_filter_counts()`. */
+export interface SearchFilterCountRow {
+  kind: string;
+  value: string;
+  label: string;
+  song_count: number;
+}
+
+/**
+ * Splits `fn_search_filter_counts()` rows into sorted Songbook and Language `BrowseOption` lists
+ * so `GlobalSearchModal` renders the same `SearchFiltersModal` selects as `/songs` (Story 6.2.25, #570).
+ */
+export function browseOptionsFromRows(
+  rows: readonly SearchFilterCountRow[] | null | undefined,
+  locale?: string
+): { songbooks: BrowseOption[]; languages: BrowseOption[] } {
+  const songbooks: BrowseOption[] = [];
+  const languages: BrowseOption[] = [];
+  for (const row of rows ?? []) {
+    if (!row.value || !row.label) continue;
+    const option: BrowseOption = {
+      value: row.value,
+      label: row.label,
+      count: Number(row.song_count) || 0,
+    };
+    if (row.kind === 'songbook') songbooks.push(option);
+    else if (row.kind === 'language') languages.push(option);
+  }
+  const sort = byLabel(locale);
+  return {
+    songbooks: songbooks.sort(sort),
+    languages: languages.sort(sort),
+  };
+}
+
+export interface GroupedCategoryOption<T extends { name: string; slug: string } = { name: string; slug: string }> {
+  parentName: string;
+  categories: T[];
+}
+
+/**
+ * Groups shown by the category & tag selector in Search options (Story 6.2.24 / G5.7, #569):
+ * excludes the "Languages" group (language is chosen in the Language filter only) and filters by search text.
+ */
+export function filterTagSelectorGroups<T extends { name: string; slug: string }>(
+  grouped: readonly GroupedCategoryOption<T>[],
+  query = ''
+): GroupedCategoryOption<T>[] {
+  const nonLanguage = grouped.filter(
+    ({ parentName }) =>
+      parentName !== LANGUAGES_PARENT_NAME &&
+      parentName.toLowerCase() !== LANGUAGES_PARENT_SLUG
+  );
+  const trimmed = query.trim();
+  if (!trimmed) {
+    return nonLanguage.map(({ parentName, categories }) => ({ parentName, categories: [...categories] }));
+  }
+  const term = trimmed.toLowerCase();
+  return nonLanguage
+    .map(({ parentName, categories }) => ({
+      parentName,
+      categories: categories.filter(
+        (cat) =>
+          cat.name.toLowerCase().includes(term) ||
+          cat.slug.toLowerCase().includes(term) ||
+          parentName.toLowerCase().includes(term)
+      ),
+    }))
+    .filter((group) => group.categories.length > 0);
+}
+
+/**
+ * Every language category slug known from the catalog (the children of the "Languages" group).
+ * Used on `/songs` to map legacy `?category=<lang>` and `?tag=<lang>` links into the Language filter;
+ * the parent group slug (`"languages"`) stays a category filter.
+ */
+export function knownLanguageSlugs(
+  songs: readonly Pick<Song, 'categories'>[],
+  taxonomy?: readonly { name?: string; slug?: string; children?: readonly { slug?: string }[] }[]
+): Set<string> {
+  const slugs = new Set<string>();
+  for (const song of songs) {
+    for (const l of songLanguages(song)) slugs.add(l.slug);
+  }
+  for (const node of taxonomy ?? []) {
+    if (node.name === LANGUAGES_PARENT_NAME || node.slug === LANGUAGES_PARENT_SLUG) {
+      for (const child of node.children ?? []) {
+        if (child.slug) slugs.add(child.slug);
+      }
+    }
+  }
+  return slugs;
+}
+
+export interface LegacyLanguageParams {
+  category?: string;
+  tags: string[];
+  language: string;
+}
+
+/**
+ * Maps old `?category=<lang>` and `?tag=<lang>` (or `?tags=<lang>`) links into `language` so bookmarked links keep
+ * filtering and select the Language filter without showing a duplicate chip in the tag selector.
+ * An explicit `language` parameter always takes precedence; non-language tags and categories stay untouched.
+ */
+export function normalizeLegacyLanguageParams(
+  params: Pick<URLSearchParams, 'get'>,
+  languageSlugs: ReadonlySet<string>
+): LegacyLanguageParams {
+  const rawCategory = params.get('category') || undefined;
+  const rawTagParam = params.get('tag') || params.get('tags') || '';
+  const rawTags = rawTagParam ? rawTagParam.split(',').filter(Boolean) : [];
+  let language = params.get('language') || '';
+
+  let category = rawCategory;
+  if (category && languageSlugs.has(category)) {
+    if (!language) language = category;
+    category = undefined;
+  }
+
+  const tags: string[] = [];
+  for (const t of rawTags) {
+    if (languageSlugs.has(t)) {
+      if (!language) language = t;
+    } else {
+      tags.push(t);
+    }
+  }
+
+  return { category, tags, language };
+}
