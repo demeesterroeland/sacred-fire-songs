@@ -1,5 +1,20 @@
 # Changelog
 
+## [1.9.0](https://github.com/demeesterroeland/sacred-fire-songs/compare/v1.8.0...v1.9.0) (2026-11-13)
+
+
+### ✨ New features
+
+* **ux:** promote UX v3 to develop ([#585](https://github.com/demeesterroeland/sacred-fire-songs/issues/585)) ([700aafc](https://github.com/demeesterroeland/sacred-fire-songs/commit/700aafc90d594b48ecfab980fecf700f95962e5e))
+
+
+### 🐛 Bug fixes
+
+* "Private" and "No artist" wording; redirect old /explore links ([#571](https://github.com/demeesterroeland/sacred-fire-songs/issues/571)) ([337b47c](https://github.com/demeesterroeland/sacred-fire-songs/commit/337b47ca2a991ad2651e73ab9c4fe059c9e6f0cf))
+* **test:** placeholder seed accounts in catalog-edit steps; language filter known limit ([#593](https://github.com/demeesterroeland/sacred-fire-songs/issues/593)) ([265bc79](https://github.com/demeesterroeland/sacred-fire-songs/commit/265bc79717c9bca19e196dbd10d8d525979b1c37))
+* **ui:** sober colours in playlist surfaces ([#582](https://github.com/demeesterroeland/sacred-fire-songs/issues/582)) ([d590274](https://github.com/demeesterroeland/sacred-fire-songs/commit/d5902746f098a3163a211fb42ce1a70ac7e4ff45))
+* **ui:** sober tokens in account settings ([#485](https://github.com/demeesterroeland/sacred-fire-songs/issues/485) group 5) ([#581](https://github.com/demeesterroeland/sacred-fire-songs/issues/581)) ([88ac788](https://github.com/demeesterroeland/sacred-fire-songs/commit/88ac788b375af183c9c7b27a5b2533b8cfe3d545))
+
 ## [1.8.0](https://github.com/demeesterroeland/sacred-fire-songs/compare/v1.7.1...v1.8.0) (2026-11-13)
 
 
