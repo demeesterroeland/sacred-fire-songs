@@ -14,7 +14,10 @@
 import type { Song } from '@/lib/songUtils';
 import { bookName, type SourceBook } from '@/lib/songs/versionSources';
 
-/** The name of the group the language categories live under (`categories.name` of the parent). */
+/**
+ * The name of the group the language categories live under (`categories.name` of the parent). Shared with the row meta
+ * line (`songRowMeta`), which shows only the FIRST language of a song, whereas the language filter matches ANY of them.
+ */
 export const LANGUAGES_PARENT_NAME = 'Languages';
 /** Slug of that group. */
 export const LANGUAGES_PARENT_SLUG = 'languages';
@@ -102,6 +105,12 @@ export function applyBrowseFilters<T extends Pick<Song, 'songbooks' | 'categorie
   return songs.filter((s) => matchesSongbook(s, selection.songbook) && matchesLanguage(s, selection.language));
 }
 
+/** Labels for a chosen value no song carries (a stale URL, a book that is no longer readable). Already translated. */
+export interface BrowseFallbackLabels {
+  unknownSongbook: string;
+  unknownLanguage: string;
+}
+
 const byLabel = (locale?: string) => (a: BrowseOption, b: BrowseOption) =>
   a.label.localeCompare(b.label, locale, { sensitivity: 'base' }) || a.value.localeCompare(b.value);
 
@@ -112,13 +121,15 @@ const byLabel = (locale?: string) => (a: BrowseOption, b: BrowseOption) =>
  * @param base      the songs that pass every OTHER filter of the list (text search, categories, status, ...): counts come from here
  * @param selection the current choice; the songbook counts honour the language choice and the other way round
  * @param locale    sorts the labels
- * A chosen value that no song has any more stays in its list (count 0), so the select never shows a blank choice.
+ * @param fallback  labels of a chosen value that no song has any more; it stays in its list (count 0) so the select never
+ *                  shows a blank choice, and shows "Unknown songbook / language" instead of the raw id or slug
  */
 export function browseOptions(
   all: readonly Pick<Song, 'songbooks' | 'categories'>[],
   base: readonly Pick<Song, 'songbooks' | 'categories'>[],
   selection: BrowseSelection,
-  locale?: string
+  locale?: string,
+  fallback?: BrowseFallbackLabels
 ): { songbooks: BrowseOption[]; languages: BrowseOption[] } {
   const songbooks = new Map<string, BrowseOption>();
   const languages = new Map<string, BrowseOption>();
@@ -127,10 +138,10 @@ export function browseOptions(
     for (const l of songLanguages(song)) if (!languages.has(l.slug)) languages.set(l.slug, { value: l.slug, label: l.name, count: 0 });
   }
   if (selection.songbook && !songbooks.has(selection.songbook)) {
-    songbooks.set(selection.songbook, { value: selection.songbook, label: selection.songbook, count: 0 });
+    songbooks.set(selection.songbook, { value: selection.songbook, label: fallback?.unknownSongbook ?? selection.songbook, count: 0 });
   }
   if (selection.language && !languages.has(selection.language)) {
-    languages.set(selection.language, { value: selection.language, label: selection.language, count: 0 });
+    languages.set(selection.language, { value: selection.language, label: fallback?.unknownLanguage ?? selection.language, count: 0 });
   }
   for (const song of base) {
     if (matchesLanguage(song, selection.language)) {

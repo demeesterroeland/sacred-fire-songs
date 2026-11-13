@@ -17,13 +17,16 @@ import { useSongsFilter } from '@/hooks/useSongsFilter';
 const lang = (name: string, slug: string) => ({ name, slug, parent: 'Languages', parentSlug: 'languages' });
 const A = { id: 'bk-a', name: 'Songbook A' };
 const B = { id: 'bk-b', name: 'Songbook B' };
-const mk = (id: string, title: string, songbooks: Song['songbooks'], categories: Song['categories']): Song =>
-  ({ id, title, author: '', songKey: null, color: 'red', createdAt: '2026-01-01T00:00:00Z', songbooks, categories }) as Song;
+const C = { id: 'bk-c', name: 'Songbook C' };
+const mk = (id: string, title: string, songbooks: Song['songbooks'], categories: Song['categories'], over: Partial<Song> = {}): Song =>
+  ({ id, title, author: '', songKey: null, color: 'red', createdAt: '2026-01-01T00:00:00Z', songbooks, categories, ...over }) as Song;
 const songs = [
-  mk('1', 'Alpha', [A], [lang('Spanish', 'espanol')]),
+  mk('1', 'Alpha', [A], [lang('Spanish', 'espanol')], { hasChords: true }),
   mk('2', 'Bravo', [B], [lang('English', 'english')]),
-  mk('3', 'Charlie', [A, B], [lang('English', 'english')]),
+  mk('3', 'Charlie', [A, B], [lang('English', 'english')], { hasChords: true }),
   mk('4', 'Delta', [], []),
+  // chords exist only in book A and B; book C has a melody-only song
+  mk('5', 'Echo', [C], [lang('French', 'french')], { hasMelody: true }),
 ];
 
 function run(q: string) {
@@ -36,7 +39,7 @@ function run(q: string) {
 describe('useSongsFilter: songbook and language', () => {
   it('lists every song without a filter', () => {
     const r = run('');
-    expect(r.displaySongs.map((s) => s.title)).toEqual(['Alpha', 'Bravo', 'Charlie', 'Delta']);
+    expect(r.displaySongs.map((s) => s.title)).toEqual(['Alpha', 'Bravo', 'Charlie', 'Delta', 'Echo']);
     expect(r.hasActiveFilters).toBe(false);
   });
 
@@ -58,13 +61,40 @@ describe('useSongsFilter: songbook and language', () => {
 
   it('counts the options over the songs the text search leaves, but lists every option', () => {
     const r = run('search=charlie');
-    expect(r.browseOptionsFor({}).songbooks.map((o) => [o.value, o.count])).toEqual([['bk-a', 1], ['bk-b', 1]]);
-    expect(r.browseOptionsFor({}).languages.map((o) => [o.value, o.count])).toEqual([['english', 1], ['espanol', 0]]);
+    expect(r.browseOptionsFor(r.state).songbooks.map((o) => [o.value, o.count])).toEqual([['bk-a', 1], ['bk-b', 1], ['bk-c', 0]]);
+    expect(r.browseOptionsFor(r.state).languages.map((o) => [o.value, o.count])).toEqual([['english', 1], ['french', 0], ['espanol', 0]]);
   });
 
   it('counts for the choice the sheet shows (a draft), not only the committed one', () => {
     const r = run('');
-    expect(r.browseOptionsFor({ language: 'english' }).songbooks.map((o) => [o.value, o.count])).toEqual([['bk-a', 1], ['bk-b', 2]]);
-    expect(r.browseOptionsFor({ songbook: 'bk-b' }).languages.map((o) => [o.value, o.count])).toEqual([['english', 2], ['espanol', 0]]);
+    expect(r.browseOptionsFor({ ...r.state, language: 'english' }).songbooks.map((o) => [o.value, o.count])).toEqual([['bk-a', 1], ['bk-b', 2], ['bk-c', 0]]);
+    expect(r.browseOptionsFor({ ...r.state, songbook: 'bk-b' }).languages.map((o) => [o.value, o.count])).toEqual([['english', 2], ['french', 0], ['espanol', 0]]);
+  });
+
+  // Finding 1 of the review of #561: the counts followed the APPLIED filters, so options stayed disabled in the sheet
+  // after the user switched a filter off there.
+  it('counts for the whole draft: chords switched off in the sheet re-enables the book without chord songs', () => {
+    const r = run('chords=true');
+    expect(r.browseOptionsFor(r.state).songbooks.find((o) => o.value === 'bk-c')?.count).toBe(0);
+    const draft = { ...r.state, chords: false };
+    expect(r.browseOptionsFor(draft).songbooks.map((o) => [o.value, o.count])).toEqual([['bk-a', 2], ['bk-b', 2], ['bk-c', 1]]);
+    expect(r.browseOptionsFor(draft).languages.find((o) => o.value === 'french')?.count).toBe(1);
+  });
+
+  it('counts for the draft search text: clearing the search in the sheet counts every song again', () => {
+    const r = run('search=alpha');
+    expect(r.browseOptionsFor(r.state).songbooks.map((o) => o.count)).toEqual([1, 0, 0]);
+    expect(r.browseOptionsFor({ ...r.state, search: '' }).songbooks.map((o) => o.count)).toEqual([2, 2, 1]);
+    expect(r.browseOptionsFor({ ...r.state, search: 'echo' }).songbooks.map((o) => o.count)).toEqual([0, 0, 1]);
+  });
+
+  it('counts for a draft favourites choice', () => {
+    query = '';
+    const favoriteIds = new Set(['5']);
+    const r = renderHook(() =>
+      useSongsFilter({ songs, favoriteIds, viewedSongIds: new Set(), sortBy: 'title', locale: 'en' })
+    ).result.current;
+    expect(r.browseOptionsFor({ ...r.state, favorites: true }).songbooks.map((o) => o.count)).toEqual([0, 0, 1]);
+    expect(r.browseOptionsFor({ ...r.state, favorites: false }).songbooks.map((o) => o.count)).toEqual([2, 2, 1]);
   });
 });

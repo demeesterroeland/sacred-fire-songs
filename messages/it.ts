@@ -800,6 +800,8 @@ const it: Partial<Record<TranslationKey, string>> = {
   'search.language': "Lingua",
   'search.songbook.all': "Tutti i canzonieri",
   'search.language.all': "Tutte le lingue",
+  'search.songbook.unknown': "Canzoniere sconosciuto",
+  'search.language.unknown': "Lingua sconosciuta",
   'search.yourLibrary': 'La tua libreria',
   'search.status.draft': 'Bozza',
   'search.tagSelector.categoryPrefix': 'Categoria: {category}',

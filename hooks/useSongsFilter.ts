@@ -1,7 +1,8 @@
 import { useCallback, useMemo } from 'react';
 import { useDeclarativeFilter } from '@/hooks/useDeclarativeFilter';
-import { songListFilterConfig, isDraftActive, type SongFilterState } from '@/lib/songs/filterConfig';
-import { applyBrowseFilters, browseOptions, type BrowseSelection } from '@/lib/songs/browseFilters';
+import { songFilterConfig, isDraftActive, type SongFilterState } from '@/lib/songs/filterConfig';
+import { executeFilter } from '@/lib/declarative-filter/engine';
+import { applyBrowseFilters, browseOptions, type BrowseFallbackLabels } from '@/lib/songs/browseFilters';
 import { rankSongsBySearch } from '@/lib/songs/search';
 import type { Song } from '@/lib/songUtils';
 
@@ -16,9 +17,11 @@ interface UseSongsFilterOptions {
   sortBy: string;
   /** Sorts the songbook and language options by name. */
   locale?: string;
+  /** Translated labels of a songbook / language in the URL that no song carries. */
+  unknownLabels?: BrowseFallbackLabels;
 }
 
-export function useSongsFilter({ songs, userId, favoriteIds, userRecordingCompositionIds = new Set(), viewedSongIds, sortBy, locale }: UseSongsFilterOptions) {
+export function useSongsFilter({ songs, userId, favoriteIds, userRecordingCompositionIds = new Set(), viewedSongIds, sortBy, locale, unknownLabels }: UseSongsFilterOptions) {
   const defaultState: SongFilterState = {
     status: 'all',
     search: '',
@@ -37,7 +40,7 @@ export function useSongsFilter({ songs, userId, favoriteIds, userRecordingCompos
 
   const { filteredItems, state, setFilter, commitFilters, resetFilters } = useDeclarativeFilter(
     songs,
-    songListFilterConfig,
+    songFilterConfig,
     defaultState,
     {
       parseUrl: (params) => ({
@@ -74,38 +77,42 @@ export function useSongsFilter({ songs, userId, favoriteIds, userRecordingCompos
     }
   );
 
-  // The post-filters (favorites, mine, myRecordings, new) on top of what the engine kept.
-  const applyPostFilters = useMemo(() => {
+  // The post-filters (favorites, mine, myRecordings, new) on top of what the engine kept, for any filter state: the
+  // applied one and the sheet's draft (browseOptionsFor).
+  const postFilter = useMemo(() => {
     // eslint-disable-next-line react-hooks/purity
     const cutoff = Date.now() - THIRTY_DAYS_MS;
-    return (list: Song[]): Song[] => {
+    return (list: Song[], s: SongFilterState): Song[] => {
       let items = list;
-      if (state.favorites) items = items.filter(s => favoriteIds.has(s.id));
-      if (state.mine && userId) items = items.filter(s => s.ownerId === userId);
-      if (state.myRecordings && userId) items = items.filter(s => userRecordingCompositionIds.has(s.id));
-      if (state.new) {
-        items = items.filter(s =>
-          !viewedSongIds.has(s.id) && new Date(s.createdAt).getTime() >= cutoff
+      if (s.favorites) items = items.filter(song => favoriteIds.has(song.id));
+      if (s.mine && userId) items = items.filter(song => song.ownerId === userId);
+      if (s.myRecordings && userId) items = items.filter(song => userRecordingCompositionIds.has(song.id));
+      if (s.new) {
+        items = items.filter(song =>
+          !viewedSongIds.has(song.id) && new Date(song.createdAt).getTime() >= cutoff
         );
       }
       return items;
     };
-  }, [state.favorites, state.mine, state.myRecordings, state.new, favoriteIds, userRecordingCompositionIds, viewedSongIds, userId]);
+  }, [favoriteIds, userRecordingCompositionIds, viewedSongIds, userId]);
 
   // Songbook and language (#522) narrow the engine's result; the engine itself does not know them (songListFilterConfig).
   const browseItems = useMemo(
     () => applyBrowseFilters(filteredItems, { songbook: state.songbook, language: state.language }) as Song[],
     [filteredItems, state.songbook, state.language]
   );
-  const finalFilteredItems = useMemo(() => applyPostFilters(browseItems), [applyPostFilters, browseItems]);
+  const finalFilteredItems = useMemo(() => postFilter(browseItems, state), [postFilter, browseItems, state]);
 
   // Options and counts of the songbook and language selects: every option that exists in the catalog, each counted over
-  // the songs that pass everything else (search, categories, status, post-filters) and the other select, but not its own
-  // choice. A function of the choice, so the sheet can ask with its DRAFT choice before anything is committed.
-  const countBase = useMemo(() => applyPostFilters(filteredItems), [applyPostFilters, filteredItems]);
+  // the songs that pass everything else and the other select, but not its own choice. Takes the sheet's WHOLE draft
+  // (search text, categories, chords/melody, favourites, status, ... and both choices) and runs the same engine and
+  // post-filters on it, so the counts never lag behind what the user changed in the sheet but has not applied yet.
   const browseOptionsFor = useCallback(
-    (selection: BrowseSelection) => browseOptions(songs, countBase, selection, locale),
-    [songs, countBase, locale]
+    (draft: SongFilterState) => {
+      const base = postFilter(executeFilter(songs, songFilterConfig, draft).filteredItems, draft);
+      return browseOptions(songs, base, { songbook: draft.songbook, language: draft.language }, locale, unknownLabels);
+    },
+    [songs, postFilter, locale, unknownLabels]
   );
 
   // Sort, then (while searching) title matches before the songs found by an alias, author, songbook title, … (#521).

@@ -4,7 +4,7 @@ import { Given, Then, When } from '@cucumber/cucumber';
 import type { DataTable } from '@cucumber/cucumber';
 import { DICTIONARIES } from '../../../lib/i18n';
 import { applyBrowseFilters, browseOptions, type BrowseSelection } from '../../../lib/songs/browseFilters';
-import { songListFilterConfig } from '../../../lib/songs/filterConfig';
+import { songFilterConfig } from '../../../lib/songs/filterConfig';
 import { SONGS_SELECT } from '../../../lib/songs/queries';
 import type { Song } from '../../../lib/songUtils';
 
@@ -36,6 +36,11 @@ Given('these songs:', function (this: object, table: DataTable) {
   })) as Song[];
 });
 
+const UNKNOWN = { unknownSongbook: 'Unknown songbook', unknownLanguage: 'Unknown language' };
+
+When('I filter on the songbook id {string}', function (this: object, id: string) {
+  world(this).selection.songbook = id;
+});
 When('I filter on {string}', function (this: object, book: string) {
   world(this).selection.songbook = slug(book);
 });
@@ -43,22 +48,22 @@ When('I filter on the language {string}', function (this: object, language: stri
   world(this).selection.language = slug(language);
 });
 
-/** The list as the song page builds it: the list config (no search, no category) with the songbook and language filters on top. */
+/** The list as the song page builds it: no search, no category, the songbook and language filters on top. */
 Then('only these songs are listed: {}', function (this: object, expected: string) {
   const { songs, selection } = world(this);
-  assert.equal(songListFilterConfig.songbook!.isActive('x'), false, 'the engine config leaves both filters to the hook');
+  assert.equal(songFilterConfig.songbook, undefined, 'the engine config leaves both filters to the hook');
   const listed = applyBrowseFilters(songs, selection).map((s) => s.title);
   assert.deepEqual(listed, quoted(expected));
 });
 
 Then('the songbook options read {}', function (this: object, expected: string) {
   const { songs, selection } = world(this);
-  const { songbooks } = browseOptions(songs, songs, selection, 'en');
+  const { songbooks } = browseOptions(songs, songs, selection, 'en', UNKNOWN);
   assert.deepEqual(songbooks.map((o) => `${o.label} (${o.count})`), quoted(expected));
 });
 Then('the language options read {}', function (this: object, expected: string) {
   const { songs, selection } = world(this);
-  const { languages } = browseOptions(songs, songs, selection, 'en');
+  const { languages } = browseOptions(songs, songs, selection, 'en', UNKNOWN);
   assert.deepEqual(languages.map((o) => `${o.label} (${o.count})`), quoted(expected));
 });
 
@@ -69,7 +74,7 @@ Then('the song list select embeds the sources once and nests the songbook in it'
 
 Then('the filter sheet labels exist in {string}', function (locale: string) {
   const dict = DICTIONARIES[locale as keyof typeof DICTIONARIES] as Record<string, string>;
-  for (const key of ['search.songbook', 'search.language', 'search.songbook.all', 'search.language.all']) {
+  for (const key of ['search.songbook', 'search.language', 'search.songbook.all', 'search.language.all', 'search.songbook.unknown', 'search.language.unknown']) {
     assert.ok(dict[key]?.trim(), `${locale}: ${key}`);
   }
 });

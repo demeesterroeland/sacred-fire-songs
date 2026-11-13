@@ -800,6 +800,8 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'search.language': "Taal",
   'search.songbook.all': "Alle liedboeken",
   'search.language.all': "Alle talen",
+  'search.songbook.unknown': "Onbekend liedboek",
+  'search.language.unknown': "Onbekende taal",
   'search.yourLibrary': 'Jouw bibliotheek',
   'search.status.draft': 'Concept',
   'search.tagSelector.categoryPrefix': 'Categorie: {category}',

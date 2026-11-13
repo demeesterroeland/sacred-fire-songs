@@ -800,6 +800,8 @@ const fr: Partial<Record<TranslationKey, string>> = {
   'search.language': "Langue",
   'search.songbook.all': "Tous les recueils",
   'search.language.all': "Toutes les langues",
+  'search.songbook.unknown': "Recueil inconnu",
+  'search.language.unknown': "Langue inconnue",
   'search.yourLibrary': "Ta bibliothèque",
   'search.status.draft': "Brouillon",
   'search.tagSelector.categoryPrefix': "Catégorie : {category}",

@@ -1,6 +1,6 @@
 # Version: 1.0 | Date: Nov 13, 2026
 # Changelog
-# 1.0 | Nov 13, 2026 | Story 6.2.19 / G5.2 (#522): the search filter sheet filters songs by songbook and by language, with a count per option.
+# 1.0 | Nov 13, 2026 | Story 6.2.19 / G5.2 (#522): the search filter sheet filters songs by songbook and by language, with a count per option; a book or language in the URL that no song has reads "Unknown …".
 @ux-v3 @browse-filters
 Feature: Filter songs by songbook and language
   As a Guest
@@ -59,6 +59,11 @@ Feature: Filter songs by songbook and language
   Scenario: A count never narrows by its own choice
     When I filter on "Songbook B"
     Then the songbook options read "Songbook A (2)", "Songbook B (2)"
+
+  @unit
+  Scenario: A songbook that is not in the catalog is called "Unknown songbook"
+    When I filter on the songbook id "bk-old"
+    Then the songbook options read "Songbook A (2)", "Songbook B (2)", "Unknown songbook (0)"
 
   @unit
   Scenario: A songbook is read from the one sources embed of the song list

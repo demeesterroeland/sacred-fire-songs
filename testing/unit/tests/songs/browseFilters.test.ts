@@ -77,6 +77,22 @@ describe('matching', () => {
   });
 });
 
+describe('browseOptions: unknown values', () => {
+  const a = song({ songbooks: [bookA], categories: [lang('Spanish', 'espanol')] });
+  const labels = { unknownSongbook: 'Unknown songbook', unknownLanguage: 'Unknown language' };
+
+  it('labels a book or language in the URL that no song has with the translated "Unknown …", not the raw value', () => {
+    const { songbooks, languages } = browseOptions([a], [a], { songbook: 'bk-old', language: 'klingon' }, 'en', labels);
+    expect(songbooks).toContainEqual({ value: 'bk-old', label: 'Unknown songbook', count: 0 });
+    expect(languages).toContainEqual({ value: 'klingon', label: 'Unknown language', count: 0 });
+  });
+
+  it('a known book with no songs in view keeps its name', () => {
+    const { songbooks } = browseOptions([a], [], { songbook: 'bk-a' }, 'en', labels);
+    expect(songbooks).toEqual([{ value: 'bk-a', label: 'Songbook A', count: 0 }]);
+  });
+});
+
 describe('browseOptions', () => {
   const a = song({ songbooks: [bookA], categories: [lang('Spanish', 'espanol')] });
   const b = song({ songbooks: [bookB], categories: [lang('English', 'english')] });

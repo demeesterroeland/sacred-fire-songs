@@ -798,6 +798,8 @@ const en = {
   'search.language': "Language",
   'search.songbook.all': "All songbooks",
   'search.language.all': "All languages",
+  'search.songbook.unknown': "Unknown songbook",
+  'search.language.unknown': "Unknown language",
   'search.yourLibrary': 'Your Library',
   'search.status.draft': 'Draft',
   'search.tagSelector.categoryPrefix': 'Category: {category}',

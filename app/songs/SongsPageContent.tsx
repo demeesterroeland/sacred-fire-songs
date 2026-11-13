@@ -73,6 +73,11 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
     const { userRecordingCompositionIds } = useRecordingsQuery(user?.id);
     const viewedSongIds = useMemo(() => new Set(initialViewedSongIds), [initialViewedSongIds]);
 
+    const unknownLabels = useMemo(
+        () => ({ unknownSongbook: t('search.songbook.unknown'), unknownLanguage: t('search.language.unknown') }),
+        [t]
+    );
+
     const {
         displaySongs,
         state,
@@ -87,13 +92,13 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
         hasActiveFilters,
         filteredCount,
         browseOptionsFor
-    } = useSongsFilter({ songs, userId: user?.id, favoriteIds, userRecordingCompositionIds, viewedSongIds, sortBy, locale });
+    } = useSongsFilter({ songs, userId: user?.id, favoriteIds, userRecordingCompositionIds, viewedSongIds, sortBy, locale, unknownLabels });
 
-    // Songbook and language options of the sheet, counted for the choice shown in it (the draft while it is open)
-    const shownSelection = draft ?? state;
+    // Songbook and language options of the sheet, counted for everything the sheet shows: the draft and its search text
+    // while it is open, the applied state otherwise
     const browseOptions = useMemo(
-        () => browseOptionsFor({ songbook: shownSelection.songbook, language: shownSelection.language }),
-        [browseOptionsFor, shownSelection.songbook, shownSelection.language]
+        () => browseOptionsFor(draft ? { ...draft, search: localSearch } : state),
+        [browseOptionsFor, draft, localSearch, state]
     );
 
     // Why each row matched, worked out once per result list / query / language, not on every render (#521).

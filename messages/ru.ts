@@ -803,6 +803,8 @@ const ru: Partial<Record<TranslationKey, string>> = {
   'search.language': "Язык",
   'search.songbook.all': "Все сборники",
   'search.language.all': "Все языки",
+  'search.songbook.unknown': "Неизвестный сборник",
+  'search.language.unknown': "Неизвестный язык",
   'search.yourLibrary': 'Твоя библиотека',
   'search.status.draft': 'Черновик',
   'search.tagSelector.categoryPrefix': 'Категория: {category}',
