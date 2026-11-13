@@ -144,7 +144,8 @@ export function songMatchesSearch(song: SearchableSong, rawQuery: string): boole
 }
 
 /**
- * Songs whose title matched first, then the ones found by an alias, songbook title, author, category or lyrics.
+ * Songs whose title matched first, then the ones found by an alias, songbook title, translated title, author, category
+ * or lyrics.
  * A stable partition: the order the list already has (title, author or newest) is kept inside each group.
  * Without a query the list is returned as it is.
  */
@@ -158,8 +159,8 @@ export function rankSongsBySearch<T extends SearchableSong>(songs: readonly T[],
 }
 
 /**
- * The reason to show under the title, or `null`: only an alias, a songbook title or an author the row does not
- * already show (the row's author text is `song.author`). A title, category or lyrics match needs no hint.
+ * The reason to show under the title, or `null`: only an alias, a songbook title, a translated title or an author the
+ * row does not already show (the row's author text is `song.author`). A title, category or lyrics match needs no hint.
  */
 export function songMatchHint(song: SearchableSong, rawQuery: string): MatchHint | null {
   const match = songSearchMatch(song, rawQuery);
@@ -181,9 +182,10 @@ const HINT_KEYS = {
 
 /**
  * The hint as the row shows it, in the UI language: "Matched by alias: Gran Venerable Madre Tierra", or for a
- * translated title "Dutch: Moeder Aarde". `locale` names the language of a translated title (default English).
+ * translated title "Dutch: Moeder Aarde". `locale` (the UI language) names the language of a translated title; it is
+ * required so no caller silently shows an English language name.
  */
-export function songMatchHintText(song: SearchableSong, rawQuery: string, t: TranslateFn, locale: Locale = 'en'): string | null {
+export function songMatchHintText(song: SearchableSong, rawQuery: string, t: TranslateFn, locale: Locale): string | null {
   const hint = songMatchHint(song, rawQuery);
   if (!hint) return null;
   if (hint.kind === 'translationTitle') {

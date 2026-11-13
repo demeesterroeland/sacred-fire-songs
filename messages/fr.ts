@@ -130,7 +130,7 @@ const fr: Partial<Record<TranslationKey, string>> = {
   'songs.noResultsFilter': "Aucun chant n'est disponible pour ce filtre.",
   'songs.matchAlias': "Trouvé par l'alias : {text}",
   'songs.matchSourceTitle': 'Trouvé par le titre du recueil : {text}',
-  'songs.matchTranslation': '{language}: {text}',
+  'songs.matchTranslation': '{language} : {text}',
   'songs.matchAuthor': "Trouvé par l'auteur : {text}",
 
   // ─── Songs – Detail Page ──────────────────────────────────────────────────

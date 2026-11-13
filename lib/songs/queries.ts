@@ -214,6 +214,7 @@ export function mapCompositionToSong(
     sourceTitles: distinctTexts(
       (item.song_versions ?? []).flatMap((v) => (v.song_version_sources ?? []).map((src) => src.original_title))
     ),
+    // Every titled translation is searchable, also one without lyrics yet: its title still names the song (#547).
     translationTitles: (item.song_translations ?? []).flatMap((tr) => {
       const title = normalizeWhitespace(tr.title ?? '');
       return title ? [{ language: tr.language, title }] : [];

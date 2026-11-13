@@ -210,10 +210,10 @@ Then('the song is not in the results', function (this: object) {
   assert.equal(world(this).results.includes(world(this).songs[0]), false);
 });
 Then('the hint reads {string}', function (this: object, text: string) {
-  assert.equal(songMatchHintText(world(this).songs[0], world(this).query, t as never), text);
+  assert.equal(songMatchHintText(world(this).songs[0], world(this).query, t as never, 'en' as Locale), text);
 });
 Then('there is no hint', function (this: object) {
-  assert.equal(songMatchHintText(world(this).songs[0], world(this).query, t as never), null);
+  assert.equal(songMatchHintText(world(this).songs[0], world(this).query, t as never, 'en' as Locale), null);
 });
 Then('the results are the song {string} once', function (this: object, title: string) {
   assert.deepEqual(world(this).results.map((s) => s.title), [title]);

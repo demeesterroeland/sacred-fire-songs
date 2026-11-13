@@ -181,7 +181,7 @@ describe('translated titles', () => {
   it('renders the hint as "<language>: <title>" in the app language', () => {
     const t = (key: string, p?: Record<string, string | number>) =>
       key === 'songs.matchTranslation' ? `${p?.language}: ${p?.text}` : key;
-    expect(songMatchHintText(translated(), 'aarde', t as never)).toBe('Dutch: Moeder Aarde');
+    expect(songMatchHintText(translated(), 'aarde', t as never, 'en')).toBe('Dutch: Moeder Aarde');
     expect(songMatchHintText(translated(), 'aarde', t as never, 'nl')).toBe('Nederlands: Moeder Aarde');
   });
 });
