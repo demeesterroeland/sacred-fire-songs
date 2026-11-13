@@ -98,3 +98,80 @@ describe('useSongsFilter: songbook and language', () => {
     expect(r.browseOptionsFor({ ...r.state, favorites: false }).songbooks.map((o) => o.count)).toEqual([2, 2, 1]);
   });
 });
+
+describe('useSongsFilter: legacy language links (Story 6.2.24, #569)', () => {
+  const withDutch = [
+    ...songs,
+    mk('6', 'Zonnelied', [A], [lang('Dutch', 'dutch'), { name: 'Fire', slug: 'fire', parent: 'The Elements', parentSlug: 'the-elements' }]),
+  ];
+
+  function runWith(q: string, list = withDutch, taxonomy?: { id: string; name: string; slug: string; emoji: null; icon_name: null; children: { id: string; name: string; slug: string; emoji: null; icon_name: null; children: [] }[] }[]) {
+    query = q;
+    return renderHook(() =>
+      useSongsFilter({ songs: list, taxonomy, favoriteIds: new Set(), viewedSongIds: new Set(), sortBy: 'title', locale: 'en' })
+    ).result.current;
+  }
+
+  it('?category=dutch lists only Dutch songs and selects "dutch" in the Language filter', () => {
+    const r = runWith('category=dutch');
+    expect(r.displaySongs.map((s) => s.title)).toEqual(['Zonnelied']);
+    expect(r.state.language).toBe('dutch');
+    expect(r.state.category).toBeUndefined();
+    expect(r.hasActiveFilters).toBe(true);
+    expect(r.browseOptionsFor(r.state).languages.find((o) => o.value === 'dutch')?.label).toBe('Dutch');
+  });
+
+  it('?tag=dutch and ?tags=dutch list only Dutch songs and select "dutch" in the Language filter', () => {
+    for (const param of ['tag=dutch', 'tags=dutch']) {
+      const r = runWith(param);
+      expect(r.displaySongs.map((s) => s.title)).toEqual(['Zonnelied']);
+      expect(r.state.language).toBe('dutch');
+      expect(r.state.tags).toEqual([]);
+    }
+  });
+
+  it('?tag=fire,dutch keeps "fire" as a tag and moves "dutch" to the Language filter', () => {
+    const r = runWith('tag=fire,dutch');
+    expect(r.displaySongs.map((s) => s.title)).toEqual(['Zonnelied']);
+    expect(r.state.tags).toEqual(['fire']);
+    expect(r.state.language).toBe('dutch');
+  });
+
+  it('?category=nature&tag=dutch keeps "nature" in category and moves "dutch" to language', () => {
+    const r = runWith('category=nature&tag=dutch');
+    expect(r.state.category).toBe('nature');
+    expect(r.state.tags).toEqual([]);
+    expect(r.state.language).toBe('dutch');
+  });
+
+  it('an explicit ?language=espanol takes precedence over a legacy ?category=dutch without zeroing results', () => {
+    const r = runWith('category=dutch&language=espanol');
+    expect(r.displaySongs.map((s) => s.title)).toEqual(['Alpha']);
+    expect(r.state.language).toBe('espanol');
+    expect(r.state.category).toBeUndefined();
+  });
+
+  it('?category=languages (the parent group) keeps filtering by any language category', () => {
+    const r = runWith('category=languages');
+    expect(r.displaySongs.map((s) => s.title)).toEqual(['Alpha', 'Bravo', 'Charlie', 'Echo', 'Zonnelied']);
+    expect(r.state.category).toBe('languages');
+    expect(r.state.language).toBe('');
+  });
+
+  it('recognizes a language slug from taxonomy even when no song in the list carries it', () => {
+    const taxonomy = [
+      {
+        id: 'g-lang',
+        name: 'Languages',
+        slug: 'languages',
+        emoji: null,
+        icon_name: null,
+        children: [{ id: 'c-nl', name: 'Dutch', slug: 'dutch', emoji: null, icon_name: null, children: [] as [] }],
+      },
+    ];
+    const r = runWith('category=dutch', songs, taxonomy);
+    expect(r.displaySongs).toEqual([]);
+    expect(r.state.language).toBe('dutch');
+    expect(r.state.category).toBeUndefined();
+  });
+});
