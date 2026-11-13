@@ -3480,3 +3480,11 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - Visibility is RLS only: guests read public songs; a book none of whose songs the viewer can read does not exist for them (404, same as an unknown id; left out of the list); an admin can read a book without songs (empty state). No migration: `idx_song_version_sources_songbook_id` already exists.
 - Found by running the page against the local API: the route gives the segment URL-encoded (`a%20b`), so `songbookIdFromParam` decodes it (a book id with a space was a 404 before). Test data was inserted and removed again by hand (shared database).
 - Tests: `songbookPage.test.ts`, `songbookSelect.test.ts`, `songbookComponents.test.tsx`, `songbookPages.test.tsx`, the source line link in `songSourceLine.test.tsx`, nav tests; BDD `docs/testing/ux-v3-songbook-pages.feature` (16 `@unit`, 4 `@seed`). 8 new keys in 8 locales (`qu` needs a native check). The Library tab spec (`e2e/tests/ux-v2-library-tabs.spec.ts`) expects six tabs; E2E not run (shared database).
+
+#### Story 6.2.11 (#514) — cross-review fixes (Nov 13, 2026)
+- Merged `feat/ux-v3` (took design 2.24 / §6.20 and epic 2.10 for #524); this PR is design 2.25 / §6.21 and epic 2.11.
+- `comparePages` sorts roman pages by value after the numbered pages (`iv, v, ix, x, xii`), reusing `ROMAN_PAGE` from `lib/songs/versionSources.ts`; a roman range sorts by its first page.
+- A merged row (two versions on one page) highlights through `has-[:target]` on the `<li>`; every anchor span has `scroll-mt-24`. The page column is `min-w-14 whitespace-nowrap`.
+- `/songbooks/[id]` has `generateMetadata` (book title; the not-found title for an unknown or unreadable book); the read is shared with the page via `React.cache`.
+- Comments and design text: reads are public, own (admins all), nothing through sharing.
+- Left as is: `SONGBOOK_LIST_SELECT` fetches every row it counts (fine at about 1000 songs; RPC or view later if slow).

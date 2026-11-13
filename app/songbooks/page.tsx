@@ -7,7 +7,7 @@ import { SongbooksList } from '@/components/songbooks/SongbooksList';
 
 /**
  * Story 6.2.11 / G2.2 (#514): the printed songbooks with their song counts. Row-level security decides what the viewer
- * counts: guests the public songs, members also their own and shared ones. Open to guests (no gate).
+ * counts: guests the public songs, members also their own (admins all); nothing comes through sharing. Open to guests (no gate).
  */
 export default async function SongbooksPage() {
   const locale = await getServerLocale();

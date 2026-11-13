@@ -4,9 +4,9 @@ import { SONGBOOK_LIST_SELECT, SONGBOOK_PAGE_SELECT } from '@/lib/songbooks/song
 
 /**
  * Story 6.2.11 / G2.2 (#514): songbook pages. Everything runs with the viewer's row-level security, so a guest reads the
- * public songs of a book, a member also their own and shared ones, and a book none of whose songs the viewer can read
- * does not exist for them (the `songbooks` policy needs one readable source). Only import from Server Components or
- * Server Actions.
+ * public songs of a book, a member also their own private songs (admins all; nothing comes through sharing), and a
+ * book none of whose songs the viewer can read does not exist for them (the `songbooks` policy needs one readable
+ * source). Only import from Server Components or Server Actions.
  *
  * The selects live in `songbookSelect.ts`.
  */

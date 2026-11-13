@@ -29,6 +29,7 @@ Feature: Songbook pages
       | p. 10, 9            | 9, 10               |
       | 38-39, 40, 7        | 7, 38-39, 40        |
       | A-10, A-2, A-1      | A-1, A-2, A-10      |
+      | iv, ix, v, x, xii   | iv, v, ix, x, xii   |
 
   @unit
   Scenario: Songs without a page come last, then by title

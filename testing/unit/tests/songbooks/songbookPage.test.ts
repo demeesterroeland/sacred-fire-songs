@@ -49,6 +49,14 @@ describe('comparePages', () => {
   it('orders a range by its first page', () => {
     expect(sort(['40', '38-39', '7'])).toEqual(['7', '38-39', '40']);
   });
+  it('orders roman pages as numbers (iv, v, ix, x, xii), after the numbered pages', () => {
+    expect(sort(['xii', 'x', 'v', 'ix', 'iv'])).toEqual(['iv', 'v', 'ix', 'x', 'xii']);
+    expect(sort(['IV', '3', 'ii', '10', 'xl', 'ix'])).toEqual(['3', '10', 'ii', 'IV', 'ix', 'xl']);
+  });
+  it('orders a roman range by its first page and keeps the order total', () => {
+    expect(sort(['x', 'iv-vi', 'v', 'ix'])).toEqual(['iv-vi', 'v', 'ix', 'x']);
+    expect(sort(['xii', 'M-1', 'v', 'ix', 'A-1'])).toEqual(['A-1', 'M-1', 'v', 'ix', 'xii']);
+  });
   it('puts a missing page last (null, empty, blank, bare prefix)', () => {
     expect(sort([null, '3', '', '1', '  ', 'p.'])).toEqual(['1', '3', null, '', '  ', 'p.']);
   });

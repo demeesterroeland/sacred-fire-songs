@@ -5,7 +5,7 @@
  * A source's `page` is free text ("38", "12a", "38–39", "A-12", "p. 38"), so it is compared as a person reads it:
  * numbers as numbers ("2" before "10"), "12" before "12a" before "13", an importer prefix ignored, a missing page last.
  */
-import { cleanPage, differingOriginalTitle } from '@/lib/songs/versionSources';
+import { ROMAN_PAGE, cleanPage, differingOriginalTitle } from '@/lib/songs/versionSources';
 
 /** A song as `song_versions → compositions` returns it; a many-to-one embed is an object, a one-item array is accepted too. */
 export interface RawSongbookSong {
@@ -62,12 +62,35 @@ function pageCollator(locale: string): Intl.Collator {
   return c;
 }
 
-/** Natural order of two printed pages; a missing page sorts after every page, and two missing pages are equal. */
+const ROMAN_VALUES: Record<string, number> = { i: 1, v: 5, x: 10, l: 50, c: 100, d: 500, m: 1000 };
+
+/** The number of a roman page ("ix" → 9) or of a roman range by its first page ("iv-vi" → 4); `null` for any other page. */
+function romanPageValue(page: string): number | null {
+  const parts = page.split(/\s*[–—-]\s*/);
+  const first = parts[0] ?? '';
+  if (!parts.every((part) => ROMAN_PAGE.test(part))) return null;
+  let total = 0;
+  const digits = [...first.toLowerCase()].map((ch) => ROMAN_VALUES[ch]);
+  digits.forEach((value, i) => {
+    total += value < (digits[i + 1] ?? 0) ? -value : value;
+  });
+  return total;
+}
+
+/**
+ * Natural order of two printed pages: numbers and section pages as the collator reads them, then the roman pages by
+ * their value (iv, v, ix, x, xii, not alphabetically); a missing page sorts after every page, and two missing pages
+ * are equal.
+ */
 export function comparePages(a: string | null | undefined, b: string | null | undefined, locale = 'en'): number {
   const pa = cleanPage(a);
   const pb = cleanPage(b);
   if (pa === null || pb === null) return Number(pa === null) - Number(pb === null);
-  return pageCollator(locale).compare(pa, pb);
+  const ra = romanPageValue(pa);
+  const rb = romanPageValue(pb);
+  // Roman pages form their own group after the rest, so the order stays total (a collator and a value order never mix).
+  if (ra === null || rb === null) return Number(ra !== null) - Number(rb !== null) || pageCollator(locale).compare(pa, pb);
+  return ra - rb || pageCollator(locale).compare(pa, pb);
 }
 
 const one = <T>(v: T | T[] | null | undefined): T | null => (Array.isArray(v) ? (v[0] ?? null) : (v ?? null));

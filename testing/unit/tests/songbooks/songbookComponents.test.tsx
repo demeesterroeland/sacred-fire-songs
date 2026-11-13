@@ -88,6 +88,28 @@ describe('SongbookPageContent', () => {
     expect(container.querySelector('#source-x2')).toBeTruthy();
   });
 
+  it('highlights the row and keeps the scroll offset for every merged anchor', () => {
+    // `:target` matches the span that carries the id: the row highlights through `has-[:target]` and every span has the offset.
+    const { container } = render(<SongbookPageContent book={book({ entries: [entry({ sourceIds: ['x1', 'x2'] })] })} />);
+    const row = container.querySelector('#source-x1') as HTMLElement;
+    const second = container.querySelector('#source-x2') as HTMLElement;
+    expect(row.tagName).toBe('LI');
+    expect(row.className).toContain('has-[:target]:bg-surface');
+    expect(row.className).toContain('target:bg-surface');
+    expect(row.className).toContain('scroll-mt-24');
+    expect(second.tagName).toBe('SPAN');
+    expect(second.parentElement).toBe(row);
+    expect(second.className).toContain('scroll-mt-24');
+  });
+
+  it('keeps a page label such as "pp. 138–139" on one line', () => {
+    render(<SongbookPageContent book={book({ entries: [entry({ page: '138–139' })] })} />);
+    const label = screen.getByText('pp. 138–139');
+    expect(label.className).toContain('whitespace-nowrap');
+    expect(label.className).toContain('min-w-14');
+    expect(label.className.split(/\s+/)).not.toContain('w-14');
+  });
+
   it('shows the original title and the author, and marks a private song', () => {
     render(<SongbookPageContent book={book({ entries: [entry({ originalTitle: 'Subir', isPublic: false })] })} />);
     const row = screen.getByTestId('songbook-song-row');

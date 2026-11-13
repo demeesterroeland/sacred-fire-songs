@@ -51,6 +51,19 @@ describe('/songbooks/[id]', () => {
     expect(element.props.book).toBe(book);
   });
 
+  it('titles the tab with the book title', async () => {
+    fetchSongbookServer.mockResolvedValue({ id: 'book-a', title: 'Songbook A', entries: [], songCount: 0 });
+    const { generateMetadata } = await import('@/app/songbooks/[id]/page');
+    await expect(generateMetadata({ params: Promise.resolve({ id: 'book-a' }) })).resolves.toEqual({ title: 'Songbook A' });
+    expect(fetchSongbookServer).toHaveBeenCalledWith('book-a', 'en');
+  });
+
+  it('titles an unknown or unreadable book with the not-found title, never its own', async () => {
+    fetchSongbookServer.mockResolvedValue(null);
+    const { generateMetadata } = await import('@/app/songbooks/[id]/page');
+    await expect(generateMetadata({ params: Promise.resolve({ id: 'private-only' }) })).resolves.toEqual({ title: 'Songbook not found' });
+  });
+
   it('has its own not-found copy', async () => {
     const { default: SongbookNotFound } = await import('@/app/songbooks/[id]/not-found');
     const element = SongbookNotFound() as { type: unknown; props: { titleKey: string; descriptionKey: string; icon: string } };

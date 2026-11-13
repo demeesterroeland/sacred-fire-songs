@@ -93,7 +93,7 @@ const PAGE_PREFIX = /^(?:pp|p|págs|pág|pags|pag|S|blz|с)(?:\.\s*|\s+)(?=\S)/i
 /** Between two pages: a mark, " y " / " and " / " en " / " et " / " e " / " und ", or just white space. */
 const PAGE_SEPARATOR = /\s*[–—\-/,;&+]\s*|\s+(?:y|and|en|et|e|und)\s+|\s+/i;
 const ARABIC_PAGE = /^\d+[a-z]?$/i;
-const ROMAN_PAGE = /^[ivxlcdm]+$/i;
+export const ROMAN_PAGE = /^[ivxlcdm]+$/i;
 
 /** The page as shown: importer prefixes stripped; `plural` when it names several pages ("38–39", "38 & 40", "iv-vi"). */
 function parsePage(raw: string | null | undefined): { page: string; plural: boolean } | null {

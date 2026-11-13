@@ -1543,6 +1543,7 @@
 - [x] Failing tests first: page order and grouping (`songbookPage.test.ts`), selects, components, route files, BDD `ux-v3-songbook-pages.feature`
 - [x] `lib/songbooks/*`, `components/songbooks/*`, `app/songbooks/*`, Library tab, source line link, 8 keys in 8 locales
 - [x] Real page checked against the local API with temporary data (removed again): found and fixed the URL-encoded book id
-- [x] Docs: design doc 2.24 (§6.20), epics 2.10 (story 6.2.11), guest guide 0.32, member guide 0.30, user guide 2.10, e2e overview 1.25
+- [x] Docs: design doc 2.25 (§6.21), epics 2.11 (story 6.2.11), guest guide 0.32, member guide 0.30, user guide 2.10, e2e overview 1.25
 - [ ] `qu` copy for the songbook pages needs a native check
+- [x] Cross-review findings fixed (roman page order, merged-anchor highlight, page column, tab title, wording); merged `feat/ux-v3`
 - [ ] Cross-review by another Claude model (orchestrator, #498)

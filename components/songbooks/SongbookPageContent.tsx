@@ -51,15 +51,16 @@ function SongbookSongRow({ entry }: { entry: SongbookEntry }) {
   const [first, ...others] = entry.sourceIds;
   return (
     // The first source id is the row's own id; a second version on the same page keeps a (silent) anchor of its own.
-    <li id={sourceAnchor(first)} className="scroll-mt-24 border-b border-line last:border-b-0 target:bg-surface">
+    // `:target` then matches that empty span, so the row highlights through `has-[:target]` and the span keeps the offset.
+    <li id={sourceAnchor(first)} className="scroll-mt-24 border-b border-line last:border-b-0 target:bg-surface has-[:target]:bg-surface">
       {others.map((id) => (
-        <span key={id} id={sourceAnchor(id)} />
+        <span key={id} id={sourceAnchor(id)} className="scroll-mt-24" />
       ))}
       <ListRow
         asChild
         title={entry.title}
         meta={[page ? null : t('songbooks.noPage'), entry.originalTitle ? t('song.source.originalTitle', { title: entry.originalTitle }) : null, authors]}
-        leading={<span className="inline-block w-14 text-meta tabular-nums">{page}</span>}
+        leading={<span className="inline-block min-w-14 whitespace-nowrap text-meta tabular-nums">{page}</span>}
         trailing={entry.isPublic ? null : <VisibilityIcon isPublic={false} className="size-4 text-fg-subtle" />}
         className="ps-4 pe-3 border-b-0"
       >
