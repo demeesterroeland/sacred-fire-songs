@@ -1,5 +1,5 @@
 # Sacred Fire Songs – Admin user overview catalogue (Story 3.6.1, issue #258)
-# Version: 1.1 | Date: Oct 30, 2026
+# Version: 1.2 | Date: Nov 13, 2026
 #
 # Living Gherkin description of the admin users overview, user details and
 # contributions (Epic 3.6 #257 / Story 3.6.1 #258). Same layering as
@@ -25,6 +25,7 @@
 #   1.0 – Oct 30, 2026 – Initial catalogue for Story 3.6.1 acceptance criteria.
 #   1.1 – Oct 30, 2026 – Sort by name Z-A and by number of songs, remembered sort (#278),
 #                        clickable user rows (#279), listbox-style role/sort pickers.
+#   1.2 – Nov 13, 2026 – Seeded accounts use placeholder addresses (<role>@sfs.example).
 
 @adminUsers
 Feature: Admin users overview, details and contributions
@@ -35,10 +36,10 @@ Feature: Admin users overview, details and contributions
   Background:
     Given the seeded test accounts exist
       | role       | email                                | profile role |
-      | admin      | roel.de.meester+admin@gmail.com      | admin        |
-      | musician   | roel.de.meester+expert@gmail.com     | expert       |
-      | member     | roel.de.meester+member@gmail.com     | member       |
-      | gatekeeper | roel.de.meester+gatekeeper@gmail.com | gatekeeper   |
+      | admin      | admin@sfs.example      | admin        |
+      | musician   | expert@sfs.example     | expert       |
+      | member     | member@sfs.example     | member       |
+      | gatekeeper | gatekeeper@sfs.example | gatekeeper   |
 
   # ---------------------------------------------------------------------------
   # AC 3 – Non-admin access restricted
