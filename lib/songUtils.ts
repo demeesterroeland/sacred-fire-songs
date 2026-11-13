@@ -17,6 +17,8 @@ export interface Song {
     aliases?: string[];
     /** The title each songbook printed it under (`song_version_sources.original_title`, every version), searched too (#521). */
     sourceTitles?: string[];
+    /** The books any version of the song was printed in (`song_version_sources` → `songbooks`), for the songbook filter (#522). */
+    songbooks?: { id: string; name: string }[];
     songKey: string | null;
     color: string;
     ownerId?: string;

@@ -3,6 +3,8 @@ import type { Song } from '../songUtils';
 import { firstVersion } from './versionOrder';
 import { foldForSearch } from './search';
 import { normalizeWhitespace } from '../utils';
+import { songbooksOfVersions } from './browseFilters';
+import type { SourceBook } from './versionSources';
 
 /**
  * Shared select string for composition queries.
@@ -10,7 +12,7 @@ import { normalizeWhitespace } from '../utils';
  */
 export const SONGS_SELECT = `
   *,
-  song_versions(id, created_at, version_kind, key, content_chordpro, melody_notation, song_version_sources(original_title)),
+  song_versions(id, created_at, version_kind, key, content_chordpro, melody_notation, song_version_sources(original_title, songbooks(id, title, short_name))),
   song_category_map(
     categories(
       name,
@@ -130,8 +132,11 @@ interface SongVersionRow {
   key: string | null;
   content_chordpro: string | null;
   melody_notation: string | null;
-  /** Where the version was printed: only the title it has there is read, for the search (#521). */
-  song_version_sources?: { original_title?: string | null }[] | null;
+  /** Where the version was printed: the title it has there (search, #521) and the book (songbook filter, #522). */
+  song_version_sources?: {
+    original_title?: string | null;
+    songbooks?: Partial<SourceBook> | Partial<SourceBook>[] | null;
+  }[] | null;
 }
 
 interface CategoryRow {
@@ -211,6 +216,7 @@ export function mapCompositionToSong(
     sourceTitles: distinctTexts(
       (item.song_versions ?? []).flatMap((v) => (v.song_version_sources ?? []).map((src) => src.original_title))
     ),
+    songbooks: songbooksOfVersions(item.song_versions),
     songKey: version?.key || null,
     content: version?.content_chordpro || '',
     melodyNotation: version?.melody_notation || '',

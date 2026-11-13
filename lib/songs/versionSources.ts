@@ -58,7 +58,7 @@ function bookOf(row: SourceOrderRow): SourceBook | null {
 const clean = (v: string | null | undefined): string => (v ?? '').trim();
 
 /** The name of a book as the source line shows it: the title, else the short name. (The version label, #530, prefers `short_name`.) */
-const bookName = (b: SourceBook): string => clean(b.title) || clean(b.short_name);
+export const bookName = (b: SourceBook): string => clean(b.title) || clean(b.short_name);
 
 /**
  * Primary source first, then the others by book name (in `locale`), then by id so the order never depends on the

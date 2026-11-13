@@ -1,6 +1,6 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 2.10
+**Version:** 2.11
 **Status:** Living Document
 **Date:** Nov 13, 2026
 
@@ -63,6 +63,7 @@
 | **1.92** | Nov 6, 2026 | Epic 6.1: validation round 1 after the owner's phone run (Part of #375): auto-scroll only when the lyrics run below the fold (Story 6.1.10 / #394), expanded meta line (6.1.7 / #391), one focus style for text fields, the search suggestions in the page flow (6.1.29 / #413), search options on tokens, translated feedback and song flags across versions (6.1.11 / #395). Acceptance criteria of those stories now read as in `docs/testing/ux-v2-validation-1.feature`. |
 | **1.93** | Nov 7, 2026 | Epic 6.1: review round on the validation round 1 PR (#474, Part of #375): acceptance criteria of Stories 6.1.10 (auto-scroll offered only when the lyric text runs below the visible area above the fixed bars), 6.1.29 (suggestions close on the click and keep the scroll position), 6.1.1 (one focus cue per field, readable chip counts), 6.1.11 (a lyrics-only version has no Chords switch; a bracketed section label is not a chord) and the i18n policy (no raw server or database text in a toast) verified against the code; decisions UXA-061 to UXA-066. |
 | **1.94** | Nov 7, 2026 | Epic 6.1: validation round 2, batch 2 (Part of #375): acceptance criteria updated for Story 6.1.4 (#388: amounts between parentheses, "Air (3)"), 6.1.8 (#392: the full title wraps at the top of the page on a phone, the truncated copy shows only after scrolling past it), 6.1.10 (#394: transpose, scroll speed and a Screen stays on switch live in the one ⋮ menu; the toolbar has no ⋯), 6.1.11 (#395: every version has a `?version=` link, replaced in place, shared by Share), 6.1.23 (#407: History, Artists and Shared with me share one heading size) and 6.1.24 (#408: the Library "+" floats at the bottom right). New: Terms and Privacy pages (draft) with the operator from the server environment. |
+| **2.11** | Nov 13, 2026 | Epic 6.2: Story 6.2.19 (#522, G5.2) implemented on `feat/ux-v3` (PR into `feat/ux-v3`, in review): the search filter sheet filters by songbook and by language, each a select with a count per option (counts follow the other filters, never their own choice); both run in memory over the songs already fetched (the list select's one sources embed now also carries the book id, title and short name); state in the URL (`?songbook=`, `?language=`); labels in all 8 locales (`qu` pending a native-speaker check). Added the Story 6.2.19 row and acceptance criteria (executable: `docs/testing/ux-v3-browse-filters.feature`, `@unit`). |
 | **2.10** | Nov 13, 2026 | Epic 6.2: Story 6.2.21 (#524, G5.4) implemented on `feat/ux-v3`: catalog songs and versions corrected in the app are marked (`edited_in_app`, `edited_at`, `edited_fields`) by a database trigger, so no app code path can forget it; only signed-in app users mark (also through database functions such as linking a song as a version), importers (service role) and data migrations do not, and nobody can clear a marker from the app except an admin. Importer contract in `docs/guides/importing-songbooks.md` (v1.4): skip marked rows, report them. Admin → Catalog edits lists the corrections, downloads them as JSON (catalog keys, changed fields, current values) and marks each one as taken over. Migration `20261112160000_protect_catalog_app_edits.sql`. 8 locales (`qu` for a native check). Executable: `docs/testing/ux-v3-protect-app-edits.feature` (`@unit`, `@seed`). Review of PR #540 (Nov 13, 2026): *Taken over* clears only the correction that was downloaded (a newer one stays marked and the admin is asked to download again), in a themed confirmation dialog; the export and clear RPCs refuse the service role (importers use plain SQL on the marker columns); removing a catalog key counts; a moved version exports its new song's slug; the contract documents app deletions and merge redirects (`resolveCatalogSlug`). Re-check (Nov 13, 2026, after #536 landed): importers resolve every slug with `fn_song_id_for_catalog_slug` and write no song-level content for a redirected slug, only its versions under the target ('moved' vs 'redirect' documented; `resolveCatalogSlug` is now a thin mapping of that lookup); the real `fn_link_song_as_version` runs in a `@seed` scenario as an admin and its markers are asserted for both slug cases; only `catalog_slug` is editable in the app; read `edited_at` as text; focus moves to the next row after *Taken over*; the service role may not execute the trigger function. |
 | **2.09** | Nov 13, 2026 | Epic 6.2: Story 6.2.20 (#523, G5.3) implemented on `feat/ux-v3`: the edit form has a *Songbook details* section with the version's **beats** (a count from 1 to 99 or counts joined with `y & + / -` or a comma: `8`, `6`, `8y4`; the format the meta line prints) and **About this song** note (plain text, paragraph breaks kept, at most 4000 characters), and shows the version's **source** read-only; admins get a *Correct source* button for the page and original title of the primary source (the songbook itself is not editable here). Only changed fields are written; a blank beats or note saves NULL. Permissions are unchanged (contributor or admin of the version; catalog keys stay admin-only). 8 locales (`qu` for a native check). Executable: `docs/testing/ux-v3-edit-version-meta.feature` (`@unit`, `@seed`). A write the database filters without an error (no row back: a song owner editing a catalog version, an admin whose source update is refused) is reported with a translated message, never shown as saved; the source correction is the last step of the save, so a refusal says "version saved, source not corrected" and keeps categories and tags. |
 | **2.08** | Nov 13, 2026 | Epic 6.2: Story 6.2.18 (#521, G5.1) implemented on `feat/ux-v3` (PR into `feat/ux-v3`, in review): search finds a song by alias (`compositions.aliases`), any author and the original title in a songbook (`song_version_sources.original_title`, every version), ignoring case and accents; when the title did not match, the row says why ("Matched by alias: …"). One in-memory matcher (`lib/songs/search.ts`) serves the free-text filter and `filterSongs`; `SONGS_SELECT` embeds the sources once. The whole list is fetched in 1000-row pages (PostgREST `max_rows`), title matches are listed first. No migration and no index: nothing searches in the database (see the design doc, 2.20, for when to add `pg_trgm`). Known limit, follow-up story: the **+ Add Songs** sheet of a playlist still matches the title only (it would need the whole catalog or a lighter list fetch there). Spec: `docs/testing/ux-v3-search-aliases.feature`. |
@@ -1741,6 +1742,7 @@ GitHub epic **#498**. Many circles sing from printed songbooks: the same song ap
 | 6.2.15 | #518 | `G4.1` | A | **[Implemented on feat/ux-v3, PR #526]** As a reader, I want repeat bars shown in the lyrics so that I know which lines the circle sings twice (`‖:` … `:‖` and `×2` around the lines between `{start_of_repeat}` and `{end_of_repeat}`; chords on or off) | — |
 | 6.2.16 | #519 | `G4.2` | A | **[Implemented, PR #528]** As a Musician, I want alternative chords like A7/C7 shown and transposed correctly so that the chord line stays right in every key | — |
 | 6.2.18 | #521 | `G5.1` | B | **[Implemented on feat/ux-v3, in review]** As a Guest, I want search to find songs by alias, any author and their title in a songbook so that I find a song by the name I know | #504 |
+| 6.2.19 | #522 | `G5.2` | C | **[Implemented on feat/ux-v3, in review]** As a Guest, I want to filter songs by songbook and language so that I can browse one book or one language (two selects in the search filter sheet with a count per option; counts follow the other filters) | #513 |
 | 6.2.20 | #523 | `G5.3` | B | **[Implemented on feat/ux-v3, in review]** As a Contributor, I want to edit beats, note and source of a version in the edit form so that catalog data can be corrected in the app (beats and note are fields; the source is shown read-only with a *Correct source* button for admins) | #510, #511, #513 |
 | 6.2.21 | #524 | `G5.4` | B | **[Implemented on feat/ux-v3, in review]** As the Owner, I want app edits to catalog songs protected from the next re-import and listed for the source catalog so that corrections are never overwritten | #504 |
 
@@ -2053,6 +2055,43 @@ Scenario: A song is listed once however many fields match
 Scenario: A guest never finds a private song through its alias or songbook title (RLS)
   Given a private song of a member with alias "Gran Venerable Secreta" printed as "Canto Secreto"
   Then a guest's search finds neither; the owner's finds it; a guest finds a public catalog song by alias and by songbook title
+```
+
+**Story 6.2.19 acceptance criteria** (executable: `docs/testing/ux-v3-browse-filters.feature`, `@unit`):
+
+```gherkin
+Background:
+  Given songs "Huey Tonantzin" (Songbook A, Spanish), "Fire Song" (Songbook B, English), "Water Song" (Songbooks A and B, English) and "Loose Song" (no book, no language)
+
+Scenario: Filter on a songbook
+  When I filter on "Songbook B"
+  Then only "Fire Song" and "Water Song" are listed
+
+Scenario: A song printed in several books is listed under each of them
+  When I filter on "Songbook A"
+  Then only "Huey Tonantzin" and "Water Song" are listed
+
+Scenario: Filter on a language
+  When I filter on the language "English"
+  Then only "Fire Song" and "Water Song" are listed
+
+Scenario: Songbook and language combine
+  When I filter on "Songbook A" and on the language "English"
+  Then only "Water Song" is listed
+
+Scenario: Every option shows how many songs it holds
+  Then the songbook options read "Songbook A (2)", "Songbook B (2)" and the language options "English (2)", "Spanish (1)"
+
+Scenario: Counts follow the other filter but never their own
+  When I filter on the language "English"
+  Then the songbook options read "Songbook A (1)", "Songbook B (2)"
+  When I filter on "Songbook B"
+  Then the language options read "English (2)", "Spanish (0)" and the songbook options "Songbook A (2)", "Songbook B (2)"
+
+Scenario: A songbook is read from the one sources embed of the song list
+  Then the song list select embeds `song_version_sources (` once and nests the songbook in it
+
+Scenario Outline: The filter sheet is translated (en, nl, es, it, ru, qu, fr, pt)
 ```
 
 ## Roles & Permissions Summary

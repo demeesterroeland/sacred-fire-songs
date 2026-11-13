@@ -3,6 +3,7 @@ import { Song } from "@/lib/songUtils";
 import { normalizeWhitespace, removeDiacritics } from "@/lib/utils";
 import { cleanAuthors, songAuthorNames } from "@/lib/songs/authors";
 import { songMatchesSearch } from "@/lib/songs/search";
+import { matchesLanguage, matchesSongbook, songLanguages } from "@/lib/songs/browseFilters";
 
 // 1. Define the Filter State (URL Params map to this)
 export interface SongFilterState {
@@ -17,6 +18,10 @@ export interface SongFilterState {
   mine?: boolean;
   new?: boolean;
   artist?: string;
+  /** Songbook id: songs with a version printed in that book (Story 6.2.19, #522). */
+  songbook?: string;
+  /** Language category slug (Story 6.2.19, #522). */
+  language?: string;
 }
 
 /**
@@ -38,7 +43,9 @@ export function isDraftActive(draft: SongFilterState, userId?: string): boolean 
     draft.favorites ||
     draft.mine ||
     draft.new ||
-    draft.artist
+    draft.artist ||
+    draft.songbook ||
+    draft.language
   );
 }
 
@@ -134,5 +141,32 @@ export const songFilterConfig: FilterConfig<Song, SongFilterState> = {
         artist => removeDiacritics(normalizeWhitespace(artist)).toLowerCase() === normalizedFilter
       );
     }
+  },
+
+  // --- SONGBOOK (Story 6.2.19, #522) ---
+  // One book; counted per book id for the filter sheet
+  songbook: {
+    isActive: (val) => !!val,
+    match: (song, bookId) => matchesSongbook(song, bookId),
+    getFacetKeys: (song) => (song.songbooks ?? []).map((b) => b.id)
+  },
+
+  // --- LANGUAGE (Story 6.2.19, #522) ---
+  language: {
+    isActive: (val) => !!val,
+    match: (song, slug) => matchesLanguage(song, slug),
+    getFacetKeys: (song) => songLanguages(song).map((l) => l.slug)
   }
+};
+
+/**
+ * What `useSongsFilter` hands to the declarative engine: the same config, but the songbook and language filters are
+ * switched off. The hook applies those two itself (`applyBrowseFilters`) on the engine's result, so it also has the list
+ * WITHOUT them, which is what the counts of the songbook and language selects are taken from (#522).
+ */
+const NO_FILTER = { isActive: () => false, match: () => true };
+export const songListFilterConfig: FilterConfig<Song, SongFilterState> = {
+  ...songFilterConfig,
+  songbook: NO_FILTER,
+  language: NO_FILTER,
 };

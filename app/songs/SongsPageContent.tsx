@@ -27,7 +27,7 @@ interface SongsPageContentProps {
 }
 
 export default function SongsPageContent({ initialSongs, initialTaxonomy, initialViewedSongIds = [] }: SongsPageContentProps) {
-    const { t } = useLocale();
+    const { t, locale } = useLocale();
     const searchParams = useSearchParams();
     const router = useRouter();
     const { user } = useAuth();
@@ -59,6 +59,8 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
             mine: false,
             new: false,
             artist: '',
+            songbook: '',
+            language: '',
         });
         setLocalSearch('');
         setDraftSortBy('title');
@@ -83,8 +85,16 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
         mineCount,
         recordingsCount,
         hasActiveFilters,
-        filteredCount
-    } = useSongsFilter({ songs, userId: user?.id, favoriteIds, userRecordingCompositionIds, viewedSongIds, sortBy });
+        filteredCount,
+        browseOptionsFor
+    } = useSongsFilter({ songs, userId: user?.id, favoriteIds, userRecordingCompositionIds, viewedSongIds, sortBy, locale });
+
+    // Songbook and language options of the sheet, counted for the choice shown in it (the draft while it is open)
+    const shownSelection = draft ?? state;
+    const browseOptions = useMemo(
+        () => browseOptionsFor({ songbook: shownSelection.songbook, language: shownSelection.language }),
+        [browseOptionsFor, shownSelection.songbook, shownSelection.language]
+    );
 
     // Why each row matched, worked out once per result list / query / language, not on every render (#521).
     const matchHints = useMemo(() => {
@@ -301,6 +311,7 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
                 favoritesCount={favoritesCount}
                 mineCount={mineCount}
                 recordingsCount={recordingsCount}
+                browseOptions={browseOptions}
                 hasActiveFilters={draft ? isDraftActive({ ...draft, search: localSearch }, user?.id) : hasActiveFilters}
                 isAuthenticated={!!user}
                 localSearch={localSearch}
