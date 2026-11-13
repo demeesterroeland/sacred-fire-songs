@@ -8,6 +8,7 @@ import { categoryDisplayName } from '@/lib/taxonomy/categoryName';
 import { useTaxonomy } from '@/lib/hooks/useTaxonomy';
 import { useLocale } from '@/context/LocaleContext';
 import { formatCount } from '@/lib/format/count';
+import { filterTagSelectorGroups } from '@/lib/songs/browseFilters';
 
 interface TagSelectorProps {
   category?: string;
@@ -44,22 +45,11 @@ export default function TagSelector({
 
   const { categories, grouped } = useTaxonomy();
 
-  // Flattened options for search filter
-  const filteredGrouped = useMemo(() => {
-    if (!inputValue.trim()) return grouped;
-    const term = inputValue.toLowerCase();
-    return grouped
-      .map(({ parentName, categories: groupCats }) => ({
-        parentName,
-        categories: groupCats.filter(
-          (cat) =>
-            cat.name.toLowerCase().includes(term) ||
-            cat.slug.toLowerCase().includes(term) ||
-            parentName.toLowerCase().includes(term)
-        ),
-      }))
-      .filter((group) => group.categories.length > 0);
-  }, [grouped, inputValue]);
+  // Flattened options for search filter (Story 6.2.24 / G5.7, #569: language is chosen in the Language filter only)
+  const filteredGrouped = useMemo(
+    () => filterTagSelectorGroups(grouped, inputValue),
+    [grouped, inputValue]
+  );
 
   const toggleTagSlug = (slug: string) => {
     if (tags.includes(slug)) {

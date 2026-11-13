@@ -1,6 +1,6 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 2.19
+**Version:** 2.20
 **Status:** Living Document
 **Date:** Nov 13, 2026
 
@@ -62,8 +62,9 @@
 | **1.60** | Nov 5, 2026 | Epic 6.1: Story 6.1.7 (#391, G2.2) implemented on `feat/ux-v2` — song meta and Key · Capo · Tuning on one grey line each. |
 | **1.92** | Nov 6, 2026 | Epic 6.1: validation round 1 after the owner's phone run (Part of #375): auto-scroll only when the lyrics run below the fold (Story 6.1.10 / #394), expanded meta line (6.1.7 / #391), one focus style for text fields, the search suggestions in the page flow (6.1.29 / #413), search options on tokens, translated feedback and song flags across versions (6.1.11 / #395). Acceptance criteria of those stories now read as in `docs/testing/ux-v2-validation-1.feature`. |
 | **1.93** | Nov 7, 2026 | Epic 6.1: review round on the validation round 1 PR (#474, Part of #375): acceptance criteria of Stories 6.1.10 (auto-scroll offered only when the lyric text runs below the visible area above the fixed bars), 6.1.29 (suggestions close on the click and keep the scroll position), 6.1.1 (one focus cue per field, readable chip counts), 6.1.11 (a lyrics-only version has no Chords switch; a bracketed section label is not a chord) and the i18n policy (no raw server or database text in a toast) verified against the code; decisions UXA-061 to UXA-066. |
-| **1.94** | Nov 7, 2026 | Epic 6.1: validation round 2, batch 2 (Part of #375): acceptance criteria updated for Story 6.1.4 (#388: amounts between parentheses, "Air (3)"), 6.1.8 (#392: the full title wraps at the top of the page on a phone, the truncated copy shows only after scrolling past it), 6.1.10 (#394: transpose, scroll speed and a Screen stays on switch live in the one ⋮ menu; the toolbar has no ⋯), 6.1.11 (#395: every version has a `?version=` link, replaced in place, shared by Share), 6.1.23 (#407: History, Artists and Shared with me share one heading size) and 6.1.24 (#408: the Library "+" floats at the bottom right). New: Terms and Privacy pages (draft) with the operator from the server environment. |
-| **2.19** | Nov 13, 2026 | Epic 6.2: Story 6.2.25 (#570, G5.8) implemented on `feat/ux-v3`: the global search window opened from any non-`/songs` page (`GlobalSearchModal`) now offers **Songbook** and **Language** filters using the same `SearchFiltersModal` selects and i18n keys as `/songs`, submitting `?songbook=<id>&language=<slug>`. Option 1: read-only `SECURITY INVOKER` SQL function `fn_search_filter_counts()` (migration `20261113140000_search_filter_counts.sql`, `db-schema.sql` v3.12) enforces caller RLS via explicit join on `compositions` (guest sees public only, member sees public + own private, admin sees all) and counts `Languages` categories (not `song_translations`); React Query fetches only while open (`enabled: isOpen`, 5 min cache, invalidated on song save/delete). Known limit: modal counts are total visible counts per option ignoring other active modal filters. Executable: `docs/testing/ux-v3-global-search-filters.feature` (`@unit`, `@seed`). Row and acceptance criteria added. |
+| **1.94** | Nov 7, 2026 | Epic 6.1: validation round 2, batch 2 (Part of #375): acceptance criteria updated for Story 6.1.4 (#388: amounts between parentheses, "Air (3)"), 6.1.8 (#392: the full title wraps at the top of the page on a phone, the truncated copy shows only after scrolling past it), 6.1.10 (#394: transpose, scroll speed and a Screen stays on switch live in the one ⋮ menu; the toolbar has no ⋮), 6.1.11 (#395: every version has a `?version=` link, replaced in place, shared by Share), 6.1.23 (#407: History, Artists and Shared with me share one heading size) and 6.1.24 (#408: the Library "+" floats at the bottom right). New: Terms and Privacy pages (draft) with the operator from the server environment. |
+| **2.20** | Nov 13, 2026 | Epic 6.2: Story 6.2.25 (#570, G5.8) implemented on `feat/ux-v3`: the global search window opened from any non-`/songs` page (`GlobalSearchModal`) now offers **Songbook** and **Language** filters using the same `SearchFiltersModal` selects and i18n keys as `/songs`, submitting `?songbook=<id>&language=<slug>`. Option 1: read-only `SECURITY INVOKER` SQL function `fn_search_filter_counts()` (migration `20261113140000_search_filter_counts.sql`, `db-schema.sql` v3.12) enforces caller RLS via explicit join on `compositions` (guest sees public only, member sees public + own private, admin sees all) and counts `Languages` categories (not `song_translations`); React Query fetches only while open (`enabled: isOpen`, 5 min cache, invalidated on song save/delete). Known limit: modal counts are total visible counts per option ignoring other active modal filters. Executable: `docs/testing/ux-v3-global-search-filters.feature` (`@unit`, `@seed`). Row and acceptance criteria added. |
+| **2.19** | Nov 13, 2026 | Epic 6.2: Story 6.2.24 (#569, G5.7) implemented on `feat/ux-v3`: *Search options* lets a reader choose a language only in the **Language** select, no longer in `TagSelector` (`components/library/TagSelector.tsx`), where `filterTagSelectorGroups()` (`lib/songs/browseFilters.ts`) omits the *Languages* group both when opened and in `filteredGrouped` search results. Song add/edit forms use `CategorySelector` (`components/song/CategorySelector.tsx`) and `useTaxonomy()` is unchanged, so assigning a song's language on edit is unaffected. Legacy links carrying a language slug in `?category=`, `?tag=`, or `?tags=` (e.g. `/songs?category=dutch`) are normalized inside `useSongsFilter`'s `parseUrl` via `normalizeLegacyLanguageParams(params, knownLanguageSlugs(songs, taxonomy))`, so they still filter Dutch songs, show `"Dutch"` in **Language**, omit duplicate language chips from `TagSelector`, and serialize to `?language=<slug>` on the next filter change. Added Story 6.2.24 row and acceptance criteria; executable spec: `docs/testing/ux-v3-language-filter-only.feature` (`@unit`). |
 | **2.18** | Nov 13, 2026 | Epic 6.2: Story 6.2.22 (#542): the alias hint reads **"Also known as …"** (owner decision, Nov 13, 2026: the story's original wording), in the song list and in the **+ Add Songs** sheet alike (one key, `songs.matchAlias`, all 8 locales; `qu` needs a native-speaker check); the 6.2.18 and 6.2.22 acceptance criteria now expect "Also known as …". |
 | **2.17** | Nov 13, 2026 | Epic 6.2: Story 6.2.22 (#542, G5.5) implemented on `feat/ux-v3` (PR into `feat/ux-v3`, in review): the **+ Add Songs** sheet of a playlist finds songs with the song list's own matcher and ranking (`songMatchesSearch` / `rankSongsBySearch`, `lib/songs/search.ts`, #521): by title, alias, any author and the title in a songbook; each row shows the same *Matched by …* hint, linked to the row with `aria-describedby`. The sheet reads the song list's rows (`fetchAllSongs`, the `['songs','all']` react-query entry, `SONGS_SELECT`) instead of its own `ilike('title')` select capped at 50, so there is no second `song_version_sources (` embed; the sheet shows the first 50 by rank (`ADD_SONGS_RESULT_LIMIT`). Acceptance criteria and story row added; `docs/testing/ux-v3-add-songs-search.feature`. |
 | **2.16** | Nov 13, 2026 | Epic 6.2: Story 6.2.23 (#547, G5.6) implemented on `feat/ux-v3` (PR into `feat/ux-v3`, in review): search also finds a song by the title of a translation (`song_translations.title`), accents and case ignored; the row's grey line names the language ("Dutch: Moeder Aarde"). `SONGS_SELECT` embeds `song_translations(language, title)` once; the matcher is extended additively (`translationTitle`), no signature changed. Decision: translation lyrics are not searched, titles only (documented in the design doc, 2.25). Guests get translations of public songs only (existing RLS, unchanged). No migration. Spec: `docs/testing/ux-v3-search-translations.feature`. |
@@ -1758,6 +1759,7 @@ GitHub epic **#498**. Many circles sing from printed songbooks: the same song ap
 | 6.2.21 | #524 | `G5.4` | B | **[Implemented on feat/ux-v3, in review]** As the Owner, I want app edits to catalog songs protected from the next re-import and listed for the source catalog so that corrections are never overwritten | #504 |
 | 6.2.22 | #542 | `G5.5` | C | **[Implemented on feat/ux-v3, in review]** As a Member, I want the "+ Add Songs" sheet of a playlist to find songs by alias, any author and their title in a songbook so that I add a song by the name I know | #521 |
 | 6.2.23 | #547 | `G5.6` | C | **[Implemented on feat/ux-v3, in review]** As a Guest, I want search to find a song by the title of its translation so that I find a song by the name I know in my language | #521 (G5.1); unblocks #542 |
+| 6.2.24 | #569 | `G5.7` | C | **[Implemented on feat/ux-v3, in review]** As a Guest, I want to choose a language only in the Language filter so that the search options don't offer the same choice twice (excludes *Languages* from `TagSelector` and keeps legacy `?category=`/`?tag=`/`?tags=` language links working) | #522 (G5.2) |
 | 6.2.25 | #570 | `G5.8` | B | **[Implemented on feat/ux-v3]** As a Guest, I want the search window on every page to offer the Songbook and Language filters so that I can browse one book or one language from anywhere (`GlobalSearchModal` shows both selects lazily when open via `fn_search_filter_counts()`, respecting RLS and submitting `?songbook=<id>&language=<slug>`) | #522 |
 
 **Story 6.2.6 acceptance criteria** (executable: `docs/testing/ux-v3-version-labels.feature`, `@unit` and `@e2e`):
@@ -2337,6 +2339,33 @@ Scenario: Translation lyrics are not searched (titles only)
 
 Scenario: A guest never finds a private song through the title of its translation (RLS)
   Then a guest's search finds a public catalog song by its translated title, and not a private one
+```
+
+**Story 6.2.24 acceptance criteria** (executable: `docs/testing/ux-v3-language-filter-only.feature`, `@unit`):
+
+```gherkin
+Scenario: The tag selector has no Languages group
+  Given the taxonomy has a "Languages" group with "Dutch" and "Spanish"
+  When I open Search options on /songs
+  Then the category and tag selector shows no "Languages" group
+  And I can choose "Dutch" in the Language filter
+
+Scenario: Searching tags does not offer languages
+  Given the taxonomy has a "Languages" group with "Dutch"
+  When I type "dut" in the category and tag selector
+  Then "Dutch" is not offered there
+
+Scenario: An old language link still filters
+  Given a bookmarked link "/songs?category=dutch"
+  When I open the bookmarked link
+  Then only songs in the Dutch language category are listed
+  And the Language filter shows "Dutch"
+
+Scenario: An old tag language link still filters
+  Given a bookmarked link "/songs?tag=dutch"
+  When I open the bookmarked link
+  Then only songs in the Dutch language category are listed
+  And the Language filter shows "Dutch"
 ```
 
 **Story 6.2.25 acceptance criteria** (executable: `docs/testing/ux-v3-global-search-filters.feature`, `@unit` and `@seed`; UI in `testing/unit/tests/search/globalSearchBrowseFilters.test.tsx`):

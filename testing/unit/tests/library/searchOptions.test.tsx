@@ -3,7 +3,7 @@
 // action is the one accent, selected tags are neutral (inverted + check), and a selected category shows its
 // name, never its slug.
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, render, screen, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { DICTIONARIES } from '@/lib/i18n';
 import { countPaletteClasses } from '@/lib/design/paletteAudit';
 import { categoryDisplayName } from '@/lib/taxonomy/categoryName';
@@ -21,13 +21,25 @@ vi.mock('@/context/LocaleContext', () => ({
 const cats = [
   { id: 'c1', name: 'Lullaby', slug: 'lullaby', emoji: null, parent_name: 'Spiritual Concepts', song_count: 3 },
   { id: 'c2', name: 'Fire', slug: 'fire', emoji: null, parent_name: 'The Elements', song_count: 5 },
+  { id: 'c3', name: 'Dutch', slug: 'dutch', emoji: null, parent_name: 'Languages', song_count: 4 },
+  { id: 'c4', name: 'Spanish', slug: 'spanish', emoji: null, parent_name: 'Languages', song_count: 2 },
 ];
 vi.mock('@/lib/hooks/useTaxonomy', () => ({
-  useTaxonomy: () => ({ categories: cats, grouped: [{ parentName: 'Spiritual Concepts', categories: [cats[0]] }, { parentName: 'The Elements', categories: [cats[1]] }] }),
+  useTaxonomy: () => ({
+    categories: cats,
+    grouped: [
+      { parentName: 'Spiritual Concepts', categories: [cats[0]] },
+      { parentName: 'The Elements', categories: [cats[1]] },
+      { parentName: 'Languages', categories: [cats[2], cats[3]] },
+    ],
+    isLoading: false,
+    error: null,
+  }),
 }));
 
 import TagSelector from '@/components/library/TagSelector';
 import SearchFiltersModal from '@/components/library/SearchFiltersModal';
+import CategorySelector from '@/components/song/CategorySelector';
 
 afterEach(cleanup);
 
@@ -72,6 +84,39 @@ describe('TagSelector', () => {
     expect(chip.querySelector('svg')).toBeTruthy(); // the check
     expect(countPaletteClasses(container.innerHTML)).toBe(0);
   });
+
+  it('Story 6.2.24 (#569): does not show the Languages group when opened', () => {
+    render(
+      <TagSelector category={undefined} tags={[]} onCategoryChange={() => {}} onTagsChange={() => {}} onClearAll={() => {}} />,
+    );
+    fireEvent.focus(screen.getByRole('textbox'));
+    expect(screen.getByText('Spiritual Concepts')).toBeTruthy();
+    expect(screen.getByText('The Elements')).toBeTruthy();
+    expect(screen.queryByText('Languages')).toBeNull();
+    expect(screen.queryByRole('button', { name: /Dutch/ })).toBeNull();
+    expect(screen.queryByRole('button', { name: /Spanish/ })).toBeNull();
+  });
+
+  it('Story 6.2.24 (#569): typing "dut" or "lang" does not offer languages', () => {
+    render(
+      <TagSelector category={undefined} tags={[]} onCategoryChange={() => {}} onTagsChange={() => {}} onClearAll={() => {}} />,
+    );
+    const input = screen.getByRole('textbox');
+    fireEvent.change(input, { target: { value: 'dut' } });
+    expect(screen.queryByRole('button', { name: /Dutch/ })).toBeNull();
+    fireEvent.change(input, { target: { value: 'lang' } });
+    expect(screen.queryByText('Languages')).toBeNull();
+    expect(screen.queryByRole('button', { name: /Dutch/ })).toBeNull();
+  });
+});
+
+describe('CategorySelector (song edit forms)', () => {
+  it('Story 6.2.24 (#569): still shows the Languages group so song edit forms can assign a language', () => {
+    render(<CategorySelector selectedIds={[]} onChange={() => {}} />);
+    expect(screen.getByText('Languages')).toBeTruthy();
+    expect(screen.getByText('Dutch')).toBeTruthy();
+    expect(screen.getByText('Spanish')).toBeTruthy();
+  });
 });
 
 describe('SearchFiltersModal', () => {
@@ -87,6 +132,13 @@ describe('SearchFiltersModal', () => {
         sortBy="title"
         setSortBy={() => {}}
         taxonomy={tree}
+        browseOptions={{
+          songbooks: [],
+          languages: [
+            { value: 'dutch', label: 'Dutch', count: 4 },
+            { value: 'spanish', label: 'Spanish', count: 2 },
+          ],
+        }}
         hasActiveFilters
         isAuthenticated
         localSearch=""
@@ -120,5 +172,13 @@ describe('SearchFiltersModal', () => {
   it('the selected category chip reads its name', () => {
     modal();
     expect(screen.getByRole('button', { name: /Category: Spiritual Concepts/ })).toBeTruthy();
+  });
+
+  it('Story 6.2.24 (#569): offers Dutch in the Language filter while TagSelector omits Languages', () => {
+    modal();
+    const langSelect = screen.getByRole('combobox', { name: DICTIONARIES.en['search.language'] });
+    expect(within(langSelect).getByRole('option', { name: 'Dutch (4)' })).toBeTruthy();
+    fireEvent.focus(screen.getByPlaceholderText(DICTIONARIES.en['search.tagSelector.addMoreTags']));
+    expect(screen.queryByText('Languages')).toBeNull();
   });
 });

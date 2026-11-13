@@ -92,7 +92,7 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
         hasActiveFilters,
         filteredCount,
         browseOptionsFor
-    } = useSongsFilter({ songs, userId: user?.id, favoriteIds, userRecordingCompositionIds, viewedSongIds, sortBy, locale, unknownLabels });
+    } = useSongsFilter({ songs, taxonomy, userId: user?.id, favoriteIds, userRecordingCompositionIds, viewedSongIds, sortBy, locale, unknownLabels });
 
     // Songbook and language options of the sheet, counted for everything the sheet shows: the draft and its search text
     // while it is open, the applied state otherwise
