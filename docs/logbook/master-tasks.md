@@ -1587,3 +1587,10 @@
 - [x] Removed 85 palette classes; ratchet lowered 581 → 496
 - [x] Tests: `ux-v2-sober-playlists.feature` (`@unit`, `@e2e`), Playwright axe colour-contrast checks in light and dark mode, including the guest export dialog
 - [x] Docs: design doc 2.21, E2E overview 1.30; no new translation keys
+
+## Session November 13, 2026 (Story 6.1.40, #586, media availability on Practice)
+- [x] Owner decision: one dot on Practice for media and/or takes; Listen and Record tab counts say where; nothing on Playlist (issue #586 rewritten)
+- [x] `practiceAvailability()` (`lib/song/practiceAvailability.ts`) drives the dot (phone bar, desktop header) and the drawer tab counts; zero hidden
+- [x] `practice.available` in all 8 locales; replaces the headphones cue and take count of Story 6.2.2 (#583) after the rebase on the UX v3 promotion
+- [x] Tests: Vitest `practiceAvailability.test.ts`, `songActionBarComponent.test.tsx`; BDD `ux-v2-practice-availability.feature` (`@story-6.1.40`); `ux-v2-song-action-bar.feature` 1.3 and `ux-v2-variant-slot.spec.ts` updated
+- [x] Docs: mockups screen21 1.6 / screen23 1.3, design doc 2.39, user stories 2.24
