@@ -1,11 +1,12 @@
 # Member Guide (draft)
 
-**Version:** 0.20 | **Date:** Nov 11, 2026
+**Version:** 0.21 | **Date:** Nov 13, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.21 | Nov 13, 2026 | The search filter, the Add Song buttons and the legal pages say **Private**, never "Draft" (#564); a song without an author shows **No artist** (#565). |
 | 0.20 | Nov 11, 2026 | A singer's profile plays its recordings: tap ▶ to listen there (one at a time), tap the row to open the song with that recording (UX v2, #490). |
 | 0.19 | Nov 11, 2026 | Home looks like it does for guests (**Recently added** and the categories), with **Your library** on top: six counters, **New songs** replaced by **Your recordings**, **Shared with me** and **Shared by me**. New page **Shared by me**; the **Shared with me** row under the Library tabs is gone (UX v2, #488). |
 | 0.18 | Nov 9, 2026 | A private song's title is lighter (in lists and on the song page) and its ⋮ menu has **Make public**; "Drafts" is now **Private**; the ☰ menu's Library section matches the Library tabs. Library tabs **Playlists · Smart · History · New · Artists**; playlists in three groups; **Export PDF** in a playlist's ⋯ menu; My Drafts is no longer a smart playlist; private songs look lighter; tags are always links; the reading tools come before the version switch. |
@@ -91,7 +92,9 @@ Bottom bar **Library → + → Add Song**.
 3. Or tap **Upload .cho / .txt** under the lyrics to import a ChordPro file.
 4. Lines like `{title: …}`, `{artist: …}`, `{key: E}`, `{capo: 3}` and `{c: comment}` set the song details.
 5. Add YouTube / Spotify / SoundCloud links so others can listen.
-6. Save. Your draft is also kept in the browser while you type.
+6. Save: **Publish Song** makes it public, **Save as private** keeps it for you (and admins) only. While you type, an unsaved copy is kept in the browser.
+
+A song without an author shows **No artist** in lists and on the song page; type **Traditional** as the author when the song is traditional.
 
 ## Editing a song
 

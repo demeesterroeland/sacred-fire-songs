@@ -163,3 +163,12 @@ export const PROFILE_PLAYBACK_FIXTURE_IDS = {
   first: 'eeeeeeee-3490-4000-a000-000000000003',
   second: 'eeeeeeee-3490-4000-a000-000000000004',
 } as const;
+
+/**
+ * #565: a public song of the member without an author, for "No artist" on the song row, the song page
+ * and the admin member page. Removed by e2e/global-teardown.ts.
+ */
+export const NO_ARTIST_FIXTURE_IDS = {
+  song: 'eeeeeeee-3565-4000-a000-000000000001',
+  version: 'eeeeeeee-3565-4000-a000-000000000002',
+} as const;

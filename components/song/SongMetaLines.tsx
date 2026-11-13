@@ -6,6 +6,7 @@ import { ChevronDown } from 'lucide-react';
 import { useLocale } from '@/context/LocaleContext';
 import { joinMeta } from '@/components/ui/meta-line';
 import { songAuthors, technicalItems, type VersionTechnical } from '@/lib/songs/songMeta';
+import { parseArtists } from '@/lib/songs/artistUtils';
 import { cn } from '@/lib/utils';
 
 interface CategoryItem {
@@ -78,8 +79,10 @@ export function SongMetaLines({
     ...(hasMelody ? [{ label: t('song.technical.melody'), href: '/songs?melody=true' }] : []),
     ...(hasPersonalRecording ? [{ label: t('song.technical.takes'), href: '/songs?myRecordings=true' }] : []),
   ];
-  const links: { label: string; href: string; fitIndex?: number }[] = [
-    ...authors.map((a) => ({ label: a, href: `/songs?artist=${encodeURIComponent(a)}` })),
+  // #565: without an author the line says "No artist" as plain text; a link to ?artist=No artist would find nothing.
+  const hasAuthor = parseArtists(originalAuthor).length > 0;
+  const links: { label: string; href?: string; fitIndex?: number }[] = [
+    ...authors.map((a) => ({ label: a, href: hasAuthor ? `/songs?artist=${encodeURIComponent(a)}` : undefined })),
     ...optional.map((l, i) => ({ ...l, fitIndex: i })),
   ];
   // Validation 4 (owner): measure an invisible one-line copy and show as many links as fit. Until it is measured
@@ -125,9 +128,13 @@ export function SongMetaLines({
           {links.map(({ label, href, fitIndex }, i) => (
             <li key={`${href}-${i}`} className={cn('shrink-0', !open && fitIndex !== undefined && fitIndex >= fit && 'hidden')}>
               {i > 0 && <span aria-hidden>· </span>}
-              <Link href={href} className="inline-flex min-h-tap items-center px-1 text-fg underline underline-offset-4">
-                {label}
-              </Link>
+              {href ? (
+                <Link href={href} className="inline-flex min-h-tap items-center px-1 text-fg underline underline-offset-4">
+                  {label}
+                </Link>
+              ) : (
+                <span className="inline-flex min-h-tap items-center px-1">{label}</span>
+              )}
             </li>
           ))}
           {showMore && (

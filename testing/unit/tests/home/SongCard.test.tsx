@@ -9,6 +9,7 @@ vi.mock('@/context/LocaleContext', () => ({
     t: (k: string, v?: Record<string, string>) =>
       ({
         'song.traditional': 'Traditional',
+        'song.noArtist': 'No artist',
         'song.visibility.private': 'Private',
         'songCard.addFavorite': 'Add to favorites',
         'songCard.removeFavorite': 'Remove from favorites',
@@ -55,7 +56,7 @@ describe('SongCard row', () => {
     expect(heart.className).toContain('size-tap');
     expect(heart.getAttribute('aria-pressed')).toBe('false');
     expect(screen.getByRole('button', { name: 'Add to playlist' })).toBeTruthy();
-    expect(screen.getByTestId('song-row-meta').textContent).toBe('Traditional');
+    expect(screen.getByTestId('song-row-meta').textContent).toBe('No artist'); // #565
   });
 
   it('marks a private song with a translated label and a lighter title (validation 4)', () => {

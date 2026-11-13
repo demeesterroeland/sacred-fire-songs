@@ -634,7 +634,7 @@ export default function SongDetailPage() {
                 open={isMenuOpen}
                 onOpenChange={setIsMenuOpen}
                 title={song.title}
-                description={t('song.by', { author: song.original_author || t('song.traditional') })}
+                description={song.original_author ? t('song.by', { author: song.original_author }) : t('song.noArtist')}
                 actions={{
                     onShare: () => { void handleShare(); setIsMenuOpen(false); },
                     edit: song.owner_id === user?.id || isAdmin ? { href: editSongHref(id, currentVersion?.id) } : undefined,
@@ -685,7 +685,7 @@ export default function SongDetailPage() {
                     compositionId={id}
                     onPlayStateChange={setIsAudioPlaying}
                     songTitle={song.title}
-                    songAuthor={song.original_author || t('song.traditional')}
+                    songAuthor={song.original_author || t('song.noArtist')}
                     youtubeUrl={currentVersion.youtube_url}
                     spotifyUrl={currentVersion.spotify_url}
                     soundcloudUrl={currentVersion.soundcloud_url}

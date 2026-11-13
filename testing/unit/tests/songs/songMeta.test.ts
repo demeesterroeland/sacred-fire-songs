@@ -5,6 +5,7 @@ import { songMetaItems, technicalItems } from '@/lib/songs/songMeta';
 const t = (key: string, vars?: Record<string, string | number>) =>
   ({
     'song.traditional': 'Traditional',
+    'song.noArtist': 'No artist',
     'song.meta.key': `Key ${vars?.key}`,
     'song.meta.capo': `Capo ${vars?.capo}`,
     'song.metadata.standard': 'Standard',
@@ -17,8 +18,12 @@ describe('songMetaItems', () => {
     ).toEqual(['Herbert Quinteros', 'Fire', 'Healing', 'Spanish']);
   });
 
-  it('falls back to Traditional and translates it', () => {
-    expect(songMetaItems('', [], t)).toEqual(['Traditional']);
+  it('shows No artist when there is no author (#565)', () => {
+    expect(songMetaItems('', [], t)).toEqual(['No artist']);
+    expect(songMetaItems(null, [{ name: 'Water' }], t)).toEqual(['No artist', 'Water']);
+  });
+
+  it('translates an author entered as Traditional', () => {
     expect(songMetaItems('traditional', [{ name: 'Water' }], t)).toEqual(['Traditional', 'Water']);
   });
 });

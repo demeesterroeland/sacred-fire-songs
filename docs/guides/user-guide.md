@@ -1,8 +1,8 @@
 # User Guide: Sacred Fire Songs
 
-**Version:** 2.3
+**Version:** 2.4
 **Status:** Published
-**Date:** June 27, 2026
+**Date:** Nov 13, 2026
 
 ## Changelog
 
@@ -16,6 +16,7 @@
 | **2.1** | Feb 02, 2026 | Rebranded "Private" songs to "Draft" and added advanced filter combinability. |
 | **2.2** | Feb 23, 2026 | Removed Home page search box and renamed "Library" to "Search Songs". |
 | **2.3** | Jun 27, 2026 | Added step-by-step PWA installation guides for iOS and Android with screenshots. |
+| **2.4** | Nov 13, 2026 | A song that is not public is **Private** again, never "Draft" (#564); a song without an author shows **No artist** (#565). |
 
 Welcome to **Sacred Fire Songs**, a digital songbook designed for ceremonial musicians. This guide covers how to browse, learn, and manage medicine songs using our platform.
 
@@ -34,7 +35,7 @@ If you prefer, you can also sign up or log in using a tradition **Email & Passwo
 
 ### 1.3 User Roles
 - **Guest**: Can browse and view all **Public** songs.
-- **Member**: Can add their own songs, save songs as **Draft**, and edit/delete songs they own.
+- **Member**: Can add their own songs, save songs as **Private**, and edit/delete songs they own.
 - **Admin**: Full access to manage all songs, users, and categories.
 
 ---
@@ -50,12 +51,12 @@ The **Search Songs** page allows you to find songs quickly:
 Use the filter tabs at the top to narrow down your selection:
 - **🎸 Chords**: Show only songs that include musical chords.
 - **🎵 Melody**: Show only songs that have a melody/audio reference.
-- **🔒 Draft**: (Members only) View your personal drafts and unpublish songs.
+- **🔒 Private**: (Members only) View your private songs (songs that are not public).
 
 ### 2.3 Song Detail View
 Click any song to view its lyrics and musical data:
 - **Badges**: High-visibility badges tell you if a song has Chords or Melody.
-- **Metadata**: See the **Key**, **Capo position**, and **Tuning** at a glance.
+- **Metadata**: See the author, **Key**, **Capo position**, and **Tuning** at a glance. A song without an author shows **No artist**; "Traditional" appears only when the author was entered as Traditional.
 - **Media**: Listen to YouTube, Spotify, or SoundCloud recordings directly on the page.
 
 ---
@@ -67,10 +68,10 @@ Click **"Add Song"** in the sidebar to contribute to the library:
 - **Smart Import**: Drag and drop a `.cho` (ChordPro) or `.txt` file. The system will automatically detect the **Title**, **Author**, **Key**, and **Capo**.
 - **Manual Formatting**: Use standard brackets like `[Am]` for chords. The system will automatically align them above the lyrics for you.
 
-### 3.2 Public vs Draft
+### 3.2 Public vs Private
 When saving a song, you have two choices:
 1. **Publish Song**: Makes the song visible to everyone in the community.
-2. **Save as Draft**: Keeps the song hidden from others. Only you (and Admins) can see it in your "Draft" filter.
+2. **Save as private**: Keeps the song hidden from others. Only you (and Admins) can see it in your "Private" filter.
 
 ### 3.3 Editing & Deleting
 If you own a song (or are an Admin), you will see icons at the top of the detail page:

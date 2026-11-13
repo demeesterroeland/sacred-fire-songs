@@ -1,8 +1,8 @@
 # E2E Test Overview & Matrix: Sacred Fire Songs
 
-**Version:** 1.24
+**Version:** 1.25
 **Status:** Living Document
-**Date:** Nov 12, 2026
+**Date:** Nov 13, 2026
 **Tracking:** GH #142
 
 ## Changelog
@@ -27,6 +27,7 @@
 | **1.15** | Nov 5, 2026 | LIB-13 follows Story 6.1.24: no `/explore` route; bottom bar spec `ux-v2-bottom-bar.spec.ts`. |
 | **1.20** | Nov 7, 2026 | UX v2 validation round 1, review round on PR #474: new spec `ux-v2-validation-1-review.spec.ts` (a press on a song under the open suggestions on a phone with touch and on a desktop with a mouse, also on guest Home; the scroll position of the desktop column on the song list, Home and Playlists; auto-scroll behind the fixed bars on a phone and with padding on a desktop; the tools sheet and focus on a window that grows; section labels versus chords; toolbar alignment; one focus cue on the tag field, the artist field and the selects; Search options labels in all 8 languages at 390 px; axe colour contrast on the open tag browser, light and dark; fixture `VALIDATION_1_REVIEW_FIXTURE_IDS`, removed by `e2e/global-teardown.ts`). `ux-v2-validation-1.spec.ts` is unchanged. |
 | **1.21** | Nov 9, 2026 | Validation 4: LIB-12 is the New tab (`/library/new`); the Library tab row has five tabs and scrolls on a phone (`ux-v2-library-tabs.spec.ts`). |
+| **1.25** | Nov 13, 2026 | SONG-11 reads Public/Private (#564); SONG-13: "No artist" for a song without an author (#565), `ux-v2-private-and-no-artist.spec.ts`. |
 | **1.24** | Nov 12, 2026 | #485 group 1: SONG-12 `ux-v2-sober-colours.spec.ts` (member): every category tag on the Add song page has the same colours, a selected tag shows inverted greys and `aria-pressed`, light and dark. |
 | **1.23** | Nov 11, 2026 | #490: `ux-v2-profile-playback.spec.ts` (member): recordings on a singer profile play there one at a time, the play button is a 44 px target and the row opens the song with that take. |
 | **1.22** | Nov 11, 2026 | #492: SONG-08 now checks that a song row has no delete button (an admin on `/songs`, `ux-v2-song-rows.spec.ts`); deleting is in the song page's ⋮ menu only (SONG-07). |
@@ -141,7 +142,8 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 | SONG-08 | No row delete | A song row has no delete button, also for the owner or an admin (#492) | buttons line up on every row | A | ✅ | ✅ | P2 | 1.1.4 |
 | SONG-09 | Media links | Attach YouTube/Spotify/SoundCloud URLs; embeds render on detail | invalid URL; multiple embeds | M/A | ✅ | 🔲 | P1 | 1.1.7, 1.3.2/1.3.4 |
 | SONG-10 | Draft auto-save | In-progress add form persists to localStorage and restores | clears after submit; create-mode only | M | ✅ | 🔲 | P2 | Story 1.1.8 |
-| SONG-11 | Public/Draft toggle | Set song visibility on create/edit | draft hidden from guests | M/A | ✅ | 🔲 | P1 | SongForm |
+| SONG-11 | Public/Private toggle | Set song visibility on create/edit ("Save as private"); the search filter offers Public / Private, never Draft | private song hidden from guests | M/A | ✅ | ✅ | P1 | SongForm, `ux-v2-private-and-no-artist.spec.ts` (#564) |
+| SONG-13 | No artist | A song without an author shows "No artist" in the list, on the song page (plain text) and on the admin member page; an author "Traditional" stays | – | G/M/A | ✅ | ✅ | P2 | `ux-v2-private-and-no-artist.spec.ts` (#565) |
 | SONG-12 | Neutral category tags | Every tag in the Add/Edit song tag picker has the same colours; selected = inverted greys + `aria-pressed` | light and dark mode | M | ✅ | ✅ | P2 | `ux-v2-sober-colours.spec.ts` (Story 6.1.35) |
 
 ### 4.4 Public Library & Discovery (Epic 1.2 / 2.3)

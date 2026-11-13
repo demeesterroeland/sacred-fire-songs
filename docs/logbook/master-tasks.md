@@ -1536,3 +1536,10 @@
 - [x] `RoleBadge` + `lib/users/roleBadge.ts` (admin Shield, gatekeeper KeyRound, expert Award, musician Music, member UserCheck; labels `admin.role.*`); `user.profile.verifiedMusician` / `user.profile.member` removed from 8 locales
 - [x] Tests: `@unit` feature `ux-v2-profile-role-badge.feature`, Vitest/RTL `roleBadge.test.tsx`, `@seed` role scenario in `access-policies.feature` (v1.3), E2E `ux-v2-profile-role-badge.spec.ts`; docs (design doc 2.15, epics 1.99)
 - [x] Cross-review by another Claude model; review fixes (seed column list, guest/member role scenario, e2e naming)
+
+## Session November 13, 2026 (#564 / #565, Private and No artist)
+- [x] `@unit`/`@e2e` feature `ux-v2-private-and-no-artist.feature`; Vitest `privateAndNoArtist.test.ts`, `songMetaNoArtist.test.tsx`; song-rows/meta tests now expect "No artist"
+- [x] 8 locales: song-visibility labels say Private (filter, empty state, song form "Save as private", status, `/terms` and `/privacy`); new `song.noArtist`; `admin.detail.unknownArtist` = No artist
+- [x] `songAuthors()` falls back to `song.noArtist`; song menu subtitle without "by"; "No artist" is plain text in `SongMetaLines`
+- [x] E2E `ux-v2-private-and-no-artist.spec.ts` (fixture `NO_ARTIST_FIXTURE_IDS`, removed in global teardown); `search.spec.ts` skips "No artist"
+- [x] Docs: design doc 2.16, user guide 2.4, member guide 0.21, glossary 0.7, E2E overview 1.25

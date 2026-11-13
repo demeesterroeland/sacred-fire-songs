@@ -3447,3 +3447,11 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - A profile page (`/users/<id>`) shows one badge for the user's role, each with its own icon: admin `Shield`, gatekeeper `KeyRound`, expert `Award`, musician `Music`, member `UserCheck`. Labels reuse `admin.role.*` (all 8 locales).
 - `public.public_profiles` gains `role` (migration `20261113120000_public_profiles_role.sql`): every signed-in member sees every role; a guest reads NULL. `is_musician` stays. An unknown or missing role shows the member badge, never a privileged one.
 - Tests: `docs/testing/ux-v2-profile-role-badge.feature` (`@unit`, `@e2e`), `testing/unit/tests/profile/roleBadge.test.tsx`, a `@seed` scenario in `access-policies.feature`, `e2e/tests/ux-v2-profile-role-badge.spec.ts`.
+
+## Session November 13, 2026 — #564 / #565: "Private" and "No artist"
+
+- A song that is not public is now **Private** in every user-visible label, never "Draft", in all 8 locales: the Status options in the search filter popup on `/songs` (All · Public · Private), the empty state of the private-songs filter, the Add/Edit Song button **Save as private**, the private badge in **+ Add Songs**, and the visibility sentences on `/terms` and `/privacy`. Only the values changed; key names and `status: 'draft'` stay.
+- Kept on purpose: `songForm.guestDraft.*` (the banner for a guest's unsaved copy of the form, "Draft now — sign in to save") and `legal.draft` (the legal text is not approved yet). Neither is about a song's visibility.
+- A song without an author shows **No artist** (new key `song.noArtist`) instead of "Traditional": song rows, recently viewed, the song page meta line (plain text, no link to an empty author filter), the song menu subtitle (no "by No artist") and the admin member page. An author entered as "Traditional" still shows the translated "Traditional".
+- Tests: `docs/testing/ux-v2-private-and-no-artist.feature` (`@unit`: English labels, every locale free of the local word for "draft", "No artist" per locale; `@e2e`), `privateAndNoArtist.test.ts`, `songMetaNoArtist.test.tsx`, `e2e/tests/ux-v2-private-and-no-artist.spec.ts`; `ux-v2-song-rows.feature` 1.2 expects "No artist".
+- Note for `feat/ux-v3`: there `songAuthors()` lives in `lib/songs/authors.ts`; when develop is merged into it, its fallback must use `song.noArtist` too.
