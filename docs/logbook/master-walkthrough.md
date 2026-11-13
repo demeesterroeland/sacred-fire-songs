@@ -3454,6 +3454,16 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - `scripts/db/rename-seed-accounts.mjs` (`npm run seed:rename-accounts`) gives an existing local stack the same addresses without a reset: it matches rows by their fixed seed ids and updates `auth.users`, the `email` identity and `profiles`. Idempotent; refuses any non-localhost database.
 - Tests: `testing/unit/tests/renameSeedAccounts.test.ts` (mapping agrees with the seed files, id-based SQL, local-only guard); `admin-users.spec.ts` searches `gatekeeper@`.
 
+## Session November 13, 2026 — Story 6.1.35 (#485), group 4: header, user menu, notifications
+
+- `Header`, `UserProfile`, `NotificationBell`, `LanguageSwitcher`, `WickSelect` and `ThemedToaster` use semantic tokens only (221 palette classes fewer; `PALETTE_BASELINE` 980 → 759).
+- User menu: one grey item style for every entry (the Admin Portal is no longer purple, no hover hues per item), a grey avatar disc instead of the gradient, the role translated, the theme switch with 44 px buttons that marks the chosen theme with inverted greys and `aria-pressed`. The hover-only settings cogwheel is gone (it duplicated the Settings item and was unreachable on touch).
+- Notifications: the unread badge uses the accent token (`bg-accent text-on-accent`); each unread item says "Unread" to screen readers (`notifications.unread`, 8 locales); the bell, menu button and Create button are 44 px.
+- Toasts: one neutral surface; errors keep the danger colour next to their words.
+- Removed unused `components/common/navigation/ThemeToggle.tsx`, `components/ui/popover.tsx` and the `@radix-ui/react-popover` dependency.
+- Left for the admin group: `WickSelect` still shows the admin role colours passed by `AdminUsersTable` (light-mode contrast of the coloured label).
+- Tests: `docs/testing/ux-v2-sober-header.feature`, `testing/unit/tests/design/soberHeader.test.tsx`, `e2e/tests/ux-v2-sober-header.spec.ts` (NAV-07, axe colour contrast light and dark).
+
 ## Session November 13, 2026 — #564 / #565: "Private" and "No artist"
 
 - A song that is not public is now **Private** in every user-visible label, never "Draft", in all 8 locales: the Status options in the search filter popup on `/songs` (All · Public · Private), the empty state of the private-songs filter, the Add/Edit Song button **Save as private**, the private badge in **+ Add Songs**, and the visibility sentences on `/terms` and `/privacy`. Only the values changed; key names and `status: 'draft'` stay.

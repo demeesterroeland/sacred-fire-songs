@@ -319,6 +319,7 @@ const en = {
   'notifications.title': 'Notifications',
   'notifications.empty': 'No notifications yet.',
   'notifications.markAllRead': 'Mark all as read',
+  'notifications.unread': 'Unread',
   'notifications.recordingShared': '{actor} shared "{recording}" of {song} with you',
   "email.recordingShared.subject": "{actor} shared a practice recording of \"{song}\" with you",
   'email.recordingShared.greeting': 'Hi {name},',
