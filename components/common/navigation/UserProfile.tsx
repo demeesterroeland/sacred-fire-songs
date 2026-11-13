@@ -1,5 +1,5 @@
 import { type AuthUser } from '@/hooks/useAuth';
-import { LogOut, ChevronDown, Settings, Heart, FileText, ListMusic, Sun, Moon, Monitor, SlidersHorizontal, Clock, Globe, ShieldCheck, Users } from 'lucide-react';
+import { LogOut, ChevronDown, Heart, FileText, ListMusic, Sun, Moon, Monitor, SlidersHorizontal, Clock, Globe, ShieldCheck, Users } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
@@ -32,7 +32,7 @@ function ThemeToggle() {
   const { preferences, setPreference } = useUserPreferences();
 
   return (
-    <div className="flex items-center bg-gray-200 dark:bg-gray-800 rounded-full p-0.5 gap-0.5">
+    <div className="flex items-center bg-surface-2 rounded-panel p-0.5 gap-0.5">
       {themeOptions.map(({ value, icon: Icon }) => {
         const active = preferences.theme === value;
         return (
@@ -40,9 +40,10 @@ function ThemeToggle() {
             key={value}
             onClick={() => setPreference('theme', value)}
             aria-label={t(`theme.${value}`)}
-            className={`p-1 rounded-full transition-colors ${active ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm' : 'text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300'}`}
+            aria-pressed={active}
+            className={`size-tap inline-flex items-center justify-center rounded-control transition-colors ${active ? 'bg-chip-active text-on-chip-active' : 'text-fg-muted hover:text-fg'}`}
           >
-            <Icon className="w-3.5 h-3.5" />
+            <Icon className="w-4 h-4" aria-hidden="true" />
           </button>
         );
       })}
@@ -64,7 +65,7 @@ function SharedWithMeMenuItem({ userId, onNavigate }: { userId: string; onNaviga
       href="/library/shared"
       onClick={onNavigate}
       data-testid="user-menu-shared-with-me"
-      className="flex min-h-tap items-center gap-3 rounded-control p-2 text-fg-muted transition-colors hover:bg-surface-2 hover:text-fg"
+      className={MENU_ITEM}
     >
       <Users className="w-4 h-4" aria-hidden="true" />
       <span className="flex-1 text-sm font-medium">{t('sharedWithMe.title')}</span>
@@ -76,6 +77,13 @@ function SharedWithMeMenuItem({ userId, onNavigate }: { userId: string; onNaviga
     </Link>
   );
 }
+
+/** One style for every item in the user menu: grey text, a grey hover, no colour per item. */
+const MENU_ITEM =
+  'flex min-h-tap items-center gap-3 rounded-control p-2 text-fg-muted transition-colors hover:bg-surface-2 hover:text-fg';
+
+/** Initials or photo on a neutral grey disc. */
+const AVATAR = 'rounded-full bg-chip-active text-on-chip-active flex items-center justify-center overflow-hidden shrink-0 relative';
 
 export const UserProfile = ({ onLogout, layout = 'header', showText = true, initialUser }: UserProfileProps) => {
   const { user, loading, logout } = useAuth(initialUser);
@@ -100,7 +108,7 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true, init
   }, []);
 
   if (loading) {
-    return <div className="w-9 h-9 rounded-xl bg-gray-200 dark:bg-gray-800 animate-pulse" />;
+    return <div className="w-9 h-9 rounded-full bg-surface-2 animate-pulse" />;
   }
 
   if (!user) {
@@ -113,7 +121,8 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true, init
 
   const userDisplayName = user.full_name || user.email?.split('@')[0] || t('userMenu.defaultName');
   const userInitials = userDisplayName.substring(0, 1).toUpperCase();
-  const userRole = user.role.charAt(0).toUpperCase() + user.role.slice(1);
+  // Translated role; a guest has no account menu, so it never shows a role.
+  const userRole = user.role === 'guest' ? '' : t(`admin.role.${user.role}`);
 
   return (
     <div className="relative" ref={menuRef}>
@@ -123,9 +132,9 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true, init
         aria-label={t('userMenu.trigger')}
         aria-haspopup="menu"
         aria-expanded={isOpen}
-        className="flex items-center gap-2 px-3 py-2 rounded-full bg-gray-200/80 dark:bg-gray-800/80 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors active:scale-95 group border border-transparent hover:border-gray-400 dark:hover:border-gray-600"
+        className="flex min-h-tap items-center gap-2 px-2 rounded-control text-fg-muted hover:bg-surface-2 hover:text-fg transition-colors active:scale-95"
       >
-        <div className="w-[26px] h-[26px] rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-caption font-semibold text-white shadow-inner overflow-hidden shrink-0 relative">
+        <div className={`w-[26px] h-[26px] text-caption font-semibold ${AVATAR}`}>
           {user.avatar_url ? (
             <Image 
               src={user.avatar_url} 
@@ -139,27 +148,27 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true, init
           )}
         </div>
         {showText && (
-          <span className="hidden sm:block text-xs font-bold text-gray-700 dark:text-gray-300 truncate max-w-[100px]">
+          <span className="hidden sm:block text-xs font-bold text-fg truncate max-w-[100px]">
             {userDisplayName}
           </span>
         )}
-        <ChevronDown className={`w-4 h-4 text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-300 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDown aria-hidden="true" className={`w-4 h-4 transition-transform duration-200 ${isOpen ? 'rotate-180' : ''}`} />
       </button>
 
       {/* Dropdown Menu */}
       {isOpen && (
-        <div data-testid="user-menu" className="absolute top-full right-0 mt-2 w-72 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in zoom-in duration-200 origin-top-right">
+        <div data-testid="user-menu" className="absolute top-full right-0 mt-2 w-72 bg-surface text-fg border border-line rounded-panel shadow-sheet overflow-hidden z-50 animate-in fade-in zoom-in duration-200 origin-top-right">
           {/* Account Title */}
-          <div className="flex justify-between items-center px-4 py-3 border-b border-gray-200 dark:border-gray-800">
+          <div className="flex justify-between items-center px-4 py-1 border-b border-line">
             <span className="text-sm font-semibold text-fg">{t('userMenu.account')}</span>
             <ThemeToggle />
           </div>
 
           <div className="p-3">
             {/* User Identity Card */}
-            <div className="relative group/card bg-gray-200/50 dark:bg-gray-800/50 p-3 rounded-xl mb-3 border border-gray-300/30 dark:border-gray-700/30">
+            <div className="bg-surface-2 p-3 rounded-control mb-3">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-sm font-bold text-white shadow-inner relative overflow-hidden">
+                <div className={`w-10 h-10 text-sm font-bold ${AVATAR}`}>
                   {user.avatar_url ? (
                     <Image 
                       src={user.avatar_url} 
@@ -173,18 +182,11 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true, init
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm font-bold text-gray-900 dark:text-white truncate">{userDisplayName}</p>
-                  <p className="text-xs text-blue-400/80 font-medium">{userRole}</p>
+                  <p className="text-sm font-bold text-fg truncate">{userDisplayName}</p>
+                  <p className="text-xs text-fg-muted font-medium">{userRole}</p>
                 </div>
               </div>
 
-              {/* Hover Cogwheel */}
-              <Link
-                href="/account/settings"
-                className="absolute top-2 right-2 p-1.5 bg-gray-200/80 dark:bg-gray-800/80 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-300 dark:hover:bg-gray-700 opacity-0 group-hover/card:opacity-100 transition-all border border-gray-300/50 dark:border-gray-700/50"
-              >
-                <Settings className="w-4 h-4" />
-              </Link>
             </div>
 
             {/* Menu Items */}
@@ -193,44 +195,44 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true, init
                 <Link
                   href="/admin/users"
                   onClick={() => setIsOpen(false)}
-                  className="flex items-center gap-3 p-2 rounded-lg text-purple-600 dark:text-purple-400 hover:bg-purple-50 dark:hover:bg-purple-950/40 transition-colors group font-semibold"
+                  className={MENU_ITEM}
                 >
-                  <ShieldCheck className="w-4 h-4 text-purple-600 dark:text-purple-400" />
-                  <span className="text-sm">{t('userMenu.adminPortal')}</span>
+                  <ShieldCheck className="w-4 h-4" aria-hidden="true" />
+                  <span className="text-sm font-medium">{t('userMenu.adminPortal')}</span>
                 </Link>
               )}
-              <Link href="/account/settings" className="flex items-center gap-3 p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group">
-                <SlidersHorizontal className="w-4 h-4 group-hover:text-blue-400" />
+              <Link href="/account/settings" onClick={() => setIsOpen(false)} className={MENU_ITEM}>
+                <SlidersHorizontal className="w-4 h-4" aria-hidden="true" />
                 <span className="text-sm font-medium">{t('userMenu.settings')}</span>
               </Link>
-              <Link href="/songs?favorites=true" className="flex items-center gap-3 p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group">
-                <Heart className="w-4 h-4 group-hover:text-red-400" />
+              <Link href="/songs?favorites=true" onClick={() => setIsOpen(false)} className={MENU_ITEM}>
+                <Heart className="w-4 h-4" aria-hidden="true" />
                 <span className="text-sm font-medium">{t('userMenu.favorites')}</span>
               </Link>
-              <Link href={MY_DRAFTS_HREF} className="flex items-center gap-3 p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group">
-                <FileText className="w-4 h-4 group-hover:text-orange-400" />
+              <Link href={MY_DRAFTS_HREF} onClick={() => setIsOpen(false)} className={MENU_ITEM}>
+                <FileText className="w-4 h-4" aria-hidden="true" />
                 <span className="text-sm font-medium">{t('userMenu.drafts')}</span>
               </Link>
-              <Link href="/library/playlists" className="flex items-center gap-3 p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group">
-                <ListMusic className="w-4 h-4 group-hover:text-purple-400" />
+              <Link href="/library/playlists" onClick={() => setIsOpen(false)} className={MENU_ITEM}>
+                <ListMusic className="w-4 h-4" aria-hidden="true" />
                 <span className="text-sm font-medium">{t('userMenu.playlists')}</span>
               </Link>
               <SharedWithMeMenuItem userId={user.id} onNavigate={() => setIsOpen(false)} />
-              <Link href="/library/recently-viewed" className="flex items-center gap-3 p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group">
-                <Clock className="w-4 h-4 group-hover:text-amber-400" />
+              <Link href="/library/recently-viewed" onClick={() => setIsOpen(false)} className={MENU_ITEM}>
+                <Clock className="w-4 h-4" aria-hidden="true" />
                 <span className="text-sm font-medium">{t('userMenu.recentlyViewed')}</span>
               </Link>
             </div>
 
             {/* Language switcher */}
-            <div className="h-px bg-gray-200 dark:bg-gray-800 my-2" />
+            <div className="h-px bg-line my-2" />
             <div className="flex items-center gap-2 px-2 py-1.5">
-              <Globe className="w-4 h-4 text-gray-400" />
-              <span className="text-sm font-medium text-gray-500 dark:text-gray-400 flex-1">{t('userMenu.language')}</span>
+              <Globe className="w-4 h-4 text-fg-muted" aria-hidden="true" />
+              <span className="text-sm font-medium text-fg-muted flex-1">{t('userMenu.language')}</span>
               <LanguageSwitcher />
             </div>
 
-            <div className="h-px bg-gray-200 dark:bg-gray-800 my-2" />
+            <div className="h-px bg-line my-2" />
 
             {/* Sign Out */}
             <button
@@ -240,9 +242,9 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true, init
                 onLogout?.();
                 router.refresh();
               }}
-              className="w-full flex items-center gap-3 p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-red-400 hover:bg-red-500/10 transition-colors group"
+              className={`w-full ${MENU_ITEM}`}
             >
-              <LogOut className="w-4 h-4" />
+              <LogOut className="w-4 h-4" aria-hidden="true" />
               <span className="text-sm font-medium">{t('userMenu.signOut')}</span>
             </button>
           </div>

@@ -75,55 +75,61 @@ export function NotificationBell({ userId }: { userId: string }) {
           type="button"
           aria-label={label}
           title={label}
-          className="relative p-2 rounded-full text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
+          className="relative size-tap inline-flex items-center justify-center rounded-full text-fg-muted hover:bg-surface-2 hover:text-fg transition-colors"
         >
-          <Bell className="w-5 h-5" />
+          <Bell className="w-5 h-5" aria-hidden="true" />
           {unread.length > 0 && (
-            <span className="absolute top-1 right-1 min-w-5 h-5 px-1 rounded-full bg-[#f45d1a] text-white text-caption font-semibold leading-5 text-center">
+            <span aria-hidden="true" data-testid="notification-badge" className="absolute top-1 right-1 min-w-5 h-5 px-1 rounded-full bg-chip-active text-on-chip-active ring-2 ring-bg text-caption font-semibold leading-5 text-center">
               {unread.length > 9 ? '9+' : unread.length}
             </span>
           )}
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-80 p-0 overflow-hidden rounded-2xl bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 shadow-2xl shadow-black/10 dark:shadow-black/40">
-        <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100 dark:border-gray-800">
-          <span className="text-sm font-bold text-gray-900 dark:text-white">{t('notifications.title')}</span>
+      <DropdownMenuContent align="end" className="w-80 p-0 overflow-hidden rounded-panel bg-surface text-fg border-line shadow-sheet">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-line">
+          <span className="text-sm font-bold text-fg">{t('notifications.title')}</span>
           {unread.length > 0 && (
             <button
               type="button"
               onClick={() => void markRead(unread.map((n) => n.id))}
-              className="text-xs font-semibold text-[#f45d1a] hover:underline"
+              // -my-3 cancels the header's py-3, so the 44 px target does not make the header taller.
+              className="inline-flex min-h-tap -my-3 items-center text-xs font-semibold text-fg underline-offset-4 hover:underline"
             >
               {t('notifications.markAllRead')}
             </button>
           )}
         </div>
         {notifications.length === 0 ? (
-          <p className="px-4 py-6 text-sm text-center text-gray-500 dark:text-gray-400">{t('notifications.empty')}</p>
+          <p className="px-4 py-6 text-sm text-center text-fg-muted">{t('notifications.empty')}</p>
         ) : (
           <div className="max-h-96 overflow-y-auto py-1">
             {notifications.map((n) => (
               <DropdownMenuItem
                 key={n.id}
                 onSelect={() => openNotification(n)}
-                className="flex items-start gap-3 px-4 py-3 rounded-none cursor-pointer focus:bg-gray-100 dark:focus:bg-gray-800/70"
+                className="flex items-start gap-3 px-4 py-3 rounded-none cursor-pointer focus:bg-surface-2"
               >
-                <span className="mt-0.5 p-1.5 rounded-full bg-indigo-500/10 text-indigo-500 shrink-0">
-                  <Users className="w-3.5 h-3.5" />
+                <span className="mt-0.5 p-1.5 rounded-full bg-surface-2 text-fg-muted shrink-0">
+                  <Users className="w-3.5 h-3.5" aria-hidden="true" />
                 </span>
                 <span className="flex-1 min-w-0">
-                  <span className={`block text-sm leading-snug ${n.read_at ? 'text-gray-600 dark:text-gray-400' : 'font-semibold text-gray-900 dark:text-white'}`}>
+                  <span className={`block text-sm leading-snug ${n.read_at ? 'text-fg-muted' : 'font-semibold text-fg'}`}>
                     {t('notifications.recordingShared', {
                       actor: n.metadata.actor_name || t('user.unnamed'),
                       recording: n.metadata.recording_name ?? '',
                       song: n.metadata.song_title ?? '',
                     })}
                   </span>
-                  <span className="block mt-0.5 text-xs text-gray-400">
+                  <span className="block mt-0.5 text-xs text-fg-subtle">
                     {relativeTime(n.created_at, LOCALE_DATE_TAGS[locale])}
                   </span>
                 </span>
-                {!n.read_at && <span className="mt-1.5 w-2 h-2 rounded-full bg-[#f45d1a] shrink-0" aria-hidden />}
+                {!n.read_at && (
+                  <>
+                    <span className="mt-1.5 w-2 h-2 rounded-full bg-fg shrink-0" aria-hidden />
+                    <span className="sr-only">{t('notifications.unread')}</span>
+                  </>
+                )}
               </DropdownMenuItem>
             ))}
           </div>

@@ -14,15 +14,14 @@ export default function ThemedToaster() {
       icons={{
         success: null,
         error: null,
-        loading: <Loader2 className="w-4 h-4 animate-spin text-emerald-400" />,
+        loading: <Loader2 className="w-4 h-4 animate-spin text-fg-muted" />,
       }}
       toastOptions={{
         unstyled: true,
         classNames: {
-          toast: "bg-white dark:bg-[#141b24] border border-emerald-500/30 p-4 rounded-xl text-emerald-600 dark:text-emerald-400 text-[15px] font-medium text-center shadow-lg dark:shadow-inner min-w-[300px] flex justify-center items-center mb-2",
-          title: "text-emerald-600 dark:text-emerald-400",
-          success: "border-emerald-500/30",
-          error: "bg-red-50 dark:bg-[#1a1010] border-red-500/30 text-red-600 dark:text-red-400",
+          // Neutral surface for every toast; an error says so in its words and gets the danger text colour.
+          toast: "bg-surface border border-line p-4 rounded-panel text-fg text-[15px] font-medium text-center shadow-sheet min-w-[300px] flex justify-center items-center gap-2 mb-2",
+          error: "border-danger! text-danger!",
         }
       }}
     />

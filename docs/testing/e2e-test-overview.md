@@ -1,8 +1,8 @@
 # E2E Test Overview & Matrix: Sacred Fire Songs
 
-**Version:** 1.24
+**Version:** 1.25
 **Status:** Living Document
-**Date:** Nov 12, 2026
+**Date:** Nov 13, 2026
 **Tracking:** GH #142
 
 ## Changelog
@@ -28,6 +28,7 @@
 | **1.20** | Nov 7, 2026 | UX v2 validation round 1, review round on PR #474: new spec `ux-v2-validation-1-review.spec.ts` (a press on a song under the open suggestions on a phone with touch and on a desktop with a mouse, also on guest Home; the scroll position of the desktop column on the song list, Home and Playlists; auto-scroll behind the fixed bars on a phone and with padding on a desktop; the tools sheet and focus on a window that grows; section labels versus chords; toolbar alignment; one focus cue on the tag field, the artist field and the selects; Search options labels in all 8 languages at 390 px; axe colour contrast on the open tag browser, light and dark; fixture `VALIDATION_1_REVIEW_FIXTURE_IDS`, removed by `e2e/global-teardown.ts`). `ux-v2-validation-1.spec.ts` is unchanged. |
 | **1.21** | Nov 9, 2026 | Validation 4: LIB-12 is the New tab (`/library/new`); the Library tab row has five tabs and scrolls on a phone (`ux-v2-library-tabs.spec.ts`). |
 | **1.24** | Nov 12, 2026 | #485 group 1: SONG-12 `ux-v2-sober-colours.spec.ts` (member): every category tag on the Add song page has the same colours, a selected tag shows inverted greys and `aria-pressed`, light and dark. |
+| **1.25** | Nov 13, 2026 | #485 group 4 (1.24 is group 1, PR #537): NAV-07 `ux-v2-sober-header.spec.ts` (member): axe colour contrast on the header, the open user menu and the open notification list, light and dark; the chosen theme is the one pressed button. |
 | **1.23** | Nov 11, 2026 | #490: `ux-v2-profile-playback.spec.ts` (member): recordings on a singer profile play there one at a time, the play button is a 44 px target and the row opens the song with that take. |
 | **1.22** | Nov 11, 2026 | #492: SONG-08 now checks that a song row has no delete button (an admin on `/songs`, `ux-v2-song-rows.spec.ts`); deleting is in the song page's ⋮ menu only (SONG-07). |
 | **1.19** | Nov 6, 2026 | UX v2 validation round 1 (Part of #375): new spec `ux-v2-validation-1.spec.ts` (one focus style, suggestions panel in the flow on `/songs` and Home, search options tokens and category name, song flags versus the reader; fixed-id fixture `VALIDATION_1_FIXTURE_IDS`, removed by `e2e/global-teardown.ts`); `ux-v2-reader-tools.spec.ts` uses a short window so auto-scroll is offered and tests that it is not on a song that fits; `ux-v2-song-meta.spec.ts` checks the expanded list. |
@@ -223,6 +224,7 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 | NAV-04 | Desktop sidebar | Sidebar links navigate; collapse/expand | active state | M | ✅ | 🔲 | P2 | Sidebar |
 | NAV-05 | Header / global search | Header search opens global search modal | keyboard shortcut; non-song pages | G/M | ✅ | 🔲 | P2 | GlobalSearchModal |
 | NAV-06 | Deep links | Query params (`?search=`, `?tag=`, `?sort=`, `?next=`) restore state | invalid params | G | ✅ | 🔲 | P2 | SongsPageContent |
+| NAV-07 | Sober header and menus | Header, user menu and notification list pass axe colour contrast; the chosen theme is announced as pressed | light and dark mode | M | ✅ | ✅ | P2 | `ux-v2-sober-header.spec.ts` (Story 6.1.35) |
 
 ### 4.10 PWA (Epic 3.3 / 4.5)
 

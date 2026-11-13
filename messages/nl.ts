@@ -320,6 +320,7 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'notifications.title': 'Meldingen',
   'notifications.empty': 'Nog geen meldingen.',
   'notifications.markAllRead': 'Alles als gelezen markeren',
+  'notifications.unread': 'Ongelezen',
   'notifications.recordingShared': '{actor} deelde "{recording}" van {song} met je',
   "email.recordingShared.subject": "{actor} deelde een oefenopname van \"{song}\" met je",
   'email.recordingShared.greeting': 'Hallo {name},',

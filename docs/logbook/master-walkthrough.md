@@ -3453,3 +3453,13 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - The four seeded accounts (`supabase/seeds/01_auth_users.sql`, `02_profiles.sql`) use placeholder addresses: `admin@sfs.example`, `expert@sfs.example`, `member@sfs.example`, `gatekeeper@sfs.example`. The E2E role fixtures, the BDD steps, the UX screenshot script, two feature files, three screen mockups and `CHANGELOG.md` follow; sample names are placeholders too (`Ana Example`).
 - `scripts/db/rename-seed-accounts.mjs` (`npm run seed:rename-accounts`) gives an existing local stack the same addresses without a reset: it matches rows by their fixed seed ids and updates `auth.users`, the `email` identity and `profiles`. Idempotent; refuses any non-localhost database.
 - Tests: `testing/unit/tests/renameSeedAccounts.test.ts` (mapping agrees with the seed files, id-based SQL, local-only guard); `admin-users.spec.ts` searches `gatekeeper@`.
+
+## Session November 13, 2026 — Story 6.1.35 (#485), group 4: header, user menu, notifications
+
+- `Header`, `UserProfile`, `NotificationBell`, `LanguageSwitcher`, `WickSelect` and `ThemedToaster` use semantic tokens only (221 palette classes fewer; `PALETTE_BASELINE` 980 → 759).
+- User menu: one grey item style for every entry (the Admin Portal is no longer purple, no hover hues per item), a grey avatar disc instead of the gradient, the role translated, the theme switch with 44 px buttons that marks the chosen theme with inverted greys and `aria-pressed`. The hover-only settings cogwheel is gone (it duplicated the Settings item and was unreachable on touch).
+- Notifications: the unread badge is inverted greys, not orange; each unread item says "Unread" to screen readers (`notifications.unread`, 8 locales); the bell, menu button and Create button are 44 px.
+- Toasts: one neutral surface; errors keep the danger colour next to their words.
+- Removed unused `components/common/navigation/ThemeToggle.tsx`, `components/ui/popover.tsx` and the `@radix-ui/react-popover` dependency.
+- Left for the admin group: `WickSelect` still shows the admin role colours passed by `AdminUsersTable` (light-mode contrast of the coloured label).
+- Tests: `docs/testing/ux-v2-sober-header.feature`, `testing/unit/tests/design/soberHeader.test.tsx`, `e2e/tests/ux-v2-sober-header.spec.ts` (NAV-07, axe colour contrast light and dark).

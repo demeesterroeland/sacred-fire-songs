@@ -150,4 +150,5 @@
 | **November 12, 2026** | **Fix/UX (Epic 6.1, #485)**: sober colours group 1 — one neutral tag style, token-only tag editors, ratchet scans `lib/`, i18n, tests, docs. (estimate) | ~1.5 Hours | Completed |
 | **November 12, 2026** | **Fix/UX (Epic 6.1, #485)**: sober colours group 3 — Practice drawer and singer attribution dialog on tokens, one primary action, i18n, tests, docs. (estimate) | ~1.0 Hours | Completed |
 | **November 13, 2026** | **Feature/UX (Epic 6.1, #534)**: role badge per role on a profile page (view column, badge component, i18n, `@unit`/`@seed`/E2E tests, review round, docs). (estimate) | ~1.5 Hours | Completed |
-| **Total** | **Development + AI Collaboration** | **~267.5 Hours** | |
+| **November 13, 2026** | **Fix/UI (#485 group 4)**: sober tokens in the header, user menu, notification bell, language picker, WickSelect and toasts; unused ThemeToggle/popover removed; tests, review fixes. (estimate) | ~1.5 Hours | Completed |
+| **Total** | **Development + AI Collaboration** | **~269.0 Hours** | |
