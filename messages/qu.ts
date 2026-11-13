@@ -804,6 +804,13 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'search.sort.authorAZ': 'Ruwaq (A-Z)',
   'search.sort.newestFirst': 'Musuq ñawpaqta',
   'search.contentType': 'Contenido laya',
+  'search.songbook': "Cancionero",
+  'search.language': "Simi",
+  'search.songbook.all': "Llapan cancionerokuna",
+  'search.language.all': "Llapan simikuna",
+  // TODO(native-speaker): Quechua wording of the two "Unknown …" labels needs a check
+  'search.songbook.unknown': "Mana reqsisqa cancionero",
+  'search.language.unknown': "Mana reqsisqa simi",
   'search.yourLibrary': 'Bibliotecayki',
   'search.status.draft': 'Borrador',
   'search.tagSelector.categoryPrefix': 'Categoría: {category}',

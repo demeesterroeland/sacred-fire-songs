@@ -40,10 +40,11 @@ describe('song selects', () => {
     expect(composition).toMatch(/\bauthors\b/);
   });
 
-  // Story 6.2.18 (#521): the list select carries the original titles for the search, still through ONE embed.
-  it('the song list select embeds the sources once and asks only for the original title', () => {
+  // Story 6.2.18 (#521) + 6.2.19 (#522): the list select carries the original titles for the search and the book of
+  // each source for the songbook filter, still through ONE embed (the book is nested inside it, not a second embed).
+  it('the song list select embeds the sources once and asks for the original title and the book id and names', () => {
     expect(embeds(SONGS_SELECT)).toHaveLength(1);
-    expect(SONGS_SELECT).toMatch(/song_version_sources\s*\(\s*original_title\s*\)/);
+    expect(SONGS_SELECT).toMatch(/song_version_sources\s*\(\s*original_title\s*,\s*songbooks\s*\(\s*id\s*,\s*title\s*,\s*short_name\s*\)\s*\)/);
     // `*` brings compositions.aliases and compositions.authors with every row
     expect(SONGS_SELECT.split(/song_versions\s*\(/)[0]).toMatch(/\*/);
   });

@@ -5,6 +5,7 @@ import { songAuthors } from '@/lib/songs/authors';
  * "Herbert Quinteros · Fire · Healing · Spanish" and "Key E · Capo 3 · Standard".
  */
 import type { TranslateFn } from '@/lib/i18n';
+import { LANGUAGES_PARENT_NAME } from '@/lib/songs/browseFilters';
 
 /** Any translate function (the app's typed `t`, or a plain test double). */
 type T = TranslateFn;
@@ -47,7 +48,6 @@ export function technicalItems(v: VersionTechnical | undefined, t: T): string[] 
 
 type RowCategory = { name: string; parent?: string | null };
 const ARTISTS_PARENT = 'Artists';
-const LANGUAGES_PARENT = 'Languages';
 
 /**
  * Song list rows (Story 6.1.2 / G1.2, #386): "Author · Category · Language" —
@@ -60,8 +60,8 @@ export function songRowMeta(
   t: T
 ): string[] {
   const tags = categories.filter((c) => c.parent !== ARTISTS_PARENT && c.name !== ARTISTS_PARENT);
-  const category = tags.find((c) => c.parent !== LANGUAGES_PARENT);
-  const language = tags.find((c) => c.parent === LANGUAGES_PARENT);
+  const category = tags.find((c) => c.parent !== LANGUAGES_PARENT_NAME);
+  const language = tags.find((c) => c.parent === LANGUAGES_PARENT_NAME);
   // Server queries fill a missing author with the English placeholder 'Unknown'.
   const author = originalAuthor === 'Unknown' ? null : originalAuthor;
   return [songAuthors({ originalAuthor: author }, t).join(', '), category?.name, language?.name].filter(
