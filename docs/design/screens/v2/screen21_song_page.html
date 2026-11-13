@@ -1,5 +1,5 @@
 <!--
-**Version:** 1.3
+**Version:** 1.4
 **Status:** Accepted reference (Story 6.1.1 / G1.1 #385, G2.1–G2.4 #390–#393, G2.6 #395, G3.1 #396)
 **Date:** Nov 13, 2026
 
@@ -7,7 +7,8 @@
 
 | Version | Date | Description of Changes |
 | ----- | ----- | ----- |
-| **1.3** | Nov 13, 2026 | Chord tools in one place (#566): the toolbar is `Chords [switch] · [− n +] transpose · A− · A+`; the transpose stepper (two 44 px buttons and the signed shift) sits right after the Chords switch and shows only while chords are on. The technical line `Key E · Capo 3 · Tuning: Standard` also shows only while chords are on (the beats stay) and names the tuning. After a transpose the line shows only the new key. |
+| **1.4** | Nov 13, 2026 | Chord tools in one place (#566): the toolbar is `Chords [switch] · [− n +] transpose · A− · A+`; the transpose stepper (two 44 px buttons and the signed shift) sits right after the Chords switch and shows only while chords are on. The technical line `Key E · Capo 3` (non-standard tuning is labelled `Tuning: Drop D`; standard tuning is omitted) also shows only while chords are on (beats stay). After a transpose the line shows only the new key. Added the Reading view switch (*Original · Translation · Both*) to `#slot` (#517). |
+| **1.3** | Nov 13, 2026 | The slot gains the reader switch *Original · Translation · Both* for a song with a translation, and the language group lists languages only (two or more; Story 6.2.14, #517); *Both* shows each stanza with its translation (line under line on a phone, side by side from md up); no change to the mockup itself. |
 | **1.2** | Nov 12, 2026 | The language group of the slot is implemented (Story 6.2.13, #516): *Original language · languages the song has*, next to the version group in one wrapping row; no change to the mockup itself. |
 | **1.1** | Nov 6, 2026 | Variant / language slot (G2.6, #395) made implementable: 44 px segments, pressed = raised background + underline (never colour alone), design note that the slot renders only when the song has more than one version (language switch follows with the translation layer; nothing is shown for it today). |
 | **1.0** | Nov 5, 2026 | Accepted as the UX v2 reference (#385); token names aligned with `app/styles/sober.css` (`--text-muted`, `--text-subtle`, `--r-control/panel/sheet`, `--elev-sheet`). |
@@ -268,12 +269,17 @@ body.no-chords .line { margin-bottom: calc(var(--ls) * 0.2); }
         <dt>Includes</dt><dd>Chords, melody, 2 recordings</dd>
       </dl>
     </div>
-    <div class="music" id="music">Key <b id="music-key">E</b><span class="meta-sep">·</span>Capo <b>3</b><span class="meta-sep">·</span>Tuning: Standard</div>
+    <div class="music" id="music">Key <b id="music-key">E</b><span class="meta-sep">·</span>Capo <b>3</b></div>
     <div class="slot" id="slot" hidden>
       <span class="seg" role="group" aria-label="Version">
         <button type="button" id="ver-orig" aria-pressed="true">Original</button>
         <button type="button" id="ver-simple" aria-pressed="false">Simplified</button>
         <button type="button" id="ver-live" aria-pressed="false">Live</button>
+      </span>
+      <span class="seg" role="group" aria-label="Reading view">
+        <button type="button" id="view-orig" aria-pressed="true">Original</button>
+        <button type="button" id="view-trans" aria-pressed="false">Translation</button>
+        <button type="button" id="view-both" aria-pressed="false">Both</button>
       </span>
       <span class="seg" role="group" aria-label="Language">
         <button type="button" id="lang-es" aria-pressed="true">ES</button>

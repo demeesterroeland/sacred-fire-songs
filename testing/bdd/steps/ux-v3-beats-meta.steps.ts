@@ -37,7 +37,7 @@ Then('the meta line shows the values of the selected version', function (this: o
   const state = world(this);
   // After one switch the second version is selected: capo 0 and no beats, so neither is shown.
   assert.equal(state.selected, 1);
-  assert.deepEqual(shownValues(this), ['Key E', 'Tuning: Standard']);
+  assert.deepEqual(shownValues(this), ['Key E']);
 });
 
 Given('a version with no key, capo or tuning and beats {string}', function (this: object, beats: string) {

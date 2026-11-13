@@ -1,5 +1,6 @@
-# Version: 1.0 | Date: Nov 13, 2026
+# Version: 1.1 | Date: Nov 13, 2026
 # Changelog
+# 1.1 | Nov 13, 2026 | Owner decision & review fixes: omit standard tuning completely from the meta line; cover Both view, Translation-only view, and UXA-032 member/guest role chain through readingState + chordTools.
 # 1.0 | Nov 13, 2026 | #566: transpose next to the Chords switch; key, capo and tuning only while chords are on. Owner decisions: beats stay with chords off; the tuning is named ("Tuning: Drop D"); after a transpose only the new key shows.
 @ux-v3 @chord-tools
 Feature: Chord tools in one place
@@ -15,6 +16,12 @@ Feature: Chord tools in one place
     And the meta line shows "Key D · Tuning: Drop D"
 
   @unit
+  Scenario: Standard tuning is omitted from the meta line
+    Given a reader on a song in key Am with capo 2, tuning Standard and beats "8"
+    When the Chords switch is on
+    Then the meta line shows "Key Am · Capo 2 · Beats 8"
+
+  @unit
   Scenario: Chords off
     Given a reader on the same song
     When they switch Chords off
@@ -28,6 +35,21 @@ Feature: Chord tools in one place
     When the reader taps transpose "+" twice
     Then every chord is two semitones higher
     And the meta line shows "Key E · Tuning: Drop D"
+
+  @unit
+  Scenario: Both view with chords on keeps the stepper and shifts the key
+    Given a musician reading a song in key D with tuning Drop D and a lyrics-only Dutch translation in "Both" view
+    When the Chords switch is on
+    Then the toolbar shows the transpose stepper next to the Chords switch
+    When the reader taps transpose "+" twice
+    Then the meta line shows "Key E · Tuning: Drop D"
+
+  @unit
+  Scenario: Translation-only view hides chord tools and keeps beats
+    Given a musician reading a song in key D with tuning Drop D, beats "8" and a lyrics-only Dutch translation in "Translation" view
+    When the Chords switch is on
+    Then there is no Chords switch, no transpose stepper and no key line
+    And the meta line shows only "Beats 8"
 
   @unit
   Scenario: One place only
@@ -49,6 +71,13 @@ Feature: Chord tools in one place
   @unit
   Scenario: A reader who may not transpose still sees the chord details, but no stepper
     Given a member on a song in key D with tuning Drop D
+    When the Chords switch is on
+    Then the transpose stepper is hidden
+    And the meta line shows "Key D · Tuning: Drop D"
+
+  @unit
+  Scenario: A guest sees the chord details while chords are on, but no stepper
+    Given a guest on a song in key D with tuning Drop D
     When the Chords switch is on
     Then the transpose stepper is hidden
     And the meta line shows "Key D · Tuning: Drop D"

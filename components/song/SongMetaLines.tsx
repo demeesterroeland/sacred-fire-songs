@@ -55,7 +55,7 @@ export function fitLinkCount(rights: number[], authorCount: number, moreWidth: n
 /**
  * Story 6.1.7 / G2.2 (#391), Validation 3 and 4: grey lines above the lyrics.
  * Line 1: author, tags and Chords · Melody · Recordings, always as links; closed, as many as fit on one line
- * (validation 4). The chevron at the end opens the rest and the technical line "Key E · Capo 3 · Standard · Beats 8".
+ * (validation 4). The chevron at the end opens the rest and the technical line "Key E · Capo 3 · Beats 8" (plus non-standard tuning when set).
  * Closed by default.
  */
 export function SongMetaLines({

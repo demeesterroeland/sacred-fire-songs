@@ -19,10 +19,16 @@ afterEach(cleanup);
 const technicalText = () => screen.queryByTestId('song-technical-line')?.textContent ?? null;
 
 describe('SongMetaLines — beats in the technical line', () => {
-  it('shows key, capo, tuning and beats of the version after opening the details', () => {
+  it('shows key, capo and beats of the version after opening the details, omitting standard tuning', () => {
     render(<SongMetaLines originalAuthor="Anna" version={{ key: 'E', capo: 5, tuning: null, beats: '8' }} />);
     fireEvent.click(screen.getByTestId('song-meta-line'));
-    expect(technicalText()).toBe('Key E · Capo 5 · Tuning: Standard · Beats 8');
+    expect(technicalText()).toBe('Key E · Capo 5 · Beats 8');
+  });
+
+  it('omits "Standard" when tuning is explicitly Standard', () => {
+    render(<SongMetaLines originalAuthor="Anna" version={{ key: 'Am', capo: 2, tuning: 'Standard', beats: '8' }} />);
+    fireEvent.click(screen.getByTestId('song-meta-line'));
+    expect(technicalText()).toBe('Key Am · Capo 2 · Beats 8');
   });
 
   it('shows the line when the version has only beats', () => {
@@ -43,17 +49,17 @@ describe('SongMetaLines — beats in the technical line', () => {
       <SongMetaLines originalAuthor="Anna" version={{ key: 'E', capo: 5, tuning: null, beats: '8' }} />
     );
     fireEvent.click(screen.getByTestId('song-meta-line'));
-    expect(technicalText()).toBe('Key E · Capo 5 · Tuning: Standard · Beats 8');
+    expect(technicalText()).toBe('Key E · Capo 5 · Beats 8');
 
     rerender(<SongMetaLines originalAuthor="Anna" version={{ key: 'G', capo: 0, tuning: null, beats: null }} />);
-    expect(technicalText()).toBe('Key G · Tuning: Standard');
+    expect(technicalText()).toBe('Key G');
   });
 
   // Transposed key keeps working: the page passes the version with the shifted key and keeps its beats.
   it('shows the transposed key together with the beats', () => {
     render(<SongMetaLines originalAuthor="Anna" version={{ key: 'F', capo: 5, tuning: null, beats: '8' }} />);
     fireEvent.click(screen.getByTestId('song-meta-line'));
-    expect(technicalText()).toBe('Key F · Capo 5 · Tuning: Standard · Beats 8');
+    expect(technicalText()).toBe('Key F · Capo 5 · Beats 8');
   });
 });
 

@@ -402,9 +402,9 @@ describe('PDF Export - document labels follow the interface language (#246)', ()
         expect(l.subtitle(1, 'Oct 30, 2026')).toBe('1 song   •   Generated Oct 30, 2026');
         expect(l.subtitle(2, 'Oct 30, 2026')).toBe('2 songs   •   Generated Oct 30, 2026');
         expect(l.by('Shimshai')).toBe('By Shimshai');
-        expect(l.key('Am')).toBe('Key: Am');
-        expect(l.capo(2)).toBe('Capo: 2');
-        expect(l.tuning('Drop D')).toBe('Tuning: Drop D');
+        // Key, capo, non-standard tuning and beats are the screen's meta line (#520, #566)
+        expect(l.technical({ key: 'Am', capo: 2, tuning: 'Drop D', beats: '8' })).toEqual(['Key Am', 'Capo 2', 'Tuning: Drop D', 'Beats 8']);
+        expect(l.technical({ key: 'Am', capo: 2, tuning: 'Standard', beats: '8' })).toEqual(['Key Am', 'Capo 2', 'Beats 8']);
         expect(l.continued('Agua')).toBe('Agua (continued)');
         expect(l.playlist('Ceremony')).toBe('Playlist: Ceremony');
         expect(l.untitledSong).toBe('Untitled Song');
@@ -418,7 +418,7 @@ describe('PDF Export - document labels follow the interface language (#246)', ()
         expect(l.page(1, 3)).toBe('Pagina 1 van 3');
         expect(l.subtitle(2, '30 okt 2026')).toBe('2 liederen   •   Gemaakt op 30 okt 2026');
         expect(l.subtitle(1, '30 okt 2026')).toBe('1 lied   •   Gemaakt op 30 okt 2026');
-        expect(l.key('Am')).toBe('Toonsoort: Am');
+        expect(l.technical({ key: 'Am' })[0]).toBe('Toonsoort Am');
         expect(l.continued('Agua')).toBe('Agua (vervolg)');
         expect(l.dateLocale).toBe('nl-NL');
     });

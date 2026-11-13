@@ -95,7 +95,7 @@ test.describe('Musician @story-6.1.10', () => {
     await expect(page.getByTestId('song-meta-lines')).not.toContainText('Key E');
 
     // Original key restores everything.
-    await stepper.getByRole('button', { name: 'Original key' }).click();
+    await stepper.getByRole('button', { name: /Original key/ }).click();
     await expect(stepper.getByTestId('transpose-value')).toHaveText('0');
     await expect(page.getByTestId('chord').first()).toHaveText('E');
     await expect(page.getByTestId('song-meta-lines')).toContainText('Key E');

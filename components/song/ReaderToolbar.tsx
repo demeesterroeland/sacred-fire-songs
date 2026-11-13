@@ -166,6 +166,7 @@ function TransposeStepper({ semitones, onShift, onReset }: ReaderTranspose) {
   const atMax = semitones >= MAX_SEMITONES;
   const ends = 'aria-disabled:opacity-40 aria-disabled:cursor-default aria-disabled:hover:bg-transparent';
   const value = formatSemitones(semitones);
+  const resetLabel = `${value} — ${t('viewer.transpose.reset')}`;
   return (
     <div role="group" aria-label={t('viewer.transpose')} className="inline-flex items-center" data-testid="transpose-stepper">
       <ToolbarButton
@@ -179,20 +180,23 @@ function TransposeStepper({ semitones, onShift, onReset }: ReaderTranspose) {
         <Minus className="size-5" aria-hidden />
       </ToolbarButton>
       {semitones === 0 ? (
-        <span data-testid="transpose-value" aria-live="polite" className="inline-flex min-h-tap min-w-tap items-center justify-center text-meta font-semibold tabular-nums text-fg">
+        <span data-testid="transpose-value" className="inline-flex min-h-tap min-w-tap items-center justify-center text-meta font-semibold tabular-nums text-fg">
           {value}
         </span>
       ) : (
         <ToolbarButton
-          aria-label={t('viewer.transpose.reset')}
-          title={t('viewer.transpose.reset')}
+          aria-label={resetLabel}
+          title={resetLabel}
           onClick={onReset}
           data-testid="transpose-value"
           className="font-semibold tabular-nums text-fg"
         >
-          <span aria-live="polite">{value}</span>
+          <span aria-hidden>{value}</span>
         </ToolbarButton>
       )}
+      <span className="sr-only" aria-live="polite" data-testid="transpose-live">
+        {t('viewer.transpose.state', { n: value })}
+      </span>
       <ToolbarButton
         aria-label={t('viewer.transpose.up')}
         title={t('viewer.transpose.up')}

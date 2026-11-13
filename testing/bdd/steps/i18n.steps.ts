@@ -279,7 +279,8 @@ Then('the page footer for page {int} of {int} reads {string}', function (page: n
 });
 
 Then('the key label for {string} reads {string}', function (key: string, expected: string) {
-  assert.equal(pdfLabels.key(key), expected);
+  // The sheet prints the screen's meta line (Story 6.2.17, #520): "Key Am" / "Toonsoort Am".
+  assert.equal(pdfLabels.technical({ key })[0], expected);
 });
 
 Then(

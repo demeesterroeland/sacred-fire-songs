@@ -1,6 +1,11 @@
 // Chord tools in one place (#566): which chord controls and details the reader sees (L2).
 import { describe, expect, it } from 'vitest';
 import { chordTools } from '@/lib/reader/chordTools';
+import { canTranspose, transposeKey } from '@/lib/reader/transpose';
+import { readingState } from '@/lib/songs/readingState';
+
+const translations = [{ id: 'tr-nl', language: 'nl', title: null, lyrics: 'Naar de rivier', translator: null }];
+const chordVersion = { content_chordpro: '[D]Down to the [G]river', key: 'D' };
 
 describe('chordTools', () => {
   it('chords on: the stepper (for those who may transpose) and the key, capo and tuning show', () => {
@@ -37,5 +42,71 @@ describe('chordTools', () => {
 
   it('never shows the stepper when transposing is not allowed (e.g. a translation on its own)', () => {
     expect(chordTools({ shownHasChords: true, chordsPref: true, mayTranspose: false }).showStepper).toBe(false);
+  });
+});
+
+describe('chordTools chained with readingState and role (UXA-032)', () => {
+  it('Both view with chords on shows the stepper and shifts the key', () => {
+    const r = readingState({
+      songId: 's1',
+      translations,
+      languageChoice: { songId: 's1', language: 'nl' },
+      view: 'both',
+      version: chordVersion,
+      role: 'musician',
+      semitones: 2,
+      locale: 'en',
+    });
+    expect(r.shownHasChords).toBe(true);
+    expect(r.mayTranspose).toBe(true);
+    expect(chordTools({ shownHasChords: r.shownHasChords, chordsPref: true, mayTranspose: r.mayTranspose })).toEqual({
+      chordsOn: true,
+      showStepper: true,
+      showChordDetails: true,
+    });
+    expect(transposeKey(chordVersion.key, r.shift)).toBe('E');
+  });
+
+  it('Translation-only view (lyrics only) hides Chords switch, stepper, and key/capo/tuning', () => {
+    const r = readingState({
+      songId: 's1',
+      translations,
+      languageChoice: { songId: 's1', language: 'nl' },
+      view: 'translation',
+      version: chordVersion,
+      role: 'musician',
+      semitones: 2,
+      locale: 'en',
+    });
+    expect(r.shownHasChords).toBe(false);
+    expect(r.mayTranspose).toBe(false);
+    expect(chordTools({ shownHasChords: r.shownHasChords, chordsPref: true, mayTranspose: r.mayTranspose })).toEqual({
+      chordsOn: false,
+      showStepper: false,
+      showChordDetails: false,
+    });
+  });
+
+  it('UXA-032: member or guest on a song with chords on sees details, but no stepper', () => {
+    for (const role of ['member', null, undefined] as const) {
+      expect(canTranspose(role)).toBe(false);
+      const r = readingState({
+        songId: 's1',
+        translations: [],
+        languageChoice: null,
+        view: null,
+        version: chordVersion,
+        role,
+        semitones: 0,
+        locale: 'en',
+      });
+      expect(r.shownHasChords).toBe(true);
+      expect(r.mayTranspose).toBe(false);
+      expect(chordTools({ shownHasChords: r.shownHasChords, chordsPref: true, mayTranspose: r.mayTranspose })).toEqual({
+        chordsOn: true,
+        showStepper: false,
+        showChordDetails: true,
+      });
+    }
   });
 });

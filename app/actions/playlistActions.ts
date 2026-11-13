@@ -7,6 +7,7 @@ import { isSmartPlaylist } from '@/lib/playlists/smartPlaylists';
 import { uuid, playlistTitle, playlistDescription, safeParse } from '@/lib/validation/schemas';
 import { z } from 'zod';
 import { sortVersions } from '@/lib/songs/versionOrder';
+import { PLAYLIST_EXPORT_SELECT, exportSongFromItem, type ExportPlaylistSong, type PlaylistExportItem } from '@/lib/export/exportSong';
 
 // ─── Authorization Helper ──────────────────────────────────────────────────────
 
@@ -338,16 +339,7 @@ export async function reorderPlaylistSongs(
 
 // ─── Export PDF Data ──────────────────────────────────────────────────────────
 
-export interface ExportPlaylistSong {
-    id?: string;
-    title: string;
-    author?: string;
-    key?: string;
-    capo?: number;
-    transposition?: number;
-    content: string;
-    url?: string;
-}
+export type { ExportPlaylistSong };
 
 export async function getPlaylistSongsForExport(
     playlistId: string
@@ -385,22 +377,7 @@ export async function getPlaylistSongsForExport(
 
     const { data: items, error: itemsError } = await supabase
         .from('setlist_items')
-        .select(`
-            id,
-            order_index,
-            transposition_override,
-            song_versions (
-                id,
-                key,
-                capo,
-                content_chordpro,
-                compositions (
-                    id,
-                    title,
-                    original_author
-                )
-            )
-        `)
+        .select(PLAYLIST_EXPORT_SELECT)
         .eq('setlist_id', idParsed.data)
         .order('order_index', { ascending: true });
 
@@ -414,20 +391,7 @@ export async function getPlaylistSongsForExport(
         };
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const songs: ExportPlaylistSong[] = (items || []).map((item: any) => {
-        const compId = item.song_versions?.compositions?.id;
-        return {
-            id: compId || item.song_versions?.id || undefined,
-            title: item.song_versions?.compositions?.title || 'Unknown',
-            author: item.song_versions?.compositions?.original_author || undefined,
-            key: item.song_versions?.key || undefined,
-            capo: item.song_versions?.capo ?? undefined,
-            transposition: item.transposition_override ?? undefined,
-            content: item.song_versions?.content_chordpro || '',
-            url: compId ? `/songs/${compId}` : undefined,
-        };
-    });
+    const songs: ExportPlaylistSong[] = ((items || []) as unknown as PlaylistExportItem[]).map(exportSongFromItem);
 
     return {
         title: playlist.title,

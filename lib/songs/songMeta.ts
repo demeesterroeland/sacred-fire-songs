@@ -2,9 +2,10 @@ import { songAuthors } from '@/lib/songs/authors';
 
 /**
  * Song page meta lines (Epic 6.1, Story 6.1.7 / G2.2, #391):
- * "Herbert Quinteros · Fire · Healing · Spanish" and "Key E · Capo 3 · Standard".
+ * "Herbert Quinteros · Fire · Healing · Spanish" and "Key E · Capo 3".
  */
 import type { TranslateFn } from '@/lib/i18n';
+import { LANGUAGES_PARENT_NAME } from '@/lib/songs/browseFilters';
 
 /** Any translate function (the app's typed `t`, or a plain test double). */
 type T = TranslateFn;
@@ -35,29 +36,27 @@ export interface TechnicalOptions {
 }
 
 /**
- * "Key E · Capo 3 · Tuning: Standard · Beats 8" (Story 6.2.7 / #510: beats added last). Empty when the version has no key,
- * capo, special tuning or beats. "Standard" is only named next to other technical values, so beats alone show "Beats 8".
- * `chordsOn: false` (#566) drops key, capo and tuning.
+ * "Key E · Capo 3 · Beats 8" (or "Key D · Tuning: Drop D · Beats 8" for non-standard tuning; Story 6.2.7 / #510).
+ * Empty when the version has no key, capo, non-standard tuning or beats. Standard tuning ("Standard", null, or empty)
+ * is omitted completely. `chordsOn: false` (#566) drops key, capo and tuning while keeping beats.
  */
 export function technicalItems(v: VersionTechnical | undefined, t: T, { chordsOn = true }: TechnicalOptions = {}): string[] {
   if (!v) return [];
-  const special = chordsOn && !!v.tuning && v.tuning !== 'Standard';
   const beats = v.beats?.trim() ?? '';
-  const keyCapoOrTuning = chordsOn && (!!v.key || !!v.capo || special);
-  if (!keyCapoOrTuning && !beats) return [];
-  // The tuning is named: "Tuning: Drop D", not a bare "Drop D" (owner decision, #566).
-  const tuning = keyCapoOrTuning ? t('song.meta.tuning', { tuning: special ? v.tuning! : t('song.metadata.standard') }) : null;
+  if (!chordsOn) return beats ? [t('song.meta.beats', { beats })] : [];
+  const tuning = v.tuning?.trim() ?? '';
+  // Standard tuning is omitted; non-standard tunings are labelled ("Tuning: Drop D", owner decision #566).
+  const specialTuning = !!tuning && tuning !== 'Standard';
   return [
-    chordsOn && v.key ? t('song.meta.key', { key: v.key }) : null,
-    chordsOn && v.capo ? t('song.meta.capo', { capo: v.capo }) : null,
-    tuning,
+    v.key ? t('song.meta.key', { key: v.key }) : null,
+    v.capo ? t('song.meta.capo', { capo: v.capo }) : null,
+    specialTuning ? t('song.meta.tuning', { tuning }) : null,
     beats ? t('song.meta.beats', { beats }) : null,
   ].filter((i): i is string => !!i);
 }
 
 type RowCategory = { name: string; parent?: string | null };
 const ARTISTS_PARENT = 'Artists';
-const LANGUAGES_PARENT = 'Languages';
 
 /**
  * Song list rows (Story 6.1.2 / G1.2, #386): "Author · Category · Language" —
@@ -70,8 +69,8 @@ export function songRowMeta(
   t: T
 ): string[] {
   const tags = categories.filter((c) => c.parent !== ARTISTS_PARENT && c.name !== ARTISTS_PARENT);
-  const category = tags.find((c) => c.parent !== LANGUAGES_PARENT);
-  const language = tags.find((c) => c.parent === LANGUAGES_PARENT);
+  const category = tags.find((c) => c.parent !== LANGUAGES_PARENT_NAME);
+  const language = tags.find((c) => c.parent === LANGUAGES_PARENT_NAME);
   // Server queries fill a missing author with the English placeholder 'Unknown'.
   const author = originalAuthor === 'Unknown' ? null : originalAuthor;
   return [songAuthors({ originalAuthor: author }, t).join(', '), category?.name, language?.name].filter(

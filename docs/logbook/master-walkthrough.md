@@ -3488,3 +3488,8 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - `/songbooks/[id]` has `generateMetadata` (book title; the not-found title for an unknown or unreadable book); the read is shared with the page via `React.cache`.
 - Comments and design text: reads are public, own (admins all), nothing through sharing.
 - Left as is: `SONGBOOK_LIST_SELECT` fetches every row it counts (fine at about 1000 songs; RPC or view later if slow).
+
+## Session November 13, 2026 — Story 6.2.23 (#547): search finds a song by the title of its translation
+- `SONGS_SELECT` embeds `song_translations(language, title)` once (the embed guard allows one); `mapCompositionToSong()` fills `Song.translationTitles`. Guests only get the translations of public songs: the existing `Translations follow song privacy` policy filters through `compositions` RLS, so no policy changed.
+- `lib/songs/search.ts` is extended additively: match field and hint kind `translationTitle` (after the songbook title, before the author), carrying the language tag; `songMatchHintText()` gets an optional `locale` (default `'en'`). The hint is `songs.matchTranslation` = "{language}: {text}" ("Dutch: Moeder Aarde"), the language named by `translationLabel()`. 1 new key in 8 locales (`qu` for a native check).
+- Decision: translation lyrics are not searched, titles only (design doc 2.30). Spec: `docs/testing/ux-v3-search-translations.feature`; unit tests in `search.test.ts` and `songSelectGuard.test.ts`.

@@ -5,8 +5,10 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { parseChordProForDisplay } from '../../../lib/chordUtils';
 import { chordTools } from '../../../lib/reader/chordTools';
-import { canTranspose, shiftSemitones, transposeChordPro, transposeKey } from '../../../lib/reader/transpose';
+import { shiftSemitones, transposeChordPro, transposeKey } from '../../../lib/reader/transpose';
+import { readingState } from '../../../lib/songs/readingState';
 import { technicalItems, type VersionTechnical } from '../../../lib/songs/songMeta';
+import { BOTH_VIEW, TRANSLATION_VIEW, type LanguageChoice, type ReadingView, type SongTranslation } from '../../../lib/songs/translations';
 import { DICTIONARIES, SUPPORTED_LOCALES } from '../../../lib/i18n';
 
 type Translate = Parameters<typeof technicalItems>[1];
@@ -15,64 +17,121 @@ const t = ((key: string, vars?: Record<string, string | number>) =>
   (en[key] ?? key).replace(/\{(\w+)\}/g, (_, name: string) => String(vars?.[name] ?? `{${name}}`))) as unknown as Translate;
 
 const LYRICS = 'Down to the river we go';
+const CHORD_CONTENT = '[D]Down to the [G]river we [A]go';
+const DUTCH_LYRICS_ONLY: SongTranslation = { language: 'nl', title: null, lyrics: 'Naar de rivier gaan wij', translator: null };
+
 interface World {
-  version: VersionTechnical;
-  hasChords: boolean;
-  role: string;
+  songId: string;
+  version: VersionTechnical & { content_chordpro?: string | null };
+  translations: SongTranslation[];
+  view: ReadingView | null;
+  languageChoice: LanguageChoice | null;
+  role: string | null;
   chordsPref: boolean;
   semitones: number;
-  content: string;
 }
 const worlds = new WeakMap<object, World>();
 const world = (w: object): World => {
   let s = worlds.get(w);
   if (!s) {
-    s = { version: {}, hasChords: true, role: 'musician', chordsPref: true, semitones: 0, content: `[D]Down to the [G]river we [A]go` };
+    s = {
+      songId: 'song-1',
+      version: { content_chordpro: CHORD_CONTENT },
+      translations: [],
+      view: null,
+      languageChoice: null,
+      role: 'musician',
+      chordsPref: true,
+      semitones: 0,
+    };
     worlds.set(w, s);
   }
   return s;
 };
+const reading = (w: object) => {
+  const s = world(w);
+  return readingState({
+    songId: s.songId,
+    translations: s.translations,
+    languageChoice: s.languageChoice,
+    view: s.view,
+    version: s.version,
+    role: s.role,
+    semitones: s.semitones,
+    locale: 'en',
+  });
+};
 const tools = (w: object) => {
   const s = world(w);
-  return chordTools({ shownHasChords: s.hasChords, chordsPref: s.chordsPref, mayTranspose: canTranspose(s.role) && s.hasChords });
+  const r = reading(w);
+  return chordTools({ shownHasChords: r.shownHasChords, chordsPref: s.chordsPref, mayTranspose: r.mayTranspose });
 };
 /** What the page passes the meta line: the version with the transposed key, and whether chords are on. */
 const metaLine = (w: object) => {
   const s = world(w);
-  const shown = { ...s.version, key: transposeKey(s.version.key, s.semitones) };
+  const r = reading(w);
+  const shown = { ...s.version, key: transposeKey(s.version.key, r.shift) };
   return technicalItems(shown, t, { chordsOn: tools(w).showChordDetails }).join(' · ');
 };
 
 Given('a reader on a song in key D with tuning Drop D', function (this: object) {
-  world(this).version = { key: 'D', capo: null, tuning: 'Drop D' };
+  world(this).version = { key: 'D', capo: null, tuning: 'Drop D', content_chordpro: CHORD_CONTENT };
+});
+Given('a reader on a song in key Am with capo 2, tuning Standard and beats {string}', function (this: object, beats: string) {
+  world(this).version = { key: 'Am', capo: 2, tuning: 'Standard', beats, content_chordpro: CHORD_CONTENT };
 });
 Given('a reader on the same song', function (this: object) {
-  const s = world(this);
-  s.version = { key: 'D', capo: null, tuning: 'Drop D' };
+  world(this).version = { key: 'D', capo: null, tuning: 'Drop D', content_chordpro: CHORD_CONTENT };
 });
 Given('a member on a song in key D with tuning Drop D', function (this: object) {
-  world(this).version = { key: 'D', capo: null, tuning: 'Drop D' };
-  world(this).role = 'member';
+  const s = world(this);
+  s.version = { key: 'D', capo: null, tuning: 'Drop D', content_chordpro: CHORD_CONTENT };
+  s.role = 'member';
 });
+Given('a guest on a song in key D with tuning Drop D', function (this: object) {
+  const s = world(this);
+  s.version = { key: 'D', capo: null, tuning: 'Drop D', content_chordpro: CHORD_CONTENT };
+  s.role = null;
+});
+Given(
+  'a musician reading a song in key D with tuning Drop D and a lyrics-only Dutch translation in {string} view',
+  function (this: object, viewLabel: string) {
+    const s = world(this);
+    s.role = 'musician';
+    s.version = { key: 'D', capo: null, tuning: 'Drop D', content_chordpro: CHORD_CONTENT };
+    s.translations = [DUTCH_LYRICS_ONLY];
+    s.languageChoice = { songId: s.songId, language: 'nl' };
+    s.view = viewLabel.toLowerCase() === 'both' ? BOTH_VIEW : TRANSLATION_VIEW;
+  }
+);
+Given(
+  'a musician reading a song in key D with tuning Drop D, beats {string} and a lyrics-only Dutch translation in {string} view',
+  function (this: object, beats: string, viewLabel: string) {
+    const s = world(this);
+    s.role = 'musician';
+    s.version = { key: 'D', capo: null, tuning: 'Drop D', beats, content_chordpro: CHORD_CONTENT };
+    s.translations = [DUTCH_LYRICS_ONLY];
+    s.languageChoice = { songId: s.songId, language: 'nl' };
+    s.view = viewLabel.toLowerCase() === 'both' ? BOTH_VIEW : TRANSLATION_VIEW;
+  }
+);
 Given('a reader on a song in key D with tuning Drop D and beats {string}', function (this: object, beats: string) {
-  world(this).version = { key: 'D', capo: null, tuning: 'Drop D', beats };
+  world(this).version = { key: 'D', capo: null, tuning: 'Drop D', beats, content_chordpro: CHORD_CONTENT };
 });
 Given('a reader opens the song page ⋮ menu', function () {});
 Given('a song without chords', function (this: object) {
   const s = world(this);
-  s.hasChords = false;
   s.chordsPref = true; // the stored preference does not matter without chords
-  s.version = { key: 'D', capo: null, tuning: 'Drop D' };
-  s.content = LYRICS;
+  s.version = { key: 'D', capo: null, tuning: 'Drop D', content_chordpro: LYRICS };
 });
 Given('a version in key D with capo 2, tuning Drop D and beats {string}', function (this: object, beats: string) {
-  world(this).version = { key: 'D', capo: 2, tuning: 'Drop D', beats };
+  world(this).version = { key: 'D', capo: 2, tuning: 'Drop D', beats, content_chordpro: CHORD_CONTENT };
 });
 
 // Given or When: the switch is on; a scenario that starts here reads the song in key D with tuning Drop D.
 When('the Chords switch is on', function (this: object) {
   const s = world(this);
-  if (!s.version.key) s.version = { key: 'D', capo: null, tuning: 'Drop D' };
+  if (!s.version.key) s.version = { ...s.version, key: 'D', capo: null, tuning: 'Drop D' };
   s.chordsPref = true;
 });
 When('they switch Chords off', function (this: object) {
@@ -89,7 +148,7 @@ Then('the toolbar shows the transpose stepper next to the Chords switch', functi
   // Next to the switch: the toolbar renders the stepper straight after it (RTL: ReaderToolbar.test.tsx).
   const toolbar = fs.readFileSync(path.resolve(__dirname, '../../../components/song/ReaderToolbar.tsx'), 'utf8');
   const at = (needle: string) => toolbar.indexOf(needle);
-  assert.ok(at("role=\"switch\"") > 0 && at('<TransposeStepper') > at('role="switch"') && at('<TransposeStepper') < at('<span aria-hidden>A−'));
+  assert.ok(at('role="switch"') > 0 && at('<TransposeStepper') > at('role="switch"') && at('<TransposeStepper') < at('<span aria-hidden>A−'));
 });
 Then('the meta line shows {string}', function (this: object, expected: string) {
   assert.equal(metaLine(this), expected);
@@ -102,7 +161,7 @@ Then('key, capo and tuning are hidden', function (this: object) {
   assert.equal(metaLine(this), '');
 });
 Then('the lyrics stay', function (this: object) {
-  const text = parseChordProForDisplay(world(this).content)
+  const text = parseChordProForDisplay(world(this).version.content_chordpro ?? '')
     .flatMap((s) => s.lines.flatMap((l) => l.items.map((i) => i.lyrics ?? '')))
     .join('');
   assert.ok(text.includes('Down to the river we go'), text);
@@ -110,25 +169,31 @@ Then('the lyrics stay', function (this: object) {
 });
 Then('every chord is two semitones higher', function (this: object) {
   const s = world(this);
-  assert.equal(s.semitones, 2);
+  const r = reading(this);
+  assert.equal(r.shift, 2);
   const chords = (c: string) => [...c.matchAll(/\[([^\]]+)\]/g)].map((m) => m[1]);
-  assert.deepEqual(chords(transposeChordPro(s.content, s.semitones, { key: 'D' })), ['E', 'A', 'B']);
+  assert.deepEqual(chords(transposeChordPro(s.version.content_chordpro ?? '', r.shift, { key: 'D' })), ['E', 'A', 'B']);
 });
 Then('it has no Transpose item', function () {
   const root = path.resolve(__dirname, '../../../');
   const menu = fs.readFileSync(path.join(root, 'components/song/SongMenuSheet.tsx'), 'utf8');
   const page = fs.readFileSync(path.join(root, 'app/songs/[id]/page.tsx'), 'utf8');
   assert.ok(!/viewer\.transpose|transpose/i.test(menu.replace(/\/\*[\s\S]*?\*\//g, '')), 'the menu has no transpose code');
-  assert.ok(!/<SongMenuSheet[\s\S]*?transpose=/.test(page), 'the page passes no transpose to the menu');
+  const start = page.indexOf('<SongMenuSheet');
+  assert.ok(start >= 0, 'SongMenuSheet JSX tag is present on the song page');
+  const end = page.indexOf('/>', start);
+  assert.ok(end > start, 'SongMenuSheet JSX tag closes');
+  assert.ok(!/\btranspose=/.test(page.slice(start, end)), 'the page passes no transpose prop to SongMenuSheet');
 });
 Then('there is no Chords switch, no transpose stepper and no key line', function (this: object) {
-  const s = world(this);
-  // The switch shows for a song with chords only (ReaderToolbar `hasChords`); stepper and details need chords on.
-  assert.equal(s.hasChords, false);
-  assert.equal(tools(this).chordsOn, false);
-  assert.equal(tools(this).showStepper, false);
-  assert.equal(tools(this).showChordDetails, false);
-  assert.equal(metaLine(this), '');
+  const r = reading(this);
+  const tl = tools(this);
+  // Both readingState.shownHasChords (which feeds ReaderToolbar `hasChords`) and chordTools hide everything chord-related.
+  assert.equal(r.shownHasChords, false);
+  assert.equal(tl.chordsOn, false);
+  assert.equal(tl.showStepper, false);
+  assert.equal(tl.showChordDetails, false);
+  assert.doesNotMatch(metaLine(this), /\b(Key|Capo|Tuning)\b/);
 });
 Then('the meta line shows only {string}', function (this: object, expected: string) {
   assert.equal(metaLine(this), expected);

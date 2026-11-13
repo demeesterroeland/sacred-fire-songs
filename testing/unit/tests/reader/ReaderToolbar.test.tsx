@@ -168,15 +168,29 @@ describe('ReaderToolbar — transpose stepper', () => {
     expect(screen.getByRole('button', { name: 'Down a semitone' }).getAttribute('aria-disabled')).toBe('false');
   });
 
-  it('tapping the value goes back to the original key, only after a change', () => {
+  it('tapping the value goes back to the original key, only after a change, and its accessible name keeps the shift', () => {
     const none = transpose();
     const { rerender } = render(<ReaderToolbar {...base} transpose={none} />);
-    expect(screen.queryByRole('button', { name: 'Original key' })).toBeNull();
+    expect(screen.queryByRole('button', { name: /Original key/ })).toBeNull();
     expect(screen.getByTestId('transpose-value').textContent).toBe('0');
     const changed = transpose({ semitones: -3 });
     rerender(<ReaderToolbar {...base} transpose={changed} />);
-    fireEvent.click(screen.getByRole('button', { name: 'Original key' }));
+    const resetBtn = screen.getByRole('button', { name: '−3 — Original key' });
+    fireEvent.click(resetBtn);
     expect(changed.onReset).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps one stable live region across 0 -> +1 -> 0 so screen readers announce the first change', () => {
+    const { rerender } = render(<ReaderToolbar {...base} transpose={transpose({ semitones: 0 })} />);
+    const live = screen.getByTestId('transpose-live');
+    expect(live.getAttribute('aria-live')).toBe('polite');
+    expect(live.textContent).toBe('Transposed 0');
+    rerender(<ReaderToolbar {...base} transpose={transpose({ semitones: 1 })} />);
+    expect(screen.getByTestId('transpose-live')).toBe(live);
+    expect(live.textContent).toBe('Transposed +1');
+    rerender(<ReaderToolbar {...base} transpose={transpose({ semitones: 0 })} />);
+    expect(screen.getByTestId('transpose-live')).toBe(live);
+    expect(live.textContent).toBe('Transposed 0');
   });
 
   it('is hidden while chords are off', () => {
@@ -205,7 +219,7 @@ describe('ReaderToolbar — transpose stepper', () => {
 
   it('every stepper control is a 44 px target, and the value does not shrink below readable text', () => {
     render(<ReaderToolbar {...base} transpose={transpose({ semitones: 1 })} />);
-    for (const name of ['Down a semitone', 'Up a semitone', 'Original key']) {
+    for (const name of ['Down a semitone', 'Up a semitone', '+1 — Original key']) {
       expect(screen.getByRole('button', { name }).className).toMatch(/min-h-tap/);
     }
     expect(screen.getByTestId('transpose-value').className).not.toMatch(/text-\[(?:\d|1[01])px\]|text-xs/);

@@ -26,8 +26,10 @@ describe('songMetaItems', () => {
 });
 
 describe('technicalItems', () => {
-  it('joins key, capo and tuning in one line', () => {
-    expect(technicalItems({ key: 'E', capo: 3, tuning: null }, t)).toEqual(['Key E', 'Capo 3', 'Tuning: Standard']);
+  it('joins key, capo and non-standard tuning in one line, omitting standard tuning', () => {
+    expect(technicalItems({ key: 'E', capo: 3, tuning: null }, t)).toEqual(['Key E', 'Capo 3']);
+    expect(technicalItems({ key: 'E', capo: 3, tuning: '' }, t)).toEqual(['Key E', 'Capo 3']);
+    expect(technicalItems({ key: 'E', capo: 3, tuning: 'Standard' }, t)).toEqual(['Key E', 'Capo 3']);
     expect(technicalItems({ key: 'D', capo: null, tuning: 'DADGAD' }, t)).toEqual(['Key D', 'Tuning: DADGAD']);
   });
 
@@ -37,8 +39,9 @@ describe('technicalItems', () => {
   });
 
   // Story 6.2.7 / G1.2 (#510): the beats of the version (songbook notation such as "8" or "8y4") join the line.
-  it('adds the beats after the tuning when the version has them', () => {
-    expect(technicalItems({ key: 'E', capo: 5, tuning: null, beats: '8' }, t)).toEqual(['Key E', 'Capo 5', 'Tuning: Standard', 'Beats 8']);
+  it('adds the beats after the tuning (when non-standard) or capo', () => {
+    expect(technicalItems({ key: 'E', capo: 5, tuning: null, beats: '8' }, t)).toEqual(['Key E', 'Capo 5', 'Beats 8']);
+    expect(technicalItems({ key: 'Am', capo: 2, tuning: 'Standard', beats: '8' }, t)).toEqual(['Key Am', 'Capo 2', 'Beats 8']);
     expect(technicalItems({ key: 'E', capo: 5, tuning: 'DADGAD', beats: '8y4' }, t)).toEqual(['Key E', 'Capo 5', 'Tuning: DADGAD', 'Beats 8y4']);
   });
 
@@ -50,7 +53,7 @@ describe('technicalItems', () => {
   it('shows nothing for an empty or whitespace beats value', () => {
     expect(technicalItems({ key: null, capo: null, tuning: null, beats: '' }, t)).toEqual([]);
     expect(technicalItems({ key: null, capo: null, tuning: null, beats: '   ' }, t)).toEqual([]);
-    expect(technicalItems({ key: 'G', capo: null, tuning: null, beats: '  ' }, t)).toEqual(['Key G', 'Tuning: Standard']);
+    expect(technicalItems({ key: 'G', capo: null, tuning: null, beats: '  ' }, t)).toEqual(['Key G']);
   });
 
   it('trims the beats value', () => {
@@ -70,15 +73,17 @@ describe('technicalItems — chords off', () => {
     expect(technicalItems({ key: 'D', capo: 2, tuning: 'Drop D' }, t, { chordsOn: false })).toEqual([]);
   });
 
-  it('leaves the beats while chords are off, without a "Standard" next to them', () => {
+  it('leaves the beats while chords are off', () => {
     expect(technicalItems({ key: 'D', capo: 2, tuning: null, beats: '8y4' }, t, { chordsOn: false })).toEqual(['Beats 8y4']);
   });
 });
 
-// Owner decision (#566): the tuning is named in the meta line.
+// Owner decisions (#566): non-standard tuning is named in the meta line; standard tuning is omitted completely.
 describe('technicalItems — tuning label', () => {
-  it('reads "Key D · Tuning: Drop D"', () => {
+  it('reads "Key D · Tuning: Drop D" for non-standard tuning and omits Standard', () => {
     expect(technicalItems({ key: 'D', capo: null, tuning: 'Drop D' }, t).join(' · ')).toBe('Key D · Tuning: Drop D');
+    expect(technicalItems({ key: 'D', capo: 3, tuning: 'Drop D', beats: '4' }, t).join(' · ')).toBe('Key D · Capo 3 · Tuning: Drop D · Beats 4');
+    expect(technicalItems({ key: 'Am', capo: 2, tuning: 'Standard', beats: '8' }, t).join(' · ')).toBe('Key Am · Capo 2 · Beats 8');
   });
 
   it('after a transpose only the key changes: "Key E · Tuning: Drop D", no hint of the original key', () => {
