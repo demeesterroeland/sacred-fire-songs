@@ -383,6 +383,8 @@ export default function SongDetailPage() {
         void queryClient.invalidateQueries({ queryKey: SONG_KEYS.all() });
         void queryClient.invalidateQueries({ queryKey: SONG_KEYS.detail(summary.target_id) });
         void queryClient.invalidateQueries({ queryKey: SONG_KEYS.allFavorites() });
+        void queryClient.invalidateQueries({ queryKey: SONG_KEYS.globalFilterCounts() });
+        void queryClient.invalidateQueries({ queryKey: SONG_KEYS.allGlobalBrowseCounts() });
         router.refresh();
     };
 
