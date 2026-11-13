@@ -5,7 +5,9 @@ import { readFileSync } from 'node:fs';
 import { createClient } from '@supabase/supabase-js';
 import { DICTIONARIES, type Locale } from '../../../lib/i18n';
 import { SONG_SELECT } from '../../../lib/songs/songSelect';
+import { viewChangeSearch } from '../../../lib/songs/readingState';
 import {
+  ORIGINAL_VIEW,
   languageOptions,
   languageSearch,
   linkedLanguageChoice,
@@ -23,7 +25,6 @@ const t = (k: string, vars?: Record<string, string | number>) => {
   const text = (DICTIONARIES.en as Record<string, string>)[k] ?? k;
   return vars ? text.replace(/\{(\w+)\}/g, (_m, name) => String(vars[name])) : text;
 };
-const tFor = (locale: Locale) => (k: string) => (DICTIONARIES[locale] as Record<string, string>)[k] ?? k;
 
 interface State {
   songTitle: string;
@@ -58,7 +59,7 @@ Given('a song without translations', function (this: object) {
 
 When('I pick {string} in the language switch', function (this: object, label: string) {
   const s = get(this);
-  const option = languageOptions(s.translations, t, s.locale)!.find((o) => o.label === label);
+  const option = languageOptions(s.translations, s.locale)!.find((o) => o.label === label);
   assert.ok(option, `no option "${label}"`);
   s.choice = { songId: SONG, language: option.value };
 });
@@ -72,15 +73,15 @@ Then('the original lyrics are shown', function (this: object) {
 });
 Then('the language switch offers {string}, {string} and {string}', function (this: object, a: string, b: string, c: string) {
   const s = get(this);
-  assert.deepEqual(languageOptions(s.translations, t, s.locale)!.map((o) => o.label), [a, b, c]);
+  assert.deepEqual(languageOptions(s.translations, s.locale)!.map((o) => o.label), [a, b, c]);
 });
 Then('the language switch offers {string} and {string}', function (this: object, a: string, b: string) {
   const s = get(this);
-  assert.deepEqual(languageOptions(s.translations, tFor(s.locale), s.locale)!.map((o) => o.label), [a, b]);
+  assert.deepEqual(languageOptions(s.translations, s.locale)!.map((o) => o.label), [a, b]);
 });
 Then('the song has no language switch', function (this: object) {
   const s = get(this);
-  assert.equal(languageOptions(s.translations, t, s.locale), null);
+  assert.equal(languageOptions(s.translations, s.locale), null);
 });
 When('the app language is set to Dutch', function (this: object) {
   get(this).locale = 'nl';
@@ -97,9 +98,10 @@ When('I pick the language {string}', function (this: object, language: string) {
   const s = get(this);
   s.search = languageSearch(s.search, language);
 });
-When('I pick the original language', function (this: object) {
+When('I pick the original', function (this: object) {
+  // "Original" in the reader switch (#517): neither `?lang=` nor `?view=`.
   const s = get(this);
-  s.search = languageSearch(s.search, null);
+  s.search = viewChangeSearch(s.search, ORIGINAL_VIEW, 'en');
 });
 Then('the address is {string}', function (this: object, search: string) {
   assert.equal(get(this).search, search);

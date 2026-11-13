@@ -8,7 +8,7 @@
 import { DEFAULT_LOCALE, type Locale, type TranslateFn } from '@/lib/i18n';
 import { primarySongbookName, versionBaseLabel, type LabelledVersion } from '@/lib/songs/versionLabels';
 import { RECORDING_PARAM } from '@/lib/songs/recordingLink';
-import { BOTH_VIEW, LANGUAGE_PARAM, VIEW_PARAM, type ReadingView } from '@/lib/songs/translations';
+import { LANGUAGE_PARAM, ORIGINAL_VIEW, VIEW_PARAM, type ReadingView } from '@/lib/songs/translations';
 
 export type VersionLike = LabelledVersion;
 
@@ -128,7 +128,7 @@ export function versionSearch(
   params.delete(VIEW_PARAM);
   if (!isDefault) params.append('version', versionId);
   if (language) params.append(LANGUAGE_PARAM, language);
-  if (language && view === BOTH_VIEW) params.append(VIEW_PARAM, BOTH_VIEW);
+  if (language && view && view !== ORIGINAL_VIEW) params.append(VIEW_PARAM, view);
   const search = params.toString();
   return search ? `?${search}` : '';
 }

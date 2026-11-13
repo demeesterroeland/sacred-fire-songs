@@ -5,18 +5,21 @@ import { DICTIONARIES } from '../../../lib/i18n';
 import { lyricPx, stepBy } from '../../../lib/reader/readerPrefs';
 import { DEFAULT_LYRIC_STEP } from '../../../lib/design/tokens';
 import { bilingualRows, type BilingualRow } from '../../../lib/songs/stanzas';
-import { languageChangeSearch, readingState, type ReadingState } from '../../../lib/songs/readingState';
 import {
-  BOTH_VIEW,
+  languageChangeSearch,
+  readingState,
+  staleReadingSearch,
+  viewChangeSearch,
+  type ReadingState,
+} from '../../../lib/songs/readingState';
+import {
   LANGUAGE_PARAM,
-  TRANSLATION_VIEW,
+  ORIGINAL_VIEW,
   VIEW_PARAM,
-  languageSearch,
+  languageOptions,
   linkedLanguageChoice,
   linkedReadingView,
   readingViewOptions,
-  resolveTranslation,
-  viewSearch,
   type LanguageChoice,
   type ReadingView,
   type SongTranslation,
@@ -28,11 +31,12 @@ import { SEEDED_EMAILS } from './access-policies.steps';
 const t = (k: string) => (DICTIONARIES.en as Record<string, string>)[k] ?? k;
 const SONG = 'song-517';
 
+/** The song page: the choices it holds (taps, else the address) and the address itself. */
 interface State {
   original: string;
   translations: SongTranslation[];
   choice: LanguageChoice | null;
-  view: ReadingView;
+  view: ReadingView | null;
   search: string;
   step: number;
   chords: boolean;
@@ -47,7 +51,7 @@ const get = (w: object): State => {
       original: '',
       translations: [],
       choice: null,
-      view: TRANSLATION_VIEW,
+      view: null,
       search: '',
       step: DEFAULT_LYRIC_STEP,
       chords: true,
@@ -62,20 +66,20 @@ const get = (w: object): State => {
 const stanzaText = (lines: string[]) => lines.join('\n\n');
 const QUECHUA = stanzaText(['Pachamama sumaq\nkawsay', 'Inti tayta\nk’anchay']);
 const ENGLISH = stanzaText(['Mother earth, beautiful\nlife', 'Father sun\nlight']);
+const DUTCH = stanzaText(['Moeder aarde, mooi\nleven', 'Vader zon\nlicht']);
 
 /** What the song page reads, by the page's own rules (`readingState`). */
-const reading = (s: State): ReadingState =>
+const reading = (s: State, view: ReadingView | null = s.view): ReadingState =>
   readingState({
     songId: SONG,
     translations: s.translations,
     languageChoice: s.choice,
-    view: s.view,
+    view,
     version: { content_chordpro: s.original },
     role: s.role,
     semitones: s.semitones,
+    locale: 'en',
   });
-/** The translation the reader is on; `null` = the original language. */
-const translationOf = (s: State) => reading(s).translation;
 /** The rows of "Both", as the page passes them to `SongBilingualDisplay` (the original with its chords flag). */
 const rows = (s: State): BilingualRow[] => {
   const r = reading(s);
@@ -87,69 +91,87 @@ const rows = (s: State): BilingualRow[] => {
     showChords: s.chords,
   });
 };
-const chooseTranslation = (s: State, translation: SongTranslation) => {
-  s.translations = [{ translator: s.translator, ...translation }];
-  s.choice = { songId: SONG, language: translation.language };
-  s.search = languageSearch('', translation.language);
+const withTranslations = (s: State, original: string, translations: SongTranslation[]) => {
+  s.original = original;
+  s.translations = translations.map((tr) => ({ translator: s.translator, ...tr }));
+};
+/** The page opened with `search`: the address feeds the choices, then stale values are replaced (once the song loads). */
+const open = (s: State, search: string) => {
+  const params = new URLSearchParams(search);
+  s.choice = linkedLanguageChoice(SONG, params.get(LANGUAGE_PARAM));
+  s.view = linkedReadingView(params.get(VIEW_PARAM));
+  s.search = staleReadingSearch(search, reading(s)) ?? search;
+};
+/** A tap on the view switch, as `selectReadingView` on the page: the language read (or last read) stays chosen. */
+const pickView = (s: State, view: ReadingView) => {
+  const next = reading(s, view);
+  const language = next.language ?? reading(s).language;
+  if (language) s.choice = { songId: SONG, language };
+  s.view = view;
+  s.search = viewChangeSearch(s.search, view, next.language);
 };
 
 // ── Given ─────────────────────────────────────────────────────────────────────
 
 Given(/^a song with a translation on a (?:375 px|desktop) screen$/, function (this: object) {
   // The phone and desktop layouts draw the same rows: one column (original, then translation) or two (side by side).
+  withTranslations(get(this), QUECHUA, [{ language: 'en', lyrics: ENGLISH }]);
+});
+Given('a song with a Dutch and an English translation', function (this: object) {
+  withTranslations(get(this), QUECHUA, [{ language: 'en', lyrics: ENGLISH }, { language: 'nl', lyrics: DUTCH }]);
+});
+Given('a song with a Dutch and an English translation opened with {string}', function (this: object, search: string) {
   const s = get(this);
-  s.original = QUECHUA;
-  chooseTranslation(s, { language: 'en', lyrics: ENGLISH });
+  withTranslations(s, QUECHUA, [{ language: 'en', lyrics: ENGLISH }, { language: 'nl', lyrics: DUTCH }]);
+  open(s, search);
 });
 Given(
   'a song whose original has {int} stanzas and whose translation has {int}',
   function (this: object, originals: number, translations: number) {
-    const s = get(this);
-    s.original = stanzaText(Array.from({ length: originals }, (_v, i) => `Original stanza ${i + 1}`));
-    chooseTranslation(s, { language: 'en', lyrics: stanzaText(Array.from({ length: translations }, (_v, i) => `Translated stanza ${i + 1}`)) });
+    withTranslations(
+      get(this),
+      stanzaText(Array.from({ length: originals }, (_v, i) => `Original stanza ${i + 1}`)),
+      [{ language: 'en', lyrics: stanzaText(Array.from({ length: translations }, (_v, i) => `Translated stanza ${i + 1}`)) }]
+    );
   }
 );
 Given(
   'a song whose original starts with a chord intro before 2 stanzas, with a translation of 2 stanzas',
   function (this: object) {
-    const s = get(this);
-    s.original = `[G] [C] [D]\n\n${QUECHUA}`;
-    chooseTranslation(s, { language: 'en', lyrics: ENGLISH });
+    withTranslations(get(this), `[G] [C] [D]\n\n${QUECHUA}`, [{ language: 'en', lyrics: ENGLISH }]);
   }
 );
 Given('a song without a translation', function (this: object) {
+  withTranslations(get(this), QUECHUA, []);
+});
+Given('a song without a translation opened with {string}', function (this: object, search: string) {
   const s = get(this);
-  s.original = QUECHUA;
-  s.translations = [];
-  s.choice = linkedLanguageChoice(SONG, 'en');
+  withTranslations(s, QUECHUA, []);
+  open(s, search);
 });
 Given('a song with chords and a translation with chords', function (this: object) {
-  const s = get(this);
-  s.original = '[G]Pachamama [C]sumaq\n\n[D]Inti [G]tayta';
-  chooseTranslation(s, { language: 'en', lyrics: '[G]Mother [C]earth\n\n[D]Father [G]sun' });
+  withTranslations(get(this), '[G]Pachamama [C]sumaq\n\n[D]Inti [G]tayta', [{ language: 'en', lyrics: '[G]Mother [C]earth\n\n[D]Father [G]sun' }]);
 });
 Given('a song with a Hebrew translation', function (this: object) {
-  const s = get(this);
-  s.original = QUECHUA;
-  chooseTranslation(s, { language: 'he', lyrics: 'אמא אדמה\n\nאבא שמש' });
+  withTranslations(get(this), QUECHUA, [{ language: 'he', lyrics: 'אמא אדמה\n\nאבא שמש' }]);
 });
 
 // ── When ──────────────────────────────────────────────────────────────────────
 
 When('I pick {string}', function (this: object, label: string) {
   const s = get(this);
-  assert.ok(translationOf(s), 'no Translation · Both switch without a translation');
+  assert.ok(reading(s).viewSwitchVisible, 'no reader switch without a translation');
   const option = readingViewOptions(t).find((o) => o.label === label);
   assert.ok(option, `no option "${label}"`);
-  s.view = option.value as ReadingView;
-  s.search = viewSearch(s.search, s.view);
+  pickView(s, option.value as ReadingView);
 });
-When('I read the original language', function (this: object) {
-  // The page: picking "Original language" resets the view and drops `?view=` with `?lang=`.
+When('I tap the language {string}', function (this: object, language: string) {
+  // `selectLanguage` on the page: the language switch is there, the view (Translation or Both) stays.
   const s = get(this);
-  const { search, resetView } = languageChangeSearch(s.search, null);
-  s.choice = { songId: SONG, language: 'original' };
-  if (resetView) s.view = TRANSLATION_VIEW;
+  assert.ok(reading(s).languageSwitchVisible, 'no language switch on screen');
+  const { search, view } = languageChangeSearch(s.search, language, reading(s).view);
+  s.choice = { songId: SONG, language };
+  s.view = view;
   s.search = search;
 });
 When('I switch the chords off', function (this: object) {
@@ -161,7 +183,11 @@ When('I press {string}', function (this: object, label: string) {
   s.step = stepBy(s.step, label === 'A+' ? 1 : -1);
 });
 When('I read another version of the song', function (this: object) {
+  // `selectVersion` on the page: back to Original, the language being read is remembered.
   const s = get(this);
+  const { language } = reading(s);
+  if (language) s.choice = { songId: SONG, language };
+  s.view = ORIGINAL_VIEW;
   s.search = versionSearch(s.search, 'v2', false);
 });
 
@@ -206,10 +232,6 @@ Then('the intro has a row of its own', function (this: object) {
   assert.ok(first.original && !first.translation);
   assert.ok(first.original.section.lines.every((l) => l.items.every((i) => !i.lyrics?.trim())));
 });
-Then('the reader shows no Translation · Both switch', function (this: object) {
-  // `SongReadingViewSwitch visible={reading.viewSwitchVisible}`: no translation being read, no switch.
-  assert.equal(reading(get(this)).viewSwitchVisible, false);
-});
 const chordsIn = (row: BilingualRow, side: 'original' | 'translation') =>
   !!row[side]?.chordsOn && row[side]!.section.lines.some((l) => l.items.some((i) => i.chords));
 Then('the original shows its chords', function (this: object) {
@@ -243,27 +265,62 @@ Then('the address reads {string}', function (this: object, search: string) {
 });
 Then('the share link ends with {string}', function (this: object, search: string) {
   const s = get(this);
-  const url = versionShareUrl(`https://x.test/songs/${SONG}${s.search}`, 'v1', true, translationOf(s)?.language ?? null, s.view);
+  const r = reading(s);
+  const url = versionShareUrl(`https://x.test/songs/${SONG}${s.search}`, 'v1', true, r.language, r.view);
   assert.ok(url.endsWith(search), url);
 });
 Then('opening {string} shows both languages', function (this: object, search: string) {
   const s = get(this);
-  const params = new URLSearchParams(search);
-  const opened: State = {
-    ...s,
-    choice: linkedLanguageChoice(SONG, params.get(LANGUAGE_PARAM)),
-    view: linkedReadingView(params.get(VIEW_PARAM)),
-  };
+  const opened: State = { ...s };
+  open(opened, search);
   assert.ok(rows(opened).length > 0);
+  assert.equal(opened.search, search, 'the link was not clean');
+});
+Then('the reader shows no reader switch', function (this: object) {
+  // `SongReadingViewSwitch visible={reading.viewSwitchVisible}`: no translation with lyrics, no switch (and no space).
+  assert.equal(reading(get(this)).viewSwitchVisible, false);
+});
+Then('the reader shows no language switch', function (this: object) {
+  const s = get(this);
+  assert.equal(reading(s).languageSwitchVisible, false);
+});
+Then(
+  'the reader switch offers {string}, {string} and {string} with {string} chosen',
+  function (this: object, a: string, b: string, c: string, chosen: string) {
+    const r = reading(get(this));
+    assert.equal(r.viewSwitchVisible, true);
+    const options = readingViewOptions(t);
+    assert.deepEqual(options.map((o) => o.label), [a, b, c]);
+    assert.equal(options.find((o) => o.value === r.view)?.label, chosen);
+  }
+);
+Then('the language switch lists {string} and {string}', function (this: object, a: string, b: string) {
+  const s = get(this);
+  assert.equal(reading(s).languageSwitchVisible, true);
+  assert.deepEqual(languageOptions(s.translations, 'en')!.map((o) => o.label), [a, b]);
+});
+Then('the reader shows the original language', function (this: object) {
+  const r = reading(get(this));
+  assert.deepEqual([r.view, r.translation, r.showBoth, r.readsOriginal], [ORIGINAL_VIEW, null, false, true]);
+});
+Then('the reader shows {string}', function (this: object, view: string) {
+  assert.equal(reading(get(this)).view, view);
+});
+Then('the translation {string} is shown alone', function (this: object, language: string) {
+  const r = reading(get(this));
+  assert.deepEqual([r.language, r.showBoth, r.readsOriginal], [language, false, false]);
+});
+Then('both languages are shown with {string}', function (this: object, language: string) {
+  const r = reading(get(this));
+  assert.deepEqual([r.language, r.showBoth], [language, true]);
 });
 
-// Reading state on the page: transpose, source line, translator, a stale `?view=both`.
+// Reading state on the page: transpose, source line, translator.
 Given('a musician reading a song with chords and a translation by {string}', function (this: object, name: string) {
   const s = get(this);
   s.role = 'musician';
   s.translator = name;
-  s.original = '[G]Pachamama [C]sumaq\n\n[D]Inti [G]tayta';
-  chooseTranslation(s, { language: 'en', lyrics: 'Mother earth\n\nFather sun' });
+  withTranslations(s, '[G]Pachamama [C]sumaq\n\n[D]Inti [G]tayta', [{ language: 'en', lyrics: 'Mother earth\n\nFather sun' }]);
 });
 When('I transpose {int} semitones up', function (this: object, n: number) {
   get(this).semitones = n;
@@ -276,38 +333,10 @@ Then('the original is transposed {int} semitones and its source line is shown', 
 });
 Then('the translation alone is not transposed and shows no source line', function (this: object) {
   const r = reading(get(this));
-  assert.deepEqual([r.showBoth, r.mayTranspose, r.shift, r.showSource], [false, false, 0, false]);
+  assert.deepEqual([r.showBoth, r.readsOriginal, r.mayTranspose, r.shift, r.showSource], [false, false, false, 0, false]);
 });
 Then('the reader names the translator {string}', function (this: object, name: string) {
   assert.equal(reading(get(this)).translator, name);
-});
-Given('a song with a translation opened with {string}', function (this: object, search: string) {
-  const s = get(this);
-  s.original = QUECHUA;
-  s.translations = [{ language: 'en', lyrics: ENGLISH }];
-  const params = new URLSearchParams(search);
-  s.choice = linkedLanguageChoice(SONG, params.get(LANGUAGE_PARAM));
-  s.view = linkedReadingView(params.get(VIEW_PARAM));
-  s.search = search;
-  // The page: a stale `?view=both` (no translation to show) is dropped once the song is loaded.
-  const r = reading(s);
-  if (r.staleView) {
-    s.view = TRANSLATION_VIEW;
-    s.search = viewSearch(s.search, TRANSLATION_VIEW);
-  }
-});
-Then('the reader shows the original language', function (this: object) {
-  const r = reading(get(this));
-  assert.deepEqual([r.translation, r.showBoth, r.readsOriginal], [null, false, true]);
-});
-When('I tap the language {string}', function (this: object, language: string) {
-  const s = get(this);
-  s.choice = { songId: SONG, language };
-  s.search = languageChangeSearch(s.search, language).search;
-});
-Then('the translation is shown alone', function (this: object) {
-  const r = reading(get(this));
-  assert.ok(r.translation && !r.showBoth);
 });
 
 // ── @seed ─────────────────────────────────────────────────────────────────────
@@ -337,7 +366,6 @@ Given(
   }
 );
 When('a guest opens it with {string}', async function (this: object, label: string) {
-  assert.equal(linkedReadingView(label), BOTH_VIEW);
   const id = seededSongs.get(this)!;
   const [version] = await queryAsAnon<{ content_chordpro: string }>(
     `SELECT content_chordpro FROM public.song_versions WHERE composition_id = $1`,
@@ -347,8 +375,10 @@ When('a guest opens it with {string}', async function (this: object, label: stri
     `SELECT language, title, lyrics, translator FROM public.song_translations WHERE composition_id = $1`,
     [id]
   );
-  const translation = resolveTranslation(translations, linkedLanguageChoice(id, 'es'), id);
-  assert.ok(version && translation, 'the guest cannot read the song or its translation');
+  // No language in the link: Both opens the first (here the only) language.
+  const r = readingState({ songId: id, translations, languageChoice: null, view: linkedReadingView(label), version, role: null, semitones: 0, locale: 'en' });
+  const translation = r.translation;
+  assert.ok(version && r.showBoth && translation, 'the guest cannot read the song or its translation');
   guestRows.set(
     this,
     bilingualRows(version.content_chordpro, translation.lyrics ?? '', { language: translation.language, step: DEFAULT_LYRIC_STEP, hasChords: true, showChords: true })

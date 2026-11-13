@@ -191,11 +191,11 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'song.version.fallback': "Rikch’ay {n}",
   'song.version.numbered': "{name} {n}",
   'song.version.takeInProgress': "Versionta tikrachinaykipaq, ñawpaqta chay grabasqaykita tukuy icha chinkachiy.",
-  'song.language.label': "Qillqapa simin",
-  'song.language.originalLanguage': "Ñawpaq simi",
+  // Story 6.2.14 (#517): machine-assisted, needs a native check (language label, view switch).
+  'song.language.label': "Tikrasqapa simin",
   'song.translation.by': "{name} tikrasqan",
-  // Story 6.2.14 (#517): machine-assisted, needs a native check.
   'song.translation.view.label': "Rikuchiy",
+  'song.translation.view.original': "Ñawpaq",
   'song.translation.view.translation': "Tikrasqa",
   'song.translation.view.both': "Iskayninku",
   'song.edit.versionCaption': "Kay rikch’aytam allinchachkanki: {name}",

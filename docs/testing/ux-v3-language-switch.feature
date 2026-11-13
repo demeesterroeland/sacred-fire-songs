@@ -1,5 +1,6 @@
-# Version: 1.1 | Date: Nov 12, 2026
+# Version: 1.2 | Date: Nov 13, 2026
 # Changelog
+# 1.2 | Nov 13, 2026 | Story 6.2.14 (#517): "Original" moves to the reader switch Original · Translation · Both; the language switch lists the languages only, with two or more of them. Back to the original goes through that switch.
 # 1.1 | Nov 12, 2026 | Review fixes (#535): migration keeps versions with chords in another key/capo/tuning or blank lyrics, appends moved takes after the original's, reports dropped sources; the version-switch step reads the real labels. Re-check: migration keeps a version with its own melody, note, beats, media link or votes, and a lyrics-only version used in a playlist with a transposition when its key differs; reports the contributor; tag fallback needs 2-8 character subtags.
 # 1.0 | Nov 12, 2026 | Story 6.2.13 (#516, G3.1): language switch next to the version switch, fed by song_translations; interim `translation` versions move to song_translations.
 @ux-v3 @language-switch
@@ -9,8 +10,10 @@ Feature: Read a translation without leaving the song
   So that I read a translation of the song without leaving it
 
   # Rules decided for this story (also in docs/design/application-analysis&design.md):
-  #  - The switch lists "Original language" plus the languages the song has in song_translations (lyrics not blank); a song
-  #    without translations shows no switch and takes no space.
+  #  - The switch lists the languages the song has in song_translations (lyrics not blank) and picks the language of
+  #    "Translation" / "Both" in the reader switch Original · Translation · Both (#517, docs/testing/ux-v3-translation-both.feature).
+  #    "Original" is only in that reader switch. With fewer than two languages the language switch is left out (one
+  #    language is not a choice); a song without translations shows no switch and takes no space.
   #  - A translation belongs to the song, not to one version: it replaces the lyrics of the shown version, which stays
   #    selected. Picking another version returns to the original language (the reader asked for that version's own
   #    text); picking a language keeps the version.
@@ -19,14 +22,14 @@ Feature: Read a translation without leaving the song
 
   @unit
   Scenario: Reader switches to the English translation
-    Given a song with an English translation
+    Given a song with Dutch and English translations
     When I pick "English" in the language switch
     Then the English lyrics are shown
 
   @unit
   Scenario: Only languages that exist are offered
     Given a song with Dutch and English translations
-    Then the language switch offers "Original language", "Dutch" and "English"
+    Then the language switch offers "Dutch" and "English"
 
   @unit
   Scenario: A translation without lyrics is not offered
@@ -39,10 +42,15 @@ Feature: Read a translation without leaving the song
     Then the song has no language switch
 
   @unit
-  Scenario: The original language is labelled, in my language
-    Given a song with an English translation
+  Scenario: The languages are named in my language
+    Given a song with Dutch and English translations
     When the app language is set to Dutch
-    Then the language switch offers "Oorspronkelijke taal" and "Engels"
+    Then the language switch offers "Engels" and "Nederlands"
+
+  @unit
+  Scenario: One translation needs no language switch
+    Given a song with an English translation
+    Then the song has no language switch
 
   @unit
   Scenario: Switching version returns to the original language
@@ -58,9 +66,9 @@ Feature: Read a translation without leaving the song
     Then the address is "?version=v2&lang=en"
 
   @unit
-  Scenario: Back to the original language drops the language from the address
-    Given the address says "?version=v2&lang=en"
-    When I pick the original language
+  Scenario: Back to the original drops the language from the address
+    Given the address says "?version=v2&lang=en&view=translation"
+    When I pick the original
     Then the address is "?version=v2"
 
   @unit

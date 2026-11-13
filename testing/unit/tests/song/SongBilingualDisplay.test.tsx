@@ -1,9 +1,8 @@
 // @vitest-environment jsdom
 // Story 6.2.14 (#517): the "Translation · Both" switch and the two-language layout (RTL, L3).
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
+import { cleanup, render, screen, within } from '@testing-library/react';
 import SongBilingualDisplay from '@/components/song/SongBilingualDisplay';
-import { SongReadingViewSwitch } from '@/components/song/SongReadingViewSwitch';
 import { DICTIONARIES } from '@/lib/i18n';
 import { lyricPx } from '@/lib/reader/readerPrefs';
 
@@ -19,29 +18,7 @@ afterEach(cleanup);
 const ORIGINAL = '[G]Pachamama [C]sumaq\n[D]kawsay\n\n[G]Second [D]stanza';
 const TRANSLATION = '[G]Mother [C]earth\nlife\n\nSecond verse\n\nA third one';
 
-describe('SongReadingViewSwitch', () => {
-  it('renders nothing when no translation is being read', () => {
-    const { container } = render(<SongReadingViewSwitch visible={false} value="translation" onChange={() => {}} />);
-    expect(container.firstChild).toBeNull();
-  });
-
-  it('is a labelled radio group: Translation · Both, the current one checked', () => {
-    render(<SongReadingViewSwitch visible value="both" onChange={() => {}} />);
-    const group = screen.getByRole('radiogroup', { name: 'Show' });
-    expect(within(group).getAllByRole('radio').map((r) => r.textContent)).toEqual(['Translation', 'Both']);
-    expect(screen.getByRole('radio', { name: 'Both' }).getAttribute('aria-checked')).toBe('true');
-  });
-
-  it('reports the picked view and keeps 44 px targets and tokens only', () => {
-    const onChange = vi.fn();
-    render(<SongReadingViewSwitch visible value="translation" onChange={onChange} />);
-    fireEvent.click(screen.getByRole('radio', { name: 'Both' }));
-    expect(onChange).toHaveBeenLastCalledWith('both');
-    expect(screen.getByRole('radio', { name: 'Both' }).className).toContain('min-h-tap');
-    expect(screen.getByRole('radiogroup').outerHTML).not.toMatch(/gray-|red-|amber-|#[0-9a-f]{3,6}/i);
-  });
-});
-
+// The view switch itself: SongReadingViewSwitch.test.tsx.
 describe('SongBilingualDisplay', () => {
   const renderBoth = (props: Partial<React.ComponentProps<typeof SongBilingualDisplay>> = {}) =>
     render(
