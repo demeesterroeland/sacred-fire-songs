@@ -1,5 +1,5 @@
 <!--
-**Version:** 1.3
+**Version:** 1.4
 **Status:** Accepted reference (Story 6.1.1 / G1.1 #385, G2.1–G2.4 #390–#393, G2.6 #395, G3.1 #396)
 **Date:** Nov 13, 2026
 
@@ -7,6 +7,7 @@
 
 | Version | Date | Description of Changes |
 | ----- | ----- | ----- |
+| **1.4** | Nov 13, 2026 | Chord tools in one place (#566): the toolbar is `Chords [switch] · [− n +] transpose · A− · A+`; the transpose stepper (two 44 px buttons and the signed shift) sits right after the Chords switch and shows only while chords are on. The technical line `Key E · Capo 3` (non-standard tuning is labelled `Tuning: Drop D`; standard tuning is omitted) also shows only while chords are on (beats stay). After a transpose the line shows only the new key. Added the Reading view switch (*Original · Translation · Both*) to `#slot` (#517). |
 | **1.3** | Nov 13, 2026 | The slot gains the reader switch *Original · Translation · Both* for a song with a translation, and the language group lists languages only (two or more; Story 6.2.14, #517); *Both* shows each stanza with its translation (line under line on a phone, side by side from md up); no change to the mockup itself. |
 | **1.2** | Nov 12, 2026 | The language group of the slot is implemented (Story 6.2.13, #516): *Original language · languages the song has*, next to the version group in one wrapping row; no change to the mockup itself. |
 | **1.1** | Nov 6, 2026 | Variant / language slot (G2.6, #395) made implementable: 44 px segments, pressed = raised background + underline (never colour alone), design note that the slot renders only when the song has more than one version (language switch follows with the translation layer; nothing is shown for it today). |
@@ -125,6 +126,7 @@ h1 { margin: 0; font-size: var(--fs-title); line-height: var(--lh-tight); font-w
 .sizer button:hover:not(:disabled) { background: var(--surface); color: var(--text); }
 .sizer button:disabled { color: var(--line); cursor: default; }
 .size-read { font-size: var(--fs-caption); color: var(--text-subtle); font-variant-numeric: tabular-nums; min-width: 4ch; }
+.sizer[hidden], .music[hidden] { display: none; }
 .toolbar .spacer { flex: 1; }
 
 /* ---------- lyrics (the reference style) ---------- */
@@ -267,12 +269,17 @@ body.no-chords .line { margin-bottom: calc(var(--ls) * 0.2); }
         <dt>Includes</dt><dd>Chords, melody, 2 recordings</dd>
       </dl>
     </div>
-    <div class="music">Key <b>E</b><span class="meta-sep">·</span>Capo <b>3</b><span class="meta-sep">·</span>Standard tuning</div>
+    <div class="music" id="music">Key <b id="music-key">E</b><span class="meta-sep">·</span>Capo <b>3</b></div>
     <div class="slot" id="slot" hidden>
       <span class="seg" role="group" aria-label="Version">
         <button type="button" id="ver-orig" aria-pressed="true">Original</button>
         <button type="button" id="ver-simple" aria-pressed="false">Simplified</button>
         <button type="button" id="ver-live" aria-pressed="false">Live</button>
+      </span>
+      <span class="seg" role="group" aria-label="Reading view">
+        <button type="button" id="view-orig" aria-pressed="true">Original</button>
+        <button type="button" id="view-trans" aria-pressed="false">Translation</button>
+        <button type="button" id="view-both" aria-pressed="false">Both</button>
       </span>
       <span class="seg" role="group" aria-label="Language">
         <button type="button" id="lang-es" aria-pressed="true">ES</button>
@@ -284,6 +291,11 @@ body.no-chords .line { margin-bottom: calc(var(--ls) * 0.2); }
   <div class="toolbar gutter" id="toolbar">
     <div class="wrap">
       <button class="switch" type="button" role="switch" aria-checked="true" id="chords"><span class="track"></span>Chords</button>
+      <span class="sizer" id="transpose" role="group" aria-label="Transpose">
+        <button type="button" id="tr-down" aria-label="Down a semitone">−</button>
+        <button type="button" id="tr-value" aria-label="Original key" disabled>0</button>
+        <button type="button" id="tr-up" aria-label="Up a semitone">+</button>
+      </span>
       <span class="spacer"></span>
       <span class="size-read" id="size-read" aria-live="polite">19 px</span>
       <span class="sizer" role="group" aria-label="Text size">
@@ -384,7 +396,25 @@ body.no-chords .line { margin-bottom: calc(var(--ls) * 0.2); }
     chords.setAttribute('aria-checked', String(on));
     body.classList.toggle('no-chords', !on);
     store('sfs-mock-chords', on ? 'on' : 'off');
+    chordTools(on);
   };
+
+  /* #566: the transpose stepper and the key / capo / tuning line only show while chords are on */
+  var keys = ['E', 'F', 'F#', 'G', 'Ab', 'A', 'Bb', 'B', 'C', 'C#', 'D', 'Eb'], shift = 0;
+  var trValue = document.getElementById('tr-value');
+  function chordTools(on) {
+    document.getElementById('transpose').hidden = !on;
+    document.getElementById('music').hidden = !on;
+  }
+  function applyShift() {
+    trValue.textContent = shift > 0 ? '+' + shift : shift < 0 ? '\u2212' + Math.abs(shift) : '0';
+    trValue.disabled = shift === 0;
+    document.getElementById('music-key').textContent = keys[(shift + 12) % 12];
+  }
+  document.getElementById('tr-down').onclick = function () { if (shift > -11) { shift--; applyShift(); } };
+  document.getElementById('tr-up').onclick = function () { if (shift < 11) { shift++; applyShift(); } };
+  trValue.onclick = function () { shift = 0; applyShift(); };
+  chordTools(chords.getAttribute('aria-checked') === 'true');
 
   /* meta line expand */
   var metaBtn = document.getElementById('meta-btn'), metaDetail = document.getElementById('meta-detail');

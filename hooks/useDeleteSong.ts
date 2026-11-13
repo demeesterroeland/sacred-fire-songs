@@ -32,8 +32,9 @@ export function useDeleteSong() {
 
         // Invalidate all song lists so every page refetches
         await queryClient.invalidateQueries({ queryKey: SONG_KEYS.all() });
-        // Bust the global filter counts (chords/melody/mine may have changed)
+        // Bust the global filter counts (chords/melody/mine/songbooks/languages may have changed)
         queryClient.invalidateQueries({ queryKey: SONG_KEYS.globalFilterCounts() });
+        queryClient.invalidateQueries({ queryKey: SONG_KEYS.allGlobalBrowseCounts() });
         router.refresh(); // also bust Next.js Router Cache for Server Components
 
         if (options?.redirectTo) {

@@ -1,5 +1,6 @@
-# Version: 1.1 | Date: Nov 13, 2026
+# Version: 1.2 | Date: Nov 13, 2026
 # Changelog
+# 1.2 | Nov 13, 2026 | #566: standard tuning is omitted from the PDF meta line (matching the screen), while non-standard tuning is labelled.
 # 1.1 | Nov 13, 2026 | Review of PR #560: wrapped rows stay above the footer, the closing bar never lands on text, an untitled item prints the translated label, the cache fingerprint ignores the order of the sources.
 # 1.0 | Nov 13, 2026 | Story 6.2.17 (#520, G4.3): the PDF sheet of a song shows the version's book, capo, beats and repeat bars like the screen; the pinned version and the item's transposition are exported; labels follow the exporting user's language.
 @ux-v3 @pdf-export @story-6.2.17
@@ -12,7 +13,7 @@ Feature: PDF sheets match the screen
   Scenario: Exported sheet matches the screen
     Given a playlist with a catalog song version with capo 5, beats "8", repeats and the source "Songbook A" page "38" compiled by "Compiler A"
     When I export it to PDF
-    Then the sheet shows the meta line "By Author A · Key E · Capo 5 · Standard · Beats 8"
+    Then the sheet shows the meta line "By Author A · Key E · Capo 5 · Beats 8"
     And the sheet shows the repeat bars "‖:" and ":‖ ×2" around the repeated lines
     And the sheet shows the source line "Songbook A · p. 38 · compiled by Compiler A" under the lyrics
 

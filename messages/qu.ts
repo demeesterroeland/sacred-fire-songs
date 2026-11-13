@@ -132,8 +132,9 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'songs.emptyDrafts.action': 'Taki yapay →',
   'songs.noResultsSearch': 'Mana taki tarisqachu “{search}” nisqawan tupaq.',
   'songs.noResultsFilter': 'Kay filtropaq mana takikuna kanchu.',
-  'songs.matchAlias': 'Huk sutinwan tarisqa: {text}',
+  'songs.matchAlias': 'Huk sutinqa: {text}',
   'songs.matchSourceTitle': 'Taki qillqapi sutinwan tarisqa: {text}',
+  'songs.matchTranslation': '{language}: {text}',
   'songs.matchAuthor': 'Takichiqwan tarisqa: {text}',
 
   // ─── Songs – Detail Page ──────────────────────────────────────────────────
@@ -175,6 +176,7 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'song.metadata.standard': 'Estándar',
   'song.meta.key': "Tono {key}",
   'song.meta.capo': "Capo {capo}",
+  'song.meta.tuning': "Afinación: {tuning}", // #566: needs a native speaker check (Spanish loanword, as pdf.tuning)
   'song.meta.beats': 'Beats {beats}',
   'song.meta.showDetails': 'Astawan rikuchiy',
   'song.meta.hideDetails': 'Pakay',
@@ -554,6 +556,7 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'playlists.addSongs.title': 'Listaman takikuna yapay',
   'playlists.addSongs.search': 'Takikuna maskay…',
   'playlists.addSongs.empty': 'Mana takikuna tarisqachu.',
+  'playlists.addSongs.loadError': 'Mana takikunata cargayta atirqanchu. Wakmanta ruraykachay.',
   'playlists.addSongs.done': 'Tukusqa',
   'playlists.picker.title': 'Listaykuna',
   'playlists.picker.empty': 'Manaraq listakuna kanchu — hawapi ruway.',
@@ -691,7 +694,6 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'viewer.transpose.down': "Hukllaña semitonu uraypi",
   'viewer.transpose.up': "Hukllaña semitonu hanaypi",
   'viewer.transpose.reset': "Ñawpaq tono",
-  'viewer.transpose.key': "Tono {key} (ñawpaq {original})",
   'viewer.transpose.state': "Tikrasqa {n}",
   'viewer.awake': "Pantalla rikch’arisqa kachkan",
   'settings.prefs.offlineMode': 'Mana internet modo',
@@ -803,6 +805,13 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'search.sort.authorAZ': 'Ruwaq (A-Z)',
   'search.sort.newestFirst': 'Musuq ñawpaqta',
   'search.contentType': 'Contenido laya',
+  'search.songbook': "Cancionero",
+  'search.language': "Simi",
+  'search.songbook.all': "Llapan cancionerokuna",
+  'search.language.all': "Llapan simikuna",
+  // TODO(native-speaker): Quechua wording of the two "Unknown …" labels needs a check
+  'search.songbook.unknown': "Mana reqsisqa cancionero",
+  'search.language.unknown': "Mana reqsisqa simi",
   'search.yourLibrary': 'Bibliotecayki',
   'search.status.draft': 'Borrador',
   'search.tagSelector.categoryPrefix': 'Categoría: {category}',

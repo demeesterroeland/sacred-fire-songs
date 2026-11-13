@@ -20,6 +20,11 @@ interface SongMetaLinesProps {
   originalAuthor?: string | null;
   categories?: CategoryItem[];
   version?: VersionTechnical;
+  /**
+   * Chords are on screen (#566): key, capo and tuning only show then; the beats stay. Default `true`: no Chords
+   * switch, no change.
+   */
+  chordsOn?: boolean;
   hasChords?: boolean;
   hasMelody?: boolean;
   hasPersonalRecording?: boolean;
@@ -50,7 +55,7 @@ export function fitLinkCount(rights: number[], authorCount: number, moreWidth: n
 /**
  * Story 6.1.7 / G2.2 (#391), Validation 3 and 4: grey lines above the lyrics.
  * Line 1: author, tags and Chords · Melody · Recordings, always as links; closed, as many as fit on one line
- * (validation 4). The chevron at the end opens the rest and the technical line "Key E · Capo 3 · Standard · Beats 8".
+ * (validation 4). The chevron at the end opens the rest and the technical line "Key E · Capo 3 · Beats 8" (plus non-standard tuning when set).
  * Closed by default.
  */
 export function SongMetaLines({
@@ -58,6 +63,7 @@ export function SongMetaLines({
   originalAuthor,
   categories = [],
   version,
+  chordsOn = true,
   hasChords,
   hasMelody,
   hasPersonalRecording,
@@ -77,7 +83,7 @@ export function SongMetaLines({
   const authors = authorLabels.length > 0 ? authorLabels.map((a) => a.label) : songAuthors({}, t);
   // The text between the author links ("and", "y", ","), so each name stays its own link.
   const authorJoiners = authorSeparators(authors, locale);
-  const technical = joinMeta(technicalItems(version, t));
+  const technical = joinMeta(technicalItems(version, t, { chordsOn }));
 
   // Authors always show; tags and Chords / Melody / Recordings (`fitIndex`) only as far as they fit while closed.
   const optional = [

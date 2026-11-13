@@ -3,6 +3,8 @@ import type { Song } from '../songUtils';
 import { firstVersion } from './versionOrder';
 import { foldForSearch } from './search';
 import { normalizeWhitespace } from '../utils';
+import { songbooksOfVersions } from './browseFilters';
+import type { SourceBook } from './versionSources';
 
 /**
  * Shared select string for composition queries.
@@ -10,7 +12,8 @@ import { normalizeWhitespace } from '../utils';
  */
 export const SONGS_SELECT = `
   *,
-  song_versions(id, created_at, version_kind, key, content_chordpro, melody_notation, song_version_sources(original_title)),
+  song_versions(id, created_at, version_kind, key, content_chordpro, melody_notation, song_version_sources(original_title, songbooks(id, title, short_name))),
+  song_translations(language, title),
   song_category_map(
     categories(
       name,
@@ -130,8 +133,11 @@ interface SongVersionRow {
   key: string | null;
   content_chordpro: string | null;
   melody_notation: string | null;
-  /** Where the version was printed: only the title it has there is read, for the search (#521). */
-  song_version_sources?: { original_title?: string | null }[] | null;
+  /** Where the version was printed: the title it has there (search, #521) and the book (songbook filter, #522). */
+  song_version_sources?: {
+    original_title?: string | null;
+    songbooks?: Partial<SourceBook> | Partial<SourceBook>[] | null;
+  }[] | null;
 }
 
 interface CategoryRow {
@@ -165,6 +171,8 @@ export interface CompositionRow {
   has_chords?: boolean | null;
   has_melody?: boolean | null;
   song_versions: SongVersionRow[] | null;
+  /** The translations of the song: only the language and the title are selected, for the search (#547). */
+  song_translations?: { language: string; title?: string | null }[] | null;
   song_category_map: SongCategoryMapRow[] | null;
 }
 
@@ -211,6 +219,12 @@ export function mapCompositionToSong(
     sourceTitles: distinctTexts(
       (item.song_versions ?? []).flatMap((v) => (v.song_version_sources ?? []).map((src) => src.original_title))
     ),
+    songbooks: songbooksOfVersions(item.song_versions),
+    // Every titled translation is searchable, also one without lyrics yet: its title still names the song (#547).
+    translationTitles: (item.song_translations ?? []).flatMap((tr) => {
+      const title = normalizeWhitespace(tr.title ?? '');
+      return title ? [{ language: tr.language, title }] : [];
+    }),
     songKey: version?.key || null,
     content: version?.content_chordpro || '',
     melodyNotation: version?.melody_notation || '',

@@ -40,12 +40,19 @@ describe('song selects', () => {
     expect(composition).toMatch(/\bauthors\b/);
   });
 
-  // Story 6.2.18 (#521): the list select carries the original titles for the search, still through ONE embed.
-  it('the song list select embeds the sources once and asks only for the original title', () => {
+  // Story 6.2.18 (#521) + 6.2.19 (#522): the list select carries the original titles for the search and the book of
+  // each source for the songbook filter, still through ONE embed (the book is nested inside it, not a second embed).
+  it('the song list select embeds the sources once and asks for the original title and the book id and names', () => {
     expect(embeds(SONGS_SELECT)).toHaveLength(1);
-    expect(SONGS_SELECT).toMatch(/song_version_sources\s*\(\s*original_title\s*\)/);
+    expect(SONGS_SELECT).toMatch(/song_version_sources\s*\(\s*original_title\s*,\s*songbooks\s*\(\s*id\s*,\s*title\s*,\s*short_name\s*\)\s*\)/);
     // `*` brings compositions.aliases and compositions.authors with every row
     expect(SONGS_SELECT.split(/song_versions\s*\(/)[0]).toMatch(/\*/);
+  });
+
+  // Story 6.2.23 (#547): the list select carries the translated titles for the search, still through ONE embed.
+  it('the song list select embeds the translations once and asks only for language and title', () => {
+    expect(translationEmbeds(SONGS_SELECT)).toHaveLength(1);
+    expect(SONGS_SELECT).toMatch(/song_translations\s*\(\s*language\s*,\s*title\s*\)/);
   });
 
   // Story 6.2.20 (#523): the edit form is prefilled from these; without them it would show empty fields and a save
@@ -64,7 +71,8 @@ describe('song selects', () => {
   });
 
   it('the edit page, fetchSong and the playlist actions carry no inline copy of the embed', () => {
-    for (const file of ['app/songs/[id]/edit/page.tsx', 'lib/songs/fetchSong.ts', 'app/actions/playlistActions.ts']) {
+    // Story 6.2.22 (#542): the + Add Songs sheet reads the list through fetchAllSongs, with no select of its own.
+    for (const file of ['app/songs/[id]/edit/page.tsx', 'lib/songs/fetchSong.ts', 'app/actions/playlistActions.ts', 'components/playlists/AddSongsSheet.tsx']) {
       expect(embeds(readFileSync(file, 'utf8')), file).toHaveLength(0);
       expect(translationEmbeds(readFileSync(file, 'utf8')), file).toHaveLength(0);
     }

@@ -222,13 +222,13 @@ test.describe('song flags @fix-7', () => {
       await page.getByRole('radio', { name: 'Simplified' }).click();
       await expect(page.getByRole('radio', { name: 'Simplified' })).toHaveAttribute('aria-checked', 'true');
       await expect(page.getByRole('switch', { name: 'Chords' })).toHaveCount(0);
-      // Nothing to transpose in a lyrics-only version: the ⋮ menu has no Transpose group.
-      let sheet = await openSongMenu(page);
-      await expect(sheet.getByRole('group', { name: 'Transpose' })).toHaveCount(0);
-      await page.keyboard.press('Escape');
+      // Nothing to transpose in a lyrics-only version: the toolbar has no transpose stepper (#566: it is next to the Chords switch).
+      await expect(page.getByTestId('transpose-stepper')).toHaveCount(0);
       await page.getByRole('radio', { name: 'Original' }).click();
-      sheet = await openSongMenu(page);
-      await expect(sheet.getByRole('group', { name: 'Transpose' })).toBeVisible();
+      await expect(page.getByTestId('transpose-stepper')).toBeVisible();
+      // And never in the ⋮ menu.
+      const sheet = await openSongMenu(page);
+      await expect(sheet.getByRole('group', { name: 'Transpose' })).toHaveCount(0);
     });
   });
 });

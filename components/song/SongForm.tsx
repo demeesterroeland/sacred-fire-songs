@@ -409,8 +409,9 @@ const SongForm = ({ mode, initialData: liveInitialData, songId, versionId, sourc
             }
             queryClient.invalidateQueries({ queryKey: SONG_KEYS.all() });
             queryClient.invalidateQueries({ queryKey: SONG_KEYS.detail(id) });
-            // Bust global filter counts (chords/melody/mine may have changed)
+            // Bust global filter counts (chords/melody/mine/songbooks/languages may have changed)
             queryClient.invalidateQueries({ queryKey: SONG_KEYS.globalFilterCounts() });
+            queryClient.invalidateQueries({ queryKey: SONG_KEYS.allGlobalBrowseCounts() });
             const returnTo = mode === 'create' ? safeNextPath(searchParams.get('next')) : songVersionHref(id, versionId);
             router.refresh();
             router.push(returnTo);

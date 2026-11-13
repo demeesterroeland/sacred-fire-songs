@@ -1,11 +1,18 @@
 # Member Guide (draft)
 
-**Version:** 0.32 | **Date:** Nov 13, 2026
+**Version:** 0.39 | **Date:** Nov 13, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.39 | Nov 13, 2026 | Song page: musicians transpose with the **− n +** stepper right after the **Chords** switch in the toolbar (it is not in the ⋮ menu any more) and it shows only while chords are on. **Key**, **Capo** and non-standard **Tuning** (named, e.g. `Key E · Tuning: Drop D`) show only while chords are on; after a transpose the line shows the new key; standard tuning is omitted completely (on the song page and in the PDF); the **Beats** stay (UX v3, #566). |
+| 0.38 | Nov 13, 2026 | Search options: **Songbook** and **Language** now also appear when you open Search options from another page, counting all songs you may read (public songs plus your own private songs, or all songs for admins) (UX v3, #570). |
+| 0.37 | Nov 13, 2026 | Search options: languages are chosen only in the **Language** select, no longer under category & tag filters (UX v3, #569); song edit forms keep the *Languages* group unchanged so you can still set a song's language. |
+| 0.36 | Nov 13, 2026 | Search: when a song is found by another name, the grey line under it reads *Also known as …* (in the song list and in **+ Add Songs**). |
+| 0.35 | Nov 13, 2026 | Playlists: the **+ Add Songs** search finds a song like the song search does: by its title, by another name it is known by, by any of its authors and by the title it has in a songbook (accents and capitals do not matter). When the song's own title did not match, the row adds a grey line saying why, for example *Also known as Pachamama*; songs whose title matches are listed first (UX v3, #542). |
+| 0.34 | Nov 13, 2026 | Search: the search box also finds a song by the title of one of its translations; the grey line under the song names the language, for example *Dutch: Moeder Aarde* (UX v3, #547). Only translation titles are searched, not the translated lyrics. The **+ Add Songs** search in a playlist still matches the title only. |
+| 0.33 | Nov 13, 2026 | Search options: **Songbook** and **Language** choices with the number of songs behind each name; see the Guest Guide. They combine with your library toggles (favorites, my songs, recordings, status). |
 | 0.32 | Nov 13, 2026 | Song page: a song with a translation has the switch **Original · Translation · Both**. **Translation** shows the translation alone (not transposed); **Both** shows the original and the translation together, verse by verse (under each other on a phone, side by side on a larger screen), with chords and transpose on the original and the translation as lyrics only. With more than one translation the language switch next to it picks the language (the first one until you pick); it no longer has **Original language**. A link with `?lang=nl&view=both` opens both, `?lang=nl&view=translation` the translation, and Share keeps it; choosing another version returns to the original (UX v3, #517). |
 | 0.31 | Nov 13, 2026 | Playlist PDF: each song shows the same details as the song page: **Key**, **Capo**, tuning and **Beats** of the version in the playlist, the **source** (songbook, page, compiler) under the lyrics, and the repeat bars **‖: … :‖** (with ×2 when it says how often). A value the version does not have is not printed. A transposed song prints its new key and chords. The labels follow your language; a translation is never printed, the sheet always has the song's own lyrics. |
 | 0.30 | Nov 13, 2026 | Songbooks: **Library → Songbooks** lists the printed songbooks; a book's page lists its songs by page (also your own private songs, marked with a lock, which nobody else sees there). The grey source line on a song page links to its book (UX v3, #514). |
@@ -88,11 +95,11 @@ Your private songs (not public yet) look lighter in every song list and on the s
 - From a song: **Playlist** in the bar at the bottom → pick a playlist.
 
 - From a song: ⋮ → **Add to Playlist**. A sheet slides up: **New playlist** is the first row, then your playlists. A check shows where the song already is. Tap a playlist to add the song; tap a playlist with a check to take it out again. **Done** closes the sheet.
-- From the playlist: **+ Add Songs** and search.
+- From the playlist: **+ Add Songs** and search. You can search by the song's title, another name it is known by, any of its authors or its title in a songbook; a grey line under the row says why it was found (for example *Also known as Pachamama*). Tap a row to add the song (a check shows it is in the playlist); tap it again to take it out. The search box stays at the top while you scroll, and **Done** closes the sheet.
 
 **In a playlist** you can: reorder songs by dragging, add a description, switch **public / private** (lock icon), **print / export PDF** (printer icon) for the ceremony, share the link of a public playlist, and duplicate it via ⋯ **(verify menu labels)**.
 
-The PDF has one song per section with chords, the details of the version in the playlist (key, capo, tuning, beats), its source under the lyrics and the repeat bars, and a footer with the site address and a QR code to each song. Exporting the same unchanged playlist again reuses the earlier PDF, so it is fast.
+The PDF has one song per section with chords, the details of the version in the playlist (key, capo, non-standard tuning, beats), its source under the lyrics and the repeat bars, and a footer with the site address and a QR code to each song. Exporting the same unchanged playlist again reuses the earlier PDF, so it is fast.
 
 ## Adding a song
 
@@ -117,7 +124,7 @@ A song that comes from a printed songbook has a **Songbook details** section (ta
 
 - **Profile:** display name. E-mail changes go via support.
 - **Security:** change password, log out from all devices.
-- **Preferences:** appearance, language, keep screen awake, auto-hide navigation on song pages and e-mail notifications (text size is set on the song page with A− / A+, auto-scroll with ▶ next to them; transpose, scroll speed and **Screen stays on** are in the ⋮ menu at the top of the song page; transpose moves alternative chords such as **A7/C7** together and keeps the bass of a slash chord such as **C/E**).
+- **Preferences:** appearance, language, keep screen awake, auto-hide navigation on song pages and e-mail notifications (text size is set on the song page with A− / A+, auto-scroll with ▶ next to them; musicians transpose with the **− n +** stepper next to the **Chords** switch, and the scroll speed and **Screen stays on** are in the ⋮ menu at the top of the song page; transpose moves alternative chords such as **A7/C7** together and keeps the bass of a slash chord such as **C/E**).
 
 ## Public profile
 
