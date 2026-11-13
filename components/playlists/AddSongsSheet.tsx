@@ -103,23 +103,23 @@ export function AddSongsSheet({ playlistId, existingCompositionIds, open, onClos
         <>
             {/* Backdrop */}
             <div
-                className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm"
+                className="fixed inset-0 z-40 bg-scrim backdrop-blur-sm"
                 onClick={onClose}
             />
 
             {/* Sheet */}
-            <div className="fixed inset-x-0 bottom-0 z-50 flex flex-col bg-white dark:bg-gray-950 border-t border-gray-200 dark:border-gray-800 rounded-t-2xl max-h-[80vh]">
+            <div className="fixed inset-x-0 bottom-0 z-50 flex max-h-[80vh] flex-col rounded-t-sheet border-t border-line bg-surface">
                 {/* Handle */}
                 <div className="flex justify-center pt-3 pb-1 shrink-0">
-                    <div className="w-10 h-1 bg-gray-300 dark:bg-gray-700 rounded-full" />
+                    <div className="h-1 w-10 rounded-pill bg-line-strong" />
                 </div>
 
                 {/* Header */}
                 <div className="flex items-center justify-between px-4 pb-3 shrink-0">
-                    <h2 className="font-bold text-gray-900 dark:text-gray-100">{t('playlists.addSongs.title')}</h2>
+                    <h2 className="font-bold text-fg">{t('playlists.addSongs.title')}</h2>
                     <button
                         onClick={onClose}
-                        className="p-1 text-gray-500 hover:text-gray-300 transition-colors"
+                        className="size-tap rounded-control text-fg-muted transition-colors hover:bg-surface-2 hover:text-fg"
                         aria-label={t('common.close')}
                     >
                         <X className="w-5 h-5" />
@@ -128,17 +128,17 @@ export function AddSongsSheet({ playlistId, existingCompositionIds, open, onClos
 
                 {/* Search input */}
                 <div className="px-4 pb-3 shrink-0">
-                    <div className="flex items-center gap-2 bg-gray-100 dark:bg-gray-800 rounded-xl px-3 py-2.5">
+                    <div className="flex items-center gap-2 rounded-control bg-surface-2 px-3 py-2.5">
                         {isSearching
-                            ? <Loader2 className="w-4 h-4 text-gray-500 animate-spin shrink-0" />
-                            : <Search className="w-4 h-4 text-gray-500 shrink-0" />
+                            ? <Loader2 className="w-4 h-4 shrink-0 animate-spin text-fg-muted" />
+                            : <Search className="w-4 h-4 shrink-0 text-fg-muted" />
                         }
                         <input
                             autoFocus
                             value={query}
                             onChange={e => setQuery(e.target.value)}
                             placeholder={t('playlists.addSongs.search')}
-                            className="flex-1 bg-transparent text-sm text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-600"
+                            className="min-w-0 flex-1 bg-transparent text-sm text-fg placeholder:text-fg-subtle"
                         />
                     </div>
                 </div>
@@ -146,7 +146,7 @@ export function AddSongsSheet({ playlistId, existingCompositionIds, open, onClos
                 {/* Song list */}
                 <div className="overflow-y-auto flex-1 pb-6">
                     {!isSearching && songs.length === 0 && (
-                        <p className="text-center text-sm text-gray-600 py-10">{t('playlists.addSongs.empty')}</p>
+                        <p className="py-10 text-center text-sm text-fg-muted">{t('playlists.addSongs.empty')}</p>
                     )}
                     {songs.map(song => {
                         const inPlaylist = addedIds.has(song.id);
@@ -154,14 +154,14 @@ export function AddSongsSheet({ playlistId, existingCompositionIds, open, onClos
                             <button
                                 key={song.id}
                                 onClick={() => handleToggle(song.id, song.title)}
-                                className={`w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100/60 dark:hover:bg-gray-800/60 transition-colors text-left ${!song.is_public ? 'opacity-70 hover:opacity-100' : ''}`}
+                                className={`flex w-full items-center gap-3 px-4 py-3 text-left transition-colors hover:bg-surface-2 ${!song.is_public ? 'opacity-70 hover:opacity-100' : ''}`}
                             >
                                 <div className="w-5 h-5 shrink-0 flex items-center justify-center">
-                                    {inPlaylist && <Check className="w-4 h-4 text-amber-400" />}
+                                    {inPlaylist && <Check className="w-4 h-4 text-accent" />}
                                 </div>
                                 <div className="flex-1 min-w-0">
                                     <div className="flex items-center gap-2">
-                                        <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{song.title}</p>
+                                        <p className="truncate text-sm font-medium text-fg">{song.title}</p>
                                         {!song.is_public && (
                                             <span className="text-caption font-semibold bg-surface-2 text-fg-muted px-1.5 py-0.5 rounded border border-line shrink-0">
                                                 {t('search.status.draft')}
@@ -169,7 +169,7 @@ export function AddSongsSheet({ playlistId, existingCompositionIds, open, onClos
                                         )}
                                     </div>
                                     {song.original_author && (
-                                        <p className="text-xs text-gray-500 truncate">{song.original_author}</p>
+                                        <p className="truncate text-xs text-fg-muted">{song.original_author}</p>
                                     )}
                                 </div>
                             </button>

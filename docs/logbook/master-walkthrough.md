@@ -3490,3 +3490,10 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - Actions and inputs: Profile's **Save Changes** and Security's **Update Password** use the shared `<Button>` primary style (`bg-accent text-on-accent`), **Change Email** is an outlined button, and **Sign Out All Devices** / **Delete Account** keep `text-danger`/`border-danger` next to their words. Password visibility buttons are 44 px (`size-tap`) with translated labels.
 - Copy: replaced hard-coded English strings in `SecuritySettings` with `field.email.label` and new keys `settings.security.changeEmail`, `settings.security.emailReverifyHint`, `settings.security.showPassword` and `settings.security.hidePassword` across all 8 locales.
 - Tests: `docs/testing/ux-v2-sober-account.feature` (`@unit`, `@e2e`), `testing/unit/tests/design/soberAccount.test.tsx`, `e2e/tests/ux-v2-sober-account.spec.ts` (ACC-08, axe colour contrast on Profile, Security and Preferences in light and dark mode).
+
+## Session November 13, 2026 — Story 6.1.35 (#485), group 6: playlists
+
+- `PlaylistContextMenu`, `AddSongsSheet` and `PlaylistDetailHeader` now use semantic surface, text, accent and danger tokens. Visibility-button titles reuse translated action labels; no new UX copy or locale keys were needed.
+- The context menu has a neutral surface and focus state, with destructive actions retaining the semantic danger token. The Add Songs sheet uses the theme scrim and surface tokens; the selected-song check uses the accent token. Playlist detail actions, metadata, description and the export-login dialog follow the same tokens in light and dark mode.
+- Removed 85 palette classes; `PALETTE_BASELINE` 581 → 496.
+- Tests: `docs/testing/ux-v2-sober-playlists.feature`, `e2e/tests/ux-v2-sober-playlists.spec.ts` (details, context menu, Add Songs sheet and guest export sign-in dialog; axe contrast in light and dark mode). `docs/testing/e2e-test-overview.md` adds PL-15. Validation: TypeScript, lint, Vitest (1,798), BDD unit (284 passed, 47 pending), build and Playwright (8 passed across desktop and mobile) passed.
