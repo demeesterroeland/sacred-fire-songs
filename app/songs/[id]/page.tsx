@@ -783,6 +783,7 @@ export default function SongDetailPage() {
                 onPractice={openPractice}
                 onToggleFavorite={handleToggleFavorite}
                 onGuestPlaylist={() => setIsGuestGateOpen(true)}
+                hasReferenceMedia={hasMedia}
                 takeCount={recordings?.length ?? 0}
                 visible={actionBarVisible}
                 playlistSlot={user && id ? (

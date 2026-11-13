@@ -1,6 +1,6 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 2.21
+**Version:** 2.22
 **Status:** Living Document
 **Date:** Nov 13, 2026
 
@@ -63,6 +63,7 @@
 | **1.92** | Nov 6, 2026 | Epic 6.1: validation round 1 after the owner's phone run (Part of #375): auto-scroll only when the lyrics run below the fold (Story 6.1.10 / #394), expanded meta line (6.1.7 / #391), one focus style for text fields, the search suggestions in the page flow (6.1.29 / #413), search options on tokens, translated feedback and song flags across versions (6.1.11 / #395). Acceptance criteria of those stories now read as in `docs/testing/ux-v2-validation-1.feature`. |
 | **1.93** | Nov 7, 2026 | Epic 6.1: review round on the validation round 1 PR (#474, Part of #375): acceptance criteria of Stories 6.1.10 (auto-scroll offered only when the lyric text runs below the visible area above the fixed bars), 6.1.29 (suggestions close on the click and keep the scroll position), 6.1.1 (one focus cue per field, readable chip counts), 6.1.11 (a lyrics-only version has no Chords switch; a bracketed section label is not a chord) and the i18n policy (no raw server or database text in a toast) verified against the code; decisions UXA-061 to UXA-066. |
 | **2.21** | Nov 13, 2026 | Epic 6.1: Story 6.1.39 (#566) implemented on `feat/ux-v3`: transpose sits next to the Chords switch in the reader toolbar and leaves the ⋮ menu; key, capo and non-standard tuning (`Key D · Tuning: Drop D`) show only while chords are on (the beats stay); after a transpose only the new key shows; per binding owner decision, standard tuning is omitted completely from `technicalItems()` on both the song page and the PDF (`docs/testing/ux-v3-chord-tools.feature` v1.1, `docs/testing/ux-v3-pdf-export.feature` v1.2). Cross-review fixes: `ReaderToolbar` keeps a stable live region and exposes the shift in the reset button label; BDD steps chain `readingState` + `chordTools` across Both, Translation-only, and UXA-032 member/guest roles. Story 6.1.10 (#394) now reads: transpose is in the toolbar, not the ⋮ menu. |
+| **2.22** | Nov 13, 2026 | Epic 6.2: Story 6.2.2 (#583) implemented on `feat/583-practice-media-indicator`: Practice shows an accessible Headphones cue only when the selected version has reference media; its saved-recording count remains independent. Added the acceptance criteria to `docs/testing/ux-v2-song-action-bar.feature` and the selected-version e2e assertion. |
 | **2.20** | Nov 13, 2026 | Epic 6.2: Story 6.2.25 (#570, G5.8) implemented on `feat/ux-v3`: the global search window opened from any non-`/songs` page (`GlobalSearchModal`) now offers **Songbook** and **Language** filters using the same `SearchFiltersModal` selects and i18n keys as `/songs`, submitting `?songbook=<id>&language=<slug>`. Option 1: read-only `SECURITY INVOKER` SQL function `fn_search_filter_counts()` (migration `20261113140000_search_filter_counts.sql`, `db-schema.sql` v3.12) enforces caller RLS via explicit join on `compositions` (guest sees public only, member sees public + own private, admin sees all) and counts `Languages` categories (not `song_translations`); React Query fetches only while open (`enabled: isOpen`, 5 min cache, invalidated on song save/delete). Known limit: modal counts are total visible counts per option ignoring other active modal filters. Executable: `docs/testing/ux-v3-global-search-filters.feature` (`@unit`, `@seed`). Row and acceptance criteria added. |
 | **2.19** | Nov 13, 2026 | Epic 6.2: Story 6.2.24 (#569, G5.7) implemented on `feat/ux-v3`: *Search options* lets a reader choose a language only in the **Language** select, no longer in `TagSelector` (`components/library/TagSelector.tsx`), where `filterTagSelectorGroups()` (`lib/songs/browseFilters.ts`) omits the *Languages* group both when opened and in `filteredGrouped` search results. Song add/edit forms use `CategorySelector` (`components/song/CategorySelector.tsx`) and `useTaxonomy()` is unchanged, so assigning a song's language on edit is unaffected. Legacy links carrying a language slug in `?category=`, `?tag=`, or `?tags=` (e.g. `/songs?category=dutch`) are normalized inside `useSongsFilter`'s `parseUrl` via `normalizeLegacyLanguageParams(params, knownLanguageSlugs(songs, taxonomy))`, so they still filter Dutch songs, show `"Dutch"` in **Language**, omit duplicate language chips from `TagSelector`, and serialize to `?language=<slug>` on the next filter change. Added Story 6.2.24 row and acceptance criteria; executable spec: `docs/testing/ux-v3-language-filter-only.feature` (`@unit`). |
 | **1.94** | Nov 7, 2026 | Epic 6.1: validation round 2, batch 2 (Part of #375): acceptance criteria updated for Story 6.1.4 (#388: amounts between parentheses, "Air (3)"), 6.1.8 (#392: the full title wraps at the top of the page on a phone, the truncated copy shows only after scrolling past it), 6.1.10 (#394: transpose, scroll speed and a Screen stays on switch live in the one ⋮ menu; the toolbar has no ⋯), 6.1.11 (#395: every version has a `?version=` link, replaced in place, shared by Share), 6.1.23 (#407: History, Artists and Shared with me share one heading size) and 6.1.24 (#408: the Library "+" floats at the bottom right). New: Terms and Privacy pages (draft) with the operator from the server environment. |
@@ -1746,6 +1747,7 @@ GitHub epic **#498**. Many circles sing from printed songbooks: the same song ap
 | Story | Issue | Code | Pri | Title | Blocked by |
 |---|---|---|---|---|---|
 | 6.2.1 | #504 | `G0.1` | A | **[Implemented, PR #527]** As a self-hoster, I want the database to store songbooks, per-book variants, capo/key/beats/note per version and translations so that songbook collections can be imported without losing information | — |
+| 6.2.2 | #583 | — | — | **[Implemented on feat/583-practice-media-indicator]** As a reader, I want the Practice action to indicate when the selected song version has reference media, so that I know I can listen before opening Practice | — |
 | 6.2.6 | #509 | `G1.1` | A | **[Implemented on feat/ux-v3]** As a reader, I want each version labelled with its songbook or language and the switch to fit my phone so that I know which version I am reading | — |
 | 6.2.7 | #510 | `G1.2` | A | **[Implemented on feat/ux-v3, PR #529]** As a Musician, I want the key, capo and beats of the selected version in the meta line so that I play the version as printed in its book | #504 |
 | 6.2.8 | #511 | `G1.3` | B | **[Implemented on feat/ux-v3, in review]** As a reader, I want the note printed with a song in a collapsible "About this song" so that I learn its background without it pushing the lyrics down | — |
@@ -1766,6 +1768,30 @@ GitHub epic **#498**. Many circles sing from printed songbooks: the same song ap
 | 6.2.23 | #547 | `G5.6` | C | **[Implemented on feat/ux-v3, in review]** As a Guest, I want search to find a song by the title of its translation so that I find a song by the name I know in my language | #521 (G5.1); unblocks #542 |
 | 6.2.24 | #569 | `G5.7` | C | **[Implemented on feat/ux-v3, in review]** As a Guest, I want to choose a language only in the Language filter so that the search options don't offer the same choice twice (excludes *Languages* from `TagSelector` and keeps legacy `?category=`/`?tag=`/`?tags=` language links working) | #522 (G5.2) |
 | 6.2.25 | #570 | `G5.8` | B | **[Implemented on feat/ux-v3]** As a Guest, I want the search window on every page to offer the Songbook and Language filters so that I can browse one book or one language from anywhere (`GlobalSearchModal` shows both selects lazily when open via `fn_search_filter_counts()`, respecting RLS and submitting `?songbook=<id>&language=<slug>`) | #522 |
+
+**Story 6.2.2 acceptance criteria** (executable: `docs/testing/ux-v2-song-action-bar.feature` `@e2e`, with component coverage in `songActionBarComponent.test.tsx`):
+
+```gherkin
+Scenario: Practice indicates reference media on the selected version
+  Given the selected song version has one or more YouTube, Spotify or SoundCloud URLs
+  When I view the song action bar
+  Then Practice shows a visible reference-media indicator
+  And the indicator has an accessible text equivalent
+
+Scenario: Practice does not indicate media from another version
+  Given the selected song version has no reference media URLs
+  And another version of the song has reference media URLs
+  When I view the song action bar
+  Then Practice shows no reference-media indicator
+  When I select the version with reference media
+  Then Practice shows the reference-media indicator
+
+Scenario: The recording count remains independent
+  Given the selected song version has reference media and saved recordings
+  When I view the song action bar
+  Then Practice indicates reference media
+  And the saved-recording count is still shown
+```
 
 **Story 6.2.6 acceptance criteria** (executable: `docs/testing/ux-v3-version-labels.feature`, `@unit` and `@e2e`):
 
