@@ -3448,6 +3448,12 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - `public.public_profiles` gains `role` (migration `20261113120000_public_profiles_role.sql`): every signed-in member sees every role; a guest reads NULL. `is_musician` stays. An unknown or missing role shows the member badge, never a privileged one.
 - Tests: `docs/testing/ux-v2-profile-role-badge.feature` (`@unit`, `@e2e`), `testing/unit/tests/profile/roleBadge.test.tsx`, a `@seed` scenario in `access-policies.feature`, `e2e/tests/ux-v2-profile-role-badge.spec.ts`.
 
+## Session November 13, 2026 — privacy: placeholder addresses for the seeded accounts
+
+- The four seeded accounts (`supabase/seeds/01_auth_users.sql`, `02_profiles.sql`) use placeholder addresses: `admin@sfs.example`, `expert@sfs.example`, `member@sfs.example`, `gatekeeper@sfs.example`. The E2E role fixtures, the BDD steps, the UX screenshot script, two feature files, three screen mockups and `CHANGELOG.md` follow; sample names are placeholders too (`Ana Example`).
+- `scripts/db/rename-seed-accounts.mjs` (`npm run seed:rename-accounts`) gives an existing local stack the same addresses without a reset: it matches rows by their fixed seed ids and updates `auth.users`, the `email` identity and `profiles`. Idempotent; refuses any non-localhost database.
+- Tests: `testing/unit/tests/renameSeedAccounts.test.ts` (mapping agrees with the seed files, id-based SQL, local-only guard); `admin-users.spec.ts` searches `gatekeeper@`.
+
 ## Session November 13, 2026 — #564 / #565: "Private" and "No artist"
 
 - A song that is not public is now **Private** in every user-visible label, never "Draft", in all 8 locales: the Status options in the search filter popup on `/songs` (All · Public · Private), the empty state of the private-songs filter, the Add/Edit Song button **Save as private**, the private badge in **+ Add Songs**, and the visibility sentences on `/terms` and `/privacy`. Only the values changed; key names and `status: 'draft'` stay.

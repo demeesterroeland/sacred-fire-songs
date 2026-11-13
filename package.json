@@ -9,6 +9,7 @@
     "test": "vitest run testing/unit/tests",
     "seed:generate": "node scripts/db/export-random-seed.mjs 200",
     "seed:audio": "node scripts/db/upload-sample-recordings.mjs",
+    "seed:rename-accounts": "node scripts/db/rename-seed-accounts.mjs",
     "test:unit": "vitest run",
     "test:bdd": "NODE_OPTIONS=\"--import tsx\" cucumber-js --config cucumber.json",
     "test:bdd:unit": "NODE_OPTIONS=\"--import tsx\" cucumber-js --config cucumber.json --profile unit",

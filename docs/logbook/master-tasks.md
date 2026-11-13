@@ -1537,6 +1537,11 @@
 - [x] Tests: `@unit` feature `ux-v2-profile-role-badge.feature`, Vitest/RTL `roleBadge.test.tsx`, `@seed` role scenario in `access-policies.feature` (v1.3), E2E `ux-v2-profile-role-badge.spec.ts`; docs (design doc 2.15, epics 1.99)
 - [x] Cross-review by another Claude model; review fixes (seed column list, guest/member role scenario, e2e naming)
 
+## Session November 13, 2026 (privacy, placeholder addresses for seeded accounts)
+- [x] Seeds, E2E fixtures, BDD steps, UX script, feature files (admin-users v1.2, song v1.4), mockups and CHANGELOG use `<role>@sfs.example` and placeholder names
+- [x] `scripts/db/rename-seed-accounts.mjs` + `npm run seed:rename-accounts` + `scripts/README.md` row; unit test `renameSeedAccounts.test.ts`
+- [x] Local stack converted; tsc, lint (137), Vitest, BDD unit + seed and the admin-users / role badge / auth E2E specs green
+
 ## Session November 13, 2026 (#564 / #565, Private and No artist)
 - [x] `@unit`/`@e2e` feature `ux-v2-private-and-no-artist.feature`; Vitest `privateAndNoArtist.test.ts`, `songMetaNoArtist.test.tsx`; song-rows/meta tests now expect "No artist"
 - [x] 8 locales: song-visibility labels say Private (filter, empty state, song form "Save as private", status, `/terms` and `/privacy`); new `song.noArtist`; `admin.detail.unknownArtist` = No artist

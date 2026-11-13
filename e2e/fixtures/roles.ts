@@ -18,22 +18,22 @@ export const STORAGE_DIR = path.join(process.cwd(), 'e2e', '.auth');
  */
 export const ROLES = {
   admin: {
-    email: 'roel.de.meester+admin@gmail.com',
+    email: 'admin@sfs.example',
     storage: path.join(STORAGE_DIR, 'admin.json'),
     passwordEnv: 'E2E_PASSWORD_ADMIN',
   },
   gatekeeper: {
-    email: 'roel.de.meester+gatekeeper@gmail.com',
+    email: 'gatekeeper@sfs.example',
     storage: path.join(STORAGE_DIR, 'gatekeeper.json'),
     passwordEnv: 'E2E_PASSWORD_GATEKEEPER',
   },
   musician: {
-    email: 'roel.de.meester+expert@gmail.com',
+    email: 'expert@sfs.example',
     storage: path.join(STORAGE_DIR, 'musician.json'),
     passwordEnv: 'E2E_PASSWORD_MUSICIAN',
   },
   member: {
-    email: 'roel.de.meester+member@gmail.com',
+    email: 'member@sfs.example',
     storage: path.join(STORAGE_DIR, 'member.json'),
     passwordEnv: 'E2E_PASSWORD_MEMBER',
   },

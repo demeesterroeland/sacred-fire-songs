@@ -140,7 +140,7 @@ test.describe('Admin users – overview (AC 1)', () => {
     await page.goto('/admin/users');
     const search = page.getByRole('textbox', { name: 'Search users' });
 
-    await search.fill('+gatekeeper@');
+    await search.fill('gatekeeper@');
     await expect(usersList(page).getByRole('listitem')).toHaveCount(1);
     await expect(userRow(page, ROLES.gatekeeper.email)).toBeVisible();
 

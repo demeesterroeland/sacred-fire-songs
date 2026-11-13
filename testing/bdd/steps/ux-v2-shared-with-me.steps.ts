@@ -14,9 +14,9 @@ import type { AppNotification } from '../../../lib/notifications/queries';
 import { profileIdByEmail, queryAsUser, seedDb } from '../support/db';
 
 const SEEDED = {
-  member: 'roel.de.meester+member@gmail.com',
-  musician: 'roel.de.meester+expert@gmail.com',
-  gatekeeper: 'roel.de.meester+gatekeeper@gmail.com',
+  member: 'member@sfs.example',
+  musician: 'expert@sfs.example',
+  gatekeeper: 'gatekeeper@sfs.example',
 } as const;
 
 interface World {
