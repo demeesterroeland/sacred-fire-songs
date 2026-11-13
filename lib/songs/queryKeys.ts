@@ -35,6 +35,12 @@ export const SONG_KEYS = {
 
     /** Global filter counts (chords, melody, mine, favorites) used in GlobalSearchModal */
     globalFilterCounts: (userId?: string) => ['global-filter-counts', userId] as const,
+
+    /** Global songbook & language browse filter counts used in GlobalSearchModal (Story 6.2.25, #570) */
+    globalBrowseCounts: (userId?: string) => ['global-browse-counts', userId ?? 'guest'] as const,
+
+    /** Prefix that matches ALL ['global-browse-counts', *] keys */
+    allGlobalBrowseCounts: () => ['global-browse-counts'] as const,
 } as const;
 
 /**

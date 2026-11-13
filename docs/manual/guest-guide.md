@@ -1,11 +1,12 @@
 # Guest Guide (draft)
 
-**Version:** 0.37 | **Date:** Nov 13, 2026
+**Version:** 0.38 | **Date:** Nov 13, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.38 | Nov 13, 2026 | Search options: the **Songbook** and **Language** choices now also appear when you open Search options from another page (for example Home or a playlist page), showing how many public songs you can view in each book or language and taking you to those songs on the Songs page (UX v3, #570). |
 | 0.37 | Nov 13, 2026 | Search options: languages are now chosen only in the **Language** select, no longer under category & tag filters (UX v3, #569). Old links with a language in `?category=` or `?tag=` still list that language and show it selected in **Language**. |
 | 0.36 | Nov 13, 2026 | Search: when a song is found by another name, the grey line under it reads *Also known as …*. |
 | 0.35 | Nov 13, 2026 | Search: the search box also finds a song by the title of one of its translations; the grey line under the song names the language, for example *Dutch: Moeder Aarde* (UX v3, #547). Only translation titles are searched, not the translated lyrics. |
@@ -61,7 +62,7 @@ The ☰ menu repeats the main places (Home, Songs; under Library the same tabs a
 1. **Start on Home:** a one-line welcome says what the site is, the search field recordings you straight to matching songs (tap it to see your recent searches and the main categories), and **Recently added** lists the five newest songs; **All songs** opens the full list.
 2. **Browse by category** on Home: groups such as *The Elements* (Air, Earth, Fire, Water), *Nature*, *Lineage & Tradition*, *Medicine & Healing*. Each tag is a plain link; the grey number after it is how many songs it holds. "+3 more" shows the rest.
 3. **Search:** tap the search field and type a title, another name the song is known by, its title in a songbook, its title in another language (a translation), a line of the lyrics, an author or a category. Accents do not matter ("aguita" finds "Agüita"). When the title did not match, the row adds a grey line saying why (*Also known as …*, *Matched by songbook title: …*, *Dutch: …* for a translated title, *Matched by author: …*); songs whose title matches are listed first. Before you type, the field offers your last 5 searches (tap one to repeat it, **✕** removes one, **Clear all** removes them all; they are kept on this device only) and the main categories as grey buttons (tap one to show only those songs; tap it again to remove the filter). Tap outside the list or press Esc to close it.
-4. **Filters:** the slider button in the search field opens *Search options*, from top to bottom: the search box, category & tag filters (without languages, which live in their own filter below), **songbook** and **language** (each with the number of songs behind every name, for your other choices in the sheet: "Songbook B (12)"), the sort order and the content type (songs with chords / with melody). Tap **Show results**. A link to a songbook or language that is no longer there shows *Unknown songbook* / *Unknown language* with 0 songs.
+4. **Filters:** the slider button in the search field opens *Search options* from any page, from top to bottom: the search box, category & tag filters (without languages, which live in their own filter below), **songbook** and **language** (each with the number of songs behind every name: on the Songs page for your other choices in the sheet, e.g. "Songbook B (12)", and from other pages across all songs you may view), the sort order and the content type (songs with chords / with melody). Tap **Show results**. A link to a songbook or language that is no longer there shows *Unknown songbook* / *Unknown language* with 0 songs.
 5. **Search** in the bottom bar lists all songs A–Z and is ready for typing. Each row shows the title, a grey line *author · category · language* and the key on the right; tap the row to open the song.
 6. **Library → Artists** lists every author with their number of songs.
 7. **Library → Songbooks** lists the printed songbooks with their number of songs. Open one to see its songs in the order of its pages, handy when your circle sings from a printed book; each row shows the page and opens the version printed there. Signed out you see the public songs only.

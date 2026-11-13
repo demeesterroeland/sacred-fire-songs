@@ -161,6 +161,41 @@ export function browseOptions(
   return { songbooks: [...songbooks.values()].sort(sort), languages: [...languages.values()].sort(sort) };
 }
 
+/** One row returned by `public.fn_search_filter_counts()`. */
+export interface SearchFilterCountRow {
+  kind: string;
+  value: string;
+  label: string;
+  song_count: number;
+}
+
+/**
+ * Splits `fn_search_filter_counts()` rows into sorted Songbook and Language `BrowseOption` lists
+ * so `GlobalSearchModal` renders the same `SearchFiltersModal` selects as `/songs` (Story 6.2.25, #570).
+ */
+export function browseOptionsFromRows(
+  rows: readonly SearchFilterCountRow[] | null | undefined,
+  locale?: string
+): { songbooks: BrowseOption[]; languages: BrowseOption[] } {
+  const songbooks: BrowseOption[] = [];
+  const languages: BrowseOption[] = [];
+  for (const row of rows ?? []) {
+    if (!row.value || !row.label) continue;
+    const option: BrowseOption = {
+      value: row.value,
+      label: row.label,
+      count: Number(row.song_count) || 0,
+    };
+    if (row.kind === 'songbook') songbooks.push(option);
+    else if (row.kind === 'language') languages.push(option);
+  }
+  const sort = byLabel(locale);
+  return {
+    songbooks: songbooks.sort(sort),
+    languages: languages.sort(sort),
+  };
+}
+
 export interface GroupedCategoryOption<T extends { name: string; slug: string } = { name: string; slug: string }> {
   parentName: string;
   categories: T[];
