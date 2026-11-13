@@ -3,7 +3,7 @@
  *
  * "Dirty" is decided by a fingerprint of everything that ends up in the PDF:
  * playlist title/description, the ordered songs with their content, key, capo,
- * transposition and URL, plus the interface language, the site URL and the
+ * transposition, URL, beats and sources, plus the interface language, the site URL and the
  * user. Any change (order, added, removed, song edited, language switched)
  * gives a new fingerprint and therefore a fresh PDF.
  *
@@ -53,6 +53,9 @@ export async function exportFingerprint(input: ExportFingerprintInput): Promise<
       s.capo ?? null,
       s.transposition ?? null,
       s.tuning ?? '',
+      s.beats ?? '',
+      // Source credit lines: book, page, compiler, original title and primary flag of every source.
+      (s.sources ?? []).map((r) => [r.id, r.is_primary, r.page ?? '', r.original_title ?? '', r.songbooks]),
       s.url ?? '',
       s.content,
     ]),

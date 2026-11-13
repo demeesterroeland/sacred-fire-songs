@@ -1,5 +1,5 @@
 # Sacred Fire Songs – Interface language (i18n) behaviour catalogue
-# Version: 1.2 | Date: Oct 30, 2026
+# Version: 1.3 | Date: Nov 13, 2026
 #
 # Living Gherkin description of Story 3.7.1 (issue #246) – acceptance criteria
 # I18N-01 … I18N-12 in docs/logbook/epic&user stories.md. Each scenario names
@@ -16,6 +16,7 @@
 #   1.0 – Oct 30, 2026 – Initial catalogue for Story 3.7.1 (#246).
 #   1.1 – Oct 30, 2026 – I18N-11: playlist PDF export (#220) labels and messages.
 #   1.2 – Oct 30, 2026 – I18N-12: Spanish, Italian, Russian, Quechua, French, Portuguese.
+#   1.3 – Nov 13, 2026 – I18N-11: the PDF meta line is the screen's (Key Am, no colon), Story 6.2.17 (#520).
 
 Feature: Interface language
   The interface (navigation, pages, buttons, messages) is available in English,
@@ -229,8 +230,8 @@ Feature: Interface language
 
       Examples:
         | locale | page           | key           | date         | subtitle                                | dateLocale |
-        | en     | Page 1 of 3    | Key: Am       | Oct 30, 2026 | 2 songs   •   Generated Oct 30, 2026    | en-US      |
-        | nl     | Pagina 1 van 3 | Toonsoort: Am | 30 okt 2026  | 2 liederen   •   Gemaakt op 30 okt 2026 | nl-NL      |
+        | en     | Page 1 of 3    | Key Am        | Oct 30, 2026 | 2 songs   •   Generated Oct 30, 2026    | en-US      |
+        | nl     | Pagina 1 van 3 | Toonsoort Am  | 30 okt 2026  | 2 liederen   •   Gemaakt op 30 okt 2026 | nl-NL      |
 
     @unit @i18n @pdfExport
     Scenario: I18N-11 Export messages and the login prompt are translated
