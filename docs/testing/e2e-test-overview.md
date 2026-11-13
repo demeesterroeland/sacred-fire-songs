@@ -1,6 +1,6 @@
 # E2E Test Overview & Matrix: Sacred Fire Songs
 
-**Version:** 1.26
+**Version:** 1.27
 **Status:** Living Document
 **Date:** Nov 13, 2026
 **Tracking:** GH #142
@@ -27,6 +27,7 @@
 | **1.15** | Nov 5, 2026 | LIB-13 follows Story 6.1.24: no `/explore` route; bottom bar spec `ux-v2-bottom-bar.spec.ts`. |
 | **1.20** | Nov 7, 2026 | UX v2 validation round 1, review round on PR #474: new spec `ux-v2-validation-1-review.spec.ts` (a press on a song under the open suggestions on a phone with touch and on a desktop with a mouse, also on guest Home; the scroll position of the desktop column on the song list, Home and Playlists; auto-scroll behind the fixed bars on a phone and with padding on a desktop; the tools sheet and focus on a window that grows; section labels versus chords; toolbar alignment; one focus cue on the tag field, the artist field and the selects; Search options labels in all 8 languages at 390 px; axe colour contrast on the open tag browser, light and dark; fixture `VALIDATION_1_REVIEW_FIXTURE_IDS`, removed by `e2e/global-teardown.ts`). `ux-v2-validation-1.spec.ts` is unchanged. |
 | **1.21** | Nov 9, 2026 | Validation 4: LIB-12 is the New tab (`/library/new`); the Library tab row has five tabs and scrolls on a phone (`ux-v2-library-tabs.spec.ts`). |
+| **1.27** | Nov 13, 2026 | VIEW-09: malformed `[id]` links render not-found and song load failures show the translated message instead of raw `error.message` (#578), `ux-v2-broken-song-links.spec.ts`. |
 | **1.26** | Nov 13, 2026 | LIB-13: `/explore` redirects (308) to `/songs` with its query string (#574), `ux-v2-explore-redirect.spec.ts`. |
 | **1.25** | Nov 13, 2026 | SONG-11 reads Public/Private (#564); SONG-13: "No artist" for a song without an author (#565), `ux-v2-private-and-no-artist.spec.ts`. |
 | **1.24** | Nov 12, 2026 | #485 group 1: SONG-12 `ux-v2-sober-colours.spec.ts` (member): every category tag on the Add song page has the same colours, a selected tag shows inverted greys and `aria-pressed`, light and dark. |
@@ -177,6 +178,7 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 | VIEW-06 | Transpose | Musician transposes chords up/down | wrap A→G#; only when musician enabled | M(musician) | ⚠️ | 🔲 | P1 | 2.1.1 |
 | VIEW-07 | Record view | Visiting detail records a "recently viewed" entry | guest not recorded | M | ✅ | 🔲 | P2 | recordSongView |
 | VIEW-08 | Add-to-playlist from detail | Playlist picker opens and adds the song | unauth → nudge | M | ✅ | 🔲 | P1 | PlaylistPicker |
+| VIEW-09 | Broken song links & load error | Malformed `[id]` links render not-found; real song load failure shows translated error with Retry, never raw `error.message` | `/songs/xyz`, `/songs/<missing-uuid>`, mocked 500 | G | ✅ | ✅ | P2 | `ux-v2-broken-song-links.spec.ts` (#578) |
 
 ### 4.6 Favorites (Epic 3.1)
 

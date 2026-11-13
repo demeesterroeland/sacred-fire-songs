@@ -2,6 +2,7 @@ import { createClient } from "@/lib/supabase/server";
 import { signedUrlByPath, type ProfileRecording } from "@/lib/users/profileRecordings";
 import { toProfileRole } from "@/lib/users/roleBadge";
 import type { UserRole } from "@/lib/admin/types";
+import { isUuid } from "@/lib/validation/uuid";
 
 export type AttributedRecordingSummary = ProfileRecording;
 
@@ -16,6 +17,7 @@ export interface MusicianProfileData {
 }
 
 export async function fetchMusicianProfile(userId: string): Promise<MusicianProfileData | null> {
+  if (!isUuid(userId)) return null;
   const supabase = await createClient();
 
   const { data: profile, error } = await supabase

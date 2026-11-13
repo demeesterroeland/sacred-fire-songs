@@ -3466,3 +3466,9 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 
 - `/explore` (gone since the bottom bar, Story 6.1.24) showed "Page not found". It now redirects permanently (308) to `/songs`, keeping the query string (`/explore?category=ceremony` → `/songs?category=ceremony`), via `redirects()` in `next.config.ts`.
 - Tests: `docs/testing/ux-v2-explore-redirect.feature` (`@unit`, `@e2e`), `exploreRedirect.test.ts`, `e2e/tests/ux-v2-explore-redirect.spec.ts`; the bottom bar spec now expects the song list instead of a 404.
+
+## Session November 13, 2026 — #578: broken song links and translated load error
+
+- Every `[id]` route (`app/songs/[id]`, `app/songs/[id]/edit`, `app/users/[id]`, `app/recordings/[id]`, `app/library/playlists/[id]`, `app/admin/users/[id]`) and `fetchSong` / `fetchMusicianProfile` / `getAdminUserDetails` checks `isUuid(id)` (`lib/validation/uuid.ts`) before querying PostgreSQL `uuid` columns, so a malformed id like `/songs/xyz` renders `notFound()` instead of the raw database error `invalid input syntax for type uuid`.
+- On `app/songs/[id]/page.tsx`, the generic load-error state shows the translated `t('song.error.unexpected')` with Retry instead of `songError.message` (logged to the console).
+- Tests: `docs/testing/ux-v2-broken-song-links.feature` (`@unit`, `@e2e`), `brokenSongLinks.test.ts`, `fetchSong.test.ts`, `e2e/tests/ux-v2-broken-song-links.spec.ts`.

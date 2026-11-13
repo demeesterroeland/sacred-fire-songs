@@ -6,6 +6,7 @@
  */
 import { createClient } from '@/lib/supabase/client';
 import { sortVersions } from '@/lib/songs/versionOrder';
+import { isUuid } from '@/lib/validation/uuid';
 
 // Enforce a timeout on any promise to prevent infinite loading skeletons
 export function withTimeout<T>(promise: Promise<T>, ms: number, errorMessage = "Request timed out"): Promise<T> {
@@ -27,6 +28,7 @@ export function withTimeout<T>(promise: Promise<T>, ms: number, errorMessage = "
 }
 
 export const fetchSong = async (id: string) => {
+    if (!isUuid(id)) return null;
     const supabase = createClient();
     const queryPromise = supabase
         .from('compositions')

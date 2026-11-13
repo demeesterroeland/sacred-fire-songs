@@ -1553,3 +1553,9 @@
 - [x] `redirects()` in `next.config.ts`: `/explore` → `/songs`, permanent, query kept
 - [x] Tests: feature `ux-v2-explore-redirect.feature`, Vitest `exploreRedirect.test.ts`, E2E `ux-v2-explore-redirect.spec.ts`; `ux-v2-bottom-bar.spec.ts` updated
 - [x] Docs: design doc 2.17, E2E overview 1.26
+
+## Session November 13, 2026 (#578, broken song links and load error)
+- [x] `isUuid()` (`lib/validation/uuid.ts`) guards `[id]` routes (`/songs/[id]`, `/songs/[id]/edit`, `/users/[id]`, `/library/playlists/[id]`, `/admin/users/[id]`) and `fetchSong` / `fetchMusicianProfile` / `getAdminUserDetails` so malformed ids render `notFound()`
+- [x] `app/songs/[id]/page.tsx` load-error state shows `t('song.error.unexpected')` instead of raw `songError.message` (logged to console)
+- [x] Tests: feature `ux-v2-broken-song-links.feature` (`@unit`, `@e2e`), Vitest `brokenSongLinks.test.ts` + `fetchSong.test.ts`, E2E `ux-v2-broken-song-links.spec.ts`
+- [x] Docs: design doc 2.18, E2E overview 1.27
