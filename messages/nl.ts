@@ -564,6 +564,10 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'settings.profile.avatar.tooLarge': 'Afbeelding moet kleiner zijn dan 2 MB',
 
   'settings.security.heading': 'Beveiliging',
+  'settings.security.changeEmail': 'E-mailadres wijzigen',
+  'settings.security.emailReverifyHint': 'Het wijzigen van je e-mailadres vereist een nieuwe bevestiging.',
+  'settings.security.showPassword': 'Wachtwoord tonen',
+  'settings.security.hidePassword': 'Wachtwoord verbergen',
   'settings.security.changePassword': 'Wachtwoord wijzigen',
   'settings.security.currentPassword': 'Huidig wachtwoord',
   'settings.security.newPassword': 'Nieuw wachtwoord',

@@ -567,6 +567,10 @@ const ru: Partial<Record<TranslationKey, string>> = {
   'settings.profile.avatar.tooLarge': 'Размер изображения должен быть меньше 2 МБ',
 
   'settings.security.heading': 'Безопасность',
+  'settings.security.changeEmail': 'Сменить почту',
+  'settings.security.emailReverifyHint': 'При смене почты потребуется повторное подтверждение.',
+  'settings.security.showPassword': 'Показать пароль',
+  'settings.security.hidePassword': 'Скрыть пароль',
   'settings.security.changePassword': 'Смена пароля',
   'settings.security.currentPassword': 'Текущий пароль',
   'settings.security.newPassword': 'Новый пароль',

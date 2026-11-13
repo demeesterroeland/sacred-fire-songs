@@ -3482,3 +3482,11 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - Every `[id]` route (`app/songs/[id]`, `app/songs/[id]/edit`, `app/users/[id]`, `app/recordings/[id]`, `app/library/playlists/[id]`, `app/admin/users/[id]`) and `fetchSong` / `fetchMusicianProfile` / `getAdminUserDetails` checks `isUuid(id)` (`lib/validation/uuid.ts`) before querying PostgreSQL `uuid` columns, so a malformed id like `/songs/xyz` renders `notFound()` instead of the raw database error `invalid input syntax for type uuid`.
 - On `app/songs/[id]/page.tsx`, the generic load-error state shows the translated `t('song.error.unexpected')` with Retry instead of `songError.message` (logged to the console).
 - Tests: `docs/testing/ux-v2-broken-song-links.feature` (`@unit`, `@e2e`), `brokenSongLinks.test.ts`, `fetchSong.test.ts`, `e2e/tests/ux-v2-broken-song-links.spec.ts`.
+
+## Session November 13, 2026 — Story 6.1.35 (#485), group 5: account settings
+
+- `AccountSettings`, `ProfileSettings`, `SecuritySettings`, `PreferencesSettings` and `PrivacySettings` use semantic tokens only (178 palette classes removed; `PALETTE_BASELINE` 759 → 581, lint cap 137 → 132).
+- Navigation and theme controls: the Profile / Security / Preferences tab pills and the Light / Dark / System theme segmented buttons are 44 px targets (`min-h-tap`) that mark the chosen option with inverted greys (`bg-chip-active text-on-chip-active`) and `aria-pressed`.
+- Actions and inputs: Profile's **Save Changes** and Security's **Update Password** use the shared `<Button>` primary style (`bg-accent text-on-accent`), **Change Email** is an outlined button, and **Sign Out All Devices** / **Delete Account** keep `text-danger`/`border-danger` next to their words. Password visibility buttons are 44 px (`size-tap`) with translated labels.
+- Copy: replaced hard-coded English strings in `SecuritySettings` with `field.email.label` and new keys `settings.security.changeEmail`, `settings.security.emailReverifyHint`, `settings.security.showPassword` and `settings.security.hidePassword` across all 8 locales.
+- Tests: `docs/testing/ux-v2-sober-account.feature` (`@unit`, `@e2e`), `testing/unit/tests/design/soberAccount.test.tsx`, `e2e/tests/ux-v2-sober-account.spec.ts` (ACC-08, axe colour contrast on Profile, Security and Preferences in light and dark mode).

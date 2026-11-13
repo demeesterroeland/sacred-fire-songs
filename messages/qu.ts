@@ -568,6 +568,10 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'settings.profile.avatar.tooLarge': 'Rikch’aqa 2MB-manta pisi kanan',
 
   'settings.security.heading': 'Waqaychay',
+  'settings.security.changeEmail': 'Correo hukchay',
+  'settings.security.emailReverifyHint': 'Correoykita hukchaspaqa musuqmanta takyachinayki kanqa.',
+  'settings.security.showPassword': 'Contraseñata rikuchiy',
+  'settings.security.hidePassword': 'Contraseñata pakay',
   'settings.security.changePassword': 'Contraseña hukchay',
   'settings.security.currentPassword': 'Kunan contraseña',
   'settings.security.newPassword': 'Musuq contraseña',

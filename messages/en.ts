@@ -562,6 +562,10 @@ const en = {
   'settings.profile.avatar.tooLarge': 'Image size must be less than 2MB',
 
   'settings.security.heading': 'Security',
+  'settings.security.changeEmail': 'Change email',
+  'settings.security.emailReverifyHint': 'Changing your email will require re-verification.',
+  'settings.security.showPassword': 'Show password',
+  'settings.security.hidePassword': 'Hide password',
   'settings.security.changePassword': 'Change Password',
   'settings.security.currentPassword': 'Current Password',
   'settings.security.newPassword': 'New Password',

@@ -29,17 +29,17 @@ function PreferenceRow({
 }: PreferenceRowProps) {
   const { t } = useLocale();
   return (
-    <div className={`flex items-center justify-between p-4 bg-black/5 dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/5 transition-opacity ${disabled ? "opacity-50" : ""}`}>
+    <div className={`flex min-h-tap items-center justify-between p-4 bg-surface rounded-panel border border-line transition-opacity ${disabled ? "opacity-50" : ""}`}>
       <div className="flex items-start gap-3 pr-4">
-        <div className="mt-0.5 text-gray-500 dark:text-slate-400">{icon}</div>
+        <div className="mt-0.5 text-fg-muted" aria-hidden="true">{icon}</div>
         <div>
           <div className="flex items-center gap-2">
-            <p className="font-medium text-gray-900 dark:text-white">{label}</p>
+            <p className="font-medium text-fg">{label}</p>
           </div>
-          <p className="text-sm text-gray-500 dark:text-slate-400 mt-0.5">
+          <p className="text-sm text-fg-muted mt-0.5">
             {description}
             {notSupported && (
-              <span className="text-amber-500 block mt-1">{t('settings.prefs.notSupported')}</span>
+              <span className="text-fg-subtle block mt-1">{t('settings.prefs.notSupported')}</span>
             )}
           </p>
         </div>
@@ -56,9 +56,9 @@ function PreferenceRow({
 }
 
 const THEME_OPTIONS: { value: ThemePreference; labelKey: TranslationKey; icon: React.ReactNode }[] = [
-  { value: 'light', labelKey: 'theme.light', icon: <Sun className="w-4 h-4" /> },
-  { value: 'dark', labelKey: 'theme.dark', icon: <Moon className="w-4 h-4" /> },
-  { value: 'system', labelKey: 'theme.system', icon: <Monitor className="w-4 h-4" /> },
+  { value: 'light', labelKey: 'theme.light', icon: <Sun className="w-4 h-4" aria-hidden="true" /> },
+  { value: 'dark', labelKey: 'theme.dark', icon: <Moon className="w-4 h-4" aria-hidden="true" /> },
+  { value: 'system', labelKey: 'theme.system', icon: <Monitor className="w-4 h-4" aria-hidden="true" /> },
 ];
 
 function ThemeSelector() {
@@ -66,33 +66,40 @@ function ThemeSelector() {
   const { preferences, setPreference } = useUserPreferences();
 
   return (
-    <div className="flex items-center justify-between p-4 bg-black/5 dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/5">
+    <div className="flex items-center justify-between p-4 bg-surface rounded-panel border border-line">
       <div className="flex items-start gap-3 pr-4">
-        <div className="mt-0.5 text-gray-500 dark:text-slate-400">
-          {preferences.theme === 'light' ? <Sun className="w-5 h-5" /> : preferences.theme === 'dark' ? <Moon className="w-5 h-5" /> : <Monitor className="w-5 h-5" />}
+        <div className="mt-0.5 text-fg-muted">
+          {preferences.theme === 'light' ? <Sun className="w-5 h-5" aria-hidden="true" /> : preferences.theme === 'dark' ? <Moon className="w-5 h-5" aria-hidden="true" /> : <Monitor className="w-5 h-5" aria-hidden="true" />}
         </div>
         <div>
-          <p className="font-medium text-gray-900 dark:text-white">{t("settings.prefs.appearance")}</p>
-          <p className="text-sm text-gray-500 dark:text-slate-400 mt-0.5">
+          <p className="font-medium text-fg">{t("settings.prefs.appearance")}</p>
+          <p className="text-sm text-fg-muted mt-0.5">
             {t("settings.prefs.appearance.description")}
           </p>
         </div>
       </div>
-      <div className="bg-gray-200 dark:bg-gray-800 p-1 rounded-xl inline-flex shadow-inner shrink-0">
-        {THEME_OPTIONS.map((option) => (
-          <button
-            key={option.value}
-            onClick={() => setPreference('theme', option.value)}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold rounded-lg transition-all ${
-              preferences.theme === option.value
-                ? 'bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm ring-1 ring-gray-300 dark:ring-white/5'
-                : 'text-gray-500 hover:text-gray-700 dark:hover:text-gray-300'
-            }`}
-          >
-            {option.icon}
-            <span className="hidden sm:inline">{t(option.labelKey)}</span>
-          </button>
-        ))}
+      <div className="bg-surface-2 p-0.5 rounded-panel inline-flex gap-0.5 shrink-0">
+        {THEME_OPTIONS.map((option) => {
+          const active = preferences.theme === option.value;
+          const label = t(option.labelKey);
+          return (
+            <button
+              key={option.value}
+              type="button"
+              aria-label={label}
+              aria-pressed={active}
+              onClick={() => setPreference('theme', option.value)}
+              className={`min-h-tap inline-flex items-center justify-center gap-1.5 px-3 text-meta font-semibold rounded-control transition-colors ${
+                active
+                  ? 'bg-chip-active text-on-chip-active'
+                  : 'text-fg-muted hover:text-fg'
+              }`}
+            >
+              {option.icon}
+              <span className="hidden sm:inline">{label}</span>
+            </button>
+          );
+        })}
       </div>
     </div>
   );
@@ -102,14 +109,14 @@ function LanguageSelector() {
   const { t } = useLocale();
 
   return (
-    <div className="flex items-center justify-between p-4 bg-black/5 dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/5">
+    <div className="flex items-center justify-between p-4 bg-surface rounded-panel border border-line">
       <div className="flex items-start gap-3 pr-4">
-        <div className="mt-0.5 text-gray-500 dark:text-slate-400">
-          <Globe className="w-5 h-5" />
+        <div className="mt-0.5 text-fg-muted">
+          <Globe className="w-5 h-5" aria-hidden="true" />
         </div>
         <div>
-          <p className="font-medium text-gray-900 dark:text-white">{t("settings.prefs.language")}</p>
-          <p className="text-sm text-gray-500 dark:text-slate-400 mt-0.5">
+          <p className="font-medium text-fg">{t("settings.prefs.language")}</p>
+          <p className="text-sm text-fg-muted mt-0.5">
             {t("settings.prefs.language.description")}
           </p>
         </div>
@@ -149,7 +156,7 @@ function EmailNotificationsRow() {
 
   return (
     <PreferenceRow
-      icon={<Mail className="w-5 h-5" />}
+      icon={<Mail className="w-5 h-5" aria-hidden="true" />}
       label={t("settings.prefs.emailNotifications")}
       description={t("settings.prefs.emailNotifications.description")}
       checked={enabled ?? true}
@@ -166,7 +173,7 @@ export default function PreferencesSettings() {
 
   return (
     <section className="space-y-4">
-      <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-6">{t("settings.prefs.heading")}</h2>
+      <h2 className="text-xl font-bold text-fg mb-6">{t("settings.prefs.heading")}</h2>
 
       {/* Theme Selector — functional */}
       <ThemeSelector />
@@ -176,7 +183,7 @@ export default function PreferencesSettings() {
 
       {/* Keep Screen Awake — functional */}
       <PreferenceRow
-        icon={<Monitor className="w-5 h-5" />}
+        icon={<Monitor className="w-5 h-5" aria-hidden="true" />}
         label={t("settings.prefs.keepAwake")}
         description={t("settings.prefs.keepAwake.description")}
         checked={preferences.keepScreenAwake && isSupported}
@@ -187,7 +194,7 @@ export default function PreferencesSettings() {
 
       {/* Auto-hide Bottom Nav — functional */}
       <PreferenceRow
-        icon={<SlidersHorizontal className="w-5 h-5" />}
+        icon={<SlidersHorizontal className="w-5 h-5" aria-hidden="true" />}
         label={t("settings.prefs.autoHideNav")}
         description={t("settings.prefs.autoHideNav.description")}
         checked={preferences.autoHideBottomNav}
@@ -202,7 +209,7 @@ export default function PreferencesSettings() {
         <>
         {/* Auto-scroll Lyrics — disabled */}
         <PreferenceRow
-          icon={<FileText className="w-5 h-5" />}
+          icon={<FileText className="w-5 h-5" aria-hidden="true" />}
           label={t("settings.prefs.autoScroll")}
           description={t("settings.prefs.autoScroll.description")}
           checked={false}
@@ -212,7 +219,7 @@ export default function PreferencesSettings() {
 
         {/* Default Chord Display — disabled */}
         <PreferenceRow
-          icon={<Music2 className="w-5 h-5" />}
+          icon={<Music2 className="w-5 h-5" aria-hidden="true" />}
           label={t("settings.prefs.showChords")}
           description={t("settings.prefs.showChords.description")}
           checked={false}
@@ -222,7 +229,7 @@ export default function PreferencesSettings() {
 
         {/* Offline Mode — disabled */}
         <PreferenceRow
-          icon={<WifiOff className="w-5 h-5" />}
+          icon={<WifiOff className="w-5 h-5" aria-hidden="true" />}
           label={t("settings.prefs.offlineMode")}
           description={t("settings.prefs.offlineMode.description")}
           checked={false}

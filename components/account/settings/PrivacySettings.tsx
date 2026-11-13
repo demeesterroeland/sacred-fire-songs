@@ -3,79 +3,70 @@
 import { useState } from "react";
 import { User } from "@supabase/supabase-js";
 import { Download, Trash2 } from "lucide-react";
-import { createClient } from "@/lib/supabase/client";
-import { toast } from "sonner";
 import { useLocale } from "@/context/LocaleContext";
+import { Switch } from "@/components/ui/switch";
+import { Button } from "@/components/ui/button";
 
 interface PrivacySettingsProps {
   user: User;
   profile: any;
 }
 
-export default function PrivacySettings({ user, profile }: PrivacySettingsProps) {
+export default function PrivacySettings({ profile }: PrivacySettingsProps) {
   const { t } = useLocale();
   const [isPublic] = useState(profile?.is_public ?? false);
   const [showActivity] = useState(profile?.show_activity ?? true);
-  const supabase = createClient();
 
   return (
     <section className="space-y-8">
 
       <div className="space-y-6 opacity-50 pointer-events-none select-none">
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white">{t("settings.privacy.heading")}</h2>
+        <h2 className="text-xl font-bold text-fg">{t("settings.privacy.heading")}</h2>
         <div className="space-y-4">
           {/* Public Profile Toggle */}
-          <div className="flex items-center justify-between p-4 bg-black/5 dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/5">
+          <div className="flex items-center justify-between p-4 bg-surface rounded-panel border border-line">
             <div>
-              <p className="font-medium text-gray-900 dark:text-white">{t("settings.privacy.makePublic")}</p>
-              <p className="text-sm text-gray-500 dark:text-slate-400">{t("settings.privacy.makePublic.description")}</p>
+              <p className="font-medium text-fg">{t("settings.privacy.makePublic")}</p>
+              <p className="text-sm text-fg-muted">{t("settings.privacy.makePublic.description")}</p>
             </div>
-            <button
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${isPublic ? "bg-[#f45d1a]" : "bg-slate-700"}`}
-            >
-              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${isPublic ? "translate-x-6" : "translate-x-1"}`} />
-            </button>
+            <Switch checked={isPublic} disabled aria-label={t("settings.privacy.makePublic")} />
           </div>
 
           {/* Show Activity Toggle */}
-          <div className="flex items-center justify-between p-4 bg-black/5 dark:bg-white/5 rounded-2xl border border-gray-200 dark:border-white/5">
+          <div className="flex items-center justify-between p-4 bg-surface rounded-panel border border-line">
             <div>
-              <p className="font-medium text-gray-900 dark:text-white">{t("settings.privacy.showActivity")}</p>
-              <p className="text-sm text-gray-500 dark:text-slate-400">{t("settings.privacy.showActivity.description")}</p>
+              <p className="font-medium text-fg">{t("settings.privacy.showActivity")}</p>
+              <p className="text-sm text-fg-muted">{t("settings.privacy.showActivity.description")}</p>
             </div>
-            <button
-              className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors focus:outline-none ${showActivity ? "bg-[#f45d1a]" : "bg-slate-700"}`}
-            >
-              <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${showActivity ? "translate-x-6" : "translate-x-1"}`} />
-            </button>
+            <Switch checked={showActivity} disabled aria-label={t("settings.privacy.showActivity")} />
           </div>
         </div>
       </div>
 
-      <hr className="border-gray-200 dark:border-white/5" />
+      <hr className="border-line" />
 
       <div className="space-y-4 opacity-50 pointer-events-none select-none">
-        <h2 className="text-xl font-bold text-gray-900 dark:text-white">{t("settings.privacy.dataManagement")}</h2>
-        <p className="text-gray-500 dark:text-slate-400 text-sm">{t("settings.privacy.dataManagement.description")}</p>
-        <button className="flex items-center gap-2 text-[#f45d1a] font-medium">
-          <Download className="w-4 h-4" />
+        <h2 className="text-xl font-bold text-fg">{t("settings.privacy.dataManagement")}</h2>
+        <p className="text-fg-muted text-sm">{t("settings.privacy.dataManagement.description")}</p>
+        <Button type="button" variant="text" disabled className="px-0">
+          <Download className="w-4 h-4" aria-hidden="true" />
           {t("settings.privacy.dataExport")}
-        </button>
+        </Button>
       </div>
 
-      <hr className="border-gray-200 dark:border-white/5" />
+      <hr className="border-line" />
 
-      <div className="bg-red-500/5 border border-red-500/20 p-6 rounded-2xl opacity-50 pointer-events-none select-none">
-        <h2 className="text-red-400 font-bold mb-2 flex items-center gap-2">
-          <Trash2 className="w-5 h-5" />
+      <div className="bg-surface border border-danger p-6 rounded-panel opacity-50 pointer-events-none select-none">
+        <h2 className="text-danger font-bold mb-2 flex items-center gap-2">
+          <Trash2 className="w-5 h-5" aria-hidden="true" />
           {t("settings.privacy.dangerZone")}
         </h2>
-        <p className="text-gray-500 dark:text-slate-400 text-sm mb-6">
+        <p className="text-fg-muted text-sm mb-6">
           {t("settings.privacy.deleteWarning")}
         </p>
-        <button className="bg-red-600/10 border border-red-600/30 text-red-500 font-bold px-6 py-3 rounded-xl">
+        <Button type="button" variant="destructive" disabled>
           {t("settings.privacy.deleteAccount")}
-        </button>
+        </Button>
       </div>
     </section>
   );
