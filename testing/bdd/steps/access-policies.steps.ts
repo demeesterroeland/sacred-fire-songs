@@ -33,9 +33,9 @@ export const OTHER_MEMBER_ID = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd3a0b01';
 const OTHER_MEMBER_EMAIL = 'other-member@example.invalid';
 
 export const SEEDED_EMAILS: Record<string, string> = {
-  member: 'roel.de.meester+member@gmail.com',
-  gatekeeper: 'roel.de.meester+gatekeeper@gmail.com',
-  admin: 'roel.de.meester+admin@gmail.com',
+  member: 'member@sfs.example',
+  gatekeeper: 'gatekeeper@sfs.example',
+  admin: 'admin@sfs.example',
 };
 
 function access(world: SongBddWorld): AccessBddState {

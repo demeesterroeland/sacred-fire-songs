@@ -2,25 +2,25 @@
 INSERT INTO public.profiles (id, email, role, full_name)
 VALUES (
         'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11',
-        'roel.de.meester+admin@gmail.com',
+        'admin@sfs.example',
         'admin',
         'Local Admin'
     ),
     (
         'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12',
-        'roel.de.meester+expert@gmail.com',
+        'expert@sfs.example',
         'expert',
         'Local Expert'
     ),
     (
         'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13',
-        'roel.de.meester+member@gmail.com',
+        'member@sfs.example',
         'member',
         'Local Member'
     ),
     (
         'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14',
-        'roel.de.meester+gatekeeper@gmail.com',
+        'gatekeeper@sfs.example',
         'gatekeeper',
         'Local Gatekeeper'
     ) ON CONFLICT (id) DO

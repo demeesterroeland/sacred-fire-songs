@@ -3447,3 +3447,9 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - A profile page (`/users/<id>`) shows one badge for the user's role, each with its own icon: admin `Shield`, gatekeeper `KeyRound`, expert `Award`, musician `Music`, member `UserCheck`. Labels reuse `admin.role.*` (all 8 locales).
 - `public.public_profiles` gains `role` (migration `20261113120000_public_profiles_role.sql`): every signed-in member sees every role; a guest reads NULL. `is_musician` stays. An unknown or missing role shows the member badge, never a privileged one.
 - Tests: `docs/testing/ux-v2-profile-role-badge.feature` (`@unit`, `@e2e`), `testing/unit/tests/profile/roleBadge.test.tsx`, a `@seed` scenario in `access-policies.feature`, `e2e/tests/ux-v2-profile-role-badge.spec.ts`.
+
+## Session November 13, 2026 — privacy: placeholder addresses for the seeded accounts
+
+- The four seeded accounts (`supabase/seeds/01_auth_users.sql`, `02_profiles.sql`) use placeholder addresses: `admin@sfs.example`, `expert@sfs.example`, `member@sfs.example`, `gatekeeper@sfs.example`. The E2E role fixtures, the BDD steps, the UX screenshot script, two feature files, three screen mockups and `CHANGELOG.md` follow; sample names are placeholders too (`Ana Example`).
+- `scripts/db/rename-seed-accounts.mjs` (`npm run seed:rename-accounts`) gives an existing local stack the same addresses without a reset: it matches rows by their fixed seed ids and updates `auth.users`, the `email` identity and `profiles`. Idempotent; refuses any non-localhost database.
+- Tests: `testing/unit/tests/renameSeedAccounts.test.ts` (mapping agrees with the seed files, id-based SQL, local-only guard); `admin-users.spec.ts` searches `gatekeeper@`.
