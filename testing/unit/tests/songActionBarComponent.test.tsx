@@ -19,7 +19,6 @@ function setup(over: Partial<React.ComponentProps<typeof SongActionBar>> = {}) {
     onPractice: vi.fn(),
     onToggleFavorite: vi.fn(),
     onGuestPlaylist: vi.fn(),
-    hasReferenceMedia: false,
     ...over,
   };
   render(<SongActionBar {...props} />);
@@ -65,27 +64,18 @@ describe('SongActionBar', () => {
     expect(p.onGuestPlaylist).not.toHaveBeenCalled();
   });
 
-  it('badges Practice with the number of takes when there are any', () => {
-    setup({ takeCount: 3 });
-    expect(screen.getByTestId('song-action-practice').textContent).toContain('3');
-  });
-
-  it('indicates reference media accessibly without replacing the recording count', () => {
-    setup({ hasReferenceMedia: true, takeCount: 3 });
+  it('shows one dot on Practice when there is media or a take, and says so (#586)', () => {
+    setup({ practiceAvailable: true });
     const practice = screen.getByTestId('song-action-practice');
-    const listenLabel = screen.getByText('Listen');
-
-    expect(screen.getByTestId('practice-media-indicator')).toBeTruthy();
-    expect(listenLabel.className).toContain('sr-only');
-    expect(screen.getByRole('button', { name: 'Practice Listen 3' })).toBe(practice);
-    expect(practice.textContent).toContain('3');
+    expect(screen.getByTestId('song-action-practice-dot')).toBeTruthy();
+    expect(practice.getAttribute('aria-label')).toBe('Practice: media or recordings available');
+    expect(practice.textContent).not.toMatch(/\d/); // no count: the drawer tabs say where
   });
 
-  it('does not indicate reference media when the selected version has none', () => {
-    setup({ hasReferenceMedia: false });
-
-    expect(screen.queryByTestId('practice-media-indicator')).toBeNull();
-    expect(screen.queryByText('Listen')).toBeNull();
+  it('shows no dot when nothing is available (#586)', () => {
+    setup({ practiceAvailable: false });
+    expect(screen.queryByTestId('song-action-practice-dot')).toBeNull();
+    expect(screen.getByTestId('song-action-practice').getAttribute('aria-label')).toBeNull();
   });
 
   it('hidden bar is out of the tab order and the accessibility tree', () => {

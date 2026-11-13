@@ -280,6 +280,7 @@ const nl: Partial<Record<TranslationKey, string>> = {
 
   // ─── Rehearsal Space ──────────────────────────────────────────────────────
   'practice.title': 'Oefenen',
+  'practice.available': 'Oefenen: media of opnames beschikbaar',
   'practice.tab.listen': 'Luisteren',
   "rehearsal.recordings.empty": "Nog geen opnames",
   'rehearsal.recordings.emptyHint': 'Start een opname om je oefening vast te leggen.',

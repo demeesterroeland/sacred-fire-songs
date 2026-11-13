@@ -283,6 +283,7 @@ const ru: Partial<Record<TranslationKey, string>> = {
 
   // ─── Rehearsal Space – Drawer ─────────────────────────────────────────────
   'practice.title': 'Практика',
+  'practice.available': 'Практика: есть медиа или записи',
   'practice.tab.listen': 'Слушать',
   "rehearsal.recordings.empty": "Записей пока нет",
   'rehearsal.recordings.emptyHint': 'Начни запись, чтобы сохранить свою практику.',

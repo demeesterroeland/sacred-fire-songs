@@ -280,6 +280,7 @@ const es: Partial<Record<TranslationKey, string>> = {
 
   // ─── Rehearsal Space – Drawer ─────────────────────────────────────────────
   'practice.title': 'Práctica',
+  'practice.available': 'Práctica: medios o grabaciones disponibles',
   'practice.tab.listen': 'Escuchar',
   "rehearsal.recordings.empty": "Aún no hay grabaciones",
   'rehearsal.recordings.emptyHint': 'Empieza a grabar para capturar tu práctica.',

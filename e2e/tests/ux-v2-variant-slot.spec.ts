@@ -178,7 +178,8 @@ test.describe('Practice follows the chosen version', () => {
     await page.goto(`/songs/${IDS.song}`);
     const control = page.getByRole('radiogroup', { name: 'Song version' });
     const practice = page.getByTestId('song-action-practice');
-    const mediaIndicator = page.getByTestId('practice-media-indicator');
+    // #586: one dot when the shown version has media or a take (this member has no takes on it).
+    const mediaIndicator = page.getByTestId('song-action-practice-dot');
     await expect(mediaIndicator).toHaveCount(0);
     await expect(practice).toHaveAccessibleName('Practice');
 
@@ -192,7 +193,7 @@ test.describe('Practice follows the chosen version', () => {
     // Simplified has one: the Listen tab appears.
     await control.getByRole('radio', { name: 'Simplified' }).click();
     await expect(mediaIndicator).toBeVisible();
-    await expect(practice).toHaveAccessibleName('Practice Listen');
+    await expect(practice).toHaveAccessibleName('Practice: media or recordings available');
     await clickPractice(page);
     await expect(page.getByTestId('practice-tab-listen')).toBeVisible();
   });

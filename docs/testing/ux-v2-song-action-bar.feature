@@ -1,5 +1,6 @@
-# Version: 1.2 | Date: Nov 13, 2026
+# Version: 1.3 | Date: Nov 13, 2026
 # Changelog
+# 1.3 | Nov 13, 2026 | Story 6.1.40 (#586): the reference-media cue becomes one availability dot (media or takes); no separate count on Practice.
 # 1.2 | Nov 13, 2026 | Story 6.2.2 (#583): Practice indicates reference media on the selected version with an accessible cue.
 # 1.1 | Nov 7, 2026 | Validation round 2, item 11: the ⋮ menu is the one song menu (reading tools and the Screen stays on switch added).
 # 1.0 | Nov 5, 2026 | Story 6.1.9 / G2.4 (#393): sticky Practice · Playlist · ♥ action bar on the song page.
@@ -71,12 +72,12 @@ Feature: Sticky action bar on the song page
     Then it offers "Share Song", "Edit" and "Delete", then the reading tools and "Screen stays on"
     And it no longer offers Practice, Playlist or the heart
 
-  @story-6.2.2 @e2e
-  Scenario: Practice indicates media availability for the selected version
+  @story-6.2.2 @story-6.1.40 @e2e
+  Scenario: Practice indicates availability for the selected version
     Given a signed-in member on a song with versions "Original" and "Simplified"
     And only "Simplified" has a reference media URL
+    And the member has no takes on the song
     When the member views the action bar on "Original"
-    Then Practice has no reference-media indicator
+    Then Practice shows no availability dot
     When the member selects "Simplified"
-    Then Practice shows an accessible reference-media indicator
-    And the recording count remains independently visible
+    Then Practice shows the availability dot, named "Practice: media or recordings available"
