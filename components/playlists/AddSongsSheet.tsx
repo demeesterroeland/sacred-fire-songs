@@ -42,7 +42,7 @@ export function AddSongsSheet({ playlistId, existingCompositionIds, open, onClos
 }
 
 function AddSongsBody({ playlistId, existingCompositionIds }: Pick<AddSongsSheetProps, 'playlistId' | 'existingCompositionIds'>) {
-    const { t } = useLocale();
+    const { t, locale } = useLocale();
     const router = useRouter();
     const idBase = useId();
     const [query, setQuery] = useState('');
@@ -68,7 +68,7 @@ function AddSongsBody({ playlistId, existingCompositionIds }: Pick<AddSongsSheet
         const out = new Map<string, string>();
         if (!query.trim()) return out;
         for (const song of results) {
-            const text = songMatchHintText(song, query, t);
+            const text = songMatchHintText(song, query, t, locale);
             if (text) out.set(song.id, text);
         }
         return out;

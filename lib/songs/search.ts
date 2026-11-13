@@ -181,7 +181,7 @@ const HINT_KEYS = {
 } as const satisfies Record<MatchHint['kind'], TranslationKey>;
 
 /**
- * The hint as the row shows it, in the UI language: "Matched by alias: Gran Venerable Madre Tierra", or for a
+ * The hint as the row shows it, in the UI language: "Also known as Gran Venerable Madre Tierra", or for a
  * translated title "Dutch: Moeder Aarde". `locale` (the UI language) names the language of a translated title; it is
  * required so no caller silently shows an English language name.
  */

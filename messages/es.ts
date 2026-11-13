@@ -128,7 +128,7 @@ const es: Partial<Record<TranslationKey, string>> = {
   'songs.emptyDrafts.action': 'Añadir canción →',
   'songs.noResultsSearch': 'No encontramos canciones que coincidan con "{search}".',
   'songs.noResultsFilter': 'No hay canciones disponibles para este filtro.',
-  'songs.matchAlias': 'Coincide con el alias: {text}',
+  'songs.matchAlias': 'También conocida como {text}',
   'songs.matchSourceTitle': 'Coincide con el título del cancionero: {text}',
   'songs.matchTranslation': '{language}: {text}',
   'songs.matchAuthor': 'Coincide con el autor: {text}',

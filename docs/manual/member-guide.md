@@ -1,12 +1,13 @@
 # Member Guide (draft)
 
-**Version:** 0.35 | **Date:** Nov 13, 2026
+**Version:** 0.36 | **Date:** Nov 13, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
-| 0.35 | Nov 13, 2026 | Playlists: the **+ Add Songs** search finds a song like the song search does: by its title, by another name it is known by, by any of its authors and by the title it has in a songbook (accents and capitals do not matter). When the song's own title did not match, the row adds a grey line saying why, for example *Matched by alias: Pachamama*; songs whose title matches are listed first (UX v3, #542). |
+| 0.36 | Nov 13, 2026 | Search: when a song is found by another name, the grey line under it reads *Also known as …* (in the song list and in **+ Add Songs**). |
+| 0.35 | Nov 13, 2026 | Playlists: the **+ Add Songs** search finds a song like the song search does: by its title, by another name it is known by, by any of its authors and by the title it has in a songbook (accents and capitals do not matter). When the song's own title did not match, the row adds a grey line saying why, for example *Also known as Pachamama*; songs whose title matches are listed first (UX v3, #542). |
 | 0.34 | Nov 13, 2026 | Search: the search box also finds a song by the title of one of its translations; the grey line under the song names the language, for example *Dutch: Moeder Aarde* (UX v3, #547). Only translation titles are searched, not the translated lyrics. The **+ Add Songs** search in a playlist still matches the title only. |
 | 0.33 | Nov 13, 2026 | Search options: **Songbook** and **Language** choices with the number of songs behind each name; see the Guest Guide. They combine with your library toggles (favorites, my songs, recordings, status). |
 | 0.32 | Nov 13, 2026 | Song page: a song with a translation has the switch **Original · Translation · Both**. **Translation** shows the translation alone (not transposed); **Both** shows the original and the translation together, verse by verse (under each other on a phone, side by side on a larger screen), with chords and transpose on the original and the translation as lyrics only. With more than one translation the language switch next to it picks the language (the first one until you pick); it no longer has **Original language**. A link with `?lang=nl&view=both` opens both, `?lang=nl&view=translation` the translation, and Share keeps it; choosing another version returns to the original (UX v3, #517). |
@@ -91,7 +92,7 @@ Your private songs (not public yet) look lighter in every song list and on the s
 - From a song: **Playlist** in the bar at the bottom → pick a playlist.
 
 - From a song: ⋮ → **Add to Playlist**. A sheet slides up: **New playlist** is the first row, then your playlists. A check shows where the song already is. Tap a playlist to add the song; tap a playlist with a check to take it out again. **Done** closes the sheet.
-- From the playlist: **+ Add Songs** and search. You can search by the song's title, another name it is known by, any of its authors or its title in a songbook; a grey line under the row says why it was found (for example *Matched by alias: Pachamama*). Tap a row to add the song (a check shows it is in the playlist); tap it again to take it out. The search box stays at the top while you scroll, and **Done** closes the sheet.
+- From the playlist: **+ Add Songs** and search. You can search by the song's title, another name it is known by, any of its authors or its title in a songbook; a grey line under the row says why it was found (for example *Also known as Pachamama*). Tap a row to add the song (a check shows it is in the playlist); tap it again to take it out. The search box stays at the top while you scroll, and **Done** closes the sheet.
 
 **In a playlist** you can: reorder songs by dragging, add a description, switch **public / private** (lock icon), **print / export PDF** (printer icon) for the ceremony, share the link of a public playlist, and duplicate it via ⋯ **(verify menu labels)**.
 

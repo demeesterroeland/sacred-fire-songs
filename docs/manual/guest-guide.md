@@ -1,11 +1,12 @@
 # Guest Guide (draft)
 
-**Version:** 0.35 | **Date:** Nov 13, 2026
+**Version:** 0.36 | **Date:** Nov 13, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.36 | Nov 13, 2026 | Search: when a song is found by another name, the grey line under it reads *Also known as …*. |
 | 0.35 | Nov 13, 2026 | Search: the search box also finds a song by the title of one of its translations; the grey line under the song names the language, for example *Dutch: Moeder Aarde* (UX v3, #547). Only translation titles are searched, not the translated lyrics. |
 | 0.34 | Nov 13, 2026 | Search options: two new choices, **Songbook** and **Language**. Pick a songbook to see only the songs printed in it, or a language to see only songs in it; the number behind each name is how many songs it would show with your other choices in the sheet (also the ones you have just changed and not yet applied). Tap *All songbooks* / *All languages* to clear it. |
 | 0.33 | Nov 13, 2026 | Song page: a song with a translation has a grey switch **Original · Translation · Both**. **Translation** shows the translation alone; **Both** shows each verse of the original with its translation: under it on a phone, side by side on a larger screen. With more than one translation a second switch picks the language (the first one is used until you pick). Chords stay on the original; **A−** / **A+** change both languages. The link then ends in `?lang=nl&view=both`; the original has a plain link (UX v3, #517). |
@@ -58,7 +59,7 @@ The ☰ menu repeats the main places (Home, Songs; under Library the same tabs a
 
 1. **Start on Home:** a one-line welcome says what the site is, the search field recordings you straight to matching songs (tap it to see your recent searches and the main categories), and **Recently added** lists the five newest songs; **All songs** opens the full list.
 2. **Browse by category** on Home: groups such as *The Elements* (Air, Earth, Fire, Water), *Nature*, *Lineage & Tradition*, *Medicine & Healing*. Each tag is a plain link; the grey number after it is how many songs it holds. "+3 more" shows the rest.
-3. **Search:** tap the search field and type a title, another name the song is known by, its title in a songbook, its title in another language (a translation), a line of the lyrics, an author or a category. Accents do not matter ("aguita" finds "Agüita"). When the title did not match, the row adds a grey line saying why (*Matched by alias: …*, *Matched by songbook title: …*, *Dutch: …* for a translated title, *Matched by author: …*); songs whose title matches are listed first. Before you type, the field offers your last 5 searches (tap one to repeat it, **✕** removes one, **Clear all** removes them all; they are kept on this device only) and the main categories as grey buttons (tap one to show only those songs; tap it again to remove the filter). Tap outside the list or press Esc to close it.
+3. **Search:** tap the search field and type a title, another name the song is known by, its title in a songbook, its title in another language (a translation), a line of the lyrics, an author or a category. Accents do not matter ("aguita" finds "Agüita"). When the title did not match, the row adds a grey line saying why (*Also known as …*, *Matched by songbook title: …*, *Dutch: …* for a translated title, *Matched by author: …*); songs whose title matches are listed first. Before you type, the field offers your last 5 searches (tap one to repeat it, **✕** removes one, **Clear all** removes them all; they are kept on this device only) and the main categories as grey buttons (tap one to show only those songs; tap it again to remove the filter). Tap outside the list or press Esc to close it.
 4. **Filters:** the slider button in the search field opens *Search options*, from top to bottom: the search box, category & tag filters, **songbook** and **language** (each with the number of songs behind every name, for your other choices in the sheet: "Songbook B (12)"), the sort order and the content type (songs with chords / with melody). Tap **Show results**. A link to a songbook or language that is no longer there shows *Unknown songbook* / *Unknown language* with 0 songs.
 5. **Search** in the bottom bar lists all songs A–Z and is ready for typing. Each row shows the title, a grey line *author · category · language* and the key on the right; tap the row to open the song.
 6. **Library → Artists** lists every author with their number of songs.

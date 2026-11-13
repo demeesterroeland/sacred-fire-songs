@@ -128,7 +128,7 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'songs.emptyDrafts.action': 'Lied toevoegen →',
   'songs.noResultsSearch': 'We konden geen liederen vinden die overeenkomen met "{search}".',
   'songs.noResultsFilter': 'Er zijn geen liederen beschikbaar voor dit filter.',
-  'songs.matchAlias': 'Gevonden via alias: {text}',
+  'songs.matchAlias': 'Ook bekend als {text}',
   'songs.matchSourceTitle': 'Gevonden via liedboektitel: {text}',
   'songs.matchTranslation': '{language}: {text}',
   'songs.matchAuthor': 'Gevonden via auteur: {text}',

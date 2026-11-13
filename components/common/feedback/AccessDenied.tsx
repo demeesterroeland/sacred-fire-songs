@@ -1,8 +1,8 @@
 'use client';
 
 import Link from 'next/link';
-import { ArrowLeft, Flame, Hand } from 'lucide-react';
-import { useEffect, useState } from 'react';
+import { ArrowLeft, Flame } from 'lucide-react';
+import { useState } from 'react';
 import { useLocale } from '@/context/LocaleContext';
 
 export default function AccessDenied() {

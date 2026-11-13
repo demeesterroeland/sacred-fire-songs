@@ -15,16 +15,19 @@ const messages: Record<string, string> = {
   'playlists.addSongs.loadError': 'Could not load the songs.',
   'playlists.addSongs.added': 'Added "{title}"',
   'playlists.addSongs.removed': 'Removed "{title}"',
-  'songs.matchAlias': 'Matched by alias: {text}',
+  'songs.matchAlias': 'Also known as {text}',
   'songs.matchSourceTitle': 'Matched by songbook title: {text}',
   'songs.matchAuthor': 'Matched by author: {text}',
+  'songs.matchTranslation': '{language}: {text}',
   'search.status.draft': 'Draft',
   'playlists.addSongs.done': 'Done',
   'common.loading': 'Loading…',
   'common.close': 'Close',
 };
+const mockLocale = vi.hoisted(() => ({ value: 'en' }));
 vi.mock('@/context/LocaleContext', () => ({
   useLocale: () => ({
+    locale: mockLocale.value,
     t: (k: string, v?: Record<string, string>) => (messages[k] ?? k).replace(/\{(\w+)\}/g, (_, name) => v?.[name] ?? ''),
   }),
 }));
@@ -60,6 +63,7 @@ beforeEach(() => {
   addSongToPlaylist.mockResolvedValue({ added: true });
 });
 afterEach(() => {
+  mockLocale.value = 'en';
   cleanup();
   vi.clearAllMocks();
 });
@@ -73,14 +77,29 @@ describe('AddSongsSheet search', () => {
     expect(screen.queryByTestId('add-song-match')).toBeNull();
   });
 
-  it('finds "Madre Tierra" by its alias and says why: "Matched by alias: Pachamama"', async () => {
+  it('finds "Madre Tierra" by its alias and says why: "Also known as Pachamama"', async () => {
     renderSheet();
     await screen.findByText('Madre Tierra');
     type('pachamama');
     const row = await screen.findByRole('checkbox', { name: 'Madre Tierra' });
-    const hint = screen.getByText('Matched by alias: Pachamama');
+    const hint = screen.getByText('Also known as Pachamama');
     expect(row.getAttribute('aria-describedby')).toBe(hint.id);
     expect(hint.id).not.toBe('');
+  });
+
+  // #542 after #547: the sheet passes the UI locale, so a translated title's hint names the language in that language.
+  it.each([
+    ['en', 'Dutch: Moeder Aarde'],
+    ['nl', 'Nederlands: Moeder Aarde'],
+  ])('finds a song by its translated title with the language named in the UI language (%s)', async (locale, text) => {
+    mockLocale.value = locale;
+    fetchAllSongs.mockResolvedValue([song({ id: 'e', title: 'Madre Tierra', translationTitles: [{ language: 'nl', title: 'Moeder Aarde' }] })]);
+    renderSheet();
+    await screen.findByText('Madre Tierra');
+    type('moeder aarde');
+    const row = await screen.findByRole('checkbox', { name: 'Madre Tierra' });
+    const hint = screen.getByText(text);
+    expect(row.getAttribute('aria-describedby')).toBe(hint.id);
   });
 
   it('ranks the title match before the alias match', async () => {

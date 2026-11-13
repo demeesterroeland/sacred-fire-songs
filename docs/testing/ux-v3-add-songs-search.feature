@@ -1,5 +1,6 @@
-# Version: 1.0 | Date: Nov 13, 2026
+# Version: 1.1 | Date: Nov 13, 2026
 # Changelog
+# 1.1 | Nov 13, 2026 | Owner decision: the alias hint reads "Also known as …"; the sheet names a translated title's language in the UI language.
 # 1.0 | Nov 13, 2026 | Story 6.2.22 / G5.5 (#542): the "+ Add Songs" sheet of a playlist finds songs by alias, any author and the title in a songbook, with the song list's matcher, ranking and "matched by ..." hint.
 @ux-v3 @add-songs-search
 Feature: The "+ Add Songs" sheet finds a song by the name I know
@@ -11,7 +12,7 @@ Feature: The "+ Add Songs" sheet finds a song by the name I know
   Scenario: Add a song by its alias
     Given a catalog song "Madre Tierra" with the alias "Pachamama"
     When I search "pachamama" in the "+ Add Songs" sheet of a playlist
-    Then "Madre Tierra" is offered with the hint "Matched by alias: Pachamama"
+    Then "Madre Tierra" is offered with the hint "Also known as Pachamama"
 
   @unit
   Scenario: Add a song by a co-author the row does not show
