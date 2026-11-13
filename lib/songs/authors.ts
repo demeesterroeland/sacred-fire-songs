@@ -53,10 +53,10 @@ export function songAuthorLabels(song: AuthorSource, t: TranslateFn): AuthorLabe
   }));
 }
 
-/** Display names for the menu, the share text and the rehearsal drawer: every author, or Traditional when there is none. */
+/** Display names for the menu, the share text and the rehearsal drawer: every author, or the localized no-author label. */
 export function songAuthors(song: AuthorSource, t: TranslateFn): string[] {
   const labels = songAuthorLabels(song, t).map((a) => a.label);
-  return labels.length > 0 ? labels : [t('song.traditional')];
+  return labels.length > 0 ? labels : [t('song.noArtist')];
 }
 
 /** The song list filtered to one author: the one URL format of every author link (name encoded as one value). */
@@ -107,7 +107,7 @@ export function authorFieldsForSave(input: string): { original_author: string; a
   return { original_author: input, authors: parseArtists(input) };
 }
 
-/** Every author as one phrase in the UI language, or the translated Traditional: the ⋮ sheet's "by" line and the rehearsal drawer. */
+/** Every author as one phrase in the UI language, or the localized no-author label. */
 export function songAuthorsText(song: AuthorSource, t: TranslateFn, locale: Locale | string): string {
   return joinAuthors(songAuthors(song, t), locale);
 }

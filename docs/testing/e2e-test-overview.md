@@ -1,6 +1,6 @@
 # E2E Test Overview & Matrix: Sacred Fire Songs
 
-**Version:** 1.27
+**Version:** 1.28
 **Status:** Living Document
 **Date:** Nov 13, 2026
 **Tracking:** GH #142
@@ -31,6 +31,7 @@
 | **1.25** | Nov 13, 2026 | Story 6.2.11 (#514): Library gets a sixth tab **Songbooks** (`ux-v2-library-tabs.spec.ts` now expects six tabs); added LIB-14 for the songbook pages (covered by `@unit`/`@seed` BDD and RTL; no E2E spec yet). |
 | **1.26** | Nov 12, 2026 | (develop 1.24) #485 group 1: SONG-12 `ux-v2-sober-colours.spec.ts` (member): every category tag on the Add song page has the same colours, a selected tag shows inverted greys and `aria-pressed`, light and dark. |
 | **1.27** | Nov 13, 2026 | Sync: merge of `origin/develop` into `feat/ux-v3`. develop's row 1.24 (SONG-12, neutral tags) clashed with the `feat/ux-v3` number and is kept as 1.26. Seeded accounts are `<role>@sfs.example` on develop; `feat/ux-v3`-only specs still use the old addresses until a follow-up. |
+| **1.28** | Nov 13, 2026 | Synced E2E coverage from `develop`: Private/No artist (#564/#565), `/explore` redirect (#574), malformed song links (#578), account contrast (ACC-08), header contrast (NAV-07) and playlist contrast (PL-15). |
 | **1.23** | Nov 11, 2026 | #490: `ux-v2-profile-playback.spec.ts` (member): recordings on a singer profile play there one at a time, the play button is a 44 px target and the row opens the song with that take. |
 | **1.22** | Nov 11, 2026 | #492: SONG-08 now checks that a song row has no delete button (an admin on `/songs`, `ux-v2-song-rows.spec.ts`); deleting is in the song page's ⋮ menu only (SONG-07). |
 | **1.19** | Nov 6, 2026 | UX v2 validation round 1 (Part of #375): new spec `ux-v2-validation-1.spec.ts` (one focus style, suggestions panel in the flow on `/songs` and Home, search options tokens and category name, song flags versus the reader; fixed-id fixture `VALIDATION_1_FIXTURE_IDS`, removed by `e2e/global-teardown.ts`); `ux-v2-reader-tools.spec.ts` uses a short window so auto-scroll is offered and tests that it is not on a song that fits; `ux-v2-song-meta.spec.ts` checks the expanded list. |
@@ -96,7 +97,7 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 
 - **Roles:** G = Guest, M = Member, GK = Gatekeeper, A = Admin. (Hierarchy: Guest → Member → Gatekeeper → Admin; `is_musician` is a per-profile flag, not a role.)
 - **Feature status:** ✅ Implemented · ⚠️ Partial/Stub · ❌ Not implemented — reflects the *app feature*, from the codebase inventory.
-- **E2E status:** 🔲 Planned (no spec yet) · 🟡 In progress · ✅ Implemented — every row is 🔲 today since no E2E suite exists.
+- **E2E status:** 🔲 Planned (no spec yet) · 🟡 In progress · ✅ Implemented — reflects the Playwright specs in `e2e/tests/`.
 - **Priority:** P0 = critical smoke path, P1 = important, P2 = nice-to-have/edge.
 
 ---
@@ -126,9 +127,10 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 | ACC-02 | Profile settings | Update display name and save | empty name; avatar upload | M | ⚠️ | 🔲 | P1 | ProfileSettings |
 | ACC-03 | Security settings | Change password from settings | wrong current password; mismatch | M | ⚠️ | 🔲 | P1 | SecuritySettings |
 | ACC-04 | Privacy settings | Hidden (`FEATURES.privacySettings` off): no tab, `?tab=privacy` opens Profile | — | M | ⚠️ | ✅ | P2 | `ux-v2-hide-unfinished.spec.ts` |
-| ACC-05 | Preferences / theme | Toggle dark/light/system; persists across reload | no flash-of-wrong-theme on reload | G/M | ✅ | 🔲 | P1 | ThemeToggle |
+| ACC-05 | Preferences / theme | Toggle dark/light/system; persists across reload | no flash-of-wrong-theme on reload | G/M | ✅ | 🔲 | P1 | PreferencesSettings |
 | ACC-06 | Musician profile toggle | Enable "I play an instrument" reveals musician features | toggle off hides transpose/chord badges/Chords filter | M | ⚠️ | 🔲 | P1 | Story 3.5.1 |
 | ACC-07 | Interface language (en, nl, es, it, ru, qu, fr, pt) | Switch language from sidebar, user menu or Preferences; UI text changes without reload | browser-locale default (nl-BE → NL, de → EN); persists after reload, navigation and sign-out; SSR already in chosen language; no hydration mismatch; song content untranslated | G/M | ✅ | ✅ | P1 | Story 3.7.1, `e2e/tests/i18n.spec.ts` |
+| ACC-08 | Sober account settings | Profile, Security and Preferences pass axe contrast checks in light and dark mode | active tab and theme announce `aria-pressed` | M | ✅ | ✅ | P2 | `ux-v2-sober-account.spec.ts` (#485) |
 
 ### 4.3 Song Management (Epic 1.1 / 2.2)
 
@@ -144,7 +146,8 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 | SONG-08 | No row delete | A song row has no delete button, also for the owner or an admin (#492) | buttons line up on every row | A | ✅ | ✅ | P2 | 1.1.4 |
 | SONG-09 | Media links | Attach YouTube/Spotify/SoundCloud URLs; embeds render on detail | invalid URL; multiple embeds | M/A | ✅ | 🔲 | P1 | 1.1.7, 1.3.2/1.3.4 |
 | SONG-10 | Draft auto-save | In-progress add form persists to localStorage and restores | clears after submit; create-mode only | M | ✅ | 🔲 | P2 | Story 1.1.8 |
-| SONG-11 | Public/Draft toggle | Set song visibility on create/edit | draft hidden from guests | M/A | ✅ | 🔲 | P1 | SongForm |
+| SONG-11 | Public/Private toggle | Set song visibility on create/edit ("Save as private"); search offers Public / Private, never Draft | private song hidden from guests | M/A | ✅ | ✅ | P1 | SongForm, `ux-v2-private-and-no-artist.spec.ts` (#564) |
+| SONG-13 | No artist | Missing author is shown as "No artist"; "Traditional" stays when entered | list, song page, admin member page | G/M/A | ✅ | ✅ | P2 | `ux-v2-private-and-no-artist.spec.ts` (#565) |
 | SONG-12 | Neutral category tags | Every tag in the Add/Edit song tag picker has the same colours; selected = inverted greys + `aria-pressed` | light and dark mode | M | ✅ | ✅ | P2 | `ux-v2-sober-colours.spec.ts` (Story 6.1.35) |
 
 ### 4.4 Public Library & Discovery (Epic 1.2 / 2.3)
@@ -163,7 +166,7 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 | LIB-10 | Albums tab | Hidden (UXD-4): no tab, `/library/albums` renders not-found | — | G | ⚠️ | ✅ | P2 | `ux-v2-library-tabs.spec.ts` |
 | LIB-11 | Recently viewed | Auth user sees recently viewed songs | requires auth; records on detail visit | M | ✅ | 🔲 | P1 | `library/recently-viewed` |
 | LIB-12 | New tab | Unviewed recent songs on `/library/new` (validation 4; guest gate) | last_seen tracking | M | ✅ | 🔲 | P2 | `library/new` |
-| LIB-13 | Home/Library guest access | Guest can reach Home & Library without login; `/explore` is a 404 (Story 6.1.24) | `e2e/tests/ux-v2-bottom-bar.spec.ts` | G | ✅ | 🔲 | P2 | 1.2.3 |
+| LIB-13 | Home/Library guest access | Guest can reach Home & Library without login; `/explore` redirects to `/songs`, query kept (#574) | `ux-v2-bottom-bar.spec.ts`, `ux-v2-explore-redirect.spec.ts` | G | ✅ | ✅ | P2 | 1.2.3 |
 | LIB-14 | Songbooks | `/songbooks` lists books with song counts; `/songbooks/<id>` lists songs by page; source line links to the book; unknown id = not-found | book with only private songs; `#source-<id>` anchor | G/M | ✅ | 🔲 | P2 | `docs/testing/ux-v3-songbook-pages.feature` |
 
 ### 4.5 Song Viewer (Epic 1.3 / 2.1)
@@ -178,6 +181,7 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 | VIEW-06 | Transpose | Musician transposes chords up/down | wrap A→G#; only when musician enabled | M(musician) | ⚠️ | 🔲 | P1 | 2.1.1 |
 | VIEW-07 | Record view | Visiting detail records a "recently viewed" entry | guest not recorded | M | ✅ | 🔲 | P2 | recordSongView |
 | VIEW-08 | Add-to-playlist from detail | Playlist picker opens and adds the song | unauth → nudge | M | ✅ | 🔲 | P1 | PlaylistPicker |
+| VIEW-09 | Broken song links | Malformed song ids render not-found; load failures show translated copy | no raw `error.message` in the UI | G/M | ✅ | ✅ | P2 | `ux-v2-broken-song-links.spec.ts` (#578) |
 
 ### 4.6 Favorites (Epic 3.1)
 
@@ -205,6 +209,7 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 | PL-12 | Per-song transpose | Set +/- semitone offset per song in playlist; original unchanged | offset persists on reload | M(musician) | ⚠️ | 🔲 | P2 | 4.1.9 |
 | PL-13 | Cover color/icon | Assign cover color/icon; reflected on card | default grey when unset | M(owner) | ⚠️ | 🔲 | P2 | 4.1.10 |
 | PL-14 | Presentation/ceremony mode | Full-screen present; arrows/swipe advance; wake lock active; Esc exits | mobile swipe vs desktop keys | M | ⚠️ | 🔲 | P1 | 4.1.7 |
+| PL-15 | Sober playlist styling | Detail, menu, Add Songs sheet and export sign-in dialog pass axe contrast in light and dark | guest/member, desktop/mobile | G/M | ✅ | ✅ | P2 | `ux-v2-sober-playlists.spec.ts` (#485) |
 
 ### 4.8 Gatekeeper Tools (Epic 3.4)
 
@@ -227,6 +232,7 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 | NAV-04 | Desktop sidebar | Sidebar links navigate; collapse/expand | active state | M | ✅ | 🔲 | P2 | Sidebar |
 | NAV-05 | Header / global search | Header search opens global search modal | keyboard shortcut; non-song pages | G/M | ✅ | 🔲 | P2 | GlobalSearchModal |
 | NAV-06 | Deep links | Query params (`?search=`, `?tag=`, `?sort=`, `?next=`) restore state | invalid params | G | ✅ | 🔲 | P2 | SongsPageContent |
+| NAV-07 | Sober header styling | Header, user menu, notifications and language/theme pickers pass axe contrast checks | light and dark mode | G/M | ✅ | ✅ | P2 | `ux-v2-sober-header.spec.ts` (#485) |
 
 ### 4.10 PWA (Epic 3.3 / 4.5)
 

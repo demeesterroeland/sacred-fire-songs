@@ -1,5 +1,27 @@
 # Changelog
 
+## [1.8.0](https://github.com/demeesterroeland/sacred-fire-songs/compare/v1.7.1...v1.8.0) (2026-11-13)
+
+
+### ✨ New features
+
+* **db:** songbook data model — songbooks, per-book versions, translations ([#504](https://github.com/demeesterroeland/sacred-fire-songs/issues/504)) ([#527](https://github.com/demeesterroeland/sacred-fire-songs/issues/527)) ([fb37db1](https://github.com/demeesterroeland/sacred-fire-songs/commit/fb37db1830c18f42ceaa3149bcb11cd2ef12cd7c))
+* **home:** recently added in the category and song list columns ([#489](https://github.com/demeesterroeland/sacred-fire-songs/issues/489)) ([f795fdf](https://github.com/demeesterroeland/sacred-fire-songs/commit/f795fdfa18d6c1159599fbd64e812c2e27782baf)), closes [#488](https://github.com/demeesterroeland/sacred-fire-songs/issues/488)
+* **home:** same layout for members with personal library counts ([#491](https://github.com/demeesterroeland/sacred-fire-songs/issues/491)) ([0adbaf5](https://github.com/demeesterroeland/sacred-fire-songs/commit/0adbaf546471c1fa39c5b81f5660a443ab4af099))
+* **profile:** one badge per role on a profile page (Story 6.1.38) ([#548](https://github.com/demeesterroeland/sacred-fire-songs/issues/548)) ([a8ce834](https://github.com/demeesterroeland/sacred-fire-songs/commit/a8ce8347f0bb1aebcd66e253ddc1997d5ca0a9ab))
+* **profile:** play recordings from a singer profile (Story 6.1.37) ([#496](https://github.com/demeesterroeland/sacred-fire-songs/issues/496)) ([b1892c9](https://github.com/demeesterroeland/sacred-fire-songs/commit/b1892c99d2a778bd0dbed2fa55c9c54a18beb338))
+* **ux:** UX v2 design rework (Epic 6.1) ([#428](https://github.com/demeesterroeland/sacred-fire-songs/issues/428)) ([37a22be](https://github.com/demeesterroeland/sacred-fire-songs/commit/37a22be7b5d0a6ea03c1255dac7d3c1a6553eaee))
+
+
+### 🐛 Bug fixes
+
+* **privacy:** claim share e-mails on the server only ([#495](https://github.com/demeesterroeland/sacred-fire-songs/issues/495)) ([4a37c13](https://github.com/demeesterroeland/sacred-fire-songs/commit/4a37c138cac73154b43978965f872ee425f98abc))
+* **privacy:** read other members through public_profiles ([#487](https://github.com/demeesterroeland/sacred-fire-songs/issues/487)) ([9d3e378](https://github.com/demeesterroeland/sacred-fire-songs/commit/9d3e37830236377ec4330920097fc82875c632e3))
+* **profile:** play profile recordings through the app origin ([#525](https://github.com/demeesterroeland/sacred-fire-songs/issues/525)) ([99a3b12](https://github.com/demeesterroeland/sacred-fire-songs/commit/99a3b12709ef4d2b6f202371aec67c1b1cb01f28))
+* **songs:** delete a song from its menu only, not from list rows ([#493](https://github.com/demeesterroeland/sacred-fire-songs/issues/493)) ([91129e1](https://github.com/demeesterroeland/sacred-fire-songs/commit/91129e14c83acd0208cf112cf2b79138ecbbd5fe))
+* **ui:** one neutral tag style, token-only tag editors ([#485](https://github.com/demeesterroeland/sacred-fire-songs/issues/485) group 1) ([#537](https://github.com/demeesterroeland/sacred-fire-songs/issues/537)) ([399a4cb](https://github.com/demeesterroeland/sacred-fire-songs/commit/399a4cb94dbca87e37b46074602c9594faa24f49))
+* **ui:** sober tokens in the Practice drawer and singer dialog ([#485](https://github.com/demeesterroeland/sacred-fire-songs/issues/485) group 3) ([#541](https://github.com/demeesterroeland/sacred-fire-songs/issues/541)) ([e9b31e8](https://github.com/demeesterroeland/sacred-fire-songs/commit/e9b31e8090eda88b998ff26fbe936b1e44fffc1e))
+
 ## [1.7.1](https://github.com/demeesterroeland/sacred-fire-songs/compare/v1.7.0...v1.7.1) (2026-11-06)
 
 

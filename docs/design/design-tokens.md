@@ -1,11 +1,12 @@
 # Design Tokens & Component Sheet (UX v2, "sober" style)
 
-**Version:** 1.10 | **Date:** Nov 13, 2026 | **Story:** 6.1.1 / G1.1 (#385) | **Epic:** 6.1 (#375)
+**Version:** 1.11 | **Date:** Nov 13, 2026 | **Story:** 6.1.1 / G1.1 (#385) | **Epic:** 6.1 (#375)
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.11 | Nov 13, 2026 | Synced UX v2 restyles from `develop`: header, user menu, notifications, account settings and playlists use semantic tokens; unused ThemeToggle, popover and Radix Popover dependency removed. |
 | 1.10 | Nov 13, 2026 | Sync: merge of `origin/develop` into `feat/ux-v3`. develop's row 1.5 (TagPill / AuthorPill, one neutral tag style) clashed with the `feat/ux-v3` number and is kept as 1.9. |
 | 1.9 | Nov 12, 2026 | (develop 1.5) Component sheet: **TagPill / AuthorPill** — one neutral tag style for every category (Story 6.1.35, #485); the per-category colour map is gone. |
 | 1.8 | Nov 13, 2026 | Variant / language slot: the reader group *Original · Translation · Both* (the same `Segmented`) joins the row for a song with a translation, and the language group lists languages only (two or more, next to *Translation* / *Both*; Story 6.2.14, #517); *Both* pairs the stanzas in a grid (one column on a phone, `md:grid-cols-2`), translation in `text-fg-muted` with a start-side `border-s-2 border-line` rule on a phone. |

@@ -3528,3 +3528,46 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - `SONGS_SELECT` embeds `song_translations(language, title)` once (the embed guard allows one); `mapCompositionToSong()` fills `Song.translationTitles`. Guests only get the translations of public songs: the existing `Translations follow song privacy` policy filters through `compositions` RLS, so no policy changed.
 - `lib/songs/search.ts` is extended additively: match field and hint kind `translationTitle` (after the songbook title, before the author), carrying the language tag; `songMatchHintText()` gets an optional `locale` (default `'en'`). The hint is `songs.matchTranslation` = "{language}: {text}" ("Dutch: Moeder Aarde"), the language named by `translationLabel()`. 1 new key in 8 locales (`qu` for a native check).
 - Decision: translation lyrics are not searched, titles only (design doc 2.30). Spec: `docs/testing/ux-v3-search-translations.feature`; unit tests in `search.test.ts` and `songSelectGuard.test.ts`.
+## Session November 13, 2026 — Story 6.1.35 (#485), group 4: header, user menu, notifications
+
+- `Header`, `UserProfile`, `NotificationBell`, `LanguageSwitcher`, `WickSelect` and `ThemedToaster` use semantic tokens only (221 palette classes fewer; `PALETTE_BASELINE` 980 → 759).
+- User menu: one grey item style for every entry (the Admin Portal is no longer purple, no hover hues per item), a grey avatar disc instead of the gradient, the role translated, the theme switch with 44 px buttons that marks the chosen theme with inverted greys and `aria-pressed`. The hover-only settings cogwheel is gone (it duplicated the Settings item and was unreachable on touch).
+- Notifications: the unread badge uses the accent token (`bg-accent text-on-accent`); each unread item says "Unread" to screen readers (`notifications.unread`, 8 locales); the bell, menu button and Create button are 44 px.
+- Toasts: one neutral surface; errors keep the danger colour next to their words.
+- Removed unused `components/common/navigation/ThemeToggle.tsx`, `components/ui/popover.tsx` and the `@radix-ui/react-popover` dependency.
+- Left for the admin group: `WickSelect` still shows the admin role colours passed by `AdminUsersTable` (light-mode contrast of the coloured label).
+- Tests: `docs/testing/ux-v2-sober-header.feature`, `testing/unit/tests/design/soberHeader.test.tsx`, `e2e/tests/ux-v2-sober-header.spec.ts` (NAV-07, axe colour contrast light and dark).
+
+## Session November 13, 2026 — #564 / #565: "Private" and "No artist"
+
+- A song that is not public is now **Private** in every user-visible label, never "Draft", in all 8 locales: the Status options in the search filter popup on `/songs` (All · Public · Private), the empty state of the private-songs filter, the Add/Edit Song button **Save as private**, the private badge in **+ Add Songs**, and the visibility sentences on `/terms` and `/privacy`. Only the values changed; key names and `status: 'draft'` stay.
+- Kept on purpose: `songForm.guestDraft.*` (the banner for a guest's unsaved copy of the form, "Draft now — sign in to save") and `legal.draft` (the legal text is not approved yet). Neither is about a song's visibility.
+- A song without an author shows **No artist** (new key `song.noArtist`) instead of "Traditional": song rows, recently viewed, the song page meta line (plain text, no link to an empty author filter), the song menu subtitle (no "by No artist") and the admin member page. An author entered as "Traditional" still shows the translated "Traditional".
+- Tests: `docs/testing/ux-v2-private-and-no-artist.feature` (`@unit`: English labels, every locale free of the local word for "draft", "No artist" per locale; `@e2e`), `privateAndNoArtist.test.ts`, `songMetaNoArtist.test.tsx`, `e2e/tests/ux-v2-private-and-no-artist.spec.ts`; `ux-v2-song-rows.feature` 1.2 expects "No artist".
+- Note for `feat/ux-v3`: there `songAuthors()` lives in `lib/songs/authors.ts`; when develop is merged into it, its fallback must use `song.noArtist` too.
+
+## Session November 13, 2026 — #574: old /explore links
+
+- `/explore` (gone since the bottom bar, Story 6.1.24) showed "Page not found". It now redirects permanently (308) to `/songs`, keeping the query string (`/explore?category=ceremony` → `/songs?category=ceremony`), via `redirects()` in `next.config.ts`.
+- Tests: `docs/testing/ux-v2-explore-redirect.feature` (`@unit`, `@e2e`), `exploreRedirect.test.ts`, `e2e/tests/ux-v2-explore-redirect.spec.ts`; the bottom bar spec now expects the song list instead of a 404.
+
+## Session November 13, 2026 — #578: broken song links and translated load error
+
+- Every `[id]` route (`app/songs/[id]`, `app/songs/[id]/edit`, `app/users/[id]`, `app/recordings/[id]`, `app/library/playlists/[id]`, `app/admin/users/[id]`) and `fetchSong` / `fetchMusicianProfile` / `getAdminUserDetails` checks `isUuid(id)` (`lib/validation/uuid.ts`) before querying PostgreSQL `uuid` columns, so a malformed id like `/songs/xyz` renders `notFound()` instead of the raw database error `invalid input syntax for type uuid`.
+- On `app/songs/[id]/page.tsx`, the generic load-error state shows the translated `t('song.error.unexpected')` with Retry instead of `songError.message` (logged to the console).
+- Tests: `docs/testing/ux-v2-broken-song-links.feature` (`@unit`, `@e2e`), `brokenSongLinks.test.ts`, `fetchSong.test.ts`, `e2e/tests/ux-v2-broken-song-links.spec.ts`.
+
+## Session November 13, 2026 — Story 6.1.35 (#485), group 5: account settings
+
+- `AccountSettings`, `ProfileSettings`, `SecuritySettings`, `PreferencesSettings` and `PrivacySettings` use semantic tokens only (178 palette classes removed; `PALETTE_BASELINE` 759 → 581, lint cap 137 → 132).
+- Navigation and theme controls: the Profile / Security / Preferences tab pills and the Light / Dark / System theme segmented buttons are 44 px targets (`min-h-tap`) that mark the chosen option with inverted greys (`bg-chip-active text-on-chip-active`) and `aria-pressed`.
+- Actions and inputs: Profile's **Save Changes** and Security's **Update Password** use the shared `<Button>` primary style (`bg-accent text-on-accent`), **Change Email** is an outlined button, and **Sign Out All Devices** / **Delete Account** keep `text-danger`/`border-danger` next to their words. Password visibility buttons are 44 px (`size-tap`) with translated labels.
+- Copy: replaced hard-coded English strings in `SecuritySettings` with `field.email.label` and new keys `settings.security.changeEmail`, `settings.security.emailReverifyHint`, `settings.security.showPassword` and `settings.security.hidePassword` across all 8 locales.
+- Tests: `docs/testing/ux-v2-sober-account.feature` (`@unit`, `@e2e`), `testing/unit/tests/design/soberAccount.test.tsx`, `e2e/tests/ux-v2-sober-account.spec.ts` (ACC-08, axe colour contrast on Profile, Security and Preferences in light and dark mode).
+
+## Session November 13, 2026 — Story 6.1.35 (#485), group 6: playlists
+
+- `PlaylistContextMenu`, `AddSongsSheet` and `PlaylistDetailHeader` now use semantic surface, text, accent and danger tokens. Visibility-button titles reuse translated action labels; no new UX copy or locale keys were needed.
+- The context menu has a neutral surface and focus state, with destructive actions retaining the semantic danger token. The Add Songs sheet uses the theme scrim and surface tokens; the selected-song check uses the accent token. Playlist detail actions, metadata, description and the export-login dialog follow the same tokens in light and dark mode.
+- Removed 85 palette classes; `PALETTE_BASELINE` 581 → 496.
+- Tests: `docs/testing/ux-v2-sober-playlists.feature`, `e2e/tests/ux-v2-sober-playlists.spec.ts` (details, context menu, Add Songs sheet and guest export sign-in dialog; axe contrast in light and dark mode). `docs/testing/e2e-test-overview.md` adds PL-15. Validation: TypeScript, lint, Vitest (1,798), BDD unit (284 passed, 47 pending), build and Playwright (8 passed across desktop and mobile) passed.

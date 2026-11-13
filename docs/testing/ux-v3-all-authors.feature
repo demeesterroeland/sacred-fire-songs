@@ -1,5 +1,6 @@
-# Version: 1.1 | Date: Nov 12, 2026
+# Version: 1.2 | Date: Nov 13, 2026
 # Changelog
+# 1.2 | Nov 13, 2026 | A song without any author is shown as "No artist"; only an entered "Traditional" is an author (#565).
 # 1.1 | Nov 12, 2026 | Review round (PR #533): the link carries the exact name through the URL (`&`, `+`, `#`, commas); "Traditional" is plain text, not a link; the free-text search finds a song by each author.
 # 1.0 | Nov 12, 2026 | Story 6.2.12 / G2.3 (#515): every author of a song is shown and opens its author filter; the share text names all authors.
 @ux-v3 @all-authors
@@ -39,9 +40,9 @@ Feature: All authors of a song
     Then the song shows the authors "Herbert Quinteros" and "Cari El"
 
   @unit
-  Scenario: Without any author the song is Traditional
+  Scenario: Without any author the song is No artist
     Given a song with no authors and no original author
-    Then the song shows the author "Traditional"
+    Then the song shows the author "No artist"
     And the song shows no author link
 
   @unit

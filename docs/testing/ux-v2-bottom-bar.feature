@@ -1,5 +1,6 @@
-# Version: 1.0 | Date: Nov 5, 2026
+# Version: 1.1 | Date: Nov 13, 2026
 # Changelog
+# 1.1 | Nov 13, 2026 | #574: /explore has no page; old links redirect to /songs (ux-v2-explore-redirect.feature).
 # 1.0 | Nov 5, 2026 | Story 6.1.24 / G5.3 (#408): bottom bar is Home · Search · Library (UXD-1); /explore removed.
 @story-6.1.24
 Feature: UX v2 bottom bar

@@ -1,6 +1,6 @@
 # User Guide: Sacred Fire Songs
 
-**Version:** 2.14
+**Version:** 2.15
 **Status:** Published
 **Date:** Nov 13, 2026
 
@@ -27,6 +27,7 @@
 | **2.12** | Nov 13, 2026 | The search box also finds a song by the title of one of its translations; the result names the language, for example *Dutch: Moeder Aarde*. Only translation titles are searched, not the translated lyrics. |
 | **2.13** | Nov 13, 2026 | Search: when a song is found by another name, the grey line under it reads *Also known as …*. |
 | **2.14** | Nov 13, 2026 | Song Detail: **Key**, **Capo** and non-standard **Tuning** (named, e.g. `Tuning: Drop D`; standard tuning is omitted) show only while the **Chords** switch is on; the **Beats** stay. Musicians transpose with the **− n +** stepper next to the Chords switch (#566). |
+| **2.15** | Nov 13, 2026 | Song visibility is labelled **Private**, not Draft; songs without an author show **No artist**, while an author entered as Traditional remains **Traditional** (#564, #565). |
 
 Welcome to **Sacred Fire Songs**, a digital songbook designed for ceremonial musicians. This guide covers how to browse, learn, and manage medicine songs using our platform.
 
@@ -45,7 +46,7 @@ If you prefer, you can also sign up or log in using a tradition **Email & Passwo
 
 ### 1.3 User Roles
 - **Guest**: Can browse and view all **Public** songs.
-- **Member**: Can add their own songs, save songs as **Draft**, and edit/delete songs they own.
+- **Member**: Can add their own songs, save songs as **Private**, and edit/delete songs they own.
 - **Admin**: Full access to manage all songs, users, and categories.
 
 ---
@@ -64,12 +65,13 @@ The **Search Songs** page allows you to find songs quickly:
 Use the filter tabs at the top to narrow down your selection:
 - **🎸 Chords**: Show only songs that include musical chords.
 - **🎵 Melody**: Show only songs that have a melody/audio reference.
-- **🔒 Draft**: (Members only) View your personal drafts and unpublish songs.
+- **🔒 Private**: (Members only) View your private songs and make them public.
 
 ### 2.3 Song Detail View
 Click any song to view its lyrics and musical data:
 - **Badges**: High-visibility badges tell you if a song has Chords or Melody.
 - **Metadata**: See the **Key**, **Capo position**, non-standard **Tuning** (while chords are on; standard tuning is omitted) and, when the songbook gives them, the **Beats** of the selected version at a glance.
+- **Author**: Each author is shown separately; a song without an author says **No artist**, while an author entered as Traditional is shown as **Traditional**.
 - **Original · Translation · Both**: If the song has translations, a switch next to the version switch offers **Original**, **Translation** and **Both**. **Translation** shows the translation instead of the original; **Both** shows each verse of the original followed by its translation on a phone, and the two side by side on a larger screen; verses without a partner are still shown. Chords stay on the original, the translation shows lyrics only, and **A−** / **A+** change both. Choosing another version returns to the original. Songs without translations show no switch.
 - **Language**: If the song has more than one translation, a second switch next to **Translation** / **Both** lists the languages (named in your app language); the first one is shown until you pick another. A link ending in `?lang=nl&view=translation` opens the Dutch translation, `?lang=nl&view=both` both languages; an older link ending in `?lang=nl` still opens the translation.
 - **About this song**: If the songbook this version was printed in gives a note about the song, tap **About this song** under the metadata to read it. It starts closed and is not shown when there is no note.
@@ -84,10 +86,10 @@ Click **"Add Song"** in the sidebar to contribute to the library:
 - **Smart Import**: Drag and drop a `.cho` (ChordPro) or `.txt` file. The system will automatically detect the **Title**, **Author**, **Key**, and **Capo**.
 - **Manual Formatting**: Use standard brackets like `[Am]` for chords. The system will automatically align them above the lyrics for you.
 
-### 3.2 Public vs Draft
+### 3.2 Public vs Private
 When saving a song, you have two choices:
 1. **Publish Song**: Makes the song visible to everyone in the community.
-2. **Save as Draft**: Keeps the song hidden from others. Only you (and Admins) can see it in your "Draft" filter.
+2. **Save as Private**: Keeps the song hidden from others. Only you (and Admins) can see it in your "Private" filter.
 
 ### 3.3 Editing & Deleting
 If you own a song (or are an Admin), you will see icons at the top of the detail page:

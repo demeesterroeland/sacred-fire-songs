@@ -1,6 +1,6 @@
 'use client';
 
-import { useParams, usePathname, useSearchParams } from 'next/navigation';
+import { notFound, useParams, usePathname, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 
 import SongForm from '@/components/song/SongForm';
@@ -13,15 +13,17 @@ import { authorInputText } from '@/lib/songs/authors';
 import { EDIT_VERSION_PARAM, pickVersion, sortVersions } from '@/lib/songs/versionOrder';
 import { versionOptions } from '@/lib/songs/versionSwitch';
 import { EDIT_SONG_SELECT } from '@/lib/songs/songSelect';
+import { isUuid } from '@/lib/validation/uuid';
 
 // Similar fetch to detail page, but we just need basic data
 const fetchSongForEdit = async (id: string) => {
+    if (!isUuid(id)) return null;
     const supabase = createClient();
     const { data, error } = await supabase
         .from('compositions')
         .select(EDIT_SONG_SELECT)
         .eq('id', id)
-        .single();
+        .maybeSingle();
 
     if (error) throw error;
     // UXA-049: the same order as the song page (oldest first), so "the first version" is the same everywhere.
@@ -31,7 +33,8 @@ const fetchSongForEdit = async (id: string) => {
 export default function EditSongPage() {
     const { t, locale } = useLocale();
     const params = useParams();
-    const id = typeof params.id === 'string' ? params.id : params.id?.[0];
+    const rawId = typeof params.id === 'string' ? params.id : params.id?.[0];
+    const id = isUuid(rawId) ? rawId : undefined;
     const pathname = usePathname();
     const searchParams = useSearchParams();
     const requestedVersionId = searchParams.get(EDIT_VERSION_PARAM);
@@ -45,6 +48,8 @@ export default function EditSongPage() {
         retry: 1
     });
 
+    if (!id) return notFound();
+
     // Guests get the unified GuestGate (Story 6.1.26); the warm "not yours" copy is for signed-in non-owners.
     if (!authLoading && !user) {
         return (
@@ -55,10 +60,11 @@ export default function EditSongPage() {
     }
 
     if (isLoading || authLoading) return <div className="p-8 text-fg text-center">{t('common.loading')}</div>;
-    if (error || !song) {
+    if (error) {
         console.error("Fetch error:", error);
         return <div className="p-8 text-danger text-center">{t('song.edit.loadError')}</div>;
     }
+    if (!song) return notFound();
 
     // Permission Check (Client-side visual check, RLS enforces actual security)
     // We can show a friendly message if mismatch, though RLS would prevent the fetch ideally if using strict policies,

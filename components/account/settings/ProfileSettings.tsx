@@ -9,6 +9,7 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { useLocale } from "@/context/LocaleContext";
 import { FEATURES } from "@/lib/features";
+import { Button } from "@/components/ui/button";
 
 interface ProfileSettingsProps {
   user: User;
@@ -107,9 +108,9 @@ export default function ProfileSettings({ user, profile }: ProfileSettingsProps)
           className="hidden"
         />
 
-        <div className="flex flex-col md:flex-row items-center gap-8 pb-8 border-b border-gray-200 dark:border-white/5 opacity-50">
+        <div className="flex flex-col md:flex-row items-center gap-8 pb-8 border-b border-line opacity-50">
           <div className="relative">
-            <div className="w-24 h-24 rounded-full overflow-hidden bg-slate-200 dark:bg-slate-800 ring-2 ring-gray-900/10 dark:ring-white/10 flex items-center justify-center relative">
+            <div className="w-24 h-24 rounded-full overflow-hidden bg-surface-2 ring-1 ring-line flex items-center justify-center relative">
               {profile?.avatar_url ? (
                 <Image 
                   src={profile.avatar_url} 
@@ -119,34 +120,36 @@ export default function ProfileSettings({ user, profile }: ProfileSettingsProps)
                   sizes="96px"
                 />
               ) : (
-                <UserIcon className="w-12 h-12 text-slate-600" />
+                <UserIcon className="w-12 h-12 text-fg-muted" aria-hidden="true" />
               )}
             </div>
           </div>
           <div className="text-center md:text-left">
-            <h3 className="text-lg font-semibold text-gray-900 dark:text-white">{t("settings.profile.avatar")}</h3>
+            <h3 className="text-lg font-semibold text-fg">{t("settings.profile.avatar")}</h3>
           </div>
         </div>
         </>
       )}
 
       <div className="space-y-2">
-        <label className="text-meta font-semibold text-fg-muted ml-1">{t("settings.profile.displayName")}</label>
+        <label htmlFor="profile-display-name" className="text-meta font-semibold text-fg-muted ml-1">{t("settings.profile.displayName")}</label>
         <div className="flex flex-col sm:flex-row gap-3 sm:items-center">
           <input
+            id="profile-display-name"
             type="text"
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
-            className="flex-1 bg-slate-100/50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/10 px-4 py-3 rounded-xl text-gray-900 dark:text-white transition-all"
+            className="flex-1 min-h-tap bg-surface border border-line-strong px-4 py-2.5 rounded-control text-fg transition-colors"
           />
-          <button
+          <Button
+            type="button"
             onClick={handleSave}
             disabled={isSaving || fullName === (profile?.full_name || "")}
-            className="w-full sm:w-44 shrink-0 bg-[#f45d1a] text-white font-semibold px-6 py-3 rounded-xl hover:brightness-110 shadow-lg shadow-orange-900/20 transition-all disabled:opacity-50 flex items-center justify-center gap-2 whitespace-nowrap"
+            className="w-full sm:w-44 shrink-0"
           >
-            {isSaving && <Loader2 className="w-4 h-4 animate-spin" />}
+            {isSaving && <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />}
             {isSaving ? t("settings.profile.saving") : t("settings.profile.save")}
-          </button>
+          </Button>
         </div>
       </div>
     </section>

@@ -40,30 +40,35 @@ export default function AccountSettings({ user, profile, initialTab = "profile" 
     <div className="flex-1 p-4 md:p-8 lg:p-12">
       <div className="max-w-4xl mx-auto">
         <header className="mb-12">
-          <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2 text-gray-900 dark:text-white">{t("settings.pageTitle")}</h1>
-          <p className="text-gray-500 dark:text-slate-400">{t("settings.pageIntro")}</p>
+          <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2 text-fg">{t("settings.pageTitle")}</h1>
+          <p className="text-fg-muted">{t("settings.pageIntro")}</p>
         </header>
 
         {/* Tabs Navigation — horizontally scrollable on mobile */}
         <div className="relative mb-8">
           <div className="flex gap-2 overflow-x-auto scrollbar-none pb-1 -mx-4 px-4 md:mx-0 md:px-0">
-            {tabs.map(({ id, label, icon: Icon }) => (
-              <button
-                key={id}
-                onClick={() => setActiveTab(id)}
-                className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-bold transition-all whitespace-nowrap shrink-0 ${
-                  activeTab === id
-                    ? "bg-gray-900 text-white dark:bg-white dark:text-gray-950"
-                    : "bg-gray-200/80 text-gray-500 hover:bg-gray-300 hover:text-gray-900 border border-gray-300/50 dark:bg-gray-800/80 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white dark:border-gray-700/50"
-                }`}
-              >
-                <Icon className="w-3.5 h-3.5" />
-                {label}
-              </button>
-            ))}
+            {tabs.map(({ id, label, icon: Icon }) => {
+              const active = activeTab === id;
+              return (
+                <button
+                  key={id}
+                  type="button"
+                  onClick={() => setActiveTab(id)}
+                  aria-pressed={active}
+                  className={`inline-flex min-h-tap items-center gap-1.5 px-3.5 rounded-pill text-meta font-semibold transition-colors whitespace-nowrap shrink-0 ${
+                    active
+                      ? "bg-chip-active text-on-chip-active"
+                      : "bg-chip text-on-chip hover:bg-line"
+                  }`}
+                >
+                  <Icon className="w-3.5 h-3.5" aria-hidden="true" />
+                  {label}
+                </button>
+              );
+            })}
           </div>
           {/* Right-fade scroll hint — hidden on md+ where all tabs fit */}
-          <div className="pointer-events-none absolute inset-y-0 -right-4 md:right-0 w-12 bg-gradient-to-l from-white to-transparent dark:from-[#0a0a0a] md:hidden" />
+          <div aria-hidden="true" className="pointer-events-none absolute inset-y-0 -right-4 md:right-0 w-12 bg-gradient-to-l from-bg to-transparent md:hidden" />
         </div>
 
         {/* Tab Content */}

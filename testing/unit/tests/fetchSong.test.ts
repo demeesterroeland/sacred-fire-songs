@@ -32,14 +32,21 @@ vi.mock('@/lib/supabase/client', () => ({
 import { fetchSong } from '@/lib/songs/fetchSong';
 import { SONG_SELECT } from '@/lib/songs/songSelect';
 
+const VALID_ID = '00000000-0000-4000-8000-000000000000';
+
 describe('fetchSong', () => {
   beforeEach(() => {
     query.result = { data: null, error: null };
     query.terminal = '';
   });
 
+  it('returns null without querying Supabase when the id is not a UUID (#578)', async () => {
+    expect(await fetchSong('xyz')).toBeNull();
+    expect(query.terminal).toBe('');
+  });
+
   it('asks for at most one row, so a missing song is not an error', async () => {
-    await fetchSong('missing-id');
+    await fetchSong(VALID_ID);
     expect(query.terminal).toBe('maybeSingle');
   });
 
@@ -63,12 +70,12 @@ describe('fetchSong', () => {
   });
 
   it('returns null when no song has that id', async () => {
-    expect(await fetchSong('missing-id')).toBeNull();
+    expect(await fetchSong(VALID_ID)).toBeNull();
   });
 
   it('returns the song row when it exists', async () => {
-    query.result = { data: { id: 'abc', title: 'Morning Sunrise' }, error: null };
-    expect(await fetchSong('abc')).toEqual({ id: 'abc', title: 'Morning Sunrise' });
+    query.result = { data: { id: VALID_ID, title: 'Morning Sunrise' }, error: null };
+    expect(await fetchSong(VALID_ID)).toEqual({ id: VALID_ID, title: 'Morning Sunrise' });
   });
 
   // Story 6.2.8 (#511): each version carries its printed note, so the song page can show "About this song".
@@ -81,7 +88,7 @@ describe('fetchSong', () => {
   it('throws real errors, so the page can offer Retry', async () => {
     const error = { message: 'Failed to fetch' };
     query.result = { data: null, error };
-    await expect(fetchSong('abc')).rejects.toBe(error);
+    await expect(fetchSong(VALID_ID)).rejects.toBe(error);
   });
 });
 
@@ -98,7 +105,7 @@ describe('fetchSong version order (Story 6.1.11 / G2.6, #395)', () => {
       },
       error: null,
     };
-    const song = (await fetchSong('x')) as { song_versions: { id: string }[] };
+    const song = (await fetchSong(VALID_ID)) as { song_versions: { id: string }[] };
     expect(song.song_versions.map((v) => v.id)).toEqual(['early', 'mid', 'late']);
   });
 
@@ -108,13 +115,13 @@ describe('fetchSong version order (Story 6.1.11 / G2.6, #395)', () => {
       data: { title: 'T', song_versions: [{ id: 'b', created_at: t }, { id: 'a', created_at: t }] },
       error: null,
     };
-    const song = (await fetchSong('x')) as { song_versions: { id: string }[] };
+    const song = (await fetchSong(VALID_ID)) as { song_versions: { id: string }[] };
     expect(song.song_versions.map((v) => v.id)).toEqual(['a', 'b']);
   });
 
   it('leaves a song without versions untouched', async () => {
     query.result = { data: { title: 'T', song_versions: [] }, error: null };
-    const song = (await fetchSong('x')) as { song_versions: unknown[] };
+    const song = (await fetchSong(VALID_ID)) as { song_versions: unknown[] };
     expect(song.song_versions).toEqual([]);
   });
 });

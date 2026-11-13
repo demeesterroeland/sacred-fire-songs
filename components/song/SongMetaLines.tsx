@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { ChevronDown } from 'lucide-react';
 import { useLocale } from '@/context/LocaleContext';
 import { joinMeta } from '@/components/ui/meta-line';
-import { authorFilterHref, authorSeparators, songAuthorLabels, songAuthors } from '@/lib/songs/authors';
+import { authorFilterHref, authorSeparators, songAuthorLabels } from '@/lib/songs/authors';
 import { technicalItems, type VersionTechnical } from '@/lib/songs/songMeta';
 import { cn } from '@/lib/utils';
 
@@ -77,10 +77,9 @@ export function SongMetaLines({
   const open = expanded !== undefined ? expanded : internalOpen;
   const listId = useId();
   const detailsId = useId();
-  // Real authors only: "Traditional" stands for "no author", so it is plain text; a link to ?artist=Traditional
-  // would find nothing (songs without an author only match the "no artist" filter).
+  // Real authors only: the no-author label is plain text; it is not an author-filter link.
   const authorLabels = songAuthorLabels({ authors: authorCredits, originalAuthor }, t);
-  const authors = authorLabels.length > 0 ? authorLabels.map((a) => a.label) : songAuthors({}, t);
+  const authors = authorLabels.length > 0 ? authorLabels.map((a) => a.label) : [t('song.noArtist')];
   // The text between the author links ("and", "y", ","), so each name stays its own link.
   const authorJoiners = authorSeparators(authors, locale);
   const technical = joinMeta(technicalItems(version, t, { chordsOn }));

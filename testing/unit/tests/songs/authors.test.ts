@@ -17,7 +17,7 @@ import { SUPPORTED_LOCALES } from '@/lib/i18n';
 import { songFilterConfig } from '@/lib/songs/filterConfig';
 import type { Song } from '@/lib/songUtils';
 
-const t = (key: string) => (key === 'song.traditional' ? 'Traditional' : key);
+const t = (key: string) => (key === 'song.traditional' ? 'Traditional' : key === 'song.noArtist' ? 'No artist' : key);
 
 describe('cleanAuthors', () => {
   it('trims, drops blank entries and removes duplicates case-insensitively', () => {
@@ -63,9 +63,9 @@ describe('songAuthors (display)', () => {
     expect(songAuthors({ authors: ['A', 'B'] }, t)).toEqual(['A', 'B']);
   });
 
-  it('falls back to Traditional when both are empty', () => {
-    expect(songAuthors({ authors: [], originalAuthor: '' }, t)).toEqual(['Traditional']);
-    expect(songAuthors({ authors: ['  '], originalAuthor: null }, t)).toEqual(['Traditional']);
+  it('falls back to No artist when both are empty', () => {
+    expect(songAuthors({ authors: [], originalAuthor: '' }, t)).toEqual(['No artist']);
+    expect(songAuthors({ authors: ['  '], originalAuthor: null }, t)).toEqual(['No artist']);
   });
 
   it('translates a Traditional author', () => {
@@ -151,8 +151,8 @@ describe('songAuthorsText (⋮ sheet "by" line and rehearsal drawer)', () => {
     expect(songAuthorsText({ authors: ['Anna', 'Ben', 'Cari'], originalAuthor: 'Anna' }, t, 'es')).toBe('Anna, Ben y Cari');
   });
 
-  it('falls back to Traditional without any author', () => {
-    expect(songAuthorsText({ authors: [], originalAuthor: '' }, t, 'en')).toBe('Traditional');
+  it('falls back to No artist without any author', () => {
+    expect(songAuthorsText({ authors: [], originalAuthor: '' }, t, 'en')).toBe('No artist');
   });
 });
 

@@ -1,11 +1,12 @@
 # Roles & Glossary (draft)
 
-**Version:** 0.12 | **Date:** Nov 13, 2026
+**Version:** 0.13 | **Date:** Nov 13, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.13 | Nov 13, 2026 | Glossary: **Private** replaces Draft for a non-public song (#564); **No artist** distinguishes a missing author from an author entered as Traditional (#565). |
 | 0.12 | Nov 13, 2026 | Transpose is in the song page toolbar, right after the Chords switch, and shows only while chords are on (no longer in the ⋮ menu; UX v3, #566). |
 | 0.11 | Nov 13, 2026 | Glossary: Both (languages) in the switch **Original · Translation · Both**; the language switch only picks the language of the translation (UX v3, #517). |
 | 0.10 | Nov 13, 2026 | Admin portal: **Catalog edits** (imported songs corrected in the app, kept safe from the next import; UX v3, #524). Glossary: Catalog edit. |
@@ -51,8 +52,9 @@
 | Shared with me | The list of recordings other members shared with you, under My recordings in Practice → Record. Each row says who shared it. Listen only. |
 | Public (recording) | Recording everyone can hear, published with singer consent. |
 | Singer Attribution | Who sings on a recording; links to their profile when registered. |
-| Smart playlist | Automatic list (Favorites, Your Songs, Drafts, Your recordings). |
-| Draft | A song you added that is not public yet. |
+| Smart playlist | Automatic list (Favorites, Your Songs, Private, Your recordings). |
+| Private song | A song that is not public; it is visible to its owner and admins. The app labels its visibility **Private**, not Draft. |
+| No artist | The localized label shown when a song has no author; **Traditional** is shown only when it was entered as an author. |
 | Magic Link | Sign-in link sent by e-mail, no password needed. |
 | ChordPro (.cho) | Text format for songs with chords in brackets. |
 | Capo | Fret where the capo goes; shown above the lyrics. |

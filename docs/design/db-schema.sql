@@ -1,12 +1,13 @@
 /*
- **Version:** 3.13
+ **Version:** 3.14
  **Status:** Current
  **Date:** November 13, 2026
  
  ## Usage
  This script provides a complete setup for the "Sacred Fire Songs" database. 
  It consolidates the initial schema and all subsequent migrations up to November 13, 2026.
- (v3.13: sync, merge of origin/develop into feat/ux-v3; the schema of v3.12 is added to v3.11, nothing else changes).
+ (v3.14: merge of origin/develop into feat/ux-v3; the fresh-install schema already includes the role column from migration 20261113120000_public_profiles_role.sql; no additional schema changes).
+ (v3.13: previous merge sync; the schema of v3.12 is added to v3.11, nothing else changes).
  (v3.12: public_profiles gains role (NULL for a guest), Story 6.1.38, migration 20261113120000_public_profiles_role.sql; develop 3.9).
  (v3.12: global search window songbook and language filter counts, Story 6.2.25 (#570), migration 20261113140000_search_filter_counts.sql: read-only SECURITY INVOKER function fn_search_filter_counts() returning (kind, value, label, song_count) for visible songbooks via song_version_sources and language categories under the Languages group via song_category_map JOIN compositions so RLS filters unreadable private songs; executable by anon, authenticated, and service_role).
  (v3.11: catalog songs and versions corrected in the app, Story 6.2.21 (#524), migration 20261112160000_protect_catalog_app_edits.sql: compositions and song_versions gain edited_in_app / edited_at / edited_fields, set by trigger trg_track_catalog_edit when a signed-in app user (JWT role authenticated, also through a SECURITY DEFINER function) changes a tracked column of a row with a catalog key; importers (service_role) and data migrations do not mark, and API callers cannot set or clear the markers; admin-only fn_catalog_edits_export() and fn_clear_catalog_edit(). Review of PR #540 (Nov 13, 2026): removing a catalog key in the app counts; the export gives a moved version's new song slug; fn_clear_catalog_edit(kind, id, edited_at) returns 'cleared' / 'changed' / 'not_marked' and leaves a correction made after the download marked; the service role may not execute either function and reads and clears markers with plain SQL; re-check: the service role may not execute fn_track_catalog_edit() either).

@@ -55,17 +55,17 @@ describe('SongMetaLines — every author', () => {
     expect(linkList().textContent).toBe('Anna Lee');
   });
 
-  // Finding 9: "Traditional" stands for "no author"; a link to ?artist=Traditional would find nothing, so it is plain text.
-  it('shows Traditional as plain text, not a link, when there is no author at all', () => {
+  // A missing author uses a plain label, not a link to an author filter.
+  it('shows No artist as plain text, not a link, when there is no author at all', () => {
     render(<SongMetaLines authors={null} originalAuthor={null} />);
-    expect(screen.queryByRole('link', { name: 'Traditional' })).toBeNull();
-    expect(linkList().textContent).toBe('Traditional');
+    expect(screen.queryByRole('link', { name: 'No artist' })).toBeNull();
+    expect(linkList().textContent).toBe('No artist');
     expect(linkList().querySelector('a')).toBeNull();
   });
 
-  it('keeps the other links (tags) after the plain Traditional text', () => {
+  it('keeps the other links (tags) after the plain No artist text', () => {
     render(<SongMetaLines authors={[]} originalAuthor="" categories={[{ name: 'Water', slug: 'water' }]} />);
-    expect(screen.queryByRole('link', { name: 'Traditional' })).toBeNull();
+    expect(screen.queryByRole('link', { name: 'No artist' })).toBeNull();
     expect(authorLink('Water').getAttribute('href')).toBe('/songs?tag=water');
   });
 
