@@ -26,10 +26,13 @@ function walk(dir: string, out: string[] = []): string[] {
   return out;
 }
 
-/** Palette-class counts per file under app/ and components/ (repo-relative paths). */
+/** Folders the palette ratchet scans (Story 6.1.35 added lib/, where the category colours lived). */
+export const PALETTE_DIRS = ['app', 'components', 'lib'] as const;
+
+/** Palette-class counts per file under {@link PALETTE_DIRS} (repo-relative paths). */
 export function paletteUsage(root = path.resolve(__dirname, '..', '..')): Record<string, number> {
   const result: Record<string, number> = {};
-  for (const dir of ['app', 'components']) {
+  for (const dir of PALETTE_DIRS) {
     for (const file of walk(path.join(root, dir))) {
       const n = countPaletteClasses(fs.readFileSync(file, 'utf8'));
       if (n > 0) result[path.relative(root, file)] = n;

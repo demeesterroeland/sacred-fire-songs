@@ -151,8 +151,8 @@ function SortableRecordingItem({
       aria-current={isHighlighted ? "true" : undefined}
       className={`flex items-center gap-2.5 px-2.5 py-2 rounded-xl transition-colors group ${
         isHighlighted
-          ? "bg-indigo-500/10 ring-2 ring-indigo-500/50"
-          : "hover:bg-gray-50 dark:hover:bg-gray-900/60"
+          ? "bg-accent-soft ring-2 ring-accent"
+          : "hover:bg-surface-2"
       }`}
     >
       {/* Recordings of other users keep their owner's order (positions are owner-only),
@@ -163,7 +163,7 @@ function SortableRecordingItem({
         <button
           {...attributes}
           {...listeners}
-          className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 cursor-grab active:cursor-grabbing touch-none shrink-0 -ml-1 md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
+          className="text-fg-subtle hover:text-fg cursor-grab active:cursor-grabbing touch-none shrink-0 -ml-1 md:opacity-0 md:group-hover:opacity-100 focus-visible:opacity-100 transition-opacity"
           aria-label={t('rehearsal.recording.drag.ariaLabel')}
           title={t('rehearsal.recording.drag.ariaLabel')}
         >
@@ -174,12 +174,12 @@ function SortableRecordingItem({
       <button
         onClick={() => handleTogglePlay(rec.id, rec.audioUrl)}
         disabled={!rec.audioUrl}
-        className={`w-9 h-9 rounded-full flex items-center justify-center transition-all shrink-0 ${
+        className={`size-tap rounded-full flex items-center justify-center transition-all shrink-0 ${
           !rec.audioUrl
-            ? "bg-gray-100 dark:bg-gray-800 text-gray-400 opacity-50 cursor-not-allowed"
+            ? "bg-surface-2 text-fg-subtle opacity-50 cursor-not-allowed"
             : isPlaying
-            ? "bg-indigo-600 hover:bg-indigo-500 text-white active:scale-95"
-            : "bg-indigo-50 dark:bg-indigo-950/40 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 text-indigo-600 dark:text-indigo-400 active:scale-95"
+            ? "bg-accent text-on-accent hover:bg-accent/90 active:scale-95"
+            : "bg-surface-2 text-fg hover:bg-line active:scale-95"
         }`}
         title={!rec.audioUrl ? t('rehearsal.recording.missingTitle') : isPlaying ? t('rehearsal.recording.pause') : t('rehearsal.recording.play')}
         aria-label={!rec.audioUrl ? t('rehearsal.recording.missingTitle') : isPlaying ? t('rehearsal.recording.pause') : t('rehearsal.recording.play')}
@@ -197,7 +197,7 @@ function SortableRecordingItem({
             onBlur={handleSaveRename}
             onKeyDown={handleKeyDown}
             aria-label={t('rehearsal.recording.edit.ariaLabel')}
-            className="w-full text-sm font-semibold bg-white dark:bg-gray-900 border border-indigo-500 rounded px-2 py-0.5 text-gray-900 dark:text-white"
+            className="w-full text-sm font-semibold bg-bg border border-accent rounded-control px-2 py-0.5 text-fg"
           />
         ) : (
           <div className="flex items-center gap-1.5 min-w-0">
@@ -1032,7 +1032,7 @@ export default function RehearsalDrawer({
         onClick: () => { window.location.href = '/songs?myRecordings=true'; },
       },
       classNames: {
-        actionButton: 'text-amber-400 text-xs font-bold hover:text-amber-300 transition-colors ml-2',
+        actionButton: 'text-accent text-xs font-bold underline-offset-2 hover:underline ml-2',
       },
     });
     queryClient.invalidateQueries({ queryKey: ["song-recordings", songVersionId] });
@@ -1175,7 +1175,7 @@ export default function RehearsalDrawer({
         }}
         transition={{ duration: 0.2 }}
         onClick={onClose}
-        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity"
+        className="fixed inset-0 bg-scrim backdrop-blur-sm z-40 transition-opacity"
       />
 
       {/* Bottom Drawer Sheet */}
@@ -1206,8 +1206,8 @@ export default function RehearsalDrawer({
             {/* Header Title bar */}
             <div className="flex items-center justify-between px-6 pb-4 border-b border-line shrink-0">
               <div className="flex items-center gap-3">
-                <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-lg flex items-center justify-center text-white shadow-md">
-                  <Music className="w-5 h-5" />
+                <div className="w-10 h-10 bg-surface-2 rounded-control flex items-center justify-center text-fg-muted">
+                  <Music aria-hidden="true" className="w-5 h-5" />
                 </div>
                 <div className="text-left">
                   <h2 id={`${dialogId}-kind`} className="text-meta font-semibold text-fg-muted">{t('practice.title')}</h2>
@@ -1302,29 +1302,29 @@ export default function RehearsalDrawer({
                       
                       {/* Fake practice takes mock list for guest demo preview */}
                       {!user ? (
-                        <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-gray-50/60 dark:bg-gray-950 p-1 space-y-0.5">
+                        <div className="rounded-panel border border-line bg-surface p-1 space-y-0.5">
                           {[t('rehearsal.demo.take1'), t('rehearsal.demo.take2')].map((name) => (
                             <div key={name} className="flex items-center gap-2.5 px-2.5 py-2 rounded-xl">
-                              <div className="w-9 h-9 rounded-full bg-indigo-50 dark:bg-indigo-950/40 flex items-center justify-center text-indigo-600 dark:text-indigo-400 shrink-0">
+                              <div className="w-9 h-9 rounded-full bg-surface-2 flex items-center justify-center text-fg shrink-0">
                                 <Play className="w-3.5 h-3.5 fill-current translate-x-px" />
                               </div>
                               <div className="flex-1 text-left min-w-0">
-                                <h4 className="text-sm font-semibold text-gray-900 dark:text-white truncate">{name}</h4>
-                                <span className="text-xs text-gray-500 dark:text-gray-400">Jul 1, 2026 · 0:30</span>
+                                <h4 className="text-sm font-semibold text-fg truncate">{name}</h4>
+                                <span className="text-xs text-fg-muted">Jul 1, 2026 · 0:30</span>
                               </div>
                             </div>
                           ))}
                         </div>
                       ) : isLoading ? (
                         <div className="flex flex-col items-center justify-center py-8 space-y-2">
-                          <div className="w-6 h-6 border-2 border-indigo-500/20 border-t-indigo-500 rounded-full animate-spin" />
-                          <span className="text-xs text-gray-400">{t('rehearsal.loadingRecordings')}</span>
+                          <div className="w-6 h-6 border-2 border-line border-t-fg-muted rounded-full animate-spin" />
+                          <span className="text-xs text-fg-muted">{t('rehearsal.loadingRecordings')}</span>
                         </div>
                       ) : myTakes.length === 0 ? (
-                        <div className="text-center py-10 border border-dashed border-gray-200 dark:border-gray-800 rounded-2xl p-4">
+                        <div className="text-center py-10 border border-dashed border-line rounded-panel p-4">
                           <p className="text-2xl mb-1">🎤</p>
-                          <h4 className="text-sm font-semibold text-gray-800 dark:text-gray-200">{t('rehearsal.recordings.empty')}</h4>
-                          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 max-w-[280px] mx-auto">
+                          <h4 className="text-sm font-semibold text-fg">{t('rehearsal.recordings.empty')}</h4>
+                          <p className="text-xs text-fg-muted mt-1 max-w-[280px] mx-auto">
                             {t('rehearsal.recordings.emptyPracticeHint')}
                           </p>
                         </div>
@@ -1334,7 +1334,7 @@ export default function RehearsalDrawer({
                             items={myTakes.map((r) => r.id)}
                             strategy={verticalListSortingStrategy}
                           >
-                            <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-gray-50/60 dark:bg-gray-950 p-1 space-y-0.5">
+                            <div className="rounded-panel border border-line bg-surface p-1 space-y-0.5">
                               {myTakes.map((rec) => (
                                 <SortableRecordingItem
                                   key={rec.id}
@@ -1450,7 +1450,7 @@ export default function RehearsalDrawer({
                   {/* YouTube Player */}
                   {youtubeUrl && (
                     <div 
-                      className="aspect-video w-full rounded-2xl overflow-hidden shadow-lg border border-gray-200 dark:border-gray-800 bg-black"
+                      className="aspect-video w-full rounded-panel overflow-hidden border border-line bg-surface-2"
                       style={{ display: selectedMedia === "youtube" ? "block" : "none" }}
                     >
                       <iframe
@@ -1470,7 +1470,7 @@ export default function RehearsalDrawer({
                   {/* SoundCloud Player */}
                   {soundcloudUrl && (
                     <div 
-                      className="h-[166px] w-full rounded-2xl overflow-hidden shadow-md border border-gray-200 dark:border-gray-800"
+                      className="h-[166px] w-full rounded-panel overflow-hidden border border-line"
                       style={{ display: selectedMedia === "soundcloud" ? "block" : "none" }}
                     >
                       <iframe
@@ -1489,7 +1489,7 @@ export default function RehearsalDrawer({
                   {/* Spotify Player */}
                   {spotifyUrl && (
                     <div 
-                      className="h-[152px] w-full rounded-2xl overflow-hidden shadow-md border border-gray-200 dark:border-gray-800"
+                      className="h-[152px] w-full rounded-panel overflow-hidden border border-line"
                       style={{ display: selectedMedia === "spotify" ? "block" : "none" }}
                     >
                       <iframe

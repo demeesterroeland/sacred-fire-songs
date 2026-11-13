@@ -33,9 +33,9 @@ export const OTHER_MEMBER_ID = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd3a0b01';
 const OTHER_MEMBER_EMAIL = 'other-member@example.invalid';
 
 export const SEEDED_EMAILS: Record<string, string> = {
-  member: 'roel.de.meester+member@gmail.com',
-  gatekeeper: 'roel.de.meester+gatekeeper@gmail.com',
-  admin: 'roel.de.meester+admin@gmail.com',
+  member: 'member@sfs.example',
+  gatekeeper: 'gatekeeper@sfs.example',
+  admin: 'admin@sfs.example',
 };
 
 function access(world: SongBddWorld): AccessBddState {
@@ -280,8 +280,22 @@ Then('public_profiles has no e-mail or activity columns', async function () {
   );
   assert.deepEqual(
     rows.map((r) => r.column_name),
-    ['avatar_url', 'full_name', 'id', 'is_musician']
+    ['avatar_url', 'full_name', 'id', 'is_musician', 'role']
   );
+});
+
+// Story 6.1.38 (#534): every signed-in member sees every role; a guest sees none.
+Then(/^a (guest|member) reads the role of the admin through public_profiles as "([^"]*)"$/, async function (
+  this: SongBddWorld,
+  reader: string,
+  expected: string
+) {
+  const adminId = await profileIdByEmail(SEEDED_EMAILS.admin);
+  const rows = await queryAs<{ role: string | null }>(this, reader, 'SELECT role FROM public.public_profiles WHERE id = $1', [
+    adminId,
+  ]);
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].role, expected === '' ? null : expected);
 });
 
 Then(/^a (guest|member) cannot write through public_profiles$/, async function (this: SongBddWorld, reader: string) {

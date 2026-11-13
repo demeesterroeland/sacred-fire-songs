@@ -54,7 +54,7 @@ describe('category counts', () => {
   });
 
   it('a tag pill with a count (song form) reads "Fire (5)" as plain text', () => {
-    const { container } = render(<TagPill label="Fire" categorySlug="fire" count={5} variant="selectable" onClick={() => {}} />);
+    const { container } = render(<TagPill label="Fire" count={5} variant="selectable" onClick={() => {}} />);
     expect(container.textContent).toContain('Fire');
     expect(container.textContent).toContain('(5)');
     expect(container.innerHTML).not.toMatch(/bg-white\/20|bg-gray-700/);

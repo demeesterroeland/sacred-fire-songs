@@ -1547,3 +1547,20 @@
 - [ ] `qu` copy for the songbook pages needs a native check
 - [x] Cross-review findings fixed (roman page order, merged-anchor highlight, page column, tab title, wording); merged `feat/ux-v3`
 - [ ] Cross-review by another Claude model (orchestrator, #498)
+
+## Session November 13, 2026 (Story 6.1.38, #534, role badge on a profile)
+- [x] Plan `docs/plans/2026-11-13-role-badges.md`
+- [x] Migration `20261113120000_public_profiles_role.sql`: `public_profiles.role`, NULL for a guest; `db-schema.sql` v3.9
+- [x] `RoleBadge` + `lib/users/roleBadge.ts` (admin Shield, gatekeeper KeyRound, expert Award, musician Music, member UserCheck; labels `admin.role.*`); `user.profile.verifiedMusician` / `user.profile.member` removed from 8 locales
+- [x] Tests: `@unit` feature `ux-v2-profile-role-badge.feature`, Vitest/RTL `roleBadge.test.tsx`, `@seed` role scenario in `access-policies.feature` (v1.3), E2E `ux-v2-profile-role-badge.spec.ts`; docs (design doc 2.15, epics 1.99)
+- [x] Cross-review by another Claude model; review fixes (seed column list, guest/member role scenario, e2e naming)
+
+## Session November 13, 2026 (privacy, placeholder addresses for seeded accounts)
+- [x] Seeds, E2E fixtures, BDD steps, UX script, feature files (admin-users v1.2, song v1.4), mockups and CHANGELOG use `<role>@sfs.example` and placeholder names
+- [x] `scripts/db/rename-seed-accounts.mjs` + `npm run seed:rename-accounts` + `scripts/README.md` row; unit test `renameSeedAccounts.test.ts`
+- [x] Local stack converted; tsc, lint (137), Vitest, BDD unit + seed and the admin-users / role badge / auth E2E specs green
+
+## Session November 13, 2026 (sync develop into feat/ux-v3)
+- [x] Merge `origin/develop` into `feat/ux-v3` with a merge commit (PR `chore/sync-develop-into-ux-v3`); doc conflicts resolved keeping both sides, develop's clashing version rows renumbered
+- [x] Role badge migration `20261113120000_public_profiles_role.sql` checked in the shared local database
+- [ ] Follow-up: `feat/ux-v3`-only tests and fixtures still use the old seed addresses (develop uses `<role>@sfs.example`)

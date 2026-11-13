@@ -85,8 +85,21 @@ for (const locale of ['en', 'ru', 'fr']) {
     const buttons = page.getByTestId('lyrics-tools').getByRole('button');
     await expect(buttons).toHaveCount(2);
     await buttons.first().scrollIntoViewIfNeeded();
-    const a = await buttons.nth(0).boundingBox();
-    const b = await buttons.nth(1).boundingBox();
+    // Measure both buttons in one frame: two separate boundingBox() calls can
+    // straddle a layout shift above the row (page fade-in, hydration) and
+    // report a false offset. Poll until the row has settled.
+    const measure = () =>
+      buttons.evaluateAll((els) =>
+        els.map((el) => {
+          const r = el.getBoundingClientRect();
+          return { x: r.x, y: r.y, width: r.width, height: r.height };
+        }),
+      );
+    await expect.poll(async () => {
+      const [first, second] = await measure();
+      return Math.abs(first.y - second.y);
+    }).toBeLessThanOrEqual(2);
+    const [a, b] = await measure();
     expect(Math.abs(a!.y - b!.y)).toBeLessThanOrEqual(2);
     expect(Math.abs(a!.height - b!.height)).toBeLessThanOrEqual(2);
     expect(a!.height).toBeGreaterThanOrEqual(44);

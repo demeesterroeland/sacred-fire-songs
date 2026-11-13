@@ -1,11 +1,13 @@
 # Design Tokens & Component Sheet (UX v2, "sober" style)
 
-**Version:** 1.8 | **Date:** Nov 13, 2026 | **Story:** 6.1.1 / G1.1 (#385) | **Epic:** 6.1 (#375)
+**Version:** 1.10 | **Date:** Nov 13, 2026 | **Story:** 6.1.1 / G1.1 (#385) | **Epic:** 6.1 (#375)
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.10 | Nov 13, 2026 | Sync: merge of `origin/develop` into `feat/ux-v3`. develop's row 1.5 (TagPill / AuthorPill, one neutral tag style) clashed with the `feat/ux-v3` number and is kept as 1.9. |
+| 1.9 | Nov 12, 2026 | (develop 1.5) Component sheet: **TagPill / AuthorPill** — one neutral tag style for every category (Story 6.1.35, #485); the per-category colour map is gone. |
 | 1.8 | Nov 13, 2026 | Variant / language slot: the reader group *Original · Translation · Both* (the same `Segmented`) joins the row for a song with a translation, and the language group lists languages only (two or more, next to *Translation* / *Both*; Story 6.2.14, #517); *Both* pairs the stanzas in a grid (one column on a phone, `md:grid-cols-2`), translation in `text-fg-muted` with a start-side `border-s-2 border-line` rule on a phone. |
 | 1.7 | Nov 12, 2026 | Variant / language slot: the language group is drawn (Story 6.2.13, #516): *Original language · Dutch · English* from `song_translations`, the same `Segmented`, in one wrapping row next to the version group; a song without translations adds nothing. |
 | 1.6 | Nov 12, 2026 | Segmented: a checked segment outside the visible part of the strip is scrolled into view (the strip's own `scrollLeft`, never `scrollIntoView`); equal translation labels show the songbook (`English · Songbook B`); a label is cut at 10 rem (Story 6.2.6, #509, review of PR #530). Date of 1.5 corrected. |
@@ -123,6 +125,7 @@ Primitives in `components/ui/` (React) and the visual sheet `docs/design/screens
 | **ListRow** | `components/ui/list-row.tsx` | Title (`text-row`, `text-fg`, up to 2 lines), optional `MetaLine` under it, optional leading icon and trailing slot; divider `border-line`; whole row is the target (≥ 44 px): a `<button>` with `onClick`, or the child link with `asChild` (then `trailing` must not be interactive). No card, no border radius, no glow. |
 | **MetaLine** | `components/ui/meta-line.tsx` | One grey line (`text-meta`, `text-fg-muted`), items joined by " · ", truncates at the end; optional "show all" expand. Replaces coloured tag chips on cards and the song page. |
 | **Chip** | `components/ui/chip.tsx` | Filter-only. `rounded-pill`, `bg-chip`; selected = inverted (`bg-chip-active`) **plus** a check icon and `aria-pressed`. Never decorative. |
+| **TagPill / AuthorPill** | `components/ui/TagPill.tsx`, `components/ui/AuthorPill.tsx` (style: `lib/design/tagStyles.ts`) | One neutral style for every tag, whatever its category: `rounded-pill`, `bg-chip text-on-chip border-line`; hover (`bg-line`) only when the pill is a link or button. Selected (filter / selectable) = inverted `bg-chip-active text-on-chip-active`, **plus** a check (selectable) and `aria-pressed`. No colour per category. |
 | **BottomSheet** | `components/ui/bottom-sheet.tsx` | Radix Dialog at the bottom on mobile (centered dialog ≥ `sm`), `bg-surface`, `rounded-t-sheet`, `shadow-sheet`, `bg-scrim` overlay, grab handle, title, safe-area padding; reserves space for the mini player (`--mini-player-h`). One sheet component for menus, pickers and action sheets. |
 | **Toolbar** | `components/ui/toolbar.tsx` | `role="toolbar"` with a required translated `aria-label`, `bg-surface rounded-panel`, items are 44 px `ToolbarButton`s with text or icon + `aria-label`; toggles use `aria-pressed` **and** a visible cue (raised background + underline). Buttons stay in the tab order. Used for `Chords · A− · A+`. |
 | **Segmented** | `components/ui/segmented.tsx` | `role="radiogroup"` with a required translated `aria-label`; `bg-surface rounded-panel` strip of 44 px `role="radio"` buttons with `aria-checked` and a roving `tabindex` (one tab stop; Arrow Left/Right/Up/Down move and select with wrap-around, Home/End jump; text only, `text-meta`, no `title`); checked = raised `bg-bg` with a `ring-1 ring-line` hairline **plus** underline, never colour alone; scrolls sideways instead of widening the page and scrolls the checked segment into view (centred, via its own `scrollLeft`); a label is cut at 10 rem with an ellipsis. Used for the song page's version switch (`SongVersionSwitch`). |

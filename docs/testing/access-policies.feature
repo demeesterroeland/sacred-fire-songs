@@ -1,5 +1,5 @@
 # Sacred Fire Songs – Profile and playlist item access rules
-# Version: 1.2 | Date: Nov 10, 2026
+# Version: 1.3 | Date: Nov 13, 2026
 #
 # Living Gherkin description of who may read profile fields, who may read or
 # change playlist items, and who may write profile fields, categories, playlists
@@ -17,6 +17,8 @@
 #         and song version write rules.
 #   1.2 – Nov 10, 2026 – public_profiles carries the musician badge; user
 #         search and singer attribution never reveal e-mail addresses.
+#   1.3 – Nov 13, 2026 – public_profiles carries the role for a signed-in
+#         reader and none for a guest (Story 6.1.38, #534).
 
 @accessPolicies
 Feature: Profile and playlist item access
@@ -90,6 +92,15 @@ Feature: Profile and playlist item access
         | reader |
         | guest  |
         | member |
+
+    @seed
+    Scenario Outline: A <reader> sees the role of a profile only when signed in
+      Then a <reader> reads the role of the admin through public_profiles as "<role>"
+
+      Examples:
+        | reader | role  |
+        | guest  |       |
+        | member | admin |
 
     @seed
     Scenario: A member keeps reading and updating their own profile

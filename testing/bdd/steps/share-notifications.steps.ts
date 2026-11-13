@@ -12,9 +12,9 @@ import { parseRecordingParam, recordingPermalink } from '../../../lib/songs/reco
 import { profileIdByEmail, queryAsUser, seedDb } from '../support/db';
 
 const SEEDED_EMAILS = {
-  member: 'roel.de.meester+member@gmail.com',
-  musician: 'roel.de.meester+expert@gmail.com',
-  gatekeeper: 'roel.de.meester+gatekeeper@gmail.com',
+  member: 'member@sfs.example',
+  musician: 'expert@sfs.example',
+  gatekeeper: 'gatekeeper@sfs.example',
 } as const;
 
 interface ShareNotificationsState {
