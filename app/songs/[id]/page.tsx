@@ -226,7 +226,9 @@ export default function SongDetailPage() {
         locale,
     });
     const { view: readingView, language: readingLanguage, translationLanguage } = reading;
-    const { translation, showBoth, shownHasChords, mayTranspose, shift } = reading;
+    const { translation, showBoth, shownHasChords, mayTranspose } = reading;
+    // Derived here, not destructured from `reading`, so the React Compiler can keep the memo below (readingState uses the same rule).
+    const shift = mayTranspose ? semitones : 0;
     const selectVersion = (index: number) => {
         const next = versions[index];
         if (!next) return;

@@ -115,7 +115,8 @@ export function translationTitle(songTitle: string | null | undefined, translati
 
 /**
  * The query part (`?version=…&lang=…`, or '') after choosing `language` (`null` = original). Other parameters stay,
- * the version included: a language is read on the version being shown.
+ * the version included: a language is read on the version being shown. Since #517 the page uses the reading-state
+ * address helpers (`lib/songs/readingState.ts`); this one only backs the #516 language-switch tests and steps.
  */
 export function languageSearch(currentSearch: string, language: string | null): string {
   const params = new URLSearchParams(currentSearch);
