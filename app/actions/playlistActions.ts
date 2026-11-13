@@ -2,6 +2,7 @@
 
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
+import { NEW_PLAYLIST_IS_PUBLIC, toIsPublic } from '@/lib/playlists/visibility';
 import { isSmartPlaylist } from '@/lib/playlists/smartPlaylists';
 import { uuid, playlistTitle, playlistDescription, safeParse } from '@/lib/validation/schemas';
 import { z } from 'zod';
@@ -28,7 +29,8 @@ async function checkPlaylistModifyAccess(
 // ─── Create ───────────────────────────────────────────────────────────────────
 
 export async function createPlaylist(
-    title: string
+    title: string,
+    isPublic: boolean = NEW_PLAYLIST_IS_PUBLIC
 ): Promise<{ id: string } | { error: string }> {
     const parsed = safeParse(playlistTitle, title);
     if ('error' in parsed) return { error: parsed.error };
@@ -39,7 +41,7 @@ export async function createPlaylist(
 
     const { data, error } = await supabase
         .from('setlists')
-        .insert({ owner_id: user.id, title: parsed.data, is_public: false })
+        .insert({ owner_id: user.id, title: parsed.data, is_public: toIsPublic(isPublic) })
         .select('id')
         .maybeSingle();
 
@@ -217,28 +219,28 @@ export async function addSongToPlaylist(
     const hasAccess = await checkPlaylistModifyAccess(supabase, user, playlist);
     if (!hasAccess) return { added: false, error: 'Access denied: not your playlist or unauthorized' };
 
-    // Get first song version for this composition
-    const { data: version } = await supabase
+    // All versions of the song, oldest first: the playlist "holds the song" when it holds any of
+    // them (same rule as the picker's check marks, #414), and a new add uses the oldest version.
+    const { data: versions } = await supabase
         .from('song_versions')
         .select('id')
         .eq('composition_id', compositionParsed.data)
         .order('created_at', { ascending: true })
-        .limit(1)
-        .maybeSingle();
+        .order('id', { ascending: true }); // same tiebreak as lib/songs/versionOrder.ts
 
+    const version = versions?.[0];
     if (!version) return { added: false, error: 'Song version not found' };
 
-    // Check if already in playlist — toggle out if so
+    // Already in the playlist (any version) — toggle out: remove every version of this song
     const { data: existing } = await supabase
         .from('setlist_items')
         .select('id')
         .eq('setlist_id', playlistParsed.data)
-        .eq('song_version_id', version.id)
-        .maybeSingle();
+        .in('song_version_id', versions.map((v) => v.id));
 
-    if (existing) {
+    if (existing && existing.length > 0) {
         const { error: deleteError } = await supabase
-            .from('setlist_items').delete().eq('id', existing.id);
+            .from('setlist_items').delete().in('id', existing.map((e) => e.id));
         if (deleteError) return { added: true, error: deleteError.message };
         revalidatePath(`/library/playlists/${playlistParsed.data}`);
         return { added: false };

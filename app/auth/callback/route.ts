@@ -1,11 +1,14 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
+import { safeNextPath } from '@/lib/auth/safeNext';
+import { authErrorPath, knownAuthCode } from '@/lib/auth/notice';
 
 export async function GET(request: Request) {
     const { searchParams, origin } = new URL(request.url)
     const code = searchParams.get('code')
+    let errorCode: string | null = null
     // if "next" is in param, use it as the redirect URL
-    const next = searchParams.get('next') ?? '/'
+    const next = safeNextPath(searchParams.get('next'))
 
     if (code) {
         const supabase = await createClient()
@@ -22,8 +25,9 @@ export async function GET(request: Request) {
                 return NextResponse.redirect(`${origin}${next}`)
             }
         }
+        errorCode = knownAuthCode(error)
     }
 
     // return the user to an error page with instructions
-    return NextResponse.redirect(`${origin}/auth/error`)
+    return NextResponse.redirect(`${origin}${authErrorPath(errorCode)}`)
 }

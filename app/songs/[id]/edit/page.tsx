@@ -1,13 +1,16 @@
 'use client';
 
-import { useParams } from 'next/navigation';
+import { useParams, usePathname, useSearchParams } from 'next/navigation';
 import { createClient } from '@/lib/supabase/client';
 
 import SongForm from '@/components/song/SongForm';
-import AccessDenied from '@/components/common/feedback/AccessDenied';
+import NotYoursToEdit from '@/components/common/feedback/NotYoursToEdit';
+import GuestGate from '@/components/common/GuestGate';
 import { useQuery } from '@tanstack/react-query';
 import { useAuth } from '@/hooks/useAuth';
 import { useLocale } from '@/context/LocaleContext';
+import { EDIT_VERSION_PARAM, pickVersion, sortVersions } from '@/lib/songs/versionOrder';
+import { versionOptions } from '@/lib/songs/versionSwitch';
 
 // Similar fetch to detail page, but we just need basic data
 const fetchSongForEdit = async (id: string) => {
@@ -25,6 +28,8 @@ const fetchSongForEdit = async (id: string) => {
           ),
           song_versions!inner (
             id,
+            created_at,
+            version_name,
             content_chordpro,
             key,
             capo,
@@ -39,15 +44,19 @@ const fetchSongForEdit = async (id: string) => {
         .single();
 
     if (error) throw error;
-    return data;
+    // UXA-049: the same order as the song page (oldest first), so "the first version" is the same everywhere.
+    return data && { ...data, song_versions: sortVersions(data.song_versions) };
 };
 
 export default function EditSongPage() {
     const { t } = useLocale();
     const params = useParams();
     const id = typeof params.id === 'string' ? params.id : params.id?.[0];
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+    const requestedVersionId = searchParams.get(EDIT_VERSION_PARAM);
+    const search = searchParams.toString();
     const { user, loading: authLoading } = useAuth();
-
 
     const { data: song, isLoading, error } = useQuery({
         queryKey: ['song', id, 'edit'],
@@ -56,10 +65,19 @@ export default function EditSongPage() {
         retry: 1
     });
 
-    if (isLoading) return <div className="p-8 text-gray-900 dark:text-white text-center">{t('common.loading')}</div>;
+    // Guests get the unified GuestGate (Story 6.1.26); the warm "not yours" copy is for signed-in non-owners.
+    if (!authLoading && !user) {
+        return (
+            <div className="mx-auto max-w-xl p-4">
+                <GuestGate feature="edit" next={`${pathname || `/songs/${id}/edit`}${search ? `?${search}` : ''}`} />
+            </div>
+        );
+    }
+
+    if (isLoading || authLoading) return <div className="p-8 text-fg text-center">{t('common.loading')}</div>;
     if (error || !song) {
         console.error("Fetch error:", error);
-        return <div className="p-8 text-red-500 text-center">{t('song.edit.loadError')}</div>;
+        return <div className="p-8 text-danger text-center">{t('song.edit.loadError')}</div>;
     }
 
     // Permission Check (Client-side visual check, RLS enforces actual security)
@@ -75,40 +93,52 @@ export default function EditSongPage() {
         const isAdmin = user?.role === 'admin';
 
         if (!user || (!isOwner && !isAdmin)) {
-            return <AccessDenied />;
+            return <NotYoursToEdit songId={id} />;
         }
     }
 
+    // The version being read (`?version=`), else the first (oldest) one, like the song page.
+    const version = pickVersion(song.song_versions, requestedVersionId);
+    // Which version this form saves is only visible when the song has more than one (same labels as the switch).
+    const versionLabel = versionOptions(song.song_versions, t)?.find((o) => o.value === version?.id)?.label;
     const initialData = {
         title: song.title,
         author: song.original_author || '',
-        content: song.song_versions[0]?.content_chordpro || '',
+        content: version?.content_chordpro || '',
 
         categoryIds: song.song_category_map?.map((m: { category_id: string }) => m.category_id) || [],
-        key: song.song_versions[0]?.key,
-        capo: song.song_versions[0]?.capo,
-        tuning: song.song_versions[0]?.tuning,
-        youtubeLink: song.song_versions[0]?.youtube_url || '',
-        spotifyLink: song.song_versions[0]?.spotify_url || '',
-        soundcloudLink: song.song_versions[0]?.soundcloud_url || '',
-        melodyNotation: song.song_versions[0]?.melody_notation || '',
+        key: version?.key,
+        capo: version?.capo,
+        tuning: version?.tuning,
+        youtubeLink: version?.youtube_url || '',
+        spotifyLink: version?.spotify_url || '',
+        soundcloudLink: version?.soundcloud_url || '',
+        melodyNotation: version?.melody_notation || '',
         isPublic: song.is_public ?? true
     };
 
 
     return (
-        <div className="min-h-screen bg-white dark:bg-gray-950 pb-20">
+        <div className="min-h-screen bg-bg pb-20">
 
-            <main className="container mx-auto px-4 pt-4 lg:pt-8">
+            <div className="container mx-auto px-4 pt-4 lg:pt-8">
 
 
+                {versionLabel && (
+                    <p data-testid="edit-version-caption" className="mb-3 text-meta text-fg-muted">
+                        {t('song.edit.versionCaption', { name: versionLabel })}
+                    </p>
+                )}
+
+                {/* One form per version: version A's text can never be saved onto version B. */}
                 <SongForm
+                    key={version?.id}
                     mode="edit"
                     initialData={initialData}
                     songId={id}
-                    versionId={song.song_versions[0]?.id}
+                    versionId={version?.id}
                 />
-            </main>
+            </div>
         </div>
     );
 }

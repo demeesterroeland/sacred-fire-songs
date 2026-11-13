@@ -6,12 +6,14 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Mail, KeyRound, ArrowRight, Loader2 } from 'lucide-react';
 import { useLocale } from '@/context/LocaleContext';
+import { safeEmailParam } from '@/lib/auth/notice';
+import { errorMessage } from '@/lib/errors/errorCode';
 
 function SignUpSuccessContent() {
     const { t } = useLocale();
     const router = useRouter();
     const searchParams = useSearchParams();
-    const email = searchParams.get('email') || '';
+    const email = safeEmailParam(searchParams.get('email'));
     const next = searchParams.get('next');
 
     const [code, setCode] = useState('');
@@ -21,7 +23,7 @@ function SignUpSuccessContent() {
     const handleVerify = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!email) {
-            setError('Email not found. Please sign up again.');
+            setError(t('errors.auth.signUpAgain'));
             return;
         }
         setIsVerifying(true);
@@ -34,7 +36,7 @@ function SignUpSuccessContent() {
         });
         setIsVerifying(false);
         if (error) {
-            setError(error.message);
+            setError(errorMessage(error, t, 'common.errorOccurred'));
         } else {
             router.push(`/auth/finish-registration${next ? `?next=${encodeURIComponent(next)}` : ""}`);
         }
@@ -60,7 +62,7 @@ function SignUpSuccessContent() {
                 {/* Divider */}
                 <div className="w-full flex items-center gap-3 mb-6">
                     <div className="flex-1 h-px bg-gray-200 dark:bg-[#2d3545]" />
-                    <span className="text-[10px] font-bold text-[#5a657a] uppercase tracking-widest">or enter code</span>
+                    <span className="text-caption font-semibold text-fg-muted">{t('auth.signUpSuccess.orEnterCode')}</span>
                     <div className="flex-1 h-px bg-gray-200 dark:bg-[#2d3545]" />
                 </div>
 
@@ -78,7 +80,7 @@ function SignUpSuccessContent() {
                             placeholder="6-digit code"
                             value={code}
                             onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                            className="w-full bg-transparent border border-gray-200 dark:border-[#2d3545] rounded-xl py-4 pl-12 pr-4 text-gray-900 dark:text-white text-center text-xl tracking-[0.5em] placeholder:text-[#5a657a] placeholder:text-sm placeholder:tracking-normal focus:outline-none focus:border-[#d9481e] transition-all"
+                            className="w-full bg-transparent border border-gray-200 dark:border-[#2d3545] rounded-xl py-4 pl-12 pr-4 text-gray-900 dark:text-white text-center text-xl tracking-[0.5em] placeholder:text-[#5a657a] placeholder:text-sm placeholder:tracking-normal transition-all"
                             required
                         />
                     </div>

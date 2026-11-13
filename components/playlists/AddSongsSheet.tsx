@@ -8,6 +8,7 @@ import { addSongToPlaylist } from '@/app/actions/playlistActions';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { useLocale } from '@/context/LocaleContext';
+import { actionErrorMessage } from '@/lib/errors/actionError';
 
 interface Song {
     id: string;
@@ -82,7 +83,7 @@ export function AddSongsSheet({ playlistId, existingCompositionIds, open, onClos
         startTransition(async () => {
             const result = await addSongToPlaylist(playlistId, compositionId);
             if (result.error) {
-                toast.error(result.error);
+                toast.error(actionErrorMessage(result.error, t));
                 // revert optimistic
                 setAddedIds(prev => {
                     const next = new Set(prev);
@@ -90,7 +91,7 @@ export function AddSongsSheet({ playlistId, existingCompositionIds, open, onClos
                     return next;
                 });
             } else {
-                toast.success(result.added ? `Added "${title}"` : `Removed "${title}"`);
+                toast.success(t(result.added ? 'playlists.addSongs.added' : 'playlists.addSongs.removed', { title }));
                 router.refresh();
             }
         });
@@ -137,7 +138,7 @@ export function AddSongsSheet({ playlistId, existingCompositionIds, open, onClos
                             value={query}
                             onChange={e => setQuery(e.target.value)}
                             placeholder={t('playlists.addSongs.search')}
-                            className="flex-1 bg-transparent text-sm text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-600 outline-none"
+                            className="flex-1 bg-transparent text-sm text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-600"
                         />
                     </div>
                 </div>
@@ -162,7 +163,7 @@ export function AddSongsSheet({ playlistId, existingCompositionIds, open, onClos
                                     <div className="flex items-center gap-2">
                                         <p className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate">{song.title}</p>
                                         {!song.is_public && (
-                                            <span className="text-[9px] font-black bg-gray-200 dark:bg-gray-800 text-gray-500 px-1.5 py-0.5 rounded border border-gray-300 dark:border-gray-700 uppercase tracking-tighter shrink-0">
+                                            <span className="text-caption font-semibold bg-surface-2 text-fg-muted px-1.5 py-0.5 rounded border border-line shrink-0">
                                                 {t('search.status.draft')}
                                             </span>
                                         )}

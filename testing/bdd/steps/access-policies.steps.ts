@@ -19,6 +19,8 @@ export interface AccessBddState {
   items: Record<PlaylistName, string>;
   songs?: Record<SongName, SongFixture>;
   newUserId?: string;
+  lastSearch?: Record<string, unknown>[];
+  recordingId?: string;
 }
 
 type SongName = "the member's" | "the other member's";
@@ -27,13 +29,13 @@ interface SongFixture {
   versionId: string;
 }
 
-const OTHER_MEMBER_ID = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd3a0b01';
+export const OTHER_MEMBER_ID = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd3a0b01';
 const OTHER_MEMBER_EMAIL = 'other-member@example.invalid';
 
-const SEEDED_EMAILS: Record<string, string> = {
-  member: 'roel.de.meester+member@gmail.com',
-  gatekeeper: 'roel.de.meester+gatekeeper@gmail.com',
-  admin: 'roel.de.meester+admin@gmail.com',
+export const SEEDED_EMAILS: Record<string, string> = {
+  member: 'member@sfs.example',
+  gatekeeper: 'gatekeeper@sfs.example',
+  admin: 'admin@sfs.example',
 };
 
 function access(world: SongBddWorld): AccessBddState {
@@ -164,6 +166,95 @@ Then(
   }
 );
 
+// ── User search and singer attribution ─────────────────────────────────────────
+
+const SINGER_ADDRESS = 'unregistered-singer@example.invalid';
+
+async function memberSearch(term: string): Promise<Record<string, unknown>[]> {
+  const memberId = await profileIdByEmail(SEEDED_EMAILS.member);
+  return queryAsUser<Record<string, unknown>>(memberId, 'SELECT * FROM public.search_users_for_sharing($1)', [term]);
+}
+
+Then(/^the member's user search for "([^"]+)" finds the other member$/, async function (this: SongBddWorld, term: string) {
+  const rows = await memberSearch(term);
+  assert.deepEqual(rows.map((r) => r.id), [access(this).otherMemberId]);
+  access(this).lastSearch = rows;
+});
+
+Then('the user search returns no e-mail column', function (this: SongBddWorld) {
+  const rows = access(this).lastSearch ?? [];
+  assert.ok(rows.length > 0, 'the search found nobody');
+  assert.deepEqual(Object.keys(rows[0]).sort(), ['avatar_url', 'full_name', 'id', 'is_musician']);
+});
+
+Then("the member's user search for part of the other member's address finds nobody", async function () {
+  assert.deepEqual(await memberSearch(OTHER_MEMBER_EMAIL.split('@')[0]), []);
+  assert.deepEqual(await memberSearch('example.invalid'), []);
+});
+
+Then(
+  "the member's user search for the other member's full address finds the other member",
+  async function (this: SongBddWorld) {
+    const rows = await memberSearch(`  ${OTHER_MEMBER_EMAIL.toUpperCase()} `);
+    assert.deepEqual(rows.map((r) => r.id), [access(this).otherMemberId]);
+  }
+);
+
+Then('a guest is refused the user search', async function () {
+  await assertRefused(
+    () => queryAsAnon('SELECT * FROM public.search_users_for_sharing($1)', ['Other Member']),
+    'guest searching users'
+  );
+});
+
+Given("the member's take credits an unregistered singer with an address", async function (this: SongBddWorld) {
+  const db = await seedDb();
+  const memberId = await profileIdByEmail(SEEDED_EMAILS.member);
+  const { rows } = await db.query<{ id: string }>(
+    `INSERT INTO public.user_recordings
+       (user_id, song_version_id, recording_name, storage_path, is_public, singer_consent_confirmed, singer_name, singer_email)
+     VALUES ($1, $2, 'BDD take', 'bdd/take.webm', true, true, 'Guest Singer', $3) RETURNING id`,
+    [memberId, songs(this)["the member's"].versionId, SINGER_ADDRESS]
+  );
+  access(this).recordingId = rows[0].id;
+});
+
+Then(
+  /^a (guest|member|other member) cannot select the singer e-mail column of takes$/,
+  async function (this: SongBddWorld, reader: string) {
+    const id = access(this).recordingId;
+    await assertRefused(
+      () => queryAs(this, reader, 'SELECT singer_email FROM public.user_recordings WHERE id = $1', [id]),
+      `${reader} selecting singer_email`
+    );
+    await assertRefused(
+      () => queryAs(this, reader, 'SELECT * FROM public.user_recordings WHERE id = $1', [id]),
+      `${reader} selecting every take column`
+    );
+    const rows = await queryAs<{ singer_name: string }>(
+      this,
+      reader,
+      'SELECT singer_name FROM public.user_recordings WHERE id = $1',
+      [id]
+    );
+    assert.deepEqual(rows.map((r) => r.singer_name), ['Guest Singer']);
+  }
+);
+
+Then(
+  /^the (guest|member|other member) reads (no|the) singer address through the owner lookup$/,
+  async function (this: SongBddWorld, reader: string, expected: string) {
+    const id = access(this).recordingId;
+    const sql = 'SELECT singer_email FROM public.own_recording_singer_emails(ARRAY[$1]::uuid[])';
+    if (reader === 'guest') {
+      await assertRefused(() => queryAsAnon(sql, [id]), 'guest reading singer addresses');
+      return;
+    }
+    const rows = await queryAs<{ singer_email: string }>(this, reader, sql, [id]);
+    assert.deepEqual(rows.map((r) => r.singer_email), expected === 'the' ? [SINGER_ADDRESS] : []);
+  }
+);
+
 // ── Public profile fields ─────────────────────────────────────────────────────
 
 Then(
@@ -189,8 +280,22 @@ Then('public_profiles has no e-mail or activity columns', async function () {
   );
   assert.deepEqual(
     rows.map((r) => r.column_name),
-    ['avatar_url', 'full_name', 'id']
+    ['avatar_url', 'full_name', 'id', 'is_musician', 'role']
   );
+});
+
+// Story 6.1.38 (#534): every signed-in member sees every role; a guest sees none.
+Then(/^a (guest|member) reads the role of the admin through public_profiles as "([^"]*)"$/, async function (
+  this: SongBddWorld,
+  reader: string,
+  expected: string
+) {
+  const adminId = await profileIdByEmail(SEEDED_EMAILS.admin);
+  const rows = await queryAs<{ role: string | null }>(this, reader, 'SELECT role FROM public.public_profiles WHERE id = $1', [
+    adminId,
+  ]);
+  assert.equal(rows.length, 1);
+  assert.equal(rows[0].role, expected === '' ? null : expected);
 });
 
 Then(/^a (guest|member) cannot write through public_profiles$/, async function (this: SongBddWorld, reader: string) {

@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useEffect, useRef, useState } from 'react';
+import { THEME_COLOR } from '@/lib/design/tokens';
 
 export type ThemePreference = 'dark' | 'light' | 'system';
 
@@ -54,7 +55,7 @@ function applyThemeClass(resolved: 'dark' | 'light', animate = false) {
 function updateThemeColor(resolved: 'dark' | 'light') {
   const meta = document.querySelector('meta[name="theme-color"]');
   if (meta) {
-    meta.setAttribute('content', resolved === 'dark' ? '#1a0505' : '#ffffff');
+    meta.setAttribute('content', THEME_COLOR[resolved]);
   }
 }
 

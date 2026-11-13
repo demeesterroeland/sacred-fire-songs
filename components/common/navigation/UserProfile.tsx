@@ -1,5 +1,5 @@
 import { type AuthUser } from '@/hooks/useAuth';
-import { LogOut, ChevronDown, Settings, User, Heart, FileText, ListMusic, Sun, Moon, Monitor, SlidersHorizontal, Clock, Globe, ShieldCheck } from 'lucide-react';
+import { LogOut, ChevronDown, Settings, Heart, FileText, ListMusic, Sun, Moon, Monitor, SlidersHorizontal, Clock, Globe, ShieldCheck, Users } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
@@ -7,6 +7,10 @@ import Image from 'next/image';
 import { useUserPreferences, type ThemePreference } from '@/context/UserPreferencesContext';
 import { useLocale } from '@/context/LocaleContext';
 import { LanguageSwitcher } from './LanguageSwitcher';
+import { SignInLink } from '@/components/auth/SignInLink';
+import { MY_DRAFTS_HREF } from '@/lib/songs/draftsLink';
+import { useNotificationsQuery } from '@/hooks/useNotificationsQuery';
+import { unreadSharedCount } from '@/lib/notifications/sharedWithMe';
 
 import { usePathname, useRouter } from 'next/navigation';
 
@@ -46,6 +50,33 @@ function ThemeToggle() {
   );
 }
 
+/**
+ * "Shared with me" entry (Story 6.1.19 / G4.6, UXD-3). The unread count is said in words
+ * ("3 new"); the badge stays on the bell only, so one thing never has two badges. It reads
+ * the same query as the bell, so both drop together.
+ */
+function SharedWithMeMenuItem({ userId, onNavigate }: { userId: string; onNavigate: () => void }) {
+  const { t } = useLocale();
+  const { data } = useNotificationsQuery(userId);
+  const unread = unreadSharedCount(data);
+  return (
+    <Link
+      href="/library/shared"
+      onClick={onNavigate}
+      data-testid="user-menu-shared-with-me"
+      className="flex min-h-tap items-center gap-3 rounded-control p-2 text-fg-muted transition-colors hover:bg-surface-2 hover:text-fg"
+    >
+      <Users className="w-4 h-4" aria-hidden="true" />
+      <span className="flex-1 text-sm font-medium">{t('sharedWithMe.title')}</span>
+      {unread > 0 && (
+        <span data-testid="user-menu-shared-unread" className="rounded-pill bg-chip px-2 py-0.5 text-caption font-semibold text-on-chip">
+          {t('sharedWithMe.unreadCount', { count: unread })}
+        </span>
+      )}
+    </Link>
+  );
+}
+
 export const UserProfile = ({ onLogout, layout = 'header', showText = true, initialUser }: UserProfileProps) => {
   const { user, loading, logout } = useAuth(initialUser);
   const { t } = useLocale();
@@ -74,12 +105,9 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true, init
 
   if (!user) {
     return (
-      <Link
-        href={`/auth/login?next=${encodeURIComponent(pathname)}`}
-        className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-xl font-bold text-sm transition-all shadow-lg shadow-red-900/20 active:scale-95 whitespace-nowrap"
-      >
+      <SignInLink href={`/auth/login?next=${encodeURIComponent(pathname)}`}>
         {t('auth.login.submit')}
-      </Link>
+      </SignInLink>
     );
   }
 
@@ -97,7 +125,7 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true, init
         aria-expanded={isOpen}
         className="flex items-center gap-2 px-3 py-2 rounded-full bg-gray-200/80 dark:bg-gray-800/80 hover:bg-gray-300 dark:hover:bg-gray-700 transition-colors active:scale-95 group border border-transparent hover:border-gray-400 dark:hover:border-gray-600"
       >
-        <div className="w-[26px] h-[26px] rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-[10px] font-bold text-white shadow-inner overflow-hidden shrink-0 relative">
+        <div className="w-[26px] h-[26px] rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-caption font-semibold text-white shadow-inner overflow-hidden shrink-0 relative">
           {user.avatar_url ? (
             <Image 
               src={user.avatar_url} 
@@ -123,7 +151,7 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true, init
         <div data-testid="user-menu" className="absolute top-full right-0 mt-2 w-72 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-2xl overflow-hidden z-50 animate-in fade-in zoom-in duration-200 origin-top-right">
           {/* Account Title */}
           <div className="flex justify-between items-center px-4 py-3 border-b border-gray-200 dark:border-gray-800">
-            <span className="text-sm font-black text-gray-900 dark:text-white uppercase tracking-wider">{t('userMenu.account')}</span>
+            <span className="text-sm font-semibold text-fg">{t('userMenu.account')}</span>
             <ThemeToggle />
           </div>
 
@@ -179,7 +207,7 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true, init
                 <Heart className="w-4 h-4 group-hover:text-red-400" />
                 <span className="text-sm font-medium">{t('userMenu.favorites')}</span>
               </Link>
-              <Link href="/songs?status=draft" className="flex items-center gap-3 p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group">
+              <Link href={MY_DRAFTS_HREF} className="flex items-center gap-3 p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group">
                 <FileText className="w-4 h-4 group-hover:text-orange-400" />
                 <span className="text-sm font-medium">{t('userMenu.drafts')}</span>
               </Link>
@@ -187,6 +215,7 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true, init
                 <ListMusic className="w-4 h-4 group-hover:text-purple-400" />
                 <span className="text-sm font-medium">{t('userMenu.playlists')}</span>
               </Link>
+              <SharedWithMeMenuItem userId={user.id} onNavigate={() => setIsOpen(false)} />
               <Link href="/library/recently-viewed" className="flex items-center gap-3 p-2 rounded-lg text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors group">
                 <Clock className="w-4 h-4 group-hover:text-amber-400" />
                 <span className="text-sm font-medium">{t('userMenu.recentlyViewed')}</span>

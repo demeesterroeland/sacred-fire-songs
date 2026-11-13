@@ -29,9 +29,11 @@ test.describe('Guest smoke @smoke', () => {
     await expect(page).toHaveURL(/\/songs\/[^/]+$/, { timeout: 10000 });
   });
 
-  test('ACC-01: settings redirects unauthenticated user to login', async ({ page }) => {
+  test('ACC-01: settings shows unauthenticated user the GuestGate with a way back', async ({ page }) => {
     await page.goto('/account/settings');
-    await expect(page).toHaveURL(/\/auth\/login/);
+    const gate = page.getByTestId('guest-gate');
+    await expect(gate).toHaveAttribute('data-feature', 'settings');
+    await expect(gate.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/auth/login?next=%2Faccount%2Fsettings');
   });
 });
 
@@ -58,5 +60,21 @@ test.describe('Member smoke @smoke', () => {
     
     await expect(page).toHaveURL(/\/library\/playlists\/[a-f0-9-]+$/);
     await expect(page.getByRole('heading', { name: playlistName })).toBeVisible({ timeout: 10000 });
+
+    // Clean up created playlist so remote test suites don't accumulate test data
+    const optionsButton = page.getByRole('button', { name: /^playlist options$|^afspeellijstopties$/i });
+    await expect(optionsButton).toBeVisible();
+    await optionsButton.click();
+
+    const deleteMenuItem = page.getByRole('menuitem', { name: /delete|verwijderen/i });
+    await expect(deleteMenuItem).toBeVisible();
+    await deleteMenuItem.click();
+
+    const confirmButton = page.getByRole('button', { name: /(yes,\s*delete|verwijderen)/i });
+    await expect(confirmButton).toBeVisible();
+    await confirmButton.click();
+
+    await expect(page).toHaveURL(/\/library\/playlists$/);
+    await expect(page.getByRole('heading', { name: playlistName })).not.toBeVisible();
   });
 });

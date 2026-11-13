@@ -25,11 +25,9 @@ import {
   runScripts,
   runsCommand,
   repoFileExists,
-  stepIndex,
   triggerTypes,
   triggersOnAllBranches,
   triggersOnBranch,
-  usesEnvironment,
   type Workflow,
 } from '../../support/workflowContract';
 import { checkBranches, checkTitle } from '../../../scripts/cicd/lib/prPolicy.mjs';
@@ -158,14 +156,6 @@ Then('it only runs after the {string} checks succeeded for the same commit', fun
   assert.ok(viaWorkflowRun || viaReusable, `${wf.file} is not gated on a successful ${ciFile} run`);
 });
 
-Then('it runs {string} before deploying the app', function (this: SongBddWorld, cmd: string) {
-  const wf = byFile(this, 'deploy-staging.yml');
-  const migrate = stepIndex(wf, cmd);
-  const deploy = stepIndex(wf, 'docker compose');
-  assert.ok(migrate >= 0, `${wf.file} never runs "${cmd}"`);
-  assert.ok(deploy > migrate, `${wf.file} must run "${cmd}" before "docker compose"`);
-});
-
 // ── Images & environments ───────────────────────────────────────────────────
 Then('a push to {string} builds images tagged {string} and the short SHA', function (this: SongBddWorld, branch: string, tag: string) {
   const wf = byFile(this, 'docker.yml');
@@ -180,19 +170,10 @@ Then('no image is tagged {string}', function (this: SongBddWorld, tag: string) {
   }
 });
 
-Then('{string} uses the environment {string}', function (this: SongBddWorld, file: string, env: string) {
-  assert.ok(usesEnvironment(byFile(this, file), env), `${file} does not use environment ${env}`);
-});
-
-Then('it uses the environment {string}', function (this: SongBddWorld, env: string) {
+Then('it tags release images with the release version', function (this: SongBddWorld) {
   const wf = current(this);
-  assert.ok(usesEnvironment(wf, env), `${wf.file} does not use environment ${env}`);
-});
-
-Then('it deploys the explicit release tag, never {string}', function (this: SongBddWorld, tag: string) {
-  const wf = current(this);
-  assert.match(wf.raw, /github\.event\.release\.tag_name|release_tag|tag_name/, `${wf.file} does not deploy the release tag`);
-  assert.doesNotMatch(wf.raw, new RegExp(`:${tag}\\b`), `${wf.file} references :${tag}`);
+  assert.match(wf.raw, /type=raw,value=\{\{tag\}\},enable=\$\{\{ github\.event_name == 'release' \}\}/, `${wf.file} does not tag the vX.Y.Z release tag`);
+  assert.match(wf.raw, /type=raw,value=\$\{\{ steps\.semver\.outputs\.value \}\}/, `${wf.file} does not tag the X.Y.Z version`);
 });
 
 Then('it opens a pull request from {string} into {string}', function (this: SongBddWorld, head: string, base: string) {
@@ -202,6 +183,31 @@ Then('it opens a pull request from {string} into {string}', function (this: Song
     new RegExp(`--base[= ]${base}`).test(scripts) && new RegExp(`--head[= ]${head}`).test(scripts),
     `${wf.file} does not open a PR ${head} → ${base}`,
   );
+});
+
+// ── Back-merge main → develop (story 5.1.9) ──────────────────────────────────
+Then(
+  'it opens the pull request with the secret {string} and fails when it is missing',
+  function (this: SongBddWorld, secret: string) {
+    const wf = current(this);
+    assert.match(wf.raw, new RegExp(`GH_TOKEN:\\s*\\$\\{\\{\\s*secrets\\.${secret}\\s*\\}\\}`), `${wf.file} does not use ${secret} as GH_TOKEN`);
+    const script = runScripts(wf).join('\n');
+    assert.match(script, /if \[ -z "\$GH_TOKEN" \]; then[\s\S]*?exit 1/, `${wf.file} does not fail closed without ${secret}`);
+  },
+);
+
+Then(
+  'it labels the pull request {string} when main does not merge cleanly',
+  function (this: SongBddWorld, label: string) {
+    const script = runScripts(current(this)).join('\n');
+    assert.match(script, /git merge --no-commit --no-ff/, 'no test merge before labelling');
+    assert.match(script, new RegExp(`--add-label ${label}\\b`), `does not add the label "${label}"`);
+  },
+);
+
+Then('it never merges the pull request itself', function (this: SongBddWorld) {
+  const wf = current(this);
+  assert.doesNotMatch(runScripts(wf).join('\n'), /gh pr merge/, `${wf.file} merges the back-merge PR itself`);
 });
 
 Then(
@@ -233,6 +239,11 @@ Then('no workflow uses a deployment environment', function (this: SongBddWorld) 
   for (const wf of ci(this).workflows) {
     assert.doesNotMatch(wf.raw, /^\s+environment:/m, `${wf.file} uses a GitHub deployment environment`);
   }
+});
+
+Then('no workflow file name starts with {string}', function (this: SongBddWorld, prefix: string) {
+  const deploys = ci(this).workflows.map((w) => w.file).filter((f) => f.startsWith(prefix));
+  assert.deepEqual(deploys, [], `deployment workflows belong outside this public repo: ${deploys.join(', ')}`);
 });
 
 Then(
@@ -339,6 +350,43 @@ Then('the title check fails', function (this: SongBddWorld) {
   const { pr, policy } = ci(this);
   assert.ok(pr && policy, 'the pr-lint workflow did not run');
   assert.equal(policy.titleOk, false, `title "${pr.title}" unexpectedly passed`);
+});
+
+// ── Documentation describes Gitflow (story 5.1.13) ──────────────────────────
+/** File text without the changelog table rows (they keep historic wording). */
+function bodyText(world: SongBddWorld): { path: string; body: string } {
+  const file = ci(world).file;
+  assert.ok(file, 'no file loaded — start the scenario with Given the file "…"');
+  const body = file.text
+    .split('\n')
+    .filter((l) => !/^\|\s*\*\*\d+\.\d+\*\*\s*\|/.test(l))
+    .join('\n');
+  return { path: file.path, body };
+}
+
+Then(
+  'outside its changelog it mentions {string}, {string}, {string} and {string}',
+  function (this: SongBddWorld, a: string, b: string, c: string, d: string) {
+    const { path, body } = bodyText(this);
+    for (const term of [a, b, c, d]) assert.ok(body.includes(term), `${path} does not mention "${term}"`);
+  },
+);
+
+Then(
+  'outside its changelog it never says {string} or {string}',
+  function (this: SongBddWorld, a: string, b: string) {
+    const { path, body } = bodyText(this);
+    for (const term of [a, b]) {
+      assert.ok(!body.toLowerCase().includes(term.toLowerCase()), `${path} still says "${term}"`);
+    }
+  },
+);
+
+Then('it has a {string} header and a changelog table', function (this: SongBddWorld, header: string) {
+  const { path } = bodyText(this);
+  const text = ci(this).file?.text ?? '';
+  assert.ok(text.includes(header), `${path} has no ${header} header`);
+  assert.match(text, /^\|\s*\*\*\d+\.\d+\*\*\s*\|/m, `${path} has no changelog table`);
 });
 
 // ── Need artifacts from later stories → pending until then ──────────────────

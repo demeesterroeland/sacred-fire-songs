@@ -198,7 +198,7 @@
 ### 🐛 Bug fixes
 
 * **seeds:** update 02_profiles.sql seed role to expert ([#210](https://github.com/demeesterroel/sacred-fire-songs/issues/210)) ([8d9083c](https://github.com/demeesterroel/sacred-fire-songs/commit/8d9083c29045c877a3de94c0a136ef26daa91aa7))
-* **seeds:** update expert email address to roel.de.meester+expert@gmail.com ([#210](https://github.com/demeesterroel/sacred-fire-songs/issues/210)) ([9ccc0bb](https://github.com/demeesterroel/sacred-fire-songs/commit/9ccc0bb5732860baaf6b1d324e0755c04a7c4dbb))
+* **seeds:** update expert email address to expert@sfs.example ([#210](https://github.com/demeesterroel/sacred-fire-songs/issues/210)) ([9ccc0bb](https://github.com/demeesterroel/sacred-fire-songs/commit/9ccc0bb5732860baaf6b1d324e0755c04a7c4dbb))
 * **song-detail:** select emoji column in categories query ([#210](https://github.com/demeesterroel/sacred-fire-songs/issues/210)) ([bf850ab](https://github.com/demeesterroel/sacred-fire-songs/commit/bf850abf2dec4f2b0d1fd7bb46078b119e6df4f8))
 * **tags:** apply vibrant category colors to selectable TagPill variant in edit and search ([#210](https://github.com/demeesterroel/sacred-fire-songs/issues/210)) ([4644c66](https://github.com/demeesterroel/sacred-fire-songs/commit/4644c6656a49c8ab293b3f7672ef4bff98948629))
 * **tags:** use dynamic category colors in TagPill component ([#210](https://github.com/demeesterroel/sacred-fire-songs/issues/210)) ([ff193b1](https://github.com/demeesterroel/sacred-fire-songs/commit/ff193b178e591c1a8a0931099faba01ff36510f2))

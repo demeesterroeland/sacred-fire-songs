@@ -1,13 +1,15 @@
 # Git Workflow & Branching Guidelines: Sacred Fire Songs
 
-**Version:** 1.6
+**Version:** 1.8
 **Status:** Living Document
-**Date:** Nov 3, 2026
+**Date:** Nov 5, 2026
 
 ## Changelog
 
 | Version | Date | Description of Changes |
 | ----- | ----- | ----- |
+| **1.8** | Nov 5, 2026 | `back-merge.yml` opens the back-merge PR `main` → `develop` automatically after every push to `main`; conflicts get the `back-merge-conflict` label (Story 5.1.9). |
+| **1.7** | Nov 5, 2026 | Promotion via `scripts/cicd/develop2main.sh` (Story 5.1.8): PR `develop` → `main` with a merge commit, never `--admin`; replaces `preview2prod.sh`. CI and image delivery live in this repo, deployment (CD) does not. |
 | **1.6** | Nov 3, 2026 | `develop` publishes images only; deploying them is outside this public repo (`deploy-staging.yml` removed). Enable the isolation git hooks with `git config core.hooksPath .githooks`. |
 | **1.5** | Oct 31, 2026 | `develop` deploys to **staging** automatically (`docker.yml` → `:develop` image, `deploy-staging.yml` → restricted SSH deploy on the VPS); no more `:latest` images (Epic 5.1 Phase 3). |
 | **1.4** | Oct 31, 2026 | Epic 5.1 Phase 2: branch rulesets as code (`.github/rulesets/main.json`, `develop.json`); `pr-lint.yml` (`pr-policy` check: Conventional Commit title + allowed head → base); `start-issue.sh` validates type/issue number; `dev2preview.sh --dry-run` and correct `sacred-fire-songs-app` image names. |
@@ -186,37 +188,29 @@ Only after the feature has been verified on preview **and** the project owner ha
 gh pr merge <pr> --squash
 ```
 
-To release, open and merge the promotion PR with a **merge commit**, then merge the Release Please PR and back-merge `main` into `develop`:
+To release, run the promotion script. It opens (or reuses) the PR `develop` → `main`, waits for its checks, asks for your confirmation and merges it with a **merge commit**; then it merges the Release Please PR, which creates the `vX.Y.Z` tag and GitHub Release:
 
 ```bash
-gh pr create --base main --head develop --title "chore: promote develop to main"
+scripts/cicd/develop2main.sh --dry-run                       # show what would happen
+scripts/cicd/develop2main.sh --notes-file .brain/release-summary.md
+```
+
+The script never uses `--squash`, `--admin`, `--auto` or `--delete-branch` (`develop` is long-lived). `--skip-release` stops after the promotion merge; `--yes` skips the confirmation prompts once the owner has approved. The manual equivalent:
+
+```bash
+gh pr create --base main --head develop --title "chore(release): promote develop to main"
 gh pr merge <promotion-pr> --merge          # merge commit, never --squash
 gh pr merge <release-please-pr> --merge     # creates the vX.Y.Z tag
-gh pr create --base develop --head main --title "chore: back-merge main into develop"
-gh pr merge <back-merge-pr> --merge        # merge commit, keeps the release commit + tag reachable
+gh pr merge <back-merge-pr> --merge        # PR opened by back-merge.yml; merge commit keeps the release commit + tag reachable
 ```
 
-> [!WARNING]
-> `scripts/cicd/preview2prod.sh` is **not yet Gitflow-ready** (Epic 5.1, Phase 4): it still squash-merges the feature PR straight into `main` with `--admin`. Don't use it for feature branches until it has been updated. Its intended behaviour is described below.
-
-```bash
-scripts/cicd/preview2prod.sh --verified --notes-file .brain/release-summary.md
-```
-
-The script:
-1. enforces the preview verification gate and checks for uncommitted (logbook) changes,
-2. creates or finds the PR and waits for all CI checks,
-3. **squash-merges** the PR and deletes the remote branch (safely detaching HEAD in the worktree first),
-4. stops the local dev servers on ports `3<issue#>` / `4<issue#>`,
-5. waits for and merges the **Release Please PR**, which creates the `vX.Y.Z` tag and GitHub Release,
-6. prepends the human-readable release summary to the GitHub Release notes,
-7. tracks the versioned Docker build and prints the production deployment steps.
+After every push to `main`, `.github/workflows/back-merge.yml` opens (or updates) the back-merge PR `main` → `develop` itself. It never merges it: you merge it with a merge commit once its checks pass. If `main` does not merge cleanly it gets the `back-merge-conflict` label; resolve on a `chore/…` branch from `develop` that merges `origin/main`.
 
 Never create version tags or edit `CHANGELOG.md` by hand; Release Please owns both.
 
 ### Step 7: Deploy & Clean Up
 
-1. Deploy the **explicit version tag** on production (never `:latest`), as printed by the script.
+1. Deploy the **explicit version tag** (never `:latest`), as printed by the script. How and where is up to each self-hoster: this repository builds, tests and publishes images (CI) but contains no deployment (CD).
 2. Remove the finished worktree and local branch, from the repository root:
 
    ```bash

@@ -24,6 +24,7 @@ export interface SongFilterState {
  * so the boolean logic is not duplicated.
  */
 export function isDraftActive(draft: SongFilterState, userId?: string): boolean {
+  void userId;
   const defaultStatus = 'all';
   return !!(
     draft.category ||

@@ -5,7 +5,12 @@
       "docs/testing/i18n.feature",
       "docs/testing/admin-users.feature",
       "docs/testing/setlist-pdf-export.feature",
-      "docs/testing/access-policies.feature"
+      "docs/testing/offline.feature",
+      "docs/testing/recording-sharing.feature",
+      "docs/testing/share-notifications.feature",
+      "docs/testing/ux-v2-*.feature",
+      "docs/testing/access-policies.feature",
+      "docs/testing/songbook-data-model.feature"
     ],
     "import": [
       "testing/bdd/support/**/*.ts",
@@ -26,7 +31,12 @@
       "docs/testing/i18n.feature",
       "docs/testing/admin-users.feature",
       "docs/testing/setlist-pdf-export.feature",
-      "docs/testing/access-policies.feature"
+      "docs/testing/offline.feature",
+      "docs/testing/recording-sharing.feature",
+      "docs/testing/share-notifications.feature",
+      "docs/testing/ux-v2-*.feature",
+      "docs/testing/access-policies.feature",
+      "docs/testing/songbook-data-model.feature"
     ],
     "import": [
       "testing/bdd/support/**/*.ts",
@@ -47,7 +57,11 @@
       "docs/testing/i18n.feature",
       "docs/testing/admin-users.feature",
       "docs/testing/setlist-pdf-export.feature",
-      "docs/testing/access-policies.feature"
+      "docs/testing/offline.feature",
+      "docs/testing/share-notifications.feature",
+      "docs/testing/ux-v2-*.feature",
+      "docs/testing/access-policies.feature",
+      "docs/testing/songbook-data-model.feature"
     ],
     "import": [
       "testing/bdd/support/**/*.ts",
@@ -105,7 +119,7 @@
       "testing/bdd/support/**/*.ts",
       "testing/bdd/steps/**/*.ts"
     ],
-    "tags": "@ci-contract and (@story-5.1.1 or @story-5.1.3 or @story-5.1.5 or @story-5.1.7 or @story-5.1.12)",
+    "tags": "@ci-contract and not @deferred and (@story-5.1.1 or @story-5.1.3 or @story-5.1.5 or @story-5.1.7 or @story-5.1.8 or @story-5.1.9 or @story-5.1.12 or @story-5.1.13)",
     "format": [
       "summary"
     ],
@@ -113,5 +127,22 @@
       "snippetInterface": "async-await"
     },
     "strict": true
+  },
+  "offline": {
+    "paths": [
+      "docs/testing/offline.feature"
+    ],
+    "import": [
+      "testing/bdd/support/**/*.ts",
+      "testing/bdd/steps/**/*.ts"
+    ],
+    "tags": "@offline and @unit",
+    "format": [
+      "summary"
+    ],
+    "formatOptions": {
+      "snippetInterface": "async-await"
+    },
+    "strict": false
   }
 }

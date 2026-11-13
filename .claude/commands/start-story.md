@@ -4,8 +4,8 @@ Start working on a new user story end-to-end: branch → design/brainstorm → p
 
 ### 1. Branch Creation
 - Ask for the Story ID (e.g., "3.3.1") if not provided via `$ARGUMENTS`.
-- Create branch `feat/userstory-<epic-id>` from `main` (use the epic number, e.g. `feat/userstory-3.3` for stories 3.3.x).
-- Confirm you are NOT on `main` before proceeding.
+- Create the worktree and branch from `origin/develop` with `scripts/cicd/start-issue.sh <issue#> feat <short description>` (branch `feat/<issue#>-<desc>`; Gitflow, see `docs/guides/git-workflow.md`).
+- Confirm you are NOT on `main` or `develop` before proceeding.
 
 ### 2. Story Analysis
 - Read `docs/logbook/epic&user stories.md` to find the story and its acceptance criteria.
@@ -36,23 +36,22 @@ Save the plan to `docs/plans/YYYY-MM-DD-<story-slug>.md`.
 
 ### 6. Implementation
 - Follow the approved plan task by task.
-- Commit frequently with descriptive messages referencing the story (`feat: [Story X.X.X] ...`).
+- Commit frequently with Conventional Commit messages referencing the story (`feat(scope): ... (Story X.X.X)`).
 - Run tests after each significant change.
 
 ### 7. PR, Merge & Cleanup
-- Push branch and open a PR.
-- PR title: `[Story X.X.X] <short description>`.
-- After user approves and merges: delete the remote and local branch.
+- Run `/sync-artifacts` and commit the logbook updates on the branch.
+- Push the branch and open a PR into `develop` (`gh pr create --base develop`).
+- PR title: Conventional Commit, e.g. `feat(scope): <short description> (Story X.X.X)` — the `pr-policy` check rejects other titles.
+- Merge only after the user explicitly approves (squash into `develop`); then remove the worktree and local branch.
 
-### 8. Mark as Implemented (REQUIRED after merge)
-After the PR is merged:
-1. In `docs/logbook/epic&user stories.md`, update the story header:
+### 8. Mark as Implemented (on the story branch, before the PR)
+1. In `docs/logbook/epic&user stories.md`, update the story header in the same PR:
    ```
    **Story X.X.X: [Implemented]** ...title...
-   <!-- Branch: feat/userstory-X.X | PR: #NNN -->
+   <!-- Branch: feat/<issue#>-<desc> | PR: #NNN -->
    ```
-2. Close the corresponding GitHub Issue (or confirm it was auto-closed by the PR).
-3. Run `/sync-stories` to pull the closed status back and confirm the MD is in sync.
-4. Commit the MD update directly to `main` (or via a `chore/` branch if branch protection is strict).
+2. Put `Closes #<issue>` in the PR body so the issue closes on merge; never close issues yourself unless the user says so.
+3. After the merge, run `/sync-stories` to confirm the MD and GitHub agree; any follow-up edit goes through a `docs/…` branch and a PR into `develop` (never commit to `main` or `develop`).
 
 Story ID: $ARGUMENTS

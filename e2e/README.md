@@ -63,31 +63,40 @@ Notes:
 
 ## Roles
 
-`auth.setup.ts` signs in the seeded `admin`, `musician`, and `member` accounts
-and persists their sessions. A spec opts into a role with:
+`auth.setup.ts` signs in every seeded role from `fixtures/roles.ts` (`admin`,
+`gatekeeper`, `musician`, `member`) and persists their sessions. A spec opts
+into a role with:
 
 ```ts
 import { ROLES } from '../fixtures/roles';
 test.use({ storageState: ROLES.member.storage });
 ```
 
-Guest specs use no `storageState`. There is **no seeded Gatekeeper account yet**
-— add one (seed + `fixtures/roles.ts` + `auth.setup.ts`) when GK-* specs are
-implemented.
+Guest specs use no `storageState`.
 
 ## CI
 
-`.github/workflows/e2e.yml` runs the `@smoke` subset against the **staging**
-Supabase project on every push to `main` / `develop` and on PRs into them. It derives the
-staging URL from the project ref and reads the (public) anon key from a secret:
+`.github/workflows/e2e.yml` (the `e2e` check) is **optional**: it runs the
+`@smoke` subset against a remote Supabase project of your own (for example a
+staging copy of a self-hosted instance). The full suite runs locally, as
+described above. The workflow reads these repository secrets:
 
-- `SUPABASE_PROJECT_ID_STAGING` — staging project ref (URL = `https://<ref>.supabase.co`)
-- `SUPABASE_PUBLISHABLE_KEY_STAGING` — staging anon/publishable key (public; safe as a secret)
-- `E2E_TEST_PASSWORD` — password for the seeded E2E accounts on staging
-- `E2E_PASSWORD_ADMIN` / `_GATEKEEPER` / `_MUSICIAN` / `_MEMBER` — _optional_ per-role passwords (see `fixtures/roles.ts` `passwordFor`)
-- `SUPABASE_URL_STAGING` — _optional_ full URL override
+- `SUPABASE_PROJECT_ID_STAGING` — project ref (URL = `https://<ref>.supabase.co`), or
+- `SUPABASE_URL_STAGING` — full URL of the Supabase API (overrides the derived one)
+- `SUPABASE_PUBLISHABLE_KEY_STAGING` — anon/publishable key (public; safe as a secret)
+- `SUPABASE_DB_PASSWORD_STAGING` — database password (used to apply migrations)
+- `E2E_TEST_PASSWORD` — password of the seeded E2E accounts in that database
 
-> ⚠️ Staging must contain the E2E test accounts from `fixtures/roles.ts`
-> (seed data in `supabase/seeds/*.sql`), or `auth.setup.ts` will fail. Without
-> these secrets (e.g. in forks) the job skips its steps and still passes. Keep CI specs
-> read-only — branches share one staging DB.
+When any of them is missing (forks, and this repository itself) the job skips
+its steps and still passes. This project does not run E2E against any shared
+environment of its own.
+
+If you run the suite against your own environment where each role has its own
+password, set `E2E_PASSWORD_ADMIN`, `E2E_PASSWORD_GATEKEEPER`,
+`E2E_PASSWORD_MUSICIAN` and `E2E_PASSWORD_MEMBER` (see `passwordFor` in
+`fixtures/roles.ts`); unset roles fall back to the shared test password.
+
+> ⚠️ The target database must contain the E2E test accounts from
+> `fixtures/roles.ts` (seed data in `supabase/seeds/*.sql`), or `auth.setup.ts`
+> will fail. Never use the public seed password on a reachable database. Keep
+> remote specs read-only — parallel runs share one database.

@@ -1,6 +1,6 @@
 import ChordSheetJS from 'chordsheetjs';
 
-import { convertChordsOverLyricsToChordPro } from './chordProParsing';
+import { convertChordsOverLyricsToChordPro, isChordToken } from './chordProParsing';
 
 export interface ChordProItem {
     chords?: string;
@@ -19,6 +19,31 @@ export interface ChordProSection {
     lines: ChordProLine[];
 }
 
+/**
+ * What a musician writes as a chord, wider than `isChordToken` (which the transposer and the deployed SQL helper share
+ * and which stays as it is): flat and sharp signs (B♭, F♯m7), extensions with a slash (C6/9), a bass note after the slash.
+ * Used only to keep a real chord alone on a line in the chord row. It starts with an upper-case A-G and allows only
+ * chord-quality pieces after it, so `am`, `Hm`, `Re`, `Do`, `Chorus`, `Coda` and `N.C.` are not chord-like.
+ */
+const CHORD_LIKE = /^[A-G][#b♯♭]?(?:maj|min|dim|aug|sus|add|m|M|\d|[#b♯♭+°ø\-(),.]|\/(?:[A-G][#b♯♭]?)?)*$/;
+/** No chord is longer than this. */
+const MAX_CHORD_LENGTH = 32;
+
+function looksLikeChord(token: string): boolean {
+    return token.length <= MAX_CHORD_LENGTH && (isChordToken(token) || CHORD_LIKE.test(token));
+}
+
+/**
+ * A line holding nothing but bracketed words that are not chords ("[Chorus]", "[Bridge] [Coda]") names a section.
+ * It is text for the reader, shown like a {c:} comment, whether chords are on or off. Returns null for any other line.
+ */
+function sectionLabelItems(items: ChordProItem[]): ChordProItem[] | null {
+    const filled = items.filter((i) => i.comment !== undefined || i.chords || i.lyrics?.trim());
+    if (filled.length === 0) return null;
+    const allLabels = filled.every((i) => i.comment === undefined && i.chords && !i.lyrics?.trim() && !looksLikeChord(i.chords));
+    return allLabels ? filled.map((i) => ({ comment: i.chords })) : null;
+}
+
 export function parseChordProForDisplay(content: string): ChordProSection[] {
     const parser = new ChordSheetJS.ChordProParser();
     const chordProContent = convertChordsOverLyricsToChordPro(content);
@@ -29,7 +54,6 @@ export function parseChordProForDisplay(content: string): ChordProSection[] {
         let currentSection: ChordProSection | null = null;
         let pendingLines: ChordProLine[] = [];
 
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         song.lines.forEach((line: any) => {
             // Check for section tags in the items
@@ -129,7 +153,7 @@ export function parseChordProForDisplay(content: string): ChordProSection[] {
                     }
                 });
 
-                const cleanLine: ChordProLine = { items: atomizedItems };
+                const cleanLine: ChordProLine = { items: sectionLabelItems(atomizedItems) ?? atomizedItems };
                 if (currentSection) {
                     currentSection.lines.push(cleanLine);
                 } else {

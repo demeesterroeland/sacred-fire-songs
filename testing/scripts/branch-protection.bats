@@ -7,8 +7,7 @@ setup() {
 }
 
 @test "no script merges pull requests with --admin" {
-  skip "plan task 4.7: removing --admin from scripts/cicd/preview2prod.sh needs owner approval (Phase 4)"
-  run grep -rnE 'gh pr merge[^#]*--admin' "$ROOT/scripts"
+  run grep -rnE --include='*.sh' 'gh pr merge[^#]*--admin' "$ROOT/scripts"
   echo "$output"
   [ "$status" -eq 1 ]
 }

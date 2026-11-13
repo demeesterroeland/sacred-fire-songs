@@ -1,8 +1,8 @@
 # E2E Test Overview & Matrix: Sacred Fire Songs
 
-**Version:** 1.12
+**Version:** 1.24
 **Status:** Living Document
-**Date:** Nov 3, 2026
+**Date:** Nov 12, 2026
 **Tracking:** GH #142
 
 ## Changelog
@@ -22,6 +22,18 @@
 | **1.10** | Oct 31, 2026 | Database setup and seeder paths moved to `scripts/db/` (`scripts/db/setup-test-db.mjs`, `scripts/db/random-seeder.mjs`, #274). |
 | **1.11** | Nov 3, 2026 | Replaced deployment-specific environment names with neutral placeholders (public-repo isolation). |
 | **1.12** | Nov 3, 2026 | CI note: removed the reference to a database deploy workflow; the repo does not deploy anywhere. Staging E2E is optional and skips without secrets. |
+| **1.13** | Nov 4, 2026 | PWA-03: offline fallback page covered by `e2e/tests/offline.spec.ts` (#353); cached pages offline still planned. |
+| **1.14** | Nov 5, 2026 | Story 6.1.26 (#410): guests on members-only screens now get the GuestGate (locked preview, reason, `Sign in` with `next=`) instead of a redirect; ACC-01 updated, new spec `e2e/tests/guest-gate.spec.ts` covers every gated route. |
+| **1.15** | Nov 5, 2026 | LIB-13 follows Story 6.1.24: no `/explore` route; bottom bar spec `ux-v2-bottom-bar.spec.ts`. |
+| **1.20** | Nov 7, 2026 | UX v2 validation round 1, review round on PR #474: new spec `ux-v2-validation-1-review.spec.ts` (a press on a song under the open suggestions on a phone with touch and on a desktop with a mouse, also on guest Home; the scroll position of the desktop column on the song list, Home and Playlists; auto-scroll behind the fixed bars on a phone and with padding on a desktop; the tools sheet and focus on a window that grows; section labels versus chords; toolbar alignment; one focus cue on the tag field, the artist field and the selects; Search options labels in all 8 languages at 390 px; axe colour contrast on the open tag browser, light and dark; fixture `VALIDATION_1_REVIEW_FIXTURE_IDS`, removed by `e2e/global-teardown.ts`). `ux-v2-validation-1.spec.ts` is unchanged. |
+| **1.21** | Nov 9, 2026 | Validation 4: LIB-12 is the New tab (`/library/new`); the Library tab row has five tabs and scrolls on a phone (`ux-v2-library-tabs.spec.ts`). |
+| **1.24** | Nov 12, 2026 | #485 group 1: SONG-12 `ux-v2-sober-colours.spec.ts` (member): every category tag on the Add song page has the same colours, a selected tag shows inverted greys and `aria-pressed`, light and dark. |
+| **1.23** | Nov 11, 2026 | #490: `ux-v2-profile-playback.spec.ts` (member): recordings on a singer profile play there one at a time, the play button is a 44 px target and the row opens the song with that take. |
+| **1.22** | Nov 11, 2026 | #492: SONG-08 now checks that a song row has no delete button (an admin on `/songs`, `ux-v2-song-rows.spec.ts`); deleting is in the song page's ⋮ menu only (SONG-07). |
+| **1.19** | Nov 6, 2026 | UX v2 validation round 1 (Part of #375): new spec `ux-v2-validation-1.spec.ts` (one focus style, suggestions panel in the flow on `/songs` and Home, search options tokens and category name, song flags versus the reader; fixed-id fixture `VALIDATION_1_FIXTURE_IDS`, removed by `e2e/global-teardown.ts`); `ux-v2-reader-tools.spec.ts` uses a short window so auto-scroll is offered and tests that it is not on a song that fits; `ux-v2-song-meta.spec.ts` checks the expanded list. |
+| **1.18** | Nov 6, 2026 | Story 6.1.34 (#418): `e2e/tests/ux-v2-a11y-audit.spec.ts` (axe-core on the song page, the Practice panel, the recorder and the sheets and dialogs reachable from them; guest and member; light and dark; keyboard and focus journeys, including the delete confirmation, Escape while renaming and Tab reaching the embedded player; the sticky-title spec now picks a long-titled public song that has enough lyrics to scroll). Fixed fixture ids `A11Y_AUDIT_FIXTURE_IDS` (a second song with a reference video for the player), removed by `e2e/global-teardown.ts`. The Practice panel is now a dialog: specs wait for `data-testid="practice-drawer"` (not the old `h3`), recorder state and share list headings are `h3`, tabs expose `aria-selected`. |
+| **1.17** | Nov 6, 2026 | Story 6.1.32 (#416): PL-01 covers the New Playlist page: private line, Make public switch, Create enabled once named. New spec `ux-v2-new-playlist-visibility.spec.ts`. |
+| **1.16** | Nov 6, 2026 | Story 6.1.5 (#389): ACC-04 (Privacy settings) is hidden behind `FEATURES.privacySettings`; LIB-10 (Albums) answers not-found. New spec `ux-v2-hide-unfinished.spec.ts` asserts no "Coming soon" in Library, Settings and the song form. |
 
 ---
 
@@ -107,10 +119,10 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 
 | ID | Feature | Scenario | Variants / Edge cases | Roles | Feat | E2E | Pri | Ref |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| ACC-01 | Settings access control | Unauthenticated user is redirected to login | deep-link to `/account/settings` | G | ✅ | 🟡 | P0 | `app/account/settings` |
+| ACC-01 | Settings access control | Unauthenticated user sees the GuestGate with a `Sign in` link carrying `next=` | deep-link to `/account/settings` | G | ✅ | 🟡 | P0 | `app/account/settings` |
 | ACC-02 | Profile settings | Update display name and save | empty name; avatar upload | M | ⚠️ | 🔲 | P1 | ProfileSettings |
 | ACC-03 | Security settings | Change password from settings | wrong current password; mismatch | M | ⚠️ | 🔲 | P1 | SecuritySettings |
-| ACC-04 | Privacy settings | Toggle privacy / data options | account deletion confirm | M | ⚠️ | 🔲 | P2 | PrivacySettings |
+| ACC-04 | Privacy settings | Hidden (`FEATURES.privacySettings` off): no tab, `?tab=privacy` opens Profile | — | M | ⚠️ | ✅ | P2 | `ux-v2-hide-unfinished.spec.ts` |
 | ACC-05 | Preferences / theme | Toggle dark/light/system; persists across reload | no flash-of-wrong-theme on reload | G/M | ✅ | 🔲 | P1 | ThemeToggle |
 | ACC-06 | Musician profile toggle | Enable "I play an instrument" reveals musician features | toggle off hides transpose/chord badges/Chords filter | M | ⚠️ | 🔲 | P1 | Story 3.5.1 |
 | ACC-07 | Interface language (en, nl, es, it, ru, qu, fr, pt) | Switch language from sidebar, user menu or Preferences; UI text changes without reload | browser-locale default (nl-BE → NL, de → EN); persists after reload, navigation and sign-out; SSR already in chosen language; no hydration mismatch; song content untranslated | G/M | ✅ | ✅ | P1 | Story 3.7.1, `e2e/tests/i18n.spec.ts` |
@@ -126,10 +138,11 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 | SONG-05 | Chords-over-lyrics conversion | Pasted "chords over lyrics" auto-converts to ChordPro | non-chord text not misdetected; key/capo extraction | M/A | ✅ | 🔲 | P1 | 1.1.6 |
 | SONG-06 | Edit song | Owner edits fields and saves | non-owner blocked (RLS); admin override | M(owner)/A | ✅ | 🔲 | P0 | 2.2.1 |
 | SONG-07 | Delete song | Owner/admin deletes a song with confirmation | non-owner has no delete; cancel modal | M(owner)/A | ✅ | 🔲 | P0 | 1.1.3 |
-| SONG-08 | Card delete icon | Hover delete icon on song card (owner/admin) | hidden for non-owner/guest | M(owner)/A | ✅ | 🔲 | P2 | 1.1.4 |
+| SONG-08 | No row delete | A song row has no delete button, also for the owner or an admin (#492) | buttons line up on every row | A | ✅ | ✅ | P2 | 1.1.4 |
 | SONG-09 | Media links | Attach YouTube/Spotify/SoundCloud URLs; embeds render on detail | invalid URL; multiple embeds | M/A | ✅ | 🔲 | P1 | 1.1.7, 1.3.2/1.3.4 |
 | SONG-10 | Draft auto-save | In-progress add form persists to localStorage and restores | clears after submit; create-mode only | M | ✅ | 🔲 | P2 | Story 1.1.8 |
 | SONG-11 | Public/Draft toggle | Set song visibility on create/edit | draft hidden from guests | M/A | ✅ | 🔲 | P1 | SongForm |
+| SONG-12 | Neutral category tags | Every tag in the Add/Edit song tag picker has the same colours; selected = inverted greys + `aria-pressed` | light and dark mode | M | ✅ | ✅ | P2 | `ux-v2-sober-colours.spec.ts` (Story 6.1.35) |
 
 ### 4.4 Public Library & Discovery (Epic 1.2 / 2.3)
 
@@ -144,10 +157,10 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 | LIB-07 | Auth-state refresh | Library updates after login/logout without manual refresh | private/draft appear on login; disappear on logout | G↔M | ✅ | 🟡 | P0 | bug #62 |
 | LIB-08 | Filters: chords/melody/favorites/mine/status | Each filter narrows the list with correct counts | musician-gated Chords filter | M | ✅ | 🔲 | P1 | useSongsFilter |
 | LIB-09 | Artists tab | Browse songs aggregated by author | author with 1 vs many songs | G | ✅ | 🔲 | P2 | `library/artists` |
-| LIB-10 | Albums tab | Placeholder "coming soon" renders | — | G | ⚠️ | 🔲 | P2 | `library/albums` (stub) |
+| LIB-10 | Albums tab | Hidden (UXD-4): no tab, `/library/albums` renders not-found | — | G | ⚠️ | ✅ | P2 | `ux-v2-library-tabs.spec.ts` |
 | LIB-11 | Recently viewed | Auth user sees recently viewed songs | requires auth; records on detail visit | M | ✅ | 🔲 | P1 | `library/recently-viewed` |
-| LIB-12 | New since last visit | Unviewed recent songs surfaced | last_seen tracking | M | ✅ | 🔲 | P2 | NewSinceLastVisit |
-| LIB-13 | Explore/Playlists guest access | Guest can reach Explore & Playlists without login | redirect of `/explore` → `/` | G | ✅ | 🔲 | P2 | 1.2.3 |
+| LIB-12 | New tab | Unviewed recent songs on `/library/new` (validation 4; guest gate) | last_seen tracking | M | ✅ | 🔲 | P2 | `library/new` |
+| LIB-13 | Home/Library guest access | Guest can reach Home & Library without login; `/explore` is a 404 (Story 6.1.24) | `e2e/tests/ux-v2-bottom-bar.spec.ts` | G | ✅ | 🔲 | P2 | 1.2.3 |
 
 ### 4.5 Song Viewer (Epic 1.3 / 2.1)
 
@@ -174,7 +187,7 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 
 | ID | Feature | Scenario | Variants / Edge cases | Roles | Feat | E2E | Pri | Ref |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| PL-01 | Create playlist | Authenticated user creates a playlist inline | empty/duplicate title validation; guest blocked | M | ✅ | 🔲 | P0 | 4.1.x |
+| PL-01 | Create playlist | Authenticated user creates a playlist inline | empty/duplicate title validation; guest blocked | M | ✅ | 🔲 | P0 | `ux-v2-new-playlist-visibility.spec.ts` (private by default, public with the switch) |
 | PL-02 | Add songs via search sheet | Open "+ Add Songs", search, add to playlist | song added at end; duplicate add | M | ✅ | 🔲 | P1 | 4.1.3 |
 | PL-03 | Reorder songs | Drag-drop reorder persists | keyboard reorder; order survives reload | M | ✅ | 🔲 | P1 | PlaylistDetailClient |
 | PL-04 | Remove song | Remove a song from the playlist | last song → empty state | M | ✅ | 🔲 | P2 | PlaylistDetailClient |
@@ -217,7 +230,7 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 | PWA-01 | Manifest / installability | Manifest served; install prompt available; standalone launch | icons 192/512; theme color | G | ✅ | 🔲 | P2 | 3.3.1 |
 | PWA-02 | Branding | Installed app shows icon/name/splash/theme | — | G | ✅ | 🔲 | P2 | 3.3.2 |
-| PWA-03 | Offline fallback | Offline shows branded page; cached pages still load | not-cached route | G | ⚠️ | 🔲 | P2 | 4.5.1 |
+| PWA-03 | Offline fallback | Offline shows branded page; cached pages still load | not-cached route; Retry offline; auto-reload online | G | ⚠️ | 🟡 | P2 | 4.5.1, `offline.spec.ts` |
 
 ### 4.11 Administration (Epic 3.6)
 

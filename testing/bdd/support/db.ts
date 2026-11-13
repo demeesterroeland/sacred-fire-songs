@@ -51,11 +51,8 @@ export async function queryAsUser<T extends pg.QueryResultRow>(
   }
 }
 
-/** Runs `sql` as the `anon` role, so row-level security applies as for a guest. */
-export async function queryAsAnon<T extends pg.QueryResultRow>(
-  sql: string,
-  params: unknown[] = []
-): Promise<T[]> {
+/** Runs `sql` as the `anon` role (a guest with no session), so RLS applies as for a signed-out visitor. */
+export async function queryAsAnon<T extends pg.QueryResultRow>(sql: string, params: unknown[] = []): Promise<T[]> {
   const db = await seedDb();
   await db.query('SAVEPOINT as_anon');
   try {

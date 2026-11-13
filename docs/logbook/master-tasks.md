@@ -1379,4 +1379,165 @@
 - [x] Profile and playlist item access rules: migration `20261106120000`, `public_profiles` view, `fn_can_edit_setlist`, `db-schema.sql` installs cleanly (v2.8), `@seed` role scenarios in `access-policies.feature`
 - [ ] Owner: per-role E2E password secrets in CI; release v1.7.0 (`develop` → `main`)
 - [ ] Follow-up: offline navigation shows "page not found" instead of an offline message
+
+## Session November 4, 2026 (Part 2: Offline navigation fallback, #353)
+- [x] Reproduced: offline client navigation → Next.js "Failed to fetch RSC payload, falling back to browser navigation" → browser error page (service worker had no fetch handler)
+- [x] `public/sw.js`: stores `public/offline.html` on install; answers GET page navigations only while offline; online path stays native
+- [x] `public/offline.html`: self-contained, 8 languages from `offline.*` keys, Retry + auto-reload on `online`
+- [x] Unknown song id: `lib/songs/fetchSong.ts` with `.maybeSingle()` → "Song Not Found" instead of a load error
+- [x] Test pyramid (#262): vitest + Cucumber @unit via Node `vm` harness (35 checks), 2 Playwright journeys; full desktop E2E 87 passed
+- [x] Docs: `docs/testing/offline.feature`, design doc 1.53, stories 1.47 (Story 4.5.1 [Partial]), e2e overview 1.13
+- [ ] Owner: review PR, verify offline page on a phone; Story 4.5.1 second scenario (cached songs offline) open
+
+## Session November 4, 2026 (Part 3: Private Song Sharing, DRM-lite & Singer Attribution)
+- [x] Schema migration: `20261104160000_recording_sharing_and_attribution.sql` extending `user_recordings` with `is_public`, `singer_consent_confirmed`, `singer_profile_id`, `singer_name`, `singer_email`; created `recording_shares` table with cascade delete and foreign keys
+- [x] Search RPC `search_users_for_sharing(search_term)` and hardened RLS policies on `user_recordings`, `recording_shares`, `storage.objects` (rehearsals bucket), and `profiles`
+- [x] Synced `docs/design/db-schema.sql` (v2.8)
+- [x] Backend server actions in `lib/actions/rehearsal.ts`: `shareRecording`, `unshareRecording`, `publishRecording`, `unpublishRecording`, `updateSingerAttribution`, `getRecordingDownloadUrl`, `searchUsersForSharing`
+- [x] DRM-lite security: shared recipients cannot download audio (action-level rejection & hidden UI controls) and cannot reshare
+- [x] Singer consent disclaimer: mandatory confirmation checkbox in `RecordingPublishModal` before transitioning private recordings to public
+- [x] Singer attribution & musician profile: `RecordingAttributionModal`, `UserProfileView`, and route `/users/[id]` displaying musician badges and public attributed recordings; graceful fallback for unregistered singers
+- [x] Integrated into `components/song/RehearsalDrawer.tsx` (`SortableRecordingItem` badges, DRM enforcement, modal hooks, query invalidations)
+- [x] i18n key parity: added `recording.sharing.*`, `recording.publish.*`, `recording.attribution.*`, `user.profile.*` in all 8 locales (`en`, `nl`, `es`, `fr`, `it`, `pt`, `qu`, `ru`) — 73 unit tests passed
+- [x] Testing: 12 Vitest unit tests (`testing/unit/tests/recordingSharing.test.ts`), 7 BDD scenarios (`docs/testing/recording-sharing.feature`), typecheck clean (`npx tsc --noEmit`), lint clean (201 warnings <= 202 cap)
+- [x] Docs & plans: `docs/plans/2026-11-04-private-song-sharing-and-recording-attribution.md`, stories v1.49, design doc v1.54 (plan removed after implementation)
+
+## Session November 5, 2026 (Epic 5.1: promotion develop → main, #297)
+- [x] Live status check of Epic 5.1; closed #288, #291, #295 (owner-approved)
+- [x] Owner decision: CI + image delivery in this repo, any deployment (CD) outside it; Story 5.1.8 re-scoped
+- [x] Spec first: `@story-5.1.8` scenarios rewritten (release images, no `deploy*` workflow, promotion script); `@deferred` tag; 5.1.8 added to strict `ci-gate`
+- [x] `scripts/cicd/develop2main.sh` replaces `preview2prod.sh`: PR `develop` → `main`, merge commit, owner confirmation, Release Please PR, `vX.Y.Z` images; no `--admin`
+- [x] bats: `develop2main.bats` (stubbed `gh`), `--admin` guard un-skipped (Story 5.1.6 complete)
+- [x] Docs: design doc 1.57, stories 1.53, git-workflow guide 1.7, scripts README
+- [x] PR #422 merged into `develop` (owner)
+- [x] #298: `back-merge.yml` (push `main` → PR `main` → `develop`, PAT, fail closed, conflict label, no self-merge); contract scenarios in `ci-gate`; docs
+- [x] PR #423 merged (owner); #299 code deliverables ticked, end-to-end hotfix check moved to the 5.1.14 dress rehearsal (owner decision)
+- [x] #300: `development-workflow.md` 2.0, Gitflow PR template, `/start-story` + `/sync-artifacts` + README aligned; `@story-5.1.13` documentation contract in `ci-gate`
+- [ ] Owner: confirm changes to the global ship triggers in the private `~/.claude/CLAUDE.md` (merge = into `develop`; release = `develop2main.sh`)
+- [ ] Next: 5.1.14 dress rehearsal (#301, incl. hotfix); 5.1.2/5.1.11 once the Tailscale `tag:ci` + E2E database secrets are in the repo
+
+## Session November 4–5, 2026 (Story 4.6.6: share notifications, #373)
+- [x] Migration `20261104190000_recording_share_notifications.sql`: `notifications` inbox (trigger-created only, recipients may only set `read_at`), `recording_shares.email_sent_at`, `profiles.email_notifications`, `claim_recording_share_email` RPC (idempotent, owner-only); `docs/design/db-schema.sql` v3.0
+- [x] Header bell (`NotificationBell`) with unread badge, "Mark all as read", 60 s polling; Settings → Preferences "Email notifications" switch
+- [x] Transactional email via `nodemailer` (`SMTP_*`, `SITE_URL`; skipped when no SMTP host, never blocks the share); footer links to `/account/settings?tab=preferences` (`?tab=` opens the matching settings tab)
+- [x] Recording permalink `/recordings/[id]` → `/songs/:id?recording=:id` (version, Recordings tab, highlighted row); "Copy link" in the ⋯ menu with an owner-only hint; guest sign-in keeps `?recording=`; no drag-handle gap for shared rows
+- [x] Spec first: `docs/testing/share-notifications.feature` (3 `@unit`, 5 `@seed` + outline), Vitest `shareNotifications`, `recordingLink`; 8 locales; lint cap 202 → 201
+- [x] Seed audio: `heartbeat-of-the-earth.mp3` (90 s) added; `seed:audio` stores each file's real duration; #371 implementation plan removed
+- [x] Follow-up `fix/373-recording-not-found`: unopenable recording links show "Recording Not Available" (same copy for no access, unknown and malformed ids; `NotFound` takes optional keys), design doc 1.58
+- [ ] Open: #372 (DRM-lite stream route), #420 (personal reordering of shared recordings); pre-existing `docs/design/db-schema.sql` fresh-install failure at `idx_compositions_is_public_true`; emails use the default locale until profiles store a language
+
+## Session November 5, 2026 (Epic 6.1 UX v2, Wave A, #375)
+- [x] Integration branch `feat/ux-v2`; story PRs squash-merged after green CI + cross-review by a different Claude model (UXD-6)
+- [x] #385 type scale + tokens (PR #429), #417 E2E fixture teardown (#430), #392 (#435), #407 (#437), #391 song meta lines (#438), #390 reader toolbar (#440), #406 real 404 (#433)
+- [x] #410 GuestGate on every members-only screen, guest read of public takes needs singer consent (#439)
+- [x] #398 one name, Practice (#436); #396 mini player only after play (#434); #386 compact song rows (#441)
+- [x] #399 My takes / Shared with me / Public takes (#442); #387 readable labels, axe contrast test (#443); #400 take status in words (#444)
+- [x] Decisions UXA-006…018 in `docs/ux-research/ux-v2-decisions.md`, owner checklist in #431; validation script `docs/ux-research/ux-v2-validation.md`
+- [x] Wave A sync: lint cap 201 → 188, palette baseline 2535, UXA-010 now needs owner confirmation
+- [ ] Next: preview build `ux-v2-preview`, Wave B (#388, 393, 401, 402, 403, 408, 411, 413, 414), Wave C, #418 last
+- [ ] Follow-ups: hard-coded English toasts in `useToggleFavorite`; guest Listen list for consented takes (UXA-012); admin/auth/settings pages not axe-covered; unused `YouTubeEmbed.tsx`; native-speaker check qu/ru
+
+## Session November 5, 2026 (Epic 6.1 UX v2, Wave B, #375)
+- [x] #388 (PR #447), #408 bottom bar Home · Search · Library (#446), #411 guest song draft kept through sign-in (#450), #401 take actions bottom sheet (#448), #413 recent searches + category chips (#451)
+- [x] #393 sticky Practice · Playlist · ♥ action bar on the song page (#449), #414 Add to playlist bottom sheet with check marks (#452)
+- [x] #402 Share dialog explains who can be found and what a private song does (#453), #403 Shared with me page, "n new" entries, mark read on Practice (#454)
+- [x] Decisions UXA-019…029, owner checklist #431 updated; validation script sections per story
+- [x] Wave B sync: lint cap 188 → 177, palette baseline 2252; UX capture scripts look seeded song ids up by title (ids change on every reseed)
+- [ ] Next: preview build `ux-v2-preview`, Wave C (#389, 394, 395, 397, 404, 405, 409, 412, 415, 416), #418 last
+- [ ] Follow-ups: native-speaker check qu (share, shared-with-me copy) and nl/qu action-bar labels; concurrent tabs can add a playlist item twice (no unique constraint); Library sub-pages use h2 while Shared with me has h1; pre-existing security finding on member search reported to the owner privately
+
+## Session November 6, 2026 (Epic 6.1 UX v2, Wave C, #375)
+- [x] #389 unfinished features hidden (#456), #394 auto-scroll and transpose in the reader toolbar (#459), #395 version switch (#464), #397 calm player (#458), #404 recording meter (#460), #405 publish dialog consent and guest public takes (#465), #409 auth pages (#457), #412 guest Home (#462), #415 Add Song preview (#463), #416 New Playlist line (#461), #418 accessibility audit (#471)
+- [x] All 34 stories on `feat/ux-v2`: Wave A 14/14, Wave B 9/9, Wave C 11/11
+- [x] Decisions up to UXA-053, owner checklist #431 updated; validation script sections per story; lint cap 158, palette baseline 1721
+- [x] Whole Playwright suite on a fresh build of `feat/ux-v2`: 274 passed, 5 skipped, 0 failed
+- [ ] Owner: phone validation on the preview, decisions in #431, sign-off of `feat/ux-v2` → `develop`
+- [ ] Owner: manual VoiceOver / TalkBack pass (`docs/ux-research/2026-11-06-a11y-audit.md` section 5); #418 stays open until then
+- [ ] Follow-ups: Quechua native check, Songs / Add Song / Edit nest a second `main`, focus after deleting a song far down the list lands off-screen, `useDeleteSong` English alert, `useToggleFavorite` English toasts, `npm run test:bdd:ci` has 3 failing scenarios about `e2e.yml` and `docker.yml` (not part of CI)
+
+## Session November 6, 2026 (Epic 6.1 UX v2, validation round 1, #375)
+- [x] Fix 1 auto-scroll only when the lyrics run below the fold; fix 2 expanded meta line; fix 3 one focus style for text fields; fix 4 suggestions panel in the page flow; fix 5 search options on tokens and category names; fix 6 translated hook feedback and Settings intro; fix 7 song flags across versions (migration + page follows the version shown)
+- [x] Tests per fix (unit, component, BDD unit, Playwright), before/after screenshots at 390 px light and dark, validation script section, UXA-054…060, db-schema v3.3
+- [x] Lint cap 158 → 157, palette baseline 1721 → 1564
+- [ ] Owner: re-run the *Validation round 1* section of `docs/ux-research/ux-v2-validation.md` on a phone; decide whether to apply `20261106180000_recompute_song_flags.sql` where data is older than the any-version rule
+- [ ] Follow-ups: server-action error strings shown as toasts are still English; `PlaylistDetailHeader` still has palette classes outside its edit fields
+
+## Session November 7, 2026 (Epic 6.1 UX v2, review round on validation round 1, PR #474, #375)
+- [x] B1 press on a song under the open suggestions opens that song (close on click); H1 desktop column keeps its scroll position (sticky slot, no `scrollIntoView`); H2 auto-scroll fold = lyric text above the fixed bars; M1 tools sheet closes when empty, focus to A+; M2 one focus cue per field (`.field-composite`, selects, `<Input>`); M3 tag counts AA; M4 localised error toasts (`lib/errors/actionError.ts`); M5 Search options one column on phones; M6 chord token rule in JS and SQL (+ BOM, U+0085); L4, L6, L7
+- [x] Parity test SQL versus JS runs in an in-memory Postgres (PGlite, new devDependency), so it also runs in CI
+- [x] Palette baseline 1564 → 1559; lint cap stays 157 (157 warnings)
+- [ ] Owner: decide whether lower case, German and solfège chord spellings (`[am]`, `[Hm]`, `[Re]`) should count as chords (UXA-066)
+- [ ] Follow-ups: auth forms still show the authentication service's message; `qu` has the generic sentence for every `errors.*` key; the song page button still says "Add to Liked Songs"; two nested `<main>` elements on some pages
+
+## Session November 7, 2026 (Epic 6.1 UX v2, validation round 2, batch 2, #375)
+- [x] Items 1 to 15 (Sign In button, floating +, heading size, counts in parentheses, version links, full title, neutral desktop buttons, recording wording and the Your recordings card, Screen stays on switch, one song menu, Terms and Privacy pages, own drafts, favourites term, one `<main>`)
+- [x] Items 16, 17, 19, 20, 22 (first part) applied from the other thread's patch; 18, 21 and 22 (second part: auth and form errors by code) done here
+- [x] Tests first per fix, before/after screenshots, validation script section 16 checks, UXA-068, feature file `ux-v2-validation-2.feature`
+- [x] Lint cap 157 → 143, palette baseline 1559 → 1507
+- [ ] Owner: approve the Terms and Privacy wording (remove the Draft note), decide the open points listed in the pull request
+- [ ] Owner: set `OPERATOR_NAME` and `OPERATOR_CONTACT_EMAIL` on every server that runs the image
+- [ ] Follow-ups: native-speaker check (Runasimi uses English for the legal text and a loanword for "recording"), real iPhone check of the empty-space tap, `docs/design/screens` mockups for the song page and Library, `/auth/error` prints the `error` query parameter, the `?status=draft` list still shows every draft to an admin
+
+## Session November 7, 2026 (Epic 6.1 UX v2, validation round 2, review of PR #477)
+- [x] Auth pages: messages by code; auto-scroll with the menu open; version switch and recording link; My Drafts list; Runasimi coverage; `.env.example`; draft banner button; chord-like labels; right-click on plain text; unused message and starter component removed
+- [ ] Owner: Runasimi native-speaker check; approve the Terms and Privacy wording
+- [x] Favourites lookups filter on the owner (admin saw 6 on the card and an empty list)
+- [x] Remove Vercel Speed Insights; privacy text: operator access to stored data
 - [x] Write rules for profile fields, categories, playlists and song versions: migration `20261106130000`, trigger `trg_guard_profile_fields`, column privileges on `setlists` and `song_versions`, `db-schema.sql` v2.9, `access-policies.feature` v1.1 (104 `@seed` scenarios).
+
+## Session November 10, 2026 (profile e-mail privacy)
+- [x] Other members are read through `public_profiles` (new `is_musician` column): Listen tab, share and singer dialogs, `/users/:id`, shared-with-me list
+- [x] User search matches a name or a complete e-mail address and returns names only; singer address readable by the take's owner only (`own_recording_singer_emails`)
+- [x] Sharer named by profile name or *Unnamed member* (`user.unnamed`, 8 locales); migration `20261110120000`, `db-schema.sql` v3.6, `access-policies.feature` v1.2 (new `@seed` scenarios)
+
+## Session November 10, 2026 (Story 6.1.36, #488, Home grid)
+- [x] Recently added in the /songs and category grid: 10 songs row by row, 5 on a phone; titles, category headings, links and labels on one 16 px inset; Home padding as /songs
+- [x] E2E `ux-v2-home-grid.spec.ts` (390, 768, 1280 px), feature `ux-v2-home-grid.feature`, before/after screenshots
+
+## Session November 11, 2026 (Story 6.1.36, #488, owner review)
+- [x] Section labels at the x of the search field; members get the guest layout with Your library on top
+- [x] Your library: six personal counts (New songs out; Your recordings, Shared with me, Shared by me in), two groups of three on the content columns
+- [x] New page Shared by me (`/library/shared-by-me`), GuestGate `sharedByMe`, 5 keys in 8 locales
+- [x] One dark background: `bg-bg` on /songs, /library and /admin
+- [x] Validation: no "Shared with me" row on the Library pages; "Your recordings" counts the songs that /songs?myRecordings=true lists
+- [x] Validation: Playlists and Smart rows lose their leading icon, so all five Library tabs start their rows at the same x, 16 px in like /songs
+- [x] E2E home grid (member layout, Shared by me count, dark background), unit tests for the summary and the grouping, docs
+
+## Session November 11, 2026 (#492, no delete button on song rows)
+- [x] Song rows (`SongCard`) have no delete button; `/songs` has no delete flow; deleting stays in the song page's ⋮ menu
+- [x] Unit test (`SongCard.test.tsx`), E2E (`ux-v2-song-rows.spec.ts`, admin), feature `ux-v2-song-rows.feature` 1.1, test matrix SONG-08; lint cap 141 → 140
+
+
+## Session November 11, 2026 (privacy, share e-mails claimed by the server)
+- [x] Migration `20261111120000_share_email_server_claim.sql`: `claim_recording_share_email` takes the owner and only `service_role` may execute it
+- [x] Server-only client `createAdminClient()` (`lib/supabase/admin.ts`, `SUPABASE_SECRET_KEY`); `sendRecordingShareEmail` passes the signed-in user as owner
+- [x] `.env.example`, `docker-compose.yml`, fresh-install schema 3.7, design doc 2.09, feature `share-notifications.feature` 1.2
+- [x] Unit tests (action, admin client), `@seed` scenario (signed-in user cannot run the claim)
+
+## Session November 11, 2026 (#490, play recordings from a singer profile)
+- [x] Plan `docs/plans/2026-11-11-profile-recording-playback.md`
+- [x] `fetchMusicianProfile` signs each recording file with the viewer's session; `lib/users/profileRecordings.ts`
+- [x] `ProfileRecordingRow`: 44 px ▶/❚❚ through the shared audio player, row opens the song with that take; keys `user.profile.play` / `user.profile.pause` in 8 locales
+- [x] Tests: Vitest/RTL, `@unit` feature `ux-v2-profile-playback.feature`, E2E `ux-v2-profile-playback.spec.ts`; docs (design doc 2.10, epics 1.97 story 6.1.37, member guide 0.20, E2E overview 1.23)
+
+## Session November 11, 2026 (local sample audio)
+- [x] `npm run seed:audio` fills only takes whose file is missing (`--force` replaces all), retries storage time-outs; unit test `uploadSampleRecordings.test.ts`
+
+## Session November 11, 2026 (Story 6.2.1, #504, songbook data model)
+- [x] Migration `20261111150000_songbook_data_model.sql`: catalog columns on `compositions` / `song_versions`, tables `songbooks`, `song_version_sources`, `song_translations`, RLS (read follows the song, admins write), column privileges
+- [x] `@seed` feature `songbook-data-model.feature` (18 scenario definitions: 15 scenarios and 3 outlines; 25 executed scenarios), unit test `schemaSongbookTables.test.ts`
+- [x] `db-schema.sql` v3.8 (fresh install verified), design doc 2.12, epics 1.98 (Epic 6.2 + story 6.2.1), `types.ts`, `docs/guides/importing-songbooks.md`
+- [x] Cross-review by another Claude model (orchestrator, #498)
+- [x] Review fixes (PR #527): `trg_guard_catalog_slug` / `trg_guard_catalog_source_id` (only service role and admins set catalog keys), keys without surrounding spaces, lowercase translation languages, `song_version_sources.songbook_id` `on delete restrict`, guide: explicit increasing `created_at` and a write-rights table; `@seed` scenarios for the guards, ordering and runtime privileges
+
+## Session November 13, 2026 (Story 6.1.38, #534, role badge on a profile)
+- [x] Plan `docs/plans/2026-11-13-role-badges.md`
+- [x] Migration `20261113120000_public_profiles_role.sql`: `public_profiles.role`, NULL for a guest; `db-schema.sql` v3.9
+- [x] `RoleBadge` + `lib/users/roleBadge.ts` (admin Shield, gatekeeper KeyRound, expert Award, musician Music, member UserCheck; labels `admin.role.*`); `user.profile.verifiedMusician` / `user.profile.member` removed from 8 locales
+- [x] Tests: `@unit` feature `ux-v2-profile-role-badge.feature`, Vitest/RTL `roleBadge.test.tsx`, `@seed` role scenario in `access-policies.feature` (v1.3), E2E `ux-v2-profile-role-badge.spec.ts`; docs (design doc 2.15, epics 1.99)
+- [x] Cross-review by another Claude model; review fixes (seed column list, guest/member role scenario, e2e naming)
+
+## Session November 13, 2026 (privacy, placeholder addresses for seeded accounts)
+- [x] Seeds, E2E fixtures, BDD steps, UX script, feature files (admin-users v1.2, song v1.4), mockups and CHANGELOG use `<role>@sfs.example` and placeholder names
+- [x] `scripts/db/rename-seed-accounts.mjs` + `npm run seed:rename-accounts` + `scripts/README.md` row; unit test `renameSeedAccounts.test.ts`
+- [x] Local stack converted; tsc, lint (137), Vitest, BDD unit + seed and the admin-users / role badge / auth E2E specs green

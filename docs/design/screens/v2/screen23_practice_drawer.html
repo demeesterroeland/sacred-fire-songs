@@ -1,0 +1,430 @@
+<!--
+**Version:** 1.1
+**Status:** Accepted reference (Story 6.1.1 / G4.1–G4.8 #398–#405)
+**Date:** Nov 13, 2026
+
+## Changelog
+
+| Version | Date | Description of Changes |
+| ----- | ----- | ----- |
+| **1.1** | Nov 13, 2026 | Sample sharer name is a placeholder (no real person). |
+| **1.0** | Nov 5, 2026 | Accepted as the UX v2 reference (#385); token names aligned with `app/styles/sober.css` (`--text-muted`, `--text-subtle`, `--r-control/panel/sheet`, `--elev-sheet`). |
+| **0.1** | Nov 5, 2026 | Practice drawer & recording flow mockup: Listen tab (reference tracks, public takes) and Record tab (audio level meter, countdown, 2:41 limit, take review with single primary Save, My Takes vs. Shared With Me split, and take action sheet). |
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Practice & Recordings - Sacred Fire Songs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="tokens.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  padding-bottom: calc(var(--s-6) + env(safe-area-inset-bottom, 0px));
+}
+.gutter { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.wrap { max-width: 640px; margin: 0 auto; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: var(--r-control); }
+svg.i { width: 20px; height: 20px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---------- mockup controls bar ---------- */
+.mock {
+  border-bottom: 1px dashed var(--text-subtle);
+  background: var(--surface);
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
+  padding-block: var(--s-2);
+}
+.mock .wrap { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-3); align-items: center; }
+.mock strong { color: var(--text); font-weight: var(--fw-semibold); letter-spacing: 0.04em; text-transform: uppercase; }
+.mock-group { display: inline-flex; gap: 2px; background: var(--surface-2); border-radius: var(--r-control); padding: 2px; }
+.mock-group button { padding: 4px 8px; border-radius: 4px; min-height: 28px; }
+.mock-group button[aria-pressed="true"] { background: var(--bg); color: var(--text); font-weight: var(--fw-semibold); }
+.mock-links { display: inline-flex; gap: var(--s-2); margin-left: auto; }
+.mock-links a { color: var(--accent); text-decoration: none; font-weight: var(--fw-medium); }
+.mock-links a:hover { text-decoration: underline; }
+.mock-note { flex-basis: 100%; color: var(--text-subtle); }
+
+/* ---------- app bar ---------- */
+.appbar {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20;
+  background: var(--bg); border-bottom: 1px solid var(--line);
+}
+.appbar .wrap { height: var(--bar-h); display: flex; align-items: center; gap: var(--s-2); }
+.icon-btn { width: var(--tap); height: var(--tap); display: grid; place-items: center; border-radius: var(--r-control); color: var(--text-muted); }
+.icon-btn:hover { color: var(--text); background: var(--surface); }
+.appbar-title { flex: 1; font-size: var(--fs-title); font-weight: var(--fw-semibold); }
+
+/* ---------- practice segmented tabs (G4.1) ---------- */
+.tab-row {
+  padding-block: var(--s-3) var(--s-2);
+}
+.seg-tabs {
+  display: flex; background: var(--surface); border-radius: var(--r-panel); padding: 3px; border: 1px solid var(--line);
+}
+.seg-tabs button {
+  flex: 1; min-height: 38px; border-radius: 7px; font-size: 15px; font-weight: var(--fw-medium);
+  color: var(--text-muted); display: flex; align-items: center; justify-content: center; gap: var(--s-2);
+}
+.seg-tabs button[aria-selected="true"] {
+  background: var(--bg); color: var(--text); font-weight: var(--fw-semibold); box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+
+/* ---------- content cards ---------- */
+.section-title {
+  font-size: var(--fs-caption); font-weight: var(--fw-semibold); color: var(--text-subtle);
+  text-transform: uppercase; letter-spacing: 0.05em; margin: var(--s-4) 0 var(--s-2);
+}
+.card {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-panel);
+  padding: var(--s-3); margin-bottom: var(--s-3);
+}
+
+/* media reference track */
+.track-row { display: flex; align-items: center; gap: var(--s-3); }
+.track-icon {
+  width: 44px; height: 44px; border-radius: var(--r-control); background: var(--surface-2);
+  display: grid; place-items: center; color: var(--text-muted); flex: none;
+}
+.track-info { flex: 1; min-width: 0; }
+.track-title { font-weight: var(--fw-medium); color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.track-meta { font-size: var(--fs-meta); color: var(--text-subtle); }
+.track-play {
+  width: var(--tap); height: var(--tap); border-radius: var(--r-control); display: grid; place-items: center;
+  color: var(--accent);
+}
+
+/* ---------- recording studio box (G4.7) ---------- */
+.recorder-box {
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-panel);
+  padding: var(--s-4); text-align: center; margin-bottom: var(--s-4);
+}
+.rec-timer {
+  font-family: var(--font-mono); font-size: 32px; font-weight: var(--fw-semibold);
+  color: var(--text); margin-bottom: 2px;
+}
+.rec-limit { font-size: var(--fs-caption); color: var(--text-subtle); margin-bottom: var(--s-3); }
+
+/* audio level meter */
+.meter-row {
+  display: flex; justify-content: center; align-items: flex-end; gap: 4px; height: 32px; margin-bottom: var(--s-4);
+}
+.meter-bar { width: 6px; border-radius: 3px; background: var(--surface-2); height: 8px; transition: height .1s; }
+.recording .meter-bar { background: var(--accent); }
+
+/* record action buttons */
+.rec-actions { display: flex; justify-content: center; align-items: center; gap: var(--s-4); }
+.btn-record {
+  width: 64px; height: 64px; border-radius: 50%; background: var(--accent); color: var(--accent-ink);
+  display: grid; place-items: center; box-shadow: 0 4px 16px color-mix(in srgb, var(--accent) 35%, transparent);
+}
+.btn-record.recording { background: var(--danger); animation: pulse 1.5s infinite; }
+@keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.05); } 100% { transform: scale(1); } }
+
+/* ---------- takes list (G4.2) ---------- */
+.takes-list { border: 1px solid var(--line); border-radius: var(--r-panel); overflow: hidden; background: var(--bg); }
+.take-row {
+  display: flex; align-items: center; gap: var(--s-3); padding: var(--s-3) var(--s-4);
+  border-bottom: 1px solid var(--line);
+}
+.take-row:last-child { border-bottom: 0; }
+.take-main { flex: 1; min-width: 0; }
+.take-title { font-weight: var(--fw-medium); color: var(--text); font-size: var(--fs-row); }
+.take-meta { font-size: var(--fs-meta); color: var(--text-subtle); display: flex; align-items: center; gap: 6px; margin-top: 1px; }
+.take-badge {
+  display: inline-flex; align-items: center; gap: 3px; padding: 1px 6px; border-radius: 4px;
+  font-size: 11px; font-weight: var(--fw-medium); background: var(--surface); color: var(--text-muted);
+}
+.take-badge.public { background: color-mix(in srgb, var(--accent) 15%, transparent); color: var(--accent); }
+
+/* ---------- action sheet (G4.4) ---------- */
+.scrim { position: fixed; inset: 0; background: var(--scrim); z-index: 40; opacity: 0; transition: opacity .2s; }
+.scrim.open { opacity: 1; }
+.bsheet {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 41;
+  background: var(--bg); border-radius: var(--r-sheet) var(--r-sheet) 0 0; box-shadow: var(--elev-sheet);
+  padding-bottom: calc(var(--s-2) + env(safe-area-inset-bottom, 0px));
+  transform: translateY(100%); transition: transform .22s ease-out;
+  max-width: 640px; margin: 0 auto;
+}
+.bsheet.open { transform: none; }
+.grabber { width: 36px; height: 4px; border-radius: 2px; background: var(--surface-2); margin: var(--s-2) auto var(--s-1); }
+.bsheet h2 { margin: 0; font-size: var(--fs-meta); font-weight: var(--fw-regular); color: var(--text-subtle); padding: var(--s-2) var(--s-4); }
+.bsheet ul { list-style: none; margin: 0; padding: 0; }
+.bsheet li + li { border-top: 1px solid var(--line); }
+.row-btn { width: 100%; min-height: 48px; display: flex; align-items: center; gap: var(--s-3); padding: 0 var(--s-4); text-align: left; font-size: var(--fs-row); }
+.row-btn svg { color: var(--text-subtle); }
+.row-btn.danger { color: var(--danger); }
+.row-btn.danger svg { color: var(--danger); }
+</style>
+</head>
+<body>
+
+<!-- Mockup Controls -->
+<div class="mock gutter" aria-label="Mockup controls">
+  <div class="wrap">
+    <strong>Mockup</strong>
+    <span class="mock-group" role="group" aria-label="Theme">
+      <button type="button" id="t-auto" data-t="auto" aria-pressed="true">Auto</button>
+      <button type="button" id="t-light" data-t="light" aria-pressed="false">Light</button>
+      <button type="button" id="t-dark" data-t="dark" aria-pressed="false">Dark</button>
+    </span>
+    <span class="mock-group" role="group" aria-label="Record state">
+      <button type="button" id="btn-mock-rec" aria-pressed="false">Simulate Record</button>
+    </span>
+    <div class="mock-links">
+      <a href="screen21_song_page.html">Song Page</a> ·
+      <a href="screen22_song_list.html">Songs</a> ·
+      <a href="screen20_design_system.html">Tokens</a>
+    </div>
+    <span class="mock-note">G4 Practice Drawer: Listen vs Record, level meter, countdown, and grouped take actions.</span>
+  </div>
+</div>
+
+<!-- App Bar -->
+<header class="appbar gutter">
+  <div class="wrap">
+    <a href="screen21_song_page.html" class="icon-btn" aria-label="Back to song"><svg class="i" viewBox="0 0 24 24"><path d="M15 18l-6-6 6-6"/></svg></a>
+    <div class="appbar-title">Practice · Danza del Cielo</div>
+    <button class="icon-btn" type="button" aria-label="Info"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg></button>
+  </div>
+</header>
+
+<main class="gutter">
+  <div class="wrap">
+    
+    <!-- Tab switcher (G4.1: Listen / Record) -->
+    <div class="tab-row">
+      <div class="seg-tabs" role="tablist">
+        <button type="button" id="tab-listen" role="tab" aria-selected="true" aria-controls="pane-listen">
+          <svg class="i" viewBox="0 0 24 24"><path d="M3 18v-6a9 9 0 0 1 18 0v6"/><path d="M21 19a2 2 0 0 1-2 2h-1a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2h3zM3 19a2 2 0 0 0 2 2h1a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2H3z"/></svg>
+          Listen
+        </button>
+        <button type="button" id="tab-record" role="tab" aria-selected="false" aria-controls="pane-record">
+          <svg class="i" viewBox="0 0 24 24"><path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="23"/><line x1="8" y1="23" x2="16" y2="23"/></svg>
+          Record Take
+        </button>
+      </div>
+    </div>
+
+    <!-- PANE 1: LISTEN -->
+    <div id="pane-listen">
+      <div class="section-title">Reference Recordings</div>
+      
+      <div class="card track-row">
+        <div class="track-icon"><svg class="i" viewBox="0 0 24 24"><path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z"/><polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02"/></svg></div>
+        <div class="track-info">
+          <div class="track-title">Herbert Quinteros (Original Live)</div>
+          <div class="track-meta">YouTube · 4:18 · Standard Tuning</div>
+        </div>
+        <button type="button" class="track-play" aria-label="Play"><svg class="i" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></button>
+      </div>
+
+      <div class="card track-row">
+        <div class="track-icon"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg></div>
+        <div class="track-info">
+          <div class="track-title">Spotify Ceremony Master</div>
+          <div class="track-meta">Spotify · 5:02</div>
+        </div>
+        <button type="button" class="track-play" aria-label="Play"><svg class="i" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></button>
+      </div>
+
+      <div class="section-title">Public Community Takes</div>
+      <div class="takes-list">
+        <div class="take-row">
+          <button type="button" class="icon-btn" style="color: var(--accent);"><svg class="i" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></button>
+          <div class="take-main">
+            <div class="take-title">Guitar Arpeggio Take</div>
+            <div class="take-meta">Shared by Ana · 3:12 · <span class="take-badge public">Public</span></div>
+          </div>
+          <button type="button" class="icon-btn take-opt" aria-label="Options"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/><circle cx="5" cy="12" r="1.5"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANE 2: RECORD -->
+    <div id="pane-record" hidden>
+      <!-- Recorder Studio Box (G4.7) -->
+      <div class="recorder-box" id="recorder-studio">
+        <div class="rec-timer" id="rec-time">0:00</div>
+        <div class="rec-limit" id="rec-status">Maximum take length: 3 minutes (2:41 left)</div>
+        
+        <!-- Audio Level Meter -->
+        <div class="meter-row" id="meter-row">
+          <div class="meter-bar" style="height: 10px;"></div>
+          <div class="meter-bar" style="height: 16px;"></div>
+          <div class="meter-bar" style="height: 24px;"></div>
+          <div class="meter-bar" style="height: 20px;"></div>
+          <div class="meter-bar" style="height: 28px;"></div>
+          <div class="meter-bar" style="height: 14px;"></div>
+          <div class="meter-bar" style="height: 22px;"></div>
+          <div class="meter-bar" style="height: 8px;"></div>
+        </div>
+
+        <div class="rec-actions">
+          <button type="button" class="btn-record" id="btn-rec" aria-label="Start recording">
+            <svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="8" fill="currentColor"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Takes List: My Takes (G4.2) -->
+      <div class="section-title">My Takes (2)</div>
+      <div class="takes-list">
+        <div class="take-row">
+          <button type="button" class="icon-btn" style="color: var(--accent);"><svg class="i" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></button>
+          <div class="take-main">
+            <div class="take-title">Take 2 · Fast tempo rehearsal</div>
+            <div class="take-meta">2:14 · Nov 4 · <span class="take-badge">Private</span></div>
+          </div>
+          <button type="button" class="icon-btn take-opt" aria-label="Take actions"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/><circle cx="5" cy="12" r="1.5"/></svg></button>
+        </div>
+
+        <div class="take-row">
+          <button type="button" class="icon-btn" style="color: var(--accent);"><svg class="i" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></button>
+          <div class="take-main">
+            <div class="take-title">Take 1 · Vocal harmony only</div>
+            <div class="take-meta">1:48 · Nov 3 · <span class="take-badge public">Shared · 2</span></div>
+          </div>
+          <button type="button" class="icon-btn take-opt" aria-label="Take actions"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/><circle cx="5" cy="12" r="1.5"/></svg></button>
+        </div>
+      </div>
+
+      <!-- Shared with me (G4.2) -->
+      <div class="section-title">Shared With Me (1)</div>
+      <div class="takes-list">
+        <div class="take-row">
+          <button type="button" class="icon-btn" style="color: var(--accent);"><svg class="i" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></button>
+          <div class="take-main">
+            <div class="take-title">Flute melody improvisation</div>
+            <div class="take-meta">Shared by Nina · 2:40 · <span class="take-badge">Member</span></div>
+          </div>
+          <button type="button" class="icon-btn take-opt" aria-label="Take actions"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/><circle cx="5" cy="12" r="1.5"/></svg></button>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<!-- Bottom Action Sheet for Takes (G4.4) -->
+<div class="scrim" id="sheet-scrim" hidden></div>
+<div class="bsheet" id="take-sheet" role="dialog" aria-modal="true" aria-label="Take options" hidden>
+  <div class="grabber"></div>
+  <h2>Take Options · Take 2</h2>
+  <ul>
+    <li><button type="button" class="row-btn"><svg class="i" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>Share take with circle members</button></li>
+    <li><button type="button" class="row-btn"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>Publish to public circle (guests can listen)</button></li>
+    <li><button type="button" class="row-btn"><svg class="i" viewBox="0 0 24 24"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>Rename take</button></li>
+    <li><button type="button" class="row-btn"><svg class="i" viewBox="0 0 24 24"><path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="8.5" cy="7" r="4"/><line x1="20" y1="8" x2="20" y2="14"/><line x1="23" y1="11" x2="17" y2="11"/></svg>Attribution & instruments</button></li>
+    <li><button type="button" class="row-btn danger"><svg class="i" viewBox="0 0 24 24"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>Delete recording take</button></li>
+  </ul>
+</div>
+
+<script>
+(function() {
+  var root = document.documentElement;
+
+  // Theme switcher
+  var tGroup = document.querySelector('[aria-label="Theme"]');
+  tGroup.addEventListener('click', function(e) {
+    var b = e.target.closest('button');
+    if (!b) return;
+    if (b.dataset.t === 'auto') root.removeAttribute('data-theme');
+    else root.setAttribute('data-theme', b.dataset.t);
+    tGroup.querySelectorAll('button').forEach(function(btn) {
+      btn.setAttribute('aria-pressed', String(btn === b));
+    });
+  });
+
+  // Tab switching: Listen vs Record (G4.1)
+  var tabListen = document.getElementById('tab-listen');
+  var tabRecord = document.getElementById('tab-record');
+  var paneListen = document.getElementById('pane-listen');
+  var paneRecord = document.getElementById('pane-record');
+
+  tabListen.onclick = function() {
+    tabListen.setAttribute('aria-selected', 'true');
+    tabRecord.setAttribute('aria-selected', 'false');
+    paneListen.hidden = false;
+    paneRecord.hidden = true;
+  };
+
+  tabRecord.onclick = function() {
+    tabListen.setAttribute('aria-selected', 'false');
+    tabRecord.setAttribute('aria-selected', 'true');
+    paneListen.hidden = true;
+    paneRecord.hidden = false;
+  };
+
+  // Recording Simulation
+  var btnRec = document.getElementById('btn-rec');
+  var btnMockRec = document.getElementById('btn-mock-rec');
+  var studio = document.getElementById('recorder-studio');
+  var recTime = document.getElementById('rec-time');
+  var isRecording = false;
+  var recTimerInterval = null;
+  var seconds = 0;
+
+  function toggleRecord() {
+    isRecording = !isRecording;
+    btnRec.classList.toggle('recording', isRecording);
+    studio.classList.toggle('recording', isRecording);
+    btnMockRec.setAttribute('aria-pressed', String(isRecording));
+    
+    if (isRecording) {
+      seconds = 0;
+      recTime.textContent = '0:00';
+      recTimerInterval = setInterval(function() {
+        seconds++;
+        var m = Math.floor(seconds / 60);
+        var s = seconds % 60;
+        recTime.textContent = m + ':' + (s < 10 ? '0' : '') + s;
+        // pulse meters
+        document.querySelectorAll('.meter-bar').forEach(function(bar) {
+          bar.style.height = (Math.random() * 26 + 6) + 'px';
+        });
+      }, 1000);
+    } else {
+      clearInterval(recTimerInterval);
+      document.querySelectorAll('.meter-bar').forEach(function(bar) { bar.style.height = '8px'; });
+    }
+  }
+
+  btnRec.onclick = toggleRecord;
+  btnMockRec.onclick = function() {
+    tabRecord.click();
+    toggleRecord();
+  };
+
+  // Take Sheet actions (G4.4)
+  var scrim = document.getElementById('sheet-scrim');
+  var sheet = document.getElementById('take-sheet');
+  function openSheet() {
+    sheet.hidden = false; scrim.hidden = false;
+    requestAnimationFrame(function() { sheet.classList.add('open'); scrim.classList.add('open'); });
+  }
+  function closeSheet() {
+    sheet.classList.remove('open'); scrim.classList.remove('open');
+    setTimeout(function() { sheet.hidden = true; scrim.hidden = true; }, 220);
+  }
+  document.querySelectorAll('.take-opt').forEach(function(btn) { btn.onclick = openSheet; });
+  scrim.onclick = closeSheet;
+  sheet.addEventListener('click', function(e) { if (e.target.closest('.row-btn')) closeSheet(); });
+  document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeSheet(); });
+})();
+</script>
+</body>
+</html>

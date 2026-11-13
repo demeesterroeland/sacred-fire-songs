@@ -1,77 +1,90 @@
 # Software Development Life Cycle (SDLC) & CI/CD Workflow
 
-**Version:** 1.1
+**Version:** 2.0
 **Status:** Living Document
-**Date:** Oct 31, 2026
+**Date:** Nov 5, 2026
 
 ## Changelog
 
 | Version | Date | Description of Changes |
 | ----- | ----- | ----- |
+| **2.0** | Nov 5, 2026 | Rewritten for the lightweight Gitflow (Epic 5.1, Story 5.1.13): work branches → `develop` → `main`, `hotfix/*`, automatic back-merge PR, environments table, CI vs CD boundary (this repo builds, tests and publishes images; deploying them is up to each self-hoster). Removed the outdated `:latest` claim. |
 | **1.1** | Oct 31, 2026 | Added version header and changelog. Preview script path is now `scripts/cicd/dev2preview.sh` (#274, see `scripts/README.md`). |
 | **1.0** | Sep 27, 2026 | Initial version (GitHub Flow, preview and production releases). |
 
 ---
 
-This document outlines the industry-standard **GitHub Flow** tailored specifically for the Sacred Fire Songs Docker-based infrastructure. It covers local development, preview deployments, QA testing, and production releases.
+This document describes the life cycle of a change in Sacred Fire Songs, from a local branch to a released, versioned container image. The Git details (branch naming, commits, PR rules) are in [git-workflow.md](./git-workflow.md).
 
-## 1. Local Development (Feature Branches)
+**CI vs CD boundary.** This public repository contains **CI** (lint, typecheck, unit, BDD, build, E2E) and **image delivery** (Docker images on GHCR). It contains **no deployment (CD)**: no deploy workflows, SSH keys, GitHub Environments or server details. How and where images are deployed is up to each self-hoster.
 
-**Goal**: Develop in an isolated, safe environment without affecting production data.
+## 0. Branches and Environments
 
-1. **Create an Issue**: Never write code without an Issue to track it.
-2. **Branch out**: `git checkout -b feat/<issue-id>-<description>`
+| Branch | Purpose | Images published by `docker.yml` | Typical environment (self-hosted) |
+| --- | --- | --- | --- |
+| `feat/…`, `fix/…`, `chore/…`, `docs/…` | One issue = one short-lived work branch from `origin/develop`, squash-merged into `develop` | on demand via `dev2preview.sh`: `:<branch-slug>` + rolling `:preview` | Local dev, optional preview |
+| `develop` | Integration branch (GitHub default branch) | `:develop` + short SHA | Staging |
+| `main` | Production line; only promotion PRs, `hotfix/*` and the Release Please PR land here | short SHA; a published release adds `vX.Y.Z` + `X.Y.Z` | Production (explicit `vX.Y.Z`, never `:latest`) |
+| `hotfix/<issue>-<desc>` | Urgent production fix from `origin/main`, squash-merged into `main` | — | — |
+
+No image is ever tagged `:latest`.
+
+## 1. Local Development (Work Branches)
+
+**Goal**: Develop in an isolated, safe environment without affecting shared data.
+
+1. **Create an Issue**: Never write code without an issue to track it.
+2. **Branch out** with a worktree from `origin/develop`:
+   ```bash
+   scripts/cicd/start-issue.sh <issue> <feat|fix|chore|docs> <description>
+   ```
+   (`hotfix` branches from `origin/main` instead, see §6.)
 3. **Database Setup**:
    * **Local Supabase**: Run `npx supabase start` to spin up the local database and auth services. Your `.env.local` should point to `http://127.0.0.1:54321`.
-   * **Testing server**: When running `npm run build && npm run start`, use port `3<issue#>` for dev servers, or `4<issue#>` for local production builds (e.g., port `4237`).
-4. **Develop & Commit**: Make incremental commits using Conventional Commits (`feat: ...`, `fix: ...`).
+   * **Ports**: dev server on `3<issue#>`, production build / Playwright build server on `4<issue#>` (e.g. issue #237 → `3237` / `4237`).
+4. **Develop & Commit**: test-first (TDD/BDD), incremental Conventional Commits (`feat: ...`, `fix: ...`).
 
-## 2. The Preview Environment (`dev2preview`)
+## 2. Optional Preview (`dev2preview`)
 
-**Goal**: Validate changes on a live server connected to the Staging database before merging.
+**Goal**: Try a work branch on a real device before it reaches `develop`.
 
-When your feature is functionally complete and you are ready to test it on the actual hardware/network:
+```bash
+scripts/cicd/dev2preview.sh            # --dry-run only prints the image names
+```
 
-1. Run the deployment script: 
-   ```bash
-   scripts/cicd/dev2preview.sh
-   ```
-2. **What happens under the hood?**
-   * The script pushes your branch to origin.
-   * It triggers the GitHub Actions `docker.yml` workflow natively via the CLI.
-   * The workflow builds the Docker images (App and Migrator) and dual-tags them with both your branch name (e.g., `feat-237...`) AND the rolling `:preview` tag.
-3. **Server Deployment Setup**:
-   * SSH into your preview server.
-   * Ensure your `.env` file contains: `IMAGE_TAG=preview`
-   * Run: `docker compose pull && docker compose up -d`
-   * Because of the `:preview` tag, you never need to edit your server configuration again. It will automatically pull your newest feature branch build.
+The script pushes the branch and triggers `docker.yml`, which publishes `sacred-fire-songs-app` / `-migrator` tagged with the branch slug and the rolling `:preview` tag. Pointing a preview environment at `:preview` is up to the self-hoster; this repository does not deploy it.
 
-## 3. QA Testing & Validation
+## 3. Pull Request into `develop`
 
-**Goal**: Ensure stability.
+**Goal**: Automated validation and review.
 
-1. **Manual Testing**: Visit your preview URL and physically test the feature. Check for regressions and verify UI logic. 
-2. **Database Verification**: The preview server ALWAYS points to the **Staging Supabase** project. If data looks empty, check if the staging project was auto-paused due to inactivity.
+1. **Artifact Sync**: run `/sync-artifacts` and commit the logbook updates on the branch *before* opening the PR.
+2. **Open a PR into `develop`** with a Conventional Commit title (it becomes the squash commit and drives Release Please).
+3. **Required checks** (`ci.yml`, `pr-lint.yml`, `e2e.yml`): `lint`, `typecheck`, `unit`, `bdd`, `build`, `pipeline`, `isolation`, `pr-policy`, `e2e`.
+4. **Merge**: squash-merge into `develop` after review and owner approval. `docker.yml` then publishes `:develop` + short SHA images for staging.
 
-## 4. The Pull Request & E2E Smoke Tests
+## 4. Promotion `develop` → `main` and Release
 
-**Goal**: Automated validation and Code Review.
+**Goal**: Cut a versioned release.
 
-1. **Open a PR**: Once manual testing on the preview server is successful, open a Pull Request from your feature branch to `main`.
-2. **Artifact Sync**: *Crucial step.* Ensure you have run `/sync-artifacts` to commit the AI logbook updates (`master-walkthrough.md`, etc.) to your branch *before* opening the PR.
-3. **Automated E2E Tests**: Opening a PR triggers the Playwright E2E smoke tests in GitHub Actions.
-   * The tests run against an isolated staging container.
-   * You must have a green checkmark (passing tests) before proceeding.
+```bash
+scripts/cicd/develop2main.sh --dry-run
+scripts/cicd/develop2main.sh --notes-file .brain/release-summary.md
+```
 
-## 5. Release & Deployment (Merge to `main`)
+1. The promotion PR `develop` → `main` is merged with a **merge commit** (never squash, never `--admin`).
+2. Release Please opens its release PR on `main`; merging it creates the `vX.Y.Z` tag and GitHub Release.
+3. The published release makes `docker.yml` publish `vX.Y.Z` / `X.Y.Z` images.
+4. **Deploy** (outside this repo): pin the explicit `vX.Y.Z` tag in your own environment and restart.
 
-**Goal**: Ship to Production.
+## 5. Back-merge `main` → `develop`
 
-1. **Generate Release Notes**: Before merging, ask the AI to generate a clean end-user summary of the changes. 
-   * *Example prompt*: `"Generate a user-facing release summary for Issue #237 based on our work. Format it consistently with our previous semver release notes."*
-2. **Squash and Merge**: Merge the PR into `main`.
-3. **What happens under the hood?**
-   * Pushing to `main` triggers the production Docker build.
-   * The image is tagged with `latest` and a specific SHA.
-   * (If you tag a release e.g., `v1.6.1`, it will tag the Docker image with that explicit semver version).
-4. **Deploy**: Update the production server to pull the new specific semver tag (as per the "No Latest Tag in Production" rule) and restart the containers.
+After every push to `main` (promotion, release commit, hotfix), `.github/workflows/back-merge.yml` opens or updates the back-merge PR `main` → `develop`. Merge it with a **merge commit** once its checks pass. A PR that does not merge cleanly gets the `back-merge-conflict` label; resolve it on a `chore/…` branch from `develop` that merges `origin/main`.
+
+## 6. Hotfix
+
+```bash
+scripts/cicd/start-issue.sh <issue> hotfix <description>   # branch hotfix/<issue>-<desc> from origin/main
+```
+
+Open the PR with `--base main` and a `fix:` title, squash-merge it after the checks and owner approval. Release Please then proposes a patch release (§4, steps 2–4), and the back-merge PR (§5) brings the fix into `develop`.
