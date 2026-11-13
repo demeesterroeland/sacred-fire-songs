@@ -216,7 +216,7 @@ export default function Header({ initialUser }: { initialUser?: AuthUser | null 
                     {/* Mobile menu toggle */}
                     <button
                         onClick={() => setSidebarOpen(true)}
-                        className="lg:hidden p-1.5 -ms-2 rounded-full text-gray-500 hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors"
+                        className="lg:hidden size-tap -ms-3 inline-flex items-center justify-center rounded-full text-fg-muted hover:bg-surface-2 hover:text-fg transition-colors"
                         aria-label={t('header.openMenu')}
                     >
                         <Menu className="w-5 h-5" />
@@ -224,7 +224,7 @@ export default function Header({ initialUser }: { initialUser?: AuthUser | null 
 
                     {/* Logo */}
                     <Link href="/" className="hidden lg:flex items-center gap-2.5 group/logo shrink-0">
-                        <span className="hidden lg:block font-bold text-base text-gray-900 dark:text-white tracking-tight group-hover/logo:text-red-600 dark:group-hover/logo:text-red-400 transition-colors">
+                        <span className="hidden lg:block font-bold text-base text-fg tracking-tight group-hover/logo:text-fg-muted transition-colors">
                             {getSiteTitle()}
                         </span>
                     </Link>
@@ -285,37 +285,39 @@ export default function Header({ initialUser }: { initialUser?: AuthUser | null 
                         <div ref={createMenuRef} className="relative hidden lg:block">
                             <button
                                 onClick={() => setCreateMenuOpen(!createMenuOpen)}
-                                className={`flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-full transition-colors ${
+                                aria-haspopup="menu"
+                                aria-expanded={createMenuOpen}
+                                className={`flex min-h-tap items-center gap-1.5 px-3 text-sm font-medium rounded-control transition-colors ${
                                     createMenuOpen
-                                        ? 'text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-900'
-                                        : 'text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-900'
+                                        ? 'text-fg bg-surface-2'
+                                        : 'text-fg-muted hover:bg-surface-2 hover:text-fg'
                                 }`}
                             >
-                                <PlusCircle className="w-4 h-4" />
+                                <PlusCircle className="w-4 h-4" aria-hidden="true" />
                                 <span>{t('nav.create')}</span>
                             </button>
                             {createMenuOpen && (
-                                <div className="absolute right-0 top-full mt-2 bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-2xl shadow-2xl shadow-black/10 dark:shadow-black/40 z-50 overflow-hidden w-52 animate-in fade-in slide-in-from-top-2 duration-150">
+                                <div className="absolute right-0 top-full mt-2 bg-surface text-fg border border-line rounded-panel shadow-sheet z-50 overflow-hidden w-52 animate-in fade-in slide-in-from-top-2 duration-150">
                                     <div className="py-1">
                                         <button
                                             onClick={() => {
                                                 setCreateMenuOpen(false);
                                                 router.push(`/songs/add?next=${encodeURIComponent(pathname || '/')}`);
                                             }}
-                                            className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-800/70 transition-colors"
+                                            className="w-full flex min-h-tap items-center gap-3 px-4 py-3 hover:bg-surface-2 transition-colors"
                                         >
-                                            <Music className="w-4.5 h-4.5 text-red-400" />
-                                            <span className="text-sm font-semibold text-gray-900 dark:text-white">{t('header.addSong')}</span>
+                                            <Music className="w-4.5 h-4.5 text-fg-muted" aria-hidden="true" />
+                                            <span className="text-sm font-semibold text-fg">{t('header.addSong')}</span>
                                         </button>
                                         <button
                                             onClick={() => {
                                                 setCreateMenuOpen(false);
                                                 router.push('/library/playlists/add');
                                             }}
-                                            className="w-full flex items-center gap-3 px-4 py-3 hover:bg-gray-100 dark:hover:bg-gray-800/70 transition-colors"
+                                            className="w-full flex min-h-tap items-center gap-3 px-4 py-3 hover:bg-surface-2 transition-colors"
                                         >
-                                            <ListMusic className="w-4.5 h-4.5 text-purple-400" />
-                                            <span className="text-sm font-semibold text-gray-900 dark:text-white">{t('header.newPlaylist')}</span>
+                                            <ListMusic className="w-4.5 h-4.5 text-fg-muted" aria-hidden="true" />
+                                            <span className="text-sm font-semibold text-fg">{t('header.newPlaylist')}</span>
                                         </button>
                                     </div>
                                 </div>

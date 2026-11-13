@@ -320,6 +320,7 @@ const it: Partial<Record<TranslationKey, string>> = {
   'notifications.title': 'Notifiche',
   'notifications.empty': 'Ancora nessuna notifica.',
   'notifications.markAllRead': 'Segna tutto come letto',
+  'notifications.unread': 'Non letta',
   'notifications.recordingShared': '{actor} ha condiviso "{recording}" di {song} con te',
   "email.recordingShared.subject": "{actor} ha condiviso con te una registrazione di pratica di \"{song}\"",
   'email.recordingShared.greeting': 'Ciao {name},',

@@ -323,6 +323,7 @@ const ru: Partial<Record<TranslationKey, string>> = {
   'notifications.title': 'Уведомления',
   'notifications.empty': 'Уведомлений пока нет.',
   'notifications.markAllRead': 'Отметить все как прочитанные',
+  'notifications.unread': 'Не прочитано',
   "notifications.recordingShared": "{actor} поделился(-ась) записью «{recording}» песни {song}",
   "email.recordingShared.subject": "{actor} поделился(-ась) с вами записью практики «{song}»",
   'email.recordingShared.greeting': 'Здравствуйте, {name}!',

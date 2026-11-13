@@ -324,6 +324,7 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'notifications.title': 'Willakuykuna',
   'notifications.empty': 'Manaraq willakuykuna kanchu.',
   'notifications.markAllRead': 'Llapanta ñawinchasqa nispa churay',
+  'notifications.unread': 'Mana ñawinchasqa',
   'notifications.recordingShared': '{actor} "{recording}" ({song}) takiyta qamwan rakinakurqan',
   "email.recordingShared.subject": "{actor} \"{song}\" takipa yachakuy grabaciónninta qamwan rakinakurqan",
   'email.recordingShared.greeting': 'Napaykullayki {name},',
