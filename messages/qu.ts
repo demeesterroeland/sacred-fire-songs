@@ -551,6 +551,7 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'playlists.addSongs.title': 'Listaman takikuna yapay',
   'playlists.addSongs.search': 'Takikuna maskay…',
   'playlists.addSongs.empty': 'Mana takikuna tarisqachu.',
+  'playlists.addSongs.loadError': 'Mana takikunata cargayta atirqanchu. Wakmanta ruraykachay.',
   'playlists.addSongs.done': 'Tukusqa',
   'playlists.picker.title': 'Listaykuna',
   'playlists.picker.empty': 'Manaraq listakuna kanchu — hawapi ruway.',

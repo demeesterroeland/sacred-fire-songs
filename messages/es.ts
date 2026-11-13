@@ -547,6 +547,7 @@ const es: Partial<Record<TranslationKey, string>> = {
   'playlists.addSongs.title': 'Añadir canciones a la lista',
   'playlists.addSongs.search': 'Buscar canciones…',
   'playlists.addSongs.empty': 'No se encontraron canciones.',
+  'playlists.addSongs.loadError': 'No se pudieron cargar las canciones. Inténtalo de nuevo.',
   'playlists.addSongs.done': 'Listo',
   'playlists.picker.title': 'Mis listas',
   'playlists.picker.empty': 'Aún no hay listas — crea una arriba.',

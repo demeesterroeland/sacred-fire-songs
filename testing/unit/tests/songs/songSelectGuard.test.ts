@@ -56,7 +56,8 @@ describe('song selects', () => {
   });
 
   it('the edit page and fetchSong carry no inline copy of the embed', () => {
-    for (const file of ['app/songs/[id]/edit/page.tsx', 'lib/songs/fetchSong.ts']) {
+    // Story 6.2.22 (#542): the + Add Songs sheet reads the list through fetchAllSongs, with no select of its own.
+    for (const file of ['app/songs/[id]/edit/page.tsx', 'lib/songs/fetchSong.ts', 'components/playlists/AddSongsSheet.tsx']) {
       expect(embeds(readFileSync(file, 'utf8')), file).toHaveLength(0);
       expect(translationEmbeds(readFileSync(file, 'utf8')), file).toHaveLength(0);
     }

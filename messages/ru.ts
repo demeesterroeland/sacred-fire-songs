@@ -550,6 +550,7 @@ const ru: Partial<Record<TranslationKey, string>> = {
   'playlists.addSongs.title': 'Добавить песни в плейлист',
   'playlists.addSongs.search': 'Поиск песен…',
   'playlists.addSongs.empty': 'Песни не найдены.',
+  'playlists.addSongs.loadError': 'Не удалось загрузить песни. Попробуйте ещё раз.',
   'playlists.addSongs.done': 'Готово',
   'playlists.picker.title': 'Мои плейлисты',
   'playlists.picker.empty': 'Плейлистов пока нет — создай первый выше.',

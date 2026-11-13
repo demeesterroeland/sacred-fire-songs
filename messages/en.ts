@@ -545,6 +545,7 @@ const en = {
   'playlists.addSongs.title': 'Add Songs to Playlist',
   'playlists.addSongs.search': 'Search songs…',
   'playlists.addSongs.empty': 'No songs found.',
+  'playlists.addSongs.loadError': 'Could not load the songs. Try again.',
   'playlists.addSongs.done': 'Done',
   'playlists.picker.title': 'My Playlists',
   'playlists.picker.empty': 'No playlists yet — create one above.',

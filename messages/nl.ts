@@ -547,6 +547,7 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'playlists.addSongs.title': 'Liederen toevoegen aan afspeellijst',
   'playlists.addSongs.search': 'Liederen zoeken…',
   'playlists.addSongs.empty': 'Geen liederen gevonden.',
+  'playlists.addSongs.loadError': 'De liederen konden niet worden geladen. Probeer het opnieuw.',
   'playlists.addSongs.done': 'Gereed',
   'playlists.picker.title': 'Mijn afspeellijsten',
   'playlists.picker.empty': 'Nog geen afspeellijsten — maak er hierboven een aan.',
