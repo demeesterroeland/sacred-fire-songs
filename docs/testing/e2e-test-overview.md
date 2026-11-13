@@ -1,6 +1,6 @@
 # E2E Test Overview & Matrix: Sacred Fire Songs
 
-**Version:** 1.28
+**Version:** 1.29
 **Status:** Living Document
 **Date:** Nov 13, 2026
 **Tracking:** GH #142
@@ -32,6 +32,7 @@
 | **1.26** | Nov 13, 2026 | SONG-11 reads Public/Private (#564); SONG-13: "No artist" for a song without an author (#565), `ux-v2-private-and-no-artist.spec.ts`. |
 | **1.27** | Nov 13, 2026 | LIB-13: `/explore` redirects (308) to `/songs` with its query string (#574), `ux-v2-explore-redirect.spec.ts`. |
 | **1.28** | Nov 13, 2026 | VIEW-09: malformed `[id]` links render not-found and song load failures show the translated message instead of raw `error.message` (#578), `ux-v2-broken-song-links.spec.ts`. |
+| **1.29** | Nov 13, 2026 | #485 group 5: ACC-08 `ux-v2-sober-account.spec.ts` (member): axe colour contrast on the Profile, Security and Preferences tabs of `/account/settings`, light and dark; the active tab and active theme button announce `aria-pressed="true"`. |
 | **1.23** | Nov 11, 2026 | #490: `ux-v2-profile-playback.spec.ts` (member): recordings on a singer profile play there one at a time, the play button is a 44 px target and the row opens the song with that take. |
 | **1.22** | Nov 11, 2026 | #492: SONG-08 now checks that a song row has no delete button (an admin on `/songs`, `ux-v2-song-rows.spec.ts`); deleting is in the song page's ⋮ menu only (SONG-07). |
 | **1.19** | Nov 6, 2026 | UX v2 validation round 1 (Part of #375): new spec `ux-v2-validation-1.spec.ts` (one focus style, suggestions panel in the flow on `/songs` and Home, search options tokens and category name, song flags versus the reader; fixed-id fixture `VALIDATION_1_FIXTURE_IDS`, removed by `e2e/global-teardown.ts`); `ux-v2-reader-tools.spec.ts` uses a short window so auto-scroll is offered and tests that it is not on a song that fits; `ux-v2-song-meta.spec.ts` checks the expanded list. |
@@ -130,6 +131,7 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 | ACC-05 | Preferences / theme | Toggle dark/light/system; persists across reload | no flash-of-wrong-theme on reload | G/M | ✅ | 🔲 | P1 | ThemeToggle |
 | ACC-06 | Musician profile toggle | Enable "I play an instrument" reveals musician features | toggle off hides transpose/chord badges/Chords filter | M | ⚠️ | 🔲 | P1 | Story 3.5.1 |
 | ACC-07 | Interface language (en, nl, es, it, ru, qu, fr, pt) | Switch language from sidebar, user menu or Preferences; UI text changes without reload | browser-locale default (nl-BE → NL, de → EN); persists after reload, navigation and sign-out; SSR already in chosen language; no hydration mismatch; song content untranslated | G/M | ✅ | ✅ | P1 | Story 3.7.1, `e2e/tests/i18n.spec.ts` |
+| ACC-08 | Sober account settings | Profile, Security and Preferences tabs on `/account/settings` pass axe colour contrast; active tab and theme button announce `aria-pressed` | light and dark mode | M | ✅ | ✅ | P2 | `ux-v2-sober-account.spec.ts` (Story 6.1.35) |
 
 ### 4.3 Song Management (Epic 1.1 / 2.2)
 

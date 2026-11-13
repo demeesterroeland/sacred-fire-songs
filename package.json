@@ -17,7 +17,7 @@
     "test:bdd:ci": "NODE_OPTIONS=\"--import tsx\" cucumber-js --config cucumber.json --profile ci",
     "test:bdd:ci-gate": "NODE_OPTIONS=\"--import tsx\" cucumber-js --config cucumber.json --profile ci-gate",
     "test:scripts": "bats testing/scripts",
-    "lint": "eslint . --max-warnings 137",
+    "lint": "eslint . --max-warnings 132",
     "typecheck": "tsc --noEmit",
     "test:bdd:i18n": "NODE_OPTIONS=\"--import tsx\" cucumber-js --config cucumber.json --profile i18n",
     "test:bdd:offline": "NODE_OPTIONS=\"--import tsx\" cucumber-js --config cucumber.json --profile offline",

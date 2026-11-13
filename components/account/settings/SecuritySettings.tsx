@@ -6,6 +6,7 @@ import { Mail, Lock, LogOut, Eye, EyeOff, Loader2 } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import { toast } from "sonner";
 import { useLocale } from "@/context/LocaleContext";
+import { Button } from "@/components/ui/button";
 
 interface SecuritySettingsProps {
   user: User;
@@ -19,8 +20,6 @@ export default function SecuritySettings({ user }: SecuritySettingsProps) {
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const supabase = createClient();
-
-  const passwordsReady = newPassword.length > 0 && confirmPassword.length > 0;
 
   const handleUpdatePassword = async () => {
     if (newPassword !== confirmPassword) {
@@ -48,7 +47,7 @@ export default function SecuritySettings({ user }: SecuritySettingsProps) {
       const { error } = await supabase.auth.signOut({ scope: 'global' });
       if (error) throw error;
       window.location.href = "/auth/login";
-    } catch (error) {
+    } catch {
       toast.error(t("settings.security.signOutAllError"));
     }
   };
@@ -57,100 +56,104 @@ export default function SecuritySettings({ user }: SecuritySettingsProps) {
     <section className="space-y-8">
       {/* Email Address */}
       <div className="space-y-4">
-        <h2 className="text-xl font-bold flex items-center gap-2 text-gray-900 dark:text-white">
-          <Mail className="w-5 h-5 text-gray-500 dark:text-slate-400" />
-          Email Address
+        <h2 className="text-xl font-bold flex items-center gap-2 text-fg">
+          <Mail className="w-5 h-5 text-fg-muted" aria-hidden="true" />
+          {t("field.email.label")}
         </h2>
         <input
           type="email"
           value={user.email}
           disabled
-          className="w-full bg-slate-100/50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/10 px-4 py-3 rounded-xl text-gray-900 dark:text-white opacity-60 cursor-not-allowed"
+          aria-label={t("field.email.label")}
+          className="w-full min-h-tap bg-surface border border-line px-4 py-2.5 rounded-control text-fg-muted opacity-70 cursor-not-allowed"
         />
-        <button
+        <Button
+          type="button"
+          variant="outline"
           onClick={() => toast.info(t("settings.profile.emailNote"))}
-          className="w-full sm:w-auto bg-[#f45d1a] text-white font-semibold px-6 py-3 rounded-xl hover:brightness-110 shadow-lg shadow-orange-900/20 transition-all"
+          className="w-full sm:w-auto"
         >
-          Change Email
-        </button>
-        <p className="text-xs text-slate-500 italic">Changing your email will require re-verification.</p>
+          {t("settings.security.changeEmail")}
+        </Button>
+        <p className="text-caption text-fg-subtle">{t("settings.security.emailReverifyHint")}</p>
       </div>
 
-      <hr className="border-gray-200 dark:border-white/5" />
+      <hr className="border-line" />
 
       {/* Password */}
       <div className="space-y-4">
-        <h2 className="text-xl font-bold flex items-center gap-2 text-gray-900 dark:text-white">
-          <Lock className="w-5 h-5 text-gray-500 dark:text-slate-400" />
+        <h2 className="text-xl font-bold flex items-center gap-2 text-fg">
+          <Lock className="w-5 h-5 text-fg-muted" aria-hidden="true" />
           {t("settings.security.changePassword")}
         </h2>
 
         <div className="space-y-2">
-          <label className="text-meta font-semibold text-fg-muted">{t("settings.security.newPassword")}</label>
+          <label htmlFor="security-new-password" className="text-meta font-semibold text-fg-muted">{t("settings.security.newPassword")}</label>
           <div className="relative">
             <input
+              id="security-new-password"
               type={showNewPassword ? "text" : "password"}
-              placeholder="••••••••"
+              placeholder={t("field.password.placeholder")}
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              className="w-full bg-slate-100/50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/10 px-4 py-3 pr-10 rounded-xl text-gray-900 dark:text-white transition-all"
+              className="w-full min-h-tap bg-surface border border-line-strong px-4 py-2.5 pr-12 rounded-control text-fg transition-colors"
             />
             <button
               type="button"
               onClick={() => setShowNewPassword(prev => !prev)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 z-10 text-slate-500 hover:text-gray-900 dark:hover:text-white transition-colors p-1"
-              aria-label={showNewPassword ? "Hide password" : "Show password"}
+              className="absolute right-0.5 top-1/2 -translate-y-1/2 z-10 size-tap inline-flex items-center justify-center rounded-control text-fg-muted hover:text-fg transition-colors"
+              aria-label={showNewPassword ? t("settings.security.hidePassword") : t("settings.security.showPassword")}
             >
-              {showNewPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              {showNewPassword ? <EyeOff className="w-4 h-4" aria-hidden="true" /> : <Eye className="w-4 h-4" aria-hidden="true" />}
             </button>
           </div>
         </div>
 
         <div className="space-y-2">
-          <label className="text-meta font-semibold text-fg-muted">{t("settings.security.confirmPassword")}</label>
+          <label htmlFor="security-confirm-password" className="text-meta font-semibold text-fg-muted">{t("settings.security.confirmPassword")}</label>
           <div className="relative">
             <input
+              id="security-confirm-password"
               type={showConfirmPassword ? "text" : "password"}
-              placeholder="••••••••"
+              placeholder={t("field.password.placeholder")}
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
-              className="w-full bg-slate-100/50 dark:bg-slate-900/50 border border-gray-200 dark:border-white/10 px-4 py-3 pr-10 rounded-xl text-gray-900 dark:text-white transition-all"
+              className="w-full min-h-tap bg-surface border border-line-strong px-4 py-2.5 pr-12 rounded-control text-fg transition-colors"
             />
             <button
               type="button"
               onClick={() => setShowConfirmPassword(prev => !prev)}
-              className="absolute right-3 top-1/2 -translate-y-1/2 z-10 text-slate-500 hover:text-gray-900 dark:hover:text-white transition-colors p-1"
-              aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+              className="absolute right-0.5 top-1/2 -translate-y-1/2 z-10 size-tap inline-flex items-center justify-center rounded-control text-fg-muted hover:text-fg transition-colors"
+              aria-label={showConfirmPassword ? t("settings.security.hidePassword") : t("settings.security.showPassword")}
             >
-              {showConfirmPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              {showConfirmPassword ? <EyeOff className="w-4 h-4" aria-hidden="true" /> : <Eye className="w-4 h-4" aria-hidden="true" />}
             </button>
           </div>
         </div>
 
-        <button
+        <Button
+          type="button"
           onClick={handleUpdatePassword}
           disabled={isUpdating || !newPassword}
-          className={`w-full sm:w-auto px-6 py-3 rounded-xl font-semibold transition-all disabled:opacity-50 flex items-center justify-center gap-2 whitespace-nowrap ${
-            newPassword.length > 0
-              ? "bg-[#f45d1a] text-white hover:brightness-110 shadow-lg shadow-orange-900/20"
-              : "bg-black/5 dark:bg-white/5 border border-gray-200 dark:border-white/10 text-gray-900 dark:text-white hover:bg-black/10 dark:hover:bg-white/10"
-          }`}
+          className="w-full sm:w-auto"
         >
-          {isUpdating && <Loader2 className="w-4 h-4 animate-spin" />}
+          {isUpdating && <Loader2 className="w-4 h-4 animate-spin" aria-hidden="true" />}
           {isUpdating ? t("settings.security.updating") : t("settings.security.updatePassword")}
-        </button>
+        </Button>
       </div>
 
-      <hr className="border-gray-200 dark:border-white/5" />
+      <hr className="border-line" />
 
       <div className="pt-2">
-        <button
+        <Button
+          type="button"
+          variant="outline"
           onClick={handleLogoutAll}
-          className="w-full md:w-auto flex items-center justify-center gap-2 text-red-400 hover:text-red-300 transition-colors px-6 py-3 border border-red-500/20 rounded-xl hover:bg-red-500/5"
+          className="w-full md:w-auto text-danger border-line hover:bg-surface-2 hover:text-danger"
         >
-          <LogOut className="w-5 h-5" />
+          <LogOut className="w-5 h-5" aria-hidden="true" />
           {t("settings.security.signOutAll")}
-        </button>
+        </Button>
       </div>
     </section>
   );

@@ -564,6 +564,10 @@ const fr: Partial<Record<TranslationKey, string>> = {
   'settings.profile.avatar.tooLarge': "L'image doit faire moins de 2 Mo",
 
   'settings.security.heading': "Sécurité",
+  'settings.security.changeEmail': "Changer l'e-mail",
+  'settings.security.emailReverifyHint': "Changer ton e-mail demandera une nouvelle vérification.",
+  'settings.security.showPassword': "Afficher le mot de passe",
+  'settings.security.hidePassword': "Masquer le mot de passe",
   'settings.security.changePassword': "Changer le mot de passe",
   'settings.security.currentPassword': "Mot de passe actuel",
   'settings.security.newPassword': "Nouveau mot de passe",

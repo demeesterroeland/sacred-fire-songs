@@ -39,7 +39,7 @@ test('Account Settings: no Privacy & Data tab, no avatar block, no placeholder r
 test('a hidden ?tab=privacy deep link opens Profile', async ({ page }) => {
   await pinEnglish(page);
   await page.goto('/account/settings?tab=privacy');
-  await expect(page.getByLabel(/display name/i).or(page.getByText('Display Name').first())).toBeVisible();
+  await expect(page.getByLabel(/display name/i)).toBeVisible();
   await expect(page.getByText('Privacy Settings')).toHaveCount(0);
 });
 
