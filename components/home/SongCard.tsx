@@ -18,7 +18,7 @@ interface SongCardProps {
     songKey?: string | null;
     isPublic?: boolean;
     isFavorite?: boolean;
-    /** Why a search found this song when its title did not match: "Matched by alias: …" (Story 6.2.18, #521). */
+    /** Why a search found this song when its title did not match: "Also known as …" (Story 6.2.18, #521). */
     matchHint?: string | null;
     userId?: string;
     categories?: {

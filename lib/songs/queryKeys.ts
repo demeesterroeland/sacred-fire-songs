@@ -5,6 +5,9 @@
  * invalidateQueries({ queryKey: SONG_KEYS.all() }) invalidates every song list.
  * invalidateQueries({ queryKey: SONG_KEYS.detail(id) }) invalidates one song's detail + edit.
  */
+/** How long the song list stays fresh. Shared by every `SONG_KEYS.list()` consumer, so they agree on when to refetch. */
+export const SONGS_STALE_TIME = 60_000;
+
 export const SONG_KEYS = {
     /** Matches ['songs', 'all'] — the main songs list */
     list: () => ['songs', 'all'] as const,

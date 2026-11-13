@@ -1,6 +1,6 @@
 # User Guide: Sacred Fire Songs
 
-**Version:** 2.12
+**Version:** 2.13
 **Status:** Published
 **Date:** Nov 13, 2026
 
@@ -25,6 +25,7 @@
 | **2.10** | Nov 13, 2026 | Songbooks: **Library → Songbooks** lists the printed songbooks with their number of songs, and each book has a page that lists its songs in the order of its pages. The source line under a song's lyrics links to its book (UX v3, #514). |
 | **2.11** | Nov 13, 2026 | Song Detail: a song with a translation has the switch **Original · Translation · Both**; **Both** shows the original and the translation together, verse by verse; the language switch picks the language of the translation (more than one translation only); a right-to-left translation (Hebrew, Arabic) reads right to left (Story 6.2.14, #517). |
 | **2.12** | Nov 13, 2026 | The search box also finds a song by the title of one of its translations; the result names the language, for example *Dutch: Moeder Aarde*. Only translation titles are searched, not the translated lyrics. |
+| **2.13** | Nov 13, 2026 | Search: when a song is found by another name, the grey line under it reads *Also known as …*. |
 
 Welcome to **Sacred Fire Songs**, a digital songbook designed for ceremonial musicians. This guide covers how to browse, learn, and manage medicine songs using our platform.
 
@@ -52,7 +53,7 @@ If you prefer, you can also sign up or log in using a tradition **Email & Passwo
 
 ### 2.1 Browsing & Searching
 The **Search Songs** page allows you to find songs quickly:
-- **Search**: Search by title, another name the song is known by (alias), the title it has in a songbook, the title of one of its translations (the result names the language), author, or even words within the lyrics. A co-written song is found by each of its authors. Capitals and accents do not matter ("pachamama" finds "Pachamamá"). When the title did not match, the result adds a grey line saying why, for example *Matched by alias: Gran Venerable Madre Tierra*. Songs whose title matches are listed first.
+- **Search**: Search by title, another name the song is known by (alias), the title it has in a songbook, the title of one of its translations (the result names the language), author, or even words within the lyrics. A co-written song is found by each of its authors. Capitals and accents do not matter ("pachamama" finds "Pachamamá"). When the title did not match, the result adds a grey line saying why, for example *Also known as Gran Venerable Madre Tierra*. Songs whose title matches are listed first.
 - **Sorting**: Toggle between **Alphabetical** (Title) or **Chronological** (Newest) order.
 
 ### 2.1b Songbooks

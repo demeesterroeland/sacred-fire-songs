@@ -1,5 +1,6 @@
-# Version: 1.2 | Date: Nov 13, 2026
+# Version: 1.3 | Date: Nov 13, 2026
 # Changelog
+# 1.3 | Nov 13, 2026 | Owner decision (#542): the alias hint reads "Also known as …".
 # 1.2 | Nov 13, 2026 | Re-check of #538: keyset pages (created_at, id) until an empty page, so a server with a lower max_rows still yields the whole catalog.
 # 1.1 | Nov 12, 2026 | Review of #538: songs whose title matched are listed before the others; the whole catalog is fetched in pages (PostgREST max_rows).
 # 1.0 | Nov 12, 2026 | Story 6.2.18 / G5.1 (#521): search finds songs by alias, any author and the original title in a songbook; the "matched by ..." hint; guests never find private songs this way.
@@ -57,7 +58,7 @@ Feature: Search finds a song by the name I know
   Scenario: The hint names the alias when the title did not match
     Given a song "Huey Tonantzin" with alias "Gran Venerable Madre Tierra"
     When I search "Venerable"
-    Then the hint reads "Matched by alias: Gran Venerable Madre Tierra"
+    Then the hint reads "Also known as Gran Venerable Madre Tierra"
 
   @unit
   Scenario: The hint names the songbook title
