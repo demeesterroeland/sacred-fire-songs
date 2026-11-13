@@ -1,5 +1,5 @@
 <!--
-**Version:** 1.4
+**Version:** 1.5
 **Status:** Accepted reference (Story 6.1.1 / G1.1 #385, G2.1–G2.4 #390–#393, G2.6 #395, G3.1 #396)
 **Date:** Nov 13, 2026
 
@@ -7,6 +7,7 @@
 
 | Version | Date | Description of Changes |
 | ----- | ----- | ----- |
+| **1.5** | Nov 13, 2026 | Story 6.2.2 (#583): the Practice action includes a headphones cue for reference media, with a screen-reader-only Listen label. |
 | **1.4** | Nov 13, 2026 | Chord tools in one place (#566): the toolbar is `Chords [switch] · [− n +] transpose · A− · A+`; the transpose stepper (two 44 px buttons and the signed shift) sits right after the Chords switch and shows only while chords are on. The technical line `Key E · Capo 3` (non-standard tuning is labelled `Tuning: Drop D`; standard tuning is omitted) also shows only while chords are on (beats stay). After a transpose the line shows only the new key. Added the Reading view switch (*Original · Translation · Both*) to `#slot` (#517). |
 | **1.3** | Nov 13, 2026 | The slot gains the reader switch *Original · Translation · Both* for a song with a translation, and the language group lists languages only (two or more; Story 6.2.14, #517); *Both* shows each stanza with its translation (line under line on a phone, side by side from md up); no change to the mockup itself. |
 | **1.2** | Nov 12, 2026 | The language group of the slot is implemented (Story 6.2.13, #516): *Original language · languages the song has*, next to the version group in one wrapping row; no change to the mockup itself. |
@@ -45,6 +46,8 @@ body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-a
 button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
 :focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: var(--r-control); }
 svg.i { width: 20px; height: 20px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+svg.media-indicator { width: 16px; height: 16px; }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; border: 0; }
 
 /* ---------- mockup controls (not part of the design) ---------- */
 .mock {
@@ -345,7 +348,7 @@ body.no-chords .line { margin-bottom: calc(var(--ls) * 0.2); }
 
 <nav class="actions gutter" aria-label="Song actions">
   <div class="wrap">
-    <a href="screen23_practice_drawer.html" class="btn btn-primary" id="practice" style="text-decoration: none;"><svg class="i" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/></svg>Practice</a>
+    <a href="screen23_practice_drawer.html" class="btn btn-primary" id="practice" style="text-decoration: none;"><svg class="i" viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0014 0M12 18v3"/></svg>Practice<svg class="i media-indicator" viewBox="0 0 24 24" aria-hidden="true"><path d="M3 14v-3a9 9 0 0 1 18 0v3"/><path d="M5 14h2a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2z"/><path d="M17 14h2a2 2 0 0 1 2 2v3a2 2 0 0 1-2 2h-2a2 2 0 0 1-2-2v-3a2 2 0 0 1 2-2z"/></svg><span class="sr-only">Listen</span></a>
     <a href="screen25_playlist_sheet.html" class="btn btn-ghost" aria-label="Add to playlist" style="text-decoration: none;"><svg class="i" viewBox="0 0 24 24"><path d="M4 6h11M4 12h11M4 18h7M18 15v6M15 18h6"/></svg>Playlist</a>
     <button class="btn btn-ghost" type="button" id="fav" aria-pressed="false" aria-label="Favourite"><svg class="i" viewBox="0 0 24 24"><path d="M12 20s-7-4.4-7-10a4 4 0 017-2.6A4 4 0 0119 10c0 5.6-7 10-7 10z"/></svg></button>
   </div>
