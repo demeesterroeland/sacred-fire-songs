@@ -16,9 +16,9 @@ export const PASSWORD = process.env.NEXT_PUBLIC_DEV_TEST_PASSWORD ?? 'sacred-fir
 
 export const ROLES = {
   guest: null,
-  member: 'roel.de.meester+member@gmail.com',
-  gatekeeper: 'roel.de.meester+gatekeeper@gmail.com',
-  admin: 'roel.de.meester+admin@gmail.com',
+  member: 'member@sfs.example',
+  gatekeeper: 'gatekeeper@sfs.example',
+  admin: 'admin@sfs.example',
 };
 
 export const VIEWPORTS = {

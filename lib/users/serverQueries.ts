@@ -1,5 +1,7 @@
 import { createClient } from "@/lib/supabase/server";
 import { signedUrlByPath, type ProfileRecording } from "@/lib/users/profileRecordings";
+import { toProfileRole } from "@/lib/users/roleBadge";
+import type { UserRole } from "@/lib/admin/types";
 
 export type AttributedRecordingSummary = ProfileRecording;
 
@@ -8,6 +10,8 @@ export interface MusicianProfileData {
   full_name: string | null;
   avatar_url: string | null;
   is_musician: boolean;
+  /** The user's role for the profile badge (Story 6.1.38); "member" when unknown. */
+  role: UserRole;
   attributed_recordings: AttributedRecordingSummary[];
 }
 
@@ -15,9 +19,9 @@ export async function fetchMusicianProfile(userId: string): Promise<MusicianProf
   const supabase = await createClient();
 
   const { data: profile, error } = await supabase
-    // The public view: name, avatar and musician badge; never the e-mail address.
+    // The public view: name, avatar, musician flag and role; never the e-mail address.
     .from("public_profiles")
-    .select("id, full_name, avatar_url, is_musician")
+    .select("id, full_name, avatar_url, is_musician, role")
     .eq("id", userId)
     .maybeSingle();
 
@@ -71,6 +75,7 @@ export async function fetchMusicianProfile(userId: string): Promise<MusicianProf
     full_name: profile.full_name,
     avatar_url: profile.avatar_url,
     is_musician: !!profile.is_musician,
+    role: toProfileRole(profile.role),
     attributed_recordings: attributedRecordings,
   };
 }

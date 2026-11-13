@@ -350,10 +350,10 @@ Then('no user details are returned', function (this: SongBddWorld) {
 // ---------------------------------------------------------------------------
 
 const SEEDED_EMAILS: Record<string, string> = {
-  admin: 'roel.de.meester+admin@gmail.com',
-  musician: 'roel.de.meester+expert@gmail.com',
-  member: 'roel.de.meester+member@gmail.com',
-  gatekeeper: 'roel.de.meester+gatekeeper@gmail.com',
+  admin: 'admin@sfs.example',
+  musician: 'expert@sfs.example',
+  member: 'member@sfs.example',
+  gatekeeper: 'gatekeeper@sfs.example',
 };
 
 Then(/^fn_is_admin\(\) is true for the admin account only$/, async function () {

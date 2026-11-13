@@ -3489,6 +3489,41 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - Comments and design text: reads are public, own (admins all), nothing through sharing.
 - Left as is: `SONGBOOK_LIST_SELECT` fetches every row it counts (fine at about 1000 songs; RPC or view later if slow).
 
+## Session November 12, 2026 — Story 6.1.35 (#485), group 1: neutral tags and categories
+
+- Every category tag now has the same neutral style. The per-category colour map (`lib/uiUtils.ts`: `getCategoryColor` / `getCategoryStyles`, 221 palette classes) is replaced by `lib/design/tagStyles.ts` (`tagPillClasses`): chip greys, inverted greys when selected, a hover only on links and buttons. `TagPill` no longer takes `categorySlug`; `AuthorPill` uses the same style.
+- Selection never depends on colour alone: a toggle pill announces `aria-pressed` (new `BasePill.pressed`) and a selected tag in the Edit song picker keeps its check.
+- The Edit song tag picker (`CategorySelector`) and the artist field (`ArtistTagInput`) use semantic tokens only: no red *Selected tags* box, no indigo highlight; artist suggestion counts read `(3)`. Their hard-coded copy (loading, selected count, no match, add new artist, remove artist, clear search) moved to translation keys in all 8 locales; the English default tooltips of the pills are gone.
+- The unused starter `components/library/LibrarySidebar.tsx` was deleted.
+- The palette ratchet scans `app/`, `components/` and `lib/` (`PALETTE_DIRS`). `PALETTE_BASELINE` 1232 → 1117; lint cap 140 → 137.
+- Tests: `docs/testing/ux-v2-sober-colours.feature` (`@unit`, `@e2e`), `testing/unit/tests/design/neutralTags.test.tsx`, `paletteRatchet.test.ts` (scans a temporary `lib/`), `e2e/tests/ux-v2-sober-colours.spec.ts` (same computed colours for every tag, inverted when selected, light and dark).
+- Next groups of #485 (one PR each): song form (after the Epic 6.2 song PRs land), practice and recordings, user menu and header, account settings, playlists, auth and feedback pages, admin.
+
+## Session November 12, 2026 — Story 6.1.35 (#485), group 3: Practice and recordings
+
+- The Practice drawer (`RehearsalDrawer`) and the singer attribution dialog (`RecordingAttributionModal`) use semantic tokens only: 137 palette classes removed.
+- Drawer: take rows are neutral; a take's play button is 44 px and turns accent only while it plays, the rename field has an accent border while editing, the deep-linked take has a soft accent ring, the overlay uses the scrim token and the indigo-purple header icon is a grey tile.
+- Dialog: the chosen singer is marked with the soft accent (selected); search results no longer all show a check. Save is the single primary button (the shared `Button`), Cancel is outlined, Remove is a red text button; all 44 px. The button that clears the chosen singer has a 44 px target and a translated name (`recording.attribution.clearSinger`, 8 locales).
+- `PALETTE_BASELINE` 1117 → 980 (rebased on group 1, PR #537, which also scans `lib/`).
+- Tests: `docs/testing/ux-v2-sober-practice.feature` (`@unit`); light and dark contrast stays covered by the axe runs in `ux-v2-a11y-audit.spec.ts`.
+
+## Session November 13, 2026 — Story 6.1.38 (#534): role badge on a profile
+
+- A profile page (`/users/<id>`) shows one badge for the user's role, each with its own icon: admin `Shield`, gatekeeper `KeyRound`, expert `Award`, musician `Music`, member `UserCheck`. Labels reuse `admin.role.*` (all 8 locales).
+- `public.public_profiles` gains `role` (migration `20261113120000_public_profiles_role.sql`): every signed-in member sees every role; a guest reads NULL. `is_musician` stays. An unknown or missing role shows the member badge, never a privileged one.
+- Tests: `docs/testing/ux-v2-profile-role-badge.feature` (`@unit`, `@e2e`), `testing/unit/tests/profile/roleBadge.test.tsx`, a `@seed` scenario in `access-policies.feature`, `e2e/tests/ux-v2-profile-role-badge.spec.ts`.
+
+## Session November 13, 2026 — privacy: placeholder addresses for the seeded accounts
+
+- The four seeded accounts (`supabase/seeds/01_auth_users.sql`, `02_profiles.sql`) use placeholder addresses: `admin@sfs.example`, `expert@sfs.example`, `member@sfs.example`, `gatekeeper@sfs.example`. The E2E role fixtures, the BDD steps, the UX screenshot script, two feature files, three screen mockups and `CHANGELOG.md` follow; sample names are placeholders too (`Ana Example`).
+- `scripts/db/rename-seed-accounts.mjs` (`npm run seed:rename-accounts`) gives an existing local stack the same addresses without a reset: it matches rows by their fixed seed ids and updates `auth.users`, the `email` identity and `profiles`. Idempotent; refuses any non-localhost database.
+- Tests: `testing/unit/tests/renameSeedAccounts.test.ts` (mapping agrees with the seed files, id-based SQL, local-only guard); `admin-users.spec.ts` searches `gatekeeper@`.
+
+## Session November 13, 2026 — sync develop into feat/ux-v3
+
+- `origin/develop` merged into `feat/ux-v3` (real merge, not squashed). develop brings the neutral tag style (#485 groups 1 and 3), the role badge on a profile page (#534, migration `20261113120000_public_profiles_role.sql`), seed accounts renamed to `<role>@sfs.example`, and dependency bumps (framer-motion, lucide-react, eslint).
+- Conflicts were docs only. Both sides kept; develop's version rows that clashed with `feat/ux-v3` numbers were renumbered (marked "develop x.y") and one sync row was added per document.
+- The old seed addresses in `feat/ux-v3`-only tests are left for a follow-up.
 ## Session November 13, 2026 — Story 6.2.23 (#547): search finds a song by the title of its translation
 - `SONGS_SELECT` embeds `song_translations(language, title)` once (the embed guard allows one); `mapCompositionToSong()` fills `Song.translationTitles`. Guests only get the translations of public songs: the existing `Translations follow song privacy` policy filters through `compositions` RLS, so no policy changed.
 - `lib/songs/search.ts` is extended additively: match field and hint kind `translationTitle` (after the songbook title, before the author), carrying the language tag; `songMatchHintText()` gets an optional `locale` (default `'en'`). The hint is `songs.matchTranslation` = "{language}: {text}" ("Dutch: Moeder Aarde"), the language named by `translationLabel()`. 1 new key in 8 locales (`qu` for a native check).

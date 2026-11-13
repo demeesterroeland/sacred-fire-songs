@@ -1,6 +1,6 @@
 # E2E Test Overview & Matrix: Sacred Fire Songs
 
-**Version:** 1.25
+**Version:** 1.27
 **Status:** Living Document
 **Date:** Nov 13, 2026
 **Tracking:** GH #142
@@ -29,6 +29,8 @@
 | **1.21** | Nov 9, 2026 | Validation 4: LIB-12 is the New tab (`/library/new`); the Library tab row has five tabs and scrolls on a phone (`ux-v2-library-tabs.spec.ts`). |
 | **1.24** | Nov 11, 2026 | Story 6.2.6 (#509): new spec `ux-v3-version-labels.spec.ts` (a song with an original, two songbook variants and a translation: labels are the songbook short names and the language, original first, and at 375 px every option is reachable with no sideways page scroll; fixture `VERSION_LABELS_FIXTURE_IDS`, removed by `e2e/global-teardown.ts`). |
 | **1.25** | Nov 13, 2026 | Story 6.2.11 (#514): Library gets a sixth tab **Songbooks** (`ux-v2-library-tabs.spec.ts` now expects six tabs); added LIB-14 for the songbook pages (covered by `@unit`/`@seed` BDD and RTL; no E2E spec yet). |
+| **1.26** | Nov 12, 2026 | (develop 1.24) #485 group 1: SONG-12 `ux-v2-sober-colours.spec.ts` (member): every category tag on the Add song page has the same colours, a selected tag shows inverted greys and `aria-pressed`, light and dark. |
+| **1.27** | Nov 13, 2026 | Sync: merge of `origin/develop` into `feat/ux-v3`. develop's row 1.24 (SONG-12, neutral tags) clashed with the `feat/ux-v3` number and is kept as 1.26. Seeded accounts are `<role>@sfs.example` on develop; `feat/ux-v3`-only specs still use the old addresses until a follow-up. |
 | **1.23** | Nov 11, 2026 | #490: `ux-v2-profile-playback.spec.ts` (member): recordings on a singer profile play there one at a time, the play button is a 44 px target and the row opens the song with that take. |
 | **1.22** | Nov 11, 2026 | #492: SONG-08 now checks that a song row has no delete button (an admin on `/songs`, `ux-v2-song-rows.spec.ts`); deleting is in the song page's ⋮ menu only (SONG-07). |
 | **1.19** | Nov 6, 2026 | UX v2 validation round 1 (Part of #375): new spec `ux-v2-validation-1.spec.ts` (one focus style, suggestions panel in the flow on `/songs` and Home, search options tokens and category name, song flags versus the reader; fixed-id fixture `VALIDATION_1_FIXTURE_IDS`, removed by `e2e/global-teardown.ts`); `ux-v2-reader-tools.spec.ts` uses a short window so auto-scroll is offered and tests that it is not on a song that fits; `ux-v2-song-meta.spec.ts` checks the expanded list. |
@@ -143,6 +145,7 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 | SONG-09 | Media links | Attach YouTube/Spotify/SoundCloud URLs; embeds render on detail | invalid URL; multiple embeds | M/A | ✅ | 🔲 | P1 | 1.1.7, 1.3.2/1.3.4 |
 | SONG-10 | Draft auto-save | In-progress add form persists to localStorage and restores | clears after submit; create-mode only | M | ✅ | 🔲 | P2 | Story 1.1.8 |
 | SONG-11 | Public/Draft toggle | Set song visibility on create/edit | draft hidden from guests | M/A | ✅ | 🔲 | P1 | SongForm |
+| SONG-12 | Neutral category tags | Every tag in the Add/Edit song tag picker has the same colours; selected = inverted greys + `aria-pressed` | light and dark mode | M | ✅ | ✅ | P2 | `ux-v2-sober-colours.spec.ts` (Story 6.1.35) |
 
 ### 4.4 Public Library & Discovery (Epic 1.2 / 2.3)
 
