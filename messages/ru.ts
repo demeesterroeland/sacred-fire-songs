@@ -385,8 +385,6 @@ const ru: Partial<Record<TranslationKey, string>> = {
   'recording.attribution.clearSinger': 'Выбрать другого исполнителя',
 
   'user.profile.title': 'Профиль музыканта',
-  'user.profile.verifiedMusician': 'Подтверждённый музыкант',
-  'user.profile.member': 'Участник сообщества',
   'user.unnamed': 'Участник без имени',
   "user.profile.attributedRecordings": "Связанные записи",
   "user.profile.noAttributedRecordings": "К этому музыканту пока не привязано записей.",

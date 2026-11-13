@@ -386,8 +386,6 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'recording.attribution.clearSinger': 'Huk takiqta akllay',
 
   'user.profile.title': 'Takiqpa kawsaynin',
-  'user.profile.verifiedMusician': 'Takyasqa takiq',
-  'user.profile.member': 'Ayllupi kaq',
   'user.unnamed': 'Mana sutiyuq ayllu runa',
   "user.profile.attributedRecordings": "Paypa grabaciónkuna",
   "user.profile.noAttributedRecordings": "Manaraq grabaciónkuna kanchu.",

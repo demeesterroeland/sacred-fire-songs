@@ -4,8 +4,9 @@ import React from "react";
 import Link from "next/link";
 import { useLocale } from "@/context/LocaleContext";
 import type { MusicianProfileData } from "@/lib/users/serverQueries";
-import { Music, ArrowLeft, Mic, UserCheck } from "lucide-react";
+import { ArrowLeft, Mic } from "lucide-react";
 import { ProfileRecordingRow } from "@/components/profile/ProfileRecordingRow";
+import RoleBadge from "@/components/profile/RoleBadge";
 
 export default function UserProfileView({ profile }: { profile: MusicianProfileData }) {
   const { t } = useLocale();
@@ -31,17 +32,7 @@ export default function UserProfileView({ profile }: { profile: MusicianProfileD
             <h1 className="text-xl font-bold text-fg">
               {profile.full_name || t("user.unnamed")}
             </h1>
-            {profile.is_musician ? (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-control text-xs font-semibold bg-surface-2 text-fg border border-line">
-                <Music className="w-3.5 h-3.5" />
-                {t("user.profile.verifiedMusician")}
-              </span>
-            ) : (
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-control text-xs font-medium bg-surface-2 text-fg border border-line">
-                <UserCheck className="w-3.5 h-3.5" />
-                {t("user.profile.member")}
-              </span>
-            )}
+            <RoleBadge role={profile.role} />
           </div>
         </div>
       </div>

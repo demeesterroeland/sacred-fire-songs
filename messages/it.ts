@@ -382,8 +382,6 @@ const it: Partial<Record<TranslationKey, string>> = {
   'recording.attribution.clearSinger': 'Scegli un altro cantante',
 
   'user.profile.title': 'Profilo musicista',
-  'user.profile.verifiedMusician': 'Musicista verificato',
-  'user.profile.member': 'Membro della comunità',
   'user.unnamed': 'Membro senza nome',
   "user.profile.attributedRecordings": "Registrazioni attribuite",
   "user.profile.noAttributedRecordings": "Nessuna registrazione ancora attribuita a questo musicista.",
