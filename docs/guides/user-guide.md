@@ -1,6 +1,6 @@
 # User Guide: Sacred Fire Songs
 
-**Version:** 2.9
+**Version:** 2.10
 **Status:** Published
 **Date:** Nov 13, 2026
 
@@ -22,6 +22,7 @@
 | **2.7** | Nov 12, 2026 | Song Detail: a song with translations has a **language switch** next to the version switch (Original language plus the languages the song has); tap a language to read that translation without leaving the song (Story 6.2.13, #516). |
 | **2.8** | Nov 13, 2026 | The search box also finds a song by another name it is known by (an alias) and by the title it has in a songbook, ignoring capitals and accents. When the song's own title did not match, the result says why, for example *Matched by alias: …*. Songs whose title matches are listed first. |
 | **2.9** | Nov 13, 2026 | Editing: the edit form has a **Songbook details** section with the **Beats** and the **About this song** note of the version, and shows its source (songbook, page, compiler) as read-only text; admins can correct the source's page and original title (UX v3, #523). |
+| **2.10** | Nov 13, 2026 | Song Detail: **Key**, **Capo** and **Tuning** (now named, e.g. `Tuning: Drop D`) show only while the **Chords** switch is on; the **Beats** stay. Musicians transpose with the **− n +** stepper next to the Chords switch. |
 
 Welcome to **Sacred Fire Songs**, a digital songbook designed for ceremonial musicians. This guide covers how to browse, learn, and manage medicine songs using our platform.
 
@@ -61,7 +62,7 @@ Use the filter tabs at the top to narrow down your selection:
 ### 2.3 Song Detail View
 Click any song to view its lyrics and musical data:
 - **Badges**: High-visibility badges tell you if a song has Chords or Melody.
-- **Metadata**: See the **Key**, **Capo position**, **Tuning** and, when the songbook gives them, the **Beats** of the selected version at a glance.
+- **Metadata**: See the **Key**, **Capo position**, **Tuning** (while chords are on) and, when the songbook gives them, the **Beats** of the selected version at a glance.
 - **Language**: If the song has translations, a second switch next to the version switch lists **Original language** and the languages the song is available in (named in your app language). Tap a language to read that translation; tap **Original language** to go back. Choosing another version returns to the original language, and a link ending in `?lang=nl` opens the translation. Songs without translations show no language switch.
 - **About this song**: If the songbook this version was printed in gives a note about the song, tap **About this song** under the metadata to read it. It starts closed and is not shown when there is no note.
 - **Media**: Listen to YouTube, Spotify, or SoundCloud recordings directly on the page.

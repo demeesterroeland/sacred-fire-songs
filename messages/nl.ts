@@ -171,6 +171,7 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'song.metadata.standard': 'Standaard',
   'song.meta.key': "Toonsoort {key}",
   'song.meta.capo': "Capo {capo}",
+  'song.meta.tuning': "Stemming: {tuning}",
   'song.meta.beats': 'Tellen {beats}',
   'song.meta.showDetails': 'Details tonen',
   'song.meta.hideDetails': 'Details verbergen',

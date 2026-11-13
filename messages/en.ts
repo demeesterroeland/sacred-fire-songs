@@ -169,6 +169,7 @@ const en = {
   'song.metadata.standard': 'Standard',
   'song.meta.key': "Key {key}",
   'song.meta.capo': "Capo {capo}",
+  'song.meta.tuning': "Tuning: {tuning}",
   'song.meta.beats': 'Beats {beats}',
   'song.meta.showDetails': 'Show details',
   'song.meta.hideDetails': 'Hide details',

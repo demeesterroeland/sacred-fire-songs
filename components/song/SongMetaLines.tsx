@@ -20,6 +20,11 @@ interface SongMetaLinesProps {
   originalAuthor?: string | null;
   categories?: CategoryItem[];
   version?: VersionTechnical;
+  /**
+   * Chords are on screen (#566): key, capo and tuning only show then; the beats stay. Default `true`: no Chords
+   * switch, no change.
+   */
+  chordsOn?: boolean;
   hasChords?: boolean;
   hasMelody?: boolean;
   hasPersonalRecording?: boolean;
@@ -58,6 +63,7 @@ export function SongMetaLines({
   originalAuthor,
   categories = [],
   version,
+  chordsOn = true,
   hasChords,
   hasMelody,
   hasPersonalRecording,
@@ -77,7 +83,7 @@ export function SongMetaLines({
   const authors = authorLabels.length > 0 ? authorLabels.map((a) => a.label) : songAuthors({}, t);
   // The text between the author links ("and", "y", ","), so each name stays its own link.
   const authorJoiners = authorSeparators(authors, locale);
-  const technical = joinMeta(technicalItems(version, t));
+  const technical = joinMeta(technicalItems(version, t, { chordsOn }));
 
   // Authors always show; tags and Chords / Melody / Recordings (`fitIndex`) only as far as they fit while closed.
   const optional = [

@@ -1,11 +1,12 @@
 # Member Guide (draft)
 
-**Version:** 0.29 | **Date:** Nov 13, 2026
+**Version:** 0.30 | **Date:** Nov 13, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.30 | Nov 13, 2026 | Song page: musicians transpose with the **− n +** stepper right after the **Chords** switch in the toolbar (it is not in the ⋮ menu any more) and it shows only while chords are on. **Key**, **Capo** and **Tuning** show only while chords are on; after a transpose the line shows the new key (a song in D at +2 reads `Key E · Tuning: Drop D`); the tuning is named; the **Beats** stay (UX v3, #566). |
 | 0.29 | Nov 13, 2026 | Edit Song: the **Songbook details** section lets you correct the **Beats** (for example 8, 6, 8y4 or 8,4) and the **About this song** note of the version you are editing; clear a field to remove it. The **Source** (songbook, page, compiler) is shown there but cannot be changed; admins also see **Correct source** to fix its page and original title (UX v3, #523). |
 | 0.28 | Nov 13, 2026 | Search: the search box also finds a song by another name it is known by and by the title it has in a songbook (accents and capitals do not matter, "pachamama" finds "Pachamamá"). When the song's own title did not match, the row adds a grey line saying why, for example *Matched by alias: Gran Venerable Madre Tierra* (UX v3, #521). Songs whose title matches are listed first. The **+ Add Songs** search in a playlist still matches the title only. |
 | 0.27 | Nov 12, 2026 | Song page: a song with translations has a language switch next to the version switch (**Original language** and the languages the song has). A translation replaces the lyrics of the version you are reading; its practice recordings, key and playlist entries stay with that version. Choosing another version returns to the original language; a link can end in `?lang=nl`. Old translation versions were moved into this switch, with their recordings going to the song's first original version (after the takes already there) and their playlist entries opening the original language of that version from now on (UX v3, #516). A translation with chords in another key, capo or tuning than the original, with blank lyrics, or with its own melody, note, beats, link or votes, is not moved and stays a version. |
@@ -114,7 +115,7 @@ A song that comes from a printed songbook has a **Songbook details** section (ta
 
 - **Profile:** display name. E-mail changes go via support.
 - **Security:** change password, log out from all devices.
-- **Preferences:** appearance, language, keep screen awake, auto-hide navigation on song pages and e-mail notifications (text size is set on the song page with A− / A+, auto-scroll with ▶ next to them; transpose, scroll speed and **Screen stays on** are in the ⋮ menu at the top of the song page; transpose moves alternative chords such as **A7/C7** together and keeps the bass of a slash chord such as **C/E**).
+- **Preferences:** appearance, language, keep screen awake, auto-hide navigation on song pages and e-mail notifications (text size is set on the song page with A− / A+, auto-scroll with ▶ next to them; musicians transpose with the **− n +** stepper next to the **Chords** switch, and the scroll speed and **Screen stays on** are in the ⋮ menu at the top of the song page; transpose moves alternative chords such as **A7/C7** together and keeps the bass of a slash chord such as **C/E**).
 
 ## Public profile
 

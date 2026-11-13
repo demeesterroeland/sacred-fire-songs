@@ -45,6 +45,7 @@ import { useReaderPrefs } from '@/lib/reader/useReaderPrefs';
 import { speedBy } from '@/lib/reader/autoScroll';
 import { versionHasChords } from '@/lib/songs/versionFlags';
 import { canTranspose, shiftSemitones, transposeChordPro, transposeKey } from '@/lib/reader/transpose';
+import { chordTools } from '@/lib/reader/chordTools';
 import { cn } from '@/lib/utils';
 import { recordSongView } from '@/app/actions/recordSongView';
 import { useSongRecordings } from '@/hooks/useSongRecordings';
@@ -252,6 +253,8 @@ export default function SongDetailPage() {
             : transposeChordPro(currentVersion?.content_chordpro || '', mayTranspose ? semitones : 0, { key: currentVersion?.key }),
         [translation, currentVersion?.content_chordpro, currentVersion?.key, mayTranspose, semitones],
     );
+    // Chord tools in one place (#566): the transpose stepper (toolbar) and key, capo and tuning (meta line) only while chords are on.
+    const tools = chordTools({ shownHasChords, chordsPref: readerPrefs.chords, mayTranspose });
     const shownVersion = currentVersion && mayTranspose && semitones !== 0
         ? { ...currentVersion, key: transposeKey(currentVersion.key, semitones) }
         : currentVersion;
@@ -591,6 +594,7 @@ export default function SongDetailPage() {
                         originalAuthor={song.original_author}
                         categories={categories}
                         version={shownVersion}
+                        chordsOn={tools.showChordDetails}
                         hasChords={song.has_chords}
                         hasMelody={song.has_melody}
                         hasPersonalRecording={hasPersonalRecording}
@@ -627,6 +631,11 @@ export default function SongDetailPage() {
                                 speed={readerPrefs.speed}
                                 hasChords={shownHasChords}
                                 onChange={setReaderPrefs}
+                                transpose={tools.showStepper ? {
+                                    semitones,
+                                    onShift: (delta) => setTransposeState({ id, n: shiftSemitones(semitones, delta) }),
+                                    onReset: () => setTransposeState({ id, n: 0 }),
+                                } : undefined}
                                 scrolling={autoScroll.playing}
                                 onToggleScroll={canAutoScroll ? () => {
                                     // With the controls closed, pause removes this toolbar: keep keyboard focus on the page.
@@ -743,12 +752,6 @@ export default function SongDetailPage() {
                         : undefined,
                     onLinkAsVersion: canLinkSong(user, song.owner_id) ? () => { setIsMenuOpen(false); setIsLinkOpen(true); } : undefined,
                 }}
-                transpose={mayTranspose ? {
-                    semitones,
-                    originalKey: currentVersion?.key,
-                    onShift: (delta) => setTransposeState({ id, n: shiftSemitones(semitones, delta) }),
-                    onReset: () => setTransposeState({ id, n: 0 }),
-                } : undefined}
                 speed={readerPrefs.speed}
                 onSpeed={(delta) => setReaderPrefs({ ...readerPrefs, speed: speedBy(readerPrefs.speed, delta) })}
                 scrolling={autoScroll.playing}

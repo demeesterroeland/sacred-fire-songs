@@ -83,16 +83,16 @@ test.describe('Musician @story-6.1.10', () => {
     await expect(page.getByTestId('song-meta-lines')).toContainText('Key E');
     await expect(page.getByTestId('chord').first()).toHaveText('E');
 
-    const sheet = await openSongMenu(page);
-    const up = sheet.getByRole('button', { name: 'Up a semitone' });
+    // #566: the stepper sits next to the Chords switch in the toolbar (it is not in the ⋮ menu any more).
+    const stepper = page.getByTestId('transpose-stepper');
+    const up = stepper.getByRole('button', { name: 'Up a semitone' });
     await up.click();
     await up.click();
-    await expect(sheet.getByTestId('transpose-value')).toHaveText('+2');
-    await expect(sheet.getByTestId('transpose-key')).toContainText('F#');
-    await sheet.getByRole('button', { name: 'Close' }).last().click();
+    await expect(stepper.getByTestId('transpose-value')).toHaveText('+2');
 
     await expect(page.getByTestId('chord').first()).toHaveText('F#');
     await expect(page.getByTestId('song-meta-lines')).toContainText('Key F#');
+    await expect(page.getByTestId('song-meta-lines')).not.toContainText('Key E');
 
     // Original key restores everything.
     await openSongMenu(page);
@@ -234,6 +234,7 @@ test.describe('Member @story-6.1.10', () => {
     const sheet = await openSongMenu(page);
     await expect(sheet.getByRole('group', { name: 'Auto-scroll' })).toBeVisible();
     await expect(sheet.getByRole('group', { name: 'Transpose' })).toHaveCount(0);
+    await expect(page.getByTestId('transpose-stepper')).toHaveCount(0);
   });
 });
 
@@ -245,6 +246,7 @@ test.describe('Guest @story-6.1.10', () => {
     await expect(page.getByTestId('autoscroll-toggle')).toBeVisible();
     await openSongMenu(page);
     await expect(songMenuSheet(page).getByRole('group', { name: 'Transpose' })).toHaveCount(0);
+    await expect(page.getByTestId('transpose-stepper')).toHaveCount(0);
   });
 });
 
@@ -279,7 +281,7 @@ test.describe('Auto-scroll only when the song does not fit @validation-1', () =>
     await expect(page.getByTestId('autoscroll-toggle')).toHaveAttribute('aria-pressed', 'false'); // did not restart
   });
 
-  test('the tools sheet of a musician has no Auto-scroll section on a song that fits, but still Transpose', async ({ browser }) => {
+  test('the ⋮ menu of a musician has no Auto-scroll section on a song that fits and never a Transpose; the stepper is in the toolbar', async ({ browser }) => {
     test.skip(!longSong, 'no public chord song in the seed');
     const ctx = await browser.newContext({ storageState: ROLES.musician.storage, viewport: { width: 390, height: 5000 } });
     const page = await ctx.newPage();
@@ -287,8 +289,10 @@ test.describe('Auto-scroll only when the song does not fit @validation-1', () =>
     await page.setViewportSize({ width: 390, height: 5000 });
     await expect(page.getByTestId('autoscroll-toggle')).toHaveCount(0);
     const sheet = await openSongMenu(page);
-    await expect(sheet.getByRole('group', { name: 'Transpose' })).toBeVisible();
+    await expect(sheet.getByRole('group', { name: 'Transpose' })).toHaveCount(0);
     await expect(sheet.getByRole('group', { name: 'Auto-scroll' })).toHaveCount(0);
+    await page.keyboard.press('Escape');
+    await expect(page.getByTestId('transpose-stepper')).toBeVisible();
     await ctx.close();
   });
 });

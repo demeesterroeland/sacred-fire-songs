@@ -26,20 +26,30 @@ export type VersionTechnical = {
   beats?: string | null;
 };
 
+export interface TechnicalOptions {
+  /**
+   * Chords are on screen (#566). With `false` key, capo and tuning are left out and only the beats remain (they matter
+   * to singers too). Default `true`: callers without a Chords switch (the PDF meta line) keep today's output.
+   */
+  chordsOn?: boolean;
+}
+
 /**
- * "Key E · Capo 3 · Standard · Beats 8" (Story 6.2.7 / #510: beats added last). Empty when the version has no key,
+ * "Key E · Capo 3 · Tuning: Standard · Beats 8" (Story 6.2.7 / #510: beats added last). Empty when the version has no key,
  * capo, special tuning or beats. "Standard" is only named next to other technical values, so beats alone show "Beats 8".
+ * `chordsOn: false` (#566) drops key, capo and tuning.
  */
-export function technicalItems(v: VersionTechnical | undefined, t: T): string[] {
+export function technicalItems(v: VersionTechnical | undefined, t: T, { chordsOn = true }: TechnicalOptions = {}): string[] {
   if (!v) return [];
-  const special = !!v.tuning && v.tuning !== 'Standard';
+  const special = chordsOn && !!v.tuning && v.tuning !== 'Standard';
   const beats = v.beats?.trim() ?? '';
-  const keyCapoOrTuning = !!v.key || !!v.capo || special;
+  const keyCapoOrTuning = chordsOn && (!!v.key || !!v.capo || special);
   if (!keyCapoOrTuning && !beats) return [];
-  const tuning = keyCapoOrTuning ? (special ? v.tuning! : t('song.metadata.standard')) : null;
+  // The tuning is named: "Tuning: Drop D", not a bare "Drop D" (owner decision, #566).
+  const tuning = keyCapoOrTuning ? t('song.meta.tuning', { tuning: special ? v.tuning! : t('song.metadata.standard') }) : null;
   return [
-    v.key ? t('song.meta.key', { key: v.key }) : null,
-    v.capo ? t('song.meta.capo', { capo: v.capo }) : null,
+    chordsOn && v.key ? t('song.meta.key', { key: v.key }) : null,
+    chordsOn && v.capo ? t('song.meta.capo', { capo: v.capo }) : null,
     tuning,
     beats ? t('song.meta.beats', { beats }) : null,
   ].filter((i): i is string => !!i);

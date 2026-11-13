@@ -120,3 +120,101 @@ describe('ReaderToolbar', () => {
     expect(document.activeElement).toBe(screen.getByRole('switch', { name: 'Chords' }));
   });
 });
+
+// Chord tools in one place (#566): `Chords [switch] · [− n +] transpose · A− · A+`; the stepper only while chords are on.
+describe('ReaderToolbar — transpose stepper', () => {
+  const base = { step: 1, chords: true, speed: 3, hasChords: true, onChange: () => {} };
+  const transpose = (over: Partial<{ semitones: number; onShift: (d: -1 | 1) => void; onReset: () => void }> = {}) => ({
+    semitones: 0,
+    onShift: vi.fn(),
+    onReset: vi.fn(),
+    ...over,
+  });
+
+  it('sits right after the Chords switch and before A−', () => {
+    render(<ReaderToolbar {...base} transpose={transpose()} />);
+    const order = [...screen.getByTestId('reader-toolbar').querySelectorAll('[role="switch"], button, [data-testid="transpose-stepper"]')]
+      .map((el) => el.getAttribute('data-testid') === 'transpose-stepper' ? 'stepper' : (el.getAttribute('aria-label') ?? el.textContent ?? ''));
+    const at = (needle: string) => order.findIndex((x) => x.includes(needle));
+    expect(at('Chords')).toBeLessThan(at('stepper'));
+    expect(at('stepper')).toBeLessThan(at('Smaller text'));
+  });
+
+  it('is one labelled group with − n + and the shift in words, signed', () => {
+    render(<ReaderToolbar {...base} transpose={transpose({ semitones: 2 })} />);
+    const group = screen.getByRole('group', { name: 'Transpose' });
+    expect(group.getAttribute('data-testid')).toBe('transpose-stepper');
+    expect(screen.getByRole('button', { name: 'Down a semitone' })).toBeTruthy();
+    expect(screen.getByRole('button', { name: 'Up a semitone' })).toBeTruthy();
+    expect(screen.getByTestId('transpose-value').textContent).toBe('+2');
+  });
+
+  it('+ and − shift by one semitone', () => {
+    const tr = transpose();
+    render(<ReaderToolbar {...base} transpose={tr} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Up a semitone' }));
+    expect(tr.onShift).toHaveBeenLastCalledWith(1);
+    fireEvent.click(screen.getByRole('button', { name: 'Down a semitone' }));
+    expect(tr.onShift).toHaveBeenLastCalledWith(-1);
+  });
+
+  it('keeps ± aria-disabled and inert at the ends of the range', () => {
+    const tr = transpose({ semitones: 11 });
+    render(<ReaderToolbar {...base} transpose={tr} />);
+    const up = screen.getByRole('button', { name: 'Up a semitone' });
+    expect(up.getAttribute('aria-disabled')).toBe('true');
+    fireEvent.click(up);
+    expect(tr.onShift).not.toHaveBeenCalled();
+    expect(screen.getByRole('button', { name: 'Down a semitone' }).getAttribute('aria-disabled')).toBe('false');
+  });
+
+  it('tapping the value goes back to the original key, only after a change', () => {
+    const none = transpose();
+    const { rerender } = render(<ReaderToolbar {...base} transpose={none} />);
+    expect(screen.queryByRole('button', { name: 'Original key' })).toBeNull();
+    expect(screen.getByTestId('transpose-value').textContent).toBe('0');
+    const changed = transpose({ semitones: -3 });
+    rerender(<ReaderToolbar {...base} transpose={changed} />);
+    fireEvent.click(screen.getByRole('button', { name: 'Original key' }));
+    expect(changed.onReset).toHaveBeenCalledTimes(1);
+  });
+
+  it('is hidden while chords are off', () => {
+    render(<ReaderToolbar {...base} chords={false} transpose={transpose()} />);
+    expect(screen.queryByTestId('transpose-stepper')).toBeNull();
+    expect(screen.queryByRole('button', { name: 'Up a semitone' })).toBeNull();
+    // The Chords switch and the text size stay.
+    expect(screen.getByRole('switch', { name: 'Chords' }).getAttribute('aria-checked')).toBe('false');
+    expect(screen.getByRole('button', { name: 'Larger text' })).toBeTruthy();
+  });
+
+  it('shows with the switch and goes when it is flipped off (the toolbar follows the preference)', () => {
+    const { rerender } = render(<ReaderToolbar {...base} transpose={transpose()} />);
+    expect(screen.getByTestId('transpose-stepper')).toBeTruthy();
+    rerender(<ReaderToolbar {...base} chords={false} transpose={transpose()} />);
+    expect(screen.queryByTestId('transpose-stepper')).toBeNull();
+  });
+
+  it('is not there for a reader who may not transpose, or for a song without chords', () => {
+    const { rerender } = render(<ReaderToolbar {...base} />);
+    expect(screen.queryByTestId('transpose-stepper')).toBeNull();
+    rerender(<ReaderToolbar {...base} hasChords={false} transpose={transpose()} />);
+    expect(screen.queryByRole('switch')).toBeNull();
+    expect(screen.queryByTestId('transpose-stepper')).toBeNull();
+  });
+
+  it('every stepper control is a 44 px target, and the value does not shrink below readable text', () => {
+    render(<ReaderToolbar {...base} transpose={transpose({ semitones: 1 })} />);
+    for (const name of ['Down a semitone', 'Up a semitone', 'Original key']) {
+      expect(screen.getByRole('button', { name }).className).toMatch(/min-h-tap/);
+    }
+    expect(screen.getByTestId('transpose-value').className).not.toMatch(/text-\[(?:\d|1[01])px\]|text-xs/);
+  });
+
+  it('lets the row wrap on a narrow phone instead of scrolling sideways', () => {
+    render(<ReaderToolbar {...base} transpose={transpose()} />);
+    const cls = screen.getByTestId('reader-toolbar').className;
+    expect(cls).toMatch(/flex-wrap/);
+    expect(cls).not.toMatch(/overflow-x-(auto|scroll)/);
+  });
+});

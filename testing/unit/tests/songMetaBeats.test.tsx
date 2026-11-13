@@ -22,7 +22,7 @@ describe('SongMetaLines — beats in the technical line', () => {
   it('shows key, capo, tuning and beats of the version after opening the details', () => {
     render(<SongMetaLines originalAuthor="Anna" version={{ key: 'E', capo: 5, tuning: null, beats: '8' }} />);
     fireEvent.click(screen.getByTestId('song-meta-line'));
-    expect(technicalText()).toBe('Key E · Capo 5 · Standard · Beats 8');
+    expect(technicalText()).toBe('Key E · Capo 5 · Tuning: Standard · Beats 8');
   });
 
   it('shows the line when the version has only beats', () => {
@@ -43,16 +43,59 @@ describe('SongMetaLines — beats in the technical line', () => {
       <SongMetaLines originalAuthor="Anna" version={{ key: 'E', capo: 5, tuning: null, beats: '8' }} />
     );
     fireEvent.click(screen.getByTestId('song-meta-line'));
-    expect(technicalText()).toBe('Key E · Capo 5 · Standard · Beats 8');
+    expect(technicalText()).toBe('Key E · Capo 5 · Tuning: Standard · Beats 8');
 
     rerender(<SongMetaLines originalAuthor="Anna" version={{ key: 'G', capo: 0, tuning: null, beats: null }} />);
-    expect(technicalText()).toBe('Key G · Standard');
+    expect(technicalText()).toBe('Key G · Tuning: Standard');
   });
 
   // Transposed key keeps working: the page passes the version with the shifted key and keeps its beats.
   it('shows the transposed key together with the beats', () => {
     render(<SongMetaLines originalAuthor="Anna" version={{ key: 'F', capo: 5, tuning: null, beats: '8' }} />);
     fireEvent.click(screen.getByTestId('song-meta-line'));
-    expect(technicalText()).toBe('Key F · Capo 5 · Standard · Beats 8');
+    expect(technicalText()).toBe('Key F · Capo 5 · Tuning: Standard · Beats 8');
+  });
+});
+
+// Chord tools in one place (#566): key, capo and tuning only while chords are on; beats stay.
+describe('SongMetaLines — chords off', () => {
+  const version = { key: 'D', capo: 2, tuning: 'Drop D', beats: '8' };
+
+  it('chords on (the default): the whole technical line, with the key it is given (D → E after +2)', () => {
+    render(<SongMetaLines originalAuthor="Anna" version={{ ...version, key: 'E' }} chordsOn />);
+    fireEvent.click(screen.getByTestId('song-meta-line'));
+    expect(technicalText()).toBe('Key E · Capo 2 · Tuning: Drop D · Beats 8');
+  });
+
+  it('chords off: no key, capo or tuning; the beats stay', () => {
+    render(<SongMetaLines originalAuthor="Anna" version={version} chordsOn={false} />);
+    fireEvent.click(screen.getByTestId('song-meta-line'));
+    expect(technicalText()).toBe('Beats 8');
+  });
+
+  it('chords off and no beats: no technical line at all', () => {
+    render(<SongMetaLines originalAuthor="Anna" version={{ ...version, beats: null }} chordsOn={false} />);
+    fireEvent.click(screen.getByTestId('song-meta-line'));
+    expect(technicalText()).toBeNull();
+  });
+
+  it('chords on, after +2: "Key E · Tuning: Drop D", with no "(was D)" or other hint', () => {
+    render(<SongMetaLines originalAuthor="Anna" version={{ key: 'E', capo: null, tuning: 'Drop D' }} chordsOn />);
+    fireEvent.click(screen.getByTestId('song-meta-line'));
+    expect(technicalText()).toBe('Key E · Tuning: Drop D');
+  });
+
+  it('follows the Chords switch without a reload', () => {
+    const { rerender } = render(<SongMetaLines originalAuthor="Anna" version={version} chordsOn />);
+    fireEvent.click(screen.getByTestId('song-meta-line'));
+    expect(technicalText()).toBe('Key D · Capo 2 · Tuning: Drop D · Beats 8');
+    rerender(<SongMetaLines originalAuthor="Anna" version={version} chordsOn={false} />);
+    expect(technicalText()).toBe('Beats 8');
+  });
+
+  it('leaves the line as it was when the prop is not given', () => {
+    render(<SongMetaLines originalAuthor="Anna" version={version} />);
+    fireEvent.click(screen.getByTestId('song-meta-line'));
+    expect(technicalText()).toBe('Key D · Capo 2 · Tuning: Drop D · Beats 8');
   });
 });

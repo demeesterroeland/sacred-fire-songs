@@ -171,6 +171,7 @@ const pt: Partial<Record<TranslationKey, string>> = {
   'song.metadata.standard': 'Padrão',
   'song.meta.key': "Tom {key}",
   'song.meta.capo': "Capotraste {capo}",
+  'song.meta.tuning': "Afinação: {tuning}",
   'song.meta.beats': 'Tempos {beats}',
   'song.meta.showDetails': 'Mostrar detalhes',
   'song.meta.hideDetails': 'Ocultar detalhes',

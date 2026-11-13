@@ -175,6 +175,7 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'song.metadata.standard': 'Estándar',
   'song.meta.key': "Tono {key}",
   'song.meta.capo': "Capo {capo}",
+  'song.meta.tuning': "Afinación: {tuning}", // #566: needs a native speaker check (Spanish loanword, as pdf.tuning)
   'song.meta.beats': 'Beats {beats}',
   'song.meta.showDetails': 'Astawan rikuchiy',
   'song.meta.hideDetails': 'Pakay',
