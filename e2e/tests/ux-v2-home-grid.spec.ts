@@ -1,4 +1,5 @@
 import { test, expect, type Page } from '@playwright/test';
+import pg from 'pg';
 import { ROLES } from '../fixtures/roles';
 
 /**
@@ -8,6 +9,10 @@ import { ROLES } from '../fixtures/roles';
  * Gherkin: docs/testing/ux-v2-home-grid.feature (@e2e).
  */
 const GUEST = { cookies: [], origins: [] };
+const DATABASE_URL = process.env.DATABASE_URL ?? 'postgresql://postgres:postgres@127.0.0.1:54322/postgres';
+// Seeded accounts (scripts/db/random-seeder.mjs USERS).
+const MEMBER_ID = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13';
+const GATEKEEPER_ID = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14';
 
 const LOCALE_KEY = 'sacred-fire-songs-locale';
 const pinEnglish = (page: Page) => page.addInitScript(([k, v]) => localStorage.setItem(k, v), [LOCALE_KEY, 'en']);
@@ -148,16 +153,48 @@ for (const [width, height] of [[1280, 1000], [390, 844]] as const) {
 test.describe('Shared by me', () => {
   test.use({ viewport: { width: 1280, height: 1000 }, storageState: ROLES.member.storage });
 
-  test('the Home count matches the rows on the Shared by me page', async ({ page }) => {
-    await pinEnglish(page);
-    await page.goto('/');
-    const stat = page.locator('[data-testid="library-stat"][data-key="sharedByMe"]');
-    const count = Number(await stat.locator('p').first().innerText());
-    await stat.click();
-    await expect(page).toHaveURL(/\/library\/shared-by-me$/);
-    await expect(page.getByRole('heading', { level: 1, name: /Shared by me/ })).toBeVisible();
-    if (count === 0) await expect(page.getByTestId('shared-by-me-empty')).toBeVisible();
-    else await expect(page.getByTestId('shared-by-me-row')).toHaveCount(count);
+  // #601 (#488): the list names the song and the member, not only the count. The seed shares nothing, so this test
+  // shares one of the member's seeded takes with the gatekeeper and removes the share afterwards (the delete trigger
+  // also removes the notification).
+  test('the Home count matches the rows on the Shared by me page, each naming the song and the member', async ({ page }) => {
+    const db = new pg.Client({ connectionString: DATABASE_URL });
+    await db.connect();
+    const { rows } = await db.query<{ id: string; title: string; name: string }>(
+      `SELECT r.id, c.title, p.full_name AS name
+         FROM public.user_recordings r
+         JOIN public.song_versions v ON v.id = r.song_version_id
+         JOIN public.compositions c ON c.id = v.composition_id
+         JOIN public.public_profiles p ON p.id = $2
+        WHERE r.user_id = $1
+          AND NOT EXISTS (SELECT 1 FROM public.recording_shares s WHERE s.recording_id = r.id AND s.shared_with_user_id = $2)
+        ORDER BY r.created_at LIMIT 1`,
+      [MEMBER_ID, GATEKEEPER_ID],
+    );
+    const take = rows[0];
+    // Fail, not skip: without a seeded take the test would prove nothing.
+    expect(take, 'the seed has a take of the member and a named gatekeeper').toBeTruthy();
+    const { rows: share } = await db.query<{ id: string }>(
+      'INSERT INTO public.recording_shares (recording_id, shared_with_user_id) VALUES ($1, $2) RETURNING id',
+      [take.id, GATEKEEPER_ID],
+    );
+    try {
+      await pinEnglish(page);
+      await page.goto('/');
+      const stat = page.locator('[data-testid="library-stat"][data-key="sharedByMe"]');
+      const count = Number(await stat.locator('p').first().innerText());
+      expect(count).toBeGreaterThanOrEqual(1);
+      await stat.click();
+      await expect(page).toHaveURL(/\/library\/shared-by-me$/);
+      await expect(page.getByRole('heading', { level: 1, name: /Shared by me/ })).toBeVisible();
+      const rowsOnPage = page.getByTestId('shared-by-me-row');
+      await expect(rowsOnPage).toHaveCount(count);
+      const row = rowsOnPage.filter({ hasText: take.title }).filter({ hasText: `Shared with ${take.name}` });
+      await expect(row).toHaveCount(1);
+      await expect(row).toHaveAttribute('href', `/recordings/${take.id}`);
+    } finally {
+      await db.query('DELETE FROM public.recording_shares WHERE id = $1', [share[0].id]);
+      await db.end();
+    }
   });
 
   // Owner review: "Your recordings" counts the songs the list it opens shows, not the takes.
