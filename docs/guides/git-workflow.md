@@ -207,13 +207,13 @@ gh pr merge <back-merge-pr> --merge        # PR opened by back-merge.yml; merge 
 
 After every push to `main`, `.github/workflows/back-merge.yml` opens (or updates) the back-merge PR `main` → `develop` itself. It never merges it: you merge it with a merge commit once its checks pass. If `main` does not merge cleanly it gets the `back-merge-conflict` label; resolve on a `chore/…` branch from `develop` that merges `origin/main`.
 
-A push to `main` runs the copy of `back-merge.yml` that is **on `main`**, not the one on `develop`. Release 1.7.1 (#608) is an example: the hotfix reached `main` before the workflow was promoted there, so no back-merge PR was opened and the back-merge had to be done by hand. If no back-merge PR appears after a push to `main`, start the workflow by hand:
+A push to `main` runs the copy of `back-merge.yml` that is **on `main`**, not the one on `develop`. Release 1.7.1 (#608) is an example: the hotfix reached `main` before the workflow was promoted there, so no back-merge PR was opened and the back-merge had to be done by hand. If `back-merge.yml` is on `main` but no back-merge PR appears after a push to `main`, start the workflow by hand:
 
 ```bash
 gh workflow run back-merge.yml --ref main
 ```
 
-If the back-merge PR has the `back-merge-conflict` label, its comment lists the conflicting files. Resolve them like this:
+If the workflow is not on `main` yet, `gh workflow run` fails (the workflow is not found), so do the back-merge by hand with the steps below. If the back-merge PR has the `back-merge-conflict` label, its comment (one per PR, updated on later pushes) lists the conflicting files. Resolve them like this:
 
 ```bash
 git switch -c chore/back-merge-vX.Y.Z origin/develop

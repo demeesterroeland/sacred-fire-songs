@@ -12,7 +12,8 @@ name: Back-merge main into develop
 #   merge commit once the required checks pass.
 # - A push to main runs the copy of this file that is on main. A hotfix pushed
 #   before this file reached main gets no back-merge PR (#608, release 1.7.1):
-#   start it by hand with `gh workflow run back-merge.yml --ref main`.
+#   once this file is on main, a missed run can be started by hand with
+#   `gh workflow run back-merge.yml --ref main`.
 
 on:
   push:
@@ -85,13 +86,26 @@ jobs:
             gh label create back-merge-conflict --color B60205 \
               --description "main does not merge cleanly into develop" >/dev/null 2>&1 || true
             gh pr edit "$NUMBER" --add-label back-merge-conflict
+            MARKER="<!-- back-merge-conflict -->"
             {
-              echo "⚠️ \`main\` does not merge cleanly into \`develop\`. Conflicting files:"
+              echo "$MARKER"
+              if [ -n "$CONFLICTS" ]; then
+                echo "⚠️ \`main\` does not merge cleanly into \`develop\`. Conflicting files:"
+                echo
+                printf '%s\n' "$CONFLICTS" | sed 's/^/- `/; s/$/`/'
+              else
+                echo "⚠️ \`main\` does not merge cleanly into \`develop\`, but no file-level conflicts were found: see the workflow run log."
+              fi
               echo
-              printf '%s\n' "$CONFLICTS" | sed 's/^/- `/; s/$/`/'
-              echo
-              echo "Resolve the conflicts on a \`chore/…\` branch from \`develop\` (merge \`origin/main\` into it, see docs/guides/git-workflow.md), then let this PR update."
+              echo "Resolve the conflicts on a \`chore/…\` branch from \`develop\` (merge \`origin/main\` into it, see docs/guides/git-workflow.md). Merge that PR with a merge commit, then close this PR."
             } > conflict-comment.md
-            gh pr comment "$NUMBER" --body-file conflict-comment.md
+            # One comment per PR: update it on later pushes instead of adding another.
+            COMMENT_ID="$(gh api "repos/$GITHUB_REPOSITORY/issues/$NUMBER/comments" --paginate \
+              --jq ".[] | select(.body | startswith(\"$MARKER\")) | .id" | tail -n 1)"
+            if [ -n "$COMMENT_ID" ]; then
+              gh api -X PATCH "repos/$GITHUB_REPOSITORY/issues/comments/$COMMENT_ID" -F body=@conflict-comment.md >/dev/null
+            else
+              gh pr comment "$NUMBER" --body-file conflict-comment.md
+            fi
             echo "::warning::Back-merge PR #$NUMBER has conflicts in: $(echo "$CONFLICTS" | tr '\n' ' ')"
           fi

@@ -80,7 +80,7 @@ scripts/cicd/develop2main.sh --notes-file .brain/release-summary.md
 
 ## 5. Back-merge `main` → `develop`
 
-After every push to `main` (promotion, release commit, hotfix), `.github/workflows/back-merge.yml` opens or updates the back-merge PR `main` → `develop`. Merge it with a **merge commit** once its checks pass. A PR that does not merge cleanly gets the `back-merge-conflict` label; resolve it on a `chore/…` branch from `develop` that merges `origin/main`. The conflict comment lists the conflicting files. A push to `main` runs the copy of the workflow on `main`. If no back-merge PR appears, run `gh workflow run back-merge.yml --ref main` (see `git-workflow.md`, #608).
+After every push to `main` (promotion, release commit, hotfix), `.github/workflows/back-merge.yml` opens or updates the back-merge PR `main` → `develop`. Merge it with a **merge commit** once its checks pass. A PR that does not merge cleanly gets the `back-merge-conflict` label; resolve it on a `chore/…` branch from `develop` that merges `origin/main`. The conflict comment lists the conflicting files. A push to `main` runs the copy of the workflow on `main`. If the workflow is on `main` and no back-merge PR appears, run `gh workflow run back-merge.yml --ref main` (see `git-workflow.md`, #608).
 
 ## 6. Hotfix
 
