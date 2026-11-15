@@ -1,8 +1,8 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 2.24
+**Version:** 2.25
 **Status:** Living Document
-**Date:** Nov 13, 2026
+**Date:** Nov 15, 2026
 
 ## Changelog
 
@@ -69,6 +69,7 @@
 | **2.19** | Nov 13, 2026 | Epic 6.2: Story 6.2.24 (#569, G5.7) implemented on `feat/ux-v3`: *Search options* lets a reader choose a language only in the **Language** select, no longer in `TagSelector` (`components/library/TagSelector.tsx`), where `filterTagSelectorGroups()` (`lib/songs/browseFilters.ts`) omits the *Languages* group both when opened and in `filteredGrouped` search results. Song add/edit forms use `CategorySelector` (`components/song/CategorySelector.tsx`) and `useTaxonomy()` is unchanged, so assigning a song's language on edit is unaffected. Legacy links carrying a language slug in `?category=`, `?tag=`, or `?tags=` (e.g. `/songs?category=dutch`) are normalized inside `useSongsFilter`'s `parseUrl` via `normalizeLegacyLanguageParams(params, knownLanguageSlugs(songs, taxonomy))`, so they still filter Dutch songs, show `"Dutch"` in **Language**, omit duplicate language chips from `TagSelector`, and serialize to `?language=<slug>` on the next filter change. Added Story 6.2.24 row and acceptance criteria; executable spec: `docs/testing/ux-v3-language-filter-only.feature` (`@unit`). |
 | **1.94** | Nov 7, 2026 | Epic 6.1: validation round 2, batch 2 (Part of #375): acceptance criteria updated for Story 6.1.4 (#388: amounts between parentheses, "Air (3)"), 6.1.8 (#392: the full title wraps at the top of the page on a phone, the truncated copy shows only after scrolling past it), 6.1.10 (#394: transpose, scroll speed and a Screen stays on switch live in the one ⋮ menu; the toolbar has no ⋯), 6.1.11 (#395: every version has a `?version=` link, replaced in place, shared by Share), 6.1.23 (#407: History, Artists and Shared with me share one heading size) and 6.1.24 (#408: the Library "+" floats at the bottom right). New: Terms and Privacy pages (draft) with the operator from the server environment. |
 | **2.24** | Nov 13, 2026 | Epic 6.1: Story 6.1.40 (#586, G4) added and implemented on `feat/586-media-indicators`: one dot on Practice when there is media or a take to open; the Listen and Record tabs of the Practice panel show how many items each holds. Owner decision: no per-provider indicators, nothing on the Playlist button; the dot supersedes the Headphones cue and separate take count of Story 6.2.2 (#583). |
+| **2.25** | Nov 15, 2026 | #608: why the 1.7.1 back-merge was done by hand (the workflow was not on `main` yet). Story 5.1.9 adds the scenario for the conflicting-files comment; Story 5.1.10 adds the finding. |
 | **2.16** | Nov 13, 2026 | Sync: merge of `origin/develop` into `feat/ux-v3`. develop's row 1.99 (Story 6.1.38, role badge on a profile) clashed with the `feat/ux-v3` number and is kept as 2.15; no story changes. |
 | **2.15** | Nov 13, 2026 | (develop 1.99) Epic 6.1: Story 6.1.38 (#534) added and implemented on `feat/534-role-badges`: a profile page shows one badge per role (admin, gatekeeper, expert, musician, member) with its own label and icon; every signed-in member sees every role, a guest reads no role. |
 | **2.18** | Nov 13, 2026 | Epic 6.2: Story 6.2.22 (#542): the alias hint reads **"Also known as …"** (owner decision, Nov 13, 2026: the story's original wording), in the song list and in the **+ Add Songs** sheet alike (one key, `songs.matchAlias`, all 8 locales; `qu` needs a native-speaker check); the 6.2.18 and 6.2.22 acceptance criteria now expect "Also known as …". |
@@ -1621,6 +1622,14 @@ Scenario: Release version bump reaches develop
   Then "package.json" on "develop" has version "1.8.0"
 ```
 
+```gherkin
+Scenario: A conflicting back-merge lists its files (#608)
+  Given a hotfix PR was merged into main
+  When the back-merge workflow runs
+  Then a back-merge PR into develop is opened automatically
+  And if it has conflicts, the PR says so and lists the conflicting files
+```
+
 **Story 5.1.10:** As a Maintainer, I want a `hotfix/*` path from `main` so that I can fix production without shipping unfinished `develop` work.
 
 ```gherkin
@@ -1630,6 +1639,8 @@ Scenario: Hotfix goes straight to production and back to develop
   Then a patch release is created
   And the fix is back-merged into "develop"
 ```
+
+*Finding (#608, Nov 15, 2026):* hotfix 1.7.1 (#473 → release #475, Nov 6) got no automatic back-merge PR. `back-merge.yml` (#423) was merged into `develop` on Nov 5 but reached `main` only with promotion #575 on Nov 13, and a push to `main` runs the workflow copy on `main`, so there were no runs. The manual back-merge #484 (Nov 10) resolved the conflicts by hand. Since then, back-merges #576 and #596 were opened automatically. The conflict comment now lists the conflicting files, and `git-workflow.md` covers the manual start and the conflict procedure.
 
 **Story 5.1.11:** As a Maintainer, I want the slow test layers (full E2E, k6) to run nightly against staging and on promotion PRs so that per-PR CI stays fast while regressions are still caught.
 

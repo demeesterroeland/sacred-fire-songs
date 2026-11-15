@@ -3581,3 +3581,10 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - Open: a member's public takes are listed under Record in the app, while the issue and mockup put them under Listen.
 - Validation: TypeScript, lint, Vitest (2,613), BDD unit (539 passed, 47 pending) passed; checked in the dev server as a guest (Listen 1, dot, accessible name). Playwright not run.
 
+
+## Session November 15, 2026 — #608: why the 1.7.1 back-merge was done by hand
+
+- Finding: hotfix #473 and release #475 reached `main` on Nov 6, 2026, but `back-merge.yml` (#423, merged into `develop` on Nov 5) reached `main` only with promotion #575 on Nov 13. A push to `main` runs the workflow copy on `main`, so there were no runs and no automatic PR. The manual back-merge #484 (Nov 10) resolved the conflicts by hand. The runs for #575, #577, #594 and #597 opened #576 and #596 as intended.
+- Change: when `main` does not merge cleanly, the conflict comment now lists the conflicting files (`git diff --name-only --diff-filter=U`, posted with `--body-file`). The header comment of the workflow explains the run-from-`main` rule.
+- Docs: `git-workflow.md` 1.9 (manual start with `gh workflow run back-merge.yml --ref main`, conflict procedure), `development-workflow.md` 2.1, design doc 2.40, user stories 2.25 (Story 5.1.9 scenario, Story 5.1.10 finding).
+- Tests: `@story-5.1.9` contract step "it lists the conflicting files in a pull request comment" (red before the change, `test:bdd:ci-gate` 29/29 after). The conflict listing was also checked in a local throwaway repository.
