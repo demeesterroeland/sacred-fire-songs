@@ -1,8 +1,8 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 2.24
+**Version:** 2.25
 **Status:** Living Document
-**Date:** Nov 13, 2026
+**Date:** Nov 15, 2026
 
 ## Changelog
 
@@ -123,6 +123,7 @@
 | **1.66** | Nov 5, 2026 | Epic 6.1: Story 6.1.14 (#398, G4.1) implemented on the integration branch `feat/ux-v2` — one name, Practice, in all 8 locales. |
 | **1.65** | Nov 5, 2026 | Epic 6.1: Story 6.1.26 (#410, G6.1) implemented on `feat/ux-v2` — GuestGate on every members-only screen; guest read of public takes requires singer consent (UXD-2). |
 | **1.64** | Nov 5, 2026 | Epic 6.1: Story 6.1.22 (#406, G5.1) implemented on `feat/ux-v2` — unknown URLs show a real 404 page for every role; the proxy redirects guests to login only for `/account`, `/admin`, `/users`. Spec: `docs/testing/ux-v2-real-404.feature`. |
+| **2.25** | Nov 15, 2026 | #608: why the 1.7.1 back-merge was done by hand (the workflow was not on `main` yet). Story 5.1.9 adds the scenario for the conflicting-files comment; Story 5.1.10 adds the finding. |
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
 
@@ -1621,6 +1622,14 @@ Scenario: Release version bump reaches develop
   Then "package.json" on "develop" has version "1.8.0"
 ```
 
+```gherkin
+Scenario: A conflicting back-merge lists its files (#608)
+  Given a hotfix PR was merged into main
+  When the back-merge workflow runs
+  Then a back-merge PR into develop is opened automatically
+  And if it has conflicts, the PR says so and lists the conflicting files
+```
+
 **Story 5.1.10:** As a Maintainer, I want a `hotfix/*` path from `main` so that I can fix production without shipping unfinished `develop` work.
 
 ```gherkin
@@ -1630,6 +1639,8 @@ Scenario: Hotfix goes straight to production and back to develop
   Then a patch release is created
   And the fix is back-merged into "develop"
 ```
+
+*Finding (#608, Nov 15, 2026):* hotfix 1.7.1 (#473 → release #475, Nov 6) got no automatic back-merge PR. `back-merge.yml` (#423) was merged into `develop` on Nov 5 but reached `main` only with promotion #575 on Nov 13, and a push to `main` runs the workflow copy on `main`, so there were no runs. The manual back-merge #484 (Nov 10) resolved the conflicts by hand. Since then, back-merges #576 and #596 were opened automatically. The conflict comment now lists the conflicting files, and `git-workflow.md` covers the manual start and the conflict procedure.
 
 **Story 5.1.11:** As a Maintainer, I want the slow test layers (full E2E, k6) to run nightly against staging and on promotion PRs so that per-PR CI stays fast while regressions are still caught.
 

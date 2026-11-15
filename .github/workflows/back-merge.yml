@@ -10,6 +10,9 @@ name: Back-merge main into develop
 # - A test merge detects conflicts; conflicting PRs get the "back-merge-conflict"
 #   label and a comment. The PR is never merged here: the owner merges it with a
 #   merge commit once the required checks pass.
+# - A push to main runs the copy of this file that is on main. A hotfix pushed
+#   before this file reached main gets no back-merge PR (#608, release 1.7.1):
+#   start it by hand with `gh workflow run back-merge.yml --ref main`.
 
 on:
   push:
@@ -77,10 +80,18 @@ jobs:
             echo "main merges cleanly into develop."
             gh pr edit "$NUMBER" --remove-label back-merge-conflict >/dev/null 2>&1 || true
           else
+            CONFLICTS="$(git diff --name-only --diff-filter=U)"
             git merge --abort || true
             gh label create back-merge-conflict --color B60205 \
               --description "main does not merge cleanly into develop" >/dev/null 2>&1 || true
             gh pr edit "$NUMBER" --add-label back-merge-conflict
-            gh pr comment "$NUMBER" --body "⚠️ \`main\` does not merge cleanly into \`develop\`. Resolve the conflicts on a \`chore/…\` branch from \`develop\` (merge \`origin/main\` into it), then let this PR update."
-            echo "::warning::Back-merge PR #$NUMBER has conflicts."
+            {
+              echo "⚠️ \`main\` does not merge cleanly into \`develop\`. Conflicting files:"
+              echo
+              printf '%s\n' "$CONFLICTS" | sed 's/^/- `/; s/$/`/'
+              echo
+              echo "Resolve the conflicts on a \`chore/…\` branch from \`develop\` (merge \`origin/main\` into it, see docs/guides/git-workflow.md), then let this PR update."
+            } > conflict-comment.md
+            gh pr comment "$NUMBER" --body-file conflict-comment.md
+            echo "::warning::Back-merge PR #$NUMBER has conflicts in: $(echo "$CONFLICTS" | tr '\n' ' ')"
           fi

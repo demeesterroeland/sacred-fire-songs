@@ -1594,3 +1594,9 @@
 - [x] `practice.available` in all 8 locales; replaces the headphones cue and take count of Story 6.2.2 (#583) after the rebase on the UX v3 promotion
 - [x] Tests: Vitest `practiceAvailability.test.ts`, `songActionBarComponent.test.tsx`; BDD `ux-v2-practice-availability.feature` (`@story-6.1.40`); `ux-v2-song-action-bar.feature` 1.3 and `ux-v2-variant-slot.spec.ts` updated
 - [x] Docs: mockups screen21 1.6 / screen23 1.3, design doc 2.39, user stories 2.24
+
+## Session November 15, 2026 (#608, back-merge after hotfix 1.7.1)
+- [x] Root cause: `back-merge.yml` was not on `main` yet when hotfix 1.7.1 was pushed (pushes to `main` run the copy on `main`), so there were no runs and the back-merge (#484) was done by hand
+- [x] The conflict comment lists the conflicting files; the manual start (`gh workflow run`) and the conflict procedure are documented
+- [x] Tests: `@story-5.1.9` contract step (TDD), ci-gate 29/29
+- [x] Docs: git-workflow 1.9, development-workflow 2.1, design doc 2.40, user stories 2.25

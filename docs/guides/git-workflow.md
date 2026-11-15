@@ -1,13 +1,14 @@
 # Git Workflow & Branching Guidelines: Sacred Fire Songs
 
-**Version:** 1.8
+**Version:** 1.9
 **Status:** Living Document
-**Date:** Nov 5, 2026
+**Date:** Nov 15, 2026
 
 ## Changelog
 
 | Version | Date | Description of Changes |
 | ----- | ----- | ----- |
+| **1.9** | Nov 15, 2026 | Back-merge after a hotfix (#608): a push to `main` runs the copy of `back-merge.yml` on `main`, so the workflow must be on `main` first; manual start with `gh workflow run`; the conflict comment lists the conflicting files; manual conflict procedure. |
 | **1.8** | Nov 5, 2026 | `back-merge.yml` opens the back-merge PR `main` → `develop` automatically after every push to `main`; conflicts get the `back-merge-conflict` label (Story 5.1.9). |
 | **1.7** | Nov 5, 2026 | Promotion via `scripts/cicd/develop2main.sh` (Story 5.1.8): PR `develop` → `main` with a merge commit, never `--admin`; replaces `preview2prod.sh`. CI and image delivery live in this repo, deployment (CD) does not. |
 | **1.6** | Nov 3, 2026 | `develop` publishes images only; deploying them is outside this public repo (`deploy-staging.yml` removed). Enable the isolation git hooks with `git config core.hooksPath .githooks`. |
@@ -205,6 +206,25 @@ gh pr merge <back-merge-pr> --merge        # PR opened by back-merge.yml; merge 
 ```
 
 After every push to `main`, `.github/workflows/back-merge.yml` opens (or updates) the back-merge PR `main` → `develop` itself. It never merges it: you merge it with a merge commit once its checks pass. If `main` does not merge cleanly it gets the `back-merge-conflict` label; resolve on a `chore/…` branch from `develop` that merges `origin/main`.
+
+A push to `main` runs the copy of `back-merge.yml` that is **on `main`**, not the one on `develop`. Release 1.7.1 (#608) is an example: the hotfix reached `main` before the workflow was promoted there, so no back-merge PR was opened and the back-merge had to be done by hand. If no back-merge PR appears after a push to `main`, start the workflow by hand:
+
+```bash
+gh workflow run back-merge.yml --ref main
+```
+
+If the back-merge PR has the `back-merge-conflict` label, its comment lists the conflicting files. Resolve them like this:
+
+```bash
+git switch -c chore/back-merge-vX.Y.Z origin/develop
+git merge origin/main                       # resolve the listed files, keep both sides where they differ
+git commit                                  # the merge commit
+git push -u origin chore/back-merge-vX.Y.Z
+gh pr create --base develop --title "chore: back-merge main (vX.Y.Z) into develop"
+gh pr merge <pr> --merge                    # merge commit, never --squash
+```
+
+Once that PR is merged, `main` is no longer ahead of `develop` and the automatic back-merge PR has nothing left to merge. Close it.
 
 Never create version tags or edit `CHANGELOG.md` by hand; Release Please owns both.
 
