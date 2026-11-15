@@ -32,7 +32,7 @@ test.describe('Song Detail Timeout & Fallbacks', () => {
 
       await page.goto(songUrl);
 
-      await expect(page.locator('main.animate-pulse')).toHaveCount(0, { timeout: 15000 });
+      await expect(page.getByTestId('song-skeleton')).toHaveCount(0, { timeout: 15000 });
       await expect(page.locator('h2', { hasText: 'Taking too long' })).toHaveCount(0);
       await expect(page.getByRole('button', { name: 'Account menu' })).toBeVisible();
     });
@@ -52,7 +52,7 @@ test.describe('Song Detail Timeout & Fallbacks', () => {
       const errorHeading = page.locator('h2', { hasText: /Taking too long|Couldn't load this song/ });
       await expect(errorHeading).toBeVisible({ timeout: 20000 });
       await expect(page.getByRole('button', { name: 'Retry' })).toBeVisible();
-      await expect(page.locator('main.animate-pulse')).toHaveCount(0);
+      await expect(page.getByTestId('song-skeleton')).toHaveCount(0);
     });
   });
 });

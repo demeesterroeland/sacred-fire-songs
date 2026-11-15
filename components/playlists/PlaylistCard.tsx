@@ -2,11 +2,12 @@
 'use client';
 
 import Link from 'next/link';
-import { ListMusic } from 'lucide-react';
 import { PlaylistContextMenu } from './PlaylistContextMenu';
 import { CardContent } from '@/components/common/CardContent';
 import { toast } from 'sonner';
 import { usePlaylistRename } from '@/hooks/usePlaylistRename';
+import { usePlaylistPdfExport } from '@/hooks/usePlaylistPdfExport';
+import { PLAYLIST_MENU, PLAYLIST_ROW } from './playlistRow';
 
 import { useLocale } from '@/context/LocaleContext';
 interface PlaylistCardProps {
@@ -16,6 +17,7 @@ interface PlaylistCardProps {
     isPublic?: boolean;
     description?: string | null;
     songTitles?: string[];
+    /** Songs in the playlist, for the PDF export check. */
 }
 
 export function PlaylistCard({ id, title, subtitle, isPublic = false, description, songTitles = [] }: PlaylistCardProps) {
@@ -31,6 +33,9 @@ export function PlaylistCard({ id, title, subtitle, isPublic = false, descriptio
         handleRenameSave,
     } = usePlaylistRename(id, title);
 
+    // No song count here: the row's count can be stale, so the server's list decides (review of PR #482).
+    const { exportPdf, isExportingPdf } = usePlaylistPdfExport({ playlistId: id, title: optimisticTitle, description });
+
     const handleCopyLink = () => {
         const origin = typeof window !== 'undefined' ? window.location.origin : '';
         navigator.clipboard.writeText(`${origin}/library/playlists/${id}`);
@@ -41,13 +46,9 @@ export function PlaylistCard({ id, title, subtitle, isPublic = false, descriptio
         <div className="relative">
             <Link
                 href={`/library/playlists/${id}`}
-                className="flex items-center gap-4 p-4 pr-12 w-full min-w-0 bg-white/60 dark:bg-gray-900/40 border border-gray-200 dark:border-gray-800 rounded-2xl group hover:bg-gray-100/60 dark:hover:bg-gray-800/60 hover:border-gray-300 dark:hover:border-gray-700 transition-all hover:-translate-y-0.5"
+                className={`${PLAYLIST_ROW} pr-12`}
                 onClick={e => isRenaming && e.preventDefault()}
             >
-                <div className="w-12 h-12 bg-gray-200 dark:bg-gray-800 rounded-xl flex items-center justify-center group-hover:bg-gray-300 dark:group-hover:bg-gray-700 transition-colors shrink-0">
-                    <ListMusic className="w-6 h-6 text-gray-400" />
-                </div>
-
                 {isRenaming ? (
                     <div className="flex-1 min-w-0">
                         <input
@@ -61,7 +62,7 @@ export function PlaylistCard({ id, title, subtitle, isPublic = false, descriptio
                             }}
                             onClick={e => e.preventDefault()}
                             autoFocus
-                            className="w-[95%] bg-gray-100 dark:bg-gray-800 border border-amber-500/50 rounded-lg px-2 py-1 text-sm font-bold text-gray-900 dark:text-gray-100 outline-none focus:border-amber-500"
+                            className="min-h-tap w-[95%] rounded-control border border-line-strong bg-surface px-2 py-1 text-meta font-bold text-fg placeholder:text-fg-subtle"
                         />
                     </div>
                 ) : (
@@ -75,7 +76,7 @@ export function PlaylistCard({ id, title, subtitle, isPublic = false, descriptio
             </Link>
 
             {/* Context menu — absolutely positioned to avoid nesting inside <Link> */}
-            <div className="absolute top-3 right-3 z-10">
+            <div className={PLAYLIST_MENU}>
                 <PlaylistContextMenu
                     playlistId={id}
                     playlistTitle={optimisticTitle}
@@ -84,6 +85,8 @@ export function PlaylistCard({ id, title, subtitle, isPublic = false, descriptio
                     onRenameStart={handleRenameStart}
                     onGetLink={handleCopyLink}
                     isLinkAvailable={isPublic}
+                    onExportPdf={exportPdf}
+                    isExportingPdf={isExportingPdf}
                 />
             </div>
         </div>

@@ -4,15 +4,12 @@ import { type ActivityStatus } from '@/lib/admin/userOverview';
 import { useLocale } from '@/context/LocaleContext';
 import { ROLE_COLOR, type RoleColor } from '@/lib/admin/roleColors';
 
-// Keyed by the shared role color (lib/admin/roleColors.ts) so badges and the role filter match.
+// Role badges use sober surface-2 and border-line to adhere to single accent token rules.
 const COLOR_STYLES: Record<RoleColor, string> = {
-  purple:
-    'bg-purple-100 text-purple-700 dark:bg-purple-950/80 dark:text-purple-300 border-purple-200 dark:border-purple-800',
-  amber:
-    'bg-amber-100 text-amber-700 dark:bg-amber-950/80 dark:text-amber-300 border-amber-200 dark:border-amber-800',
-  emerald:
-    'bg-emerald-100 text-emerald-700 dark:bg-emerald-950/80 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800',
-  blue: 'bg-blue-100 text-blue-700 dark:bg-blue-950/80 dark:text-blue-300 border-blue-200 dark:border-blue-800',
+  purple: 'bg-surface-2 text-fg border-line',
+  amber: 'bg-surface-2 text-fg border-line',
+  emerald: 'bg-surface-2 text-fg border-line',
+  blue: 'bg-surface-2 text-fg border-line',
 };
 
 const ROLE_WEIGHT: Record<UserRole, string> = {
@@ -24,7 +21,7 @@ const ROLE_WEIGHT: Record<UserRole, string> = {
 };
 
 const FALLBACK_ROLE_STYLE =
-  'font-medium bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300 border-gray-200 dark:border-gray-700';
+  'font-medium bg-surface-2 text-fg border-line';
 
 export function RoleBadge({ role, size = 'sm' }: { role: UserRole; size?: 'sm' | 'md' }) {
   const { t } = useLocale();
@@ -39,7 +36,7 @@ export function RoleBadge({ role, size = 'sm' }: { role: UserRole; size?: 'sm' |
 
   return (
     <span
-      className={`inline-flex items-center gap-1 rounded-full text-xs border ${
+      className={`inline-flex items-center gap-1 rounded-control text-xs border ${
         size === 'md' ? 'px-3 py-1' : 'px-2.5 py-0.5'
       } ${ROLE_COLOR[role] ? `${ROLE_WEIGHT[role]} ${COLOR_STYLES[ROLE_COLOR[role]]}` : FALLBACK_ROLE_STYLE}`}
     >
@@ -58,7 +55,7 @@ export function ActivityStatusBadge({ status }: { status: ActivityStatus }) {
   const { t } = useLocale();
   const style = STATUS_STYLES[status];
   return (
-    <span className={`inline-flex items-center gap-1.5 text-[11px] font-semibold ${style.text}`}>
+    <span className={`inline-flex items-center gap-1.5 text-caption font-semibold ${style.text}`}>
       <span className={`w-1.5 h-1.5 rounded-full ${style.dot}`} aria-hidden="true" />
       {t(`admin.status.${status}`)}
     </span>

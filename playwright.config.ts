@@ -54,6 +54,7 @@ const baseURL = process.env.E2E_BASE_URL ?? `http://localhost:${PORT}`;
 export default defineConfig({
   testDir: './e2e',
   globalSetup: './e2e/global-setup.ts',
+  globalTeardown: './e2e/global-teardown.ts',
   // Per-file parallelism; auth setup runs first via project dependency.
   fullyParallel: true,
   forbidOnly: !!process.env.CI,
@@ -134,7 +135,8 @@ export default defineConfig({
 
   // Build + start the app for the duration of the test run.
   // Reuses an already-running dev/prod server locally for fast iteration.
-  webServer: {
+  // When testing against an existing/remote deployment (E2E_BASE_URL), skip local build.
+  webServer: process.env.E2E_BASE_URL ? undefined : {
     command: 'npm run build && npm run start',
     url: `${baseURL}/favicon.svg`,
     reuseExistingServer: !process.env.CI,

@@ -1,7 +1,9 @@
 'use client';
 
-import { useEffect, useState } from 'react';
-import { X, AlertTriangle, Trash2 } from 'lucide-react';
+import { useRef } from 'react';
+import * as DialogPrimitive from '@radix-ui/react-dialog';
+import { AlertTriangle, Trash2 } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { useLocale } from '@/context/LocaleContext';
 
 interface DeleteConfirmationModalProps {
@@ -11,8 +13,24 @@ interface DeleteConfirmationModalProps {
     title: string;
     message: string;
     isDeleting?: boolean;
+    /**
+     * Where focus goes when the opener is gone (e.g. the deleted row's menu button) so it does not
+     * fall to <body>. Called on close; return null to leave it to the browser.
+     */
+    fallbackFocus?: () => HTMLElement | null;
 }
 
+/**
+ * "Are you sure?" before a destructive action (Story 6.1.34 / G9.2, #418).
+ * A real alert dialog (Radix): focus moves to Cancel when it opens, Tab stays inside, Escape closes only
+ * this dialog. Whatever sits behind it (a page, the Practice panel) is hidden from assistive technology
+ * while it is open.
+ *
+ * Focus on close: it goes back to the element that had focus when the dialog opened, if that is still on the
+ * page. When it opened from a menu or sheet that closes in the same moment (the song ⋯ sheet, the playlist
+ * menu) or the opener is gone (a deleted row), that element no longer exists, so the caller passes
+ * `fallbackFocus`. Without one, focus is left to the browser (usually <body>).
+ */
 export default function DeleteConfirmationModal({
     isOpen,
     onClose,
@@ -20,79 +38,79 @@ export default function DeleteConfirmationModal({
     title,
     message,
     isDeleting = false,
+    fallbackFocus,
 }: DeleteConfirmationModalProps) {
     const { t } = useLocale();
-    const [render, setRender] = useState(false);
-
-    // Synchronize rendering state with isOpen prop without triggering cascading renders
-    if (isOpen && !render) {
-        setRender(true);
-    }
-
-    const onTransitionEnd = () => {
-        if (!isOpen) setRender(false);
-    };
-
-    if (!render) return null;
+    const cancelRef = useRef<HTMLButtonElement>(null);
+    const opener = useRef<HTMLElement | null>(null);
 
     return (
-        <div
-            onTransitionEnd={onTransitionEnd}
-            className={`fixed inset-0 z-50 flex items-center justify-center transition-all duration-200 ${isOpen ? 'opacity-100 backdrop-blur-sm' : 'opacity-0 backdrop-blur-none pointer-events-none'
-                }`}
+        <DialogPrimitive.Root
+            open={isOpen}
+            onOpenChange={(open) => {
+                // Not while the delete is running: the dialog stays until it finishes.
+                if (!open && !isDeleting) onClose();
+            }}
         >
-            {/* Backdrop */}
-            <div
-                className="absolute inset-0 bg-black/60 transition-opacity"
-                onClick={!isDeleting ? onClose : undefined}
-            />
-
-            {/* Modal Card */}
-            <div
-                className={`bg-white dark:bg-slate-900 border border-red-500/20 rounded-2xl p-6 max-w-md w-full shadow-2xl shadow-red-900/20 transform transition-all duration-200 relative z-10 mx-4 ${isOpen ? 'scale-100 translate-y-0' : 'scale-95 translate-y-4'
-                    }`}
-            >
-                <div className="flex items-center gap-4 mb-6 text-red-500">
-                    <div className="p-3 bg-red-500/10 rounded-full shrink-0">
-                        <AlertTriangle className="w-8 h-8" />
+            <DialogPrimitive.Portal>
+                <DialogPrimitive.Overlay
+                    data-testid="delete-confirmation-overlay"
+                    className="fixed inset-0 z-[70] bg-scrim motion-safe:data-[state=open]:animate-in motion-safe:data-[state=closed]:animate-out motion-safe:data-[state=closed]:fade-out-0 motion-safe:data-[state=open]:fade-in-0"
+                />
+                <DialogPrimitive.Content
+                    role="alertdialog"
+                    data-testid="delete-confirmation"
+                    onOpenAutoFocus={(e) => {
+                        // Cancel is the safe default for a destructive question.
+                        e.preventDefault();
+                        const active = document.activeElement;
+                        opener.current = active instanceof HTMLElement && active !== document.body ? active : null;
+                        cancelRef.current?.focus({ preventScroll: true });
+                    }}
+                    onCloseAutoFocus={(e) => {
+                        const target = opener.current?.isConnected ? opener.current : (fallbackFocus?.() ?? null);
+                        opener.current = null;
+                        if (target) {
+                            e.preventDefault();
+                            target.focus({ preventScroll: true });
+                        }
+                    }}
+                    className="fixed left-1/2 top-1/2 z-[70] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-panel border border-line-strong bg-surface p-6 text-fg shadow-sheet outline-none motion-safe:data-[state=open]:animate-in motion-safe:data-[state=closed]:animate-out motion-safe:data-[state=closed]:fade-out-0 motion-safe:data-[state=open]:fade-in-0"
+                >
+                    <div className="mb-4 flex items-start gap-4">
+                        <div className="shrink-0 rounded-pill bg-danger/10 p-3 text-danger">
+                            <AlertTriangle aria-hidden="true" className="size-6" />
+                        </div>
+                        <div className="min-w-0">
+                            <DialogPrimitive.Title className="text-title font-semibold text-fg">{title}</DialogPrimitive.Title>
+                            <p className="text-meta text-danger">{t('feedback.delete.body')}</p>
+                        </div>
                     </div>
-                    <div>
-                        <h3 className="text-xl font-bold text-gray-900 dark:text-white">{title}</h3>
-                        <p className="text-red-400 text-sm">{t('feedback.delete.body')}</p>
+
+                    <DialogPrimitive.Description className="mb-6 text-body text-fg-muted">
+                        {message}
+                    </DialogPrimitive.Description>
+
+                    <div className="grid grid-cols-2 gap-3">
+                        <Button ref={cancelRef} type="button" variant="outline" onClick={onClose} disabled={isDeleting}>
+                            {t('common.cancel')}
+                        </Button>
+                        <Button type="button" variant="destructive" onClick={onConfirm} disabled={isDeleting}>
+                            {isDeleting ? (
+                                <>
+                                    <span aria-hidden="true" className="size-4 animate-spin rounded-pill border-2 border-on-danger/30 border-t-on-danger motion-reduce:animate-none" />
+                                    {t('common.deleting')}
+                                </>
+                            ) : (
+                                <>
+                                    <Trash2 aria-hidden="true" />
+                                    {t('common.yesDelete')}
+                                </>
+                            )}
+                        </Button>
                     </div>
-                </div>
-
-                <p className="text-gray-600 dark:text-gray-300 mb-8 leading-relaxed">
-                    {message}
-                </p>
-
-                <div className="grid grid-cols-2 gap-4">
-                    <button
-                        onClick={onClose}
-                        disabled={isDeleting}
-                        className="px-4 py-3 rounded-xl font-semibold text-gray-500 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-white/5 border border-transparent hover:border-gray-200 dark:hover:border-white/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-                    >
-                        {t('common.cancel')}
-                    </button>
-                    <button
-                        onClick={onConfirm}
-                        disabled={isDeleting}
-                        className="flex items-center justify-center gap-2 px-4 py-3 rounded-xl font-bold bg-red-600 hover:bg-red-500 text-white shadow-lg shadow-red-900/20 transition-all disabled:opacity-70 disabled:cursor-not-allowed"
-                    >
-                        {isDeleting ? (
-                            <>
-                                <span className="animate-spin rounded-full h-4 w-4 border-2 border-white/20 border-t-white"></span>
-                                {t('common.deleting')}
-                            </>
-                        ) : (
-                            <>
-                                <Trash2 className="w-4 h-4" />
-                                {t('common.yesDelete')}
-                            </>
-                        )}
-                    </button>
-                </div>
-            </div>
-        </div>
+                </DialogPrimitive.Content>
+            </DialogPrimitive.Portal>
+        </DialogPrimitive.Root>
     );
 }

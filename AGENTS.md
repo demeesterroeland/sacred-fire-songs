@@ -58,6 +58,11 @@ Implementation plans live in `docs/plans/YYYY-MM-DD-<feature>.md`.
 1. Update `docs/design/db-schema.sql` to reflect the changes.
 2. Keep `docs/design/db-schema.sql` valid as a single-file fresh-install setup script.
 
+## Local Server Ports
+
+- Ports derive from the GitHub issue number of the branch: dev server (`npm run dev`) on `3<issue>`, production build / Playwright build server (`npm run build && npm run start`, `PORT=`) on `4<issue>`. Example: issue #245 → dev `3245`, build `4245`.
+- Check the port first with `ss -ltnp | grep ":<port> "` (`lsof` can miss a listening `next-server`). Only use another port if that one is busy, and say so.
+
 ## Database Environments
 
 - **Development**: the local Supabase CLI stack (`npx supabase start`, `http://127.0.0.1:54321`) via `.env.local` (`NEXT_PUBLIC_SUPABASE_URL_DEV`, `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY_DEV`).
@@ -70,9 +75,34 @@ Implementation plans live in `docs/plans/YYYY-MM-DD-<feature>.md`.
 - Server-side queries belong in `lib/*/serverQueries.ts`; import `createClient` from `@/lib/supabase/server`.
 - Only import server queries from Server Components or Server Actions (never from client components).
 
-## Testing
+## Testing Pyramid, TDD & BDD
 
-- Test runner: **vitest** — run with `npx vitest run <file>` (not Jest). `npm test` runs all unit tests.
+Always follow **Test-Driven Development (TDD)** and **Behavior-Driven Development (BDD)** structured by the project's **Testing Pyramid**:
+
+- **TDD First:** Write the failing test or executable specification before writing implementation code.
+- **BDD Gherkin Specifications:** Feature files in `docs/testing/*.feature` define user-visible behavior. Scenarios are tagged `@unit` (L2, in-memory/test-doubles via `npm run test:bdd:unit`), `@seed` (L2/L3 against local Supabase via `npm run test:bdd:seed`), or `@e2e` (L5 Playwright).
+- **Testing Pyramid Layers:**
+  1. **Layer 1 (L1) Static Quality:** TypeScript typecheck (`npx tsc --noEmit`) and ESLint (`npm run lint`).
+  2. **Layer 2 (L2) Unit & Service Contract Tests:** Fast, in-memory Vitest unit tests in `testing/unit/tests/` and fast BDD steps.
+  3. **Layer 3 (L3) Component Tests:** RTL / Vitest component-level interaction tests where applicable.
+  4. **Layer 4 (L4) Integration & API / Contract Tests:** Subsystem contracts, migrations, server actions.
+  5. **Layer 5 (L5) End-to-End (E2E):** Real-browser Playwright specs in `e2e/tests/` verifying user journeys and smoke paths.
 - Unit tests live in **one** tree: `testing/unit/tests/` (Vitest only collects that folder). Playwright specs live in `e2e/` and never run under Vitest.
 - BDD: `npm run test:bdd:unit` (no database), `npm run test:bdd:seed` (local Supabase). Gitflow pipeline contracts: `npm run test:bdd:ci` / `test:bdd:ci-gate`, bats via `npm run test:scripts`.
 - CI (`.github/workflows/ci.yml`) runs `lint`, `typecheck`, `unit`, `bdd`, `build`, `pipeline` and `isolation` on every push and PR. `pr-lint.yml` (`pr-policy`) checks every PR into `develop`/`main`: Conventional Commit title and Gitflow head → base (work branches → `develop`; `develop`/`hotfix/*` → `main`). Branch rulesets live in `.github/rulesets/*.json`. `npm run lint` caps warnings (`--max-warnings`); never raise the cap, lower it when you remove warnings.
+
+## Internationalization (i18n) Policy
+
+- **Zero Hardcoded UX Strings:** Never hardcode user-facing copy in components, dialogs, forms, toasts, badges, or buttons.
+- **Immediate Translation Sync:** When adding or updating UX copy, **always** register the keys using `useLocale()` / `t(...)` and update **every locale file** in `messages/` — currently 8: `en.ts`, `nl.ts`, `es.ts`, `it.ts`, `ru.ts`, `qu.ts`, `fr.ts`, `pt.ts` (source of truth: `SUPPORTED_LOCALES` in `lib/i18n/index.ts`; `useLocale` comes from `@/context/LocaleContext`).
+- Ensure fallback behavior is clean and date/time formatters use `LOCALE_DATE_TAGS[locale]`.
+
+<!-- BEGIN:nextjs-agent-rules -->
+
+## This is NOT the Next.js you know
+
+This version has breaking changes — APIs, conventions, and file structure may all differ from your training data. Read the relevant guide in `node_modules/next/dist/docs/` (resolved from this file's directory; in monorepos the `next` package may not be visible from the repo root) before writing any code. Heed deprecation notices.
+
+This block is written and re-added by `next dev` — verify at `node_modules/next/dist/server/lib/generate-agent-files.js`. Removing it from a diff only re-creates the uncommitted change; committing it with your work keeps the tree clean.
+
+<!-- END:nextjs-agent-rules -->

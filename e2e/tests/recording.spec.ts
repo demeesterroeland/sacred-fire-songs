@@ -1,5 +1,6 @@
-import { test, expect, Page } from '@playwright/test';
+import { test, expect, Page, Locator } from '@playwright/test';
 import { ROLES } from '../fixtures/roles';
+import { clickPractice } from '../fixtures/songActions';
 
 // Set up fake media/mic devices for the chromium instances in this test file
 test.use({
@@ -10,6 +11,12 @@ test.use({
     ],
   },
 });
+
+// Owner actions sit in the row's "More actions" bottom sheet (Story 6.1.17 / G4.4); the sheet renders in a portal.
+async function recordingAction(page: Page, row: Locator, name: string) {
+  await row.locator('button[aria-label="More actions"]').click();
+  return page.getByRole('dialog').getByRole('button', { name, exact: true });
+}
 
 test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
   let songUrl: string;
@@ -30,25 +37,10 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
   });
 
   async function openRecordingsDrawer(page: Page) {
-    const recordBtn = page.locator('button[title="Recordings"]').first();
-    const moreActionsBtn = page.locator('button[aria-label="More actions"]').first();
-    
-    await Promise.race([
-      recordBtn.waitFor({ state: 'attached', timeout: 10000 }),
-      moreActionsBtn.waitFor({ state: 'attached', timeout: 10000 })
-    ]);
-    
-    if (await recordBtn.isVisible()) {
-      await recordBtn.click();
-    } else {
-      await moreActionsBtn.click();
-      const mobileRecordBtn = page.locator('button:has-text("Recordings")').filter({ visible: true }).first();
-      await expect(mobileRecordBtn).toBeVisible({ timeout: 5000 });
-      await mobileRecordBtn.click();
-    }
+    await clickPractice(page, 10000);
 
     // Wait for drawer to slide in and stabilize in viewport
-    const drawerTitle = page.locator('h3:has-text("Rehearsal Space")');
+    const drawerTitle = page.getByTestId('practice-drawer');
     await expect(drawerTitle).toBeVisible({ timeout: 10000 });
     await page.waitForTimeout(1000);
   }
@@ -94,19 +86,19 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       await openRecordingsDrawer(page);
 
       // Verify rehearsal drawer slides up (framer-motion spring animation takes ~500ms)
-      const drawerTitle = page.locator('h3:has-text("Rehearsal Space")');
+      const drawerTitle = page.getByTestId('practice-drawer');
       await expect(drawerTitle).toBeVisible({ timeout: 8000 });
 
       // Verify tabs exist because the song has media
-      const voiceRecorderTab = page.locator('button:has-text("Voice Recorder")');
-      const referenceTracksTab = page.locator('button:has-text("Reference Tracks")');
+      const voiceRecorderTab = page.locator('[data-testid="practice-tab-record"]');
+      const referenceTracksTab = page.locator('[data-testid="practice-tab-listen"]');
       await expect(voiceRecorderTab).toBeVisible();
       await expect(referenceTracksTab).toBeVisible();
 
-      // The "Recordings" button opens the drawer on the Voice Recorder tab
-      await expect(voiceRecorderTab).toHaveClass(/border-indigo-600/);
+      // The "Practice" button opens the drawer on the Record tab
+      await expect(voiceRecorderTab).toHaveAttribute('aria-selected', 'true');
       await referenceTracksTab.click();
-      await expect(referenceTracksTab).toHaveClass(/border-indigo-600/);
+      await expect(referenceTracksTab).toHaveAttribute('aria-selected', 'true');
 
       // Verify that media selector buttons are present for both YouTube and Spotify
       const ytBtn = page.locator('button:has-text("YouTube")');
@@ -124,15 +116,13 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       const spotifyPlayer = page.locator('iframe[src*="spotify.com/embed"]');
       await expect(spotifyPlayer).toBeVisible();
 
-      // Switch to "Voice Recorder" tab
+      // Switch to "Record" tab
       await voiceRecorderTab.click();
 
-      // Verify that the Guest Sign In CTA overlay card is visible
-      const ctaTitle = page.locator('h4:has-text("Personal Audio Recorder")');
-      await expect(ctaTitle).toBeVisible();
-
-      const ctaBtn = page.locator('button:has-text("Sign In to Record")');
-      await expect(ctaBtn).toBeVisible();
+      // Verify that the unified GuestGate (Story 6.1.26) covers the recorder
+      const gate = page.locator('[data-testid="guest-gate"][data-feature="recorder"]');
+      await expect(gate).toBeVisible();
+      await expect(gate.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', /\/auth\/login\?next=/);
     });
   });
 
@@ -152,28 +142,28 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       await page.waitForLoadState('networkidle');
 
       // Takes from earlier runs may exist: compare against the count before saving
-      const recordingsBtn = page.locator('button[title="Recordings"]');
+      const recordingsBtn = page.locator('button[title="Practice"]');
       const countBefore = Number((await recordingsBtn.innerText()).match(/\d+/)?.[0] ?? 0);
 
       // Open recordings drawer
       await openRecordingsDrawer(page);
 
       // Verify rehearsal drawer slides up
-      const drawerTitle = page.locator('h3:has-text("Rehearsal Space")');
+      const drawerTitle = page.getByTestId('practice-drawer');
       await expect(drawerTitle).toBeVisible({ timeout: 8000 });
       await page.waitForTimeout(500);
 
-      // Switch to Voice Recorder tab if tabs exist (Reference Tracks is active by default in Issue 187)
-      const voiceRecorderTab = page.locator('button:has-text("Voice Recorder")').first();
+      // Switch to Record tab if tabs exist (Listen is active by default in Issue 187)
+      const voiceRecorderTab = page.locator('[data-testid="practice-tab-record"]').first();
       if (await voiceRecorderTab.isVisible({ timeout: 5000 }).catch(() => false)) {
         await voiceRecorderTab.click({ force: true });
-        const recordPrompt = page.locator('h4:has-text("Ready to record")');
+        const recordPrompt = page.locator('h3:has-text("Ready to record")');
         if (!await recordPrompt.isVisible({ timeout: 2000 }).catch(() => false)) {
           await voiceRecorderTab.click({ force: true });
         }
       }
       
-      const recordPrompt = page.locator('h4:has-text("Ready to record")');
+      const recordPrompt = page.locator('h3:has-text("Ready to record")');
       await expect(recordPrompt).toBeVisible({ timeout: 10000 });
 
       // Start recording
@@ -182,7 +172,7 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       await startBtn.click({ force: true });
 
       // Verify active recording prompt appears
-      const activePrompt = page.locator('h4:has-text("Recording...")');
+      const activePrompt = page.locator('h3:has-text("Recording...")');
       await expect(activePrompt).toBeVisible();
 
       // Let it record for 3 seconds (fake device streams mock tone)
@@ -194,7 +184,7 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       await stopBtn.click();
 
       // Verify review state
-      const reviewPrompt = page.locator('h4:has-text("Review your recording")');
+      const reviewPrompt = page.locator('h3:has-text("Review your recording")');
       await expect(reviewPrompt).toBeVisible();
 
       // Verify native audio preview element is rendered
@@ -234,7 +224,7 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       await playBtn.click();
 
       // Close the drawer while playing: desktop shows an equalizer in the header
-      // Recordings button, mobile (button hidden) shows the mini-player
+      // Practice button, mobile (button hidden) shows the mini-player
       await page.locator('button[aria-label="Close"]').click();
       if (isMobile) {
         await expect(page.locator('[data-testid="bottom-mini-player"]')).toBeVisible({ timeout: 5000 });
@@ -255,7 +245,7 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       await expect(page.locator('text="Audio URL is not available"')).toHaveCount(0);
 
       // Verify and click the download button
-      const downloadBtn = cardRow.locator('button[aria-label="Download recording"]');
+      const downloadBtn = await recordingAction(page, cardRow, 'Download recording');
       await expect(downloadBtn).toBeVisible();
       const downloadPromise = page.waitForEvent('download');
       await downloadBtn.click();
@@ -263,9 +253,10 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       expect(download.suggestedFilename()).toContain('.webm');
 
       // Clean up/Delete the created take to keep database clean
-      const deleteBtn = cardRow.locator('button[aria-label="Delete recording"]');
+      const deleteBtn = await recordingAction(page, cardRow, 'Delete recording');
       await expect(deleteBtn).toBeVisible();
       await deleteBtn.click();
+      await page.getByRole('button', { name: 'Yes, delete' }).click();
 
       // Verify the take disappears
       await expect(savedTake).toHaveCount(0, { timeout: 10000 });
@@ -280,21 +271,21 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       await openRecordingsDrawer(page);
 
       // Verify rehearsal drawer slides up and is ready
-      const drawerTitle = page.locator('h3:has-text("Rehearsal Space")');
+      const drawerTitle = page.getByTestId('practice-drawer');
       await expect(drawerTitle).toBeVisible({ timeout: 8000 });
       await page.waitForTimeout(500);
 
-      // Switch to Voice Recorder tab if tabs exist (Reference Tracks is active by default in Issue 187)
-      const voiceRecorderTab = page.locator('button:has-text("Voice Recorder")').first();
+      // Switch to Record tab if tabs exist (Listen is active by default in Issue 187)
+      const voiceRecorderTab = page.locator('[data-testid="practice-tab-record"]').first();
       if (await voiceRecorderTab.isVisible({ timeout: 5000 }).catch(() => false)) {
         await voiceRecorderTab.click({ force: true });
-        const recordPrompt = page.locator('h4:has-text("Ready to record")');
+        const recordPrompt = page.locator('h3:has-text("Ready to record")');
         if (!await recordPrompt.isVisible({ timeout: 2000 }).catch(() => false)) {
           await voiceRecorderTab.click({ force: true });
         }
       }
 
-      const recordPrompt = page.locator('h4:has-text("Ready to record")');
+      const recordPrompt = page.locator('h3:has-text("Ready to record")');
       await expect(recordPrompt).toBeVisible({ timeout: 10000 });
 
       // 2. Switch to the "Upload File" tab
@@ -341,7 +332,7 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       await expect(page.locator('text="Audio URL is not available"')).toHaveCount(0);
 
       // Verify and click the download button
-      const downloadBtn = container.locator('button[aria-label="Download recording"]');
+      const downloadBtn = await recordingAction(page, container, 'Download recording');
       await expect(downloadBtn).toBeVisible();
       const downloadPromise = page.waitForEvent('download');
       await downloadBtn.click();
@@ -349,8 +340,9 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       expect(download.suggestedFilename()).toContain('.wav');
 
       // 8. Delete it to clean up
-      const deleteBtn = container.locator('button[aria-label="Delete recording"]');
+      const deleteBtn = await recordingAction(page, container, 'Delete recording');
       await deleteBtn.click();
+      await page.getByRole('button', { name: 'Yes, delete' }).click();
 
       // Wait for deletion
       await expect(savedTake).toHaveCount(0, { timeout: 10000 });
@@ -362,17 +354,17 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       // Open drawer
       await openRecordingsDrawer(page);
 
-      // Switch to Voice Recorder tab if tabs exist (Reference Tracks is active by default in Issue 187)
-      const voiceRecorderTab = page.locator('button:has-text("Voice Recorder")').first();
+      // Switch to Record tab if tabs exist (Listen is active by default in Issue 187)
+      const voiceRecorderTab = page.locator('[data-testid="practice-tab-record"]').first();
       if (await voiceRecorderTab.isVisible({ timeout: 5000 }).catch(() => false)) {
         await voiceRecorderTab.click({ force: true });
-        const recordPrompt = page.locator('h4:has-text("Ready to record")');
+        const recordPrompt = page.locator('h3:has-text("Ready to record")');
         if (!await recordPrompt.isVisible({ timeout: 2000 }).catch(() => false)) {
           await voiceRecorderTab.click({ force: true });
         }
       }
 
-      const recordPrompt = page.locator('h4:has-text("Ready to record")');
+      const recordPrompt = page.locator('h3:has-text("Ready to record")');
       await expect(recordPrompt).toBeVisible({ timeout: 10000 });
 
       // Set fast timer flag in browser context
@@ -389,7 +381,7 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       await page.waitForTimeout(3000);
 
       // Verify that it automatically stops and shows the review UI
-      const reviewPrompt = page.locator('h4:has-text("Review your recording")');
+      const reviewPrompt = page.locator('h3:has-text("Review your recording")');
       await expect(reviewPrompt).toBeVisible({ timeout: 10000 });
 
       // Verify that the duration shows 03:00
@@ -403,17 +395,17 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       // Open drawer
       await openRecordingsDrawer(page);
 
-      // Switch to Voice Recorder tab if tabs exist (Reference Tracks is active by default in Issue 187)
-      const voiceRecorderTab = page.locator('button:has-text("Voice Recorder")').first();
+      // Switch to Record tab if tabs exist (Listen is active by default in Issue 187)
+      const voiceRecorderTab = page.locator('[data-testid="practice-tab-record"]').first();
       if (await voiceRecorderTab.isVisible({ timeout: 5000 }).catch(() => false)) {
         await voiceRecorderTab.click({ force: true });
-        const recordPrompt = page.locator('h4:has-text("Ready to record")');
+        const recordPrompt = page.locator('h3:has-text("Ready to record")');
         if (!await recordPrompt.isVisible({ timeout: 2000 }).catch(() => false)) {
           await voiceRecorderTab.click({ force: true });
         }
       }
 
-      const recordPrompt = page.locator('h4:has-text("Ready to record")');
+      const recordPrompt = page.locator('h3:has-text("Ready to record")');
       await expect(recordPrompt).toBeVisible({ timeout: 10000 });
 
       // Start recording
@@ -422,7 +414,7 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       await startBtn.click({ force: true });
 
       // Verify recording started
-      const activePrompt = page.locator('h4:has-text("Recording...")');
+      const activePrompt = page.locator('h3:has-text("Recording...")');
       await expect(activePrompt).toBeVisible({ timeout: 5000 });
 
       // Let it record briefly
@@ -446,7 +438,7 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       await stopBtn.click();
 
       // Verify review UI is visible
-      await expect(page.locator('h4:has-text("Review your recording")')).toBeVisible({ timeout: 10000 });
+      await expect(page.locator('h3:has-text("Review your recording")')).toBeVisible({ timeout: 10000 });
 
       // Try to save the rehearsal
       const saveBtn = page.locator('button:has-text("Save Recording")');
@@ -463,11 +455,11 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       // Open drawer
       await openRecordingsDrawer(page);
 
-      // Switch to Voice Recorder tab if tabs exist (Reference Tracks is active by default in Issue 187)
-      const voiceRecorderTab = page.locator('button:has-text("Voice Recorder")').first();
+      // Switch to Record tab if tabs exist (Listen is active by default in Issue 187)
+      const voiceRecorderTab = page.locator('[data-testid="practice-tab-record"]').first();
       if (await voiceRecorderTab.isVisible({ timeout: 5000 }).catch(() => false)) {
         await voiceRecorderTab.click({ force: true });
-        const recordPrompt = page.locator('h4:has-text("Ready to record")');
+        const recordPrompt = page.locator('h3:has-text("Ready to record")');
         if (!await recordPrompt.isVisible({ timeout: 2000 }).catch(() => false)) {
           await voiceRecorderTab.click({ force: true });
         }
@@ -523,8 +515,9 @@ test.describe('Private Rehearsal Audio Recording (Story 4.6.1) @headed', () => {
       await expect(container.locator('svg.lucide-pause')).toBeVisible({ timeout: 5000 });
       
       // Clean up
-      const deleteBtn = container.locator('button[aria-label="Delete recording"]');
+      const deleteBtn = await recordingAction(page, container, 'Delete recording');
       await deleteBtn.click();
+      await page.getByRole('button', { name: 'Yes, delete' }).click();
       await expect(savedTake).toHaveCount(0, { timeout: 10000 });
     });
   });

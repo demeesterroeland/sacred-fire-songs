@@ -5,6 +5,8 @@ import { toast } from 'sonner';
 import { type UserRecording } from "@/lib/actions/rehearsal";
 
 import { useLocale } from '@/context/LocaleContext';
+import { createClient } from '@/lib/supabase/client';
+
 interface AudioContextType {
   activePlaybackId: string | null;
   activeRecording: UserRecording | null;
@@ -33,16 +35,48 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
   const [recordingDuration, setRecordingDuration] = useState(1);
 
   const activeAudioRef = useRef<HTMLAudioElement | null>(null);
+  const audioElementsRef = useRef<Record<string, HTMLAudioElement>>({});
 
   const clearAudioElements = () => {
-    Object.values(audioElements).forEach(audio => {
-      audio.pause();
+    Object.values(audioElementsRef.current).forEach(audio => {
+      try {
+        audio.pause();
+        audio.currentTime = 0;
+        audio.src = '';
+      } catch {
+        // ignore media pause errors
+      }
     });
+    if (activeAudioRef.current) {
+      try {
+        activeAudioRef.current.pause();
+        activeAudioRef.current.currentTime = 0;
+        activeAudioRef.current.src = '';
+      } catch {
+        // ignore
+      }
+      activeAudioRef.current = null;
+    }
+    audioElementsRef.current = {};
     setAudioElements({});
     setActivePlaybackId(null);
     setActiveRecording(null);
     setIsRecordingPlaying(false);
   };
+
+  // Automatically stop playback when user logs out or session changes
+  useEffect(() => {
+    const supabase = createClient();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_OUT' || event === 'USER_UPDATED') {
+        clearAudioElements();
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+    };
+  }, []);
 
   const handleTogglePlay = (recording: UserRecording, audioUrl: string | undefined) => {
     const recordingId = recording.id;
@@ -123,6 +157,7 @@ export function AudioProvider({ children }: { children: React.ReactNode }) {
         });
       };
 
+      audioElementsRef.current[recordingId] = audio;
       setAudioElements(prev => ({ ...prev, [recordingId]: audio }));
     }
 

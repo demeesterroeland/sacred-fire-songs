@@ -1,0 +1,86 @@
+name: Back-merge main into develop
+
+# Gitflow (Epic 5.1, Story 5.1.9): after every push to main (promotion, Release
+# Please release commit or hotfix) open a pull request main → develop so version
+# bumps, changelog and hotfixes are never lost on develop.
+#
+# - The PR is created with RELEASE_PLEASE_TOKEN (a PAT): PRs opened with the
+#   default GITHUB_TOKEN do not trigger CI, so the required checks would never run.
+#   The job fails closed when the secret is missing.
+# - A test merge detects conflicts; conflicting PRs get the "back-merge-conflict"
+#   label and a comment. The PR is never merged here: the owner merges it with a
+#   merge commit once the required checks pass.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: back-merge
+  cancel-in-progress: false
+
+jobs:
+  back-merge:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    env:
+      GH_TOKEN: ${{ secrets.RELEASE_PLEASE_TOKEN }}
+    steps:
+      - name: Require the PR token
+        run: |
+          if [ -z "$GH_TOKEN" ]; then
+            echo "::error::Missing secret RELEASE_PLEASE_TOKEN: back-merge PRs need a PAT so CI runs on them."
+            exit 1
+          fi
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Check whether main is ahead of develop
+        id: ahead
+        run: |
+          AHEAD="$(git rev-list --count origin/develop..origin/main)"
+          echo "main is $AHEAD commit(s) ahead of develop"
+          echo "count=$AHEAD" >> "$GITHUB_OUTPUT"
+
+      - name: Open or reuse the back-merge pull request
+        if: steps.ahead.outputs.count != '0'
+        id: pr
+        run: |
+          NUMBER="$(gh pr list --base develop --head main --state open --json number -q '.[0].number')"
+          if [ -z "$NUMBER" ]; then
+            URL="$(gh pr create --base develop --head main \
+              --title "chore: back-merge main into develop" \
+              --body "Automatic Gitflow back-merge of \`main\` into \`develop\` (Story 5.1.9). Merge with a **merge commit** once the required checks pass.")"
+            NUMBER="$(gh pr view "$URL" --json number -q .number)"
+          fi
+          echo "Back-merge PR #$NUMBER"
+          echo "number=$NUMBER" >> "$GITHUB_OUTPUT"
+
+      - name: Label the pull request when main does not merge cleanly
+        if: steps.ahead.outputs.count != '0'
+        env:
+          NUMBER: ${{ steps.pr.outputs.number }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git switch -q -c back-merge-check origin/develop
+          if git merge --no-commit --no-ff origin/main >/dev/null 2>&1; then
+            echo "main merges cleanly into develop."
+            gh pr edit "$NUMBER" --remove-label back-merge-conflict >/dev/null 2>&1 || true
+          else
+            git merge --abort || true
+            gh label create back-merge-conflict --color B60205 \
+              --description "main does not merge cleanly into develop" >/dev/null 2>&1 || true
+            gh pr edit "$NUMBER" --add-label back-merge-conflict
+            gh pr comment "$NUMBER" --body "⚠️ \`main\` does not merge cleanly into \`develop\`. Resolve the conflicts on a \`chore/…\` branch from \`develop\` (merge \`origin/main\` into it), then let this PR update."
+            echo "::warning::Back-merge PR #$NUMBER has conflicts."
+          fi

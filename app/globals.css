@@ -1,30 +1,217 @@
 @import "tailwindcss";
+@import "./styles/sober.css";
 
 @custom-variant dark (&:where(.dark, .dark *));
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
   --navbar-height: 3.5rem;
+  /* Height of the visible mini player; 0 when hidden (set by the player, #396). */
+  --mini-player-h: 0px;
 }
 
-.dark {
-  --background: #0a0a0a;
-  --foreground: #ededed;
-}
-
+/*
+ * Semantic design tokens → Tailwind utilities (Story 6.1.1 / G1.1, #385, ADR 0007).
+ * Values live in app/styles/sober.css; docs in docs/design/design-tokens.md.
+ * Use these (bg-surface, text-fg-muted, border-line, bg-accent, text-chord,
+ * text-meta, rounded-control, min-h-tap, shadow-sheet …), never palette classes.
+ */
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-  --color-primary: #dc2626; /* red-600 */
+  --font-sans: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  /* colour */
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-line: var(--line);
+  --color-line-strong: var(--line-strong);
+  --color-fg: var(--text);
+  --color-fg-muted: var(--text-muted);
+  --color-fg-subtle: var(--text-subtle);
+  --color-accent: var(--accent);
+  --color-on-accent: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-chord: var(--chord);
+  --color-danger: var(--danger);
+  --color-on-danger: var(--danger-ink);
+  --color-focus: var(--focus);
+  --color-chip: var(--chip-bg);
+  --color-on-chip: var(--chip-text);
+  --color-chip-active: var(--chip-bg-active);
+  --color-on-chip-active: var(--chip-text-active);
+  --color-scrim: var(--scrim);
+
+  /* aliases for the shadcn-style primitives in components/ui */
+  --color-background: var(--bg);
+  --color-foreground: var(--text);
+  --color-primary: var(--accent);
+  --color-primary-foreground: var(--accent-ink);
+  --color-secondary: var(--surface-2);
+  --color-secondary-foreground: var(--text);
+  --color-muted: var(--surface);
+  --color-muted-foreground: var(--text-muted);
+  --color-destructive: var(--danger);
+  --color-destructive-foreground: var(--danger-ink);
+  --color-input: var(--line-strong);
+  --color-ring: var(--focus);
+  --color-border: var(--line);
+  --color-popover: var(--surface);
+  --color-popover-foreground: var(--text);
+  --color-card: var(--surface);
+  --color-card-foreground: var(--text);
+
+  /* type scale (never below 12 px) */
+  --text-caption: var(--fs-caption);
+  --text-caption--line-height: var(--lh-tight);
+  --text-meta: var(--fs-meta);
+  --text-meta--line-height: var(--lh-tight);
+  --text-body: var(--fs-body);
+  --text-body--line-height: var(--lh-body);
+  --text-row: var(--fs-row);
+  --text-row--line-height: var(--lh-tight);
+  --text-title: var(--fs-title);
+  --text-title--line-height: var(--lh-tight);
+  --text-display: var(--fs-display);
+  --text-display--line-height: var(--lh-tight);
+
+  /* radius */
+  --radius-control: var(--r-control);
+  --radius-panel: var(--r-panel);
+  --radius-sheet: var(--r-sheet);
+  --radius-pill: var(--r-pill);
+
+  /* size */
+  --spacing-tap: var(--tap);
+  --spacing-bar: var(--bar-h);
+
+  /* elevation: floating layers (sheets, dialogs) only */
+  --shadow-sheet: var(--elev-sheet);
+}
+
+/*
+ * Bridge (UXA-003): until each restyle story moves its files to the semantic
+ * utilities above, Tailwind's grey palettes render as the sober warm greys
+ * (same lightness as Tailwind's, so contrast is unchanged; hue 60 = fire bias).
+ */
+@theme {
+  --color-gray-50: oklch(98.5% 0.006 60);
+  --color-gray-100: oklch(96.7% 0.006 60);
+  --color-gray-200: oklch(92.8% 0.006 60);
+  --color-gray-300: oklch(87.2% 0.006 60);
+  --color-gray-400: oklch(70.7% 0.006 60);
+  --color-gray-500: oklch(55.1% 0.006 60);
+  --color-gray-600: oklch(44.6% 0.006 60);
+  --color-gray-700: oklch(37.3% 0.006 60);
+  --color-gray-800: oklch(27.8% 0.006 60);
+  --color-gray-900: oklch(21% 0.006 60);
+  --color-gray-950: oklch(13% 0.006 60);
+  --color-slate-50: oklch(98.5% 0.006 60);
+  --color-slate-100: oklch(96.7% 0.006 60);
+  --color-slate-200: oklch(92.8% 0.006 60);
+  --color-slate-300: oklch(87.2% 0.006 60);
+  --color-slate-400: oklch(70.7% 0.006 60);
+  --color-slate-500: oklch(55.1% 0.006 60);
+  --color-slate-600: oklch(44.6% 0.006 60);
+  --color-slate-700: oklch(37.3% 0.006 60);
+  --color-slate-800: oklch(27.8% 0.006 60);
+  --color-slate-900: oklch(21% 0.006 60);
+  --color-slate-950: oklch(13% 0.006 60);
+  --color-zinc-50: oklch(98.5% 0.006 60);
+  --color-zinc-100: oklch(96.7% 0.006 60);
+  --color-zinc-200: oklch(92.8% 0.006 60);
+  --color-zinc-300: oklch(87.2% 0.006 60);
+  --color-zinc-400: oklch(70.7% 0.006 60);
+  --color-zinc-500: oklch(55.1% 0.006 60);
+  --color-zinc-600: oklch(44.6% 0.006 60);
+  --color-zinc-700: oklch(37.3% 0.006 60);
+  --color-zinc-800: oklch(27.8% 0.006 60);
+  --color-zinc-900: oklch(21% 0.006 60);
+  --color-zinc-950: oklch(13% 0.006 60);
+  --color-neutral-50: oklch(98.5% 0.006 60);
+  --color-neutral-100: oklch(96.7% 0.006 60);
+  --color-neutral-200: oklch(92.8% 0.006 60);
+  --color-neutral-300: oklch(87.2% 0.006 60);
+  --color-neutral-400: oklch(70.7% 0.006 60);
+  --color-neutral-500: oklch(55.1% 0.006 60);
+  --color-neutral-600: oklch(44.6% 0.006 60);
+  --color-neutral-700: oklch(37.3% 0.006 60);
+  --color-neutral-800: oklch(27.8% 0.006 60);
+  --color-neutral-900: oklch(21% 0.006 60);
+  --color-neutral-950: oklch(13% 0.006 60);
+  --color-stone-50: oklch(98.5% 0.006 60);
+  --color-stone-100: oklch(96.7% 0.006 60);
+  --color-stone-200: oklch(92.8% 0.006 60);
+  --color-stone-300: oklch(87.2% 0.006 60);
+  --color-stone-400: oklch(70.7% 0.006 60);
+  --color-stone-500: oklch(55.1% 0.006 60);
+  --color-stone-600: oklch(44.6% 0.006 60);
+  --color-stone-700: oklch(37.3% 0.006 60);
+  --color-stone-800: oklch(27.8% 0.006 60);
+  --color-stone-900: oklch(21% 0.006 60);
+  --color-stone-950: oklch(13% 0.006 60);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-geist-sans), ui-sans-serif, system-ui, sans-serif;
+}
+
+/* Respect reduced motion everywhere (WCAG 2.3.3); individual animations may still opt in with motion-safe:. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Focus is always visible and uses the token (keyboard users). */
+:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/*
+ * Text fields have ONE focus style. This rule is unlayered, so it beats Tailwind's utilities: `outline-none`,
+ * `focus:ring-*` and `focus:border-*` on an <input> never replaced it, they only stacked a second cue on top
+ * (underline plus box). Components must not add their own; the lint-style test textFieldFocus.test.ts checks.
+ */
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  box-shadow: none;
+}
+
+/*
+ * Fields drawn as a single underline (the New Playlist name): the one focus cue is the underline itself,
+ * 2 px in the accent instead of 1 px grey (a thicker line, not only a colour change), and no outline box.
+ * The shadow adds the second pixel without moving the layout.
+ */
+.field-underline:focus,
+.field-underline:focus-visible {
+  outline: none !important;
+  outline-offset: 0 !important;
+  border-bottom-color: var(--focus);
+  box-shadow: 0 1px 0 0 var(--focus);
+}
+
+/*
+ * Fields drawn as a container around their input (selected chips + a typing area: the Search options tags, the
+ * artist field): the container carries the ONE focus cue, in the same 2 px token outline as every other
+ * field. The input inside draws nothing of its own, and the container does not change its border or add a ring.
+ * Only the input counts (`:has(input:focus-visible)`): a chip's remove button keeps its own outline.
+ */
+.field-composite:has(input:focus-visible) {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+.field-composite input:focus-visible {
+  outline: none;
+  box-shadow: none;
 }
 
 @layer utilities {
@@ -49,8 +236,10 @@ body {
   50%       { filter: drop-shadow(0 0 9px rgb(251 191 36 / 0.9)); }
 }
 
-.heart-glow {
-  animation: heart-glow 2.5s ease-in-out infinite;
+@media (prefers-reduced-motion: no-preference) {
+  .heart-glow {
+    animation: heart-glow 2.5s ease-in-out infinite;
+  }
 }
 @keyframes equalizer {
   0%, 100% { height: 20%; }

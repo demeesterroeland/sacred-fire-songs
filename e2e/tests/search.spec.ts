@@ -47,10 +47,10 @@ test.describe('Search Functionality E2E Tests', () => {
     await expect(firstTitleElement).toBeVisible();
     const songTitle = (await firstTitleElement.innerText()).trim();
 
-    // Artists render as pills linking to the artist filter
-    const firstAuthorElement = page.locator('a[href^="/songs?artist="]').first();
-    await expect(firstAuthorElement).toBeVisible();
-    const songAuthor = (await firstAuthorElement.innerText()).trim();
+    // Song rows (Story 6.1.2, #386): the grey meta line starts with the author(s): "Author · Category · Language"
+    const firstMeta = page.getByTestId('song-row-meta').first();
+    await expect(firstMeta).toBeVisible();
+    const songAuthor = (await firstMeta.innerText()).split(' · ')[0].split(', ')[0].trim();
 
     const searchInput = page.locator('input[placeholder="Search 200+ songs"]');
 
@@ -62,7 +62,7 @@ test.describe('Search Functionality E2E Tests', () => {
     await expect(page.locator(`text=${songTitle}`).first()).toBeVisible();
 
     // 3. Author Search: search using lowercase version of author
-    if (songAuthor && songAuthor !== 'Unknown' && songAuthor !== 'Traditional') {
+    if (songAuthor && songAuthor !== 'Unknown' && songAuthor !== 'Traditional' && songAuthor !== 'No artist') {
       await searchInput.click();
       await searchInput.fill('');
       await searchInput.pressSequentially(songAuthor.toLowerCase(), { delay: 30 });

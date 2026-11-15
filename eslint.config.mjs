@@ -29,6 +29,7 @@ const eslintConfig = defineConfig([
     "graphify-out/**",
     "playwright-report/**",
     "test-results/**",
+    "supabase/.temp/**",
   ]),
 ]);
 

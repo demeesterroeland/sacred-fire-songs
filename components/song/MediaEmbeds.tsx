@@ -17,7 +17,7 @@ const MediaEmbeds: React.FC<MediaEmbedsProps> = ({ youtubeUrl, spotifyUrl, sound
                 <div className="bg-gray-100/50 dark:bg-black/20 rounded-xl overflow-hidden shadow-lg border border-gray-200 dark:border-white/5">
                     <div className="p-3 bg-gray-100 dark:bg-white/5 border-b border-gray-200 dark:border-white/5 flex items-center gap-2">
                         <span className="material-symbols-outlined text-red-500 text-sm">play_circle</span>
-                        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">YouTube</h3>
+                        <h3 className="text-meta font-semibold text-fg-muted">YouTube</h3>
                     </div>
                     <div className="aspect-video">
                         <iframe
@@ -37,7 +37,7 @@ const MediaEmbeds: React.FC<MediaEmbedsProps> = ({ youtubeUrl, spotifyUrl, sound
                 <div className="bg-gray-100/50 dark:bg-black/20 rounded-xl overflow-hidden shadow-lg border border-gray-200 dark:border-white/5">
                     <div className="p-3 bg-gray-100 dark:bg-white/5 border-b border-gray-200 dark:border-white/5 flex items-center gap-2">
                         <span className="material-symbols-outlined text-[#ff5500] text-sm">cloud</span>
-                        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">SoundCloud</h3>
+                        <h3 className="text-meta font-semibold text-fg-muted">SoundCloud</h3>
                     </div>
                     {/* SoundCloud embed logic often requires API call if just a track URL, 
                         but standard Embed URL works if user pastes embed src.
@@ -62,7 +62,7 @@ const MediaEmbeds: React.FC<MediaEmbedsProps> = ({ youtubeUrl, spotifyUrl, sound
                 <div className="bg-gray-100/50 dark:bg-black/20 rounded-xl overflow-hidden shadow-lg border border-gray-200 dark:border-white/5">
                     <div className="p-3 bg-gray-100 dark:bg-white/5 border-b border-gray-200 dark:border-white/5 flex items-center gap-2">
                         <span className="material-symbols-outlined text-[#1db954] text-sm">radio</span>
-                        <h3 className="text-xs font-bold text-gray-400 uppercase tracking-widest">Spotify</h3>
+                        <h3 className="text-meta font-semibold text-fg-muted">Spotify</h3>
                     </div>
                     <div className="h-[152px]">
                         {/* Spotify Embed requires converting open.spotify.com/track/ID to open.spotify.com/embed/track/ID */}

@@ -87,7 +87,7 @@ export default function AdminUsersTable({ initialUsers }: AdminUsersTableProps) 
     <div className="space-y-8">
       {/* Summary cards (same style as components/home/LibrarySummary.tsx) */}
       <section>
-        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">{t('admin.overview')}</p>
+        <p className="text-caption font-semibold text-fg-muted mb-4">{t('admin.overview')}</p>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
           {[
             {
@@ -136,7 +136,7 @@ export default function AdminUsersTable({ initialUsers }: AdminUsersTableProps) 
               </div>
               <div className="min-w-0">
                 <p className="text-lg font-bold text-gray-900 dark:text-white leading-tight">{value}</p>
-                <p className="text-[10px] md:text-xs text-gray-500 truncate" title={title}>
+                <p className="text-caption text-fg-muted truncate" title={title}>
                   {label}
                 </p>
               </div>
@@ -156,7 +156,7 @@ export default function AdminUsersTable({ initialUsers }: AdminUsersTableProps) 
             aria-label={t('admin.search.label')}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full pl-10 pr-4 py-2.5 bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-full text-sm text-gray-900 dark:text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-purple-500"
+            className="w-full pl-10 pr-4 py-2.5 bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 rounded-full text-sm text-gray-900 dark:text-white placeholder-gray-400"
           />
         </div>
 
@@ -181,7 +181,7 @@ export default function AdminUsersTable({ initialUsers }: AdminUsersTableProps) 
 
       {/* Users List / Table */}
       <section>
-        <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">
+        <p className="text-caption font-semibold text-fg-muted mb-4">
           {t('admin.list.heading', { count: filteredUsers.length })}
         </p>
         <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white/50 dark:bg-gray-900/30 overflow-hidden">
@@ -271,7 +271,7 @@ export default function AdminUsersTable({ initialUsers }: AdminUsersTableProps) 
                     </div>
 
                     {/* Join Date */}
-                    <div className="flex flex-col items-end text-right text-[11px] text-gray-400">
+                    <div className="flex flex-col items-end text-right text-caption text-fg-muted">
                       <ActivityStatusBadge status={getActivityStatus(user.last_seen_at)} />
                       <span>{t('admin.user.joined', { date: formatDate(user.created_at) })}</span>
                     </div>

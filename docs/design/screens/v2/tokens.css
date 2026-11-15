@@ -1,0 +1,115 @@
+/*
+ * Sacred Fire Songs — design tokens v2 (DRAFT for review, Story 6.1.1 / G1.1, #385)
+ * Version: 1.0 | Date: Nov 5, 2026
+ *
+ * Changelog
+ * 1.0 | Nov 5, 2026 | Mockup copy of app/styles/sober.css (the app source of truth); names aligned
+ *                      (--text-muted, --text-subtle, --r-control/panel/sheet, --elev-sheet).
+ * 0.1 | Nov 4, 2026 | First draft for the mockup review: warm greys, one fire accent,
+ *                      type scale 12–28 px, spacing 4/8/12/16/24/32, radius, sheet elevation.
+ *
+ * Rules (report §5):
+ *  - Greys carry all structure. --accent is the only hue: the single primary action,
+ *    the now-playing state and chord symbols. Colour never carries meaning alone.
+ *  - No text below 12 px. Text tokens reach ≥ 4.5:1 on --bg and --surface.
+ *  - Surfaces are separated by spacing and --line, not by shadows. Only sheets float.
+ *
+ * Contrast (WCAG 2.2, measured):
+ *   light: --text 16.8 · --text-muted 6.8 · --text-subtle 5.2 · --accent 5.2 · white on --accent 5.4
+ *   dark:  --text 16.2 · --text-muted 7.7 · --text-subtle 5.4 · --accent 6.8 · --accent-ink on --accent 6.8
+ */
+
+:root {
+  /* colour: light (warm greys biased toward the fire hue) */
+  --bg: #fbfaf9;
+  --surface: #f3f2f0;
+  --surface-2: #e9e7e4;
+  --line: #e0ddd9;
+  --text: #1a1918;
+  --text-muted: #5c5853;
+  --text-subtle: #6b665f;
+  --accent: #c23a0c;
+  --accent-ink: #ffffff;
+  --accent-soft: color-mix(in srgb, var(--accent) 12%, transparent);
+  --chord: var(--accent);
+  --danger: #b42318;
+  --focus: #2f6fdb;
+  --scrim: rgba(20, 18, 16, 0.42);
+
+  /* type */
+  --font-sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --fs-caption: 12px;   /* minimum, never smaller */
+  --fs-meta: 13px;      /* meta lines, secondary */
+  --fs-body: 16px;      /* body; 15px is the alternative under review */
+  --fs-row: 16px;       /* list row title */
+  --fs-title: 22px;     /* page title */
+  --fs-display: 28px;   /* rare: empty states */
+  --lh-tight: 1.25;
+  --lh-body: 1.5;
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+
+  /* lyric scale (reader-controlled with A− / A+) */
+  --lyric-steps: 15 17 19 21 24 28;
+
+  /* spacing */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+
+  /* radius */
+  --r-control: 6px;    /* buttons, inputs */
+  --r-panel: 10px;   /* segmented control, toolbar */
+  --r-sheet: 16px;   /* bottom sheet top corners */
+  --r-pill: 999px;/* filter chips only */
+
+  /* size */
+  --tap: 44px;    /* minimum touch target */
+  --bar-h: 56px;  /* app bar, bottom action bar */
+
+  /* elevation: only for floating layers */
+  --elev-sheet: 0 -8px 32px rgba(20, 18, 16, 0.16);
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f0e0d;
+    --surface: #181716;
+    --surface-2: #232120;
+    --line: #2c2a28;
+    --text: #ecebe9;
+    --text-muted: #a8a39d;
+    --text-subtle: #8c8781;
+    --accent: #ff6a2b;
+    --accent-ink: #0f0e0d;
+    --danger: #ff6b5e;
+    --focus: #7aa7ff;
+    --scrim: rgba(0, 0, 0, 0.6);
+    --elev-sheet: 0 -8px 32px rgba(0, 0, 0, 0.5);
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme="dark"] {
+  --bg: #0f0e0d;
+  --surface: #181716;
+  --surface-2: #232120;
+  --line: #2c2a28;
+  --text: #ecebe9;
+  --text-muted: #a8a39d;
+  --text-subtle: #8c8781;
+  --accent: #ff6a2b;
+  --accent-ink: #0f0e0d;
+  --danger: #ff6b5e;
+  --focus: #7aa7ff;
+  --scrim: rgba(0, 0, 0, 0.6);
+  --elev-sheet: 0 -8px 32px rgba(0, 0, 0, 0.5);
+  color-scheme: dark;
+}

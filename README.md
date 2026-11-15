@@ -76,6 +76,7 @@ npm install
 
 # 3. Set up environment variables
 cp .env.example .env.local
+# Self-hosting: set OPERATOR_NAME and OPERATOR_CONTACT_EMAIL (server-side, never NEXT_PUBLIC_) so the /terms and /privacy pages say who runs your server
 # Add your Supabase URL and anon key
 
 # 4. Run locally
@@ -110,8 +111,8 @@ For a comprehensive guide on how we develop, test, and deploy features (includin
 ## Contributing
 
 1. Check [`docs/logbook/epic&user stories.md`](docs/logbook/epic%26user%20stories.md) for open stories
-2. Branch from `main`: `feat/userstory-X.X` or `fix/short-description`
-3. Run tests: `npm test`
-4. Open a PR — title format: `[Story X.X.X] Short description`
+2. Branch from `develop` (Gitflow): `feat/<issue>-<desc>`, `fix/…`, `chore/…` or `docs/…` (`scripts/cicd/start-issue.sh <issue> <type> <desc>`); urgent production fixes use `hotfix/<issue>-<desc>` from `main`
+3. Run tests: `npm run lint`, `npx tsc --noEmit`, `npm test`, `npm run test:bdd:unit`
+4. Open a PR into `develop` with a Conventional Commit title, e.g. `feat(songs): add capo hint`
 
-Direct commits to `main` are not allowed.
+Direct commits to `main` or `develop` are not allowed. See [git-workflow.md](docs/guides/git-workflow.md).

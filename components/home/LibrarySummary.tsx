@@ -1,90 +1,55 @@
 import Link from 'next/link';
-import { Heart, PenLine, Music, Sparkles } from 'lucide-react';
 
 import { getServerT } from '@/lib/i18n/server';
-interface LibrarySummaryProps {
-  favoritesCount: number;
-  draftsCount: number;
-  mySongsCount: number;
-  newSongsCount: number;
-}
+import type { TranslationKey } from '@/lib/i18n';
+import { MY_DRAFTS_HREF } from '@/lib/songs/draftsLink';
+import type { LibrarySummary as LibrarySummaryCounts } from '@/lib/songs/serverQueries';
 
-const stats = [
-  {
-    key: 'favorites',
-    icon: Heart,
-    labelKey: 'nav.favorites',
-    href: '/songs?favorites=true',
-    color: 'text-rose-400',
-    iconFill: 'fill-rose-400',
-    bg: 'bg-rose-500/10',
-    border: 'border-rose-500/20 hover:border-rose-500/40',
-  },
-  {
-    key: 'drafts',
-    icon: PenLine,
-    labelKey: 'nav.drafts',
-    href: '/songs?status=draft',
-    color: 'text-amber-400',
-    iconFill: '',
-    bg: 'bg-amber-500/10',
-    border: 'border-amber-500/20 hover:border-amber-500/40',
-  },
-  {
-    key: 'mySongs',
-    icon: Music,
-    labelKey: 'librarySummary.mySongs.title',
-    href: '/songs?mine=true',
-    color: 'text-violet-400',
-    iconFill: '',
-    bg: 'bg-violet-500/10',
-    border: 'border-violet-500/20 hover:border-violet-500/40',
-  },
-  {
-    key: 'newSongs',
-    icon: Sparkles,
-    labelKey: 'librarySummary.newSongs.title',
-    href: '/songs?new=true',
-    color: 'text-emerald-400',
-    iconFill: '',
-    bg: 'bg-emerald-500/10',
-    border: 'border-emerald-500/20 hover:border-emerald-500/40',
-  },
-] as const;
+type Stat = { key: string; labelKey: TranslationKey; href: string; count: keyof LibrarySummaryCounts };
 
-const countMap: Record<string, keyof LibrarySummaryProps> = {
-  favorites: 'favoritesCount',
-  drafts: 'draftsCount',
-  mySongs: 'mySongsCount',
-  newSongs: 'newSongsCount',
-};
+/**
+ * Story 6.1.36 (#488): personal items only, in two groups of three that sit on the two columns of
+ * "Recently added" and the category grid below (one row of six from md, two rows of three on a phone).
+ * The first count of each group starts at the song titles' x.
+ */
+const groups: ReadonlyArray<ReadonlyArray<Stat>> = [
+  [
+    { key: 'favorites', labelKey: 'nav.favorites', href: '/songs?favorites=true', count: 'favoritesCount' },
+    { key: 'drafts', labelKey: 'nav.drafts', href: MY_DRAFTS_HREF, count: 'draftsCount' },
+    { key: 'mySongs', labelKey: 'librarySummary.mySongs.title', href: '/songs?mine=true', count: 'mySongsCount' },
+  ],
+  [
+    { key: 'recordings', labelKey: 'librarySummary.recordings.title', href: '/songs?myRecordings=true', count: 'recordingsCount' },
+    { key: 'sharedWithMe', labelKey: 'sharedWithMe.title', href: '/library/shared', count: 'sharedWithMeCount' },
+    { key: 'sharedByMe', labelKey: 'sharedByMe.title', href: '/library/shared-by-me', count: 'sharedByMeCount' },
+  ],
+];
 
-export default async function LibrarySummary(props: LibrarySummaryProps) {
+export default async function LibrarySummary(props: LibrarySummaryCounts) {
   const t = await getServerT();
   return (
-    <div>
-      <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mb-4">{t('library.heading')}</p>
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {stats.map((stat) => {
-          const Icon = stat.icon;
-          const count = props[countMap[stat.key]];
-          return (
-            <Link
-              key={stat.key}
-              href={stat.href}
-              className={`flex items-center gap-3 p-3 md:p-4 rounded-2xl border transition-all hover:-translate-y-0.5 group ${stat.border} bg-white/50 dark:bg-gray-900/30`}
-            >
-              <div className={`w-9 h-9 rounded-xl flex items-center justify-center shrink-0 ${stat.bg}`}>
-                <Icon className={`w-4 h-4 ${stat.color} ${stat.iconFill}`} />
-              </div>
-              <div className="min-w-0">
-                <p className="text-lg font-bold text-gray-900 dark:text-white leading-tight">{count}</p>
-                <p className="text-[10px] md:text-xs text-gray-500 truncate">{t(stat.labelKey)}</p>
-              </div>
-            </Link>
-          );
-        })}
+    <section aria-labelledby="library-summary-heading" data-testid="library-summary">
+      <p id="library-summary-heading" className="text-meta font-semibold text-fg-muted mb-4">
+        {t('library.heading')}
+      </p>
+      <div className="grid grid-cols-1 gap-y-2 md:grid-cols-2 md:gap-x-6">
+        {groups.map((group, g) => (
+          <div key={g} className="grid grid-cols-3 divide-x divide-line">
+            {group.map((stat) => (
+              <Link
+                key={stat.key}
+                href={stat.href}
+                data-testid="library-stat"
+                data-key={stat.key}
+                className="block min-h-tap min-w-0 px-2 py-1 transition-colors first:ps-4 hover:bg-surface md:px-4"
+              >
+                <p className="text-lg font-bold text-fg leading-tight">{props[stat.count]}</p>
+                <p className="text-caption text-fg-muted break-words hyphens-auto">{t(stat.labelKey)}</p>
+              </Link>
+            ))}
+          </div>
+        ))}
       </div>
-    </div>
+    </section>
   );
 }

@@ -4,6 +4,8 @@ import { useState, useRef, useTransition, useEffect } from 'react';
 import { renamePlaylist } from '@/app/actions/playlistActions';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
+import { useLocale } from '@/context/LocaleContext';
+import { actionErrorMessage } from '@/lib/errors/actionError';
 
 export function usePlaylistRename(id: string, initialTitle: string) {
     const [isRenaming, setIsRenaming] = useState(false);
@@ -13,6 +15,7 @@ export function usePlaylistRename(id: string, initialTitle: string) {
     const inputRef = useRef<HTMLInputElement>(null);
     const [, startTransition] = useTransition();
     const router = useRouter();
+    const { t } = useLocale();
 
     useEffect(() => { setOptimisticTitle(initialTitle); }, [initialTitle]);
 
@@ -33,10 +36,10 @@ export function usePlaylistRename(id: string, initialTitle: string) {
         startTransition(async () => {
             const result = await renamePlaylist(id, trimmed);
             if (result.error) {
-                toast.error(result.error);
+                toast.error(actionErrorMessage(result.error, t));
                 setOptimisticTitle(initialTitle);
             } else {
-                toast.success('Renamed');
+                toast.success(t('playlists.rename.success'));
                 router.refresh();
             }
             isSavingRef.current = false;

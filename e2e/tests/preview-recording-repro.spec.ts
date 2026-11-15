@@ -1,3 +1,4 @@
+import { clickPractice } from '../fixtures/songActions';
 import { test, expect } from '@playwright/test';
 import { ROLES, passwordFor } from '../fixtures/roles';
 
@@ -45,13 +46,12 @@ test.describe('Preview Environment Rehearsal Playback Debugging', () => {
     await page.goto(`${PREVIEW_BASE_URL}/songs/6ba02979-174c-4121-ae0a-b5c0a759616b`);
     await page.waitForLoadState('networkidle');
 
-    // 3. Open Rehearsal Space drawer
-    const recordBtn = page.locator('button[title="Recordings"]').first();
-    await recordBtn.click();
+    // 3. Open Practice drawer
+    await clickPractice(page); // phone: action bar (#393); desktop: header button
     await page.waitForTimeout(1000);
 
-    // Switch to Voice Recorder tab
-    const voiceRecorderTab = page.locator('button:has-text("Voice Recorder")').first();
+    // Switch to Record tab
+    const voiceRecorderTab = page.locator('[data-testid="practice-tab-record"]').first();
     await voiceRecorderTab.click();
     await page.waitForTimeout(1000);
 
