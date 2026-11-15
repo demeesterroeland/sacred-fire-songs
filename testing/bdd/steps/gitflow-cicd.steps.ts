@@ -30,6 +30,7 @@ import {
   triggersOnBranch,
   type Workflow,
 } from '../../support/workflowContract';
+import { generatedTags, metadataSteps, RUN_CONTEXTS } from '../../support/metadataTags';
 import { checkBranches, checkTitle } from '../../../scripts/cicd/lib/prPolicy.mjs';
 
 export interface CiBddState {
@@ -37,6 +38,7 @@ export interface CiBddState {
   file?: { path: string; text: string };
   pr?: { head: string; base: string; title: string };
   policy?: { ok: boolean; titleOk: boolean; branchesOk: boolean };
+  tags?: Array<{ step: string; tags: string[] }>;
 }
 
 type CucumberProfile = { paths?: string[] };
@@ -164,10 +166,48 @@ Then('a push to {string} builds images tagged {string} and the short SHA', funct
   assert.match(wf.raw, /type=sha/, 'docker.yml does not tag the short SHA');
 });
 
+// #602: check the tags docker/metadata-action would generate for every event,
+// not the workflow text (flavor latest=auto adds "latest" for a release tag).
 Then('no image is tagged {string}', function (this: SongBddWorld, tag: string) {
   for (const wf of ci(this).workflows) {
     assert.doesNotMatch(wf.raw, new RegExp(`value=${tag}\\b`), `${wf.file} still tags "${tag}"`);
+    for (const step of metadataSteps(wf)) {
+      for (const [run, ctx] of Object.entries(RUN_CONTEXTS)) {
+        assert.ok(!generatedTags(step, ctx).includes(tag), `${wf.file} "${step.name}" tags "${tag}" on ${run}`);
+      }
+    }
   }
+});
+
+Given('the workflow {string} without its {string} flavor', function (this: SongBddWorld, file: string, flavor: string) {
+  const wf = loadWorkflow(file);
+  for (const step of metadataSteps(wf)) {
+    const value = String(step.with?.flavor ?? '');
+    step.with = { ...step.with, flavor: value.split('\n').filter((l) => l.trim() !== flavor).join('\n') };
+  }
+  ci(this).workflows = [wf];
+});
+
+When('the Docker workflow runs for the release {string}', function (this: SongBddWorld, version: string) {
+  const ctx = { event: 'release' as const, ref: `refs/tags/${version}`, sha: 'abcdef1234567890' };
+  ci(this).tags = metadataSteps(current(this)).map((step) => ({ step: step.name ?? '', tags: generatedTags(step, ctx) }));
+});
+
+Then('the app and migrator images are tagged {string} and {string}', function (this: SongBddWorld, a: string, b: string) {
+  const runs = ci(this).tags ?? [];
+  assert.equal(runs.length, 2, 'expected an app and a migrator metadata step');
+  for (const { step, tags } of runs) {
+    assert.ok(tags.includes(a) && tags.includes(b), `${step}: ${tags.join(', ')}`);
+  }
+});
+
+Then('no generated tag is {string}', function (this: SongBddWorld, tag: string) {
+  for (const { step, tags } of ci(this).tags ?? []) assert.ok(!tags.includes(tag), `${step} would push "${tag}": ${tags.join(', ')}`);
+});
+
+Then('the contract check finds the tag {string}', function (this: SongBddWorld, tag: string) {
+  const runs = ci(this).tags ?? [];
+  assert.ok(runs.length > 0 && runs.every(({ tags }) => tags.includes(tag)), `the model does not detect "${tag}"`);
 });
 
 Then('it tags release images with the release version', function (this: SongBddWorld) {
