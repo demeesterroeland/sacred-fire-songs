@@ -17,6 +17,9 @@ import { useRecordingsQuery } from "@/hooks/useRecordingsQuery";
 import { useSongsFilter } from "@/hooks/useSongsFilter";
 import { isDraftActive } from "@/lib/songs/filterConfig";
 import { useLocale } from "@/context/LocaleContext";
+import GuestGate from "@/components/common/GuestGate";
+import { returnPath } from "@/lib/auth/guestGate";
+import { songsGuestGateFeature } from "@/lib/songs/guestCollections";
 
 type SortByType = 'title' | 'author' | 'newest';
 
@@ -30,7 +33,7 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
     const { t, locale } = useLocale();
     const searchParams = useSearchParams();
     const router = useRouter();
-    const { user } = useAuth();
+    const { user, loading: authLoading } = useAuth();
     const { setHeaderCount, searchFiltersOpen, setSearchFiltersOpen, setHasActiveSearchFilters, isSearching } = useSidebar();
     const [localSearch, setLocalSearch] = useState(searchParams.get('search') || '');
 
@@ -93,6 +96,7 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
         filteredCount,
         browseOptionsFor
     } = useSongsFilter({ songs, taxonomy, userId: user?.id, favoriteIds, userRecordingCompositionIds, viewedSongIds, sortBy, locale, unknownLabels });
+    const guestGate = songsGuestGateFeature({ favorites: !!state.favorites, status: state.status ?? "all", isGuest: !user, authLoading });
 
     // Songbook and language options of the sheet, counted for everything the sheet shows: the draft and its search text
     // while it is open, the applied state otherwise
@@ -214,7 +218,12 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
                             isSearching ? 'opacity-60' : 'opacity-100'
                         }`}
                     >
-                        {displaySongs.length > 0 ? (
+                        {guestGate ? (
+                            // #600: a guest on Favorites sees why an account is needed, and returns here after signing in.
+                            <div className="col-span-full py-6">
+                                <GuestGate feature={guestGate} next={returnPath('/songs', searchParams)} />
+                            </div>
+                        ) : displaySongs.length > 0 ? (
                             displaySongs.map((song) => (
                                 <div key={song.id} className="relative">
                                     <SongCard

@@ -6,10 +6,13 @@ import { DICTIONARIES, SUPPORTED_LOCALES } from '../../../lib/i18n';
 import {
   GUEST_GATE_FEATURES,
   guestGateKeys,
+  loginRedirectHref,
+  returnPath,
   signInHref,
   type GuestGateFeature,
 } from '../../../lib/auth/guestGate';
 import { safeNextPath } from '../../../lib/auth/safeNext';
+import { songsGuestGateFeature } from '../../../lib/songs/guestCollections';
 import { queryAsAnon, seedDb } from '../support/db';
 
 interface GateState {
@@ -118,4 +121,58 @@ Then('the guest can read the audio file of the consented take only', function (t
   const { seenPaths, consented, unconsented } = get(this);
   assert.ok(seenPaths!.includes(consented!.path));
   assert.ok(!seenPaths!.includes(unconsented!.path));
+});
+
+// ─── #600: Favorites gate and next= on every sign-in link ──────────────────────
+
+interface SongsViewState {
+  songsView?: string;
+  loginHref?: string;
+}
+const viewState = new WeakMap<object, SongsViewState>();
+const view = (w: object) => {
+  if (!viewState.has(w)) viewState.set(w, {});
+  return viewState.get(w)!;
+};
+
+When('they open the songs view {string}', function (this: object, page: string) {
+  view(this).songsView = page;
+  get(this).next = page;
+});
+
+function songsViewGate(page: string) {
+  const params = new URL(page, 'http://x.test').searchParams;
+  return songsGuestGateFeature({
+    favorites: params.get('favorites') === 'true',
+    status: params.get('status') ?? 'all',
+    isGuest: true,
+    authLoading: false,
+  });
+}
+
+Then('the songs view shows the GuestGate for {string}', function (this: object, feature: string) {
+  assert.equal(songsViewGate(view(this).songsView!), feature);
+  const url = new URL(view(this).songsView!, 'http://x.test');
+  assert.equal(signInHref(returnPath(url.pathname, url.search)), signInHref(view(this).songsView));
+});
+
+Then('the songs view shows no GuestGate', function (this: object) {
+  assert.equal(songsViewGate(view(this).songsView!), null);
+});
+
+When(
+  'they follow the sign-in link of the {} on {string}',
+  function (this: object, origin: string, page: string) {
+    const url = new URL(page, 'http://x.test');
+    // Each origin builds its link from the current path + query through the shared helpers (lib/auth/guestGate.ts).
+    view(this).loginHref =
+      origin === 'proxy redirect'
+        ? loginRedirectHref(url.pathname, url.search)
+        : signInHref(returnPath(url.pathname, url.search));
+  }
+);
+
+Then('the login URL has next= {string}', function (this: object, page: string) {
+  const next = new URL(view(this).loginHref!, 'http://x.test').searchParams.get('next');
+  assert.equal(next, page);
 });
