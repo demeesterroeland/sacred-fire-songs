@@ -21,6 +21,7 @@ import { recordingPermalink, takeListTab } from "@/lib/songs/recordingLink";
 import { useModalFocus } from "@/hooks/useModalFocus";
 import { nextTabIndex } from "@/lib/a11y/focusTrap";
 import { practiceAvailability } from "@/lib/song/practiceAvailability";
+import { PracticeTabs } from "./PracticeTabs";
 import { partitionTakes } from "@/lib/songs/partitionTakes";
 import { takeStatusPills } from "@/lib/songs/takeStatus";
 import { TakeStatusPills } from "@/components/song/TakeStatusPills";
@@ -382,7 +383,6 @@ export default function RehearsalDrawer({
   const [activeDomain, setActiveDomain] = useState<'recording' | 'media' | null>(null);
 
   const hasMedia = !!(youtubeUrl || spotifyUrl || soundcloudUrl);
-  const showTabs = hasMedia || !user;
   const onTabsKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
     const order = ["media", "recorder"] as const;
     const next = nextTabIndex(e.key, order.indexOf(activeTab), order.length);
@@ -505,6 +505,8 @@ export default function RehearsalDrawer({
   const { mine: myTakes, shared: sharedTakes, public: publicTakes } = useMemo(() => partitionTakes(recordings), [recordings]);
   // Story 6.1.40 (#586): each tab says how many items it holds (hidden at zero).
   const tabCounts = practiceAvailability({ providerCount: referenceProviders.length, takeCount: recordings.length, isMember: !!user });
+  // #601 / #586: tabs whenever a tab has something to show, so takes without reference media still get their Record count.
+  const showTabs = tabCounts.tabs;
   const songRecordingIds = useMemo(() => recordings.map((r) => r.id), [recordings]);
   const miniPlayerVisible = isMiniPlayerVisible({ mediaSessionStarted, activePlaybackId, songRecordingIds });
 
@@ -1230,39 +1232,7 @@ export default function RehearsalDrawer({
 
               {/* Tabs Navigation (a guest always has Listen: the public takes live there) */}
             {showTabs && (
-              <div role="tablist" aria-label={t('practice.title')} onKeyDown={onTabsKeyDown} className="flex px-6 border-b border-line shrink-0">
-                {([
-                  { id: "media", testId: "practice-tab-listen", label: t('practice.tab.listen'), count: tabCounts.listen },
-                  { id: "recorder", testId: "practice-tab-record", label: t('practice.tab.record'), count: tabCounts.record },
-                ] as const).map((tab) => (
-                  <button
-                    key={tab.id}
-                    type="button"
-                    role="tab"
-                    id={`${dialogId}-tab-${tab.id}`}
-                    aria-selected={activeTab === tab.id}
-                    aria-controls={`${dialogId}-panel-${tab.id}`}
-                    tabIndex={activeTab === tab.id ? 0 : -1}
-                    data-testid={tab.testId}
-                    onClick={() => setActiveTab(tab.id)}
-                    className={`flex-1 py-3 text-sm font-bold text-center border-b-2 transition-all ${
-                      activeTab === tab.id
-                        ? "border-accent text-accent"
-                        : "border-transparent text-fg-muted hover:text-fg"
-                    }`}
-                  >
-                    {tab.label}
-                    {tab.count > 0 && (
-                      <span
-                        data-testid={`${tab.testId}-count`}
-                        className="ml-1.5 inline-flex min-w-5 items-center justify-center rounded-pill bg-chip px-1.5 text-caption font-medium tabular-nums text-on-chip"
-                      >
-                        {tab.count}
-                      </span>
-                    )}
-                  </button>
-                ))}
-              </div>
+              <PracticeTabs idPrefix={dialogId} counts={tabCounts} activeTab={activeTab} onSelect={setActiveTab} onKeyDown={onTabsKeyDown} />
             )}
 
             {/* Content Body */}
