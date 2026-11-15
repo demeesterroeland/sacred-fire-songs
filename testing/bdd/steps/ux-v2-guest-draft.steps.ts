@@ -8,7 +8,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { countPaletteClasses } from '../../../lib/design/paletteAudit';
 import { DICTIONARIES, SUPPORTED_LOCALES } from '../../../lib/i18n';
-import { SONG_DRAFT_KEY, readSongDraft, writeSongDraft } from '../../../lib/songs/songDraft';
+import { SONG_DRAFT_KEY, clearSongDraft, readSongDraft, writeSongDraft } from '../../../lib/songs/songDraft';
 
 interface World {
   source: string;
@@ -74,8 +74,11 @@ Then('a guest who saves is sent to sign in with a way back to Add Song', functio
   assert.doesNotMatch(this.source, /Please log in to save songs/);
 });
 
-// #607: shared devices. The helper runs against an in-memory Storage; the
-// sign-out wiring is checked in useAuth (rendered in useAuthDraftCleanup.test.tsx).
+// #607: shared devices. The draft helper runs for real against an in-memory
+// Storage, and the sign-out step checks that useAuth calls it. The rendered
+// behaviour is covered by testing/unit/tests/auth/useAuthDraftCleanup.test.tsx
+// (logout, SIGNED_OUT) and testing/unit/tests/songs/songFormDraftOwner.test.tsx
+// (form emptied at sign-out, guest draft adopted, typing during load kept).
 Given('I am signed in as {string} and have an unsaved draft on Add Song', function (this: World, member: string) {
   this.storage = memoryStorage();
   writeSongDraft(DRAFT, member, this.storage);
@@ -92,7 +95,7 @@ When('I sign out', function (this: World) {
   assert.match(logout, /clearSongDraft\(\)/, 'logout does not clear the draft');
   const signedOut = auth.slice(auth.indexOf("event === 'SIGNED_OUT'"), auth.indexOf('setUser(null)', auth.indexOf("event === 'SIGNED_OUT'")));
   assert.match(signedOut, /clearSongDraft\(\)/, 'the SIGNED_OUT event does not clear the draft');
-  this.storage.removeItem(SONG_DRAFT_KEY); // what clearSongDraft() does in the browser
+  clearSongDraft(this.storage); // the helper useAuth calls, on this device's storage
 });
 
 When('{string} opens Add Song on the same device', function (this: World, member: string) {
