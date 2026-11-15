@@ -10,7 +10,7 @@ import { flushSync } from 'react-dom';
 import { parseChordPro, hasChords } from '@/lib/chordProParsing';
 import { useAuth } from '@/hooks/useAuth';
 import { readSongDraft, writeSongDraft, clearSongDraft } from '@/lib/songs/songDraft';
-import { signInHref } from '@/lib/auth/guestGate';
+import { returnPath, signInHref } from '@/lib/auth/guestGate';
 import GuestDraftBanner from '@/components/song/GuestDraftBanner';
 import CategorySelector from './CategorySelector';
 import ChordProEditor from './ChordProEditor';
@@ -118,6 +118,8 @@ const SongForm = ({ mode, initialData: liveInitialData, songId, versionId, sourc
     const queryClient = useQueryClient();
     const router = useRouter();
     const searchParams = useSearchParams();
+    // #600: back to Add Song with its own query, so an incoming next= survives the sign-in.
+    const addSongReturnPath = returnPath(ADD_SONG_PATH, searchParams);
     const [serverError, setServerError] = useState<string | null>(null);
     const [showPreview, setShowPreview] = useState(false);
     const [uploadError, setUploadError] = useState<'read' | 'tooLarge' | null>(null);
@@ -429,7 +431,7 @@ const SongForm = ({ mode, initialData: liveInitialData, songId, versionId, sourc
         if (authLoading) return; // session not known yet: don't bounce a signed-in user to sign-in
         if (!user) {
             // Keep the way back to this form; the draft is already in storage (#411).
-            router.push(signInHref(ADD_SONG_PATH));
+            router.push(signInHref(addSongReturnPath));
             return;
         }
         mutation.mutate(data);
@@ -437,7 +439,7 @@ const SongForm = ({ mode, initialData: liveInitialData, songId, versionId, sourc
 
     return (
         <>
-        {mode === 'create' && !user && !authLoading && <GuestDraftBanner next={ADD_SONG_PATH} />}
+        {mode === 'create' && !user && !authLoading && <GuestDraftBanner next={addSongReturnPath} />}
         <form onSubmit={handleSubmit(handleFormSubmit, () => flushSync(() => setShowPreview(false)))} className="space-y-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 p-4 sm:p-6 rounded-2xl w-full max-w-2xl mx-auto shadow-xl min-w-0">
             <div className="space-y-4">
                 {/* 1. Title */}

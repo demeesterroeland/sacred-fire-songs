@@ -1,4 +1,6 @@
 import { redirect } from 'next/navigation';
+import { headers } from 'next/headers';
+import { RETURN_PATH_HEADER, signInHref } from '@/lib/auth/guestGate';
 import { checkAdminAccess } from '@/lib/admin/serverQueries';
 import AdminHeader from '@/components/admin/AdminHeader';
 import AccessDeniedNotice from '@/components/admin/AccessDeniedNotice';
@@ -15,7 +17,8 @@ export default async function AdminLayout({
   const { authorized, user } = await checkAdminAccess();
 
   if (!user) {
-    redirect('/auth/login?next=/admin/users');
+    // #600: back to the admin page the guest opened (the proxy forwards path + query).
+    redirect(signInHref((await headers()).get(RETURN_PATH_HEADER) ?? '/admin'));
   }
 
   return (
