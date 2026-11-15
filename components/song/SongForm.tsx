@@ -142,12 +142,17 @@ const SongForm = ({ mode, initialData: liveInitialData, songId, versionId, sourc
     const [previewContent, flushPreview] = useDebouncedValue(liveContent, PREVIEW_DEBOUNCE_MS);
 
 
-    // Persistence Logic (Create Mode): the draft survives a sign-in round trip (#411)
+    // Persistence Logic (Create Mode): the draft survives a sign-in round trip (#411).
+    // It is tied to its owner, so wait for the session: a member's draft is only
+    // restored for that member (#607).
+    const draftOwner = user?.id ?? null;
+    const draftRestored = useRef(false);
     useEffect(() => {
-        if (mode !== 'create') return;
+        if (mode !== 'create' || authLoading) return;
 
-        // Restore on mount
-        const parsed = readSongDraft();
+        // Restore once, as soon as the session is known
+        const parsed = draftRestored.current ? null : readSongDraft(draftOwner);
+        draftRestored.current = true;
         if (parsed) {
             Object.keys(parsed).forEach((key) => {
                 setValue(key as keyof SongFormData, parsed[key] as never);
@@ -163,9 +168,9 @@ const SongForm = ({ mode, initialData: liveInitialData, songId, versionId, sourc
         }
 
         // Save on change
-        const subscription = watch((value) => writeSongDraft(value));
+        const subscription = watch((value) => writeSongDraft(value, draftOwner));
         return () => subscription.unsubscribe();
-    }, [mode, setValue, watch]);
+    }, [mode, setValue, watch, authLoading, draftOwner]);
 
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const input = e.target;

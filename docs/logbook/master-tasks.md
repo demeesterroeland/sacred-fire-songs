@@ -1594,3 +1594,10 @@
 - [x] `practice.available` in all 8 locales; replaces the headphones cue and take count of Story 6.2.2 (#583) after the rebase on the UX v3 promotion
 - [x] Tests: Vitest `practiceAvailability.test.ts`, `songActionBarComponent.test.tsx`; BDD `ux-v2-practice-availability.feature` (`@story-6.1.40`); `ux-v2-song-action-bar.feature` 1.3 and `ux-v2-variant-slot.spec.ts` updated
 - [x] Docs: mockups screen21 1.6 / screen23 1.3, design doc 2.39, user stories 2.24
+
+## Session November 15, 2026 (#607, Add Song draft on shared devices)
+- [x] The draft records its owner; a member's draft is only restored for that member, otherwise it is removed
+- [x] Sign-out (`logout`, `SIGNED_OUT`) removes the draft next to the query cache and PDF cache
+- [x] A guest draft is kept through sign-in (#229); drafts in the old format are dropped
+- [x] Tests: Vitest (owner rules, useAuth sign-out), BDD `ux-v2-guest-draft.feature` 1.1, E2E guest draft round trip
+- [x] Docs: design doc 2.41, user stories 2.26

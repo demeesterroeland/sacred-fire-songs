@@ -3581,3 +3581,10 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - Open: a member's public takes are listed under Record in the app, while the issue and mockup put them under Listen.
 - Validation: TypeScript, lint, Vitest (2,613), BDD unit (539 passed, 47 pending) passed; checked in the dev server as a guest (Listen 1, dot, accessible name). Playwright not run.
 
+
+## Session November 15, 2026 — #607: Add Song draft on shared devices
+
+- Problem: the Add Song draft (`song-form-draft` in `localStorage`) was only removed after a save, so on a shared device the next person could see a member's unsaved draft.
+- Change: `lib/songs/songDraft.ts` stores `{ owner, draft }` (member id, or null for a guest). `readSongDraft(viewerId)` returns a member's draft only to that member and removes it for anyone else; a guest draft is returned to whoever signs in (#229). Drafts in the old format without an owner are dropped. `hooks/useAuth.tsx` calls `clearSongDraft()` in `logout` and on the `SIGNED_OUT` event. `SongForm` waits for the session before it restores the draft (once) and writes with the current owner.
+- Tests: Vitest `songDraft.test.ts` (owner rules) and `auth/useAuthDraftCleanup.test.tsx` (logout and `SIGNED_OUT` remove the draft), both red first. BDD `ux-v2-guest-draft.feature` 1.1 (three `@unit` scenarios from the issue). E2E `ux-v2-guest-draft.spec.ts` (guest → sign-in round trip) still passes.
+- Validation: TypeScript, lint (126 warnings, cap unchanged), Vitest 2,620, BDD unit 542 passed / 47 pending, E2E guest draft 1/1.
