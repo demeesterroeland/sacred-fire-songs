@@ -1,11 +1,12 @@
 # Practice: Listen, Record & Recordings (draft)
 
-**Version:** 0.13 | **Date:** Nov 10, 2026
+**Version:** 0.14 | **Date:** Nov 15, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.14 | Nov 15, 2026 | The Share dialog no longer says shared recordings cannot be downloaded; it asks you to have recipients treat the recording with respect (#603). |
 | 0.13 | Nov 10, 2026 | The Share and Singer dialogs find a member by name, or by their complete e-mail address; they show names only, never e-mail addresses. |
 | 0.12 | Nov 7, 2026 | The audio item is a **recording** everywhere (validation round 2, item 8): Save Recording, Delete recording, My recordings, Recordings chip, Your recordings; the toggle in the recorder is **Record**; the ⋮ menu on the song page is the one menu (Share, Edit, Delete, Transpose, Auto-scroll speed, Screen stays on). |
 | 0.11 | Nov 6, 2026 | Keyboard and screen reader notes for the Practice panel; the recorder says its state out loud; the delete question works with the keyboard (#418). |
@@ -82,7 +83,7 @@ Choose an action and the sheet closes. To close it without choosing, swipe the b
 3. *Shared with (n)* lists everyone; **Revoke** removes access.
 
 Rules (so the singer stays protected):
-- People you share with can **listen only**: they cannot download it ("Shared recordings cannot be downloaded") and cannot share it further ("Only the recording owner can share this recording.").
+- People you share with can **listen in the app**: the app gives them no download or share button ("Only the recording owner can share this recording."). This is not a hard protection: anyone who can hear a recording can still save it. The dialog says so gently: *Members you share with can listen in the app. Please ask them to treat the recording with respect and not pass it on.*
 - The song must be public so they can open it. If the song is private and it is **your** song, the dialog first asks *Make the song public to share this recording?* and lists two effects: **the song lyrics become public** (everyone can see the song), and **the recording is shared** only with the members you pick next. Nothing changes until you tap **Make song public and continue**; **Cancel** leaves everything as it was. If you leave after confirming, the song stays public. If it is someone else's private song, the dialog explains that only the song owner can make the lyrics public, and shows no search.
 
 ## When someone shares a recording with you
