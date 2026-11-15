@@ -114,9 +114,11 @@ describe('Practice naming (usage)', () => {
   });
 
   it('labels the drawer tabs Listen and Record', () => {
-    const drawer = src('components/song/RehearsalDrawer.tsx');
-    expect(drawer).toContain("t('practice.tab.listen')");
-    expect(drawer).toContain("t('practice.tab.record')");
+    // The tab strip lives in its own component since #601 (#586); the drawer renders it.
+    const tabs = src('components/song/PracticeTabs.tsx');
+    expect(tabs).toContain("t('practice.tab.listen')");
+    expect(tabs).toContain("t('practice.tab.record')");
+    expect(src('components/song/RehearsalDrawer.tsx')).toContain('<PracticeTabs');
   });
 });
 

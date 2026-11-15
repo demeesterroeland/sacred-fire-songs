@@ -42,3 +42,12 @@ Then('the {word} tab shows {int}', function (this: World, tab: string, count: nu
 Then('the {word} tab shows no count', function (this: World, tab: string) {
   assert.equal(tab === 'Listen' ? this.availability.listen : this.availability.record, 0);
 });
+
+// #601 (#586): tabs whenever a tab has something to show.
+Then('the Practice drawer shows the Listen and Record tabs', function (this: World) {
+  assert.equal(this.availability.tabs, true);
+});
+
+Then('the Practice drawer shows no tabs', function (this: World) {
+  assert.equal(this.availability.tabs, false);
+});
