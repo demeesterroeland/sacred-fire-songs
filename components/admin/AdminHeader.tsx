@@ -2,12 +2,13 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
-import { Users, Settings as SettingsIcon, ChevronRight } from 'lucide-react';
+import { Users, FilePenLine, Settings as SettingsIcon, ChevronRight } from 'lucide-react';
 
 import { useLocale } from '@/context/LocaleContext';
 import type { TranslationKey } from '@/lib/i18n';
 const tabs: { labelKey: TranslationKey; href: string; icon: typeof Users; planned: boolean }[] = [
   { labelKey: 'admin.tab.users', href: '/admin/users', icon: Users, planned: false },
+  { labelKey: 'admin.tab.catalogEdits', href: '/admin/catalog-edits', icon: FilePenLine, planned: false },
   { labelKey: 'admin.tab.configuration', href: '/admin/configuration', icon: SettingsIcon, planned: true },
 ];
 
@@ -60,7 +61,7 @@ export default function AdminHeader() {
                 >
                   <Icon className="w-3.5 h-3.5" />
                   {t(labelKey)}
-                  <span className="text-[9px] uppercase tracking-wider">· {t('admin.planned')}</span>
+                  <span className="text-caption">· {t('admin.planned')}</span>
                 </span>
               );
             }

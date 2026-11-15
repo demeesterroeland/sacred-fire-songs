@@ -1,0 +1,89 @@
+/*
+ * Sacred Fire Songs — "sober" style tokens (Epic 6.1, Story 6.1.1 / G1.1, #385).
+ *
+ * Semantic tokens only (ADR 0007 / UXD-7). Components use the Tailwind utilities
+ * mapped in app/globals.css (bg-surface, text-fg-muted, text-accent, …), never
+ * palette values. A second style is a second file with the same token names,
+ * scoped by :root[data-style="<name>"].
+ *
+ * Mode: light by default, dark when <html> has the .dark class (set before first
+ * paint by the inline script in app/layout.tsx; "system" resolves there).
+ *
+ * Documented in docs/design/design-tokens.md. The unit test
+ * testing/unit/tests/design/designTokens.test.ts keeps both in sync and checks
+ * contrast (>= 4.5:1 for text) and the 12 px minimum.
+ */
+
+:root[data-style="sober"] {
+  /* colour: light (warm greys biased toward the fire hue) */
+  --bg: #fbfaf9;
+  --surface: #f3f2f0;
+  --surface-2: #e9e7e4;
+  --line: #e0ddd9;
+  --line-strong: #8a857f;
+  --text: #1a1918;
+  --text-muted: #5c5853;
+  --text-subtle: #6b665f;
+  --accent: #c23a0c;
+  --accent-ink: #ffffff;
+  --accent-soft: color-mix(in srgb, var(--accent) 12%, transparent);
+  --chord: var(--accent);
+  --danger: #b42318;
+  --danger-ink: #ffffff;
+  --focus: var(--accent);
+  --chip-bg: var(--surface-2);
+  --chip-text: var(--text);
+  --chip-bg-active: var(--text);
+  --chip-text-active: var(--bg);
+  --scrim: rgba(20, 18, 16, 0.42);
+  --elev-sheet: 0 -8px 32px rgba(20, 18, 16, 0.16);
+
+  /* type */
+  --fs-caption: 12px;
+  --fs-meta: 13px;
+  --fs-body: 16px;
+  --fs-row: 16px;
+  --fs-title: 22px;
+  --fs-display: 28px;
+  --lh-tight: 1.25;
+  --lh-body: 1.5;
+
+  /* spacing (Tailwind steps 1 · 2 · 3 · 4 · 6 · 8) */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+
+  /* radius */
+  --r-control: 6px;
+  --r-panel: 10px;
+  --r-sheet: 16px;
+  --r-pill: 999px;
+
+  /* size */
+  --tap: 44px;
+  --bar-h: 56px;
+
+  color-scheme: light;
+}
+
+:root[data-style="sober"].dark {
+  --bg: #0f0e0d;
+  --surface: #181716;
+  --surface-2: #232120;
+  --line: #2c2a28;
+  --line-strong: #6f6a64;
+  --text: #ecebe9;
+  --text-muted: #a8a39d;
+  --text-subtle: #8c8781;
+  --accent: #ff6a2b;
+  --accent-ink: #0f0e0d;
+  --danger: #ff6b5e;
+  --danger-ink: #0f0e0d;
+  --scrim: rgba(0, 0, 0, 0.6);
+  --elev-sheet: 0 -8px 32px rgba(0, 0, 0, 0.5);
+
+  color-scheme: dark;
+}

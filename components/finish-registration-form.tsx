@@ -9,6 +9,8 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useState, useEffect, Suspense } from "react";
 import { Flame, User, Compass, CheckCircle } from "lucide-react";
 import { useLocale } from "@/context/LocaleContext";
+import { errorMessage } from "@/lib/errors/errorCode";
+import { safeNextPath } from '@/lib/auth/safeNext';
 
 export function FinishRegistrationForm(props: React.ComponentPropsWithoutRef<"div">) {
   const { t } = useLocale();
@@ -52,9 +54,9 @@ function FinishRegistrationFormContent({
       // Notify other components like Sidebar to refresh auth state
       window.dispatchEvent(new Event("auth-role-change"));
 
-      router.push(next || "/explore");
+      router.push(safeNextPath(next, "/"));
     } catch (error: unknown) {
-      setError(error instanceof Error ? error.message : t('auth.error.default'));
+      setError(errorMessage(error, t, 'auth.error.default'));
     } finally {
       setIsLoading(false);
     }
@@ -106,15 +108,15 @@ function FinishRegistrationFormContent({
           </div>
 
           <div className="space-y-4">
-            <p className="text-[#8e99aa] text-sm text-center leading-relaxed">
+            <p className="text-fg-muted text-sm text-center leading-relaxed">
               {t('auth.finishRegistration.description')}
             </p>
           </div>
 
           <div className="space-y-1">
-            <Label className="text-xs font-semibold text-gray-900 dark:text-white ml-1 tracking-wide uppercase opacity-70">{t('auth.finishRegistration.nameLabel')}</Label>
+            <Label className="text-meta font-semibold text-fg-muted ml-1">{t('auth.finishRegistration.nameLabel')}</Label>
             <div className="relative group">
-              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5a657a] group-focus-within:text-[#d9481e] transition-colors pointer-events-none">
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5a657a] pointer-events-none">
                 <User className="w-5 h-5" />
               </div>
               <Input
@@ -124,7 +126,7 @@ function FinishRegistrationFormContent({
                 required
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="w-full bg-transparent border-gray-200 dark:border-[#2d3545] rounded-xl py-3.5 md:py-4 pl-12 pr-4 text-gray-900 dark:text-white placeholder-[#5a657a] focus:outline-none focus:border-[#d9481e] transition-all text-[14px] md:text-[15px] h-auto"
+                className="w-full bg-transparent border-gray-200 dark:border-[#2d3545] rounded-xl py-3.5 md:py-4 pl-12 pr-4 text-gray-900 dark:text-white placeholder-[#5a657a] transition-all text-[14px] md:text-[15px] h-auto"
               />
             </div>
           </div>
@@ -143,7 +145,7 @@ function FinishRegistrationFormContent({
 
         {/* Footer */}
         <div className="mt-8 text-center md:text-left border-t border-gray-200 dark:border-[#2d3545] pt-6">
-          <p className="text-[#8e99aa] text-[12px] leading-relaxed italic">
+          <p className="text-fg-muted text-caption leading-relaxed italic">
             &quot;{t('app.tagline')}&quot;
           </p>
         </div>

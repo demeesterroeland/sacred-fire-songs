@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { isSmartPlaylist } from '@/lib/playlists/smartPlaylists';
 import { uuid, playlistTitle, playlistDescription, safeParse } from '@/lib/validation/schemas';
 

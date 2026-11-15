@@ -19,9 +19,12 @@ test.describe('New Playlist auth guard', () => {
   test.describe('guest', () => {
     test.use({ storageState: { cookies: [], origins: [] } });
 
-    test('is sent to login with next= pointing back to the form', async ({ page }) => {
+    test('sees the GuestGate whose Sign in carries next= back to the form', async ({ page }) => {
       await page.goto('/library/playlists/add');
-      await expect(page).toHaveURL(/\/auth\/login\?next=%2Flibrary%2Fplaylists%2Fadd$/);
+      await expect(page).toHaveURL(/\/library\/playlists\/add$/);
+      const gate = page.getByTestId('guest-gate');
+      await expect(gate).toHaveAttribute('data-feature', 'newPlaylist');
+      await expect(gate.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', '/auth/login?next=%2Flibrary%2Fplaylists%2Fadd');
     });
   });
 });

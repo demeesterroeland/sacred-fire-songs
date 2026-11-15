@@ -6,6 +6,7 @@ import {
   fetchAdminUsersList,
   type AdminAccessResult,
 } from './userQueries';
+import { isUuid } from '@/lib/validation/uuid';
 
 /**
  * Validates that the current session belongs to an administrator.
@@ -27,5 +28,6 @@ export async function getAdminUsersList(): Promise<AdminUserSummary[] | null> {
  * Strictly requires admin authorization (returns null otherwise).
  */
 export async function getAdminUserDetails(userId: string): Promise<AdminUserDetails | null> {
+  if (!isUuid(userId)) return null;
   return fetchAdminUserDetails(await createClient(), userId);
 }

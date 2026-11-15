@@ -1,5 +1,5 @@
 # Sacred Fire Songs – Offline library behaviour catalogue
-# Version: 1.0 | Date: Nov 4, 2026
+# Version: 1.1 | Date: Nov 15, 2026
 #
 # Living Gherkin specification of Epic 4.3 (#357): a signed-in musician keeps
 # their whole text library (songs, setlists, favourites, recently viewed) on the
@@ -24,6 +24,8 @@
 #
 # Changelog
 #   1.0 – Nov 4, 2026 – Initial catalogue for Epic 4.3 (#357), Story 4.3.2 (#358).
+#   1.1 – Nov 15, 2026 – Merge of develop (#606): the step `When I open "/songs"` is now `When I open the song list "/songs"`,
+#                        because develop's generic step `I open {string}` made the pending stand-in ambiguous.
 
 @offline-library
 Feature: Offline library
@@ -173,7 +175,7 @@ Feature: Offline library
   @unit @wip @offline-library @story-4.3.6
   Scenario: The song list offline
     Given my library is stored and I am offline
-    When I open "/songs"
+    When I open the song list "/songs"
     Then I see all stored songs with the same cards, search, category/tag filters and sort as online
 
   @unit @wip @offline-library @story-4.3.6

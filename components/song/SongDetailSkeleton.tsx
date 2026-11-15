@@ -2,7 +2,7 @@
 
 export default function SongDetailSkeleton() {
     return (
-        <main className="flex-1 p-6 text-gray-900 dark:text-white overflow-hidden animate-pulse">
+        <div data-testid="song-skeleton" className="flex-1 p-6 text-gray-900 dark:text-white overflow-hidden animate-pulse">
             <div className="space-y-4">
                 {/* Title Skeleton */}
                 <div className="h-8 bg-gray-300/50 dark:bg-gray-700/50 rounded-full w-3/4"></div>
@@ -24,6 +24,6 @@ export default function SongDetailSkeleton() {
                     </div>
                 ))}
             </div>
-        </main>
+        </div>
     );
 }

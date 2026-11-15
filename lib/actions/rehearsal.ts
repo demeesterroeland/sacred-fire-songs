@@ -1,4 +1,29 @@
 import { createClient } from "@/lib/supabase/client";
+import { sendRecordingShareEmail } from "@/lib/actions/notifications";
+import { sharedByName } from "@/lib/songs/partitionTakes";
+import { SONG_NOT_PUBLIC, songIsPublicOfTake } from "@/lib/songs/publishAudience";
+
+// Other people's profiles are read through the `public_profiles` view: name, avatar and the
+// musician badge only. E-mail addresses never reach another user's browser.
+export interface UserProfileSummary {
+  id: string;
+  full_name: string | null;
+  avatar_url: string | null;
+  role?: string;
+  is_musician?: boolean;
+}
+
+export interface RecordingShareInfo {
+  id: string;
+  user_id: string;
+  full_name: string | null;
+}
+
+// Every user_recordings column the API may read. `singer_email` is left out on purpose: only the
+// owner reads it, through getOwnSingerEmail().
+const RECORDING_COLUMNS =
+  "id, user_id, song_version_id, recording_name, storage_path, position, created_at, file_size_bytes, " +
+  "duration_seconds, is_public, singer_consent_confirmed, singer_profile_id, singer_name";
 
 export interface UserRecording {
   id: string;
@@ -9,27 +34,40 @@ export interface UserRecording {
   position?: number;
   file_size_bytes?: number;
   duration_seconds?: number;
+  is_public?: boolean;
+  singer_consent_confirmed?: boolean;
+  singer_profile_id?: string | null;
+  singer_name?: string | null;
   created_at: string;
   audioUrl?: string; // Resolved temporary signed URL or public URL
+  is_owner?: boolean;
+  is_shared?: boolean;
+  can_download?: boolean;
+  can_share?: boolean;
+  singer_profile?: UserProfileSummary | null;
+  shared_with?: RecordingShareInfo[];
+  /** Who shared this take with the current user (set for takes of other users when readable). */
+  shared_by_name?: string | null;
 }
 
-// 1. Fetch user recordings for a specific song version
+// 1. Fetch user recordings for a specific song version (own, shared, and public)
 export async function getUserRecordings(songVersionId: string): Promise<UserRecording[]> {
   const supabase = createClient();
-  const { data: { user }, error: authError } = await supabase.auth.getUser();
+  const { data: { user } } = await supabase.auth.getUser();
 
-  if (authError || !user) {
-    console.warn("[rehearsal] User not logged in, cannot fetch recordings");
-    return [];
+  console.log(`[rehearsal] Fetching recordings for songVersionId=${songVersionId}, userId=${user?.id ?? "guest"}`);
+
+  let query = supabase
+    .from("user_recordings")
+    .select(RECORDING_COLUMNS)
+    .eq("song_version_id", songVersionId);
+
+  // If not logged in, only fetch public recordings
+  if (!user) {
+    query = query.eq("is_public", true);
   }
 
-  console.log(`[rehearsal] Fetching recordings for songVersionId=${songVersionId}, userId=${user.id}`);
-
-  const { data, error } = await supabase
-    .from("user_recordings")
-    .select("*")
-    .eq("song_version_id", songVersionId)
-    .eq("user_id", user.id)
+  const { data, error } = await query
     .order("position", { ascending: true })
     .order("created_at", { ascending: false });
 
@@ -38,24 +76,118 @@ export async function getUserRecordings(songVersionId: string): Promise<UserReco
     return [];
   }
 
-  const recordings = data as UserRecording[];
-  console.log(`[rehearsal] Found ${recordings.length} recording metadata row(s) in DB for songVersionId=${songVersionId}`);
-
-  if (recordings.length === 0) {
-    console.log(`[rehearsal] INFO: No user_recordings metadata rows exist in DB for songVersionId=${songVersionId}`);
+  const rawRecordings = (data || []) as unknown as UserRecording[];
+  if (rawRecordings.length === 0) {
     return [];
+  }
+
+  // Collect singer profile IDs to fetch in batch
+  const singerProfileIds = Array.from(
+    new Set(rawRecordings.map((r) => r.singer_profile_id).filter((id): id is string => !!id))
+  );
+
+  let singerProfilesMap = new Map<string, UserProfileSummary>();
+  if (singerProfileIds.length > 0) {
+    const { data: profiles } = await supabase
+      .from("public_profiles")
+      // Only what the rows use: the name and the musician badge. The avatar is not shown on a row.
+      .select("id, full_name, is_musician")
+      .in("id", singerProfileIds);
+
+    if (profiles) {
+      singerProfilesMap = new Map(
+        profiles.map((p) => [
+          p.id,
+          {
+            id: p.id,
+            full_name: p.full_name,
+            avatar_url: null,
+            is_musician: !!p.is_musician,
+          },
+        ])
+      );
+    }
+  }
+
+  // For recordings owned by current user, fetch their shares
+  const ownedRecordingIds = user
+    ? rawRecordings.filter((r) => r.user_id === user.id).map((r) => r.id)
+    : [];
+
+  const sharesMap = new Map<string, RecordingShareInfo[]>();
+  if (ownedRecordingIds.length > 0) {
+    const { data: shares } = await supabase
+      .from("recording_shares")
+      .select("id, recording_id, shared_with_user_id")
+      .in("recording_id", ownedRecordingIds);
+
+    if (shares && shares.length > 0) {
+      const names = await publicNames(supabase, shares.map((s) => s.shared_with_user_id));
+      for (const s of shares) {
+        const list = sharesMap.get(s.recording_id) || [];
+        list.push({
+          id: s.id,
+          user_id: s.shared_with_user_id,
+          full_name: names.get(s.shared_with_user_id) ?? null,
+        });
+        sharesMap.set(s.recording_id, list);
+      }
+    }
+  }
+
+  // Takes of others that were shared with me (a recipient may read its own share rows).
+  // A private take of someone else is readable only through a share, so it counts as shared too.
+  const otherIds = user ? rawRecordings.filter((r) => r.user_id !== user.id).map((r) => r.id) : [];
+  const sharedWithMe = new Set<string>();
+  if (user && otherIds.length > 0) {
+    const { data: myShares } = await supabase
+      .from("recording_shares")
+      .select("recording_id")
+      .eq("shared_with_user_id", user.id)
+      .in("recording_id", otherIds);
+    for (const s of myShares ?? []) sharedWithMe.add(s.recording_id);
+  }
+  const isSharedWithMe = (rec: { id: string; user_id: string; is_public?: boolean | null }) =>
+    !!user && rec.user_id !== user.id && (sharedWithMe.has(rec.id) || !rec.is_public);
+
+  // Owners of takes shared with me, named from their public profile.
+  const otherOwnerIds = user
+    ? Array.from(new Set(rawRecordings.filter((r) => isSharedWithMe(r)).map((r) => r.user_id)))
+    : [];
+  const ownerNames = new Map<string, string | null>();
+  if (otherOwnerIds.length > 0) {
+    const names = await publicNames(supabase, otherOwnerIds);
+    for (const id of otherOwnerIds) ownerNames.set(id, sharedByName({ full_name: names.get(id) }));
   }
 
   // Create temporary signed URLs for each recording since the rehearsals bucket is private
   const recordingsWithUrls = await Promise.all(
-    recordings.map(async (rec) => {
-      if (!rec.storage_path) {
-        console.warn(`[rehearsal] MISSING METADATA: Recording id=${rec.id} has no storage_path in DB`);
-        return rec;
-      }
+    rawRecordings.map(async (rec) => {
+      const isOwner = user ? rec.user_id === user.id : false;
+      const isShared = isSharedWithMe(rec);
+      // Strict DRM-lite: only the owner can download and only the owner can share
+      const canDownload = isOwner;
+      const canShare = isOwner;
 
-      const fileExt = rec.storage_path.split(".").pop()?.toLowerCase();
-      console.log(`[rehearsal] Processing recording id=${rec.id}, name="${rec.recording_name}", ext=.${fileExt}, path=${rec.storage_path}`);
+      const singerProfile = rec.singer_profile_id
+        ? singerProfilesMap.get(rec.singer_profile_id) || null
+        : null;
+
+      const sharedWith = isOwner ? sharesMap.get(rec.id) || [] : undefined;
+      const sharedByNameFor = isShared ? ownerNames.get(rec.user_id) ?? null : undefined;
+
+      if (!rec.storage_path) {
+        return {
+          ...rec,
+          is_owner: isOwner,
+          is_shared: isShared,
+          can_download: canDownload,
+          can_share: canShare,
+          singer_profile: singerProfile,
+          shared_with: sharedWith,
+          shared_by_name: sharedByNameFor,
+        };
+      }
 
       try {
         const { data: signedData, error: signError } = await supabase.storage
@@ -63,19 +195,42 @@ export async function getUserRecordings(songVersionId: string): Promise<UserReco
           .createSignedUrl(rec.storage_path, 3600); // 1 hour expiry
 
         if (signError) {
-          console.error(`[rehearsal] STORAGE SIGN ERROR for id=${rec.id}, path=${rec.storage_path}:`, signError);
-          return rec;
+          console.error(`[rehearsal] STORAGE SIGN ERROR for id=${rec.id}:`, signError);
+          return {
+            ...rec,
+            is_owner: isOwner,
+            is_shared: isShared,
+            can_download: canDownload,
+            can_share: canShare,
+            singer_profile: singerProfile,
+            shared_with: sharedWith,
+          shared_by_name: sharedByNameFor,
+          };
         }
-
-        console.log(`[rehearsal] SIGN SUCCESS: Signed URL generated for id=${rec.id}:`, signedData?.signedUrl);
 
         return {
           ...rec,
           audioUrl: signedData?.signedUrl,
+          is_owner: isOwner,
+          is_shared: isShared,
+          can_download: canDownload,
+          can_share: canShare,
+          singer_profile: singerProfile,
+          shared_with: sharedWith,
+          shared_by_name: sharedByNameFor,
         };
       } catch (e) {
-        console.error(`[rehearsal] EXCEPTION signing URL for id=${rec.id}, path=${rec.storage_path}:`, e);
-        return rec;
+        console.error(`[rehearsal] EXCEPTION signing URL for id=${rec.id}:`, e);
+        return {
+          ...rec,
+          is_owner: isOwner,
+          is_shared: isShared,
+          can_download: canDownload,
+          can_share: canShare,
+          singer_profile: singerProfile,
+          shared_with: sharedWith,
+          shared_by_name: sharedByNameFor,
+        };
       }
     })
   );
@@ -115,7 +270,6 @@ export async function uploadRehearsalRecording(
       else rawExt = subType;
     }
   }
-  // Check if blob is a File instance with name extension
   if ('name' in blob && (blob as File).name.includes('.')) {
     const nameExt = (blob as File).name.split('.').pop()?.toLowerCase();
     if (nameExt && ['mp3', 'm4a', 'opus', 'flac', 'wav', 'ogg', 'webm', 'aac'].includes(nameExt)) {
@@ -148,37 +302,55 @@ export async function uploadRehearsalRecording(
       storage_path: storagePath,
       file_size_bytes: blob.size || 0,
       duration_seconds: durationSeconds || 0,
+      is_public: false,
+      singer_consent_confirmed: false,
     })
-    .select()
+    .select(RECORDING_COLUMNS)
     .single();
 
   if (dbError) {
     console.error("[rehearsal] Error inserting recording metadata:", dbError);
-    // Attempt cleanup of orphaned storage file
     await supabase.storage.from("rehearsals").remove([storagePath]);
     return { recording: null, error: dbError.message || "Failed to save recording metadata." };
   }
 
-  // Generate signed URL for return value
   const { data: signedData } = await supabase.storage
     .from("rehearsals")
     .createSignedUrl(storagePath, 3600);
 
   return {
     recording: {
-      ...(data as UserRecording),
+      ...(data as unknown as UserRecording),
       audioUrl: signedData?.signedUrl,
+      is_owner: true,
+      is_shared: false,
+      can_download: true,
+      can_share: true,
     },
     error: null,
   };
 }
 
-// 3. Delete recording file & database metadata
+// 3. Delete recording file & database metadata (owner only)
 export async function deleteUserRecording(
   recordingId: string,
   storagePath: string
 ): Promise<boolean> {
   const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return false;
+
+  // Verify ownership before deleting
+  const { data: rec } = await supabase
+    .from("user_recordings")
+    .select("user_id")
+    .eq("id", recordingId)
+    .maybeSingle();
+
+  if (!rec || rec.user_id !== user.id) {
+    console.error("[rehearsal] Unauthorized: only the owner can delete a recording");
+    return false;
+  }
 
   // Delete from storage
   const { error: storageError } = await supabase.storage
@@ -187,14 +359,14 @@ export async function deleteUserRecording(
 
   if (storageError) {
     console.error("[rehearsal] Error deleting audio file from storage:", storageError);
-    // Continue anyway to delete metadata, or return false? Better delete metadata if storage is missing.
   }
 
   // Delete from database
   const { error: dbError } = await supabase
     .from("user_recordings")
     .delete()
-    .eq("id", recordingId);
+    .eq("id", recordingId)
+    .eq("user_id", user.id);
 
   if (dbError) {
     console.error("[rehearsal] Error deleting recording metadata:", dbError);
@@ -234,6 +406,7 @@ export async function reorderUserRecordings(
   return { success: true };
 }
 
+// 5. Rename user recording (owner only)
 export async function renameUserRecording(recordingId: string, newName: string) {
   const supabase = createClient();
   const { data: { user } } = await supabase.auth.getUser();
@@ -253,4 +426,386 @@ export async function renameUserRecording(recordingId: string, newName: string) 
   }
 
   return { success: true };
+}
+
+// 6. Search users for sharing and attribution
+export async function searchUsersForSharing(searchTerm: string): Promise<UserProfileSummary[]> {
+  const trimmed = searchTerm.trim();
+  if (trimmed.length < 2) return [];
+
+  const supabase = createClient();
+  const { data, error } = await supabase.rpc("search_users_for_sharing", {
+    search_term: trimmed,
+  });
+
+  if (error) {
+    console.error("[rehearsal] RPC search_users_for_sharing error:", error);
+    return [];
+  }
+
+  return (data || []) as UserProfileSummary[];
+}
+
+// 7. Share recording with a registered user (owner only, DRM-lite: recipient cannot reshare)
+export async function shareRecording(
+  recordingId: string,
+  targetUserId: string
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return { success: false, error: "Not authenticated" };
+  }
+
+  // Strict ownership check: only owner can share
+  // Also verify that the underlying song is public so the recipient can view it
+  const { data: rec } = await supabase
+    .from("user_recordings")
+    .select(`
+      user_id,
+      song_version_id,
+      song_versions (
+        composition_id,
+        compositions (
+          id,
+          is_public,
+          owner_id
+        )
+      )
+    `)
+    .eq("id", recordingId)
+    .maybeSingle();
+
+  if (!rec || rec.user_id !== user.id) {
+    return { success: false, error: "Only the recording owner can share this recording." };
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const comp = (rec.song_versions as any)?.compositions;
+  if (comp && comp.is_public === false) {
+    return {
+      success: false,
+      error: "This song is private. You must make the song lyrics public before sharing recordings.",
+    };
+  }
+
+  if (targetUserId === user.id) {
+    return { success: false, error: "Cannot share recording with yourself." };
+  }
+
+  const { error } = await supabase
+    .from("recording_shares")
+    .insert({
+      recording_id: recordingId,
+      shared_with_user_id: targetUserId,
+    });
+
+  if (error) {
+    if (error.code === "23505") {
+      // Already shared
+      return { success: true };
+    }
+    console.error("[rehearsal] Error sharing recording:", error);
+    return { success: false, error: error.message };
+  }
+
+  // The in-app notification is created by a database trigger. The email is
+  // fire-and-forget: a dispatch failure must never fail the share.
+  Promise.resolve()
+    .then(() => sendRecordingShareEmail(recordingId, targetUserId))
+    .catch((e) => {
+      console.warn("[rehearsal] Share email dispatch failed:", e);
+    });
+
+  return { success: true };
+}
+
+// 8. Revoke share / unshare recording
+export async function unshareRecording(
+  recordingId: string,
+  targetUserId: string
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return { success: false, error: "Not authenticated" };
+  }
+
+  const { error } = await supabase
+    .from("recording_shares")
+    .delete()
+    .eq("recording_id", recordingId)
+    .eq("shared_with_user_id", targetUserId);
+
+  if (error) {
+    console.error("[rehearsal] Error revoking share:", error);
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
+}
+
+// 9. Make song public (required before sharing recordings on a private song)
+export async function makeSongPublic(
+  compositionId: string
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return { success: false, error: "Not authenticated" };
+  }
+
+  const { data: profile } = await supabase
+    .from("profiles")
+    .select("role")
+    .eq("id", user.id)
+    .maybeSingle();
+
+  const isAdmin = profile?.role === "admin";
+
+  const { data: comp } = await supabase
+    .from("compositions")
+    .select("id, owner_id, is_public")
+    .eq("id", compositionId)
+    .maybeSingle();
+
+  if (!comp) {
+    return { success: false, error: "Song not found" };
+  }
+
+  if (comp.owner_id !== user.id && !isAdmin) {
+    return { success: false, error: "Only the song owner or an admin can publish this song." };
+  }
+
+  const { error } = await supabase
+    .from("compositions")
+    .update({ is_public: true })
+    .eq("id", compositionId);
+
+  if (error) {
+    console.error("[rehearsal] Error making song public:", error);
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
+}
+
+// 10. Publish recording publicly with singer consent confirmation (owner only).
+// A take on a private song has no audience yet, so it can only be published once the song
+// is public; unpublishing is always allowed.
+export async function publishRecording(
+  recordingId: string,
+  consentConfirmed: boolean
+): Promise<{ success: boolean; error?: string; code?: typeof SONG_NOT_PUBLIC }> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return { success: false, error: "Not authenticated" };
+  }
+
+  if (!consentConfirmed) {
+    return {
+      success: false,
+      error: "Singer consent must be explicitly confirmed before publishing publicly.",
+    };
+  }
+
+  const { data: take, error: lookupError } = await supabase
+    .from("user_recordings")
+    .select("id, song_versions(compositions(is_public))")
+    .eq("id", recordingId)
+    .eq("user_id", user.id)
+    .maybeSingle();
+
+  if (lookupError) {
+    console.error("[rehearsal] Error reading recording before publishing:", lookupError);
+    return { success: false, error: lookupError.message };
+  }
+  if (!take) {
+    return { success: false, error: "Take not found." };
+  }
+  if (!songIsPublicOfTake(take)) {
+    return {
+      success: false,
+      code: SONG_NOT_PUBLIC,
+      error: "This song is private, so this take has no audience yet. Make the song public first, then publish the take.",
+    };
+  }
+
+  const { error } = await supabase
+    .from("user_recordings")
+    .update({
+      is_public: true,
+      singer_consent_confirmed: true,
+    })
+    .eq("id", recordingId)
+    .eq("user_id", user.id);
+
+  if (error) {
+    console.error("[rehearsal] Error publishing recording:", error);
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
+}
+
+// Visibility of a song right now (the Make public dialog asks when it opens).
+// A song without an explicit public flag is not public; a failed lookup throws, so the caller
+// can say it could not check instead of reporting the song as private.
+export async function getSongIsPublic(compositionId: string): Promise<boolean> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("compositions")
+    .select("is_public")
+    .eq("id", compositionId)
+    .maybeSingle();
+  if (error) {
+    console.error("[rehearsal] Error reading song visibility:", error);
+    throw new Error(error.message);
+  }
+  return data?.is_public === true;
+}
+
+// 10. Unpublish recording back to private (owner only)
+export async function unpublishRecording(
+  recordingId: string
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return { success: false, error: "Not authenticated" };
+  }
+
+  const { error } = await supabase
+    .from("user_recordings")
+    .update({
+      is_public: false,
+    })
+    .eq("id", recordingId)
+    .eq("user_id", user.id);
+
+  if (error) {
+    console.error("[rehearsal] Error unpublishing recording:", error);
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
+}
+
+// 11. Update singer attribution (owner only)
+export async function updateSingerAttribution(
+  recordingId: string,
+  attribution: {
+    singerProfileId?: string | null;
+    singerName?: string | null;
+    /** Leave out (undefined) to keep the stored address. */
+    singerEmail?: string | null;
+  }
+): Promise<{ success: boolean; error?: string }> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return { success: false, error: "Not authenticated" };
+  }
+
+  const { error } = await supabase
+    .from("user_recordings")
+    .update({
+      singer_profile_id: attribution.singerProfileId || null,
+      singer_name: attribution.singerName?.trim() || null,
+      ...(attribution.singerEmail === undefined
+        ? {}
+        : { singer_email: attribution.singerEmail?.trim() || null }),
+    })
+    .eq("id", recordingId)
+    .eq("user_id", user.id);
+
+  if (error) {
+    console.error("[rehearsal] Error updating singer attribution:", error);
+    return { success: false, error: error.message };
+  }
+
+  return { success: true };
+}
+
+// 12. Strict DRM-lite download URL check: only owner may download
+export async function getRecordingDownloadUrl(
+  recordingId: string
+): Promise<{ downloadUrl?: string; error?: string }> {
+  const supabase = createClient();
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) {
+    return { error: "Not authenticated" };
+  }
+
+  const { data: rec, error } = await supabase
+    .from("user_recordings")
+    .select("user_id, storage_path, recording_name")
+    .eq("id", recordingId)
+    .maybeSingle();
+
+  if (error || !rec) {
+    return { error: "Recording not found" };
+  }
+
+  if (rec.user_id !== user.id) {
+    return { error: "Shared recordings cannot be downloaded" };
+  }
+
+  const { data: signedData, error: signError } = await supabase.storage
+    .from("rehearsals")
+    .createSignedUrl(rec.storage_path, 300); // 5 min for download
+
+  if (signError || !signedData?.signedUrl) {
+    return { error: "Failed to create download link" };
+  }
+
+  return { downloadUrl: signedData.signedUrl };
+}
+
+// 13. Fetch public profile for singer
+export async function getUserProfile(userId: string): Promise<UserProfileSummary | null> {
+  const supabase = createClient();
+  const { data, error } = await supabase
+    .from("public_profiles")
+    .select("id, full_name, avatar_url, is_musician")
+    .eq("id", userId)
+    .maybeSingle();
+
+  if (error || !data) return null;
+
+  return {
+    id: data.id,
+    full_name: data.full_name,
+    avatar_url: data.avatar_url,
+    is_musician: !!data.is_musician,
+  };
+}
+
+// 14. The e-mail address the owner typed for an unregistered singer (owner only).
+// `ok` is false when the lookup failed, so the caller can leave the stored address alone.
+export async function getOwnSingerEmail(recordingId: string): Promise<{ ok: boolean; email: string | null }> {
+  const supabase = createClient();
+  const { data, error } = await supabase.rpc("own_recording_singer_emails", {
+    p_recording_ids: [recordingId],
+  });
+  if (error) {
+    console.error("[rehearsal] RPC own_recording_singer_emails error:", error);
+    return { ok: false, email: null };
+  }
+  const rows = (data || []) as { recording_id: string; singer_email: string | null }[];
+  return { ok: true, email: rows[0]?.singer_email ?? null };
+}
+
+// Names from the public profile view, keyed by user id.
+async function publicNames(
+  supabase: ReturnType<typeof createClient>,
+  ids: string[]
+): Promise<Map<string, string | null>> {
+  const unique = Array.from(new Set(ids));
+  const names = new Map<string, string | null>();
+  if (unique.length === 0) return names;
+  const { data } = await supabase.from("public_profiles").select("id, full_name").in("id", unique);
+  for (const p of data ?? []) names.set(p.id, p.full_name);
+  return names;
 }

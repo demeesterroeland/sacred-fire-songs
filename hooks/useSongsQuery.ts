@@ -1,7 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { fetchAllSongs } from '@/lib/songUtils';
 import { fetchCategoryTree, type TaxonomyNode } from '@/lib/taxonomyUtils';
-import { SONG_KEYS } from '@/lib/songs/queryKeys';
+import { SONG_KEYS, SONGS_STALE_TIME } from '@/lib/songs/queryKeys';
 import type { Song } from '@/lib/songUtils';
 
 interface UseSongsQueryOptions {
@@ -14,7 +14,7 @@ export function useSongsQuery({ initialSongs, initialTaxonomy }: UseSongsQueryOp
     queryKey: SONG_KEYS.list(),
     queryFn: fetchAllSongs,
     placeholderData: initialSongs,
-    staleTime: 60_000,
+    staleTime: SONGS_STALE_TIME,
   });
 
   const { data: taxonomy = [] } = useQuery({

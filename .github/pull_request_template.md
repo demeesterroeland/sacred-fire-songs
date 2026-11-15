@@ -1,8 +1,16 @@
 ## Description
 
-Please include a summary of the change and which issue is fixed. Please also include relevant motivation and context. List any dependencies that are required for this change.
+Summary of the change, motivation and context.
 
-Fixes # (issue)
+Closes # (issue)
+
+## Target branch (Gitflow)
+
+- [ ] Work branch (`feat/…`, `fix/…`, `chore/…`, `docs/…`) → **`develop`** (squash)
+- [ ] `hotfix/…` → **`main`** (squash; `main` is back-merged into `develop` automatically)
+- [ ] Promotion `develop` → **`main`** (merge commit)
+
+The PR title is a Conventional Commit (`feat(scope): …`); it becomes the squash commit and drives Release Please.
 
 ## Type of change
 
@@ -11,19 +19,17 @@ Fixes # (issue)
 - [ ] Breaking change (fix or feature that would cause existing functionality to not work as expected)
 - [ ] Chore (documentation, refactoring, dependency upgrade)
 
-## How Has This Been Tested?
+## Test pyramid
 
-Please describe the tests that you ran to verify your changes. Provide instructions so we can reproduce.
+- [ ] L1 static: `npm run lint` and `npx tsc --noEmit`
+- [ ] L2 unit / BDD: `npm test` and `npm run test:bdd:unit` (failing test written first)
+- [ ] L3/L4 component, integration or `npm run test:bdd:seed` where relevant
+- [ ] L5 E2E: Playwright journey added or updated where user-visible behaviour changed
+- [ ] Manual verification (describe steps)
 
-- [ ] Unit Tests
-- [ ] Manual Verification (describe steps)
+## Checklist
 
-## Checklist:
-
-- [ ] My code follows the style guidelines of this project
-- [ ] I have performed a self-review of my own code
-- [ ] I have commented my code, particularly in hard-to-understand areas
-- [ ] I have made corresponding changes to the documentation
-- [ ] My changes generate no new warnings
-- [ ] I have added tests that prove my fix is effective or that my feature works
-- [ ] New and existing unit tests pass locally with my changes
+- [ ] Docs, tests and code aligned (design doc, stories, feature files, changelog headers)
+- [ ] All 8 locale files updated for new UX copy
+- [ ] `/sync-artifacts` run; logbook committed on this branch
+- [ ] No deployment details (hosts, server paths, deploy secrets) in this public repo

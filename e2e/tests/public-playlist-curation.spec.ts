@@ -83,21 +83,21 @@ test.describe('Public Playlist Curation (Story 3.4.6)', () => {
       const sheet = page.locator('h2:has-text("Add Songs")');
       await expect(sheet).toBeVisible();
 
-      // First song in the sheet's scrollable list (the header's first button is Close)
-      const firstSongBtn = page.locator('.fixed.bottom-0.z-50 .overflow-y-auto button').first();
+      // First song row in the sheet's list
+      const firstSongBtn = page.getByTestId('add-song-row').first();
       await expect(firstSongBtn).toBeVisible({ timeout: 10000 });
       await firstSongBtn.click({ force: true });
 
       // Close the sheet
-      await page.locator('button[aria-label="Close"]').click();
+      await page.getByRole('button', { name: 'Done' }).click();
       await expect(sheet).not.toBeVisible();
     });
 
     test('cannot access another user\'s private playlist', async ({ page }) => {
       // My Healing Practice is a private playlist owned by member
       await page.goto(`/library/playlists/${privatePlaylistId}`);
-      // Should show Not Found page (with custom "Song Not Found" header)
-      await expect(page.locator('h1').first()).toHaveText('Song Not Found');
+      // Shows the generic 404 page (not the song-specific one)
+      await expect(page.locator('h1').first()).toHaveText('Page not found');
     });
   });
 
