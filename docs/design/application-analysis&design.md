@@ -1,6 +1,6 @@
 # Project Analysis & Design Document: Song Sharing Application (Sacred Fire Songs)
 
-**Version:** 2.44
+**Version:** 2.45
 **Status:** Living Document
 **Date:** Nov 23, 2026
 
@@ -108,6 +108,7 @@
 | **2.42** | Nov 23, 2026 | Back-merge (#608): the conflict comment of `back-merge.yml` lists the conflicting files; a push to `main` runs the workflow copy on `main` (why release 1.7.1 got no automatic back-merge PR). |
 | **2.43** | Nov 23, 2026 | Add Song draft on shared devices (#607): the draft records its owner (member id, or null for a guest). Sign-out (`logout` and the `SIGNED_OUT` event in `hooks/useAuth.tsx`) removes it, next to `queryClient.clear()` and `clearPdfCache()`. A member draft read by someone else is removed instead of shown. A guest draft is kept through sign-in (#229). Drafts in the old format without an owner are dropped. |
 | **2.44** | Nov 23, 2026 | Palette ratchet (#605): `PALETTE_BASELINE` in `testing/unit/tests/design/paletteRatchet.test.ts` restored to the real count, 980 → 496 (the UX v3 promotion #585 had set it back). New test *keeps no headroom*: the baseline must equal the current count from `lib/design/paletteAudit.ts`, so a raise (or unrecorded removals) fails CI and the message says which value to set. |
+| **2.45** | Nov 23, 2026 | #601 (#393): `e2e/tests/ux-v2-song-action-bar.spec.ts` no longer skips a test when the seed lacks a public one-version song with or without media; it fails with a clear message. The E2E seed's anchor songs provide both shapes, pinned by `testing/unit/tests/e2e/actionBarSpecNoVacuousSkip.test.ts`. |
 | **2.03** | Nov 7, 2026 | Owner review of the Terms and Privacy text: the Vercel Speed Insights script and its dependency are removed from the app (`app/layout.tsx`, `package.json`), the privacy text no longer mentions it, and it says that anyone with direct access to the database or file storage (the operator) can reach everything stored, private recordings included. |
 | **2.02** | Nov 7, 2026 | UX v2 validation round 2, review of PR #477: favourites lookups (`useFavoritesQuery`, `useGlobalFilterCounts`, the song page) use `fetchFavoritesSetlistId` (`lib/playlists/favorites.ts`, owner filter), so an admin who can read every member's setlists gets their own hearts, list and counts. |
 | **2.01** | Nov 7, 2026 | UX v2 validation round 2, review of PR #477. Auth pages show translated messages chosen by a code (`lib/auth/notice.ts`, `lib/errors/errorCode.ts`; §6.18); the ⋮ buttons are in the auto-scroll keep zone; `versionSearch` drops `recording`; the "My Drafts" card links to `/songs?mine=true&status=draft` (`MY_DRAFTS_HREF`); Runasimi coverage; `looksLikeChord` keeps real chords alone on a line in the chord row; a right-click on plain text closes the suggestions; `.env.example` has the operator variables commented out; `components/auth-button.tsx` and `errors.sharedTakeNoDownload` removed. Decisions UXA-068. |
