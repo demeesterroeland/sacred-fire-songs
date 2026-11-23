@@ -12,6 +12,16 @@ async function firstPublicSongId(page: Page): Promise<string> {
   return href.replace('/songs/', '').split(/[/?#]/)[0];
 }
 
+// The song page shows Playlist and ♥ twice: in the desktop header (lg and up) and in the
+// phone action bar (#393). Only one of them is on screen per layout, so click the visible one.
+function songAction(page: Page, action: 'playlist' | 'favorite') {
+  return page
+    .getByTestId(`song-header-${action}`)
+    .or(page.getByTestId(`song-action-${action}`))
+    .filter({ visible: true })
+    .first();
+}
+
 const GATED: Array<{ path: string; feature: string }> = [
   { path: '/library/recently-viewed', feature: 'history' },
   { path: '/library/playlists/add', feature: 'newPlaylist' },
@@ -66,7 +76,7 @@ test.describe('GuestGate on members-only screens @smoke', () => {
 
   test('guest adding a song to a playlist gets the add-to-playlist gate in a sheet', async ({ page }) => {
     await page.goto(`/songs/${await firstPublicSongId(page)}`);
-    await page.getByTestId('song-action-playlist').click(); // phone layout: the sticky action bar (#393)
+    await songAction(page, 'playlist').click();
     const gate = page.locator('[data-testid="guest-gate"][data-feature="addToPlaylist"]');
     await expect(gate).toHaveAttribute('data-feature', 'addToPlaylist');
     await expect(gate.getByRole('link', { name: 'Sign in' })).toHaveAttribute('href', /\/auth\/login\?next=%2Fsongs%2F/);
@@ -74,7 +84,7 @@ test.describe('GuestGate on members-only screens @smoke', () => {
 
   test('guest tapping the heart gets the favourites gate whose Sign in keeps the query string', async ({ page }) => {
     await page.goto(`/songs/${await firstPublicSongId(page)}?ref=heart`);
-    await page.getByTestId('song-action-favorite').click(); // phone layout: the heart lives in the action bar (#393)
+    await songAction(page, 'favorite').click();
     const gate = page.locator('[data-testid="guest-gate"][data-feature="favourites"]');
     await expect(gate).toBeVisible();
     await expect(gate.getByRole('link', { name: 'Sign in' })).toHaveAttribute(

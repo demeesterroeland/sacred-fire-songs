@@ -592,6 +592,7 @@ export default function SongDetailPage() {
                         )}
                         {!user && (
                             <button
+                                data-testid="song-header-playlist"
                                 onClick={() => {
                                     setIsGuestGateOpen(true);
                                 }}
@@ -602,6 +603,7 @@ export default function SongDetailPage() {
                             </button>
                         )}
                         <button
+                            data-testid="song-header-favorite"
                             onClick={handleToggleFavorite}
                             aria-label={isFav ? t('song.removeFromFavorites') : t('song.addToFavorites')}
                             aria-pressed={isFav}
