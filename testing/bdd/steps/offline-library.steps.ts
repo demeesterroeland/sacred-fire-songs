@@ -53,6 +53,10 @@ const escapeRegExp = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&
  * ux-v2-guest-draft.steps.ts owns "I sign out"). Registering a pending stand-in
  * for them too makes the step ambiguous, so they are left out here. The @wip
  * scenarios stay pending through their other, story specific steps.
+ * Story 4.3.4 (library wipe on identity change): when it removes @wip, "I sign
+ * out" binds to develop's step, which only checks the song draft cleanup. Then
+ * either extend that shared step with the library wipe or give the Examples row
+ * an offline specific text, and drop the entry here.
  */
 const DEFINED_ELSEWHERE = new Set(['I sign out']);
 
