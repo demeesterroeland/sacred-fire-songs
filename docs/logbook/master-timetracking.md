@@ -109,13 +109,13 @@
 
 | **October 30, 2026 (Part 10)** | **CI-CD/Testing (#287)**: Gitflow Phase 0 harness — workflow contract helper, Vitest contract tests, Cucumber `ci` profile, bats tests for `start-issue.sh`, lint/typecheck scripts and baseline. | ~1.0 Hours | ✅ Completed |
 
-| **October 31, 2026** | **CI-CD (#282)**: Gitflow Phase 1 — `ci.yml` quality gate, lint ratchet, single unit-test tree, SHA-pinned actions, Dependabot; E2E Supabase stack drafted in <infra-repo> #106 (deferred). | ~2.5 Hours | ✅ Completed |
+| **October 31, 2026** | **CI-CD (#282)**: Gitflow Phase 1 — `ci.yml` quality gate, lint ratchet, single unit-test tree, SHA-pinned actions, Dependabot; E2E Supabase stack drafted outside this repo (deferred). | ~2.5 Hours | ✅ Completed |
 
 | **October 31, 2026 (Part 2)** | **Chore/Scripts (#274)**: `scripts/` reorganized into `cicd/`, `db/`, `dev/` with `scripts/README.md`, story-sync scripts moved out of `.claude/scripts/`, all references and the CI shellcheck glob updated, layout contract in bats. | ~1.0 Hours | ✅ Completed |
 
 | **October 31, 2026 (Part 2)** | **CI-CD (#283)**: Gitflow Phase 2 — PR policy check (`pr-lint.yml`), rulesets as code, `start-issue.sh` validation, `dev2preview.sh` image names + dry run; recovered #317 via #318. | ~1.5 Hours | ✅ Completed |
 
-| **October 31, 2026 (Part 3)** | **CI-CD (#284)**: Gitflow Phase 3 — develop images, `deploy-staging.yml`, restricted SSH deploy script + compose sync (<infra-repo> #107). | ~1.5 Hours | ✅ Completed |
+| **October 31, 2026 (Part 3)** | **CI-CD (#284)**: Gitflow Phase 3 — develop images, `deploy-staging.yml`, restricted SSH deploy script + compose sync (kept outside this repo). | ~1.5 Hours | ✅ Completed |
 
 | **October 31, 2026 (Part 4)** | **Bug (#321)**: "New Playlist" redirected logged-in users to `/` — `useAuth` initial `loading` when no server user, server-side guard on `/library/playlists/add`, unit + e2e regression tests. | ~0.75 Hours | ✅ Completed |
 

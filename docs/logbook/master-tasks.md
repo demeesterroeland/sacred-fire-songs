@@ -889,9 +889,9 @@
     - [x] Author `docs/beta-deployment.md` (beta cutover off Vercel onto VPS + staging Supabase)
     - [x] Update README deployment row to link the beta deployment guide
     - [x] Open PR #147 (docs: add beta deployment guide)
-    - [x] Investigate existing Vercel-migration research (none found; context in <infra-repo>)
-    - [x] Create <infra-repo>#84 — chore: migrate Songbook prod off Vercel (prod-cutover scope)
-    - [x] Cross-link <infra-repo>#34 as blocking dependency
+    - [x] Investigate existing Vercel-migration research (none found; context outside this repo)
+    - [x] Create a private-infrastructure issue to migrate Songbook prod off Vercel (prod-cutover scope)
+    - [x] Cross-link a blocking dependency in the same private tracker
     - [x] Remove stray `issue_draft.md` from main → PR #148
 
 # Task: Implement Dedicated Artist Filtering (#165) & "No Artist" Grouping
@@ -920,10 +920,10 @@
     - [x] Create `walkthrough.md` <!-- id: 21 -->
     - [x] Document in project logs and commit changes <!-- id: 22 -->
 
-- [x] **Session — Jun 23, 2026 (Tailscale Database Setup & PR #163 Merge)**
-    - [x] Expose Kong gateway API on Tailscale IP port 8000.
-    - [x] Re-route `SITE_URL` and `API_EXTERNAL_URL` in self-hosted Supabase configuration to Tailscale.
-    - [x] Rebuild and restart the `songbook` stack against the Tailscale Supabase endpoint.
+- [x] **Session — Jun 23, 2026 (Private-network Database Setup & PR #163 Merge)**
+    - [x] Expose the Kong gateway API on the private network interface, port 8000.
+    - [x] Re-route `SITE_URL` and `API_EXTERNAL_URL` in self-hosted Supabase configuration to the private network.
+    - [x] Rebuild and restart the `songbook` stack against the private Supabase endpoint.
     - [x] Fix Traefik dynamically registered routers by restarting the proxy stack.
     - [x] Replace all legacy database domain references in stacks and admin dashboard config.
     - [x] Merge PR #163 and clean up local branch structures.
@@ -1014,7 +1014,7 @@
     - [x] Handle and display React Query fetch errors with Retry buttons on detail page.
     - [x] Implement browser console warning and error logging for timeouts and fetch issues.
     - [x] Add timeouts E2E test suite `e2e/tests/timeouts.spec.ts` verifying auth and skeleton loading timeout fallbacks.
-    - [x] Diagnose database seeder bottleneck: identified ~480 sequential tailscale network roundtrips taking 70s.
+    - [x] Diagnose database seeder bottleneck: identified ~480 sequential private-network roundtrips taking 70s.
     - [x] Rewrite `random-seeder.mjs` to execute completely database-side inside a single PL/pgSQL `DO` block (reducing run time to under 3s, total E2E run down to 51s).
     - [x] Solve PL/pgSQL local variable/column name collisions by prefixing table-interacting variables.
     - [x] Fix PL/pgSQL random selection bug by querying `public.categories` table directly with `ORDER BY random()` instead of array `unnest` subquery (which was optimized away).
@@ -1075,7 +1075,7 @@
 
 ## Session July 14, 2026 (Mobile UI Overflow Fixes for Issue #188)
 
-- [x] Configure `_DEV` environment variables in `.env.local` to resolve Tailscale Supabase DEV connection
+- [x] Configure `_DEV` environment variables in `.env.local` to resolve private-network Supabase DEV connection
 - [x] Fix card constraints on `PlaylistCard` and `PublicPlaylistCard` to prevent horizontal overflow on mobile
 - [x] Refactor metadata grid and action buttons in `SongForm` to stack vertically on mobile screens (<640px)
 - [x] Refactor `CardContent` subtitle container to use simple block-level `truncate` for reliable responsive sizing
@@ -1310,7 +1310,7 @@
 
 ## Session October 31, 2026 (Gitflow Phase 1 — CI Quality Gate, #282, PR #310)
 - [x] Merge Phase 0 PR #309 into `develop`
-- [x] Investigate E2E target: cloud staging/prod Supabase projects are paused; owner chose a self-hosted E2E Supabase on <server> → <infra-repo> PR #106 (`stacks/songbook-e2e`, Tailscale-only, `init-env.sh`); then owner deferred all E2E work (Story 5.1.2)
+- [x] Investigate E2E target: cloud staging/prod Supabase projects are paused; owner chose a self-hosted E2E Supabase prepared outside this repo (private network only); then owner deferred all E2E work (Story 5.1.2)
 - [x] `ci.yml`: lint (ratchet `--max-warnings 182`), typecheck, unit, bdd, build, pipeline (actionlint, shellcheck, bats, strict `test:bdd:ci-gate`)
 - [x] One unit-test tree `testing/unit/tests/` (removed `lib/unit-tests/`, stale `testing/e2e/tests/`); Vitest `include` restricted (286 tests)
 - [x] Wire `setlist-pdf-export.feature` with pending stubs; `ci-gate` profile (6/6)
@@ -1318,7 +1318,7 @@
 - [x] Fix shellcheck/actionlint findings; ESLint ignores `.worktrees/**`
 - [x] Docs: CLAUDE.md, git-workflow v1.2, e2e overview v1.9, design doc §6.6, plan v1.4, epic stories; issue #288 body aligned with D4
 - [x] Required checks on the `main` ruleset + classic protection removed (applied by the owner; agent was blocked by the permission classifier)
-- [ ] Deferred: Story 5.1.2 (E2E fail-closed, secrets, docker gating), <infra-repo> #106 rollout, Tailscale `tag:ci`
+- [ ] Deferred: Story 5.1.2 (E2E fail-closed, secrets, docker gating), rollout of the E2E database, CI access to it
 
 ## Session October 31, 2026 (Part 2: Reorganize scripts/ into cicd/, db/, dev/, #274)
 - [x] Branch `chore/274-reorganize-scripts` from `chore/282-gitflow-quality-gate` (PR #310)
@@ -1341,14 +1341,14 @@
 
 ## Session October 31, 2026 (Part 3: Gitflow Phase 3 — Staging CD from develop, #284)
 - [x] Verify owner-applied rulesets (`main` 12237277, `develop` 26249878); close Story 5.1.4 (#292)
-- [x] Investigate access: public SSH (key-only) reachable from runners; staging web Tailscale-only; preview stack has a migrator; `<stacks-dir>` had uncommitted preview + prod compose drift (prod runs `-app:v1.6.0`)
+- [x] Investigate access: public SSH (key-only) reachable from runners; staging web reachable on a private network only; preview stack has a migrator; the server stack had uncommitted preview + prod compose drift (prod runs `-app:v1.6.0`)
 - [x] Rewrite @story-5.1.7 scenarios for the SSH forced-command design (red → green, `ci-gate` 18/18)
 - [x] `docker.yml`: build on `develop`, short SHA on push, remove `:latest`
 - [x] `deploy-staging.yml`: workflow_run after develop build, `environment: Staging`, pinned host key, only `deploy develop <sha>`
-- [x] <infra-repo> PR #107: `<server-deploy-script>` (bats 8/8, shellcheck), preview `IMAGE_TAG`, prod compose = running state
+- [x] Server deploy script outside this repo (bats 8/8, shellcheck), preview `IMAGE_TAG`, prod compose = running state
 - [x] D6: Vercel tokens removed from `performance.yml`
-- [ ] Owner: merge <infra-repo> #107; VPS rollout; `Staging` environment + secrets; first deploy
-- [ ] Deferred: 3.4 nightly E2E/k6 (Tailscale), app-level Vercel code
+- [ ] Owner: merge the private-infrastructure change; server rollout; `Staging` environment + secrets; first deploy
+- [ ] Deferred: 3.4 nightly E2E/k6 (private network), app-level Vercel code
 
 ## Session October 31, 2026 (Part 4: Fix New Playlist auth redirect, #321)
 - [x] Issue #321, branch `fix/321-playlist-add-auth-redirect`
@@ -1414,7 +1414,7 @@
 - [x] PR #423 merged (owner); #299 code deliverables ticked, end-to-end hotfix check moved to the 5.1.14 dress rehearsal (owner decision)
 - [x] #300: `development-workflow.md` 2.0, Gitflow PR template, `/start-story` + `/sync-artifacts` + README aligned; `@story-5.1.13` documentation contract in `ci-gate`
 - [ ] Owner: confirm changes to the global ship triggers in the private `~/.claude/CLAUDE.md` (merge = into `develop`; release = `develop2main.sh`)
-- [ ] Next: 5.1.14 dress rehearsal (#301, incl. hotfix); 5.1.2/5.1.11 once the Tailscale `tag:ci` + E2E database secrets are in the repo
+- [ ] Next: 5.1.14 dress rehearsal (#301, incl. hotfix); 5.1.2/5.1.11 once CI access to a private E2E database and its secrets are in place
 
 ## Session November 4–5, 2026 (Story 4.6.6: share notifications, #373)
 - [x] Migration `20261104190000_recording_share_notifications.sql`: `notifications` inbox (trigger-created only, recipients may only set `read_at`), `recording_shares.email_sent_at`, `profiles.email_notifications`, `claim_recording_share_email` RPC (idempotent, owner-only); `docs/design/db-schema.sql` v3.0
@@ -1452,7 +1452,7 @@
 - [x] Decisions up to UXA-053, owner checklist #431 updated; validation script sections per story; lint cap 158, palette baseline 1721
 - [x] Whole Playwright suite on a fresh build of `feat/ux-v2`: 274 passed, 5 skipped, 0 failed
 - [ ] Owner: phone validation on the preview, decisions in #431, sign-off of `feat/ux-v2` → `develop`
-- [ ] Owner: manual VoiceOver / TalkBack pass (`docs/ux-research/2026-11-06-a11y-audit.md` section 5); #418 stays open until then
+- [x] Owner: manual VoiceOver / TalkBack pass (`docs/ux-research/2026-11-06-a11y-audit.md` section 5) validated by the owner (recorded Nov 15, 2026); #418 closed
 - [ ] Follow-ups: Quechua native check, Songs / Add Song / Edit nest a second `main`, focus after deleting a song far down the list lands off-screen, `useDeleteSong` English alert, `useToggleFavorite` English toasts, `npm run test:bdd:ci` has 3 failing scenarios about `e2e.yml` and `docker.yml` (not part of CI)
 
 ## Session November 6, 2026 (Epic 6.1 UX v2, validation round 1, #375)
@@ -1594,3 +1594,16 @@
 - [x] `practice.available` in all 8 locales; replaces the headphones cue and take count of Story 6.2.2 (#583) after the rebase on the UX v3 promotion
 - [x] Tests: Vitest `practiceAvailability.test.ts`, `songActionBarComponent.test.tsx`; BDD `ux-v2-practice-availability.feature` (`@story-6.1.40`); `ux-v2-song-action-bar.feature` 1.3 and `ux-v2-variant-slot.spec.ts` updated
 - [x] Docs: mockups screen21 1.6 / screen23 1.3, design doc 2.39, user stories 2.24
+
+## Session November 15, 2026 (#599, logbook sync with GitHub)
+- [x] Status sync after the Nov 14 audit: Epic 6.1 and 6.2 stories, Story 3.1.4 family, Epic 5.1 rows, 4.6.5 / 4.6.7 numbering (changelog 2.25 of `epic&user stories.md`)
+- [x] #418 manual screen reader pass recorded as validated by the owner (audit section 5, validation script, README)
+- [x] ADR 0001 corrected (`/explore` redirects to `/songs`; three bottom items)
+- [x] #266 (option A): `@e2e` is documentation only; `song.feature` names the Playwright spec per scenario; E2E overview note; PL-11 corrected
+- [x] #301 run URLs recorded in `master-walkthrough.md`
+- [x] Isolation: private-network and private-infrastructure details removed from docs
+- [ ] In review, not merged: https://github.com/demeesterroeland/sacred-fire-songs/pull/611 (#605 palette baseline 496), https://github.com/demeesterroeland/sacred-fire-songs/pull/612 (#604), https://github.com/demeesterroeland/sacred-fire-songs/pull/613 (#603), https://github.com/demeesterroeland/sacred-fire-songs/pull/610 (#607), https://github.com/demeesterroeland/sacred-fire-songs/pull/614 (#602 never tag `latest`), https://github.com/demeesterroeland/sacred-fire-songs/pull/609 (#608 back-merge), https://github.com/demeesterroeland/sacred-fire-songs/pull/615 (#606, into `feat/offline-library`), https://github.com/demeesterroeland/sacred-fire-songs/pull/616 (#600), https://github.com/demeesterroeland/sacred-fire-songs/pull/617 (#586 follow-up), https://github.com/demeesterroeland/sacred-fire-songs/pull/618 (#510), https://github.com/demeesterroeland/sacred-fire-songs/pull/619 (#393), https://github.com/demeesterroeland/sacred-fire-songs/pull/620 (#488)
+- [ ] Owner: decide whether to remove the stray `latest` tag on both GHCR images (same digest as v1.9.0)
+- [ ] Owner decisions open (#601): #516, #515, #520, #512, language-filter limit, #578 copy, `@seed` tests in CI; #600: Drafts GuestGate or empty state (#232)
+- [x] Seed run (Nov 15, 2026, `develop` a6e11ab7): 268 scenarios, 255 passed, 0 failed, 13 pending (stub steps in `song.feature`)
+- [ ] Not done in this sync: roles table, Gherkin wording fixes, issue numbers on 3.4.x / 4.1.x / 4.2.x rows, GitHub issue text edits
