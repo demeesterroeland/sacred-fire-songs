@@ -1,5 +1,5 @@
 # Sacred Fire Songs – Song behaviour catalogue
-# Version: 1.4 | Date: Nov 13, 2026
+# Version: 1.5 | Date: Nov 23, 2026
 #
 # Living Gherkin description of every song situation that the automated tests
 # exercise. Each scenario names the test that covers it (unit = vitest files in
@@ -11,6 +11,7 @@
 # supabase/seeds/03_songs_random_generated.sql (regenerate: npm run seed:generate).
 #
 # Changelog
+#   1.5 – Nov 23, 2026 – (#266, option A) Each @e2e scenario is documentation only and names the Playwright spec that covers it; E2E runs through e2e/tests/ with plain Playwright, not playwright-bdd.
 #   1.4 – Nov 13, 2026 – Seeded accounts use placeholder addresses (<role>@sfs.example).
 #   1.3 – Nov 6, 2026 – Story 6.1.21 (#405): a guest opens Practice on Listen, so the sign-in gate covers the Record tab (not the first thing a guest sees).
 #   1.2 – Nov 5, 2026 – Story 6.1.14 (#398): the rehearsal feature is called "Practice" everywhere (drawer, menu, tabs Listen / Record, badge, guest card).
@@ -148,6 +149,7 @@ Feature: Songs
         | inline chords, ABC melody notation, no links | true       | true       |
       # Anchors "Espíritu del agua", "Pachamama", "Grandmother Earth", "Wakan Tanka", "Canto Sem Fim"
 
+    # @e2e is documentation only (plain Playwright, no playwright-bdd). Covered by: `e2e/tests/media-player.spec.ts`, `e2e/tests/recording.spec.ts`
     @e2e @media-player @recording
     Scenario: A song with YouTube, Spotify and SoundCloud references
       Given the song "Danza del Cielo Curandero" by "Herbert Quinteros" with key "E", capo 3 and tuning "Standard"
@@ -160,12 +162,14 @@ Feature: Songs
       Then the mini player shows the song title and "YouTube Reference"
       And the source switcher lists YouTube and SoundCloud but Spotify has no mini player
 
+    # @e2e is documentation only (plain Playwright, no playwright-bdd). Covered by: `e2e/tests/timeouts.spec.ts`
     @e2e @timeouts
     Scenario: A song with YouTube and Spotify but no SoundCloud
       Given a song with key "G", capo 0, a YouTube link and a Spotify link and no SoundCloud link
       When the page loads while authentication is slow
       Then the skeleton resolves after the guest fallback timeout and the song renders
 
+    # @e2e is documentation only (plain Playwright, no playwright-bdd). Covered by: `e2e/tests/recording.spec.ts`
     @e2e @recording
     Scenario: The Listen tab only exists when the song has media
       Given a song without any media link
@@ -238,6 +242,7 @@ Feature: Songs
       Given a song whose author is "First  Last"
       Then filtering by "First Last" and by "first   last" both match it
 
+    # @e2e is documentation only (plain Playwright, no playwright-bdd). Covered by: `e2e/tests/search.spec.ts`
     @e2e @search
     Scenario: Searching by the author shown on the first card
       Given the first song card shows an author that is not "Unknown"
@@ -278,6 +283,7 @@ Feature: Songs
         | /songs?category=nature                    |
         | /songs?category=nature&tag=water,plantas  |
 
+    # @e2e is documentation only (plain Playwright, no playwright-bdd). Covered by: `e2e/tests/performance.spec.ts`
     @e2e @performance
     Scenario: The filter modal offers at least one category checkbox
       When the search options modal is opened on /songs
@@ -293,6 +299,7 @@ Feature: Songs
   # ---------------------------------------------------------------------------
   Rule: Visibility, ownership and roles
 
+    # @e2e is documentation only (plain Playwright, no playwright-bdd). Covered by: `e2e/tests/smoke.spec.ts`
     @e2e @smoke
     Scenario: A guest sees public songs only
       When a guest opens /songs
@@ -322,6 +329,7 @@ Feature: Songs
       And the musician cannot edit it
       And the admin can edit it
 
+    # @e2e is documentation only (plain Playwright, no playwright-bdd). Covered by: `e2e/tests/auth-hydration.spec.ts`
     @e2e @auth-hydration
     Scenario: A signed-in member never sees a "Sign In" flash on /songs
       When the member opens /songs
@@ -330,6 +338,7 @@ Feature: Songs
   # ---------------------------------------------------------------------------
   Rule: Private rehearsal recordings belong to a user and a song version
 
+    # @e2e is documentation only (plain Playwright, no playwright-bdd). Covered by: `e2e/tests/recording.spec.ts`
     @e2e @recording
     Scenario: Recording, playing, downloading and deleting a take on the first song
       Given the first song on /songs has no recordings for the member
@@ -339,12 +348,14 @@ Feature: Songs
       Then the take can be played, downloaded as ".webm" and deleted
       # The seeder keeps the newest song ("Morning Sunrise") free of recordings so the count is exactly 1
 
+    # @e2e is documentation only (plain Playwright, no playwright-bdd). Covered by: `e2e/tests/recording.spec.ts`
     @e2e @recording
     Scenario: Uploading an audio file as a recording
       When the member uploads "dummy-audio.wav"
       Then the recording name defaults to "dummy-audio"
       And it downloads with the ".wav" extension
 
+    # @e2e is documentation only (plain Playwright, no playwright-bdd). Covered by: `e2e/tests/recording.spec.ts`
     @e2e @recording
     Scenario Outline: Recording limits
       When <action>
@@ -355,11 +366,13 @@ Feature: Songs
         | a recording reaches 03:00                | it stops automatically                              |
         | a file larger than 10 MB is uploaded     | the message "File size exceeds the 10 MB limit." is shown |
 
+    # @e2e is documentation only (plain Playwright, no playwright-bdd). Covered by: `e2e/tests/recording.spec.ts`
     @e2e @recording
     Scenario: A guest cannot record
       When a guest opens the Record tab of the Practice drawer
       Then the "Sign in to record" gate covers the recorder
 
+    # @e2e is documentation only (plain Playwright, no playwright-bdd). Covered by: `e2e/tests/media-player.spec.ts`, `e2e/tests/recording.spec.ts`
     @e2e @media-player
     Scenario: The mini player keeps playing while the drawer is toggled
       Given a recording is playing in the mini player
@@ -377,6 +390,7 @@ Feature: Songs
   # ---------------------------------------------------------------------------
   Rule: Playlists and favorites
 
+    # @e2e is documentation only (plain Playwright, no playwright-bdd). Covered by: `e2e/tests/public-playlist-curation.spec.ts`
     @e2e @public-playlist-curation
     Scenario: A gatekeeper curates public playlists of other users
       Given the member's public playlist "Water Ceremony" with id aaaaaaaa-0001-4000-a000-000000000001
@@ -386,12 +400,14 @@ Feature: Songs
       When the gatekeeper opens it
       Then "Song Not Found" is shown
 
+    # @e2e is documentation only (plain Playwright, no playwright-bdd). Covered by: `e2e/tests/public-playlist-curation.spec.ts`
     @e2e @public-playlist-curation
     Scenario: A member can view but not curate an admin's public playlist
       Given the admin's public playlist "Admin Fire Circle" with id aaaaaaaa-0002-4000-a000-000000000002
       When the member opens it
       Then the songs are listed but there is no "Add Songs" button and the description is not editable
 
+    # @e2e is documentation only (plain Playwright, no playwright-bdd). Covered by: `e2e/tests/smoke.spec.ts`
     @e2e @smoke
     Scenario: A member creates a playlist
       When the member creates a playlist named "Smoke Test Playlist <timestamp>"
@@ -460,6 +476,7 @@ Feature: Songs
       When "Espíritu" is searched
       Then "Espíritu del agua" is shown and "Pachamama" is hidden
 
+    # @e2e is documentation only (plain Playwright, no playwright-bdd). Covered by: `e2e/tests/search.spec.ts`
     @e2e @search
     Scenario: Search feedback
       When "vuela" is typed into the search box
@@ -467,6 +484,7 @@ Feature: Songs
       When "NonExistentSongName123" is typed
       Then "No songs found" is shown and the URL carries "search=NonExistentSongName123"
 
+    # @e2e is documentation only (plain Playwright, no playwright-bdd). Covered by: `e2e/tests/performance.spec.ts`
     @e2e @performance
     Scenario: Search for "test" returns within budget
       When "test" is typed into the search box
@@ -479,6 +497,7 @@ Feature: Songs
       And pages contain 20 songs using a keyset cursor
       # The seeder spreads created_at over 400 days, with the anchors as the newest songs
 
+    # @e2e is documentation only (plain Playwright, no playwright-bdd). Covered by: `e2e/tests/performance.spec.ts`
     @e2e @performance
     Scenario Outline: Page load budgets
       Given the database holds <songs> songs
