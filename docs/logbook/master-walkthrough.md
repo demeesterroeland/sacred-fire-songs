@@ -3628,3 +3628,11 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - Change: `SongForm`, `MediaEmbeds`, `YouTubeEmbed` and `SongDetailSkeleton` use semantic tokens only. Publish Song is the single primary `Button` (accent), Save as private is `outline`; inputs are `bg-surface border-line-strong rounded-control`, selects are 44 px, errors use `text-danger`. Link icons are neutral `text-fg-muted` (owner decision, reversible); category emojis are data and stay. `PALETTE_BASELINE` 496 → 354.
 - Tests: `soberSongForm.test.tsx` (red first), BDD `ux-v2-sober-song-form.feature` (`@unit`, `@e2e`), E2E `ux-v2-sober-song-form.spec.ts` (axe contrast, light and dark; not run locally). Docs: design doc 2.53, design tokens 1.13, E2E overview 1.30 (SONG-14).
 - Validation: TypeScript, lint (126 warnings, cap unchanged), Vitest 2,701, BDD unit 561 passed / 47 pending.
+
+## Session November 23, 2026 — #639: logbook follow-ups from the Nov 14 sync
+
+- Scope: the items PR #625 left out of the #599 sync. Docs only; every change was checked against the code (`components/common/Header.tsx`, `MobileBottomNav.tsx`, `lib/navigation.ts`, `components/library/SearchFiltersModal.tsx`, `components/playlists/*`, `lib/export/pdfExport.ts`, `app/songs/add`, `SongForm`) or against GitHub.
+- `epic&user stories.md` 2.28: Gherkin aligned for Stories 1.1.5, 1.1.6 (test path), 1.1.9, 1.2.1, 1.3.3 (also closes the unclosed code fence that swallowed Story 1.3.5), 2.3.2, 4.1.1, 4.1.5, 4.2.1 and the 6.1 rows #390, #398, #399, #403 and #408. The rewritten issue Gherkin of #140, #108, #112 and #245 is mirrored in Stories 3.1.3, 3.4.4, 4.5.1 and 4.6.2.
+- Issue numbers added to the 3.4.x, 3.6.1, 4.1.x, 4.2.x and 4.5.1 rows; Epic 3.6 shows #257 as reopened and #275–#277 as not started; Epic 4.3 notes that `feat/offline-library` (#357) was stale until PR #615 (#606, step 0) and is still 22 commits behind `develop`.
+- GitHub issue text updated: #403 (bell badge, no avatar badge), #7 (stepper, C → Db at +1, role precondition) and #408 (three bottom items, `/explore` redirects to `/songs`).
+- Left for the owner (listed in the PR): the Roles & Permissions table, the "Story 4.6.5" title on #372 in GitHub, where #481 belongs in the stories file. #267, #356 and #266 are test-infrastructure chores (docs/testing, CI, test helpers), not stories, so they were not mirrored.

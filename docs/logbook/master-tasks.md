@@ -1627,3 +1627,11 @@
 - [x] `PALETTE_BASELINE` 496 → 354
 - [x] Docs: design doc 2.53, design tokens 1.13, E2E overview 1.30
 - [ ] Owner decisions open: keep neutral link icons? category tag emojis (💧🔥🌎 …)?
+
+## Session November 23, 2026 (#639, logbook follow-ups from the Nov 14 sync)
+- [x] Gherkin aligned with the code: Stories 1.1.5, 1.1.6 (path), 1.1.9, 1.2.1, 1.3.3, 2.3.2, 4.1.1, 4.1.5, 4.2.1; 6.1 rows #390, #398, #399, #403, #408 (`epic&user stories.md` 2.28)
+- [x] Rewritten issue Gherkin mirrored: #140 (3.1.3), #108 (3.4.4), #112 (4.5.1), #245 (4.6.2)
+- [x] Issue numbers on the 3.4.x, 3.6.1, 4.1.x, 4.2.x and 4.5.1 rows; Epic 3.6 status (#257 reopened, #275–#277 not started); Epic 4.3 note (`feat/offline-library` stale, #606 step 0)
+- [x] GitHub issue text: #403, #7, #408
+- [ ] Owner: Roles & Permissions table (musician / expert are roles, `is_musician` is derived, transpose rule, planned Gatekeeper actions, admin view-only), Story 4.6.5 numbering on GitHub (#372 still says 4.6.5), where #481 lives in the stories file (see the PR description)
+- [ ] Not stories, not mirrored: #267, #356 and #266 (test-infrastructure chores: docs/testing, CI, test helpers)
