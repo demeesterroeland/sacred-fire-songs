@@ -353,13 +353,13 @@ export default function SongDetailPage() {
             return (
                 <div className="flex flex-col items-center justify-center min-h-screen gap-4 text-center px-6">
                     <p className="text-3xl">⚠️</p>
-                    <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100">{t('song.error.timeout')}</h2>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                    <h2 className="text-row font-bold text-fg">{t('song.error.timeout')}</h2>
+                    <p className="text-meta text-fg-muted">
                         {t('song.error.timeoutDescription')}
                     </p>
                     <button
                         onClick={() => window.location.reload()}
-                        className="mt-2 px-5 py-2 rounded-lg bg-[#ff4400] text-white text-sm font-semibold hover:bg-[#e03c00] transition-colors"
+                        className="mt-2 min-h-tap px-5 py-2 rounded-control bg-accent text-on-accent text-meta font-semibold hover:bg-accent/90 transition-colors"
                     >
                         {t('song.error.retry')}
                     </button>
@@ -372,13 +372,13 @@ export default function SongDetailPage() {
         return (
             <div className="flex flex-col items-center justify-center min-h-screen gap-4 text-center px-6">
                 <p className="text-3xl">🔥</p>
-                <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100">{t('song.error.loadFailed')}</h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <h2 className="text-row font-bold text-fg">{t('song.error.loadFailed')}</h2>
+                <p className="text-meta text-fg-muted">
                     {t('song.error.unexpected')}
                 </p>
                 <button
                     onClick={() => window.location.reload()}
-                    className="mt-2 px-5 py-2 rounded-lg bg-[#ff4400] text-white text-sm font-semibold hover:bg-[#e03c00] transition-colors"
+                    className="mt-2 min-h-tap px-5 py-2 rounded-control bg-accent text-on-accent text-meta font-semibold hover:bg-accent/90 transition-colors"
                 >
                     {t('song.error.retry')}
                 </button>

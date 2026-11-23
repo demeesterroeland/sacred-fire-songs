@@ -24,21 +24,21 @@ export default function EnvironmentBanner() {
 
   const config = {
     preview: {
-      bg: "bg-amber-500",
-      text: "text-black",
+      bg: "bg-fg",
+      text: "text-bg",
       label: "Preview Environment",
       icon: <Rocket className="w-4 h-4" />,
     },
     development: {
-      bg: "bg-blue-600",
-      text: "text-white",
+      bg: "bg-fg",
+      text: "text-bg",
       label: "Local Development",
       icon: <Code className="w-4 h-4" />,
     },
   }[env as "preview" | "development"];
 
   return (
-    <div ref={bannerRef} className={`${config.bg} ${config.text} px-4 py-1.5 flex items-center justify-center gap-2 text-caption font-semibold z-[100] sticky top-0 shadow-lg`}>
+    <div ref={bannerRef} className={`${config.bg} ${config.text} px-4 py-1.5 flex items-center justify-center gap-2 text-caption font-semibold z-[100] sticky top-0`}>
       {config.icon}
       <span>{config.label}</span>
       <span className="opacity-50 mx-1">|</span>

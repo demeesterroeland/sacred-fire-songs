@@ -1621,6 +1621,21 @@
 - [x] Tests: Vitest (owner rules, useAuth sign-out), BDD `ux-v2-guest-draft.feature` 1.1, E2E guest draft round trip
 - [x] Docs: design doc 2.43, user stories 2.27
 
+## Session November 23, 2026 (#485 group 7, song form)
+- [x] Red test first: `testing/unit/tests/design/soberSongForm.test.tsx`; `ux-v2-sober-song-form.feature` (`@unit`, `@e2e`)
+- [x] `SongForm`, `MediaEmbeds`, `YouTubeEmbed`, `SongDetailSkeleton` on semantic tokens; one accent button (Publish Song), Save as private `outline`; neutral link icons
+- [x] `PALETTE_BASELINE` 496 → 354
+- [x] Docs: design doc 2.53, design tokens 1.13, E2E overview 1.30
+- [ ] Owner decisions open: keep neutral link icons? category tag emojis (💧🔥🌎 …)?
+
+## Session November 23, 2026 (#639, logbook follow-ups from the Nov 14 sync)
+- [x] Gherkin aligned with the code: Stories 1.1.5, 1.1.6 (path), 1.1.9, 1.2.1, 1.3.3, 2.3.2, 4.1.1, 4.1.5, 4.2.1; 6.1 rows #390, #398, #399, #403, #408 (`epic&user stories.md` 2.28)
+- [x] Rewritten issue Gherkin mirrored: #140 (3.1.3), #108 (3.4.4), #112 (4.5.1), #245 (4.6.2)
+- [x] Issue numbers on the 3.4.x, 3.6.1, 4.1.x, 4.2.x and 4.5.1 rows; Epic 3.6 status (#257 reopened, #275–#277 not started); Epic 4.3 note (`feat/offline-library` stale, #606 step 0)
+- [x] GitHub issue text: #403, #7, #408
+- [ ] Owner: Roles & Permissions table (musician / expert are roles, `is_musician` is derived, transpose rule, planned Gatekeeper actions, admin view-only), Story 4.6.5 numbering on GitHub (#372 still says 4.6.5), where #481 lives in the stories file (see the PR description)
+- [ ] Not stories, not mirrored: #267, #356 and #266 (test-infrastructure chores: docs/testing, CI, test helpers)
+
 ## Session November 23, 2026 (Story 6.2.26, #598, design: suggest a song as a version)
 - [x] Branch target checked: no PR targets `feat/ux-v3`, UX v3 is in `develop` via #585, so the work goes to `develop`
 - [x] Plan `docs/plans/2026-11-23-598-version-suggestion.md`: data model (`song_link_suggestions`, `song_link_audit.suggestion_id`), functions, row-level security, review queue UX, notifications, undo and audit, Gherkin, test plan, files
