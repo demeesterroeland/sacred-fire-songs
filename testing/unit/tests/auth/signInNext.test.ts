@@ -34,8 +34,10 @@ describe('songsGuestGateFeature', () => {
     expect(songsGuestGateFeature({ favorites: true, status: 'all', isGuest: false, authLoading: false })).toBeNull();
     expect(songsGuestGateFeature({ favorites: false, status: 'all', isGuest: true, authLoading: false })).toBeNull();
   });
-  it('leaves Drafts alone until the owner decides (gate or empty state, #232)', () => {
-    expect(songsGuestGateFeature({ favorites: false, status: 'draft', isGuest: true, authLoading: false })).toBeNull();
+  it('gates Drafts for a guest once the session is known (supersedes the empty state of #232)', () => {
+    expect(songsGuestGateFeature({ favorites: false, status: 'draft', isGuest: true, authLoading: false })).toBe('drafts');
+    expect(songsGuestGateFeature({ favorites: false, status: 'draft', isGuest: true, authLoading: true })).toBeNull();
+    expect(songsGuestGateFeature({ favorites: false, status: 'draft', isGuest: false, authLoading: false })).toBeNull();
   });
 });
 

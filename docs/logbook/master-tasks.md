@@ -1620,3 +1620,10 @@
 - [x] A guest draft is kept through sign-in (#229); drafts in the old format are dropped
 - [x] Tests: Vitest (owner rules, useAuth sign-out), BDD `ux-v2-guest-draft.feature` 1.1, E2E guest draft round trip
 - [x] Docs: design doc 2.43, user stories 2.27
+
+## Session November 23, 2026 (#485 group 7, song form)
+- [x] Red test first: `testing/unit/tests/design/soberSongForm.test.tsx`; `ux-v2-sober-song-form.feature` (`@unit`, `@e2e`)
+- [x] `SongForm`, `MediaEmbeds`, `YouTubeEmbed`, `SongDetailSkeleton` on semantic tokens; one accent button (Publish Song), Save as private `outline`; neutral link icons
+- [x] `PALETTE_BASELINE` 496 → 354
+- [x] Docs: design doc 2.53, design tokens 1.13, E2E overview 1.30
+- [ ] Owner decisions open: keep neutral link icons? category tag emojis (💧🔥🌎 …)?

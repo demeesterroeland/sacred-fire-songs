@@ -1078,6 +1078,8 @@ const es: Partial<Record<TranslationKey, string>> = {
   'guestGate.addToPlaylist.reason': 'Tus favoritas y tus listas viven en tu cuenta, así te acompañan en cada dispositivo.',
   'guestGate.favourites.title': 'Inicia sesión para guardar favoritas',
   'guestGate.favourites.reason': 'Tus canciones favoritas viven en tu cuenta, así te acompañan en cada dispositivo.',
+  'guestGate.drafts.title': 'Inicia sesión para guardar canciones privadas',
+  'guestGate.drafts.reason': 'Las canciones privadas viven en tu cuenta, así que solo tú las ves y te acompañan en cada dispositivo.',
   'sharedWithMe.unreadCount': 'Nuevas: {count}',
   'sharedWithMe.title': 'Compartidas conmigo',
   "sharedByMe.title": "Compartido por mí",
