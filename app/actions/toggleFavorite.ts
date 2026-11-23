@@ -3,6 +3,8 @@
 import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { uuid, safeParse } from '@/lib/validation/schemas';
+import { firstVersion } from '@/lib/songs/versionOrder';
+import { fetchFavoritesSetlistId, FAVORITES_TITLE } from '@/lib/playlists/favorites';
 
 export async function toggleFavorite(
     compositionId: string
@@ -17,43 +19,38 @@ export async function toggleFavorite(
         return { error: 'Not authenticated' };
     }
 
-    // Find the default (first) song version for this composition
-    const { data: version } = await supabase
+    // The default (first) version of the song, in the order of the song page (original, variants, translations;
+    // each oldest first: lib/songs/versionOrder.ts, #509), not simply the oldest row.
+    const { data: versionRows } = await supabase
         .from('song_versions')
-        .select('id')
-        .eq('composition_id', parsed.data)
-        .order('created_at', { ascending: true })
-        .limit(1)
-        .maybeSingle();
+        .select('id, created_at, version_kind')
+        .eq('composition_id', parsed.data);
+
+    const version = firstVersion(versionRows);
 
     if (!version) {
         return { error: 'Song version not found' };
     }
 
     // Find or create "My Favorites" setlist
-    let { data: setlist } = await supabase
-        .from('setlists')
-        .select('id')
-        .eq('owner_id', user.id)
-        .eq('title', 'My Favorites')
-        .maybeSingle();
+    let setlistId = await fetchFavoritesSetlistId(supabase, user.id);
 
-    if (!setlist) {
+    if (!setlistId) {
         const { data: newSetlist, error: createError } = await supabase
             .from('setlists')
-            .insert({ owner_id: user.id, title: 'My Favorites', is_public: false })
+            .insert({ owner_id: user.id, title: FAVORITES_TITLE, is_public: false })
             .select('id')
             .single();
 
         if (createError) return { error: createError.message };
-        setlist = newSetlist;
+        setlistId = newSetlist.id;
     }
 
     // Check if already in favorites
     const { data: existingItem } = await supabase
         .from('setlist_items')
         .select('id')
-        .eq('setlist_id', setlist.id)
+        .eq('setlist_id', setlistId)
         .eq('song_version_id', version.id)
         .maybeSingle();
 
@@ -72,7 +69,7 @@ export async function toggleFavorite(
         const { data: items } = await supabase
             .from('setlist_items')
             .select('order_index')
-            .eq('setlist_id', setlist.id)
+            .eq('setlist_id', setlistId)
             .order('order_index', { ascending: false })
             .limit(1);
 
@@ -81,7 +78,7 @@ export async function toggleFavorite(
         await supabase
             .from('setlist_items')
             .insert({
-                setlist_id: setlist.id,
+                setlist_id: setlistId,
                 song_version_id: version.id,
                 order_index: nextIndex,
             });

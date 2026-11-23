@@ -17,11 +17,11 @@ import { keyToIndex, typeaheadIndex } from '@/lib/ui/listbox';
 export interface WickSelectOption<T extends string> {
   value: T;
   label: string;
-  /** Optional color for this option's wick, glow and selected label (defaults to ember orange). */
+  /** Optional color for this option's wick, glow and selected label (defaults to the accent token). */
   accent?: string;
 }
 
-const EMBER = '#f45d1a';
+const EMBER = 'var(--accent)';
 
 const LIST_GAP = 6;
 const LIST_MIN_WIDTH = 208;
@@ -40,7 +40,7 @@ function Wick({ lit, igniting, accent }: { lit: boolean; igniting?: boolean; acc
           ? `bg-[var(--wick)] shadow-[0_0_0_3px_color-mix(in_srgb,var(--wick)_18%,transparent),0_0_10px_color-mix(in_srgb,var(--wick)_60%,transparent)] ${igniting ? 'wick-ignite' : ''}`
           : accent
             ? 'border border-[var(--wick)]'
-            : 'border border-gray-400 dark:border-gray-600 group-data-[active=true]:border-[color-mix(in_srgb,var(--wick)_70%,transparent)]'
+            : 'border border-line-strong group-data-[active=true]:border-[color-mix(in_srgb,var(--wick)_70%,transparent)]'
       }`}
     />
   );
@@ -178,12 +178,12 @@ export function WickSelect<T extends string>({
         aria-controls={open ? listId : undefined}
         onClick={() => (open ? close(false) : openList())}
         onKeyDown={onTriggerKeyDown}
-        className={`inline-flex items-center gap-2 pl-3.5 pr-3 py-2.5 rounded-full text-xs font-semibold text-gray-700 dark:text-gray-200 bg-gray-100 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 hover:bg-gray-200 dark:hover:bg-gray-800 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#f45d1a]/60 ${className}`}
+        className={`inline-flex min-h-tap items-center gap-2 pl-3.5 pr-3 rounded-control text-xs font-semibold text-fg bg-surface-2 border border-line hover:bg-line transition-colors ${className}`}
       >
         <Wick lit accent={current?.accent} />
         <span className="sr-only">{label}: </span>
         <span className="truncate">
-          {prefix && <span className="text-gray-500 dark:text-gray-400 font-medium">{prefix} </span>}
+          {prefix && <span className="text-fg-muted font-medium">{prefix} </span>}
           <span style={current?.accent ? { color: current.accent } : undefined}>{current?.label}</span>
         </span>
         <ChevronDown
@@ -204,7 +204,7 @@ export function WickSelect<T extends string>({
             aria-activedescendant={optionId(activeIndex)}
             onKeyDown={onListKeyDown}
             style={{ left: position.left, width: position.width, top: position.top, bottom: position.bottom }}
-            className="fixed z-[70] p-1.5 rounded-xl bg-white dark:bg-gray-900 border border-gray-200 dark:border-gray-800 shadow-[0_16px_40px_-16px_rgba(0,0,0,0.55)] focus:outline-none"
+            className="fixed z-[70] p-1.5 rounded-panel bg-surface border border-line shadow-sheet focus:outline-none"
           >
             {options.map((option, index) => {
               const selected = option.value === value;
@@ -217,9 +217,9 @@ export function WickSelect<T extends string>({
                   data-active={index === activeIndex}
                   onPointerMove={() => setActiveIndex(index)}
                   onClick={() => choose(index)}
-                  className={`group flex items-center gap-3 px-3 py-2 rounded-lg text-sm cursor-pointer select-none ${
-                    index === activeIndex ? 'bg-gray-100 dark:bg-gray-800' : ''
-                  } ${selected ? 'font-semibold text-gray-900 dark:text-white' : 'text-gray-600 dark:text-gray-300'}`}
+                  className={`group flex items-center gap-3 px-3 py-2 rounded-control text-sm cursor-pointer select-none ${
+                    index === activeIndex ? 'bg-surface-2' : ''
+                  } ${selected ? 'font-semibold text-fg' : 'text-fg-muted'}`}
                 >
                   <Wick lit={selected} igniting={igniting === option.value} accent={option.accent} />
                   <span className="truncate" style={selected && option.accent ? { color: option.accent } : undefined}>

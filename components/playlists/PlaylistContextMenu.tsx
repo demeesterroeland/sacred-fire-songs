@@ -6,12 +6,13 @@ import {
     DropdownMenu, DropdownMenuContent, DropdownMenuItem,
     DropdownMenuSeparator, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { MoreHorizontal, Pencil, Trash2, Link2, Copy, Globe, Lock, FileText } from 'lucide-react';
+import { MoreHorizontal, Pencil, Trash2, Link2, Copy, Globe, Lock, Printer } from 'lucide-react';
 import DeleteConfirmationModal from '@/components/common/DeleteConfirmationModal';
 import { deletePlaylist, togglePlaylistVisibility } from '@/app/actions/playlistActions';
 import { toast } from 'sonner';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useLocale } from '@/context/LocaleContext';
+import { actionErrorMessage } from '@/lib/errors/actionError';
 
 interface PlaylistContextMenuProps {
     playlistId: string;
@@ -43,14 +44,16 @@ export function PlaylistContextMenu({
     const [isDeleting, startDeleteTransition] = useTransition();
     const [, startVisibilityTransition] = useTransition();
     const router = useRouter();
+    const pathname = usePathname();
     const preventFocusReturn = useRef(false);
+    const triggerRef = useRef<HTMLButtonElement>(null);
 
     const handleToggleVisibility = () => {
         const next = !isPublic;
         startVisibilityTransition(async () => {
             const result = await togglePlaylistVisibility(playlistId, next);
             if (result.error) {
-                toast.error(result.error);
+                toast.error(actionErrorMessage(result.error, t));
             } else {
                 toast.success(next ? t('playlists.toast.nowPublic') : t('playlists.toast.nowPrivate'));
                 router.refresh();
@@ -62,11 +65,15 @@ export function PlaylistContextMenu({
         startDeleteTransition(async () => {
             const result = await deletePlaylist(playlistId);
             if (result.error) {
-                toast.error(result.error);
+                toast.error(actionErrorMessage(result.error, t));
             } else {
                 toast.success(t('playlists.toast.deleted', { title: playlistTitle }));
                 setShowDeleteModal(false);
-                router.refresh();
+                if (pathname?.includes(`/library/playlists/${playlistId}`)) {
+                    router.push('/library/playlists');
+                } else {
+                    router.refresh();
+                }
             }
         });
     };
@@ -76,8 +83,9 @@ export function PlaylistContextMenu({
             <DropdownMenu>
                 <DropdownMenuTrigger asChild>
                     <button
+                        ref={triggerRef}
                         onClick={e => e.stopPropagation()}
-                        className="p-1.5 rounded-lg text-gray-600 hover:text-gray-800 dark:hover:text-gray-300 hover:bg-gray-200/60 dark:hover:bg-gray-700/60 transition-colors"
+                        className="flex size-tap items-center justify-center rounded-control text-fg-muted transition-colors hover:bg-surface-2 hover:text-fg"
                         aria-label={t('playlists.optionsAria')}
                     >
                         <MoreHorizontal className="w-4 h-4" />
@@ -85,7 +93,7 @@ export function PlaylistContextMenu({
                 </DropdownMenuTrigger>
                 <DropdownMenuContent
                     align="end"
-                    className="w-52 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700"
+                    className="w-52 rounded-panel border-line bg-surface text-fg"
                     onCloseAutoFocus={e => {
                         if (preventFocusReturn.current) {
                             e.preventDefault();
@@ -97,12 +105,12 @@ export function PlaylistContextMenu({
                         <>
                             <DropdownMenuItem
                                 onSelect={() => { preventFocusReturn.current = true; onRenameStart(); }}
-                                className="gap-2 text-gray-700 dark:text-gray-200 focus:bg-gray-100 dark:focus:bg-gray-200 dark:bg-gray-800 cursor-pointer"
+                                className="min-h-tap gap-2 rounded-control text-fg focus:bg-surface-2 focus:text-fg cursor-pointer"
                             >
                                 <Pencil className="w-4 h-4" />
                                 {t('playlists.context.rename')}
                             </DropdownMenuItem>
-                            <DropdownMenuSeparator className="bg-gray-200 dark:bg-gray-800" />
+                            <DropdownMenuSeparator className="bg-line" />
                         </>
                     )}
 
@@ -118,14 +126,14 @@ export function PlaylistContextMenu({
                             title={isLinkAvailable ? undefined : t('playlists.context.sharePrivateHint')}
                             className={`gap-2 cursor-pointer ${
                                 isLinkAvailable
-                                    ? 'text-gray-700 dark:text-gray-200 focus:bg-gray-100 dark:focus:bg-gray-200 dark:bg-gray-800'
-                                    : 'text-gray-500 focus:bg-gray-200 dark:bg-gray-800/50'
+                                    ? 'min-h-tap rounded-control text-fg focus:bg-surface-2 focus:text-fg'
+                                    : 'min-h-tap rounded-control text-fg-muted focus:bg-surface-2 focus:text-fg'
                             }`}
                         >
                             <Link2 className="w-4 h-4" />
                             {t('playlists.context.getLink')}
                             {!isLinkAvailable && (
-                                <span className="ml-auto text-xs text-gray-600">{t('playlists.context.privateBadge')}</span>
+                                <span className="ml-auto text-caption text-fg-muted">{t('playlists.context.privateBadge')}</span>
                             )}
                         </DropdownMenuItem>
                     )}
@@ -134,26 +142,26 @@ export function PlaylistContextMenu({
                         <DropdownMenuItem
                             onSelect={onExportPdf}
                             disabled={isExportingPdf}
-                            className="gap-2 text-gray-700 dark:text-gray-200 focus:bg-gray-100 dark:focus:bg-gray-200 dark:bg-gray-800 cursor-pointer disabled:opacity-50"
+                            className="min-h-tap gap-2 rounded-control text-fg focus:bg-surface-2 focus:text-fg cursor-pointer disabled:opacity-50"
                         >
-                            <FileText className="w-4 h-4" />
+                            <Printer aria-hidden className="w-4 h-4" /> {/* same icon as the playlist page */}
                             {isExportingPdf ? t('playlists.export.exporting') : t('playlists.export.menu')}
                         </DropdownMenuItem>
                     )}
 
                     <DropdownMenuItem
                         disabled
-                        className="gap-2 text-gray-500 cursor-not-allowed"
+                        className="min-h-tap gap-2 rounded-control text-fg-subtle cursor-not-allowed"
                     >
                         <Copy className="w-4 h-4" />
                         {t('playlists.context.duplicate')}
-                        <span className="ml-auto text-xs text-gray-600">{t('playlists.context.soonBadge')}</span>
+                        <span className="ml-auto text-caption text-fg-muted">{t('playlists.context.soonBadge')}</span>
                     </DropdownMenuItem>
 
                     {isOwner && isPublic !== undefined && (
                         <DropdownMenuItem
                             onSelect={handleToggleVisibility}
-                            className="gap-2 text-gray-700 dark:text-gray-200 focus:bg-gray-100 dark:focus:bg-gray-200 dark:bg-gray-800 cursor-pointer"
+                            className="min-h-tap gap-2 rounded-control text-fg focus:bg-surface-2 focus:text-fg cursor-pointer"
                         >
                             {isPublic
                                 ? <Lock className="w-4 h-4" />
@@ -165,10 +173,10 @@ export function PlaylistContextMenu({
 
                     {isOwner && (
                         <>
-                            <DropdownMenuSeparator className="bg-gray-200 dark:bg-gray-800" />
+                            <DropdownMenuSeparator className="bg-line" />
                             <DropdownMenuItem
                                 onSelect={() => setShowDeleteModal(true)}
-                                className="gap-2 text-red-400 focus:bg-red-950/40 focus:text-red-300 cursor-pointer"
+                                className="min-h-tap gap-2 rounded-control text-danger focus:bg-danger/10 focus:text-danger cursor-pointer"
                             >
                                 <Trash2 className="w-4 h-4" />
                                 {t('playlists.context.delete')}
@@ -185,6 +193,8 @@ export function PlaylistContextMenu({
                 title={t('playlists.deleteModal.title')}
                 message={t('playlists.deleteModal.message', { title: playlistTitle })}
                 isDeleting={isDeleting}
+                // The menu that opened this closed with its Delete item: focus goes back to its trigger.
+                fallbackFocus={() => triggerRef.current}
             />
         </>
     );

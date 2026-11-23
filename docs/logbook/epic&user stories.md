@@ -1,8 +1,8 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 1.48
+**Version:** 2.24
 **Status:** Living Document
-**Date:** Nov 4, 2026
+**Date:** Nov 13, 2026
 
 ## Changelog
 
@@ -46,7 +46,83 @@
 | **1.45** | Oct 31, 2026 | Story 5.1.4 [Implemented] (both rulesets applied). Story 5.1.7 [Partial]: develop images + `deploy-staging.yml` + server deploy script (<infra-repo> #107), rollout pending. Story 5.1.11 [Deferred] (staging is Tailscale-only). |
 | **1.46** | Nov 3, 2026 | Story 5.1.7 re-scoped: deployment of the maintainer's environments moved out of this public repo (`deploy-staging.yml` removed); this repo only publishes images. Added public-repo isolation enforcement (`isolation` CI job, git hooks, Claude Code hook). |
 | **1.47** | Nov 4, 2026 | Story 4.5.1 [Partial]: offline fallback page for page navigations implemented (#353, `docs/testing/offline.feature`); cached pages and songs offline (second scenario) not yet. |
-| **1.48** | Nov 4, 2026 | Epic 4.3 Offline Library (#357): stories 4.3.2–4.3.8 added (#358–#364), Story 4.3.1 (#20) rescoped to the setlist view of the offline shell. Built on the integration branch `feat/offline-library`, released separately. |
+| **1.48** | Nov 4, 2026 | Aligned MD logbook with GitHub: synced [Implemented] statuses (3.4.6, 4.2.1, 4.2.3, 4.2.4, 5.1.3, 5.1.4, 5.1.5); added Story 1.2.5 (#218), Stories 3.1.1 (#13), 3.1.3 (#140), 3.1.4 and sub-stories 3.1.4.1–3.1.4.6 (#323–#329); expanded Epic 4.3 with Stories 4.3.2–4.3.8 (#357, #358–#364). |
+| **1.49** | Nov 4, 2026 | Added Stories 4.6.2 (User-to-User Private Sharing with DRM-lite restriction), 4.6.3 (Public Publication with Explicit Singer Consent Disclaimer), and 4.6.4 (Singer Attribution & Musician Profile Linking), all [Implemented]. Executable spec: `docs/testing/recording-sharing.feature`. |
+| **1.50** | Nov 4, 2026 | Added Story 4.6.6 (Notification & Email Dispatching for Shared Rehearsal Recordings, #373) [Implemented]. Executable spec: `docs/testing/share-notifications.feature`. |
+| **1.51** | Nov 4, 2026 | Added Phase 6 and Epic 6.1 (UX & Design Rework, #375): 9 group epics and 34 stories from the UX research in `docs/ux-research/`. |
+| **1.52** | Nov 5, 2026 | Added Story 4.6.5 (Personal Reordering of Shared-with-Me and Public Recordings, #420) [Planned] with Option A decision (decoupled user-specific ordering table). |
+| **1.53** | Nov 5, 2026 | Epic 5.1: Story 5.1.8 (#297) re-scoped and implemented — promotion `develop` → `main` via `scripts/cicd/develop2main.sh` (merge commit, no `--admin`) and versioned release images; production deployment lives outside the public repo. Story 5.1.6 (#294) completed (no script uses `--admin`). Stories 5.1.1, 5.1.7 and 5.1.12 closed on GitHub. |
+| **1.54** | Nov 5, 2026 | Story 5.1.9 (#298) implemented: `back-merge.yml` opens the PR `main` → `develop` after every push to `main`, labels conflicts; merged by the owner, never automatically. |
+| **1.55** | Nov 5, 2026 | Story 5.1.13 (#300) implemented: development guide 2.0 (Gitflow, environments, CI vs CD boundary), Gitflow PR template, `/start-story` and `/sync-artifacts` target `develop`, README contributing; documentation contract in `ci-gate`. Story 5.1.10 (#299) code complete; its end-to-end check moves into the 5.1.14 dress rehearsal (owner). |
+| **1.56** | Nov 5, 2026 | Epic 6.1: Story 6.1.1 (#385, G1.1) implemented on the integration branch `feat/ux-v2` — design tokens, component primitives and token tests (`docs/design/design-tokens.md`). |
+| **1.57** | Nov 5, 2026 | Epic 6.1: Story 6.1.33 (#417, G9.1) implemented on `feat/ux-v2` — E2E fixtures removed by a Playwright global teardown; seed hygiene checks. |
+| **1.58** | Nov 5, 2026 | Epic 6.1: Story 6.1.8 (#392, G2.3) implemented on `feat/ux-v2` — sticky song title truncates at the end. |
+| **1.59** | Nov 5, 2026 | Epic 6.1: Story 6.1.23 (#407, G5.2) implemented on `feat/ux-v2` — Library tabs fit a phone, Albums hidden behind a feature flag (UXD-4). |
+| **1.61** | Nov 5, 2026 | Epic 6.1: Story 6.1.6 (#390, G2.1) implemented on `feat/ux-v2` — `Chords · A− · A+` reader toolbar, size persisted per device. |
+| **1.60** | Nov 5, 2026 | Epic 6.1: Story 6.1.7 (#391, G2.2) implemented on `feat/ux-v2` — song meta and Key · Capo · Tuning on one grey line each. |
+| **1.92** | Nov 6, 2026 | Epic 6.1: validation round 1 after the owner's phone run (Part of #375): auto-scroll only when the lyrics run below the fold (Story 6.1.10 / #394), expanded meta line (6.1.7 / #391), one focus style for text fields, the search suggestions in the page flow (6.1.29 / #413), search options on tokens, translated feedback and song flags across versions (6.1.11 / #395). Acceptance criteria of those stories now read as in `docs/testing/ux-v2-validation-1.feature`. |
+| **1.93** | Nov 7, 2026 | Epic 6.1: review round on the validation round 1 PR (#474, Part of #375): acceptance criteria of Stories 6.1.10 (auto-scroll offered only when the lyric text runs below the visible area above the fixed bars), 6.1.29 (suggestions close on the click and keep the scroll position), 6.1.1 (one focus cue per field, readable chip counts), 6.1.11 (a lyrics-only version has no Chords switch; a bracketed section label is not a chord) and the i18n policy (no raw server or database text in a toast) verified against the code; decisions UXA-061 to UXA-066. |
+| **2.21** | Nov 13, 2026 | Epic 6.1: Story 6.1.39 (#566) implemented on `feat/ux-v3`: transpose sits next to the Chords switch in the reader toolbar and leaves the ⋮ menu; key, capo and non-standard tuning (`Key D · Tuning: Drop D`) show only while chords are on (the beats stay); after a transpose only the new key shows; per binding owner decision, standard tuning is omitted completely from `technicalItems()` on both the song page and the PDF (`docs/testing/ux-v3-chord-tools.feature` v1.1, `docs/testing/ux-v3-pdf-export.feature` v1.2). Cross-review fixes: `ReaderToolbar` keeps a stable live region and exposes the shift in the reset button label; BDD steps chain `readingState` + `chordTools` across Both, Translation-only, and UXA-032 member/guest roles. Story 6.1.10 (#394) now reads: transpose is in the toolbar, not the ⋮ menu. |
+| **2.22** | Nov 13, 2026 | Epic 6.2: Story 6.2.2 (#583) implemented on `feat/583-practice-media-indicator`: Practice shows an accessible Headphones cue only when the selected version has reference media; its saved-recording count remains independent. Added the acceptance criteria to `docs/testing/ux-v2-song-action-bar.feature` and the selected-version e2e assertion. |
+| **2.23** | Nov 13, 2026 | Synced `develop` acceptance criteria: non-public songs are labelled Private, missing authors show No artist, `/explore` redirects to `/songs` with its query, and malformed song ids render not-found; UX v2 account and playlist accessibility checks are recorded in the E2E matrix. |
+| **2.20** | Nov 13, 2026 | Epic 6.2: Story 6.2.25 (#570, G5.8) implemented on `feat/ux-v3`: the global search window opened from any non-`/songs` page (`GlobalSearchModal`) now offers **Songbook** and **Language** filters using the same `SearchFiltersModal` selects and i18n keys as `/songs`, submitting `?songbook=<id>&language=<slug>`. Option 1: read-only `SECURITY INVOKER` SQL function `fn_search_filter_counts()` (migration `20261113140000_search_filter_counts.sql`, `db-schema.sql` v3.12) enforces caller RLS via explicit join on `compositions` (guest sees public only, member sees public + own private, admin sees all) and counts `Languages` categories (not `song_translations`); React Query fetches only while open (`enabled: isOpen`, 5 min cache, invalidated on song save/delete). Known limit: modal counts are total visible counts per option ignoring other active modal filters. Executable: `docs/testing/ux-v3-global-search-filters.feature` (`@unit`, `@seed`). Row and acceptance criteria added. |
+| **2.19** | Nov 13, 2026 | Epic 6.2: Story 6.2.24 (#569, G5.7) implemented on `feat/ux-v3`: *Search options* lets a reader choose a language only in the **Language** select, no longer in `TagSelector` (`components/library/TagSelector.tsx`), where `filterTagSelectorGroups()` (`lib/songs/browseFilters.ts`) omits the *Languages* group both when opened and in `filteredGrouped` search results. Song add/edit forms use `CategorySelector` (`components/song/CategorySelector.tsx`) and `useTaxonomy()` is unchanged, so assigning a song's language on edit is unaffected. Legacy links carrying a language slug in `?category=`, `?tag=`, or `?tags=` (e.g. `/songs?category=dutch`) are normalized inside `useSongsFilter`'s `parseUrl` via `normalizeLegacyLanguageParams(params, knownLanguageSlugs(songs, taxonomy))`, so they still filter Dutch songs, show `"Dutch"` in **Language**, omit duplicate language chips from `TagSelector`, and serialize to `?language=<slug>` on the next filter change. Added Story 6.2.24 row and acceptance criteria; executable spec: `docs/testing/ux-v3-language-filter-only.feature` (`@unit`). |
+| **1.94** | Nov 7, 2026 | Epic 6.1: validation round 2, batch 2 (Part of #375): acceptance criteria updated for Story 6.1.4 (#388: amounts between parentheses, "Air (3)"), 6.1.8 (#392: the full title wraps at the top of the page on a phone, the truncated copy shows only after scrolling past it), 6.1.10 (#394: transpose, scroll speed and a Screen stays on switch live in the one ⋮ menu; the toolbar has no ⋯), 6.1.11 (#395: every version has a `?version=` link, replaced in place, shared by Share), 6.1.23 (#407: History, Artists and Shared with me share one heading size) and 6.1.24 (#408: the Library "+" floats at the bottom right). New: Terms and Privacy pages (draft) with the operator from the server environment. |
+| **2.24** | Nov 13, 2026 | Epic 6.1: Story 6.1.40 (#586, G4) added and implemented on `feat/586-media-indicators`: one dot on Practice when there is media or a take to open; the Listen and Record tabs of the Practice panel show how many items each holds. Owner decision: no per-provider indicators, nothing on the Playlist button; the dot supersedes the Headphones cue and separate take count of Story 6.2.2 (#583). |
+| **2.16** | Nov 13, 2026 | Sync: merge of `origin/develop` into `feat/ux-v3`. develop's row 1.99 (Story 6.1.38, role badge on a profile) clashed with the `feat/ux-v3` number and is kept as 2.15; no story changes. |
+| **2.15** | Nov 13, 2026 | (develop 1.99) Epic 6.1: Story 6.1.38 (#534) added and implemented on `feat/534-role-badges`: a profile page shows one badge per role (admin, gatekeeper, expert, musician, member) with its own label and icon; every signed-in member sees every role, a guest reads no role. |
+| **2.18** | Nov 13, 2026 | Epic 6.2: Story 6.2.22 (#542): the alias hint reads **"Also known as …"** (owner decision, Nov 13, 2026: the story's original wording), in the song list and in the **+ Add Songs** sheet alike (one key, `songs.matchAlias`, all 8 locales; `qu` needs a native-speaker check); the 6.2.18 and 6.2.22 acceptance criteria now expect "Also known as …". |
+| **2.17** | Nov 13, 2026 | Epic 6.2: Story 6.2.22 (#542, G5.5) implemented on `feat/ux-v3` (PR into `feat/ux-v3`, in review): the **+ Add Songs** sheet of a playlist finds songs with the song list's own matcher and ranking (`songMatchesSearch` / `rankSongsBySearch`, `lib/songs/search.ts`, #521): by title, alias, any author and the title in a songbook; each row shows the same *Matched by …* hint, linked to the row with `aria-describedby`. The sheet reads the song list's rows (`fetchAllSongs`, the `['songs','all']` react-query entry, `SONGS_SELECT`) instead of its own `ilike('title')` select capped at 50, so there is no second `song_version_sources (` embed; the sheet shows the first 50 by rank (`ADD_SONGS_RESULT_LIMIT`). Acceptance criteria and story row added; `docs/testing/ux-v3-add-songs-search.feature`. |
+| **2.16** | Nov 13, 2026 | Epic 6.2: Story 6.2.23 (#547, G5.6) implemented on `feat/ux-v3` (PR into `feat/ux-v3`, in review): search also finds a song by the title of a translation (`song_translations.title`), accents and case ignored; the row's grey line names the language ("Dutch: Moeder Aarde"). `SONGS_SELECT` embeds `song_translations(language, title)` once; the matcher is extended additively (`translationTitle`), no signature changed. Decision: translation lyrics are not searched, titles only (documented in the design doc, 2.25). Guests get translations of public songs only (existing RLS, unchanged). No migration. Spec: `docs/testing/ux-v3-search-translations.feature`. |
+| **2.15** | Nov 13, 2026 | Epic 6.2: Story 6.2.19 (#522, G5.2) implemented on `feat/ux-v3` (PR into `feat/ux-v3`, in review): the search filter sheet filters by songbook and by language, each a select with a count per option (counts follow the other filters, never their own choice); both run in memory over the songs already fetched (the list select's one sources embed now also carries the book id, title and short name); state in the URL (`?songbook=`, `?language=`); labels in all 8 locales (`qu` pending a native-speaker check). Added the Story 6.2.19 row and acceptance criteria (executable: `docs/testing/ux-v3-browse-filters.feature`, `@unit`). Review round: the counts follow the sheet's whole draft (not the applied filters); a book or language in the URL that no song has reads "Unknown songbook" / "Unknown language". |
+| **2.14** | Nov 13, 2026 | Epic 6.2: Story 6.2.14 (#517, G3.2) implemented on `feat/ux-v3`: the reader switch *Original · Translation · Both* (owner decision Nov 13, 2026; songs with a translation with lyrics) — *Translation* / *Both* use the language of the language switch (first by default), which now lists languages only and shows with two or more of them; every state within two taps. *Both* shows each stanza of the original with its translation, side by side from md up and line under line on a phone. Extra stanzas on either side keep their own row (nothing dropped); a chord intro does not shift the pairs; chords on the original only (translation lyrics only); A− / A+ size both columns; each column has its language and a direction read from its lyrics, and stanzas use logical sides (RTL-safe; review round on PR #545). Reading rules (view in effect, default language, which switches show, transpose and source line follow the original in Both, translator, addresses) live in `lib/songs/readingState.ts`. The view is in the address (`?lang=<tag>&view=translation|both`, none for the original; kept in the share link; old `?lang=` links open the translation; stale values replaced; a version switch returns to Original and remembers the language), not a device preference. 8 locales (`qu` for a native check). Executable: `docs/testing/ux-v3-translation-both.feature` (`@unit`, `@seed`). |
+| **2.13** | Nov 13, 2026 | Epic 6.2: review of PR #560 (Story 6.2.17 / #520): a wrapped row of a long line never prints in the footer or QR area, the closing repeat bar never lands on the last word (it moves to its own row when the text reaches the margin), an untitled playlist item prints the translated "untitled song" label, and a different database order of the sources does not make the PDF regenerate. Acceptance criteria of Story 6.2.17 extended with four scenarios (`docs/testing/ux-v3-pdf-export.feature` v1.1). |
+| **2.12** | Nov 13, 2026 | Epic 6.2: Story 6.2.17 (#520, G4.3) implemented on `feat/ux-v3` (PR into `feat/ux-v3`, in review): the PDF sheet of a song shows the key, capo, tuning and beats like the song page's meta line, the source credit line under the lyrics, and the repeat bars (`‖:` … `:‖ ×N`); the export prints the version a playlist item is pinned to with the item's transposition; labels follow the exporting user's language (8 locales, existing strings reused). Executable: `docs/testing/ux-v3-pdf-export.feature`. Row and acceptance criteria added. |
+| **2.11** | Nov 13, 2026 | Epic 6.2: Story 6.2.11 (#514, G2.2) implemented on `feat/ux-v3` (PR in review): `/songbooks` lists the printed books with their song counts and `/songbooks/<id>` lists one book's songs by page (title, compiler, community, year, attribution; open to guests; sixth Library tab *Songbooks*; the source line links to the book at the row of that source). Pages are ordered naturally (`2` before `10`, `12` before `12a`, a missing page last, then title); a song printed on several pages is listed once per page and links to the right version (`?version=`), versions on the same page are one row; guests see public songs only, a book without a readable song is a 404 (and left out of the list). 8 locales (`qu` for a native check). Review fixes: roman pages sort by value after the numbers (`iv, v, ix, x, xii`), the tab shows the book title (not-found title for an unknown or unreadable book), a merged row highlights on its second anchor, the page column keeps `pp. 138–139` on one line. Executable: `docs/testing/ux-v3-songbook-pages.feature` (`@unit`, `@seed`). |
+| **2.10** | Nov 13, 2026 | Epic 6.2: Story 6.2.21 (#524, G5.4) implemented on `feat/ux-v3`: catalog songs and versions corrected in the app are marked (`edited_in_app`, `edited_at`, `edited_fields`) by a database trigger, so no app code path can forget it; only signed-in app users mark (also through database functions such as linking a song as a version), importers (service role) and data migrations do not, and nobody can clear a marker from the app except an admin. Importer contract in `docs/guides/importing-songbooks.md` (v1.4): skip marked rows, report them. Admin → Catalog edits lists the corrections, downloads them as JSON (catalog keys, changed fields, current values) and marks each one as taken over. Migration `20261112160000_protect_catalog_app_edits.sql`. 8 locales (`qu` for a native check). Executable: `docs/testing/ux-v3-protect-app-edits.feature` (`@unit`, `@seed`). Review of PR #540 (Nov 13, 2026): *Taken over* clears only the correction that was downloaded (a newer one stays marked and the admin is asked to download again), in a themed confirmation dialog; the export and clear RPCs refuse the service role (importers use plain SQL on the marker columns); removing a catalog key counts; a moved version exports its new song's slug; the contract documents app deletions and merge redirects (`resolveCatalogSlug`). Re-check (Nov 13, 2026, after #536 landed): importers resolve every slug with `fn_song_id_for_catalog_slug` and write no song-level content for a redirected slug, only its versions under the target ('moved' vs 'redirect' documented; `resolveCatalogSlug` is now a thin mapping of that lookup); the real `fn_link_song_as_version` runs in a `@seed` scenario as an admin and its markers are asserted for both slug cases; only `catalog_slug` is editable in the app; read `edited_at` as text; focus moves to the next row after *Taken over*; the service role may not execute the trigger function. |
+| **2.09** | Nov 13, 2026 | Epic 6.2: Story 6.2.20 (#523, G5.3) implemented on `feat/ux-v3`: the edit form has a *Songbook details* section with the version's **beats** (a count from 1 to 99 or counts joined with `y & + / -` or a comma: `8`, `6`, `8y4`; the format the meta line prints) and **About this song** note (plain text, paragraph breaks kept, at most 4000 characters), and shows the version's **source** read-only; admins get a *Correct source* button for the page and original title of the primary source (the songbook itself is not editable here). Only changed fields are written; a blank beats or note saves NULL. Permissions are unchanged (contributor or admin of the version; catalog keys stay admin-only). 8 locales (`qu` for a native check). Executable: `docs/testing/ux-v3-edit-version-meta.feature` (`@unit`, `@seed`). A write the database filters without an error (no row back: a song owner editing a catalog version, an admin whose source update is refused) is reported with a translated message, never shown as saved; the source correction is the last step of the save, so a refusal says "version saved, source not corrected" and keeps categories and tags. |
+| **2.08** | Nov 13, 2026 | Epic 6.2: Story 6.2.18 (#521, G5.1) implemented on `feat/ux-v3` (PR into `feat/ux-v3`, in review): search finds a song by alias (`compositions.aliases`), any author and the original title in a songbook (`song_version_sources.original_title`, every version), ignoring case and accents; when the title did not match, the row says why ("Matched by alias: …"). One in-memory matcher (`lib/songs/search.ts`) serves the free-text filter and `filterSongs`; `SONGS_SELECT` embeds the sources once. The whole list is fetched in 1000-row pages (PostgREST `max_rows`), title matches are listed first. No migration and no index: nothing searches in the database (see the design doc, 2.20, for when to add `pg_trgm`). Known limit, follow-up story: the **+ Add Songs** sheet of a playlist still matches the title only (it would need the whole catalog or a lighter list fetch there). Spec: `docs/testing/ux-v3-search-aliases.feature`. |
+| **2.07** | Nov 13, 2026 | Epic 6.2: Story 6.2.9 (#512, G1.4) implemented on `feat/ux-v3` (PR into `feat/ux-v3`, in review): admins (any song) and gatekeepers (only songs they own: source and target) link a duplicate song as a version of another song from the song menu (search, preview of what moves, clear confirm; no undo); both songs must be public or both private, for everyone. One database function `fn_link_song_as_version` moves versions (recordings and playlist entries follow), merges categories, aliases, authors and favourites, keeps the catalog slug reachable, leaves a redirect from the old link (chains collapse) and an audit entry (`docs/testing/ux-v3-link-song-version.feature`). |
+| **2.06** | Nov 12, 2026 | Epic 6.2: Story 6.2.13 (#516, G3.1) implemented on `feat/ux-v3`: a language switch (*Original language · Dutch · English*) sits next to the version switch and is fed by `song_translations`; a song without translations shows no switch and takes no space. A translation replaces the lyrics of the version being read (version stays selected, source line hidden, translator and a differing translated title shown); choosing a version returns to the original language, choosing a language keeps the version; `?lang=<tag>` deep link; guests see the translations of public songs only (row-level security). Migration `20261112140000_translation_versions_to_translations.sql` moves the interim `translation` versions to `song_translations` (recordings go to the first original version, appended after the takes already there; playlist items open that version in its original language; rows that cannot move cleanly stay and are reported: language not derivable, no original version, blank lyrics, chords in another key/capo/tuning than the original, lyrics-only in another key while a playlist transposes it, its own melody/note/beats/media link/votes, or a different stored text; dropped sources and the contributor are logged). The importer guide (v1.3) now says translations go to `song_translations`. 8 locales (`qu` for a native check). Executable: `docs/testing/ux-v3-language-switch.feature` (`@unit`, `@seed`). Unblocks #517 (G3.2). |
+| **2.05** | Nov 12, 2026 | Epic 6.2: Story 6.2.12 (#515, G2.3) implemented on `feat/ux-v3` (PR #533): every author of a song is shown, each its own link to the author filter (the meta line, the share text, the ⋮ sheet and the rehearsal drawer). Review round: the Add/Edit form prefills from `authors` and writes it next to `original_author` when the author input is changed (any other edit leaves both columns as stored); the free-text search, the author filter and the artists index use the same names (`authors`, else `original_author` split); the joiner sits after the previous link (no "Anna , Ben"); "Traditional" is plain text, not a link; the link carries the exact name through the URL (`&`, `+`, `#`); `qu` has no conjunction data (plain-list fallback). Spec: `docs/testing/ux-v3-all-authors.feature`. |
+| **2.04** | Nov 12, 2026 | Epic 6.2: Story 6.2.6 (#509, G1.1) implemented on `feat/ux-v3`: each version is labelled with its songbook short name (original, variants) or its language name in the app language (translations), ordered original, variants, translations; four versions fit a 375 px phone. Executable in `docs/testing/ux-v3-version-labels.feature`. Review round (PR #530): adding to a playlist and favouriting use the first version of that order (not the oldest row); the switch scrolls the opened version into view on a phone; any language tag names its language; two translations in one language show their songbook; an unrecognised translation shows its songbook; one embed of `song_version_sources` per query (guarded by a unit test). |
+| **2.03** | Nov 12, 2026 | Epic 6.2: Story 6.2.8 (#511, G1.3) implemented on `feat/ux-v3` (PR into `feat/ux-v3`, in review): "About this song" under the meta line shows the selected version's `song_note`, collapsed by default (button with aria-expanded), hidden when the note is empty or whitespace-only, plain text with paragraph breaks. Spec: `docs/testing/ux-v3-about-this-song.feature`. Review round: keyed per-version collapse tested at L3, unused children slot removed; the fold at 390 × 844 is a design intent (no E2E assertion yet). |
+| **2.02** | Nov 12, 2026 | Epic 6.2: Story 6.2.10 (#513, G2.1) implemented on `feat/ux-v3`: the song page shows a grey source line under the lyrics with the songbook, page and compiler of the version being shown (primary source first, several listed, original title when it differs, nothing without sources, guests too). Review round (PR #531): `p.` / `pp.` from the page notation, importer prefixes stripped, original title compared without accents, apostrophe style or trailing punctuation, plural list label, one embed of `song_version_sources` per song query. Acceptance criteria block added. Executable: `docs/testing/ux-v3-songbook-source.feature`. |
+| **2.01** | Nov 12, 2026 | Epic 6.2: Story 6.2.7 (#510, G1.2) implemented on `feat/ux-v3` (PR #529): the meta line shows the beats of the selected version after Key · Capo · Tuning (`docs/testing/ux-v3-beats-meta.feature`). |
+| **2.00** | Nov 11, 2026 | Epic 6.2: Story 6.2.16 (#519, G4.2) implemented on `feat/ux-v3` (PR #528) — alternative chords such as A7/C7 are transposed together (B7/D7 at +2), bass-note slash chords (C/E → D/F#) are unchanged, and the PDF export uses the same rule. Review of PR #528: chords written with ♭/♯, alt, mi, ma or Δ and three or more alternatives move too, spelling follows the key in effect. Spec: `docs/testing/ux-v3-alternative-chords.feature`. |
+| **1.99** | Nov 11, 2026 | Epic 6.2: Story 6.2.15 (#518, G4.1) implemented on `feat/ux-v3` (PR #526): the reader shows ‖: … :‖ (with ×N) around the lines between `{start_of_repeat}` and `{end_of_repeat}`. |
+| **1.98** | Nov 11, 2026 | Epic 6.2 (Songbook Data Model & UX v3, #498) added with groups G0–G5; Story 6.2.1 (#504, G0.1) implemented: songbook data model in the database, schema only, executable in `docs/testing/songbook-data-model.feature`. Review round on PR #527: acceptance criterion added that only importers (service role) and admins set the catalog keys. |
+| **1.97** | Nov 11, 2026 | Epic 6.1: Story 6.1.37 (#490) added: recordings on a singer profile play on the page, one at a time, and open the song with that take. |
+| **1.96** | Nov 11, 2026 | Story 6.1.36 (#488) owner review: members get the same Home layout with six personal counts on top (New songs replaced by My recordings, Shared with me, Shared by me); new page Shared by me; one dark background. |
+| **1.95** | Nov 10, 2026 | Epic 6.1: Story 6.1.36 (#488) added: guests see Recently added on Home in the columns of the categories and of /songs (10 songs, 5 on a phone). |
+| **1.91** | Nov 6, 2026 | Epic 6.1: Story 6.1.34 (#418, G9.2) implemented on `feat/ux-v2` — the song page and the Practice panel pass an axe-core audit (no violation of any impact, guest and member, light and dark, 390 px); the Practice panel is a modal dialog with focus handling and ARIA tabs; sheets return focus to their opener; the recorder announces its state. The manual VoiceOver and TalkBack pass is **not done**: a checklist for the owner is in `docs/ux-research/2026-11-06-a11y-audit.md`. Acceptance (*Automated audit*) is covered by `e2e/tests/ux-v2-a11y-audit.spec.ts`; the story's manual item stays open until the owner has run the checklist. |
+| **1.90** | Nov 6, 2026 | Epic 6.1: Story 6.1.21 (#405, G4.8) implemented on `feat/ux-v2` — the Make public dialog names the take and the song and says who will hear it (everyone visiting a public song, including guests); a take on a private song starts with making the song public (the owner can do it from the dialog) and cannot be published before; a line says the take can be made private again without undoing what was heard; guests hear public takes on the Listen tab (UXD-2). |
+| **1.89** | Nov 6, 2026 | Epic 6.1: Story 6.1.11 (#395, G2.6) implemented on `feat/ux-v2` — a segmented version switch under the song title, shown only when the song has more than one version (nothing for single-version songs); the language switch stays a documented slot until translations exist. `/songs/<id>?version=<id>` opens that version (Save on the edit form returns there), and a take in progress blocks switching until it is saved or discarded. |
+| **1.88** | Nov 6, 2026 | Epic 6.1: Story 6.1.31 (#415, G8.2) implemented on `feat/ux-v2`: Preview toggle and visible Upload .cho / .txt button on Add Song. |
+| **1.87** | Nov 6, 2026 | Epic 6.1: Story 6.1.28 (#412, G6.3) implemented on `feat/ux-v2` — guests see a one-line welcome, a search field and a *Recently added* row on Home (the header search field is hidden there for guests); members keep Your library. |
+| **1.86** | Nov 6, 2026 | Epic 6.1: Story 6.1.32 (#416, G8.3) implemented on `feat/ux-v2`: New Playlist has a Make public switch (off by default) and one line that says private unless made public / public to anyone; the Add to playlist sheet says new playlists are private. |
+| **1.85** | Nov 6, 2026 | Epic 6.1: Story 6.1.10 (#394, G2.5) implemented on `feat/ux-v2` — auto-scroll (▶ / ⏸ in the toolbar, speed in the ⋯ sheet, pauses on a touch, stops at the end) and musician-only transpose (± semitone, key shown) join the reader toolbar; stay-awake indicator while the screen lock is held. |
+| **1.84** | Nov 6, 2026 | Epic 6.1: Story 6.1.20 (#404, G4.7) implemented on `feat/ux-v2` — recorder level meter, optional 3-2-1 count-in, `m:ss left` in the last minute, Save Take as the single full-width primary in review (review fixes: mic released on failed start, live regions, iOS audio context). |
+| **1.83** | Nov 6, 2026 | Epic 6.1: Story 6.1.25 (#409, G5.4) implemented on `feat/ux-v2`: auth pages without the fake ✕; Back returns to the `next=` target, else Home. |
+| **1.82** | Nov 6, 2026 | Epic 6.1: Story 6.1.5 (#389, G1.5) implemented on `feat/ux-v2` — unfinished features hidden behind `lib/features.ts` (Albums already by #407; avatar block, Privacy & Data tab, planned preference rows, melody notation section); "Coming soon" copy removed from all 8 locales. Decisions UXA-030, UXA-031. |
+| **1.81** | Nov 5, 2026 | Epic 6.1: Story 6.1.13 (#397, G3.2) implemented on `feat/ux-v2` — calm mini player (plain bar, accent only on play, state in words), provider buttons only for providers with a link, "Open player", wrapping status line. |
+| **1.80** | Nov 5, 2026 | Epic 6.1: Story 6.1.19 (#403, G4.6) implemented on `feat/ux-v2` — **Shared with me** page (`/library/shared`) listing takes shared with me with the sharer and a **New** marker, entered from the account menu and a Library row (unread count in words); opening a song's Practice drawer marks its notifications read and the bell badge drops (UXD-3, UXA-029). |
+| **1.79** | Nov 5, 2026 | Epic 6.1: Story 6.1.18 (#402, G4.5) implemented on `feat/ux-v2` — the Share dialog says who can be found (registered members) with an empty state and invite hint, and on a private song lists both effects (lyrics become public, take is shared) before anything changes; non-owners get an explanation instead of a toast. |
+| **1.78** | Nov 5, 2026 | Epic 6.1: Story 6.1.30 (#414, G8.1) implemented on `feat/ux-v2` — Add to playlist is a bottom sheet with "New playlist" first, check marks and tap-to-toggle; Story 3.1.4.6 reused (one `createPlaylist` action). |
+| **1.77** | Nov 5, 2026 | Epic 6.1: Story 6.1.9 (#393, G2.4) implemented on the integration branch `feat/ux-v2` — sticky Practice · Playlist · ♥ action bar on the song page (phones). |
+| **1.76** | Nov 5, 2026 | Epic 6.1: Story 6.1.29 (#413, G7.1) implemented on `feat/ux-v2` — focusing the search field shows the last 5 recent searches (clearable) and the top-level categories as chips. |
+| **1.75** | Nov 5, 2026 | Epic 6.1: Story 6.1.17 (#401, G4.4) implemented on `feat/ux-v2` — take actions open as a grouped bottom action sheet (Play / Edit name / Download · Share / Singer / Make public / Copy link · Delete alone in red), rows ≥ 44 px, 32 px swipe handle; shared-with-me takes stay listen only. |
+| **1.74** | Nov 5, 2026 | Epic 6.1: Story 6.1.27 (#411, G6.2) implemented on `feat/ux-v2` — guests on Add Song see "Draft now — sign in to save"; the draft survives the sign-in round trip (E2E). |
+| **1.73** | Nov 5, 2026 | Epic 6.1: Story 6.1.24 (#408, G5.3) implemented on `feat/ux-v2` — bottom bar is Home · Search · Library (UXD-1), Create is a "+" in Library, `/explore` removed; Story 1.1.9 updated. |
+| **1.72** | Nov 5, 2026 | Epic 6.1: Story 6.1.4 (#388, G1.4) implemented on `feat/ux-v2` — calm monochrome category grid: grey tiles, tags as text links with a grey count, 44 px links, accent only when pressed. |
+| **1.71** | Nov 5, 2026 | Epic 6.1: Story 6.1.16 (#400, G4.3) implemented on `feat/ux-v2` — take rows show **Public**, **Shared · n**, **Pending invite** and **Verified musician** as text pills (no tooltip-only icons), in 8 locales. |
+| **1.70** | Nov 5, 2026 | Epic 6.1: Story 6.1.3 (#387, G1.3) implemented on `feat/ux-v2` — small labels readable: sentence-case 13 px section titles, nothing below 12 px, axe-core colour-contrast smoke test. |
+| **1.69** | Nov 5, 2026 | Epic 6.1: Story 6.1.15 (#399, G4.2) implemented on `feat/ux-v2` — Record tab splits **My takes** and **Shared with me**; shared rows say "Shared by {name}" and are listen-only. |
+| **1.68** | Nov 5, 2026 | Epic 6.1: Story 6.1.2 (#386, G1.2) implemented on `feat/ux-v2` — compact song rows with one grey meta line. |
+| **1.67** | Nov 5, 2026 | Epic 6.1: Story 6.1.12 (#396, G3.1) implemented on the integration branch `feat/ux-v2` — the mini player appears only after play (UXD-5); sheets, drawer and page reserve `--mini-player-h`. |
+| **1.66** | Nov 5, 2026 | Epic 6.1: Story 6.1.14 (#398, G4.1) implemented on the integration branch `feat/ux-v2` — one name, Practice, in all 8 locales. |
+| **1.65** | Nov 5, 2026 | Epic 6.1: Story 6.1.26 (#410, G6.1) implemented on `feat/ux-v2` — GuestGate on every members-only screen; guest read of public takes requires singer consent (UXD-2). |
+| **1.64** | Nov 5, 2026 | Epic 6.1: Story 6.1.22 (#406, G5.1) implemented on `feat/ux-v2` — unknown URLs show a real 404 page for every role; the proxy redirects guests to login only for `/account`, `/admin`, `/users`. Spec: `docs/testing/ux-v2-real-404.feature`. |
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
 
@@ -173,14 +249,14 @@ Scenario: Search by title
   Then only songs whose title or lyrics contain "Grandmother" should be visible
 ```
 
-**Story 1.2.3: [Implemented]** As a Guest, I want to access the Explore and Playlists pages so that I can discover medicine songs without being forced to log in.
+**Story 1.2.3: [Implemented]** As a Guest, I want old Explore links to open the song list and to browse Playlists without being forced to log in.
 
 ```gherkin
-Scenario: Guest accesses Explore page
+Scenario: An old Explore link redirects to the song list
   Given I am an unauthenticated Guest
-  When I visit the "/explore" page
-  Then I should see the category grid
-  And I should not be redirected to the login page
+  When I visit "/explore?category=ceremony"
+  Then I am permanently redirected to "/songs?category=ceremony"
+  And I am not redirected to the login page
 
 Scenario: Guest accesses Playlists page
   Given I am an unauthenticated Guest
@@ -215,6 +291,49 @@ Scenario: Disable Automatic Search when Advanced Filter is Open
   When I type a search query in the search field
   Then the automatic debounced search should NOT execute while the popup is open
   And the search should only execute when I click the "Show results" button
+```
+
+**Story 1.2.5: [Implemented]** As a logged-in user, I want to filter and identify songs with personal rehearsal recordings and interact with author pills across all viewports.
+
+```gherkin
+Scenario: Personal Rehearsal Recording indicator for logged-in user
+  Given I am logged in as a user who has saved or uploaded a private rehearsal recording for a song
+  When I view the song listing or song detail header
+  Then I should see a personal rehearsal indicator (🎙️ Mic / Violet icon) labeled "Recording" on that song card / detail header
+  And public melody links should continue to display the 🎵 Emerald Note icon
+
+Scenario: Direct Audio File Upload in Rehearsal Drawer
+  Given I am a logged-in user on a song detail page
+  When I open the Rehearsal Drawer
+  Then I should see options to both record live audio and upload an existing audio file (.mp3, .m4a, .wav, .webm)
+  When I select and upload an audio file
+  Then the file should be saved under my private user recordings in Supabase storage
+  And the song should immediately display the "Recording" badge
+
+Scenario: Privacy boundary for anonymous visitors
+  Given I am an anonymous visitor (not logged in)
+  When I view the song listing
+  Then I should NOT see any personal rehearsal indicators (🎙️ Mic / Violet icon)
+  And the "My Recordings" filter toggle should be hidden from the Search & Filter bar
+
+Scenario: Smart Playlist card for "My Recordings"
+  Given I am a logged-in user viewing the Playlists page (/library/playlists)
+  Then I should see a "My Recordings" card under the Smart Playlists section
+  And it should display a Mic (🎙️) icon, description "Your private rehearsal recordings", and count of songs with personal recordings
+  When I click the "My Recordings" Smart Playlist card
+  Then I should be navigated to the Songs page filtered by "?myRecordings=true"
+
+Scenario: Interactive Author Pill across all viewports
+  Given I am viewing a song detail page on mobile, tablet, or desktop
+  Then the author name should be rendered as a clear, interactive pill badge (e.g. 👤 Author Name)
+  When I tap or click the Author pill badge
+  Then I should be navigated to the Songs page filtered strictly by that author ("?artist=AuthorName")
+
+Scenario: Filtering song list by "My Recordings"
+  Given I am logged in on the Songs page
+  When I activate the "My Recordings" filter toggle in the Search & Filter bar
+  Then only songs for which I (auth.uid()) have saved or uploaded a private rehearsal recording should be displayed
+  And the "My Recordings" filter toggle should be displayed as active
 ```
 
 ### Epic 1.3: Basic Song Viewer
@@ -363,6 +482,17 @@ Scenario: Browse by Category
 
 ### Epic 3.1: User Accounts
 
+**Story 3.1.1: [Implemented]** As a Guest, I want to sign up with my Google account so that I don't have to remember another password.
+
+```gherkin
+Scenario: Social Login
+  Given I am on the Login page
+  When I click "Continue with Google"
+  And I authenticate successfully with Google
+  Then a user profile should be created for me in the system
+  And I should be logged in
+```
+
 **Story 3.1.2: [Implemented]** As a Member, I want to "Heart" songs so that I can quickly access my favorites.
 
 ```
@@ -371,6 +501,84 @@ Scenario: Add to Favorites
   When I click the "Heart" icon on a song
   Then the icon should change to filled/active
   And the song should appear in my "My Favorites" list
+```
+
+**Story 3.1.3:** As an operator/maintainer, I want to switch the transactional email delivery mechanism via a single environment variable (between built-in Supabase/Inbucket, Gmail SMTP, and SendGrid SMTP) so that I can use a local mailbox in development and a real provider in production without code changes.
+
+```gherkin
+Scenario: Development email using Inbucket
+  Given the environment is configured with mail provider "inbucket"
+  When an auth email is triggered
+  Then the message is delivered to the local Inbucket mailbox
+
+Scenario: Production email using SMTP provider
+  Given the environment is configured with mail provider "smtp"
+  When an auth email is triggered
+  Then the message is dispatched via the configured external SMTP service
+```
+
+**Story 3.1.4:** As a Guest, I want members-only features to behave consistently — show me what the feature is, tell me why I need an account, and bring me straight back to where I was after signing in.
+
+```gherkin
+Scenario: Members-only feature prompt
+  Given I am an unauthenticated Guest
+  When I attempt to access a members-only action
+  Then I should be shown the context for why an account is required
+  And after authenticating, I should be redirected back to my original destination
+```
+
+**Story 3.1.4.1:** As a Guest, I want foundational sign-in navigation with signInHref, reason keys, and next= query parameters so that my intended destination is preserved across the auth flow.
+
+```gherkin
+Scenario: Preserve intent with next parameter
+  Given I am an unauthenticated Guest
+  When I click sign in with an intended return path
+  Then the sign-in URL includes the return path in the next parameter
+  And successful authentication returns me to that path
+```
+
+**Story 3.1.4.2:** As a Guest, I want a GuestGate locked preview for personal collections so that I can see the value of collections before signing in.
+
+```gherkin
+Scenario: Locked preview of collection
+  Given I am an unauthenticated Guest navigating to a personal collection
+  Then I see a locked preview banner explaining the benefits of membership
+  And an action button prompting me to sign in
+```
+
+**Story 3.1.4.3:** As a Guest, I want a SignInSheet with intent resume for guest actions so that I can complete my action immediately after signing in.
+
+```gherkin
+Scenario: Resume action after sign in
+  Given I triggered an action that requires an account
+  When the SignInSheet opens and I complete authentication
+  Then the pending action resumes or completes seamlessly
+```
+
+**Story 3.1.4.4:** As a Guest, I want guest creation flows to gate at save while preserving input so that I do not lose work when prompted to log in.
+
+```gherkin
+Scenario: Input preserved during gate at save
+  Given I have entered song or playlist data as a Guest
+  When I click save and authenticate
+  Then my entered data is preserved and saved under my new account
+```
+
+**Story 3.1.4.5:** As a Contributor, I want documentation for access tiers and guest pattern mockups so that developers build consistent guest gating.
+
+```gherkin
+Scenario: Access tiers documented
+  Given the project documentation
+  Then access tiers and guest patterns are clearly defined with component usage guidelines
+```
+
+**Story 3.1.4.6:** As a User, I want one consistent way to create a playlist across the app so that playlist creation behaves predictably everywhere.
+
+```gherkin
+Scenario: Consistent playlist creation
+  Given I am anywhere in the app where playlists can be created
+  When I choose to create a playlist
+  Then the same creation interface and validation are presented
 ```
 
 ### Epic 3.2: Version Control
@@ -537,7 +745,7 @@ Scenario: No featured playlists
   Then the Featured section should not appear on the playlists page
 ```
 
-**Story 3.4.6:** As an Admin or Gatekeeper, I want to add/remove songs from any Public Playlist, edit the playlist details, and change the song order, so that we can curate public playlists and maintain high-quality collections.
+**Story 3.4.6: [Implemented]** As an Admin or Gatekeeper, I want to add/remove songs from any Public Playlist, edit the playlist details, and change the song order, so that we can curate public playlists and maintain high-quality collections.
 
 ```gherkin
 Scenario: Gatekeeper adds a song to another user's Public Playlist
@@ -875,7 +1083,7 @@ Scenario: Set playlist cover color
 
 ### Epic 4.2: Print & Export
 
-**Story 4.2.1:** As a Member or Musician, I want to generate a PDF of my setlist so that I can print it for the ceremony. **[Implemented - PR #220]**
+**Story 4.2.1: [Implemented]** As a Member or Musician, I want to generate a PDF of my setlist so that I can print it for the ceremony.
 
 ```
 Scenario: Export PDF (Authenticated Member)
@@ -912,7 +1120,7 @@ Scenario: Group by Category in PDF
   And followed by all "Water" songs grouped together (or vice versa)
 ```
 
-**Story 4.2.3:** As a musician printing a setlist, I want the page footer to show just the songbook's main address and a small QR code for the song, so that the footer stays clean and I can open the song on my phone by scanning it. **[Implemented – #303]**
+**Story 4.2.3: [Implemented]** As a musician printing a setlist, I want the page footer to show just the songbook's main address and a small QR code for the song, so that the footer stays clean and I can open the song on my phone by scanning it.
 
 ```gherkin
 Scenario: Footer shows only the main site URL and a QR code to the song
@@ -923,7 +1131,7 @@ Scenario: Footer shows only the main site URL and a QR code to the song
   And pages without a song URL show no QR code
 ```
 
-**Story 4.2.4:** As a musician exporting the same setlist several times, I want the app to reuse the last generated PDF when nothing has changed, so that the download is instant. **[Implemented – #304]**
+**Story 4.2.4: [Implemented]** As a musician exporting the same setlist several times, I want the app to reuse the last generated PDF when nothing has changed, so that the download is instant.
 
 ```gherkin
 Scenario: Only regenerate the PDF when the playlist is dirty
@@ -934,11 +1142,9 @@ Scenario: Only regenerate the PDF when the playlist is dirty
   And cached PDFs are per user and cleared on sign-out
 ```
 
-### Epic 4.3: Offline Reliability — Offline Library (#357)
+### Epic 4.3: Offline Reliability
 
-A signed-in musician keeps a read-only copy of their whole text library (songs, chords, playlists, favourites, drafts, recently viewed) in IndexedDB on the device, so the installed app works without network. Media shows a "not available offline" notice. Design, decisions and dependency graph: epic #357. Built on the integration branch `feat/offline-library` and released separately after a preview period.
-
-**Story 4.3.1 (#20):** As a Musician, I want to access my setlists while offline so that I can use the app in the forest.
+**Story 4.3.1:** As a Musician, I want to access my setlists while offline so that I can use the app in the forest.
 
 ```
 Scenario: Offline Access
@@ -949,21 +1155,194 @@ Scenario: Offline Access
   And I should see an "Offline Mode" indicator
 ```
 
-**Story 4.3.2 (#358):** As a Contributor, I want an offline-library spec and test harness so that every offline story is built test-first.
+**Story 4.3.2: [Implemented]** As a Contributor, I want an executable offline-library specification and test harness so that every offline story is built test-first.
 
-**Story 4.3.3 (#359):** As a Musician, I want my library stored on my device, tied to my account, so that it is available offline and never shown to someone else.
+```gherkin
+Scenario: Offline library spec exists and runs
+  Given the feature file docs/testing/offline-library.feature
+  When I run npm run test:bdd:offline-library
+  Then every scenario of the epic is listed with its tags (@unit or @e2e, @story-4.3.x)
+  And scenarios without step code are reported as pending, not passed
+  And the unit profile is part of the CI bdd job
 
-**Story 4.3.4 (#360):** As a Musician, I want my offline library kept in sync automatically, with an Offline Mode switch (on by default), so that I can rely on it or free up storage.
+Scenario: IndexedDB can be tested without a browser
+  Given fake-indexeddb is installed as a dev dependency
+  When a vitest or Cucumber step opens an IndexedDB database
+  Then it runs in Node in milliseconds and every test starts from an empty database
 
-**Story 4.3.5 (#361):** As a Musician, I want the installed app to open offline on any page so that I reach my library instead of an error.
+Scenario: Service worker harness covers the new routing
+  Given the Node vm harness of testing/bdd/support/offlineHarness.ts
+  When it loads public/sw.js with a set of cached entries and an online/offline flag
+  Then steps can assert which response a navigation or asset request gets
+```
 
-**Story 4.3.6 (#362):** As a Musician in the forest, I want to browse, search and open my songs offline so that I can play without network.
+**Story 4.3.3:** As a Musician, I want my library stored on my device, tied to my account, so that it is available offline and never shown to someone else.
 
-**Story 4.3.7 (#363):** As a Musician, I want to see that I am offline and which actions are unavailable (greyed out) so that nothing seems broken.
+```gherkin
+Scenario: Library copy is scoped to one user
+  Given the local library belongs to user "A"
+  When the store is opened for user "B"
+  Then the store is wiped before anything is written or read for "B"
 
-**Story 4.3.8 (#364):** As the Maintainer, I want end-to-end proof, aligned docs and a preview build so that I can test the offline library before it ships.
+Scenario: Reading the library
+  Given a stored library with songs, categories, setlists with items, favourite ids and recently viewed ids
+  When the offline UI asks for songs, a song by id, setlists or a setlist by id
+  Then it gets the same Song shape the online app uses (mapCompositionToSong), all versions included
+  And a setlist returns its items in order_index order with transposition overrides
 
-> Acceptance criteria (Gherkin) live in the GitHub issues and in `docs/testing/offline-library.feature` (from Story 4.3.2).
+Scenario: Wipe
+  When the library is wiped
+  Then all object stores and the meta record are empty
+
+Scenario: Schema upgrade
+  Given a library stored with an older schema version
+  When the app opens the store with a newer schema version
+  Then the old copy is discarded and a full sync is requested
+```
+
+**Story 4.3.4:** As a Musician, I want my offline library kept up to date automatically while I am online, and a switch to turn it off, so that I can rely on it in the forest or free up storage.
+
+```gherkin
+Scenario: First sync after sign-in
+  Given I am signed in, online, and Offline Mode is on
+  And there is no local library
+  When the app starts
+  Then my setlists, then the songs in them, then the rest of the catalogue, then favourites and recently viewed are stored
+  And Preferences shows the last synced time, the number of songs and the storage used
+
+Scenario: Refresh
+  Given the local library is older than 1 hour
+  When the app starts or the device comes back online
+  Then the library is refreshed in the background without blocking the page
+
+Scenario: Sync now
+  When I press "Sync now" in Preferences
+  Then the library is refreshed and the last synced time updates
+
+Scenario: Offline Mode is on by default and can be turned off
+  Given I never changed the Offline Mode preference
+  Then Offline Mode is on
+  When I turn Offline Mode off
+  Then the local library is wiped and no further sync runs
+
+Scenario Outline: Wipe on identity change
+  Given the local library belongs to me
+  When <event>
+  Then the local library is wiped
+  Examples:
+    | event                                          |
+    | I sign out                                     |
+    | another user signs in on this device           |
+    | the app is online and the server says I am signed out |
+
+Scenario: Guests get nothing
+  Given I am not signed in
+  Then no local library is created
+
+Scenario: Storage full
+  Given the browser refuses to store the whole catalogue
+  Then the songs of my setlists are kept and Preferences says the library is partial
+```
+
+**Story 4.3.5:** As a Musician, I want the installed app to open offline on any page so that I reach my library instead of an error.
+
+```gherkin
+Scenario: Shell is precached without user data
+  When the service worker installs
+  Then it stores the offline shell page and the static chunks it needs in a cache named with the build id
+  And the stored shell HTML contains no user id, e-mail, name or private content
+
+Scenario: Offline navigation gets the shell
+  Given the shell is cached and the device is offline
+  When I navigate to "/", "/songs", "/songs/<id>", "/library/playlists" or "/library/playlists/<id>"
+  Then the service worker answers with the shell and the address bar keeps the requested URL
+
+Scenario: Fallback stays
+  Given the shell is not cached and the device is offline
+  When I navigate to any page
+  Then I get /offline.html as today (#353)
+
+Scenario: Online is untouched
+  Given the device is online
+  When I navigate or load assets
+  Then the service worker does not answer the request
+
+Scenario: New deploy
+  When a new build activates
+  Then old sfs-* caches are deleted and the new shell is precached
+```
+
+**Story 4.3.6:** As a Musician in the forest, I want to browse, search and open my songs offline so that I can play from the app without network.
+
+```gherkin
+Scenario: Song list offline
+  Given my library is stored and I am offline
+  When I open "/songs"
+  Then I see all stored songs with the same cards, search, category/tag filters and sort as online
+
+Scenario: Song detail offline
+  When I open a stored song
+  Then I see its lyrics and chords, can switch versions and transpose
+  And media embeds are replaced by the offline notice (4.3.7)
+
+Scenario: Song not in the library
+  When I open a song that is not stored
+  Then I see "This song is not saved on this device" with a link to the song list
+
+Scenario: Home and library offline
+  When I open "/" or "/library/playlists"
+  Then I see my favourites, drafts, recently viewed and playlists from the local copy
+```
+
+**Story 4.3.7:** As a Musician, I want to see clearly that I am offline and which actions are unavailable so that nothing seems broken.
+
+```gherkin
+Scenario: Offline indicator
+  Given I am offline
+  Then a banner says "Offline · library saved <time>" and the header shows an offline badge
+  When the device comes back online
+  Then the banner disappears
+
+Scenario Outline: Save actions are disabled, not hidden
+  Given I am offline
+  Then <action> is shown greyed out with the hint "Not available offline" and does nothing
+  Examples:
+    | action                                       |
+    | create, edit or delete a song                |
+    | create, rename, delete or reorder a playlist |
+    | add or remove a song to a playlist           |
+    | favourite (heart)                            |
+    | record or delete a recording                 |
+    | every setting in account settings            |
+
+Scenario: Media offline notice
+  Given I am offline
+  When a song has YouTube, Spotify or SoundCloud links or recordings
+  Then each media block shows "Not available offline" instead of an embed or spinner
+```
+
+**Story 4.3.8:** As the Maintainer, I want end-to-end proof, aligned docs and a preview build of the offline library so that I can test the offline library before shipping.
+
+```gherkin
+Scenario: Forest journey (Playwright)
+  Given I signed in, the library synced, and the app is reloaded with the network off
+  When I open "/library/playlists/<id>", then a song from it, then "/songs" and search
+  Then everything renders from the local copy, media shows the offline notice and save actions are disabled
+
+Scenario: No leak between accounts (Playwright)
+  Given user A synced a library and signed out
+  When user B signs in, syncs and goes offline
+  Then B never sees A's private songs or playlists
+
+Scenario: Signed out or Offline Mode off (Playwright)
+  Given I signed out, or turned Offline Mode off
+  When I go offline and navigate
+  Then I get the offline page and no library
+
+Scenario: Preview build
+  When the integration branch is complete
+  Then an image tagged offline-preview is built from feat/offline-library with the docker workflow
+```
 
 ### Epic 4.4: Desktop Experience
 
@@ -979,7 +1358,7 @@ Scenario: Desktop Layout
 
 ### Epic 4.5: Progressive Web App — Offline Reliability
 
-**Story 4.5.1 [Partial]:** As a Musician, I want to see a friendly offline page when I have no internet connection, so that I understand what happened instead of seeing a browser error.
+**Story 4.5.1: [Partial]** As a Musician, I want to see a friendly offline page when I have no internet connection, so that I understand what happened instead of seeing a browser error.
 
 ```gherkin
 Scenario: Offline fallback page
@@ -996,7 +1375,7 @@ Scenario: Cached pages still load offline
   And cached songs and playlists should remain accessible
 ```
 
-> **Status (Nov 4, 2026, #353):** the offline fallback page is implemented (`public/sw.js`, `public/offline.html`) in the visitor's language, with Retry and automatic reload when back online. It does not yet point to cached playlists, and the second scenario (cached pages and songs offline) is still open; it is delivered by the Offline Library epic (#357, stories 4.3.5 and 4.3.6).
+> **Status (Nov 4, 2026, #353):** the offline fallback page is implemented (`public/sw.js`, `public/offline.html`) in the visitor's language, with Retry and automatic reload when back online. It does not yet point to cached playlists, and the second scenario (cached pages and songs offline) is still open.
 
 ### Epic 4.6: Private Rehearsal & Audio Storage
 
@@ -1030,6 +1409,107 @@ Scenario: Guest cannot record or see private rehearsals
   And I should not see any private rehearsal recordings
 ```
 
+**Story 4.6.2: [Implemented]** As a recording owner, I want to share a private recording directly with another registered user with strict DRM-lite permissions so that they can listen without downloading or resharing.
+
+```gherkin
+Scenario: Owner shares recording with registered user
+  Given I am the owner of a private recording "Medicine Song (Ceremony Take)"
+  When I share the recording with "maya@sacredfiresongs.org"
+  Then "maya@sacredfiresongs.org" should have streaming access to the recording
+  And "maya@sacredfiresongs.org" should not have download permissions on the recording
+
+Scenario: Shared recipient cannot reshare recording
+  Given a recording shared by "Carlos" with "Maya"
+  When "Maya" attempts to share the recording with "David"
+  Then the sharing request should be rejected with "Only the recording owner can share this recording."
+```
+
+**Story 4.6.3: [Implemented]** As a recording owner, I want to publish a private recording publicly only after explicitly confirming singer consent so that musical rights and artist integrity are respected.
+
+```gherkin
+Scenario: Publishing without confirming consent is rejected
+  Given I am the owner of a private recording "Pachamama Sunrise"
+  When I attempt to make the recording public without confirming singer consent
+  Then the publication should be rejected with "Singer consent must be explicitly confirmed"
+  And the recording should remain private
+
+Scenario: Publishing with singer consent confirmation succeeds
+  Given I am the owner of a private recording "Pachamama Sunrise"
+  When I confirm singer consent and publish the recording
+  Then the recording visibility should be updated to public
+```
+
+**Story 4.6.4: [Implemented]** As a recording owner, I want to attribute the singer on a recording with verified profile links or pending guest invites so that singers are acknowledged properly.
+
+```gherkin
+Scenario: Attributing registered musician links to verified profile
+  Given a recording by an owner
+  When the recording is attributed to registered musician "Danit" with id "musician-danit-id"
+  Then the recording should display "Danit" with a verified musician badge
+  And clicking the singer attribution should navigate to "/users/musician-danit-id"
+
+Scenario: Attributing unregistered singer displays pending invite gracefully
+  Given a recording by an owner
+  When the recording is attributed to unregistered singer "Elena Wood" with email "elena@wood.org"
+  Then the recording should display "Elena Wood" with a pending invite badge
+  And the system should not crash
+```
+
+**Story 4.6.6: [Implemented]** As a registered user, I want an in-app notification and an email when someone shares a rehearsal recording with me so that I find the take without browsing to the song. (GitHub #373)
+
+```gherkin
+Scenario: Recipient is notified in-app and by email
+  Given a recording owner shares a rehearsal recording with a registered user
+  Then the recipient sees an unread notification with the sender, recording and song in the header bell
+  And the recipient receives one email with a direct link to "/recordings/[recordingId]"
+  And the email links to "/account/settings?tab=preferences" to turn email notifications off
+
+Scenario: A notification opens the shared recording
+  Given the recipient opens the notification or the email link
+  Then the song opens on the recording's version with the Recordings tab open
+  And the shared recording is highlighted
+
+Scenario: A recording link grants no access by itself
+  Given a user who is neither the owner nor a recipient opens "/recordings/[recordingId]" of a private recording
+  Then they get "not found" (or the login page when signed out, returning to the link after login)
+
+Scenario: Recipient has turned off email notifications
+  Given the recipient turned off "Email notifications" in Settings → Preferences
+  When a recording is shared with them
+  Then they get the in-app notification but no email
+
+Scenario: Dispatch failure does not block sharing
+  Given the mail server is unreachable
+  When the owner shares a recording
+  Then the share succeeds and the failure is only logged
+```
+
+**Story 4.6.5: [Planned]** As a user viewing a song's recordings (my own, shared takes, and public recordings), I want to reorder any recording in my list (including recordings shared with me) so that I can organize the rehearsal takes in the sequence that works best for my practice without altering other users' views. (GitHub #420)
+
+> [!NOTE] Architecture Decision: Option A (Decoupled User-Specific Ordering Table)
+> Currently, `user_recordings.position` is an owner-only column. Allowing recipients to reorder shared takes without collisions requires decoupling viewer ordering from recording ownership.
+>
+> 1. **Schema:** A junction table `user_song_version_recording_orders (user_id, song_version_id, ordered_recording_ids uuid[], updated_at)` with RLS `auth.uid() = user_id`.
+> 2. **Persistence:** `reorderUserRecordings` upserts the user's `ordered_recording_ids` array atomically instead of modifying `user_recordings.position`.
+> 3. **Query & Sort:** `getUserRecordings` sorts takes according to `ordered_recording_ids`, appending unranked takes by `created_at DESC`.
+> 4. **UI:** `RehearsalDrawer.tsx` enables drag handles for all logged-in users (`isCustomSort && user`), not just the recording owner.
+> 
+> *Cross-cutting applicability:* The same pattern can also be used for personal viewer overrides on shared or public playlists (`user_playlist_orders`).
+
+```gherkin
+Scenario: Drag handle is available for shared recordings
+  Given I am logged in as a registered user
+  And another musician has shared a rehearsal take with me
+  When I open the Rehearsal drawer for the song
+  Then I should see drag handles on both my own takes and shared takes
+
+Scenario: Reordering shared takes persists per user without affecting others
+  Given user "Maya" has a private recording shared with user "Carlos"
+  When "Carlos" reorders the shared recording to the top of his list
+  Then the new order is saved to Carlos's personal recording order
+  And "Maya" continues to see the recording in her original order
+```
+
 ## Phase 5: Engineering Excellence
 
 Delivery-pipeline work. Personas: **Maintainer** (project owner) and **Contributor** (human or AI agent). GitHub master epic: #280 (phases #281–#286, Task 5.1.0 #287). Full acceptance spec: `docs/testing/gitflow-cicd.feature` (tag `@story-5.1.x`). Plan: `docs/plans/2026-10-30-gitflow-cicd-migration.md`.
@@ -1045,14 +1525,14 @@ Move from GitHub Flow to a lightweight Gitflow: `main` = production, `develop` =
 | 5.1.3 | #290 | Single unit-test tree, strict BDD | 1 | [Implemented] (strict only for `ci-gate`) |
 | 5.1.4 | #292 | Protected `main` + `develop` (rulesets), default branch `develop` | 2 | [Implemented] |
 | 5.1.5 | #293 | Branch & PR-title policy (`pr-lint.yml`) | 2 | [Implemented] |
-| 5.1.6 | #294 | Scripts follow Gitflow (no `--admin`, correct image names) | 2 | [Partial] (`--admin` removal in Phase 4) |
+| 5.1.6 | #294 | Scripts follow Gitflow (no `--admin`, correct image names) | 2 | [Implemented] |
 | 5.1.7 | #295 | Staging CD from `develop` (images, migrations, deploy) | 3 | [Re-scoped] (this repo publishes `develop` images; deployment lives outside the public repo) |
-| 5.1.8 | #297 | Production promotion `develop` → `main` with approval | 4 | [Planned] |
-| 5.1.9 | #298 | Automatic back-merge `main` → `develop` | 4 | [Planned] |
-| 5.1.10 | #299 | Hotfix flow | 4 | [Planned] |
+| 5.1.8 | #297 | Promotion `develop` → `main` + versioned release images | 4 | [Implemented] (re-scoped Nov 5: deployment and its approval live outside the public repo; slow-layer required checks deferred with 5.1.2/5.1.11) |
+| 5.1.9 | #298 | Automatic back-merge `main` → `develop` | 4 | [Implemented] (PR opened automatically; owner merges) |
+| 5.1.10 | #299 | Hotfix flow | 4 | [Partial] (code + automatic back-merge done; end-to-end check in the 5.1.14 dress rehearsal) |
 | 5.1.11 | #296 | Test-pyramid schedule (nightly full E2E + perf) | 3 | [Deferred] (needs Tailscale `tag:ci`, with 5.1.2) |
 | 5.1.12 | #291 | Supply-chain hardening (pinned actions, Dependabot, permissions) | 1 | [Implemented] |
-| 5.1.13 | #300 | Documentation & agent tooling aligned to Gitflow | 5 | [Planned] |
+| 5.1.13 | #300 | Documentation & agent tooling aligned to Gitflow | 5 | [Implemented] |
 | 5.1.14 | #301 | Dress rehearsal & cut-over of open branches | 5 | [Planned] |
 
 **Story 5.1.1:** As a Maintainer, I want every pull request to run lint, typecheck, unit, BDD, build and the staging smoke E2E (`e2e`) so that broken code cannot be merged.
@@ -1074,7 +1554,7 @@ Scenario: Missing staging secrets fail the staging E2E job
   Then the job fails with a clear "missing secrets" error instead of being skipped
 ```
 
-**Story 5.1.3:** As a Contributor, I want one unit-test directory and all feature files wired into Cucumber so that tests are not duplicated or silently ignored.
+**Story 5.1.3: [Implemented]** As a Contributor, I want one unit-test directory and all feature files wired into Cucumber so that tests are not duplicated or silently ignored.
 
 ```gherkin
 Scenario: Unit tests live in exactly one directory
@@ -1083,7 +1563,7 @@ Scenario: Unit tests live in exactly one directory
   And every "docs/testing/*.feature" file is included in "cucumber.json"
 ```
 
-**Story 5.1.4:** As a Maintainer, I want `main` and `develop` protected with required checks, no force-push and rules applying to admins so that history is safe and every change is verified.
+**Story 5.1.4: [Implemented]** As a Maintainer, I want `main` and `develop` protected with required checks, no force-push and rules applying to admins so that history is safe and every change is verified.
 
 ```gherkin
 Scenario: Long-lived branches are protected
@@ -1092,7 +1572,7 @@ Scenario: Long-lived branches are protected
   And the CI checks are required before merging
 ```
 
-**Story 5.1.5:** As a Maintainer, I want pull requests checked for a Conventional Commit title and an allowed head → base combination so that releases are versioned correctly and work never skips `develop`.
+**Story 5.1.5: [Implemented]** As a Maintainer, I want pull requests checked for a Conventional Commit title and an allowed head → base combination so that releases are versioned correctly and work never skips `develop`.
 
 ```gherkin
 Scenario: Feature PR into main is rejected
@@ -1120,17 +1600,19 @@ Scenario: Staging reflects develop after a merge
   Then staging runs the new commit with all migrations applied
 ```
 
-**Story 5.1.8:** As a Maintainer, I want to promote `develop` to `main` with a merge-commit PR that requires the full E2E and performance checks, and deploy the release tag to production only after my approval.
+**Story 5.1.8: [Implemented]** As a Maintainer, I want to promote `develop` to `main` with a merge-commit PR and get explicit `vX.Y.Z` release images, so that every release is traceable and deployable without `:latest`.
+
+> Re-scoped Nov 5, 2026: CI and image delivery live in this repo; deploying a release (CD, approvals, deploy secrets) lives outside the public repository. Requiring the full E2E and k6 checks on the promotion PR is deferred with Stories 5.1.2 / 5.1.11.
 
 ```gherkin
-Scenario: Production deploy waits for approval
+Scenario: A published release builds versioned images
   Given Release Please published "v1.8.0"
-  When the production deploy workflow starts
-  Then it waits for approval in the "Production" environment
-  And it deploys "ghcr.io/demeesterroeland/sacred-fire-songs-app:v1.8.0", never "latest"
+  When the Docker workflow finishes
+  Then "ghcr.io/demeesterroeland/sacred-fire-songs-app:v1.8.0" exists, never "latest"
+  And no workflow in this repository deploys it
 ```
 
-**Story 5.1.9:** As a Maintainer, I want `main` merged back into `develop` after every release or hotfix so that version bumps and fixes are never lost.
+**Story 5.1.9: [Implemented]** As a Maintainer, I want `main` merged back into `develop` after every release or hotfix so that version bumps and fixes are never lost.
 
 ```gherkin
 Scenario: Release version bump reaches develop
@@ -1166,7 +1648,7 @@ Scenario: Third-party actions are pinned
   And every workflow declares top-level "permissions"
 ```
 
-**Story 5.1.13:** As a Contributor, I want the guides, CLAUDE.md, PR template, design doc and agent skills to describe the Gitflow process so that humans and AI agents follow the same rules.
+**Story 5.1.13: [Implemented]** As a Contributor, I want the guides, CLAUDE.md, PR template, design doc and agent skills to describe the Gitflow process so that humans and AI agents follow the same rules.
 
 ```gherkin
 Scenario: Guides describe Gitflow
@@ -1182,6 +1664,776 @@ Scenario: Dress rehearsal passes end to end
   Given a trivial "docs:" change on a work branch
   When it goes through develop, staging, the release PR, production approval and back-merge
   Then every stage succeeds and the run URLs are recorded in the logbook
+```
+
+## Phase 6: Experience & Design
+
+UX and visual rework, mobile first. Personas: **Guest**, **Member**, **Musician**, **Owner** (product decisions), **Contributor**. GitHub master epic: **#375** (group epics #376–#384, stories #385–#418). Research and plan: `docs/ux-research/2026-11-04-ux-research.md` (§4 findings, §5 design direction, §6 plan). Manual knowledge base: `docs/manual/`.
+
+### Epic 6.1: UX & Design Rework
+
+Owner decision of Nov 4, 2026: sober greyscale interface with one accent, smaller type with more air, a reader-controlled font size (`Chords · A− · A+`) instead of a "large font" setting, tags shown as one grey meta line, the ChordPro viewer as the reference style, and a reserved slot on the song page for song variants and translations. Design tokens come first (`docs/design/`), then pages are restyled from them.
+
+| Group | Issue | Theme | Exit criterion |
+|---|---|---|---|
+| G1 | #376 | Visual language & design system | Design tokens exist in `docs/design/`, every list row / card / chip / sheet uses them, no 10–11 px labels remain, contrast ≥ 4.5:1. |
+| G2 | #377 | Song page: reading in the circle | A song opens with a one-line meta row, Key/Capo/Tuning in one line, the `Chords · A− · A+` toolbar, and the title never clips. Taps to Practice ≤ 2. |
+| G3 | #378 | Media player | The mini player appears only after the user starts playback and never covers sheet or drawer content. |
+| G4 | #379 | Practice & recordings | One name (Practice), my takes and shared takes are separate lists with text labels, row actions are a grouped bottom sheet, recipients are notified. |
+| G5 | #380 | Navigation & information architecture | Unknown URLs give a 404 for every role, no dead tabs, the bottom bar matches Story 1.1.9. |
+| G6 | #381 | Guest experience | Every members-only screen uses the same GuestGate pattern with reason and `next=`; guests know up front when saving needs an account. |
+| G7 | #382 | Search & browse | Search focus offers recent searches and category chips; results use the compact row. |
+| G8 | #383 | Playlists & forms | Add-to-playlist is a bottom sheet; Add Song and New Playlist explain themselves. |
+| G9 | #384 | Accessibility & data hygiene | Demo seed holds no test playlists; axe and screen-reader pass on song page and Practice panel. |
+
+| Story | Issue | Code | Pri | Title | Blocked by |
+|---|---|---|---|---|---|
+| 6.1.1 | #385 | `G1.1` | A | **[Implemented on feat/ux-v2]** As a Contributor, I want design tokens and a component sheet so that every screen is restyled from one sober greyscale system instead of page by page | — |
+| 6.1.2 | #386 | `G1.2` | A | **[Implemented on feat/ux-v2]** As a Guest, I want song cards and list rows to show a title and one grey meta line so that I can scan a list of songs quickly | #385 |
+| 6.1.3 | #387 | `G1.3` | A | **[Implemented on feat/ux-v2]** As a Member, I want small labels to be readable so that section headings and meta text are not grey-on-grey | #385 |
+| 6.1.4 | #388 | `G1.4` | B | **[Implemented on feat/ux-v2]** As a Guest, I want the category grid in a calm monochrome style so that the home page does not shout (amounts are written between parentheses, "Air (3)") | #385 |
+| 6.1.5 | #389 | `G1.5` | C | **[Implemented on feat/ux-v2]** As a Member, I want unfinished features hidden so that I do not meet 'coming soon' placeholders | #407 |
+| 6.1.6 | #390 | `G2.1` | A | **[Implemented on feat/ux-v2]** As a reader in the circle, I want a `Chords · A− · A+` toolbar on the song page so that I set the text size myself | #385 |
+| 6.1.7 | #391 | `G2.2` | A | **[Implemented on feat/ux-v2]** As a reader, I want Key, Capo, Tuning and the tags on one grey line each so that the first lyric line is visible without scrolling | #385 |
+| 6.1.8 | #392 | `G2.3` | A | **[Implemented on feat/ux-v2]** As a reader, I want the sticky song title to truncate at the end so that the first letters are never cut off (the full title wraps at the top of the page on a phone; the truncated copy shows after scrolling past it) | — |
+| 6.1.9 | #393 | `G2.4` | B | **[Implemented on feat/ux-v2]** As a Member, I want a sticky action bar on the song page (Practice · Playlist · ♥) so that the main actions are in thumb reach | #385, #390, #398 |
+| 6.1.10 | #394 | `G2.5` | C | **[Implemented on feat/ux-v2]** As a Musician, I want auto-scroll and transpose in the same viewer toolbar so that all reading tools live in one place (scroll speed and the Screen stays on switch are in the song page's one ⋮ menu; transpose sits next to the Chords switch in the toolbar, #566) | #390 |
+| 6.1.11 | #395 | `G2.6` | C | **[Implemented on feat/ux-v2]** As a Contributor, I want a reserved slot for a variant / language switch under the song title so that song variants and translations fit the sober layout later (each version has its own `?version=` link) | #391 |
+| 6.1.12 | #396 | `G3.1` | A | **[Implemented on feat/ux-v2]** As a reader, I want the mini player to appear only after I press play so that it does not cover the lyrics and sheets on every song | — |
+| 6.1.13 | #397 | `G3.2` | C | **[Implemented on feat/ux-v2]** As a Guest, I want the player and reference tab to be calm and exact so that I know which provider is playing | #385 |
+| 6.1.14 | #398 | `G4.1` | A | **[Implemented on feat/ux-v2]** As a Member, I want one name — Practice — for the rehearsal feature so that menu, drawer, tabs, badge and library all say the same thing | — |
+| 6.1.15 | #399 | `G4.2` | A | **[Implemented on feat/ux-v2]** As a Member, I want takes shared with me listed separately from my own takes so that I see who shared what | #398 |
+| 6.1.16 | #400 | `G4.3` | A | **[Implemented on feat/ux-v2]** As a Member, I want text labels next to take status icons so that I understand 'public', 'shared' and 'pending invite' without a tooltip | #398 |
+| 1.79 | #401 | `G4.4` | B | As a Member, I want take actions in a grouped bottom action sheet so that Delete is never one tap from Share | #385, #398 |
+| 6.1.18 | #402 | `G4.5` | B | **[Implemented on feat/ux-v2]** As a recording owner, I want the Share dialog to explain who can be found and what happens with a private song so that sharing has no surprises | #398 |
+| 6.1.17 | #401 | `G4.4` | B | **[Implemented on feat/ux-v2]** As a Member, I want take actions in a grouped bottom action sheet so that Delete is never one tap from Share | #385, #398 |
+| 6.1.18 | #402 | `G4.5` | B | As a recording owner, I want the Share dialog to explain who can be found and what happens with a private song so that sharing has no surprises | #398 |
+| 6.1.19 | #403 | `G4.6` | B | **[Implemented on feat/ux-v2]** As a Member, I want to be told when someone shares a take with me so that I do not have to guess which song to open | #399 |
+| 6.1.20 | #404 | `G4.7` | C | **[Implemented on feat/ux-v2]** As a Member, I want a level meter, count-in and remaining time while recording so that I know the microphone works and when the 3-minute limit comes | #385 |
+| 6.1.21 | #405 | `G4.8` | C | **[Implemented on feat/ux-v2]** As a recording owner, I want the publish dialog to name the song and say who will hear it so that consent is informed | #402 |
+| 6.1.22 | #406 | `G5.1` | A | **[Implemented on feat/ux-v2]** As a Guest, I want an unknown URL, including a malformed song id, to show a 404 page so that I am not sent to login or shown a database error for content that does not exist (song load failures show translated copy; `docs/testing/ux-v2-broken-song-links.feature`) | — |
+| 6.1.23 | #407 | `G5.2` | A | **[Implemented on feat/ux-v2]** As a Member, I want the Library tab row to fit my phone with no dead tab so that every tab I see works (History, Artists and Shared with me share one heading size) | — |
+| 6.1.24 | #408 | `G5.3` | B | **[Implemented on feat/ux-v2]** As the Owner, I want a decision on the bottom bar (Home · Songs · Library · Create vs Home · Search · Library) so that Explore, Home and Search stop overlapping (the Library "+" floats at the bottom right above the bar) | — |
+| 6.1.25 | #409 | `G5.4` | C | **[Implemented on feat/ux-v2]** As a Guest, I want auth pages without a fake close button so that I always know where I go | #385 |
+| 6.1.26 | #410 | `G6.1` | A | **[Implemented on feat/ux-v2]** As a Guest, I want every members-only screen to use the same locked preview with a reason and a sign-in button so that gating feels consistent | — |
+| 6.1.27 | #411 | `G6.2` | B | **[Implemented on feat/ux-v2]** As a Guest, I want to know before typing that saving a song needs an account so that I am not surprised at save | #410 |
+| 6.1.28 | #412 | `G6.3` | C | **[Implemented on feat/ux-v2]** As a first-time visitor, I want a one-line welcome, a search box and a 'Recently added' row on Home so that I understand the site and find a song fast | #386, #413 |
+| 1.78 | #413 | `G7.1` | B | As a Guest, I want recent searches and category chips when I focus the search field so that I can repeat or narrow a search in one tap | #386 |
+| 6.1.30 | #414 | `G8.1` | B | **[Implemented on feat/ux-v2]** As a Member, I want Add to playlist as a bottom sheet with 'New playlist' first and check marks so that I see where the song already is | #385 |
+| 6.1.29 | #413 | `G7.1` | B | **[Implemented on feat/ux-v2]** As a Guest, I want recent searches and category chips when I focus the search field so that I can repeat or narrow a search in one tap | #386 |
+| 6.1.30 | #414 | `G8.1` | B | As a Member, I want Add to playlist as a bottom sheet with 'New playlist' first and check marks so that I see where the song already is | #385 |
+| 6.1.31 | #415 | `G8.2` | C | **[Implemented on feat/ux-v2]** As a Member, I want a live chord preview and a visible upload button on Add Song so that I see what I am writing | #385 |
+| 6.1.32 | #416 | `G8.3` | C | **[Implemented on feat/ux-v2]** As a Member, I want the New Playlist page to explain private vs public in one line so that I know what I am creating | #385 |
+| 6.1.33 | #417 | `G9.1` | A | **[Implemented on feat/ux-v2]** As a Contributor, I want the demo seed free of E2E and smoke-test playlists so that screenshots and demos show real-looking data | — |
+| 6.1.34 | #418 | `G9.2` | C | **[Implemented on feat/ux-v2; manual screen reader pass still open]** As a reader using assistive technology, I want the song page and Practice panel to pass an accessibility audit so that the app works with a screen reader | #393, #401 |
+| 6.1.36 | #488 | — | C | **[In review]** As a Guest or Member, I want the recently added songs on Home in the same columns as the categories and the song list, with my personal library counts on top when signed in, so that the page reads as one tidy grid | #412 |
+| 6.1.37 | #490 | — | C | **[Implemented]** As a visitor of a singer's profile, I want to play the recordings listed there, one at a time, so that I can hear the singer without opening every song first | #375 |
+| 6.1.38 | #534 | — | C | **[Implemented on feat/534-role-badges]** As a Member, I want each role on a profile page shown with its own label and icon so that I can see at a glance who is an admin, gatekeeper, expert, musician or member | #490 |
+| 6.1.39 | #566 | — | B | **[Implemented on feat/ux-v3]** As a Musician, I want transpose next to the Chords switch and the chord details shown only while chords are on so that everything about chords lives in one place and singers see a clean page (toolbar `Chords [switch] · [− n +] · A− · A+`; key, capo and non-standard tuning only while chords are on, the key follows the transpose and shows only the new key; non-standard tuning is named `Tuning: Drop D`, while standard tuning is omitted; beats stay with chords off; Transpose is not in the ⋮ menu; a song without chords has none of these; acceptance: `docs/testing/ux-v3-chord-tools.feature`) | #394, #510 |
+| 6.1.40 | #586 | `G4` | B | **[Implemented on feat/586-media-indicators]** As someone viewing a song, I want to see at a glance whether media or recordings are available, and in the Practice panel which tab holds them, so that I can choose what to listen to or practise without opening each tab first | #379 |
+
+Priority **A** = quick wins (one sprint together), **B** = flow work, **C** = backlog. Acceptance criteria (Gherkin) live in each GitHub issue and move to `docs/testing/*.feature` when a story starts.
+
+### Epic 6.2: Songbook Data Model & UX v3
+
+GitHub epic **#498**. Many circles sing from printed songbooks: the same song appears in several books with its own capo, key, beats and note, sometimes with a translation. G0 adds a generic schema so any self-hoster can import a songbook collection (importers live outside this repository); G1–G5 (UX v3, integration branch `feat/ux-v3`) show it.
+
+| Group | Issue | Theme |
+|---|---|---|
+| G0 | #504 | Songbook data model (schema only, straight into `develop`) |
+| G1 | #499 | Versions on the song page (labels, meta, note, link a song as a version of another) |
+| G2 | #500 | Provenance & credits (source line, songbook pages, authors) |
+| G3 | #501 | Translations (language switch, side by side) |
+| G4 | #502 | ChordPro fidelity & export |
+| G5 | #503 | Search, browse & curation (incl. re-import safety) |
+
+| Story | Issue | Code | Pri | Title | Blocked by |
+|---|---|---|---|---|---|
+| 6.2.1 | #504 | `G0.1` | A | **[Implemented, PR #527]** As a self-hoster, I want the database to store songbooks, per-book variants, capo/key/beats/note per version and translations so that songbook collections can be imported without losing information | — |
+| 6.2.2 | #583 | — | — | **[Superseded by 6.1.40 / #586: one availability dot]** As a reader, I want the Practice action to indicate when the selected song version has reference media, so that I know I can listen before opening Practice | — |
+| 6.2.6 | #509 | `G1.1` | A | **[Implemented on feat/ux-v3]** As a reader, I want each version labelled with its songbook or language and the switch to fit my phone so that I know which version I am reading | — |
+| 6.2.7 | #510 | `G1.2` | A | **[Implemented on feat/ux-v3, PR #529]** As a Musician, I want the key, capo and beats of the selected version in the meta line so that I play the version as printed in its book | #504 |
+| 6.2.8 | #511 | `G1.3` | B | **[Implemented on feat/ux-v3, in review]** As a reader, I want the note printed with a song in a collapsible "About this song" so that I learn its background without it pushing the lyrics down | — |
+| 6.2.9 | #512 | `G1.4` | B | **[Implemented on feat/ux-v3, in review]** As a Contributor, I want to link a song as a version of another song so that duplicates become one song with several versions (admins on any song, gatekeepers on songs they own; both songs public or both private; ⋮ menu → "Link as a version of…"; preview and confirm; the old link opens the target) | #504 |
+| 6.2.10 | #513 | `G2.1` | A | **[Implemented on feat/ux-v3]** As a reader, I want to see in which songbook and on which page a version appears so that I can find it in the printed book and credit its compiler (grey line under the lyrics: `Songbook A · p. 38 · compiled by Compiler A`; original title when it differs; follows `?version=`; guests too) | #504 |
+| 6.2.11 | #514 | `G2.2` | C | **[Implemented on feat/ux-v3, in review]** As a Guest, I want a page per songbook listing its songs by page so that I can sing along with a printed book (`/songbooks` with song counts and `/songbooks/<id>`: title, compiler, attribution, songs in natural page order, each linking to the version printed there; links from the source line; public songs only for guests; Library tab *Songbooks*) | #504; #513 |
+| 6.2.12 | #515 | `G2.3` | B | **[Implemented on feat/ux-v3, PR #533]** As a reader, I want all authors of a song shown and tappable so that co-written songs credit everyone | #504 |
+| 6.2.13 | #516 | `G3.1` | B | **[Implemented on feat/ux-v3, in review]** As a reader, I want a language switch next to the version switch so that I read a translation without leaving the song | #504; unblocks #517 |
+| 6.2.14 | #517 | `G3.2` | C | **[Implemented on feat/ux-v3, in review]** As a reader, I want the original and the translation side by side or line under line so that I understand what I sing (useful for Quechua, Nahuatl and Portuguese songs in the circle; toggle *Original · Translation · Both*, the language switch picks the translation; respects A− / A+) | #516 |
+| 6.2.15 | #518 | `G4.1` | A | **[Implemented on feat/ux-v3, PR #526]** As a reader, I want repeat bars shown in the lyrics so that I know which lines the circle sings twice (`‖:` … `:‖` and `×2` around the lines between `{start_of_repeat}` and `{end_of_repeat}`; chords on or off) | — |
+| 6.2.16 | #519 | `G4.2` | A | **[Implemented, PR #528]** As a Musician, I want alternative chords like A7/C7 shown and transposed correctly so that the chord line stays right in every key | — |
+| 6.2.17 | #520 | `G4.3` | C | **[Implemented on feat/ux-v3, in review]** As a Member, I want the PDF export to include the version's book, capo, beats and repeat bars so that printed sheets match the screen | — |
+| 6.2.18 | #521 | `G5.1` | B | **[Implemented on feat/ux-v3, in review]** As a Guest, I want search to find songs by alias, any author and their title in a songbook so that I find a song by the name I know | #504 |
+| 6.2.19 | #522 | `G5.2` | C | **[Implemented on feat/ux-v3, in review]** As a Guest, I want to filter songs by songbook and language so that I can browse one book or one language (two selects in the search filter sheet with a count per option; counts follow the other filters) | #513 |
+| 6.2.20 | #523 | `G5.3` | B | **[Implemented on feat/ux-v3, in review]** As a Contributor, I want to edit beats, note and source of a version in the edit form so that catalog data can be corrected in the app (beats and note are fields; the source is shown read-only with a *Correct source* button for admins) | #510, #511, #513 |
+| 6.2.21 | #524 | `G5.4` | B | **[Implemented on feat/ux-v3, in review]** As the Owner, I want app edits to catalog songs protected from the next re-import and listed for the source catalog so that corrections are never overwritten | #504 |
+| 6.2.22 | #542 | `G5.5` | C | **[Implemented on feat/ux-v3, in review]** As a Member, I want the "+ Add Songs" sheet of a playlist to find songs by alias, any author and their title in a songbook so that I add a song by the name I know | #521 |
+| 6.2.23 | #547 | `G5.6` | C | **[Implemented on feat/ux-v3, in review]** As a Guest, I want search to find a song by the title of its translation so that I find a song by the name I know in my language | #521 (G5.1); unblocks #542 |
+| 6.2.24 | #569 | `G5.7` | C | **[Implemented on feat/ux-v3, in review]** As a Guest, I want to choose a language only in the Language filter so that the search options don't offer the same choice twice (excludes *Languages* from `TagSelector` and keeps legacy `?category=`/`?tag=`/`?tags=` language links working) | #522 (G5.2) |
+| 6.2.25 | #570 | `G5.8` | B | **[Implemented on feat/ux-v3]** As a Guest, I want the search window on every page to offer the Songbook and Language filters so that I can browse one book or one language from anywhere (`GlobalSearchModal` shows both selects lazily when open via `fn_search_filter_counts()`, respecting RLS and submitting `?songbook=<id>&language=<slug>`) | #522 |
+
+**Story 6.2.2 acceptance criteria** (superseded by Story 6.1.40 / #586, owner decision Nov 13, 2026: Practice shows one availability dot for media or takes; kept for history; executable: `docs/testing/ux-v2-song-action-bar.feature` `@e2e`, with component coverage in `songActionBarComponent.test.tsx`):
+
+```gherkin
+Scenario: Practice indicates reference media on the selected version
+  Given the selected song version has one or more YouTube, Spotify or SoundCloud URLs
+  When I view the song action bar
+  Then Practice shows a visible reference-media indicator
+  And the indicator has an accessible text equivalent
+
+Scenario: Practice does not indicate media from another version
+  Given the selected song version has no reference media URLs
+  And another version of the song has reference media URLs
+  When I view the song action bar
+  Then Practice shows no reference-media indicator
+  When I select the version with reference media
+  Then Practice shows the reference-media indicator
+
+Scenario: The recording count remains independent
+  Given the selected song version has reference media and saved recordings
+  When I view the song action bar
+  Then Practice indicates reference media
+  And the saved-recording count is still shown
+```
+
+**Story 6.2.6 acceptance criteria** (executable: `docs/testing/ux-v3-version-labels.feature`, `@unit` and `@e2e`):
+
+```gherkin
+Scenario: Versions are named after their book
+  Given a song with versions from "Songbook A" and "Songbook B"
+  Then the switch shows both book names
+
+Scenario: A translation in any language tag is named after that language
+  Given a song with an original from "Songbook A" and a translation named "lkt"
+  Then the switch shows "Songbook A" and "Lakota"
+
+Scenario: A translation whose language is not recognised shows its songbook
+  Given a song with an original from "Songbook A" and a translation named "Singable" from "Songbook B"
+  Then the switch shows "Songbook A" and "Songbook B"
+
+Scenario: Two translations in one language are told apart by songbook
+  Given a song with an original from "Songbook A" and two translations named "English" from "Songbook B" and "Songbook C"
+  Then the switch shows "Songbook A", "English · Songbook B" and "English · Songbook C"
+
+Scenario: Many versions fit a phone
+  Given a song with 4 versions on a 375 px screen
+  Then every option is reachable without the page scrolling sideways
+```
+
+**Story 6.2.13 acceptance criteria** (executable: `docs/testing/ux-v3-language-switch.feature`, `@unit` and `@seed`):
+
+```gherkin
+Scenario: Reader switches to the English translation
+  Given a song with an English translation
+  When I pick "English" in the language switch
+  Then the English lyrics are shown
+
+Scenario: A song without translations has no switch and takes no space
+  Given a song without translations
+  Then the song has no language switch
+
+Scenario: Switching version returns to the original language
+  Given a song with an English translation
+  And the address says "?lang=en&recording=r1"
+  When I pick another version
+  Then the address is "?version=v2"
+
+Scenario: Switching language keeps the version and the view
+  Given the address says "?version=v2&lang=nl&view=both"
+  When I pick the language "en"
+  Then the address is "?version=v2&lang=en&view=both"
+
+Scenario: A deep link opens the translation
+  Given a song with an English translation
+  When I open the song with "?lang=EN"
+  Then the English lyrics are shown
+
+Scenario: A guest reads the translations of a public song only
+  Given a public song and a private song, each with a Dutch translation
+  Then a guest reads the Dutch translation of the public song
+  And a guest reads no translation of the private song
+  And the owner reads the translation of the private song
+
+Scenario: A translation version moves, with its recordings and playlist items, to the original
+  Given a song with an original version and a translation version named "English" with a recording and a playlist item
+  When the translation migration runs
+  Then the song has an "en" translation with the lyrics of that version
+  And the recording and the playlist item are on the original version
+  And the translation version is gone
+
+Scenario: A translation whose language cannot be determined stays where it is
+  Given a song with an original version and a translation version named "Singable"
+  When the translation migration runs
+  Then the song has no translation
+  And the translation version is still there
+
+Scenario: A translation with chords in another key than the original stays where it is
+  Given a song with an original version in key "G" and a translation version named "English" with chords in key "C"
+  When the translation migration runs
+  Then the translation version is still there
+
+Scenario Outline: A translation version with its own <field> stays where it is
+  Given a song with an original version and a translation version named "English" with its own "<field>"
+  When the translation migration runs
+  Then the translation version is still there
+  # <field>: melody_notation, song_note, beats, youtube_url, spotify_url, soundcloud_url, vote_count
+
+Scenario: Moved takes go after the takes of the original version
+  Given a song whose original version has two takes and whose translation version named "English" has two takes
+  When the translation migration runs
+  Then the original version has the takes "original one", "original two", "translation newer" and "translation older" in that order
+
+Scenario: The version switch no longer lists the translation afterwards
+  Given a song with an original version, a variant and a translation version named "English"
+  When the translation migration runs
+  Then the version switch of the song lists "Standard" and "Live" and no translation
+```
+
+**Story 6.2.14 acceptance criteria** (executable: `docs/testing/ux-v3-translation-both.feature`, `@unit` and `@seed`; layout in `testing/unit/tests/song/SongBilingualDisplay.test.tsx`):
+
+```gherkin
+Scenario: Both languages on a phone
+  Given a song with a translation on a 375 px screen
+  When I pick "Both"
+  Then each stanza is followed by its translation
+
+Scenario: Desktop shows two columns aligned per stanza
+  Given a song with a translation on a desktop screen
+  When I pick "Both"
+  Then stanza 1 of the original and stanza 1 of the translation share a row
+
+Scenario: The original has more stanzas than the translation
+  Given a song whose original has 3 stanzas and whose translation has 2
+  When I pick "Both"
+  Then 3 rows are shown
+  And the last row holds only the original
+
+Scenario: A chord intro does not shift the pairs
+  Given a song whose original starts with a chord intro before 2 stanzas, with a translation of 2 stanzas
+  When I pick "Both"
+  Then the intro has a row of its own
+
+Scenario: A song without a translation shows no reader switch
+  Given a song without a translation
+  Then the reader shows no reader switch
+  And the reader shows no language switch
+
+Scenario: Chords stay on the original
+  Given a song with chords and a translation with chords
+  When I pick "Both"
+  Then the original shows its chords
+  And the translation shows no chords
+
+Scenario: A− and A+ size both columns
+  Given a song with a translation on a desktop screen
+  When I pick "Both"
+  And I press "A+"
+  Then both columns use the larger lyric size
+
+Scenario: A right-to-left translation flows right to left
+  Given a song with a Hebrew translation
+  When I pick "Both"
+  Then the translation column has language "he" and direction "rtl"
+  And the original column has direction "ltr"
+
+Scenario: In Both, transpose and the source line follow the original
+  Given a musician reading a song with chords and a translation by "Ana"
+  When I pick "Both"
+  And I transpose 2 semitones up
+  Then the original is transposed 2 semitones and its source line is shown
+  And the reader names the translator "Ana"
+
+Scenario: A song opens on the original with the three-option switch
+  Given a song with a translation on a 375 px screen
+  Then the reader switch offers "Original", "Translation" and "Both" with "Original" chosen
+  And the reader shows no language switch
+
+Scenario: Translation shows the translation alone
+  Given a song with a translation on a 375 px screen
+  When I pick "Translation"
+  Then the translation "en" is shown alone
+  And the address reads "?lang=en&view=translation"
+
+Scenario: Original goes back to the original and clears the address
+  Given a song with a translation on a 375 px screen
+  When I pick "Both"
+  And I pick "Original"
+  Then the reader shows the original language
+  And the address reads ""
+
+Scenario: Translation and Both use the language of the language switch, the first one by default
+  Given a song with a Dutch and an English translation
+  When I pick "Translation"
+  Then the translation "nl" is shown alone
+  And the language switch lists "Dutch" and "English"
+  When I tap the language "en"
+  And I pick "Both"
+  Then both languages are shown with "en"
+  And the address reads "?lang=en&view=both"
+
+Scenario: The view is kept in the address and in the share link
+  Given a song with a translation on a 375 px screen
+  When I pick "Both"
+  Then the address reads "?lang=en&view=both"
+  And the share link ends with "?lang=en&view=both"
+
+Scenario: Another version returns to the original and remembers the language
+  Given a song with a Dutch and an English translation
+  When I pick "Translation"
+  And I tap the language "en"
+  And I pick "Both"
+  And I read another version of the song
+  Then the address reads "?version=v2"
+  And the reader shows the original language
+
+Scenario Outline: Links open the right view and stale values are cleaned from the address
+  Given a song with a Dutch and an English translation opened with "<link>"
+  Then the reader shows "<view>"
+  And the address reads "<address>"
+  # ?lang=en → translation; ?view=both → both in the first language (nl); ?lang=xx → original, address "";
+  # ?view=original&lang=en → original, address ""; ?lang=en&view=side → translation
+```
+
+Decisions (owner decision Nov 13, 2026): the toggle is *Original · Translation · Both*; *Translation* and *Both* use the language picked in the language switch (its first language by default), which lists languages only (no *Original language*: one "Original" on screen) and shows next to *Translation* / *Both* with two or more languages, so every state is at most two taps away. The view is a URL parameter (`?lang=<tag>&view=translation|both`, none for the original; a `?lang=` link without a view still opens the translation; stale values are replaced), not a device preference, because it belongs to the song being read and travels with the share link; chords stay on the original (they belong to its melody and rarely fit the translated words). There is no print or presentation mode on the reader; the setlist PDF export is unchanged.
+
+**Story 6.2.20 acceptance criteria** (executable: `docs/testing/ux-v3-edit-version-meta.feature`, `@unit` and `@seed`; the rendered form in `testing/unit/tests/songs/songFormVersionMeta.test.tsx`):
+
+```gherkin
+Scenario: Contributor corrects the beats
+  Given a catalog version with beats "8"
+  When a contributor changes it to "6" and saves
+  Then the song page shows beats 6
+
+Scenario: Clearing beats and note saves NULL, not an empty string
+  Given a catalog version with beats "8" and the note "Old note"
+  When a contributor clears both and saves
+  Then beats and note are saved as NULL
+
+Scenario: The note keeps its paragraph breaks and is saved as plain text
+  When a contributor saves a note with a blank line and "<b>" markup
+  Then the note is saved as typed and "About this song" shows 2 paragraphs with the markup as plain text
+
+Scenario: Beats validation (1-99, or counts joined with y & + / - or a comma)
+  Then "8", "6", "8y4", "8 y 4", "3/4" and blank are accepted
+  But "0", "100", "waltz", "8y" and "<b>8" are refused
+
+Scenario: Editing an untouched form does not rewrite beats or note
+  When a contributor changes only the lyrics and saves
+  Then the save writes neither beats nor note, and a stored beats value that fails the format check does not block it
+
+Scenario: The source line is read-only for everyone and the correct link is for admins only
+  Then the edit form shows "Songbook A · p. 38 · compiled by Compiler A" as text
+  And an admin is offered "Correct source"; a member, a gatekeeper and a guest are not
+```
+
+Also: an admin's correction writes only the changed page or original title of the primary source (blank as NULL); a member's save never sends it, and the database refuses it too. Another member's save changes no row; the catalog keys stay admin-only. Not in this story: editing the songbook itself (title, compiler), adding or removing a source, the create form.
+
+**Story 6.2.13 release notes** (read before promoting `feat/ux-v3`):
+
+- Importers must write translations to `song_translations` before migration `20261112140000_translation_versions_to_translations.sql` runs on real data: the migration deletes each moved translation version together with its `catalog_source_id`, so an importer that still upserts translations as versions would create them again, and they would not be migrated again (see `docs/guides/importing-songbooks.md`).
+- Offline copies that refer to a deleted translation version id go stale when the migration runs: a version, playlist entry or take stored offline under that id no longer matches anything until the copy is refreshed online.
+- A playlist entry that opened a translation opens the song's first original version in the original language afterwards (`setlist_items` has no language column); its transposition was relative to the translation's key, which is why a translation with chords in another key, capo or tuning than the original is not moved.
+- Moved takes are appended after the takes already on the original version. The translation's songbook and page are reported with `RAISE NOTICE` and not kept (#517 may add a source to translations).
+
+**Story 6.2.21 acceptance criteria** (executable: `docs/testing/ux-v3-protect-app-edits.feature`, `@unit` and `@seed`):
+
+```gherkin
+Scenario: Re-import keeps an app correction
+  Given a catalog version corrected in the app
+  When an importer that follows the contract runs again
+  Then the correction stays and is reported as skipped
+
+Scenario: A version without a catalog key is never marked
+  Given the member added a version of their own without a catalog key
+  When the member changes the lyrics of their own version in the app
+  Then their own version is not marked as edited
+
+Scenario: An importer write does not mark the row as edited
+  When the importer updates the lyrics of the catalog version and the song title as service_role
+  Then the catalog version is not marked as edited
+  And the catalog song is not marked as edited
+
+Scenario: Song-level corrections mark the catalog song
+  When the admin changes the title, aliases and authors of the catalog song in the app
+  Then the catalog song is marked as edited in the app now
+
+Scenario: The export lists edited rows with their catalog keys and changed fields
+  When the admin exports the catalog edits
+  Then the export lists version "songbook-a" of "bdd-protect-song" with its new lyrics, key and capo
+
+Scenario Outline: Only admins can read the export
+  Then the <account> cannot export the catalog edits
+  Examples: guest, member, expert, gatekeeper, importer
+
+Scenario: "Taken over" leaves a correction made after the download
+  Given the admin downloaded the catalog edits before a later correction
+  When the member changes the lyrics, key and capo of the catalog version in the app
+  And the admin marks the downloaded correction of the catalog version as taken over
+  Then the admin hears that the catalog version changed since the download
+
+Scenario: Linking a catalog song into a song that keeps its slug marks what moved
+  When the admin links the catalog song as a version of the other song in the app
+  Then the catalog version is marked as edited in the app now
+  And its edited fields are "composition_id, version_kind"
+  And the moved version "songbook-b" lost its catalog key and its edited fields are "catalog_source_id"
+  And the other song's edited fields are "aliases"
+  And an importer that looks up "bdd-protect-song" writes only its versions to the other song
+
+Scenario: Catalog slugs resolve through the database lookup
+  Given "bdd-merged" was linked in the app into a song that kept its own slug
+  And "bdd-moved" was linked in the app into a song without a slug, which took it
+  When an importer resolves the catalog slugs "bdd-merged", "bdd-moved" and "bdd-fresh"
+  Then it writes no song content for "bdd-merged" and upserts its versions under the song it was merged into
+  And it writes "bdd-moved" to the song that carries that slug now, honouring its markers
+  And it creates "bdd-fresh" as a new song
+```
+
+Which edits count (decision): a tracked column of a row that has a catalog key (`compositions.catalog_slug`, the version's own `catalog_source_id`), changed by a signed-in app user (JWT role `authenticated`), directly or through a database function the user calls. Song level: `title`, `original_author`, `aliases`, `authors`. Version level: lyrics and chords, version name, melody, key, capo, tuning, the three media links, `version_kind`, `beats`, `song_note`, and a move to another song (linking a song as a version, #512, is a gatekeeper's or admin's decision, so the moved catalog versions are marked). Not marked: the service role (importers), writes without a signed-in user (data migrations such as `20261112140000`), saves without a change, derived flags (`has_chords`, `has_melody`), visibility, new rows. Song-level and version-level markers are separate, so an importer can still add new versions to a corrected song. No snapshot of the imported values is stored: the export lists the edited fields and their current values, the source catalog holds the old ones.
+
+**Story 6.2.1 acceptance criteria** (executable: `docs/testing/songbook-data-model.feature`, `@seed`):
+
+```gherkin
+Scenario: Existing songs keep working after the migration
+  Given the current schema plus the new migration
+  When a member opens a song created before the migration
+  Then it renders exactly as before
+
+Scenario: A songbook variant keeps its own musical data
+  Given a version with catalog_source_id "songbook-a", capo 5, beats "8" and a song note
+  Then the row is stored with those values and is unique per song and book
+
+Scenario: A member cannot claim a catalog slug
+  Given the member owns a song with a version they contributed
+  Then the member cannot give that song a catalog slug
+  And the member cannot add a version with a catalog_source_id to that song
+  But the member can change the version kind, beats and song note of that version
+```
+
+**Story 6.2.8 acceptance criteria** (executable: `docs/testing/ux-v3-about-this-song.feature`, `@unit`; disclosure semantics in `testing/unit/tests/aboutThisSong.test.tsx`):
+
+```gherkin
+Scenario: Note is collapsed until opened
+  Given a version with a song note
+  Then 'About this song' is shown collapsed
+  When I open it
+  Then the note is shown
+```
+
+Also: a whitespace-only note counts as empty (hidden); switching version shows that version's note and hides the panel when it has none; paragraph breaks are kept and the note is plain text (never HTML); design intent (not yet asserted by an E2E spec): the collapsed panel keeps the first lyric line above the fold at 390 × 844.
+
+**Story 6.2.9 acceptance criteria** (executable: `docs/testing/ux-v3-link-song-version.feature`, `@unit` and `@seed`):
+
+```gherkin
+Scenario: Linking merges two songs
+  Given the gatekeeper's songs "Weyo wey yanna" and "Weyo Wey Yanna (Songbook B)"
+  When a gatekeeper links the second as a version of the first
+  Then the first song has both versions
+  And the old link opens the first song
+  And recordings and playlist entries of the second still work
+
+Scenario: A gatekeeper cannot link another member's song
+  Given the second song belongs to another member
+  When a gatekeeper links the second as a version of the first
+  Then the link is refused as not their own
+
+Scenario: A public song cannot be linked into a private song
+  Given the first song is private
+  When a gatekeeper links the second as a version of the first
+  Then the link is refused as a visibility mismatch
+```
+
+Also: the first song keeps its own version first (a moved `original` becomes a `variant`), gains the old title as an alias and the categories of both songs, and an audit entry names who linked what; the preview changes nothing; members (and every role below gatekeeper) are refused, and so is linking a song to itself; **gatekeepers link only songs they own** — both the source and the target (the menu item is hidden on someone else's song, the search lists only their own songs, the database refuses with *You can only link songs you own.*); admins link any song; **both songs must be public or both private**, for everyone (admins included), and the preview shows that refusal before any confirm; a guest cannot see a redirect to a private song; redirect chains collapse (a song linked earlier into the source now leads to the target; linking the source again is refused as already linked; a target that was itself linked is followed to the song it lives in); catalog slug: the target takes the source's slug when it has none (also in a gatekeeper's link: the link deliberately moves catalog keys past the admin-only catalog guards, the values only ever come from the source song), otherwise keeps its own and the source's slug still resolves to the target (`fn_song_id_for_catalog_slug`); two versions from the same songbook do not collide on `(composition_id, catalog_source_id)` (the moved one keeps its content and loses the key); a member who favourited both songs keeps one favourite, on the target's first version; an old `/songs/<id>?version=…&recording=…` continues at the target with the same query. Undo: none — a clear confirm with the preview instead (reasoning: `application-analysis&design.md` §6.19, "Confirm, not undo").
+
+**Story 6.2.10 acceptance criteria** (executable: `docs/testing/ux-v3-songbook-source.feature`, `@unit` and `@seed`):
+
+```gherkin
+Scenario: Source line credits the book
+  Given a version from "Songbook A" page "38" compiled by "Compiler A"
+  Then the song page shows the line "Songbook A · p. 38 · compiled by Compiler A"
+
+Scenario: Page notation decides between "p." and "pp."
+  Given pages "38–39", "38 & 40" and "38 y 40"
+  Then the line says "pp." for each of them
+  But "A-12", "II-4", "12a" and a "p. 38" copied from the book say "p."
+
+Scenario: The original title shows only when it really differs
+  Given the song "Rise Up" has a version with the original title "Subir"
+  Then the line ends with "Original title: Subir"
+  But "Pachamamá" for "Pachamama", "Mother’s" for "Mother's" and "Rise Up!" for "Rise Up" show nothing
+
+Scenario: Several books are listed, the primary source first
+  Given a version printed in "Songbook B" and as the primary source in "Songbook A"
+  Then the song page lists "Songbook A" first and the list is labelled "Sources"
+
+Scenario: The line follows the selected version
+  When the reader opens the song with "?version=" the second version
+  Then the song page shows the line of that version
+
+Scenario: Nothing is shown without sources
+  Given a version without sources, or cached song data from before the sources existed
+  Then the song page shows no source line and leaves no space
+
+Scenario: A guest reads the source of a public song, not of a private one
+  Then a guest reads the book, page and compiler of the public version
+  And a guest reads no source of the private version
+
+Scenario: The song page's real query is accepted by the local API
+  Then the select of the song page runs without error and returns the sources of each version as a list
+```
+
+**Story 6.2.11 acceptance criteria** (executable: `docs/testing/ux-v3-songbook-pages.feature`, `@unit` and `@seed`; the rendered pages in `testing/unit/tests/songbooks/`):
+
+```gherkin
+Scenario: Songbook page lists songs by page
+  Given the songbook "Songbook A"
+  When I open its page
+  Then its songs are listed in page order with links to each song
+
+Scenario Outline: Pages are ordered as a person reads them, not as text
+  # "10, 2, 1" -> "1, 2, 10"; "12a, 12, 13, 2" -> "2, 12, 12a, 13"; "A-10, A-2, A-1" -> "A-1, A-2, A-10"; "iv, ix, v, x, xii" -> "iv, v, ix, x, xii"
+
+Scenario: Songs without a page come last, then by title
+
+Scenario: A song printed on two pages is listed once per page and links to the right version
+  Then "Song A" is listed twice, on page "4" and on page "30"
+  And the row on page "4" links to version "v1" and the row on page "30" links to version "v2"
+
+Scenario: Two versions of a song on the same page are one row
+
+Scenario: The list shows books by title with their song counts
+  Then the list reads "Songbook A (1 song)", "Songbook B (3 songs)"      # a book with 0 readable songs is left out
+
+Scenario: The source line links to the songbook page
+  Then the source line of the version links to the page of "Songbook A" at the row of that source
+
+Scenario: An unknown songbook answers 404
+
+Scenario: A guest sees the public songs of a book, not the private ones
+Scenario: A book with only private songs does not exist for a guest
+Scenario: The owner of a private song sees it in the book
+Scenario: The songbook page's real query is accepted by the local API
+```
+
+Decisions: a song printed on several pages of one book is listed once per distinct page (a printed book is read by page); versions on the same page are one row. A book the viewer can read no song of is a 404, the same answer as an unknown id (no leak of private-only books); an admin reading a book without songs sees an empty state. Roman-numeral front matter sorts after the numbers (plain text compare).
+
+**Story 6.2.17 acceptance criteria** (executable: `docs/testing/ux-v3-pdf-export.feature`, `@unit` and `@seed`):
+
+```gherkin
+Scenario: Exported sheet matches the screen
+  Given a playlist with a catalog song version with capo 5, beats "8", repeats and the source "Songbook A" page "38" compiled by "Compiler A"
+  When I export it to PDF
+  Then the sheet shows the meta line "By Author A · Key E · Capo 5 · Beats 8"
+  And the sheet shows the repeat bars "‖:" and ":‖ ×2" around the repeated lines
+  And the sheet shows the source line "Songbook A · p. 38 · compiled by Compiler A" under the lyrics
+
+Scenario: A song without capo, beats or source prints no empty labels
+  Given a playlist with a song without key, capo, beats, tuning, author or source
+  When I export it to PDF
+  Then the sheet prints none of the labels "Key", "Capo", "Beats", "Standard", "compiled by"
+
+Scenario: A playlist item prints the version it is pinned to
+  Given a song with a first version in key "E" with capo 5 and a second version in key "G" without capo, both from different books
+  And a playlist item pinned to the second version
+  When the export reads the playlist item
+  Then the exported song has the key, capo, beats, sources and lyrics of the second version
+
+Scenario: The item's transposition moves the printed key and chords
+  Given a playlist item with a song in key "E" transposed by 2 semitones
+  When I export it to PDF
+  Then the sheet shows the meta line "Key F#"
+
+Scenario: A translation is never printed
+  Given a song that has a translation
+  Then the export asks for no translations, so the sheet shows the original lyrics
+
+Scenario: A wrapped row never runs into the footer
+  Given a playlist with a song of 40 short lines followed by one very long line
+  When I export it to PDF
+  Then no lyric is printed below the bottom margin on any page
+
+Scenario: The closing bar never lands on the last word
+  Given a playlist with a song with a repeated line of words that fill the line up to the right margin
+  When I export it to PDF
+  Then the closing bar overlaps no text and stays inside the right margin
+
+Scenario: An item without a title prints the translated untitled-song label
+  Given a playlist item whose song has no title
+  Then the sheet shows the translated untitled-song label in "nl"
+
+Scenario: The order the database returns the sources in does not change the cached PDF
+  When the database returns the sources in another order
+  Then the cached PDF is still reused
+```
+
+**Story 6.2.18 acceptance criteria** (executable: `docs/testing/ux-v3-search-aliases.feature`, `@unit` and `@seed`):
+
+```gherkin
+Scenario: Found by alias
+  Given a song "Huey Tonantzin" with alias "Gran Venerable Madre Tierra"
+  When I search "Venerable"
+  Then the song is in the results
+
+Scenario: Found by a co-author that is only in the authors list
+  Given a song "Huey Tonantzin" by "Anna Lee" with authors "Anna Lee" and "Ben Cruz"
+  When I search "Ben Cruz"
+  Then the song is in the results
+
+Scenario: Found by the original title in a songbook (any version)
+  Given a song "Huey Tonantzin" printed as "Canto a la Madre Tierra" in a songbook
+  When I search "madre tierra"
+  Then the song is in the results
+
+Scenario Outline: Case and accents do not matter
+  Examples: "venerable" / "VENERABLE" for "Venerable"; "pachamama" for "Pachamamá" and the reverse; "LA NUSTA" for "Ñusta"
+
+Scenario: The hint names why, only when the title did not match
+  Then "Also known as Gran Venerable Madre Tierra", "Matched by songbook title: …" or "Matched by author: Ben Cruz"
+  But no hint when the title matched, even if an alias matches too
+
+Scenario: A song is listed once however many fields match
+  Then the results are the song "Huey Tonantzin" once
+
+Scenario: A guest never finds a private song through its alias or songbook title (RLS)
+  Given a private song of a member with alias "Gran Venerable Secreta" printed as "Canto Secreto"
+  Then a guest's search finds neither; the owner's finds it; a guest finds a public catalog song by alias and by songbook title
+```
+
+**Story 6.2.19 acceptance criteria** (executable: `docs/testing/ux-v3-browse-filters.feature`, `@unit`):
+
+```gherkin
+Background:
+  Given songs "Huey Tonantzin" (Songbook A, Spanish), "Fire Song" (Songbook B, English), "Water Song" (Songbooks A and B, English) and "Loose Song" (no book, no language)
+
+Scenario: Filter on a songbook
+  When I filter on "Songbook B"
+  Then only "Fire Song" and "Water Song" are listed
+
+Scenario: A song printed in several books is listed under each of them
+  When I filter on "Songbook A"
+  Then only "Huey Tonantzin" and "Water Song" are listed
+
+Scenario: Filter on a language
+  When I filter on the language "English"
+  Then only "Fire Song" and "Water Song" are listed
+
+Scenario: Songbook and language combine
+  When I filter on "Songbook A" and on the language "English"
+  Then only "Water Song" is listed
+
+Scenario: Every option shows how many songs it holds
+  Then the songbook options read "Songbook A (2)", "Songbook B (2)" and the language options "English (2)", "Spanish (1)"
+
+Scenario: Counts follow the other filter but never their own
+  When I filter on the language "English"
+  Then the songbook options read "Songbook A (1)", "Songbook B (2)"
+  When I filter on "Songbook B"
+  Then the language options read "English (2)", "Spanish (0)" and the songbook options "Songbook A (2)", "Songbook B (2)"
+
+Scenario: A songbook that is not in the catalog is called "Unknown songbook"
+  When I filter on the songbook id "bk-old"
+  Then the songbook options read "Songbook A (2)", "Songbook B (2)", "Unknown songbook (0)"
+
+Scenario: A songbook is read from the one sources embed of the song list
+  Then the song list select embeds `song_version_sources (` once and nests the songbook in it
+
+Scenario Outline: The filter sheet is translated (en, nl, es, it, ru, qu, fr, pt)
+```
+
+**Story 6.2.22 acceptance criteria** (executable: `docs/testing/ux-v3-add-songs-search.feature`, `@unit`; the rendered sheet in `testing/unit/tests/playlists/AddSongsSheet.test.tsx`):
+
+```gherkin
+Scenario: Add a song by its alias
+  Given a song "Madre Tierra" with the alias "Pachamama"
+  When I search "pachamama" in the "+ Add Songs" sheet of a playlist
+  Then "Madre Tierra" is offered with the hint "Also known as Pachamama"
+
+Scenario: Add a song by a co-author, or by its title in a songbook
+  Then "Matched by author: Ben Cruz" / "Matched by songbook title: Canto a la Madre Tierra" is the hint
+
+Scenario: A title match needs no hint and comes before an alias match
+Scenario: Case and accents do not matter
+Scenario: The sheet reads the song list's rows, not a select of its own (no second song_version_sources embed)
+```
+
+**Story 6.2.23 acceptance criteria** (executable: `docs/testing/ux-v3-search-translations.feature`, `@unit` and `@seed`):
+
+```gherkin
+Scenario: Find a song by its translated title
+  Given a song "Madre Tierra" with a Dutch translation titled "Moeder Aarde"
+  When I search "moeder aarde"
+  Then "Madre Tierra" is in the results with the hint "Dutch: Moeder Aarde"
+
+Scenario: The hint names the language in the app language
+  Then, in Dutch, the hint reads "Nederlands: Moeder Aarde"
+
+Scenario: Translation lyrics are not searched (titles only)
+  Given a Dutch translation without a title but with the lyrics "Zingen voor de aarde"
+  When I search "zingen"
+  Then the song is not in the results
+
+Scenario: A guest never finds a private song through the title of its translation (RLS)
+  Then a guest's search finds a public catalog song by its translated title, and not a private one
+```
+
+**Story 6.2.24 acceptance criteria** (executable: `docs/testing/ux-v3-language-filter-only.feature`, `@unit`):
+
+```gherkin
+Scenario: The tag selector has no Languages group
+  Given the taxonomy has a "Languages" group with "Dutch" and "Spanish"
+  When I open Search options on /songs
+  Then the category and tag selector shows no "Languages" group
+  And I can choose "Dutch" in the Language filter
+
+Scenario: Searching tags does not offer languages
+  Given the taxonomy has a "Languages" group with "Dutch"
+  When I type "dut" in the category and tag selector
+  Then "Dutch" is not offered there
+
+Scenario: An old language link still filters
+  Given a bookmarked link "/songs?category=dutch"
+  When I open the bookmarked link
+  Then only songs in the Dutch language category are listed
+  And the Language filter shows "Dutch"
+
+Scenario: An old tag language link still filters
+  Given a bookmarked link "/songs?tag=dutch"
+  When I open the bookmarked link
+  Then only songs in the Dutch language category are listed
+  And the Language filter shows "Dutch"
+```
+
+**Story 6.2.25 acceptance criteria** (executable: `docs/testing/ux-v3-global-search-filters.feature`, `@unit` and `@seed`; UI in `testing/unit/tests/search/globalSearchBrowseFilters.test.tsx`):
+
+```gherkin
+Scenario: Closed window loads nothing
+  Given I am on the home page with the search window closed
+  When I do not open the search window
+  Then no songbook or language counts are requested
+
+Scenario: Filter by songbook from another page
+  Given I am on the home page
+  And the count source returns songbook "Book A" with id "book-a" and 12 songs
+  When I open the search window
+  Then the global search window offers a Songbook option "Book A (12)"
+  When I choose the songbook "book-a" and submit the global search
+  Then the global search navigates to "/songs?songbook=book-a"
+
+Scenario: Filter by language from another page
+  Given I am on a playlist page
+  And the count source returns language "Spanish" with slug "spanish" and 7 songs
+  When I open the search window
+  Then the global search window offers a Language option "Spanish (7)"
+  When I choose the language "spanish" and submit the global search
+  Then the global search navigates to "/songs?language=spanish"
+
+Scenario: Counts respect what I may read
+  Given a test songbook "book-570" titled "Book 570" with 3 public songs and 2 private songs of another user
+  When a guest requests search filter counts
+  Then the guest sees songbook "book-570" with count 3
+  When the private songs' owner requests search filter counts
+  Then the owner sees songbook "book-570" with count 5
+  When an admin requests search filter counts
+  Then the admin sees songbook "book-570" with count 5
 ```
 
 ## Roles & Permissions Summary
@@ -1242,12 +2494,12 @@ Scenario: Restore draft
         *   Submitting the song successfully clears the draft.
         *   Draft persistence only applies to the "Add" mode, not Edit.
 
-**Story 1.1.9: [Implemented]** As a User, I want a Spotify-style mobile bottom navigation bar with Home, Search, Your Library, and Create tabs so that I can navigate the app with one hand.
+**Story 1.1.9: [Implemented]** As a User, I want a Spotify-style mobile bottom navigation bar with Home, Search and Your Library tabs so that I can navigate the app with one hand. (Decision UXD-1, Story 6.1.24: Create is a "+" inside Library, not a fourth tab.)
 
 ```
 Scenario: Bottom bar visible on mobile
   Given I am viewing any page on a mobile device (< md breakpoint)
-  Then I should see a fixed bottom navigation bar with four tabs: Home, Search, Your Library, and Create
+  Then I should see a fixed bottom navigation bar with three tabs: Home, Search and Your Library
   And the bottom bar should not appear on tablet or desktop
 
 Scenario: Navigate via bottom bar
@@ -1258,8 +2510,12 @@ Scenario: Navigate via bottom bar
   Then I should navigate to the songs page with the search field focused
   When I tap "Your Library"
   Then I should navigate to the playlists/library page
-  When I tap "Create"
-  Then I should navigate to the add song page (or show a guest nudge if not authenticated)
+
+Scenario: Create from Library
+  Given I am signed in and on the Library page of a mobile device
+  When I tap "+"
+  Then a sheet offers "Add Song" and "New Playlist"
+  And guests see no "+" (the Library shows its sign-in preview)
 
 Scenario: Active tab indicator
   Given I am on the songs page
@@ -1279,7 +2535,6 @@ Scenario: Top-right avatar hidden on mobile
 
 Scenario: Guest bottom bar
   Given I am not logged in on a mobile device
-  Then the bottom bar should still show Home, Search, and Your Library
-  And "Create" should show a sign-in nudge when tapped
+  Then the bottom bar shows the same three tabs: Home, Search, and Your Library
   And the hamburger icon should remain (no avatar replacement)
 ```

@@ -1,8 +1,8 @@
 # E2E Test Overview & Matrix: Sacred Fire Songs
 
-**Version:** 1.4
+**Version:** 1.5
 **Status:** Living Document
-**Date:** June 23, 2026
+**Date:** Nov 11, 2026
 **Tracking:** GH #142
 
 ## Changelog
@@ -14,6 +14,7 @@
 | **1.2** | May 30, 2026 | CI now runs `@smoke` against the **staging** Supabase on push to `main`/`feat|fix|chore/**` (resolves staging URL + anon key via the CLI) instead of a local stack. Documented the staging seed-data caveat and read-only/shared-DB constraints. |
 | **1.3** | May 31, 2026 | CI hardening: the staging anon key is now read from the `SUPABASE_PUBLISHABLE_KEY_STAGING` secret instead of the `supabase projects api-keys` CLI lookup (which returned no key and failed the run). Dropped the Supabase CLI step; URL derived from the project ref. Documented required secrets. |
 | **1.4** | Jun 23, 2026 | Isolated E2E database environment from staging app `<staging-app>`. Integrated automatic database wipe and seeding via Playwright `globalSetup` hook and `setup-test-db.mjs` script. |
+| **1.5** | Nov 11, 2026 | #492: SONG-08 is now "no delete button on a song row" (deleting is in the song page's menu only). |
 
 ---
 
@@ -117,7 +118,7 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 | SONG-05 | Chords-over-lyrics conversion | Pasted "chords over lyrics" auto-converts to ChordPro | non-chord text not misdetected; key/capo extraction | M/A | ✅ | 🔲 | P1 | 1.1.6 |
 | SONG-06 | Edit song | Owner edits fields and saves | non-owner blocked (RLS); admin override | M(owner)/A | ✅ | 🔲 | P0 | 2.2.1 |
 | SONG-07 | Delete song | Owner/admin deletes a song with confirmation | non-owner has no delete; cancel modal | M(owner)/A | ✅ | 🔲 | P0 | 1.1.3 |
-| SONG-08 | Card delete icon | Hover delete icon on song card (owner/admin) | hidden for non-owner/guest | M(owner)/A | ✅ | 🔲 | P2 | 1.1.4 |
+| SONG-08 | No row delete | A song row has no delete button, also for the owner or an admin (#492) | buttons line up on every row | A | ✅ | ✅ | P2 | 1.1.4 |
 | SONG-09 | Media links | Attach YouTube/Spotify/SoundCloud URLs; embeds render on detail | invalid URL; multiple embeds | M/A | ✅ | 🔲 | P1 | 1.1.7, 1.3.2/1.3.4 |
 | SONG-10 | Draft auto-save | In-progress add form persists to localStorage and restores | clears after submit; create-mode only | M | ✅ | 🔲 | P2 | Story 1.1.8 |
 | SONG-11 | Public/Draft toggle | Set song visibility on create/edit | draft hidden from guests | M/A | ✅ | 🔲 | P1 | SongForm |
@@ -138,7 +139,7 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 | LIB-10 | Albums tab | Placeholder "coming soon" renders | — | G | ⚠️ | 🔲 | P2 | `library/albums` (stub) |
 | LIB-11 | Recently viewed | Auth user sees recently viewed songs | requires auth; records on detail visit | M | ✅ | 🔲 | P1 | `library/recently-viewed` |
 | LIB-12 | New since last visit | Unviewed recent songs surfaced | last_seen tracking | M | ✅ | 🔲 | P2 | NewSinceLastVisit |
-| LIB-13 | Explore/Playlists guest access | Guest can reach Explore & Playlists without login | redirect of `/explore` → `/` | G | ✅ | 🔲 | P2 | 1.2.3 |
+| LIB-13 | Home/Library guest access | Guest can reach Home & Library without login; `/explore` is a 404 (Story 6.1.24) | `e2e/tests/ux-v2-bottom-bar.spec.ts` | G | ✅ | 🔲 | P2 | 1.2.3 |
 
 ### 4.5 Song Viewer (Epic 1.3 / 2.1)
 

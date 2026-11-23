@@ -1,0 +1,29 @@
+import { createClient as createSupabaseClient, type SupabaseClient } from "@supabase/supabase-js";
+
+type Env = Record<string, string | undefined>;
+
+/**
+ * Server-only Supabase client with the project's secret (service role) key.
+ *
+ * Only for the few database calls that must never run with a user's session, such as
+ * claiming a share e-mail (`lib/actions/notifications.ts`). Never import this from a
+ * client component: the key bypasses row-level security. Returns null when
+ * `SUPABASE_SECRET_KEY` is not set, so those features switch off cleanly.
+ */
+export function createAdminClient(env?: Env): SupabaseClient | null {
+    if (typeof window !== "undefined") {
+        throw new Error("createAdminClient must only run on the server.");
+    }
+    const key = (env ?? process.env).SUPABASE_SECRET_KEY?.trim();
+    // Without `env`, read the public URL like lib/supabase/server.ts does (literal
+    // process.env.NEXT_PUBLIC_*, which Next.js may inline at build time).
+    const url = (env
+        ? (env.NODE_ENV === "development" ? env.NEXT_PUBLIC_SUPABASE_URL_DEV : env.NEXT_PUBLIC_SUPABASE_URL)
+        : (process.env.NODE_ENV === "development"
+            ? process.env.NEXT_PUBLIC_SUPABASE_URL_DEV
+            : process.env.NEXT_PUBLIC_SUPABASE_URL))?.trim();
+    if (!key || !url) return null;
+    return createSupabaseClient(url, key, {
+        auth: { persistSession: false, autoRefreshToken: false, detectSessionInUrl: false },
+    });
+}

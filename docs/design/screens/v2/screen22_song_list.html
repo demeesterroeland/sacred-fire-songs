@@ -1,0 +1,440 @@
+<!--
+**Version:** 1.0
+**Status:** Accepted reference (Story 6.1.1 / G1.2 #386, G1.4 #388, G7.1 #413)
+**Date:** Nov 5, 2026
+
+## Changelog
+
+| Version | Date | Description of Changes |
+| ----- | ----- | ----- |
+| **1.0** | Nov 5, 2026 | Accepted as the UX v2 reference (#385); token names aligned with `app/styles/sober.css` (`--text-muted`, `--text-subtle`, `--r-control/panel/sheet`, `--elev-sheet`). |
+| **0.1** | Nov 5, 2026 | Mobile-first song list & search mockup: dense one-line rows, search input with instant filter, horizontal filter chips, sort control, now-playing indicator, sober bottom navigation bar. |
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Songs & Search - Sacred Fire Songs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="tokens.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  padding-bottom: calc(var(--bar-h) + var(--s-5) + env(safe-area-inset-bottom, 0px));
+}
+body.playing { padding-bottom: calc(var(--bar-h) * 2 + var(--s-5) + env(safe-area-inset-bottom, 0px)); }
+body::before { content: ""; position: fixed; inset: 0 0 auto; height: env(safe-area-inset-top, 0px); z-index: 30; background: var(--bg); }
+.gutter { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.wrap { max-width: 640px; margin: 0 auto; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: var(--r-control); }
+svg.i { width: 20px; height: 20px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---------- mockup controls bar ---------- */
+.mock {
+  border-bottom: 1px dashed var(--text-subtle);
+  background: var(--surface);
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
+  padding-block: var(--s-2);
+}
+.mock .wrap { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-3); align-items: center; }
+.mock strong { color: var(--text); font-weight: var(--fw-semibold); letter-spacing: 0.04em; text-transform: uppercase; }
+.mock-group { display: inline-flex; gap: 2px; background: var(--surface-2); border-radius: var(--r-control); padding: 2px; }
+.mock-group button { padding: 4px 8px; border-radius: 4px; min-height: 28px; }
+.mock-group button[aria-pressed="true"] { background: var(--bg); color: var(--text); font-weight: var(--fw-semibold); }
+.mock-links { display: inline-flex; gap: var(--s-2); margin-left: auto; }
+.mock-links a { color: var(--accent); text-decoration: none; font-weight: var(--fw-medium); }
+.mock-links a:hover { text-decoration: underline; }
+.mock-note { flex-basis: 100%; color: var(--text-subtle); }
+
+/* ---------- search header ---------- */
+.search-header {
+  position: sticky; top: env(safe-area-inset-top, 0px); z-index: 20;
+  background: var(--bg);
+  padding-top: var(--s-2);
+  padding-bottom: var(--s-2);
+  border-bottom: 1px solid var(--line);
+}
+.search-box-row { display: flex; align-items: center; gap: var(--s-2); }
+.search-input-wrap {
+  flex: 1; position: relative; display: flex; align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-panel);
+  padding-left: var(--s-3);
+  padding-right: var(--s-2);
+  height: 44px;
+}
+.search-input-wrap:focus-within { border-color: var(--text); background: var(--bg); }
+.search-input-wrap svg { color: var(--text-subtle); margin-right: var(--s-2); }
+.search-input {
+  flex: 1; border: none; background: transparent; font: inherit; font-size: 15px;
+  color: var(--text); outline: none; width: 100%;
+}
+.search-input::placeholder { color: var(--text-subtle); }
+.clear-btn {
+  width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center;
+  color: var(--text-subtle);
+}
+.clear-btn:hover { color: var(--text); background: var(--surface-2); }
+
+/* filter chips row */
+.filter-scroll {
+  display: flex; gap: var(--s-2); overflow-x: auto; scrollbar-width: none;
+  padding-top: var(--s-2); padding-bottom: 2px;
+}
+.filter-scroll::-webkit-scrollbar { display: none; }
+.f-chip {
+  display: inline-flex; align-items: center; gap: 4px;
+  min-height: 32px; padding: 0 var(--s-3);
+  border-radius: var(--r-pill); font-size: var(--fs-meta);
+  background: var(--surface); color: var(--text-muted);
+  border: 1px solid var(--line); white-space: nowrap; flex: none;
+}
+.f-chip[aria-pressed="true"] {
+  background: var(--text); color: var(--bg); border-color: var(--text); font-weight: var(--fw-medium);
+}
+
+/* ---------- count & sort bar ---------- */
+.meta-bar {
+  display: flex; justify-content: space-between; align-items: center;
+  padding-block: var(--s-3) var(--s-2);
+  font-size: var(--fs-meta); color: var(--text-subtle);
+}
+.sort-btn {
+  display: inline-flex; align-items: center; gap: 4px;
+  color: var(--text-muted); font-weight: var(--fw-medium);
+}
+.sort-btn svg { width: 16px; height: 16px; color: var(--text-subtle); }
+
+/* ---------- song list rows (G1.2) ---------- */
+.song-list { display: flex; flex-direction: column; }
+.song-card {
+  display: flex; align-items: center; gap: var(--s-3);
+  padding: var(--s-3) 0;
+  border-bottom: 1px solid var(--line);
+  text-decoration: none; color: inherit;
+  min-height: 58px;
+}
+.song-card:hover { background: color-mix(in srgb, var(--surface) 50%, transparent); }
+.song-card.now-playing {
+  border-left: 3px solid var(--accent);
+  padding-left: calc(var(--s-3) - 3px);
+  background: color-mix(in srgb, var(--accent) 5%, transparent);
+}
+.song-card.now-playing .sc-title { color: var(--accent); font-weight: var(--fw-semibold); }
+.sc-main { flex: 1; min-width: 0; }
+.sc-title {
+  font-size: var(--fs-row); font-weight: var(--fw-medium);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  color: var(--text);
+}
+.sc-meta {
+  font-size: var(--fs-meta); color: var(--text-muted);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  margin-top: 1px;
+}
+.sc-meta b { font-weight: var(--fw-regular); color: var(--text-subtle); }
+.meta-dot { color: var(--text-subtle); padding-inline: 3px; }
+.sc-action {
+  width: var(--tap); height: var(--tap); display: grid; place-items: center;
+  color: var(--text-subtle); border-radius: var(--r-control);
+}
+.sc-action:hover { color: var(--text); background: var(--surface); }
+
+/* mini player */
+.player {
+  position: fixed; left: 0; right: 0; z-index: 24;
+  bottom: calc(var(--bar-h) + env(safe-area-inset-bottom, 0px));
+  background: var(--surface); border-top: 1px solid var(--line);
+}
+.player .prog { height: 2px; background: var(--line); }
+.player .prog i { display: block; height: 100%; width: 45%; background: var(--accent); }
+.player .wrap { height: calc(var(--bar-h) - 2px); display: flex; align-items: center; gap: var(--s-3); }
+.player .txt { flex: 1; min-width: 0; }
+.player .t1 { font-size: 14px; font-weight: var(--fw-medium); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.player .t2 { font-size: var(--fs-caption); color: var(--text-subtle); }
+.player .pp { color: var(--accent); }
+
+/* ---------- bottom navigation bar (thumb zone) ---------- */
+.navbar {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 25;
+  background: var(--bg); border-top: 1px solid var(--line);
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
+.navbar .wrap { height: var(--bar-h); display: flex; align-items: stretch; }
+.nav-item {
+  flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 2px; color: var(--text-subtle); font-size: 11px; font-weight: var(--fw-medium);
+  text-decoration: none;
+}
+.nav-item.active { color: var(--accent); font-weight: var(--fw-semibold); }
+.nav-item svg { width: 22px; height: 22px; }
+</style>
+</head>
+<body class="playing">
+
+<!-- Mockup Controls -->
+<div class="mock gutter" aria-label="Mockup controls">
+  <div class="wrap">
+    <strong>Mockup</strong>
+    <span class="mock-group" role="group" aria-label="Theme">
+      <button type="button" id="t-auto" data-t="auto" aria-pressed="true">Auto</button>
+      <button type="button" id="t-light" data-t="light" aria-pressed="false">Light</button>
+      <button type="button" id="t-dark" data-t="dark" aria-pressed="false">Dark</button>
+    </span>
+    <span class="mock-group" role="group" aria-label="Body size">
+      <button type="button" id="b-15" data-b="15" aria-pressed="false">15</button>
+      <button type="button" id="b-16" data-b="16" aria-pressed="true">16</button>
+    </span>
+    <span class="mock-group" role="group" aria-label="Player toggle">
+      <button type="button" id="btn-toggle-player" aria-pressed="true">Mini player</button>
+    </span>
+    <div class="mock-links">
+      <a href="screen24_home.html">Home</a> ·
+      <a href="screen21_song_page.html">Song Page</a> ·
+      <a href="screen23_practice_drawer.html">Practice</a> ·
+      <a href="screen20_design_system.html">Tokens</a>
+    </div>
+    <span class="mock-note">G1.2 (dense rows) & G7.1 (instant filter). Try typing "fire" or tapping a category chip.</span>
+  </div>
+</div>
+
+<!-- Search Header -->
+<header class="search-header gutter">
+  <div class="wrap">
+    <div class="search-box-row">
+      <div class="search-input-wrap">
+        <svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        <input type="search" class="search-input" id="search-input" placeholder="Search songs, artists, lyrics..." autocomplete="off">
+        <button type="button" class="clear-btn" id="clear-btn" aria-label="Clear search" hidden>✕</button>
+      </div>
+      <button type="button" class="sc-action" aria-label="Search filters">
+        <svg class="i" viewBox="0 0 24 24"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+      </button>
+    </div>
+
+    <!-- Filter chips -->
+    <div class="filter-scroll" role="group" aria-label="Category filter">
+      <button type="button" class="f-chip" data-filter="all" aria-pressed="true">All</button>
+      <button type="button" class="f-chip" data-filter="fire" aria-pressed="false">Fire</button>
+      <button type="button" class="f-chip" data-filter="water" aria-pressed="false">Water</button>
+      <button type="button" class="f-chip" data-filter="earth" aria-pressed="false">Earth</button>
+      <button type="button" class="f-chip" data-filter="healing" aria-pressed="false">Healing</button>
+      <button type="button" class="f-chip" data-filter="chords" aria-pressed="false">With Chords</button>
+    </div>
+  </div>
+</header>
+
+<main class="gutter">
+  <div class="wrap">
+    <!-- Meta count and sort -->
+    <div class="meta-bar">
+      <span id="result-count">7 songs in library</span>
+      <button type="button" class="sort-btn" id="sort-btn">
+        <span>Sort: A–Z</span>
+        <svg class="i" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+    </div>
+
+    <!-- Dense Song List (G1.2) -->
+    <div class="song-list" id="song-list">
+      
+      <a href="screen21_song_page.html" class="song-card now-playing" data-title="abre tus alas" data-artist="nina" data-cat="water" data-chords="true">
+        <div class="sc-main">
+          <div class="sc-title">Abre Tus Alas</div>
+          <div class="sc-meta">Nina<span class="meta-dot">·</span>Water<span class="meta-dot">·</span>Spanish<span class="meta-dot">·</span>Chords + Melody</div>
+        </div>
+        <div class="sc-action" style="color: var(--accent);"><svg class="i" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></div>
+      </a>
+
+      <a href="screen21_song_page.html" class="song-card" data-title="danza del cielo curandero" data-artist="herbert quinteros" data-cat="fire healing" data-chords="true">
+        <div class="sc-main">
+          <div class="sc-title">Danza del Cielo Curandero</div>
+          <div class="sc-meta">Herbert Quinteros<span class="meta-dot">·</span>Fire<span class="meta-dot">·</span>Spanish<span class="meta-dot">·</span>2 takes</div>
+        </div>
+        <div class="sc-action"><svg class="i" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+      </a>
+
+      <a href="screen21_song_page.html" class="song-card" data-title="pachamama pachacamac" data-artist="traditional" data-cat="earth" data-chords="true">
+        <div class="sc-main">
+          <div class="sc-title">Pachamama Pachacamac</div>
+          <div class="sc-meta">Traditional<span class="meta-dot">·</span>Earth<span class="meta-dot">·</span>Quechua<span class="meta-dot">·</span>Capo 2</div>
+        </div>
+        <div class="sc-action"><svg class="i" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+      </a>
+
+      <a href="screen21_song_page.html" class="song-card" data-title="aguita de manantial" data-artist="shimshai" data-cat="water" data-chords="true">
+        <div class="sc-main">
+          <div class="sc-title">Aguita de Manantial</div>
+          <div class="sc-meta">Shimshai<span class="meta-dot">·</span>Water<span class="meta-dot">·</span>Spanish<span class="meta-dot">·</span>1 take</div>
+        </div>
+        <div class="sc-action"><svg class="i" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+      </a>
+
+      <a href="screen21_song_page.html" class="song-card" data-title="corazon que sangra" data-artist="alonso del rio" data-cat="healing" data-chords="true">
+        <div class="sc-main">
+          <div class="sc-title">Corazón que Sangra</div>
+          <div class="sc-meta">Alonso del Río<span class="meta-dot">·</span>Healing<span class="meta-dot">·</span>Spanish<span class="meta-dot">·</span>Chords</div>
+        </div>
+        <div class="sc-action"><svg class="i" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+      </a>
+
+      <a href="screen21_song_page.html" class="song-card" data-title="madre tierra madre vida" data-artist="diego palma" data-cat="earth" data-chords="false">
+        <div class="sc-main">
+          <div class="sc-title">Madre Tierra Madre Vida</div>
+          <div class="sc-meta">Diego Palma<span class="meta-dot">·</span>Earth<span class="meta-dot">·</span>Spanish</div>
+        </div>
+        <div class="sc-action"><svg class="i" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+      </a>
+
+      <a href="screen21_song_page.html" class="song-card" data-title="vuela con el viento" data-artist="ayla schafer" data-cat="air" data-chords="false">
+        <div class="sc-main">
+          <div class="sc-title">Vuela con el Viento</div>
+          <div class="sc-meta">Ayla Schafer<span class="meta-dot">·</span>Air<span class="meta-dot">·</span>English / Spanish</div>
+        </div>
+        <div class="sc-action"><svg class="i" viewBox="0 0 24 24"><path d="M9 18l6-6-6-6"/></svg></div>
+      </a>
+
+    </div>
+  </div>
+</main>
+
+<!-- Mini player (G3.1) -->
+<aside class="player gutter" id="player">
+  <div class="prog"><i role="progressbar" aria-valuenow="45" aria-valuemin="0" aria-valuemax="100"></i></div>
+  <div class="wrap">
+    <button class="icon-btn pp" type="button" aria-label="Pause"><svg class="i" viewBox="0 0 24 24"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg></button>
+    <a href="screen21_song_page.html" class="txt" style="text-decoration: none; color: inherit;">
+      <div class="t1">Abre Tus Alas</div>
+      <div class="t2">Nina · Standard tuning</div>
+    </a>
+    <button class="icon-btn" type="button" id="close-player" aria-label="Close player"><svg class="i" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+  </div>
+</aside>
+
+<!-- Bottom Navigation Bar (G5.3) -->
+<nav class="navbar gutter">
+  <div class="wrap">
+    <a href="screen24_home.html" class="nav-item">
+      <svg class="i" viewBox="0 0 24 24"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <span>Home</span>
+    </a>
+    <a href="screen22_song_list.html" class="nav-item active">
+      <svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <span>Search</span>
+    </a>
+    <a href="screen25_playlist_sheet.html" class="nav-item">
+      <svg class="i" viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+      <span>Playlists</span>
+    </a>
+    <a href="screen20_design_system.html" class="nav-item">
+      <svg class="i" viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+      <span>Account</span>
+    </a>
+  </div>
+</nav>
+
+<script>
+(function() {
+  var root = document.documentElement;
+
+  // Theme switcher
+  var tGroup = document.querySelector('[aria-label="Theme"]');
+  tGroup.addEventListener('click', function(e) {
+    var b = e.target.closest('button');
+    if (!b) return;
+    if (b.dataset.t === 'auto') root.removeAttribute('data-theme');
+    else root.setAttribute('data-theme', b.dataset.t);
+    tGroup.querySelectorAll('button').forEach(function(btn) {
+      btn.setAttribute('aria-pressed', String(btn === b));
+    });
+  });
+
+  // Body size switcher
+  var bGroup = document.querySelector('[aria-label="Body size"]');
+  bGroup.addEventListener('click', function(e) {
+    var b = e.target.closest('button');
+    if (!b) return;
+    root.style.setProperty('--fs-body', b.dataset.b + 'px');
+    root.style.setProperty('--fs-row', b.dataset.b + 'px');
+    bGroup.querySelectorAll('button').forEach(function(btn) {
+      btn.setAttribute('aria-pressed', String(btn === b));
+    });
+  });
+
+  // Mini player toggle
+  var btnTogglePlayer = document.getElementById('btn-toggle-player');
+  var player = document.getElementById('player');
+  btnTogglePlayer.onclick = function() {
+    var on = btnTogglePlayer.getAttribute('aria-pressed') !== 'true';
+    btnTogglePlayer.setAttribute('aria-pressed', String(on));
+    player.hidden = !on;
+    document.body.classList.toggle('playing', on);
+  };
+  document.getElementById('close-player').onclick = function() {
+    btnTogglePlayer.setAttribute('aria-pressed', 'false');
+    player.hidden = true;
+    document.body.classList.remove('playing');
+  };
+
+  // Live filter & search
+  var searchInput = document.getElementById('search-input');
+  var clearBtn = document.getElementById('clear-btn');
+  var songCards = Array.from(document.querySelectorAll('.song-card'));
+  var resultCount = document.getElementById('result-count');
+  var activeFilter = 'all';
+
+  function filterSongs() {
+    var q = searchInput.value.trim().toLowerCase();
+    clearBtn.hidden = !q;
+    var count = 0;
+    songCards.forEach(function(card) {
+      var title = card.dataset.title;
+      var artist = card.dataset.artist;
+      var cat = card.dataset.cat;
+      var chords = card.dataset.chords === 'true';
+
+      var matchesQuery = !q || title.includes(q) || artist.includes(q);
+      var matchesFilter = true;
+      if (activeFilter === 'chords') matchesFilter = chords;
+      else if (activeFilter !== 'all') matchesFilter = cat.includes(activeFilter);
+
+      var visible = matchesQuery && matchesFilter;
+      card.style.display = visible ? 'flex' : 'none';
+      if (visible) count++;
+    });
+    resultCount.textContent = count + ' song' + (count === 1 ? '' : 's') + ' found';
+  }
+
+  searchInput.addEventListener('input', filterSongs);
+  clearBtn.addEventListener('click', function() {
+    searchInput.value = '';
+    filterSongs();
+    searchInput.focus();
+  });
+
+  // Filter chips click
+  document.querySelectorAll('.f-chip').forEach(function(chip) {
+    chip.addEventListener('click', function() {
+      document.querySelectorAll('.f-chip').forEach(function(c) { c.setAttribute('aria-pressed', 'false'); });
+      chip.setAttribute('aria-pressed', 'true');
+      activeFilter = chip.dataset.filter;
+      filterSongs();
+    });
+  });
+})();
+</script>
+</body>
+</html>

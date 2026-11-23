@@ -1,0 +1,626 @@
+<!--
+**Version:** 1.0
+**Status:** Accepted reference (Story 6.1.1 / G1.1 #385)
+**Date:** Nov 5, 2026
+
+## Changelog
+
+| Version | Date | Description of Changes |
+| ----- | ----- | ----- |
+| **1.0** | Nov 5, 2026 | Accepted as the UX v2 reference (#385); token names aligned with `app/styles/sober.css` (`--text-muted`, `--text-subtle`, `--r-control/panel/sheet`, `--elev-sheet`). |
+| **0.1** | Nov 4, 2026 | First design-system sheet on v2 tokens: swatches with WCAG contrast, type scale, spacing, buttons (primary, secondary, ghost, icon), song row (dense list), filter chips, meta line, segmented control, toolbar, sheet preview. |
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Design System & Tokens v2 - Sacred Fire Songs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="tokens.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+  padding-bottom: calc(var(--s-6) + env(safe-area-inset-bottom, 0px));
+}
+.gutter { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.wrap { max-width: 680px; margin: 0 auto; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: var(--r-control); }
+svg.i { width: 18px; height: 18px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---------- mockup controls bar ---------- */
+.mock {
+  border-bottom: 1px dashed var(--text-subtle);
+  background: var(--surface);
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
+  padding-block: var(--s-2);
+}
+.mock .wrap { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-3); align-items: center; }
+.mock strong { color: var(--text); font-weight: var(--fw-semibold); letter-spacing: 0.04em; text-transform: uppercase; }
+.mock-group { display: inline-flex; gap: 2px; background: var(--surface-2); border-radius: var(--r-control); padding: 2px; }
+.mock-group button { padding: 4px 8px; border-radius: 4px; min-height: 28px; }
+.mock-group button[aria-pressed="true"] { background: var(--bg); color: var(--text); font-weight: var(--fw-semibold); }
+.mock a { color: var(--accent); text-decoration: none; font-weight: var(--fw-medium); }
+.mock a:hover { text-decoration: underline; }
+.mock-note { flex-basis: 100%; color: var(--text-subtle); }
+
+/* ---------- section headers & layout ---------- */
+header.hero {
+  padding-top: var(--s-5);
+  padding-bottom: var(--s-4);
+  border-bottom: 1px solid var(--line);
+}
+h1 { margin: 0 0 var(--s-1); font-size: var(--fs-display); font-weight: var(--fw-semibold); letter-spacing: -0.02em; }
+.hero-desc { color: var(--text-muted); margin: 0; font-size: var(--fs-meta); }
+
+section { padding-block: var(--s-5); border-bottom: 1px solid var(--line); }
+h2 {
+  margin: 0 0 var(--s-3);
+  font-size: var(--fs-title);
+  font-weight: var(--fw-semibold);
+  letter-spacing: -0.01em;
+}
+.sec-intro { color: var(--text-muted); font-size: var(--fs-meta); margin: 0 0 var(--s-4); }
+
+/* ---------- swatches grid ---------- */
+.swatches { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: var(--s-3); }
+.swatch {
+  border: 1px solid var(--line);
+  border-radius: var(--r-control);
+  overflow: hidden;
+  background: var(--surface);
+  font-size: var(--fs-caption);
+}
+.swatch-color { height: 52px; width: 100%; border-bottom: 1px solid var(--line); position: relative; }
+.swatch-info { padding: var(--s-2); display: flex; flex-direction: column; gap: 2px; }
+.swatch-name { font-weight: var(--fw-semibold); color: var(--text); }
+.swatch-hex { color: var(--text-subtle); font-family: var(--font-mono); }
+.swatch-cr { font-size: 11px; color: var(--text-muted); margin-top: 2px; }
+.badge-pass { display: inline-block; padding: 1px 4px; border-radius: 3px; font-size: 10px; font-weight: var(--fw-semibold); background: var(--surface-2); color: var(--text-muted); width: fit-content; }
+
+/* ---------- type scale demo ---------- */
+.type-list { display: flex; flex-direction: column; gap: var(--s-3); }
+.type-row {
+  display: grid;
+  grid-template-columns: 100px 1fr;
+  align-items: baseline;
+  gap: var(--s-3);
+  padding-block: var(--s-2);
+  border-bottom: 1px dashed var(--line);
+}
+.type-label { font-size: var(--fs-caption); color: var(--text-subtle); font-family: var(--font-mono); }
+.type-sample { color: var(--text); }
+
+/* ---------- spacing demo ---------- */
+.space-list { display: flex; flex-direction: column; gap: var(--s-2); }
+.space-row { display: flex; align-items: center; gap: var(--s-3); }
+.space-label { width: 80px; font-size: var(--fs-caption); color: var(--text-subtle); font-family: var(--font-mono); }
+.space-bar { height: 20px; background: var(--accent); border-radius: 2px; opacity: 0.85; }
+
+/* ---------- components: buttons ---------- */
+.btn-grid { display: flex; flex-wrap: wrap; gap: var(--s-3); align-items: center; }
+.btn {
+  min-height: var(--tap);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s-2);
+  padding: 0 var(--s-4);
+  border-radius: var(--r-control);
+  font-weight: var(--fw-medium);
+  font-size: 15px;
+  text-decoration: none;
+}
+.btn-primary { background: var(--accent); color: var(--accent-ink); }
+.btn-primary:hover { filter: brightness(1.06); }
+.btn-secondary { background: var(--surface-2); color: var(--text); border: 1px solid var(--line); }
+.btn-secondary:hover { background: var(--line); }
+.btn-ghost { color: var(--text-muted); }
+.btn-ghost:hover { color: var(--text); background: var(--surface); }
+.btn-danger { color: var(--danger); background: transparent; border: 1px solid color-mix(in srgb, var(--danger) 30%, transparent); }
+.btn-danger:hover { background: color-mix(in srgb, var(--danger) 10%, transparent); }
+.icon-btn {
+  width: var(--tap); height: var(--tap);
+  display: grid; place-items: center;
+  border-radius: var(--r-control);
+  color: var(--text-muted);
+}
+.icon-btn:hover { color: var(--text); background: var(--surface); }
+
+/* ---------- components: song rows (dense list) ---------- */
+.list-group { border-radius: var(--r-panel); border: 1px solid var(--line); overflow: hidden; background: var(--bg); }
+.song-row {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  padding: var(--s-3) var(--s-4);
+  border-bottom: 1px solid var(--line);
+  min-height: 54px;
+}
+.song-row:last-child { border-bottom: 0; }
+.song-row.playing { background: var(--surface); border-left: 3px solid var(--accent); padding-left: calc(var(--s-4) - 3px); }
+.song-row .main-col { flex: 1; min-width: 0; }
+.song-row .row-title {
+  font-size: var(--fs-row);
+  font-weight: var(--fw-medium);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  color: var(--text);
+}
+.song-row.playing .row-title { color: var(--accent); font-weight: var(--fw-semibold); }
+.song-row .row-meta {
+  font-size: var(--fs-meta);
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.meta-dot { color: var(--text-subtle); padding-inline: 3px; }
+
+/* ---------- components: filter chips ---------- */
+.chip-row { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-1);
+  min-height: 34px;
+  padding: 0 var(--s-3);
+  border-radius: var(--r-pill);
+  font-size: var(--fs-meta);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  color: var(--text-muted);
+}
+.chip[aria-pressed="true"] {
+  background: var(--text);
+  color: var(--bg);
+  border-color: var(--text);
+  font-weight: var(--fw-medium);
+}
+.chip svg { width: 14px; height: 14px; }
+
+/* ---------- components: segmented control ---------- */
+.seg { display: inline-flex; background: var(--surface); border-radius: var(--r-panel); padding: 3px; gap: 2px; }
+.seg button {
+  min-height: 32px;
+  padding: 0 var(--s-3);
+  border-radius: 7px;
+  font-size: var(--fs-meta);
+  color: var(--text-muted);
+}
+.seg button[aria-pressed="true"] {
+  background: var(--bg);
+  color: var(--text);
+  font-weight: var(--fw-medium);
+  box-shadow: 0 0 0 1px var(--line);
+}
+
+/* ---------- components: viewer toolbar ---------- */
+.toolbar-box {
+  background: var(--surface);
+  border-radius: var(--r-panel);
+  padding: var(--s-2) var(--s-3);
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  border: 1px solid var(--line);
+}
+.switch { display: inline-flex; align-items: center; gap: var(--s-2); min-height: var(--tap); font-size: var(--fs-meta); color: var(--text-muted); }
+.switch .track { width: 34px; height: 20px; border-radius: var(--r-pill); background: var(--surface-2); position: relative; transition: background .15s; box-shadow: inset 0 0 0 1px var(--line); }
+.switch .track::after { content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: var(--text-subtle); transition: transform .15s, background .15s; }
+.switch[aria-checked="true"] .track { background: var(--text); box-shadow: none; }
+.switch[aria-checked="true"] .track::after { transform: translateX(14px); background: var(--bg); }
+.switch[aria-checked="true"] { color: var(--text); }
+.sizer { display: inline-flex; border: 1px solid var(--line); border-radius: var(--r-control); overflow: hidden; background: var(--bg); }
+.sizer button { width: var(--tap); height: 36px; font-size: var(--fs-meta); color: var(--text-muted); font-weight: var(--fw-medium); }
+.sizer button + button { border-left: 1px solid var(--line); }
+.sizer button:hover:not(:disabled) { background: var(--surface); color: var(--text); }
+.sizer button:disabled { color: var(--line); cursor: default; }
+
+/* ---------- sheet mock preview ---------- */
+.sheet-preview {
+  border: 1px solid var(--line);
+  border-radius: var(--r-sheet);
+  background: var(--surface);
+  box-shadow: var(--elev-sheet);
+  overflow: hidden;
+}
+.sheet-preview .grabber {
+  width: 36px; height: 4px; border-radius: 2px; background: var(--surface-2); margin: var(--s-2) auto var(--s-1);
+}
+.sheet-preview .sheet-header {
+  padding: var(--s-2) var(--s-4);
+  font-size: var(--fs-meta);
+  color: var(--text-subtle);
+}
+.sheet-preview ul { list-style: none; margin: 0; padding: 0; }
+.sheet-preview li + li { border-top: 1px solid var(--line); }
+.sheet-preview .row-btn {
+  width: 100%; min-height: 48px; display: flex; align-items: center; gap: var(--s-3); padding: 0 var(--s-4); text-align: left; font-size: var(--fs-row);
+}
+.sheet-preview .row-btn svg { color: var(--text-subtle); }
+</style>
+</head>
+<body>
+
+<!-- Mockup Controls -->
+<div class="mock gutter" aria-label="Mockup controls">
+  <div class="wrap">
+    <strong>Design System</strong>
+    <span class="mock-group" role="group" aria-label="Theme">
+      <button type="button" id="t-auto" data-t="auto" aria-pressed="true">Auto</button>
+      <button type="button" id="t-light" data-t="light" aria-pressed="false">Light</button>
+      <button type="button" id="t-dark" data-t="dark" aria-pressed="false">Dark</button>
+    </span>
+    <span class="mock-group" role="group" aria-label="Body size">
+      <button type="button" id="b-15" data-b="15" aria-pressed="false">Body 15</button>
+      <button type="button" id="b-16" data-b="16" aria-pressed="true">16</button>
+    </span>
+    <span style="display: inline-flex; gap: 6px; margin-left: auto;">
+      <a href="screen24_home.html">Home</a> ·
+      <a href="screen22_song_list.html">Songs</a> ·
+      <a href="screen21_song_page.html">Song Page</a> ·
+      <a href="screen23_practice_drawer.html">Practice</a> ·
+      <a href="screen25_playlist_sheet.html">Playlist</a>
+    </span>
+    <span class="mock-note">Story 6.1.1 (G1.1, #385). Monochromatic structure, one fire accent, minimum 12px type, WCAG 2.2 AA compliant.</span>
+  </div>
+</div>
+
+<header class="hero gutter">
+  <div class="wrap">
+    <h1>Design Tokens & Components v2</h1>
+    <p class="hero-desc">Sober greyscale foundation for Sacred Fire Songs. Derives directly from the ChordPro reader experience (Report §5).</p>
+  </div>
+</header>
+
+<main class="gutter">
+  <div class="wrap">
+
+    <!-- 1. Color Tokens & WCAG Contrast -->
+    <section id="colors">
+      <h2>1. Colour Tokens & Contrast</h2>
+      <p class="sec-intro">Greys provide structure and hierarchy. <code>--accent</code> is reserved exclusively for primary actions, the "now playing" indicator, and chord notation symbols. No rainbow categories.</p>
+      
+      <div class="swatches">
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--bg);"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">--bg</span>
+            <span class="swatch-hex">Base canvas</span>
+            <span class="badge-pass">Canvas</span>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--surface);"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">--surface</span>
+            <span class="swatch-hex">Cards & bars</span>
+            <span class="badge-pass">Layer 1</span>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--surface-2);"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">--surface-2</span>
+            <span class="swatch-hex">Toggles & pills</span>
+            <span class="badge-pass">Layer 2</span>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--line);"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">--line</span>
+            <span class="swatch-hex">Subtle borders</span>
+            <span class="badge-pass">Hairlines</span>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--text);"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">--text</span>
+            <span class="swatch-hex">Primary text</span>
+            <span class="swatch-cr">≥ 16:1</span>
+            <span class="badge-pass">AAA Pass</span>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--text-muted);"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">--text-muted</span>
+            <span class="swatch-hex">Secondary text</span>
+            <span class="swatch-cr">≥ 6.8:1</span>
+            <span class="badge-pass">AA Pass</span>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--text-subtle);"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">--text-subtle</span>
+            <span class="swatch-hex">Meta & captions</span>
+            <span class="swatch-cr">≥ 5.2:1</span>
+            <span class="badge-pass">AA Pass</span>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--accent);"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">--accent</span>
+            <span class="swatch-hex">Fire orange</span>
+            <span class="swatch-cr">≥ 5.2:1</span>
+            <span class="badge-pass">Key hue</span>
+          </div>
+        </div>
+        <div class="swatch">
+          <div class="swatch-color" style="background: var(--danger);"></div>
+          <div class="swatch-info">
+            <span class="swatch-name">--danger</span>
+            <span class="swatch-hex">Destructive</span>
+            <span class="swatch-cr">≥ 4.6:1</span>
+            <span class="badge-pass">AA Pass</span>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Typography Scale -->
+    <section id="type">
+      <h2>2. Typography Scale</h2>
+      <p class="sec-intro">Clear hierarchy built on <strong>Geist Sans</strong> and <strong>Geist Mono</strong>. Strict rule: no font size smaller than 12px anywhere in the UI.</p>
+      
+      <div class="type-list">
+        <div class="type-row">
+          <div class="type-label">display 28px</div>
+          <div class="type-sample" style="font-size: var(--fs-display); font-weight: var(--fw-semibold); line-height: var(--lh-tight);">Sacred Fire Songs</div>
+        </div>
+        <div class="type-row">
+          <div class="type-label">title 22px</div>
+          <div class="type-sample" style="font-size: var(--fs-title); font-weight: var(--fw-semibold); line-height: var(--lh-tight);">Danza del Cielo Curandero</div>
+        </div>
+        <div class="type-row">
+          <div class="type-label">row / body 16px</div>
+          <div class="type-sample" style="font-size: var(--fs-body); font-weight: var(--fw-medium);">Standard reading body and list item title</div>
+        </div>
+        <div class="type-row">
+          <div class="type-label">meta 13px</div>
+          <div class="type-sample" style="font-size: var(--fs-meta); color: var(--text-muted);">Herbert Quinteros · Fire · Healing · Spanish · 2 takes</div>
+        </div>
+        <div class="type-row">
+          <div class="type-label">caption 12px</div>
+          <div class="type-sample" style="font-size: var(--fs-caption); color: var(--text-subtle); text-transform: uppercase; letter-spacing: 0.05em; font-weight: var(--fw-semibold);">CHORUS / SECTION BADGE (MINIMUM LIMIT)</div>
+        </div>
+        <div class="type-row">
+          <div class="type-label">mono 13px</div>
+          <div class="type-sample" style="font-family: var(--font-mono); font-size: 13px; font-weight: var(--fw-semibold); color: var(--chord);">[Em]  [Am]  [B7]  [Em] (ChordPro chords)</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Spacing Scale -->
+    <section id="spacing">
+      <h2>3. Spacing Scale</h2>
+      <p class="sec-intro">Consistent 4px geometric progression: 4, 8, 12, 16, 24, 32px.</p>
+      
+      <div class="space-list">
+        <div class="space-row">
+          <div class="space-label">--s-1 (4px)</div>
+          <div class="space-bar" style="width: 4px;"></div>
+        </div>
+        <div class="space-row">
+          <div class="space-label">--s-2 (8px)</div>
+          <div class="space-bar" style="width: 8px;"></div>
+        </div>
+        <div class="space-row">
+          <div class="space-label">--s-3 (12px)</div>
+          <div class="space-bar" style="width: 12px;"></div>
+        </div>
+        <div class="space-row">
+          <div class="space-label">--s-4 (16px)</div>
+          <div class="space-bar" style="width: 16px;"></div>
+        </div>
+        <div class="space-row">
+          <div class="space-label">--s-5 (24px)</div>
+          <div class="space-bar" style="width: 24px;"></div>
+        </div>
+        <div class="space-row">
+          <div class="space-label">--s-6 (32px)</div>
+          <div class="space-bar" style="width: 32px;"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Interactive Components -->
+    <section id="buttons">
+      <h2>4. Buttons & Actions</h2>
+      <p class="sec-intro">All interactive controls meet the 44×44px minimum touch target requirement (WCAG 2.5.8).</p>
+      
+      <div class="btn-grid">
+        <button type="button" class="btn btn-primary">
+          <svg class="i" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+          Primary Action
+        </button>
+        <button type="button" class="btn btn-secondary">Secondary</button>
+        <button type="button" class="btn btn-ghost">Ghost / Text</button>
+        <button type="button" class="btn btn-danger">Destructive</button>
+        <button type="button" class="icon-btn" aria-label="Search">
+          <svg class="i" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+        </button>
+        <button type="button" class="icon-btn" aria-label="Heart">
+          <svg class="i" viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/></svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- 5. Dense Song List Rows -->
+    <section id="lists">
+      <h2>5. Song Rows (G1.2 & G7.1)</h2>
+      <p class="sec-intro">High-density row layout for fast scanning: song title on line 1, single grey meta line below. Clean dividers instead of heavy card borders.</p>
+      
+      <div class="list-group">
+        <div class="song-row">
+          <div class="main-col">
+            <div class="row-title">Danza del Cielo Curandero</div>
+            <div class="row-meta">Herbert Quinteros<span class="meta-dot">·</span>Fire<span class="meta-dot">·</span>Spanish<span class="meta-dot">·</span>2 takes</div>
+          </div>
+          <button class="icon-btn" type="button" aria-label="Options"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/><circle cx="5" cy="12" r="1.5"/></svg></button>
+        </div>
+        
+        <div class="song-row playing">
+          <div class="main-col">
+            <div class="row-title">Abre Tus Alas (Now Playing)</div>
+            <div class="row-meta">Nina<span class="meta-dot">·</span>Water<span class="meta-dot">·</span>Spanish<span class="meta-dot">·</span>Chords + Melody</div>
+          </div>
+          <button class="icon-btn" type="button" style="color: var(--accent);" aria-label="Playing"><svg class="i" viewBox="0 0 24 24"><polygon points="5 3 19 12 5 21 5 3"/></svg></button>
+        </div>
+        
+        <div class="song-row">
+          <div class="main-col">
+            <div class="row-title">Pachamama Pachacamac</div>
+            <div class="row-meta">Traditional<span class="meta-dot">·</span>Earth<span class="meta-dot">·</span>Quechua<span class="meta-dot">·</span>Capo 2</div>
+          </div>
+          <button class="icon-btn" type="button" aria-label="Options"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/><circle cx="5" cy="12" r="1.5"/></svg></button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. Filter Chips & Segmented Controls -->
+    <section id="chips-and-controls">
+      <h2>6. Chips & Segmented Controls</h2>
+      <p class="sec-intro">Chips are reserved exclusively for filtering (G1.4) — not decorative badges. Segmented controls organize related views.</p>
+      
+      <div style="display: flex; flex-direction: column; gap: var(--s-4);">
+        <div>
+          <div style="font-size: var(--fs-caption); color: var(--text-subtle); margin-bottom: var(--s-2); font-weight: var(--fw-semibold);">FILTER CHIPS (TAP TO TOGGLE)</div>
+          <div class="chip-row">
+            <button type="button" class="chip" aria-pressed="true">
+              <svg class="i" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg>
+              All Categories
+            </button>
+            <button type="button" class="chip" aria-pressed="false">Fire</button>
+            <button type="button" class="chip" aria-pressed="false">Water</button>
+            <button type="button" class="chip" aria-pressed="false">Healing</button>
+            <button type="button" class="chip" aria-pressed="false">Spanish</button>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size: var(--fs-caption); color: var(--text-subtle); margin-bottom: var(--s-2); font-weight: var(--fw-semibold);">SEGMENTED CONTROLS (G2.6)</div>
+          <div class="seg" role="group" aria-label="Version switcher">
+            <button type="button" aria-pressed="true">Original</button>
+            <button type="button" aria-pressed="false">Simplified</button>
+            <button type="button" aria-pressed="false">Live</button>
+          </div>
+          <div class="seg" role="group" aria-label="Language switcher" style="margin-left: var(--s-2);">
+            <button type="button" aria-pressed="true">ES</button>
+            <button type="button" aria-pressed="false">EN</button>
+          </div>
+        </div>
+
+        <div>
+          <div style="font-size: var(--fs-caption); color: var(--text-subtle); margin-bottom: var(--s-2); font-weight: var(--fw-semibold);">VIEWER TOOLBAR (G2.2)</div>
+          <div class="toolbar-box">
+            <button class="switch" type="button" role="switch" aria-checked="true" id="chord-sw">
+              <span class="track"></span>
+              <span>Chords</span>
+            </button>
+            <div style="flex: 1;"></div>
+            <div class="sizer" role="group" aria-label="Lyrics font size">
+              <button type="button" id="sz-dec" aria-label="Smaller">A−</button>
+              <button type="button" id="sz-inc" aria-label="Larger">A+</button>
+            </div>
+            <button class="icon-btn" type="button" aria-label="More options"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="1.5"/><circle cx="19" cy="12" r="1.5"/><circle cx="5" cy="12" r="1.5"/></svg></button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. Bottom Sheet Preview -->
+    <section id="sheet">
+      <h2>7. Shared Bottom Sheet (G1.3)</h2>
+      <p class="sec-intro">Replaces fragmented custom dialogs. Uses 16px rounded top corners, top grabber handle, and clear touch actions.</p>
+      
+      <div class="sheet-preview">
+        <div class="grabber"></div>
+        <div class="sheet-header">Song Actions</div>
+        <ul>
+          <li><button type="button" class="row-btn"><svg class="i" viewBox="0 0 24 24"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>Share song link</button></li>
+          <li><button type="button" class="row-btn"><svg class="i" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"/></svg>Edit lyrics & chords</button></li>
+          <li><button type="button" class="row-btn"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Version history</button></li>
+          <li><button type="button" class="row-btn" style="color: var(--danger);"><svg class="i" viewBox="0 0 24 24" style="color: var(--danger);"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>Report an error</button></li>
+        </ul>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<script>
+(function() {
+  var root = document.documentElement;
+
+  // Theme switcher
+  var tGroup = document.querySelector('[aria-label="Theme"]');
+  tGroup.addEventListener('click', function(e) {
+    var b = e.target.closest('button');
+    if (!b) return;
+    if (b.dataset.t === 'auto') root.removeAttribute('data-theme');
+    else root.setAttribute('data-theme', b.dataset.t);
+    tGroup.querySelectorAll('button').forEach(function(btn) {
+      btn.setAttribute('aria-pressed', String(btn === b));
+    });
+  });
+
+  // Body size switcher
+  var bGroup = document.querySelector('[aria-label="Body size"]');
+  bGroup.addEventListener('click', function(e) {
+    var b = e.target.closest('button');
+    if (!b) return;
+    root.style.setProperty('--fs-body', b.dataset.b + 'px');
+    bGroup.querySelectorAll('button').forEach(function(btn) {
+      btn.setAttribute('aria-pressed', String(btn === b));
+    });
+  });
+
+  // Toggle filter chips
+  document.querySelectorAll('.chip').forEach(function(chip) {
+    chip.addEventListener('click', function() {
+      var pressed = chip.getAttribute('aria-pressed') === 'true';
+      chip.setAttribute('aria-pressed', String(!pressed));
+    });
+  });
+
+  // Segmented control buttons
+  document.querySelectorAll('.seg').forEach(function(seg) {
+    seg.addEventListener('click', function(e) {
+      var b = e.target.closest('button');
+      if (!b) return;
+      seg.querySelectorAll('button').forEach(function(btn) {
+        btn.setAttribute('aria-pressed', String(btn === b));
+      });
+    });
+  });
+
+  // Chords toggle switch demo
+  var chordSw = document.getElementById('chord-sw');
+  if (chordSw) {
+    chordSw.addEventListener('click', function() {
+      var ch = chordSw.getAttribute('aria-checked') === 'true';
+      chordSw.setAttribute('aria-checked', String(!ch));
+    });
+  }
+})();
+</script>
+</body>
+</html>

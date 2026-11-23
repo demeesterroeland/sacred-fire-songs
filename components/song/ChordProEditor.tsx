@@ -11,7 +11,7 @@ const ChordProEditor = forwardRef<HTMLTextAreaElement, ChordProEditorProps>(
       const parts = text.split(/(\[.*?\])/g);
       return parts.map((part, i) => {
         if (part.startsWith('[') && part.endsWith(']')) {
-          return <span key={i} className="text-primary font-bold">{part}</span>;
+          return <span key={i} className="text-chord font-bold">{part}</span>;
         }
         return part;
       });
@@ -39,7 +39,7 @@ const ChordProEditor = forwardRef<HTMLTextAreaElement, ChordProEditorProps>(
         <div style={{ position: 'relative', minWidth: '100%', minHeight: '100%', width: 'max-content', display: 'flex' }}>
           {/* Backdrop Layer */}
           <div
-            className="pointer-events-none text-gray-900 dark:text-white flex-1"
+            className="pointer-events-none text-fg flex-1"
             aria-hidden="true"
             style={{
               ...sharedStyles,
@@ -58,7 +58,7 @@ const ChordProEditor = forwardRef<HTMLTextAreaElement, ChordProEditorProps>(
           {/* Input Layer */}
           <textarea
             ref={ref}
-            className="absolute top-0 left-0 bg-transparent caret-gray-900 dark:caret-white focus:outline-none resize-none selection:bg-blue-500/30 selection:text-transparent placeholder:text-[#a19eb7]/30"
+            className="absolute top-0 left-0 bg-transparent caret-fg resize-none selection:bg-accent-soft selection:text-transparent placeholder:text-fg-subtle"
             style={{
               ...sharedStyles,
               zIndex: 1,

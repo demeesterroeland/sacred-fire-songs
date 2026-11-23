@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test';
+import { clickPractice } from '../fixtures/songActions';
 
-test.describe('Rehearsal Space Media Player E2E Tests', () => {
+test.describe('Practice Media Player E2E Tests', () => {
   let songUrl = '';
 
   test.beforeAll(async ({ playwright }) => {
@@ -55,26 +56,11 @@ test.describe('Rehearsal Space Media Player E2E Tests', () => {
 
     await page.goto(songUrl);
 
-    // Open Rehearsal Drawer Space (responsive: desktop header button or mobile overflow menu)
-    const recordBtn = page.locator('button[title="Recordings"]').first();
-    const moreActionsBtn = page.locator('button[aria-label="More actions"]').first();
+    // Open Rehearsal Drawer Space (responsive: desktop header button or the phone action bar)
+    await clickPractice(page);
 
-    await Promise.race([
-      recordBtn.waitFor({ state: 'attached', timeout: 15000 }).catch(() => {}),
-      moreActionsBtn.waitFor({ state: 'attached', timeout: 15000 }).catch(() => {})
-    ]);
-
-    if (await recordBtn.isVisible()) {
-      await recordBtn.click();
-    } else {
-      await moreActionsBtn.click();
-      const mobileRecordBtn = page.locator('button:has-text("Recordings")').filter({ visible: true }).first();
-      await expect(mobileRecordBtn).toBeVisible({ timeout: 5000 });
-      await mobileRecordBtn.click();
-    }
-
-    // Select Reference Tracks tab
-    const referenceTracksTab = page.locator('button:has-text("Reference Tracks")');
+    // Select Listen tab
+    const referenceTracksTab = page.locator('[data-testid="practice-tab-listen"]');
     await expect(referenceTracksTab).toBeVisible();
     await referenceTracksTab.click();
 
@@ -100,7 +86,7 @@ test.describe('Rehearsal Space Media Player E2E Tests', () => {
 
     const scBtn = page.locator('button:has-text("SoundCloud")');
     await scBtn.click();
-    await expect(scBtn).toHaveClass(/text-\[#ff5500\]/);
+    await expect(scBtn).toHaveAttribute("aria-pressed", "true");
 
     const lastYtMessage = await page.evaluate(() => (window as any).lastYtMessage);
     expect(lastYtMessage).toBeNull(); // Did not receive pause command
@@ -112,7 +98,7 @@ test.describe('Rehearsal Space Media Player E2E Tests', () => {
 
     const spotifyBtn = page.locator('button:has-text("Spotify")');
     await spotifyBtn.click();
-    await expect(spotifyBtn).toHaveClass(/text-\[#1db954\]/);
+    await expect(spotifyBtn).toHaveAttribute("aria-pressed", "true");
 
     const lastYtMessage = await page.evaluate(() => (window as any).lastYtMessage);
     expect(lastYtMessage).toBeNull(); // Did not receive pause command
@@ -121,7 +107,7 @@ test.describe('Rehearsal Space Media Player E2E Tests', () => {
   test('Permutation 3: Play SC -> Switch to YT (audio persists, no pause sent)', async ({ page }) => {
     const scBtn = page.locator('button:has-text("SoundCloud")');
     await scBtn.click();
-    await expect(scBtn).toHaveClass(/text-\[#ff5500\]/);
+    await expect(scBtn).toHaveAttribute("aria-pressed", "true");
     await page.waitForTimeout(1000);
 
     await page.evaluate(() => window.postMessage('{"event":"play"}', '*'));
@@ -129,7 +115,7 @@ test.describe('Rehearsal Space Media Player E2E Tests', () => {
 
     const ytBtn = page.locator('button:has-text("YouTube")');
     await ytBtn.click();
-    await expect(ytBtn).toHaveClass(/text-red-550/);
+    await expect(ytBtn).toHaveAttribute("aria-pressed", "true");
 
     const lastScMessage = await page.evaluate(() => (window as any).lastScMessage);
     expect(lastScMessage).toBeNull(); // Did not receive pause command
@@ -138,7 +124,7 @@ test.describe('Rehearsal Space Media Player E2E Tests', () => {
   test('Permutation 4: Play SC -> Switch to SP (audio persists, no pause sent)', async ({ page }) => {
     const scBtn = page.locator('button:has-text("SoundCloud")');
     await scBtn.click();
-    await expect(scBtn).toHaveClass(/text-\[#ff5500\]/);
+    await expect(scBtn).toHaveAttribute("aria-pressed", "true");
     await page.waitForTimeout(1000);
 
     await page.evaluate(() => window.postMessage('{"event":"play"}', '*'));
@@ -146,7 +132,7 @@ test.describe('Rehearsal Space Media Player E2E Tests', () => {
 
     const spotifyBtn = page.locator('button:has-text("Spotify")');
     await spotifyBtn.click();
-    await expect(spotifyBtn).toHaveClass(/text-\[#1db954\]/);
+    await expect(spotifyBtn).toHaveAttribute("aria-pressed", "true");
 
     const lastScMessage = await page.evaluate(() => (window as any).lastScMessage);
     expect(lastScMessage).toBeNull(); // Did not receive pause command
@@ -155,7 +141,7 @@ test.describe('Rehearsal Space Media Player E2E Tests', () => {
   test('Permutation 5: Play SP -> Switch to YT (audio persists, no tab change override)', async ({ page }) => {
     const spotifyBtn = page.locator('button:has-text("Spotify")');
     await spotifyBtn.click();
-    await expect(spotifyBtn).toHaveClass(/text-\[#1db954\]/);
+    await expect(spotifyBtn).toHaveAttribute("aria-pressed", "true");
     await page.waitForTimeout(1000);
 
     // Focus Spotify iframe (this calls pauseYouTube + pauseSoundCloud internally)
@@ -174,7 +160,7 @@ test.describe('Rehearsal Space Media Player E2E Tests', () => {
 
     const ytBtn = page.locator('button:has-text("YouTube")');
     await ytBtn.click();
-    await expect(ytBtn).toHaveClass(/text-red-550/);
+    await expect(ytBtn).toHaveAttribute("aria-pressed", "true");
 
     const source = await page.evaluate(() => (window as any).lastYtMessage);
     expect(source).toBeNull(); // Tab switch alone should NOT send a pause to YouTube
@@ -183,7 +169,7 @@ test.describe('Rehearsal Space Media Player E2E Tests', () => {
   test('Permutation 6: Play SP -> Switch to SC (audio persists, no tab change override)', async ({ page }) => {
     const spotifyBtn = page.locator('button:has-text("Spotify")');
     await spotifyBtn.click();
-    await expect(spotifyBtn).toHaveClass(/text-\[#1db954\]/);
+    await expect(spotifyBtn).toHaveAttribute("aria-pressed", "true");
     await page.waitForTimeout(1000);
 
     // Focus Spotify iframe (this calls pauseYouTube + pauseSoundCloud internally)
@@ -202,7 +188,7 @@ test.describe('Rehearsal Space Media Player E2E Tests', () => {
 
     const scBtn = page.locator('button:has-text("SoundCloud")');
     await scBtn.click();
-    await expect(scBtn).toHaveClass(/text-\[#ff5500\]/);
+    await expect(scBtn).toHaveAttribute("aria-pressed", "true");
 
     const source = await page.evaluate(() => (window as any).lastScMessage);
     expect(source).toBeNull(); // Tab switch alone should NOT send a pause to SoundCloud
@@ -358,6 +344,52 @@ test.describe('Rehearsal Space Media Player E2E Tests', () => {
   // CATEGORY 3: BOTTOM MINI-PLAYER DISPLAY & SYNC (3 Permutations)
   // =========================================================================
 
+  // Story 6.1.12 / G3.1 (#396), UXD-5: the mini player appears only after play.
+  test('Mini-player is not rendered on load, appears after play, hides after stop', async ({ page }) => {
+    const miniPlayer = page.locator('[data-testid="bottom-mini-player"]');
+    const reserved = () => page.evaluate(() => document.documentElement.style.getPropertyValue('--mini-player-h'));
+
+    // Fresh song page with the drawer open and a reference track preselected: no bar, nothing reserved
+    await expect(miniPlayer).toHaveCount(0);
+    expect(await reserved()).toBe('');
+
+    // Press play: bar appears, and the drawer body reserves room so the last row is never covered
+    await page.evaluate(() => window.postMessage('{"event":"onStateChange","info":1}', '*'));
+    await expect(miniPlayer).toBeVisible();
+    await expect.poll(reserved).toContain('3.5rem');
+    const barHeight = (await miniPlayer.boundingBox())!.height;
+    const bodyPad = await page.locator('[data-testid="rehearsal-drawer-body"]').evaluate(
+      (el) => parseFloat(getComputedStyle(el).paddingBottom),
+    );
+    expect(bodyPad).toBeGreaterThanOrEqual(barHeight);
+
+    // Scrolled to the end, the last visible block of the drawer ends above the bar
+    // (reference-track bar: no seeded take with audio in this mocked song; the take case is in ux-v2-mini-player.spec.ts).
+    const body = page.locator('[data-testid="rehearsal-drawer-body"]');
+    await body.evaluate((el) => { el.scrollTop = el.scrollHeight; });
+    await expect
+      .poll(async () => {
+        const barTop = (await miniPlayer.boundingBox())!.y;
+        const lastBottom = await body.evaluate((el) => {
+          const shown = [...el.children].filter((c) => (c as HTMLElement).offsetHeight > 0);
+          return shown[shown.length - 1].getBoundingClientRect().bottom;
+        });
+        return barTop - lastBottom;
+      })
+      .toBeGreaterThanOrEqual(0);
+
+    // Pause keeps the bar; closing the drawer keeps it too
+    await page.evaluate(() => window.postMessage('{"event":"onStateChange","info":2}', '*'));
+    await expect(miniPlayer).toBeVisible();
+    await page.locator('button[aria-label="Close"]').first().click();
+    await expect(miniPlayer).toBeVisible();
+
+    // Stop removes the bar and the reserved space
+    await miniPlayer.locator('[data-testid="mini-close-btn"]').click();
+    await expect(miniPlayer).toHaveCount(0);
+    await expect.poll(reserved).toBe('');
+  });
+
   test('Permutation 13: YouTube Mini-Player display on drawer fold', async ({ page }) => {
     await page.evaluate(() => window.postMessage('{"event":"onStateChange","info":1}', '*'));
     await page.waitForTimeout(500);
@@ -368,7 +400,7 @@ test.describe('Rehearsal Space Media Player E2E Tests', () => {
     const miniPlayer = page.locator('[data-testid="bottom-mini-player"]');
     await expect(miniPlayer).toBeVisible();
     await expect(miniPlayer.locator('text=Danza del Cielo Curandero').first()).toBeVisible();
-    await expect(miniPlayer.locator('text=YouTube Reference').first()).toBeVisible();
+    await expect(miniPlayer.getByTestId('mini-now-playing')).toContainText('YouTube');
   });
 
   test('Permutation 14: SoundCloud Mini-Player display on drawer fold', async ({ page }) => {
@@ -385,7 +417,7 @@ test.describe('Rehearsal Space Media Player E2E Tests', () => {
     const miniPlayer = page.locator('[data-testid="bottom-mini-player"]');
     await expect(miniPlayer).toBeVisible();
     await expect(miniPlayer.locator('text=Danza del Cielo Curandero').first()).toBeVisible();
-    await expect(miniPlayer.locator('text=SoundCloud Reference').first()).toBeVisible();
+    await expect(miniPlayer.getByTestId('mini-now-playing')).toContainText('SoundCloud');
   });
 
   // Owner decision (#342): the mini-player stays visible for every source, Spotify included.
@@ -409,12 +441,13 @@ test.describe('Rehearsal Space Media Player E2E Tests', () => {
 
     const miniPlayer = page.locator('[data-testid="bottom-mini-player"]');
     await expect(miniPlayer).toBeVisible();
-    await expect(miniPlayer.locator('text=Spotify Reference').first()).toBeVisible();
+    await expect(miniPlayer.getByTestId('mini-now-playing')).toContainText('Spotify');
   });
 
 
   test('Permutation 15a: Source Switcher dropdown interacts and switches tracks', async ({ page }) => {
-    // The Rehearsal Space drawer is open (beforeEach); close it to show the mini-player
+    // The Practice drawer is open (beforeEach); the mini-player only appears after play (#396)
+    await page.evaluate(() => window.postMessage('{"event":"onStateChange","info":1}', '*'));
     const closeBtn = page.locator('button[aria-label="Close"]').first();
     await closeBtn.click();
     
@@ -435,7 +468,7 @@ test.describe('Rehearsal Space Media Player E2E Tests', () => {
     await expect(dropdown).toBeHidden();
     
     // Verify track switched
-    await expect(miniPlayer.locator('text=SoundCloud Reference').first()).toBeVisible();
+    await expect(miniPlayer.getByTestId('mini-now-playing')).toContainText('SoundCloud');
   });
 
   // =========================================================================

@@ -8,10 +8,8 @@ import { PlaylistContextMenu } from './PlaylistContextMenu';
 import {
     togglePlaylistVisibility,
     updatePlaylistDescription,
-    getPlaylistSongsForExport,
 } from '@/app/actions/playlistActions';
-import { exportPlaylistToPdf, downloadPdf } from '@/lib/export/pdfExport';
-import { browserPdfStore, exportFingerprint, getOrCreatePdf, pdfCacheKey } from '@/lib/export/pdfCache';
+import { usePlaylistPdfExport } from '@/hooks/usePlaylistPdfExport';
 import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { usePlaylistRename } from '@/hooks/usePlaylistRename';
@@ -24,6 +22,9 @@ import {
     DialogDescription,
     DialogFooter,
 } from '@/components/ui/dialog';
+import { actionErrorMessage } from '@/lib/errors/actionError';
+import { SignInLink } from '@/components/auth/SignInLink';
+import { Button } from '@/components/ui/button';
 
 interface Props {
     playlistId: string;
@@ -46,7 +47,7 @@ export function PlaylistDetailHeader({
     isCurator = false,
     isLoggedIn = false,
 }: Props) {
-    const { t, locale } = useLocale();
+    const { t } = useLocale();
     const canEdit = isOwner || isCurator;
     // ─── Title ────────────────────────────────────────────────────────────────
     const {
@@ -71,7 +72,7 @@ export function PlaylistDetailHeader({
         startTransition(async () => {
             const result = await togglePlaylistVisibility(playlistId, next);
             if (result.error) {
-                toast.error(result.error);
+                toast.error(actionErrorMessage(result.error, t));
                 setIsPublic(!next);
             } else {
                 toast.success(next ? t('playlists.toast.nowPublic') : t('playlists.toast.nowPrivate'));
@@ -102,7 +103,7 @@ export function PlaylistDetailHeader({
         startTransition(async () => {
             const result = await updatePlaylistDescription(playlistId, trimmed);
             if (result.error) {
-                toast.error(result.error);
+                toast.error(actionErrorMessage(result.error, t));
                 setOptimisticDesc(initialDescription ?? '');
             }
         });
@@ -112,67 +113,15 @@ export function PlaylistDetailHeader({
     const router = useRouter();
 
     // ─── Export PDF ───────────────────────────────────────────────────────────
-    const [isExportingPdf, setIsExportingPdf] = useState(false);
     const [showLoginModal, setShowLoginModal] = useState(false);
-
-    const handleExportPdf = async () => {
-        if (!isLoggedIn) {
-            setShowLoginModal(true);
-            return;
-        }
-
-        if (songCount > 200) {
-            toast.error(t('playlists.export.limitExceeded', { max: 200 }));
-            return;
-        }
-
-        if (songCount === 0) {
-            toast.info(t('playlists.export.empty'));
-            return;
-        }
-
-        setIsExportingPdf(true);
-        const toastId = toast.loading(t('playlists.export.generating'));
-
-        try {
-            const result = await getPlaylistSongsForExport(playlistId);
-            if (result.error) {
-                toast.error(t('playlists.export.failed'), { id: toastId, description: result.error });
-                return;
-            }
-
-            if (!result.songs || result.songs.length === 0) {
-                toast.info(t('playlists.export.empty'), { id: toastId });
-                return;
-            }
-
-            const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
-            const exportData = {
-                title: result.title || optimisticTitle,
-                description: optimisticDesc || result.description,
-                songs: result.songs,
-                baseUrl,
-                locale,
-            };
-
-            // Reuse the last PDF while the playlist is unchanged (#304).
-            const userId = result.userId ?? 'anonymous';
-            const { blob } = await getOrCreatePdf({
-                store: browserPdfStore(),
-                key: pdfCacheKey(userId, playlistId),
-                fingerprint: await exportFingerprint({ ...exportData, userId, playlistId }),
-                generate: () => exportPlaylistToPdf(exportData),
-            });
-
-            downloadPdf(blob, result.title || optimisticTitle);
-            toast.success(t('playlists.export.downloaded'), { id: toastId });
-        } catch (error) {
-            console.error('Failed to export PDF:', error);
-            toast.error(t('playlists.export.failed'), { id: toastId });
-        } finally {
-            setIsExportingPdf(false);
-        }
-    };
+    const { exportPdf: handleExportPdf, isExportingPdf } = usePlaylistPdfExport({
+        playlistId,
+        title: optimisticTitle,
+        description: optimisticDesc,
+        songCount,
+        isLoggedIn,
+        onNeedLogin: () => setShowLoginModal(true),
+    });
 
     return (
         <div className="space-y-2">
@@ -180,7 +129,7 @@ export function PlaylistDetailHeader({
             <div className="flex items-center gap-3">
                 <Link
                     href="/library/playlists"
-                    className="text-gray-500 hover:text-gray-300 transition-colors shrink-0"
+                    className="shrink-0 text-fg-muted transition-colors hover:text-fg"
                     aria-label={t('playlists.detail.back')}
                 >
                     <ArrowLeft className="w-5 h-5" />
@@ -198,12 +147,12 @@ export function PlaylistDetailHeader({
                                 if (e.key === 'Escape') setIsRenaming(false);
                             }}
                             autoFocus
-                            className="w-full bg-gray-100 dark:bg-gray-800 border border-amber-500/50 rounded-lg px-2 py-1 text-xl font-bold text-gray-900 dark:text-gray-100 outline-none focus:border-amber-500"
+                            className="min-h-tap w-full px-2 py-1 text-title font-bold rounded-control border border-line-strong bg-surface text-fg placeholder:text-fg-subtle"
                         />
                     ) : (
-                        <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 truncate">{optimisticTitle}</h1>
+                        <h1 className="truncate text-xl font-bold text-fg">{optimisticTitle}</h1>
                     )}
-                    <p className="text-xs text-gray-500 mt-0.5">
+                    <p className="mt-0.5 text-xs text-fg-muted">
                         {songCount === 1 ? t('playlists.songCountSingle') : t('playlists.songCount', { count: songCount })}
                     </p>
                 </div>
@@ -214,12 +163,12 @@ export function PlaylistDetailHeader({
                         <button
                             onClick={handleToggleVisibility}
                             aria-label={isPublic ? t('playlists.context.makePrivate') : t('playlists.context.makePublic')}
-                            title={isPublic ? 'Public — click to make private' : 'Private — click to make public'}
-                            className="p-1.5 rounded-lg text-gray-600 hover:text-gray-800 dark:hover:text-gray-300 hover:bg-gray-200/60 dark:hover:bg-gray-700/60 transition-colors"
+                            title={isPublic ? t('playlists.context.makePrivate') : t('playlists.context.makePublic')}
+                            className="size-tap rounded-control text-fg-muted transition-colors hover:bg-surface-2 hover:text-fg"
                         >
                             {isPublic
-                                ? <Globe className="w-4 h-4 text-emerald-400" />
-                                : <Lock className="w-4 h-4" />
+                                ? <Globe className="w-4 h-4 text-fg-muted" />
+                                : <Lock className="w-4 h-4 text-fg-muted" />
                             }
                         </button>
                     )}
@@ -228,7 +177,7 @@ export function PlaylistDetailHeader({
                         disabled={isExportingPdf}
                         aria-label={t('playlists.export.menu')}
                         title={songCount === 0 ? t('playlists.export.addSongsFirst') : t('playlists.export.menu')}
-                        className="p-1.5 rounded-lg text-gray-600 hover:text-gray-800 dark:hover:text-gray-300 hover:bg-gray-200/60 dark:hover:bg-gray-700/60 transition-colors disabled:opacity-40"
+                        className="size-tap rounded-control text-fg-muted transition-colors hover:bg-surface-2 hover:text-fg disabled:opacity-40"
                     >
                         <Printer className="w-4 h-4" />
                     </button>
@@ -261,7 +210,7 @@ export function PlaylistDetailHeader({
                         autoFocus
                         rows={2}
                         placeholder={t('playlists.detail.addDescription')}
-                        className="w-full bg-gray-100 dark:bg-gray-800 border border-amber-500/50 rounded-lg px-3 py-2 text-sm text-gray-600 dark:text-gray-300 placeholder-gray-400 dark:placeholder-gray-600 outline-none focus:border-amber-500 resize-none"
+                        className="w-full resize-none px-3 py-2 text-meta rounded-control border border-line-strong bg-surface text-fg placeholder:text-fg-subtle"
                     />
                 ) : (
                     <button
@@ -273,41 +222,36 @@ export function PlaylistDetailHeader({
                         className="text-sm text-left w-full"
                     >
                         {optimisticDesc
-                            ? <span className="text-gray-400">{optimisticDesc}</span>
-                            : <span className="italic text-gray-700 hover:text-gray-600 transition-colors">{t('playlists.detail.addDescription')}</span>
+                            ? <span className="text-fg-muted">{optimisticDesc}</span>
+                            : <span className="italic text-fg-muted transition-colors hover:text-fg">{t('playlists.detail.addDescription')}</span>
                         }
                     </button>
                 )
             ) : (
                 optimisticDesc
-                    ? <p className="text-sm text-gray-400">{optimisticDesc}</p>
+                    ? <p className="text-sm text-fg-muted">{optimisticDesc}</p>
                     : null
             )}
 
             {/* Login Prompt Modal for PDF Export */}
             <Dialog open={showLoginModal} onOpenChange={setShowLoginModal}>
-                <DialogContent className="sm:max-w-md bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-800 text-gray-900 dark:text-gray-100">
+                <DialogContent className="rounded-panel border-line bg-surface text-fg sm:max-w-md">
                     <DialogHeader>
                         <DialogTitle className="text-xl font-bold">{t('playlists.export.login.title')}</DialogTitle>
-                        <DialogDescription className="text-gray-600 dark:text-gray-400 mt-2">
+                        <DialogDescription className="mt-2 text-fg-muted">
                             {t('playlists.export.login.description')}
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter className="mt-4 flex gap-2 sm:justify-end">
-                        <button
-                            type="button"
-                            onClick={() => setShowLoginModal(false)}
-                            className="px-4 py-2 text-sm font-medium rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                        >
+                        <Button type="button" variant="ghost" onClick={() => setShowLoginModal(false)}>
                             {t('playlists.export.login.cancel')}
-                        </button>
-                        <Link
+                        </Button>
+                        <SignInLink
                             href={`/auth/login?next=${encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname : `/library/playlists/${playlistId}`)}`}
-                            className="px-4 py-2 text-sm font-semibold rounded-lg bg-amber-500 hover:bg-amber-600 text-white transition-colors text-center"
                             onClick={() => setShowLoginModal(false)}
                         >
                             {t('playlists.export.login.submit')}
-                        </Link>
+                        </SignInLink>
                     </DialogFooter>
                 </DialogContent>
             </Dialog>

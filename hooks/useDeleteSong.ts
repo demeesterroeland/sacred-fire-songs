@@ -3,6 +3,8 @@
 import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import { useLocale } from '@/context/LocaleContext';
 import { createClient } from '@/lib/supabase/client';
 import { SONG_KEYS } from '@/lib/songs/queryKeys';
 
@@ -15,6 +17,7 @@ export function useDeleteSong() {
     const [isDeleting, setIsDeleting] = useState(false);
     const queryClient = useQueryClient();
     const router = useRouter();
+    const { t } = useLocale();
 
     const deleteSong = async (id: string, options?: { redirectTo?: string }): Promise<boolean> => {
         setIsDeleting(true);
@@ -22,15 +25,16 @@ export function useDeleteSong() {
         const { error } = await supabase.from('compositions').delete().eq('id', id);
 
         if (error) {
-            alert('Failed to delete song: ' + error.message);
+            toast.error(t('song.delete.failed'));
             setIsDeleting(false);
             return false;
         }
 
         // Invalidate all song lists so every page refetches
         await queryClient.invalidateQueries({ queryKey: SONG_KEYS.all() });
-        // Bust the global filter counts (chords/melody/mine may have changed)
+        // Bust the global filter counts (chords/melody/mine/songbooks/languages may have changed)
         queryClient.invalidateQueries({ queryKey: SONG_KEYS.globalFilterCounts() });
+        queryClient.invalidateQueries({ queryKey: SONG_KEYS.allGlobalBrowseCounts() });
         router.refresh(); // also bust Next.js Router Cache for Server Components
 
         if (options?.redirectTo) {

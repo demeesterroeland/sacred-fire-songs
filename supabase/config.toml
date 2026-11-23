@@ -96,8 +96,9 @@ openai_api_key = "env(OPENAI_API_KEY)"
 enabled = true
 # Port to use for the email testing server web interface.
 port = 54324
-# Uncomment to expose additional ports for testing user applications that send emails.
-# smtp_port = 54325
+# Exposed so the app's transactional emails (SMTP_HOST=127.0.0.1, SMTP_PORT=54325)
+# land in the local mailbox UI on port 54324.
+smtp_port = 54325
 # pop3_port = 54326
 # admin_email = "admin@email.com"
 # sender_name = "Admin"

@@ -1,0 +1,277 @@
+<!--
+**Version:** 1.0
+**Status:** Accepted reference (Story 6.1.1 / G8.1 #414)
+**Date:** Nov 5, 2026
+
+## Changelog
+
+| Version | Date | Description of Changes |
+| ----- | ----- | ----- |
+| **1.0** | Nov 5, 2026 | Accepted as the UX v2 reference (#385); token names aligned with `app/styles/sober.css` (`--text-muted`, `--text-subtle`, `--r-control/panel/sheet`, `--elev-sheet`). |
+| **0.1** | Nov 5, 2026 | Add to Playlist bottom sheet mockup: "+ New playlist" button as top item, checkmarks for playlists already containing the song, privacy indicator, and instant toggle feedback. |
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Add to Playlist - Sacred Fire Songs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@500;600&display=swap">
+<link rel="stylesheet" href="tokens.css">
+<style>
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-sans);
+  font-size: var(--fs-body);
+  line-height: var(--lh-body);
+}
+.gutter { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.wrap { max-width: 640px; margin: 0 auto; }
+button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: var(--r-control); }
+svg.i { width: 20px; height: 20px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---------- mockup controls bar ---------- */
+.mock {
+  border-bottom: 1px dashed var(--text-subtle);
+  background: var(--surface);
+  font-size: var(--fs-caption);
+  color: var(--text-muted);
+  padding-block: var(--s-2);
+}
+.mock .wrap { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-3); align-items: center; }
+.mock strong { color: var(--text); font-weight: var(--fw-semibold); letter-spacing: 0.04em; text-transform: uppercase; }
+.mock-group { display: inline-flex; gap: 2px; background: var(--surface-2); border-radius: var(--r-control); padding: 2px; }
+.mock-group button { padding: 4px 8px; border-radius: 4px; min-height: 28px; }
+.mock-group button[aria-pressed="true"] { background: var(--bg); color: var(--text); font-weight: var(--fw-semibold); }
+.mock-links { display: inline-flex; gap: var(--s-2); margin-left: auto; }
+.mock-links a { color: var(--accent); text-decoration: none; font-weight: var(--fw-medium); }
+.mock-links a:hover { text-decoration: underline; }
+.mock-note { flex-basis: 100%; color: var(--text-subtle); }
+
+/* dimmed background behind the sheet */
+.bg-stage {
+  padding-block: var(--s-4);
+  opacity: 0.35;
+  pointer-events: none;
+  filter: blur(1px);
+}
+.demo-song-head { font-size: 20px; font-weight: var(--fw-semibold); margin-bottom: 4px; }
+.demo-song-sub { font-size: 13px; color: var(--text-muted); }
+
+/* ---------- bottom sheet (G8.1) ---------- */
+.sheet-container {
+  position: fixed; left: 0; right: 0; bottom: 0; z-index: 40;
+  background: var(--surface);
+  border-radius: var(--r-sheet) var(--r-sheet) 0 0;
+  border-top: 1px solid var(--line);
+  box-shadow: var(--elev-sheet);
+  padding-bottom: calc(var(--s-4) + env(safe-area-inset-bottom, 0px));
+}
+.grabber { width: 36px; height: 4px; border-radius: 2px; background: var(--surface-2); margin: var(--s-2) auto var(--s-1); }
+
+.sheet-head {
+  padding: var(--s-2) var(--s-4) var(--s-3);
+  display: flex; justify-content: space-between; align-items: center;
+  border-bottom: 1px solid var(--line);
+}
+.sheet-title { font-size: 17px; font-weight: var(--fw-semibold); color: var(--text); margin: 0; }
+.sheet-close { color: var(--text-subtle); }
+.sheet-close:hover { color: var(--text); }
+
+/* new playlist action item */
+.new-pl-btn {
+  width: 100%; display: flex; align-items: center; gap: var(--s-3);
+  padding: var(--s-3) var(--s-4);
+  color: var(--accent); font-weight: var(--fw-medium); font-size: 15px;
+  border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--accent) 4%, transparent);
+}
+.new-pl-btn svg { stroke-width: 2.2; }
+.new-pl-btn:hover { background: color-mix(in srgb, var(--accent) 8%, transparent); }
+
+/* playlist items */
+.pl-list { list-style: none; margin: 0; padding: 0; }
+.pl-item {
+  width: 100%; display: flex; align-items: center; gap: var(--s-3);
+  padding: var(--s-3) var(--s-4); text-align: left;
+  border-bottom: 1px solid var(--line);
+  transition: background .12s;
+}
+.pl-item:hover { background: var(--surface-2); }
+.pl-info { flex: 1; min-width: 0; }
+.pl-name { font-size: var(--fs-row); font-weight: var(--fw-medium); color: var(--text); }
+.pl-meta { font-size: var(--fs-meta); color: var(--text-subtle); margin-top: 1px; }
+
+/* checkbox / state indicator */
+.pl-check {
+  width: 24px; height: 24px; border-radius: 50%;
+  border: 1.5px solid var(--line); display: grid; place-items: center;
+  color: transparent; flex: none; transition: all .15s;
+}
+.pl-item[aria-checked="true"] .pl-check {
+  background: var(--accent); border-color: var(--accent); color: var(--accent-ink);
+}
+.pl-item[aria-checked="true"] .pl-name {
+  color: var(--accent); font-weight: var(--fw-semibold);
+}
+
+/* toast notification */
+.toast {
+  position: fixed; top: 64px; left: 50%; transform: translateX(-50%) translateY(-20px);
+  background: var(--text); color: var(--bg); font-size: var(--fs-meta); font-weight: var(--fw-medium);
+  padding: 8px 16px; border-radius: var(--r-pill); box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+  z-index: 50; opacity: 0; pointer-events: none; transition: all .2s;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+
+<!-- Mockup Controls -->
+<div class="mock gutter" aria-label="Mockup controls">
+  <div class="wrap">
+    <strong>Mockup</strong>
+    <span class="mock-group" role="group" aria-label="Theme">
+      <button type="button" id="t-auto" data-t="auto" aria-pressed="true">Auto</button>
+      <button type="button" id="t-light" data-t="light" aria-pressed="false">Light</button>
+      <button type="button" id="t-dark" data-t="dark" aria-pressed="false">Dark</button>
+    </span>
+    <div class="mock-links">
+      <a href="screen21_song_page.html">Song Page</a> ·
+      <a href="screen22_song_list.html">Song List</a> ·
+      <a href="screen24_home.html">Home</a> ·
+      <a href="screen20_design_system.html">Tokens</a>
+    </div>
+    <span class="mock-note">G8.1 Add-to-playlist bottom sheet: "+ New playlist" first, checkmarks for existing songs. Tap a playlist to toggle.</span>
+  </div>
+</div>
+
+<div class="toast" id="toast">Added to playlist</div>
+
+<!-- Dimmed background simulation of the song page -->
+<div class="bg-stage gutter">
+  <div class="wrap">
+    <div class="demo-song-head">Danza del Cielo Curandero</div>
+    <div class="demo-song-sub">Herbert Quinteros · Fire · Healing · Spanish</div>
+    <p style="margin-top: 16px; line-height: 1.8;">
+      [Em] Danza del cielo, fuego sagrado,<br>
+      [Am] cura las almas, viento dorado.<br>
+      [B7] Abre las alas, limpia el camino,<br>
+      [Em] con la medicina de nuestro destino.
+    </p>
+  </div>
+</div>
+
+<!-- Bottom Sheet (G8.1) -->
+<div class="sheet-container gutter">
+  <div class="wrap">
+    <div class="grabber"></div>
+    <div class="sheet-head">
+      <h2 class="sheet-title">Add to Playlist</h2>
+      <a href="screen21_song_page.html" class="sheet-close" aria-label="Close sheet">
+        <svg class="i" viewBox="0 0 24 24"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </a>
+    </div>
+
+    <!-- 1. New playlist action is top item -->
+    <button type="button" class="new-pl-btn" id="btn-new-pl">
+      <svg class="i" viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      <span>Create New Playlist</span>
+    </button>
+
+    <!-- 2. Existing Playlists List -->
+    <ul class="pl-list" role="listbox">
+      <li>
+        <button type="button" class="pl-item" role="option" aria-checked="true">
+          <div class="pl-check"><svg class="i" style="width: 14px; height: 14px;" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="pl-info">
+            <div class="pl-name">Tonight's Sacred Fire Ceremony</div>
+            <div class="pl-meta">14 songs · Public · Ceremony tonight</div>
+          </div>
+        </button>
+      </li>
+
+      <li>
+        <button type="button" class="pl-item" role="option" aria-checked="true">
+          <div class="pl-check"><svg class="i" style="width: 14px; height: 14px;" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="pl-info">
+            <div class="pl-name">Heart Opening Medicine</div>
+            <div class="pl-meta">8 songs · Private</div>
+          </div>
+        </button>
+      </li>
+
+      <li>
+        <button type="button" class="pl-item" role="option" aria-checked="false">
+          <div class="pl-check"><svg class="i" style="width: 14px; height: 14px;" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="pl-info">
+            <div class="pl-name">Sweat Lodge Chants</div>
+            <div class="pl-meta">19 songs · Public</div>
+          </div>
+        </button>
+      </li>
+
+      <li>
+        <button type="button" class="pl-item" role="option" aria-checked="false">
+          <div class="pl-check"><svg class="i" style="width: 14px; height: 14px;" viewBox="0 0 24 24"><polyline points="20 6 9 17 4 12"/></svg></div>
+          <div class="pl-info">
+            <div class="pl-name">Morning Sun & Gratitude</div>
+            <div class="pl-meta">6 songs · Private</div>
+          </div>
+        </button>
+      </li>
+    </ul>
+
+  </div>
+</div>
+
+<script>
+(function() {
+  var root = document.documentElement;
+
+  // Theme switcher
+  var tGroup = document.querySelector('[aria-label="Theme"]');
+  tGroup.addEventListener('click', function(e) {
+    var b = e.target.closest('button');
+    if (!b) return;
+    if (b.dataset.t === 'auto') root.removeAttribute('data-theme');
+    else root.setAttribute('data-theme', b.dataset.t);
+    tGroup.querySelectorAll('button').forEach(function(btn) {
+      btn.setAttribute('aria-pressed', String(btn === b));
+    });
+  });
+
+  // Toggle playlist items
+  var toast = document.getElementById('toast');
+  var toastTimeout = null;
+
+  function showToast(msg) {
+    clearTimeout(toastTimeout);
+    toast.textContent = msg;
+    toast.classList.add('show');
+    toastTimeout = setTimeout(function() { toast.classList.remove('show'); }, 2000);
+  }
+
+  document.querySelectorAll('.pl-item').forEach(function(item) {
+    item.addEventListener('click', function() {
+      var checked = item.getAttribute('aria-checked') === 'true';
+      var name = item.querySelector('.pl-name').textContent;
+      item.setAttribute('aria-checked', String(!checked));
+      showToast(!checked ? 'Added to ' + name : 'Removed from ' + name);
+    });
+  });
+
+  document.getElementById('btn-new-pl').onclick = function() {
+    var title = prompt('Enter new playlist name:', 'New Ceremony');
+    if (title) showToast('Created playlist: ' + title);
+  };
+})();
+</script>
+</body>
+</html>

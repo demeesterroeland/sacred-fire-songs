@@ -4,16 +4,20 @@ import Link from 'next/link';
 import { useLocale } from '@/context/LocaleContext';
 
 interface BackButtonProps {
-    href?: string;
+    /** Where "Back" leads. On auth pages: `authBackHref(next)` (the page the guest came from, else Home). */
+    href: string;
     label?: string;
+    /** Test hook; auth pages pass `auth-back`. */
+    testId?: string;
 }
 
-export function BackButton({ href = '/', label }: BackButtonProps) {
+export function BackButton({ href, label, testId = 'back-link' }: BackButtonProps) {
     const { t } = useLocale();
     return (
         <Link
             href={href}
-            className="absolute left-8 top-8 py-2 px-4 rounded-md no-underline text-foreground bg-btn-background hover:bg-btn-background-hover flex items-center group text-sm text-gray-400 hover:text-white transition-colors"
+            data-testid={testId}
+            className="group -ml-2 inline-flex min-h-tap items-center gap-2 rounded-control px-2 text-body text-fg-muted no-underline transition-colors hover:bg-surface-2 hover:text-fg"
         >
             <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -25,7 +29,8 @@ export function BackButton({ href = '/', label }: BackButtonProps) {
                 strokeWidth="2"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                className="mr-2 h-4 w-4 transition-transform group-hover:-translate-x-1"
+                aria-hidden="true"
+                className="size-4 motion-safe:transition-transform motion-safe:group-hover:-translate-x-1"
             >
                 <polyline points="15 18 9 12 15 6" />
             </svg>

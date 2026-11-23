@@ -1,10 +1,11 @@
+import { countSharedTakes } from '@/lib/library/sharedByMe';
 import { createClient } from "@/lib/supabase/server";
 import type { Song } from "@/lib/songUtils";
 import type { TaxonomyNode } from "@/lib/taxonomyUtils";
-import { songsQuery, mapCompositionToSong } from './queries';
+import { songsQuery, fetchAllSongRows, mapCompositionToSong, recentlyAddedQuery, RECENTLY_ADDED_LIMIT, type CompositionRow } from './queries';
 import type { SupabaseClient } from "@supabase/supabase-js";
-import { normalizeWhitespace, removeDiacritics } from "@/lib/utils";
-import { parseArtists } from "./artistUtils";
+import { aggregateArtists, type ArtistRow, type ArtistSummary } from "./artistIndex";
+import { fetchFavoritesSetlistId } from "@/lib/playlists/favorites";
 
 const PAGE_SIZE = 20;
 
@@ -12,19 +13,14 @@ async function fetchFavoriteIds(supabase: SupabaseClient) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return new Set<string>();
 
-    const { data: setlist } = await supabase
-        .from('setlists')
-        .select('id')
-        .eq('owner_id', user.id)
-        .eq('title', 'My Favorites')
-        .maybeSingle();
+    const setlistId = await fetchFavoritesSetlistId(supabase, user.id);
 
-    if (!setlist) return new Set<string>();
+    if (!setlistId) return new Set<string>();
 
     const { data: items } = await supabase
         .from('setlist_items')
         .select('song_versions(composition_id)')
-        .eq('setlist_id', setlist.id);
+        .eq('setlist_id', setlistId);
 
     return new Set<string>(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -40,7 +36,8 @@ export async function fetchSongsServer(limit?: number): Promise<Song[]> {
     const supabase = await createClient();
 
     const [songsResult, favoriteIds] = await Promise.all([
-        songsQuery(supabase, { limit: limit ?? undefined }),
+        // No limit = the whole catalog, in pages (PostgREST caps one request at max_rows, #521).
+        limit ? songsQuery(supabase, { limit }) : fetchAllSongRows(supabase),
         fetchFavoriteIds(supabase),
     ]);
 
@@ -92,14 +89,9 @@ export async function fetchFavoriteSongsServer(): Promise<Song[]> {
 
     if (!user) return [];
 
-    const { data: setlist } = await supabase
-        .from('setlists')
-        .select('id')
-        .eq('owner_id', user.id)
-        .eq('title', 'My Favorites')
-        .maybeSingle();
+    const setlistId = await fetchFavoritesSetlistId(supabase, user.id);
 
-    if (!setlist) return [];
+    if (!setlistId) return [];
 
     const { data, error } = await supabase
         .from('setlist_items')
@@ -128,7 +120,7 @@ export async function fetchFavoriteSongsServer(): Promise<Song[]> {
                 )
             )
         `)
-        .eq('setlist_id', setlist.id)
+        .eq('setlist_id', setlistId)
         .order('order_index');
 
     if (error || !data) return [];
@@ -177,11 +169,16 @@ export interface LibrarySummary {
     favoritesCount: number;
     draftsCount: number;
     mySongsCount: number;
-    newSongsCount: number;
+    /** Songs I can read that have at least one take of mine (the list /songs?myRecordings=true shows). */
+    recordingsCount: number;
+    /** Takes other members shared with me. */
+    sharedWithMeCount: number;
+    /** My takes that I shared with at least one member. */
+    sharedByMeCount: number;
 }
 
 /**
- * Fetch aggregate counts for the home page "Your Library" summary.
+ * Fetch aggregate counts for the home page "Your Library" summary (Story 6.1.36: personal items only).
  * Only import from Server Components or Server Actions.
  */
 export async function getLibrarySummary(userId: string): Promise<LibrarySummary> {
@@ -189,55 +186,56 @@ export async function getLibrarySummary(userId: string): Promise<LibrarySummary>
 
     // Favorites count
     let favoritesCount = 0;
-    const { data: favSetlist } = await supabase
-        .from('setlists')
-        .select('id')
-        .eq('owner_id', userId)
-        .eq('title', 'My Favorites')
-        .maybeSingle();
-    if (favSetlist) {
+    const favSetlistId = await fetchFavoritesSetlistId(supabase, userId);
+    if (favSetlistId) {
         const { count } = await supabase
             .from('setlist_items')
             .select('id', { count: 'exact', head: true })
-            .eq('setlist_id', favSetlist.id);
+            .eq('setlist_id', favSetlistId);
         favoritesCount = count ?? 0;
     }
 
-    // My songs count (songs I own)
-    const { count: mySongsCount } = await supabase
-        .from('compositions')
-        .select('id', { count: 'exact', head: true })
-        .eq('owner_id', userId);
-
-    // Drafts count (all non-public songs visible to user via RLS)
-    const { count: draftsCount } = await supabase
-        .from('compositions')
-        .select('id', { count: 'exact', head: true })
-        .eq('is_public', false);
-
-    // New songs: created in last 30 days, never viewed by this user (RLS handles visibility)
-    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
-    const { data: viewedIds } = await supabase
-        .from('song_views')
-        .select('song_id')
-        .eq('user_id', userId);
-    const viewedSet = new Set((viewedIds ?? []).map(v => v.song_id));
-
-    // Count unviewed songs from last 30 days (RLS handles visibility)
-    let newSongsCount = 0;
-    const { data: recentSongs } = await supabase
-        .from('compositions')
-        .select('id')
-        .gte('created_at', thirtyDaysAgo);
-    if (recentSongs) {
-        newSongsCount = recentSongs.filter(c => !viewedSet.has(c.id)).length;
-    }
+    const [mySongs, drafts, recordings, sharedWithMe, sharedByMe] = await Promise.all([
+        // My songs count (songs I own)
+        supabase
+            .from('compositions')
+            .select('id', { count: 'exact', head: true })
+            .eq('owner_id', userId),
+        // Drafts count: my own non-public songs. RLS lets an admin read every draft, so filter on the owner too.
+        supabase
+            .from('compositions')
+            .select('id', { count: 'exact', head: true })
+            .eq('is_public', false)
+            .eq('owner_id', userId),
+        // Songs with my takes, counted like the list it opens (/songs?myRecordings=true): one per song, and only
+        // songs I can read. Public takes of others are readable too, so filter on the owner.
+        supabase
+            .from('user_recordings')
+            .select('song_versions!inner(composition_id, compositions!inner(id))')
+            .eq('user_id', userId),
+        // Takes shared with me.
+        supabase
+            .from('recording_shares')
+            .select('id', { count: 'exact', head: true })
+            .eq('shared_with_user_id', userId),
+        // Shares of my own takes; one take shared with several members counts once.
+        supabase
+            .from('recording_shares')
+            .select('recording_id, user_recordings!inner(user_id)')
+            .eq('user_recordings.user_id', userId),
+    ]);
 
     return {
         favoritesCount,
-        draftsCount: draftsCount ?? 0,
-        mySongsCount: mySongsCount ?? 0,
-        newSongsCount,
+        draftsCount: drafts.count ?? 0,
+        mySongsCount: mySongs.count ?? 0,
+        recordingsCount: new Set(
+            ((recordings.data ?? []) as unknown as { song_versions: { composition_id: string } | null }[])
+                .map((r) => r.song_versions?.composition_id)
+                .filter(Boolean),
+        ).size,
+        sharedWithMeCount: sharedWithMe.count ?? 0,
+        sharedByMeCount: countSharedTakes((sharedByMe.data ?? []) as { recording_id: string }[]),
     };
 }
 
@@ -312,7 +310,9 @@ export async function getRecentlyViewedCount(userId: string): Promise<number> {
 }
 
 /**
- * Fetch public songs from the last 30 days that the user has never viewed.
+ * Fetch songs from the last 30 days that the user has never viewed: public songs and the user's own.
+ * Filtered explicitly, not by RLS alone: RLS lets an admin read every private song, and the New tab must not list
+ * other members' drafts (review of PR #482).
  */
 export async function getUnviewedSongs(userId: string, limit = 20): Promise<Song[]> {
     const supabase = await createClient();
@@ -325,10 +325,10 @@ export async function getUnviewedSongs(userId: string, limit = 20): Promise<Song
         .eq('user_id', userId);
     const viewedSet = new Set((viewedIds ?? []).map(v => v.song_id));
 
-    // Get recent songs visible to user (RLS handles visibility)
     const { data: recentSongs, error } = await supabase
         .from('compositions')
         .select('id')
+        .or(`is_public.eq.true,owner_id.eq.${userId}`)
         .gte('created_at', thirtyDaysAgo)
         .order('created_at', { ascending: false });
 
@@ -395,23 +395,18 @@ export async function fetchCategoryTreeServer(): Promise<TaxonomyNode[]> {
 
 /* ── Artists aggregation ─────────────────────────────────── */
 
-export interface ArtistSummary {
-    name: string;
-    songCount: number;
-    songTitles: string[];
-}
+export type { ArtistSummary } from './artistIndex';
 
 /**
- * Aggregates unique authors from all compositions (public + drafts)
- * with song counts and first 5 song titles.
- * Handles spacing variations (collapses multiple spaces) and casing variations.
+ * Aggregates unique authors from all compositions (public + drafts) with song counts and first 5 song titles.
+ * Names come from `authors` and `original_author`, like the author filter (Story 6.2.12, #515); see `aggregateArtists`.
  */
 export async function fetchArtistsServer(): Promise<ArtistSummary[]> {
     const supabase = await createClient();
 
     const { data: rows, error } = await supabase
         .from('compositions')
-        .select('title, original_author')
+        .select('title, original_author, authors')
         .limit(5000);
 
     if (error) {
@@ -419,67 +414,22 @@ export async function fetchArtistsServer(): Promise<ArtistSummary[]> {
         return [];
     }
 
-    const authorCounts = new Map<string, number>();
-    const authorTitles = new Map<string, string[]>();
-    const authorCanonicalNames = new Map<string, string>(); // lowercased-normalized -> preferred casing
-    let unspecifiedCount = 0;
-    const unspecifiedTitles: string[] = [];
-
-    for (const row of rows || []) {
-        const parsed = parseArtists(row.original_author as string);
-        if (parsed.length === 0) {
-            unspecifiedCount++;
-            if (unspecifiedTitles.length < 5 && row.title) {
-                unspecifiedTitles.push(row.title as string);
-            }
-            continue;
-        }
-
-        for (const artistName of parsed) {
-            const normalized = normalizeWhitespace(artistName);
-            if (!normalized) continue;
-
-            const key = removeDiacritics(normalized).toLowerCase();
-
-            authorCounts.set(key, (authorCounts.get(key) || 0) + 1);
-
-            if (!authorTitles.has(key)) authorTitles.set(key, []);
-            const titles = authorTitles.get(key)!;
-            if (titles.length < 5 && row.title && !titles.includes(row.title as string)) {
-                titles.push(row.title as string);
-            }
-
-            // Keep casing with most uppercase letters, or fall back to the first one seen
-            const existingCanonical = authorCanonicalNames.get(key);
-            if (!existingCanonical) {
-                authorCanonicalNames.set(key, normalized);
-            } else {
-                const existingUppers = (existingCanonical.match(/[A-Z]/g) || []).length;
-                const newUppers = (normalized.match(/[A-Z]/g) || []).length;
-                if (newUppers > existingUppers) {
-                    authorCanonicalNames.set(key, normalized);
-                }
-            }
-        }
-    }
-
-    const result = Array.from(authorCounts.entries())
-        .map(([key, songCount]) => ({
-            name: authorCanonicalNames.get(key) || key,
-            songCount,
-            songTitles: authorTitles.get(key) || [],
-        }))
-        .sort((a, b) => a.name.localeCompare(b.name));
-
-    if (unspecifiedCount > 0) {
-        result.push({
-            name: 'No Artist',
-            songCount: unspecifiedCount,
-            songTitles: unspecifiedTitles,
-        });
-    }
-
-    return result;
+    return aggregateArtists((rows ?? []) as ArtistRow[]);
 }
 
+/**
+ * The newest public songs, for the "Recently added" row on Home (Story 6.1.28 / G6.3, #412).
+ * Guests only ever receive public songs from RLS; the query also filters on `is_public` so a signed-in
+ * owner's drafts never show up. Only import this from Server Components or Server Actions.
+ */
+export async function getRecentlyAddedSongs(limit = RECENTLY_ADDED_LIMIT): Promise<Song[]> {
+    const supabase = await createClient();
+    const { data, error } = await recentlyAddedQuery(supabase, limit);
 
+    if (error || !data) {
+        console.error('getRecentlyAddedSongs error:', error);
+        return [];
+    }
+    // The select string is a literal, so PostgREST's parser infers nested relations as arrays; the shape is a CompositionRow.
+    return (data as unknown as CompositionRow[]).map(item => mapCompositionToSong(item));
+}

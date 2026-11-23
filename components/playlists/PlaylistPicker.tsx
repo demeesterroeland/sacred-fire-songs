@@ -1,16 +1,19 @@
 // components/playlists/PlaylistPicker.tsx
 'use client';
 
-import { useState, useRef, useTransition } from 'react';
+import { useRef, useState, useTransition } from 'react';
 import { Plus, Check, ListPlus, Loader2 } from 'lucide-react';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { createClient } from '@/lib/supabase/client';
-import { addSongToPlaylist, createPlaylist } from '@/app/actions/playlistActions';
-import { PLAYLIST_KEYS } from '@/lib/songs/queryKeys';
 import { toast } from 'sonner';
+import { BottomSheet, BottomSheetClose, BottomSheetContent, BottomSheetTrigger } from '@/components/ui/bottom-sheet';
+import { Button } from '@/components/ui/button';
+import { addSongToPlaylist, createPlaylist } from '@/app/actions/playlistActions';
+import { fetchContainingPlaylists, fetchUserPlaylists } from '@/lib/playlists/pickerQueries';
+import { buildPickerRows, toggleMembership } from '@/lib/playlists/pickerModel';
+import { PLAYLIST_KEYS } from '@/lib/songs/queryKeys';
 import { cn } from '@/lib/utils';
 import { useLocale } from '@/context/LocaleContext';
+import { actionErrorMessage } from '@/lib/errors/actionError';
 
 interface PlaylistPickerProps {
     compositionId: string;
@@ -20,55 +23,32 @@ interface PlaylistPickerProps {
     /** className for the ListPlus icon — defaults to w-3.5 h-3.5 */
     iconClassName?: string;
     label?: string;
+    /** className for the icon + label wrapper (only when `label` is set) */
+    contentClassName?: string;
+    /** className for the label text */
+    labelClassName?: string;
+    triggerTestId?: string;
+    /** Called when the sheet opens or closes (e.g. to close a parent menu once the sheet is dismissed) */
+    onOpenChange?: (open: boolean) => void;
 }
 
-// ─── Data fetching ────────────────────────────────────────────────────────────
+const ROW = 'flex min-h-tap w-full items-center gap-3 px-4 py-3 text-left text-body text-fg transition-colors hover:bg-surface-2 disabled:opacity-50';
+const TOAST_ACTION = { actionButton: 'ml-2 text-meta font-semibold text-accent' };
 
-async function fetchUserPlaylists(userId: string) {
-    const supabase = createClient();
-
-    const { data: profile } = await supabase
-        .from('profiles')
-        .select('role')
-        .eq('id', userId)
-        .maybeSingle();
-
-    const isCurator = profile?.role === 'admin' || profile?.role === 'gatekeeper';
-
-    let query = supabase
-        .from('setlists')
-        .select('id, title, is_public, owner_id');
-
-    if (isCurator) {
-        query = query.or(`owner_id.eq.${userId},is_public.eq.true`);
-    } else {
-        query = query.eq('owner_id', userId);
-    }
-
-    const { data } = await query
-        .not('title', 'in', '("My Favorites","My Songs","My Drafts")')
-        .order('created_at', { ascending: false });
-
-    return data ?? [];
-}
-
-async function fetchContainingPlaylists(compositionId: string) {
-    const supabase = createClient();
-    const { data } = await supabase
-        .from('setlist_items')
-        .select('setlist_id, song_versions!inner(composition_id)')
-        .eq('song_versions.composition_id', compositionId);
-    return new Set((data ?? []).map(d => d.setlist_id));
-}
-
-// ─── Component ────────────────────────────────────────────────────────────────
-
-export function PlaylistPicker({ compositionId, userId, triggerClassName, iconClassName, label }: PlaylistPickerProps) {
+/**
+ * Add to playlist as a bottom sheet (Story 6.1.30 / G8.1, #414): "New playlist"
+ * is the first row, every playlist is a check row (checked = the song is in it),
+ * and tapping a row adds or removes the song. Creation goes through the same
+ * `createPlaylist` action as the Add playlist page (Story 3.1.4.6).
+ */
+export function PlaylistPicker({ compositionId, userId, triggerClassName, iconClassName, label, contentClassName, labelClassName, triggerTestId, onOpenChange }: PlaylistPickerProps) {
     const { t } = useLocale();
     const [open, setOpen] = useState(false);
+    const [creating, setCreating] = useState(false);
     const [newTitle, setNewTitle] = useState('');
     const [isCreating, startCreateTransition] = useTransition();
     const queryClient = useQueryClient();
+    const containingKey = PLAYLIST_KEYS.containingComposition(compositionId);
 
     const { data: playlists = [], isLoading: loadingPlaylists } = useQuery({
         queryKey: PLAYLIST_KEYS.list(userId),
@@ -77,50 +57,53 @@ export function PlaylistPicker({ compositionId, userId, triggerClassName, iconCl
     });
 
     const { data: containingIds = new Set<string>(), isLoading: loadingContaining } = useQuery({
-        queryKey: PLAYLIST_KEYS.containingComposition(compositionId),
+        queryKey: containingKey,
         queryFn: () => fetchContainingPlaylists(compositionId),
         enabled: open,
+        // Playlists change elsewhere (playlist page, other tabs): check marks are fetched fresh on open.
+        staleTime: 0,
+        refetchOnMount: 'always',
     });
 
     const isLoading = loadingPlaylists || loadingContaining;
-
     const pendingRef = useRef(new Set<string>());
+
+    const openAction = (playlistId: string) => ({
+        label: t('playlists.openPlaylist'),
+        onClick: () => { window.location.href = `/library/playlists/${playlistId}`; },
+    });
+
+    const handleOpenChange = (next: boolean) => {
+        setOpen(next);
+        onOpenChange?.(next);
+        if (!next) {
+            setCreating(false);
+            setNewTitle('');
+        }
+    };
 
     const handleToggle = async (playlistId: string, playlistTitle: string) => {
         if (pendingRef.current.has(playlistId)) return;
         pendingRef.current.add(playlistId);
 
-        const wasIn = containingIds.has(playlistId);
-
         // Optimistic update
-        queryClient.setQueryData<Set<string>>(
-            PLAYLIST_KEYS.containingComposition(compositionId),
-            prev => {
-                const next = new Set(prev);
-                if (wasIn) next.delete(playlistId);
-                else next.add(playlistId);
-                return next;
-            }
-        );
+        queryClient.setQueryData<Set<string>>(containingKey, prev => toggleMembership(prev ?? new Set(), playlistId));
 
         try {
             const result = await addSongToPlaylist(playlistId, compositionId);
             if (result.error) {
-                toast.error(result.error);
-                // revert
-                queryClient.invalidateQueries({ queryKey: PLAYLIST_KEYS.containingComposition(compositionId) });
+                toast.error(actionErrorMessage(result.error, t));
+                queryClient.invalidateQueries({ queryKey: containingKey }); // revert
             } else {
+                // The server decides: keep the check mark in line with what it did.
+                queryClient.setQueryData<Set<string>>(containingKey, prev => {
+                    const next = new Set(prev ?? []);
+                    if (result.added) next.add(playlistId); else next.delete(playlistId);
+                    return next;
+                });
                 toast.success(
-                    result.added ? `Added to "${playlistTitle}"` : `Removed from "${playlistTitle}"`,
-                    {
-                        action: {
-                            label: t('playlists.openPlaylist'),
-                            onClick: () => { window.location.href = `/library/playlists/${playlistId}`; },
-                        },
-                        classNames: {
-                            actionButton: 'text-amber-400 text-xs font-bold hover:text-amber-300 transition-colors ml-2',
-                        },
-                    }
+                    t(result.added ? 'playlists.picker.added' : 'playlists.picker.removed', { playlist: playlistTitle }),
+                    { action: openAction(playlistId), classNames: TOAST_ACTION },
                 );
             }
         } finally {
@@ -135,105 +118,128 @@ export function PlaylistPicker({ compositionId, userId, triggerClassName, iconCl
         startCreateTransition(async () => {
             const result = await createPlaylist(trimmed);
             if ('error' in result) {
-                toast.error(result.error);
+                toast.error(actionErrorMessage(result.error, t));
                 return;
             }
-            // Add the song to the new playlist
             const addResult = await addSongToPlaylist(result.id, compositionId);
             if (addResult.error) {
-                toast.error(t('playlists.picker.createdButNotAdded', { error: String(addResult.error) }));
+                toast.error(t('playlists.picker.createdButNotAdded'));
+                // The playlist exists now: a second Create would make a duplicate.
+                setNewTitle('');
+                setCreating(false);
             } else {
                 toast.success(t('playlists.picker.addedToNew', { name: trimmed }), {
-                    action: {
-                        label: t('playlists.openPlaylist'),
-                        onClick: () => { window.location.href = `/library/playlists/${result.id}`; },
-                    },
-                    classNames: {
-                        actionButton: 'text-amber-400 text-xs font-bold hover:text-amber-300 transition-colors ml-2',
-                    },
+                    action: openAction(result.id),
+                    classNames: TOAST_ACTION,
                 });
                 setNewTitle('');
+                setCreating(false);
             }
             queryClient.invalidateQueries({ queryKey: PLAYLIST_KEYS.list(userId) });
-            queryClient.invalidateQueries({ queryKey: PLAYLIST_KEYS.containingComposition(compositionId) });
+            queryClient.invalidateQueries({ queryKey: containingKey });
         });
     };
 
     return (
-        <Popover open={open} onOpenChange={setOpen}>
-            <PopoverTrigger asChild>
+        <BottomSheet open={open} onOpenChange={handleOpenChange}>
+            <BottomSheetTrigger asChild>
                 <button
+                    type="button"
+                    data-testid={triggerTestId}
                     aria-label={t('playlists.picker.addToPlaylist')}
                     className={cn(
-                        'p-1 rounded-full transition-all duration-300 text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300',
+                        'rounded-pill p-1 text-fg-muted transition-colors hover:text-fg',
                         triggerClassName
                     )}
                 >
                     {label ? (
-                        <div className="flex items-center gap-4 w-full">
-                            <ListPlus className={iconClassName ?? 'w-3.5 h-3.5'} />
-                            <span className="text-sm font-bold">{label}</span>
+                        <div className={contentClassName ?? 'flex w-full items-center gap-4'}>
+                            <ListPlus className={iconClassName ?? 'w-3.5 h-3.5'} aria-hidden />
+                            <span className={labelClassName ?? 'text-body font-semibold'}>{label}</span>
                         </div>
                     ) : (
                         <ListPlus className={iconClassName ?? 'w-3.5 h-3.5'} />
                     )}
                 </button>
-            </PopoverTrigger>
-            <PopoverContent align="end" className="w-64">
-                {/* New playlist input */}
-                <div className="flex items-center gap-2 p-3 border-b border-gray-200 dark:border-gray-800">
-                    <input
-                        value={newTitle}
-                        onChange={e => setNewTitle(e.target.value)}
-                        onKeyDown={e => {
-                            e.stopPropagation();
-                            if (e.key === 'Enter') handleCreate();
-                            if (e.key === 'Escape') setOpen(false);
-                        }}
-                        placeholder={t('playlists.picker.newPlaylistPlaceholder')}
-                        disabled={isCreating}
-                        className="flex-1 bg-transparent text-sm text-gray-700 dark:text-gray-200 placeholder-gray-400 dark:placeholder-gray-600 outline-none"
-                    />
-                    <button
-                        onClick={handleCreate}
-                        disabled={!newTitle.trim() || isCreating}
-                        className="text-amber-400 hover:text-amber-300 disabled:opacity-30 transition-colors"
-                    >
-                        {isCreating
-                            ? <Loader2 className="w-4 h-4 animate-spin" />
-                            : <Plus className="w-4 h-4" />
+            </BottomSheetTrigger>
+            <BottomSheetContent
+                title={t('playlists.picker.addToPlaylist')}
+                // Escape in the name field cancels the field, not the whole sheet.
+                onEscapeKeyDown={e => {
+                    if (creating) {
+                        e.preventDefault();
+                        setCreating(false);
+                    }
+                }}
+            >
+                <div role="group" aria-label={t('playlists.picker.addToPlaylist')}>
+                    {buildPickerRows(isLoading ? [] : playlists, containingIds).map(row => {
+                        if (row.kind === 'new') {
+                            // First row: create a new playlist
+                            return creating ? (
+                                <div key="new">
+                                    <div data-testid="picker-row" className="flex min-h-tap items-center gap-2 px-4 py-2">
+                                        <input
+                                            autoFocus
+                                            value={newTitle}
+                                            onChange={e => setNewTitle(e.target.value)}
+                                            onKeyDown={e => {
+                                                e.stopPropagation();
+                                                if (e.key === 'Enter') handleCreate();
+                                                if (e.key === 'Escape') setCreating(false);
+                                            }}
+                                            aria-label={t('playlists.picker.newPlaylistName')}
+                                            placeholder={t('playlists.picker.newPlaylistPlaceholder')}
+                                            disabled={isCreating}
+                                            className="h-tap min-w-0 flex-1 rounded-control border border-line-strong bg-bg px-3 text-body text-fg placeholder:text-fg-subtle"
+                                        />
+                                        <Button type="button" onClick={handleCreate} disabled={!newTitle.trim() || isCreating}>
+                                            {isCreating ? <Loader2 aria-hidden="true" className="size-4 motion-safe:animate-spin" /> : null}
+                                            {t('playlists.picker.create')}
+                                        </Button>
+                                    </div>
+                                    <p className="px-4 pb-2 text-meta text-fg-muted">{t('playlists.picker.newPrivateHint')}</p>
+                                </div>
+                            ) : (
+                                <button key="new" type="button" data-testid="picker-row" onClick={() => setCreating(true)} className={ROW}>
+                                    <Plus aria-hidden="true" className="size-5 shrink-0" />
+                                    <span className="min-w-0 flex-1 font-semibold">{t('playlists.picker.newPlaylist')}</span>
+                                </button>
+                            );
                         }
-                    </button>
-                </div>
+                        return (
+                            <button
+                                key={row.id}
+                                type="button"
+                                role="checkbox"
+                                aria-checked={row.checked}
+                                data-testid="picker-row"
+                                onClick={() => handleToggle(row.id, row.title)}
+                                className={ROW}
+                            >
+                                <span className="min-w-0 flex-1 truncate">{row.title}</span>
+                                <span aria-hidden="true" className="flex size-5 shrink-0 items-center justify-center">
+                                    {row.checked && <Check className="size-5 text-accent" />}
+                                </span>
+                            </button>
+                        );
+                    })}
 
-                {/* Playlist list */}
-                <div className="max-h-56 overflow-y-auto py-1">
                     {isLoading && (
                         <div className="flex justify-center py-4">
-                            <Loader2 className="w-4 h-4 animate-spin text-gray-600" />
+                            <Loader2 aria-hidden="true" className="size-5 text-fg-subtle motion-safe:animate-spin" />
                         </div>
                     )}
                     {!isLoading && playlists.length === 0 && (
-                        <p className="text-xs text-gray-600 text-center py-4 px-3">
-                            {t('playlists.picker.empty')}
-                        </p>
+                        <p className="px-4 py-4 text-center text-meta text-fg-muted">{t('playlists.picker.empty')}</p>
                     )}
-                    {!isLoading && playlists.map(pl => (
-                        <button
-                            key={pl.id}
-                            onClick={() => handleToggle(pl.id, pl.title)}
-                            className="w-full flex items-center gap-3 px-3 py-2 text-sm text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors text-left"
-                        >
-                            <div className="w-4 h-4 shrink-0 flex items-center justify-center">
-                                {containingIds.has(pl.id) && (
-                                    <Check className="w-3.5 h-3.5 text-amber-400" />
-                                )}
-                            </div>
-                            <span className="truncate">{pl.title}</span>
-                        </button>
-                    ))}
                 </div>
-            </PopoverContent>
-        </Popover>
+                <div className="border-t border-line p-3">
+                    <BottomSheetClose asChild>
+                        <Button type="button" variant="outline" className="w-full">{t('playlists.picker.done')}</Button>
+                    </BottomSheetClose>
+                </div>
+            </BottomSheetContent>
+        </BottomSheet>
     );
 }

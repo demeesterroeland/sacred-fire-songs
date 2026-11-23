@@ -1,8 +1,8 @@
 # Test Cases: Sacred Fire Songs
 
-**Version:** 1.9
+**Version:** 1.10
 **Status:** Draft
-**Date:** February 1, 2026
+**Date:** Nov 5, 2026
 
 ## Changelog
 
@@ -17,6 +17,7 @@
 | **1.6** | Jan 10, 2026 | Updated cases for Member Uploads and Owner Editing. |
 | **1.7** | Jan 10, 2026 | Refactored "Upload" terminology to "Add Song". |
 | **1.8** | Jan 10, 2026 | Added test cases for Non-Owner restriction and Admin override. |
+| **1.10** | Nov 5, 2026 | `/explore` removed (UX v2, #408): steps use Home (`/`, category grid) and Search (`/songs`); `/explore` is a 404 (TC-2.6.6). |
 | **1.9** | Feb 1, 2026 | Added comprehensive test cases for unified header, environment labels, navigation refactoring, mobile menu, and dynamic filtering. |
 
 This document contains the test cases derived from the project's Epics and User Stories. These cases are intended for both manual verification and as a blueprint for future automated testing.
@@ -226,10 +227,10 @@ This document contains the test cases derived from the project's Epics and User 
 - **Steps**:
     1. Navigate to Dashboard (`/`).
     2. Navigate to Library (`/songs`).
-    3. Navigate to Explore (`/explore`).
+    3. Open Library (`/library`).
 - **Expected Results**:
     - Header displays "Sacred Fire Songs" logo and title on all pages.
-    - Dynamic subtitle changes based on current page (e.g., "DASHBOARD", "LIBRARY", "EXPLORE").
+    - Dynamic subtitle changes based on current page (e.g., "DASHBOARD", "LIBRARY").
     - Header is responsive and visible on both desktop and mobile.
 
 #### TC-2.5.2: Environment Label Display
@@ -248,13 +249,13 @@ This document contains the test cases derived from the project's Epics and User 
 - **Pre-conditions**: Desktop viewport (width > 768px), user is logged in.
 - **Steps**:
     1. View the sidebar on the left side of the screen.
-    2. Click each navigation item (Dashboard, Explore, Library, Playlist, Add Song).
+    2. Click each navigation item (Home, Songs, Playlists, Favorites, Drafts, Recently Viewed, Add Song, New Playlist).
 - **Expected Results**:
     - User profile (avatar, email, logout button) is visible at the top of sidebar.
     - All navigation items are visible with correct icons.
     - Active navigation item is highlighted with red icon and gray background.
     - Clicking each item navigates to the correct page.
-    - LibrarySidebar filters appear when on `/songs` or `/explore` pages.
+    - LibrarySidebar filters appear when on `/songs`.
 
 #### TC-2.5.4: Mobile Menu Navigation
 - **User Story**: Mobile Menu Synchronization
@@ -301,7 +302,7 @@ This document contains the test cases derived from the project's Epics and User 
 
 #### TC-2.6.1: Category Filter (OR Logic)
 - **User Story**: 2.3.1
-- **Pre-conditions**: User is on Library (`/songs`) or Explore (`/explore`) page.
+- **Pre-conditions**: User is on the song list (`/songs`).
 - **Steps**:
     1. Click "Nature" category in the LibrarySidebar.
     2. Verify URL updates to `?category=nature`.
@@ -349,14 +350,14 @@ This document contains the test cases derived from the project's Epics and User 
     - Same filtered results are displayed upon return.
     - LibrarySidebar shows the same active filters.
 
-#### TC-2.6.5: Explore Page Category Grid
+#### TC-2.6.5: Home Category Grid
 - **User Story**: 2.3.1
-- **Pre-conditions**: User is on Explore (`/explore`) page.
+- **Pre-conditions**: User is on Home (`/`).
 - **Steps**:
     1. View the category grid.
     2. Click on a category card (e.g., "The Elements").
 - **Expected Results**:
-    - All top-level categories are displayed as cards with icons and colors.
+    - All top-level categories are displayed as grey cards with a grey icon (UX v2, #388).
     - Clicking a category navigates to `/songs?category=the-elements`.
     - LibrarySidebar appears showing subcategories and tags.
 
@@ -366,12 +367,11 @@ This document contains the test cases derived from the project's Epics and User 
 - **Steps**:
     1. Navigate to Dashboard (`/`).
     2. Navigate to Library (`/songs`).
-    3. Navigate to Explore (`/explore`).
+    3. Open `/explore`: the "Page not found" page shows (HTTP 404).
     4. Navigate to Playlists (`/playlists`).
 - **Expected Results**:
     - LibrarySidebar is NOT visible on Dashboard.
     - LibrarySidebar IS visible on Library page.
-    - LibrarySidebar IS visible on Explore page.
     - LibrarySidebar is NOT visible on Playlists page.
 
 #### TC-2.6.7: Filter Pills Styling
