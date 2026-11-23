@@ -3606,3 +3606,10 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
   - #601 items: https://github.com/demeesterroeland/sacred-fire-songs/pull/617 (#586, Practice tabs when a version has takes but no media), https://github.com/demeesterroeland/sacred-fire-songs/pull/618 (#510, beats not cut off), https://github.com/demeesterroeland/sacred-fire-songs/pull/619 (#393, action-bar E2E fails instead of skipping), https://github.com/demeesterroeland/sacred-fire-songs/pull/620 (#488, Shared by me E2E asserts title and member name).
 - Open owner decisions from #601: #516, #515, #520, #512, the language-filter limit, the #578 copy, running the `@seed` tests in CI.
 - Seed run (#601, Nov 15, 2026, `develop` a6e11ab7): `npm run test:bdd:seed` ran 268 scenarios: 255 passed, 0 failed, 13 pending (stub steps in `song.feature`).
+
+## Session November 15, 2026 — #608: why the 1.7.1 back-merge was done by hand
+
+- Finding: hotfix #473 and release #475 reached `main` on Nov 6, 2026, but `back-merge.yml` (#423, merged into `develop` on Nov 5) reached `main` only with promotion #575 on Nov 13. A push to `main` runs the workflow copy on `main`, so there were no runs and no automatic PR. The manual back-merge #484 (Nov 10) resolved the conflicts by hand. The runs for #575, #577, #594 and #597 opened #576 and #596 as intended.
+- Change: when `main` does not merge cleanly, the conflict comment now lists the conflicting files (`git diff --name-only --diff-filter=U`, posted with `--body-file`). The header comment of the workflow explains the run-from-`main` rule.
+- Docs: `git-workflow.md` 1.9 (manual start with `gh workflow run back-merge.yml --ref main`, conflict procedure), `development-workflow.md` 2.1, design doc 2.42, user stories 2.26 (Story 5.1.9 scenario, Story 5.1.10 finding).
+- Tests: `@story-5.1.9` contract step "it lists the conflicting files in a pull request comment" (red before the change, `test:bdd:ci-gate` 29/29 after). The conflict listing was also checked in a local throwaway repository.

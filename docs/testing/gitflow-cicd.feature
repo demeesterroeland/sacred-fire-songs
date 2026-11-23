@@ -199,6 +199,7 @@ Feature: Gitflow branching and CI/CD pipeline
     Given the workflow "back-merge.yml"
     Then it opens the pull request with the secret "RELEASE_PLEASE_TOKEN" and fails when it is missing
     And it labels the pull request "back-merge-conflict" when main does not merge cleanly
+    And it lists the conflicting files in a pull request comment
     And it never merges the pull request itself
 
   @story-5.1.9 @manual
