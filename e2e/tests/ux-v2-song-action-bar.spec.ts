@@ -5,6 +5,9 @@ import { ROLES } from '../fixtures/roles';
 /**
  * Story 6.1.9 / G2.4 (#393): sticky Practice · Playlist · ♥ action bar on the song page (phones).
  * Gherkin: docs/testing/ux-v2-song-action-bar.feature (@e2e). Read-only: seeded public songs only.
+ * The seed's anchor songs always include one public one-version song with media and one without
+ * (scripts/db/random-seeder.mjs, pinned by testing/unit/tests/e2e/actionBarSpecNoVacuousSkip.test.ts). A test whose
+ * song is missing fails instead of skipping, so the spec can never pass vacuously (#601, #393).
  */
 const DATABASE_URL =
   process.env.DATABASE_URL ?? 'postgresql://postgres:postgres@127.0.0.1:54322/postgres';
@@ -41,6 +44,7 @@ test.beforeAll(async () => {
 });
 
 async function openSong(page: Page, id: string) {
+  expect(id, 'the seed has a public one-version song of the shape this test needs').toBeTruthy();
   await page.goto(`/songs/${id}`);
   await page.evaluate(() => localStorage.setItem('sacred-fire-songs-locale', 'en'));
   await page.reload();
@@ -58,7 +62,6 @@ test.describe('Member @story-6.1.9', () => {
   test.use({ storageState: ROLES.member.storage });
 
   test('shows three labelled 44 px actions, labels at least 12 px', async ({ page }) => {
-    test.skip(!withoutMedia, 'no public song without media in the seed');
     await openSong(page, withoutMedia);
     for (const id of ['song-action-practice', 'song-action-playlist', 'song-action-favorite']) {
       const action = page.getByTestId(id);
@@ -73,14 +76,12 @@ test.describe('Member @story-6.1.9', () => {
   });
 
   test('two taps to the recorder when the song has no media: Practice opens on Record', async ({ page }) => {
-    test.skip(!withoutMedia, 'no public song without media in the seed');
     await openSong(page, withoutMedia);
     await page.getByTestId('song-action-practice').click(); // tap 1
     await expect(page.getByRole('button', { name: 'Upload File' })).toBeVisible({ timeout: 10_000 });
   });
 
   test('two taps to the recorder when the song has media: Practice → Record', async ({ page }) => {
-    test.skip(!withMedia, 'no public song with media in the seed');
     await openSong(page, withMedia);
     await page.getByTestId('song-action-practice').click(); // tap 1: opens on Listen
     await expect(page.getByTestId('practice-tab-listen')).toBeVisible({ timeout: 10_000 });
@@ -90,7 +91,6 @@ test.describe('Member @story-6.1.9', () => {
   });
 
   test('the ⋮ menu keeps the song actions and reading tools, but not Practice, Playlist or Favorites', async ({ page }) => {
-    test.skip(!withoutMedia, 'no public song without media in the seed');
     await openSong(page, withoutMedia);
     await page.getByRole('button', { name: 'More actions' }).first().click();
     const sheet = page.getByTestId('song-menu-sheet');
@@ -101,7 +101,6 @@ test.describe('Member @story-6.1.9', () => {
   });
 
   test('the bar sits above the bottom nav and rises with the mini player', async ({ page }) => {
-    test.skip(!withoutMedia, 'no public song without media in the seed');
     await openSong(page, withoutMedia);
     // On a song page the bottom nav slides away 3 s after the last touch (auto-hide, on by default) and the bar
     // then sits lower, so "rises by 56 px" depends on how long the test took: the other cause of this test's
@@ -143,14 +142,12 @@ test.describe('Member @story-6.1.9', () => {
   });
 
   test('reserves its height on the page so the last lines are not covered', async ({ page }) => {
-    test.skip(!withoutMedia, 'no public song without media in the seed');
     await openSong(page, withoutMedia);
     const reserved = await page.evaluate(() => document.documentElement.style.getPropertyValue('--action-bar-h'));
     expect(reserved).toBe('3.5rem');
   });
 
   test('hides when scrolling down and shows when scrolling up', async ({ page }) => {
-    test.skip(!withoutMedia, 'no public song without media in the seed');
     await openSong(page, withoutMedia);
     await makeScrollable(page);
     const bar = page.getByTestId('song-action-bar');
@@ -163,7 +160,6 @@ test.describe('Member @story-6.1.9', () => {
   });
 
   test('stays visible while scrolling when the auto-hide preference is off', async ({ page }) => {
-    test.skip(!withoutMedia, 'no public song without media in the seed');
     await openSong(page, withoutMedia);
     await page.evaluate(() => {
       const key = 'sacred-fire-songs-preferences';
@@ -184,7 +180,6 @@ test.describe('Member @story-6.1.9', () => {
 
 test.describe('Guest @story-6.1.9', () => {
   test('the heart opens the favourites gate with the current path in next=', async ({ page }) => {
-    test.skip(!withoutMedia, 'no public song without media in the seed');
     await openSong(page, withoutMedia);
     await page.getByTestId('song-action-favorite').click();
     const gate = page.locator('[data-testid="guest-gate"][data-feature="favourites"]');
@@ -196,14 +191,12 @@ test.describe('Guest @story-6.1.9', () => {
   });
 
   test('Playlist opens the add-to-playlist gate', async ({ page }) => {
-    test.skip(!withoutMedia, 'no public song without media in the seed');
     await openSong(page, withoutMedia);
     await page.getByTestId('song-action-playlist').click();
     await expect(page.locator('[data-testid="guest-gate"][data-feature="addToPlaylist"]')).toBeVisible();
   });
 
   test('Practice opens the drawer on Listen; Record shows the recorder gate', async ({ page }) => {
-    test.skip(!withoutMedia, 'no public song without media in the seed');
     await openSong(page, withoutMedia);
     await page.getByTestId('song-action-practice').click();
     // A guest cannot record: Practice opens on Listen (public takes), Record keeps the gate (#405).
