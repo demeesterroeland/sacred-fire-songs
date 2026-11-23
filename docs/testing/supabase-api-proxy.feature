@@ -19,3 +19,11 @@ Feature: The Supabase API proxy passes redirects to the browser
     Given the auth server answers 200 with the JSON body '{"ok":true}'
     When a request goes through the app's proxy
     Then the proxy answers 200 with the JSON body '{"ok":true}'
+
+  # Playwright: e2e/tests/auth-magic-link-proxy.spec.ts (local Supabase stack and its mail catcher)
+  @e2e
+  Scenario: A magic link opened through the proxy signs the user in
+    Given a member asks for a magic link on the sign-in page
+    When the member opens the emailed verify link through the app's proxy
+    Then the browser receives a 303 with the sign-in code
+    And the sign-in callback sets the session cookie
