@@ -112,11 +112,11 @@ export function sanitizeForPdf(str: string): string {
 
 /**
  * Sanitizes a playlist or song title for safe file downloading.
- * e.g., "Ceremony Setlist" -> "Ceremony_Setlist.pdf"
+ * e.g., "Ceremony Playlist" -> "Ceremony_Playlist.pdf"
  */
 export function sanitizeFilename(title: string): string {
     if (!title || typeof title !== 'string') {
-        return 'setlist.pdf';
+        return 'playlist.pdf';
     }
 
     // Strip unsafe characters, preserve alphanumeric, dashes, dots, and spaces
@@ -129,7 +129,7 @@ export function sanitizeFilename(title: string): string {
     clean = clean.replace(/^[_.-]+|[_.-]+$/g, '');
 
     if (!clean) {
-        return 'setlist.pdf';
+        return 'playlist.pdf';
     }
 
     // Ensure .pdf extension (case-insensitive check)
@@ -210,7 +210,7 @@ export function formatSongForPdf(song: ExportSongData, untitled = 'Untitled Song
 }
 
 /**
- * Generates a clean, professional printable PDF document of a setlist tailored
+ * Generates a clean, professional printable PDF document of a playlist tailored
  * for musicians in ceremony.
  */
 export async function exportPlaylistToPdf(playlist: ExportPlaylistData): Promise<Blob> {
@@ -228,7 +228,7 @@ export function createPdfDocument(): jsPDF {
     });
 }
 
-/** Draws the whole setlist onto `doc` (split from `exportPlaylistToPdf` so a test can watch what is printed). */
+/** Draws the whole playlist onto `doc` (split from `exportPlaylistToPdf` so a test can watch what is printed). */
 export async function drawPlaylistPdf(doc: jsPDF, playlist: ExportPlaylistData): Promise<void> {
     const labels = getPdfLabels(playlist.locale);
     if (!playlist.songs || playlist.songs.length === 0) {
@@ -322,7 +322,7 @@ export async function drawPlaylistPdf(doc: jsPDF, playlist: ExportPlaylistData):
         y += BAR_ROW;
     };
 
-    // ─── Setlist Header on Page 1 ─────────────────────────────────────────────
+    // ─── Playlist Header on Page 1 ─────────────────────────────────────────────
     pageSongMap.set(1, { title: playlist.title || labels.untitledPlaylist });
 
     doc.setFont('DejaVuSans', 'bold');

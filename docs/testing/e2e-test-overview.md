@@ -1,8 +1,8 @@
 # E2E Test Overview & Matrix: Sacred Fire Songs
 
-**Version:** 1.30
+**Version:** 1.31
 **Status:** Living Document
-**Date:** Nov 23, 2026
+**Date:** Nov 24, 2026
 **Tracking:** GH #142
 
 ## Changelog
@@ -40,6 +40,7 @@
 | **1.16** | Nov 6, 2026 | Story 6.1.5 (#389): ACC-04 (Privacy settings) is hidden behind `FEATURES.privacySettings`; LIB-10 (Albums) answers not-found. New spec `ux-v2-hide-unfinished.spec.ts` asserts no "Coming soon" in Library, Settings and the song form. |
 | **1.29** | Nov 23, 2026 | (#266, option A) `@e2e` scenarios in `docs/testing/*.feature` are documentation only; E2E runs through plain Playwright specs in `e2e/tests/` and `playwright-bdd` is not used. `song.feature` names the covering spec for each `@e2e` scenario. PL-11 (Duplicate playlist) feature status corrected to not implemented (#100). |
 | **1.30** | Nov 23, 2026 | #485 group 7: SONG-14 `ux-v2-sober-song-form.spec.ts` (member): axe colour contrast on the Add Song form with every section open, light and dark. |
+| **1.31** | Nov 24, 2026 | #573: the tables are `playlists` / `playlist_items` (were setlists); smoke teardown and seed queries use the new names; section 4.7 is titled Playlists. |
 
 ---
 
@@ -196,7 +197,7 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 | FAV-02 | Guest favorites | Guest hearts persist in localStorage | survive reload; merge on login (if supported) | G | ✅ | 🔲 | P1 | useGuestFavorites |
 | FAV-03 | Favorites filter | Filter library to favorites only | empty favorites state | M | ✅ | 🔲 | P2 | useSongsFilter |
 
-### 4.7 Playlists / Setlists (Epic 4.1)
+### 4.7 Playlists (Epic 4.1)
 
 | ID | Feature | Scenario | Variants / Edge cases | Roles | Feat | E2E | Pri | Ref |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |

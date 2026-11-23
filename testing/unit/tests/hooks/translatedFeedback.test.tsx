@@ -88,7 +88,7 @@ describe('useDeleteSong failure', () => {
 describe('usePlaylistRename failure (validation 1 review, M4)', () => {
   it.each([
     ['Playlist not found', 'errors.playlistNotFound'],
-    ['duplicate key value violates unique constraint "setlists_pkey"', 'errors.generic'],
+    ['duplicate key value violates unique constraint "playlists_pkey"', 'errors.generic'],
   ])('a server answer of "%s" is shown in the person\'s language (%s), never as sent', async (serverError, key) => {
     renamePlaylist.mockResolvedValue({ error: serverError });
     const { result } = renderHook(() => usePlaylistRename('p1', 'Old'));

@@ -52,8 +52,8 @@ try {
   await client.query(`
     DELETE FROM public.song_views;
     DELETE FROM public.user_recordings;
-    DELETE FROM public.setlist_items;
-    DELETE FROM public.setlists;
+    DELETE FROM public.playlist_items;
+    DELETE FROM public.playlists;
     DELETE FROM public.song_category_map;
     DELETE FROM public.song_versions;
     DELETE FROM public.compositions;
@@ -71,9 +71,9 @@ try {
       WHERE p.slug = 'artists' ORDER BY c.slug`);
   const tagMaps = await q(`SELECT m.song_id, c.slug FROM public.song_category_map m JOIN public.categories c ON c.id = m.category_id
       ORDER BY m.song_id, c.slug`);
-  const setlists = await q(`SELECT id, owner_id, title, description, is_public, extract(epoch FROM now() - created_at) AS ago
-      FROM public.setlists ORDER BY title, id`);
-  const items = await q(`SELECT setlist_id, song_version_id, order_index FROM public.setlist_items ORDER BY setlist_id, order_index`);
+  const playlists = await q(`SELECT id, owner_id, title, description, is_public, extract(epoch FROM now() - created_at) AS ago
+      FROM public.playlists ORDER BY title, id`);
+  const items = await q(`SELECT playlist_id, song_version_id, order_index FROM public.playlist_items ORDER BY playlist_id, order_index`);
   const recordings = await q(`SELECT id, user_id, song_version_id, recording_name, storage_path, position, file_size_bytes, duration_seconds,
       extract(epoch FROM now() - created_at) AS ago FROM public.user_recordings ORDER BY song_version_id, position, id`);
   const views = await q(`SELECT user_id, song_id, extract(epoch FROM now() - viewed_at) AS ago FROM public.song_views ORDER BY user_id, song_id`);
@@ -115,11 +115,11 @@ try {
     sql += `\n) AS v(song_id, slug) JOIN public.categories c ON c.slug = v.slug\nON CONFLICT DO NOTHING;\n`;
   }
   sql += '\n';
-  sql += block('Playlists', 'setlists', ['id', 'owner_id', 'title', 'description', 'is_public', 'created_at'],
-    setlists.map((r) => [lit(r.id), lit(r.owner_id), lit(r.title), lit(r.description), lit(r.is_public), ts(r.ago)]),
+  sql += block('Playlists', 'playlists', ['id', 'owner_id', 'title', 'description', 'is_public', 'created_at'],
+    playlists.map((r) => [lit(r.id), lit(r.owner_id), lit(r.title), lit(r.description), lit(r.is_public), ts(r.ago)]),
     { onConflict: 'ON CONFLICT (id) DO NOTHING' });
-  sql += block('Playlist items', 'setlist_items', ['setlist_id', 'song_version_id', 'order_index'],
-    items.map((r) => [lit(r.setlist_id), lit(r.song_version_id), lit(r.order_index)]));
+  sql += block('Playlist items', 'playlist_items', ['playlist_id', 'song_version_id', 'order_index'],
+    items.map((r) => [lit(r.playlist_id), lit(r.song_version_id), lit(r.order_index)]));
   sql += block('Private rehearsal recordings (metadata only, no files in storage)', 'user_recordings',
     ['id', 'user_id', 'song_version_id', 'recording_name', 'storage_path', 'position', 'file_size_bytes', 'duration_seconds', 'created_at'],
     recordings.map((r) => [lit(r.id), lit(r.user_id), lit(r.song_version_id), lit(r.recording_name), lit(r.storage_path), lit(r.position), lit(r.file_size_bytes), lit(r.duration_seconds), ts(r.ago)]));
@@ -128,7 +128,7 @@ try {
     { onConflict: 'ON CONFLICT (user_id, song_id) DO NOTHING' });
 
   fs.writeFileSync(outFile, sql);
-  console.log(`[export-random-seed] Wrote ${path.relative(process.cwd(), outFile)}: ${compositions.length} songs, ${versions.length} versions, ${tagMaps.length} tag links, ${setlists.length} playlists, ${recordings.length} recordings (${(sql.length / 1024).toFixed(0)} KB)`);
+  console.log(`[export-random-seed] Wrote ${path.relative(process.cwd(), outFile)}: ${compositions.length} songs, ${versions.length} versions, ${tagMaps.length} tag links, ${playlists.length} playlists, ${recordings.length} recordings (${(sql.length / 1024).toFixed(0)} KB)`);
 } finally {
   await client.query('ROLLBACK');
   await client.end();

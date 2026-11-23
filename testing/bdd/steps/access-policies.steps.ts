@@ -90,11 +90,11 @@ Given('the member owns a private and a public playlist with one song each', asyn
 
   const addPlaylist = async (title: string, ownerId: string, isPublic: boolean) => {
     const { rows } = await db.query<{ id: string }>(
-      `INSERT INTO public.setlists (owner_id, title, is_public) VALUES ($1, $2, $3) RETURNING id`,
+      `INSERT INTO public.playlists (owner_id, title, is_public) VALUES ($1, $2, $3) RETURNING id`,
       [ownerId, title, isPublic]
     );
     const { rows: items } = await db.query<{ id: string }>(
-      `INSERT INTO public.setlist_items (setlist_id, song_version_id, order_index) VALUES ($1, $2, 0) RETURNING id`,
+      `INSERT INTO public.playlist_items (playlist_id, song_version_id, order_index) VALUES ($1, $2, 0) RETURNING id`,
       [rows[0].id, versions[0].id]
     );
     return { playlist: rows[0].id, item: items[0].id };
@@ -137,7 +137,7 @@ Then('a guest cannot select all columns of profiles', async function () {
 Then('a guest cannot read e-mail addresses through an embedded playlist owner', async function () {
   await assertRefused(
     () =>
-      queryAsAnon(`SELECT s.id, p.email FROM public.setlists s JOIN public.profiles p ON p.id = s.owner_id
+      queryAsAnon(`SELECT s.id, p.email FROM public.playlists s JOIN public.profiles p ON p.id = s.owner_id
                     WHERE s.is_public`),
     'guest joining playlists to profile e-mail'
   );
@@ -330,7 +330,7 @@ Then(
   /^a (guest|member|other member|gatekeeper|admin) (can|cannot) read the items of the member's (public|private) playlist$/,
   async function (this: SongBddWorld, reader: string, result: string, visibility: 'public' | 'private') {
     const playlistId = access(this).playlists[`the member's ${visibility}`];
-    const rows = await queryAs(this, reader, 'SELECT id FROM public.setlist_items WHERE setlist_id = $1', [playlistId]);
+    const rows = await queryAs(this, reader, 'SELECT id FROM public.playlist_items WHERE playlist_id = $1', [playlistId]);
     assert.equal(rows.length, result === 'can' ? 1 : 0, `${reader} reading items of a ${visibility} playlist`);
   }
 );
@@ -353,12 +353,12 @@ Then(
         queryAs(
           this,
           writer,
-          `INSERT INTO public.setlist_items (setlist_id, song_version_id, order_index) VALUES ($1, $2, 9) RETURNING id`,
+          `INSERT INTO public.playlist_items (playlist_id, song_version_id, order_index) VALUES ($1, $2, 9) RETURNING id`,
           [s.playlists[name], s.songVersionId]
         ),
       change: () =>
-        queryAs(this, writer, 'UPDATE public.setlist_items SET order_index = 9 WHERE id = $1 RETURNING id', [s.items[name]]),
-      remove: () => queryAs(this, writer, 'DELETE FROM public.setlist_items WHERE id = $1 RETURNING id', [s.items[name]]),
+        queryAs(this, writer, 'UPDATE public.playlist_items SET order_index = 9 WHERE id = $1 RETURNING id', [s.items[name]]),
+      remove: () => queryAs(this, writer, 'DELETE FROM public.playlist_items WHERE id = $1 RETURNING id', [s.items[name]]),
     };
     assert.equal(await isAllowed(statements[action]), result === 'can', `${writer} ${action} on ${visibility} playlist`);
   }
@@ -369,7 +369,7 @@ Then(
   async function (this: SongBddWorld, writer: string, result: string, source: PlaylistName, target: PlaylistName) {
     const s = access(this);
     const allowed = await isAllowed(() =>
-      queryAs(this, writer, 'UPDATE public.setlist_items SET setlist_id = $2 WHERE id = $1 RETURNING id', [
+      queryAs(this, writer, 'UPDATE public.playlist_items SET playlist_id = $2 WHERE id = $1 RETURNING id', [
         s.items[source],
         s.playlists[target],
       ])
@@ -623,7 +623,7 @@ Then(
   async function (this: SongBddWorld, account: string, visibility: 'public' | 'private') {
     const s = access(this);
     const allowed = await isAllowed(() =>
-      queryAs(this, account, 'UPDATE public.setlists SET owner_id = $2 WHERE id = $1 RETURNING id', [
+      queryAs(this, account, 'UPDATE public.playlists SET owner_id = $2 WHERE id = $1 RETURNING id', [
         s.playlists[`the member's ${visibility}`],
         s.otherMemberId,
       ])
@@ -639,7 +639,7 @@ Then('a gatekeeper is refused upserting the member\'s public playlist with anoth
       queryAs(
         this,
         'gatekeeper',
-        `INSERT INTO public.setlists (id, owner_id, title, is_public) VALUES ($1, $2, 'BDD public', true)
+        `INSERT INTO public.playlists (id, owner_id, title, is_public) VALUES ($1, $2, 'BDD public', true)
          ON CONFLICT (id) DO UPDATE SET owner_id = EXCLUDED.owner_id RETURNING id`,
         [s.playlists["the member's public"], s.otherMemberId]
       ),
@@ -651,7 +651,7 @@ Then(
   /^a (member|other member|gatekeeper) (can|cannot) rename the member's (public|private) playlist$/,
   async function (this: SongBddWorld, account: string, result: string, visibility: 'public' | 'private') {
     const allowed = await isAllowed(() =>
-      queryAs(this, account, `UPDATE public.setlists SET title = 'Renamed', description = 'D' WHERE id = $1 RETURNING id`, [
+      queryAs(this, account, `UPDATE public.playlists SET title = 'Renamed', description = 'D' WHERE id = $1 RETURNING id`, [
         access(this).playlists[`the member's ${visibility}`],
       ])
     );
@@ -660,7 +660,7 @@ Then(
 );
 
 Then('the member can publish their own private playlist', async function (this: SongBddWorld) {
-  const rows = await queryAs(this, 'member', 'UPDATE public.setlists SET is_public = true WHERE id = $1 RETURNING id', [
+  const rows = await queryAs(this, 'member', 'UPDATE public.playlists SET is_public = true WHERE id = $1 RETURNING id', [
     access(this).playlists["the member's private"],
   ]);
   assert.equal(rows.length, 1);

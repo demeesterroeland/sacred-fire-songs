@@ -7,7 +7,7 @@ import type { ExportSongData } from '@/lib/export/pdfExport';
 import { VERSION_SOURCES_SELECT, type VersionSourceRow } from '@/lib/songs/versionSources';
 
 /**
- * Select of `setlist_items`: the embedded `song_versions` is the version the item is pinned to (`song_version_id`), not
+ * Select of `playlist_items`: the embedded `song_versions` is the version the item is pinned to (`song_version_id`), not
  * the song's first one, and `transposition_override` is the item's own transposition. The sources come from the one
  * shared fragment: PostgREST fails the whole query with 42803 when `song_version_sources (` is embedded twice. There is
  * deliberately no `song_translations (` embed: a translation is never printed, the sheet always shows the version's own

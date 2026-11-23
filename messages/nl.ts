@@ -939,7 +939,7 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'pdf.continued': '{title} (vervolg)',
   'pdf.playlist': 'Afspeellijst: {title}',
   'pdf.untitledSong': 'Naamloos lied',
-  'pdf.untitledPlaylist': 'Setlist',
+  'pdf.untitledPlaylist': 'Playlist',
   // ─── Administration (#259) ──────────────────────────────────────────────
   'nav.administration': 'Beheer',
   'nav.adminUsers': 'Gebruikersoverzicht',

@@ -196,7 +196,7 @@ interface Fixture {
   originals: string[];
   translationId?: string;
   recordingId?: string;
-  setlistItemId?: string;
+  playlistItemId?: string;
   ownerId: string;
 }
 const fixtures = new WeakMap<object, Fixture>();
@@ -264,15 +264,15 @@ async function addUsage(f: Fixture) {
     [f.ownerId, f.translationId, `bdd/${f.translationId}.webm`]
   );
   const list = await db.query<{ id: string }>(
-    `INSERT INTO public.setlists (owner_id, title) VALUES ($1, 'BDD list') RETURNING id`,
+    `INSERT INTO public.playlists (owner_id, title) VALUES ($1, 'BDD list') RETURNING id`,
     [f.ownerId]
   );
   const item = await db.query<{ id: string }>(
-    `INSERT INTO public.setlist_items (setlist_id, song_version_id, order_index) VALUES ($1, $2, 0) RETURNING id`,
+    `INSERT INTO public.playlist_items (playlist_id, song_version_id, order_index) VALUES ($1, $2, 0) RETURNING id`,
     [list.rows[0].id, f.translationId]
   );
   f.recordingId = rec.rows[0].id;
-  f.setlistItemId = item.rows[0].id;
+  f.playlistItemId = item.rows[0].id;
 }
 const translationsOf = async (songId: string) =>
   (await (await seedDb()).query<{ language: string; title: string | null; lyrics: string }>(
@@ -471,7 +471,7 @@ Given(
     await addOriginal(f, undefined, { key: originalKey });
     await addTranslation(f, name, 'Mother earth, I hear you', { key: translationKey });
     await addUsage(f);
-    await (await seedDb()).query('UPDATE public.setlist_items SET transposition_override = $2 WHERE id = $1', [f.setlistItemId, transposition]);
+    await (await seedDb()).query('UPDATE public.playlist_items SET transposition_override = $2 WHERE id = $1', [f.playlistItemId, transposition]);
     fixtures.set(this, f);
   }
 );
@@ -484,7 +484,9 @@ When('the translation migration runs', async function (this: object) {
   const onNotice = (n: { message: string }) => log.push(n.message);
   db.on('notice', onNotice);
   try {
-    await db.query(readFileSync(MIGRATION, 'utf8'));
+    // The migration is replayed as it was written (old migrations stay untouched); the playlist tables carry
+    // their renamed names since the setlist -> playlist migration (#573), so the table name is mapped.
+    await db.query(readFileSync(MIGRATION, 'utf8').replaceAll('setlist_items', 'playlist_items'));
   } finally {
     db.off('notice', onNotice);
   }
@@ -518,7 +520,7 @@ Then('the recording and the playlist item are on the original version', async fu
   const f = fx(this);
   const db = await seedDb();
   const rec = await db.query('SELECT song_version_id FROM public.user_recordings WHERE id = $1', [f.recordingId]);
-  const item = await db.query('SELECT song_version_id FROM public.setlist_items WHERE id = $1', [f.setlistItemId]);
+  const item = await db.query('SELECT song_version_id FROM public.playlist_items WHERE id = $1', [f.playlistItemId]);
   assert.equal(rec.rows[0].song_version_id, f.originals[0]);
   assert.equal(item.rows[0].song_version_id, f.originals[0]);
 });

@@ -97,7 +97,7 @@ export interface SongTranslation {
   created_at: string;
 }
 
-export interface Setlist {
+export interface Playlist {
   id: string;
   owner_id: string;
   title: string;
@@ -105,12 +105,12 @@ export interface Setlist {
   is_public: boolean;
   created_at: string;
   // Nested items for easier UI consumption
-  items?: SetlistItem[];
+  items?: PlaylistItem[];
 }
 
-export interface SetlistItem {
+export interface PlaylistItem {
   id: string;
-  setlist_id: string;
+  playlist_id: string;
   song_version_id: string;
   order_index: number;
   transposition_override?: number | null;

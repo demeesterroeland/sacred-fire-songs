@@ -4,7 +4,7 @@ import { createClient } from '@/lib/supabase/server';
 import { revalidatePath } from 'next/cache';
 import { uuid, safeParse } from '@/lib/validation/schemas';
 import { firstVersion } from '@/lib/songs/versionOrder';
-import { fetchFavoritesSetlistId, FAVORITES_TITLE } from '@/lib/playlists/favorites';
+import { fetchFavoritesPlaylistId, FAVORITES_TITLE } from '@/lib/playlists/favorites';
 
 export async function toggleFavorite(
     compositionId: string
@@ -32,32 +32,32 @@ export async function toggleFavorite(
         return { error: 'Song version not found' };
     }
 
-    // Find or create "My Favorites" setlist
-    let setlistId = await fetchFavoritesSetlistId(supabase, user.id);
+    // Find or create "My Favorites" playlist
+    let playlistId = await fetchFavoritesPlaylistId(supabase, user.id);
 
-    if (!setlistId) {
-        const { data: newSetlist, error: createError } = await supabase
-            .from('setlists')
+    if (!playlistId) {
+        const { data: newPlaylist, error: createError } = await supabase
+            .from('playlists')
             .insert({ owner_id: user.id, title: FAVORITES_TITLE, is_public: false })
             .select('id')
             .single();
 
         if (createError) return { error: createError.message };
-        setlistId = newSetlist.id;
+        playlistId = newPlaylist.id;
     }
 
     // Check if already in favorites
     const { data: existingItem } = await supabase
-        .from('setlist_items')
+        .from('playlist_items')
         .select('id')
-        .eq('setlist_id', setlistId)
+        .eq('playlist_id', playlistId)
         .eq('song_version_id', version.id)
         .maybeSingle();
 
     if (existingItem) {
         // Remove from favorites
         await supabase
-            .from('setlist_items')
+            .from('playlist_items')
             .delete()
             .eq('id', existingItem.id);
 
@@ -67,18 +67,18 @@ export async function toggleFavorite(
     } else {
         // Get next order index
         const { data: items } = await supabase
-            .from('setlist_items')
+            .from('playlist_items')
             .select('order_index')
-            .eq('setlist_id', setlistId)
+            .eq('playlist_id', playlistId)
             .order('order_index', { ascending: false })
             .limit(1);
 
         const nextIndex = (items?.[0]?.order_index ?? -1) + 1;
 
         await supabase
-            .from('setlist_items')
+            .from('playlist_items')
             .insert({
-                setlist_id: setlistId,
+                playlist_id: playlistId,
                 song_version_id: version.id,
                 order_index: nextIndex,
             });

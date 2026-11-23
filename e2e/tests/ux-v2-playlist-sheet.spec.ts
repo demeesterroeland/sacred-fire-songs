@@ -36,7 +36,7 @@ test.beforeAll(async () => {
     songId = song.rows[0].id;
     const make = async (title: string) => {
       const { rows } = await client.query<{ id: string }>(
-        'INSERT INTO public.setlists (owner_id, title, is_public) VALUES ($1, $2, false) RETURNING id',
+        'INSERT INTO public.playlists (owner_id, title, is_public) VALUES ($1, $2, false) RETURNING id',
         [member.rows[0].id, title]
       );
       return rows[0].id;
@@ -45,7 +45,7 @@ test.beforeAll(async () => {
     const fire = await make(FIRE);
     playlistIds = [water, fire];
     await client.query(
-      'INSERT INTO public.setlist_items (setlist_id, song_version_id, order_index) VALUES ($1, $2, 0)',
+      'INSERT INTO public.playlist_items (playlist_id, song_version_id, order_index) VALUES ($1, $2, 0)',
       [water, song.rows[0].version_id]
     );
   } finally {
@@ -58,8 +58,8 @@ test.afterAll(async () => {
   const client = new pg.Client({ connectionString: DATABASE_URL });
   await client.connect();
   try {
-    await client.query('DELETE FROM public.setlists WHERE id = ANY($1::uuid[])', [playlistIds]);
-    await client.query('DELETE FROM public.setlists WHERE title = $1 AND owner_id = (SELECT id FROM public.profiles WHERE email = $2)', ['E2E Sunrise ' + RUN, ROLES.member.email]);
+    await client.query('DELETE FROM public.playlists WHERE id = ANY($1::uuid[])', [playlistIds]);
+    await client.query('DELETE FROM public.playlists WHERE title = $1 AND owner_id = (SELECT id FROM public.profiles WHERE email = $2)', ['E2E Sunrise ' + RUN, ROLES.member.email]);
   } finally {
     await client.end();
   }

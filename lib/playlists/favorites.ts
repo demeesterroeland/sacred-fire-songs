@@ -4,15 +4,15 @@ import type { SupabaseClient } from '@supabase/supabase-js';
 export const FAVORITES_TITLE = 'My Favorites';
 
 /**
- * The id of the signed-in user's own "My Favorites" setlist, or null.
+ * The id of the signed-in user's own "My Favorites" playlist, or null.
  *
- * Always filter on the owner: an admin or curator can read every member's setlists, so a title-only lookup sees several
+ * Always filter on the owner: an admin or curator can read every member's playlists, so a title-only lookup sees several
  * rows, `.maybeSingle()` answers with an error and no data, and the hearts, the list and the counts come back empty.
  * Ordered and limited, so a stray duplicate of the user's own cannot cause the same error.
  */
-export async function fetchFavoritesSetlistId(supabase: SupabaseClient, userId: string): Promise<string | null> {
+export async function fetchFavoritesPlaylistId(supabase: SupabaseClient, userId: string): Promise<string | null> {
   const { data } = await supabase
-    .from('setlists')
+    .from('playlists')
     .select('id')
     .eq('owner_id', userId)
     .eq('title', FAVORITES_TITLE)

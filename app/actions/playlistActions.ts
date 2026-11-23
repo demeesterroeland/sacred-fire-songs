@@ -42,7 +42,7 @@ export async function createPlaylist(
     if (!user) return { error: 'Not authenticated' };
 
     const { data, error } = await supabase
-        .from('setlists')
+        .from('playlists')
         .insert({ owner_id: user.id, title: parsed.data, is_public: toIsPublic(isPublic) })
         .select('id')
         .maybeSingle();
@@ -70,7 +70,7 @@ export async function renamePlaylist(
     if (!user) return { error: 'Not authenticated' };
 
     const { data: playlist } = await supabase
-        .from('setlists')
+        .from('playlists')
         .select('title, owner_id, is_public')
         .eq('id', idParsed.data)
         .maybeSingle();
@@ -81,7 +81,7 @@ export async function renamePlaylist(
     if (isSmartPlaylist(playlist.title)) return { error: 'Cannot rename smart playlists' };
 
     const { error } = await supabase
-        .from('setlists')
+        .from('playlists')
         .update({ title: titleParsed.data })
         .eq('id', idParsed.data);
 
@@ -104,7 +104,7 @@ export async function deletePlaylist(
     if (!user) return { error: 'Not authenticated' };
 
     const { data: playlist } = await supabase
-        .from('setlists')
+        .from('playlists')
         .select('title, owner_id')
         .eq('id', parsed.data)
         .maybeSingle();
@@ -114,7 +114,7 @@ export async function deletePlaylist(
     if (isSmartPlaylist(playlist.title)) return { error: 'Cannot delete smart playlists' };
 
     const { error } = await supabase
-        .from('setlists')
+        .from('playlists')
         .delete()
         .eq('id', parsed.data);
 
@@ -137,7 +137,7 @@ export async function togglePlaylistVisibility(
     if (!user) return { error: 'Not authenticated' };
 
     const { data: playlist } = await supabase
-        .from('setlists')
+        .from('playlists')
         .select('owner_id, title, is_public')
         .eq('id', idParsed.data)
         .maybeSingle();
@@ -148,7 +148,7 @@ export async function togglePlaylistVisibility(
     if (isSmartPlaylist(playlist.title)) return { error: 'Cannot modify smart playlists' };
 
     const { error } = await supabase
-        .from('setlists')
+        .from('playlists')
         .update({ is_public: isPublic })
         .eq('id', idParsed.data);
 
@@ -175,7 +175,7 @@ export async function updatePlaylistDescription(
     if (!user) return { error: 'Not authenticated' };
 
     const { data: playlist } = await supabase
-        .from('setlists')
+        .from('playlists')
         .select('owner_id, title, is_public')
         .eq('id', idParsed.data)
         .maybeSingle();
@@ -186,7 +186,7 @@ export async function updatePlaylistDescription(
     if (isSmartPlaylist(playlist.title)) return { error: 'Cannot modify smart playlists' };
 
     const { error } = await supabase
-        .from('setlists')
+        .from('playlists')
         .update({ description: descParsed.data?.trim() || null })
         .eq('id', idParsed.data);
 
@@ -212,7 +212,7 @@ export async function addSongToPlaylist(
     if (!user) return { added: false, error: 'Not authenticated' };
 
     const { data: playlist } = await supabase
-        .from('setlists')
+        .from('playlists')
         .select('owner_id, is_public')
         .eq('id', playlistParsed.data)
         .maybeSingle();
@@ -235,14 +235,14 @@ export async function addSongToPlaylist(
 
     // Already in the playlist (any version) — toggle out: remove every version of this song
     const { data: existing } = await supabase
-        .from('setlist_items')
+        .from('playlist_items')
         .select('id')
-        .eq('setlist_id', playlistParsed.data)
+        .eq('playlist_id', playlistParsed.data)
         .in('song_version_id', versions.map((v) => v.id));
 
     if (existing && existing.length > 0) {
         const { error: deleteError } = await supabase
-            .from('setlist_items').delete().in('id', existing.map((e) => e.id));
+            .from('playlist_items').delete().in('id', existing.map((e) => e.id));
         if (deleteError) return { added: true, error: deleteError.message };
         revalidatePath(`/library/playlists/${playlistParsed.data}`);
         return { added: false };
@@ -250,9 +250,9 @@ export async function addSongToPlaylist(
 
     // Get next order_index
     const { data: last } = await supabase
-        .from('setlist_items')
+        .from('playlist_items')
         .select('order_index')
-        .eq('setlist_id', playlistParsed.data)
+        .eq('playlist_id', playlistParsed.data)
         .order('order_index', { ascending: false })
         .limit(1)
         .maybeSingle();
@@ -260,8 +260,8 @@ export async function addSongToPlaylist(
     const nextIndex = (last?.order_index ?? -1) + 1;
 
     const { error } = await supabase
-        .from('setlist_items')
-        .insert({ setlist_id: playlistParsed.data, song_version_id: version.id, order_index: nextIndex });
+        .from('playlist_items')
+        .insert({ playlist_id: playlistParsed.data, song_version_id: version.id, order_index: nextIndex });
 
     if (error) return { added: false, error: error.message };
     revalidatePath(`/library/playlists/${playlistParsed.data}`);
@@ -281,20 +281,20 @@ export async function removeSongFromPlaylist(
     if (!user) return { error: 'Not authenticated' };
 
     const { data: item } = await supabase
-        .from('setlist_items')
-        .select('id, setlist_id, setlists(owner_id, is_public)')
+        .from('playlist_items')
+        .select('id, playlist_id, playlists(owner_id, is_public)')
         .eq('id', parsed.data)
         .maybeSingle();
 
     if (!item) return { error: 'Item not found' };
-    const setlist = item.setlists as unknown as { owner_id: string; is_public: boolean } | null;
-    if (!setlist) return { error: 'Playlist not found' };
-    const hasAccess = await checkPlaylistModifyAccess(supabase, user, setlist);
+    const playlist = item.playlists as unknown as { owner_id: string; is_public: boolean } | null;
+    if (!playlist) return { error: 'Playlist not found' };
+    const hasAccess = await checkPlaylistModifyAccess(supabase, user, playlist);
     if (!hasAccess) return { error: 'Access denied: not your playlist or unauthorized' };
 
-    const { error } = await supabase.from('setlist_items').delete().eq('id', parsed.data);
+    const { error } = await supabase.from('playlist_items').delete().eq('id', parsed.data);
     if (error) return { error: error.message };
-    revalidatePath(`/library/playlists/${item.setlist_id}`);
+    revalidatePath(`/library/playlists/${item.playlist_id}`);
     return {};
 }
 
@@ -315,7 +315,7 @@ export async function reorderPlaylistSongs(
     if (!user) return { error: 'Not authenticated' };
 
     const { data: playlist } = await supabase
-        .from('setlists')
+        .from('playlists')
         .select('owner_id, is_public')
         .eq('id', playlistParsed.data)
         .maybeSingle();
@@ -326,10 +326,10 @@ export async function reorderPlaylistSongs(
 
     const results = await Promise.all(
         itemIdsParsed.data.map((id, index) =>
-            supabase.from('setlist_items')
+            supabase.from('playlist_items')
                 .update({ order_index: index })
                 .eq('id', id)
-                .eq('setlist_id', playlistParsed.data)
+                .eq('playlist_id', playlistParsed.data)
         )
     );
     const failed = results.find(r => r.error);
@@ -363,7 +363,7 @@ export async function getPlaylistSongsForExport(
     }
 
     const { data: playlist, error: playlistError } = await supabase
-        .from('setlists')
+        .from('playlists')
         .select('id, title, owner_id, is_public, description')
         .eq('id', idParsed.data)
         .maybeSingle();
@@ -376,9 +376,9 @@ export async function getPlaylistSongsForExport(
     }
 
     const { data: items, error: itemsError } = await supabase
-        .from('setlist_items')
+        .from('playlist_items')
         .select(PLAYLIST_EXPORT_SELECT)
-        .eq('setlist_id', idParsed.data)
+        .eq('playlist_id', idParsed.data)
         .order('order_index', { ascending: true });
 
     if (itemsError) return { title: playlist.title, songs: [], error: itemsError.message };

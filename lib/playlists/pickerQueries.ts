@@ -19,7 +19,7 @@ export async function fetchUserPlaylists(userId: string): Promise<PickerPlaylist
     const isCurator = profile?.role === 'admin' || profile?.role === 'gatekeeper';
 
     let query = supabase
-        .from('setlists')
+        .from('playlists')
         .select('id, title, is_public, owner_id');
 
     if (isCurator) {
@@ -39,8 +39,8 @@ export async function fetchUserPlaylists(userId: string): Promise<PickerPlaylist
 export async function fetchContainingPlaylists(compositionId: string): Promise<Set<string>> {
     const supabase = createClient();
     const { data } = await supabase
-        .from('setlist_items')
-        .select('setlist_id, song_versions!inner(composition_id)')
+        .from('playlist_items')
+        .select('playlist_id, song_versions!inner(composition_id)')
         .eq('song_versions.composition_id', compositionId);
-    return new Set((data ?? []).map(d => d.setlist_id));
+    return new Set((data ?? []).map(d => d.playlist_id));
 }

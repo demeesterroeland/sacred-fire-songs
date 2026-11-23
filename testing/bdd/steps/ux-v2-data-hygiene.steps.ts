@@ -6,14 +6,14 @@ import { seedDb } from '../support/db';
 
 Given('the local seed is applied', async function () {
   const db = await seedDb();
-  const { rows } = await db.query<{ n: number }>('SELECT count(*)::int AS n FROM public.setlists');
+  const { rows } = await db.query<{ n: number }>('SELECT count(*)::int AS n FROM public.playlists');
   assert.ok(rows[0].n > 0, 'the seed inserts playlists');
 });
 
 Then('no playlist title contains {string} or {string}', async function (a: string, b: string) {
   const db = await seedDb();
   const { rows } = await db.query<{ title: string }>(
-    'SELECT title FROM public.setlists WHERE title ILIKE $1 OR title ILIKE $2',
+    'SELECT title FROM public.playlists WHERE title ILIKE $1 OR title ILIKE $2',
     [`%${a}%`, `%${b}%`],
   );
   const offending = rows.map((r) => r.title).filter((t) => isTestFixtureTitle(t, [a, b]));

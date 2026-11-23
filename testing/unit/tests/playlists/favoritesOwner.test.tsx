@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-// An admin (or curator) can read every member's setlists, so several setlists titled "My Favorites" are visible.
+// An admin (or curator) can read every member's playlists, so several playlists titled "My Favorites" are visible.
 // Every lookup of the signed-in user's favourites must filter on the owner; otherwise `.maybeSingle()` meets several
 // rows, answers with an error and no data, and the heart, the list and the counts come back empty.
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -12,17 +12,17 @@ type Row = Record<string, unknown>;
 const ME = 'user-admin';
 const DB: Record<string, Row[]> = {
   compositions: [],
-  setlists: [
+  playlists: [
     { id: 's-other-1', owner_id: 'user-a', title: 'My Favorites' },
     { id: 's-mine', owner_id: ME, title: 'My Favorites' },
     { id: 's-other-2', owner_id: 'user-b', title: 'My Favorites' },
     { id: 's-mine-2', owner_id: ME, title: 'Road trip' },
   ],
-  setlist_items: [
-    { setlist_id: 's-other-1', song_versions: { composition_id: 'c-other-1' } },
-    { setlist_id: 's-mine', song_versions: { composition_id: 'c1' } },
-    { setlist_id: 's-mine', song_versions: { composition_id: 'c2' } },
-    { setlist_id: 's-other-2', song_versions: { composition_id: 'c-other-2' } },
+  playlist_items: [
+    { playlist_id: 's-other-1', song_versions: { composition_id: 'c-other-1' } },
+    { playlist_id: 's-mine', song_versions: { composition_id: 'c1' } },
+    { playlist_id: 's-mine', song_versions: { composition_id: 'c2' } },
+    { playlist_id: 's-other-2', song_versions: { composition_id: 'c-other-2' } },
   ],
 };
 
@@ -56,23 +56,23 @@ vi.mock('@/lib/supabase/client', () => ({ createClient: () => fakeClient() }));
 
 import { useFavoritesQuery } from '@/hooks/useFavoritesQuery';
 import { useGlobalFilterCounts } from '@/hooks/useGlobalFilterCounts';
-import { fetchFavoritesSetlistId } from '@/lib/playlists/favorites';
+import { fetchFavoritesPlaylistId } from '@/lib/playlists/favorites';
 
 const wrapper = ({ children }: { children: ReactNode }) => (
   <QueryClientProvider client={new QueryClient({ defaultOptions: { queries: { retry: false } } })}>{children}</QueryClientProvider>
 );
 afterEach(() => vi.clearAllMocks());
 
-describe('fetchFavoritesSetlistId', () => {
-  it('returns the signed-in user\'s own favourites setlist when several are visible', async () => {
-    expect(await fetchFavoritesSetlistId(fakeClient() as never, ME)).toBe('s-mine');
+describe('fetchFavoritesPlaylistId', () => {
+  it('returns the signed-in user\'s own favourites playlist when several are visible', async () => {
+    expect(await fetchFavoritesPlaylistId(fakeClient() as never, ME)).toBe('s-mine');
   });
   it('is null for a user who has none', async () => {
-    expect(await fetchFavoritesSetlistId(fakeClient() as never, 'user-nobody')).toBeNull();
+    expect(await fetchFavoritesPlaylistId(fakeClient() as never, 'user-nobody')).toBeNull();
   });
 });
 
-describe('with several "My Favorites" setlists visible', () => {
+describe('with several "My Favorites" playlists visible', () => {
   it('the hearts (useFavoritesQuery) are the user\'s own favourites', async () => {
     const { result } = renderHook(() => useFavoritesQuery(ME), { wrapper });
     await waitFor(() => expect(result.current.favoriteIds.size).toBe(2));
@@ -88,7 +88,7 @@ describe('with several "My Favorites" setlists visible', () => {
 describe('no title-only lookup of a smart playlist is left', () => {
   it.each(['hooks/useFavoritesQuery.ts', 'hooks/useGlobalFilterCounts.ts', 'app/songs/[id]/page.tsx'])('%s uses the owner-filtered helper', (file) => {
     const src = readFileSync(file, 'utf8');
-    expect(src).toContain('fetchFavoritesSetlistId');
+    expect(src).toContain('fetchFavoritesPlaylistId');
     expect(src).not.toMatch(/\.eq\(\s*'title',\s*'My Favorites'\s*\)/);
   });
 });

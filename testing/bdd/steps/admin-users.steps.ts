@@ -41,7 +41,7 @@ const FALLBACK_ADMIN = 'root-admin@test.com';
 
 function state(world: SongBddWorld): AdminBddState {
   world.admin ??= {
-    db: { tables: { profiles: [], compositions: [], song_versions: [], setlists: [] }, authUser: null },
+    db: { tables: { profiles: [], compositions: [], song_versions: [], playlists: [] }, authUser: null },
     now: new Date(),
     filter: {},
   };
@@ -162,7 +162,7 @@ Given(
       tables.song_versions.push({ id: `${email}-v-${i}`, composition_id: 'any', contributor_id: owner, created_at: atNoon('2026-06-01') });
     }
     for (let i = 0; i < playlists; i++) {
-      tables.setlists.push({ id: `${email}-pl-${i}`, owner_id: owner, title: `Playlist ${i}`, is_public: i < pub, created_at: atNoon('2026-06-01') });
+      tables.playlists.push({ id: `${email}-pl-${i}`, owner_id: owner, title: `Playlist ${i}`, is_public: i < pub, created_at: atNoon('2026-06-01') });
     }
   }
 );
@@ -274,7 +274,7 @@ Given(
   '{string} created the public playlist {string} and the private playlist {string}',
   function (this: SongBddWorld, email: string, publicTitle: string, privateTitle: string) {
     const { tables } = state(this).db;
-    tables.setlists.push(
+    tables.playlists.push(
       { id: 'pl:public', owner_id: idFor(email), title: publicTitle, is_public: true, created_at: atNoon('2026-06-03') },
       { id: 'pl:private', owner_id: idFor(email), title: privateTitle, is_public: false, created_at: atNoon('2026-06-04') }
     );
@@ -368,7 +368,7 @@ Given('the member owns a private playlist', async function (this: SongBddWorld) 
   const db = await seedDb();
   const owner = await profileIdByEmail(SEEDED_EMAILS.member);
   const { rows } = await db.query<{ id: string }>(
-    `INSERT INTO public.setlists (owner_id, title, is_public) VALUES ($1, 'BDD private playlist', false) RETURNING id`,
+    `INSERT INTO public.playlists (owner_id, title, is_public) VALUES ($1, 'BDD private playlist', false) RETURNING id`,
     [owner]
   );
   state(this).playlistId = rows[0].id;
@@ -378,7 +378,7 @@ Then(
   /^the (admin|musician|gatekeeper|member) account (can|cannot) read that playlist$/,
   async function (this: SongBddWorld, account: string, can: string) {
     const id = await profileIdByEmail(SEEDED_EMAILS[account]);
-    const rows = await queryAsUser(id, 'SELECT id FROM public.setlists WHERE id = $1', [state(this).playlistId]);
+    const rows = await queryAsUser(id, 'SELECT id FROM public.playlists WHERE id = $1', [state(this).playlistId]);
     assert.equal(rows.length, can === 'can' ? 1 : 0, `${account} reading a member's private playlist`);
   }
 );
@@ -402,7 +402,7 @@ Then('the admin account can read every profile and every playlist in the databas
   const db = await seedDb();
   const admin = await profileIdByEmail(SEEDED_EMAILS.admin);
   const countSql = `SELECT (SELECT count(*) FROM public.profiles)::int AS profiles,
-                           (SELECT count(*) FROM public.setlists)::int AS playlists`;
+                           (SELECT count(*) FROM public.playlists)::int AS playlists`;
   type Counts = { profiles: number; playlists: number };
   const {
     rows: [total],

@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 // #607: on a shared device, signing out removes the unsaved Add Song draft,
-// next to the query cache and the cached setlist PDFs.
+// next to the query cache and the cached playlist PDFs.
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { act, cleanup, renderHook } from '@testing-library/react';
 import { createElement, type ReactNode } from 'react';

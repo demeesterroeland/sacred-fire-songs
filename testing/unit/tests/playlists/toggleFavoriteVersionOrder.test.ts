@@ -22,11 +22,11 @@ function builder(table: string) {
     return chain;
   };
   chain.eq = (column: string, value: unknown) => {
-    if (table === 'setlist_items' && column === 'song_version_id') calls.eqVersion.push(value);
+    if (table === 'playlist_items' && column === 'song_version_id') calls.eqVersion.push(value);
     return chain;
   };
   chain.insert = (row: unknown) => {
-    if (table === 'setlist_items') calls.inserted.push(row);
+    if (table === 'playlist_items') calls.inserted.push(row);
     return Object.assign(Promise.resolve({ error: null }), chain);
   };
   chain.single = () => Promise.resolve({ data: { id: 'list' }, error: null });
@@ -44,7 +44,7 @@ vi.mock('@/lib/supabase/server', () => ({
 }));
 vi.mock('@/lib/playlists/favorites', () => ({
   FAVORITES_TITLE: 'My Favorites',
-  fetchFavoritesSetlistId: async () => 'favorites-list',
+  fetchFavoritesPlaylistId: async () => 'favorites-list',
 }));
 vi.mock('next/cache', () => ({ revalidatePath: vi.fn() }));
 
@@ -66,7 +66,7 @@ describe('toggleFavorite', () => {
     expect(calls.versionSelects[0]).toMatch(/created_at/);
     expect(calls.versionSelects[0]).toMatch(/version_kind/);
     expect(calls.eqVersion).toEqual([ORIGINAL]);
-    expect(calls.inserted).toEqual([{ setlist_id: 'favorites-list', song_version_id: ORIGINAL, order_index: 0 }]);
+    expect(calls.inserted).toEqual([{ playlist_id: 'favorites-list', song_version_id: ORIGINAL, order_index: 0 }]);
   });
 
   it('reports a song without versions', async () => {

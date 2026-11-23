@@ -32,14 +32,14 @@ async function OtherPublicPlaylists({
         <section data-testid="other-public-playlists">
             <LibrarySubpageHeading icon={Users} title={title} count={playlists.length} />
             <div className={PLAYLIST_LIST}>
-                {playlists.map(setlist => (
+                {playlists.map(playlist => (
                     <PublicPlaylistCard
-                        key={setlist.id}
-                        id={setlist.id}
-                        title={setlist.title}
-                        description={setlist.description}
-                        songCount={songCounts[setlist.id] ?? 0}
-                        songTitles={songTitles[setlist.id] ?? []}
+                        key={playlist.id}
+                        id={playlist.id}
+                        title={playlist.title}
+                        description={playlist.description}
+                        songCount={songCounts[playlist.id] ?? 0}
+                        songTitles={songTitles[playlist.id] ?? []}
                     />
                 ))}
             </div>
@@ -63,17 +63,17 @@ async function OwnPlaylists({
     if (playlists.length === 0) return <p className="text-meta text-fg-muted italic py-2">{emptyLabel}</p>;
     return (
         <div className={PLAYLIST_LIST}>
-            {playlists.map(setlist => {
-                const counts = songCounts[setlist.id] ?? { total: 0, public: 0, draft: 0 };
+            {playlists.map(playlist => {
+                const counts = songCounts[playlist.id] ?? { total: 0, public: 0, draft: 0 };
                 return (
                     <PlaylistCard
-                        key={setlist.id}
-                        id={setlist.id}
-                        title={setlist.title}
-                        isPublic={setlist.is_public ?? false}
-                        description={setlist.description ?? null}
+                        key={playlist.id}
+                        id={playlist.id}
+                        title={playlist.title}
+                        isPublic={playlist.is_public ?? false}
+                        description={playlist.description ?? null}
                         subtitle={<SongCountSubtitle counts={counts} emptyLabel={t('librarySummary.mySongs.empty')} />}
-                        songTitles={songTitles[setlist.id] ?? []}
+                        songTitles={songTitles[playlist.id] ?? []}
                     />
                 );
             })}
@@ -92,26 +92,26 @@ export default async function PlaylistsPage() {
 
     // Other members' public playlists: filtered in the query, so your own recent public lists cannot crowd them out.
     let publicQuery = supabase
-        .from('setlists')
+        .from('playlists')
         .select('id, title, description, owner_id')
         .eq('is_public', true);
     if (user) publicQuery = publicQuery.neq('owner_id', user.id);
-    const { data: publicSetlists } = await publicQuery
+    const { data: publicRows } = await publicQuery
         .order('created_at', { ascending: false })
         .limit(20);
-    const publicPlaylists: PublicPlaylist[] = publicSetlists ?? [];
+    const publicPlaylists: PublicPlaylist[] = publicRows ?? [];
 
     const publicIds = publicPlaylists.map(p => p.id);
     const publicSongCounts: Record<string, number> = {};
     const publicSongTitles: Record<string, string[]> = {};
     if (publicIds.length > 0) {
         const { data: pubItems } = await supabase
-            .from('setlist_items')
-            .select('setlist_id, order_index, song_versions(compositions(title))')
-            .in('setlist_id', publicIds)
+            .from('playlist_items')
+            .select('playlist_id, order_index, song_versions(compositions(title))')
+            .in('playlist_id', publicIds)
             .order('order_index', { ascending: true });
         for (const item of pubItems ?? []) {
-            const sid = item.setlist_id;
+            const sid = item.playlist_id;
             publicSongCounts[sid] = (publicSongCounts[sid] ?? 0) + 1;
             const title = (item.song_versions as unknown as { compositions: { title: string } } | null)?.compositions?.title;
             if (title) (publicSongTitles[sid] ??= []).push(title);
@@ -128,12 +128,12 @@ export default async function PlaylistsPage() {
         );
     }
 
-    const { data: setlists } = await supabase
-        .from('setlists')
+    const { data: playlists } = await supabase
+        .from('playlists')
         .select('id, title, description, is_public, created_at')
         .eq('owner_id', user.id)
         .order('created_at', { ascending: false });
-    const own = (setlists ?? []).filter(s => s.title !== FAVORITES_TITLE);
+    const own = (playlists ?? []).filter(s => s.title !== FAVORITES_TITLE);
     const privatePlaylists = own.filter(s => !s.is_public);
     const ownPublicPlaylists = own.filter(s => s.is_public);
 
@@ -142,12 +142,12 @@ export default async function PlaylistsPage() {
     const ownIds = own.map(s => s.id);
     if (ownIds.length > 0) {
         const { data: items } = await supabase
-            .from('setlist_items')
-            .select('setlist_id, order_index, song_versions(compositions(title, is_public))')
-            .in('setlist_id', ownIds)
+            .from('playlist_items')
+            .select('playlist_id, order_index, song_versions(compositions(title, is_public))')
+            .in('playlist_id', ownIds)
             .order('order_index', { ascending: true });
         for (const item of items ?? []) {
-            const sid = item.setlist_id;
+            const sid = item.playlist_id;
             const counts = (songCounts[sid] ??= { total: 0, public: 0, draft: 0 });
             counts.total++;
             const comp = (item.song_versions as unknown as { compositions: { is_public: boolean; title: string } } | null)?.compositions;

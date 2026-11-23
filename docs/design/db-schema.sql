@@ -1,11 +1,12 @@
 /*
- **Version:** 3.14
+ **Version:** 3.15
  **Status:** Current
- **Date:** November 13, 2026
+ **Date:** November 24, 2026
  
  ## Usage
  This script provides a complete setup for the "Sacred Fire Songs" database. 
- It consolidates the initial schema and all subsequent migrations up to November 13, 2026.
+ It consolidates the initial schema and all subsequent migrations up to November 24, 2026.
+ (v3.15: setlist renamed to playlist, #573, migration 20261124120000_rename_setlist_to_playlist.sql: tables playlists / playlist_items, column playlist_items.playlist_id, function fn_can_edit_playlist(p_playlist_id), the 12 RLS policies, the indexes and constraints, and the bodies of fn_song_link_summary / fn_link_song_as_version; the rows, ids, access rules and grants are unchanged and no compatibility views are kept. Older changelog lines below keep the names of their time).
  (v3.14: merge of origin/develop into feat/ux-v3; the fresh-install schema already includes the role column from migration 20261113120000_public_profiles_role.sql; no additional schema changes).
  (v3.13: previous merge sync; the schema of v3.12 is added to v3.11, nothing else changes).
  (v3.12: public_profiles gains role (NULL for a guest), Story 6.1.38, migration 20261113120000_public_profiles_role.sql; develop 3.9).
@@ -121,8 +122,8 @@ create table public.song_versions (
   edited_fields text[] not null default '{}',
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
--- SETLISTS
-create table public.setlists (
+-- PLAYLISTS
+create table public.playlists (
   id uuid default uuid_generate_v4() primary key,
   owner_id uuid references public.profiles(id) on delete cascade not null,
   title text not null,
@@ -130,10 +131,10 @@ create table public.setlists (
   is_public boolean default false,
   created_at timestamp with time zone default timezone('utc'::text, now()) not null
 );
--- SETLIST ITEMS
-create table public.setlist_items (
+-- PLAYLIST ITEMS
+create table public.playlist_items (
   id uuid default uuid_generate_v4() primary key,
-  setlist_id uuid references public.setlists(id) on delete cascade not null,
+  playlist_id uuid references public.playlists(id) on delete cascade not null,
   song_version_id uuid references public.song_versions(id) on delete cascade not null,
   order_index integer not null,
   transposition_override integer,
@@ -220,7 +221,10 @@ create unique index song_version_sources_one_primary
   on public.song_version_sources (song_version_id) where is_primary;
 -- Partial indexes for public content optimization
 CREATE INDEX IF NOT EXISTS idx_compositions_is_public_true ON public.compositions (created_at DESC) WHERE is_public = true;
-CREATE INDEX IF NOT EXISTS idx_setlists_is_public_true ON public.setlists (created_at DESC) WHERE is_public = true;
+CREATE INDEX IF NOT EXISTS idx_playlists_is_public_true ON public.playlists (created_at DESC) WHERE is_public = true;
+CREATE INDEX IF NOT EXISTS idx_playlists_owner_id ON public.playlists(owner_id);
+CREATE INDEX IF NOT EXISTS idx_playlist_items_playlist_id ON public.playlist_items(playlist_id);
+CREATE INDEX IF NOT EXISTS idx_playlist_items_song_version_id ON public.playlist_items(song_version_id);
 CREATE INDEX IF NOT EXISTS idx_compositions_title_alphabetical ON public.compositions (title ASC);
 CREATE INDEX IF NOT EXISTS idx_recording_shares_user ON public.recording_shares(shared_with_user_id);
 CREATE INDEX IF NOT EXISTS idx_recording_shares_recording ON public.recording_shares(recording_id);
@@ -455,8 +459,8 @@ create policy "Owners/Admins can delete song categories" on public.song_category
   )
 );
 alter table public.song_versions enable row level security;
-alter table public.setlists enable row level security;
-alter table public.setlist_items enable row level security;
+alter table public.playlists enable row level security;
+alter table public.playlist_items enable row level security;
 alter table public.user_recordings enable row level security;
 alter table public.recording_shares enable row level security;
 -- Public Read Policies
@@ -584,33 +588,33 @@ create policy "Allow contributors and admins to delete versions" on public.song_
     contributor_id = (select auth.uid())
     or (select role from public.profiles where id = (select auth.uid())) = 'admin'
   );
--- Setlist Policies (RLS enabled)
-create policy "Public setlists visible" on public.setlists for
+-- Playlist Policies (RLS enabled)
+create policy "Public playlists visible" on public.playlists for
 select to public using (is_public = true);
-create policy "Owners can view their setlists" on public.setlists for
+create policy "Owners can view their playlists" on public.playlists for
 select to authenticated using (
     owner_id = (
       select auth.uid()
     )
   );
-create policy "Owners can insert setlists" on public.setlists for
+create policy "Owners can insert playlists" on public.playlists for
 insert to authenticated with check (
     owner_id = (
       select auth.uid()
     )
   );
-create policy "Owners can update setlists" on public.setlists for
+create policy "Owners can update playlists" on public.playlists for
 update to authenticated using (owner_id = (select auth.uid()))
   with check (owner_id = (select auth.uid()));
-create policy "Owners can delete setlists" on public.setlists for
+create policy "Owners can delete playlists" on public.playlists for
 delete to authenticated using (
     owner_id = (
       select auth.uid()
     )
   );
-create policy "Admins can view all setlists" on public.setlists for
+create policy "Admins can view all playlists" on public.playlists for
 select to authenticated using (public.fn_is_admin());
-create policy "Admins and Gatekeepers can update public setlists" on public.setlists for
+create policy "Admins and Gatekeepers can update public playlists" on public.playlists for
 update to authenticated using (
     is_public = true
     and (select role::text from public.profiles where id = (select auth.uid())) in ('admin', 'gatekeeper')
@@ -619,13 +623,13 @@ update to authenticated using (
     and (select role::text from public.profiles where id = (select auth.uid())) in ('admin', 'gatekeeper')
   );
 -- A policy cannot compare a row with its previous value, so column privileges keep owner_id fixed.
-revoke update on public.setlists from anon, authenticated;
-grant update (title, description, is_public) on public.setlists to authenticated;
--- Setlist Items Policies
+revoke update on public.playlists from anon, authenticated;
+grant update (title, description, is_public) on public.playlists to authenticated;
+-- Playlist Items Policies
 -- Read: parent playlist is public, or the caller owns it, or the caller is admin.
 -- Write: caller owns the parent playlist, or is admin, or is gatekeeper and the
 -- parent playlist is public. Checked for the old and the new row.
-create or replace function public.fn_can_edit_setlist(p_setlist_id uuid)
+create or replace function public.fn_can_edit_playlist(p_playlist_id uuid)
 returns boolean
 language sql
 stable
@@ -634,9 +638,9 @@ set search_path = ''
 as $$
   select exists (
     select 1
-    from public.setlists s
+    from public.playlists s
     left join public.profiles p on p.id = auth.uid()
-    where s.id = p_setlist_id
+    where s.id = p_playlist_id
       and (
         s.owner_id = auth.uid()
         or p.role = 'admin'::public.user_role
@@ -645,22 +649,22 @@ as $$
   );
 $$;
 
-revoke all on function public.fn_can_edit_setlist(uuid) from public, anon;
-grant execute on function public.fn_can_edit_setlist(uuid) to authenticated, service_role;
+revoke all on function public.fn_can_edit_playlist(uuid) from public, anon;
+grant execute on function public.fn_can_edit_playlist(uuid) to authenticated, service_role;
 
-create policy "Guests can read items of public setlists" on public.setlist_items for
+create policy "Guests can read items of public playlists" on public.playlist_items for
 select to anon using (
     exists (
-      select 1 from public.setlists s
-      where s.id = setlist_items.setlist_id
+      select 1 from public.playlists s
+      where s.id = playlist_items.playlist_id
         and s.is_public = true
     )
   );
-create policy "Users can read items of visible setlists" on public.setlist_items for
+create policy "Users can read items of visible playlists" on public.playlist_items for
 select to authenticated using (
     exists (
-      select 1 from public.setlists s
-      where s.id = setlist_items.setlist_id
+      select 1 from public.playlists s
+      where s.id = playlist_items.playlist_id
         and (
           s.is_public = true
           or s.owner_id = (select auth.uid())
@@ -668,12 +672,12 @@ select to authenticated using (
         )
     )
   );
-create policy "Editors can insert setlist items" on public.setlist_items for
-insert to authenticated with check (public.fn_can_edit_setlist(setlist_id));
-create policy "Editors can update setlist items" on public.setlist_items for
-update to authenticated using (public.fn_can_edit_setlist(setlist_id))
-  with check (public.fn_can_edit_setlist(setlist_id));
-create policy "Editors can delete setlist items" on public.setlist_items for delete to authenticated using (public.fn_can_edit_setlist(setlist_id));
+create policy "Editors can insert playlist items" on public.playlist_items for
+insert to authenticated with check (public.fn_can_edit_playlist(playlist_id));
+create policy "Editors can update playlist items" on public.playlist_items for
+update to authenticated using (public.fn_can_edit_playlist(playlist_id))
+  with check (public.fn_can_edit_playlist(playlist_id));
+create policy "Editors can delete playlist items" on public.playlist_items for delete to authenticated using (public.fn_can_edit_playlist(playlist_id));
 -- Song Views Policies
 alter table public.song_views enable row level security;
 create policy "Users can read own song views" on public.song_views for
@@ -1377,9 +1381,9 @@ AS $$
        t AS (SELECT * FROM public.compositions WHERE id = p_target),
        sv AS (SELECT id, catalog_source_id FROM public.song_versions WHERE composition_id = p_source),
        fav_items AS (
-         SELECT si.setlist_id, v.composition_id
-         FROM public.setlist_items si
-         JOIN public.setlists sl ON sl.id = si.setlist_id AND sl.title = 'My Favorites'
+         SELECT si.playlist_id, v.composition_id
+         FROM public.playlist_items si
+         JOIN public.playlists sl ON sl.id = si.playlist_id AND sl.title = 'My Favorites'
          JOIN public.song_versions v ON v.id = si.song_version_id
          WHERE v.composition_id IN (p_source, p_target)
        )
@@ -1391,14 +1395,14 @@ AS $$
     'versions', (SELECT count(*) FROM sv),
     'recordings', (SELECT count(*) FROM public.user_recordings r WHERE r.song_version_id IN (SELECT id FROM sv)),
     'playlist_items', (
-      SELECT count(*) FROM public.setlist_items si
-      JOIN public.setlists sl ON sl.id = si.setlist_id
+      SELECT count(*) FROM public.playlist_items si
+      JOIN public.playlists sl ON sl.id = si.playlist_id
       WHERE si.song_version_id IN (SELECT id FROM sv) AND sl.title <> 'My Favorites'
     ),
-    'favourites', (SELECT count(DISTINCT setlist_id) FROM fav_items WHERE composition_id = p_source),
+    'favourites', (SELECT count(DISTINCT playlist_id) FROM fav_items WHERE composition_id = p_source),
     'favourites_merged', (
       SELECT count(*) FROM (
-        SELECT setlist_id FROM fav_items GROUP BY setlist_id HAVING count(DISTINCT composition_id) = 2
+        SELECT playlist_id FROM fav_items GROUP BY playlist_id HAVING count(DISTINCT composition_id) = 2
       ) both_songs
     ),
     'categories_added', (
@@ -1548,19 +1552,19 @@ BEGIN
   ORDER BY CASE version_kind WHEN 'variant' THEN 1 WHEN 'translation' THEN 2 ELSE 0 END, created_at NULLS LAST, id
   LIMIT 1;
 
-  DELETE FROM public.setlist_items si
+  DELETE FROM public.playlist_items si
   USING (
-    SELECT i.id, row_number() OVER (PARTITION BY i.setlist_id ORDER BY i.order_index, i.created_at, i.id) AS rn
-    FROM public.setlist_items i
-    JOIN public.setlists sl ON sl.id = i.setlist_id AND sl.title = 'My Favorites'
+    SELECT i.id, row_number() OVER (PARTITION BY i.playlist_id ORDER BY i.order_index, i.created_at, i.id) AS rn
+    FROM public.playlist_items i
+    JOIN public.playlists sl ON sl.id = i.playlist_id AND sl.title = 'My Favorites'
     JOIN public.song_versions v ON v.id = i.song_version_id AND v.composition_id = v_target
   ) dup
   WHERE si.id = dup.id AND dup.rn > 1;
 
-  UPDATE public.setlist_items si
+  UPDATE public.playlist_items si
   SET song_version_id = v_first_version
-  FROM public.setlists sl, public.song_versions v
-  WHERE sl.id = si.setlist_id AND sl.title = 'My Favorites'
+  FROM public.playlists sl, public.song_versions v
+  WHERE sl.id = si.playlist_id AND sl.title = 'My Favorites'
     AND v.id = si.song_version_id AND v.composition_id = v_target
     AND si.song_version_id <> v_first_version;
 

@@ -63,7 +63,7 @@ Feature: Gitflow branching and CI/CD pipeline
   Scenario: All feature files are wired into Cucumber
     Given the file "cucumber.json"
     Then the default profile includes "docs/testing/song.feature"
-    And it includes "docs/testing/setlist-pdf-export.feature"
+    And it includes "docs/testing/playlist-pdf-export.feature"
     And it includes "docs/testing/gitflow-cicd.feature"
 
   # ── Story 5.1.4: protected long-lived branches ────────────────────────────

@@ -5,7 +5,7 @@ import { getServerT } from '@/lib/i18n/server';
 import GuestGate from '@/components/common/GuestGate';
 import { PLAYLIST_LIST } from '@/components/playlists/playlistRow';
 import { RecordingCountSubtitle, SmartPlaylistCard, SongCountSubtitle } from '@/components/playlists/PlaylistSubtitles';
-import { fetchFavoritesSetlistId } from '@/lib/playlists/favorites';
+import { fetchFavoritesPlaylistId } from '@/lib/playlists/favorites';
 import { fetchLibrarySummary, type SongCounts } from '@/lib/library/summary';
 
 /**
@@ -19,7 +19,7 @@ export default async function SmartPlaylistsPage() {
     if (!user) return <GuestGate feature="smartPlaylists" next="/library/smart" />;
 
     const [favoritesId, summary] = await Promise.all([
-        fetchFavoritesSetlistId(supabase, user.id),
+        fetchFavoritesPlaylistId(supabase, user.id),
         fetchLibrarySummary(supabase, user.id),
     ]);
 
@@ -27,9 +27,9 @@ export default async function SmartPlaylistsPage() {
     const favTitles: string[] = [];
     if (favoritesId) {
         const { data: items } = await supabase
-            .from('setlist_items')
+            .from('playlist_items')
             .select('order_index, song_versions(compositions(title, is_public))')
-            .eq('setlist_id', favoritesId)
+            .eq('playlist_id', favoritesId)
             .order('order_index', { ascending: true });
         for (const item of items ?? []) {
             favCounts.total++;

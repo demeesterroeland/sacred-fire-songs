@@ -44,7 +44,7 @@ export const SONG_KEYS = {
 } as const;
 
 /**
- * React Query key definitions for playlists (setlists).
+ * React Query key definitions for playlists (playlists).
  */
 export const PLAYLIST_KEYS = {
     /** All user-created playlists (excludes smart playlists) for a user */

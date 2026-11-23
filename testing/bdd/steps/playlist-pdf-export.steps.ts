@@ -1,5 +1,5 @@
 /**
- * Pending step stubs for docs/testing/setlist-pdf-export.feature (@unit @pdfExport).
+ * Pending step stubs for docs/testing/playlist-pdf-export.feature (@unit @pdfExport).
  *
  * The behaviour is covered by Vitest (testing/unit/tests/pdfExport.test.ts,
  * pdfCache.test.ts). These stubs keep `npm run test:bdd` green now that the
@@ -9,27 +9,27 @@
 /* eslint-disable @typescript-eslint/no-unused-vars -- Cucumber checks step arity, so unused `_param`s must stay */
 import { Given, Then, When } from '@cucumber/cucumber';
 
-Given('I exported the setlist to PDF', function () {
+Given('I exported the playlist to PDF', function () {
   return 'pending';
 });
 
-Given('I have a setlist titled {string}', function (_string: string) {
+Given('I have a playlist titled {string}', function (_string: string) {
   return 'pending';
 });
 
-Given('nothing in the setlist has changed', function () {
+Given('nothing in the playlist has changed', function () {
   return 'pending';
 });
 
-Given('the setlist contains songs with song page URLs', function () {
+Given('the playlist contains songs with song page URLs', function () {
   return 'pending';
 });
 
-Given('the setlist is exported from {string}', function (_string: string) {
+Given('the playlist is exported from {string}', function (_string: string) {
   return 'pending';
 });
 
-Given('two users export setlists on the same device', function () {
+Given('two users export playlists on the same device', function () {
   return 'pending';
 });
 
@@ -77,11 +77,11 @@ When('a song\'s content or key is edited', function () {
   return 'pending';
 });
 
-When('I export the setlist to PDF again', function () {
+When('I export the playlist to PDF again', function () {
   return 'pending';
 });
 
-When('I export the setlist to PDF', function () {
+When('I export the playlist to PDF', function () {
   return 'pending';
 });
 
@@ -89,7 +89,7 @@ When('the interface language is switched', function () {
   return 'pending';
 });
 
-When('the setlist title or description changes', function () {
+When('the playlist title or description changes', function () {
   return 'pending';
 });
 

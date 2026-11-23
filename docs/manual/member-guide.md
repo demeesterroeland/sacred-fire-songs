@@ -1,11 +1,12 @@
 # Member Guide (draft)
 
-**Version:** 0.40 | **Date:** Nov 13, 2026
+**Version:** 0.41 | **Date:** Nov 24, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.41 | Nov 24, 2026 | The Playlists section is titled **Playlists** (the word *setlists* is gone from the guide). |
 | 0.39 | Nov 13, 2026 | Song page: musicians transpose with the **− n +** stepper right after the **Chords** switch in the toolbar (it is not in the ⋮ menu any more) and it shows only while chords are on. **Key**, **Capo** and non-standard **Tuning** (named, e.g. `Key E · Tuning: Drop D`) show only while chords are on; after a transpose the line shows the new key; standard tuning is omitted completely (on the song page and in the PDF); the **Beats** stay (UX v3, #566). |
 | 0.40 | Nov 13, 2026 | Non-public songs are labelled **Private**, not Draft; songs without an author show **No artist**, while an author entered as Traditional remains **Traditional** (#564, #565). |
 | 0.38 | Nov 13, 2026 | Search options: **Songbook** and **Language** now also appear when you open Search options from another page, counting all songs you may read (public songs plus your own private songs, or all songs for admins) (UX v3, #570). |
@@ -88,7 +89,7 @@ Your private songs (not public yet) look lighter in every song list and on the s
 
 **History** lists the songs you opened. **New** lists the songs added since your last visit.
 
-## Playlists (setlists)
+## Playlists
 
 **Create:** bottom bar **Library → +  → New Playlist**, or **Library → + New Playlist**. Type a name → **Create Playlist**. Under the name, the switch **Make public** is off: *Private: only you can see this playlist unless you make it public.* Switch it on and anyone can find and open the playlist, with or without an account. A new playlist made from the **Add to playlist** sheet is always private; you can change either kind later from the playlist's menu.
 
