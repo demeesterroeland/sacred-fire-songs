@@ -3227,7 +3227,7 @@ SELECT v.song_id::uuid, c.id FROM (VALUES
 ON CONFLICT DO NOTHING;
 
 -- Playlists (10)
-INSERT INTO public.setlists (id, owner_id, title, description, is_public, created_at) VALUES
+INSERT INTO public.playlists (id, owner_id, title, description, is_public, created_at) VALUES
   ('aaaaaaaa-0002-4000-a000-000000000002', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Admin Fire Circle', 'Public playlist curated by the admin.', true, now() - interval '2374485 seconds'),
   ('aaaaaaaa-0006-4000-a000-000000000006', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a12', 'Fire Songs', 'A collection of songs for the sacred fire circle.', true, now() - interval '938597 seconds'),
   ('aaaaaaaa-0007-4000-a000-000000000007', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a14', 'Gatekeeper Circle', 'Curated by the gatekeeper.', true, now() - interval '1673103 seconds'),
@@ -3235,13 +3235,13 @@ INSERT INTO public.setlists (id, owner_id, title, description, is_public, create
   ('3826ed9a-34de-4f95-baaa-f86a80038bbd', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', 'My Favorites', 'Songs I love', false, now() - interval '0 seconds'),
   ('ab2fe71f-f566-481b-abca-803947c8c7b0', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'My Favorites', 'Songs I love', false, now() - interval '0 seconds'),
   ('aaaaaaaa-0003-4000-a000-000000000003', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', 'My Healing Practice', 'Private practice list.', false, now() - interval '2320356 seconds'),
-  ('aaaaaaaa-0004-4000-a000-000000000004', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', 'New Moon Ceremony', 'Private setlist for the next new moon.', false, now() - interval '1417716 seconds'),
+  ('aaaaaaaa-0004-4000-a000-000000000004', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', 'New Moon Ceremony', 'Private playlist for the next new moon.', false, now() - interval '1417716 seconds'),
   ('aaaaaaaa-0001-4000-a000-000000000001', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', 'Water Ceremony', 'Songs for water blessings and river ceremonies.', true, now() - interval '1886737 seconds'),
   ('aaaaaaaa-0005-4000-a000-000000000005', 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', 'Work in Progress', 'Empty playlist, nothing added yet.', false, now() - interval '2280740 seconds')
 ON CONFLICT (id) DO NOTHING;
 
 -- Playlist items (59)
-INSERT INTO public.setlist_items (setlist_id, song_version_id, order_index) VALUES
+INSERT INTO public.playlist_items (playlist_id, song_version_id, order_index) VALUES
   ('1e881f96-c3ee-476f-bf2d-a902dd07c6d5', '4a82cc40-188c-4327-aea5-3c0644f31c1e', 1),
   ('1e881f96-c3ee-476f-bf2d-a902dd07c6d5', 'a87cb758-2480-43dc-9737-6bc996c85f8b', 2),
   ('1e881f96-c3ee-476f-bf2d-a902dd07c6d5', '79b517f3-b88c-479c-8896-9cdd85186b09', 3),
@@ -3292,7 +3292,7 @@ INSERT INTO public.setlist_items (setlist_id, song_version_id, order_index) VALU
   ('aaaaaaaa-0006-4000-a000-000000000006', '66938eb0-d1fb-4969-b892-6bafa3e188f0', 10),
   ('aaaaaaaa-0007-4000-a000-000000000007', 'f3abd6ad-945b-4159-919a-d379f8c12a35', 1),
   ('aaaaaaaa-0007-4000-a000-000000000007', 'a14e9572-1a42-4f7c-9147-0f5ef024b0d1', 2);
-INSERT INTO public.setlist_items (setlist_id, song_version_id, order_index) VALUES
+INSERT INTO public.playlist_items (playlist_id, song_version_id, order_index) VALUES
   ('aaaaaaaa-0007-4000-a000-000000000007', 'bfea479d-1c76-4196-a6a6-8885d729c573', 3),
   ('aaaaaaaa-0007-4000-a000-000000000007', '4776bbac-1a59-4a46-8c20-435e748212fd', 4),
   ('aaaaaaaa-0007-4000-a000-000000000007', '593f81b5-0b32-4094-8373-9f6e934c90d5', 5),

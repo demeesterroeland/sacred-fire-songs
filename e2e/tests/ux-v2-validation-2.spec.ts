@@ -387,8 +387,8 @@ test.describe('admin', () => {
     const own = Number(
       (
         await client.query(
-          `SELECT count(*) AS n FROM public.setlist_items i
-             JOIN public.setlists s ON s.id = i.setlist_id
+          `SELECT count(*) AS n FROM public.playlist_items i
+             JOIN public.playlists s ON s.id = i.playlist_id
              JOIN public.profiles p ON p.id = s.owner_id
             WHERE p.email = $1 AND s.title = 'My Favorites'`,
           [ROLES.admin.email],

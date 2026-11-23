@@ -85,7 +85,7 @@ Given('a server answer {string} and a raw database message', function (answer: s
 Then('the first is shown as its translated message and the second as the generic message', function () {
   const t = (k: string) => `T:${k}`;
   assert.equal(actionErrorMessage('Playlist not found', t), 'T:errors.playlistNotFound');
-  assert.equal(actionErrorMessage('duplicate key value violates unique constraint "setlists_pkey"', t), 'T:errors.generic');
+  assert.equal(actionErrorMessage('duplicate key value violates unique constraint "playlists_pkey"', t), 'T:errors.generic');
 });
 
 Given('the versions {string} with lyrics, {string} with lyrics and {string} with lyrics', function (this: object, a: string, b: string, c: string) {

@@ -19,9 +19,9 @@ const calls = vi.hoisted(() => ({
 
 function builder(table: string) {
   const result = (): { data: unknown } => {
-    if (table === 'setlists') return { data: { owner_id: USER, is_public: false } };
+    if (table === 'playlists') return { data: { owner_id: USER, is_public: false } };
     if (table === 'song_versions') return { data: calls.versions };
-    if (table === 'setlist_items') return { data: [] };
+    if (table === 'playlist_items') return { data: [] };
     return { data: null };
   };
   const chain: Record<string, unknown> = {};
@@ -38,7 +38,7 @@ function builder(table: string) {
     calls.inserted.push(row);
     return Promise.resolve({ error: null });
   };
-  chain.maybeSingle = () => Promise.resolve(table === 'setlist_items' ? { data: null } : result());
+  chain.maybeSingle = () => Promise.resolve(table === 'playlist_items' ? { data: null } : result());
   chain.then = (resolve: (v: unknown) => unknown) => resolve(result());
   return chain;
 }
@@ -70,7 +70,7 @@ describe('addSongToPlaylist', () => {
     expect(res).toEqual({ added: true });
     expect(calls.versionSelects[0]).toMatch(/created_at/);
     expect(calls.versionSelects[0]).toMatch(/version_kind/);
-    expect(calls.inserted).toEqual([{ setlist_id: PLAYLIST, song_version_id: ORIGINAL, order_index: 0 }]);
+    expect(calls.inserted).toEqual([{ playlist_id: PLAYLIST, song_version_id: ORIGINAL, order_index: 0 }]);
     // The "already in the playlist" check still covers every version.
     expect([...(calls.inFilters[0] as string[])].sort()).toEqual([ORIGINAL, VARIANT, TRANSLATION].sort());
   });
@@ -82,6 +82,6 @@ describe('addSongToPlaylist', () => {
     ];
     const { addSongToPlaylist } = await import('@/app/actions/playlistActions');
     await addSongToPlaylist(PLAYLIST, SONG);
-    expect(calls.inserted).toEqual([{ setlist_id: PLAYLIST, song_version_id: ORIGINAL, order_index: 0 }]);
+    expect(calls.inserted).toEqual([{ playlist_id: PLAYLIST, song_version_id: ORIGINAL, order_index: 0 }]);
   });
 });

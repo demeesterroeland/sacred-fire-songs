@@ -1,8 +1,8 @@
 # E2E Test Overview & Matrix: Sacred Fire Songs
 
-**Version:** 1.6
+**Version:** 1.7
 **Status:** Living Document
-**Date:** Nov 23, 2026
+**Date:** Nov 24, 2026
 **Tracking:** GH #142
 
 ## Changelog
@@ -16,6 +16,7 @@
 | **1.4** | Jun 23, 2026 | Isolated E2E database environment from staging app `<staging-app>`. Integrated automatic database wipe and seeding via Playwright `globalSetup` hook and `setup-test-db.mjs` script. |
 | **1.5** | Nov 11, 2026 | #492: SONG-08 is now "no delete button on a song row" (deleting is in the song page's menu only). |
 | **1.6** | Nov 23, 2026 | PL-11 (Duplicate playlist) feature status corrected to not implemented (#100; menu item disabled). `@e2e` tags in the Gherkin files are documentation only (#266). |
+| **1.7** | Nov 24, 2026 | #573: section 4.7 is titled Playlists (setlist renamed to playlist). |
 
 ---
 
@@ -163,7 +164,7 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 | FAV-02 | Guest favorites | Guest hearts persist in localStorage | survive reload; merge on login (if supported) | G | ✅ | 🔲 | P1 | useGuestFavorites |
 | FAV-03 | Favorites filter | Filter library to favorites only | empty favorites state | M | ✅ | 🔲 | P2 | useSongsFilter |
 
-### 4.7 Playlists / Setlists (Epic 4.1)
+### 4.7 Playlists (Epic 4.1)
 
 | ID | Feature | Scenario | Variants / Edge cases | Roles | Feat | E2E | Pri | Ref |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- |

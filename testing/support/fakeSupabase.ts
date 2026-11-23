@@ -42,7 +42,7 @@ export const TABLE_COLUMNS: Record<string, string[]> = {
     'vote_count',
     'created_at',
   ],
-  setlists: ['id', 'owner_id', 'title', 'description', 'is_public', 'created_at'],
+  playlists: ['id', 'owner_id', 'title', 'description', 'is_public', 'created_at'],
   user_recordings: [
     'id',
     'user_id',

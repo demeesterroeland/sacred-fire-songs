@@ -1,6 +1,6 @@
 # 🔥 Sacred Fire Songs
 
-> A digital songbook for medicine music ceremonies — ChordPro editing, transposition, and setlist management, built for musicians who play in circle.
+> A digital songbook for medicine music ceremonies — ChordPro editing, transposition, and playlist management, built for musicians who play in circle.
 
 [![Next.js](https://img.shields.io/badge/Next.js-16-black?logo=nextdotjs)](https://nextjs.org/)
 [![Supabase](https://img.shields.io/badge/Supabase-postgres-3FCF8E?logo=supabase)](https://supabase.com/)
@@ -39,7 +39,7 @@ It's designed for **use in ceremony**: large readable text, screen wake lock so 
 
 - **ChordPro editor** — full ChordPro notation with live auto-sizing and smart paste from any text source
 - **Transposition** — music-theory-aware key shifting (C → G, Am → Em, etc.) powered by ChordSheetJS
-- **Playlists / Setlists** — build ordered setlists with drag-and-drop, shareable links, and visibility control
+- **Playlists** — build ordered playlists with drag-and-drop, shareable links, and visibility control
 - **Category filtering** — 32 subcategories across 6 groups (Elements, Nature, Language, Lineage, Healing, Spiritual) — see [`docs/design/categories.md`](docs/design/categories.md)
 - **Screen Wake Lock** — keeps the screen on during ceremony so songs stay visible
 - **Role-based access** — Guest → Member → Gatekeeper → Admin; gatekeepers review and curate the song library

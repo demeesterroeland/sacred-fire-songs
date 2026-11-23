@@ -16,11 +16,11 @@ test.beforeAll(async () => {
 
   try {
     // 1. Clean up potential leftover items
-    await client.query('DELETE FROM public.setlist_items WHERE setlist_id IN ($1, $2)', [testPlaylistId, privatePlaylistId]);
+    await client.query('DELETE FROM public.playlist_items WHERE playlist_id IN ($1, $2)', [testPlaylistId, privatePlaylistId]);
 
     // 2. Insert test public playlist owned by Member ('a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13')
     await client.query(`
-      INSERT INTO public.setlists (id, owner_id, title, description, is_public, created_at)
+      INSERT INTO public.playlists (id, owner_id, title, description, is_public, created_at)
       VALUES ($1, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', 'Water Ceremony', 'Songs for water blessings.', true, now())
       ON CONFLICT (id) DO UPDATE SET 
         owner_id = EXCLUDED.owner_id, 
@@ -31,7 +31,7 @@ test.beforeAll(async () => {
 
     // 3. Insert test private playlist owned by Member
     await client.query(`
-      INSERT INTO public.setlists (id, owner_id, title, description, is_public, created_at)
+      INSERT INTO public.playlists (id, owner_id, title, description, is_public, created_at)
       VALUES ($1, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a13', 'My Healing Practice', 'Personal private healing songs.', false, now())
       ON CONFLICT (id) DO UPDATE SET 
         owner_id = EXCLUDED.owner_id, 
@@ -112,9 +112,9 @@ test.describe('Public Playlist Curation (Story 3.4.6)', () => {
       const client = new pg.Client({ connectionString });
       await client.connect();
       try {
-        await client.query('DELETE FROM public.setlist_items WHERE setlist_id = $1', [adminPlaylistId]);
+        await client.query('DELETE FROM public.playlist_items WHERE playlist_id = $1', [adminPlaylistId]);
         await client.query(`
-          INSERT INTO public.setlists (id, owner_id, title, description, is_public, created_at)
+          INSERT INTO public.playlists (id, owner_id, title, description, is_public, created_at)
           VALUES ($1, 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11', 'Admin Fire Circle', 'Admin public playlist.', true, now())
           ON CONFLICT (id) DO UPDATE SET 
             owner_id = EXCLUDED.owner_id, 

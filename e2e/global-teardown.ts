@@ -82,11 +82,11 @@ export default async function globalTeardown(): Promise<void> {
     await client.query('DELETE FROM public.song_versions WHERE id = ANY($1)', [[labels.original, labels.variantB, labels.variantC, labels.translation]]);
     await client.query('DELETE FROM public.compositions WHERE id = $1', [labels.song]);
     await client.query('DELETE FROM public.songbooks WHERE id = ANY($1)', [[labels.bookA, labels.bookB, labels.bookC]]);
-    await client.query('DELETE FROM public.setlists WHERE id = $1', [ids.playlist]);
+    await client.query('DELETE FROM public.playlists WHERE id = $1', [ids.playlist]);
     await client.query('DELETE FROM public.song_versions WHERE id = $1', [ids.version]);
     await client.query('DELETE FROM public.compositions WHERE id = $1', [ids.song]);
     const playlists = await client.query(
-      `DELETE FROM public.setlists WHERE title ~ '^Smoke Test Playlist [0-9]+$' AND ${STALE}`
+      `DELETE FROM public.playlists WHERE title ~ '^Smoke Test Playlist [0-9]+$' AND ${STALE}`
     );
     const takes = await client.query(
       `DELETE FROM public.user_recordings

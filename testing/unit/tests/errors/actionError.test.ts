@@ -42,7 +42,7 @@ describe('actionErrorMessage', () => {
 
   it('never shows an unknown or raw database message: the generic one instead', () => {
     for (const raw of [
-      'duplicate key value violates unique constraint "setlists_pkey"',
+      'duplicate key value violates unique constraint "playlists_pkey"',
       'JWT expired',
       'Insert returned no data',
       'Invalid playlist ID',

@@ -244,7 +244,7 @@ Then('the select of the playlist export runs against the local API without error
   // The scenario's seed transaction is invisible to PostgREST, so this reads whatever the local database holds (a guest
   // sees no playlist items of private lists). PostgREST plans the whole embed, so a doubled `song_version_sources (` (42803) fails here.
   const { url, key } = localApi();
-  const { error } = await createClient(url, key, { auth: { persistSession: false } }).from('setlist_items').select(PLAYLIST_EXPORT_SELECT).limit(5);
+  const { error } = await createClient(url, key, { auth: { persistSession: false } }).from('playlist_items').select(PLAYLIST_EXPORT_SELECT).limit(5);
   assert.equal(error, null, `PostgREST rejected the export select: ${error?.message}`);
 });
 
@@ -260,8 +260,8 @@ Given(
     const second = (await db.query<{ id: string }>(`INSERT INTO public.song_versions (composition_id, content_chordpro, key, capo, beats) VALUES ($1, '[G]Second', 'G', 0, '4') RETURNING id`, [song])).rows[0].id;
     await db.query(`INSERT INTO public.songbooks (id, title, compiler) VALUES ('bdd-520-book', 'Songbook B', 'Compiler B') ON CONFLICT (id) DO NOTHING`);
     await db.query(`INSERT INTO public.song_version_sources (song_version_id, songbook_id, page, is_primary) VALUES ($1, 'bdd-520-book', '2', true)`, [second]);
-    const list = (await db.query<{ id: string }>(`INSERT INTO public.setlists (owner_id, title, is_public) VALUES ($1, 'BDD export list', true) RETURNING id`, [owner])).rows[0].id;
-    const item = (await db.query<{ id: string }>(`INSERT INTO public.setlist_items (setlist_id, song_version_id, order_index, transposition_override) VALUES ($1, $2, 0, 2) RETURNING id`, [list, second])).rows[0].id;
+    const list = (await db.query<{ id: string }>(`INSERT INTO public.playlists (owner_id, title, is_public) VALUES ($1, 'BDD export list', true) RETURNING id`, [owner])).rows[0].id;
+    const item = (await db.query<{ id: string }>(`INSERT INTO public.playlist_items (playlist_id, song_version_id, order_index, transposition_override) VALUES ($1, $2, 0, 2) RETURNING id`, [list, second])).rows[0].id;
     w(this).pinned = { id: item, second };
     void first;
   }
@@ -273,7 +273,7 @@ Then('the rows a guest reads for that item export the second version with its so
   }>(
     `SELECT i.transposition_override, v.key AS v_key, v.capo, v.beats, v.content_chordpro AS content, b.title AS book, s.page, b.compiler,
             c.id AS song_id, c.title, c.original_author AS author
-     FROM public.setlist_items i
+     FROM public.playlist_items i
      JOIN public.song_versions v ON v.id = i.song_version_id
      JOIN public.compositions c ON c.id = v.composition_id
      JOIN public.song_version_sources s ON s.song_version_id = v.id

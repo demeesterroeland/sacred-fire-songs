@@ -1,11 +1,12 @@
 # UX v2: Agent Decisions (ADR-lite)
 
-**Version:** 1.44 | **Date:** Nov 24, 2026 | **Epic:** 6.1 (#375)
+**Version:** 1.45 | **Date:** Nov 24, 2026 | **Epic:** 6.1 (#375)
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.45 | Nov 24, 2026 | #573: setlist renamed to playlist in the decision text and identifiers (`fetchFavoritesPlaylistId`); the changelog rows above keep the old word. |
 | 1.44 | Nov 24, 2026 | UXA-019 follow-up: tag and category emoji dropped everywhere, no greyscale emoji fallback (owner decision, #485). |
 | 1.43 | Nov 9, 2026 | UXA-071: validation round 4 (Library tabs, playlist sections, PDF in the row menu, private songs lighter, categories in two columns, tags always links, reader tools above the versions). |
 | 1.42 | Nov 8, 2026 | UXA-070: follow-ups from the cross-review of PRs #477 and #478. |
@@ -503,7 +504,7 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 ### UXA-046 · New Playlist: visibility switch and one line of explanation
 
 - **Date / story:** Nov 6, 2026 · #416 (G8.3)
-- **Context:** the page only had a small grey hint (*Created as private — you can change this later*); there was no way to choose. The story asks for one line that states the playlist is private unless made public, plus a visibility switch on creation. What is true in the database: RLS on `setlists` lets the owner (and admins) read a private playlist and everyone, signed in or not, read a public one; public playlists are listed under *Public playlists*. Only the owner (or an admin or gatekeeper, for a public one) can change it afterwards.
+- **Context:** the page only had a small grey hint (*Created as private — you can change this later*); there was no way to choose. The story asks for one line that states the playlist is private unless made public, plus a visibility switch on creation. What is true in the database: RLS on `playlists` lets the owner (and admins) read a private playlist and everyone, signed in or not, read a public one; public playlists are listed under *Public playlists*. Only the owner (or an admin or gatekeeper, for a public one) can change it afterwards.
 - **Options:** (a) a switch plus a line that always says the same thing; (b) a switch plus one line that follows the switch; (c) two radio cards (Private / Public) with longer text.
 - **Choice:** (b): a **Make public** switch, off by default, and one line under it: off *Private: only you can see this playlist unless you make it public.*, on *Public: anyone can find and open this playlist, with or without an account.* The line is tied to the switch with `aria-describedby`, and the icon changes (lock / globe) so the state is never colour alone. Any member may create a public playlist directly: this is the same right they already have after creating (the playlist's menu → Make Public), so it adds no new permission, only one tap fewer. `createPlaylist(title, isPublic = false)`; only an explicit `true` is public. RLS and the data model are not touched.
 - **Consequences:** the key `playlists.add.privateHint` is replaced by `visibilityLabel`, `privateExplain` and `publicExplain` in all 8 locales. A member can now publish a playlist in one step; the copy says who can see it. Songs inside a public playlist still follow their own visibility. "Only you" is shorthand: admins can also open private playlists (moderation), as `lib/playlists/visibility.ts` states.
@@ -705,11 +706,11 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 - **Song title:** wraps on desktop as on a phone.
 - **Chord matching:** tokens are matched in bounded time and capped at 32 characters.
 - **Email addresses:** an apostrophe is valid, for the sign-up code and the operator address.
-- **Favourites:** every lookup uses `fetchFavoritesSetlistId`, so a duplicate "My Favorites" cannot split readers and writers.
+- **Favourites:** every lookup uses `fetchFavoritesPlaylistId`, so a duplicate "My Favorites" cannot split readers and writers.
 - **Headings:** Library sub-pages are an `h2` under the tabs' `h1`; Shared with me has no tabs and keeps `h1`.
 - **Terms and Privacy:** guest favourites are no longer mentioned, because guests have none; the shared recording text says what the app offers instead of promising that a recording cannot be saved.
 - **Targets and tokens:** the playlist ⋯ button is 44 px; `hover:bg-surface-3` did not exist.
-- **Not done:** starting or stopping auto-scroll with the controls closed still moves the lyrics by one toolbar height; focus is not moved when a song reaches its end. A unique index on the favourites setlist needs a data-merging migration and waits for the owner.
+- **Not done:** starting or stopping auto-scroll with the controls closed still moves the lyrics by one toolbar height; focus is not moved when a song reaches its end. A unique index on the favourites playlist needs a data-merging migration and waits for the owner.
 
 ### UXA-069 · Flat Home and Library
 
@@ -744,7 +745,7 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 - **Runasimi (review round):** all new interface strings are translated (best effort, no speaker has checked them) except the body text of the Terms and Privacy pages, which stays English until the owner approves the wording. The Draft note and the operator lines are translated.
 - **Chord-like labels (review round):** a line of only bracket words is shown as text unless a word looks like a chord. `looksLikeChord` in `lib/chordUtils.ts` is wider than `isChordToken` (flat and sharp signs, `C6/9`, a bass note); `isChordToken` itself is unchanged. `[B♭]`, `[C6/9]`, `[F♯m7]` alone stay in the chord row; `[am]`, `[Hm]`, `[Re]`, `[Do]`, `[N.C.]` and section words show as text.
 - **Right-click (review round):** a press that never clicks closes the panel when it landed outside the field and the panel and left focus outside them too (a link it pressed, or the page body after a right-click on plain text). A press inside the panel never closes it.
-- **Favourites for admins (review round):** an admin can read every member's setlists, so a title-only lookup of "My Favorites" found several rows, `.maybeSingle()` returned an error and the hearts, the `/songs?favorites=true` list and the Search options count came back empty while the Home card (owner-filtered) showed a number. All lookups use `fetchFavoritesSetlistId(supabase, userId)` (`lib/playlists/favorites.ts`: owner filter, ordered, limit 1). Checked the others: the server queries, the toggle action and the Library page already filter on the owner.
+- **Favourites for admins (review round):** an admin can read every member's playlists, so a title-only lookup of "My Favorites" found several rows, `.maybeSingle()` returned an error and the hearts, the `/songs?favorites=true` list and the Search options count came back empty while the Home card (owner-filtered) showed a number. All lookups use `fetchFavoritesPlaylistId(supabase, userId)` (`lib/playlists/favorites.ts`: owner filter, ordered, limit 1). Checked the others: the server queries, the toggle action and the Library page already filter on the owner.
 - **Owner review of the Terms and Privacy text:** the Vercel Speed Insights script and its package are removed (nothing measures page speed any more), so the privacy text has no paragraph about it. A paragraph was added to "Who can see it": anyone with direct access to the database or the file storage, such as the operator, can reach everything stored, private recordings included. The row-level security policies give the app's admin role no access to other members' private recordings; the text claims no more than the policies show. Open point for the owner: say if the admin role should be described differently.
 - **Removed:** `errors.sharedTakeNoDownload` (no caller of the action) and the unused starter `components/auth-button.tsx`.
 - **Confirm:** yes: the Terms and Privacy wording (Draft), whether the History page should say "History", the Runasimi loanword "grabación" for recording, and whether the Content type counts should stay in parentheses.

@@ -4,7 +4,7 @@ import { PlaylistDetailClient } from '@/components/playlists/PlaylistDetailClien
 import { PlaylistDetailHeader } from '@/components/playlists/PlaylistDetailHeader';
 import { isUuid } from '@/lib/validation/uuid';
 
-interface SetlistItemRow {
+interface PlaylistItemRow {
     id: string;
     song_versions: {
         compositions: {
@@ -26,7 +26,7 @@ export default async function PlaylistDetailPage({ params }: Props) {
     const { data: { user } } = await supabase.auth.getUser();
 
     const { data: playlist } = await supabase
-        .from('setlists')
+        .from('playlists')
         .select('id, title, owner_id, is_public, description')
         .eq('id', id)
         .maybeSingle();
@@ -52,7 +52,7 @@ export default async function PlaylistDetailPage({ params }: Props) {
     }
 
     const { data: items } = await supabase
-        .from('setlist_items')
+        .from('playlist_items')
         .select(`
             id,
             order_index,
@@ -65,10 +65,10 @@ export default async function PlaylistDetailPage({ params }: Props) {
                 )
             )
         `)
-        .eq('setlist_id', id)
+        .eq('playlist_id', id)
         .order('order_index', { ascending: true });
 
-    const mappedItems = (items as unknown as SetlistItemRow[] ?? []).map(item => ({
+    const mappedItems = (items as unknown as PlaylistItemRow[] ?? []).map(item => ({
         id: item.id,
         songTitle: item.song_versions?.compositions?.title ?? 'Unknown',
         songAuthor: item.song_versions?.compositions?.original_author ?? '',

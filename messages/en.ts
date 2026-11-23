@@ -937,7 +937,7 @@ const en = {
   'pdf.continued': '{title} (continued)',
   'pdf.playlist': 'Playlist: {title}',
   'pdf.untitledSong': 'Untitled Song',
-  'pdf.untitledPlaylist': 'Setlist',
+  'pdf.untitledPlaylist': 'Playlist',
 
   // ─── Administration (#259) ──────────────────────────────────────────────
   'nav.administration': 'Administration',

@@ -5,7 +5,7 @@ import type { TaxonomyNode } from "@/lib/taxonomyUtils";
 import { songsQuery, fetchAllSongRows, mapCompositionToSong, recentlyAddedQuery, RECENTLY_ADDED_LIMIT, type CompositionRow } from './queries';
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { aggregateArtists, type ArtistRow, type ArtistSummary } from "./artistIndex";
-import { fetchFavoritesSetlistId } from "@/lib/playlists/favorites";
+import { fetchFavoritesPlaylistId } from "@/lib/playlists/favorites";
 
 const PAGE_SIZE = 20;
 
@@ -13,14 +13,14 @@ async function fetchFavoriteIds(supabase: SupabaseClient) {
     const { data: { user } } = await supabase.auth.getUser();
     if (!user) return new Set<string>();
 
-    const setlistId = await fetchFavoritesSetlistId(supabase, user.id);
+    const playlistId = await fetchFavoritesPlaylistId(supabase, user.id);
 
-    if (!setlistId) return new Set<string>();
+    if (!playlistId) return new Set<string>();
 
     const { data: items } = await supabase
-        .from('setlist_items')
+        .from('playlist_items')
         .select('song_versions(composition_id)')
-        .eq('setlist_id', setlistId);
+        .eq('playlist_id', playlistId);
 
     return new Set<string>(
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -79,7 +79,7 @@ export async function fetchSongsPageServer(cursor?: string): Promise<{
 }
 
 /**
- * Fetches songs in the authenticated user's "My Favorites" setlist.
+ * Fetches songs in the authenticated user's "My Favorites" playlist.
  * Returns an empty array if the user is not authenticated or has no favorites.
  * Only import this from Server Components or Server Actions.
  */
@@ -89,12 +89,12 @@ export async function fetchFavoriteSongsServer(): Promise<Song[]> {
 
     if (!user) return [];
 
-    const setlistId = await fetchFavoritesSetlistId(supabase, user.id);
+    const playlistId = await fetchFavoritesPlaylistId(supabase, user.id);
 
-    if (!setlistId) return [];
+    if (!playlistId) return [];
 
     const { data, error } = await supabase
-        .from('setlist_items')
+        .from('playlist_items')
         .select(`
             order_index,
             song_versions(
@@ -120,7 +120,7 @@ export async function fetchFavoriteSongsServer(): Promise<Song[]> {
                 )
             )
         `)
-        .eq('setlist_id', setlistId)
+        .eq('playlist_id', playlistId)
         .order('order_index');
 
     if (error || !data) return [];
@@ -186,12 +186,12 @@ export async function getLibrarySummary(userId: string): Promise<LibrarySummary>
 
     // Favorites count
     let favoritesCount = 0;
-    const favSetlistId = await fetchFavoritesSetlistId(supabase, userId);
-    if (favSetlistId) {
+    const favPlaylistId = await fetchFavoritesPlaylistId(supabase, userId);
+    if (favPlaylistId) {
         const { count } = await supabase
-            .from('setlist_items')
+            .from('playlist_items')
             .select('id', { count: 'exact', head: true })
-            .eq('setlist_id', favSetlistId);
+            .eq('playlist_id', favPlaylistId);
         favoritesCount = count ?? 0;
     }
 

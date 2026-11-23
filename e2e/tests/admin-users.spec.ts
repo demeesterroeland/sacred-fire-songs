@@ -44,7 +44,7 @@ test.beforeAll(async () => {
       [VERSION_ID, SONG_ID, VERSION_NAME, gatekeeper.id]
     );
     await client.query(
-      `INSERT INTO public.setlists (id, owner_id, title, is_public)
+      `INSERT INTO public.playlists (id, owner_id, title, is_public)
        VALUES ($1, $2, $3, true)
        ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, owner_id = EXCLUDED.owner_id, is_public = true`,
       [PLAYLIST_ID, gatekeeper.id, PLAYLIST_TITLE]

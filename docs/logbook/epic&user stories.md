@@ -1,8 +1,8 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 2.29
+**Version:** 2.30
 **Status:** Living Document
-**Date:** Nov 23, 2026
+**Date:** Nov 24, 2026
 
 ## Changelog
 
@@ -128,6 +128,7 @@
 | **2.27** | Nov 23, 2026 | #607: on a shared device, sign-out removes the Add Song draft and a member's draft is never shown to someone else; a guest keeps the draft through sign-in (Story 6.1.27). |
 | **2.28** | Nov 23, 2026 | #639 (leftovers of the #599 sync): Gherkin aligned with the code for Stories 1.1.5 (guest draft banner, no join-our-circle modal), 1.1.6 (test path), 1.1.9 (bar hidden from `lg`, menu button and avatar), 1.2.1 (no dashboard, no infinite scroll), 1.3.3 (no back arrow; code fence closed so 1.3.5 renders), 2.3.2 (search options window, no Theme or Rhythm), 4.1.1 (New playlist field), 4.1.5 (Get Link in the menu, private playlists), 4.2.1 (footer per 4.2.3, 200-song limit without Premium) and the 6.1 rows #390 (six lyric steps, 15–28 px), #398 / #399 (My recordings), #403 (bell badge, no avatar badge) and #408 (three bottom items, `/explore` redirects to `/songs`). Rewritten issue Gherkin mirrored for Stories 3.1.3 (#140), 3.4.4 (#108), 4.5.1 (#112) and 4.6.2 (#245). Issue numbers added to the rows 3.4.2, 3.4.3, 3.4.5, 3.4.6, 3.6.1, 4.1.x, 4.2.x, 4.3.1 and 4.5.1; Epic 3.6 shows #257 as reopened and #275–#277 as not started; Epic 4.3 notes that `feat/offline-library` (#357) was stale (#606 is step 0). Not changed, waiting for the owner: the Roles & Permissions table, the 4.6.5 / 4.6.7 numbering in GitHub, the placement of #481 (see the PR description). #267, #356 and #266 are test-infrastructure chores (docs/testing, CI, test helpers), not stories, so they have no row here. The code fence of Story 1.3.3 is closed and the unclosed I18N block of Story 3.7.1 is closed, so Epics 2.1 to 3.7 render as text again. |
 | **2.29** | Nov 23, 2026 | #642 follow-up (owner answers): the Roles & Permissions Summary now matches the code. The database role enum is `admin`, `expert`, `member`, `musician` (legacy) and `gatekeeper`; `is_musician` is derived (`role IN ('musician','expert')`), not a profile setting. New Musician / Expert column; Transpose is for musician, expert and admin only (`canTranspose`), not for members or gatekeepers. Unbuilt rows marked "planned (#…)": flag songs (#106), edit any song's metadata (#107), merge duplicates (#108, partial through link-as-version #512), feature playlists (#109), Manage Users & Roles (view-only; #275–#277), Sheet Music / ABC (Story 2.1.2). Built: public-playlist curation (#197), linking songs you own (#512). Epic 3.5 note fixed (the "profile setting" idea is closed as not planned, Stories 3.5.1 and 3.5.2). Story 4.6.8 [Planned] added for #481 (Library › Shared); the GitHub issue is unchanged. #372 is titled Story 4.6.7 on GitHub; #267, #356 and #266 stay chores with no row. |
+| **2.30** | Nov 24, 2026 | #573: Epic 4.1 and the stories below say "playlist" instead of "setlist" (the schema, code and docs were renamed; the user-facing word did not change). The changelog rows above keep the old word. |
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
 
@@ -988,23 +989,23 @@ Scenario: I18N-12 – Additional languages
 
 **Focus:** Tools for ceremony leaders.
 
-### Epic 4.1: Setlists
+### Epic 4.1: Playlists
 
-**Story 4.1.1: [Implemented]** (#16) As a Musician, I want to create a named setlist so that I can prepare for a specific night.
+**Story 4.1.1: [Implemented]** (#16) As a Musician, I want to create a named playlist so that I can prepare for a specific night.
 
 ```
-Scenario: Create Setlist
+Scenario: Create Playlist
   Given I am logged in
   When I open Library → Playlists
   And I type "Full Moon Ceremony" in the "New playlist…" field and press Enter or "Create"
   Then a new empty playlist named "Full Moon Ceremony" should exist
 ```
 
-**Story 4.1.2: [Implemented]** (#17) As a Musician, I want to reorder songs in my setlist so that the flow matches the ceremony intensity.
+**Story 4.1.2: [Implemented]** (#17) As a Musician, I want to reorder songs in my playlist so that the flow matches the ceremony intensity.
 
 ```
-Scenario: Reorder Setlist
-  Given I have a setlist with "Song A" at position 1 and "Song B" at position 2
+Scenario: Reorder Playlist
+  Given I have a playlist with "Song A" at position 1 and "Song B" at position 2
   When I drag "Song B" to position 1
   Then "Song B" should be at position 1
   And "Song A" should be at position 2
@@ -1110,27 +1111,27 @@ Scenario: Set playlist cover color
 
 ### Epic 4.2: Print & Export
 
-**Story 4.2.1: [Implemented]** (#18, PR #220) As a Member or Musician, I want to generate a PDF of my setlist so that I can print it for the ceremony.
+**Story 4.2.1: [Implemented]** (#18, PR #220) As a Member or Musician, I want to generate a PDF of my playlist so that I can print it for the ceremony.
 
 ```
 Scenario: Export PDF (Authenticated Member)
   Given I am logged in as a Member or Musician
-  And I am viewing a setlist with between 1 and 200 songs
+  And I am viewing a playlist with between 1 and 200 songs
   When I click "Export PDF" or the Printer button
   Then a PDF file should download
-  And the PDF should contain the lyrics and chords for all songs in the setlist
+  And the PDF should contain the lyrics and chords for all songs in the playlist
   And every page should display a 3-part footer:
     | Site URL + song QR code (bottom left, see Story 4.2.3) | Playlist: <name> (bottom middle) | Page X of Y (bottom right) |
 
 Scenario: Guest clicks Export PDF
-  Given I am an unauthenticated Guest viewing a public setlist
+  Given I am an unauthenticated Guest viewing a public playlist
   When I click "Export PDF" or the Printer button
   Then the export button should be visible
   And clicking it should display a popup "Log in to export PDF" with a "Log In" button
   And no PDF download should be initiated
 
-Scenario: Exporting setlist exceeding maximum songs limit
-  Given I am viewing a setlist containing more than 200 songs
+Scenario: Exporting playlist exceeding maximum songs limit
+  Given I am viewing a playlist containing more than 200 songs
   When I click "Export PDF" or the Printer button
   Then an alert or toast should inform me that a maximum of 200 songs can be exported per PDF
   And no PDF file should be generated
@@ -1140,14 +1141,14 @@ Scenario: Exporting setlist exceeding maximum songs limit
 
 ```
 Scenario: Group by Category in PDF
-  Given my setlist contains songs from "Water" and "Fire" categories mixed together
+  Given my playlist contains songs from "Water" and "Fire" categories mixed together
   When I select "Group by Category" in the export options
   And I generate the PDF
   Then the PDF should show all "Fire" songs grouped together
   And followed by all "Water" songs grouped together (or vice versa)
 ```
 
-**Story 4.2.3: [Implemented]** (#303) As a musician printing a setlist, I want the page footer to show just the songbook's main address and a small QR code for the song, so that the footer stays clean and I can open the song on my phone by scanning it.
+**Story 4.2.3: [Implemented]** (#303) As a musician printing a playlist, I want the page footer to show just the songbook's main address and a small QR code for the song, so that the footer stays clean and I can open the song on my phone by scanning it.
 
 ```gherkin
 Scenario: Footer shows only the main site URL and a QR code to the song
@@ -1158,7 +1159,7 @@ Scenario: Footer shows only the main site URL and a QR code to the song
   And pages without a song URL show no QR code
 ```
 
-**Story 4.2.4: [Implemented]** (#304) As a musician exporting the same setlist several times, I want the app to reuse the last generated PDF when nothing has changed, so that the download is instant.
+**Story 4.2.4: [Implemented]** (#304) As a musician exporting the same playlist several times, I want the app to reuse the last generated PDF when nothing has changed, so that the download is instant.
 
 ```gherkin
 Scenario: Only regenerate the PDF when the playlist is dirty
@@ -1173,14 +1174,14 @@ Scenario: Only regenerate the PDF when the playlist is dirty
 
 > **Status (Nov 23, 2026):** only the spec and test harness (Story 4.3.2, #358, PR #365) are done. The integration branch `feat/offline-library` (#357) was **stale**: it was untouched from Nov 4 until Nov 23, 2026 and lacked UX v2, UX v3 and everything after. Step 0, issue #606 (merge `develop` into it), is still open: PR #615 merged `develop` as of Nov 15 into the branch on Nov 23, 2026, and the branch is still 22 commits behind `develop` (checked on Nov 23, 2026). The rewritten stories #359, #361 and #363 stay blocked until #606 is closed. Nothing of this epic is released; all work lands on `feat/offline-library` until the owner has tested a preview build.
 
-**Story 4.3.1:** (#20) As a Musician, I want to access my setlists while offline so that I can use the app in the forest.
+**Story 4.3.1:** (#20) As a Musician, I want to access my playlists while offline so that I can use the app in the forest.
 
 ```
 Scenario: Offline Access
-  Given I have previously viewed "Full Moon Setlist" while online
+  Given I have previously viewed "Full Moon Playlist" while online
   And I am currently disconnected from the internet
-  When I navigate to "Full Moon Setlist"
-  Then the setlist and its songs should load from the cache
+  When I navigate to "Full Moon Playlist"
+  Then the playlist and its songs should load from the cache
   And I should see an "Offline Mode" indicator
 ```
 
@@ -1214,10 +1215,10 @@ Scenario: Library copy is scoped to one user
   Then the store is wiped before anything is written or read for "B"
 
 Scenario: Reading the library
-  Given a stored library with songs, categories, setlists with items, favourite ids and recently viewed ids
-  When the offline UI asks for songs, a song by id, setlists or a setlist by id
+  Given a stored library with songs, categories, playlists with items, favourite ids and recently viewed ids
+  When the offline UI asks for songs, a song by id, playlists or a playlist by id
   Then it gets the same Song shape the online app uses (mapCompositionToSong), all versions included
-  And a setlist returns its items in order_index order with transposition overrides
+  And a playlist returns its items in order_index order with transposition overrides
 
 Scenario: Wipe
   When the library is wiped
@@ -1236,7 +1237,7 @@ Scenario: First sync after sign-in
   Given I am signed in, online, and Offline Mode is on
   And there is no local library
   When the app starts
-  Then my setlists, then the songs in them, then the rest of the catalogue, then favourites and recently viewed are stored
+  Then my playlists, then the songs in them, then the rest of the catalogue, then favourites and recently viewed are stored
   And Preferences shows the last synced time, the number of songs and the storage used
 
 Scenario: Refresh
@@ -1270,7 +1271,7 @@ Scenario: Guests get nothing
 
 Scenario: Storage full
   Given the browser refuses to store the whole catalogue
-  Then the songs of my setlists are kept and Preferences says the library is partial
+  Then the songs of my playlists are kept and Preferences says the library is partial
 ```
 
 **Story 4.3.5:** As a Musician, I want the installed app to open offline on any page so that I reach my library instead of an error.
@@ -2079,7 +2080,7 @@ Scenario Outline: Links open the right view and stale values are cleaned from th
   # ?view=original&lang=en → original, address ""; ?lang=en&view=side → translation
 ```
 
-Decisions (owner decision Nov 13, 2026): the toggle is *Original · Translation · Both*; *Translation* and *Both* use the language picked in the language switch (its first language by default), which lists languages only (no *Original language*: one "Original" on screen) and shows next to *Translation* / *Both* with two or more languages, so every state is at most two taps away. The view is a URL parameter (`?lang=<tag>&view=translation|both`, none for the original; a `?lang=` link without a view still opens the translation; stale values are replaced), not a device preference, because it belongs to the song being read and travels with the share link; chords stay on the original (they belong to its melody and rarely fit the translated words). There is no print or presentation mode on the reader; the setlist PDF export is unchanged.
+Decisions (owner decision Nov 13, 2026): the toggle is *Original · Translation · Both*; *Translation* and *Both* use the language picked in the language switch (its first language by default), which lists languages only (no *Original language*: one "Original" on screen) and shows next to *Translation* / *Both* with two or more languages, so every state is at most two taps away. The view is a URL parameter (`?lang=<tag>&view=translation|both`, none for the original; a `?lang=` link without a view still opens the translation; stale values are replaced), not a device preference, because it belongs to the song being read and travels with the share link; chords stay on the original (they belong to its melody and rarely fit the translated words). There is no print or presentation mode on the reader; the playlist PDF export is unchanged.
 
 **Story 6.2.20 acceptance criteria** (executable: `docs/testing/ux-v3-edit-version-meta.feature`, `@unit` and `@seed`; the rendered form in `testing/unit/tests/songs/songFormVersionMeta.test.tsx`):
 
@@ -2117,7 +2118,7 @@ Also: an admin's correction writes only the changed page or original title of th
 
 - Importers must write translations to `song_translations` before migration `20261112140000_translation_versions_to_translations.sql` runs on real data: the migration deletes each moved translation version together with its `catalog_source_id`, so an importer that still upserts translations as versions would create them again, and they would not be migrated again (see `docs/guides/importing-songbooks.md`).
 - Offline copies that refer to a deleted translation version id go stale when the migration runs: a version, playlist entry or take stored offline under that id no longer matches anything until the copy is refreshed online.
-- A playlist entry that opened a translation opens the song's first original version in the original language afterwards (`setlist_items` has no language column); its transposition was relative to the translation's key, which is why a translation with chords in another key, capo or tuning than the original is not moved.
+- A playlist entry that opened a translation opens the song's first original version in the original language afterwards (`playlist_items` has no language column); its transposition was relative to the translation's key, which is why a translation with chords in another key, capo or tuning than the original is not moved.
 - Moved takes are appended after the takes already on the original version. The translation's songbook and page are reported with `RAISE NOTICE` and not kept (#517 may add a source to translations).
 
 **Story 6.2.21 acceptance criteria** (executable: `docs/testing/ux-v3-protect-app-edits.feature`, `@unit` and `@seed`):
@@ -2539,7 +2540,7 @@ Scenario: Counts respect what I may read
 | **Vote on Versions** | ❌ | ✅ | ✅ | ✅ | ✅ |
 | **Add/Create Songs** | ❌ | ✅ | ✅ | ✅ | ✅ |
 | **Edit Own Songs** | ❌ | ✅ | ✅ | ✅ | ✅ |
-| **Create/Edit Setlists** | ❌ | ✅ | ✅ | ✅ | ✅ |
+| **Create/Edit Playlists** | ❌ | ✅ | ✅ | ✅ | ✅ |
 | **Export/Print PDF** | ❌ | ✅ | ✅ | ✅ | ✅ |
 | **Submit New Version** | ❌ | ✅ | ✅ | ✅ | ✅ |
 | **Record & Store Private Audio** | ❌ | ✅ | ✅ | ✅ | ✅ |

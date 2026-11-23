@@ -12,7 +12,7 @@ import {
 describe('PDF Export - TDD Suite', () => {
     describe('sanitizeFilename', () => {
         it('sanitizes standard playlist names and appends .pdf', () => {
-            expect(sanitizeFilename('Ceremony Setlist')).toBe('Ceremony_Setlist.pdf');
+            expect(sanitizeFilename('Ceremony Playlist')).toBe('Ceremony_Playlist.pdf');
         });
 
         it('replaces special characters and slashes with underscores', () => {
@@ -23,10 +23,10 @@ describe('PDF Export - TDD Suite', () => {
             expect(sanitizeFilename('Ceremony_Songs.pdf')).toBe('Ceremony_Songs.pdf');
         });
 
-        it('falls back to default setlist.pdf for empty or whitespace-only titles', () => {
-            expect(sanitizeFilename('')).toBe('setlist.pdf');
-            expect(sanitizeFilename('   ')).toBe('setlist.pdf');
-            expect(sanitizeFilename('???///')).toBe('setlist.pdf');
+        it('falls back to default playlist.pdf for empty or whitespace-only titles', () => {
+            expect(sanitizeFilename('')).toBe('playlist.pdf');
+            expect(sanitizeFilename('   ')).toBe('playlist.pdf');
+            expect(sanitizeFilename('???///')).toBe('playlist.pdf');
         });
     });
 
@@ -215,7 +215,7 @@ describe('PDF Export - TDD Suite', () => {
     describe('exportPlaylistToPdf', () => {
         it('throws an error when exporting an empty playlist', async () => {
             const emptyPlaylist: ExportPlaylistData = {
-                title: 'Empty Setlist',
+                title: 'Empty Playlist',
                 songs: [],
             };
 
@@ -224,7 +224,7 @@ describe('PDF Export - TDD Suite', () => {
             );
         });
 
-        it('generates a valid PDF Blob for a setlist with multiple songs', async () => {
+        it('generates a valid PDF Blob for a playlist with multiple songs', async () => {
             const playlist: ExportPlaylistData = {
                 title: 'Ceremony Fire Circle',
                 songs: [
@@ -293,7 +293,7 @@ describe('PDF Export - TDD Suite', () => {
 
         it('renders 3-part footer with song URL, playlist title, and page numbers', async () => {
             const playlist: ExportPlaylistData = {
-                title: 'Ceremony Setlist',
+                title: 'Ceremony Playlist',
                 baseUrl: 'https://prod.example.com',
                 songs: [
                     {
@@ -376,10 +376,10 @@ describe('PDF Export - TDD Suite', () => {
             } as unknown as typeof URL;
 
             try {
-                downloadPdf(blob, 'Ceremony_Setlist.pdf');
+                downloadPdf(blob, 'Ceremony_Playlist.pdf');
 
                 expect(globalThis.URL.createObjectURL).toHaveBeenCalledWith(blob);
-                expect(mockLink.download).toBe('Ceremony_Setlist.pdf');
+                expect(mockLink.download).toBe('Ceremony_Playlist.pdf');
                 expect(mockLink.href).toBe(mockUrl);
                 expect(appendChildSpy).toHaveBeenCalledWith(mockLink);
                 expect(mockLink.click).toHaveBeenCalled();
@@ -408,7 +408,7 @@ describe('PDF Export - document labels follow the interface language (#246)', ()
         expect(l.continued('Agua')).toBe('Agua (continued)');
         expect(l.playlist('Ceremony')).toBe('Playlist: Ceremony');
         expect(l.untitledSong).toBe('Untitled Song');
-        expect(l.untitledPlaylist).toBe('Setlist');
+        expect(l.untitledPlaylist).toBe('Playlist');
         expect(l.dateLocale).toBe('en-US');
     });
 

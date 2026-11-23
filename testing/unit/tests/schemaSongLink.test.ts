@@ -15,8 +15,13 @@ const normalise = (sql: string) =>
     .toLowerCase();
 
 const schema = normalise(readFileSync(join(process.cwd(), 'docs/design/db-schema.sql'), 'utf8'));
+// The migration keeps the table names of its time; migration 20261124120000 (#573) renamed setlist -> playlist and
+// recreated both functions, so the old text is compared with the renamed words.
 const migration = normalise(
-  readFileSync(join(process.cwd(), 'supabase/migrations/20261112120000_link_song_as_version.sql'), 'utf8')
+  readFileSync(join(process.cwd(), 'supabase/migrations/20261112120000_link_song_as_version.sql'), 'utf8').replaceAll(
+    'setlist',
+    'playlist'
+  )
 );
 
 const fn = (sql: string, name: string) => sql.match(new RegExp(`create or replace function public\\.${name}\\([\\s\\S]*?\\$\\$;`))?.[0];

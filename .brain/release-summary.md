@@ -8,4 +8,4 @@ Adds printable ceremony setlist PDF export for musicians using ChordSheetJS and 
 - **Transposition & Capo Support**: Automatically applies per-song transposition overrides and capo settings.
 - **Structured Ceremony Layout**: Setlist cover/header, automatic pagination, running `(continued)` headers on page breaks, and section markers.
 - **UI Integration**: Added quick-action "Export PDF" printer button to the playlist header and an option in the playlist context menu with toast feedback.
-- **BDD & TDD Verified**: Living specification in `docs/testing/setlist-pdf-export.feature` and 12 unit tests in `testing/unit/tests/pdfExport.test.ts`.
+- **BDD & TDD Verified**: Living specification in `docs/testing/playlist-pdf-export.feature` and 12 unit tests in `testing/unit/tests/pdfExport.test.ts`.

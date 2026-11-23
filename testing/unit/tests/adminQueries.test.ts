@@ -45,7 +45,7 @@ function seededState(overrides: Partial<FakeSupabaseState> = {}): FakeSupabaseSt
         { id: 'v-3', composition_id: 'song-3', version_name: 'Original', contributor_id: ADMIN, created_at: '2026-01-02T00:00:00Z' },
         { id: 'v-4', composition_id: 'gone', version_name: 'Dangling', contributor_id: EXPERT, created_at: '2026-03-06T00:00:00Z' },
       ],
-      setlists: [
+      playlists: [
         { id: 'pl-1', owner_id: EXPERT, title: 'Night Ceremony', is_public: true, created_at: '2026-03-07T00:00:00Z' },
         { id: 'pl-2', owner_id: EXPERT, title: 'Practice', is_public: false, created_at: '2026-03-08T00:00:00Z' },
         { id: 'pl-3', owner_id: MEMBER, title: 'My Healing Practice', is_public: false, created_at: '2026-05-02T00:00:00Z' },
@@ -239,11 +239,11 @@ describe('fetchAdminUserDetails', () => {
     await fetchAdminUserDetails(current.client, EXPERT);
     expect(errorSpy).not.toHaveBeenCalled();
     const tables = current.selects.map((s) => s.table);
-    expect(tables).toEqual(expect.arrayContaining(['compositions', 'song_versions', 'setlists']));
+    expect(tables).toEqual(expect.arrayContaining(['compositions', 'song_versions', 'playlists']));
   });
 
   it('logs and returns an empty list when a contribution query fails', async () => {
-    const fake = createFakeSupabase(seededState({ failingTables: ['setlists'] }));
+    const fake = createFakeSupabase(seededState({ failingTables: ['playlists'] }));
     const details = await fetchAdminUserDetails(fake.client, EXPERT);
     expect(details!.contributions.playlists).toEqual([]);
     expect(details!.contributions.songs).toHaveLength(2);

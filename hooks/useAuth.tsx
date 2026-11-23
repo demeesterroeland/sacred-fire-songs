@@ -146,7 +146,7 @@ export const useAuth = (initialUser?: AuthUser | null) => {
         queryClient.clear();
         // An unsaved Add Song draft must not reach the next person on this device (#607).
         clearSongDraft();
-        // Cached setlist PDFs may contain private playlists (#304).
+        // Cached playlist PDFs may contain private playlists (#304).
         await clearPdfCache();
         setUser(null);
     };

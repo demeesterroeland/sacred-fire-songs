@@ -421,7 +421,7 @@ const PLAYLISTS = [
   { id: 'aaaaaaaa-0001-4000-a000-000000000001', owner: 'member', title: 'Water Ceremony', description: 'Songs for water blessings and river ceremonies.', is_public: true, tag: 'water', count: 8 },
   { id: 'aaaaaaaa-0002-4000-a000-000000000002', owner: 'admin', title: 'Admin Fire Circle', description: 'Public playlist curated by the admin.', is_public: true, tag: 'fire', count: 6 },
   { id: 'aaaaaaaa-0003-4000-a000-000000000003', owner: 'member', title: 'My Healing Practice', description: 'Private practice list.', is_public: false, tag: null, count: 7 },
-  { id: 'aaaaaaaa-0004-4000-a000-000000000004', owner: 'member', title: 'New Moon Ceremony', description: 'Private setlist for the next new moon.', is_public: false, tag: 'moon', count: 5 },
+  { id: 'aaaaaaaa-0004-4000-a000-000000000004', owner: 'member', title: 'New Moon Ceremony', description: 'Private playlist for the next new moon.', is_public: false, tag: 'moon', count: 5 },
   { id: 'aaaaaaaa-0005-4000-a000-000000000005', owner: 'member', title: 'Work in Progress', description: 'Empty playlist, nothing added yet.', is_public: false, tag: null, count: 0 },
   { id: 'aaaaaaaa-0006-4000-a000-000000000006', owner: 'expert', title: 'Fire Songs', description: 'A collection of songs for the sacred fire circle.', is_public: true, tag: 'fire', count: 10 },
   { id: 'aaaaaaaa-0007-4000-a000-000000000007', owner: 'gatekeeper', title: 'Gatekeeper Circle', description: 'Curated by the gatekeeper.', is_public: true, tag: null, count: 5 },
@@ -507,15 +507,15 @@ DECLARE
   fav uuid;
   ver uuid;
 BEGIN
-  SELECT id INTO fav FROM public.setlists WHERE owner_id = p_user AND title = 'My Favorites' LIMIT 1;
+  SELECT id INTO fav FROM public.playlists WHERE owner_id = p_user AND title = 'My Favorites' LIMIT 1;
   IF fav IS NULL THEN
-    INSERT INTO public.setlists (owner_id, title, description, is_public) VALUES (p_user, 'My Favorites', 'Songs I love', false) RETURNING id INTO fav;
+    INSERT INTO public.playlists (owner_id, title, description, is_public) VALUES (p_user, 'My Favorites', 'Songs I love', false) RETURNING id INTO fav;
   END IF;
   SELECT id INTO ver FROM public.song_versions WHERE composition_id = p_comp ORDER BY created_at LIMIT 1;
   IF ver IS NULL THEN RETURN; END IF;
-  IF NOT EXISTS (SELECT 1 FROM public.setlist_items WHERE setlist_id = fav AND song_version_id = ver) THEN
-    INSERT INTO public.setlist_items (setlist_id, song_version_id, order_index)
-    SELECT fav, ver, coalesce(max(order_index), 0) + 1 FROM public.setlist_items WHERE setlist_id = fav;
+  IF NOT EXISTS (SELECT 1 FROM public.playlist_items WHERE playlist_id = fav AND song_version_id = ver) THEN
+    INSERT INTO public.playlist_items (playlist_id, song_version_id, order_index)
+    SELECT fav, ver, coalesce(max(order_index), 0) + 1 FROM public.playlist_items WHERE playlist_id = fav;
   END IF;
 END $f$;
 
@@ -842,12 +842,12 @@ BEGIN
     -- -----------------------------------------------------------------------
     FOR p IN SELECT value AS s FROM jsonb_array_elements(playlists) LOOP
         pl_owner := (users->>(p.s->>'owner'))::uuid;
-        INSERT INTO public.setlists (id, owner_id, title, description, is_public, created_at)
+        INSERT INTO public.playlists (id, owner_id, title, description, is_public, created_at)
         VALUES ((p.s->>'id')::uuid, pl_owner, p.s->>'title', p.s->>'description', (p.s->>'is_public')::boolean, now() - (random() * interval '30 days'))
         ON CONFLICT (id) DO NOTHING;
         num_pl_songs := (p.s->>'count')::int;
         IF num_pl_songs > 0 THEN
-            INSERT INTO public.setlist_items (setlist_id, song_version_id, order_index)
+            INSERT INTO public.playlist_items (playlist_id, song_version_id, order_index)
             SELECT (p.s->>'id')::uuid, z.id, row_number() OVER ()
             FROM (
                 SELECT sv.id

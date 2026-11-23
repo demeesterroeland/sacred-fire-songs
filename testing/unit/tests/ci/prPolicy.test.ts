@@ -42,7 +42,7 @@ describe('checkBranches (head → base policy)', () => {
 
 describe('checkTitle (Conventional Commits)', () => {
   it.each([
-    'feat: add setlist export',
+    'feat: add playlist export',
     'feat(admin): sort users by name (#278)',
     'fix!: drop legacy route',
     'chore(main): release 1.7.0',

@@ -256,11 +256,11 @@ Given('the second song has a take and is in a playlist', async function () {
   );
   s.recordingId = rec[0].id;
   const { rows: list } = await db.query<{ id: string }>(
-    `INSERT INTO public.setlists (owner_id, title) VALUES ($1, 'BDD Link Playlist') RETURNING id`,
+    `INSERT INTO public.playlists (owner_id, title) VALUES ($1, 'BDD Link Playlist') RETURNING id`,
     [member]
   );
   const { rows: item } = await db.query<{ id: string }>(
-    `INSERT INTO public.setlist_items (setlist_id, song_version_id, order_index) VALUES ($1, $2, 0) RETURNING id`,
+    `INSERT INTO public.playlist_items (playlist_id, song_version_id, order_index) VALUES ($1, $2, 0) RETURNING id`,
     [list[0].id, s.secondVersion]
   );
   s.playlistItemId = item[0].id;
@@ -341,12 +341,12 @@ Given('a member favourited both songs', async function () {
   const db = await seedDb();
   s.memberId = await accountId('member');
   const { rows } = await db.query<{ id: string }>(
-    `INSERT INTO public.setlists (owner_id, title, is_public) VALUES ($1, 'My Favorites', false) RETURNING id`,
+    `INSERT INTO public.playlists (owner_id, title, is_public) VALUES ($1, 'My Favorites', false) RETURNING id`,
     [s.memberId]
   );
   s.favouritesId = rows[0].id;
   await db.query(
-    'INSERT INTO public.setlist_items (setlist_id, song_version_id, order_index) VALUES ($1, $2, 0), ($1, $3, 1)',
+    'INSERT INTO public.playlist_items (playlist_id, song_version_id, order_index) VALUES ($1, $2, 0), ($1, $3, 1)',
     [rows[0].id, s.firstVersion, s.secondVersion]
   );
 });
@@ -398,7 +398,7 @@ Then('recordings and playlist entries of the second still work', async function 
   );
   assert.equal(rec[0]?.composition_id, s.first);
   const { rows: item } = await db.query<{ composition_id: string }>(
-    `SELECT v.composition_id FROM public.setlist_items i JOIN public.song_versions v ON v.id = i.song_version_id
+    `SELECT v.composition_id FROM public.playlist_items i JOIN public.song_versions v ON v.id = i.song_version_id
      WHERE i.id = $1`,
     [s.playlistItemId]
   );
@@ -554,9 +554,9 @@ Then('the member has the first song once in their favourites', async function ()
   const s = w(this);
   const db = await seedDb();
   const { rows } = await db.query<{ n: number }>(
-    `SELECT count(*)::int AS n FROM public.setlist_items i
+    `SELECT count(*)::int AS n FROM public.playlist_items i
      JOIN public.song_versions v ON v.id = i.song_version_id AND v.composition_id = $2
-     WHERE i.setlist_id = $1`,
+     WHERE i.playlist_id = $1`,
     [s.favouritesId, s.first]
   );
   assert.equal(rows[0].n, 1);
@@ -570,7 +570,7 @@ Then("the favourite points at the first song's first version", async function ()
     [s.first]
   );
   const { rows } = await db.query<{ song_version_id: string }>(
-    'SELECT song_version_id FROM public.setlist_items WHERE setlist_id = $1',
+    'SELECT song_version_id FROM public.playlist_items WHERE playlist_id = $1',
     [s.favouritesId]
   );
   // The same "first version" the heart toggles (lib/songs/versionOrder.ts).

@@ -939,7 +939,7 @@ const fr: Partial<Record<TranslationKey, string>> = {
   'pdf.continued': "{title} (suite)",
   'pdf.playlist': "Playlist : {title}",
   'pdf.untitledSong': "Chant sans titre",
-  'pdf.untitledPlaylist': "Setlist",
+  'pdf.untitledPlaylist': "Playlist",
 
   // ─── Administration (#259) ──────────────────────────────────────────────
   'nav.administration': "Administration",

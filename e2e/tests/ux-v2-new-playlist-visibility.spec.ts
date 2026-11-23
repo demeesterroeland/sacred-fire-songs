@@ -20,7 +20,7 @@ async function visibilityOf(title: string): Promise<boolean | undefined> {
   await client.connect();
   try {
     const { rows } = await client.query<{ is_public: boolean }>(
-      'SELECT is_public FROM public.setlists WHERE title = $1 AND owner_id = (SELECT id FROM public.profiles WHERE email = $2)',
+      'SELECT is_public FROM public.playlists WHERE title = $1 AND owner_id = (SELECT id FROM public.profiles WHERE email = $2)',
       [title, ROLES.member.email]
     );
     return rows[0]?.is_public;
@@ -34,7 +34,7 @@ test.afterAll(async () => {
   await client.connect();
   try {
     await client.query(
-      'DELETE FROM public.setlists WHERE title = ANY($1::text[]) AND owner_id = (SELECT id FROM public.profiles WHERE email = $2)',
+      'DELETE FROM public.playlists WHERE title = ANY($1::text[]) AND owner_id = (SELECT id FROM public.profiles WHERE email = $2)',
       [[PRIVATE_NAME, PUBLIC_NAME], ROLES.member.email]
     );
   } finally {

@@ -34,17 +34,17 @@ test.beforeAll(async () => {
     );
     if (!song.rows[0]) throw new Error('No public song seeded');
     const playlist = await client.query<{ id: string }>(
-      'INSERT INTO public.setlists (owner_id, title, is_public) VALUES ($1, $2, false) RETURNING id',
+      'INSERT INTO public.playlists (owner_id, title, is_public) VALUES ($1, $2, false) RETURNING id',
       [member.rows[0].id, TITLE],
     );
     playlistId = playlist.rows[0].id;
     const publicPlaylist = await client.query<{ id: string }>(
-      'INSERT INTO public.setlists (owner_id, title, is_public) VALUES ($1, $2, true) RETURNING id',
+      'INSERT INTO public.playlists (owner_id, title, is_public) VALUES ($1, $2, true) RETURNING id',
       [member.rows[0].id, PUBLIC_TITLE],
     );
     publicPlaylistId = publicPlaylist.rows[0].id;
     await client.query(
-      'INSERT INTO public.setlist_items (setlist_id, song_version_id, order_index) VALUES ($1, $2, 0)',
+      'INSERT INTO public.playlist_items (playlist_id, song_version_id, order_index) VALUES ($1, $2, 0)',
       [publicPlaylistId, song.rows[0].version_id],
     );
   } finally {
@@ -60,8 +60,8 @@ test.afterAll(async () => {
   await client.connect();
   try {
     const ids = [playlistId, publicPlaylistId].filter(Boolean);
-    await client.query('DELETE FROM public.setlist_items WHERE setlist_id = ANY($1::uuid[])', [ids]);
-    await client.query('DELETE FROM public.setlists WHERE id = ANY($1::uuid[])', [ids]);
+    await client.query('DELETE FROM public.playlist_items WHERE playlist_id = ANY($1::uuid[])', [ids]);
+    await client.query('DELETE FROM public.playlists WHERE id = ANY($1::uuid[])', [ids]);
   } finally {
     await client.end();
   }

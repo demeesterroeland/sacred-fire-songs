@@ -1,7 +1,7 @@
 /**
  * Visibility of a new playlist (Story 6.1.32 / G8.3, #416).
  *
- * What the database does (RLS on `setlists`): a private playlist is readable by
+ * What the database does (RLS on `playlists`): a private playlist is readable by
  * its owner (and admins); a public one by everyone, signed in or not, and it is
  * listed under "Public playlists". Only the owner, or an admin or gatekeeper for a
  * public one, may change it. New playlists are private unless the creator

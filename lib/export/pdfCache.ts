@@ -1,5 +1,5 @@
 /**
- * Reuse the last generated setlist PDF while the playlist is unchanged (#304).
+ * Reuse the last generated playlist PDF while the playlist is unchanged (#304).
  *
  * "Dirty" is decided by a fingerprint of everything that ends up in the PDF:
  * playlist title/description, the ordered songs with their content, key, capo,
@@ -142,7 +142,7 @@ export function browserPdfStore(): PdfCacheStore {
   };
 }
 
-/** Forget every cached PDF, e.g. on sign-out so private setlists don't linger on a shared device. */
+/** Forget every cached PDF, e.g. on sign-out so private playlists don't linger on a shared device. */
 export async function clearPdfCache(): Promise<void> {
   try {
     await browserPdfStore().clear();

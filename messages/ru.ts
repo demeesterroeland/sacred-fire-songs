@@ -942,7 +942,7 @@ const ru: Partial<Record<TranslationKey, string>> = {
   'pdf.continued': '{title} (продолжение)',
   'pdf.playlist': 'Плейлист: {title}',
   'pdf.untitledSong': 'Песня без названия',
-  'pdf.untitledPlaylist': 'Сет-лист',
+  'pdf.untitledPlaylist': 'Плейлист',
   // ─── Administration (#259) ──────────────────────────────────────────────
   'nav.administration': 'Администрирование',
   'nav.adminUsers': 'Обзор пользователей',

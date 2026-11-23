@@ -20,7 +20,7 @@ describe('isTestFixtureTitle', () => {
 describe('committed demo seed', () => {
   it('inserts no playlist whose title looks like a test fixture', () => {
     const sql = fs.readFileSync(path.resolve(__dirname, '../../../supabase/seeds/03_songs_random_generated.sql'), 'utf8');
-    const block = /INSERT INTO public\.setlists[\s\S]*?;\n/i.exec(sql)?.[0] ?? '';
+    const block = /INSERT INTO public\.playlists[\s\S]*?;\n/i.exec(sql)?.[0] ?? '';
     expect(block.length).toBeGreaterThan(0);
     const titles = [...block.matchAll(/\(\s*'[0-9a-f-]{36}',\s*'[0-9a-f-]{36}',\s*'((?:[^']|'')*)'/g)].map((m) => m[1]);
     expect(titles.length).toBeGreaterThan(0);

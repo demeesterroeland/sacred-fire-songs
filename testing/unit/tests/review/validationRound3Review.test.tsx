@@ -83,7 +83,7 @@ describe('every favourites lookup uses the one helper', () => {
   it.each(['app/actions/toggleFavorite.ts', 'lib/songs/serverQueries.ts'])('%s', (file) => {
     const source = read(file);
     expect(source).not.toContain(".eq('title', 'My Favorites')");
-    expect(source).toContain('fetchFavoritesSetlistId');
+    expect(source).toContain('fetchFavoritesPlaylistId');
   });
 });
 

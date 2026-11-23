@@ -85,11 +85,11 @@ export async function fetchAdminUsersList(
   const [songs, versions, playlists] = await Promise.all([
     supabase.from('compositions').select('owner_id'),
     supabase.from('song_versions').select('contributor_id'),
-    supabase.from('setlists').select('owner_id, is_public'),
+    supabase.from('playlists').select('owner_id, is_public'),
   ]);
   logQueryError('fetchAdminUsersList:compositions', songs.error);
   logQueryError('fetchAdminUsersList:song_versions', versions.error);
-  logQueryError('fetchAdminUsersList:setlists', playlists.error);
+  logQueryError('fetchAdminUsersList:playlists', playlists.error);
 
   type OwnerRow = { owner_id: string | null };
   type ContributorRow = { contributor_id: string | null };
@@ -150,14 +150,14 @@ export async function fetchAdminUserDetails(
       .eq('contributor_id', userId)
       .order('created_at', { ascending: false }),
     supabase
-      .from('setlists')
+      .from('playlists')
       .select('id, title, is_public, created_at')
       .eq('owner_id', userId)
       .order('created_at', { ascending: false }),
   ]);
   logQueryError('fetchAdminUserDetails:compositions', songsResult.error);
   logQueryError('fetchAdminUserDetails:song_versions', versionsResult.error);
-  logQueryError('fetchAdminUserDetails:setlists', playlistsResult.error);
+  logQueryError('fetchAdminUserDetails:playlists', playlistsResult.error);
 
   type SongRow = { id: string; title: string; original_author: string | null; created_at: string };
   type VersionRow = {

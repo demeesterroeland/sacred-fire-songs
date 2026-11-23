@@ -22,7 +22,7 @@ Follow these steps to ensure that the Design Document, User Stories, DB Schema, 
 
 3.  **Cross-Reference Data & UI**:
     - Verify that all data fields displayed in `screen*.html` mockups are present in the `db-schema.sql`.
-    - Verify that the `db-schema.sql` supports all entities required by the User Stories (e.g., Setlists, Versions).
+    - Verify that the `db-schema.sql` supports all entities required by the User Stories (e.g., Playlists, Versions).
     - Identify UI changes in the codebase not reflected in documentation or HTML mockups.
 
 ## 2. Reporting Phase
