@@ -5,6 +5,8 @@
  *   public takes there.
  * - Record lists every take a member can open (their own, shared with them, public). A guest cannot open it.
  * - `available` is the single dot on Practice: anything to listen to or practise. Zero counts are hidden.
+ * - `tabs`: the drawer shows its Listen · Record tabs when a tab has something to show (#601): reference media,
+ *   takes, or a guest (public takes live under Listen). A member with neither opens straight on Record.
  */
 export interface PracticeAvailabilityInput {
   /** Reference providers with a link on the shown version. */
@@ -18,10 +20,11 @@ export interface PracticeAvailability {
   listen: number;
   record: number;
   available: boolean;
+  tabs: boolean;
 }
 
 export function practiceAvailability({ providerCount, takeCount, isMember }: PracticeAvailabilityInput): PracticeAvailability {
   const listen = providerCount + (isMember ? 0 : takeCount);
   const record = isMember ? takeCount : 0;
-  return { listen, record, available: listen + record > 0 };
+  return { listen, record, available: listen + record > 0, tabs: !isMember || providerCount > 0 || takeCount > 0 };
 }
