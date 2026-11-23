@@ -1,5 +1,6 @@
-# Version: 1.0 | Date: Nov 13, 2026
+# Version: 1.1 | Date: Nov 15, 2026
 # Changelog
+# 1.1 | Nov 15, 2026 | #601 (#586): the drawer shows its tabs when takes exist without reference media, so the Record count shows.
 # 1.0 | Nov 13, 2026 | Story 6.1.40 / G4 (#586): one availability dot on Practice; Listen and Record tab counts.
 @story-6.1.40
 Feature: Practice shows whether there is something to listen to or practise
@@ -42,3 +43,18 @@ Feature: Practice shows whether there is something to listen to or practise
     Then the Practice button shows no availability dot
     And the Listen tab shows no count
     And the Record tab shows no count
+
+  @unit @bug-601
+  Scenario: A member with takes but no reference media gets the tabs
+    Given I am a member
+    And the song has 0 reference links and 2 takes I can open
+    When I view the song
+    Then the Practice drawer shows the Listen and Record tabs
+    And the Record tab shows 2
+
+  @unit @bug-601
+  Scenario: A member with nothing to listen to or open gets no tabs
+    Given I am a member
+    And the song has 0 reference links and 0 takes I can open
+    When I view the song
+    Then the Practice drawer shows no tabs

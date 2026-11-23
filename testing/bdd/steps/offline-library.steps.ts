@@ -48,7 +48,15 @@ function wipStepTexts(): string[] {
 
 const escapeRegExp = (text: string) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
-for (const text of wipStepTexts()) {
+/**
+ * Step texts that another feature's steps already define for real (develop's
+ * ux-v2-guest-draft.steps.ts owns "I sign out"). Registering a pending stand-in
+ * for them too makes the step ambiguous, so they are left out here. The @wip
+ * scenarios stay pending through their other, story specific steps.
+ */
+const DEFINED_ELSEWHERE = new Set(['I sign out']);
+
+for (const text of wipStepTexts().filter((t) => !DEFINED_ELSEWHERE.has(t))) {
   // Given/When/Then are interchangeable keywords in Cucumber's registry.
   Given(new RegExp(`^${escapeRegExp(text)}$`), function () {
     return 'pending';

@@ -1,5 +1,8 @@
 import { Given, When, Then } from '@cucumber/cucumber';
 import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import path from 'node:path';
+import { DICTIONARIES, SUPPORTED_LOCALES } from '../../../lib/i18n';
 import type { SongBddWorld } from '../support/world';
 
 export interface RecordingSharingBddState {
@@ -269,4 +272,34 @@ Then('the recording should display a pending invite status without a profile lin
   const state = getState(this);
   assert.equal(state.recording.singer_profile_id, null);
   assert.equal(state.recording.singer_email, 'keeper@sacredfire.org');
+});
+
+// #603 — the share dialog notice must not promise that downloading is impossible.
+const SHARE_NOTICE_KEYS = ['recording.sharing.respectNotice', 'recording.sharing.cannotShare'] as const;
+const OLD_DOWNLOAD_PROMISE = /cannot be downloaded|kunnen niet worden gedownload|no se pueden descargar|non possono essere scaricate|нельзя скачивать|mana uraykuchiyta atikunchu|ne peuvent pas être téléchargés|não podem ser baixadas/i;
+
+Given('I open the share dialog for a recording', function (this: SongBddWorld) {
+  const source = fs.readFileSync(path.join(process.cwd(), 'components/song/RecordingShareModal.tsx'), 'utf8');
+  for (const key of SHARE_NOTICE_KEYS) assert.ok(source.includes(`t("${key}")`), `dialog shows ${key}`);
+  assert.ok(!source.includes('recording.sharing.cannotDownload'), 'dialog no longer uses the old key');
+});
+
+Then('the text does not say that shared recordings cannot be downloaded', function () {
+  const en = DICTIONARIES.en as Record<string, string>;
+  const text = SHARE_NOTICE_KEYS.map((k) => en[k]).join(' ');
+  assert.doesNotMatch(text, OLD_DOWNLOAD_PROMISE);
+});
+
+Then('the text asks the recipient to treat the recording with respect', function () {
+  assert.match((DICTIONARIES.en as Record<string, string>)['recording.sharing.respectNotice'], /respect/i);
+});
+
+Then('the same change exists in all 8 locales', function () {
+  assert.equal(SUPPORTED_LOCALES.length, 8);
+  for (const locale of SUPPORTED_LOCALES) {
+    const dict = DICTIONARIES[locale] as Record<string, string>;
+    assert.equal(dict['recording.sharing.cannotDownload'], undefined, `${locale}: old key gone`);
+    assert.ok(dict['recording.sharing.respectNotice'], `${locale}: notice present`);
+    for (const key of SHARE_NOTICE_KEYS) assert.doesNotMatch(dict[key] ?? '', OLD_DOWNLOAD_PROMISE, `${locale}: ${key}`);
+  }
 });

@@ -9,7 +9,11 @@ import { countPaletteClasses } from '@/lib/design/paletteAudit';
 
 const dict = DICTIONARIES.en as Record<string, string>;
 vi.mock('@/context/LocaleContext', () => ({ useLocale: () => ({ t: (k: string) => dict[k] ?? k }) }));
-vi.mock('next/navigation', () => ({ usePathname: () => '/songs', useRouter: () => ({ push: vi.fn() }) }));
+vi.mock('next/navigation', () => ({
+  usePathname: () => '/songs',
+  useRouter: () => ({ push: vi.fn() }),
+  useSearchParams: () => new URLSearchParams(),
+}));
 vi.mock('@/hooks/useAuth', () => ({ useAuth: () => ({ user: null, loading: false, logout: vi.fn() }) }));
 vi.mock('@/context/UserPreferencesContext', () => ({
   useUserPreferences: () => ({ preferences: { theme: 'dark' }, setPreference: vi.fn() }),

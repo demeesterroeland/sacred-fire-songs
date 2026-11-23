@@ -12,6 +12,7 @@
       "docs/testing/ux-v3-*.feature",
       "docs/testing/access-policies.feature",
       "docs/testing/songbook-data-model.feature",
+      "docs/testing/supabase-api-proxy.feature",
       "docs/testing/offline-library.feature"
     ],
     "import": [
@@ -40,6 +41,7 @@
       "docs/testing/ux-v3-*.feature",
       "docs/testing/access-policies.feature",
       "docs/testing/songbook-data-model.feature",
+      "docs/testing/supabase-api-proxy.feature",
       "docs/testing/offline-library.feature"
     ],
     "import": [

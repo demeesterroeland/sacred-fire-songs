@@ -9,6 +9,15 @@
             "command": "scripts/dev/isolation-guard.sh --claude-hook"
           }
         ]
+      },
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "scripts/dev/ops-guard.sh --claude-hook"
+          }
+        ]
       }
     ],
     "PostToolUse": [
