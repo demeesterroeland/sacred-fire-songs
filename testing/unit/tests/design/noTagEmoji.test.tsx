@@ -51,9 +51,16 @@ describe('tags carry no emoji', () => {
     expect(container.textContent).toContain('Fire');
   });
 
-  it('a selected selectable TagPill keeps its check icon', () => {
-    const { container } = render(<TagPill label="Fire" variant="selectable" selected onClick={() => {}} />);
-    expect(container.querySelectorAll('svg').length).toBe(1);
+  it('a badge keeps its grey Tag icon', () => {
+    const { container } = render(<TagPill label="Fire" />);
+    expect(container.querySelectorAll('svg.lucide-tag').length).toBe(1);
+  });
+
+  it('a selected selectable TagPill keeps its check icon, an unselected one has no icon', () => {
+    const { container, rerender } = render(<TagPill label="Fire" variant="selectable" selected onClick={() => {}} />);
+    expect(container.querySelectorAll('svg.lucide-check').length).toBe(1);
+    rerender(<TagPill label="Fire" variant="selectable" onClick={() => {}} />);
+    expect(container.querySelectorAll('svg').length).toBe(0);
   });
 
   it('the Edit song tag picker shows no emoji even when the category data has one', () => {

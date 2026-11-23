@@ -3663,3 +3663,4 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - Not changed: the `categories.emoji` column, seeds and migrations; the taxonomy types and queries still read it (unused by the UI).
 - Test: `testing/unit/tests/design/noTagEmoji.test.tsx` renders `TagPill`, `CategorySelector` and `TagSelector` with emoji in the category data and asserts no pictograph reaches the DOM; two of its four tests fail on the old code.
 - Docs: design doc 2.59, design tokens 1.14, mockup `screen24_home.html` 1.1 (emoji dropped from the category names).
+- Cross-review (claude-opus-5-5): no blocking findings. Follow-ups fixed: the unused `lib/iconUtils.tsx` (emoji fallback) is deleted, UXA-019 in `docs/ux-research/ux-v2-decisions.md` (1.44) notes the Nov 24 decision, and the test now also checks the `badge` Tag icon and the check icon by class.
