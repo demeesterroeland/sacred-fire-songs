@@ -1,8 +1,8 @@
 # E2E Test Overview & Matrix: Sacred Fire Songs
 
-**Version:** 1.5
+**Version:** 1.6
 **Status:** Living Document
-**Date:** Nov 11, 2026
+**Date:** Nov 23, 2026
 **Tracking:** GH #142
 
 ## Changelog
@@ -15,6 +15,7 @@
 | **1.3** | May 31, 2026 | CI hardening: the staging anon key is now read from the `SUPABASE_PUBLISHABLE_KEY_STAGING` secret instead of the `supabase projects api-keys` CLI lookup (which returned no key and failed the run). Dropped the Supabase CLI step; URL derived from the project ref. Documented required secrets. |
 | **1.4** | Jun 23, 2026 | Isolated E2E database environment from staging app `<staging-app>`. Integrated automatic database wipe and seeding via Playwright `globalSetup` hook and `setup-test-db.mjs` script. |
 | **1.5** | Nov 11, 2026 | #492: SONG-08 is now "no delete button on a song row" (deleting is in the song page's menu only). |
+| **1.6** | Nov 23, 2026 | PL-11 (Duplicate playlist) feature status corrected to not implemented (#100; menu item disabled). `@e2e` tags in the Gherkin files are documentation only (#266). |
 
 ---
 
@@ -176,7 +177,7 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 | PL-08 | Access control | Private playlist 404/redirect for non-owner; public viewable by anyone | logged-out vs logged-in | G/M | ✅ | 🔲 | P0 | `playlists/[id]` |
 | PL-09 | Shareable link | Copy public playlist link; toast confirms | private link not shareable | M | ✅ | 🔲 | P2 | 4.1.5 |
 | PL-10 | Description | Add/edit playlist description; persists | empty description | M(owner) | ✅ | 🔲 | P2 | 4.1.6 |
-| PL-11 | Duplicate playlist | Duplicate creates "Copy of …" with same songs/order | navigates to new playlist | M | ✅ | 🔲 | P2 | 4.1.8 |
+| PL-11 | Duplicate playlist | Duplicate creates "Copy of …" with same songs/order | navigates to new playlist | M | ❌ | 🔲 | P2 | 4.1.8 (#100; the menu item is disabled, "Soon") |
 | PL-12 | Per-song transpose | Set +/- semitone offset per song in playlist; original unchanged | offset persists on reload | M(musician) | ⚠️ | 🔲 | P2 | 4.1.9 |
 | PL-13 | Cover color/icon | Assign cover color/icon; reflected on card | default grey when unset | M(owner) | ⚠️ | 🔲 | P2 | 4.1.10 |
 | PL-14 | Presentation/ceremony mode | Full-screen present; arrows/swipe advance; wake lock active; Esc exits | mobile swipe vs desktop keys | M | ⚠️ | 🔲 | P1 | 4.1.7 |

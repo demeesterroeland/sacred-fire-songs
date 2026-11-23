@@ -278,6 +278,7 @@ const en = {
 
   // ─── Rehearsal Space – Drawer ─────────────────────────────────────────────
   'practice.title': 'Practice',
+  'practice.available': 'Practice: media or recordings available',
   'practice.tab.listen': 'Listen',
   "rehearsal.recordings.empty": "No recordings yet",
   'rehearsal.recordings.emptyHint': 'Start recording to capture your practice.',
@@ -336,7 +337,8 @@ const en = {
   "recording.sharing.success": "Recording shared successfully.",
   'recording.sharing.revokeSuccess': 'Access revoked.',
   'recording.sharing.error': 'Failed to update sharing.',
-  "recording.sharing.cannotDownload": "Shared recordings cannot be downloaded.",
+  "recording.sharing.respectNotice": "Members you share with can listen in the app. Please ask them to treat the recording with respect and not pass it on.",
+  "recording.sharing.downloadOwnerOnly": "Only the owner of this recording can download it.",
   "recording.sharing.cannotShare": "Shared recordings cannot be reshared.",
   "recording.sharing.privateSongPrompt.title": "Make the song public to share this recording?",
   "recording.sharing.privateSongPrompt.body": "This song is private. Sharing this recording does three things:",
@@ -1074,6 +1076,8 @@ const en = {
   'guestGate.addToPlaylist.reason': 'Your favourites and playlists live in your account, so they follow you to every device.',
   'guestGate.favourites.title': 'Sign in to save favourites',
   "guestGate.favourites.reason": "Your Favorites live in your account, so they follow you to every device.",
+  'guestGate.drafts.title': 'Sign in to keep private songs',
+  'guestGate.drafts.reason': 'Private songs live in your account, so only you see them and they follow you to every device.',
   'sharedWithMe.unreadCount': '{count} new',
   'sharedWithMe.title': 'Shared with me',
   "sharedByMe.title": "Shared by me",

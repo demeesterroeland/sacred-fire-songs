@@ -280,6 +280,7 @@ const es: Partial<Record<TranslationKey, string>> = {
 
   // ─── Rehearsal Space – Drawer ─────────────────────────────────────────────
   'practice.title': 'Práctica',
+  'practice.available': 'Práctica: medios o grabaciones disponibles',
   'practice.tab.listen': 'Escuchar',
   "rehearsal.recordings.empty": "Aún no hay grabaciones",
   'rehearsal.recordings.emptyHint': 'Empieza a grabar para capturar tu práctica.',
@@ -338,7 +339,8 @@ const es: Partial<Record<TranslationKey, string>> = {
   "recording.sharing.success": "Grabación compartida con éxito.",
   'recording.sharing.revokeSuccess': 'Acceso revocado.',
   'recording.sharing.error': 'Error al actualizar el uso compartido.',
-  "recording.sharing.cannotDownload": "Las grabaciones compartidas no se pueden descargar.",
+  "recording.sharing.respectNotice": "Los miembros con quienes compartes pueden escucharla en la app. Pídeles que traten la grabación con respeto y no la pasen a otros.",
+  "recording.sharing.downloadOwnerOnly": "Solo el propietario de esta grabación puede descargarla.",
   "recording.sharing.cannotShare": "Las grabaciones compartidas no se pueden volver a compartir.",
   "recording.sharing.privateSongPrompt.title": "¿Hacer pública la canción para compartir esta grabación?",
   "recording.sharing.privateSongPrompt.body": "Esta canción es privada. Compartir esta grabación hace tres cosas:",
@@ -1076,6 +1078,8 @@ const es: Partial<Record<TranslationKey, string>> = {
   'guestGate.addToPlaylist.reason': 'Tus favoritas y tus listas viven en tu cuenta, así te acompañan en cada dispositivo.',
   'guestGate.favourites.title': 'Inicia sesión para guardar favoritas',
   'guestGate.favourites.reason': 'Tus canciones favoritas viven en tu cuenta, así te acompañan en cada dispositivo.',
+  'guestGate.drafts.title': 'Inicia sesión para guardar canciones privadas',
+  'guestGate.drafts.reason': 'Las canciones privadas viven en tu cuenta, así que solo tú las ves y te acompañan en cada dispositivo.',
   'sharedWithMe.unreadCount': 'Nuevas: {count}',
   'sharedWithMe.title': 'Compartidas conmigo',
   "sharedByMe.title": "Compartido por mí",

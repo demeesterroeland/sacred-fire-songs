@@ -1,13 +1,14 @@
 # Software Development Life Cycle (SDLC) & CI/CD Workflow
 
-**Version:** 2.0
+**Version:** 2.1
 **Status:** Living Document
-**Date:** Nov 5, 2026
+**Date:** Nov 15, 2026
 
 ## Changelog
 
 | Version | Date | Description of Changes |
 | ----- | ----- | ----- |
+| **2.1** | Nov 15, 2026 | §5: a push to `main` runs the copy of `back-merge.yml` on `main`; manual start and conflict procedure in `git-workflow.md` (#608). |
 | **2.0** | Nov 5, 2026 | Rewritten for the lightweight Gitflow (Epic 5.1, Story 5.1.13): work branches → `develop` → `main`, `hotfix/*`, automatic back-merge PR, environments table, CI vs CD boundary (this repo builds, tests and publishes images; deploying them is up to each self-hoster). Removed the outdated `:latest` claim. |
 | **1.1** | Oct 31, 2026 | Added version header and changelog. Preview script path is now `scripts/cicd/dev2preview.sh` (#274, see `scripts/README.md`). |
 | **1.0** | Sep 27, 2026 | Initial version (GitHub Flow, preview and production releases). |
@@ -79,7 +80,7 @@ scripts/cicd/develop2main.sh --notes-file .brain/release-summary.md
 
 ## 5. Back-merge `main` → `develop`
 
-After every push to `main` (promotion, release commit, hotfix), `.github/workflows/back-merge.yml` opens or updates the back-merge PR `main` → `develop`. Merge it with a **merge commit** once its checks pass. A PR that does not merge cleanly gets the `back-merge-conflict` label; resolve it on a `chore/…` branch from `develop` that merges `origin/main`.
+After every push to `main` (promotion, release commit, hotfix), `.github/workflows/back-merge.yml` opens or updates the back-merge PR `main` → `develop`. Merge it with a **merge commit** once its checks pass. A PR that does not merge cleanly gets the `back-merge-conflict` label; resolve it on a `chore/…` branch from `develop` that merges `origin/main`. The conflict comment lists the conflicting files. A push to `main` runs the copy of the workflow on `main`. If the workflow is on `main` and no back-merge PR appears, run `gh workflow run back-merge.yml --ref main` (see `git-workflow.md`, #608).
 
 ## 6. Hotfix
 

@@ -1,7 +1,7 @@
 import { type AuthUser } from '@/hooks/useAuth';
 import { LogOut, ChevronDown, Heart, FileText, ListMusic, Sun, Moon, Monitor, SlidersHorizontal, Clock, Globe, ShieldCheck, Users } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
-import { useState, useRef, useEffect } from 'react';
+import { Suspense, useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useUserPreferences, type ThemePreference } from '@/context/UserPreferencesContext';
@@ -12,7 +12,8 @@ import { MY_DRAFTS_HREF } from '@/lib/songs/draftsLink';
 import { useNotificationsQuery } from '@/hooks/useNotificationsQuery';
 import { unreadSharedCount } from '@/lib/notifications/sharedWithMe';
 
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { returnPath, signInHref } from '@/lib/auth/guestGate';
 
 interface UserProfileProps {
   initialUser?: AuthUser | null;
@@ -113,9 +114,10 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true, init
 
   if (!user) {
     return (
-      <SignInLink href={`/auth/login?next=${encodeURIComponent(pathname)}`}>
-        {t('auth.login.submit')}
-      </SignInLink>
+      // useSearchParams needs a Suspense boundary; until it resolves the link keeps the path only.
+      <Suspense fallback={<SignInLink href={signInHref(pathname)}>{t('auth.login.submit')}</SignInLink>}>
+        <HeaderSignInLink pathname={pathname} label={t('auth.login.submit')} />
+      </Suspense>
     );
   }
 
@@ -253,3 +255,9 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true, init
     </div>
   );
 };
+
+/** #600: the header Sign in returns to this page with its query string (`/songs?favorites=true`). */
+function HeaderSignInLink({ pathname, label }: { pathname: string; label: string }) {
+  const searchParams = useSearchParams();
+  return <SignInLink href={signInHref(returnPath(pathname, searchParams))}>{label}</SignInLink>;
+}

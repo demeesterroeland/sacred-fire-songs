@@ -280,6 +280,7 @@ const fr: Partial<Record<TranslationKey, string>> = {
 
   // ─── Rehearsal Space – Drawer ─────────────────────────────────────────────
   'practice.title': "Pratique",
+  'practice.available': 'Pratique : médias ou enregistrements disponibles',
   'practice.tab.listen': "Écouter",
   "rehearsal.recordings.empty": "Pas encore d’enregistrements",
   'rehearsal.recordings.emptyHint': "Lance un enregistrement pour garder la trace de ta pratique.",
@@ -338,7 +339,8 @@ const fr: Partial<Record<TranslationKey, string>> = {
   "recording.sharing.success": "Enregistrement partagé avec succès.",
   'recording.sharing.revokeSuccess': 'Accès révoqué.',
   'recording.sharing.error': 'Échec de la mise à jour du partage.',
-  "recording.sharing.cannotDownload": "Les enregistrements partagés ne peuvent pas être téléchargés.",
+  "recording.sharing.respectNotice": "Les membres avec qui vous partagez peuvent l’écouter dans l’application. Demandez-leur de traiter l’enregistrement avec respect et de ne pas le transmettre.",
+  "recording.sharing.downloadOwnerOnly": "Seul le propriétaire de cet enregistrement peut le télécharger.",
   "recording.sharing.cannotShare": "Les enregistrements partagés ne peuvent pas être repartagés.",
   "recording.sharing.privateSongPrompt.title": "Rendre le chant public pour partager cet enregistrement ?",
   "recording.sharing.privateSongPrompt.body": "Ce chant est privé. Partager cet enregistrement fait trois choses :",
@@ -1076,6 +1078,8 @@ const fr: Partial<Record<TranslationKey, string>> = {
   'guestGate.addToPlaylist.reason': 'Vos favoris et vos playlists vivent dans votre compte, ils vous suivent donc sur chaque appareil.',
   'guestGate.favourites.title': 'Connectez-vous pour enregistrer vos favoris',
   'guestGate.favourites.reason': 'Vos chants favoris vivent dans votre compte, ils vous suivent donc sur chaque appareil.',
+  'guestGate.drafts.title': 'Connectez-vous pour garder vos chants privés',
+  'guestGate.drafts.reason': 'Les chants privés vivent dans votre compte : vous seul les voyez, et ils vous suivent sur chaque appareil.',
   'sharedWithMe.unreadCount': 'Nouvelles : {count}',
   'sharedWithMe.title': 'Partagées avec moi',
   "sharedByMe.title": "Partagé par moi",

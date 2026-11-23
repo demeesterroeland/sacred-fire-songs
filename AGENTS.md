@@ -12,6 +12,7 @@ This repository is **public open source**. Anyone may self-host it. The maintain
 - Ops work (server changes, deploys, stack config, deploy decisions) is documented in the maintainer's **private infra repo**, not in `docs/logbook/` or `docs/plans/`. If a session touches both, write the ops part there.
 - **Allowed**: unit tests, Playwright E2E tests, local Supabase dev setup, generic self-hosting documentation.
 - Enforcement is automated and fails closed: `scripts/dev/isolation-guard.sh` runs as `.githooks/pre-commit` and `.githooks/commit-msg` (enable with `git config core.hooksPath .githooks`), as a Claude Code `PreToolUse` hook, and as the required `isolation` CI job. It reads its pattern list from `~/.config/sfs/denylist` (CI: the `ISOLATION_DENYLIST` secret) — that list must never be committed here. If the guard blocks you, do not work around it; move the content to the private repo.
+- Server operations (`ssh`, `scp`, `rsync` to a host, remote `docker`) belong in the private infra repo's own session. In Claude Code, `scripts/dev/ops-guard.sh` asks for confirmation before such a command runs from this repo (#630); a declined prompt means: do it from the infra repo.
 
 ## Branches and Merging (CRITICAL)
 

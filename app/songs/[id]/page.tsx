@@ -23,6 +23,8 @@ import { useWakeLock } from '@/hooks/useWakeLock';
 import { useAutoScroll, useLyricsBelowFold, AUTOSCROLL_KEEP_ATTR } from '@/hooks/useAutoScroll';
 import { useSongControlsExpanded } from '@/hooks/useSongControlsExpanded';
 import { SongActionBar } from '@/components/song/SongActionBar';
+import { practiceAvailability } from '@/lib/song/practiceAvailability';
+import { availableProviders } from '@/lib/player/referenceProviders';
 import { useActionBarVisibility } from '@/hooks/useActionBarVisibility';
 import { useUserPreferences } from '@/context/UserPreferencesContext';
 import { practiceTab } from '@/lib/song/actionBar';
@@ -301,6 +303,16 @@ export default function SongDetailPage() {
     // Story 6.1.9 (#393): the phone action bar hides on scroll down when the user has auto-hide on.
     const actionBarVisible = useActionBarVisibility(preferences.autoHideBottomNav);
     const hasMedia = !!(currentVersion?.youtube_url || currentVersion?.spotify_url || currentVersion?.soundcloud_url);
+    // Story 6.1.40 (#586): one dot on Practice when there is anything to listen to or practise.
+    const practice = practiceAvailability({
+        providerCount: availableProviders({
+            youtubeUrl: currentVersion?.youtube_url,
+            soundcloudUrl: currentVersion?.soundcloud_url,
+            spotifyUrl: currentVersion?.spotify_url,
+        }).length,
+        takeCount: recordings?.length ?? 0,
+        isMember: !!user,
+    });
     const openPractice = () => {
         // Listen when there is reference media (or for a guest: public takes), otherwise straight to Record.
         setDrawerRequestedTab(practiceTab(hasMedia, !!user));
@@ -341,13 +353,13 @@ export default function SongDetailPage() {
             return (
                 <div className="flex flex-col items-center justify-center min-h-screen gap-4 text-center px-6">
                     <p className="text-3xl">⚠️</p>
-                    <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100">{t('song.error.timeout')}</h2>
-                    <p className="text-sm text-gray-500 dark:text-gray-400">
+                    <h2 className="text-row font-bold text-fg">{t('song.error.timeout')}</h2>
+                    <p className="text-meta text-fg-muted">
                         {t('song.error.timeoutDescription')}
                     </p>
                     <button
                         onClick={() => window.location.reload()}
-                        className="mt-2 px-5 py-2 rounded-lg bg-[#ff4400] text-white text-sm font-semibold hover:bg-[#e03c00] transition-colors"
+                        className="mt-2 min-h-tap px-5 py-2 rounded-control bg-accent text-on-accent text-meta font-semibold hover:bg-accent/90 transition-colors"
                     >
                         {t('song.error.retry')}
                     </button>
@@ -360,13 +372,13 @@ export default function SongDetailPage() {
         return (
             <div className="flex flex-col items-center justify-center min-h-screen gap-4 text-center px-6">
                 <p className="text-3xl">🔥</p>
-                <h2 className="text-lg font-bold text-gray-800 dark:text-gray-100">{t('song.error.loadFailed')}</h2>
-                <p className="text-sm text-gray-500 dark:text-gray-400">
+                <h2 className="text-row font-bold text-fg">{t('song.error.loadFailed')}</h2>
+                <p className="text-meta text-fg-muted">
                     {t('song.error.unexpected')}
                 </p>
                 <button
                     onClick={() => window.location.reload()}
-                    className="mt-2 px-5 py-2 rounded-lg bg-[#ff4400] text-white text-sm font-semibold hover:bg-[#e03c00] transition-colors"
+                    className="mt-2 min-h-tap px-5 py-2 rounded-control bg-accent text-on-accent text-meta font-semibold hover:bg-accent/90 transition-colors"
                 >
                     {t('song.error.retry')}
                 </button>
@@ -550,8 +562,8 @@ export default function SongDetailPage() {
                                     setIsRehearsalDrawerOpen(true);
                                 }}
                                 className="px-3 active:scale-[0.98] xl:px-4"
-                                title={t('practice.title')}
-                                aria-label={t('practice.title')}
+                                title={practice.available ? t('practice.available') : t('practice.title')}
+                                aria-label={practice.available ? t('practice.available') : t('practice.title')}
                                 data-testid="song-header-practice"
                             >
                                 {isAudioPlaying ? (
@@ -565,10 +577,8 @@ export default function SongDetailPage() {
                                     <Mic aria-hidden />
                                 )}
                                 <span className="hidden xl:inline">{t('practice.title')}</span>
-                                {recordings && recordings.length > 0 && (
-                                    <span className="rounded-pill bg-on-accent/20 px-1.5 text-caption font-medium">
-                                        {recordings.length}
-                                    </span>
+                                {practice.available && (
+                                    <span data-testid="song-header-practice-dot" aria-hidden className="size-2 shrink-0 rounded-full bg-current" />
                                 )}
                             </Button>
                         )}
@@ -787,8 +797,7 @@ export default function SongDetailPage() {
                 onPractice={openPractice}
                 onToggleFavorite={handleToggleFavorite}
                 onGuestPlaylist={() => setIsGuestGateOpen(true)}
-                hasReferenceMedia={hasMedia}
-                takeCount={recordings?.length ?? 0}
+                practiceAvailable={practice.available}
                 visible={actionBarVisible}
                 playlistSlot={user && id ? (
                     <PlaylistPicker

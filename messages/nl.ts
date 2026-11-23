@@ -280,6 +280,7 @@ const nl: Partial<Record<TranslationKey, string>> = {
 
   // ─── Rehearsal Space ──────────────────────────────────────────────────────
   'practice.title': 'Oefenen',
+  'practice.available': 'Oefenen: media of opnames beschikbaar',
   'practice.tab.listen': 'Luisteren',
   "rehearsal.recordings.empty": "Nog geen opnames",
   'rehearsal.recordings.emptyHint': 'Start een opname om je oefening vast te leggen.',
@@ -338,7 +339,8 @@ const nl: Partial<Record<TranslationKey, string>> = {
   "recording.sharing.success": "Opname succesvol gedeeld.",
   'recording.sharing.revokeSuccess': 'Toegang ingetrokken.',
   'recording.sharing.error': 'Delen bijwerken mislukt.',
-  "recording.sharing.cannotDownload": "Gedeelde opnames kunnen niet worden gedownload.",
+  "recording.sharing.respectNotice": "Leden met wie je deelt, kunnen de opname in de app beluisteren. Vraag hen er met respect mee om te gaan en ze niet door te geven.",
+  "recording.sharing.downloadOwnerOnly": "Alleen de eigenaar van deze opname kan haar downloaden.",
   "recording.sharing.cannotShare": "Gedeelde opnames kunnen niet verder worden gedeeld.",
   "recording.sharing.privateSongPrompt.title": "Lied openbaar maken om deze opname te delen?",
   "recording.sharing.privateSongPrompt.body": "Dit lied is privé. Deze opname delen doet drie dingen:",
@@ -1075,6 +1077,8 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'guestGate.addToPlaylist.reason': 'Je favorieten en afspeellijsten staan in je account, zodat ze op elk apparaat met je meekomen.',
   'guestGate.favourites.title': 'Log in om favorieten op te slaan',
   'guestGate.favourites.reason': 'Je favoriete liederen staan in je account, zodat ze op elk apparaat met je meekomen.',
+  'guestGate.drafts.title': 'Log in om privéliederen te bewaren',
+  'guestGate.drafts.reason': 'Privéliederen staan in je account, zodat alleen jij ze ziet en ze op elk apparaat met je meekomen.',
   'sharedWithMe.unreadCount': 'Nieuw: {count}',
   'sharedWithMe.title': 'Met mij gedeeld',
   "sharedByMe.title": "Door mij gedeeld",

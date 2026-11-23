@@ -109,13 +109,13 @@
 
 | **October 30, 2026 (Part 10)** | **CI-CD/Testing (#287)**: Gitflow Phase 0 harness — workflow contract helper, Vitest contract tests, Cucumber `ci` profile, bats tests for `start-issue.sh`, lint/typecheck scripts and baseline. | ~1.0 Hours | ✅ Completed |
 
-| **October 31, 2026** | **CI-CD (#282)**: Gitflow Phase 1 — `ci.yml` quality gate, lint ratchet, single unit-test tree, SHA-pinned actions, Dependabot; E2E Supabase stack drafted in <infra-repo> #106 (deferred). | ~2.5 Hours | ✅ Completed |
+| **October 31, 2026** | **CI-CD (#282)**: Gitflow Phase 1 — `ci.yml` quality gate, lint ratchet, single unit-test tree, SHA-pinned actions, Dependabot; E2E Supabase stack drafted outside this repo (deferred). | ~2.5 Hours | ✅ Completed |
 
 | **October 31, 2026 (Part 2)** | **Chore/Scripts (#274)**: `scripts/` reorganized into `cicd/`, `db/`, `dev/` with `scripts/README.md`, story-sync scripts moved out of `.claude/scripts/`, all references and the CI shellcheck glob updated, layout contract in bats. | ~1.0 Hours | ✅ Completed |
 
 | **October 31, 2026 (Part 2)** | **CI-CD (#283)**: Gitflow Phase 2 — PR policy check (`pr-lint.yml`), rulesets as code, `start-issue.sh` validation, `dev2preview.sh` image names + dry run; recovered #317 via #318. | ~1.5 Hours | ✅ Completed |
 
-| **October 31, 2026 (Part 3)** | **CI-CD (#284)**: Gitflow Phase 3 — develop images, `deploy-staging.yml`, restricted SSH deploy script + compose sync (<infra-repo> #107). | ~1.5 Hours | ✅ Completed |
+| **October 31, 2026 (Part 3)** | **CI-CD (#284)**: Gitflow Phase 3 — develop images, `deploy-staging.yml`, restricted SSH deploy script + compose sync (kept outside this repo). | ~1.5 Hours | ✅ Completed |
 
 | **October 31, 2026 (Part 4)** | **Bug (#321)**: "New Playlist" redirected logged-in users to `/` — `useAuth` initial `loading` when no server user, server-side guard on `/library/playlists/add`, unit + e2e regression tests. | ~0.75 Hours | ✅ Completed |
 
@@ -157,4 +157,10 @@
 | **November 13, 2026** | **Fix/UX (#578)**: non-UUID ids on `[id]` routes render not-found; song load error shows translated message instead of raw `error.message`, tests, docs. (estimate) | ~0.5 Hours | Completed |
 | **November 13, 2026** | **Fix/UI (#485 group 5)**: sober tokens in account settings (Profile, Security, Preferences, Privacy), shared Button primitives, 44 px password visibility toggles, 8-locale i18n, unit + BDD + E2E tests, docs. (estimate) | ~1.0 Hours | Completed |
 | **November 13, 2026** | **Fix/UX (#485 group 6)**: sober tokens in the playlist menu, Add Songs sheet and playlist detail header, palette ratchet, BDD and light/dark contrast E2E tests, docs. (estimate) | ~1.0 Hours | Completed |
-| **Total** | **Development + AI Collaboration** | **~273.25 Hours** | |
+| **November 13, 2026** | **Feature/UX (Epic 6.1, #586)**: Practice availability dot and drawer tab counts (mockups, issue rewrite, helper, 8-locale i18n, unit/BDD tests, rebase on UX v3 replacing the #583 cue, docs). (estimate) | ~1.5 Hours | Completed |
+| **November 15, 2026** | **Chore/CI (#608)**: root cause of the manual 1.7.1 back-merge (workflow not on `main` yet), conflicting files listed in the back-merge comment, manual procedure documented, contract test. (estimate) | ~0.75 Hours | Completed |
+| **November 15, 2026** | **Fix/Privacy (#607)**: the Add Song draft records its owner and is removed at sign-out; a guest keeps the draft through sign-in; Vitest, BDD and E2E tests, docs. (estimate) | ~0.75 Hours | Completed |
+| **November 23, 2026** | **Docs (#639)**: logbook follow-ups from the Nov 14 sync: Gherkin aligned with the code (9 stories, 5 UX v2 rows), rewritten issue Gherkin mirrored, issue numbers and epic notes, three GitHub issue texts, review round. (estimate) | ~1.5 Hours | Completed |
+| **November 23, 2026** | **Docs (#642 follow-up)**: roles table checked against the code and rewritten (stories file, manual, design doc), Epic 3.5 note, Story 4.6.8 for #481. (estimate) | ~0.75 Hours | Completed |
+| **November 23, 2026** | **Design (Epic 6.2, #598)**: suggest a song as a version of another song: branch-target check, plan (data model, RLS, queue UX, notifications, audit, Gherkin, open questions), HTML mockup, draft PR. Nothing built. (estimate) | ~1.5 Hours | Completed |
+| **Total** | **Development + AI Collaboration** | **~280 Hours** | |

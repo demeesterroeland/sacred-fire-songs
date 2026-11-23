@@ -8,6 +8,9 @@ import { Mail, KeyRound, ArrowRight, Loader2 } from 'lucide-react';
 import { useLocale } from '@/context/LocaleContext';
 import { safeEmailParam } from '@/lib/auth/notice';
 import { errorMessage } from '@/lib/errors/errorCode';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/button';
+import { AuthCard, AuthHeader, AuthNotice, authFooterClass, authIconClass } from '@/components/auth/AuthShell';
 
 function SignUpSuccessContent() {
     const { t } = useLocale();
@@ -44,33 +47,28 @@ function SignUpSuccessContent() {
 
     return (
         <div className="flex-1 flex flex-col items-center justify-center min-h-[80vh] px-4 text-center">
-            <div className="w-full max-w-md bg-white dark:bg-[#1c222d] border border-gray-200 dark:border-[#2d3545] rounded-3xl p-8 shadow-2xl flex flex-col items-center">
-
-                {/* Icon */}
-                <div className="w-16 h-16 bg-emerald-500/15 rounded-full flex items-center justify-center mb-6 text-emerald-400">
-                    <Mail className="w-8 h-8" />
-                </div>
-
-                <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">{t('auth.signUpSuccess.title')}</h1>
-                <p className="text-[#8e99aa] text-sm mb-2">
-                    {t('auth.signUpSuccess.description')}
-                </p>
+            <AuthCard className="flex flex-col items-center">
+                <AuthHeader
+                    icon={<Mail />}
+                    title={t('auth.signUpSuccess.title')}
+                    description={t('auth.signUpSuccess.description')}
+                />
                 {email && (
-                    <p className="text-gray-900 dark:text-white font-semibold text-sm mb-6 truncate max-w-full">{email}</p>
+                    <p className="mb-6 max-w-full truncate text-meta font-semibold text-fg">{email}</p>
                 )}
 
                 {/* Divider */}
-                <div className="w-full flex items-center gap-3 mb-6">
-                    <div className="flex-1 h-px bg-gray-200 dark:bg-[#2d3545]" />
+                <div className="mb-6 flex w-full items-center gap-3">
+                    <div className="h-px flex-1 bg-line" />
                     <span className="text-caption font-semibold text-fg-muted">{t('auth.signUpSuccess.orEnterCode')}</span>
-                    <div className="flex-1 h-px bg-gray-200 dark:bg-[#2d3545]" />
+                    <div className="h-px flex-1 bg-line" />
                 </div>
 
                 {/* OTP Form */}
                 <form onSubmit={handleVerify} className="w-full space-y-4">
-                    <div className="relative group">
-                        <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5a657a] group-focus-within:text-[#d9481e] transition-colors pointer-events-none">
-                            <KeyRound className="w-5 h-5" />
+                    <div className="group relative">
+                        <div className={authIconClass}>
+                            <KeyRound className="size-5" />
                         </div>
                         <input
                             type="text"
@@ -80,46 +78,38 @@ function SignUpSuccessContent() {
                             placeholder="6-digit code"
                             value={code}
                             onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-                            className="w-full bg-transparent border border-gray-200 dark:border-[#2d3545] rounded-xl py-4 pl-12 pr-4 text-gray-900 dark:text-white text-center text-xl tracking-[0.5em] placeholder:text-[#5a657a] placeholder:text-sm placeholder:tracking-normal transition-all"
+                            className="min-h-tap w-full rounded-control border border-line-strong bg-transparent py-4 pl-12 pr-4 text-center text-title tracking-[0.5em] text-fg placeholder:text-meta placeholder:tracking-normal placeholder:text-fg-muted"
                             required
                         />
                     </div>
 
-                    {error && (
-                        <p className="text-sm text-red-400 bg-red-500/10 border border-red-500/20 rounded-xl p-3">
-                            {error}
-                        </p>
-                    )}
+                    {error && <AuthNotice tone="error">{error}</AuthNotice>}
 
-                    <button
-                        type="submit"
-                        disabled={isVerifying || code.length !== 6}
-                        className="w-full bg-gradient-to-r from-[#d9481e] to-[#f45d1a] hover:brightness-110 disabled:opacity-50 text-white font-bold py-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-[0_4px_15px_rgba(217,72,30,0.4)] active:scale-[0.98]"
-                    >
+                    <Button type="submit" className="w-full" disabled={isVerifying || code.length !== 6}>
                         {isVerifying ? (
-                            <Loader2 className="w-5 h-5 animate-spin" />
+                            <Loader2 className="animate-spin" />
                         ) : (
-                            <>{t('auth.signUpSuccess.verify')} <ArrowRight className="w-5 h-5" /></>
+                            <>{t('auth.signUpSuccess.verify')} <ArrowRight /></>
                         )}
-                    </button>
+                    </Button>
                 </form>
 
-                <div className="mt-8 pt-6 border-t border-gray-200 dark:border-[#2d3545] w-full text-center">
+                <div className={cn(authFooterClass, 'w-full')}>
                     <Link
                         href={`/auth/login${next ? `?next=${encodeURIComponent(next)}` : ""}`}
-                        className="text-[#8e99aa] hover:text-gray-900 dark:hover:text-white text-sm transition-colors"
+                        className="text-fg-muted underline underline-offset-4 hover:text-fg"
                     >
                         {t('auth.signUpSuccess.returnToLogin')}
                     </Link>
                 </div>
-            </div>
+            </AuthCard>
         </div>
     );
 }
 
 export default function SignupSuccess() {
     return (
-        <Suspense fallback={<div className="flex-1 flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-gray-500" /></div>}>
+        <Suspense fallback={<div className="flex-1 flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-fg-muted" /></div>}>
             <SignUpSuccessContent />
         </Suspense>
     );

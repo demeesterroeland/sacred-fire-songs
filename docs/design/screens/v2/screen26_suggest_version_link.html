@@ -1,0 +1,416 @@
+<!--
+**Version:** 0.2
+**Status:** Draft for owner review (Story 6.2.26, #598)
+**Date:** Nov 23, 2026
+
+## Changelog
+
+| Version | Date | Description of Changes |
+| ----- | ----- | ----- |
+| **0.2** | Nov 23, 2026 | Review round (Claude Opus): 44 px targets for links, Segmented pattern (radiogroup, 44 px, underline) for the queue segments, `--line-strong` defined per theme, bell label matches the badge, preview lists categories and catalog keys, new screens: user menu with badge, reviewed list (Reopen, Closed), empty state. |
+| **0.1** | Nov 23, 2026 | First mockup: suggest sheet (pick, confirm), review queue, review sheet with link preview, member's own list, bell notification. Sober greys, one accent. Plan: `docs/plans/2026-11-23-598-version-suggestion.md`. |
+-->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Suggest a version link - Sacred Fire Songs</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="tokens.css">
+<style>
+:root { --line-strong: #8a857f; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --line-strong: #6f6a64; } }
+:root[data-theme="dark"] { --line-strong: #6f6a64; }
+*, *::before, *::after { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font-sans); font-size: var(--fs-body); line-height: var(--lh-body); }
+button, input, textarea { font: inherit; color: inherit; }
+button { background: none; border: 0; padding: 0; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--focus); outline-offset: 2px; border-radius: var(--r-control); }
+svg.i { width: 20px; height: 20px; flex: none; stroke: currentColor; fill: none; stroke-width: 1.75; stroke-linecap: round; stroke-linejoin: round; }
+.gutter { padding-inline: max(16px, env(safe-area-inset-left, 0px)); }
+.wrap { max-width: 640px; margin: 0 auto; }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* ---------- mockup controls ---------- */
+.mock { border-bottom: 1px dashed var(--text-subtle); background: var(--surface); font-size: var(--fs-caption); color: var(--text-muted); padding-block: var(--s-2); }
+.mock .wrap { display: flex; flex-wrap: wrap; gap: var(--s-2) var(--s-3); align-items: center; }
+.mock strong { color: var(--text); font-weight: var(--fw-semibold); letter-spacing: .04em; text-transform: uppercase; }
+.mock-group { display: inline-flex; flex-wrap: wrap; gap: 2px; background: var(--surface-2); border-radius: var(--r-control); padding: 2px; }
+.mock-group button { padding: 4px 8px; border-radius: 4px; min-height: 28px; }
+.mock-group button[aria-pressed="true"] { background: var(--bg); color: var(--text); font-weight: var(--fw-semibold); }
+.mock-note { flex-basis: 100%; color: var(--text-subtle); }
+
+/* ---------- phone-width stage ---------- */
+.stage { position: relative; max-width: 420px; margin: var(--s-4) auto var(--s-6); border: 1px solid var(--line); border-radius: var(--r-sheet); overflow: hidden; background: var(--bg); min-height: 640px; }
+.view[hidden] { display: none; }
+.appbar { height: var(--bar-h); display: flex; align-items: center; gap: var(--s-2); padding-inline: var(--s-4); border-bottom: 1px solid var(--line); }
+.appbar h1 { font-size: 17px; font-weight: var(--fw-semibold); margin: 0; flex: 1; }
+.icon-btn { width: var(--tap); height: var(--tap); display: grid; place-items: center; border-radius: var(--r-control); color: var(--text-muted); position: relative; }
+.icon-btn:hover { background: var(--surface-2); color: var(--text); }
+.badge { position: absolute; top: 4px; right: 2px; min-width: 20px; height: 20px; padding-inline: 5px; border-radius: var(--r-pill); background: var(--text); color: var(--bg); font-size: var(--fs-caption); font-weight: var(--fw-semibold); line-height: 20px; text-align: center; }
+.dim { opacity: .35; filter: blur(1px); pointer-events: none; }
+.song-head { padding: var(--s-4); }
+.song-head h2 { margin: 0 0 4px; font-size: var(--fs-title); line-height: var(--lh-tight); }
+.meta { font-size: var(--fs-meta); color: var(--text-muted); }
+.subtle { font-size: var(--fs-meta); color: var(--text-subtle); }
+
+/* ---------- buttons, fields ---------- */
+.btn { min-height: var(--tap); padding-inline: var(--s-4); border-radius: var(--r-control); font-weight: var(--fw-medium); display: inline-flex; align-items: center; justify-content: center; gap: var(--s-2); }
+.btn-primary { background: var(--accent); color: var(--accent-ink); }
+.btn-primary:disabled { opacity: .45; cursor: not-allowed; }
+.btn-secondary { border: 1px solid var(--line-strong, #8a857f); background: transparent; }
+.btn-secondary:hover { background: var(--surface-2); }
+.btn-ghost { color: var(--text-muted); }
+.btn-ghost:hover { background: var(--surface-2); color: var(--text); }
+.field { width: 100%; min-height: var(--tap); border: 1px solid var(--line-strong, #8a857f); border-radius: var(--r-control); background: var(--surface); padding: var(--s-2) var(--s-3); }
+textarea.field { min-height: 88px; resize: vertical; }
+label.lbl { display: block; font-size: var(--fs-meta); font-weight: var(--fw-medium); margin-bottom: var(--s-1); }
+.counter { font-size: var(--fs-caption); color: var(--text-subtle); text-align: right; margin-top: 2px; }
+.hint { font-size: var(--fs-meta); color: var(--text-muted); margin: var(--s-3) 0; }
+
+/* ---------- sheet (in-frame) ---------- */
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; background: var(--surface); border-radius: var(--r-sheet) var(--r-sheet) 0 0; border-top: 1px solid var(--line); box-shadow: var(--elev-sheet); max-height: 92%; overflow-y: auto; padding-bottom: var(--s-4); }
+.grabber { width: 36px; height: 4px; border-radius: 2px; background: var(--surface-2); margin: var(--s-2) auto var(--s-1); }
+.sheet-head { padding: var(--s-2) var(--s-4) var(--s-3); display: flex; align-items: center; gap: var(--s-2); border-bottom: 1px solid var(--line); }
+.sheet-head h2 { margin: 0; font-size: 17px; font-weight: var(--fw-semibold); flex: 1; }
+.sheet-body { padding: var(--s-4); }
+
+/* ---------- flat rows ---------- */
+.rows { list-style: none; margin: 0; padding: 0; }
+.row { display: flex; gap: var(--s-3); align-items: flex-start; width: 100%; text-align: start; padding: var(--s-3) var(--s-4); border-bottom: 1px solid var(--line); min-height: var(--tap); }
+button.row:hover { background: var(--surface-2); }
+.row-main { flex: 1; min-width: 0; }
+.row-title { font-size: var(--fs-row); font-weight: var(--fw-medium); overflow-wrap: anywhere; }
+.arrow { color: var(--text-subtle); padding-inline: 4px; }
+.quote { font-size: var(--fs-meta); color: var(--text-muted); border-inline-start: 2px solid var(--line); padding-inline-start: var(--s-2); margin-top: var(--s-1); }
+.chip-note { display: inline-block; font-size: var(--fs-caption); color: var(--text-muted); background: var(--surface-2); border-radius: var(--r-control); padding: 1px 6px; margin-top: var(--s-1); margin-inline-end: var(--s-1); }
+.status { font-size: var(--fs-caption); font-weight: var(--fw-semibold); display: inline-flex; align-items: center; gap: 4px; color: var(--text-muted); white-space: nowrap; }
+.status svg.i { width: 14px; height: 14px; }
+.status.ok { color: var(--text); }
+.link-more { color: var(--text); text-decoration: underline; text-underline-offset: 3px; font-size: var(--fs-meta); display: inline-flex; align-items: center; min-height: var(--tap); padding-inline: var(--s-1); }
+
+/* segmented */
+.seg { display: flex; margin: var(--s-3) var(--s-4); background: var(--surface-2); border-radius: var(--r-panel); padding: 2px; }
+.seg button { flex: 1; min-height: var(--tap); border-radius: 8px; font-size: var(--fs-meta); font-weight: var(--fw-medium); color: var(--text-muted); border-bottom: 2px solid transparent; }
+.seg button[aria-checked="true"] { background: var(--bg); color: var(--text); font-weight: var(--fw-semibold); border-bottom-color: var(--text); box-shadow: inset 0 0 0 1px var(--line-strong); }
+
+/* preview list */
+.preview { list-style: none; margin: var(--s-3) 0; padding: 0; font-size: var(--fs-meta); }
+.preview li { padding: 6px 0; border-bottom: 1px solid var(--line); display: flex; gap: var(--s-2); }
+.preview li::before { content: "+"; color: var(--text-subtle); font-weight: var(--fw-semibold); }
+.swap { display: flex; align-items: center; gap: var(--s-3); min-height: var(--tap); font-size: var(--fs-meta); }
+.swap input { width: 20px; height: 20px; accent-color: var(--accent); }
+.warn { font-size: var(--fs-meta); color: var(--text); background: var(--surface-2); border-radius: var(--r-control); padding: var(--s-2) var(--s-3); }
+.actions { display: flex; gap: var(--s-3); margin-top: var(--s-4); flex-wrap: wrap; }
+.actions .btn { flex: 1; }
+
+/* menu */
+.menu { position: absolute; top: calc(var(--bar-h) - 4px); right: var(--s-3); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-panel); box-shadow: var(--elev-sheet); width: 260px; padding: var(--s-1) 0; z-index: 5; }
+.menu button { display: flex; width: 100%; align-items: center; gap: var(--s-3); padding: var(--s-3) var(--s-4); min-height: var(--tap); text-align: start; }
+.menu button:hover { background: var(--surface-2); }
+.menu button[aria-disabled="true"] { color: var(--text-subtle); cursor: not-allowed; }
+.menu hr { border: 0; border-top: 1px solid var(--line); margin: var(--s-1) 0; }
+
+/* bell */
+.bell { position: absolute; top: calc(var(--bar-h) - 4px); right: var(--s-3); left: var(--s-3); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-panel); box-shadow: var(--elev-sheet); overflow: hidden; }
+.bell h2 { font-size: 14px; margin: 0; padding: var(--s-3) var(--s-4); border-bottom: 1px solid var(--line); }
+.note-item { display: flex; gap: var(--s-3); padding: var(--s-3) var(--s-4); border-bottom: 1px solid var(--line); font-size: 14px; }
+.note-item:last-child { border-bottom: 0; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--text); margin-top: 7px; flex: none; }
+.toast { position: absolute; top: 64px; left: 50%; transform: translateX(-50%); background: var(--text); color: var(--bg); font-size: var(--fs-meta); font-weight: var(--fw-medium); padding: 8px 16px; border-radius: var(--r-pill); }
+.empty { padding: var(--s-6) var(--s-4); text-align: center; color: var(--text-muted); }
+.spec { max-width: 420px; margin: 0 auto var(--s-6); font-size: var(--fs-meta); color: var(--text-muted); }
+.spec h2 { font-size: 15px; color: var(--text); margin: var(--s-4) 0 var(--s-1); }
+.spec ul { margin: 0; padding-inline-start: 18px; }
+</style>
+</head>
+<body>
+
+<div class="mock gutter" aria-label="Mockup controls">
+  <div class="wrap">
+    <strong>Mockup</strong>
+    <span class="mock-group" role="group" aria-label="Theme">
+      <button type="button" data-t="auto" aria-pressed="true">Auto</button>
+      <button type="button" data-t="light" aria-pressed="false">Light</button>
+      <button type="button" data-t="dark" aria-pressed="false">Dark</button>
+    </span>
+    <span class="mock-group" role="group" aria-label="Screen">
+      <button type="button" data-v="menu" aria-pressed="true">1 Menu</button>
+      <button type="button" data-v="pick" aria-pressed="false">2 Pick</button>
+      <button type="button" data-v="confirm" aria-pressed="false">3 Confirm</button>
+      <button type="button" data-v="queue" aria-pressed="false">4 Queue</button>
+      <button type="button" data-v="review" aria-pressed="false">5 Review</button>
+      <button type="button" data-v="mine" aria-pressed="false">6 My list</button>
+      <button type="button" data-v="bell" aria-pressed="false">7 Bell</button>
+      <button type="button" data-v="usermenu" aria-pressed="false">8 User menu</button>
+      <button type="button" data-v="reviewed" aria-pressed="false">9 Reviewed</button>
+      <button type="button" data-v="empty" aria-pressed="false">10 Empty</button>
+    </span>
+    <span class="mock-note">Story 6.2.26 (#598). Members suggest, gatekeepers and admins decide. Plan: docs/plans/2026-11-23-598-version-suggestion.md. Buttons in the mockup move between screens.</span>
+  </div>
+</div>
+
+<main class="stage" id="stage">
+
+  <!-- 1. Song page with the menu (member) -->
+  <section class="view" data-view="menu" aria-label="Song menu for a member">
+    <div class="appbar"><h1>Siento la medica</h1><button class="icon-btn" aria-label="Song menu" aria-expanded="true"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="5" r="1"/><circle cx="12" cy="12" r="1"/><circle cx="12" cy="19" r="1"/></svg></button></div>
+    <div class="song-head dim"><h2>Siento la medica</h2><div class="meta">Unknown · Spanish · 1 version</div><p style="line-height:1.8">[Em] Siento la medica,<br>[Am] fuego sagrado…</p></div>
+    <div class="menu" role="menu" aria-label="Song menu">
+      <button role="menuitem"><svg class="i" viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Edit song</button>
+      <button role="menuitem"><svg class="i" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>Add to playlist</button>
+      <hr>
+      <button role="menuitem" data-go="pick"><svg class="i" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>Suggest as a version of…</button>
+    </div>
+    <p class="spec" style="position:absolute;bottom:0;padding:0 var(--s-4)">A member (also a musician, expert, or a gatekeeper on songs they do not own) sees <em>Suggest as a version of…</em>. Admins, and gatekeepers on their own songs, see <em>Link as a version of…</em> instead. Never both.</p>
+  </section>
+
+  <!-- 2. Suggest sheet: pick -->
+  <section class="view" data-view="pick" aria-label="Suggest sheet, pick a song" hidden>
+    <div class="appbar dim"><h1>Siento la medica</h1></div>
+    <div class="song-head dim"><h2>Siento la medica</h2><div class="meta">Unknown · Spanish</div></div>
+    <div class="sheet" role="dialog" aria-label="Suggest as a version of…">
+      <div class="grabber"></div>
+      <div class="sheet-head"><h2>Suggest as a version of…</h2><button class="icon-btn" aria-label="Close"><svg class="i" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div>
+      <div class="sheet-body" style="padding-bottom:0">
+        <label class="lbl" for="q">Which song is <strong>Siento la medica</strong> a version of?</label>
+        <input id="q" class="field" type="search" value="siento la med" autocomplete="off">
+      </div>
+      <ul class="rows" style="margin-top:var(--s-3)">
+        <li><div class="row" style="align-items:center">
+          <button class="row-main" style="text-align:start" data-go="confirm"><div class="row-title">Siento la medicina</div><div class="meta">Herbert Quinteros · Spanish · 3 versions</div></button>
+          <a class="link-more" href="#" onclick="return false">Open song</a></div></li>
+        <li><div class="row" style="align-items:center">
+          <button class="row-main" style="text-align:start" data-go="confirm"><div class="row-title">Siente la medicina nai</div><div class="meta">No artist · Spanish · 1 version</div></button>
+          <a class="link-more" href="#" onclick="return false">Open song</a></div></li>
+      </ul>
+      <p class="hint" style="margin-inline:var(--s-4)">Only public songs you can read. Open both songs and compare the lyrics before you choose: look-alike titles are often different songs.</p>
+    </div>
+  </section>
+
+  <!-- 3. Suggest sheet: confirm -->
+  <section class="view" data-view="confirm" aria-label="Suggest sheet, confirm" hidden>
+    <div class="appbar dim"><h1>Siento la medica</h1></div>
+    <div class="song-head dim"><h2>Siento la medica</h2></div>
+    <div class="sheet" role="dialog" aria-label="Suggest as a version of…">
+      <div class="grabber"></div>
+      <div class="sheet-head"><button class="icon-btn" aria-label="Back" data-go="pick"><svg class="i" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button><h2>Suggest as a version of…</h2></div>
+      <div class="sheet-body">
+        <p style="margin:0 0 var(--s-3)"><strong>Siento la medica</strong> is a version of <strong>Siento la medicina</strong></p>
+        <label class="lbl" for="n">Note for the reviewer (optional)</label>
+        <textarea id="n" class="field" maxlength="280" placeholder="Same song, same chords. The first one has a typo in the title.">Same song, same chords, one letter different in the title.</textarea>
+        <div class="counter">56 / 280</div>
+        <p class="hint">Nothing changes now. A gatekeeper or admin looks at your suggestion and decides. You get a message either way.</p>
+        <p class="warn" role="note">Inline refusal example: This suggestion already exists.</p>
+        <div class="actions">
+          <button class="btn btn-secondary" data-go="pick">Back</button>
+          <button class="btn btn-primary" data-go="menu" data-toast="Suggestion sent">Send suggestion</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. Review queue (admin) -->
+  <section class="view" data-view="queue" aria-label="Review queue" hidden>
+    <div class="appbar"><h1>Link suggestions</h1><button class="icon-btn" aria-label="Notifications"><svg class="i" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21h4"/></svg></button></div>
+    <div class="seg" role="radiogroup" aria-label="Suggestions">
+      <button role="radio" aria-checked="true" data-go="queue">To review (3)</button>
+      <button role="radio" aria-checked="false" data-go="reviewed">Reviewed</button>
+      <button role="radio" aria-checked="false" data-go="mine">Mine</button>
+    </div>
+    <ul class="rows">
+      <li><button class="row" data-go="review">
+        <div class="row-main">
+          <div class="row-title">Siento la medica <span class="arrow">→</span> Siento la medicina</div>
+          <div class="meta">Anna · 2 days ago</div>
+          <div class="quote">Same song, same chords, one letter different in the title.</div>
+        </div><svg class="i" viewBox="0 0 24 24" style="color:var(--text-subtle)"><path d="m9 18 6-6-6-6"/></svg></button></li>
+      <li><button class="row" data-go="review">
+        <div class="row-main">
+          <div class="row-title">Pipe song 58 <span class="arrow">→</span> Pipe song 65</div>
+          <div class="meta">Ben · 5 days ago</div>
+          <span class="chip-note">Declined before on Nov 9</span>
+        </div><svg class="i" viewBox="0 0 24 24" style="color:var(--text-subtle)"><path d="m9 18 6-6-6-6"/></svg></button></li>
+      <li><button class="row" data-go="review">
+        <div class="row-main">
+          <div class="row-title">Siente la medicina nai <span class="arrow">→</span> Siento la medica</div>
+          <div class="meta">Carla · 6 days ago</div>
+          <span class="chip-note">Also suggested: → Siento la medicina</span>
+        </div><svg class="i" viewBox="0 0 24 24" style="color:var(--text-subtle)"><path d="m9 18 6-6-6-6"/></svg></button></li>
+    </ul>
+    <p class="spec" style="padding:var(--s-4)">Gatekeepers see only suggestions where they own both songs; their segment often reads "Nothing to review". The count on the user-menu entry is the reviewer's signal.</p>
+  </section>
+
+  <!-- 5. Review sheet -->
+  <section class="view" data-view="review" aria-label="Review a suggestion" hidden>
+    <div class="appbar dim"><h1>Link suggestions</h1></div>
+    <div class="sheet" role="dialog" aria-label="Review suggestion">
+      <div class="grabber"></div>
+      <div class="sheet-head"><button class="icon-btn" aria-label="Close" data-go="queue"><svg class="i" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg></button><h2>Review suggestion</h2></div>
+      <div class="sheet-body">
+        <p style="margin:0"><strong>Siento la medica</strong> → <strong>Siento la medicina</strong></p>
+        <p class="meta" style="margin:2px 0 var(--s-2)">Suggested by Anna · 2 days ago</p>
+        <div class="quote">Same song, same chords, one letter different in the title.</div>
+        <p style="margin:var(--s-3) 0 0"><a class="link-more" href="#" onclick="return false">Open Siento la medica</a> · <a class="link-more" href="#" onclick="return false">Open Siento la medicina</a></p>
+        <h3 style="font-size:14px;margin:var(--s-4) 0 0">If you link, this moves</h3>
+        <ul class="preview">
+          <li>1 version</li>
+          <li>2 recordings</li>
+          <li>1 playlist entry</li>
+          <li>3 favourites, 1 merged into an existing one</li>
+          <li>2 categories added</li>
+          <li>1 catalog key cleared (the song that stays keeps its own)</li>
+          <li>The title becomes an alias: Siento la medica</li>
+        </ul>
+        <label class="swap"><input type="checkbox"> Keep <strong>Siento la medica</strong> instead (it becomes the song that stays)</label>
+        <p class="warn" role="note">There is no undo. The suggested song is removed and its old link opens the song that stays.</p>
+        <div class="actions">
+          <button class="btn btn-secondary" data-go="decline">Decline…</button>
+          <button class="btn btn-primary" data-go="queue" data-toast="Linked. Anna is told.">Link</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Decline step (inside review) -->
+  <section class="view" data-view="decline" aria-label="Decline a suggestion" hidden>
+    <div class="appbar dim"><h1>Link suggestions</h1></div>
+    <div class="sheet" role="dialog" aria-label="Decline suggestion">
+      <div class="grabber"></div>
+      <div class="sheet-head"><button class="icon-btn" aria-label="Back" data-go="review"><svg class="i" viewBox="0 0 24 24"><path d="m15 18-6-6 6-6"/></svg></button><h2>Decline suggestion</h2></div>
+      <div class="sheet-body">
+        <label class="lbl" for="r">Reason for Anna (optional)</label>
+        <textarea id="r" class="field" maxlength="280" placeholder="Different songs: the second verse differs.">Different songs.</textarea>
+        <div class="counter">16 / 280</div>
+        <p class="hint">Both songs stay as they are. An admin can reopen a declined suggestion.</p>
+        <div class="actions">
+          <button class="btn btn-secondary" data-go="review">Back</button>
+          <button class="btn btn-primary" data-go="queue" data-toast="Declined. Anna is told.">Decline suggestion</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6. Member's own list -->
+  <section class="view" data-view="mine" aria-label="My suggestions" hidden>
+    <div class="appbar"><h1>My suggestions</h1></div>
+    <ul class="rows">
+      <li class="row"><div class="row-main">
+        <div class="row-title">Siento la medica <span class="arrow">→</span> Siento la medicina</div>
+        <div class="meta">Sent 2 days ago</div></div>
+        <div style="text-align:end"><span class="status"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Waiting</span><br><button class="link-more">Withdraw</button></div></li>
+      <li class="row"><div class="row-main">
+        <div class="row-title">Siente la medicina nai <span class="arrow">→</span> Siento la medicina</div>
+        <div class="meta">Linked by Dana · Nov 12</div></div>
+        <span class="status ok"><svg class="i" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg>Linked</span></li>
+      <li class="row"><div class="row-main">
+        <div class="row-title">Pipe song 58 <span class="arrow">→</span> Pipe song 65</div>
+        <div class="meta">Declined by Dana · Nov 9</div>
+        <div class="quote">Different songs: the second verse differs.</div></div>
+        <span class="status"><svg class="i" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>Declined</span></li>
+    </ul>
+    <p class="spec" style="padding:var(--s-4)">Status is always a word plus an icon, never colour alone. A suggestion closed by a link or a song delete reads "Closed" with the line "The songs were linked another way."</p>
+  </section>
+
+  <!-- 7. Bell -->
+  <section class="view" data-view="bell" aria-label="Notification for the member" hidden>
+    <div class="appbar"><h1>Home</h1><button class="icon-btn" aria-label="2 unread notifications"><svg class="i" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21h4"/></svg><span class="badge" aria-hidden="true">2</span></button></div>
+    <div class="bell" role="group" aria-label="Notifications">
+      <h2>Notifications</h2>
+      <div class="note-item"><span class="dot" aria-hidden="true"></span><div><strong>Siento la medica</strong> was linked as a version of <strong>Siento la medicina</strong>.<div class="subtle">2 hours ago</div></div></div>
+      <div class="note-item"><span class="dot" aria-hidden="true"></span><div>Your suggestion for <strong>Pipe song 58</strong> was declined: Different songs.<div class="subtle">Yesterday</div></div></div>
+      <div class="note-item" style="color:var(--text-muted)"><div>Dana shared a take of <strong>Danza del Cielo</strong> with you.<div class="subtle">3 days ago</div></div></div>
+    </div>
+  </section>
+
+  <!-- 8. User menu with the reviewer badge -->
+  <section class="view" data-view="usermenu" aria-label="User menu with badge" hidden>
+    <div class="appbar"><h1>Home</h1><button class="icon-btn" aria-label="User menu" aria-expanded="true"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></button></div>
+    <div class="menu" role="group" aria-label="User menu">
+      <button>Profile</button>
+      <button data-go="queue"><span style="flex:1">Link suggestions</span><span class="status ok" aria-label="3 to review">3</span></button>
+      <button>Settings</button>
+      <hr>
+      <button>Sign out</button>
+    </div>
+    <p class="spec" style="position:absolute;bottom:0;padding:0 var(--s-4)">Reviewers see a number (not only a dot) next to the entry. Members see the same entry as "My suggestions" without a number. The label of the entry follows the role.</p>
+  </section>
+
+  <!-- 9. Reviewed list -->
+  <section class="view" data-view="reviewed" aria-label="Reviewed suggestions" hidden>
+    <div class="appbar"><h1>Link suggestions</h1></div>
+    <div class="seg" role="radiogroup" aria-label="Suggestions">
+      <button role="radio" aria-checked="false" data-go="queue">To review (3)</button>
+      <button role="radio" aria-checked="true" data-go="reviewed">Reviewed</button>
+      <button role="radio" aria-checked="false" data-go="mine">Mine</button>
+    </div>
+    <ul class="rows">
+      <li class="row"><div class="row-main">
+        <div class="row-title">Siente la medicina nai <span class="arrow">→</span> Siento la medicina</div>
+        <div class="meta">Carla · linked by Dana · Nov 12</div></div>
+        <span class="status ok"><svg class="i" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg>Linked</span></li>
+      <li class="row"><div class="row-main">
+        <div class="row-title">Pipe song 58 <span class="arrow">→</span> Pipe song 65</div>
+        <div class="meta">Ben · declined by Dana · Nov 9</div>
+        <div class="quote">Different songs: the second verse differs.</div></div>
+        <div style="text-align:end"><span class="status"><svg class="i" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>Declined</span><br><button class="link-more" data-toast="Reopened" data-go="queue">Reopen</button></div></li>
+      <li class="row"><div class="row-main">
+        <div class="row-title">Siento la medica <span class="arrow">→</span> Siente la medicina nai</div>
+        <div class="meta">Anna · Nov 12</div>
+        <div class="quote">The songs were linked another way.</div></div>
+        <span class="status"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/></svg>Closed</span></li>
+    </ul>
+    <p class="spec" style="padding:var(--s-4)">Reopen is for admins and only on declined rows. It is refused with a plain reason when the songs were linked or deleted meanwhile.</p>
+  </section>
+
+  <!-- 10. Empty state -->
+  <section class="view" data-view="empty" aria-label="Nothing to review" hidden>
+    <div class="appbar"><h1>Link suggestions</h1></div>
+    <div class="seg" role="radiogroup" aria-label="Suggestions">
+      <button role="radio" aria-checked="true" data-go="queue">To review (0)</button>
+      <button role="radio" aria-checked="false" data-go="reviewed">Reviewed</button>
+      <button role="radio" aria-checked="false" data-go="mine">Mine</button>
+    </div>
+    <div class="empty">
+      <p style="font-size:var(--fs-row);color:var(--text);margin:0 0 var(--s-2)">Nothing to review.</p>
+      <p class="meta" style="margin:0">You see suggestions for songs you own. An admin handles the rest.</p>
+    </div>
+  </section>
+
+  <div class="toast" id="toast" role="status" hidden></div>
+</main>
+
+<script>
+(function () {
+  var root = document.documentElement;
+  var themeGroup = document.querySelector('[aria-label="Theme"]');
+  themeGroup.addEventListener('click', function (e) {
+    var b = e.target.closest('button'); if (!b) return;
+    if (b.dataset.t === 'auto') root.removeAttribute('data-theme'); else root.setAttribute('data-theme', b.dataset.t);
+    themeGroup.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', String(x === b)); });
+  });
+
+  var screenGroup = document.querySelector('[aria-label="Screen"]');
+  var toast = document.getElementById('toast'), timer = null;
+  function show(name) {
+    document.querySelectorAll('.view').forEach(function (v) { v.hidden = v.dataset.view !== name; });
+    screenGroup.querySelectorAll('button').forEach(function (x) { x.setAttribute('aria-pressed', String(x.dataset.v === name)); });
+  }
+  function say(msg) {
+    clearTimeout(timer); toast.textContent = msg; toast.hidden = false;
+    timer = setTimeout(function () { toast.hidden = true; }, 2200);
+  }
+  screenGroup.addEventListener('click', function (e) { var b = e.target.closest('button'); if (b) show(b.dataset.v); });
+  document.getElementById('stage').addEventListener('click', function (e) {
+    var t = e.target.closest('[data-go]'); if (!t) return;
+    show(t.dataset.go);
+    if (t.dataset.toast) say(t.dataset.toast);
+  });
+})();
+</script>
+</body>
+</html>

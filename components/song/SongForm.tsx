@@ -10,7 +10,7 @@ import { flushSync } from 'react-dom';
 import { parseChordPro, hasChords } from '@/lib/chordProParsing';
 import { useAuth } from '@/hooks/useAuth';
 import { readSongDraft, writeSongDraft, clearSongDraft } from '@/lib/songs/songDraft';
-import { signInHref } from '@/lib/auth/guestGate';
+import { returnPath, signInHref } from '@/lib/auth/guestGate';
 import GuestDraftBanner from '@/components/song/GuestDraftBanner';
 import CategorySelector from './CategorySelector';
 import ChordProEditor from './ChordProEditor';
@@ -96,6 +96,8 @@ const SongForm = ({ mode, initialData: liveInitialData, songId, versionId, sourc
         handleSubmit,
         setValue,
         watch,
+        reset,
+        getValues,
         formState: { errors },
     } = useForm<SongFormData>({
         defaultValues: {
@@ -118,6 +120,8 @@ const SongForm = ({ mode, initialData: liveInitialData, songId, versionId, sourc
     const queryClient = useQueryClient();
     const router = useRouter();
     const searchParams = useSearchParams();
+    // #600: back to Add Song with its own query, so an incoming next= survives the sign-in.
+    const addSongReturnPath = returnPath(ADD_SONG_PATH, searchParams);
     const [serverError, setServerError] = useState<string | null>(null);
     const [showPreview, setShowPreview] = useState(false);
     const [uploadError, setUploadError] = useState<'read' | 'tooLarge' | null>(null);
@@ -142,30 +146,53 @@ const SongForm = ({ mode, initialData: liveInitialData, songId, versionId, sourc
     const [previewContent, flushPreview] = useDebouncedValue(liveContent, PREVIEW_DEBOUNCE_MS);
 
 
-    // Persistence Logic (Create Mode): the draft survives a sign-in round trip (#411)
+    // Persistence Logic (Create Mode): the draft survives a sign-in round trip (#411).
+    // It is tied to its owner (#607): restored once the session is known, only for
+    // that member; a guest draft is adopted by the member who signs in to save it.
+    const draftOwner = user?.id ?? null;
+    const draftRestored = useRef(false);
+    const lastDraftOwner = useRef<string | null>(null);
     useEffect(() => {
-        if (mode !== 'create') return;
+        if (mode !== 'create' || authLoading) return;
 
-        // Restore on mount
-        const parsed = readSongDraft();
-        if (parsed) {
-            Object.keys(parsed).forEach((key) => {
-                setValue(key as keyof SongFormData, parsed[key] as never);
-            });
+        // The member signed out (or another member signed in) with the form open:
+        // empty it, so the next person neither sees nor re-saves their text.
+        if (lastDraftOwner.current && lastDraftOwner.current !== draftOwner) {
+            reset();
+            clearSongDraft();
+        }
+        lastDraftOwner.current = draftOwner;
 
-            // Restore UI states
-            if (parsed.key || parsed.capo || (parsed.tuning && parsed.tuning !== 'Standard')) {
-                setIsMetadataExpanded(true);
-            }
-            if (Array.isArray(parsed.categoryIds) && parsed.categoryIds.length > 0) {
-                setIsTagsExpanded(true);
+        // Restore once, as soon as the session is known. Only fill fields that are
+        // still empty: text typed while the session loaded wins.
+        if (!draftRestored.current) {
+            draftRestored.current = true;
+            const parsed = readSongDraft(draftOwner);
+            if (parsed) {
+                Object.keys(parsed).forEach((key) => {
+                    const current = getValues(key as keyof SongFormData) as unknown;
+                    const untouched = current === undefined || current === '' || (Array.isArray(current) && current.length === 0);
+                    if (untouched) setValue(key as keyof SongFormData, parsed[key] as never);
+                });
+
+                // Restore UI states
+                if (parsed.key || parsed.capo || (parsed.tuning && parsed.tuning !== 'Standard')) {
+                    setIsMetadataExpanded(true);
+                }
+                if (Array.isArray(parsed.categoryIds) && parsed.categoryIds.length > 0) {
+                    setIsTagsExpanded(true);
+                }
             }
         }
 
+        // Store what the form holds now under the current owner: text typed while the
+        // session loaded, and an adopted guest draft (no longer ownerless).
+        writeSongDraft(getValues(), draftOwner);
+
         // Save on change
-        const subscription = watch((value) => writeSongDraft(value));
+        const subscription = watch((value) => writeSongDraft(value, draftOwner));
         return () => subscription.unsubscribe();
-    }, [mode, setValue, watch]);
+    }, [mode, setValue, watch, reset, getValues, authLoading, draftOwner]);
 
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const input = e.target;
@@ -429,7 +456,7 @@ const SongForm = ({ mode, initialData: liveInitialData, songId, versionId, sourc
         if (authLoading) return; // session not known yet: don't bounce a signed-in user to sign-in
         if (!user) {
             // Keep the way back to this form; the draft is already in storage (#411).
-            router.push(signInHref(ADD_SONG_PATH));
+            router.push(signInHref(addSongReturnPath));
             return;
         }
         mutation.mutate(data);
@@ -437,27 +464,27 @@ const SongForm = ({ mode, initialData: liveInitialData, songId, versionId, sourc
 
     return (
         <>
-        {mode === 'create' && !user && !authLoading && <GuestDraftBanner next={ADD_SONG_PATH} />}
-        <form onSubmit={handleSubmit(handleFormSubmit, () => flushSync(() => setShowPreview(false)))} className="space-y-6 bg-white dark:bg-gray-900 border border-gray-200 dark:border-white/10 p-4 sm:p-6 rounded-2xl w-full max-w-2xl mx-auto shadow-xl min-w-0">
+        {mode === 'create' && !user && !authLoading && <GuestDraftBanner next={addSongReturnPath} />}
+        <form onSubmit={handleSubmit(handleFormSubmit, () => flushSync(() => setShowPreview(false)))} className="space-y-6 bg-surface border border-line p-4 sm:p-6 rounded-panel w-full max-w-2xl mx-auto min-w-0">
             <div className="space-y-4">
                 {/* 1. Title */}
                 <div className="space-y-2">
-                    <label htmlFor="title" className="block text-sm font-medium text-gray-600 dark:text-gray-300 p-1">
+                    <label htmlFor="title" className="block text-meta font-medium text-fg p-1">
                         {t('songForm.field.title')}
                     </label>
                     <input
                         id="title"
                         {...register('title', { required: t('songForm.field.title.required') })}
-                        className="w-full bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg px-4 py-3 text-gray-900 dark:text-white transition-all placeholder:text-gray-400 dark:placeholder:text-[#a19eb7]/50"
+                        className="w-full bg-surface border border-line-strong rounded-control px-4 py-3 text-fg placeholder:text-fg-subtle"
                         placeholder={t('songForm.field.title.placeholder')}
                     />
-                    {errors.title && <p className="text-red-400 text-sm">{errors.title.message}</p>}
+                    {errors.title && <p className="text-danger text-meta">{errors.title.message}</p>}
                 </div>
 
                 {/* 2. Author / Artist (Multi-Artist Pill Input) */}
                 <div className="space-y-2">
-                    <label htmlFor="author" className="block text-sm font-medium text-gray-600 dark:text-gray-300 p-1">
-                        {t('songForm.field.author')} <span className="text-gray-500 font-normal">{t('common.optional')}</span>
+                    <label htmlFor="author" className="block text-meta font-medium text-fg p-1">
+                        {t('songForm.field.author')} <span className="text-fg-subtle font-normal">{t('common.optional')}</span>
                     </label>
                     <ArtistTagInput
                         selectedArtists={parseArtists(watch('author') || '')}
@@ -549,35 +576,35 @@ const SongForm = ({ mode, initialData: liveInitialData, songId, versionId, sourc
 
                 {/* 4. Key / Capo / Tuning (collapsible, simplified) */}
                 <details className="group" open={isMetadataExpanded} onToggle={(e) => setIsMetadataExpanded(e.currentTarget.open)}>
-                    <summary className="w-full flex items-center justify-between py-3 cursor-pointer select-none list-none">
-                        <h3 className="text-gray-400 font-semibold text-sm">{t('songForm.section.metadata')}</h3>
-                        <span className="material-symbols-outlined text-gray-400 transition-transform group-open:rotate-180">expand_more</span>
+                    <summary className="w-full min-h-tap flex items-center justify-between py-3 cursor-pointer select-none list-none">
+                        <h3 className="text-fg-muted font-semibold text-meta">{t('songForm.section.metadata')}</h3>
+                        <span className="material-symbols-outlined text-fg-muted transition-transform group-open:rotate-180">expand_more</span>
                     </summary>
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pb-3">
                         {/* Key */}
                         <div className="space-y-1.5">
-                            <label className="block text-xs font-medium text-gray-400">{t('songForm.field.key')}</label>
+                            <label className="block text-caption font-medium text-fg-muted">{t('songForm.field.key')}</label>
                             <div className="relative">
                                 <select
                                     {...register('key')}
-                                    className="w-full bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg px-2 py-2 text-xs text-gray-900 dark:text-white appearance-none"
+                                    className="w-full min-h-tap bg-surface border border-line-strong rounded-control ps-3 pe-8 py-2 text-meta text-fg appearance-none"
                                 >
                                     <option value="">{t('songForm.field.key.select')}</option>
                                     {['C', 'Cm', 'C#', 'Db', 'D', 'Dm', 'Eb', 'E', 'Em', 'F', 'Fm', 'F#', 'Gb', 'G', 'Gm', 'G#', 'Ab', 'A', 'Am', 'Bb', 'B', 'Bm'].map(k => (
                                         <option key={k} value={k}>{k}</option>
                                     ))}
                                 </select>
-                                <span className="material-symbols-outlined absolute right-1 top-2 text-gray-500 pointer-events-none text-base">arrow_drop_down</span>
+                                <span className="material-symbols-outlined absolute end-2 top-1/2 -translate-y-1/2 text-fg-muted pointer-events-none text-base">arrow_drop_down</span>
                             </div>
                         </div>
 
                         {/* Capo */}
                         <div className="space-y-1.5">
-                            <label className="block text-xs font-medium text-gray-400">{t('songForm.field.capo')}</label>
+                            <label className="block text-caption font-medium text-fg-muted">{t('songForm.field.capo')}</label>
                             <div className="relative">
                                 <select
                                     {...register('capo')}
-                                    className="w-full bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg px-2 py-2 text-xs text-gray-900 dark:text-white appearance-none"
+                                    className="w-full min-h-tap bg-surface border border-line-strong rounded-control ps-3 pe-8 py-2 text-meta text-fg appearance-none"
                                 >
                                     <option value="">{t('songForm.field.capo.none')}</option>
                                     {Array.from({ length: 12 }, (_, i) => i + 1).map(i => (
@@ -592,17 +619,17 @@ const SongForm = ({ mode, initialData: liveInitialData, songId, versionId, sourc
                                         </option>
                                     ))}
                                 </select>
-                                <span className="material-symbols-outlined absolute right-1 top-2 text-gray-500 pointer-events-none text-base">arrow_drop_down</span>
+                                <span className="material-symbols-outlined absolute end-2 top-1/2 -translate-y-1/2 text-fg-muted pointer-events-none text-base">arrow_drop_down</span>
                             </div>
                         </div>
 
                         {/* Tuning */}
                         <div className="space-y-1.5">
-                            <label className="block text-xs font-medium text-gray-400">{t('songForm.field.tuning')}</label>
+                            <label className="block text-caption font-medium text-fg-muted">{t('songForm.field.tuning')}</label>
                             <div className="relative">
                                 <select
                                     {...register('tuning')}
-                                    className="w-full bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg px-2 py-2 text-xs text-gray-900 dark:text-white appearance-none"
+                                    className="w-full min-h-tap bg-surface border border-line-strong rounded-control ps-3 pe-8 py-2 text-meta text-fg appearance-none"
                                 >
                                     <option value="">{t('songForm.field.tuning.select')}</option>
                                     <option value="Standard">{t('songForm.field.tuning.standard')}</option>
@@ -611,7 +638,7 @@ const SongForm = ({ mode, initialData: liveInitialData, songId, versionId, sourc
                                     <option value="DADGAD">DADGAD</option>
                                     <option value="Open D">Open D</option>
                                 </select>
-                                <span className="material-symbols-outlined absolute right-1 top-2 text-gray-500 pointer-events-none text-base">arrow_drop_down</span>
+                                <span className="material-symbols-outlined absolute end-2 top-1/2 -translate-y-1/2 text-fg-muted pointer-events-none text-base">arrow_drop_down</span>
                             </div>
                         </div>
                     </div>
@@ -635,9 +662,9 @@ const SongForm = ({ mode, initialData: liveInitialData, songId, versionId, sourc
 
                 {/* 5. Categories / Tags (collapsible, simplified) */}
                 <details className="group" open={isTagsExpanded} onToggle={(e) => setIsTagsExpanded(e.currentTarget.open)}>
-                    <summary className="w-full flex items-center justify-between py-3 cursor-pointer select-none list-none">
-                        <h3 className="text-gray-400 font-semibold text-sm">{t('songForm.section.categoriesTags')}</h3>
-                        <span className="material-symbols-outlined text-gray-400 transition-transform group-open:rotate-180">expand_more</span>
+                    <summary className="w-full min-h-tap flex items-center justify-between py-3 cursor-pointer select-none list-none">
+                        <h3 className="text-fg-muted font-semibold text-meta">{t('songForm.section.categoriesTags')}</h3>
+                        <span className="material-symbols-outlined text-fg-muted transition-transform group-open:rotate-180">expand_more</span>
                     </summary>
                     <div className="pb-3">
                         <CategorySelector
@@ -649,42 +676,42 @@ const SongForm = ({ mode, initialData: liveInitialData, songId, versionId, sourc
 
                 {/* 6. Links (collapsible) */}
                 <details className="group">
-                    <summary className="w-full flex items-center justify-between py-3 cursor-pointer select-none list-none">
-                        <h3 className="text-gray-400 font-semibold text-sm">{t('songForm.section.links')}</h3>
-                        <span className="material-symbols-outlined text-gray-400 transition-transform group-open:rotate-180">expand_more</span>
+                    <summary className="w-full min-h-tap flex items-center justify-between py-3 cursor-pointer select-none list-none">
+                        <h3 className="text-fg-muted font-semibold text-meta">{t('songForm.section.links')}</h3>
+                        <span className="material-symbols-outlined text-fg-muted transition-transform group-open:rotate-180">expand_more</span>
                     </summary>
                     <div className="space-y-3 pb-2">
                         <div className="relative w-full">
-                            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                <span className="material-symbols-outlined text-[#ff0000] text-xl">play_circle</span>
+                            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-fg-muted">
+                                <span className="material-symbols-outlined text-xl">play_circle</span>
                             </div>
                             <input
                                 {...register('youtubeLink')}
-                                className="w-full pl-11 bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg h-12 text-gray-900 dark:text-white transition-all placeholder:text-gray-400 dark:placeholder:text-[#a19eb7]/50 text-sm"
+                                className="w-full pl-11 bg-surface border border-line-strong rounded-control h-12 text-fg placeholder:text-fg-subtle text-body"
                                 placeholder={t('songForm.field.youtube.placeholder')}
                             />
                         </div>
 
                         <div className="relative w-full">
-                            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                <span className="material-symbols-outlined text-[#1db954] text-xl">radio</span>
+                            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-fg-muted">
+                                <span className="material-symbols-outlined text-xl">radio</span>
                             </div>
                             <input
                                 {...register('spotifyLink')}
-                                className="w-full pl-11 bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg h-12 text-gray-900 dark:text-white transition-all placeholder:text-gray-400 dark:placeholder:text-[#a19eb7]/50 text-sm"
+                                className="w-full pl-11 bg-surface border border-line-strong rounded-control h-12 text-fg placeholder:text-fg-subtle text-body"
                                 placeholder={t('songForm.field.spotify.placeholder')}
                             />
                         </div>
 
                         <div className="relative w-full">
-                            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
-                                <svg role="img" viewBox="0 0 24 24" className="w-6 h-6 fill-[#ff5500]" xmlns="http://www.w3.org/2000/svg">
+                            <div className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none text-fg-muted">
+                                <svg role="img" viewBox="0 0 24 24" className="w-6 h-6 fill-current" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M23.999 14.165c-.052 1.796-1.612 3.169-3.4 3.169h-8.18a.68.68 0 0 1-.675-.683V7.862a.747.747 0 0 1 .452-.724s.75-.513 2.333-.513a5.364 5.364 0 0 1 2.763.755 5.433 5.433 0 0 1 2.57 3.54c.282-.08.574-.121.868-.12.884 0 1.73.358 2.347.992s.948 1.49.922 2.373ZM10.721 8.421c.247 2.98.427 5.697 0 8.672a.264.264 0 0 1-.53 0c-.395-2.946-.22-5.718 0-8.672a.264.264 0 0 1 .53 0ZM9.072 9.448c.285 2.659.37 4.986-.006 7.655a.277.277 0 0 1-.55 0c-.331-2.63-.256-5.02 0-7.655a.277.277 0 0 1 .556 0Zm-1.663-.257c.27 2.726.39 5.171 0 7.904a.266.266 0 0 1-.532 0c-.38-2.69-.257-5.21 0-7.904a.266.266 0 0 1 .532 0Zm-1.647.77a26.108 26.108 0 0 1-.008 7.147.272.272 0 0 1-.542 0 27.955 27.955 0 0 1 0-7.147.275.275 0 0 1 .55 0Zm-1.67 1.769c.421 1.865.228 3.5-.029 5.388a.257.257 0 0 1-.514 0c-.21-1.858-.398-3.549 0-5.389a.272.272 0 0 1 .543 0Zm-1.655-.273c.388 1.897.26 3.508-.01 5.412-.026.28-.514.283-.54 0-.244-1.878-.347-3.54-.01-5.412a.283.283 0 0 1 .56 0Zm-1.668.911c.4 1.268.257 2.292-.026 3.572a.257.257 0 0 1-.514 0c-.241-1.262-.354-2.312-.023-3.572a.283.283 0 0 1 .563 0Z" />
                                 </svg>
                             </div>
                             <input
                                 {...register('soundcloudLink')}
-                                className="w-full pl-11 bg-gray-50 dark:bg-[#1d1c26] border border-gray-300 dark:border-[#3f3d52] rounded-lg h-12 text-gray-900 dark:text-white transition-all placeholder:text-gray-400 dark:placeholder:text-[#a19eb7]/50 text-sm"
+                                className="w-full pl-11 bg-surface border border-line-strong rounded-control h-12 text-fg placeholder:text-fg-subtle text-body"
                                 placeholder={t('songForm.field.soundcloud.placeholder')}
                             />
                         </div>
@@ -693,57 +720,59 @@ const SongForm = ({ mode, initialData: liveInitialData, songId, versionId, sourc
 
                 {/* 7. Melody Notation — hidden until FEATURES.melodyNotation is on (Story 6.1.5, #389) */}
                 {FEATURES.melodyNotation && (
-                    <details className="group opacity-60">
-                        <summary className="w-full flex items-center justify-between py-3 cursor-pointer select-none list-none">
+                    <details className="group">
+                        <summary className="w-full min-h-tap flex items-center justify-between py-3 cursor-pointer select-none list-none">
                             <div className="flex items-center gap-2">
-                                <h3 className="text-gray-400 font-semibold text-sm">{t('songForm.field.melody')}</h3>
+                                <h3 className="text-fg-muted font-semibold text-meta">{t('songForm.field.melody')}</h3>
                             </div>
-                            <span className="material-symbols-outlined text-gray-400 transition-transform group-open:rotate-180">expand_more</span>
+                            <span className="material-symbols-outlined text-fg-muted transition-transform group-open:rotate-180">expand_more</span>
                         </summary>
                         <div className="py-3">
-                            <p className="text-gray-500 text-xs">{t('songForm.field.melody.hint')}</p>
+                            <p className="text-fg-subtle text-caption">{t('songForm.field.melody.hint')}</p>
                         </div>
                     </details>
                 )}
             </div>
 
             {serverError && (
-                <div className="p-3 bg-red-100 dark:bg-red-900/30 border border-red-300 dark:border-red-800 rounded-lg text-red-700 dark:text-red-200 text-sm">
+                <div className="p-3 bg-surface border border-danger rounded-control text-danger text-meta">
                     {t('common.error')}: {serverError}
                 </div>
             )}
 
             <div className="flex flex-col sm:flex-row gap-3 mt-8">
-                <button
+                <Button
                     type="submit"
+                    variant="outline"
                     onClick={() => setValue('isPublic', false)}
                     disabled={mutation.isPending || authLoading}
-                    className="flex-1 bg-transparent border-2 border-gray-300 dark:border-[#3f3d52] text-gray-500 dark:text-[#a19eb7] hover:text-gray-900 dark:hover:text-white hover:border-gray-400 dark:hover:border-white/20 font-bold py-3 rounded-xl active:scale-[0.98] transition-all disabled:opacity-50 flex justify-center items-center gap-2"
+                    className="flex-1 font-semibold"
                 >
                     {mutation.isPending && watch('isPublic') === false ? (
                         <>
-                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            <div className="size-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
                             {t('songForm.submitting')}
                         </>
                     ) : (
                         t('songForm.saveAsDraft')
                     )}
-                </button>
-                <button
+                </Button>
+                <Button
                     type="submit"
+                    variant="primary"
                     onClick={() => setValue('isPublic', true)}
                     disabled={mutation.isPending || authLoading}
-                    className="flex-1 bg-red-600 hover:bg-red-500 text-white font-bold py-3 rounded-xl shadow-lg shadow-red-500/20 active:scale-[0.98] transition-transform disabled:opacity-50 disabled:cursor-not-allowed flex justify-center items-center gap-2"
+                    className="flex-1 font-semibold"
                 >
                     {mutation.isPending && watch('isPublic') === true ? (
                         <>
-                            <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+                            <div className="size-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
                             {t('songForm.publishing')}
                         </>
                     ) : (
                         t('songForm.publishSong')
                     )}
-                </button>
+                </Button>
             </div>
         </form>
         </>

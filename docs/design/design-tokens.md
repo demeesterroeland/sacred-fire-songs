@@ -1,11 +1,13 @@
 # Design Tokens & Component Sheet (UX v2, "sober" style)
 
-**Version:** 1.11 | **Date:** Nov 13, 2026 | **Story:** 6.1.1 / G1.1 (#385) | **Epic:** 6.1 (#375)
+**Version:** 1.13 | **Date:** Nov 23, 2026 | **Story:** 6.1.1 / G1.1 (#385) | **Epic:** 6.1 (#375)
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.13 | Nov 23, 2026 | §5: form rule — one accent button per form (the publishing action), the secondary action is `outline`; brand icons (YouTube, Spotify, SoundCloud) are neutral `text-fg-muted` (Story 6.1.35 group 7, #485). |
+| 1.12 | Nov 15, 2026 | §6: the palette ratchet scans `app/`, `components/` and `lib/` and its baseline must equal the current count (496 after #605), so a raise fails CI. |
 | 1.11 | Nov 13, 2026 | Synced UX v2 restyles from `develop`: header, user menu, notifications, account settings and playlists use semantic tokens; unused ThemeToggle, popover and Radix Popover dependency removed. |
 | 1.10 | Nov 13, 2026 | Sync: merge of `origin/develop` into `feat/ux-v3`. develop's row 1.5 (TagPill / AuthorPill, one neutral tag style) clashed with the `feat/ux-v3` number and is kept as 1.9. |
 | 1.9 | Nov 12, 2026 | (develop 1.5) Component sheet: **TagPill / AuthorPill** — one neutral tag style for every category (Story 6.1.35, #485); the per-category colour map is gone. |
@@ -131,10 +133,12 @@ Primitives in `components/ui/` (React) and the visual sheet `docs/design/screens
 | **Toolbar** | `components/ui/toolbar.tsx` | `role="toolbar"` with a required translated `aria-label`, `bg-surface rounded-panel`, items are 44 px `ToolbarButton`s with text or icon + `aria-label`; toggles use `aria-pressed` **and** a visible cue (raised background + underline). Buttons stay in the tab order. Used for `Chords · A− · A+`. |
 | **Segmented** | `components/ui/segmented.tsx` | `role="radiogroup"` with a required translated `aria-label`; `bg-surface rounded-panel` strip of 44 px `role="radio"` buttons with `aria-checked` and a roving `tabindex` (one tab stop; Arrow Left/Right/Up/Down move and select with wrap-around, Home/End jump; text only, `text-meta`, no `title`); checked = raised `bg-bg` with a `ring-1 ring-line` hairline **plus** underline, never colour alone; scrolls sideways instead of widening the page and scrolls the checked segment into view (centred, via its own `scrollLeft`); a label is cut at 10 rem with an ellipsis. Used for the song page's version switch (`SongVersionSwitch`). |
 
+**Forms (Story 6.1.35, #485).** A form has one primary `Button` (the action that publishes or saves for everyone); the other submit is `variant="outline"`. Text fields are `bg-surface border-line-strong rounded-control text-fg` with `placeholder:text-fg-subtle`, selects and inputs are at least 44 px. Icons that stand for a third-party service (YouTube, Spotify, SoundCloud) carry no brand colour: `text-fg-muted`. Emoji in category data are content, not styling.
+
 **Variant / language slot (Story 6.1.11, `screen21_song_page.html`).** One slot under the title, meta and key lines and above the reader toolbar holds up to three `Segmented` groups: *version* (`Original · Simplified · Live`, or `Songbook A · Songbook B · Dutch` for catalog songs: songbook short name, language name for a translation; original, variants, translations), *reader* (`Original · Translation · Both`, for a song with a translation in `song_translations`; Story 6.2.14, #517) and *language* (`Dutch · English`: the languages the song has, named in the app language; Story 6.2.13, #516; only next to *Translation* / *Both* and with two or more languages, so one "Original" is on screen). The slot exists only when there is something to choose: a song with one version and no translations renders nothing and reserves no space, so it never shifts the layout and never shows a dead control. The groups sit in one row that wraps (`flex-wrap`, `gap-x-3 gap-y-2`) so they fit a 375 px phone, each strip scrolling inside itself; an empty row is hidden. *Translation* / *Both* show the chosen language (first by default) under the version being read (the version stays selected); choosing a version returns to *Original*. The slot does not stick during auto-scroll (the reader toolbar does), so the two never collide.
 
 ## 6. Migration rule for restyle stories
 
-Each restyle story converts the files it touches from palette classes to the utilities in §4. Two ratchets only go down: `testing/unit/tests/design/paletteRatchet.test.ts` (palette classes in `app/` and `components/`, baseline 3081 at #385) and `primitives.test.ts` (arbitrary text sizes below 12 px, baseline 70). Lower a baseline when you remove usages; never raise it.
+Each restyle story converts the files it touches from palette classes to the utilities in §4. Two ratchets only go down: `testing/unit/tests/design/paletteRatchet.test.ts` (palette classes in `app/`, `components/` and `lib/`; baseline 3081 at #385, 496 since #605; the baseline must equal the current count, so it cannot hide a raise) and `primitives.test.ts` (arbitrary text sizes below 12 px, baseline 70). Lower a baseline when you remove usages (the palette test fails until you do); never raise it.
 
 `cn()` (`lib/utils.ts`) is configured so tailwind-merge treats `text-caption … text-display` as font sizes and `rounded-control …`, `shadow-sheet` as their groups; without it a token size and a token colour would cancel each other.

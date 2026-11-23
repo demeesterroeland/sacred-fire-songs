@@ -24,6 +24,7 @@ import {
 } from '@/components/ui/dialog';
 import { actionErrorMessage } from '@/lib/errors/actionError';
 import { SignInLink } from '@/components/auth/SignInLink';
+import { currentReturnPath, signInHref } from '@/lib/auth/guestGate';
 import { Button } from '@/components/ui/button';
 
 interface Props {
@@ -247,7 +248,7 @@ export function PlaylistDetailHeader({
                             {t('playlists.export.login.cancel')}
                         </Button>
                         <SignInLink
-                            href={`/auth/login?next=${encodeURIComponent(typeof window !== 'undefined' ? window.location.pathname : `/library/playlists/${playlistId}`)}`}
+                            href={signInHref(currentReturnPath(`/library/playlists/${playlistId}`))}
                             onClick={() => setShowLoginModal(false)}
                         >
                             {t('playlists.export.login.submit')}

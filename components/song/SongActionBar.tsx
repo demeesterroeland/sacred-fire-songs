@@ -1,7 +1,7 @@
 'use client';
 
 import type { ReactNode } from 'react';
-import { Headphones, Heart, ListPlus, Mic } from 'lucide-react';
+import { Heart, ListPlus, Mic } from 'lucide-react';
 import { Toolbar, ToolbarButton } from '@/components/ui/toolbar';
 import { useLocale } from '@/context/LocaleContext';
 import { ACTION_BAR_BOTTOM } from '@/lib/song/actionBar';
@@ -15,10 +15,8 @@ interface SongActionBarProps {
   onGuestPlaylist: () => void;
   /** Members: the existing playlist picker, rendered as the middle action. */
   playlistSlot?: ReactNode;
-  /** Whether the selected song version has reference media. */
-  hasReferenceMedia: boolean;
-  /** Number of takes on this song; shown next to Practice when above 0. */
-  takeCount?: number;
+  /** Story 6.1.40 (#586): media or takes to open; shows one dot on Practice. The drawer tabs say where. */
+  practiceAvailable?: boolean;
   /** Slid away while scrolling down (only when the auto-hide preference is on). */
   visible?: boolean;
   className?: string;
@@ -38,8 +36,7 @@ export function SongActionBar({
   onToggleFavorite,
   onGuestPlaylist,
   playlistSlot,
-  hasReferenceMedia,
-  takeCount = 0,
+  practiceAvailable = false,
   visible = true,
   className,
 }: SongActionBarProps) {
@@ -61,24 +58,14 @@ export function SongActionBar({
     >
       <ToolbarButton
         data-testid="song-action-practice"
-        aria-label={hasReferenceMedia
-          ? `${t('practice.title')} ${t('practice.tab.listen')}${takeCount > 0 ? ` ${takeCount}` : ''}`
-          : undefined}
         onClick={onPractice}
+        aria-label={practiceAvailable ? t('practice.available') : undefined}
         className={cn(ACTION_BUTTON_CLASS, 'font-semibold text-accent hover:text-accent')}
       >
         <Mic className="size-5 shrink-0" aria-hidden />
         <span className="truncate">{t('practice.title')}</span>
-        {(hasReferenceMedia || takeCount > 0) && (
-          <span className="inline-flex items-center gap-1 rounded-pill bg-chip px-1.5 text-caption font-medium text-on-chip">
-            {hasReferenceMedia && (
-              <>
-                <Headphones className="size-3.5 shrink-0" data-testid="practice-media-indicator" aria-hidden />
-                <span className="sr-only">{t('practice.tab.listen')}</span>
-              </>
-            )}
-            {takeCount > 0 && <span>{takeCount}</span>}
-          </span>
+        {practiceAvailable && (
+          <span data-testid="song-action-practice-dot" aria-hidden className="size-2 shrink-0 rounded-full bg-current" />
         )}
       </ToolbarButton>
 

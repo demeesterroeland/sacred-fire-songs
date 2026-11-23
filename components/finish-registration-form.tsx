@@ -82,28 +82,27 @@ function FinishRegistrationFormContent({
         .ember {
           position: absolute;
           bottom: -10px;
-          background: #f45d1a;
+          background: var(--accent);
           border-radius: 50%;
-          box-shadow: 0 0 10px #d9481e, 0 0 20px #f45d1a;
           pointer-events: none;
           animation: ember-rise linear forwards;
         }
       `}</style>
 
-      <div className={cn("relative z-10 w-full max-w-[420px] bg-white dark:bg-[#1c222d] md:border md:border-gray-200 dark:md:border-[#2d3545] md:rounded-3xl p-6 md:p-8 md:shadow-2xl transition-all duration-300", className)} {...props}>
+      <div className={cn("relative z-10 w-full max-w-[420px] bg-bg md:border md:border-line md:bg-surface md:rounded-panel p-6 md:p-8", className)} {...props}>
         {/* Header */}
         <div className="flex flex-row md:flex-col items-center md:items-center gap-4 md:gap-0 mb-8 md:mb-10 mt-4 md:mt-0">
-          <div className="w-12 h-12 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-[#b91c1c] to-[#ea580c] flex items-center justify-center shadow-[0_0_20px_rgba(185,28,28,0.3)] ring-1 ring-gray-900/10 dark:ring-white/10 md:mb-6 flex-shrink-0">
-            <Flame className="text-white w-6 h-6 md:w-10 md:h-10 fill-current" />
+          <div className="size-12 md:size-20 rounded-pill bg-accent-soft text-accent flex items-center justify-center md:mb-6 shrink-0">
+            <Flame className="size-6 md:size-10 fill-current" />
           </div>
           <div className="text-left md:text-center">
-            <h1 className="text-gray-900 dark:text-white text-xl md:text-3xl font-bold md:mb-2 leading-tight">{t('auth.heading')}</h1>
+            <h1 className="text-fg text-title font-bold md:mb-2">{t('auth.heading')}</h1>
           </div>
         </div>
 
         {/* Finish Registration Form */}
         <form onSubmit={handleFinishRegistration} className="space-y-6 md:space-y-8">
-          <div className="bg-emerald-50 dark:bg-[#141b24] border border-emerald-500/30 p-4 rounded-xl text-emerald-400 text-[15px] font-medium text-center mb-6 shadow-inner">
+          <div className="bg-surface-2 border border-line-strong p-4 rounded-control text-fg text-body font-medium text-center mb-6">
             {t('auth.finishRegistration.emailVerified')}
           </div>
 
@@ -116,8 +115,8 @@ function FinishRegistrationFormContent({
           <div className="space-y-1">
             <Label className="text-meta font-semibold text-fg-muted ml-1">{t('auth.finishRegistration.nameLabel')}</Label>
             <div className="relative group">
-              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-[#5a657a] pointer-events-none">
-                <User className="w-5 h-5" />
+              <div className="absolute left-4 top-1/2 -translate-y-1/2 text-fg-muted pointer-events-none">
+                <User className="size-5" />
               </div>
               <Input
                 id="full-name"
@@ -126,25 +125,25 @@ function FinishRegistrationFormContent({
                 required
                 value={fullName}
                 onChange={(e) => setFullName(e.target.value)}
-                className="w-full bg-transparent border-gray-200 dark:border-[#2d3545] rounded-xl py-3.5 md:py-4 pl-12 pr-4 text-gray-900 dark:text-white placeholder-[#5a657a] transition-all text-[14px] md:text-[15px] h-auto"
+                className="w-full min-h-tap bg-transparent border-line-strong rounded-control py-3.5 md:py-4 pl-12 pr-4 text-fg placeholder:text-fg-muted text-body h-auto"
               />
             </div>
           </div>
 
-          {error && <p className="text-sm text-red-500 text-center bg-red-500/10 border border-red-500/20 p-2 rounded">{error}</p>}
+          {error && <p role="alert" className="text-meta text-danger text-center border border-danger p-2 rounded-control">{error}</p>}
 
           <Button
             type="submit"
-            className="w-full h-auto bg-gradient-to-r from-[#d9481e] to-[#f45d1a] hover:brightness-110 active:scale-[0.98] text-white font-bold py-3.5 md:py-4 rounded-xl flex items-center justify-center gap-2 transition-all shadow-[0_4px_15px_rgba(217,72,30,0.4)] disabled:opacity-50"
+            className="w-full"
             disabled={isLoading}
           >
             {isLoading ? t('auth.finishRegistration.submitting') : t('auth.finishRegistration.submit')}
-            <Compass className="w-5 h-5" />
+            <Compass />
           </Button>
         </form>
 
         {/* Footer */}
-        <div className="mt-8 text-center md:text-left border-t border-gray-200 dark:border-[#2d3545] pt-6">
+        <div className="mt-8 text-center md:text-left border-t border-line pt-6">
           <p className="text-fg-muted text-caption leading-relaxed italic">
             &quot;{t('app.tagline')}&quot;
           </p>
