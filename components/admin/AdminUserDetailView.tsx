@@ -53,10 +53,10 @@ export default function AdminUserDetailView({ user }: AdminUserDetailViewProps) 
   return (
     <div className="space-y-8">
       {/* User Header Profile Card */}
-      <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white/50 dark:bg-gray-900/30 p-5 md:p-8">
+      <div className="rounded-panel border border-line bg-surface p-5 md:p-8">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="flex items-center gap-5">
-            <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-xl md:text-2xl font-bold text-white shadow-lg relative overflow-hidden shrink-0">
+            <div className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-surface-2 flex items-center justify-center text-xl md:text-2xl font-bold text-fg relative overflow-hidden shrink-0">
               {user.avatar_url ? (
                 <Image
                   src={user.avatar_url}
@@ -72,13 +72,13 @@ export default function AdminUserDetailView({ user }: AdminUserDetailViewProps) 
 
             <div className="space-y-1">
               <div className="flex items-center gap-3 flex-wrap">
-                <h1 className="text-xl md:text-2xl font-black text-gray-900 dark:text-white tracking-tight">
+                <h1 className="text-title font-bold text-fg">
                   {displayName}
                 </h1>
                 <RoleBadge role={user.role} size="md" />
               </div>
 
-              <div className="flex items-center gap-2 text-xs md:text-sm text-gray-500 dark:text-gray-400">
+              <div className="flex items-center gap-2 text-meta text-fg-muted">
                 <Mail className="w-3.5 h-3.5 shrink-0" />
                 <span>{user.email}</span>
               </div>
@@ -91,20 +91,20 @@ export default function AdminUserDetailView({ user }: AdminUserDetailViewProps) 
           </div>
 
           {/* Dates Metadata */}
-          <div className="flex flex-row flex-wrap md:flex-col justify-start md:items-end gap-4 md:gap-1 text-xs text-gray-500 dark:text-gray-400 border-t md:border-t-0 pt-4 md:pt-0 border-gray-100 dark:border-gray-800">
+          <div className="flex flex-row flex-wrap md:flex-col justify-start md:items-end gap-4 md:gap-1 text-meta text-fg-muted border-t md:border-t-0 pt-4 md:pt-0 border-line">
             <div className="flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5 text-gray-400" />
+              <Calendar className="w-3.5 h-3.5 text-fg-subtle" />
               <span>{t('admin.detail.joined')} <strong>{formatDate(user.created_at)}</strong></span>
             </div>
             <div className="flex items-center gap-1.5">
-              <Clock className="w-3.5 h-3.5 text-gray-400" />
+              <Clock className="w-3.5 h-3.5 text-fg-subtle" />
               <span>{t('admin.detail.lastActive')} <strong>{formatDate(user.last_seen_at)}</strong></span>
             </div>
             <div className="flex items-center gap-1.5">
               <ActivityStatusBadge status={getActivityStatus(user.last_seen_at)} />
             </div>
             <div className="flex items-center gap-1.5">
-              <Guitar className="w-3.5 h-3.5 text-gray-400" />
+              <Guitar className="w-3.5 h-3.5 text-fg-subtle" />
               <span>
                 {t('admin.detail.musician')} <strong>{isMusician ? t('admin.detail.yes') : t('admin.detail.no')}</strong>
               </span>
@@ -139,10 +139,10 @@ export default function AdminUserDetailView({ user }: AdminUserDetailViewProps) 
               role="tab"
               aria-selected={activeTab === key}
               onClick={() => setActiveTab(key)}
-              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-bold transition-all whitespace-nowrap shrink-0 ${
+              className={`flex min-h-tap items-center gap-1.5 px-4 py-1.5 rounded-pill text-meta font-bold transition-colors whitespace-nowrap shrink-0 ${
                 activeTab === key
-                  ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-950'
-                  : 'bg-gray-200/80 dark:bg-gray-800/80 text-gray-500 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white border border-gray-300/50 dark:border-gray-700/50'
+                  ? 'bg-chip-active text-on-chip-active'
+                  : 'bg-chip text-on-chip hover:bg-line border border-line'
               }`}
             >
               <Icon className="w-3.5 h-3.5" />
@@ -151,34 +151,34 @@ export default function AdminUserDetailView({ user }: AdminUserDetailViewProps) 
           ))}
         </div>
 
-        <div className="rounded-2xl border border-gray-200 dark:border-gray-800 bg-white/50 dark:bg-gray-900/30 overflow-hidden">
+        <div className="rounded-panel border border-line bg-surface overflow-hidden">
         {/* Tab Panel: Songs */}
         {activeTab === 'songs' && (
           <div className="p-6">
             {songs.length === 0 ? (
-              <div className="py-12 text-center text-gray-400">
+              <div className="py-12 text-center text-fg-subtle">
                 <Music className="w-10 h-10 mx-auto mb-2 opacity-30" />
-                <p className="text-sm font-medium">{t('admin.detail.noSongs')}</p>
+                <p className="text-meta font-medium">{t('admin.detail.noSongs')}</p>
               </div>
             ) : (
-              <div className="divide-y divide-gray-100 dark:divide-gray-800">
+              <div className="divide-y divide-line">
                 {songs.map((song) => (
                   <div
                     key={song.id}
-                    className="py-3.5 flex items-center justify-between gap-4 hover:bg-gray-50/50 dark:hover:bg-gray-800/30 px-3 rounded-xl transition-colors"
+                    className="py-3.5 flex items-center justify-between gap-4 hover:bg-surface-2 px-3 rounded-control transition-colors"
                   >
                     <div>
-                      <div className="font-bold text-sm text-gray-900 dark:text-white">
+                      <div className="font-bold text-meta text-fg">
                         {song.title}
                       </div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                      <div className="text-caption text-fg-muted">
                         {song.artist || t('admin.detail.unknownArtist')} · {t('admin.detail.created', { date: formatDate(song.created_at) })}
                       </div>
                     </div>
 
                     <Link
                       href={`/songs/${song.id}`}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-600 dark:text-gray-300 hover:text-red-600 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 transition-colors"
+                      className="inline-flex min-h-tap items-center gap-1.5 px-3 py-1.5 rounded-control text-caption font-semibold text-fg-muted hover:text-fg hover:bg-surface-2 transition-colors"
                       target="_blank"
                     >
                       <span>{t('admin.detail.openSong')}</span>
@@ -195,29 +195,29 @@ export default function AdminUserDetailView({ user }: AdminUserDetailViewProps) 
         {activeTab === 'versions' && (
           <div className="p-6">
             {versions.length === 0 ? (
-              <div className="py-12 text-center text-gray-400">
+              <div className="py-12 text-center text-fg-subtle">
                 <FileText className="w-10 h-10 mx-auto mb-2 opacity-30" />
-                <p className="text-sm font-medium">{t('admin.detail.noVersions')}</p>
+                <p className="text-meta font-medium">{t('admin.detail.noVersions')}</p>
               </div>
             ) : (
-              <div className="divide-y divide-gray-100 dark:divide-gray-800">
+              <div className="divide-y divide-line">
                 {versions.map((version) => (
                   <div
                     key={version.id}
-                    className="py-3.5 flex items-center justify-between gap-4 hover:bg-gray-50/50 dark:hover:bg-gray-800/30 px-3 rounded-xl transition-colors"
+                    className="py-3.5 flex items-center justify-between gap-4 hover:bg-surface-2 px-3 rounded-control transition-colors"
                   >
                     <div>
-                      <div className="font-bold text-sm text-gray-900 dark:text-white">
+                      <div className="font-bold text-meta text-fg">
                         {version.name || t('admin.detail.defaultArrangement')}
                       </div>
-                      <div className="text-xs text-gray-500 dark:text-gray-400">
+                      <div className="text-caption text-fg-muted">
                         {t('admin.detail.songLabel')} <span className="font-semibold">{version.song_title}</span> · {t('admin.detail.contributed', { date: formatDate(version.created_at) })}
                       </div>
                     </div>
 
                     <Link
                       href={`/songs/${version.song_id}`}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-600 dark:text-gray-300 hover:text-amber-600 dark:hover:text-amber-400 hover:bg-amber-50 dark:hover:bg-amber-950/40 transition-colors"
+                      className="inline-flex min-h-tap items-center gap-1.5 px-3 py-1.5 rounded-control text-caption font-semibold text-fg-muted hover:text-fg hover:bg-surface-2 transition-colors"
                       target="_blank"
                     >
                       <span>{t('admin.detail.openSong')}</span>
@@ -234,37 +234,37 @@ export default function AdminUserDetailView({ user }: AdminUserDetailViewProps) 
         {activeTab === 'playlists' && (
           <div className="p-6">
             {playlists.length === 0 ? (
-              <div className="py-12 text-center text-gray-400">
+              <div className="py-12 text-center text-fg-subtle">
                 <ListMusic className="w-10 h-10 mx-auto mb-2 opacity-30" />
-                <p className="text-sm font-medium">{t('admin.detail.noPlaylists')}</p>
+                <p className="text-meta font-medium">{t('admin.detail.noPlaylists')}</p>
               </div>
             ) : (
-              <div className="divide-y divide-gray-100 dark:divide-gray-800">
+              <div className="divide-y divide-line">
                 {playlists.map((playlist) => (
                   <div
                     key={playlist.id}
-                    className="py-3.5 flex items-center justify-between gap-4 hover:bg-gray-50/50 dark:hover:bg-gray-800/30 px-3 rounded-xl transition-colors"
+                    className="py-3.5 flex items-center justify-between gap-4 hover:bg-surface-2 px-3 rounded-control transition-colors"
                   >
                     <div className="flex items-center gap-3">
-                      <div className="w-9 h-9 rounded-xl bg-blue-100 dark:bg-blue-950/60 border border-blue-200 dark:border-blue-900 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
+                      <div className="size-9 rounded-control bg-surface-2 border border-line flex items-center justify-center text-fg-muted shrink-0">
                         <ListMusic className="w-4 h-4" />
                       </div>
                       <div>
                         <div className="flex items-center gap-2">
-                          <span className="font-bold text-sm text-gray-900 dark:text-white">
+                          <span className="font-bold text-meta text-fg">
                             {playlist.title}
                           </span>
                           {playlist.is_public ? (
-                            <span className="inline-flex items-center gap-1 text-caption font-semibold text-emerald-600 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/50 px-2 py-0.5 rounded-full border border-emerald-200 dark:border-emerald-800">
+                            <span className="inline-flex items-center gap-1 text-caption font-semibold text-fg bg-chip px-2 py-0.5 rounded-pill border border-line">
                               <Globe className="w-2.5 h-2.5" /> {t('admin.detail.public')}
                             </span>
                           ) : (
-                            <span className="inline-flex items-center gap-1 text-caption font-semibold text-fg-muted bg-surface-2 px-2 py-0.5 rounded-full">
+                            <span className="inline-flex items-center gap-1 text-caption font-semibold text-fg-muted bg-surface-2 px-2 py-0.5 rounded-pill">
                               <Lock className="w-2.5 h-2.5" /> {t('admin.detail.private')}
                             </span>
                           )}
                         </div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">
+                        <div className="text-caption text-fg-muted">
                           {t('admin.detail.created', { date: formatDate(playlist.created_at) })}
                         </div>
                       </div>
@@ -272,7 +272,7 @@ export default function AdminUserDetailView({ user }: AdminUserDetailViewProps) 
 
                     <Link
                       href={`/library/playlists/${playlist.id}`}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-gray-600 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-950/40 transition-colors"
+                      className="inline-flex min-h-tap items-center gap-1.5 px-3 py-1.5 rounded-control text-caption font-semibold text-fg-muted hover:text-fg hover:bg-surface-2 transition-colors"
                       target="_blank"
                     >
                       <span>{t('admin.detail.openPlaylist')}</span>
