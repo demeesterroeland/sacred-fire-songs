@@ -2,13 +2,15 @@
 // semantic tokens. The baseline only goes DOWN: when a restyle story removes
 // palette classes, lower PALETTE_BASELINE to the new total. Never raise it.
 // Story 6.1.35 (#485): the audit also scans lib/ (category colours lived there).
+// #605: the baseline must equal the real count, so no headroom can hide a raise
+// (the UX v3 promotion once set it back from 496 to 980 without failing CI).
 import fs from 'node:fs';
 import os from 'node:os';
 import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { countPaletteClasses, PALETTE_DIRS, paletteUsage } from '@/lib/design/paletteAudit';
 
-const PALETTE_BASELINE = 980;
+const PALETTE_BASELINE = 496;
 
 describe('palette ratchet', () => {
   it('detects palette classes and hex colours, not semantic tokens', () => {
@@ -31,5 +33,13 @@ describe('palette ratchet', () => {
     const total = Object.values(usage).reduce((a, b) => a + b, 0);
     const top = Object.entries(usage).sort((a, b) => b[1] - a[1]).slice(0, 10);
     expect(total, `top files: ${JSON.stringify(top)}`).toBeLessThanOrEqual(PALETTE_BASELINE);
+  });
+
+  it('keeps no headroom: the baseline equals the current count', () => {
+    const total = Object.values(paletteUsage()).reduce((a, b) => a + b, 0);
+    expect(
+      PALETTE_BASELINE,
+      `palette classes went down to ${total}: lower PALETTE_BASELINE to ${total} (never raise it)`
+    ).toBe(total);
   });
 });

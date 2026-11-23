@@ -158,4 +158,6 @@
 | **November 13, 2026** | **Fix/UI (#485 group 5)**: sober tokens in account settings (Profile, Security, Preferences, Privacy), shared Button primitives, 44 px password visibility toggles, 8-locale i18n, unit + BDD + E2E tests, docs. (estimate) | ~1.0 Hours | Completed |
 | **November 13, 2026** | **Fix/UX (#485 group 6)**: sober tokens in the playlist menu, Add Songs sheet and playlist detail header, palette ratchet, BDD and light/dark contrast E2E tests, docs. (estimate) | ~1.0 Hours | Completed |
 | **November 13, 2026** | **Feature/UX (Epic 6.1, #586)**: Practice availability dot and drawer tab counts (mockups, issue rewrite, helper, 8-locale i18n, unit/BDD tests, rebase on UX v3 replacing the #583 cue, docs). (estimate) | ~1.5 Hours | Completed |
-| **Total** | **Development + AI Collaboration** | **~274.75 Hours** | |
+| **November 15, 2026** | **Chore/CI (#608)**: root cause of the manual 1.7.1 back-merge (workflow not on `main` yet), conflicting files listed in the back-merge comment, manual procedure documented, contract test. (estimate) | ~0.75 Hours | Completed |
+| **November 15, 2026** | **Fix/Privacy (#607)**: the Add Song draft records its owner and is removed at sign-out; a guest keeps the draft through sign-in; Vitest, BDD and E2E tests, docs. (estimate) | ~0.75 Hours | Completed |
+| **Total** | **Development + AI Collaboration** | **~276.25 Hours** | |

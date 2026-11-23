@@ -1607,3 +1607,16 @@
 - [ ] Owner decisions open (#601): #516, #515, #520, #512, language-filter limit, #578 copy, `@seed` tests in CI; #600: Drafts GuestGate or empty state (#232)
 - [x] Seed run (Nov 15, 2026, `develop` a6e11ab7): 268 scenarios, 255 passed, 0 failed, 13 pending (stub steps in `song.feature`)
 - [ ] Not done in this sync: roles table, Gherkin wording fixes, issue numbers on 3.4.x / 4.1.x / 4.2.x rows, GitHub issue text edits
+
+## Session November 15, 2026 (#608, back-merge after hotfix 1.7.1)
+- [x] Root cause: `back-merge.yml` was not on `main` yet when hotfix 1.7.1 was pushed (pushes to `main` run the copy on `main`), so there were no runs and the back-merge (#484) was done by hand
+- [x] The conflict comment lists the conflicting files; the manual start (`gh workflow run`) and the conflict procedure are documented
+- [x] Tests: `@story-5.1.9` contract step (TDD), ci-gate 29/29
+- [x] Docs: git-workflow 1.9, development-workflow 2.1, design doc 2.42, user stories 2.26
+
+## Session November 15, 2026 (#607, Add Song draft on shared devices)
+- [x] The draft records its owner; a member's draft is only restored for that member, otherwise it is removed
+- [x] Sign-out (`logout`, `SIGNED_OUT`) removes the draft next to the query cache and PDF cache
+- [x] A guest draft is kept through sign-in (#229); drafts in the old format are dropped
+- [x] Tests: Vitest (owner rules, useAuth sign-out), BDD `ux-v2-guest-draft.feature` 1.1, E2E guest draft round trip
+- [x] Docs: design doc 2.43, user stories 2.27
