@@ -5,6 +5,7 @@ import { useEffect, useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 
 import { clearPdfCache } from '@/lib/export/pdfCache';
+import { clearSongDraft } from '@/lib/songs/songDraft';
 export type UserRole = 'admin' | 'gatekeeper' | 'musician' | 'member' | 'guest';
 
 export interface AuthUser {
@@ -91,6 +92,8 @@ export const useAuth = (initialUser?: AuthUser | null) => {
                     loadUser(signal);
                 } else if (event === 'SIGNED_OUT') {
                     queryClient.clear();
+                    // An unsaved Add Song draft must not reach the next person on this device (#607).
+                    clearSongDraft();
                     setUser(null);
                     setLoading(false);
                 }
@@ -141,6 +144,8 @@ export const useAuth = (initialUser?: AuthUser | null) => {
         await supabase.auth.signOut();
 
         queryClient.clear();
+        // An unsaved Add Song draft must not reach the next person on this device (#607).
+        clearSongDraft();
         // Cached setlist PDFs may contain private playlists (#304).
         await clearPdfCache();
         setUser(null);
