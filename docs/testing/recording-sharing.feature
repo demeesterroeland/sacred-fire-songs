@@ -1,5 +1,5 @@
 # Sacred Fire Songs – Private Song Sharing & Recording Attribution
-# Version: 1.0 | Date: Nov 4, 2026
+# Version: 1.1 | Date: Nov 15, 2026
 #
 # Living Gherkin specification for Epic 4.6 Extension: Private Song Sharing & Recording Attribution.
 # Layering:
@@ -8,6 +8,8 @@
 # Changelog
 #   1.0 – Nov 4, 2026 – Initial specification covering user-to-user sharing, DRM-lite permissions,
 #                       public publication with consent disclaimer, and singer attribution.
+#   1.1 – Nov 15, 2026 – #603: the share dialog no longer promises that shared recordings cannot be
+#                       downloaded (recipients get a signed URL to the file; hardening is #372).
 
 @recordingSharing
 Feature: Private Song Sharing and Recording Attribution
@@ -63,3 +65,10 @@ Feature: Private Song Sharing and Recording Attribution
     When a recording owner attributes "Unknown Fire Keeper" with optional email "keeper@sacredfire.org"
     Then the recording should display the singer name without crashing
     And the recording should display a pending invite status without a profile link
+
+  @unit @bug-603
+  Scenario: The share dialog does not overpromise
+    Given I open the share dialog for a recording
+    Then the text does not say that shared recordings cannot be downloaded
+    And the text asks the recipient to treat the recording with respect
+    And the same change exists in all 8 locales

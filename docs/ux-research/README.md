@@ -1,11 +1,12 @@
 # UX Research
 
-**Version:** 1.4 | **Date:** Nov 6, 2026
+**Version:** 1.5 | **Date:** Nov 23, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.5 | Nov 23, 2026 | Accessibility audit: the manual screen reader pass is validated by the owner. |
 | 1.4 | Nov 6, 2026 | Added the accessibility audit (`2026-11-06-a11y-audit.md`), ux-v2 decisions and validation script to the contents. |
 | 1.3 | Nov 5, 2026 | UX v2: `UX_SCHEME` (light/dark), `UX_ROUTES` filter and `capture-story.sh` for per-story before/after sets in `screenshots/ux-v2/<issue>/`. |
 | 1.2 | Nov 4, 2026 | Capture scripts moved to `scripts/dev/ux/` (scripts layout contract). |
@@ -17,7 +18,7 @@
 | Path | What |
 | :--- | :--- |
 | [2026-11-04-ux-research.md](2026-11-04-ux-research.md) | Report: method, screen inventory, user flows, findings, improvement plan. |
-| [2026-11-06-a11y-audit.md](2026-11-06-a11y-audit.md) | Accessibility audit of the song page and Practice panel (axe-core, keyboard) and the checklist for the manual screen reader pass (still to be done). |
+| [2026-11-06-a11y-audit.md](2026-11-06-a11y-audit.md) | Accessibility audit of the song page and Practice panel (axe-core, keyboard) and the checklist for the manual screen reader pass (validated by the owner). |
 | `screenshots/mobile/<role>/` | 390 × 844 screenshots (primary). Roles: `guest`, `member`, `admin`, `gatekeeper` (recipient of shared recordings). |
 | `screenshots/desktop/<role>/` | 1440 × 900 screenshots of the routes (secondary). |
 | `references/` | Reference images for the design direction (e.g. the `Chords · A− · A+` viewer control). |

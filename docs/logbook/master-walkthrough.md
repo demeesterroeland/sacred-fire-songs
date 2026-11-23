@@ -2268,11 +2268,11 @@ Successfully implemented a dedicated `artist` filter parameter (`?artist=Name`) 
 * Ran `npx vitest run` and confirmed all 63 unit tests pass successfully.
 * Confirmed that files touched are free of lint errors.
 
-## Session Update (Jun 23, 2026 — Part 2 — Database Migration to Tailscale & PR #163 Merge)
+## Session Update (Jun 23, 2026 — Part 2 — Database Migration to a Private Network & PR #163 Merge)
 
-### 1. Exposed Supabase API on Tailscale Private IP
-- Configured Kong gateway in `<stacks-dir>/stacks/supabase/docker-compose.yaml` to publish container port 8000 on the Tailscale interface, disabling public routing.
-- Set `SITE_URL` and `API_EXTERNAL_URL` inside `<stacks-dir>/stacks/supabase/.env` to the private Tailscale database URL.
+### 1. Exposed Supabase API on a Private Network Interface
+- Configured the Kong gateway in the private server stack to publish container port 8000 on the private network interface only, disabling public routing.
+- Set `SITE_URL` and `API_EXTERNAL_URL` in the private server stack to the private database URL.
 - Cleaned up Traefik routing in the `supabase` stack by setting `traefik.enable=false` and removing public `Host` rules for unused domains on the HTTPS entrypoint. This avoids Let's Encrypt renewal warnings for unused domains.
 - Restarted `supabase` stack to apply configuration changes.
 
@@ -2322,7 +2322,7 @@ Successfully implemented a dedicated `artist` filter parameter (`?artist=Name`) 
 - Updated exception handlers in the Next.js middleware `lib/supabase/proxy.ts` to bypass `/supabase-api` paths from authentication redirect checks, allowing guests to execute public rest API queries.
 
 ### 4. Admin Card Layout Update
-- Updated `stacks/admin-dashboard/html/index.html` to split the old unified Supabase Studio card into two separate Tailscale cards: Supabase Studio (Staging) pointing to `:4002` and Supabase Studio (Dev) pointing to `:3002`.
+- Updated the private admin dashboard page to split the old unified Supabase Studio card into two separate cards: Supabase Studio (Staging) and Supabase Studio (Dev).
 
 ### 5. VPS Configuration & Rebuild
 - Updated VPS \`<stacks-dir>/stacks/songbook/.env\` to configure \`NEXT_PUBLIC_SUPABASE_URL\` using the internal Docker hostname \`http://supabase-beta-kong:8000\`.
@@ -2494,7 +2494,7 @@ This session extended PR #179 with several mobile UX improvements discovered dur
 **PR**: #181 | **Branch**: `fix/issue-181-skeleton-hang`
 
 ### Context
-This session addressed a critical bug where slow Supabase Auth calls (due to Tailscale or cold start latencies) caused song detail pages to hang indefinitely on a loading skeleton. It also optimized the database seeder to reduce E2E test runs from 2.1 minutes down to 51 seconds.
+This session addressed a critical bug where slow Supabase Auth calls (due to private-network or cold start latencies) caused song detail pages to hang indefinitely on a loading skeleton. It also optimized the database seeder to reduce E2E test runs from 2.1 minutes down to 51 seconds.
 
 ### 1. useAuth Timeout & Race Conditions
 - Wrapped the Supabase auth `getUser()` and `profiles` calls in a 5-second `Promise.race()` timeout. If Supabase fails to respond in 5s, the auth state falls back to guest mode and logs a console warning.
@@ -2509,7 +2509,7 @@ This session addressed a critical bug where slow Supabase Auth calls (due to Tai
 - Verified that guest fallback, skeleton timeouts, retry buttons, and console warning logs are correctly triggered and handled.
 
 ### 4. Database-Side SQL Seeder Optimization (Key Engineering Insight)
-- **Problem**: Seeding 80 mock songs sequentially from the client machine triggered ~480 separate insert queries. Over the Tailscale VPN, this took 70 seconds per database reset, bloating test suite times.
+- **Problem**: Seeding 80 mock songs sequentially from the client machine triggered ~480 separate insert queries. Over a private network, this took 70 seconds per database reset, bloating test suite times.
 - **Solution**: Rewrote `random-seeder.mjs` to execute completely database-side inside a single PL/pgSQL `DO` block. By running queries locally on the Postgres instance, network roundtrips were eliminated and execution dropped to **under 0.2 seconds** (total script setup ~1.9s).
 - **Scope Collision**: Avoided PL/pgSQL variable collisions with table columns by renaming variables (e.g. `var_has_chords`).
 - **Randomization Resolution**: Fixed array `unnest()` queries where `ORDER BY random()` was optimized away by the Postgres planner. Replaced with direct table queries (`SELECT id FROM categories WHERE parent_id IS NOT NULL ORDER BY random()`).
@@ -2712,7 +2712,7 @@ This session addressed a critical bug where slow Supabase Auth calls (due to Tai
 - Standardized application stacks: `stacks/<prod-stack>` and `stacks/<staging-stack>`.
 - Restored database dataset from Supabase Cloud pooler to self-hosted database stack (14 auth users, 238 compositions, 238 song versions, 11 setlists).
 - Fixed Kong API Gateway credentials mapping (`kong-runtime.yml`) and Traefik router rules.
-- Secured preview subdomains with Traefik `tailscale-only@docker` middleware restricting access to private VPN.
+- Secured preview subdomains with a reverse-proxy middleware restricting access to a private network.
 - Relocated deployment and environment documentation directly into stack `README.md` files.
 
 ### 3. GitHub Issue & Branch Audit
@@ -3063,8 +3063,8 @@ Added the fast layers of the test pyramid as required-check candidates and clean
 - **Lint ratchet**: `no-explicit-any` → warning, `eslint . --max-warnings 182`; nine intentional patterns (sync `setState` in effects, mutated `<audio>` state, CommonJS `require`) got targeted `eslint-disable-next-line … -- reason` instead of behaviour-changing refactors.
 - **Tests**: `lib/unit-tests/` duplicates differed only in import paths → one tree `testing/unit/tests/`; Vitest `include` stops it from loading Playwright specs; PDF feature wired with pending stubs (undefined steps fail even when non-strict).
 - **Supply chain**: SHA-pinned actions, top-level `permissions`, Dependabot; actionlint/shellcheck run from digest-pinned images.
-- **E2E investigation**: both cloud Supabase projects are paused (why `e2e` was a false green). Owner chose a self-hosted E2E stack: <infra-repo> PR #106 (`stacks/songbook-e2e`, Tailscale-only Kong :5003 / Postgres :54324, `init-env.sh` generates secrets on the VPS). Tailscale policy advice: the default `* → *` grant must be narrowed or `tag:ci` gets full tailnet access. Then deferred.
-- **Findings**: `tsconfig.json` excludes `testing/`/`e2e/`; preview server compose drifted from <infra-repo> git (`…-app:preview`).
+- **E2E investigation**: both cloud Supabase projects are paused (why `e2e` was a false green). Owner chose a self-hosted E2E stack, prepared outside this repo and reachable on a private network only. Network advice: restrict the CI access rule to the E2E database only. Then deferred.
+- **Findings**: `tsconfig.json` excludes `testing/`/`e2e/`; the preview server compose had drifted from its source repo.
 
 ## October 31, 2026 (Part 2) - Reorganize scripts/ into cicd/, db/, dev/ (#274)
 
@@ -3097,9 +3097,9 @@ Make every merge into `develop` land on staging automatically, without giving CI
 **Technical Details**
 - **Images**: `docker.yml` now builds on `develop`; `:latest` removed (with `develop` as default branch, `is_default_branch` would have tagged develop images as latest).
 - **Deploy**: `deploy-staging.yml` runs after a successful develop build, in the `Staging` environment, with a pinned known_hosts entry (`StrictHostKeyChecking=yes`, no `ssh-keyscan`). The key is locked on the VPS with `restrict,command="…/<server-deploy-script>"`, which only accepts `deploy <develop|preview> <40-char sha>` (regex, injection attempts tested) and then: lock → pull → migrator (abort on failure) → `up -d --no-deps app` → wait healthy → revision label == sha.
-- **Design changes vs. plan**: no `supabase db push` (staging Supabase is self-hosted; the migrator image applies migrations), no runner-side HTTP health check (staging is Tailscale-only).
-- **Drift**: `<stacks-dir>` had uncommitted compose changes for preview and prod; <infra-repo> #107 commits the running prod state byte-for-byte so `git pull` is clean.
-- **Deferred**: nightly E2E/k6 against staging (needs runners on the tailnet).
+- **Design changes vs. plan**: no `supabase db push` (staging Supabase is self-hosted; the migrator image applies migrations), no runner-side HTTP health check (staging is reachable on a private network only).
+- **Drift**: the server stack had uncommitted compose changes for preview and prod; they were committed outside this repo so a pull is clean.
+- **Deferred**: nightly E2E/k6 against staging (needs CI access to a private network).
 
 ## October 31, 2026 (Part 4) - Fix: "New Playlist" redirected logged-in users home (#321)
 
@@ -3581,3 +3581,52 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - Open: a member's public takes are listed under Record in the app, while the issue and mockup put them under Listen.
 - Validation: TypeScript, lint, Vitest (2,613), BDD unit (539 passed, 47 pending) passed; checked in the dev server as a guest (Listen 1, dot, accessible name). Playwright not run.
 
+
+## Session November 15, 2026: logbook sync with GitHub (#599)
+
+- Synced `docs/logbook/` with the Nov 14, 2026 issue audit: Epic 6.1 (#385–#418, in `develop` via #428), Epic 6.2 (#509–#522, #542, #547, #569, #570, in `develop` via #585), the Story 3.1.4 family (GuestGate #410, PR #439), Epic 5.1 and other status fixes. Details are in the `epic&user stories.md` changelog (2.25).
+- #418: the owner validated the manual VoiceOver / TalkBack pass. `docs/ux-research/2026-11-06-a11y-audit.md` section 5 records it (device and date were not written down).
+- ADR 0001 corrected: `/explore` redirects to `/songs` (#571, #574); the bottom bar has three items.
+- Test docs (#266, option A): `@e2e` is documentation only, E2E runs through plain Playwright in `e2e/tests/`, `playwright-bdd` is not used. `song.feature` names the spec of each `@e2e` scenario; the E2E overview has a note; PL-11 (Duplicate playlist) is corrected to not implemented.
+- Isolation: private-network and private-infrastructure details were removed from the Gitflow feature file comment, the Epic 5.1 table and changelog, and older logbook entries.
+- #301 run URLs (Story 5.1.14, Gitflow dress rehearsal):
+  - Promotions `develop` → `main`: https://github.com/demeesterroeland/sacred-fire-songs/pull/332, https://github.com/demeesterroeland/sacred-fire-songs/pull/351, https://github.com/demeesterroeland/sacred-fire-songs/pull/575, https://github.com/demeesterroeland/sacred-fire-songs/pull/594
+  - Release PRs: https://github.com/demeesterroeland/sacred-fire-songs/pull/261 (1.7.0), https://github.com/demeesterroeland/sacred-fire-songs/pull/577 (1.8.0), https://github.com/demeesterroeland/sacred-fire-songs/pull/597 (1.9.0)
+  - Hotfix: https://github.com/demeesterroeland/sacred-fire-songs/pull/473 → release https://github.com/demeesterroeland/sacred-fire-songs/pull/475 (1.7.1)
+  - Back-merges `main` → `develop`: https://github.com/demeesterroeland/sacred-fire-songs/pull/484, https://github.com/demeesterroeland/sacred-fire-songs/pull/576, https://github.com/demeesterroeland/sacred-fire-songs/pull/596
+- Pull requests opened this session, all **in review, not merged**:
+  - #605: https://github.com/demeesterroeland/sacred-fire-songs/pull/611 restore `PALETTE_BASELINE` to 496 (it was 980 on `develop`).
+  - #604: https://github.com/demeesterroeland/sacred-fire-songs/pull/612 no playlist is created when the field loses focus.
+  - #603: https://github.com/demeesterroeland/sacred-fire-songs/pull/613 the share dialog no longer says recordings cannot be downloaded.
+  - #607: https://github.com/demeesterroeland/sacred-fire-songs/pull/610 the Add Song draft is cleared at sign-out.
+  - #602: https://github.com/demeesterroeland/sacred-fire-songs/pull/614 release images are never tagged `latest` (app and migrator, `flavor: latest=false`; the contract test checks the generated tags). GHCR still has a stray `latest` tag on both images (same digest as v1.9.0); the owner decides whether to remove it.
+  - #608: https://github.com/demeesterroeland/sacred-fire-songs/pull/609 back-merge after the hotfix investigation. Root cause: `back-merge.yml` was not yet on `main` when 1.7.1 shipped.
+  - #606: https://github.com/demeesterroeland/sacred-fire-songs/pull/615 merge `develop` into `feat/offline-library` (base is `feat/offline-library`, not `develop`).
+  - #600: https://github.com/demeesterroeland/sacred-fire-songs/pull/616 Favorites GuestGate for guests and `next=` on every sign-in link. Drafts: GuestGate or empty state is an open owner decision (#232).
+  - #601 items: https://github.com/demeesterroeland/sacred-fire-songs/pull/617 (#586, Practice tabs when a version has takes but no media), https://github.com/demeesterroeland/sacred-fire-songs/pull/618 (#510, beats not cut off), https://github.com/demeesterroeland/sacred-fire-songs/pull/619 (#393, action-bar E2E fails instead of skipping), https://github.com/demeesterroeland/sacred-fire-songs/pull/620 (#488, Shared by me E2E asserts title and member name).
+- Open owner decisions from #601: #516, #515, #520, #512, the language-filter limit, the #578 copy, running the `@seed` tests in CI.
+- Seed run (#601, Nov 15, 2026, `develop` a6e11ab7): `npm run test:bdd:seed` ran 268 scenarios: 255 passed, 0 failed, 13 pending (stub steps in `song.feature`).
+
+## Session November 15, 2026 — #608: why the 1.7.1 back-merge was done by hand
+
+- Finding: hotfix #473 and release #475 reached `main` on Nov 6, 2026, but `back-merge.yml` (#423, merged into `develop` on Nov 5) reached `main` only with promotion #575 on Nov 13. A push to `main` runs the workflow copy on `main`, so there were no runs and no automatic PR. The manual back-merge #484 (Nov 10) resolved the conflicts by hand. The runs for #575, #577, #594 and #597 opened #576 and #596 as intended.
+- Change: when `main` does not merge cleanly, the conflict comment now lists the conflicting files (`git diff --name-only --diff-filter=U`, posted with `--body-file`). The header comment of the workflow explains the run-from-`main` rule.
+- Docs: `git-workflow.md` 1.9 (manual start with `gh workflow run back-merge.yml --ref main`, conflict procedure), `development-workflow.md` 2.1, design doc 2.42, user stories 2.26 (Story 5.1.9 scenario, Story 5.1.10 finding).
+- Tests: `@story-5.1.9` contract step "it lists the conflicting files in a pull request comment" (red before the change, `test:bdd:ci-gate` 29/29 after). The conflict listing was also checked in a local throwaway repository.
+
+## Session November 15, 2026 — #607: Add Song draft on shared devices
+
+- Problem: the Add Song draft (`song-form-draft` in `localStorage`) was only removed after a save, so on a shared device the next person could see a member's unsaved draft.
+- Change: `lib/songs/songDraft.ts` stores `{ owner, draft }` (member id, or null for a guest). `readSongDraft(viewerId)` returns a member's draft only to that member and removes it for anyone else; a guest draft is returned to whoever signs in (#229). Drafts in the old format without an owner are dropped. `hooks/useAuth.tsx` calls `clearSongDraft()` in `logout` and on the `SIGNED_OUT` event. `SongForm` waits for the session before it restores the draft (once) and writes with the current owner.
+- Tests: Vitest `songDraft.test.ts` (owner rules) and `auth/useAuthDraftCleanup.test.tsx` (logout and `SIGNED_OUT` remove the draft), both red first. BDD `ux-v2-guest-draft.feature` 1.1 (three `@unit` scenarios from the issue). E2E `ux-v2-guest-draft.spec.ts` (guest → sign-in round trip) still passes.
+- Review (Claude Sonnet) round: three timing gaps in `SongForm`, fixed test-first in `songFormDraftOwner.test.tsx`. (1) Signing out with Add Song open left the member's text in the fields, and the next keystroke saved it as a guest draft: the form now resets when the owner changes from a member. (2) Text typed while the session loaded was overwritten by the restore: the restore now fills only empty fields, and the form is saved under the owner as soon as the session is known. (3) An adopted guest draft stayed ownerless until the next edit: it is now stored under the member right away. The BDD sign-out step now calls the real `clearSongDraft`.
+- Validation: TypeScript, lint (126 warnings, cap unchanged), Vitest 2,623, BDD unit 542 passed / 47 pending, E2E guest draft 1/1.
+
+## Session November 23, 2026 — #606: second sync of `develop` into `feat/offline-library`
+
+- Why: the first sync (PR #615, merged Nov 23, 2026) brought `feat/offline-library` up to `develop` `a6e11ab7`; `develop` has moved on by 22 commits since, so the integration branch was brought up to date again before the stories #359, #361 and #363 start.
+- Method: branch `chore/606-sync-develop` from `origin/feat/offline-library`, `git merge origin/develop` (merge commit, not a rebase or squash). The pull request has base `feat/offline-library` and must be merged with a **merge commit**.
+- Conflicts and resolutions: `cucumber.json` (both feature files kept in the `unit` and `seed` profiles: `supabase-api-proxy.feature` and `offline-library.feature`), `package.json` (`fake-indexeddb` kept, `jsdom` 31.0.1 and `supabase` 3.2.0 from `develop`), `package-lock.json` (taken from `develop`, `fake-indexeddb` re-added with `npm install --package-lock-only`).
+- Semantic collision found by the BDD run (not a text conflict): the `@wip` stand-in step "I sign out" in `offline-library.steps.ts` and the real step in `ux-v2-guest-draft.steps.ts` (`develop`, #607) made two scenarios ambiguous. The stand-in generator now skips step texts that `develop` defines for real (`DEFINED_ELSEWHERE`); the `@wip` scenario stays pending through its other steps.
+- `PALETTE_BASELINE` stays 496: the ratchet test passes in both directions, so 496 is the real count.
+- Validation: `npx tsc --noEmit` clean, `npm run lint` 126 warnings (cap unchanged), `npx vitest run` 219 files / 2,702 tests passed, `npm run test:bdd:unit` 642 scenarios (560 passed, 82 pending, 0 ambiguous), `npm run test:bdd:offline-library` 35 pending (all `@wip`, by design), `npm run test:bdd:offline` 14/14.

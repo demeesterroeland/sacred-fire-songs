@@ -246,11 +246,11 @@ export default function RecordingShareModal({
 
         {step === "search" && (
           <>
-            {/* DRM-lite Protection Notice */}
+            {/* Sharing notice (#603): asks for respect; no download protection is promised (#372) */}
             <div className="flex items-center gap-2.5 p-3 bg-surface-2 border border-line rounded-control text-meta text-fg-muted">
               <Shield className="w-4 h-4 shrink-0" aria-hidden />
               <span>
-                {t("recording.sharing.cannotDownload")} {t("recording.sharing.cannotShare")}
+                {t("recording.sharing.respectNotice")} {t("recording.sharing.cannotShare")}
               </span>
             </div>
 

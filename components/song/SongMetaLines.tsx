@@ -82,7 +82,11 @@ export function SongMetaLines({
   const authors = authorLabels.length > 0 ? authorLabels.map((a) => a.label) : [t('song.noArtist')];
   // The text between the author links ("and", "y", ","), so each name stays its own link.
   const authorJoiners = authorSeparators(authors, locale);
-  const technical = joinMeta(technicalItems(version, t, { chordsOn }));
+  // Each value stays whole and the line wraps, so the last one (beats) is never cut off on a phone (#601, #510).
+  const technicalParts = technicalItems(version, t, { chordsOn })
+    .filter((i): i is string => typeof i === 'string' && i.trim().length > 0)
+    .map((i) => i.trim());
+  const technical = joinMeta(technicalParts);
 
   // Authors always show; tags and Chords / Melody / Recordings (`fitIndex`) only as far as they fit while closed.
   const optional = [
@@ -209,8 +213,13 @@ export function SongMetaLines({
       </div>
       <div id={detailsId} hidden={!open}>
         {open && technical && (
-          <p className="truncate mt-1" data-testid="song-technical-line">
-            {technical}
+          <p className="mt-1 break-words" data-testid="song-technical-line">
+            {technicalParts.map((part, i) => (
+              <span key={`${part}-${i}`}>
+                {i > 0 && ' · '}
+                <span className="inline-block max-w-full break-words" data-testid="song-technical-item">{part}</span>
+              </span>
+            ))}
           </p>
         )}
       </div>

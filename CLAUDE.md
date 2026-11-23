@@ -5,6 +5,7 @@
 `AGENTS.md` (imported above) is the canonical instruction file for all agents. Put shared rules there, not here.
 
 - The isolation guard runs as a `PreToolUse` hook (`.claude/settings.json`) on Write/Edit inside this repo and on outward Bash commands (commit, push, `gh pr/issue/release/api`). If it blocks, do not work around it.
+- `scripts/dev/ops-guard.sh` runs as a second `PreToolUse` hook on Bash: server commands (`ssh`, `scp`, remote `rsync`/`docker`) get a confirmation prompt (#630). If the user declines, run the work from the private infra repo session.
 - Run `/sync-artifacts` at the end of a session (before creating a PR or merging).
 - Use `/update-doc-changelog` when modifying `docs/**`, `/update-schema` after a migration.
 
