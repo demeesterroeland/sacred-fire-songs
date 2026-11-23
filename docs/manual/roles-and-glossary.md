@@ -1,11 +1,12 @@
 # Roles & Glossary (draft)
 
-**Version:** 0.13 | **Date:** Nov 13, 2026
+**Version:** 0.14 | **Date:** Nov 23, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.14 | Nov 23, 2026 | Roles: Musician / Expert is a role, not a profile setting; Transpose is for musician, expert and admin only (not members or gatekeepers); rows not built yet are marked planned (#642 follow-up). |
 | 0.13 | Nov 13, 2026 | Glossary: **Private** replaces Draft for a non-public song (#564); **No artist** distinguishes a missing author from an author entered as Traditional (#565). |
 | 0.12 | Nov 13, 2026 | Transpose is in the song page toolbar, right after the Chords switch, and shows only while chords are on (no longer in the ⋮ menu; UX v3, #566). |
 | 0.11 | Nov 13, 2026 | Glossary: Both (languages) in the switch **Original · Translation · Both**; the language switch only picks the language of the translation (UX v3, #517). |
@@ -22,20 +23,24 @@
 
 ## Roles
 
-**Guest → Member → Gatekeeper → Admin.** *Musician* is not a role but a profile setting any member can switch on.
+**Guest → Member → Gatekeeper → Admin**, plus **Musician / Expert**. *Musician* is not a profile setting a member can switch on; changing a role in the app is planned (#277). A gatekeeper has the member rights plus the gatekeeper rows. Rows marked *planned* are not built yet. The full table with issue numbers is the Roles & Permissions Summary in `docs/logbook/epic&user stories.md`.
 
-| What | Guest | Member | Gatekeeper | Admin |
-| :--- | :-: | :-: | :-: | :-: |
-| Browse, search, read chords & lyrics | ✅ | ✅ | ✅ | ✅ |
-| Listen to reference tracks | ✅ | ✅ | ✅ | ✅ |
-| Favourites, history | — | ✅ | ✅ | ✅ |
-| Add songs, edit own songs | — | ✅ | ✅ | ✅ |
-| Playlists, PDF export | — | ✅ | ✅ | ✅ |
-| Record, share, publish own recordings | — | ✅ | ✅ | ✅ |
-| Transpose (song page toolbar, next to Chords), sheet music | — | musician | musician | ✅ |
-| Edit details & links of any song, curate public playlists | — | — | ✅ | ✅ |
-| Link a duplicate song as a version of another song (song page → ⋮ → **Link as a version of…**; both songs public or both private) | — | — | ✅ own songs only (source and target) | ✅ any song |
-| Admin portal (users overview, catalog edits) | — | — | — | ✅ |
+| What | Guest | Member | Musician / Expert | Gatekeeper | Admin |
+| :--- | :-: | :-: | :-: | :-: | :-: |
+| Browse, search, read chords & lyrics | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Listen to reference tracks | ✅ | ✅ | ✅ | ✅ | ✅ |
+| Favourites, history | — | ✅ | ✅ | ✅ | ✅ |
+| Add songs, edit own songs | — | ✅ | ✅ | ✅ | ✅ |
+| Playlists, PDF export | — | ✅ | ✅ | ✅ | ✅ |
+| Record, share, publish own recordings | — | ✅ | ✅ | ✅ | ✅ |
+| Transpose (song page toolbar, next to Chords) | — | — | ✅ | — | ✅ |
+| Sheet music | — | — | planned | — | planned |
+| Curate public playlists (add, remove, reorder, edit) | — | — | — | ✅ | ✅ |
+| Link a duplicate song as a version of another song (song page → ⋮ → **Link as a version of…**; both songs public or both private) | — | — | — | ✅ own songs only (source and target) | ✅ any song |
+| Edit details & links of any song | — | — | — | planned | ✅ |
+| Flag songs, merge duplicates, feature playlists | — | — | — | planned | planned |
+| Admin portal: users overview (view only), catalog edits | — | — | — | — | ✅ |
+| Invite, suspend, change the role of users | — | — | — | — | planned |
 
 ## Glossary
 

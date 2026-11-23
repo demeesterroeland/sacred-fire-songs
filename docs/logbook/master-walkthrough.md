@@ -3637,6 +3637,14 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - GitHub issue text updated: #403 (bell badge, no avatar badge), #7 (stepper, C → Db at +1, role precondition) and #408 (three bottom items, `/explore` redirects to `/songs`).
 - Left for the owner (listed in the PR): the Roles & Permissions table, the "Story 4.6.5" title on #372 in GitHub, where #481 belongs in the stories file. #267, #356 and #266 are test-infrastructure chores (docs/testing, CI, test helpers), not stories, so they were not mirrored.
 
+## Session November 23, 2026 — #642 follow-up: roles table and Story 4.6.8
+
+- Scope: docs only, the owner's answers to the four questions in PR #642 (1 = A, 2 = A, 3 = A, 4 = confirmed).
+- Checked against the code before writing: `user_role` enum (`admin`, `expert`, `member`, `musician` legacy, `gatekeeper`; migrations `20260104224500`, `20260111020000`, `20260715173000`); `is_musician` is derived as `role IN ('musician','expert')` (`public_profiles`); `canTranspose` in `lib/reader/transpose.ts` allows musician, expert and admin only; the song edit page lets only the owner or an admin in; `deleteSong` is admin only; playlist curation allows admin and gatekeeper (`app/actions/playlistActions.ts`, #197); `canLinkSong` (#512) allows admins on any song and gatekeepers on songs they own; no ABC rendering code exists (Story 2.1.2).
+- `epic&user stories.md` 2.29: the Roles & Permissions Summary has a Musician / Expert column, no "musician is a profile setting" note, Transpose for musician, expert and admin only, and "planned (#…)" on the unbuilt rows (#106, #107, #108, #109, #275–#277, Story 2.1.2). The Epic 3.5 note says both stories are closed as not planned. Story 4.6.8 [Planned] (#481, Library › Shared) added with the issue's story and Gherkin; the GitHub issue is unchanged.
+- `docs/manual/roles-and-glossary.md` 0.14 carries the same table in short form; design doc 2.58 fixes the "Musician Setting" line and §5.2.
+- #372 was renamed "[Story 4.6.7]" on GitHub earlier; #267, #356 and #266 stay chores.
+
 ## Session November 23, 2026 — #598: design for suggesting a song as a version (nothing built)
 
 - Branch target: `develop`. #498 records that UX v3 reached `develop` via #585; no open PR targets `feat/ux-v3` and the latest PRs all target `develop`. The remote `feat/ux-v3` is 34 commits behind and unused.

@@ -1636,6 +1636,14 @@
 - [ ] Owner: Roles & Permissions table (musician / expert are roles, `is_musician` is derived, transpose rule, planned Gatekeeper actions, admin view-only), Story 4.6.5 numbering on GitHub (#372 still says 4.6.5), where #481 lives in the stories file (see the PR description)
 - [ ] Not stories, not mirrored: #267, #356 and #266 (test-infrastructure chores: docs/testing, CI, test helpers)
 
+## Session November 23, 2026 (#642 follow-up, owner answers: roles table, Story 4.6.8)
+- [x] Owner answered the PR #642 questions: 1 = A, 2 = A, 3 = A, 4 = confirmed
+- [x] Roles & Permissions Summary rewritten to match the code (Musician / Expert column, `is_musician` derived, `canTranspose`, planned rows marked, Epic 3.5 note fixed): `epic&user stories.md` 2.29, `roles-and-glossary.md` 0.14, design doc 2.58
+- [x] Story 4.6.8 [Planned] (#481, Library › Shared) added under Epic 4.6; the GitHub issue is not edited
+- [x] #372 renamed to "[Story 4.6.7]" on GitHub (done before this PR)
+- [x] #267, #356 and #266 stay chores, no rows (no change)
+- [ ] Planned, not built: flag songs (#106), edit any song's metadata (#107), merge (#108, partial via #512), feature playlists (#109), Manage Users & Roles (#275–#277), Sheet Music / ABC (Story 2.1.2)
+
 ## Session November 23, 2026 (Story 6.2.26, #598, design: suggest a song as a version)
 - [x] Branch target checked: no PR targets `feat/ux-v3`, UX v3 is in `develop` via #585, so the work goes to `develop`
 - [x] Plan `docs/plans/2026-11-23-598-version-suggestion.md`: data model (`song_link_suggestions`, `song_link_audit.suggestion_id`), functions, row-level security, review queue UX, notifications, undo and audit, Gherkin, test plan, files
