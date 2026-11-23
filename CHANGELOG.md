@@ -1,5 +1,33 @@
 # Changelog
 
+## [1.9.2](https://github.com/demeesterroeland/sacred-fire-songs/compare/v1.9.1...v1.9.2) (2026-11-23)
+
+
+### 🐛 Bug fixes
+
+* **auth:** Favorites gate for guests and next= on every sign-in link ([#600](https://github.com/demeesterroeland/sacred-fire-songs/issues/600)) ([#616](https://github.com/demeesterroeland/sacred-fire-songs/issues/616)) ([d050f87](https://github.com/demeesterroeland/sacred-fire-songs/commit/d050f871355b3e1a880c2d4dcb349146caba2cfa))
+* **auth:** GuestGate for guests on Drafts ([#600](https://github.com/demeesterroeland/sacred-fire-songs/issues/600)) ([#634](https://github.com/demeesterroeland/sacred-fire-songs/issues/634)) ([729fab9](https://github.com/demeesterroeland/sacred-fire-songs/commit/729fab9765a69ab4039946a9f16f1b99f7ddfb3f))
+* **ci:** never tag release images latest ([#602](https://github.com/demeesterroeland/sacred-fire-songs/issues/602)) ([#614](https://github.com/demeesterroeland/sacred-fire-songs/issues/614)) ([4ffb14d](https://github.com/demeesterroeland/sacred-fire-songs/commit/4ffb14d0e501489f629ba7ae5359dac6b9751323))
+* **i18n:** share dialog no longer promises recordings cannot be downloaded ([#603](https://github.com/demeesterroeland/sacred-fire-songs/issues/603)) ([#613](https://github.com/demeesterroeland/sacred-fire-songs/issues/613)) ([2d553ea](https://github.com/demeesterroeland/sacred-fire-songs/commit/2d553eafaef84bb151ff7a4be17ff4350664b2fb))
+* **playlists:** do not create a playlist when the field loses focus ([#604](https://github.com/demeesterroeland/sacred-fire-songs/issues/604)) ([#612](https://github.com/demeesterroeland/sacred-fire-songs/issues/612)) ([9716ee7](https://github.com/demeesterroeland/sacred-fire-songs/commit/9716ee7cecac566eaecf60c735448e17d6101bd6))
+* **practice:** show the drawer tabs when a version has takes but no media ([#601](https://github.com/demeesterroeland/sacred-fire-songs/issues/601)) ([#617](https://github.com/demeesterroeland/sacred-fire-songs/issues/617)) ([8533a1e](https://github.com/demeesterroeland/sacred-fire-songs/commit/8533a1eb76f9ce8fb29bd987a35d996af65b8185))
+* **privacy:** clear the Add Song draft at sign-out ([#610](https://github.com/demeesterroeland/sacred-fire-songs/issues/610)) ([b674049](https://github.com/demeesterroeland/sacred-fire-songs/commit/b6740490e87b459c35ef3b1cd08a033bb174b63b))
+* **song:** never cut off the beats in the technical line on a phone ([#601](https://github.com/demeesterroeland/sacred-fire-songs/issues/601)) ([#618](https://github.com/demeesterroeland/sacred-fire-songs/issues/618)) ([99e16b6](https://github.com/demeesterroeland/sacred-fire-songs/commit/99e16b69e4b9b1b741ba938dbe1703a85a8ff751))
+* **ui:** sober tokens in the admin area ([#485](https://github.com/demeesterroeland/sacred-fire-songs/issues/485)) ([#637](https://github.com/demeesterroeland/sacred-fire-songs/issues/637)) ([646c7ec](https://github.com/demeesterroeland/sacred-fire-songs/commit/646c7ecc704182331cec23c203e51b8b4ab7a03e))
+* **ui:** sober tokens in the remaining small files ([#485](https://github.com/demeesterroeland/sacred-fire-songs/issues/485)) ([#638](https://github.com/demeesterroeland/sacred-fire-songs/issues/638)) ([c30c763](https://github.com/demeesterroeland/sacred-fire-songs/commit/c30c7639196eeec6643f2b88cfe09ebcb3f82a73))
+* **ui:** sober tokens in the song form ([#485](https://github.com/demeesterroeland/sacred-fire-songs/issues/485) song form group) ([#635](https://github.com/demeesterroeland/sacred-fire-songs/issues/635)) ([52268ba](https://github.com/demeesterroeland/sacred-fire-songs/commit/52268baa62450e0aa816662eadfacb2cfe9dc7eb))
+* **ui:** sober tokens on auth and feedback pages ([#485](https://github.com/demeesterroeland/sacred-fire-songs/issues/485)) ([#636](https://github.com/demeesterroeland/sacred-fire-songs/issues/636)) ([007110d](https://github.com/demeesterroeland/sacred-fire-songs/commit/007110dc01353d7f3fd2e7c431fa3121a6b7bd60))
+
+
+### 📖 Documentation
+
+* **598:** apply cross-review to plan and mockup ([0866c13](https://github.com/demeesterroeland/sacred-fire-songs/commit/0866c132ca277b3d9baf13fe45732957635dbe2d))
+* **598:** plan and mockup for suggesting a song as a version ([15ef785](https://github.com/demeesterroeland/sacred-fire-songs/commit/15ef785ef60fa32d59937f4a2759dc014bca9f4b))
+* **598:** plan and mockup for suggesting a song as a version ([a929401](https://github.com/demeesterroeland/sacred-fire-songs/commit/a9294014d8e9a9da86fa5b3165043a6138a614bf))
+* **logbook:** follow-ups from the Nov 14 sync ([#639](https://github.com/demeesterroeland/sacred-fire-songs/issues/639)) ([#642](https://github.com/demeesterroeland/sacred-fire-songs/issues/642)) ([1f6a489](https://github.com/demeesterroeland/sacred-fire-songs/commit/1f6a489903c31806ee285c3e5e0b9dc19af4b859))
+* **stories:** roles table matches code; add Story 4.6.8 ([eb06db1](https://github.com/demeesterroeland/sacred-fire-songs/commit/eb06db18ce07e3a905c7c91c3425b73b635d9b91))
+* **stories:** roles table matches code; add Story 4.6.8 ([bd3fce2](https://github.com/demeesterroeland/sacred-fire-songs/commit/bd3fce2609a244bd7a074e59f3e497bf8c767c15))
+
 ## [1.9.1](https://github.com/demeesterroeland/sacred-fire-songs/compare/v1.9.0...v1.9.1) (2026-11-23)
 
 
