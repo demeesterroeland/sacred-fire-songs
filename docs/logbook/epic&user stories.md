@@ -1,6 +1,6 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 2.27
+**Version:** 2.28
 **Status:** Living Document
 **Date:** Nov 23, 2026
 
@@ -126,6 +126,7 @@
 | **2.25** | Nov 23, 2026 | Sync with GitHub after the Nov 14 audit (#599). Epic 6.1 stories #385–#418 [Implemented] in `develop` via #428; #418: manual screen reader pass validated by the owner; 6.1.36 (#488), 6.1.38 (#534), 6.1.39 (#566), 6.1.40 (#586) implemented; row 6.1.35 (#485, in progress) added; duplicate rows 1.79, 1.78, second 6.1.18 and second 6.1.30 removed. Epic 6.2 stories #509–#522, #542, #547, #569, #570 [Implemented] in `develop` via #585; row 6.2.26 (#598, planned) added. Status fixes: 2.1.1, 3.7.1, 3.1.4 family (GuestGate #410, PR #439), 3.1.3, 3.2.1, 3.4.1, 3.4.4, 3.5.1, 3.5.2, 4.1.9, 4.6.1, 4.6.2, 5.1.1, 5.1.6, 5.1.7, 5.1.8 (Partial: `latest` tag bug), 5.1.10 (hotfix #473 → #475 → #484), 5.1.12; 3.1.1 and 4.1.8 no longer marked implemented; 4.6.5 clash resolved (#372 is now 4.6.7). Private-infrastructure details removed from the changelog and Epic 5.1 table. Open PRs recorded as in review (not merged): #609–#620 (see `master-walkthrough.md`). |
 | **2.26** | Nov 23, 2026 | #608: why the 1.7.1 back-merge was done by hand (the workflow was not on `main` yet). Story 5.1.9 adds the scenario for the conflicting-files comment; Story 5.1.10 adds the finding. |
 | **2.27** | Nov 23, 2026 | #607: on a shared device, sign-out removes the Add Song draft and a member's draft is never shown to someone else; a guest keeps the draft through sign-in (Story 6.1.27). |
+| **2.28** | Nov 23, 2026 | #639 (leftovers of the #599 sync): Gherkin aligned with the code for Stories 1.1.5 (guest draft banner, no join-our-circle modal), 1.1.6 (test path), 1.1.9 (bar hidden from `lg`, menu button and avatar), 1.2.1 (no dashboard, no infinite scroll), 1.3.3 (no back arrow; code fence closed so 1.3.5 renders), 2.3.2 (search options window, no Theme or Rhythm), 4.1.1 (New playlist field), 4.1.5 (Get Link in the menu, private playlists), 4.2.1 (footer per 4.2.3, 200-song limit without Premium) and the 6.1 rows #390 (six lyric steps, 15–28 px), #398 / #399 (My recordings), #403 (bell badge, no avatar badge) and #408 (three bottom items, `/explore` redirects to `/songs`). Rewritten issue Gherkin mirrored for Stories 3.1.3 (#140), 3.4.4 (#108), 4.5.1 (#112) and 4.6.2 (#245). Issue numbers added to the rows 3.4.2, 3.4.3, 3.4.5, 3.4.6, 3.6.1, 4.1.x, 4.2.x and 4.5.1; Epic 3.6 shows #257 as reopened and #275–#277 as not started; Epic 4.3 notes that `feat/offline-library` (#357) was stale (#606 is step 0). Not changed, waiting for the owner: the Roles & Permissions table, the 4.6.5 / 4.6.7 numbering in GitHub, the placement of #481 (see the PR description). #267, #356 and #266 are chores about `docs/testing`, not stories, so they have no row here. |
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
 
@@ -193,19 +194,26 @@ Scenario: Successful Admin Login
   And I should see Admin controls (e.g., Upload button, Delete icons)
 ```
 
-**Story 1.1.5: [Implemented]** As a Guest, I want to be kindly prompted to create an account when I click "Upload" so that I understand this is a community feature.
-<!-- /songs/add renders SongForm directly for all users. The only guard is a silent redirect to /auth/login on submit. No "Please join our circle" modal or Log In / Create Account prompt exists. -->
+**Story 1.1.5: [Implemented]** As a Guest, I want to know before I type that saving a song needs an account, and to find my draft again after signing in, so that I understand this is a community feature. (Reworked by Story 6.1.27 / #411; executable in `docs/testing/ux-v2-guest-draft.feature`.)
+<!-- /songs/add renders SongForm for every visitor; there is no "Please join our circle" modal. A guest sees the form with the GuestDraftBanner ("Draft now — sign in to save"). Saving as a guest redirects to the sign-in page with a `next=` return path (signInHref). -->
 
 ```
-Scenario: Guest clicks Upload
+Scenario: Guest opens Add Song
   Given I am an unauthenticated Guest
-  When I click the "Add Song" icon in the header
-  Then I should see a modal or page saying "Please join our circle to share medicine."
-  And I should be offered options to "Log In" or "Create Account"
+  When I open the "Add Song" page
+  Then I see the form with a banner "Draft now — sign in to save"
+  And the banner says that saving a song needs an account and that my draft stays on this device
+  And no modal blocks the form
+
+Scenario: Guest saves
+  Given I typed a title and lyrics as a Guest
+  When I press save, or "Sign in" in the banner
+  Then I am sent to the sign-in page with a way back to Add Song
+  And after signing in my title and lyrics are still in the form
 ```
 
 **Story 1.1.6: [Implemented]** As a Content Contributor, I want the system to automatically detect and convert songs formatted with "Chords over Lyrics" into standard ChordPro format, so that I don't have to manually reformat existing song sheets when adding them to the library.
-<!-- lib/chordProParsing.ts: full detection heuristic, conversion, Title/Author/Key/Capo auto-fill. Paste and file-upload handlers in SongForm. Unit tests in lib/unit-tests/chordProParsing.test.ts. -->
+<!-- lib/chordProParsing.ts: full detection heuristic, conversion, Title/Author/Key/Capo auto-fill. Paste and file-upload handlers in SongForm. Unit tests in testing/unit/tests/chordProParsing.test.ts. -->
 
 ```
 Scenario: Paste "Chords over Lyrics" content
@@ -236,11 +244,11 @@ Scenario: Persist and Display Media Links
 Scenario: Guest views song library
   Given I am an unauthenticated Guest
   When I visit the Home page
-  Then I should see a clear Dashboard with options: "Search Songs", "Upload Song", "Settings"
-  When I click "Search Songs"
+  Then I see a one-line welcome, a search field, a "Recently added" row and the category grid
+  When I open "Songs" (the Search tab of the bottom bar, or Songs in the side menu)
   Then I should see a list of songs
-  And each song card should display a Title and Author
-  And the list should load more songs as I scroll down
+  And each song row displays a title and one grey meta line (author, key and the like)
+  And the whole list is on one page: nothing loads further while I scroll
 ```
 
 **Story 1.2.2: [Implemented]** As a Guest, I want to search for a song by title or lyrics so that I can quickly find a specific song.
@@ -369,13 +377,19 @@ Scenario: Display YouTube Video
   Then I should see an embedded YouTube player
 ```
 
-**Story 1.3.3: [Implemented]** As a Guest, I want to navigate back to the home screen from any page so that I can easily browse more songs.
+**Story 1.3.3: [Implemented]** As a Guest, I want to navigate back to the home screen from any page so that I can easily browse more songs. (There is no "Back" arrow in the header; Home is in the bottom bar and the side menu.)
 
 ```
-Scenario: Navigate back to home
-  Given I am on the Song Detail page
-  When I click the "Back" arrow in the header
-  Then I should be redirected to the Home page
+Scenario: Navigate to Home on a phone
+  Given I am on the Song Detail page on a screen narrower than 1024 px
+  When I tap "Home" in the bottom bar
+  Then I should be on the Home page
+
+Scenario: Navigate to Home on a desktop
+  Given I am on the Song Detail page on a screen of 1024 px or wider
+  When I click the site title in the header, or "Home" in the side menu
+  Then I should be on the Home page
+```
 
 **Story 1.3.5: [Implemented]** As a Musician, I want the screen to stay awake while I am viewing a song so that I don't have to touch it to keep the lyrics and chords visible while playing.
 
@@ -460,14 +474,16 @@ Scenario: Filter by Category
   And songs tagged with "Fire" should be hidden
 ```
 
-**Story 2.3.2: [Implemented]** As a Guest & Authenticated Member, I want to open a side menu (hamburger) to access filters easily without cluttering the main view.
+**Story 2.3.2: [Implemented]** As a Guest & Authenticated Member, I want to open a search options window from the search field to access filters easily without cluttering the main view. (The hamburger menu opens the navigation menu, not the filters.)
 
 ```
-Scenario: Open Filter Menu
+Scenario: Open the search options
   Given I am on the Song List page
-  When I click the hamburger menu icon
-  Then a side drawer should slide in
-  And I should see filter options for "Theme", "Rhythm", etc.
+  When I click the filter button inside the search field
+  Then the "Search options" window opens
+  And I see "Category & Tags", "Songbook" and "Language" (when songs have them), "Sort by" and "Content type" (Chords, Melody)
+  And a signed-in member also sees the "Your Library" filters (favourites, my songs, my recordings, status)
+  And there is no "Theme" or "Rhythm" filter
 ```
 
 **Story 2.3.3: [Implemented]** As a Guest, I want to browse songs by category page so that I can explore all songs in a specific theme.
@@ -507,18 +523,21 @@ Scenario: Add to Favorites
   And the song should appear in my "My Favorites" list
 ```
 
-**Story 3.1.3: [Partial]** (#140; app emails use `SMTP_*`, there is no provider switch) As an operator/maintainer, I want to switch the transactional email delivery mechanism via a single environment variable (between built-in Supabase/Inbucket, Gmail SMTP, and SendGrid SMTP) so that I can use a local mailbox in development and a real provider in production without code changes.
+**Story 3.1.3: [Partial]** (#140; app emails use `SMTP_*`, there is no provider switch) As an operator/maintainer, I want the e-mail delivery set-up documented and, if wanted, switchable, so that I can use a local mailbox in development and a real provider in production, and our documentation accurately describes how e-mails work.
+
+> **Rewritten Nov 14, 2026 (#140).** The app now sends its own e-mails (share notifications) through nodemailer with `SMTP_*` environment variables (`lib/notifications/email.ts`, `mailer.ts`), next to Supabase's built-in auth e-mail. The original `EMAIL_PROVIDER` switch (supabase | gmail | sendgrid) was never built and is optional. Scope: (1) fix the auth-email documentation first (`README.md` still says "email OTP via Supabase", but the flows use confirmation and reset **links**; reconcile it and `application-analysis&design.md`); (2) document both e-mail paths (Supabase auth e-mail: local capture in development and SMTP in production; app e-mail: the `SMTP_*` variables, what happens when they are missing, the `profiles.email_notifications` opt-out; `.env.example` lists every variable); (3) decide first whether to keep the `EMAIL_PROVIDER` switch (one variable for both paths) or drop it in favour of plain `SMTP_*`, and close that part as not planned if it is dropped. A vitest doc-sync test guards against "OTP" wording.
 
 ```gherkin
-Scenario: Development email using Inbucket
-  Given the environment is configured with mail provider "inbucket"
-  When an auth email is triggered
-  Then the message is delivered to the local Inbucket mailbox
+Scenario: Documentation reflects link-based auth emails
+  Given the codebase uses confirmation/reset links (not OTP codes)
+  When a reader consults README.md and application-analysis&design.md
+  Then the auth-email description says "verification/reset links via Supabase"
+  And no doc claims auth uses "email OTP" unless OTP is implemented
 
-Scenario: Production email using SMTP provider
-  Given the environment is configured with mail provider "smtp"
-  When an auth email is triggered
-  Then the message is dispatched via the configured external SMTP service
+Scenario: Both e-mail paths are documented
+  When an operator reads the self-hosting docs
+  Then they find the variables for auth e-mail and for share-notification e-mail
+  And what happens when SMTP is not configured
 ```
 
 **Story 3.1.4: [Partial]** (#323) As a Guest, I want members-only features to behave consistently — show me what the feature is, tell me why I need an account, and bring me straight back to where I was after signing in.
@@ -666,7 +685,7 @@ Scenario: Gatekeeper accesses their tools
   That are not visible to Members or Musicians
 ```
 
-**Story 3.4.2:** As a Gatekeeper, I want to flag songs as "Needs Improvement" or "Duplicate" so that quality issues are visible to the community and tracked in my queue, and the original contributor is informed.
+**Story 3.4.2:** (#106) As a Gatekeeper, I want to flag songs as "Needs Improvement" or "Duplicate" so that quality issues are visible to the community and tracked in my queue, and the original contributor is informed.
 
 ```gherkin
 Scenario: Flag a song as needing improvement
@@ -692,7 +711,7 @@ Scenario: Resolve a flag
   And the song is removed from the Gatekeeper queue
 ```
 
-**Story 3.4.3:** As a Gatekeeper, I want to edit the metadata and media links of any song so that I can enrich the library without waiting for the original contributor.
+**Story 3.4.3:** (#107) As a Gatekeeper, I want to edit the metadata and media links of any song so that I can enrich the library without waiting for the original contributor.
 
 ```gherkin
 Scenario: Add a YouTube link to someone else's song
@@ -711,25 +730,23 @@ Scenario: Update song categories and key
 
 **Story 3.4.4: [Partial]** (#108; via link-as-version, #512) As a Gatekeeper, I want to merge two duplicate songs into one canonical entry with multiple versions so that the library stays clean and both contributors are acknowledged.
 
-```gherkin
-Scenario: Merge a duplicate into a canonical song
-  Given I am logged in as a Gatekeeper
-  And I am viewing a song flagged as a duplicate
-  When I select "Merge with…" and search for and select the canonical song
-  And I confirm the merge
-  Then the duplicate song becomes an alternate version of the canonical song
-  And the canonical song's detail page shows a version selector
-  And both original contributors are notified with a link to the merged entry
-  And the duplicate song's old URL redirects to the canonical song page
+> **Rewritten Nov 14, 2026 (#108).** The merge mechanism exists as "link a song as a version of another song" (Story 6.2.9, #512, PR #536: `lib/songs/linkSong.ts`, `app/actions/linkSong.ts`, `LinkSongSheet`, migration `20261112120000_link_song_as_version`); a separate merge UI is not needed.
+>
+> **Done:** linking a song as a version of another song, with a version selector on the canonical song; the redirect from the old URL (`composition_redirects`, `fetchSongRedirect`); the contributor of each moved version is kept (`contributor_id`).
+>
+> **Remaining:** (1) Gatekeeper rights (owner decision plus a function and RLS change): a Gatekeeper can link only when they own both songs (`fn_assert_can_link_song`) and the search lists only their own songs; (2) notify contributors: the link function only re-points existing notifications, both original contributors should get a new notification with a link to the merged entry; (3) credit in the UI: no song screen shows each version's contributor yet. Depends on the Gatekeeper role being assignable (#105 / #277) and on #106 (flag as duplicate) for the start of the workflow.
 
-Scenario: Merge is visible in version selector
-  Given a song has been merged from two originals
-  When any user views the canonical song
-  Then they can switch between versions using the version selector
-  And each version credits its original contributor
+```gherkin
+Scenario: Gatekeeper links someone else's duplicate
+  Given I am logged in as a Gatekeeper
+  And I am viewing a duplicate song I do not own
+  When I link it as a version of the canonical song and confirm
+  Then the canonical song shows a version selector with both versions
+  And both original contributors are notified with a link
+  And each version shows its original contributor
 ```
 
-**Story 3.4.5:** As a Gatekeeper, I want to mark a public playlist as "Featured" so that it appears in a curated section at the top of the playlists page for all visitors.
+**Story 3.4.5:** (#109) As a Gatekeeper, I want to mark a public playlist as "Featured" so that it appears in a curated section at the top of the playlists page for all visitors.
 
 ```gherkin
 Scenario: Feature a playlist
@@ -749,7 +766,7 @@ Scenario: No featured playlists
   Then the Featured section should not appear on the playlists page
 ```
 
-**Story 3.4.6: [Implemented]** As an Admin or Gatekeeper, I want to add/remove songs from any Public Playlist, edit the playlist details, and change the song order, so that we can curate public playlists and maintain high-quality collections.
+**Story 3.4.6: [Implemented]** (#197) As an Admin or Gatekeeper, I want to add/remove songs from any Public Playlist, edit the playlist details, and change the song order, so that we can curate public playlists and maintain high-quality collections.
 
 ```gherkin
 Scenario: Gatekeeper adds a song to another user's Public Playlist
@@ -822,12 +839,14 @@ Scenario: Onboarding question
   And I can always change this later in my profile settings
 ```
 
-### Epic 3.6: Administrative Management
+### Epic 3.6: Administrative Management (#257)
 
 > **Placeholder & umbrella for administrative user stories.**
 > As an administrator, I want to be able to administer configuration, users, settings, and songs in such a way that I can ensure that I have up-to-date info and can act accordingly.
+>
+> **Status (Nov 23, 2026):** the epic #257 was reopened on Nov 14, 2026 (it stays open until the stories below are done). Stories 3.6.1 (#258), 3.6.5 (#278) and 3.6.6 (#279) are implemented. Stories 3.6.2, 3.6.3 and 3.6.4 (#275, #276, #277) are **not started**: the admin user overview is view-only today.
 
-**Story 3.6.1: [Implemented]** As an Admin, I want to have an overview of all users, view their details, and see their contributions, so that I can monitor community activity and ensure account information is accurate and up to date.
+**Story 3.6.1: [Implemented]** (#258) As an Admin, I want to have an overview of all users, view their details, and see their contributions, so that I can monitor community activity and ensure account information is accurate and up to date.
 
 ```gherkin
 Scenario: View user list overview
@@ -972,17 +991,17 @@ Scenario: I18N-12 – Additional languages
 
 ### Epic 4.1: Setlists
 
-**Story 4.1.1: [Implemented]** As a Musician, I want to create a named setlist so that I can prepare for a specific night.
+**Story 4.1.1: [Implemented]** (#16) As a Musician, I want to create a named setlist so that I can prepare for a specific night.
 
 ```
 Scenario: Create Setlist
   Given I am logged in
-  When I go to "My Setlists" and click "New"
-  And I name it "Full Moon Ceremony"
-  Then a new empty setlist named "Full Moon Ceremony" should exist
+  When I open Library → Playlists
+  And I type "Full Moon Ceremony" in the "New playlist…" field and press Enter or "Create"
+  Then a new empty playlist named "Full Moon Ceremony" should exist
 ```
 
-**Story 4.1.2: [Implemented]** As a Musician, I want to reorder songs in my setlist so that the flow matches the ceremony intensity.
+**Story 4.1.2: [Implemented]** (#17) As a Musician, I want to reorder songs in my setlist so that the flow matches the ceremony intensity.
 
 ```
 Scenario: Reorder Setlist
@@ -992,7 +1011,7 @@ Scenario: Reorder Setlist
   And "Song A" should be at position 2
 ```
 
-**Story 4.1.3: [Implemented]** As a Musician, I want to search for and add songs to a playlist directly from the playlist detail page so that I don't have to navigate away to find songs.
+**Story 4.1.3: [Implemented]** (#95) As a Musician, I want to search for and add songs to a playlist directly from the playlist detail page so that I don't have to navigate away to find songs.
 
 ```gherkin
 Scenario: Add song via search sheet
@@ -1004,7 +1023,7 @@ Scenario: Add song via search sheet
   And the song should appear at the bottom of the list
 ```
 
-**Story 4.1.4: [Implemented]** As a Musician, I want to toggle my playlist between public and private so that I can control who can see it.
+**Story 4.1.4: [Implemented]** (#96) As a Musician, I want to toggle my playlist between public and private so that I can control who can see it.
 
 ```gherkin
 Scenario: Make playlist public
@@ -1021,17 +1040,22 @@ Scenario: Make playlist private
   And the icon should change to a Lock
 ```
 
-**Story 4.1.5: [Implemented]** As a Musician, I want to share a link to a public playlist so that ceremony co-facilitators can view it.
+**Story 4.1.5: [Implemented]** (#97) As a Musician, I want to share a link to a public playlist so that ceremony co-facilitators can view it.
 
 ```gherkin
 Scenario: Copy shareable link
   Given I am on the Playlist Detail page of a public playlist
-  When I click the "Copy Link" button
+  When I choose "Get Link" in the playlist's ⋯ menu
   Then the playlist URL should be copied to my clipboard
   And a toast should confirm "Link copied"
+
+Scenario: A private playlist has no link to share
+  Given I am on the Playlist Detail page of a private playlist
+  Then "Get Link" in the ⋯ menu is marked "private"
+  And choosing it says "Make this playlist public to share the link"
 ```
 
-**Story 4.1.6: [Implemented]** As a Musician, I want to add a description or note to a playlist so that I can remember its purpose (e.g. "Closing songs, slow and grounding").
+**Story 4.1.6: [Implemented]** (#98) As a Musician, I want to add a description or note to a playlist so that I can remember its purpose (e.g. "Closing songs, slow and grounding").
 
 ```gherkin
 Scenario: Add description
@@ -1042,7 +1066,7 @@ Scenario: Add description
   And it should display below the playlist title
 ```
 
-**Story 4.1.7:** As a Ceremony Leader, I want to enter a full-screen presentation mode for a playlist so that I can read songs clearly during a ceremony without UI chrome.
+**Story 4.1.7:** (#99) As a Ceremony Leader, I want to enter a full-screen presentation mode for a playlist so that I can read songs clearly during a ceremony without UI chrome.
 
 ```gherkin
 Scenario: Enter presentation mode
@@ -1075,7 +1099,7 @@ Scenario: Set per-song transpose in playlist
   And the original song in the library should remain unchanged
 ```
 
-**Story 4.1.10:** As a Musician, I want to assign a cover color or icon to a playlist so that I can visually distinguish my playlists at a glance.
+**Story 4.1.10:** (#102) As a Musician, I want to assign a cover color or icon to a playlist so that I can visually distinguish my playlists at a glance.
 
 ```gherkin
 Scenario: Set playlist cover color
@@ -1087,7 +1111,7 @@ Scenario: Set playlist cover color
 
 ### Epic 4.2: Print & Export
 
-**Story 4.2.1: [Implemented]** As a Member or Musician, I want to generate a PDF of my setlist so that I can print it for the ceremony.
+**Story 4.2.1: [Implemented]** (#18, PR #220) As a Member or Musician, I want to generate a PDF of my setlist so that I can print it for the ceremony.
 
 ```
 Scenario: Export PDF (Authenticated Member)
@@ -1097,23 +1121,23 @@ Scenario: Export PDF (Authenticated Member)
   Then a PDF file should download
   And the PDF should contain the lyrics and chords for all songs in the setlist
   And every page should display a 3-part footer:
-    | Song URL (bottom left) | Playlist: <name> (bottom middle) | Page X of Y (bottom right) |
+    | Site URL + song QR code (bottom left, see Story 4.2.3) | Playlist: <name> (bottom middle) | Page X of Y (bottom right) |
 
 Scenario: Guest clicks Export PDF
   Given I am an unauthenticated Guest viewing a public setlist
   When I click "Export PDF" or the Printer button
   Then the export button should be visible
-  And clicking it should display a popup modal with a link to log in
+  And clicking it should display a popup "Log in to export PDF" with a "Log In" button
   And no PDF download should be initiated
 
 Scenario: Exporting setlist exceeding maximum songs limit
   Given I am viewing a setlist containing more than 200 songs
   When I click "Export PDF" or the Printer button
-  Then an alert or toast should inform me that maximum 200 songs can be exported per PDF (upgrade to Premium for 1000 songs)
+  Then an alert or toast should inform me that a maximum of 200 songs can be exported per PDF
   And no PDF file should be generated
 ```
 
-**Story 4.2.2:** As a Musician, I want to group songs by category in the PDF so that I can keep "Water" songs together on paper.
+**Story 4.2.2:** (#19) As a Musician, I want to group songs by category in the PDF so that I can keep "Water" songs together on paper.
 
 ```
 Scenario: Group by Category in PDF
@@ -1124,7 +1148,7 @@ Scenario: Group by Category in PDF
   And followed by all "Water" songs grouped together (or vice versa)
 ```
 
-**Story 4.2.3: [Implemented]** As a musician printing a setlist, I want the page footer to show just the songbook's main address and a small QR code for the song, so that the footer stays clean and I can open the song on my phone by scanning it.
+**Story 4.2.3: [Implemented]** (#303) As a musician printing a setlist, I want the page footer to show just the songbook's main address and a small QR code for the song, so that the footer stays clean and I can open the song on my phone by scanning it.
 
 ```gherkin
 Scenario: Footer shows only the main site URL and a QR code to the song
@@ -1135,7 +1159,7 @@ Scenario: Footer shows only the main site URL and a QR code to the song
   And pages without a song URL show no QR code
 ```
 
-**Story 4.2.4: [Implemented]** As a musician exporting the same setlist several times, I want the app to reuse the last generated PDF when nothing has changed, so that the download is instant.
+**Story 4.2.4: [Implemented]** (#304) As a musician exporting the same setlist several times, I want the app to reuse the last generated PDF when nothing has changed, so that the download is instant.
 
 ```gherkin
 Scenario: Only regenerate the PDF when the playlist is dirty
@@ -1146,9 +1170,11 @@ Scenario: Only regenerate the PDF when the playlist is dirty
   And cached PDFs are per user and cleared on sign-out
 ```
 
-### Epic 4.3: Offline Reliability
+### Epic 4.3: Offline Reliability (#357)
 
-**Story 4.3.1:** As a Musician, I want to access my setlists while offline so that I can use the app in the forest.
+> **Status (Nov 23, 2026):** only the spec and test harness (Story 4.3.2, #358, PR #365) are done. The integration branch `feat/offline-library` (#357) was **stale**: it was untouched from Nov 4 until Nov 23, 2026 and lacked UX v2, UX v3 and everything after. Step 0, issue #606 (merge `develop` into it), is still open: PR #615 merged `develop` as of Nov 15 into the branch on Nov 23, 2026, and the branch is still 22 commits behind `develop` (checked on Nov 23, 2026). The rewritten stories #359, #361 and #363 stay blocked until #606 is closed. Nothing of this epic is released; all work lands on `feat/offline-library` until the owner has tested a preview build.
+
+**Story 4.3.1:** (#20) As a Musician, I want to access my setlists while offline so that I can use the app in the forest.
 
 ```
 Scenario: Offline Access
@@ -1362,7 +1388,7 @@ Scenario: Desktop Layout
 
 ### Epic 4.5: Progressive Web App — Offline Reliability
 
-**Story 4.5.1: [Partial]** As a Musician, I want to see a friendly offline page when I have no internet connection, so that I understand what happened instead of seeing a browser error.
+**Story 4.5.1: [Partial]** (#112; scenario 1 was delivered by #353, scenario 2 needs the Offline Library epic #357: #359, #360, #361, #362) As a Musician, I want to see a friendly offline page when I have no internet connection, so that I understand what happened instead of seeing a browser error.
 
 ```gherkin
 Scenario: Offline fallback page
@@ -1372,14 +1398,14 @@ Scenario: Offline fallback page
   And the page should suggest I connect to the internet or access a cached playlist
   Rather than showing a generic browser "No internet" error
 
-Scenario: Cached pages still load offline
-  Given I have previously visited the home page and song list while online
+Scenario: The library opens offline
+  Given I am signed in, Offline Mode is on and my library synced while I was online
   When I open the app without internet
-  Then the home page shell should still load from the service worker cache
-  And cached songs and playlists should remain accessible
+  Then the app shell loads from the service worker cache
+  And my songs and playlists are available from the local copy
 ```
 
-> **Status (Nov 4, 2026, #353):** the offline fallback page is implemented (`public/sw.js`, `public/offline.html`) in the visitor's language, with Retry and automatic reload when back online. It does not yet point to cached playlists, and the second scenario (cached pages and songs offline) is still open.
+> **Status (Nov 4, 2026, #353; reworded Nov 14, 2026 in #112):** scenario 1 is implemented (`public/sw.js`, `public/offline.html`): the service worker serves the offline page for page navigations while offline, once it has been installed online, in the visitor's language, with Retry and automatic reload when back online (`docs/testing/offline.feature`, E2E spec). The original second scenario ("previously visited") did not match the epic's design, which syncs the whole library for signed-in users with Offline Mode on and gives guests nothing; it is replaced by "The library opens offline" above. This story closes when #359, #360, #361 and #362 are closed, or earlier if the owner decides the epic is not wanted.
 
 ### Epic 4.6: Private Rehearsal & Audio Storage
 
@@ -1415,6 +1441,8 @@ Scenario: Guest cannot record or see private rehearsals
 
 **Story 4.6.2: [Partial]** (#245: acknowledgments missing; real download protection is #372, Story 4.6.7) As a recording owner, I want to share a private recording directly with another registered user with strict DRM-lite permissions so that they can listen without downloading or resharing.
 
+> **Rewritten Nov 14, 2026 (#245).** The sharing mechanism shipped with PR #371 (in `develop`): sharing with registered users (`recording_shares` with RLS, `RecordingShareModal` with user search, share and unshare), owner-only download (recipients cannot download or reshare, at UI level; hardening is Story 4.6.7, #372), the public-consent checkbox and singer attribution (Stories 4.6.3, 4.6.4) and the notifications (Story 4.6.6, #373). **Remaining (this story stays [Partial]):** a *sender acknowledgment* (before a share is executed a respectful reminder to share private recordings thoughtfully, with an explicit acknowledgment), a *receiver acknowledgment* (before first listening to a shared recording a note that it is private and to be treated with respect), copy in the tone of the app in the 8 locales, and "Save to Library" (discussed on Nov 4, to be confirmed by the owner). Open decision: sharing by e-mail with people who have no account (shadow account, tokenized landing page) is not part of the registered-users-only design; it would be a separate story.
+
 ```gherkin
 Scenario: Owner shares recording with registered user
   Given I am the owner of a private recording "Medicine Song (Ceremony Take)"
@@ -1426,6 +1454,17 @@ Scenario: Shared recipient cannot reshare recording
   Given a recording shared by "Carlos" with "Maya"
   When "Maya" attempts to share the recording with "David"
   Then the sharing request should be rejected with "Only the recording owner can share this recording."
+
+Scenario: Sender acknowledges before sharing (not built yet)
+  Given I am sharing a recording with another member
+  When I press Share
+  Then I see a respectful reminder and must acknowledge it
+  And nothing is shared until I do
+
+Scenario: Receiver acknowledges before listening (not built yet)
+  Given a recording was shared with me
+  When I open it for the first time
+  Then I see a note that it is a private recording and must acknowledge it before it plays
 ```
 
 **Story 4.6.3: [Implemented]** As a recording owner, I want to publish a private recording publicly only after explicitly confirming singer consent so that musical rights and artist integrity are respected.
@@ -1709,7 +1748,7 @@ Owner decision of Nov 4, 2026: sober greyscale interface with one accent, smalle
 | 6.1.3 | #387 | `G1.3` | A | **[Implemented, in `develop` via #428]** As a Member, I want small labels to be readable so that section headings and meta text are not grey-on-grey | #385 |
 | 6.1.4 | #388 | `G1.4` | B | **[Implemented, in `develop` via #428]** As a Guest, I want the category grid in a calm monochrome style so that the home page does not shout (amounts are written between parentheses, "Air (3)") | #385 |
 | 6.1.5 | #389 | `G1.5` | C | **[Implemented, in `develop` via #428]** As a Member, I want unfinished features hidden so that I do not meet 'coming soon' placeholders | #407 |
-| 6.1.6 | #390 | `G2.1` | A | **[Implemented, in `develop` via #428]** As a reader in the circle, I want a `Chords · A− · A+` toolbar on the song page so that I set the text size myself | #385 |
+| 6.1.6 | #390 | `G2.1` | A | **[Implemented, in `develop` via #428]** As a reader in the circle, I want a `Chords · A− · A+` toolbar on the song page so that I set the text size myself (the lyric scale has six steps, 15 to 28 px, default 17 px, from the design tokens; UXA-007) | #385 |
 | 6.1.7 | #391 | `G2.2` | A | **[Implemented, in `develop` via #428]** As a reader, I want Key, Capo, Tuning and the tags on one grey line each so that the first lyric line is visible without scrolling | #385 |
 | 6.1.8 | #392 | `G2.3` | A | **[Implemented, in `develop` via #428]** As a reader, I want the sticky song title to truncate at the end so that the first letters are never cut off (the full title wraps at the top of the page on a phone; the truncated copy shows after scrolling past it) | — |
 | 6.1.9 | #393 | `G2.4` | B | **[Implemented, in `develop` via #428]** As a Member, I want a sticky action bar on the song page (Practice · Playlist · ♥) so that the main actions are in thumb reach | #385, #390, #398 |
@@ -1717,17 +1756,17 @@ Owner decision of Nov 4, 2026: sober greyscale interface with one accent, smalle
 | 6.1.11 | #395 | `G2.6` | C | **[Implemented, in `develop` via #428]** As a Contributor, I want a reserved slot for a variant / language switch under the song title so that song variants and translations fit the sober layout later (each version has its own `?version=` link) | #391 |
 | 6.1.12 | #396 | `G3.1` | A | **[Implemented, in `develop` via #428]** As a reader, I want the mini player to appear only after I press play so that it does not cover the lyrics and sheets on every song | — |
 | 6.1.13 | #397 | `G3.2` | C | **[Implemented, in `develop` via #428]** As a Guest, I want the player and reference tab to be calm and exact so that I know which provider is playing | #385 |
-| 6.1.14 | #398 | `G4.1` | A | **[Implemented, in `develop` via #428]** As a Member, I want one name — Practice — for the rehearsal feature so that menu, drawer, tabs, badge and library all say the same thing | — |
-| 6.1.15 | #399 | `G4.2` | A | **[Implemented, in `develop` via #428]** As a Member, I want takes shared with me listed separately from my own takes so that I see who shared what | #398 |
+| 6.1.14 | #398 | `G4.1` | A | **[Implemented, in `develop` via #428]** As a Member, I want one name — Practice — for the rehearsal feature so that menu, drawer, tabs, badge and library all say the same thing (the lists inside it are named **My recordings**, not "My takes") | — |
+| 6.1.15 | #399 | `G4.2` | A | **[Implemented, in `develop` via #428]** As a Member, I want takes shared with me listed separately from my own takes so that I see who shared what (the lists are headed **My recordings**, **Shared with me** and **Public recordings**; the earlier name "My takes" is gone) | #398 |
 | 6.1.16 | #400 | `G4.3` | A | **[Implemented, in `develop` via #428]** As a Member, I want text labels next to take status icons so that I understand 'public', 'shared' and 'pending invite' without a tooltip | #398 |
 | 6.1.18 | #402 | `G4.5` | B | **[Implemented, in `develop` via #428]** As a recording owner, I want the Share dialog to explain who can be found and what happens with a private song so that sharing has no surprises | #398 |
 | 6.1.17 | #401 | `G4.4` | B | **[Implemented, in `develop` via #428]** As a Member, I want take actions in a grouped bottom action sheet so that Delete is never one tap from Share | #385, #398 |
-| 6.1.19 | #403 | `G4.6` | B | **[Implemented, in `develop` via #428]** As a Member, I want to be told when someone shares a take with me so that I do not have to guess which song to open | #399 |
+| 6.1.19 | #403 | `G4.6` | B | **[Implemented, in `develop` via #428]** As a Member, I want to be told when someone shares a take with me so that I do not have to guess which song to open (the unread badge is on the notification bell and the account menu entry **Shared with me** shows the count in words; there is no badge on the avatar) | #399 |
 | 6.1.20 | #404 | `G4.7` | C | **[Implemented, in `develop` via #428]** As a Member, I want a level meter, count-in and remaining time while recording so that I know the microphone works and when the 3-minute limit comes | #385 |
 | 6.1.21 | #405 | `G4.8` | C | **[Implemented, in `develop` via #428]** As a recording owner, I want the publish dialog to name the song and say who will hear it so that consent is informed | #402 |
 | 6.1.22 | #406 | `G5.1` | A | **[Implemented, in `develop` via #428]** As a Guest, I want an unknown URL, including a malformed song id, to show a 404 page so that I am not sent to login or shown a database error for content that does not exist (song load failures show translated copy; `docs/testing/ux-v2-broken-song-links.feature`) | — |
 | 6.1.23 | #407 | `G5.2` | A | **[Implemented, in `develop` via #428]** As a Member, I want the Library tab row to fit my phone with no dead tab so that every tab I see works (History, Artists and Shared with me share one heading size) | — |
-| 6.1.24 | #408 | `G5.3` | B | **[Implemented, in `develop` via #428]** As the Owner, I want a decision on the bottom bar (Home · Songs · Library · Create vs Home · Search · Library) so that Explore, Home and Search stop overlapping (the Library "+" floats at the bottom right above the bar) | — |
+| 6.1.24 | #408 | `G5.3` | B | **[Implemented, in `develop` via #428]** As the Owner, I want a decision on the bottom bar (Home · Songs · Library · Create vs Home · Search · Library) so that Explore, Home and Search stop overlapping (decision UXD-1: the bottom bar has three items, Home · Search · Library; `/explore` has no page and redirects to `/songs`, #571 and #574; the Library "+" floats at the bottom right above the bar) | — |
 | 6.1.25 | #409 | `G5.4` | C | **[Implemented, in `develop` via #428]** As a Guest, I want auth pages without a fake close button so that I always know where I go | #385 |
 | 6.1.26 | #410 | `G6.1` | A | **[Implemented, in `develop` via #428]** As a Guest, I want every members-only screen to use the same locked preview with a reason and a sign-in button so that gating feels consistent | — |
 | 6.1.27 | #411 | `G6.2` | B | **[Implemented, in `develop` via #428]** As a Guest, I want to know before typing that saving a song needs an account so that I am not surprised at save | #410 |
@@ -2512,14 +2551,14 @@ Scenario: Restore draft
 
 ```
 Scenario: Bottom bar visible on mobile
-  Given I am viewing any page on a mobile device (< md breakpoint)
+  Given I am viewing any page on a screen narrower than 1024 px (below the `lg` breakpoint)
   Then I should see a fixed bottom navigation bar with three tabs: Home, Search and Your Library
-  And the bottom bar should not appear on tablet or desktop
+  And the bottom bar should not appear from 1024 px up, where the side menu is always visible
 
 Scenario: Navigate via bottom bar
   Given I see the bottom navigation bar
   When I tap "Home"
-  Then I should navigate to the home/dashboard page
+  Then I should navigate to the Home page
   When I tap "Search"
   Then I should navigate to the songs page with the search field focused
   When I tap "Your Library"
@@ -2536,19 +2575,16 @@ Scenario: Active tab indicator
   Then the "Search" tab in the bottom bar should be visually highlighted
   And the other tabs should appear in their default inactive state
 
-Scenario: Avatar replaces hamburger icon
-  Given I am logged in on a mobile device
-  Then the hamburger menu icon in the header is replaced by my avatar (or initials)
+Scenario: Menu button and avatar on a phone
+  Given I am logged in on a screen narrower than 1024 px
+  Then the header shows a menu button (hamburger) on the left and my avatar (or initials) on the right
+  When I tap the menu button
+  Then the side menu slides open with Home, Songs, the Library tabs and Create
   When I tap the avatar
-  Then the side menu slides open containing my personal menu (profile, settings, logout)
-
-Scenario: Top-right avatar hidden on mobile
-  Given I am on a mobile device
-  Then the personal avatar button in the top-right header area should not be visible
-  And it should remain visible on tablet and desktop
+  Then my account menu opens (settings, favourites, drafts, playlists, recently viewed, Shared with me, language, sign out)
 
 Scenario: Guest bottom bar
-  Given I am not logged in on a mobile device
+  Given I am not logged in on a screen narrower than 1024 px
   Then the bottom bar shows the same three tabs: Home, Search, and Your Library
-  And the hamburger icon should remain (no avatar replacement)
+  And the header keeps the menu button and shows a "Sign in" link instead of an avatar
 ```

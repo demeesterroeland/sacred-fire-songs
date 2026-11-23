@@ -1620,3 +1620,11 @@
 - [x] A guest draft is kept through sign-in (#229); drafts in the old format are dropped
 - [x] Tests: Vitest (owner rules, useAuth sign-out), BDD `ux-v2-guest-draft.feature` 1.1, E2E guest draft round trip
 - [x] Docs: design doc 2.43, user stories 2.27
+
+## Session November 23, 2026 (#639, logbook follow-ups from the Nov 14 sync)
+- [x] Gherkin aligned with the code: Stories 1.1.5, 1.1.6 (path), 1.1.9, 1.2.1, 1.3.3, 2.3.2, 4.1.1, 4.1.5, 4.2.1; 6.1 rows #390, #398, #399, #403, #408 (`epic&user stories.md` 2.28)
+- [x] Rewritten issue Gherkin mirrored: #140 (3.1.3), #108 (3.4.4), #112 (4.5.1), #245 (4.6.2)
+- [x] Issue numbers on the 3.4.x, 3.6.1, 4.1.x, 4.2.x and 4.5.1 rows; Epic 3.6 status (#257 reopened, #275–#277 not started); Epic 4.3 note (`feat/offline-library` stale, #606 step 0)
+- [x] GitHub issue text: #403, #7, #408
+- [ ] Owner: Roles & Permissions table (musician / expert are roles, `is_musician` is derived, transpose rule, planned Gatekeeper actions, admin view-only), Story 4.6.5 numbering on GitHub (#372 still says 4.6.5), where #481 lives in the stories file (see the PR description)
+- [ ] Not stories, not mirrored: #267 and #356 (docs/testing and test-helper chores)
