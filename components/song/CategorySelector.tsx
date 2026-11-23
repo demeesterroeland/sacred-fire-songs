@@ -117,7 +117,6 @@ export default function CategorySelector({ selectedIds, onChange }: CategorySele
               <TagPill
                 key={`selected-${cat.id}`}
                 label={cat.name}
-                emoji={cat.emoji}
                 variant="selectable"
                 selected={true}
                 onClick={() => toggleCategory(cat.id)}
@@ -139,7 +138,6 @@ export default function CategorySelector({ selectedIds, onChange }: CategorySele
                 <TagPill
                   key={cat.id}
                   label={cat.name}
-                  emoji={cat.emoji}
                   count={cat.song_count}
                   variant="selectable"
                   selected={selectedIds.includes(cat.id)}

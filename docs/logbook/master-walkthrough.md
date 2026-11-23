@@ -3655,3 +3655,11 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - Notifications: the member gets a bell item when linked or declined; reviewers get the count badge only (no row per reviewer).
 - Mockup: `docs/design/screens/v2/screen26_suggest_version_link.html` (sober greys, one accent, seven screens).
 - Open questions (12) are in the draft PR for the owner. Not run: tests, Playwright, any migration.
+
+## Session November 24, 2026 — #485: tags lose their emoji
+
+- Owner decision (Nov 24): tags and tag categories render plain text, no emoji, as part of the sober greyscale design.
+- Render points removed: `TagPill` (the `emoji` prop; a `badge` keeps its grey `Tag` icon, a selected `selectable` tag keeps its check), `TagSelector` (active chips and dropdown list) and `CategorySelector` (no longer passes `emoji`). The song list data no longer carries the category emoji (`SongCard` and `Song` types, the category mapping in `lib/songs/queries.ts`, `SONGS_SELECT` and `songSelect.ts`).
+- Not changed: the `categories.emoji` column, seeds and migrations; the taxonomy types and queries still read it (unused by the UI).
+- Test: `testing/unit/tests/design/noTagEmoji.test.tsx` renders `TagPill`, `CategorySelector` and `TagSelector` with emoji in the category data and asserts no pictograph reaches the DOM; two of its four tests fail on the old code.
+- Docs: design doc 2.59, design tokens 1.14, mockup `screen24_home.html` 1.1 (emoji dropped from the category names).

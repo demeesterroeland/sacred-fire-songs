@@ -1651,3 +1651,12 @@
 - [x] Draft PR with the numbered open questions for the owner
 - [ ] Owner answers the open questions (split of #598 into three stories, gatekeeper scope, private songs, queue location)
 - [ ] Build test-first (feature file, helpers, migration, UI, 8 locales, docs) after the answers
+
+## Session November 24, 2026 (#485, drop tag emojis)
+- [x] Owner decision Nov 24: tags and tag categories show no emoji (sober greyscale, one accent, no decoration)
+- [x] Red test first: `testing/unit/tests/design/noTagEmoji.test.tsx` (fails on the old code for `CategorySelector` and `TagSelector`)
+- [x] `TagPill` loses its `emoji` prop; `TagSelector` and `CategorySelector` draw the name only; `SongCard` / `Song` types, `SONGS_SELECT` and `songSelect.ts` no longer carry the category emoji
+- [x] DB column, seeds and migrations untouched (data may stay for now)
+- [x] Docs: design doc 2.59, design tokens 1.14, home mockup `screen24_home.html` 1.1
+- [x] `tsc`, `lint` (126 warnings, cap 132 unchanged), `npm run test` (2746), `test:bdd:unit`; `PALETTE_BASELINE` stays 0
+- [ ] Owner closes #485 after the PR merges (the PR says "Part of #485")

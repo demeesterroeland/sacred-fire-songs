@@ -24,7 +24,6 @@ interface SongCardProps {
     categories?: {
         name: string;
         slug: string;
-        emoji?: string;
         parent?: string | null;
     }[];
 }
