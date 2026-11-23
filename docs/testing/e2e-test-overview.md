@@ -1,6 +1,6 @@
 # E2E Test Overview & Matrix: Sacred Fire Songs
 
-**Version:** 1.29
+**Version:** 1.30
 **Status:** Living Document
 **Date:** Nov 23, 2026
 **Tracking:** GH #142
@@ -39,6 +39,7 @@
 | **1.17** | Nov 6, 2026 | Story 6.1.32 (#416): PL-01 covers the New Playlist page: private line, Make public switch, Create enabled once named. New spec `ux-v2-new-playlist-visibility.spec.ts`. |
 | **1.16** | Nov 6, 2026 | Story 6.1.5 (#389): ACC-04 (Privacy settings) is hidden behind `FEATURES.privacySettings`; LIB-10 (Albums) answers not-found. New spec `ux-v2-hide-unfinished.spec.ts` asserts no "Coming soon" in Library, Settings and the song form. |
 | **1.29** | Nov 23, 2026 | (#266, option A) `@e2e` scenarios in `docs/testing/*.feature` are documentation only; E2E runs through plain Playwright specs in `e2e/tests/` and `playwright-bdd` is not used. `song.feature` names the covering spec for each `@e2e` scenario. PL-11 (Duplicate playlist) feature status corrected to not implemented (#100). |
+| **1.30** | Nov 23, 2026 | #485 group 7: SONG-14 `ux-v2-sober-song-form.spec.ts` (member): axe colour contrast on the Add Song form with every section open, light and dark. |
 
 ---
 
@@ -152,6 +153,7 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 | SONG-11 | Public/Private toggle | Set song visibility on create/edit ("Save as private"); search offers Public / Private, never Draft | private song hidden from guests | M/A | ✅ | ✅ | P1 | SongForm, `ux-v2-private-and-no-artist.spec.ts` (#564) |
 | SONG-13 | No artist | Missing author is shown as "No artist"; "Traditional" stays when entered | list, song page, admin member page | G/M/A | ✅ | ✅ | P2 | `ux-v2-private-and-no-artist.spec.ts` (#565) |
 | SONG-12 | Neutral category tags | Every tag in the Add/Edit song tag picker has the same colours; selected = inverted greys + `aria-pressed` | light and dark mode | M | ✅ | ✅ | P2 | `ux-v2-sober-colours.spec.ts` (Story 6.1.35) |
+| SONG-14 | Sober Add Song form | Add Song form with metadata, tags and links sections open passes axe colour contrast; one accent button (Publish Song) | light and dark mode | M | ✅ | ✅ | P2 | `ux-v2-sober-song-form.spec.ts` (Story 6.1.35) |
 
 ### 4.4 Public Library & Discovery (Epic 1.2 / 2.3)
 
