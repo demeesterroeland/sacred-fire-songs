@@ -9,7 +9,7 @@ export default function SidebarOverlay() {
 
     return (
         <div
-            className="fixed inset-0 z-30 bg-black/40 lg:hidden"
+            className="fixed inset-0 z-30 bg-scrim lg:hidden"
             onClick={() => setIsOpen(false)}
             aria-hidden="true"
         />

@@ -46,9 +46,10 @@ export function RoleBadge({ role, size = 'sm' }: { role: UserRole; size?: 'sm' |
 }
 
 const STATUS_STYLES: Record<ActivityStatus, { dot: string; text: string }> = {
-  active: { dot: 'bg-emerald-500', text: 'text-emerald-700 dark:text-emerald-400' },
-  inactive: { dot: 'bg-gray-400', text: 'text-gray-500 dark:text-gray-400' },
-  never: { dot: 'bg-gray-300 dark:bg-gray-600', text: 'text-gray-400 dark:text-gray-500' },
+  // Greys only; the label always says the status (colour never carries it alone).
+  active: { dot: 'bg-fg', text: 'text-fg' },
+  inactive: { dot: 'bg-fg-subtle', text: 'text-fg-muted' },
+  never: { dot: 'border border-fg-subtle', text: 'text-fg-subtle' },
 };
 
 export function ActivityStatusBadge({ status }: { status: ActivityStatus }) {
@@ -56,7 +57,7 @@ export function ActivityStatusBadge({ status }: { status: ActivityStatus }) {
   const style = STATUS_STYLES[status];
   return (
     <span className={`inline-flex items-center gap-1.5 text-caption font-semibold ${style.text}`}>
-      <span className={`w-1.5 h-1.5 rounded-full ${style.dot}`} aria-hidden="true" />
+      <span className={`size-1.5 rounded-pill ${style.dot}`} aria-hidden="true" />
       {t(`admin.status.${status}`)}
     </span>
   );

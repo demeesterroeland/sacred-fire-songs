@@ -1621,6 +1621,13 @@
 - [x] Tests: Vitest (owner rules, useAuth sign-out), BDD `ux-v2-guest-draft.feature` 1.1, E2E guest draft round trip
 - [x] Docs: design doc 2.43, user stories 2.27
 
+## Session November 23, 2026 (#485 group 7, song form)
+- [x] Red test first: `testing/unit/tests/design/soberSongForm.test.tsx`; `ux-v2-sober-song-form.feature` (`@unit`, `@e2e`)
+- [x] `SongForm`, `MediaEmbeds`, `YouTubeEmbed`, `SongDetailSkeleton` on semantic tokens; one accent button (Publish Song), Save as private `outline`; neutral link icons
+- [x] `PALETTE_BASELINE` 496 → 354
+- [x] Docs: design doc 2.53, design tokens 1.13, E2E overview 1.30
+- [ ] Owner decisions open: keep neutral link icons? category tag emojis (💧🔥🌎 …)?
+
 ## Session November 23, 2026 (#639, logbook follow-ups from the Nov 14 sync)
 - [x] Gherkin aligned with the code: Stories 1.1.5, 1.1.6 (path), 1.1.9, 1.2.1, 1.3.3, 2.3.2, 4.1.1, 4.1.5, 4.2.1; 6.1 rows #390, #398, #399, #403, #408 (`epic&user stories.md` 2.28)
 - [x] Rewritten issue Gherkin mirrored: #140 (3.1.3), #108 (3.4.4), #112 (4.5.1), #245 (4.6.2)

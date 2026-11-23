@@ -24,12 +24,12 @@ export default function AdminHeader() {
   if (parentTab) {
     return (
       <nav aria-label={t('admin.breadcrumb')} className="mb-8">
-        <div className="flex items-center gap-1.5 text-sm text-gray-500">
-          <Link href="/admin/users" className="hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+        <div className="flex items-center gap-1.5 text-meta text-fg-muted">
+          <Link href="/admin/users" className="hover:text-fg transition-colors">
             {t('admin.title')}
           </Link>
           <ChevronRight className="w-3.5 h-3.5 shrink-0" />
-          <Link href={parentTab.href} className="hover:text-gray-700 dark:hover:text-gray-300 transition-colors">
+          <Link href={parentTab.href} className="hover:text-fg transition-colors">
             {t(parentTab.labelKey)}
           </Link>
         </div>
@@ -40,10 +40,10 @@ export default function AdminHeader() {
   return (
     <>
       <header className="mb-8 md:mb-12">
-        <h1 className="text-3xl md:text-4xl font-bold tracking-tight mb-2 text-gray-900 dark:text-white">
+        <h1 className="text-title font-bold mb-2 text-fg">
           {t('admin.title')}
         </h1>
-        <p className="text-slate-500 dark:text-slate-400">
+        <p className="text-fg-muted">
           {t('admin.subtitle')}
         </p>
       </header>
@@ -57,7 +57,7 @@ export default function AdminHeader() {
                   key={href}
                   aria-disabled="true"
                   title={t('admin.planned')}
-                  className="flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-bold whitespace-nowrap shrink-0 bg-gray-100 dark:bg-gray-900 text-gray-400 dark:text-gray-600 border border-gray-200/50 dark:border-gray-800/50 cursor-not-allowed"
+                  className="flex min-h-tap items-center gap-1.5 px-4 py-1.5 rounded-pill text-meta font-bold whitespace-nowrap shrink-0 bg-surface text-fg-subtle border border-line cursor-not-allowed"
                 >
                   <Icon className="w-3.5 h-3.5" />
                   {t(labelKey)}
@@ -70,10 +70,10 @@ export default function AdminHeader() {
                 key={href}
                 href={href}
                 aria-current={isActive ? 'page' : undefined}
-                className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-sm font-bold transition-all whitespace-nowrap shrink-0 ${
+                className={`flex min-h-tap items-center gap-1.5 px-4 py-1.5 rounded-pill text-meta font-bold transition-colors whitespace-nowrap shrink-0 ${
                   isActive
-                    ? 'bg-gray-900 dark:bg-white text-white dark:text-gray-950'
-                    : 'bg-gray-200/80 dark:bg-gray-800/80 text-gray-500 dark:text-gray-400 hover:bg-gray-300 dark:hover:bg-gray-700 hover:text-gray-900 dark:hover:text-white border border-gray-300/50 dark:border-gray-700/50'
+                    ? 'bg-chip-active text-on-chip-active'
+                    : 'bg-chip text-on-chip hover:bg-line border border-line'
                 }`}
               >
                 <Icon className="w-3.5 h-3.5" />
