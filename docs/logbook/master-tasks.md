@@ -1613,3 +1613,10 @@
 - [x] The conflict comment lists the conflicting files; the manual start (`gh workflow run`) and the conflict procedure are documented
 - [x] Tests: `@story-5.1.9` contract step (TDD), ci-gate 29/29
 - [x] Docs: git-workflow 1.9, development-workflow 2.1, design doc 2.42, user stories 2.26
+
+## Session November 15, 2026 (#607, Add Song draft on shared devices)
+- [x] The draft records its owner; a member's draft is only restored for that member, otherwise it is removed
+- [x] Sign-out (`logout`, `SIGNED_OUT`) removes the draft next to the query cache and PDF cache
+- [x] A guest draft is kept through sign-in (#229); drafts in the old format are dropped
+- [x] Tests: Vitest (owner rules, useAuth sign-out), BDD `ux-v2-guest-draft.feature` 1.1, E2E guest draft round trip
+- [x] Docs: design doc 2.43, user stories 2.27

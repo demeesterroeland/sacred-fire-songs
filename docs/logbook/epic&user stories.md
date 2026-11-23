@@ -1,6 +1,6 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 2.26
+**Version:** 2.27
 **Status:** Living Document
 **Date:** Nov 23, 2026
 
@@ -125,6 +125,7 @@
 | **1.64** | Nov 5, 2026 | Epic 6.1: Story 6.1.22 (#406, G5.1) implemented on `feat/ux-v2` — unknown URLs show a real 404 page for every role; the proxy redirects guests to login only for `/account`, `/admin`, `/users`. Spec: `docs/testing/ux-v2-real-404.feature`. |
 | **2.25** | Nov 23, 2026 | Sync with GitHub after the Nov 14 audit (#599). Epic 6.1 stories #385–#418 [Implemented] in `develop` via #428; #418: manual screen reader pass validated by the owner; 6.1.36 (#488), 6.1.38 (#534), 6.1.39 (#566), 6.1.40 (#586) implemented; row 6.1.35 (#485, in progress) added; duplicate rows 1.79, 1.78, second 6.1.18 and second 6.1.30 removed. Epic 6.2 stories #509–#522, #542, #547, #569, #570 [Implemented] in `develop` via #585; row 6.2.26 (#598, planned) added. Status fixes: 2.1.1, 3.7.1, 3.1.4 family (GuestGate #410, PR #439), 3.1.3, 3.2.1, 3.4.1, 3.4.4, 3.5.1, 3.5.2, 4.1.9, 4.6.1, 4.6.2, 5.1.1, 5.1.6, 5.1.7, 5.1.8 (Partial: `latest` tag bug), 5.1.10 (hotfix #473 → #475 → #484), 5.1.12; 3.1.1 and 4.1.8 no longer marked implemented; 4.6.5 clash resolved (#372 is now 4.6.7). Private-infrastructure details removed from the changelog and Epic 5.1 table. Open PRs recorded as in review (not merged): #609–#620 (see `master-walkthrough.md`). |
 | **2.26** | Nov 23, 2026 | #608: why the 1.7.1 back-merge was done by hand (the workflow was not on `main` yet). Story 5.1.9 adds the scenario for the conflicting-files comment; Story 5.1.10 adds the finding. |
+| **2.27** | Nov 23, 2026 | #607: on a shared device, sign-out removes the Add Song draft and a member's draft is never shown to someone else; a guest keeps the draft through sign-in (Story 6.1.27). |
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
 
