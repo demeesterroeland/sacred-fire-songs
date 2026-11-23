@@ -14,9 +14,9 @@ const MediaEmbeds: React.FC<MediaEmbedsProps> = ({ youtubeUrl, spotifyUrl, sound
     return (
         <div className="space-y-6">
             {youtubeUrl && (
-                <div className="bg-gray-100/50 dark:bg-black/20 rounded-xl overflow-hidden shadow-lg border border-gray-200 dark:border-white/5">
-                    <div className="p-3 bg-gray-100 dark:bg-white/5 border-b border-gray-200 dark:border-white/5 flex items-center gap-2">
-                        <span className="material-symbols-outlined text-red-500 text-sm">play_circle</span>
+                <div className="bg-surface rounded-panel overflow-hidden border border-line">
+                    <div className="p-3 bg-surface-2 border-b border-line flex items-center gap-2">
+                        <span className="material-symbols-outlined text-fg-muted text-sm">play_circle</span>
                         <h3 className="text-meta font-semibold text-fg-muted">YouTube</h3>
                     </div>
                     <div className="aspect-video">
@@ -34,9 +34,9 @@ const MediaEmbeds: React.FC<MediaEmbedsProps> = ({ youtubeUrl, spotifyUrl, sound
             )}
 
             {soundcloudUrl && (
-                <div className="bg-gray-100/50 dark:bg-black/20 rounded-xl overflow-hidden shadow-lg border border-gray-200 dark:border-white/5">
-                    <div className="p-3 bg-gray-100 dark:bg-white/5 border-b border-gray-200 dark:border-white/5 flex items-center gap-2">
-                        <span className="material-symbols-outlined text-[#ff5500] text-sm">cloud</span>
+                <div className="bg-surface rounded-panel overflow-hidden border border-line">
+                    <div className="p-3 bg-surface-2 border-b border-line flex items-center gap-2">
+                        <span className="material-symbols-outlined text-fg-muted text-sm">cloud</span>
                         <h3 className="text-meta font-semibold text-fg-muted">SoundCloud</h3>
                     </div>
                     {/* SoundCloud embed logic often requires API call if just a track URL, 
@@ -59,9 +59,9 @@ const MediaEmbeds: React.FC<MediaEmbedsProps> = ({ youtubeUrl, spotifyUrl, sound
             )}
 
             {spotifyUrl && (
-                <div className="bg-gray-100/50 dark:bg-black/20 rounded-xl overflow-hidden shadow-lg border border-gray-200 dark:border-white/5">
-                    <div className="p-3 bg-gray-100 dark:bg-white/5 border-b border-gray-200 dark:border-white/5 flex items-center gap-2">
-                        <span className="material-symbols-outlined text-[#1db954] text-sm">radio</span>
+                <div className="bg-surface rounded-panel overflow-hidden border border-line">
+                    <div className="p-3 bg-surface-2 border-b border-line flex items-center gap-2">
+                        <span className="material-symbols-outlined text-fg-muted text-sm">radio</span>
                         <h3 className="text-meta font-semibold text-fg-muted">Spotify</h3>
                     </div>
                     <div className="h-[152px]">
