@@ -99,3 +99,19 @@ Then('it counts palette classes in app\\/, components\\/ and lib\\/', function (
     fs.rmSync(root, { recursive: true, force: true });
   }
 });
+
+// Story 6.1.35 (#485), group 7 — docs/testing/ux-v2-sober-song-form.feature. The rendered buttons are covered in
+// testing/unit/tests/design/soberSongForm.test.tsx.
+Given('the song form source', function () {});
+
+Then('Publish Song is the single accent button and Save as private is a neutral outline button', function () {
+  const src = fs.readFileSync(path.join(ROOT, 'components/song/SongForm.tsx'), 'utf8');
+  assert.equal((src.match(/variant="primary"/g) ?? []).length, 1);
+  assert.match(src, /variant="outline"/);
+});
+
+Then('the YouTube, Spotify and SoundCloud icons carry no brand colour', function () {
+  const form = fs.readFileSync(path.join(ROOT, 'components/song/SongForm.tsx'), 'utf8');
+  const embeds = fs.readFileSync(path.join(ROOT, 'components/song/MediaEmbeds.tsx'), 'utf8');
+  assert.doesNotMatch(form + embeds, /#ff0000|#1db954|#ff5500|\btext-red-500\b/i);
+});
