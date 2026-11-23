@@ -1,6 +1,6 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 2.28
+**Version:** 2.29
 **Status:** Living Document
 **Date:** Nov 23, 2026
 
@@ -127,6 +127,7 @@
 | **2.26** | Nov 23, 2026 | #608: why the 1.7.1 back-merge was done by hand (the workflow was not on `main` yet). Story 5.1.9 adds the scenario for the conflicting-files comment; Story 5.1.10 adds the finding. |
 | **2.27** | Nov 23, 2026 | #607: on a shared device, sign-out removes the Add Song draft and a member's draft is never shown to someone else; a guest keeps the draft through sign-in (Story 6.1.27). |
 | **2.28** | Nov 23, 2026 | #639 (leftovers of the #599 sync): Gherkin aligned with the code for Stories 1.1.5 (guest draft banner, no join-our-circle modal), 1.1.6 (test path), 1.1.9 (bar hidden from `lg`, menu button and avatar), 1.2.1 (no dashboard, no infinite scroll), 1.3.3 (no back arrow; code fence closed so 1.3.5 renders), 2.3.2 (search options window, no Theme or Rhythm), 4.1.1 (New playlist field), 4.1.5 (Get Link in the menu, private playlists), 4.2.1 (footer per 4.2.3, 200-song limit without Premium) and the 6.1 rows #390 (six lyric steps, 15–28 px), #398 / #399 (My recordings), #403 (bell badge, no avatar badge) and #408 (three bottom items, `/explore` redirects to `/songs`). Rewritten issue Gherkin mirrored for Stories 3.1.3 (#140), 3.4.4 (#108), 4.5.1 (#112) and 4.6.2 (#245). Issue numbers added to the rows 3.4.2, 3.4.3, 3.4.5, 3.4.6, 3.6.1, 4.1.x, 4.2.x, 4.3.1 and 4.5.1; Epic 3.6 shows #257 as reopened and #275–#277 as not started; Epic 4.3 notes that `feat/offline-library` (#357) was stale (#606 is step 0). Not changed, waiting for the owner: the Roles & Permissions table, the 4.6.5 / 4.6.7 numbering in GitHub, the placement of #481 (see the PR description). #267, #356 and #266 are test-infrastructure chores (docs/testing, CI, test helpers), not stories, so they have no row here. The code fence of Story 1.3.3 is closed and the unclosed I18N block of Story 3.7.1 is closed, so Epics 2.1 to 3.7 render as text again. |
+| **2.29** | Nov 23, 2026 | #642 follow-up (owner answers): the Roles & Permissions Summary now matches the code. The database role enum is `admin`, `expert`, `member`, `musician` (legacy) and `gatekeeper`; `is_musician` is derived (`role IN ('musician','expert')`), not a profile setting. New Musician / Expert column; Transpose is for musician, expert and admin only (`canTranspose`), not for members or gatekeepers. Unbuilt rows marked "planned (#…)": flag songs (#106), edit any song's metadata (#107), merge duplicates (#108, partial through link-as-version #512), feature playlists (#109), Manage Users & Roles (view-only; #275–#277), Sheet Music / ABC (Story 2.1.2). Built: public-playlist curation (#197), linking songs you own (#512). Epic 3.5 note fixed (the "profile setting" idea is closed as not planned, Stories 3.5.1 and 3.5.2). Story 4.6.8 [Planned] added for #481 (Library › Shared); the GitHub issue is unchanged. #372 is titled Story 4.6.7 on GitHub; #267, #356 and #266 stay chores with no row. |
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
 
@@ -796,9 +797,7 @@ Scenario: Member attempts to edit another user's Public Playlist
 
 ### Epic 3.5: Musician Profile Setting
 
-> **Note:** The `musician` role has been removed from the role hierarchy. Playing an instrument and reading chords is a personal skill, not a trust level. Members self-declare this via their profile.
->
-> Role hierarchy: **Guest → Member → Gatekeeper → Admin**
+> **Note (corrected Nov 23, 2026):** Both stories of this epic are closed as not planned. There is no musician profile setting and no `is_musician` column to toggle. The role is stored on the profile (`profiles.role`: `admin`, `expert`, `member`, `musician` (legacy), `gatekeeper`), and `is_musician` is only derived (`role IN ('musician','expert')`) for the musician badge. Transpose follows the role (`canTranspose`: musician, expert, admin). The Gherkin below is kept as the record of the dropped idea. See the Roles & Permissions Summary.
 
 **Story 3.5.1: [Closed, not planned]** (#110) As a Member, I want to indicate in my profile that I play an instrument and can read chord notation, so that the app shows me musician-focused features like transpose controls and sheet music.
 
@@ -1553,6 +1552,39 @@ Scenario: Reordering shared takes persists per user without affecting others
   When "Carlos" reorders the shared recording to the top of his list
   Then the new order is saved to Carlos's personal recording order
   And "Maya" continues to see the recording in her original order
+```
+
+**Story 4.6.8: [Planned]** (#481) As a Member, I want one Library page "Shared" that shows the recordings others shared with me and the recordings I shared with others, so that I find every share in one place.
+
+> Only recordings can be shared with another member today (`recording_shares`); there is no way to share a song or a playlist. Sharing songs and playlists would need a sharing model first and would be a separate story. **Done today:** two separate gated pages, `/library/shared` (takes shared with me) and `/library/shared-by-me` (my shared takes), plus the notification bell (#373). **Remaining:** one Library entry **Library › Shared** with two titled lists, each with its count (styled like the History, New and Artists headings), "Shared by me" showing whom each take is shared with (or "public"), removal of the repeated "Shared with me" row under the Library tabs if it still shows, and i18n in all 8 locales. Related: #399, #403, #420.
+
+```gherkin
+Feature: Library › Shared
+
+  Scenario: No repeated row
+    Given I am signed in
+    When I open any Library tab
+    Then the "Shared with me" row is not shown under the tabs
+    And the Library offers a "Shared" entry
+
+  Scenario: Shared with me
+    Given another member shared a recording with me
+    When I open Library › Shared
+    Then I see it under "Shared with me" with who shared it
+
+  Scenario: Shared by me
+    Given I shared a recording with others
+    When I open Library › Shared
+    Then I see it under "Shared by me" with whom it is shared
+
+  Scenario: Unread shares
+    Given a recording was shared with me that I have not opened
+    Then the bell and the "Shared" entry show it as new
+
+  Scenario: Guest
+    Given I am not signed in
+    When I open Library › Shared
+    Then I am asked to sign in
 ```
 
 ## Phase 5: Engineering Excellence
@@ -2491,39 +2523,41 @@ Scenario: Counts respect what I may read
 
 ## Roles & Permissions Summary
 
+> **Updated Nov 23, 2026 (#642 follow-up), checked against the code.**
+> **Database role** (`profiles.role`, enum `user_role`): `admin`, `expert`, `member`, `musician` (legacy name, kept for existing accounts) and `gatekeeper`. A guest has no account.
+> **Musician / Expert** is one column: `is_musician` is derived (`role IN ('musician','expert')`, view `public_profiles`), not a profile setting. A member cannot switch it on; changing a role in the app is planned (#277).
+> A gatekeeper has the Member rights (not transpose) plus the Gatekeeper rows below. Only `admin` opens `/admin/*`.
+> Status: ✅ built, ❌ not allowed, **planned (#…)** = intended for that role but not built yet.
 
-> **Role hierarchy:** Guest → Member → Gatekeeper → Admin
-> **Musician** is a profile setting (`is_musician`), not a role. Any Member can self-enable it.
+| Feature / Action | Guest | Member | Musician / Expert | Gatekeeper | Admin |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **Browse & Search Songs** | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **View Chords & Lyrics** | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Listen to Audio/Video** | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Play Melody (Synth)** | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Favorite Songs** | ❌ | ✅ | ✅ | ✅ | ✅ |
+| **Vote on Versions** | ❌ | ✅ | ✅ | ✅ | ✅ |
+| **Add/Create Songs** | ❌ | ✅ | ✅ | ✅ | ✅ |
+| **Edit Own Songs** | ❌ | ✅ | ✅ | ✅ | ✅ |
+| **Create/Edit Setlists** | ❌ | ✅ | ✅ | ✅ | ✅ |
+| **Export/Print PDF** | ❌ | ✅ | ✅ | ✅ | ✅ |
+| **Submit New Version** | ❌ | ✅ | ✅ | ✅ | ✅ |
+| **Record & Store Private Audio** | ❌ | ✅ | ✅ | ✅ | ✅ |
+| **Install as App (PWA)** | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **Transpose Chords** (`canTranspose`) | ❌ | ❌ | ✅ | ❌ | ✅ |
+| **Sheet Music / ABC Notation** | ❌ | ❌ | planned (Story 2.1.2) | ❌ | planned (Story 2.1.2) |
+| **Edit/Reorder Any Public Playlist** (#197) | ❌ | ❌ | ❌ | ✅ | ✅ |
+| **Link a Duplicate Song as a Version** (#512; gatekeeper only on songs they own) | ❌ | ❌ | ❌ | ✅ (own songs) | ✅ (any song) |
+| **Edit Metadata & Links (any song)** | ❌ | ❌ | ❌ | planned (#107) | ✅ |
+| **Flag Songs (needs improvement, duplicate)** | ❌ | ❌ | ❌ | planned (#106) | planned (#106) |
+| **Merge Duplicate Songs** | ❌ | ❌ | ❌ | planned (#108; partial through link-as-version) | planned (#108; partial through link-as-version) |
+| **Feature / Unfeature Playlists** | ❌ | ❌ | ❌ | planned (#109) | planned (#109) |
+| **Edit Lyrics/Chords (any song)** | ❌ | ❌ | ❌ | ❌ | ✅ |
+| **Delete Songs** | ❌ | ❌ | ❌ | ❌ | ✅ |
+| **View Users Overview & Details** (#258) | ❌ | ❌ | ❌ | ❌ | ✅ |
+| **Manage Users & Roles** (invite, suspend, change role) | ❌ | ❌ | ❌ | ❌ | planned (#275–#277; the overview is view-only) |
 
-| Feature / Action | Guest | Member | Gatekeeper | Admin |
-| :--- | :---: | :---: | :---: | :---: |
-| **Browse & Search Songs** | ✅ | ✅ | ✅ | ✅ |
-| **View Chords & Lyrics** | ✅ | ✅ | ✅ | ✅ |
-| **Listen to Audio/Video** | ✅ | ✅ | ✅ | ✅ |
-| **Play Melody (Synth)** | ✅ | ✅ | ✅ | ✅ |
-| **Favorite Songs** | ❌ | ✅ | ✅ | ✅ |
-| **Vote on Versions** | ❌ | ✅ | ✅ | ✅ |
-| **Add/Create Songs** | ❌ | ✅ | ✅ | ✅ |
-| **Edit Own Songs** | ❌ | ✅ | ✅ | ✅ |
-| **Create/Edit Setlists** | ❌ | ✅ | ✅ | ✅ |
-| **Export/Print PDF** | ❌ | ✅ | ✅ | ✅ |
-| **Submit New Version** | ❌ | ✅ | ✅ | ✅ |
-| **Transpose Chords** *(requires is_musician)* | ❌ | ✅¹ | ✅¹ | ✅ |
-| **Sheet Music / ABC Notation** *(requires is_musician)* | ❌ | ✅¹ | ✅¹ | ✅ |
-| **Edit Metadata & Links (any song)** | ❌ | ❌ | ✅ | ✅ |
-| **Flag Songs (needs improvement, duplicate)** | ❌ | ❌ | ✅ | ✅ |
-| **Merge Duplicate Songs** | ❌ | ❌ | ✅ | ✅ |
-| **Feature / Unfeature Playlists** | ❌ | ❌ | ✅ | ✅ |
-| **Edit/Reorder Any Public Playlist** | ❌ | ❌ | ✅ | ✅ |
-| **Edit Lyrics/Chords (any song)** | ❌ | ❌ | ❌ | ✅ |
-| **Delete Songs** | ❌ | ❌ | ❌ | ✅ |
-| **Manage Users & Roles** | ❌ | ❌ | ❌ | ✅ |
-| **Install as App (PWA)** | ✅ | ✅ | ✅ | ✅ |
-| **Record & Store Private Audio** | ❌ | ✅ | ✅ | ✅ |
-
-
-
-*¹ Only when `is_musician = true` on the user's profile (self-declared setting)*
+*Musician and Expert have the same rights; "musician" is the legacy role name. Members and gatekeepers cannot transpose (`canTranspose` in `lib/reader/transpose.ts`).*
 
 
 **Story 1.1.8: [Implemented]** As a Member, I want my new song drafts to be saved automatically to my browser's local storage so that I don't lose my work if I navigate away.
