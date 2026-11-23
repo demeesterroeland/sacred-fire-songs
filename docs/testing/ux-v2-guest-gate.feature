@@ -1,5 +1,6 @@
-# Version: 1.3 | Date: Nov 15, 2026
+# Version: 1.4 | Date: Nov 23, 2026
 # Changelog
+# 1.4 | Nov 23, 2026 | #600: Drafts gate for guests on /songs?status=draft (GuestGate `drafts` instead of the empty state; supersedes the empty-state expectation of #232).
 # 1.3 | Nov 15, 2026 | #600: Favorites gate for guests on /songs?favorites=true; every sign-in link and the proxy redirect keep next= (path and query). Drafts (?status=draft) waits for an owner decision (#232).
 # 1.2 | Nov 6, 2026 | Story 6.1.5 (#389): the deep-link example uses ?tab=preferences, because ?tab=privacy now opens Profile (hidden tab).
 # 1.1 | Nov 5, 2026 | #410 review fixes: hardened next= validation at every consumer; favourites gate on the heart; add-to-playlist gets its own feature key.
@@ -34,9 +35,16 @@ Feature: UX v2 GuestGate on every members-only screen
     And the sign-in link is "/auth/login?next=%2Fsongs%3Ffavorites%3Dtrue"
 
   @unit @bug-600
-  Scenario: Drafts for a guest are not gated yet (owner decision pending, #232)
+  Scenario: A guest on Drafts sees the gate and returns there
     Given a signed-out guest
     When they open the songs view "/songs?status=draft"
+    Then the songs view shows the GuestGate for "drafts"
+    And the sign-in link is "/auth/login?next=%2Fsongs%3Fstatus%3Ddraft"
+
+  @unit @bug-600
+  Scenario: A guest on the plain song list sees no gate
+    Given a signed-out guest
+    When they open the songs view "/songs"
     Then the songs view shows no GuestGate
 
   @unit @bug-600

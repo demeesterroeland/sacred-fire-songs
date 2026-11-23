@@ -1080,6 +1080,8 @@ const ru: Partial<Record<TranslationKey, string>> = {
   'guestGate.addToPlaylist.reason': 'Избранное и плейлисты живут в вашем аккаунте и следуют за вами на любом устройстве.',
   'guestGate.favourites.title': 'Войдите, чтобы сохранять избранное',
   'guestGate.favourites.reason': 'Избранные песни хранятся в вашем аккаунте и следуют за вами на любом устройстве.',
+  'guestGate.drafts.title': 'Войдите, чтобы сохранять личные песни',
+  'guestGate.drafts.reason': 'Личные песни хранятся в вашем аккаунте: их видите только вы, и они следуют за вами на любом устройстве.',
   'sharedWithMe.unreadCount': 'Новых: {count}',
   'sharedWithMe.title': 'Поделились со мной',
   "sharedByMe.title": "Мои публикации",

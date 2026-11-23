@@ -37,9 +37,9 @@ describe('signInHref / safeNextPath', () => {
 });
 
 describe('GuestGate reason keys', () => {
-  it('covers add-to-playlist, edit, history, new playlist, new songs, settings, profile, smart playlists, recorder, sharing and favourites', () => {
+  it('covers add-to-playlist, edit, history, new playlist, new songs, settings, profile, smart playlists, recorder, sharing, favourites and drafts', () => {
     expect([...GUEST_GATE_FEATURES].sort()).toEqual(
-      ['addToPlaylist', 'edit', 'favourites', 'history', 'newPlaylist', 'newSongs', 'profile', 'recorder', 'settings', 'sharedByMe', 'sharedWithMe', 'sharing', 'smartPlaylists'],
+      ['addToPlaylist', 'drafts', 'edit', 'favourites', 'history', 'newPlaylist', 'newSongs', 'profile', 'recorder', 'settings', 'sharedByMe', 'sharedWithMe', 'sharing', 'smartPlaylists'],
     );
   });
 
