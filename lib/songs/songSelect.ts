@@ -42,7 +42,6 @@ export const SONG_SELECT = `
             categories (
               name,
               slug,
-              emoji,
               parent:parent_id(name, slug)
             )
           )

@@ -95,7 +95,6 @@ export default function TagSelector({
           const tagObj = categories.find((c) => c.slug === tagSlug || c.id === tagSlug);
           return (
             <Chip key={tagSlug} selected onClick={() => toggleTagSlug(tagSlug)}>
-              {tagObj?.emoji && <span aria-hidden className="leading-none">{tagObj.emoji}</span>}
               {tagObj?.name || categoryDisplayName(tagSlug, taxonomy, categories)}
             </Chip>
           );
@@ -157,7 +156,6 @@ export default function TagSelector({
                   const isSelected = tags.includes(cat.slug) || tags.includes(cat.id);
                   return (
                     <Chip key={cat.id} selected={isSelected} onClick={() => toggleTagSlug(cat.slug)}>
-                      {cat.emoji && <span aria-hidden className="leading-none">{cat.emoji}</span>}
                       {cat.name}
                       {cat.song_count !== undefined && ' '}
                       {cat.song_count !== undefined && (
