@@ -1,6 +1,6 @@
 # Gitflow CI/CD acceptance specification — Epic 5.1
-# Version: 1.1 | Date: Nov 23, 2026
-# Changelog: 1.1 (Nov 23, 2026) reworded a comment on the deferred 5.1.8 scenario; 1.0 first version.
+# Version: 1.2 | Date: Nov 24, 2026
+# Changelog: 1.2 (Nov 24, 2026) the PDF feature file is now playlist-pdf-export.feature (#573); 1.1 (Nov 23, 2026) reworded a comment on the deferred 5.1.8 scenario; 1.0 first version.
 # Plan: docs/plans/2026-10-30-gitflow-cicd-migration.md
 #
 # Tags:

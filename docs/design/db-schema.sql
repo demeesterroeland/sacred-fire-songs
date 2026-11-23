@@ -6,7 +6,7 @@
  ## Usage
  This script provides a complete setup for the "Sacred Fire Songs" database. 
  It consolidates the initial schema and all subsequent migrations up to November 24, 2026.
- (v3.15: setlist renamed to playlist, #573, migration 20261124120000_rename_setlist_to_playlist.sql: tables playlists / playlist_items, column playlist_items.playlist_id, function fn_can_edit_playlist(p_playlist_id), the 12 RLS policies, the indexes and constraints, and the bodies of fn_song_link_summary / fn_link_song_as_version; the rows, ids, access rules and grants are unchanged and no compatibility views are kept. Older changelog lines below keep the names of their time).
+ (v3.15: setlist renamed to playlist, #573, migration 20261124120000_rename_setlist_to_playlist.sql: tables playlists / playlist_items, column playlist_items.playlist_id, function fn_can_edit_playlist(p_playlist_id), the 12 RLS policies, the indexes and constraints, and the bodies of fn_song_link_summary / fn_link_song_as_version; the rows, ids, access rules and grants are unchanged and no compatibility views are kept; the script also gains the three playlist indexes idx_playlists_owner_id, idx_playlist_items_playlist_id and idx_playlist_items_song_version_id that migration 20260130030000 created but the script lacked. Older changelog lines below keep the names of their time).
  (v3.14: merge of origin/develop into feat/ux-v3; the fresh-install schema already includes the role column from migration 20261113120000_public_profiles_role.sql; no additional schema changes).
  (v3.13: previous merge sync; the schema of v3.12 is added to v3.11, nothing else changes).
  (v3.12: public_profiles gains role (NULL for a guest), Story 6.1.38, migration 20261113120000_public_profiles_role.sql; develop 3.9).

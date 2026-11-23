@@ -945,7 +945,7 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'pdf.continued': '{title} (hinallan)',
   'pdf.playlist': 'Lista: {title}',
   'pdf.untitledSong': 'Mana sutiyuq taki',
-  'pdf.untitledPlaylist': 'Takikuna ñiqi',
+  'pdf.untitledPlaylist': 'Lista',
 
   // ─── Administration (#259) ──────────────────────────────────────────────
   'nav.administration': 'Administración',
