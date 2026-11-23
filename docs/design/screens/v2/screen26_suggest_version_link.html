@@ -1,5 +1,5 @@
 <!--
-**Version:** 0.1
+**Version:** 0.2
 **Status:** Draft for owner review (Story 6.2.26, #598)
 **Date:** Nov 23, 2026
 
@@ -7,6 +7,7 @@
 
 | Version | Date | Description of Changes |
 | ----- | ----- | ----- |
+| **0.2** | Nov 23, 2026 | Review round (Claude Opus): 44 px targets for links, Segmented pattern (radiogroup, 44 px, underline) for the queue segments, `--line-strong` defined per theme, bell label matches the badge, preview lists categories and catalog keys, new screens: user menu with badge, reviewed list (Reopen, Closed), empty state. |
 | **0.1** | Nov 23, 2026 | First mockup: suggest sheet (pick, confirm), review queue, review sheet with link preview, member's own list, bell notification. Sober greys, one accent. Plan: `docs/plans/2026-11-23-598-version-suggestion.md`. |
 -->
 <!DOCTYPE html>
@@ -20,6 +21,9 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&display=swap">
 <link rel="stylesheet" href="tokens.css">
 <style>
+:root { --line-strong: #8a857f; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --line-strong: #6f6a64; } }
+:root[data-theme="dark"] { --line-strong: #6f6a64; }
 *, *::before, *::after { box-sizing: border-box; }
 html { -webkit-text-size-adjust: 100%; }
 body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font-sans); font-size: var(--fs-body); line-height: var(--lh-body); }
@@ -87,12 +91,12 @@ button.row:hover { background: var(--surface-2); }
 .status { font-size: var(--fs-caption); font-weight: var(--fw-semibold); display: inline-flex; align-items: center; gap: 4px; color: var(--text-muted); white-space: nowrap; }
 .status svg.i { width: 14px; height: 14px; }
 .status.ok { color: var(--text); }
-.link-more { color: var(--text); text-decoration: underline; text-underline-offset: 3px; font-size: var(--fs-meta); }
+.link-more { color: var(--text); text-decoration: underline; text-underline-offset: 3px; font-size: var(--fs-meta); display: inline-flex; align-items: center; min-height: var(--tap); padding-inline: var(--s-1); }
 
 /* segmented */
 .seg { display: flex; margin: var(--s-3) var(--s-4); background: var(--surface-2); border-radius: var(--r-panel); padding: 2px; }
-.seg button { flex: 1; min-height: 40px; border-radius: 8px; font-size: var(--fs-meta); font-weight: var(--fw-medium); color: var(--text-muted); }
-.seg button[aria-selected="true"] { background: var(--bg); color: var(--text); font-weight: var(--fw-semibold); }
+.seg button { flex: 1; min-height: var(--tap); border-radius: 8px; font-size: var(--fs-meta); font-weight: var(--fw-medium); color: var(--text-muted); border-bottom: 2px solid transparent; }
+.seg button[aria-checked="true"] { background: var(--bg); color: var(--text); font-weight: var(--fw-semibold); border-bottom-color: var(--text); box-shadow: inset 0 0 0 1px var(--line-strong); }
 
 /* preview list */
 .preview { list-style: none; margin: var(--s-3) 0; padding: 0; font-size: var(--fs-meta); }
@@ -142,6 +146,9 @@ button.row:hover { background: var(--surface-2); }
       <button type="button" data-v="review" aria-pressed="false">5 Review</button>
       <button type="button" data-v="mine" aria-pressed="false">6 My list</button>
       <button type="button" data-v="bell" aria-pressed="false">7 Bell</button>
+      <button type="button" data-v="usermenu" aria-pressed="false">8 User menu</button>
+      <button type="button" data-v="reviewed" aria-pressed="false">9 Reviewed</button>
+      <button type="button" data-v="empty" aria-pressed="false">10 Empty</button>
     </span>
     <span class="mock-note">Story 6.2.26 (#598). Members suggest, gatekeepers and admins decide. Plan: docs/plans/2026-11-23-598-version-suggestion.md. Buttons in the mockup move between screens.</span>
   </div>
@@ -210,10 +217,10 @@ button.row:hover { background: var(--surface-2); }
   <!-- 4. Review queue (admin) -->
   <section class="view" data-view="queue" aria-label="Review queue" hidden>
     <div class="appbar"><h1>Link suggestions</h1><button class="icon-btn" aria-label="Notifications"><svg class="i" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21h4"/></svg></button></div>
-    <div class="seg" role="tablist" aria-label="Suggestions">
-      <button role="tab" aria-selected="true">To review (3)</button>
-      <button role="tab" aria-selected="false">Reviewed</button>
-      <button role="tab" aria-selected="false">Mine</button>
+    <div class="seg" role="radiogroup" aria-label="Suggestions">
+      <button role="radio" aria-checked="true" data-go="queue">To review (3)</button>
+      <button role="radio" aria-checked="false" data-go="reviewed">Reviewed</button>
+      <button role="radio" aria-checked="false" data-go="mine">Mine</button>
     </div>
     <ul class="rows">
       <li><button class="row" data-go="review">
@@ -255,6 +262,8 @@ button.row:hover { background: var(--surface-2); }
           <li>2 recordings</li>
           <li>1 playlist entry</li>
           <li>3 favourites, 1 merged into an existing one</li>
+          <li>2 categories added</li>
+          <li>1 catalog key cleared (the song that stays keeps its own)</li>
           <li>The title becomes an alias: Siento la medica</li>
         </ul>
         <label class="swap"><input type="checkbox"> Keep <strong>Siento la medica</strong> instead (it becomes the song that stays)</label>
@@ -309,12 +318,66 @@ button.row:hover { background: var(--surface-2); }
 
   <!-- 7. Bell -->
   <section class="view" data-view="bell" aria-label="Notification for the member" hidden>
-    <div class="appbar"><h1>Home</h1><button class="icon-btn" aria-label="3 unread notifications"><svg class="i" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21h4"/></svg><span class="badge" aria-hidden="true">2</span></button></div>
-    <div class="bell" role="menu" aria-label="Notifications">
+    <div class="appbar"><h1>Home</h1><button class="icon-btn" aria-label="2 unread notifications"><svg class="i" viewBox="0 0 24 24"><path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9"/><path d="M10 21h4"/></svg><span class="badge" aria-hidden="true">2</span></button></div>
+    <div class="bell" role="group" aria-label="Notifications">
       <h2>Notifications</h2>
       <div class="note-item"><span class="dot" aria-hidden="true"></span><div><strong>Siento la medica</strong> was linked as a version of <strong>Siento la medicina</strong>.<div class="subtle">2 hours ago</div></div></div>
       <div class="note-item"><span class="dot" aria-hidden="true"></span><div>Your suggestion for <strong>Pipe song 58</strong> was declined: Different songs.<div class="subtle">Yesterday</div></div></div>
       <div class="note-item" style="color:var(--text-muted)"><div>Dana shared a take of <strong>Danza del Cielo</strong> with you.<div class="subtle">3 days ago</div></div></div>
+    </div>
+  </section>
+
+  <!-- 8. User menu with the reviewer badge -->
+  <section class="view" data-view="usermenu" aria-label="User menu with badge" hidden>
+    <div class="appbar"><h1>Home</h1><button class="icon-btn" aria-label="User menu" aria-expanded="true"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg></button></div>
+    <div class="menu" role="group" aria-label="User menu">
+      <button>Profile</button>
+      <button data-go="queue"><span style="flex:1">Link suggestions</span><span class="status ok" aria-label="3 to review">3</span></button>
+      <button>Settings</button>
+      <hr>
+      <button>Sign out</button>
+    </div>
+    <p class="spec" style="position:absolute;bottom:0;padding:0 var(--s-4)">Reviewers see a number (not only a dot) next to the entry. Members see the same entry as "My suggestions" without a number. The label of the entry follows the role.</p>
+  </section>
+
+  <!-- 9. Reviewed list -->
+  <section class="view" data-view="reviewed" aria-label="Reviewed suggestions" hidden>
+    <div class="appbar"><h1>Link suggestions</h1></div>
+    <div class="seg" role="radiogroup" aria-label="Suggestions">
+      <button role="radio" aria-checked="false" data-go="queue">To review (3)</button>
+      <button role="radio" aria-checked="true" data-go="reviewed">Reviewed</button>
+      <button role="radio" aria-checked="false" data-go="mine">Mine</button>
+    </div>
+    <ul class="rows">
+      <li class="row"><div class="row-main">
+        <div class="row-title">Siente la medicina nai <span class="arrow">→</span> Siento la medicina</div>
+        <div class="meta">Carla · linked by Dana · Nov 12</div></div>
+        <span class="status ok"><svg class="i" viewBox="0 0 24 24"><path d="m5 12 5 5 9-10"/></svg>Linked</span></li>
+      <li class="row"><div class="row-main">
+        <div class="row-title">Pipe song 58 <span class="arrow">→</span> Pipe song 65</div>
+        <div class="meta">Ben · declined by Dana · Nov 9</div>
+        <div class="quote">Different songs: the second verse differs.</div></div>
+        <div style="text-align:end"><span class="status"><svg class="i" viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>Declined</span><br><button class="link-more" data-toast="Reopened" data-go="queue">Reopen</button></div></li>
+      <li class="row"><div class="row-main">
+        <div class="row-title">Siento la medica <span class="arrow">→</span> Siente la medicina nai</div>
+        <div class="meta">Anna · Nov 12</div>
+        <div class="quote">The songs were linked another way.</div></div>
+        <span class="status"><svg class="i" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8 12h8"/></svg>Closed</span></li>
+    </ul>
+    <p class="spec" style="padding:var(--s-4)">Reopen is for admins and only on declined rows. It is refused with a plain reason when the songs were linked or deleted meanwhile.</p>
+  </section>
+
+  <!-- 10. Empty state -->
+  <section class="view" data-view="empty" aria-label="Nothing to review" hidden>
+    <div class="appbar"><h1>Link suggestions</h1></div>
+    <div class="seg" role="radiogroup" aria-label="Suggestions">
+      <button role="radio" aria-checked="true" data-go="queue">To review (0)</button>
+      <button role="radio" aria-checked="false" data-go="reviewed">Reviewed</button>
+      <button role="radio" aria-checked="false" data-go="mine">Mine</button>
+    </div>
+    <div class="empty">
+      <p style="font-size:var(--fs-row);color:var(--text);margin:0 0 var(--s-2)">Nothing to review.</p>
+      <p class="meta" style="margin:0">You see suggestions for songs you own. An admin handles the rest.</p>
     </div>
   </section>
 
