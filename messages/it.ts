@@ -1078,6 +1078,8 @@ const it: Partial<Record<TranslationKey, string>> = {
   'guestGate.addToPlaylist.reason': 'I tuoi preferiti e le tue playlist vivono nel tuo account, così ti seguono su ogni dispositivo.',
   'guestGate.favourites.title': 'Accedi per salvare i preferiti',
   'guestGate.favourites.reason': 'I tuoi canti preferiti vivono nel tuo account, così ti seguono su ogni dispositivo.',
+  'guestGate.drafts.title': 'Accedi per salvare i canti privati',
+  'guestGate.drafts.reason': 'I canti privati vivono nel tuo account, così solo tu li vedi e ti seguono su ogni dispositivo.',
   'sharedWithMe.unreadCount': 'Nuove: {count}',
   'sharedWithMe.title': 'Condivisi con me',
   "sharedByMe.title": "Condiviso da me",

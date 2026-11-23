@@ -1085,6 +1085,8 @@ const qu: Partial<Record<TranslationKey, string>> = {
   'guestGate.addToPlaylist.reason': 'Munasqaykikunapas listaykikunapas cuentaykipi kanku, chaymi llapa aparatupi qatiykusunki.',
   'guestGate.favourites.title': 'Munasqakunata waqaychanaykipaq yaykuy',
   'guestGate.favourites.reason': 'Munasqa takiykikuna cuentaykipi kanku, chaymi llapa aparatupi qatiykusunki.',
+  'guestGate.drafts.title': 'Pakasqa takikunata waqaychanaykipaq yaykuy',
+  'guestGate.drafts.reason': 'Pakasqa takiykikuna cuentaykipi kanku, chaymi qanllapaq rikukun, llapa aparatupi qatiykusunki.',
   'sharedWithMe.unreadCount': 'Mosoq: {count}',
   'sharedWithMe.title': 'Ñoqaman qusqakuna',
   "sharedByMe.title": "Ñuqap rakisqay",
