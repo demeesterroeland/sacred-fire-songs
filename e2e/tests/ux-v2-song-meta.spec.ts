@@ -110,3 +110,40 @@ test('author and tags are links in both states; the chevron adds the rest', asyn
   await expect(toggle).toHaveAttribute('aria-expanded', 'false');
   await expect(links).toHaveCount(collapsed);
 });
+
+// #601 (#510): on a 390 px phone the open technical line shows every value whole, the beats (last) included.
+test('the technical line keeps the beats on screen on a phone', async ({ page }) => {
+  const client = new pg.Client({ connectionString: DATABASE_URL });
+  await client.connect();
+  // The random E2E seed sets no beats: give the public version with the longest Key · Capo · Tuning text long beats
+  // for this test, and put its old value back afterwards.
+  const { rows } = await client.query<{ id: string; version_id: string; beats: string | null }>(`
+    SELECT c.id, v.id AS version_id, v.beats
+      FROM public.compositions c
+      JOIN public.song_versions v ON v.composition_id = c.id
+     WHERE c.is_public AND length(v.content_chordpro) > 40
+     ORDER BY length(coalesce(v.key, '') || coalesce(v.tuning, '')) DESC, c.title
+     LIMIT 1`);
+  const target = rows[0];
+  // Fail, not skip, when the seed has no such song: a vacuous pass would hide a regression.
+  expect(target, 'seed has a public song with lyrics').toBeTruthy();
+  await client.query('UPDATE public.song_versions SET beats = $1 WHERE id = $2', ['8y4 then 6y3 to the end', target.version_id]);
+  try {
+    await page.goto(`/songs/${target.id}?version=${target.version_id}`);
+    await page.getByTestId('song-meta-line').click();
+    const line = page.getByTestId('song-technical-line');
+    await expect(line).toBeVisible();
+    await expect(line.getByTestId('song-technical-item').last()).toHaveText('Beats 8y4 then 6y3 to the end');
+    const outside = await line.evaluate((el) => {
+      const box = el.getBoundingClientRect();
+      return [...el.querySelectorAll('[data-testid="song-technical-item"]')]
+        .map((i) => i.getBoundingClientRect())
+        .filter((r) => r.right > box.right + 0.5 || r.left < box.left - 0.5).length;
+    });
+    expect(outside).toBe(0);
+    expect(await line.evaluate((el) => el.scrollWidth <= el.clientWidth + 1)).toBe(true);
+  } finally {
+    await client.query('UPDATE public.song_versions SET beats = $1 WHERE id = $2', [target.beats, target.version_id]);
+    await client.end();
+  }
+});

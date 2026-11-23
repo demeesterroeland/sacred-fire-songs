@@ -11,7 +11,8 @@
       "docs/testing/ux-v2-*.feature",
       "docs/testing/ux-v3-*.feature",
       "docs/testing/access-policies.feature",
-      "docs/testing/songbook-data-model.feature"
+      "docs/testing/songbook-data-model.feature",
+      "docs/testing/supabase-api-proxy.feature"
     ],
     "import": [
       "testing/bdd/support/**/*.ts",
@@ -38,7 +39,8 @@
       "docs/testing/ux-v2-*.feature",
       "docs/testing/ux-v3-*.feature",
       "docs/testing/access-policies.feature",
-      "docs/testing/songbook-data-model.feature"
+      "docs/testing/songbook-data-model.feature",
+      "docs/testing/supabase-api-proxy.feature"
     ],
     "import": [
       "testing/bdd/support/**/*.ts",

@@ -1,5 +1,6 @@
-# Version: 1.1 | Date: Nov 11, 2026
+# Version: 1.2 | Date: Nov 15, 2026
 # Changelog
+# 1.2 | Nov 15, 2026 | #601 (#488): Shared by me names the song and the member on each row; the E2E shares a take itself, so the list is never empty.
 # 1.1 | Nov 11, 2026 | Owner review (incl. validation: recordings count = songs, no Shared with me row on Library pages): section labels at the x of the search field; members get the same layout under six personal counts; one dark background.
 # 1.0 | Nov 10, 2026 | Story 6.1.36 (#488): Recently added on Home in the columns of the category grid and of /songs.
 @story-6.1.36
@@ -44,8 +45,10 @@ Feature: UX v2 Home grid
   @e2e
   Scenario: Shared by me
     Given I am a signed-in member
+    And I shared one of my recordings with another member
     When I open "Shared by me" from the home page
     Then I see one row per recording I shared, with the names of the members I shared it with
+    And that recording's row shows the song title and "Shared with" the member's name
     And the count on the home page equals the number of rows
 
   @e2e
