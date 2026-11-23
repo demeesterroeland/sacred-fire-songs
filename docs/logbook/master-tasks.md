@@ -1643,3 +1643,11 @@
 - [x] #372 renamed to "[Story 4.6.7]" on GitHub (done before this PR)
 - [x] #267, #356 and #266 stay chores, no rows (no change)
 - [ ] Planned, not built: flag songs (#106), edit any song's metadata (#107), merge (#108, partial via #512), feature playlists (#109), Manage Users & Roles (#275–#277), Sheet Music / ABC (Story 2.1.2)
+
+## Session November 23, 2026 (Story 6.2.26, #598, design: suggest a song as a version)
+- [x] Branch target checked: no PR targets `feat/ux-v3`, UX v3 is in `develop` via #585, so the work goes to `develop`
+- [x] Plan `docs/plans/2026-11-23-598-version-suggestion.md`: data model (`song_link_suggestions`, `song_link_audit.suggestion_id`), functions, row-level security, review queue UX, notifications, undo and audit, Gherkin, test plan, files
+- [x] Mockup `docs/design/screens/v2/screen26_suggest_version_link.html`
+- [x] Draft PR with the numbered open questions for the owner
+- [ ] Owner answers the open questions (split of #598 into three stories, gatekeeper scope, private songs, queue location)
+- [ ] Build test-first (feature file, helpers, migration, UI, 8 locales, docs) after the answers

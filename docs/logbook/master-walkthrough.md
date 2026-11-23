@@ -3644,3 +3644,14 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - `epic&user stories.md` 2.29: the Roles & Permissions Summary has a Musician / Expert column, no "musician is a profile setting" note, Transpose for musician, expert and admin only, and "planned (#…)" on the unbuilt rows (#106, #107, #108, #109, #275–#277, Story 2.1.2). The Epic 3.5 note says both stories are closed as not planned. Story 4.6.8 [Planned] (#481, Library › Shared) added with the issue's story and Gherkin; the GitHub issue is unchanged.
 - `docs/manual/roles-and-glossary.md` 0.14 carries the same table in short form; design doc 2.58 fixes the "Musician Setting" line and §5.2.
 - #372 was renamed "[Story 4.6.7]" on GitHub earlier; #267, #356 and #266 stay chores.
+
+## Session November 23, 2026 — #598: design for suggesting a song as a version (nothing built)
+
+- Branch target: `develop`. #498 records that UX v3 reached `develop` via #585; no open PR targets `feat/ux-v3` and the latest PRs all target `develop`. The remote `feat/ux-v3` is 34 commits behind and unused.
+- Plan `docs/plans/2026-11-23-598-version-suggestion.md` covers only the original story (suggest, review, notify). The two additions in the issue body (contributors keep editing their version, unlink my version) are proposed as separate stories.
+- Data model: table `song_link_suggestions` (statuses `open`, `accepted`, `declined`, `withdrawn`, `superseded`; title snapshots so a row survives the deleted source song; one open row per pair), `song_link_audit.suggestion_id`. All writes go through `SECURITY DEFINER` functions, members only read their own rows; reviewers read what they may act on (admin all; gatekeeper the open ones where they own both songs, the #512 rule).
+- Merge: a suggestion moves nothing. Accepting calls the existing link, whose body becomes a core function that also closes or re-points open suggestions before the source song is deleted (direct links too), so none points at a deleted song.
+- UX: "Suggest as a version of…" in the song menu for everyone who cannot link directly; a `/suggestions` page (queue for reviewers, "My suggestions" for members) from the user menu with a count badge; review sheet reuses `fn_preview_song_link`; Link or Decline (optional reason); decline can be reopened by an admin; link has no undo.
+- Notifications: the member gets a bell item when linked or declined; reviewers get the count badge only (no row per reviewer).
+- Mockup: `docs/design/screens/v2/screen26_suggest_version_link.html` (sober greys, one accent, seven screens).
+- Open questions (12) are in the draft PR for the owner. Not run: tests, Playwright, any migration.

@@ -162,4 +162,5 @@
 | **November 15, 2026** | **Fix/Privacy (#607)**: the Add Song draft records its owner and is removed at sign-out; a guest keeps the draft through sign-in; Vitest, BDD and E2E tests, docs. (estimate) | ~0.75 Hours | Completed |
 | **November 23, 2026** | **Docs (#639)**: logbook follow-ups from the Nov 14 sync: Gherkin aligned with the code (9 stories, 5 UX v2 rows), rewritten issue Gherkin mirrored, issue numbers and epic notes, three GitHub issue texts, review round. (estimate) | ~1.5 Hours | Completed |
 | **November 23, 2026** | **Docs (#642 follow-up)**: roles table checked against the code and rewritten (stories file, manual, design doc), Epic 3.5 note, Story 4.6.8 for #481. (estimate) | ~0.75 Hours | Completed |
-| **Total** | **Development + AI Collaboration** | **~278.5 Hours** | |
+| **November 23, 2026** | **Design (Epic 6.2, #598)**: suggest a song as a version of another song: branch-target check, plan (data model, RLS, queue UX, notifications, audit, Gherkin, open questions), HTML mockup, draft PR. Nothing built. (estimate) | ~1.5 Hours | Completed |
+| **Total** | **Development + AI Collaboration** | **~280 Hours** | |
