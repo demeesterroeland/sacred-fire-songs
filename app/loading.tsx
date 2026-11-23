@@ -32,7 +32,7 @@ export default function Loading() {
   }, []);
 
   return (
-    <div className="fixed inset-0 bg-gray-50 dark:bg-[#080000] flex flex-col items-center justify-center z-50">
+    <div className="fixed inset-0 bg-bg flex flex-col items-center justify-center z-50">
       {/* Rising embers */}
       <div className="fixed inset-0 pointer-events-none hidden dark:block">
         {embers.map((ember) => (
@@ -57,13 +57,13 @@ export default function Loading() {
           alt="Sacred Fire Songs"
           width={96}
           height={96}
-          className="rounded-2xl shadow-[0_0_40px_rgba(220,60,0,0.2)] dark:shadow-[0_0_40px_rgba(220,60,0,0.4)]"
+          className="rounded-panel"
           priority
         />
-        <h1 className="text-2xl font-semibold tracking-wide text-amber-900 dark:text-amber-100">
+        <h1 className="text-title font-semibold tracking-wide text-fg">
           Sacred Fire Songs
         </h1>
-        <p className="text-sm text-amber-700/80 dark:text-amber-900/80 tracking-widest uppercase">
+        <p className="text-meta text-fg-muted tracking-widest uppercase">
           Medicine Music
         </p>
       </div>
@@ -79,9 +79,8 @@ export default function Loading() {
         .loading-ember {
           position: absolute;
           bottom: -10px;
-          background: #f45d1a;
+          background: var(--accent);
           border-radius: 50%;
-          box-shadow: 0 0 10px #d9481e, 0 0 20px #f45d1a;
           pointer-events: none;
           animation: loading-ember-rise linear forwards;
         }

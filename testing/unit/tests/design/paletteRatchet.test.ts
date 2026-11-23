@@ -10,7 +10,7 @@ import path from 'node:path';
 import { describe, expect, it } from 'vitest';
 import { countPaletteClasses, PALETTE_DIRS, paletteUsage } from '@/lib/design/paletteAudit';
 
-const PALETTE_BASELINE = 129;
+const PALETTE_BASELINE = 22;
 
 describe('palette ratchet', () => {
   it('detects palette classes and hex colours, not semantic tokens', () => {
