@@ -205,6 +205,13 @@ Then(
   },
 );
 
+Then('it lists the conflicting files in a pull request comment', function (this: SongBddWorld) {
+  const script = runScripts(current(this)).join('\n');
+  assert.match(script, /git diff --name-only --diff-filter=U/, 'does not collect the conflicting files');
+  assert.match(script, /gh pr comment[^\n]*--body-file/, 'does not post the conflicting files as a comment');
+  assert.match(script, /issues\/comments\/\$COMMENT_ID/, 'posts a new conflict comment on every push instead of updating it');
+});
+
 Then('it never merges the pull request itself', function (this: SongBddWorld) {
   const wf = current(this);
   assert.doesNotMatch(runScripts(wf).join('\n'), /gh pr merge/, `${wf.file} merges the back-merge PR itself`);
