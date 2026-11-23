@@ -1,11 +1,12 @@
 # UX v2: Phone Validation Script
 
-**Version:** 1.44 | **Date:** Nov 9, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
+**Version:** 1.45 | **Date:** Nov 23, 2026 | **Epic:** 6.1 (#375) | **Branch:** `feat/ux-v2`
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 1.45 | Nov 23, 2026 | Precondition note: the screen reader pass (steps 6 and 7) was validated by the owner (#418). |
 | 1.44 | Nov 9, 2026 | UXA-071: new section Validation round 4; #407, #391, #388 and #395 steps follow it (five Library tabs, tags always links, two category columns, reader tools above the versions). |
 | 1.43 | Nov 8, 2026 | UXA-070: the song details button reads "Show details"; desktop titles wrap. |
 | 1.42 | Nov 8, 2026 | #388: no cards. Categories are rows with lines between them (UXA-069); the screenshots in steps 1 and 2 still show the earlier look. |
@@ -522,7 +523,7 @@ Each gate shows a greyed placeholder, a lock, a title, one sentence saying why, 
 
 ### #418 · G9.2 Accessibility audit of the song page and the Practice panel
 
-**Preconditions:** a 390 px phone; steps 1 to 5 need a keyboard (Bluetooth, or a desktop browser narrowed to 390 px); steps 6 and 7 need VoiceOver (iPhone) or TalkBack (Android). Run signed out once and as a member once, in light and in dark. The automated part (axe-core, keyboard journeys) ran in CI-style on a build and is described in `docs/ux-research/2026-11-06-a11y-audit.md`; **the screen reader pass has not been done by anyone yet**, steps 6 and 7 are it. The full checklist with a result column is section 5 of that file.
+**Preconditions:** a 390 px phone; steps 1 to 5 need a keyboard (Bluetooth, or a desktop browser narrowed to 390 px); steps 6 and 7 need VoiceOver (iPhone) or TalkBack (Android). Run signed out once and as a member once, in light and in dark. The automated part (axe-core, keyboard journeys) ran in CI-style on a build and is described in `docs/ux-research/2026-11-06-a11y-audit.md`; **the screen reader pass was validated by the owner** (steps 6 and 7). The full checklist with a result column is section 5 of that file.
 
 - [ ] 1. Open a song. Press **Tab** repeatedly. **Expected:** a visible focus ring moves through the header, the reader toolbar and the bar at the bottom (*Practice*, *Playlist*, *Like*) in reading order; **A−** and **A+** show a focus ring.
 - [ ] 2. Focus **Practice** and press **Enter**. **Expected:** the Practice panel opens and focus is inside it; the song page behind it is not reachable with Tab. Press **Tab** many times: focus stays in the panel (and the mini player bar if one is showing), then goes back to the start. **Shift+Tab** does the same backwards.
