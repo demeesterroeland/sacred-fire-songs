@@ -1,12 +1,13 @@
 # UX v2: Agent Decisions (ADR-lite)
 
-**Version:** 1.44 | **Date:** Nov 24, 2026 | **Epic:** 6.1 (#375)
+**Version:** 1.45 | **Date:** Nov 24, 2026 | **Epic:** 6.1 (#375)
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
-| 1.44 | Nov 24, 2026 | #573: setlist renamed to playlist in the decision text and identifiers (`fetchFavoritesPlaylistId`); the changelog rows above keep the old word. |
+| 1.45 | Nov 24, 2026 | #573: setlist renamed to playlist in the decision text and identifiers (`fetchFavoritesPlaylistId`); the changelog rows above keep the old word. |
+| 1.44 | Nov 24, 2026 | UXA-019 follow-up: tag and category emoji dropped everywhere, no greyscale emoji fallback (owner decision, #485). |
 | 1.43 | Nov 9, 2026 | UXA-071: validation round 4 (Library tabs, playlist sections, PDF in the row menu, private songs lighter, categories in two columns, tags always links, reader tools above the versions). |
 | 1.42 | Nov 8, 2026 | UXA-070: follow-ups from the cross-review of PRs #477 and #478. |
 | 1.41 | Nov 8, 2026 | UXA-069: flat Home and Library, no cards; private playlists show a lock. |
@@ -276,7 +277,8 @@ Choices the build agent made on its own during UX v2. Owner decisions (UXD-1 to 
 - **Date / story:** Nov 5, 2026 · #388 (G1.4)
 - **Context:** the story asks for monochrome icons and tags as plain text links with a count. Tags carried an emoji (🔥, 💧, country flags); emoji are always in colour.
 - **Options:** (a) keep the emoji next to the text; (b) drop the emoji on tags and keep only the category icon (Lucide, grey); (c) render the emoji in greyscale.
-- **Choice:** (b). Tags show name + grey count only. A category without a Lucide icon falls back to its emoji with the CSS `grayscale` filter. `TagPill` stays in use elsewhere (song rows, filters); only the home grid stops using it.
+- **Choice:** (b). Tags show name + grey count only. `TagPill` stays in use elsewhere (song rows, filters); only the home grid stops using it.
+- **Update Nov 24, 2026 (#485):** the owner dropped the emoji on tags and tag categories everywhere (`TagPill`, the search tag selector, the song form tag picker); the home grid no longer falls back to an emoji either. The `categories.emoji` column stays as data.
 - **Consequences:** the language tags no longer show flags on the home page; the language name carries the meaning.
 - **Confirm:** no
 

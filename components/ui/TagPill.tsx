@@ -7,7 +7,6 @@ import { BasePill } from './BasePill';
 
 export interface TagPillProps {
   label: string;
-  emoji?: string;
   variant?: 'badge' | 'filter' | 'selectable';
   selected?: boolean;
   count?: number;
@@ -20,10 +19,10 @@ export interface TagPillProps {
 /**
  * Category tag (Story 6.1.35, #485): one neutral style for every category. A selected `filter` or `selectable`
  * tag shows inverted greys; a selected `selectable` tag also shows a check, and toggles announce `aria-pressed`.
+ * No emoji: tag names are plain text (owner decision Nov 24, 2026).
  */
 export function TagPill({
   label,
-  emoji,
   variant = 'badge',
   selected = false,
   count,
@@ -41,11 +40,7 @@ export function TagPill({
       {variant === 'selectable' && selected && (
         <Check aria-hidden="true" className="w-3.5 h-3.5 shrink-0 stroke-[2.5]" />
       )}
-      {emoji ? (
-        <span aria-hidden="true" className="text-xs shrink-0 leading-none">{emoji}</span>
-      ) : variant === 'badge' ? (
-        <Tag aria-hidden="true" className="w-3 h-3 shrink-0 opacity-80" />
-      ) : null}
+      {variant === 'badge' && <Tag aria-hidden="true" className="w-3 h-3 shrink-0 opacity-80" />}
     </>
   );
 

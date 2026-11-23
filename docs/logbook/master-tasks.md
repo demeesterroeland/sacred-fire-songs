@@ -1652,6 +1652,15 @@
 - [ ] Owner answers the open questions (split of #598 into three stories, gatekeeper scope, private songs, queue location)
 - [ ] Build test-first (feature file, helpers, migration, UI, 8 locales, docs) after the answers
 
+## Session November 24, 2026 (#485, drop tag emojis)
+- [x] Owner decision Nov 24: tags and tag categories show no emoji (sober greyscale, one accent, no decoration)
+- [x] Red test first: `testing/unit/tests/design/noTagEmoji.test.tsx` (fails on the old code for `CategorySelector` and `TagSelector`)
+- [x] `TagPill` loses its `emoji` prop; `TagSelector` and `CategorySelector` draw the name only; `SongCard` / `Song` types, `SONGS_SELECT` and `songSelect.ts` no longer carry the category emoji
+- [x] DB column, seeds and migrations untouched (data may stay for now)
+- [x] Docs: design doc 2.59, design tokens 1.14, home mockup `screen24_home.html` 1.1
+- [x] `tsc`, `lint` (126 warnings, cap 132 unchanged), `npm run test` (2746), `test:bdd:unit`; `PALETTE_BASELINE` stays 0
+- [ ] Owner closes #485 after the PR merges (the PR says "Part of #485")
+
 ## Session November 24, 2026 (Chore #573, rename setlist to playlist)
 - [x] Scan of the local database and the UI for "setlist": only internal names, the PDF fallback title (`pdf.untitledPlaylist`, en/nl/fr/ru), the default PDF file name and one seed description were visible to users
 - [x] Migration `20261124120000_rename_setlist_to_playlist.sql`: tables, column, constraints, indexes, 12 policies, `fn_can_edit_playlist`, bodies of `fn_song_link_summary` / `fn_link_song_as_version`, safety check; no compatibility views
@@ -1659,7 +1668,7 @@
 - [x] `docs/design/db-schema.sql` v3.15 (replayed on a scratch database and compared with the migrated one)
 - [x] Mechanical rename in `types.ts`, `lib/`, `app/`, `hooks/`, tests, BDD steps, `e2e/`, `scripts/`, seeds; feature and steps file renamed to `playlist-pdf-export`
 - [x] New tests: `docs/testing/playlist-rename.feature` (@seed) and `schemaSongLink.test.ts` compares with the renamed old migration text
-- [x] Docs: design doc 2.59, epic doc 2.30, ux-v2 decisions 1.44, member guide 0.41, E2E overview 1.31, test matrix 1.7, README
+- [x] Docs: design doc 2.60, epic doc 2.30, ux-v2 decisions 1.45, member guide 0.41, E2E overview 1.31, test matrix 1.7, README
 - [x] tsc, lint, Vitest (2742), BDD unit and seed green locally
 - [ ] CI green, cross-review by claude-opus-5-5, owner merge
 - [ ] Follow-up: Supabase CLI 3.x rejects `[inbucket]` in `supabase/config.toml` (use `local_smtp`), separate chore

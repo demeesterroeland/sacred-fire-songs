@@ -3656,6 +3656,15 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - Mockup: `docs/design/screens/v2/screen26_suggest_version_link.html` (sober greys, one accent, seven screens).
 - Open questions (12) are in the draft PR for the owner. Not run: tests, Playwright, any migration.
 
+## Session November 24, 2026 — #485: tags lose their emoji
+
+- Owner decision (Nov 24): tags and tag categories render plain text, no emoji, as part of the sober greyscale design.
+- Render points removed: `TagPill` (the `emoji` prop; a `badge` keeps its grey `Tag` icon, a selected `selectable` tag keeps its check), `TagSelector` (active chips and dropdown list) and `CategorySelector` (no longer passes `emoji`). The song list data no longer carries the category emoji (`SongCard` and `Song` types, the category mapping in `lib/songs/queries.ts`, `SONGS_SELECT` and `songSelect.ts`).
+- Not changed: the `categories.emoji` column, seeds and migrations; the taxonomy types and queries still read it (unused by the UI).
+- Test: `testing/unit/tests/design/noTagEmoji.test.tsx` renders `TagPill`, `CategorySelector` and `TagSelector` with emoji in the category data and asserts no pictograph reaches the DOM; two of its four tests fail on the old code.
+- Docs: design doc 2.59, design tokens 1.14, mockup `screen24_home.html` 1.1 (emoji dropped from the category names).
+- Cross-review (claude-opus-5-5): no blocking findings. Follow-ups fixed: the unused `lib/iconUtils.tsx` (emoji fallback) is deleted, UXA-019 in `docs/ux-research/ux-v2-decisions.md` (1.44) notes the Nov 24 decision, and the test now also checks the `badge` Tag icon and the check icon by class.
+
 ## Session November 24, 2026 — #573: setlist renamed to playlist (schema, code, docs)
 
 - Scan first: in the local database the user can only meet the word through `pdf.untitledPlaylist` ("Setlist" in en, nl and fr, "Сет-лист" in ru; now "Playlist"), the default PDF file name `setlist.pdf` (now `playlist.pdf`) and one seed description. Rows written by users (titles, descriptions) are left alone; production was not touched or scanned.
