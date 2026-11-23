@@ -161,6 +161,22 @@ Feature: Gitflow branching and CI/CD pipeline
     And it tags release images with the release version
     And no image is tagged "latest"
 
+  # #602: "no image is tagged" checks the tags docker/metadata-action would
+  # generate (testing/support/metadataTags.ts), not the workflow text: with the
+  # default flavor latest=auto it adds "latest" on its own for a release tag.
+  @story-5.1.8 @ci-contract
+  Scenario: A release never publishes latest
+    Given the workflow "docker.yml"
+    When the Docker workflow runs for the release "v1.9.1"
+    Then the app and migrator images are tagged "v1.9.1" and "1.9.1"
+    And no generated tag is "latest"
+
+  @story-5.1.8 @ci-contract
+  Scenario: The contract test checks real tags
+    Given the workflow "docker.yml" without its "latest=false" flavor
+    When the Docker workflow runs for the release "v1.9.1"
+    Then the contract check finds the tag "latest"
+
   @story-5.1.8 @ci-contract
   Scenario: No workflow deploys a release
     Given every workflow in ".github/workflows"
