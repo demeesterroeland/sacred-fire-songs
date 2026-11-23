@@ -37,6 +37,9 @@ async function proxyRequest(request: NextRequest, context: { params: Promise<{ p
       headers,
       body,
       cache: 'no-store',
+      // #623: never follow a redirect on the server. Auth answers email links (magic link, recovery) with a 303 to
+      // /auth/callback; the browser must get that 303 to open the callback with the code and receive its cookies.
+      redirect: 'manual',
     });
 
     const responseHeaders = new Headers(response.headers);

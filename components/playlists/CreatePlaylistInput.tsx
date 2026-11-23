@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { useRouter } from 'next/navigation';
 import { useLocale } from '@/context/LocaleContext';
 import { actionErrorMessage } from '@/lib/errors/actionError';
+import { inlineCreateIntent, type InlineCreateTrigger } from '@/lib/playlists/inlineCreate';
 
 export function CreatePlaylistInput() {
     const { t } = useLocale();
@@ -22,9 +23,16 @@ export function CreatePlaylistInput() {
         setTimeout(() => inputRef.current?.focus(), 50);
     };
 
-    const submit = () => {
+    const cancel = () => {
+        setIsOpen(false);
+        setTitle('');
+    };
+
+    // #604: only Enter or Create creates; blur (click or tap away) and Escape cancel.
+    const handle = (trigger: InlineCreateTrigger) => {
+        if (isPending) return;
+        if (inlineCreateIntent(trigger, title) === 'cancel') { cancel(); return; }
         const trimmed = title.trim();
-        if (!trimmed) { setIsOpen(false); return; }
 
         startTransition(async () => {
             const result = await createPlaylist(trimmed);
@@ -60,22 +68,30 @@ export function CreatePlaylistInput() {
     }
 
     return (
-        <div className="flex items-center gap-2">
+        <div
+            className="flex items-center gap-2"
+            onBlur={e => {
+                // Moving focus to the Create button (keyboard) keeps the field open.
+                if (e.currentTarget.contains(e.relatedTarget as Node | null)) return;
+                handle('blur');
+            }}
+        >
             <input
                 ref={inputRef}
                 value={title}
                 onChange={e => setTitle(e.target.value)}
                 onKeyDown={e => {
-                    if (e.key === 'Enter') submit();
-                    if (e.key === 'Escape') { setIsOpen(false); }
+                    if (e.key === 'Enter') handle('enter');
+                    if (e.key === 'Escape') handle('escape');
                 }}
-                onBlur={submit}
                 placeholder={t('playlists.new.placeholder')}
                 disabled={isPending}
                 className="min-h-tap w-40 min-w-0 flex-1 px-3 py-1 text-meta disabled:opacity-50 rounded-control border border-line-strong bg-surface text-fg placeholder:text-fg-subtle"
             />
             <button
-                onClick={submit}
+                // Keep focus in the field while pressing Create, so the blur does not cancel first.
+                onMouseDown={e => e.preventDefault()}
+                onClick={() => handle('create')}
                 disabled={isPending || !title.trim()}
                 className="inline-flex min-h-tap shrink-0 items-center px-1 text-meta font-semibold text-fg underline underline-offset-4 transition-colors hover:text-fg-muted disabled:opacity-40"
             >

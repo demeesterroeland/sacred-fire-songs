@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.1](https://github.com/demeesterroeland/sacred-fire-songs/compare/v1.9.0...v1.9.1) (2026-11-23)
+
+
+### 🐛 Bug fixes
+
+* **auth:** pass Supabase API proxy redirects to the browser ([#624](https://github.com/demeesterroeland/sacred-fire-songs/issues/624)) ([c550d87](https://github.com/demeesterroeland/sacred-fire-songs/commit/c550d87ef54d54ab81de4c1eeb9f40b72d2e2a83))
+
 ## [1.9.0](https://github.com/demeesterroeland/sacred-fire-songs/compare/v1.8.0...v1.9.0) (2026-11-13)
 
 
