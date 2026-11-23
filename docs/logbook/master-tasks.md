@@ -1627,4 +1627,4 @@
 - [x] Issue numbers on the 3.4.x, 3.6.1, 4.1.x, 4.2.x and 4.5.1 rows; Epic 3.6 status (#257 reopened, #275–#277 not started); Epic 4.3 note (`feat/offline-library` stale, #606 step 0)
 - [x] GitHub issue text: #403, #7, #408
 - [ ] Owner: Roles & Permissions table (musician / expert are roles, `is_musician` is derived, transpose rule, planned Gatekeeper actions, admin view-only), Story 4.6.5 numbering on GitHub (#372 still says 4.6.5), where #481 lives in the stories file (see the PR description)
-- [ ] Not stories, not mirrored: #267 and #356 (docs/testing and test-helper chores)
+- [ ] Not stories, not mirrored: #267, #356 and #266 (test-infrastructure chores: docs/testing, CI, test helpers)

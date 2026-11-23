@@ -126,7 +126,7 @@
 | **2.25** | Nov 23, 2026 | Sync with GitHub after the Nov 14 audit (#599). Epic 6.1 stories #385–#418 [Implemented] in `develop` via #428; #418: manual screen reader pass validated by the owner; 6.1.36 (#488), 6.1.38 (#534), 6.1.39 (#566), 6.1.40 (#586) implemented; row 6.1.35 (#485, in progress) added; duplicate rows 1.79, 1.78, second 6.1.18 and second 6.1.30 removed. Epic 6.2 stories #509–#522, #542, #547, #569, #570 [Implemented] in `develop` via #585; row 6.2.26 (#598, planned) added. Status fixes: 2.1.1, 3.7.1, 3.1.4 family (GuestGate #410, PR #439), 3.1.3, 3.2.1, 3.4.1, 3.4.4, 3.5.1, 3.5.2, 4.1.9, 4.6.1, 4.6.2, 5.1.1, 5.1.6, 5.1.7, 5.1.8 (Partial: `latest` tag bug), 5.1.10 (hotfix #473 → #475 → #484), 5.1.12; 3.1.1 and 4.1.8 no longer marked implemented; 4.6.5 clash resolved (#372 is now 4.6.7). Private-infrastructure details removed from the changelog and Epic 5.1 table. Open PRs recorded as in review (not merged): #609–#620 (see `master-walkthrough.md`). |
 | **2.26** | Nov 23, 2026 | #608: why the 1.7.1 back-merge was done by hand (the workflow was not on `main` yet). Story 5.1.9 adds the scenario for the conflicting-files comment; Story 5.1.10 adds the finding. |
 | **2.27** | Nov 23, 2026 | #607: on a shared device, sign-out removes the Add Song draft and a member's draft is never shown to someone else; a guest keeps the draft through sign-in (Story 6.1.27). |
-| **2.28** | Nov 23, 2026 | #639 (leftovers of the #599 sync): Gherkin aligned with the code for Stories 1.1.5 (guest draft banner, no join-our-circle modal), 1.1.6 (test path), 1.1.9 (bar hidden from `lg`, menu button and avatar), 1.2.1 (no dashboard, no infinite scroll), 1.3.3 (no back arrow; code fence closed so 1.3.5 renders), 2.3.2 (search options window, no Theme or Rhythm), 4.1.1 (New playlist field), 4.1.5 (Get Link in the menu, private playlists), 4.2.1 (footer per 4.2.3, 200-song limit without Premium) and the 6.1 rows #390 (six lyric steps, 15–28 px), #398 / #399 (My recordings), #403 (bell badge, no avatar badge) and #408 (three bottom items, `/explore` redirects to `/songs`). Rewritten issue Gherkin mirrored for Stories 3.1.3 (#140), 3.4.4 (#108), 4.5.1 (#112) and 4.6.2 (#245). Issue numbers added to the rows 3.4.2, 3.4.3, 3.4.5, 3.4.6, 3.6.1, 4.1.x, 4.2.x and 4.5.1; Epic 3.6 shows #257 as reopened and #275–#277 as not started; Epic 4.3 notes that `feat/offline-library` (#357) was stale (#606 is step 0). Not changed, waiting for the owner: the Roles & Permissions table, the 4.6.5 / 4.6.7 numbering in GitHub, the placement of #481 (see the PR description). #267, #356 and #266 are chores about `docs/testing`, not stories, so they have no row here. |
+| **2.28** | Nov 23, 2026 | #639 (leftovers of the #599 sync): Gherkin aligned with the code for Stories 1.1.5 (guest draft banner, no join-our-circle modal), 1.1.6 (test path), 1.1.9 (bar hidden from `lg`, menu button and avatar), 1.2.1 (no dashboard, no infinite scroll), 1.3.3 (no back arrow; code fence closed so 1.3.5 renders), 2.3.2 (search options window, no Theme or Rhythm), 4.1.1 (New playlist field), 4.1.5 (Get Link in the menu, private playlists), 4.2.1 (footer per 4.2.3, 200-song limit without Premium) and the 6.1 rows #390 (six lyric steps, 15–28 px), #398 / #399 (My recordings), #403 (bell badge, no avatar badge) and #408 (three bottom items, `/explore` redirects to `/songs`). Rewritten issue Gherkin mirrored for Stories 3.1.3 (#140), 3.4.4 (#108), 4.5.1 (#112) and 4.6.2 (#245). Issue numbers added to the rows 3.4.2, 3.4.3, 3.4.5, 3.4.6, 3.6.1, 4.1.x, 4.2.x, 4.3.1 and 4.5.1; Epic 3.6 shows #257 as reopened and #275–#277 as not started; Epic 4.3 notes that `feat/offline-library` (#357) was stale (#606 is step 0). Not changed, waiting for the owner: the Roles & Permissions table, the 4.6.5 / 4.6.7 numbering in GitHub, the placement of #481 (see the PR description). #267, #356 and #266 are test-infrastructure chores (docs/testing, CI, test helpers), not stories, so they have no row here. The code fence of Story 1.3.3 is closed and the unclosed I18N block of Story 3.7.1 is closed, so Epics 2.1 to 3.7 render as text again. |
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
 
@@ -407,7 +407,6 @@ Scenario: Behavior on visibility change
   Then the wake lock should be released
   When I return to the song page tab
   Then the wake lock should be re-acquired automatically
-```
 ```
 
 ## Phase 2: Minimal Lovable Product (MLP)
@@ -984,6 +983,7 @@ Scenario: I18N-12 – Additional languages
   Then the interface is shown in that language
   And I can pick any of the eight languages, each listed in its own name, from the language menu
   And every language has a complete translation (same keys and placeholders as English)
+```
 
 ## Phase 4: Professional Toolkit
 
@@ -2581,7 +2581,7 @@ Scenario: Menu button and avatar on a phone
   When I tap the menu button
   Then the side menu slides open with Home, Songs, the Library tabs and Create
   When I tap the avatar
-  Then my account menu opens (settings, favourites, drafts, playlists, recently viewed, Shared with me, language, sign out)
+  Then my account menu opens (settings, favourites, my private songs, playlists, recently viewed, Shared with me, language, sign out)
 
 Scenario: Guest bottom bar
   Given I am not logged in on a screen narrower than 1024 px
