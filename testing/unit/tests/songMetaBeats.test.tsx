@@ -105,3 +105,26 @@ describe('SongMetaLines — chords off', () => {
     expect(technicalText()).toBe('Key D · Capo 2 · Tuning: Drop D · Beats 8');
   });
 });
+
+// #601 (#510): on a phone the technical line wraps instead of cutting off its last value (beats).
+describe('SongMetaLines — technical line never cuts off the beats', () => {
+  const long = { key: 'C#m', capo: 7, tuning: 'Open G with a long custom name', beats: '8y4' };
+
+  it('wraps the line instead of truncating it', () => {
+    render(<SongMetaLines originalAuthor="Anna" version={long} />);
+    fireEvent.click(screen.getByTestId('song-meta-line'));
+    const line = screen.getByTestId('song-technical-line');
+    expect(line.className).not.toMatch(/\btruncate\b/);
+    expect(line.className).not.toMatch(/\bwhitespace-nowrap\b|\boverflow-hidden\b|\btext-ellipsis\b/);
+  });
+
+  it('keeps each value whole, so "Beats 8y4" never breaks across lines', () => {
+    render(<SongMetaLines originalAuthor="Anna" version={long} />);
+    fireEvent.click(screen.getByTestId('song-meta-line'));
+    const items = [...screen.getByTestId('song-technical-line').querySelectorAll('[data-testid="song-technical-item"]')];
+    expect(items.map((i) => i.textContent)).toEqual(['Key C#m', 'Capo 7', 'Tuning: Open G with a long custom name', 'Beats 8y4']);
+    // inline-block moves a value to the next line as a whole; max-w-full lets an over-long one wrap inside instead of overflowing.
+    for (const item of items) expect(item.className).toMatch(/\binline-block\b.*\bmax-w-full\b/);
+    expect(technicalText()).toBe('Key C#m · Capo 7 · Tuning: Open G with a long custom name · Beats 8y4');
+  });
+});
