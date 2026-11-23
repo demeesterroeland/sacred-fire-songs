@@ -1,4 +1,6 @@
 # Gitflow CI/CD acceptance specification — Epic 5.1
+# Version: 1.1 | Date: Nov 23, 2026
+# Changelog: 1.1 (Nov 23, 2026) reworded a comment on the deferred 5.1.8 scenario; 1.0 first version.
 # Plan: docs/plans/2026-10-30-gitflow-cicd-migration.md
 #
 # Tags:
@@ -178,7 +180,7 @@ Feature: Gitflow branching and CI/CD pipeline
     Then it is merged with a merge commit
     And Release Please proposes a minor version with both entries in the changelog
 
-  # Deferred with 5.1.2 / 5.1.11: needs the CI E2E database on the tailnet.
+  # Deferred with 5.1.2 / 5.1.11: needs a CI E2E database on private infrastructure.
   @story-5.1.8 @ci-contract @deferred
   Scenario: Promotion PR requires the slow test layers
     Given a pull request from "develop" into "main"
@@ -197,6 +199,7 @@ Feature: Gitflow branching and CI/CD pipeline
     Given the workflow "back-merge.yml"
     Then it opens the pull request with the secret "RELEASE_PLEASE_TOKEN" and fails when it is missing
     And it labels the pull request "back-merge-conflict" when main does not merge cleanly
+    And it lists the conflicting files in a pull request comment
     And it never merges the pull request itself
 
   @story-5.1.9 @manual
