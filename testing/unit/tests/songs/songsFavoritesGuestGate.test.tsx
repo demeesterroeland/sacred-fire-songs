@@ -82,10 +82,33 @@ describe('Favorites for guests (#600)', () => {
     expect(screen.queryByTestId('guest-gate')).toBeNull();
   });
 
-  it('Drafts is unchanged for a guest until the owner decides (#232)', () => {
+});
+
+describe('Drafts for guests (#600)', () => {
+  it('a guest sees the GuestGate whose Sign in returns to /songs?status=draft', () => {
     h.search = 'status=draft';
+    render(<SongsPageContent initialSongs={[]} initialTaxonomy={[]} />);
+    const gate = screen.getByTestId('guest-gate');
+    expect(gate.getAttribute('data-feature')).toBe('drafts');
+    expect(screen.getByText(dict['guestGate.drafts.title'])).toBeTruthy();
+    expect(screen.getByTestId('guest-gate-sign-in').getAttribute('href')).toBe(
+      '/auth/login?next=%2Fsongs%3Fstatus%3Ddraft'
+    );
+    expect(screen.queryByText(dict['songs.emptyDrafts.title'])).toBeNull();
+  });
+
+  it('a member keeps the Drafts empty state', () => {
+    h.search = 'status=draft';
+    h.user = { id: 'u1' };
     render(<SongsPageContent initialSongs={[]} initialTaxonomy={[]} />);
     expect(screen.queryByTestId('guest-gate')).toBeNull();
     expect(screen.getByText(dict['songs.emptyDrafts.title'])).toBeTruthy();
+  });
+
+  it('no gate flashes while the session is loading', () => {
+    h.search = 'status=draft';
+    h.loading = true;
+    render(<SongsPageContent initialSongs={[]} initialTaxonomy={[]} />);
+    expect(screen.queryByTestId('guest-gate')).toBeNull();
   });
 });

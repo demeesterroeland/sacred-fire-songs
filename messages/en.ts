@@ -1076,6 +1076,8 @@ const en = {
   'guestGate.addToPlaylist.reason': 'Your favourites and playlists live in your account, so they follow you to every device.',
   'guestGate.favourites.title': 'Sign in to save favourites',
   "guestGate.favourites.reason": "Your Favorites live in your account, so they follow you to every device.",
+  'guestGate.drafts.title': 'Sign in to keep private songs',
+  'guestGate.drafts.reason': 'Private songs live in your account, so only you see them and they follow you to every device.',
   'sharedWithMe.unreadCount': '{count} new',
   'sharedWithMe.title': 'Shared with me',
   "sharedByMe.title": "Shared by me",

@@ -1,9 +1,9 @@
 import type { GuestGateFeature } from '@/lib/auth/guestGate';
 
 /**
- * #600: personal views of /songs that a guest cannot have. `/songs?favorites=true` shows the
- * GuestGate instead of the "No favourites yet" empty state. Drafts (`?status=draft`) stay as
- * they are until the owner decides between a gate and the empty state of #232.
+ * #600: personal views of /songs that a guest cannot have. `/songs?favorites=true` and
+ * `/songs?status=draft` show the GuestGate instead of the "No favourites yet" / "No private songs
+ * yet" empty states (the owner chose the gate over the empty state of #232).
  */
 export function songsGuestGateFeature(view: {
   favorites: boolean;
@@ -13,5 +13,6 @@ export function songsGuestGateFeature(view: {
 }): GuestGateFeature | null {
   if (!view.isGuest || view.authLoading) return null;
   if (view.favorites) return 'favourites';
+  if (view.status === 'draft') return 'drafts';
   return null;
 }

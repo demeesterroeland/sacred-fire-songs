@@ -18,6 +18,7 @@ export const GUEST_GATE_FEATURES = [
   'recorder',
   'sharing',
   'favourites',
+  'drafts',
   'addToPlaylist',
   'sharedWithMe',
   'sharedByMe',

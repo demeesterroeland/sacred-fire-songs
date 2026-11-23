@@ -1077,6 +1077,8 @@ const nl: Partial<Record<TranslationKey, string>> = {
   'guestGate.addToPlaylist.reason': 'Je favorieten en afspeellijsten staan in je account, zodat ze op elk apparaat met je meekomen.',
   'guestGate.favourites.title': 'Log in om favorieten op te slaan',
   'guestGate.favourites.reason': 'Je favoriete liederen staan in je account, zodat ze op elk apparaat met je meekomen.',
+  'guestGate.drafts.title': 'Log in om privéliederen te bewaren',
+  'guestGate.drafts.reason': 'Privéliederen staan in je account, zodat alleen jij ze ziet en ze op elk apparaat met je meekomen.',
   'sharedWithMe.unreadCount': 'Nieuw: {count}',
   'sharedWithMe.title': 'Met mij gedeeld',
   "sharedByMe.title": "Door mij gedeeld",

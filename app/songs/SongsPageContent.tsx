@@ -219,7 +219,7 @@ export default function SongsPageContent({ initialSongs, initialTaxonomy, initia
                         }`}
                     >
                         {guestGate ? (
-                            // #600: a guest on Favorites sees why an account is needed, and returns here after signing in.
+                            // #600: a guest on Favorites or Drafts sees why an account is needed, and returns here after signing in.
                             <div className="col-span-full py-6">
                                 <GuestGate feature={guestGate} next={returnPath('/songs', searchParams)} />
                             </div>
