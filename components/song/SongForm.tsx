@@ -96,6 +96,8 @@ const SongForm = ({ mode, initialData: liveInitialData, songId, versionId, sourc
         handleSubmit,
         setValue,
         watch,
+        reset,
+        getValues,
         formState: { errors },
     } = useForm<SongFormData>({
         defaultValues: {
@@ -144,30 +146,53 @@ const SongForm = ({ mode, initialData: liveInitialData, songId, versionId, sourc
     const [previewContent, flushPreview] = useDebouncedValue(liveContent, PREVIEW_DEBOUNCE_MS);
 
 
-    // Persistence Logic (Create Mode): the draft survives a sign-in round trip (#411)
+    // Persistence Logic (Create Mode): the draft survives a sign-in round trip (#411).
+    // It is tied to its owner (#607): restored once the session is known, only for
+    // that member; a guest draft is adopted by the member who signs in to save it.
+    const draftOwner = user?.id ?? null;
+    const draftRestored = useRef(false);
+    const lastDraftOwner = useRef<string | null>(null);
     useEffect(() => {
-        if (mode !== 'create') return;
+        if (mode !== 'create' || authLoading) return;
 
-        // Restore on mount
-        const parsed = readSongDraft();
-        if (parsed) {
-            Object.keys(parsed).forEach((key) => {
-                setValue(key as keyof SongFormData, parsed[key] as never);
-            });
+        // The member signed out (or another member signed in) with the form open:
+        // empty it, so the next person neither sees nor re-saves their text.
+        if (lastDraftOwner.current && lastDraftOwner.current !== draftOwner) {
+            reset();
+            clearSongDraft();
+        }
+        lastDraftOwner.current = draftOwner;
 
-            // Restore UI states
-            if (parsed.key || parsed.capo || (parsed.tuning && parsed.tuning !== 'Standard')) {
-                setIsMetadataExpanded(true);
-            }
-            if (Array.isArray(parsed.categoryIds) && parsed.categoryIds.length > 0) {
-                setIsTagsExpanded(true);
+        // Restore once, as soon as the session is known. Only fill fields that are
+        // still empty: text typed while the session loaded wins.
+        if (!draftRestored.current) {
+            draftRestored.current = true;
+            const parsed = readSongDraft(draftOwner);
+            if (parsed) {
+                Object.keys(parsed).forEach((key) => {
+                    const current = getValues(key as keyof SongFormData) as unknown;
+                    const untouched = current === undefined || current === '' || (Array.isArray(current) && current.length === 0);
+                    if (untouched) setValue(key as keyof SongFormData, parsed[key] as never);
+                });
+
+                // Restore UI states
+                if (parsed.key || parsed.capo || (parsed.tuning && parsed.tuning !== 'Standard')) {
+                    setIsMetadataExpanded(true);
+                }
+                if (Array.isArray(parsed.categoryIds) && parsed.categoryIds.length > 0) {
+                    setIsTagsExpanded(true);
+                }
             }
         }
 
+        // Store what the form holds now under the current owner: text typed while the
+        // session loaded, and an adopted guest draft (no longer ownerless).
+        writeSongDraft(getValues(), draftOwner);
+
         // Save on change
-        const subscription = watch((value) => writeSongDraft(value));
+        const subscription = watch((value) => writeSongDraft(value, draftOwner));
         return () => subscription.unsubscribe();
-    }, [mode, setValue, watch]);
+    }, [mode, setValue, watch, reset, getValues, authLoading, draftOwner]);
 
     const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
         const input = e.target;
