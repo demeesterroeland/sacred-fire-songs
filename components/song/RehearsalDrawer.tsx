@@ -1087,7 +1087,7 @@ export default function RehearsalDrawer({
   // Handle download recording (strictly DRM-lite protected: owner only)
   const handleDownload = async (rec: UserRecording) => {
     if (rec.is_owner === false || rec.can_download === false) {
-      toast.error(t('recording.sharing.cannotDownload'));
+      toast.error(t('recording.sharing.downloadOwnerOnly'));
       return;
     }
     if (!rec.audioUrl) {
