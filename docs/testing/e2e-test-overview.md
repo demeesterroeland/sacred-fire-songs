@@ -1,8 +1,8 @@
 # E2E Test Overview & Matrix: Sacred Fire Songs
 
-**Version:** 1.28
+**Version:** 1.29
 **Status:** Living Document
-**Date:** Nov 13, 2026
+**Date:** Nov 23, 2026
 **Tracking:** GH #142
 
 ## Changelog
@@ -38,10 +38,13 @@
 | **1.18** | Nov 6, 2026 | Story 6.1.34 (#418): `e2e/tests/ux-v2-a11y-audit.spec.ts` (axe-core on the song page, the Practice panel, the recorder and the sheets and dialogs reachable from them; guest and member; light and dark; keyboard and focus journeys, including the delete confirmation, Escape while renaming and Tab reaching the embedded player; the sticky-title spec now picks a long-titled public song that has enough lyrics to scroll). Fixed fixture ids `A11Y_AUDIT_FIXTURE_IDS` (a second song with a reference video for the player), removed by `e2e/global-teardown.ts`. The Practice panel is now a dialog: specs wait for `data-testid="practice-drawer"` (not the old `h3`), recorder state and share list headings are `h3`, tabs expose `aria-selected`. |
 | **1.17** | Nov 6, 2026 | Story 6.1.32 (#416): PL-01 covers the New Playlist page: private line, Make public switch, Create enabled once named. New spec `ux-v2-new-playlist-visibility.spec.ts`. |
 | **1.16** | Nov 6, 2026 | Story 6.1.5 (#389): ACC-04 (Privacy settings) is hidden behind `FEATURES.privacySettings`; LIB-10 (Albums) answers not-found. New spec `ux-v2-hide-unfinished.spec.ts` asserts no "Coming soon" in Library, Settings and the song form. |
+| **1.29** | Nov 23, 2026 | (#266, option A) `@e2e` scenarios in `docs/testing/*.feature` are documentation only; E2E runs through plain Playwright specs in `e2e/tests/` and `playwright-bdd` is not used. `song.feature` names the covering spec for each `@e2e` scenario. PL-11 (Duplicate playlist) feature status corrected to not implemented (#100). |
 
 ---
 
 ## 1. Purpose
+
+> **Note on `@e2e` tags:** in `docs/testing/*.feature`, `@e2e` is documentation only. E2E tests run through plain Playwright specs in `e2e/tests/`; `playwright-bdd` is not used (decision #266, option A). Each `@e2e` scenario in `song.feature` names its spec.
 
 This document is the **single source of truth for end-to-end (E2E) test coverage** of Sacred Fire Songs. It enumerates every user-facing feature and its variants, maps each to one or more named E2E scenarios, records the roles affected, and tracks implementation status so coverage gaps are visible and prioritizable.
 
@@ -205,7 +208,7 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 | PL-08 | Access control | Private playlist 404/redirect for non-owner; public viewable by anyone | logged-out vs logged-in | G/M | ✅ | 🔲 | P0 | `playlists/[id]` |
 | PL-09 | Shareable link | Copy public playlist link; toast confirms | private link not shareable | M | ✅ | 🔲 | P2 | 4.1.5 |
 | PL-10 | Description | Add/edit playlist description; persists | empty description | M(owner) | ✅ | 🔲 | P2 | 4.1.6 |
-| PL-11 | Duplicate playlist | Duplicate creates "Copy of …" with same songs/order | navigates to new playlist | M | ✅ | 🔲 | P2 | 4.1.8 |
+| PL-11 | Duplicate playlist | Duplicate creates "Copy of …" with same songs/order | navigates to new playlist | M | ❌ | 🔲 | P2 | 4.1.8 (#100; the menu item is disabled, "Soon") |
 | PL-12 | Per-song transpose | Set +/- semitone offset per song in playlist; original unchanged | offset persists on reload | M(musician) | ⚠️ | 🔲 | P2 | 4.1.9 |
 | PL-13 | Cover color/icon | Assign cover color/icon; reflected on card | default grey when unset | M(owner) | ⚠️ | 🔲 | P2 | 4.1.10 |
 | PL-14 | Presentation/ceremony mode | Full-screen present; arrows/swipe advance; wake lock active; Esc exits | mobile swipe vs desktop keys | M | ⚠️ | 🔲 | P1 | 4.1.7 |
