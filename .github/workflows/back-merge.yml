@@ -92,6 +92,7 @@ jobs:
               if [ -n "$CONFLICTS" ]; then
                 echo "⚠️ \`main\` does not merge cleanly into \`develop\`. Conflicting files:"
                 echo
+                # shellcheck disable=SC2016 # the backticks are Markdown code marks, not a command
                 printf '%s\n' "$CONFLICTS" | sed 's/^/- `/; s/$/`/'
               else
                 echo "⚠️ \`main\` does not merge cleanly into \`develop\`, but no file-level conflicts were found: see the workflow run log."
