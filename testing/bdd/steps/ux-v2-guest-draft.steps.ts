@@ -54,7 +54,9 @@ Then('its sign-in link is at least 44 px tall and brings the guest back to Add S
   assert.match(this.source, /<SignInLink[\s\S]*?href=\{signInHref\(next\)\}/);
   assert.match(read('components/ui/button.tsx'), /min-h-tap/);
   const form = read('components/song/SongForm.tsx');
-  assert.match(form, /<GuestDraftBanner next=\{ADD_SONG_PATH\} \/>/);
+  // #600: back to Add Song with its own query, so an incoming next= survives the sign-in.
+  assert.match(form, /const addSongReturnPath = returnPath\(ADD_SONG_PATH, searchParams\)/);
+  assert.match(form, /<GuestDraftBanner next=\{addSongReturnPath\} \/>/);
   assert.match(form, /const ADD_SONG_PATH = '\/songs\/add'/);
 });
 
@@ -70,7 +72,7 @@ Then('the draft is read and written through the guarded draft helper', function 
 });
 
 Then('a guest who saves is sent to sign in with a way back to Add Song', function (this: World) {
-  assert.match(this.source, /router\.push\(signInHref\(ADD_SONG_PATH\)\)/);
+  assert.match(this.source, /router\.push\(signInHref\(addSongReturnPath\)\)/);
   assert.doesNotMatch(this.source, /Please log in to save songs/);
 });
 

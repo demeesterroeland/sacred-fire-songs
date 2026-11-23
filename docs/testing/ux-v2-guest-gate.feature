@@ -1,5 +1,6 @@
-# Version: 1.2 | Date: Nov 6, 2026
+# Version: 1.3 | Date: Nov 15, 2026
 # Changelog
+# 1.3 | Nov 15, 2026 | #600: Favorites gate for guests on /songs?favorites=true; every sign-in link and the proxy redirect keep next= (path and query). Drafts (?status=draft) waits for an owner decision (#232).
 # 1.2 | Nov 6, 2026 | Story 6.1.5 (#389): the deep-link example uses ?tab=preferences, because ?tab=privacy now opens Profile (hidden tab).
 # 1.1 | Nov 5, 2026 | #410 review fixes: hardened next= validation at every consumer; favourites gate on the heart; add-to-playlist gets its own feature key.
 # 1.0 | Nov 5, 2026 | Story 6.1.26 / G6.1 (#410): one GuestGate pattern on every members-only screen; UXD-2 guests hear consented public takes only.
@@ -24,6 +25,33 @@ Feature: UX v2 GuestGate on every members-only screen
       | /songs/abc/edit             | edit           | /auth/login?next=%2Fsongs%2Fabc%2Fedit                 |
       | /songs/abc?ref=heart        | favourites     | /auth/login?next=%2Fsongs%2Fabc%3Fref%3Dheart          |
       | /songs/abc                  | addToPlaylist  | /auth/login?next=%2Fsongs%2Fabc                        |
+
+  @unit @bug-600
+  Scenario: A guest on Favorites sees the gate and returns there
+    Given a signed-out guest
+    When they open the songs view "/songs?favorites=true"
+    Then the songs view shows the GuestGate for "favourites"
+    And the sign-in link is "/auth/login?next=%2Fsongs%3Ffavorites%3Dtrue"
+
+  @unit @bug-600
+  Scenario: Drafts for a guest are not gated yet (owner decision pending, #232)
+    Given a signed-out guest
+    When they open the songs view "/songs?status=draft"
+    Then the songs view shows no GuestGate
+
+  @unit @bug-600
+  Scenario Outline: Every sign-in link returns to its origin (path and query)
+    Given a signed-out guest
+    When they follow the sign-in link of the <origin> on "<page>"
+    Then the login URL has next= "<page>"
+
+    Examples:
+      | origin          | page                                  |
+      | proxy redirect  | /admin/users?tab=roles                |
+      | admin layout    | /admin/catalog-edits?page=2           |
+      | playlist header | /library/playlists/p1?view=grid       |
+      | user profile    | /songs?favorites=true                 |
+      | Add Song form   | /songs/add?next=%2Flibrary%2Fplaylists |
 
   @unit
   Scenario: A sign-in link never leaves the site
