@@ -7,6 +7,7 @@ import TagSelector from '@/components/library/TagSelector';
 import type { TaxonomyNode } from '@/lib/taxonomyUtils';
 import type { SongFilterState } from '@/lib/songs/filterConfig';
 import { useLocale } from '@/context/LocaleContext';
+import { useSongSearchPlaceholder } from '@/context/SongCountContext';
 import { formatCount } from '@/lib/format/count';
 import type { BrowseOption } from '@/lib/songs/browseFilters';
 
@@ -57,6 +58,7 @@ export default function SearchFiltersModal({
     setLocalSearch,
 }: SearchFiltersModalProps) {
     const { t } = useLocale();
+    const searchPlaceholder = useSongSearchPlaceholder('search.placeholder');
     const [render, setRender] = useState(false);
 
     if (isOpen && !render) {
@@ -156,7 +158,7 @@ export default function SearchFiltersModal({
                                 value={localSearch}
                                 onChange={(e) => setLocalSearch(e.target.value)}
                                 onKeyDown={(e) => { if (e.key === 'Enter') onSubmit?.(); }}
-                                placeholder={t('search.placeholder', { count: 200 })}
+                                placeholder={searchPlaceholder}
                                 className="min-h-tap w-full rounded-control border border-line-strong bg-surface py-2.5 pl-10 pr-4 text-body text-fg placeholder:text-fg-subtle"
                             />
                         </div>

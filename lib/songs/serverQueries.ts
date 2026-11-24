@@ -83,6 +83,23 @@ export async function fetchSongsPageServer(cursor?: string): Promise<{
  * Returns an empty array if the user is not authenticated or has no favorites.
  * Only import this from Server Components or Server Actions.
  */
+/**
+ * Number of public songs, for the search placeholder "Search 1000+ songs" (#657). Public only, so every visitor sees
+ * the same number. Null when the count fails; the placeholder then shows no number.
+ */
+export async function getPublicSongCount(): Promise<number | null> {
+    const supabase = await createClient();
+    const { count, error } = await supabase
+        .from('compositions')
+        .select('id', { count: 'exact', head: true })
+        .eq('is_public', true);
+    if (error) {
+        console.error('getPublicSongCount error:', error);
+        return null;
+    }
+    return count ?? null;
+}
+
 export async function fetchFavoriteSongsServer(): Promise<Song[]> {
     const supabase = await createClient();
     const { data: { user } } = await supabase.auth.getUser();
