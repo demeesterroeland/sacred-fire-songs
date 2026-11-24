@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.9.3](https://github.com/demeesterroeland/sacred-fire-songs/compare/v1.9.2...v1.9.3) (2026-11-24)
+
+
+### 🐛 Bug fixes
+
+* **ui:** show the real public song count in the search placeholder ([#657](https://github.com/demeesterroeland/sacred-fire-songs/issues/657)) ([#659](https://github.com/demeesterroeland/sacred-fire-songs/issues/659)) ([459eb74](https://github.com/demeesterroeland/sacred-fire-songs/commit/459eb74faf9ee1ee93bdb9ef13adbed6c2cc5936))
+
 ## [1.9.2](https://github.com/demeesterroeland/sacred-fire-songs/compare/v1.9.1...v1.9.2) (2026-11-23)
 
 
