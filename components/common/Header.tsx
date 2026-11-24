@@ -10,6 +10,7 @@ import { getSiteTitle } from '@/lib/env';
 import { UserProfile } from './navigation/UserProfile';
 import { NotificationBell } from './navigation/NotificationBell';
 import { useLocale } from '@/context/LocaleContext';
+import { useSongSearchPlaceholder } from '@/context/SongCountContext';
 import { FOCUS_SEARCH_EVENT } from '@/lib/search/focusSearch';
 import { addRecentSearch, clearRecentSearches, removeRecentSearch } from '@/lib/search/history';
 import { useSearchSuggestions } from '@/hooks/useSearchSuggestions';
@@ -18,6 +19,7 @@ import { SuggestionsPortal } from '@/components/search/SuggestionsSlot';
 
 export default function Header({ initialUser }: { initialUser?: AuthUser | null }) {
     const { t } = useLocale();
+    const searchPlaceholder = useSongSearchPlaceholder('songs.searchPlaceholder');
     const pathname = usePathname();
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -251,7 +253,7 @@ export default function Header({ initialUser }: { initialUser?: AuthUser | null 
                             onBlur={handleBlur}
                             aria-controls={suggestionsVisible ? 'search-suggestions' : undefined}
                             aria-describedby="search-suggestions-hint"
-                            placeholder={t('songs.searchPlaceholder', { count: 200 })}
+                            placeholder={searchPlaceholder}
                             className="w-full min-h-tap bg-surface-2 border border-line rounded-control py-2.5 pl-10 pr-14 text-body text-fg placeholder:text-fg-subtle transition-all relative z-10"
                         />
                         <span id="search-suggestions-hint" className="sr-only">{t('header.suggestionsHint')}</span>

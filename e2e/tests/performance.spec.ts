@@ -192,7 +192,7 @@ test('@performance Desktop: Search interaction performance', async ({ page }) =>
     await clearBrowserCache(page);
     
     // Perform a search
-    const searchInput = page.locator('input[placeholder="Search 200+ songs"]');
+    const searchInput = page.locator('#app-navbar input[aria-label="Search songs"]');
     await searchInput.click();
     await searchInput.fill('test');
     

@@ -1,11 +1,12 @@
 # Guest Guide (draft)
 
-**Version:** 0.39 | **Date:** Nov 13, 2026
+**Version:** 0.40 | **Date:** Nov 24, 2026
 
 ## Changelog
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 0.40 | Nov 24, 2026 | Top bar: the search field shows how many public songs there are, rounded down (for example "Search 1000+ songs"), instead of a fixed number; without songs it reads "Search songs" (#657). |
 | 0.39 | Nov 13, 2026 | Song page: **Key**, **Capo** and non-standard **Tuning** (named, e.g. `Key D · Tuning: Drop D`) show only while the **Chords** switch is on (the **Beats** stay); standard tuning is omitted (`Key E · Capo 3 · Beats 8`). A song without chords has no Chords switch and no key line (UX v3, #566). |
 | 0.38 | Nov 13, 2026 | Search options: the **Songbook** and **Language** choices now also appear when you open Search options from another page (for example Home or a playlist page), showing how many public songs you can view in each book or language and taking you to those songs on the Songs page (UX v3, #570). |
 | 0.37 | Nov 13, 2026 | Search options: languages are now chosen only in the **Language** select, no longer under category & tag filters (UX v3, #569). Old links with a language in `?category=` or `?tag=` still list that language and show it selected in **Language**. |
@@ -52,7 +53,7 @@ A songbook of medicine and ceremony songs with lyrics and chords, for singing to
 
 The screen has three fixed parts:
 
-- **Top bar:** ☰ menu (left), the search field ("Search 200+ songs") with a filter button, and **Sign In** (right).
+- **Top bar:** ☰ menu (left), the search field (for example "Search 1000+ songs": the number of public songs, rounded down) with a filter button, and **Sign In** (right).
 - **Content** in the middle.
 - **Bottom bar:** **Home**, **Search**, **Library**. **Search** opens the song list and puts the cursor in the search field.
 
