@@ -141,7 +141,7 @@ test.describe('Musician @story-6.1.10', () => {
     expect(last.y + last.height - 20).toBeLessThanOrEqual(bar.y + 1);
   });
 
-  test('Auto-scroll: starts, keeps the toolbar under the title bar, pauses on a touch', async ({ page }) => {
+  test('Auto-scroll: starts, keeps the toolbar under the title bar, pauses on a touch', async ({ page, hasTouch }) => {
     test.skip(!longSong, 'no public chord song in the seed');
     await openSong(page, longSong);
     await makeScrollable(page);
@@ -181,7 +181,9 @@ test.describe('Musician @story-6.1.10', () => {
     }
 
     // Reading controls stay usable while it runs, and a tap on the lyrics pauses it.
-    await page.touchscreen.tap(200, 300);
+    // Touch devices tap (touchstart); the desktop project has no touch, so it presses the mouse (mousedown) - both pause.
+    if (hasTouch) await page.touchscreen.tap(200, 300);
+    else await page.mouse.click(200, 300);
     await expect(toggle).toHaveAttribute('aria-pressed', 'false');
     const stopped = await page.evaluate(() => window.scrollY);
     await page.waitForTimeout(600);

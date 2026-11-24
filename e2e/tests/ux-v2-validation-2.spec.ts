@@ -89,7 +89,8 @@ test('1: the Sign In button is the accent primary button, the same as the login 
 test.describe('member', () => {
   test.use({ storageState: ROLES.member.storage });
 
-  test('2: the Library "+" floats bottom right, above the bottom bar, and stays put on scroll', async ({ page }) => {
+  test('2: the Library "+" floats bottom right, above the bottom bar, and stays put on scroll', async ({ page }, testInfo) => {
+    test.skip(!/mobile/.test(testInfo.project.name), 'phone only: from lg the Library header has a Create menu and there is no bottom bar');
     await page.goto('/library/playlists');
     const fab = page.getByRole('button', { name: 'Create', exact: true });
     await expect(fab).toBeVisible();
@@ -139,6 +140,7 @@ test('4: category counts are written between parentheses', async ({ page }) => {
 
 // ── 5 · version link ───────────────────────────────────────────────────────────────────────────────────────
 test('5: switching version updates ?version= in place, Share shares it, the first version is clean', async ({ page }) => {
+  const phone = page.viewportSize()!.width < 1024;
   await page.addInitScript(() => {
     Object.defineProperty(navigator, 'share', { configurable: true, value: undefined });
     (window as unknown as { __copied: string[] }).__copied = [];
@@ -154,8 +156,13 @@ test('5: switching version updates ?version= in place, Share shares it, the firs
   await expect(page).toHaveURL(new RegExp(`/songs/${IDS.song}\\?version=${IDS.simplified}$`));
   expect(await page.evaluate(() => history.length)).toBe(historyBefore); // no history entry per switch
 
-  const sheet = await openSongMenu(page);
-  await sheet.getByRole('button', { name: 'Share Song' }).click();
+  // Phone: Share is in the ⋮ menu. From lg the header has its own Share button (the menu then holds only the reading tools).
+  if (phone) {
+    const sheet = await openSongMenu(page);
+    await sheet.getByRole('button', { name: 'Share Song' }).click();
+  } else {
+    await page.getByRole('button', { name: 'Share song', exact: true }).click();
+  }
   await expect.poll(() => page.evaluate(() => (window as unknown as { __copied: string[] }).__copied.at(-1) ?? '')).toContain(`?version=${IDS.simplified}`);
 
   await page.reload(); // opening the link shows that version
@@ -165,7 +172,8 @@ test('5: switching version updates ?version= in place, Share shares it, the firs
 });
 
 // ── 6 · full title ─────────────────────────────────────────────────────────────────────────────────────────
-test('6: the full title wraps at the top of the page; the truncated copy shows only after scrolling past it', async ({ page }) => {
+test('6: the full title wraps at the top of the page; the truncated copy shows only after scrolling past it', async ({ page }, testInfo) => {
+  test.skip(!/mobile/.test(testInfo.project.name), 'phone only (#392): from lg the title sits in the sticky desktop header, with no truncated copy');
   await page.goto(`/songs/${IDS.song}`);
   const title = page.getByTestId('song-title');
   await expect(title).toContainText(LONG_TITLE);
@@ -216,8 +224,14 @@ test('11: there is one overflow menu, with Share, the reading tools and the scre
   await page.goto(`/songs/${IDS.song}`);
   await expect(page.locator('[data-testid^="song-menu-button"]:visible')).toHaveCount(1);
   await expect(page.getByTestId('reader-tools-button')).toHaveCount(0);
+  const phone = page.viewportSize()!.width < 1024;
+  if (!phone) await expect(page.getByRole('button', { name: 'Share song', exact: true })).toBeVisible(); // the header button (the open menu hides the page)
   const sheet = await openSongMenu(page);
-  await expect(sheet.getByRole('button', { name: 'Share Song' })).toBeVisible();
+  if (phone) await expect(sheet.getByRole('button', { name: 'Share Song' })).toBeVisible();
+  else {
+    // From lg Share is a header button, not a menu row.
+    await expect(sheet.getByRole('button', { name: 'Share Song' })).toHaveCount(0);
+  }
   await expect(sheet.getByRole('group', { name: 'Auto-scroll' })).toBeVisible(); // the 60-line song does not fit
   await expect(sheet.getByRole('switch', { name: 'Screen stays on' })).toBeVisible();
   await page.keyboard.press('Escape');

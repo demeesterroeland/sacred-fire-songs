@@ -1,4 +1,4 @@
-import { clickPractice, expectPracticeStaysOpen } from '../fixtures/songActions';
+import { openPracticeRecordTab, expectPracticeStaysOpen } from '../fixtures/songActions';
 import { test, expect, type Locator, type Page } from '@playwright/test';
 import pg from 'pg';
 import { ROLES } from '../fixtures/roles';
@@ -51,10 +51,7 @@ test.beforeAll(async () => {
 
 async function openRecordTab(page: Page) {
   await page.goto(`/songs/${IDS.song}`);
-  await clickPractice(page); // phone: the action bar (#393), not the ⋮ sheet
-  await expect(page.getByTestId('practice-drawer')).toBeVisible({ timeout: 10_000 });
-  const recordTab = page.locator('[data-testid="practice-tab-record"]');
-  if (await recordTab.count()) await recordTab.first().click({ force: true });
+  await openPracticeRecordTab(page);
 }
 
 /** Sheets and dialogs on top of the Practice panel (the panel is itself a dialog, Story 6.1.34 / #418). */

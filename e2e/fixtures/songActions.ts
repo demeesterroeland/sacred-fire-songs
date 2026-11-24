@@ -29,3 +29,23 @@ export async function expectPracticeStaysOpen(page: Page) {
   await expect(panel).not.toHaveAttribute('inert', '');
   await expect(panel).toBeVisible();
 }
+
+/**
+ * Open the Practice drawer on its Record tab (#544). The drawer slides up with a spring: a click on
+ * the tab while it is still below the fold fails with "Element is outside of the viewport", so wait
+ * until the panel has settled on screen first. A song without reference tracks opens on Record and
+ * has no tab bar.
+ */
+export async function openPracticeRecordTab(page: Page) {
+  await clickPractice(page);
+  const drawer = page.getByTestId('practice-drawer');
+  await expect(drawer).toBeVisible({ timeout: 10_000 });
+  await expect
+    .poll(async () => {
+      const box = await drawer.boundingBox();
+      return box ? box.y + box.height : Infinity;
+    })
+    .toBeLessThanOrEqual(page.viewportSize()!.height + 1);
+  const recordTab = page.locator('[data-testid="practice-tab-record"]');
+  if (await recordTab.count()) await recordTab.first().click({ force: true });
+}
