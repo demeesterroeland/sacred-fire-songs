@@ -1671,4 +1671,12 @@
 - [x] Docs: design doc 2.60, epic doc 2.30, ux-v2 decisions 1.45, member guide 0.41, E2E overview 1.31, test matrix 1.7, README
 - [x] tsc, lint, Vitest (2742), BDD unit and seed green locally
 - [ ] CI green, cross-review by claude-opus-5-5, owner merge
-- [ ] Follow-up: Supabase CLI 3.x rejects `[inbucket]` in `supabase/config.toml` (use `local_smtp`), separate chore
+- [x] Follow-up: Supabase CLI 3.x rejects `[inbucket]` in `supabase/config.toml` (use `local_smtp`): done in chore #651
+
+## Session November 24, 2026 (Chore #651, Supabase CLI 3.x config)
+
+- [x] Compared `supabase/config.toml` with the `supabase init` template of the pinned CLI 3.2.0: `[inbucket]` -> `[local_smtp]` (ports 54324 / 54325 unchanged), `enable_signup` -> `enabled` under `[auth.email]` / `[auth.sms]` (two CLI deprecation warnings)
+- [x] Guard test `testing/unit/tests/supabaseConfig.test.ts` (red on the old config, green on the new)
+- [x] Docs: README (local Supabase and mail catcher), development workflow 2.2, design doc 2.61, `.env.example`, E2E spec comment
+- [x] `npx supabase status` and `migration list` parse the config without warnings; mail catcher receives a test message on SMTP 54325 and serves it on 54324
+- [ ] CI green, cross-review by claude-opus-5-5, owner merge
