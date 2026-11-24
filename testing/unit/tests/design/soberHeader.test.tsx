@@ -42,6 +42,7 @@ const notes = [
   { id: 'n3', read_at: new Date().toISOString(), created_at: new Date().toISOString(), metadata: {}, recording_id: null, composition_id: null },
 ];
 vi.mock('@/hooks/useNotificationsQuery', () => ({ useNotificationsQuery: () => ({ data: notes }) }));
+vi.mock('@/hooks/useOpenSuggestionCount', () => ({ useOpenSuggestionCount: () => ({ data: 3 }) }));
 
 import { UserProfile } from '@/components/common/navigation/UserProfile';
 import { NotificationBell } from '@/components/common/navigation/NotificationBell';
@@ -67,6 +68,15 @@ describe('sober user menu', () => {
     const admin = screen.getByRole('link', { name: dict['userMenu.adminPortal'] });
     const favourites = screen.getByRole('link', { name: dict['userMenu.favorites'] });
     expect(admin.className).toBe(favourites.className);
+  });
+
+  it('a reviewer sees the number of open link suggestions next to the entry (Story 6.2.26)', () => {
+    openMenu();
+    const entry = screen.getByTestId('user-menu-suggestions');
+    expect(entry.getAttribute('href')).toBe('/suggestions');
+    expect(entry.textContent).toContain(dict['userMenu.linkSuggestions']);
+    expect(screen.getByTestId('user-menu-suggestions-count').textContent).toBe('3');
+    expect(screen.getByLabelText('3 to review')).toBeTruthy();
   });
 
   it('the role is translated', () => {

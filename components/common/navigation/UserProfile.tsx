@@ -1,5 +1,5 @@
 import { type AuthUser } from '@/hooks/useAuth';
-import { LogOut, ChevronDown, Heart, FileText, ListMusic, Sun, Moon, Monitor, SlidersHorizontal, Clock, Globe, ShieldCheck, Users } from 'lucide-react';
+import { LogOut, ChevronDown, Heart, FileText, ListMusic, Sun, Moon, Monitor, SlidersHorizontal, Clock, Globe, ShieldCheck, Users, GitMerge } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import { Suspense, useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
@@ -11,6 +11,8 @@ import { SignInLink } from '@/components/auth/SignInLink';
 import { MY_DRAFTS_HREF } from '@/lib/songs/draftsLink';
 import { useNotificationsQuery } from '@/hooks/useNotificationsQuery';
 import { unreadSharedCount } from '@/lib/notifications/sharedWithMe';
+import { useOpenSuggestionCount } from '@/hooks/useOpenSuggestionCount';
+import { isSuggestionReviewer } from '@/lib/songs/linkSuggestion';
 
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
 import { returnPath, signInHref } from '@/lib/auth/guestGate';
@@ -73,6 +75,32 @@ function SharedWithMeMenuItem({ userId, onNavigate }: { userId: string; onNaviga
       {unread > 0 && (
         <span data-testid="user-menu-shared-unread" className="rounded-pill bg-chip px-2 py-0.5 text-caption font-semibold text-on-chip">
           {t('sharedWithMe.unreadCount', { count: unread })}
+        </span>
+      )}
+    </Link>
+  );
+}
+
+/**
+ * Link suggestions (Story 6.2.26 / G1.5, #598). Gatekeepers and admins review every open suggestion: the entry shows
+ * the number waiting (a number, not only a dot). Everyone else sees "My suggestions" without a number.
+ */
+function LinkSuggestionsMenuItem({ userId, role, onNavigate }: { userId: string; role: string; onNavigate: () => void }) {
+  const { t } = useLocale();
+  const reviewer = isSuggestionReviewer(role);
+  const { data } = useOpenSuggestionCount(userId, reviewer);
+  const count = reviewer ? (data ?? 0) : 0;
+  return (
+    <Link href="/suggestions" onClick={onNavigate} data-testid="user-menu-suggestions" className={MENU_ITEM}>
+      <GitMerge className="w-4 h-4" aria-hidden="true" />
+      <span className="flex-1 text-sm font-medium">{reviewer ? t('userMenu.linkSuggestions') : t('userMenu.mySuggestions')}</span>
+      {count > 0 && (
+        <span
+          data-testid="user-menu-suggestions-count"
+          aria-label={t('userMenu.linkSuggestionsCount', { count })}
+          className="rounded-pill bg-chip px-2 py-0.5 text-caption font-semibold text-on-chip"
+        >
+          {count}
         </span>
       )}
     </Link>
@@ -220,6 +248,7 @@ export const UserProfile = ({ onLogout, layout = 'header', showText = true, init
                 <span className="text-sm font-medium">{t('userMenu.playlists')}</span>
               </Link>
               <SharedWithMeMenuItem userId={user.id} onNavigate={() => setIsOpen(false)} />
+              <LinkSuggestionsMenuItem userId={user.id} role={user.role} onNavigate={() => setIsOpen(false)} />
               <Link href="/library/recently-viewed" onClick={() => setIsOpen(false)} className={MENU_ITEM}>
                 <Clock className="w-4 h-4" aria-hidden="true" />
                 <span className="text-sm font-medium">{t('userMenu.recentlyViewed')}</span>

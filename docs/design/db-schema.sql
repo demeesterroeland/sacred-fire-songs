@@ -1,11 +1,13 @@
 /*
- **Version:** 3.15
+ **Version:** 3.17
  **Status:** Current
  **Date:** November 24, 2026
  
  ## Usage
  This script provides a complete setup for the "Sacred Fire Songs" database. 
  It consolidates the initial schema and all subsequent migrations up to November 24, 2026.
+ (v3.17: review fixes of #598 in migration 20261124150000_song_link_suggestions.sql: trigger trg_close_link_suggestions_on_visibility_change closes the open suggestions of a song whose visibility changes; fn_link_song_as_version_core re-checks that a suggestion still names exactly the two songs and that both are public, and re-points no suggestion across a visibility; fn_suggest_song_link checks readability before "already linked" / "itself" and says "already linked" only when the song it lives in is readable; fn_reopen_song_link_suggestion holds both songs (FOR KEY SHARE) and enforces the limit of 10 open per member).
+ (v3.16: members suggest a song as a version of another song, Story 6.2.26 (#598), migration 20261124150000_song_link_suggestions.sql: table song_link_suggestions (read by the suggester; gatekeepers and admins read all; nobody writes through the API) with the SECURITY DEFINER functions fn_suggest_song_link, fn_withdraw_song_link_suggestion, fn_decline_song_link_suggestion, fn_preview_song_link_suggestion, fn_accept_song_link_suggestion, fn_reopen_song_link_suggestion and fn_open_song_link_suggestion_count, the reviewer check fn_assert_can_review_link (no ownership rule: a gatekeeper reviews every suggestion), and the trigger fn_close_link_suggestions_on_song_delete; the body of fn_link_song_as_version moves into fn_link_song_as_version_core (no API grants) which also accepts, re-points or supersedes suggestions; song_link_audit.suggestion_id; notifications.type also allows link_suggestion_accepted and link_suggestion_declined).
  (v3.15: setlist renamed to playlist, #573, migration 20261124120000_rename_setlist_to_playlist.sql: tables playlists / playlist_items, column playlist_items.playlist_id, function fn_can_edit_playlist(p_playlist_id), the 12 RLS policies, the indexes and constraints, and the bodies of fn_song_link_summary / fn_link_song_as_version; the rows, ids, access rules and grants are unchanged and no compatibility views are kept; the script also gains the three playlist indexes idx_playlists_owner_id, idx_playlist_items_playlist_id and idx_playlist_items_song_version_id that migration 20260130030000 created but the script lacked. Older changelog lines below keep the names of their time).
  (v3.14: merge of origin/develop into feat/ux-v3; the fresh-install schema already includes the role column from migration 20261113120000_public_profiles_role.sql; no additional schema changes).
  (v3.13: previous merge sync; the schema of v3.12 is added to v3.11, nothing else changes).
@@ -766,7 +768,7 @@ CREATE TABLE IF NOT EXISTS public.notifications (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
   user_id uuid NOT NULL REFERENCES public.profiles(id) ON DELETE CASCADE,
   actor_id uuid REFERENCES public.profiles(id) ON DELETE SET NULL,
-  type text NOT NULL CHECK (type IN ('recording_shared')),
+  type text NOT NULL CONSTRAINT notifications_type_check CHECK (type IN ('recording_shared', 'link_suggestion_accepted', 'link_suggestion_declined')),
   recording_id uuid REFERENCES public.user_recordings(id) ON DELETE CASCADE,
   composition_id uuid REFERENCES public.compositions(id) ON DELETE CASCADE,
   metadata jsonb NOT NULL DEFAULT '{}'::jsonb,
@@ -1260,6 +1262,51 @@ CREATE POLICY "Song redirects follow the target song" ON public.composition_redi
 REVOKE INSERT, UPDATE, DELETE, TRUNCATE ON public.composition_redirects FROM anon, authenticated;
 GRANT SELECT ON public.composition_redirects TO anon, authenticated;
 
+-- Link 1b. Suggestions (v3.16, Story 6.2.26, migration 20261124150000_song_link_suggestions.sql): members suggest that a
+-- song is a version of another song, gatekeepers and admins review EVERY suggestion (also on songs they own neither)
+-- and link or decline. Written only by the fn_*_song_link_suggestion functions below; public songs only; one open
+-- suggestion per pair in either direction; at most 10 open per member; note and reason at most 280 characters.
+CREATE TABLE IF NOT EXISTS public.song_link_suggestions (
+  id            uuid PRIMARY KEY DEFAULT gen_random_uuid(),
+  source_id     uuid REFERENCES public.compositions(id) ON DELETE SET NULL,  -- the duplicate
+  target_id     uuid REFERENCES public.compositions(id) ON DELETE SET NULL,  -- the song it is a version of
+  source_title  text NOT NULL,
+  target_title  text NOT NULL,
+  suggested_by  uuid REFERENCES public.profiles(id) ON DELETE SET NULL,
+  note          text CHECK (note IS NULL OR char_length(note) <= 280),
+  status        text NOT NULL DEFAULT 'open'
+                CHECK (status IN ('open', 'accepted', 'declined', 'withdrawn', 'superseded')),
+  decision_note text CHECK (decision_note IS NULL OR char_length(decision_note) <= 280),
+  reviewed_by   uuid REFERENCES public.profiles(id) ON DELETE SET NULL,
+  reviewed_at   timestamptz,
+  reopened_at   timestamptz,
+  created_at    timestamptz NOT NULL DEFAULT now(),
+  CONSTRAINT song_link_suggestions_open_has_songs CHECK (status <> 'open' OR (source_id IS NOT NULL AND target_id IS NOT NULL)),
+  CONSTRAINT song_link_suggestions_not_self CHECK (source_id <> target_id),
+  CONSTRAINT song_link_suggestions_decided CHECK (status NOT IN ('accepted', 'declined') OR reviewed_at IS NOT NULL)
+);
+-- One open suggestion per pair of songs, in either direction.
+CREATE UNIQUE INDEX IF NOT EXISTS uq_song_link_suggestions_open_pair
+  ON public.song_link_suggestions (LEAST(source_id, target_id), GREATEST(source_id, target_id))
+  WHERE status = 'open';
+CREATE INDEX IF NOT EXISTS idx_song_link_suggestions_queue ON public.song_link_suggestions (status, created_at);
+CREATE INDEX IF NOT EXISTS idx_song_link_suggestions_member ON public.song_link_suggestions (suggested_by, created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_song_link_suggestions_source ON public.song_link_suggestions (source_id) WHERE status = 'open';
+CREATE INDEX IF NOT EXISTS idx_song_link_suggestions_target ON public.song_link_suggestions (target_id) WHERE status = 'open';
+
+ALTER TABLE public.song_link_suggestions ENABLE ROW LEVEL SECURITY;
+-- A member reads their own suggestions (any status); gatekeepers and admins read all of them.
+DROP POLICY IF EXISTS "Members read their own link suggestions" ON public.song_link_suggestions;
+CREATE POLICY "Members read their own link suggestions" ON public.song_link_suggestions
+  FOR SELECT TO authenticated
+  USING (suggested_by = (SELECT auth.uid()));
+DROP POLICY IF EXISTS "Reviewers read every link suggestion" ON public.song_link_suggestions;
+CREATE POLICY "Reviewers read every link suggestion" ON public.song_link_suggestions
+  FOR SELECT TO authenticated
+  USING ((SELECT role::text FROM public.profiles WHERE id = (SELECT auth.uid())) IN ('admin', 'gatekeeper'));
+REVOKE ALL ON public.song_link_suggestions FROM anon, authenticated;
+GRANT SELECT ON public.song_link_suggestions TO authenticated;
+
 -- Link 2. Audit: one row per link, written by fn_link_song_as_version only
 CREATE TABLE IF NOT EXISTS public.song_link_audit (
   id uuid PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -1269,6 +1316,8 @@ CREATE TABLE IF NOT EXISTS public.song_link_audit (
   source_title text NOT NULL,
   target_title text NOT NULL,
   summary jsonb NOT NULL DEFAULT '{}'::jsonb,
+  -- The suggestion an accepted link came from (Story 6.2.26).
+  suggestion_id uuid REFERENCES public.song_link_suggestions(id) ON DELETE SET NULL,
   created_at timestamptz NOT NULL DEFAULT now()
 );
 CREATE INDEX IF NOT EXISTS idx_song_link_audit_created ON public.song_link_audit (created_at DESC);
@@ -1451,8 +1500,64 @@ $$;
 REVOKE ALL ON FUNCTION public.fn_preview_song_link(uuid, uuid) FROM PUBLIC, anon, service_role;
 GRANT EXECUTE ON FUNCTION public.fn_preview_song_link(uuid, uuid) TO authenticated;
 
--- Link 5. The link itself, in one transaction.
-CREATE OR REPLACE FUNCTION public.fn_link_song_as_version(p_source uuid, p_target uuid)
+-- Link 5. The link itself, in one transaction (v3.16: the body lives in fn_link_song_as_version_core, which also closes
+-- or re-points open suggestions; fn_link_song_as_version keeps its signature, checks and grants).
+CREATE OR REPLACE FUNCTION public.fn_assert_can_review_link(p_source uuid, p_target uuid)
+RETURNS uuid
+LANGUAGE plpgsql
+STABLE
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+DECLARE
+  v_uid uuid := auth.uid();
+  v_role text;
+  v_target uuid;
+  v_source public.compositions%ROWTYPE;
+  v_target_row public.compositions%ROWTYPE;
+BEGIN
+  SELECT role::text INTO v_role FROM public.profiles WHERE id = v_uid;
+  IF v_uid IS NULL OR v_role IS NULL OR v_role NOT IN ('admin', 'gatekeeper') THEN
+    RAISE EXCEPTION 'Only gatekeepers and admins can review suggestions' USING ERRCODE = '42501';
+  END IF;
+
+  IF p_source IS NULL OR p_target IS NULL THEN
+    RAISE EXCEPTION 'Song not found' USING ERRCODE = 'P0002';
+  END IF;
+
+  SELECT r.new_id INTO v_target FROM public.composition_redirects r WHERE r.old_id = p_target;
+  v_target := coalesce(v_target, p_target);
+
+  IF p_source = v_target THEN
+    RAISE EXCEPTION 'A song cannot be linked to itself' USING ERRCODE = '22023';
+  END IF;
+
+  SELECT * INTO v_source FROM public.compositions WHERE id = p_source;
+  IF NOT FOUND THEN
+    IF EXISTS (SELECT 1 FROM public.composition_redirects WHERE old_id = p_source) THEN
+      RAISE EXCEPTION 'This song is already linked to another song' USING ERRCODE = '22023';
+    END IF;
+    RAISE EXCEPTION 'Song not found' USING ERRCODE = 'P0002';
+  END IF;
+
+  SELECT * INTO v_target_row FROM public.compositions WHERE id = v_target;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Song not found' USING ERRCODE = 'P0002';
+  END IF;
+
+  IF coalesce(v_source.is_public, false) <> coalesce(v_target_row.is_public, false) THEN
+    RAISE EXCEPTION 'Both songs must be public, or both private' USING ERRCODE = '22023';
+  END IF;
+  IF NOT coalesce(v_source.is_public, false) THEN
+    RAISE EXCEPTION 'Only public songs can be suggested' USING ERRCODE = '22023';
+  END IF;
+
+  RETURN v_target;
+END;
+$$;
+REVOKE ALL ON FUNCTION public.fn_assert_can_review_link(uuid, uuid) FROM PUBLIC, anon, authenticated, service_role;
+
+CREATE OR REPLACE FUNCTION public.fn_link_song_as_version_core(p_source uuid, p_target uuid, p_suggestion uuid)
 RETURNS jsonb
 LANGUAGE plpgsql
 SECURITY DEFINER
@@ -1465,20 +1570,55 @@ DECLARE
   v_summary jsonb;
   v_first_version uuid;
   v_slug_moves boolean;
+  v_sugg public.song_link_suggestions%ROWTYPE;
+  v_reviewer text;
 BEGIN
-  v_target := public.fn_assert_can_link_song(p_source, p_target);
+  -- A suggestion is decided by a reviewer, who need not own the songs; a direct link keeps the #512 rules.
+  v_target := CASE WHEN p_suggestion IS NULL
+    THEN public.fn_assert_can_link_song(p_source, p_target)
+    ELSE public.fn_assert_can_review_link(p_source, p_target)
+  END;
 
   -- Lock both songs in a stable order, so two links that cross cannot deadlock.
   PERFORM 1 FROM public.compositions WHERE id IN (p_source, v_target) ORDER BY id FOR UPDATE;
   -- A concurrent link may have committed while this one waited for the locks: check again
   -- on the rows as they are now, so the caller hears "already linked", not "not found".
-  IF public.fn_assert_can_link_song(p_source, p_target) IS DISTINCT FROM v_target THEN
+  IF (CASE WHEN p_suggestion IS NULL
+        THEN public.fn_assert_can_link_song(p_source, p_target)
+        ELSE public.fn_assert_can_review_link(p_source, p_target)
+      END) IS DISTINCT FROM v_target THEN
     RAISE EXCEPTION 'This song is already linked to another song' USING ERRCODE = '22023';
   END IF;
   SELECT * INTO v_source FROM public.compositions WHERE id = p_source;
   SELECT * INTO v_target_row FROM public.compositions WHERE id = v_target;
   IF v_source.id IS NULL OR v_target_row.id IS NULL THEN
     RAISE EXCEPTION 'Song not found' USING ERRCODE = 'P0002';
+  END IF;
+
+  -- The suggestion being accepted, or the open one for exactly this pair (a direct link closes it too).
+  -- Songs are locked first, then the suggestion: decline and withdraw never wait for a song lock.
+  IF p_suggestion IS NOT NULL THEN
+    SELECT * INTO v_sugg FROM public.song_link_suggestions WHERE id = p_suggestion FOR UPDATE;
+    IF NOT FOUND THEN
+      RAISE EXCEPTION 'Suggestion not found' USING ERRCODE = 'P0002';
+    END IF;
+    IF v_sugg.status <> 'open' THEN
+      RAISE EXCEPTION 'This suggestion was already decided' USING ERRCODE = '22023';
+    END IF;
+    -- The wrapper read the row without a lock: it must still be about exactly these two songs (a re-point by another
+    -- link, or a swap race, changes it), and both songs must still be public (a suggestion is public songs only).
+    IF NOT ((v_sugg.source_id = p_source AND v_sugg.target_id = v_target)
+         OR (v_sugg.source_id = v_target AND v_sugg.target_id = p_source)) THEN
+      RAISE EXCEPTION 'This suggestion was already decided' USING ERRCODE = '22023';
+    END IF;
+    IF NOT (coalesce(v_source.is_public, false) AND coalesce(v_target_row.is_public, false)) THEN
+      RAISE EXCEPTION 'Only public songs can be suggested' USING ERRCODE = '22023';
+    END IF;
+  ELSE
+    SELECT * INTO v_sugg FROM public.song_link_suggestions
+    WHERE status = 'open'
+      AND ((source_id = p_source AND target_id = v_target) OR (source_id = v_target AND target_id = p_source))
+    FOR UPDATE;
   END IF;
 
   v_summary := public.fn_song_link_summary(p_source, v_target);
@@ -1526,6 +1666,33 @@ BEGIN
 
   UPDATE public.notifications SET composition_id = v_target WHERE composition_id = p_source;
 
+  -- Suggestions: the one being accepted is done; no other open suggestion may point at the song that goes.
+  IF v_sugg.id IS NOT NULL THEN
+    UPDATE public.song_link_suggestions
+    SET status = 'accepted', reviewed_by = auth.uid(), reviewed_at = now()
+    WHERE id = v_sugg.id;
+  END IF;
+  -- Suggestions that start from the song that goes: the link did the work.
+  UPDATE public.song_link_suggestions SET status = 'superseded' WHERE status = 'open' AND source_id = p_source;
+  -- Suggestions that point at the song that goes are re-pointed to the song that stays, unless that would
+  -- become a self-link, repeat an open pair, or cross a visibility (a suggestion is public songs only); those are
+  -- closed.
+  UPDATE public.song_link_suggestions s
+  SET status = 'superseded'
+  WHERE s.status = 'open' AND s.target_id = p_source
+    AND (
+      s.source_id = v_target
+      OR NOT (coalesce(v_source.is_public, false) AND coalesce(v_target_row.is_public, false))
+      OR EXISTS (
+        SELECT 1 FROM public.song_link_suggestions o
+        WHERE o.status = 'open' AND o.id <> s.id
+          AND ((o.source_id = s.source_id AND o.target_id = v_target) OR (o.source_id = v_target AND o.target_id = s.source_id))
+      )
+    );
+  UPDATE public.song_link_suggestions
+  SET target_id = v_target, target_title = v_target_row.title
+  WHERE status = 'open' AND target_id = p_source;
+
   -- Redirects that led to the source now lead to the target (chains collapse), before the
   -- source is deleted (its redirects would cascade away).
   UPDATE public.composition_redirects SET new_id = v_target WHERE new_id = p_source;
@@ -1568,15 +1735,435 @@ BEGIN
     AND v.id = si.song_version_id AND v.composition_id = v_target
     AND si.song_version_id <> v_first_version;
 
-  INSERT INTO public.song_link_audit (actor_id, source_id, target_id, source_title, target_title, summary)
-  VALUES (auth.uid(), p_source, v_target, v_source.title, v_target_row.title, v_summary);
+  INSERT INTO public.song_link_audit (actor_id, source_id, target_id, source_title, target_title, summary, suggestion_id)
+  VALUES (auth.uid(), p_source, v_target, v_source.title, v_target_row.title, v_summary, v_sugg.id);
+
+  -- The member is told in the bell (never the reviewer about their own suggestion). A failed
+  -- notification never blocks the link.
+  IF v_sugg.id IS NOT NULL AND v_sugg.suggested_by IS NOT NULL AND v_sugg.suggested_by IS DISTINCT FROM auth.uid() THEN
+    BEGIN
+      SELECT nullif(btrim(full_name), '') INTO v_reviewer FROM public.profiles WHERE id = auth.uid();
+      INSERT INTO public.notifications (user_id, actor_id, type, composition_id, metadata)
+      VALUES (
+        v_sugg.suggested_by, auth.uid(), 'link_suggestion_accepted', v_target,
+        jsonb_build_object('source_title', v_source.title, 'target_title', v_target_row.title, 'reviewer_name', v_reviewer)
+      );
+    EXCEPTION WHEN OTHERS THEN
+      RAISE WARNING 'link suggestion notification failed for suggestion %: %', v_sugg.id, SQLERRM;
+    END;
+  END IF;
 
   RETURN v_summary;
 END;
 $$;
--- Signed-in callers only (see fn_preview_song_link): no service_role grant.
+REVOKE ALL ON FUNCTION public.fn_link_song_as_version_core(uuid, uuid, uuid) FROM PUBLIC, anon, authenticated, service_role;
+
+CREATE OR REPLACE FUNCTION public.fn_link_song_as_version(p_source uuid, p_target uuid)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+BEGIN
+  RETURN public.fn_link_song_as_version_core(p_source, p_target, NULL);
+END;
+$$;
+-- Signed-in callers only (the checks need auth.uid()): no service_role grant.
 REVOKE ALL ON FUNCTION public.fn_link_song_as_version(uuid, uuid) FROM PUBLIC, anon, service_role;
 GRANT EXECUTE ON FUNCTION public.fn_link_song_as_version(uuid, uuid) TO authenticated;
+
+
+-- 7. Suggest. Not for gatekeepers and admins, who link or review instead.
+CREATE OR REPLACE FUNCTION public.fn_suggest_song_link(p_source uuid, p_target uuid, p_note text DEFAULT NULL)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+DECLARE
+  v_uid uuid := auth.uid();
+  v_role text;
+  v_target uuid;
+  v_note text;
+  v_source public.compositions%ROWTYPE;
+  v_target_row public.compositions%ROWTYPE;
+  v_id uuid;
+BEGIN
+  SELECT role::text INTO v_role FROM public.profiles WHERE id = v_uid;
+  IF v_uid IS NULL OR v_role IS NULL THEN
+    RAISE EXCEPTION 'Sign in to suggest a link' USING ERRCODE = '42501';
+  END IF;
+  IF v_role IN ('admin', 'gatekeeper') THEN
+    RAISE EXCEPTION 'You can link or review these songs yourself' USING ERRCODE = '42501';
+  END IF;
+
+  IF p_source IS NULL OR p_target IS NULL THEN
+    RAISE EXCEPTION 'Pick the song to suggest and the song it belongs to' USING ERRCODE = '22023';
+  END IF;
+
+  v_note := nullif(btrim(coalesce(p_note, '')), '');
+  IF char_length(v_note) > 280 THEN
+    RAISE EXCEPTION 'The note is too long' USING ERRCODE = '22023';
+  END IF;
+
+  -- A target that was itself linked earlier stands for the song it now lives in.
+  SELECT r.new_id INTO v_target FROM public.composition_redirects r WHERE r.old_id = p_target;
+  v_target := coalesce(v_target, p_target);
+
+  SELECT * INTO v_source FROM public.compositions WHERE id = p_source;
+  IF NOT FOUND THEN
+    -- "Already linked" only when the song it lives in is readable too: no hint about a private song.
+    IF EXISTS (
+      SELECT 1 FROM public.composition_redirects r JOIN public.compositions c ON c.id = r.new_id
+      WHERE r.old_id = p_source AND (c.is_public IS TRUE OR c.owner_id = v_uid)
+    ) THEN
+      RAISE EXCEPTION 'This song is already linked to another song' USING ERRCODE = '22023';
+    END IF;
+    RAISE EXCEPTION 'Song not found' USING ERRCODE = 'P0002';
+  END IF;
+  SELECT * INTO v_target_row FROM public.compositions WHERE id = v_target;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Song not found' USING ERRCODE = 'P0002';
+  END IF;
+
+  -- A song the caller cannot read stays "not found", before anything else is said about the pair.
+  IF NOT ((v_source.is_public IS TRUE OR v_source.owner_id = v_uid)
+          AND (v_target_row.is_public IS TRUE OR v_target_row.owner_id = v_uid)) THEN
+    RAISE EXCEPTION 'Song not found' USING ERRCODE = 'P0002';
+  END IF;
+
+  IF p_source = v_target THEN
+    RAISE EXCEPTION 'A song cannot be linked to itself' USING ERRCODE = '22023';
+  END IF;
+
+  IF coalesce(v_source.is_public, false) <> coalesce(v_target_row.is_public, false) THEN
+    RAISE EXCEPTION 'Both songs must be public, or both private' USING ERRCODE = '22023';
+  END IF;
+  IF NOT coalesce(v_source.is_public, false) THEN
+    RAISE EXCEPTION 'Only public songs can be suggested' USING ERRCODE = '22023';
+  END IF;
+
+  -- One open suggestion per pair, either direction; at most 10 open per member. The advisory lock
+  -- makes two parallel sends of the same member count one after the other.
+  PERFORM pg_advisory_xact_lock(hashtext('song_link_suggestions:' || v_uid::text));
+  IF EXISTS (
+    SELECT 1 FROM public.song_link_suggestions
+    WHERE status = 'open'
+      AND ((source_id = p_source AND target_id = v_target) OR (source_id = v_target AND target_id = p_source))
+  ) THEN
+    RAISE EXCEPTION 'This suggestion already exists' USING ERRCODE = '23505';
+  END IF;
+  IF (SELECT count(*) FROM public.song_link_suggestions WHERE suggested_by = v_uid AND status = 'open') >= 10 THEN
+    RAISE EXCEPTION 'Too many open suggestions' USING ERRCODE = '22023';
+  END IF;
+
+  BEGIN
+    INSERT INTO public.song_link_suggestions (source_id, target_id, source_title, target_title, suggested_by, note)
+    VALUES (p_source, v_target, v_source.title, v_target_row.title, v_uid, v_note)
+    RETURNING id INTO v_id;
+  EXCEPTION WHEN unique_violation THEN
+    RAISE EXCEPTION 'This suggestion already exists' USING ERRCODE = '23505';
+  END;
+
+  RETURN jsonb_build_object('id', v_id);
+END;
+$$;
+REVOKE ALL ON FUNCTION public.fn_suggest_song_link(uuid, uuid, text) FROM PUBLIC, anon, service_role;
+GRANT EXECUTE ON FUNCTION public.fn_suggest_song_link(uuid, uuid, text) TO authenticated;
+
+-- 8. Withdraw: the suggester takes back their own open suggestion.
+CREATE OR REPLACE FUNCTION public.fn_withdraw_song_link_suggestion(p_id uuid)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+DECLARE
+  v_uid uuid := auth.uid();
+  v_row public.song_link_suggestions%ROWTYPE;
+BEGIN
+  IF v_uid IS NULL THEN
+    RAISE EXCEPTION 'Sign in to suggest a link' USING ERRCODE = '42501';
+  END IF;
+  SELECT * INTO v_row FROM public.song_link_suggestions WHERE id = p_id FOR UPDATE;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Suggestion not found' USING ERRCODE = 'P0002';
+  END IF;
+  IF v_row.suggested_by IS DISTINCT FROM v_uid THEN
+    RAISE EXCEPTION 'You can only withdraw your own suggestions' USING ERRCODE = '42501';
+  END IF;
+  IF v_row.status <> 'open' THEN
+    RAISE EXCEPTION 'This suggestion was already decided' USING ERRCODE = '22023';
+  END IF;
+  UPDATE public.song_link_suggestions SET status = 'withdrawn' WHERE id = p_id;
+END;
+$$;
+REVOKE ALL ON FUNCTION public.fn_withdraw_song_link_suggestion(uuid) FROM PUBLIC, anon, service_role;
+GRANT EXECUTE ON FUNCTION public.fn_withdraw_song_link_suggestion(uuid) TO authenticated;
+
+-- 9. Decline: a reviewer says no, with an optional reason; the member is told.
+CREATE OR REPLACE FUNCTION public.fn_decline_song_link_suggestion(p_id uuid, p_reason text DEFAULT NULL)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+DECLARE
+  v_uid uuid := auth.uid();
+  v_role text;
+  v_reason text;
+  v_reviewer text;
+  v_row public.song_link_suggestions%ROWTYPE;
+BEGIN
+  SELECT role::text INTO v_role FROM public.profiles WHERE id = v_uid;
+  IF v_uid IS NULL OR v_role IS NULL OR v_role NOT IN ('admin', 'gatekeeper') THEN
+    RAISE EXCEPTION 'Only gatekeepers and admins can review suggestions' USING ERRCODE = '42501';
+  END IF;
+  v_reason := nullif(btrim(coalesce(p_reason, '')), '');
+  IF char_length(v_reason) > 280 THEN
+    RAISE EXCEPTION 'The reason is too long' USING ERRCODE = '22023';
+  END IF;
+
+  SELECT * INTO v_row FROM public.song_link_suggestions WHERE id = p_id FOR UPDATE;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Suggestion not found' USING ERRCODE = 'P0002';
+  END IF;
+  IF v_row.status <> 'open' THEN
+    RAISE EXCEPTION 'This suggestion was already decided' USING ERRCODE = '22023';
+  END IF;
+
+  UPDATE public.song_link_suggestions
+  SET status = 'declined', decision_note = v_reason, reviewed_by = v_uid, reviewed_at = now()
+  WHERE id = p_id;
+
+  -- A lost notification is accepted: the decision stands and the member still sees it under "My suggestions"; the
+  -- failure (also a lock timeout or a deadlock inside the subtransaction) is logged as a WARNING, never raised.
+  IF v_row.suggested_by IS NOT NULL AND v_row.suggested_by IS DISTINCT FROM v_uid THEN
+    BEGIN
+      SELECT nullif(btrim(full_name), '') INTO v_reviewer FROM public.profiles WHERE id = v_uid;
+      INSERT INTO public.notifications (user_id, actor_id, type, composition_id, metadata)
+      VALUES (
+        v_row.suggested_by, v_uid, 'link_suggestion_declined', v_row.source_id,
+        jsonb_build_object(
+          'source_title', v_row.source_title, 'target_title', v_row.target_title,
+          'reviewer_name', v_reviewer, 'reason', v_reason
+        )
+      );
+    EXCEPTION WHEN OTHERS THEN
+      RAISE WARNING 'link suggestion notification failed for suggestion %: %', p_id, SQLERRM;
+    END;
+  END IF;
+END;
+$$;
+REVOKE ALL ON FUNCTION public.fn_decline_song_link_suggestion(uuid, text) FROM PUBLIC, anon, service_role;
+GRANT EXECUTE ON FUNCTION public.fn_decline_song_link_suggestion(uuid, text) TO authenticated;
+
+-- 10. Preview what accepting would move (the same summary as fn_preview_song_link), without changing anything.
+CREATE OR REPLACE FUNCTION public.fn_preview_song_link_suggestion(p_id uuid, p_swap boolean DEFAULT false)
+RETURNS jsonb
+LANGUAGE plpgsql
+STABLE
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+DECLARE
+  v_uid uuid := auth.uid();
+  v_role text;
+  v_row public.song_link_suggestions%ROWTYPE;
+  v_source uuid;
+  v_target uuid;
+BEGIN
+  SELECT role::text INTO v_role FROM public.profiles WHERE id = v_uid;
+  IF v_uid IS NULL OR v_role IS NULL OR v_role NOT IN ('admin', 'gatekeeper') THEN
+    RAISE EXCEPTION 'Only gatekeepers and admins can review suggestions' USING ERRCODE = '42501';
+  END IF;
+
+  SELECT * INTO v_row FROM public.song_link_suggestions WHERE id = p_id;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Suggestion not found' USING ERRCODE = 'P0002';
+  END IF;
+  IF v_row.status <> 'open' THEN
+    RAISE EXCEPTION 'This suggestion was already decided' USING ERRCODE = '22023';
+  END IF;
+
+  v_source := CASE WHEN p_swap THEN v_row.target_id ELSE v_row.source_id END;
+  v_target := CASE WHEN p_swap THEN v_row.source_id ELSE v_row.target_id END;
+  RETURN public.fn_song_link_summary(v_source, public.fn_assert_can_review_link(v_source, v_target));
+END;
+$$;
+REVOKE ALL ON FUNCTION public.fn_preview_song_link_suggestion(uuid, boolean) FROM PUBLIC, anon, service_role;
+GRANT EXECUTE ON FUNCTION public.fn_preview_song_link_suggestion(uuid, boolean) TO authenticated;
+
+-- 11. Accept: the reviewer links the songs from the suggestion; with p_swap the suggested target is the
+--     song that goes and the source stays ("keep the other title").
+CREATE OR REPLACE FUNCTION public.fn_accept_song_link_suggestion(p_id uuid, p_swap boolean DEFAULT false)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+DECLARE
+  v_uid uuid := auth.uid();
+  v_role text;
+  v_row public.song_link_suggestions%ROWTYPE;
+BEGIN
+  SELECT role::text INTO v_role FROM public.profiles WHERE id = v_uid;
+  IF v_uid IS NULL OR v_role IS NULL OR v_role NOT IN ('admin', 'gatekeeper') THEN
+    RAISE EXCEPTION 'Only gatekeepers and admins can review suggestions' USING ERRCODE = '42501';
+  END IF;
+
+  SELECT * INTO v_row FROM public.song_link_suggestions WHERE id = p_id;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Suggestion not found' USING ERRCODE = 'P0002';
+  END IF;
+  IF v_row.status <> 'open' THEN
+    RAISE EXCEPTION 'This suggestion was already decided' USING ERRCODE = '22023';
+  END IF;
+
+  RETURN public.fn_link_song_as_version_core(
+    CASE WHEN p_swap THEN v_row.target_id ELSE v_row.source_id END,
+    CASE WHEN p_swap THEN v_row.source_id ELSE v_row.target_id END,
+    p_id
+  );
+END;
+$$;
+REVOKE ALL ON FUNCTION public.fn_accept_song_link_suggestion(uuid, boolean) FROM PUBLIC, anon, service_role;
+GRANT EXECUTE ON FUNCTION public.fn_accept_song_link_suggestion(uuid, boolean) TO authenticated;
+
+-- 12. Reopen: an admin takes a decline back (a decline is reversible, a link is not). The guard rails run
+--     again on the stored songs: they may have been linked, deleted or made private since.
+CREATE OR REPLACE FUNCTION public.fn_reopen_song_link_suggestion(p_id uuid)
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+DECLARE
+  v_uid uuid := auth.uid();
+  v_role text;
+  v_row public.song_link_suggestions%ROWTYPE;
+  v_source public.compositions%ROWTYPE;
+  v_target public.compositions%ROWTYPE;
+BEGIN
+  SELECT role::text INTO v_role FROM public.profiles WHERE id = v_uid;
+  IF v_uid IS NULL OR v_role IS DISTINCT FROM 'admin' THEN
+    RAISE EXCEPTION 'Only admins can reopen suggestions' USING ERRCODE = '42501';
+  END IF;
+
+  SELECT * INTO v_row FROM public.song_link_suggestions WHERE id = p_id FOR UPDATE;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Suggestion not found' USING ERRCODE = 'P0002';
+  END IF;
+  IF v_row.status <> 'declined' THEN
+    RAISE EXCEPTION 'Only declined suggestions can be reopened' USING ERRCODE = '22023';
+  END IF;
+
+  -- Hold both songs while the checks run, so a delete or a visibility change cannot slip in between the checks and
+  -- the update (the foreign keys would otherwise null the ids under us, or a private song would be reopened).
+  PERFORM 1 FROM public.compositions WHERE id IN (v_row.source_id, v_row.target_id) ORDER BY id FOR KEY SHARE;
+
+  -- A song that was linked or deleted since leaves a NULL id on the row.
+  SELECT * INTO v_source FROM public.compositions WHERE id = v_row.source_id;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Song not found' USING ERRCODE = 'P0002';
+  END IF;
+  SELECT * INTO v_target FROM public.compositions WHERE id = v_row.target_id;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Song not found' USING ERRCODE = 'P0002';
+  END IF;
+  IF coalesce(v_source.is_public, false) <> coalesce(v_target.is_public, false) THEN
+    RAISE EXCEPTION 'Both songs must be public, or both private' USING ERRCODE = '22023';
+  END IF;
+  IF NOT coalesce(v_source.is_public, false) THEN
+    RAISE EXCEPTION 'Only public songs can be suggested' USING ERRCODE = '22023';
+  END IF;
+  IF EXISTS (
+    SELECT 1 FROM public.song_link_suggestions o
+    WHERE o.status = 'open' AND o.id <> p_id
+      AND ((o.source_id = v_row.source_id AND o.target_id = v_row.target_id)
+        OR (o.source_id = v_row.target_id AND o.target_id = v_row.source_id))
+  ) THEN
+    RAISE EXCEPTION 'This suggestion already exists' USING ERRCODE = '23505';
+  END IF;
+
+  -- The limit of 10 open suggestions per member holds for a reopened one too (same advisory lock as a new one).
+  IF v_row.suggested_by IS NOT NULL THEN
+    PERFORM pg_advisory_xact_lock(hashtext('song_link_suggestions:' || v_row.suggested_by::text));
+    IF (SELECT count(*) FROM public.song_link_suggestions WHERE suggested_by = v_row.suggested_by AND status = 'open') >= 10 THEN
+      RAISE EXCEPTION 'Too many open suggestions' USING ERRCODE = '22023';
+    END IF;
+  END IF;
+
+  -- reviewed_by, reviewed_at and decision_note keep the last decision ("Declined before").
+  UPDATE public.song_link_suggestions SET status = 'open', reopened_at = now() WHERE id = p_id;
+END;
+$$;
+REVOKE ALL ON FUNCTION public.fn_reopen_song_link_suggestion(uuid) FROM PUBLIC, anon, service_role;
+GRANT EXECUTE ON FUNCTION public.fn_reopen_song_link_suggestion(uuid) TO authenticated;
+
+-- 13. The reviewer's badge: how many open suggestions wait. 0 for everyone else.
+CREATE OR REPLACE FUNCTION public.fn_open_song_link_suggestion_count()
+RETURNS integer
+LANGUAGE sql
+STABLE
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+  SELECT CASE
+    WHEN (SELECT role::text FROM public.profiles WHERE id = auth.uid()) IN ('admin', 'gatekeeper')
+    THEN (SELECT count(*)::int FROM public.song_link_suggestions WHERE status = 'open')
+    ELSE 0
+  END;
+$$;
+REVOKE ALL ON FUNCTION public.fn_open_song_link_suggestion_count() FROM PUBLIC, anon, service_role;
+GRANT EXECUTE ON FUNCTION public.fn_open_song_link_suggestion_count() TO authenticated;
+
+-- 14. A song that is deleted another way (its owner deletes it) closes its open suggestions first, so the
+--     "open suggestions keep both songs" check never fails a delete. SECURITY DEFINER: owners have no
+--     UPDATE grant on the table.
+CREATE OR REPLACE FUNCTION public.fn_close_link_suggestions_on_song_delete()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+BEGIN
+  UPDATE public.song_link_suggestions
+  SET status = 'superseded'
+  WHERE status = 'open' AND (source_id = OLD.id OR target_id = OLD.id);
+  RETURN OLD;
+END;
+$$;
+REVOKE ALL ON FUNCTION public.fn_close_link_suggestions_on_song_delete() FROM PUBLIC, anon, authenticated, service_role;
+
+DROP TRIGGER IF EXISTS trg_close_link_suggestions_on_song_delete ON public.compositions;
+CREATE TRIGGER trg_close_link_suggestions_on_song_delete
+  BEFORE DELETE ON public.compositions
+  FOR EACH ROW EXECUTE FUNCTION public.fn_close_link_suggestions_on_song_delete();
+
+-- 15. A song that changes visibility closes its open suggestions: a suggestion is public songs only, so a song that goes
+--     private must not stay in a reviewer's queue, be re-pointed to another song or be accepted (its title would reach
+--     people who cannot read the song). SECURITY DEFINER for the same reason as the delete trigger above.
+CREATE OR REPLACE FUNCTION public.fn_close_link_suggestions_on_visibility_change()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+BEGIN
+  UPDATE public.song_link_suggestions
+  SET status = 'superseded'
+  WHERE status = 'open' AND (source_id = NEW.id OR target_id = NEW.id);
+  RETURN NEW;
+END;
+$$;
+REVOKE ALL ON FUNCTION public.fn_close_link_suggestions_on_visibility_change() FROM PUBLIC, anon, authenticated, service_role;
+
+DROP TRIGGER IF EXISTS trg_close_link_suggestions_on_visibility_change ON public.compositions;
+CREATE TRIGGER trg_close_link_suggestions_on_visibility_change
+  AFTER UPDATE OF is_public ON public.compositions
+  FOR EACH ROW WHEN (OLD.is_public IS DISTINCT FROM NEW.is_public)
+  EXECUTE FUNCTION public.fn_close_link_suggestions_on_visibility_change();
 
 -- Link 6. Importers: the song a catalog slug stands for, also after it was linked away.
 CREATE OR REPLACE FUNCTION public.fn_song_id_for_catalog_slug(p_slug text)

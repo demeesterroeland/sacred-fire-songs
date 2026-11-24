@@ -187,3 +187,30 @@ export const NO_ARTIST_FIXTURE_IDS = {
   song: 'eeeeeeee-3565-4000-a000-000000000001',
   version: 'eeeeeeee-3565-4000-a000-000000000002',
 } as const;
+
+/**
+ * Story 6.2.26 / G1.5 (#598): two public songs owned by the admin for the "suggest a version link" journey: the member
+ * suggests the source as a version of the target, an admin links them (the source song is deleted). The spec resets
+ * the rows first; removed by e2e/global-teardown.ts.
+ */
+export const SUGGEST_LINK_FIXTURE_IDS = {
+  source: 'eeeeeeee-3626-4000-a000-000000000001',
+  sourceVersion: 'eeeeeeee-3626-4000-a000-000000000002',
+  target: 'eeeeeeee-3626-4000-a000-000000000003',
+  targetVersion: 'eeeeeeee-3626-4000-a000-000000000004',
+} as const;
+export const SUGGEST_LINK_TITLES = { source: 'E2E Suggest Source', target: 'E2E Suggest Target' } as const;
+
+/**
+ * Story 6.2.26 / G1.5 (#598): a hub song and three songs suggested as versions of it (three open suggestions of the
+ * member), for the review badge. Removed by e2e/global-teardown.ts.
+ */
+export const SUGGEST_BADGE_FIXTURE_IDS = {
+  hub: 'eeeeeeee-3626-4000-a000-000000000010',
+  sources: [
+    'eeeeeeee-3626-4000-a000-000000000011',
+    'eeeeeeee-3626-4000-a000-000000000012',
+    'eeeeeeee-3626-4000-a000-000000000013',
+  ],
+} as const;
+export const SUGGEST_BADGE_TITLES = { hub: 'E2E Badge Hub', source: (i: number) => `E2E Badge Source ${i + 1}` } as const;

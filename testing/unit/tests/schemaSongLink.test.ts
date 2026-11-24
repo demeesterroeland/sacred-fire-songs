@@ -24,6 +24,13 @@ const migration = normalise(
   )
 );
 
+// Migration 20261124150000 (#598) moved the body of fn_link_song_as_version into fn_link_song_as_version_core and left a
+// wrapper with the same signature, checks and grants; that migration is the newer text of the function.
+const suggestionMigration = normalise(
+  readFileSync(join(process.cwd(), 'supabase/migrations/20261124150000_song_link_suggestions.sql'), 'utf8')
+);
+const MOVED_LATER = new Set(['fn_link_song_as_version']);
+
 const fn = (sql: string, name: string) => sql.match(new RegExp(`create or replace function public\\.${name}\\([\\s\\S]*?\\$\\$;`))?.[0];
 
 const FUNCTIONS = [
@@ -44,7 +51,7 @@ describe('db-schema.sql: link a song as a version (Story 6.2.9)', () => {
   it.each(FUNCTIONS)('%s matches the migration and pins the search path', (name) => {
     const inSchema = fn(schema, name);
     expect(inSchema, name).toBeTruthy();
-    expect(inSchema).toBe(fn(migration, name));
+    expect(inSchema).toBe(fn(MOVED_LATER.has(name) ? suggestionMigration : migration, name));
     expect(inSchema).toContain("set search_path = ''");
   });
 

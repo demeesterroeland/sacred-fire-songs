@@ -20,6 +20,8 @@ export interface SongMenuActions {
   onPublish?: () => void;
   /** Admin, or gatekeeper on their own song (Story 6.2.9, #512): link this song as a version of another song (the page opens the sheet). */
   onLinkAsVersion?: () => void;
+  /** Signed in, not a gatekeeper or admin, public song (Story 6.2.26, #598): suggest this song as a version of another song. */
+  onSuggestAsVersion?: () => void;
 }
 
 interface SongMenuSheetProps {
@@ -109,6 +111,14 @@ export function SongMenuSheet({
             <div className="py-2">
               <SheetAction icon={<Link2 />} onClick={actions.onLinkAsVersion} data-testid="song-menu-link-version">
                 {t('song.menu.linkAsVersion')}
+              </SheetAction>
+            </div>
+          )}
+
+          {actions.onSuggestAsVersion && (
+            <div className="py-2">
+              <SheetAction icon={<Link2 />} onClick={actions.onSuggestAsVersion} data-testid="song-menu-suggest-version">
+                {t('song.menu.suggestAsVersion')}
               </SheetAction>
             </div>
           )}

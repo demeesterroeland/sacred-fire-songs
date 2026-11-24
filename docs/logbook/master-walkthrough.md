@@ -3691,3 +3691,20 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - Docs: README port table (CLI stack vs. self-host stack), `.env.example`, development workflow 2.3, design doc 2.62.
 - Tests: `composePorts.test.ts` (failed on the old compose file); `docker compose config` validates the file and an override.
 
+## Session November 24, 2026 — #598: members suggest a song as a version of another song
+
+- Owner answers applied. The one change against the plan: a gatekeeper reviews and decides **every** suggestion, also on songs they own neither (like an admin); a direct link still needs ownership. Gatekeepers and admins review instead of suggesting; public songs only.
+- Split: the bundled stories became #655 (contributors keep editing their own version) and #656 (unlink my version), both sub-issues of #499 with Gherkin. Not built.
+- Database (`20261124150000_song_link_suggestions.sql`): `song_link_suggestions` with row-level security (own rows, or all rows for the two review roles) and no write grant; every write goes through `SECURITY DEFINER` functions (suggest, withdraw, decline, preview, accept, reopen, count). The merge body of `fn_link_song_as_version` moved into `fn_link_song_as_version_core` (no API grants); accepting calls it with the suggestion id and a reviewer check without the ownership rule. The core also handles every other open suggestion before the source row is deleted (re-point to the song that stays, or `superseded` when that would be a self-link or a repeat pair), closes the exact suggested pair on a direct link, writes the bell item for the member, and records the suggestion on the audit entry. A `BEFORE DELETE` trigger closes the suggestions of a song deleted another way.
+- App: suggest sheet from the song menu (search with author and version count, "Open song" in a new tab, note up to 280 characters), `/suggestions` (reviewers: To review, Reviewed, Mine; others: their own list with Withdraw), review sheet with the same preview as the direct link, a "keep the other song" switch, an optional decline reason, admin Reopen; count badge on the user-menu entry; two new bell items. 83 new keys in all 8 locales.
+- Tests: feature file with @unit and @seed scenarios as the real database roles in rolled-back transactions (42 scenarios), Vitest for helpers, actions, both sheets and the review page, schema parity test, one Playwright journey (CI only). The schema test of #512 now compares the link wrapper with the new migration.
+- Found, not fixed: the Supabase CLI 3.x still rejects `[inbucket]` (#651); the migration was applied with the 2.x CLI.
+
+## Session November 24, 2026 — #598 review fixes (Claude Opus review of PR #658)
+
+- Private-title leak closed: an `AFTER UPDATE OF is_public` trigger sets the open suggestions of a song whose visibility changes to `superseded`; the link core also checks, after locking the suggestion, that it still names exactly the two songs and that both are public, and closes (instead of re-pointing) a suggestion that would cross a visibility.
+- Reopen race and limit: `fn_reopen_song_link_suggestion` holds both songs with `FOR KEY SHARE` before its checks and applies the limit of 10 open suggestions (same advisory lock as a new suggestion).
+- Queue: every open suggestion is read without a limit; only the history is capped, so "To review (n)" matches the badge.
+- Smaller: `fn_suggest_song_link` checks readability before "itself" / "already linked" (and says "already linked" only when the song it lives in is readable); the decline notification loss is documented as accepted (logged as WARNING); the pair text is the translation key `suggest.pair`.
+- Tests: six new @seed scenarios plus an outline (78 scenarios in the file), queue and schema-parity tests, one more Playwright test for the review badge (CI only).
+
