@@ -1,6 +1,6 @@
 # Software Development Life Cycle (SDLC) & CI/CD Workflow
 
-**Version:** 2.2
+**Version:** 2.3
 **Status:** Living Document
 **Date:** Nov 24, 2026
 
@@ -8,6 +8,7 @@
 
 | Version | Date | Description of Changes |
 | ----- | ----- | ----- |
+| **2.3** | Nov 24, 2026 | §1 step 3: the self-host `docker-compose.yml` publishes 55321 (API), 55322 (Postgres) and 55323 (Studio), overridable with `SFS_API_PORT` / `SFS_DB_PORT` / `SFS_STUDIO_PORT`, so it no longer clashes with the CLI dev stack (54321–54325) (#654). |
 | **2.2** | Nov 24, 2026 | §1 step 3: `supabase/config.toml` follows the Supabase CLI 3.x schema (`[local_smtp]` replaces `[inbucket]`); the local mail catcher stays on `http://127.0.0.1:54324` (#651). |
 | **2.1** | Nov 15, 2026 | §5: a push to `main` runs the copy of `back-merge.yml` on `main`; manual start and conflict procedure in `git-workflow.md` (#608). |
 | **2.0** | Nov 5, 2026 | Rewritten for the lightweight Gitflow (Epic 5.1, Story 5.1.13): work branches → `develop` → `main`, `hotfix/*`, automatic back-merge PR, environments table, CI vs CD boundary (this repo builds, tests and publishes images; deploying them is up to each self-hoster). Removed the outdated `:latest` claim. |
@@ -43,6 +44,7 @@ No image is ever tagged `:latest`.
    (`hotfix` branches from `origin/main` instead, see §6.)
 3. **Database Setup**:
    * **Local Supabase**: Run `npx supabase start` to spin up the local database and auth services. Your `.env.local` should point to `http://127.0.0.1:54321`. Auth e-mails (magic link, sign-up confirmation) land in the local mail catcher at `http://127.0.0.1:54324` (SMTP `54325`, section `[local_smtp]` in `supabase/config.toml`). `npx supabase migration up` applies new migrations to the running stack.
+   * **Self-host stack**: `docker compose up -d` (`docker-compose.yml`) uses its own host ports (API `55321`, Postgres `55322`, Studio `55323`; override with `SFS_API_PORT`, `SFS_DB_PORT`, `SFS_STUDIO_PORT`), so it can run next to the CLI stack. Port table in the README.
    * **Ports**: dev server on `3<issue#>`, production build / Playwright build server on `4<issue#>` (e.g. issue #237 → `3237` / `4237`).
 4. **Develop & Commit**: test-first (TDD/BDD), incremental Conventional Commits (`feat: ...`, `fix: ...`).
 
