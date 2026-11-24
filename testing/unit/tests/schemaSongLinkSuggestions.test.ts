@@ -17,13 +17,15 @@ const normalise = (sql: string) =>
 const read = (path: string) => readFileSync(join(process.cwd(), path), 'utf8');
 const schema = normalise(read('docs/design/db-schema.sql'));
 const migration = normalise(read('supabase/migrations/20261124150000_song_link_suggestions.sql'));
-// Migration 20261124180000 (gatekeepers suggest too) replaced four of the functions: it holds their newer text.
+// Migration 20261124180000 (gatekeepers suggest too) replaced six of the functions: it holds their newer text.
 const followUp = normalise(read('supabase/migrations/20261124180000_gatekeepers_suggest_links.sql'));
 const REPLACED_LATER = new Set([
   'fn_suggest_song_link',
   'fn_link_song_as_version_core',
   'fn_decline_song_link_suggestion',
   'fn_open_song_link_suggestion_count',
+  'fn_preview_song_link_suggestion',
+  'fn_accept_song_link_suggestion',
 ]);
 
 const fn = (sql: string, name: string) => sql.match(new RegExp(`create or replace function public\\.${name}\\([\\s\\S]*?\\$\\$;`))?.[0];
@@ -121,6 +123,17 @@ describe('db-schema.sql: song link suggestions (Story 6.2.26)', () => {
     expect(fn(schema, 'fn_link_song_as_version_core')).toContain('v_sugg.suggested_by is not distinct from auth.uid()');
     expect(fn(schema, 'fn_decline_song_link_suggestion')).toContain('v_row.suggested_by is not distinct from v_uid');
     expect(fn(schema, 'fn_open_song_link_suggestion_count')).toContain('suggested_by is distinct from auth.uid()');
+    // Preview and accept refuse it too, accept before any song check.
+    expect(fn(schema, 'fn_preview_song_link_suggestion')).toContain('v_row.suggested_by is not distinct from v_uid');
+    const accept = fn(schema, 'fn_accept_song_link_suggestion')!;
+    expect(accept.indexOf('v_row.suggested_by is not distinct from v_uid')).toBeGreaterThan(0);
+    expect(accept.indexOf('v_row.suggested_by is not distinct from v_uid')).toBeLessThan(accept.indexOf('fn_link_song_as_version_core'));
+  });
+
+  it('a direct link by the suggester closes their own suggestion as superseded, not accepted', () => {
+    const core = fn(schema, 'fn_link_song_as_version_core')!;
+    expect(core).toContain("if v_sugg.suggested_by is not distinct from auth.uid() then");
+    expect(core).toContain("update public.song_link_suggestions set status = 'superseded' where id = v_sugg.id;");
   });
 
   it('a reviewer needs no ownership: the review check has no owner rule, the direct link keeps it', () => {

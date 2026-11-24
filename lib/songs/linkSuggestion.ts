@@ -26,15 +26,14 @@ export function isSuggestionReviewer(role: string | null | undefined): boolean {
 }
 
 /**
- * Whether the song menu offers "Suggest as a version of…": a signed-in person who cannot link the song directly, on a
- * public song (public songs only in v1). Admins link directly and never suggest; a gatekeeper links their own songs
- * directly (the menu shows "Link as a version of…") and suggests on the songs of others.
+ * Whether the song menu offers "Suggest as a version of…": a signed-in person on a public song (public songs only in
+ * v1), except an admin (admins link directly and never suggest). A gatekeeper on their own public song sees both
+ * "Link as a version of…" and "Suggest…": the target is picked later, and the database refuses a pair of two songs
+ * they own (they link those directly).
  */
 export function canSuggestLink(user: RoleUser, song: { isPublic: boolean; ownerId?: string | null }): boolean {
   if (!user?.id || !user.role || !song.isPublic) return false;
-  if (user.role === 'admin') return false;
-  if (user.role === 'gatekeeper') return song.ownerId !== user.id;
-  return true;
+  return user.role !== 'admin';
 }
 
 /** A suggestion as the review page reads it. */
@@ -58,9 +57,7 @@ export interface LinkSuggestion {
 
 /** Reviewers decide open suggestions, never their own (a gatekeeper's suggestion needs another gatekeeper or an admin). */
 export function canDecideSuggestion(user: RoleUser, suggestion: Pick<LinkSuggestion, 'status' | 'suggested_by'>): boolean {
-  return (
-    !!user && isSuggestionReviewer(user.role) && suggestion.status === 'open' && (!user.id || suggestion.suggested_by !== user.id)
-  );
+  return !!user?.id && isSuggestionReviewer(user.role) && suggestion.status === 'open' && suggestion.suggested_by !== user.id;
 }
 
 /** The suggester takes back their own open suggestion. */
@@ -215,7 +212,7 @@ export function rowsForSegment(
   switch (segment) {
     case 'review':
       // Their own open suggestions are not theirs to decide: they wait under "Mine".
-      return rows.filter((r) => r.status === 'open' && (!userId || r.suggested_by !== userId));
+      return rows.filter((r) => !!userId && r.status === 'open' && r.suggested_by !== userId);
     case 'reviewed':
       return rows.filter((r) => r.status !== 'open' && r.status !== 'withdrawn');
     case 'mine':

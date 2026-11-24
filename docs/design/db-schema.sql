@@ -1,11 +1,12 @@
 /*
- **Version:** 3.18
+ **Version:** 3.19
  **Status:** Current
  **Date:** November 24, 2026
  
  ## Usage
  This script provides a complete setup for the "Sacred Fire Songs" database. 
  It consolidates the initial schema and all subsequent migrations up to November 24, 2026.
+ (v3.19: review fixes of PR #669 in migration 20261124180000_gatekeepers_suggest_links.sql: fn_preview_song_link_suggestion refuses a reviewer previewing their own suggestion; fn_accept_song_link_suggestion checks it before any song check; a direct link by the suggester closes their own suggestion as superseded, not accepted).
  (v3.18: gatekeepers suggest too (owner decision on PR #658): fn_suggest_song_link refuses an admin, and a gatekeeper only when they own both songs; a reviewer never decides their own suggestion (fn_link_song_as_version_core and fn_decline_song_link_suggestion raise 42501 "You cannot decide your own suggestion"); fn_open_song_link_suggestion_count does not count the caller's own open suggestions).
  (v3.17: review fixes of #598 in migration 20261124150000_song_link_suggestions.sql: trigger trg_close_link_suggestions_on_visibility_change closes the open suggestions of a song whose visibility changes; fn_link_song_as_version_core re-checks that a suggestion still names exactly the two songs and that both are public, and re-points no suggestion across a visibility; fn_suggest_song_link checks readability before "already linked" / "itself" and says "already linked" only when the song it lives in is readable; fn_reopen_song_link_suggestion holds both songs (FOR KEY SHARE) and enforces the limit of 10 open per member).
  (v3.16: members suggest a song as a version of another song, Story 6.2.26 (#598), migration 20261124150000_song_link_suggestions.sql: table song_link_suggestions (read by the suggester; gatekeepers and admins read all; nobody writes through the API) with the SECURITY DEFINER functions fn_suggest_song_link, fn_withdraw_song_link_suggestion, fn_decline_song_link_suggestion, fn_preview_song_link_suggestion, fn_accept_song_link_suggestion, fn_reopen_song_link_suggestion and fn_open_song_link_suggestion_count, the reviewer check fn_assert_can_review_link (no ownership rule: a gatekeeper reviews every suggestion), and the trigger fn_close_link_suggestions_on_song_delete; the body of fn_link_song_as_version moves into fn_link_song_as_version_core (no API grants) which also accepts, re-points or supersedes suggestions; song_link_audit.suggestion_id; notifications.type also allows link_suggestion_accepted and link_suggestion_declined).
@@ -1673,9 +1674,15 @@ BEGIN
 
   -- Suggestions: the one being accepted is done; no other open suggestion may point at the song that goes.
   IF v_sugg.id IS NOT NULL THEN
-    UPDATE public.song_link_suggestions
-    SET status = 'accepted', reviewed_by = auth.uid(), reviewed_at = now()
-    WHERE id = v_sugg.id;
+    IF v_sugg.suggested_by IS NOT DISTINCT FROM auth.uid() THEN
+      -- The suggester linked the pair themselves (a direct link, for instance after becoming the owner of both
+      -- songs): nobody reviewed it, so it is closed, not "accepted".
+      UPDATE public.song_link_suggestions SET status = 'superseded' WHERE id = v_sugg.id;
+    ELSE
+      UPDATE public.song_link_suggestions
+      SET status = 'accepted', reviewed_by = auth.uid(), reviewed_at = now()
+      WHERE id = v_sugg.id;
+    END IF;
   END IF;
   -- Suggestions that start from the song that goes: the link did the work.
   UPDATE public.song_link_suggestions SET status = 'superseded' WHERE status = 'open' AND source_id = p_source;
@@ -1998,6 +2005,10 @@ BEGIN
   IF v_row.status <> 'open' THEN
     RAISE EXCEPTION 'This suggestion was already decided' USING ERRCODE = '22023';
   END IF;
+  -- A reviewer never decides their own suggestion, so they do not preview it either.
+  IF v_row.suggested_by IS NOT DISTINCT FROM v_uid THEN
+    RAISE EXCEPTION 'You cannot decide your own suggestion' USING ERRCODE = '42501';
+  END IF;
 
   v_source := CASE WHEN p_swap THEN v_row.target_id ELSE v_row.source_id END;
   v_target := CASE WHEN p_swap THEN v_row.source_id ELSE v_row.target_id END;
@@ -2031,6 +2042,10 @@ BEGIN
   END IF;
   IF v_row.status <> 'open' THEN
     RAISE EXCEPTION 'This suggestion was already decided' USING ERRCODE = '22023';
+  END IF;
+  -- Before any song check, so the reviewer hears the real reason (the core checks it again under the locks).
+  IF v_row.suggested_by IS NOT DISTINCT FROM v_uid THEN
+    RAISE EXCEPTION 'You cannot decide your own suggestion' USING ERRCODE = '42501';
   END IF;
 
   RETURN public.fn_link_song_as_version_core(

@@ -10,6 +10,9 @@
 --     "You cannot decide your own suggestion")
 --   * a reviewer's badge does not count their own open suggestions (fn_open_song_link_suggestion_count)
 --
+--   * a reviewer cannot preview their own suggestion either, and accept checks it before any song check; a direct
+--     link by the suggester closes their own suggestion as 'superseded' (nobody reviewed it), not 'accepted'
+--
 -- Only function bodies change (CREATE OR REPLACE, grants restated); no table or policy changes.
 -- Safe to run more than once.
 
@@ -230,9 +233,15 @@ BEGIN
 
   -- Suggestions: the one being accepted is done; no other open suggestion may point at the song that goes.
   IF v_sugg.id IS NOT NULL THEN
-    UPDATE public.song_link_suggestions
-    SET status = 'accepted', reviewed_by = auth.uid(), reviewed_at = now()
-    WHERE id = v_sugg.id;
+    IF v_sugg.suggested_by IS NOT DISTINCT FROM auth.uid() THEN
+      -- The suggester linked the pair themselves (a direct link, for instance after becoming the owner of both
+      -- songs): nobody reviewed it, so it is closed, not "accepted".
+      UPDATE public.song_link_suggestions SET status = 'superseded' WHERE id = v_sugg.id;
+    ELSE
+      UPDATE public.song_link_suggestions
+      SET status = 'accepted', reviewed_by = auth.uid(), reviewed_at = now()
+      WHERE id = v_sugg.id;
+    END IF;
   END IF;
   -- Suggestions that start from the song that goes: the link did the work.
   UPDATE public.song_link_suggestions SET status = 'superseded' WHERE status = 'open' AND source_id = p_source;
@@ -394,3 +403,80 @@ AS $$
 $$;
 REVOKE ALL ON FUNCTION public.fn_open_song_link_suggestion_count() FROM PUBLIC, anon, service_role;
 GRANT EXECUTE ON FUNCTION public.fn_open_song_link_suggestion_count() TO authenticated;
+
+CREATE OR REPLACE FUNCTION public.fn_preview_song_link_suggestion(p_id uuid, p_swap boolean DEFAULT false)
+RETURNS jsonb
+LANGUAGE plpgsql
+STABLE
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+DECLARE
+  v_uid uuid := auth.uid();
+  v_role text;
+  v_row public.song_link_suggestions%ROWTYPE;
+  v_source uuid;
+  v_target uuid;
+BEGIN
+  SELECT role::text INTO v_role FROM public.profiles WHERE id = v_uid;
+  IF v_uid IS NULL OR v_role IS NULL OR v_role NOT IN ('admin', 'gatekeeper') THEN
+    RAISE EXCEPTION 'Only gatekeepers and admins can review suggestions' USING ERRCODE = '42501';
+  END IF;
+
+  SELECT * INTO v_row FROM public.song_link_suggestions WHERE id = p_id;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Suggestion not found' USING ERRCODE = 'P0002';
+  END IF;
+  IF v_row.status <> 'open' THEN
+    RAISE EXCEPTION 'This suggestion was already decided' USING ERRCODE = '22023';
+  END IF;
+  -- A reviewer never decides their own suggestion, so they do not preview it either.
+  IF v_row.suggested_by IS NOT DISTINCT FROM v_uid THEN
+    RAISE EXCEPTION 'You cannot decide your own suggestion' USING ERRCODE = '42501';
+  END IF;
+
+  v_source := CASE WHEN p_swap THEN v_row.target_id ELSE v_row.source_id END;
+  v_target := CASE WHEN p_swap THEN v_row.source_id ELSE v_row.target_id END;
+  RETURN public.fn_song_link_summary(v_source, public.fn_assert_can_review_link(v_source, v_target));
+END;
+$$;
+REVOKE ALL ON FUNCTION public.fn_preview_song_link_suggestion(uuid, boolean) FROM PUBLIC, anon, service_role;
+GRANT EXECUTE ON FUNCTION public.fn_preview_song_link_suggestion(uuid, boolean) TO authenticated;
+
+CREATE OR REPLACE FUNCTION public.fn_accept_song_link_suggestion(p_id uuid, p_swap boolean DEFAULT false)
+RETURNS jsonb
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+DECLARE
+  v_uid uuid := auth.uid();
+  v_role text;
+  v_row public.song_link_suggestions%ROWTYPE;
+BEGIN
+  SELECT role::text INTO v_role FROM public.profiles WHERE id = v_uid;
+  IF v_uid IS NULL OR v_role IS NULL OR v_role NOT IN ('admin', 'gatekeeper') THEN
+    RAISE EXCEPTION 'Only gatekeepers and admins can review suggestions' USING ERRCODE = '42501';
+  END IF;
+
+  SELECT * INTO v_row FROM public.song_link_suggestions WHERE id = p_id;
+  IF NOT FOUND THEN
+    RAISE EXCEPTION 'Suggestion not found' USING ERRCODE = 'P0002';
+  END IF;
+  IF v_row.status <> 'open' THEN
+    RAISE EXCEPTION 'This suggestion was already decided' USING ERRCODE = '22023';
+  END IF;
+  -- Before any song check, so the reviewer hears the real reason (the core checks it again under the locks).
+  IF v_row.suggested_by IS NOT DISTINCT FROM v_uid THEN
+    RAISE EXCEPTION 'You cannot decide your own suggestion' USING ERRCODE = '42501';
+  END IF;
+
+  RETURN public.fn_link_song_as_version_core(
+    CASE WHEN p_swap THEN v_row.target_id ELSE v_row.source_id END,
+    CASE WHEN p_swap THEN v_row.source_id ELSE v_row.target_id END,
+    p_id
+  );
+END;
+$$;
+REVOKE ALL ON FUNCTION public.fn_accept_song_link_suggestion(uuid, boolean) FROM PUBLIC, anon, service_role;
+GRANT EXECUTE ON FUNCTION public.fn_accept_song_link_suggestion(uuid, boolean) TO authenticated;

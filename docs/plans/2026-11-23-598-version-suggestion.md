@@ -1,9 +1,10 @@
 # Plan: suggest a song as a version of another song (Story 6.2.26, #598)
 
-**Version:** 2.1 | **Date:** Nov 24, 2026 | **Status:** BUILT (PR into `develop`, #598) after the owner's answers of Nov 24, 2026 (see "Owner answers"). Where the text below still says "gatekeeper only where they own both songs" or "private songs", the owner answers win.
+**Version:** 2.2 | **Date:** Nov 24, 2026 | **Status:** BUILT (PR into `develop`, #598) after the owner's answers of Nov 24, 2026 (see "Owner answers"). Where the text below still says "gatekeeper only where they own both songs" or "private songs", the owner answers win.
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 2.2 | Nov 24, 2026 | Review of PR #669: a gatekeeper on their own public song sees both "Link as a version of…" and "Suggest as a version of…"; the database refuses a pair of two songs they own. |
 | 2.1 | Nov 24, 2026 | Owner decision on PR #658 (while the "change proposals" story was discussed): **gatekeepers suggest too**, on songs they cannot link directly (not when they own both songs; never an admin). A reviewer never decides their own suggestion: a gatekeeper's suggestion is decided by another gatekeeper or an admin, and it is not counted in their badge. Supersedes the reading of answer 4 in 2.0. |
 | 2.0 | Nov 24, 2026 | Owner answers to the 12 questions applied. **Changed vs the plan: a gatekeeper reviews and acts on EVERY suggestion, also on songs they own neither, like an admin** (answer 3); gatekeepers and admins review instead of suggesting (answer 4); public songs only (answer 5); the split (answer 1) created #655 and #656. Sections 3.3, 3.4, 3.5, 4.1, 4.2 and 7 corrected below; built as `supabase/migrations/20261124150000_song_link_suggestions.sql`. |
 | 1.1 | Nov 23, 2026 | Review round (Claude Opus): grants of the core and helper functions, reopen re-checks, lock order, swap and direct-link notification rules, advisory lock for the cap, trigger privileges, hint visibility, section number §6.22, question 5 reasoning. Mockup: 44 px targets, Segmented pattern, more screens. |

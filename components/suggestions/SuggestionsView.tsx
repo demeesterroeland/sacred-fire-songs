@@ -14,6 +14,7 @@ import { SONG_KEYS } from '@/lib/songs/queryKeys';
 import {
   SUGGESTION_ERROR_KEYS,
   SUGGESTION_STATUS_KEYS,
+  canDecideSuggestion,
   canReopenSuggestion,
   canWithdrawSuggestion,
   rowsForSegment,
@@ -106,7 +107,7 @@ export function SuggestionsView({ rows, user }: SuggestionsViewProps) {
         <ul className="-mx-4 divide-y divide-line border-y border-line" data-testid="suggestions-list">
           {visible.map((row) => {
             const hints = suggestionHints(row, rows);
-            const open = reviewer && segment === 'review' && row.status === 'open';
+            const open = reviewer && segment === 'review' && canDecideSuggestion(user, row);
             const body = (
               <>
                 <span className="block text-row font-medium text-fg [overflow-wrap:anywhere]" data-testid="suggestion-pair">

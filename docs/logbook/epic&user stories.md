@@ -1,6 +1,6 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 2.32
+**Version:** 2.33
 **Status:** Living Document
 **Date:** Nov 24, 2026
 
@@ -131,6 +131,7 @@
 | **2.30** | Nov 24, 2026 | #573: Epic 4.1 and the stories below say "playlist" instead of "setlist" (the schema, code and docs were renamed; the user-facing word did not change). The changelog rows above keep the old word. |
 | **2.31** | Nov 24, 2026 | Story 6.2.26 (#598, G1.5) implemented on `feat/598-suggest-version` (PR into `develop`): members suggest that a song is a version of another song, gatekeepers and admins review every suggestion (also on songs they own neither) and link or decline; queue at `/suggestions`, count badge on the user menu, bell item for the member; public songs only. The two other stories bundled in #598 are split off as sub-issues of #499: Story 6.2.30 (#655, contributors keep editing their own version) and Story 6.2.31 (#656, unlink my version). Acceptance criteria below; spec `docs/testing/ux-v3-suggest-song-link.feature`. |
 | **2.32** | Nov 24, 2026 | Story 6.2.33 (#668), follow-up of #598: gatekeepers suggest links too on songs they cannot link directly (admins never; a gatekeeper who owns both links directly), and a reviewer never decides their own suggestion. New Story 6.2.32 (#667, G1.10): gatekeepers (and, with tighter limits, members) propose changes to a song's details, decided by the owner, an admin or another gatekeeper; planned. |
+| **2.33** | Nov 24, 2026 | Review fixes of PR #669 (Story 6.2.33, #668): a gatekeeper on their own public song sees both the link and the suggest action; a reviewer cannot preview their own suggestion; a direct link by the suggester supersedes their own suggestion. |
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
 
@@ -1861,7 +1862,7 @@ GitHub epic **#498**. Many circles sing from printed songbooks: the same song ap
 | 6.2.26 | #598 | `G1.5` | C | **[Implemented, in `develop` via #658]** As a Member, I want to suggest that a song is a version of another song so that duplicates get merged by someone who may do so (⋮ menu → "Suggest as a version of…" with search and note; gatekeepers and admins review every suggestion at `/suggestions`, link or decline, and choose which song stays; the member gets a bell item; public songs only; spec `docs/testing/ux-v3-suggest-song-link.feature`) | #499 |
 | 6.2.30 | #655 | `G1.8` | B | **[Planned, not started]** As a Member whose song was linked as a version of another song, I want to keep editing my own version so that a merge does not take my work out of my hands (split off #598) | #499 |
 | 6.2.31 | #656 | `G1.9` | C | **[Planned, not started]** As a Member whose version sits in another song, I want to make my version its own song again so that I am not kept in a merge I do not agree with (split off #598) | #499 |
-| 6.2.33 | #668 | `G1.11` | C | **[Implemented on `feat/668-gatekeeper-suggest-link`, PR into `develop`]** As a Gatekeeper, I want to suggest that a song is a version of another song when I cannot link them myself (not on songs I own both; admins never; a reviewer never decides their own suggestion) | #499 |
+| 6.2.33 | #668 | `G1.11` | C | **[Implemented on `feat/668-gatekeeper-suggest-link`, PR into `develop`]** As a Gatekeeper, I want to suggest that a song is a version of another song when I cannot link them myself (not when I own both songs; admins never; a reviewer never decides their own suggestion; on my own public song I see both the link and the suggest action) | #499 |
 | 6.2.32 | #667 | `G1.10` | C | **[Planned, not started]** As a Gatekeeper, I want to propose a change to a song's details (title, aliases, authors, original artist) so that quality improves without editing songs I do not own; decided by the owner, an admin or another gatekeeper; members too with tighter limits | #498 |
 
 **Story 6.2.2 acceptance criteria** (superseded by Story 6.1.40 / #586, owner decision Nov 13, 2026: Practice shows one availability dot for media or takes; kept for history; executable: `docs/testing/ux-v2-song-action-bar.feature` `@e2e`, with component coverage in `songActionBarComponent.test.tsx`):

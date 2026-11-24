@@ -1726,3 +1726,10 @@
 - [x] New migration `20261124180000_gatekeepers_suggest_links.sql` (suggest, decline, core, count; PR #658 was already merged), helpers `canSuggestLink` / `canDecideSuggestion`, review tab, error text in 8 locales, 7 new @seed scenarios, docs (plan 2.1, design doc 2.65, mockup 0.4, feature 1.2)
 - [x] New story for "propose a change" (song metadata, approvers: owner, admin, other gatekeeper; members with tighter limits) written up as #667 (Story 6.2.32), not built
 
+## Session November 24, 2026 (Story 6.2.33, #668: review fixes of PR #669)
+- [x] Opus review of PR #669 (approve with should-fix); merged origin/develop (#666), timetracking total recomputed from the rows
+- [x] `fn_preview_song_link_suggestion` refuses the suggester; accept checks it before any song check; a direct link by the suggester supersedes their own suggestion (migration `20261124180000` extended, `db-schema.sql` v3.19)
+- [x] A gatekeeper on their own public song sees both menu items; `canDecideSuggestion` and the review tab fail closed without a user id; second guard in `SuggestionsView`
+- [x] New @seed scenarios (other gatekeeper decides, self-accept with swap, self-preview, gatekeeper with one own song, limit of ten for gatekeepers, direct link by the suggester); feature 1.3
+- [ ] CI green, owner merge
+
