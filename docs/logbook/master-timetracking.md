@@ -167,4 +167,5 @@
 | **November 24, 2026** | **Chore (#573)**: setlist renamed to playlist in the schema (one migration, safety check), code, tests, seeds and docs; local database scan, schema script replay, new @seed scenarios. (estimate) | ~2.5 Hours | ✅ Completed |
 | **November 24, 2026** | **Chore (#651)**: Supabase config migrated to the CLI 3.x schema (`[local_smtp]`, `enabled`), guard test, local verification, README and docs. (estimate) | ~0.75 Hours | Completed |
 | **November 24, 2026** | **Chore (#654)**: self-host `docker-compose.yml` host ports moved off the Supabase CLI dev stack range (55321/55322/55323, overridable), guard test, `.env.example`, README and docs. (estimate) | ~0.5 Hours | Completed |
-| **Total** | **Development + AI Collaboration** | **~284.75 Hours** | |
+| **November 24, 2026** | **Fix/A11y (#664)**: Practice drawer focus retry in `useModalFocus` (red unit test, hook fix, 10x E2E on mobile, docs). (estimate) | ~0.75 Hours | Completed |
+| **Total** | **Development + AI Collaboration** | **~285.5 Hours** | |

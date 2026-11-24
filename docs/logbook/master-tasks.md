@@ -1688,3 +1688,10 @@
 - [x] `.env.example`, README port table, development workflow 2.3, design doc 2.62
 - [ ] CI green, owner merge (owner asked to fix and merge into develop)
 
+
+## Session November 24, 2026 (#664, Practice drawer focus)
+- [x] Red unit test first: `useModalFocus` with a dialog that ignores its first two `focus()` calls (hidden on the first frames)
+- [x] `hooks/useModalFocus.ts`: retry focus on each animation frame until it is inside the dialog (max 30 frames), cancelled on close
+- [x] Vitest 2759 green, `tsc`, `eslint`; E2E "Practice is a labelled dialog" (`@smoke`) 10/10 on `mobile-chrome-headless`
+- [x] Design doc 2.64
+- [ ] Owner merge (closes #664; then #544 can close)
