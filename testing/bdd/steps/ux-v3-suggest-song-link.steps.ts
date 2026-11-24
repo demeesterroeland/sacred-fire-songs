@@ -28,6 +28,8 @@ const EMAILS: Record<Account, string> = { ...SEEDED_EMAILS, expert: 'expert@sfs.
 interface SuggestWorld {
   role?: string | null;
   isPublic?: boolean;
+  ownsSong?: boolean;
+  suggestedByMe?: boolean;
   dbError?: { code: string; message: string };
   note?: NoteCheck;
   rows?: LinkSuggestion[];
@@ -57,24 +59,31 @@ const t = (key: string, params?: Record<string, string | number>) =>
 
 // ── @unit ───────────────────────────────────────────────────────────────────
 
-Given(/^a signed-in "([^"]+)" on a (public|private) song$/, function (role: string, visibility: string) {
+Given(/^a signed-in "([^"]+)" on a (public|private) song(?: (they own|of someone else))?$/, function (role: string, visibility: string, owner?: string) {
   const s = w(this);
   s.role = role === 'guest' ? null : role;
   s.isPublic = visibility === 'public';
+  s.ownsSong = owner === 'they own';
 });
 
 Then(/^the suggest action is (shown|not shown) in the song menu$/, function (shown: string) {
   const s = w(this);
   const user = s.role ? { id: 'me', role: s.role } : null;
-  assert.equal(canSuggestLink(user, { isPublic: !!s.isPublic }), shown === 'shown');
+  assert.equal(canSuggestLink(user, { isPublic: !!s.isPublic, ownerId: s.ownsSong ? 'me' : 'someone-else' }), shown === 'shown');
 });
 
-Given(/^a signed-in "([^"]+)" looking at an open suggestion by someone else$/, function (role: string) {
-  w(this).role = role;
+Given(/^a signed-in "([^"]+)" looking at an open suggestion by (someone else|themselves)$/, function (role: string, by: string) {
+  const s = w(this);
+  s.role = role;
+  s.suggestedByMe = by === 'themselves';
 });
 
 Then(/^the review actions are (shown|not shown)$/, function (shown: string) {
-  assert.equal(canDecideSuggestion({ id: 'me', role: w(this).role }, { status: 'open' }), shown === 'shown');
+  const s = w(this);
+  assert.equal(
+    canDecideSuggestion({ id: 'me', role: s.role }, { status: 'open', suggested_by: s.suggestedByMe ? 'me' : 'someone-else' }),
+    shown === 'shown'
+  );
 });
 
 When('the note {string} is checked', function (note: string) {
@@ -330,6 +339,13 @@ Given('the public song {string} of another member', async function (title: strin
   await insertSong(w(this), title, OTHER_MEMBER_ID, true);
 });
 
+Given('the gatekeeper\'s public songs {string} and {string}', async function (a: string, b: string) {
+  const s = w(this);
+  const owner = await accountId('gatekeeper');
+  await insertSong(s, a, owner, true);
+  await insertSong(s, b, owner, true);
+});
+
 Given('the member\'s private song {string}', async function (title: string) {
   await insertSong(w(this), title, await accountId('member'), false);
 });
@@ -351,7 +367,7 @@ Given(
 );
 
 Given(
-  /^an open suggestion "([^"]+)" → "([^"]+)" by (the member|the expert)$/,
+  /^an open suggestion "([^"]+)" → "([^"]+)" by (the member|the expert|the gatekeeper)$/,
   async function (source: string, target: string, who: string) {
     const s = w(this);
     await suggest(s, accountOf(who), source, target, source === 'Siento la medica' && target === 'Siento la medicina' ? 'Same song' : undefined);
@@ -551,7 +567,7 @@ Then('both songs are unchanged', async function () {
 });
 
 Then(
-  /^an open suggestion "([^"]+)" → "([^"]+)" is saved with (the member|the expert) as the suggester$/,
+  /^an open suggestion "([^"]+)" → "([^"]+)" is saved with (the member|the expert|the gatekeeper) as the suggester$/,
   async function (source: string, target: string, who: string) {
     const rows = (await suggestionsOf([source])).filter((r) => r.source_title === source && r.target_title === target && r.status === 'open');
     assert.equal(rows.length, 1, `open suggestions for ${source} → ${target}: ${rows.length}`);

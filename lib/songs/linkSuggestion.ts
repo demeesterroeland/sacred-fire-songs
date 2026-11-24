@@ -26,12 +26,15 @@ export function isSuggestionReviewer(role: string | null | undefined): boolean {
 }
 
 /**
- * Whether the song menu offers "Suggest as a version of…": a signed-in person who is not a reviewer (admins and
- * gatekeepers link or review instead of suggesting), on a public song (public songs only in v1).
+ * Whether the song menu offers "Suggest as a version of…": a signed-in person who cannot link the song directly, on a
+ * public song (public songs only in v1). Admins link directly and never suggest; a gatekeeper links their own songs
+ * directly (the menu shows "Link as a version of…") and suggests on the songs of others.
  */
-export function canSuggestLink(user: RoleUser, song: { isPublic: boolean }): boolean {
-  if (!user?.id || !user.role) return false;
-  return !isSuggestionReviewer(user.role) && song.isPublic;
+export function canSuggestLink(user: RoleUser, song: { isPublic: boolean; ownerId?: string | null }): boolean {
+  if (!user?.id || !user.role || !song.isPublic) return false;
+  if (user.role === 'admin') return false;
+  if (user.role === 'gatekeeper') return song.ownerId !== user.id;
+  return true;
 }
 
 /** A suggestion as the review page reads it. */
@@ -53,9 +56,11 @@ export interface LinkSuggestion {
   created_at: string;
 }
 
-/** Reviewers decide open suggestions. */
-export function canDecideSuggestion(user: RoleUser, suggestion: Pick<LinkSuggestion, 'status'>): boolean {
-  return !!user && isSuggestionReviewer(user.role) && suggestion.status === 'open';
+/** Reviewers decide open suggestions, never their own (a gatekeeper's suggestion needs another gatekeeper or an admin). */
+export function canDecideSuggestion(user: RoleUser, suggestion: Pick<LinkSuggestion, 'status' | 'suggested_by'>): boolean {
+  return (
+    !!user && isSuggestionReviewer(user.role) && suggestion.status === 'open' && (!user.id || suggestion.suggested_by !== user.id)
+  );
 }
 
 /** The suggester takes back their own open suggestion. */
@@ -84,6 +89,7 @@ export type SuggestionError =
   | 'reviewer'
   | 'notReviewer'
   | 'notAdmin'
+  | 'ownSuggestion'
   | 'notAllowed'
   | 'self'
   | 'alreadyLinked'
@@ -103,6 +109,7 @@ export const SUGGESTION_ERROR_KEYS: Readonly<Record<SuggestionError, Translation
   reviewer: 'suggest.error.reviewer',
   notReviewer: 'suggest.error.notReviewer',
   notAdmin: 'suggest.error.notAdmin',
+  ownSuggestion: 'suggest.error.ownSuggestion',
   notAllowed: 'suggest.error.notAllowed',
   self: 'suggest.error.self',
   alreadyLinked: 'suggest.error.alreadyLinked',
@@ -126,6 +133,7 @@ export function suggestionError(error: { code?: string | null; message?: string 
     if (/sign in/i.test(message)) return 'signIn';
     if (/yourself/i.test(message)) return 'reviewer';
     if (/only admins/i.test(message)) return 'notAdmin';
+    if (/decide your own/i.test(message)) return 'ownSuggestion';
     if (/review suggestions/i.test(message)) return 'notReviewer';
     if (/own suggestions/i.test(message)) return 'notAllowed';
     return 'notAllowed';
@@ -206,7 +214,8 @@ export function rowsForSegment(
 ): LinkSuggestion[] {
   switch (segment) {
     case 'review':
-      return rows.filter((r) => r.status === 'open');
+      // Their own open suggestions are not theirs to decide: they wait under "Mine".
+      return rows.filter((r) => r.status === 'open' && (!userId || r.suggested_by !== userId));
     case 'reviewed':
       return rows.filter((r) => r.status !== 'open' && r.status !== 'withdrawn');
     case 'mine':

@@ -42,24 +42,32 @@ describe('canSuggestLink', () => {
     ['member', true],
     ['musician', true],
     ['expert', true],
-    ['gatekeeper', false],
+    ['gatekeeper', true],
     ['admin', false],
-  ])('%s on a public song: %s', (role, shown) => {
-    expect(canSuggestLink({ id: 'u1', role }, { isPublic: true })).toBe(shown);
+  ])('%s on a public song of someone else: %s', (role, shown) => {
+    expect(canSuggestLink({ id: 'u1', role }, { isPublic: true, ownerId: 'other' })).toBe(shown);
+  });
+  it('a gatekeeper links their own song directly instead', () => {
+    expect(canSuggestLink({ id: 'u1', role: 'gatekeeper' }, { isPublic: true, ownerId: 'u1' })).toBe(false);
+    // A member who owns the song still suggests: they cannot link.
+    expect(canSuggestLink({ id: 'u1', role: 'member' }, { isPublic: true, ownerId: 'u1' })).toBe(true);
   });
   it('is never offered to a guest or on a private song', () => {
-    expect(canSuggestLink(null, { isPublic: true })).toBe(false);
-    expect(canSuggestLink({ id: 'u1', role: null }, { isPublic: true })).toBe(false);
-    expect(canSuggestLink({ id: 'u1', role: 'member' }, { isPublic: false })).toBe(false);
+    expect(canSuggestLink(null, { isPublic: true, ownerId: 'x' })).toBe(false);
+    expect(canSuggestLink({ id: 'u1', role: null }, { isPublic: true, ownerId: 'x' })).toBe(false);
+    expect(canSuggestLink({ id: 'u1', role: 'member' }, { isPublic: false, ownerId: 'x' })).toBe(false);
   });
 });
 
 describe('who acts on a row', () => {
   it('gatekeepers and admins decide open rows, nobody else', () => {
-    expect(canDecideSuggestion({ role: 'gatekeeper' }, row())).toBe(true);
-    expect(canDecideSuggestion({ role: 'admin' }, row())).toBe(true);
-    expect(canDecideSuggestion({ role: 'member' }, row())).toBe(false);
-    expect(canDecideSuggestion({ role: 'admin' }, row({ status: 'accepted' }))).toBe(false);
+    expect(canDecideSuggestion({ id: 'dana', role: 'gatekeeper' }, row())).toBe(true);
+    expect(canDecideSuggestion({ id: 'dana', role: 'admin' }, row())).toBe(true);
+    expect(canDecideSuggestion({ id: 'dana', role: 'member' }, row())).toBe(false);
+    expect(canDecideSuggestion({ id: 'dana', role: 'admin' }, row({ status: 'accepted' }))).toBe(false);
+  });
+  it('a reviewer never decides their own suggestion', () => {
+    expect(canDecideSuggestion({ id: 'u1', role: 'gatekeeper' }, row({ suggested_by: 'u1' }))).toBe(false);
   });
   it('the suggester withdraws their own open row', () => {
     expect(canWithdrawSuggestion({ id: 'u1' }, row())).toBe(true);
@@ -89,6 +97,7 @@ describe('suggestionError', () => {
     ['42501', 'You can link or review these songs yourself', 'reviewer'],
     ['42501', 'Only gatekeepers and admins can review suggestions', 'notReviewer'],
     ['42501', 'Only admins can reopen suggestions', 'notAdmin'],
+    ['42501', 'You cannot decide your own suggestion', 'ownSuggestion'],
     ['42501', 'You can only withdraw your own suggestions', 'notAllowed'],
     ['P0002', 'Song not found', 'notFound'],
     ['23505', 'This suggestion already exists', 'duplicate'],
@@ -145,7 +154,9 @@ describe('segments', () => {
       row({ id: '3', status: 'withdrawn', suggested_by: 'u2' }),
       row({ id: '4', status: 'declined', suggested_by: 'u2' }),
     ];
-    expect(rowsForSegment('review', rows, 'u1').map((r) => r.id)).toEqual(['1']);
+    expect(rowsForSegment('review', rows, 'u2').map((r) => r.id)).toEqual(['1']);
+    // Their own open suggestions are not theirs to decide: they wait under "Mine".
+    expect(rowsForSegment('review', rows, 'u1')).toEqual([]);
     expect(rowsForSegment('reviewed', rows, 'u1').map((r) => r.id)).toEqual(['2', '4']);
     expect(rowsForSegment('mine', rows, 'u1').map((r) => r.id)).toEqual(['1', '2']);
     expect(rowsForSegment('mine', rows, null)).toEqual([]);

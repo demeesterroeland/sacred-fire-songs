@@ -1711,3 +1711,8 @@
 - [x] db-schema.sql v3.17; design doc 2.63; feature 1.1
 - [ ] CI green, owner merge
 
+## Session November 24, 2026 (Story 6.2.26, #598: gatekeepers suggest too)
+- [x] Owner decision: gatekeepers suggest links on songs they cannot link directly (not when they own both; never an admin); a reviewer never decides their own suggestion and it is not counted in their badge
+- [x] New migration `20261124180000_gatekeepers_suggest_links.sql` (suggest, decline, core, count; PR #658 was already merged), helpers `canSuggestLink` / `canDecideSuggestion`, review tab, error text in 8 locales, 7 new @seed scenarios, docs (plan 2.1, design doc 2.65, mockup 0.4, feature 1.2)
+- [x] New story for "propose a change" (song metadata, approvers: owner, admin, other gatekeeper; members with tighter limits) written up as #667 (Story 6.2.32), not built
+

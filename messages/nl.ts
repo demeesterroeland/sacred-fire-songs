@@ -1219,6 +1219,7 @@ const nl: Partial<Record<TranslationKey, string>> = {
   "suggest.error.reviewer": "Je kunt deze liederen zelf koppelen of beoordelen.",
   "suggest.error.notReviewer": "Alleen gatekeepers en admins kunnen voorstellen beoordelen.",
   "suggest.error.notAdmin": "Alleen admins kunnen voorstellen heropenen.",
+  "suggest.error.ownSuggestion": "Je kunt niet over je eigen voorstel beslissen. Een andere gatekeeper of een admin doet dat.",
   "suggest.error.notAllowed": "Je kunt alleen je eigen voorstellen wijzigen.",
   "suggest.error.self": "Een lied kan geen versie van zichzelf zijn.",
   "suggest.error.alreadyLinked": "Dit lied is al gekoppeld aan een ander lied.",

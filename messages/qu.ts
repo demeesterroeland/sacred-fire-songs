@@ -1227,6 +1227,7 @@ const qu: Partial<Record<TranslationKey, string>> = {
   "suggest.error.reviewer": "Kay takikunata kikiyki tinkiyta utaq qhawayta atinki.",
   "suggest.error.notReviewer": "Gatekeeperkuna adminkunallam willasqakunata qhawayta atinku.",
   "suggest.error.notAdmin": "Adminkunallam willasqakunata kutichiyta atinku.",
+  "suggest.error.ownSuggestion": "Kikiykipa willasqaykita manam akllayta atinkichu. Huk gatekeeper utaq admin akllan.",
   "suggest.error.notAllowed": "Kikiykipa willasqaykikunallatam tikrayta atinki.",
   "suggest.error.self": "Huk taki kikinpa versionnin mana kanmanchu.",
   "suggest.error.alreadyLinked": "Kay taki ñam huk takiwan tinkisqa.",

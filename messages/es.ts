@@ -1220,6 +1220,7 @@ const es: Partial<Record<TranslationKey, string>> = {
   "suggest.error.reviewer": "Puedes vincular o revisar estas canciones tú mismo.",
   "suggest.error.notReviewer": "Solo los gatekeepers y admins pueden revisar sugerencias.",
   "suggest.error.notAdmin": "Solo los admins pueden reabrir sugerencias.",
+  "suggest.error.ownSuggestion": "No puedes decidir tu propia sugerencia. Lo hace otro gatekeeper o un admin.",
   "suggest.error.notAllowed": "Solo puedes cambiar tus propias sugerencias.",
   "suggest.error.self": "Una canción no puede ser versión de sí misma.",
   "suggest.error.alreadyLinked": "Esta canción ya está vinculada a otra canción.",

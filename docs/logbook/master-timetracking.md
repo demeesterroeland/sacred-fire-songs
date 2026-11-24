@@ -169,4 +169,5 @@
 | **November 24, 2026** | **Chore (#654)**: self-host `docker-compose.yml` host ports moved off the Supabase CLI dev stack range (55321/55322/55323, overridable), guard test, `.env.example`, README and docs. (estimate) | ~0.5 Hours | Completed |
 | **November 24, 2026** | **Feature/UX (Epic 6.2, #598)**: suggest a song as a version of another song: feature file and tests first, migration (table, RLS, SECURITY DEFINER functions, link core), server actions, suggest sheet, `/suggestions` review page, user-menu badge, bell items, 8-locale i18n, e2e spec, docs, two split-off sub-issues. (estimate) | ~5.0 Hours | Completed |
 | **November 24, 2026** | **Fix/Review (Epic 6.2, #598)**: review fixes of PR #658 (visibility trigger, core guards, reopen lock and limit, queue limit, pair key, new @seed and e2e tests, docs). (estimate) | ~1.5 Hours | Completed |
-| **Total** | **Development + AI Collaboration** | **~291.5 Hours** | |
+| **November 24, 2026** | **Feature/UX (Epic 6.2, #598)**: gatekeepers suggest links too, a reviewer never decides their own suggestion (migration, helpers, UI, @seed and unit tests, docs); story for change proposals written up. (estimate) | ~1.0 Hours | Completed |
+| **Total** | **Development + AI Collaboration** | **~292.5 Hours** | |

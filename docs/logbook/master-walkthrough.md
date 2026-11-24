@@ -3708,3 +3708,8 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - Smaller: `fn_suggest_song_link` checks readability before "itself" / "already linked" (and says "already linked" only when the song it lives in is readable); the decline notification loss is documented as accepted (logged as WARNING); the pair text is the translation key `suggest.pair`.
 - Tests: six new @seed scenarios plus an outline (78 scenarios in the file), queue and schema-parity tests, one more Playwright test for the review badge (CI only).
 
+## Session November 24, 2026 — #598: gatekeepers suggest links too
+
+- Owner decision on the PR: a gatekeeper may suggest a link on songs they cannot link directly (they own both → they link directly; an admin never suggests). To keep a suggestion a peer review, a reviewer can never decide their own suggestion: the core and the decline function refuse it (42501), the queue lists it under "Mine" with Withdraw, and the badge does not count it. Another gatekeeper or an admin decides it.
+- New migration `20261124180000_gatekeepers_suggest_links.sql` (function bodies only; PR #658 was already merged); `db-schema.sql` v3.18; seed scenarios for the new rules; the menu shows "Suggest as a version of…" to a gatekeeper on a song of someone else and "Link as a version of…" on their own.
+

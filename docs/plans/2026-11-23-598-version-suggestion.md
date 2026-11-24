@@ -1,9 +1,10 @@
 # Plan: suggest a song as a version of another song (Story 6.2.26, #598)
 
-**Version:** 2.0 | **Date:** Nov 24, 2026 | **Status:** BUILT (PR into `develop`, #598) after the owner's answers of Nov 24, 2026 (see "Owner answers"). Where the text below still says "gatekeeper only where they own both songs" or "private songs", the owner answers win.
+**Version:** 2.1 | **Date:** Nov 24, 2026 | **Status:** BUILT (PR into `develop`, #598) after the owner's answers of Nov 24, 2026 (see "Owner answers"). Where the text below still says "gatekeeper only where they own both songs" or "private songs", the owner answers win.
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 2.1 | Nov 24, 2026 | Owner decision on PR #658 (while the "change proposals" story was discussed): **gatekeepers suggest too**, on songs they cannot link directly (not when they own both songs; never an admin). A reviewer never decides their own suggestion: a gatekeeper's suggestion is decided by another gatekeeper or an admin, and it is not counted in their badge. Supersedes the reading of answer 4 in 2.0. |
 | 2.0 | Nov 24, 2026 | Owner answers to the 12 questions applied. **Changed vs the plan: a gatekeeper reviews and acts on EVERY suggestion, also on songs they own neither, like an admin** (answer 3); gatekeepers and admins review instead of suggesting (answer 4); public songs only (answer 5); the split (answer 1) created #655 and #656. Sections 3.3, 3.4, 3.5, 4.1, 4.2 and 7 corrected below; built as `supabase/migrations/20261124150000_song_link_suggestions.sql`. |
 | 1.1 | Nov 23, 2026 | Review round (Claude Opus): grants of the core and helper functions, reopen re-checks, lock order, swap and direct-link notification rules, advisory lock for the cap, trigger privileges, hint visibility, section number §6.22, question 5 reasoning. Mockup: 44 px targets, Segmented pattern, more screens. |
 | 1.0 | Nov 23, 2026 | First plan: data model, row-level security, queue UX, notifications, audit, Gherkin, test and build order, open questions. Mockup: `docs/design/screens/v2/screen26_suggest_version_link.html`. |
@@ -19,7 +20,7 @@
 | 1 | Split #598 | New sub-issues of #499: #655 "contributors keep editing their own version", #656 "unlink my version". Not built here. |
 | 2 | Delete `feat/ux-v3` after the sign-off | Left alone; the owner deletes it. |
 | 3 | **A gatekeeper reviews and acts on every suggestion**, also on songs they own neither, like an admin. Accepting through the suggestion flow is allowed for gatekeepers and admins, though a direct link (#512) still needs ownership. | `fn_assert_can_review_link` (no ownership rule) is used by the accept and preview functions; the policy "Reviewers read every link suggestion" lets both roles read all rows; the badge counts all open rows for both. `fn_can_review_link_suggestion` of section 3.3 is not needed and was not built. |
-| 4 | Everyone signed in who cannot link the pair directly may suggest, never an admin. "With answer 3, a gatekeeper reviews instead of suggesting." | Read as: **gatekeepers and admins never suggest** (the database refuses with "You can link or review these songs yourself"; the menu hides the item). If the owner wants gatekeepers to suggest on songs they own neither, it is one line in `fn_suggest_song_link` and `canSuggestLink`. |
+| 4 | Everyone signed in who cannot link the pair directly may suggest, never an admin. | Built as written, after the owner confirmed on PR #658: **gatekeepers suggest on songs they cannot link directly**; an admin, and a gatekeeper who owns both songs, are refused with "You can link or review these songs yourself" (the menu hides the item). A reviewer never decides their own suggestion ("You cannot decide your own suggestion"), so a gatekeeper's suggestion needs another gatekeeper or an admin; the badge does not count it. |
 | 5 | Public songs only in v1 | Both songs must be public; two private songs: "Only public songs can be suggested"; one of each: "Both songs must be public, or both private". Accept and reopen check it again. |
 | 6 | Pair rules as written | Unique index on `LEAST/GREATEST` of the pair where `status = 'open'`; "Declined before" hint. |
 | 7 | Reviewer chooses which song stays | `p_swap` on accept and preview; the "Keep … instead" switch. |
@@ -96,7 +97,7 @@ Rows are history: they are never deleted by the app. `ON DELETE SET NULL` on the
 
 | Function | Who | What |
 | :--- | :--- | :--- |
-| `fn_suggest_song_link(p_source, p_target, p_note)` | signed in, **not a gatekeeper or admin** (a member, musician, expert; owner answers 3 and 4: gatekeepers review instead of suggesting) | Guard rails of section 3.5, then insert. Returns `{ id }`. |
+| `fn_suggest_song_link(p_source, p_target, p_note)` | signed in, **not able to link these songs directly** (a member, musician, expert; a gatekeeper unless they own both songs; never an admin) | Guard rails of section 3.5, then insert. Returns `{ id }`. |
 | `fn_withdraw_song_link_suggestion(p_id)` | the suggester, while `open` | status `withdrawn`. |
 | `fn_decline_song_link_suggestion(p_id, p_reason)` | reviewer (3.4) | status `declined`, `reviewed_by/at`, optional reason; notifies the suggester. |
 | `fn_accept_song_link_suggestion(p_id, p_swap default false)` | reviewer (3.4) | Locks the suggestion, requires `open`, calls the link core (3.6), sets `accepted`, notifies the suggester. Returns the link summary (same shape as `fn_preview_song_link`). |
@@ -124,7 +125,7 @@ Policies: `Members read their own link suggestions`, `Reviewers read every link 
 
 In this order, each with its own message:
 
-1. Signed in, and not a gatekeeper or admin ("You can link or review these songs yourself"). `42501`.
+1. Signed in, not an admin, and not a gatekeeper who owns both songs ("You can link or review these songs yourself"). `42501`.
 2. Both ids present; the target follows `composition_redirects` (a target that was itself linked earlier stands for the song it lives in), like `fn_assert_can_link_song`.
 3. Not the same song (`22023`); the source is not already linked away (`22023`, "already linked"); both songs exist and are **readable by the caller** (`is_public` or `owner_id = auth.uid()`), otherwise `P0002` "Song not found" (no hint that a private song exists).
 4. Same visibility: "Both songs must be public, or both private" (`22023`). Whether both-private is allowed at all is open question 5.

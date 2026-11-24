@@ -1222,6 +1222,7 @@ const ru: Partial<Record<TranslationKey, string>> = {
   "suggest.error.reviewer": "Вы можете сами связать или проверить эти песни.",
   "suggest.error.notReviewer": "Предложения могут проверять только модераторы и администраторы.",
   "suggest.error.notAdmin": "Только администраторы могут вновь открывать предложения.",
+  "suggest.error.ownSuggestion": "Нельзя решать по собственному предложению. Это делает другой модератор или администратор.",
   "suggest.error.notAllowed": "Вы можете менять только свои предложения.",
   "suggest.error.self": "Песня не может быть версией самой себя.",
   "suggest.error.alreadyLinked": "Эта песня уже связана с другой песней.",
