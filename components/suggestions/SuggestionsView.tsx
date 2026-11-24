@@ -109,8 +109,8 @@ export function SuggestionsView({ rows, user }: SuggestionsViewProps) {
             const open = reviewer && segment === 'review' && row.status === 'open';
             const body = (
               <>
-                <span className="block text-row font-medium text-fg [overflow-wrap:anywhere]">
-                  {row.source_title} <span className="px-1 text-fg-subtle">→</span> {row.target_title}
+                <span className="block text-row font-medium text-fg [overflow-wrap:anywhere]" data-testid="suggestion-pair">
+                  {t('suggest.pair', { source: row.source_title, target: row.target_title })}
                 </span>
                 <span className="block text-meta text-fg-muted">{rowMeta(row, t, formatDate)}</span>
                 {row.note && (

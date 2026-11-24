@@ -1249,6 +1249,7 @@ const en = {
   "suggest.empty.reviewHint": "New suggestions from members show up here.",
   "suggest.empty.reviewed": "Nothing reviewed yet.",
   "suggest.empty.mine": "You have not suggested anything yet.",
+  "suggest.pair": "{source} → {target}",
   "suggest.row.by": "{name} · {date}",
   "suggest.row.linkedBy": "Linked by {name} · {date}",
   "suggest.row.declinedBy": "Declined by {name} · {date}",

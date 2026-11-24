@@ -142,8 +142,8 @@ function ReviewBody({
   return (
     <div className="flex flex-col gap-3 px-4 pb-4">
       <div>
-        <p className="text-body text-fg">
-          <strong className="font-semibold">{suggestion.source_title}</strong> → <strong className="font-semibold">{suggestion.target_title}</strong>
+        <p className="text-body font-semibold text-fg [overflow-wrap:anywhere]">
+          {t('suggest.pair', { source: suggestion.source_title, target: suggestion.target_title })}
         </p>
         <p className="text-meta text-fg-muted">
           {t('suggest.review.by', { name: suggester, date: formatDate(suggestion.created_at) })}

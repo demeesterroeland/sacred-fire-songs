@@ -1,5 +1,5 @@
 # Sacred Fire Songs – Suggest a song as a version of another song
-# Version: 1.0 | Date: Nov 24, 2026
+# Version: 1.1 | Date: Nov 24, 2026
 #
 # Story 6.2.26 / G1.5 (#598): a member suggests "this song is a version of that song"; a
 # gatekeeper or admin reviews it and links (fn_link_song_as_version core) or declines.
@@ -17,6 +17,9 @@
 #   1.0 – Nov 24, 2026 – Initial scenarios (Story 6.2.26, #598). A gatekeeper reviews every
 #         suggestion, also on songs they own neither (owner answer 3); public songs only
 #         (answer 5); gatekeepers and admins review instead of suggesting (answer 4).
+#   1.1 – Nov 24, 2026 – Review fixes (Opus): a song that goes private closes its open suggestions; a
+#         reopened suggestion counts against the limit of ten; the internal functions, the table and the badge
+#         are closed to the API roles; reviewers only preview; a decided suggestion cannot be withdrawn.
 
 @story-6.2.26 @suggestSongLink
 Feature: Members suggest linking a song as a version of another song
@@ -242,6 +245,40 @@ Feature: Members suggest linking a song as a version of another song
       When the expert withdraws it
       Then it is refused as not allowed
 
+    @seed
+    Scenario: A decided suggestion cannot be withdrawn
+      Given an open suggestion "Siento la medica" → "Siento la medicina" by the member
+      And the admin declined the suggestion without a reason
+      When the member withdraws it
+      Then it is refused with "This suggestion was already decided"
+
+  Rule: The internal functions and the table are closed to the API roles
+
+    Background:
+      Given the public songs "Siento la medicina" and "Siento la medica" of another member
+      And an open suggestion "Siento la medica" → "Siento la medicina" by the member
+
+    @seed
+    Scenario Outline: <who> cannot call <function>
+      When <who> calls "<function>" directly
+      Then it is refused as not allowed
+
+      Examples:
+        | who        | function                     |
+        | the member | fn_link_song_as_version_core |
+        | a guest    | fn_link_song_as_version_core |
+        | the member | fn_assert_can_review_link    |
+        | a guest    | fn_assert_can_review_link    |
+        | the admin  | fn_link_song_as_version_core |
+        | the admin  | fn_assert_can_review_link    |
+
+    @seed
+    Scenario: A guest cannot read the table or the badge
+      When a guest reads the suggestions table
+      Then it is refused as not allowed
+      When a guest asks for the open count
+      Then it is refused as not allowed
+
   Rule: Gatekeepers and admins review every suggestion
 
     Background:
@@ -323,10 +360,12 @@ Feature: Members suggest linking a song as a version of another song
       Then it is refused with "This suggestion was already decided"
 
     @seed
-    Scenario: A suggestion whose songs went private is not linked
+    Scenario: A song that goes private closes its open suggestions
       Given "Siento la medica" was made private
+      Then the suggestion is superseded
+      And the open count is 0 for the admin, 0 for the gatekeeper and 0 for the member
       When the admin accepts the suggestion
-      Then it is refused with "Both songs must be public, or both private"
+      Then it is refused with "This suggestion was already decided"
       And both songs are unchanged
 
     @seed
@@ -348,6 +387,23 @@ Feature: Members suggest linking a song as a version of another song
       And an admin linked "Siento la medica" directly into "Siento la medicina"
       When the admin reopens the suggestion
       Then it is refused with "Song not found"
+
+    @seed
+    Scenario: A reopened suggestion counts against the limit of ten
+      Given the admin declined the suggestion without a reason
+      And the member has 10 open suggestions
+      When the admin reopens the suggestion
+      Then it is refused with "Too many open suggestions"
+
+    @seed
+    Scenario Outline: A <role> cannot preview a suggestion
+      When the <role> previews the suggestion
+      Then it is refused with "Only gatekeepers and admins can review suggestions"
+
+      Examples:
+        | role   |
+        | member |
+        | expert |
 
   Rule: A link closes or re-points the open suggestions around it
 
@@ -429,6 +485,6 @@ Feature: Members suggest linking a song as a version of another song
     @e2e
     Scenario: The review badge counts what is waiting
       Given three open suggestions
-      Then the admin's user menu shows 3 next to "Link suggestions"
-      And a gatekeeper's user menu shows 3 as well
+      Then the admin's user menu shows the number of open suggestions next to "Link suggestions"
+      And a gatekeeper's user menu shows the same number
       And a member's menu shows "My suggestions" without a number

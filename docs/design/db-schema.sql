@@ -1,11 +1,12 @@
 /*
- **Version:** 3.16
+ **Version:** 3.17
  **Status:** Current
  **Date:** November 24, 2026
  
  ## Usage
  This script provides a complete setup for the "Sacred Fire Songs" database. 
  It consolidates the initial schema and all subsequent migrations up to November 24, 2026.
+ (v3.17: review fixes of #598 in migration 20261124150000_song_link_suggestions.sql: trigger trg_close_link_suggestions_on_visibility_change closes the open suggestions of a song whose visibility changes; fn_link_song_as_version_core re-checks that a suggestion still names exactly the two songs and that both are public, and re-points no suggestion across a visibility; fn_suggest_song_link checks readability before "already linked" / "itself" and says "already linked" only when the song it lives in is readable; fn_reopen_song_link_suggestion holds both songs (FOR KEY SHARE) and enforces the limit of 10 open per member).
  (v3.16: members suggest a song as a version of another song, Story 6.2.26 (#598), migration 20261124150000_song_link_suggestions.sql: table song_link_suggestions (read by the suggester; gatekeepers and admins read all; nobody writes through the API) with the SECURITY DEFINER functions fn_suggest_song_link, fn_withdraw_song_link_suggestion, fn_decline_song_link_suggestion, fn_preview_song_link_suggestion, fn_accept_song_link_suggestion, fn_reopen_song_link_suggestion and fn_open_song_link_suggestion_count, the reviewer check fn_assert_can_review_link (no ownership rule: a gatekeeper reviews every suggestion), and the trigger fn_close_link_suggestions_on_song_delete; the body of fn_link_song_as_version moves into fn_link_song_as_version_core (no API grants) which also accepts, re-points or supersedes suggestions; song_link_audit.suggestion_id; notifications.type also allows link_suggestion_accepted and link_suggestion_declined).
  (v3.15: setlist renamed to playlist, #573, migration 20261124120000_rename_setlist_to_playlist.sql: tables playlists / playlist_items, column playlist_items.playlist_id, function fn_can_edit_playlist(p_playlist_id), the 12 RLS policies, the indexes and constraints, and the bodies of fn_song_link_summary / fn_link_song_as_version; the rows, ids, access rules and grants are unchanged and no compatibility views are kept; the script also gains the three playlist indexes idx_playlists_owner_id, idx_playlist_items_playlist_id and idx_playlist_items_song_version_id that migration 20260130030000 created but the script lacked. Older changelog lines below keep the names of their time).
  (v3.14: merge of origin/develop into feat/ux-v3; the fresh-install schema already includes the role column from migration 20261113120000_public_profiles_role.sql; no additional schema changes).
@@ -1604,6 +1605,15 @@ BEGIN
     IF v_sugg.status <> 'open' THEN
       RAISE EXCEPTION 'This suggestion was already decided' USING ERRCODE = '22023';
     END IF;
+    -- The wrapper read the row without a lock: it must still be about exactly these two songs (a re-point by another
+    -- link, or a swap race, changes it), and both songs must still be public (a suggestion is public songs only).
+    IF NOT ((v_sugg.source_id = p_source AND v_sugg.target_id = v_target)
+         OR (v_sugg.source_id = v_target AND v_sugg.target_id = p_source)) THEN
+      RAISE EXCEPTION 'This suggestion was already decided' USING ERRCODE = '22023';
+    END IF;
+    IF NOT (coalesce(v_source.is_public, false) AND coalesce(v_target_row.is_public, false)) THEN
+      RAISE EXCEPTION 'Only public songs can be suggested' USING ERRCODE = '22023';
+    END IF;
   ELSE
     SELECT * INTO v_sugg FROM public.song_link_suggestions
     WHERE status = 'open'
@@ -1665,12 +1675,14 @@ BEGIN
   -- Suggestions that start from the song that goes: the link did the work.
   UPDATE public.song_link_suggestions SET status = 'superseded' WHERE status = 'open' AND source_id = p_source;
   -- Suggestions that point at the song that goes are re-pointed to the song that stays, unless that would
-  -- become a self-link or repeat an open pair; those are closed.
+  -- become a self-link, repeat an open pair, or cross a visibility (a suggestion is public songs only); those are
+  -- closed.
   UPDATE public.song_link_suggestions s
   SET status = 'superseded'
   WHERE s.status = 'open' AND s.target_id = p_source
     AND (
       s.source_id = v_target
+      OR NOT (coalesce(v_source.is_public, false) AND coalesce(v_target_row.is_public, false))
       OR EXISTS (
         SELECT 1 FROM public.song_link_suggestions o
         WHERE o.status = 'open' AND o.id <> s.id
@@ -1798,13 +1810,13 @@ BEGIN
   SELECT r.new_id INTO v_target FROM public.composition_redirects r WHERE r.old_id = p_target;
   v_target := coalesce(v_target, p_target);
 
-  IF p_source = v_target THEN
-    RAISE EXCEPTION 'A song cannot be linked to itself' USING ERRCODE = '22023';
-  END IF;
-
   SELECT * INTO v_source FROM public.compositions WHERE id = p_source;
   IF NOT FOUND THEN
-    IF EXISTS (SELECT 1 FROM public.composition_redirects WHERE old_id = p_source) THEN
+    -- "Already linked" only when the song it lives in is readable too: no hint about a private song.
+    IF EXISTS (
+      SELECT 1 FROM public.composition_redirects r JOIN public.compositions c ON c.id = r.new_id
+      WHERE r.old_id = p_source AND (c.is_public IS TRUE OR c.owner_id = v_uid)
+    ) THEN
       RAISE EXCEPTION 'This song is already linked to another song' USING ERRCODE = '22023';
     END IF;
     RAISE EXCEPTION 'Song not found' USING ERRCODE = 'P0002';
@@ -1814,10 +1826,14 @@ BEGIN
     RAISE EXCEPTION 'Song not found' USING ERRCODE = 'P0002';
   END IF;
 
-  -- A song the caller cannot read stays "not found": no hint that a private song exists.
+  -- A song the caller cannot read stays "not found", before anything else is said about the pair.
   IF NOT ((v_source.is_public IS TRUE OR v_source.owner_id = v_uid)
           AND (v_target_row.is_public IS TRUE OR v_target_row.owner_id = v_uid)) THEN
     RAISE EXCEPTION 'Song not found' USING ERRCODE = 'P0002';
+  END IF;
+
+  IF p_source = v_target THEN
+    RAISE EXCEPTION 'A song cannot be linked to itself' USING ERRCODE = '22023';
   END IF;
 
   IF coalesce(v_source.is_public, false) <> coalesce(v_target_row.is_public, false) THEN
@@ -1920,6 +1936,8 @@ BEGIN
   SET status = 'declined', decision_note = v_reason, reviewed_by = v_uid, reviewed_at = now()
   WHERE id = p_id;
 
+  -- A lost notification is accepted: the decision stands and the member still sees it under "My suggestions"; the
+  -- failure (also a lock timeout or a deadlock inside the subtransaction) is logged as a WARNING, never raised.
   IF v_row.suggested_by IS NOT NULL AND v_row.suggested_by IS DISTINCT FROM v_uid THEN
     BEGIN
       SELECT nullif(btrim(full_name), '') INTO v_reviewer FROM public.profiles WHERE id = v_uid;
@@ -2040,6 +2058,10 @@ BEGIN
     RAISE EXCEPTION 'Only declined suggestions can be reopened' USING ERRCODE = '22023';
   END IF;
 
+  -- Hold both songs while the checks run, so a delete or a visibility change cannot slip in between the checks and
+  -- the update (the foreign keys would otherwise null the ids under us, or a private song would be reopened).
+  PERFORM 1 FROM public.compositions WHERE id IN (v_row.source_id, v_row.target_id) ORDER BY id FOR KEY SHARE;
+
   -- A song that was linked or deleted since leaves a NULL id on the row.
   SELECT * INTO v_source FROM public.compositions WHERE id = v_row.source_id;
   IF NOT FOUND THEN
@@ -2062,6 +2084,14 @@ BEGIN
         OR (o.source_id = v_row.target_id AND o.target_id = v_row.source_id))
   ) THEN
     RAISE EXCEPTION 'This suggestion already exists' USING ERRCODE = '23505';
+  END IF;
+
+  -- The limit of 10 open suggestions per member holds for a reopened one too (same advisory lock as a new one).
+  IF v_row.suggested_by IS NOT NULL THEN
+    PERFORM pg_advisory_xact_lock(hashtext('song_link_suggestions:' || v_row.suggested_by::text));
+    IF (SELECT count(*) FROM public.song_link_suggestions WHERE suggested_by = v_row.suggested_by AND status = 'open') >= 10 THEN
+      RAISE EXCEPTION 'Too many open suggestions' USING ERRCODE = '22023';
+    END IF;
   END IF;
 
   -- reviewed_by, reviewed_at and decision_note keep the last decision ("Declined before").
@@ -2110,6 +2140,30 @@ DROP TRIGGER IF EXISTS trg_close_link_suggestions_on_song_delete ON public.compo
 CREATE TRIGGER trg_close_link_suggestions_on_song_delete
   BEFORE DELETE ON public.compositions
   FOR EACH ROW EXECUTE FUNCTION public.fn_close_link_suggestions_on_song_delete();
+
+-- 15. A song that changes visibility closes its open suggestions: a suggestion is public songs only, so a song that goes
+--     private must not stay in a reviewer's queue, be re-pointed to another song or be accepted (its title would reach
+--     people who cannot read the song). SECURITY DEFINER for the same reason as the delete trigger above.
+CREATE OR REPLACE FUNCTION public.fn_close_link_suggestions_on_visibility_change()
+RETURNS trigger
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = ''
+AS $$
+BEGIN
+  UPDATE public.song_link_suggestions
+  SET status = 'superseded'
+  WHERE status = 'open' AND (source_id = NEW.id OR target_id = NEW.id);
+  RETURN NEW;
+END;
+$$;
+REVOKE ALL ON FUNCTION public.fn_close_link_suggestions_on_visibility_change() FROM PUBLIC, anon, authenticated, service_role;
+
+DROP TRIGGER IF EXISTS trg_close_link_suggestions_on_visibility_change ON public.compositions;
+CREATE TRIGGER trg_close_link_suggestions_on_visibility_change
+  AFTER UPDATE OF is_public ON public.compositions
+  FOR EACH ROW WHEN (OLD.is_public IS DISTINCT FROM NEW.is_public)
+  EXECUTE FUNCTION public.fn_close_link_suggestions_on_visibility_change();
 
 -- Link 6. Importers: the song a catalog slug stands for, also after it was linked away.
 CREATE OR REPLACE FUNCTION public.fn_song_id_for_catalog_slug(p_slug text)

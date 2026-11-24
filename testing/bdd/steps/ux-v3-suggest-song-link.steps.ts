@@ -490,6 +490,31 @@ When('the owner deletes {string}', async function (title: string) {
   s.outcome = result.ok && result.rows.length === 1 ? { ok: true, data: null } : result.ok ? { ok: false, message: 'nothing deleted' } : result;
 });
 
+When(
+  /^(the member|the admin|a guest) calls "(fn_link_song_as_version_core|fn_assert_can_review_link)" directly$/,
+  async function (who: string, fn: string) {
+    const s = w(this);
+    const actor: Actor = who === 'a guest' ? 'guest' : accountOf(who);
+    const ids = Object.values(s.songs);
+    const sql =
+      fn === 'fn_link_song_as_version_core'
+        ? 'SELECT public.fn_link_song_as_version_core($1, $2, NULL)'
+        : 'SELECT public.fn_assert_can_review_link($1, $2)';
+    const result = await runAs(actor, sql, [ids[1], ids[0]], false);
+    s.outcome = result.ok ? { ok: true, data: null } : result;
+  }
+);
+
+When('a guest reads the suggestions table', async function () {
+  const result = await runAs('guest', 'SELECT count(*) FROM public.song_link_suggestions', [], false);
+  w(this).outcome = result.ok ? { ok: true, data: null } : result;
+});
+
+When('a guest asks for the open count', async function () {
+  const result = await runAs('guest', 'SELECT public.fn_open_song_link_suggestion_count()', [], false);
+  w(this).outcome = result.ok ? { ok: true, data: null } : result;
+});
+
 // ── @seed: outcomes ─────────────────────────────────────────────────────────
 
 Then('it is refused with {string}', function (message: string) {

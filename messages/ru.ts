@@ -1253,6 +1253,7 @@ const ru: Partial<Record<TranslationKey, string>> = {
   "suggest.empty.reviewHint": "Здесь появляются новые предложения участников.",
   "suggest.empty.reviewed": "Пока ничего не проверено.",
   "suggest.empty.mine": "Вы пока ничего не предлагали.",
+  "suggest.pair": "{source} → {target}",
   "suggest.row.by": "{name} · {date}",
   "suggest.row.linkedBy": "Связал(а) {name} · {date}",
   "suggest.row.declinedBy": "Отклонил(а) {name} · {date}",

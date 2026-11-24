@@ -2,7 +2,12 @@ import { test, expect } from '@playwright/test';
 import pg from 'pg';
 import en from '../../messages/en';
 import { ROLES } from '../fixtures/roles';
-import { SUGGEST_LINK_FIXTURE_IDS as IDS, SUGGEST_LINK_TITLES as TITLES } from '../fixtures/ids';
+import {
+  SUGGEST_BADGE_FIXTURE_IDS as BADGE,
+  SUGGEST_BADGE_TITLES as BADGE_TITLES,
+  SUGGEST_LINK_FIXTURE_IDS as IDS,
+  SUGGEST_LINK_TITLES as TITLES,
+} from '../fixtures/ids';
 import { openSongMenu } from '../fixtures/songMenu';
 
 /**
@@ -82,4 +87,60 @@ test('a member suggests, an admin links from the suggestion, the member is told'
 
   await member.close();
   await admin.close();
+});
+
+/**
+ * @e2e "The review badge counts what is waiting": three open suggestions of the member. The expected number is read from
+ * the database (the shared database may hold other open suggestions), so the spec checks that the badge is the number of
+ * open suggestions for an admin and a gatekeeper, and that a member sees the entry "My suggestions" without a number.
+ * Same serial describe as the journey above: both change the number of open suggestions.
+ */
+test('the review badge counts what is waiting', async ({ browser }, testInfo) => {
+  test.skip(!/desktop/.test(testInfo.project.name), 'one project is enough: the badge reads shared rows');
+  const connectionString = process.env.DATABASE_URL ?? 'postgresql://postgres:postgres@127.0.0.1:54322/postgres';
+  const client = new pg.Client({ connectionString });
+  await client.connect();
+  let waiting: number;
+  try {
+    const titles = [BADGE_TITLES.hub, ...BADGE.sources.map((_, i) => BADGE_TITLES.source(i))];
+    await client.query('DELETE FROM public.song_link_suggestions WHERE source_title = ANY($1) OR target_title = ANY($1)', [titles]);
+    await client.query('DELETE FROM public.compositions WHERE id = ANY($1)', [[BADGE.hub, ...BADGE.sources]]);
+    const songs: [string, string][] = [[BADGE.hub, BADGE_TITLES.hub], ...BADGE.sources.map((id, i): [string, string] => [id, BADGE_TITLES.source(i)])];
+    for (const [id, title] of songs) {
+      await client.query(`INSERT INTO public.compositions (id, title, is_public, owner_id) VALUES ($1, $2, true, $3)`, [id, title, ADMIN_ID]);
+    }
+    for (const [i, id] of BADGE.sources.entries()) {
+      await client.query(
+        `INSERT INTO public.song_link_suggestions (source_id, target_id, source_title, target_title, suggested_by)
+         VALUES ($1, $2, $3, $4, (SELECT id FROM public.profiles WHERE email = $5))`,
+        [id, BADGE.hub, BADGE_TITLES.source(i), BADGE_TITLES.hub, ROLES.member.email],
+      );
+    }
+    const { rows } = await client.query<{ n: number }>("SELECT count(*)::int AS n FROM public.song_link_suggestions WHERE status = 'open'");
+    waiting = rows[0].n;
+  } finally {
+    await client.end();
+  }
+  expect(waiting).toBeGreaterThanOrEqual(3);
+
+  const openMenu = async (storageState: string) => {
+    const context = await browser.newContext({ storageState, locale: 'en-US' });
+    const page = await context.newPage();
+    await page.goto('/songs');
+    await page.getByRole('button', { name: en['userMenu.trigger'] }).first().click();
+    return { context, page };
+  };
+
+  for (const role of ['admin', 'gatekeeper'] as const) {
+    const { context, page } = await openMenu(ROLES[role].storage);
+    const entry = page.getByTestId('user-menu-suggestions');
+    await expect(entry).toContainText(en['userMenu.linkSuggestions']);
+    await expect(page.getByTestId('user-menu-suggestions-count')).toHaveText(String(waiting));
+    await context.close();
+  }
+
+  const { context, page } = await openMenu(ROLES.member.storage);
+  await expect(page.getByTestId('user-menu-suggestions')).toContainText(en['userMenu.mySuggestions']);
+  await expect(page.getByTestId('user-menu-suggestions-count')).toHaveCount(0);
+  await context.close();
 });

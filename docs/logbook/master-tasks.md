@@ -1702,3 +1702,12 @@
 - [x] Docs: design doc 2.61 (new section 6.22, table I), stories file 2.31, mockup 0.3, plan 2.0
 - [x] tsc, lint (126 warnings, cap 132 unchanged), Vitest, BDD unit and seed
 - [ ] CI green, cross-review by claude-opus-5-5 (security / RLS), owner merge
+
+## Session November 24, 2026 (Story 6.2.26, #598: review fixes)
+- [x] Opus review of PR #658 (no blockers): 3 should-fix, 4 nits, test gaps
+- [x] Visibility trigger closes open suggestions; core re-checks the pair and that both songs are public; reopen holds both songs (`FOR KEY SHARE`) and keeps the limit of 10; suggest checks readability first; decline notification loss documented
+- [x] Queue reads every open suggestion (history capped at 200); pair text is the key `suggest.pair` in 8 locales
+- [x] New @seed scenarios (visibility, reopen limit, internal functions closed, guest table and badge, preview by member/expert, withdraw after decision), Vitest for the queries and the schema parity, Playwright badge test (CI only)
+- [x] db-schema.sql v3.17; design doc 2.63; feature 1.1
+- [ ] CI green, owner merge
+

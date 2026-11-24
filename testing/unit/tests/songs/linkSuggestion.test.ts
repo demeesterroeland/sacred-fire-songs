@@ -172,3 +172,14 @@ describe('notifications', () => {
     );
   });
 });
+
+describe('the pair text', () => {
+  it('is a translation key in every locale, so a language can order or mirror it', async () => {
+    const { DICTIONARIES, SUPPORTED_LOCALES } = await import('@/lib/i18n');
+    for (const locale of SUPPORTED_LOCALES) {
+      const text = (DICTIONARIES[locale] as Record<string, string>)['suggest.pair'];
+      expect(text, locale).toContain('{source}');
+      expect(text, locale).toContain('{target}');
+    }
+  });
+});

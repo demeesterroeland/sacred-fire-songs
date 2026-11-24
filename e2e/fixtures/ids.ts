@@ -200,3 +200,17 @@ export const SUGGEST_LINK_FIXTURE_IDS = {
   targetVersion: 'eeeeeeee-3626-4000-a000-000000000004',
 } as const;
 export const SUGGEST_LINK_TITLES = { source: 'E2E Suggest Source', target: 'E2E Suggest Target' } as const;
+
+/**
+ * Story 6.2.26 / G1.5 (#598): a hub song and three songs suggested as versions of it (three open suggestions of the
+ * member), for the review badge. Removed by e2e/global-teardown.ts.
+ */
+export const SUGGEST_BADGE_FIXTURE_IDS = {
+  hub: 'eeeeeeee-3626-4000-a000-000000000010',
+  sources: [
+    'eeeeeeee-3626-4000-a000-000000000011',
+    'eeeeeeee-3626-4000-a000-000000000012',
+    'eeeeeeee-3626-4000-a000-000000000013',
+  ],
+} as const;
+export const SUGGEST_BADGE_TITLES = { hub: 'E2E Badge Hub', source: (i: number) => `E2E Badge Source ${i + 1}` } as const;

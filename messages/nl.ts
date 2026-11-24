@@ -1250,6 +1250,7 @@ const nl: Partial<Record<TranslationKey, string>> = {
   "suggest.empty.reviewHint": "Nieuwe voorstellen van leden verschijnen hier.",
   "suggest.empty.reviewed": "Nog niets beoordeeld.",
   "suggest.empty.mine": "Je hebt nog niets voorgesteld.",
+  "suggest.pair": "{source} → {target}",
   "suggest.row.by": "{name} · {date}",
   "suggest.row.linkedBy": "Gekoppeld door {name} · {date}",
   "suggest.row.declinedBy": "Afgewezen door {name} · {date}",

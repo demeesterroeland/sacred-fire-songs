@@ -1,5 +1,5 @@
 import pg from 'pg';
-import { A11Y_AUDIT_FIXTURE_IDS, NO_ARTIST_FIXTURE_IDS, PROFILE_PLAYBACK_FIXTURE_IDS, ADMIN_USERS_FIXTURE_IDS, PUBLISH_CONSENT_FIXTURE_IDS, SHARED_TAKES_FIXTURE_IDS, SHARED_WITH_ME_FIXTURE_IDS, SHARE_EXPLAIN_FIXTURE_IDS, TAKE_ACTIONS_FIXTURE_IDS, TAKE_STATUS_FIXTURE_IDS, VALIDATION_1_FIXTURE_IDS, VALIDATION_1_REVIEW_FIXTURE_IDS, VALIDATION_2_FIXTURE_IDS, VARIANT_SLOT_FIXTURE_IDS, VERSION_LABELS_FIXTURE_IDS, SUGGEST_LINK_FIXTURE_IDS, SUGGEST_LINK_TITLES } from './fixtures/ids';
+import { A11Y_AUDIT_FIXTURE_IDS, NO_ARTIST_FIXTURE_IDS, PROFILE_PLAYBACK_FIXTURE_IDS, ADMIN_USERS_FIXTURE_IDS, PUBLISH_CONSENT_FIXTURE_IDS, SHARED_TAKES_FIXTURE_IDS, SHARED_WITH_ME_FIXTURE_IDS, SHARE_EXPLAIN_FIXTURE_IDS, TAKE_ACTIONS_FIXTURE_IDS, TAKE_STATUS_FIXTURE_IDS, VALIDATION_1_FIXTURE_IDS, VALIDATION_1_REVIEW_FIXTURE_IDS, VALIDATION_2_FIXTURE_IDS, VARIANT_SLOT_FIXTURE_IDS, VERSION_LABELS_FIXTURE_IDS, SUGGEST_LINK_FIXTURE_IDS, SUGGEST_LINK_TITLES, SUGGEST_BADGE_FIXTURE_IDS, SUGGEST_BADGE_TITLES } from './fixtures/ids';
 
 /**
  * Story 6.1.33 / G9.1 (#417): leave no test fixtures behind in the shared
@@ -84,6 +84,10 @@ export default async function globalTeardown(): Promise<void> {
     await client.query('DELETE FROM public.composition_redirects WHERE old_id = ANY($1)', [[suggest.source, suggest.target]]);
     await client.query('DELETE FROM public.song_versions WHERE id = ANY($1)', [[suggest.sourceVersion, suggest.targetVersion]]);
     await client.query('DELETE FROM public.compositions WHERE id = ANY($1)', [[suggest.source, suggest.target]]);
+    const badge = SUGGEST_BADGE_FIXTURE_IDS;
+    const badgeTitles = [SUGGEST_BADGE_TITLES.hub, ...badge.sources.map((_, i) => SUGGEST_BADGE_TITLES.source(i))];
+    await client.query('DELETE FROM public.song_link_suggestions WHERE source_title = ANY($1) OR target_title = ANY($1)', [badgeTitles]);
+    await client.query('DELETE FROM public.compositions WHERE id = ANY($1)', [[badge.hub, ...badge.sources]]);
     const variants = VARIANT_SLOT_FIXTURE_IDS;
     await client.query('DELETE FROM public.song_versions WHERE id = ANY($1)', [[variants.original, variants.simplified, variants.singleVersion, variants.flagsOriginal, variants.flagsSimplified]]);
     await client.query('DELETE FROM public.compositions WHERE id = ANY($1)', [[variants.song, variants.singleSong, variants.flagsSong]]);

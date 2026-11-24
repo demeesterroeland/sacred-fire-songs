@@ -1251,6 +1251,7 @@ const fr: Partial<Record<TranslationKey, string>> = {
   "suggest.empty.reviewHint": "Les nouvelles suggestions des membres apparaissent ici.",
   "suggest.empty.reviewed": "Rien d’examiné pour l’instant.",
   "suggest.empty.mine": "Tu n’as encore rien suggéré.",
+  "suggest.pair": "{source} → {target}",
   "suggest.row.by": "{name} · {date}",
   "suggest.row.linkedBy": "Liée par {name} · {date}",
   "suggest.row.declinedBy": "Refusée par {name} · {date}",

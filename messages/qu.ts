@@ -1258,6 +1258,7 @@ const qu: Partial<Record<TranslationKey, string>> = {
   "suggest.empty.reviewHint": "Mushuq willasqakuna kaypi rikhurinqa.",
   "suggest.empty.reviewed": "Manaraqmi imapas qhawasqa.",
   "suggest.empty.mine": "Manaraqmi imatapas willarqankichu.",
+  "suggest.pair": "{source} → {target}",
   "suggest.row.by": "{name} · {date}",
   "suggest.row.linkedBy": "{name} tinkisqa · {date}",
   "suggest.row.declinedBy": "{name} mana chaskisqa · {date}",

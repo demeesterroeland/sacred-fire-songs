@@ -1,7 +1,8 @@
 import { createClient } from '@/lib/supabase/server';
 import type { LinkSuggestion, SuggestionStatus } from '@/lib/songs/linkSuggestion';
 
-export const SUGGESTIONS_LIMIT = 200;
+/** Only the history (decided and closed rows) is capped: the open ones are all listed, so the tab matches the badge. */
+export const SUGGESTIONS_HISTORY_LIMIT = 200;
 
 interface Row {
   id: string;
@@ -26,16 +27,24 @@ interface Row {
  */
 export async function getLinkSuggestions(): Promise<LinkSuggestion[]> {
   const supabase = await createClient();
-  const { data, error } = await supabase
-    .from('song_link_suggestions')
-    .select(
-      'id, source_id, target_id, source_title, target_title, suggested_by, note, status, decision_note, reviewed_by, reviewed_at, reopened_at, created_at',
-    )
-    .order('created_at', { ascending: false })
-    .limit(SUGGESTIONS_LIMIT);
-  if (error) throw error;
+  const columns =
+    'id, source_id, target_id, source_title, target_title, suggested_by, note, status, decision_note, reviewed_by, reviewed_at, reopened_at, created_at';
+  const [open, history] = await Promise.all([
+    supabase.from('song_link_suggestions').select(columns).eq('status', 'open').order('created_at', { ascending: false }),
+    supabase
+      .from('song_link_suggestions')
+      .select(columns)
+      .neq('status', 'open')
+      .order('created_at', { ascending: false })
+      .limit(SUGGESTIONS_HISTORY_LIMIT),
+  ]);
+  if (open.error) throw open.error;
+  if (history.error) throw history.error;
+  const data = [...((open.data ?? []) as Row[]), ...((history.data ?? []) as Row[])].sort((a, b) =>
+    a.created_at < b.created_at ? 1 : a.created_at > b.created_at ? -1 : 0,
+  );
 
-  const rows = (data ?? []) as Row[];
+  const rows = data;
   if (rows.length === 0) return [];
 
   const personIds = Array.from(

@@ -3699,3 +3699,12 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - App: suggest sheet from the song menu (search with author and version count, "Open song" in a new tab, note up to 280 characters), `/suggestions` (reviewers: To review, Reviewed, Mine; others: their own list with Withdraw), review sheet with the same preview as the direct link, a "keep the other song" switch, an optional decline reason, admin Reopen; count badge on the user-menu entry; two new bell items. 83 new keys in all 8 locales.
 - Tests: feature file with @unit and @seed scenarios as the real database roles in rolled-back transactions (42 scenarios), Vitest for helpers, actions, both sheets and the review page, schema parity test, one Playwright journey (CI only). The schema test of #512 now compares the link wrapper with the new migration.
 - Found, not fixed: the Supabase CLI 3.x still rejects `[inbucket]` (#651); the migration was applied with the 2.x CLI.
+
+## Session November 24, 2026 — #598 review fixes (Claude Opus review of PR #658)
+
+- Private-title leak closed: an `AFTER UPDATE OF is_public` trigger sets the open suggestions of a song whose visibility changes to `superseded`; the link core also checks, after locking the suggestion, that it still names exactly the two songs and that both are public, and closes (instead of re-pointing) a suggestion that would cross a visibility.
+- Reopen race and limit: `fn_reopen_song_link_suggestion` holds both songs with `FOR KEY SHARE` before its checks and applies the limit of 10 open suggestions (same advisory lock as a new suggestion).
+- Queue: every open suggestion is read without a limit; only the history is capped, so "To review (n)" matches the badge.
+- Smaller: `fn_suggest_song_link` checks readability before "itself" / "already linked" (and says "already linked" only when the song it lives in is readable); the decline notification loss is documented as accepted (logged as WARNING); the pair text is the translation key `suggest.pair`.
+- Tests: six new @seed scenarios plus an outline (78 scenarios in the file), queue and schema-parity tests, one more Playwright test for the review badge (CI only).
+

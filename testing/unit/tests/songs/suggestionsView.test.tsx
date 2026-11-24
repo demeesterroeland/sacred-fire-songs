@@ -88,6 +88,8 @@ describe('SuggestionsView as a reviewer', () => {
     );
     expect(screen.getByRole('radio', { name: 'To review (2)' })).toBeTruthy();
     expect(screen.getAllByTestId('suggestion-row')).toHaveLength(2);
+    // The pair is one translated text (no literal arrow in the markup), so a locale can order it its own way.
+    expect(screen.getAllByTestId('suggestion-pair')[0].textContent).toBe('Siento la medica → Siento la medicina');
     expect(screen.getAllByText('Same song, same chords.').length).toBeGreaterThan(0);
     expect(screen.getByText(/Declined before on/)).toBeTruthy();
   });

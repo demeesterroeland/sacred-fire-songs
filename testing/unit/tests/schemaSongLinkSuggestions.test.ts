@@ -35,6 +35,7 @@ const INTERNAL_FUNCTIONS = [
   ['fn_assert_can_review_link', '(uuid, uuid)'],
   ['fn_link_song_as_version_core', '(uuid, uuid, uuid)'],
   ['fn_close_link_suggestions_on_song_delete', '()'],
+  ['fn_close_link_suggestions_on_visibility_change', '()'],
 ] as const;
 
 describe('db-schema.sql: song link suggestions (Story 6.2.26)', () => {
@@ -118,5 +119,29 @@ describe('db-schema.sql: song link suggestions (Story 6.2.26)', () => {
 
   it('a song delete closes its open suggestions before the foreign keys run', () => {
     expect(schema).toContain('before delete on public.compositions for each row execute function public.fn_close_link_suggestions_on_song_delete()');
+  });
+
+  it('a song that changes visibility closes its open suggestions', () => {
+    expect(schema).toContain(
+      'after update of is_public on public.compositions for each row when (old.is_public is distinct from new.is_public) execute function public.fn_close_link_suggestions_on_visibility_change()'
+    );
+  });
+
+  it('the core re-checks the pair and the visibility of a suggestion it accepts', () => {
+    const core = fn(schema, 'fn_link_song_as_version_core')!;
+    expect(core).toContain('v_sugg.source_id = p_source and v_sugg.target_id = v_target');
+    expect(core).toContain('not (coalesce(v_source.is_public, false) and coalesce(v_target_row.is_public, false))');
+  });
+
+  it('reopen holds both songs and keeps the limit of ten', () => {
+    const reopen = fn(schema, 'fn_reopen_song_link_suggestion')!;
+    expect(reopen).toContain('for key share');
+    expect(reopen).toContain("status = 'open') >= 10");
+  });
+
+  it('a suggestion never says "already linked" about a song the caller cannot read', () => {
+    const suggest = fn(schema, 'fn_suggest_song_link')!;
+    expect(suggest.indexOf("'song not found'")).toBeLessThan(suggest.indexOf("'a song cannot be linked to itself'"));
+    expect(suggest).toContain('c.is_public is true or c.owner_id = v_uid');
   });
 });
