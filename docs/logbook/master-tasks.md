@@ -1671,6 +1671,16 @@
 - [x] Docs: design doc 2.60, epic doc 2.30, ux-v2 decisions 1.45, member guide 0.41, E2E overview 1.31, test matrix 1.7, README
 - [x] tsc, lint, Vitest (2742), BDD unit and seed green locally
 - [ ] CI green, cross-review by claude-opus-5-5, owner merge
+- [ ] Follow-up: Supabase CLI 3.x rejects `[inbucket]` in `supabase/config.toml` (use `local_smtp`), separate chore
+
+## Session November 24, 2026 (#544, local E2E baseline)
+- [x] Baseline on a clean `develop` (`fdc4ec2c`), local Supabase stack, `E2E_REUSE_DB=1`, desktop + mobile headless: 706 passed, 11 failed
+- [x] Guest-gate `:67` / `:75` already fixed by #648 (layout-aware Playlist / heart buttons); green on both projects
+- [x] Performance budgets, `reader-tools:193`, `validation-2:367` and `recording-meter` pass locally now: no threshold change
+- [x] Test bugs fixed: `reader-tools:144` (mouse press on the desktop project, touch tap on phones), `search:18` (selectors after the token restyle), `validation-2:92/:141/:168/:215` (phone-only checks skip on desktop, Share from the desktop header), `variant-slot:128` (fixture song has chords since #566), `recording-meter:104` (pointer hover colour), `profile-role-badge:37` (loading screen h1)
+- [x] Shared helper `openPracticeRecordTab` waits for the Practice drawer to finish sliding in (5 specs: "Element is outside of the viewport")
+- [x] App bug filed, not hidden: #664 (focus does not always move into the Practice drawer; `a11y-audit:319` `@smoke` flaky on mobile)
+- [ ] Owner merge; #544 stays open until #664 is fixed
 - [x] Follow-up: Supabase CLI 3.x rejects `[inbucket]` in `supabase/config.toml` (use `local_smtp`): done in chore #651
 
 ## Session November 24, 2026 (Chore #651, Supabase CLI 3.x config)
