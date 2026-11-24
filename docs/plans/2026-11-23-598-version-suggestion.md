@@ -1,15 +1,35 @@
 # Plan: suggest a song as a version of another song (Story 6.2.26, #598)
 
-**Version:** 1.1 | **Date:** Nov 23, 2026 | **Status:** DESIGN ONLY, waiting for the owner's answers (see "Open questions"). Nothing is built.
+**Version:** 2.0 | **Date:** Nov 24, 2026 | **Status:** BUILT (PR into `develop`, #598) after the owner's answers of Nov 24, 2026 (see "Owner answers"). Where the text below still says "gatekeeper only where they own both songs" or "private songs", the owner answers win.
 
 | Version | Date | Change |
 | :--- | :--- | :--- |
+| 2.0 | Nov 24, 2026 | Owner answers to the 12 questions applied. **Changed vs the plan: a gatekeeper reviews and acts on EVERY suggestion, also on songs they own neither, like an admin** (answer 3); gatekeepers and admins review instead of suggesting (answer 4); public songs only (answer 5); the split (answer 1) created #655 and #656. Sections 3.3, 3.4, 3.5, 4.1, 4.2 and 7 corrected below; built as `supabase/migrations/20261124150000_song_link_suggestions.sql`. |
 | 1.1 | Nov 23, 2026 | Review round (Claude Opus): grants of the core and helper functions, reopen re-checks, lock order, swap and direct-link notification rules, advisory lock for the cap, trigger privileges, hint visibility, section number §6.22, question 5 reasoning. Mockup: 44 px targets, Segmented pattern, more screens. |
 | 1.0 | Nov 23, 2026 | First plan: data model, row-level security, queue UX, notifications, audit, Gherkin, test and build order, open questions. Mockup: `docs/design/screens/v2/screen26_suggest_version_link.html`. |
 
 **Goal:** a member who spots a duplicate suggests "this song is a version of that song". A gatekeeper or admin looks at it, sees what a link would move, and either links (the existing `fn_link_song_as_version`) or declines. The member never changes anything irreversible.
 
 **Decided already (owner, Nov 13, 2026, option A):** members suggest, gatekeepers and admins confirm. The merge itself stays in `fn_link_song_as_version` with its role checks (admin any song; gatekeeper only songs they own, source and target). Members linking directly (options B/C) and undo of a link are out of scope.
+
+## 0. Owner answers (issue #598, Nov 24, 2026) and how they were built
+
+| # | Answer | Built as |
+| :--- | :--- | :--- |
+| 1 | Split #598 | New sub-issues of #499: #655 "contributors keep editing their own version", #656 "unlink my version". Not built here. |
+| 2 | Delete `feat/ux-v3` after the sign-off | Left alone; the owner deletes it. |
+| 3 | **A gatekeeper reviews and acts on every suggestion**, also on songs they own neither, like an admin. Accepting through the suggestion flow is allowed for gatekeepers and admins, though a direct link (#512) still needs ownership. | `fn_assert_can_review_link` (no ownership rule) is used by the accept and preview functions; the policy "Reviewers read every link suggestion" lets both roles read all rows; the badge counts all open rows for both. `fn_can_review_link_suggestion` of section 3.3 is not needed and was not built. |
+| 4 | Everyone signed in who cannot link the pair directly may suggest, never an admin. "With answer 3, a gatekeeper reviews instead of suggesting." | Read as: **gatekeepers and admins never suggest** (the database refuses with "You can link or review these songs yourself"; the menu hides the item). If the owner wants gatekeepers to suggest on songs they own neither, it is one line in `fn_suggest_song_link` and `canSuggestLink`. |
+| 5 | Public songs only in v1 | Both songs must be public; two private songs: "Only public songs can be suggested"; one of each: "Both songs must be public, or both private". Accept and reopen check it again. |
+| 6 | Pair rules as written | Unique index on `LEAST/GREATEST` of the pair where `status = 'open'`; "Declined before" hint. |
+| 7 | Reviewer chooses which song stays | `p_swap` on accept and preview; the "Keep … instead" switch. |
+| 8 | Withdraw, admin Reopen, `withdrawn` and `superseded` | Built. |
+| 9 | Count badge on the user menu, in-app only, no bell row per reviewer; the member gets a bell item | Built (`useOpenSuggestionCount`, `link_suggestion_accepted` / `link_suggestion_declined`). |
+| 10 | Max 10 open per member; note and reason at most 280 characters | Built (advisory lock for the cap; `CHECK` and function checks for the length). |
+| 11 | Queue at `/suggestions` from the user menu | Built. |
+| 12 | Decline reason: optional free text | Built. |
+
+Follow-up, not built: #650 (show similar songs while adding a song).
 
 ## 1. Branch target (checked)
 
@@ -76,13 +96,14 @@ Rows are history: they are never deleted by the app. `ON DELETE SET NULL` on the
 
 | Function | Who | What |
 | :--- | :--- | :--- |
-| `fn_suggest_song_link(p_source, p_target, p_note)` | signed in, **not able to link these songs directly** (a member, musician, expert; a gatekeeper on songs they do not own both; never an admin) | Guard rails of section 3.5, then insert. Returns `{ id }`. |
+| `fn_suggest_song_link(p_source, p_target, p_note)` | signed in, **not a gatekeeper or admin** (a member, musician, expert; owner answers 3 and 4: gatekeepers review instead of suggesting) | Guard rails of section 3.5, then insert. Returns `{ id }`. |
 | `fn_withdraw_song_link_suggestion(p_id)` | the suggester, while `open` | status `withdrawn`. |
 | `fn_decline_song_link_suggestion(p_id, p_reason)` | reviewer (3.4) | status `declined`, `reviewed_by/at`, optional reason; notifies the suggester. |
 | `fn_accept_song_link_suggestion(p_id, p_swap default false)` | reviewer (3.4) | Locks the suggestion, requires `open`, calls the link core (3.6), sets `accepted`, notifies the suggester. Returns the link summary (same shape as `fn_preview_song_link`). |
 | `fn_reopen_song_link_suggestion(p_id)` | admin, only `declined` | Back to `open` (a decline is reversible, a link is not), **after re-running guard rails 2–5 of 3.5 on the stored ids**: the songs may have been linked or deleted since, and a refusal must read like the others ("already linked", "Song not found", "This suggestion already exists"), never a raw `23514` / `23505`. `reviewed_by`, `reviewed_at` and `decision_note` keep the last decision (the row still shows "Declined before"); `reopened_at` is set. |
 | `fn_open_song_link_suggestion_count()` | signed in | Number of open suggestions the caller may review: the badge. `0` for everyone else. |
-| `fn_can_review_link_suggestion(p_source, p_target)` | helper used by the policy and the decide functions | admin → true; gatekeeper → owns both songs (`owner_id = auth.uid()`, the 6.2.9 rule); otherwise false. It takes **no user id**: it reads `auth.uid()` itself, so it answers only for the caller. **`GRANT EXECUTE ... TO authenticated`** (policies run their functions as the caller; a revoked helper would fail every SELECT on the table with "permission denied for function", members included). The list and the actions cannot disagree. |
+| ~~`fn_can_review_link_suggestion`~~ | not built (owner answer 3) | Replaced by `fn_assert_can_review_link(p_source, p_target)` (internal, no API grant): admin or gatekeeper, no ownership rule, public songs of the same visibility. The policy reads the caller's role directly, like `song_link_audit`. |
+| `fn_preview_song_link_suggestion(p_id, p_swap)` | reviewer | The same summary as `fn_preview_song_link`, for a suggestion, without changing anything. |
 
 Errors reuse the #512 vocabulary so `songLinkError()` and the translated messages carry over: `42501` forbidden, `P0002` not found, `22023` self / already linked / "Both songs must be public, or both private", plus new `23505` "This suggestion already exists", `22023` "Too many open suggestions" and `22023` "This suggestion was already decided".
 
@@ -94,16 +115,16 @@ Errors reuse the #512 vocabulary so `songLinkError()` and the translated message
 | :--- | :--- | :--- |
 | Guest | nothing | nothing |
 | Member / musician / expert | their own suggestions (`suggested_by = auth.uid()`), any status | suggest, withdraw their own open one |
-| Gatekeeper | their own suggestions; **open** ones where they own both songs (`fn_can_review_link_suggestion`); closed ones they decided (`reviewed_by = auth.uid()`) | the same as a member when they cannot link directly; accept / decline what they can see |
+| Gatekeeper | **every** suggestion, any status (owner answer 3) | accept / decline every open suggestion (not suggest, answer 4) |
 | Admin | all | accept, decline, reopen a declined one |
 
-Policies: `Members read their own link suggestions`, `Reviewers read the link suggestions they may act on` (admin → all; gatekeeper → the two conditions above). The reviewer policy calls the `SECURITY DEFINER` helper, so it does not recurse into the `compositions` policies.
+Policies: `Members read their own link suggestions`, `Reviewers read every link suggestion` (admin or gatekeeper → all rows).
 
 ### 3.5 Guard rails on create (`fn_suggest_song_link`)
 
 In this order, each with its own message:
 
-1. Signed in, and the caller cannot link the pair directly (admin: "You can link these songs yourself"; gatekeeper who owns both: same). `42501`.
+1. Signed in, and not a gatekeeper or admin ("You can link or review these songs yourself"). `42501`.
 2. Both ids present; the target follows `composition_redirects` (a target that was itself linked earlier stands for the song it lives in), like `fn_assert_can_link_song`.
 3. Not the same song (`22023`); the source is not already linked away (`22023`, "already linked"); both songs exist and are **readable by the caller** (`is_public` or `owner_id = auth.uid()`), otherwise `P0002` "Song not found" (no hint that a private song exists).
 4. Same visibility: "Both songs must be public, or both private" (`22023`). Whether both-private is allowed at all is open question 5.
@@ -130,7 +151,7 @@ What this story adds around the merge, inside the same transaction:
 - A `BEFORE DELETE` trigger on `compositions` closes (`superseded`) open suggestions of any song deleted another way (the owner deletes it), so the `open_has_songs` check cannot fail a delete. The trigger function is `SECURITY DEFINER` with `search_path = ''` (owners have no UPDATE grant on the table). Order is safe: the BEFORE trigger flips the status before the `ON DELETE SET NULL` action runs after the row is gone.
 - **A direct link of the exact suggested pair** (either direction, no suggestion id passed) closes that suggestion as `accepted` too, sets `song_link_audit.suggestion_id`, and notifies the suggester, so the member is not told nothing.
 - **Lock order** (no deadlock with a direct link, which locks `compositions` first): accept reads the suggestion without a lock, lets the core lock the songs, then `SELECT ... FOR UPDATE` the suggestion and re-checks it is `open`. Withdraw and decline use `UPDATE ... WHERE status = 'open'` and check the row count.
-- The suggestion does not change what the link refuses: ownership of both songs for a gatekeeper, same visibility, "not found" for songs the caller cannot read. An admin accepting a suggestion links as admin.
+- Owner answer 3: accepting a suggestion does **not** need ownership, for gatekeepers too (`fn_assert_can_review_link`); a direct link keeps the ownership rule. Same visibility and public-only still apply.
 
 ### 3.7 Types, helpers
 
@@ -153,10 +174,10 @@ Mockup: `docs/design/screens/v2/screen26_suggest_version_link.html` (suggest she
 ### 4.2 Review queue (gatekeeper / admin)
 
 - **Where:** a page `/suggestions` (open question 11). Entry in the user menu: **Link suggestions**, with the count of open suggestions the person may review as a badge (a number, not only a dot). It is not in the admin portal (admin-only; gatekeepers have no access there) and not a Library tab (keeps the three-item bottom bar and the Library tabs calm).
-- **Reviewers see two segments:** *To review (n)* and *Reviewed*. Flat rows, newest first. A row: `Siento la medica → Siento la medicina`, below it in muted text: suggester name, relative date, note (quoted, 2 lines, expandable), plus quiet hints when they apply: "Declined before on <date>" (same pair), "Also suggested: <other target>" (same source). Hints are built only from rows the caller may read (RLS), so a gatekeeper never learns a title from a suggestion hidden from them.
+- **Reviewers (gatekeepers and admins, every suggestion) see three segments:** *To review (n)* and *Reviewed*. Flat rows, newest first. A row: `Siento la medica → Siento la medicina`, below it in muted text: suggester name, relative date, note (quoted, 2 lines, expandable), plus quiet hints when they apply: "Declined before on <date>" (same pair), "Also suggested: <other target>" (same source). Hints are built only from rows the caller may read (RLS), so a gatekeeper never learns a title from a suggestion hidden from them.
 - **Review sheet** (tap a row): the existing link preview (`fn_preview_song_link`: versions, recordings, playlist entries, favourites, catalog keys, aliases) in the same wording as the link sheet, two **Open song** links, the suggester's note, and a **Keep <source> instead** toggle (swap direction, open question 7). Buttons: primary **Link** (an irreversible-action confirm line: "There is no undo."), secondary **Decline…** which asks for an optional reason (280 characters) and then declines.
 - After Link or Decline the row leaves *To review*; focus moves to the next row (as in the catalog-edits screen); a toast says what happened.
-- **Empty state:** "Nothing to review." A gatekeeper whose songs have no suggestions sees the same (and, once, a quiet line "You see suggestions for songs you own; an admin handles the rest", open question 3).
+- **Empty state:** "Nothing to review." plus "New suggestions from members show up here." (owner answer 3: gatekeepers see every suggestion, so no gatekeeper-only line).
 - *Reviewed* lists accepted, declined and superseded rows with the reviewer and date; an admin sees **Reopen** on declined ones.
 
 ### 4.3 Member's own list

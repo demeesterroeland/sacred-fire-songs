@@ -167,5 +167,7 @@
 | **November 24, 2026** | **Chore (#573)**: setlist renamed to playlist in the schema (one migration, safety check), code, tests, seeds and docs; local database scan, schema script replay, new @seed scenarios. (estimate) | ~2.5 Hours | ✅ Completed |
 | **November 24, 2026** | **Chore (#651)**: Supabase config migrated to the CLI 3.x schema (`[local_smtp]`, `enabled`), guard test, local verification, README and docs. (estimate) | ~0.75 Hours | Completed |
 | **November 24, 2026** | **Chore (#654)**: self-host `docker-compose.yml` host ports moved off the Supabase CLI dev stack range (55321/55322/55323, overridable), guard test, `.env.example`, README and docs. (estimate) | ~0.5 Hours | Completed |
+| **November 24, 2026** | **Feature/UX (Epic 6.2, #598)**: suggest a song as a version of another song: feature file and tests first, migration (table, RLS, SECURITY DEFINER functions, link core), server actions, suggest sheet, `/suggestions` review page, user-menu badge, bell items, 8-locale i18n, e2e spec, docs, two split-off sub-issues. (estimate) | ~5.0 Hours | Completed |
+| **November 24, 2026** | **Fix/Review (Epic 6.2, #598)**: review fixes of PR #658 (visibility trigger, core guards, reopen lock and limit, queue limit, pair key, new @seed and e2e tests, docs). (estimate) | ~1.5 Hours | Completed |
 | **November 24, 2026** | **Test/E2E (#544)**: local Playwright baseline on develop (full desktop + mobile runs, layout-aware spec fixes, Practice drawer helper, fixtures, app bug #664 filed). (estimate) | ~2.0 Hours | Completed |
-| **Total** | **Development + AI Collaboration** | **~286.75 Hours** | |
+| **Total** | **Development + AI Collaboration** | **~293.5 Hours** | |
