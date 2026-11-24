@@ -1681,6 +1681,13 @@
 - [x] `npx supabase status` and `migration list` parse the config without warnings; mail catcher receives a test message on SMTP 54325 and serves it on 54324
 - [ ] CI green, cross-review by claude-opus-5-5, owner merge
 
+## Session November 24, 2026 (Chore #654, self-host ports vs. CLI dev stack)
+
+- [x] Guard test `testing/unit/tests/composePorts.test.ts`: no host port of `docker-compose.yml` is also a port in `supabase/config.toml`; default Supabase URLs follow the API port (red on the old compose file)
+- [x] `docker-compose.yml`: API `${SFS_API_PORT:-55321}`, Postgres `${SFS_DB_PORT:-55322}`, Studio `${SFS_STUDIO_PORT:-55323}`; default `NEXT_PUBLIC_SUPABASE_URL` / `API_EXTERNAL_URL` on 55321; `docker compose config` valid, overrides work
+- [x] `.env.example`, README port table, development workflow 2.3, design doc 2.62
+- [ ] CI green, owner merge (owner asked to fix and merge into develop)
+
 - [ ] Follow-up: Supabase CLI 3.x rejects `[inbucket]` in `supabase/config.toml` (use `local_smtp`), separate chore
 
 ## Session November 24, 2026 (Story 6.2.26, #598: suggest a song as a version of another song)

@@ -166,5 +166,6 @@
 | **November 24, 2026** | **Fix/UI (#485)**: drop tag and category emojis in `TagPill`, `TagSelector`, `CategorySelector` and the song list data, unit test, docs (design doc 2.59, design tokens 1.14, home mockup). (estimate) | ~0.5 Hours | Completed |
 | **November 24, 2026** | **Chore (#573)**: setlist renamed to playlist in the schema (one migration, safety check), code, tests, seeds and docs; local database scan, schema script replay, new @seed scenarios. (estimate) | ~2.5 Hours | ✅ Completed |
 | **November 24, 2026** | **Chore (#651)**: Supabase config migrated to the CLI 3.x schema (`[local_smtp]`, `enabled`), guard test, local verification, README and docs. (estimate) | ~0.75 Hours | Completed |
+| **November 24, 2026** | **Chore (#654)**: self-host `docker-compose.yml` host ports moved off the Supabase CLI dev stack range (55321/55322/55323, overridable), guard test, `.env.example`, README and docs. (estimate) | ~0.5 Hours | Completed |
 | **November 24, 2026** | **Feature/UX (Epic 6.2, #598)**: suggest a song as a version of another song: feature file and tests first, migration (table, RLS, SECURITY DEFINER functions, link core), server actions, suggest sheet, `/suggestions` review page, user-menu badge, bell items, 8-locale i18n, e2e spec, docs, two split-off sub-issues. (estimate) | ~5.0 Hours | Completed |
-| **Total** | **Development + AI Collaboration** | **~289.25 Hours** | |
+| **Total** | **Development + AI Collaboration** | **~290.0 Hours** | |

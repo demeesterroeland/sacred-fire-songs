@@ -1,5 +1,10 @@
 # docker-compose.yml — Sacred Fire Songs local development & self-hosting stack
 # Usage: docker compose up -d
+#
+# Host ports (#654): the self-host stack uses 55321 (API), 55322 (Postgres) and 55323 (Studio),
+# so it never clashes with the Supabase CLI dev stack (54321-54329, see supabase/config.toml).
+# Override with SFS_API_PORT, SFS_DB_PORT and SFS_STUDIO_PORT; when you change SFS_API_PORT,
+# also set NEXT_PUBLIC_SUPABASE_URL and API_EXTERNAL_URL to the same port.
 
 services:
   app:
@@ -14,7 +19,7 @@ services:
       retries: 3
       start_period: 2s
     environment:
-      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL:-http://localhost:54321}
+      - NEXT_PUBLIC_SUPABASE_URL=${NEXT_PUBLIC_SUPABASE_URL:-http://localhost:55321}
       - NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=${NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY}
       - SUPABASE_SECRET_KEY=${SUPABASE_SECRET_KEY:-${SERVICE_ROLE_KEY:-}}
       - SITE_URL=${SITE_URL:-http://localhost:3000}
@@ -43,7 +48,7 @@ services:
   db:
     image: supabase/postgres:15.8.1.060
     ports:
-      - "54323:5432"
+      - "${SFS_DB_PORT:-55322}:5432"
     restart: unless-stopped
     healthcheck:
       test: pg_isready -U postgres -h localhost
@@ -163,7 +168,7 @@ services:
     restart: unless-stopped
     entrypoint: ["/bin/sh", "-c", "sed -e \"s|\\$${SUPABASE_ANON_KEY}|$${SUPABASE_ANON_KEY}|g\" -e \"s|\\$${SUPABASE_SERVICE_KEY}|$${SUPABASE_SERVICE_KEY}|g\" /home/kong/kong.yml > /tmp/kong.yml && exec /docker-entrypoint.sh kong docker-start"]
     ports:
-      - "54321:8000"
+      - "${SFS_API_PORT:-55321}:8000"
     environment:
       KONG_DATABASE: "off"
       KONG_DECLARATIVE_CONFIG: /tmp/kong.yml
@@ -176,12 +181,12 @@ services:
     image: supabase/studio:20241230-8d5ecfc
     restart: unless-stopped
     ports:
-      - "54324:3000"
+      - "${SFS_STUDIO_PORT:-55323}:3000"
     environment:
       STUDIO_PG_META_URL: http://meta:8080
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       SUPABASE_URL: http://kong:8000
-      SUPABASE_PUBLIC_URL: ${API_EXTERNAL_URL:-http://localhost:54321}
+      SUPABASE_PUBLIC_URL: ${API_EXTERNAL_URL:-http://localhost:55321}
       SUPABASE_ANON_KEY: ${ANON_KEY}
       SUPABASE_SERVICE_KEY: ${SERVICE_ROLE_KEY}
       AUTH_JWT_SECRET: ${JWT_SECRET:-super-secret-jwt-token-with-at-least-32-characters-long}
