@@ -40,6 +40,9 @@ test('a member sees the admin badge and no e-mail address @story-6.1.38', async 
   await expect(badge).toHaveText('Admin');
   await expect(badge).toHaveAttribute('data-role', 'admin');
   await expect(badge.locator('svg[data-icon="Shield"]')).toHaveCount(1);
+  // The route's loading screen (app/loading.tsx) has its own brand h1 and can still be on its way out:
+  // wait for the profile's name to be the only h1.
+  await expect(page.locator('h1')).toHaveCount(1);
   await expect(page.locator('h1')).not.toBeEmpty();
   await expect(page.locator('body')).not.toContainText(ROLES.admin.email);
 });

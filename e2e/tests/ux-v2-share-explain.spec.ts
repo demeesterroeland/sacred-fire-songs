@@ -2,7 +2,7 @@ import { test, expect, type Page } from '@playwright/test';
 import pg from 'pg';
 import { ROLES } from '../fixtures/roles';
 import { SHARE_EXPLAIN_FIXTURE_IDS as IDS } from '../fixtures/ids';
-import { clickPractice } from '../fixtures/songActions';
+import { openPracticeRecordTab } from '../fixtures/songActions';
 
 /**
  * Story 6.1.18 / G4.5 (#402): the Share dialog explains who can be found and what sharing does on
@@ -71,10 +71,7 @@ test.beforeEach(async ({}, testInfo) => {
 
 async function openShareDialog(page: Page) {
   await page.goto(`/songs/${IDS.song}`);
-  await clickPractice(page); // phone: the action bar (#393)
-  await expect(page.getByTestId('practice-drawer')).toBeVisible({ timeout: 10_000 });
-  const recordTab = page.locator('[data-testid="practice-tab-record"]');
-  if (await recordTab.count()) await recordTab.first().click({ force: true });
+  await openPracticeRecordTab(page);
   const row = page.getByTestId('rehearsal-drawer-body').locator('[data-recording-id]', { hasText: TAKE });
   await row.locator('button[aria-label="More actions"]').click();
   // The take's actions are a bottom sheet (#401); Share opens the dialog once the sheet has closed.

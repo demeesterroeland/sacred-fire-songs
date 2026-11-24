@@ -26,11 +26,11 @@ test.describe('Search Functionality E2E Tests', () => {
     await searchInput.pressSequentially('vuela', { delay: 50 });
     
     // Immediately after typing, the loader spinner should be visible in the search bar
-    const spinner = page.locator('.animate-spin');
+    const spinner = page.locator('nav .animate-spin');
     await expect(spinner).toBeVisible();
 
     // The loading/searching overlay on the grid should also fade in
-    const overlay = page.locator('.pointer-events-none.bg-white\\/50, .pointer-events-none.bg-gray-950\\/50');
+    const overlay = page.locator('section.relative > .pointer-events-none.bg-surface\\/50');
     await expect(overlay).toHaveClass(/opacity-100/);
 
     // Wait for the 350ms debounce to settle
