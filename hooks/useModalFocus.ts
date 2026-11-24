@@ -47,10 +47,20 @@ export function useModalFocus({ open, containerRef, onEscape, escapeBusy, extraS
     const active = document.activeElement;
     opener.current = active instanceof HTMLElement && active !== document.body && !container?.contains(active) ? active : null;
 
-    // After the frame in which the dialog becomes visible: an element that is not shown cannot take focus.
-    const raf = requestAnimationFrame(() => {
-      if (container && !container.contains(document.activeElement)) container.focus({ preventScroll: true });
-    });
+    // An element that is not shown cannot take focus, and the browser ignores focus() on it without an error.
+    // The Practice drawer starts at `visibility: hidden` and framer-motion only shows it on its own first
+    // animation frame, which may run after ours (#664). So try on each frame until focus is inside,
+    // for a short while (an animation never takes this long to become visible).
+    const MAX_FOCUS_FRAMES = 30;
+    let frames = 0;
+    let raf = 0;
+    const focusIn = () => {
+      if (!container || container.contains(document.activeElement)) return;
+      container.focus({ preventScroll: true });
+      frames += 1;
+      if (!container.contains(document.activeElement) && frames < MAX_FOCUS_FRAMES) raf = requestAnimationFrame(focusIn);
+    };
+    raf = requestAnimationFrame(focusIn);
 
     const scope = () => [containerRef.current, ...(extraRef.current?.() ?? [])].filter((el): el is HTMLElement => !!el);
     const inScope = (node: Node | null) => !!node && scope().some((el) => el.contains(node));

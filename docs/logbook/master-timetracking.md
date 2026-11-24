@@ -170,4 +170,5 @@
 | **November 24, 2026** | **Feature/UX (Epic 6.2, #598)**: suggest a song as a version of another song: feature file and tests first, migration (table, RLS, SECURITY DEFINER functions, link core), server actions, suggest sheet, `/suggestions` review page, user-menu badge, bell items, 8-locale i18n, e2e spec, docs, two split-off sub-issues. (estimate) | ~5.0 Hours | Completed |
 | **November 24, 2026** | **Fix/Review (Epic 6.2, #598)**: review fixes of PR #658 (visibility trigger, core guards, reopen lock and limit, queue limit, pair key, new @seed and e2e tests, docs). (estimate) | ~1.5 Hours | Completed |
 | **November 24, 2026** | **Test/E2E (#544)**: local Playwright baseline on develop (full desktop + mobile runs, layout-aware spec fixes, Practice drawer helper, fixtures, app bug #664 filed). (estimate) | ~2.0 Hours | Completed |
-| **Total** | **Development + AI Collaboration** | **~293.5 Hours** | |
+| **November 24, 2026** | **Fix/A11y (#664)**: Practice drawer focus retry in `useModalFocus` (red unit test, hook fix, 10x E2E on mobile, docs). (estimate) | ~0.75 Hours | Completed |
+| **Total** | **Development + AI Collaboration** | **~294.25 Hours** | |

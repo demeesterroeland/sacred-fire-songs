@@ -3698,6 +3698,12 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - Docs: README port table (CLI stack vs. self-host stack), `.env.example`, development workflow 2.3, design doc 2.62.
 - Tests: `composePorts.test.ts` (failed on the old compose file); `docker compose config` validates the file and an override.
 
+
+## Session November 24, 2026 — #664: focus always moves into the Practice drawer
+
+- Cause: `useModalFocus` focused the dialog once, one animation frame after it opened. The Practice drawer starts at `visibility: hidden` and framer-motion makes it visible on its own first frame; when ours ran first, the browser silently ignored `focus()`, nothing retried, and focus stayed on the Practice button (found by #544: `ux-v2-a11y-audit.spec.ts` "Practice is a labelled dialog", `@smoke`, failed about 3 of 4 mobile runs).
+- Fix: the hook tries again on each frame until focus is inside the dialog, for at most 30 frames, and cancels the retry when the dialog closes. Other users of the hook keep the same behaviour (their first attempt already succeeds).
+- Tests: two unit tests (retry until focus lands; no more attempts after close), the first red on the old code; the E2E test passed 10 of 10 runs on mobile.
 ## Session November 24, 2026 — #598: members suggest a song as a version of another song
 
 - Owner answers applied. The one change against the plan: a gatekeeper reviews and decides **every** suggestion, also on songs they own neither (like an admin); a direct link still needs ownership. Gatekeepers and admins review instead of suggesting; public songs only.
