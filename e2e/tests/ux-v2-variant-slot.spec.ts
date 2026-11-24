@@ -70,22 +70,23 @@ test.beforeAll(async () => {
     const { rows } = await client.query<{ id: string }>('SELECT id FROM public.profiles WHERE email = $1', [ROLES.member.email]);
     if (!rows[0]) throw new Error('Seeded member profile missing');
     const owner = rows[0].id;
-    for (const [id, title] of [
-      [IDS.song, 'E2E Variant Slot Song'],
-      [IDS.singleSong, 'E2E Variant Slot Single'],
-      [IDS.flagsSong, 'E2E Variant Slot Flags'],
+    for (const [id, title, hasChords] of [
+      [IDS.song, 'E2E Variant Slot Song', true],
+      [IDS.singleSong, 'E2E Variant Slot Single', false],
+      [IDS.flagsSong, 'E2E Variant Slot Flags', false],
     ]) {
+      // The key shows in the meta line only for a song with chords (#566): the switch test needs a chorded song.
       await client.query(
-        `INSERT INTO public.compositions (id, title, original_author, owner_id, is_public)
-         VALUES ($1, $2, 'E2E Author', $3, true)
-         ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, is_public = true`,
-        [id, title, owner]
+        `INSERT INTO public.compositions (id, title, original_author, owner_id, is_public, has_chords)
+         VALUES ($1, $2, 'E2E Author', $3, true, $4)
+         ON CONFLICT (id) DO UPDATE SET title = EXCLUDED.title, is_public = true, has_chords = EXCLUDED.has_chords`,
+        [id, title, owner, hasChords]
       );
     }
     // The two versions differ in key and in reference media, so the tests can tell which one is shown.
     const versions: Array<[string, string, string, string, string, string, string | null]> = [
-      [IDS.original, IDS.song, 'Original', 'Original verse for the variant slot', '2026-01-01T00:00:00Z', 'Am', null],
-      [IDS.simplified, IDS.song, 'Simplified', 'Simplified verse for the variant slot', '2026-01-02T00:00:00Z', 'C', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'],
+      [IDS.original, IDS.song, 'Original', '[Am]Original verse for the variant slot', '2026-01-01T00:00:00Z', 'Am', null],
+      [IDS.simplified, IDS.song, 'Simplified', '[C]Simplified verse for the variant slot', '2026-01-02T00:00:00Z', 'C', 'https://www.youtube.com/watch?v=dQw4w9WgXcQ'],
       [IDS.singleVersion, IDS.singleSong, 'Standard', 'Single verse for the variant slot', '2026-01-01T00:00:00Z', 'G', null],
       [IDS.flagsOriginal, IDS.flagsSong, 'Original', '[Am]Flags original verse', '2026-01-01T00:00:00Z', 'Am', null],
       [IDS.flagsSimplified, IDS.flagsSong, 'Simplified', 'Flags simplified verse', '2026-01-02T00:00:00Z', 'C', null],

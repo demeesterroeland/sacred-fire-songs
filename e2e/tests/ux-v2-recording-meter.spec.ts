@@ -133,12 +133,12 @@ test('time left shows in the last minute; auto-stop leads to a review with Save 
   expect(d!.height).toBeGreaterThanOrEqual(44);
   expect(d!.y).toBeGreaterThan(s!.y);
   expect(Math.abs(d!.width - s!.width)).toBeLessThan(2);
-  const [saveBg, discardBg] = await Promise.all([
-    save.evaluate((el) => getComputedStyle(el).backgroundColor),
-    discard.evaluate((el) => getComputedStyle(el).backgroundColor),
-  ]);
-  expect(saveBg).not.toBe('rgba(0, 0, 0, 0)');
-  expect(discardBg).toBe('rgba(0, 0, 0, 0)');
+  // The pointer is still where Start recording was clicked, and the review buttons can render under it:
+  // move it away so the hover colour (and its transition) does not count as the resting background.
+  await page.mouse.move(0, 0);
+  const background = (el: HTMLElement | SVGElement) => getComputedStyle(el).backgroundColor;
+  await expect.poll(() => save.evaluate(background)).not.toBe('rgba(0, 0, 0, 0)');
+  await expect.poll(() => discard.evaluate(background)).toBe('rgba(0, 0, 0, 0)');
 
   await discard.click();
   await expect(page.getByText('Ready to record')).toBeVisible();

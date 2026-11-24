@@ -1671,6 +1671,16 @@
 - [x] Docs: design doc 2.60, epic doc 2.30, ux-v2 decisions 1.45, member guide 0.41, E2E overview 1.31, test matrix 1.7, README
 - [x] tsc, lint, Vitest (2742), BDD unit and seed green locally
 - [ ] CI green, cross-review by claude-opus-5-5, owner merge
+- [ ] Follow-up: Supabase CLI 3.x rejects `[inbucket]` in `supabase/config.toml` (use `local_smtp`), separate chore
+
+## Session November 24, 2026 (#544, local E2E baseline)
+- [x] Baseline on a clean `develop` (`fdc4ec2c`), local Supabase stack, `E2E_REUSE_DB=1`, desktop + mobile headless: 706 passed, 11 failed
+- [x] Guest-gate `:67` / `:75` already fixed by #648 (layout-aware Playlist / heart buttons); green on both projects
+- [x] Performance budgets, `reader-tools:193`, `validation-2:367` and `recording-meter` pass locally now: no threshold change
+- [x] Test bugs fixed: `reader-tools:144` (mouse press on the desktop project, touch tap on phones), `search:18` (selectors after the token restyle), `validation-2:92/:141/:168/:215` (phone-only checks skip on desktop, Share from the desktop header), `variant-slot:128` (fixture song has chords since #566), `recording-meter:104` (pointer hover colour), `profile-role-badge:37` (loading screen h1)
+- [x] Shared helper `openPracticeRecordTab` waits for the Practice drawer to finish sliding in (5 specs: "Element is outside of the viewport")
+- [x] App bug filed, not hidden: #664 (focus does not always move into the Practice drawer; `a11y-audit:319` `@smoke` flaky on mobile)
+- [ ] Owner merge; #544 stays open until #664 is fixed
 - [x] Follow-up: Supabase CLI 3.x rejects `[inbucket]` in `supabase/config.toml` (use `local_smtp`): done in chore #651
 
 ## Session November 24, 2026 (Chore #651, Supabase CLI 3.x config)
@@ -1693,5 +1703,28 @@
 - [x] Red unit test first: `useModalFocus` with a dialog that ignores its first two `focus()` calls (hidden on the first frames)
 - [x] `hooks/useModalFocus.ts`: retry focus on each animation frame until it is inside the dialog (max 30 frames), cancelled on close
 - [x] Vitest 2759 green, `tsc`, `eslint`; E2E "Practice is a labelled dialog" (`@smoke`) 10/10 on `mobile-chrome-headless`
-- [x] Design doc 2.64
+- [x] Design doc 2.65
 - [ ] Owner merge (closes #664; then #544 can close)
+- [ ] Follow-up: Supabase CLI 3.x rejects `[inbucket]` in `supabase/config.toml` (use `local_smtp`), separate chore
+
+## Session November 24, 2026 (Story 6.2.26, #598: suggest a song as a version of another song)
+- [x] Owner answers read (issue comment, Nov 24, 2026); plan `docs/plans/2026-11-23-598-version-suggestion.md` updated to 2.0 (gatekeeper reviews every suggestion, gatekeepers and admins review instead of suggesting, public songs only)
+- [x] Split: sub-issues of #499 created, not built: #655 (Story 6.2.30, contributors keep editing their own version) and #656 (Story 6.2.31, unlink my version); `feat/ux-v3` left alone
+- [x] Spec first: `docs/testing/ux-v3-suggest-song-link.feature` (@unit, @seed, @e2e), `testing/bdd/steps/ux-v3-suggest-song-link.steps.ts`, Vitest `linkSuggestion*.test.ts`, `suggestSongSheet.test.tsx`, `suggestionsView.test.tsx`, `schemaSongLinkSuggestions.test.ts`, `linkSuggestionBell.test.tsx`
+- [x] Migration `20261124150000_song_link_suggestions.sql` (applied locally with `migration up`, idempotent): table + RLS, 7 `SECURITY DEFINER` functions, reviewer check, link core shared with the direct link, delete trigger, notification types, `song_link_audit.suggestion_id`
+- [x] `docs/design/db-schema.sql` v3.16 (replayed on a scratch database)
+- [x] Server actions `app/actions/linkSuggestion.ts`, queries `lib/suggestions/*`, helpers `lib/songs/linkSuggestion.ts`
+- [x] UI: `SuggestSongSheet`, song menu item, `/suggestions` (`SuggestionsView`, `ReviewSuggestionSheet`), user-menu entry with count badge, bell items; 83 keys in all 8 locales
+- [x] Playwright spec `e2e/tests/suggest-song-link.spec.ts` + fixtures and teardown (not run locally; CI)
+- [x] Docs: design doc 2.61 (new section 6.22, table I), stories file 2.31, mockup 0.3, plan 2.0
+- [x] tsc, lint (126 warnings, cap 132 unchanged), Vitest, BDD unit and seed
+- [ ] CI green, cross-review by claude-opus-5-5 (security / RLS), owner merge
+
+## Session November 24, 2026 (Story 6.2.26, #598: review fixes)
+- [x] Opus review of PR #658 (no blockers): 3 should-fix, 4 nits, test gaps
+- [x] Visibility trigger closes open suggestions; core re-checks the pair and that both songs are public; reopen holds both songs (`FOR KEY SHARE`) and keeps the limit of 10; suggest checks readability first; decline notification loss documented
+- [x] Queue reads every open suggestion (history capped at 200); pair text is the key `suggest.pair` in 8 locales
+- [x] New @seed scenarios (visibility, reopen limit, internal functions closed, guest table and badge, preview by member/expert, withdraw after decision), Vitest for the queries and the schema parity, Playwright badge test (CI only)
+- [x] db-schema.sql v3.17; design doc 2.63; feature 1.1
+- [ ] CI green, owner merge
+
