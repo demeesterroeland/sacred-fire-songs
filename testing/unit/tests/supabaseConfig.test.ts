@@ -8,7 +8,10 @@ import { describe, expect, it } from 'vitest';
  * `[auth.email]` / `[auth.sms]`. The mail catcher keeps its ports: UI + API on 54324, SMTP on 54325.
  */
 const config = readFileSync(join(process.cwd(), 'supabase/config.toml'), 'utf8');
-const lines = config.split('\n').filter((line) => !line.trim().startsWith('#'));
+const lines = config
+  .split('\n')
+  .map((line) => line.replace(/\s+#.*$/, ''))
+  .filter((line) => !line.trim().startsWith('#'));
 
 /** Body of a `[section]` without comment lines, up to the next section header. */
 function section(name: string): string {
