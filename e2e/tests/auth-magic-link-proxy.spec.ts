@@ -9,7 +9,7 @@ import { test, expect } from '@playwright/test';
  * so the spec rewrites that link onto the proxy. The verify step must reach the browser as a 303
  * with the code; before the fix the proxy followed it on the server and answered 500.
  *
- * Needs the local Supabase stack with its mail catcher (supabase/config.toml [inbucket]).
+ * Needs the local Supabase stack with its mail catcher (supabase/config.toml [local_smtp]).
  */
 test.use({ storageState: { cookies: [], origins: [] } });
 

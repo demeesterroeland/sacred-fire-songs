@@ -85,6 +85,10 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
+### Local Supabase and mail catcher
+
+`npx supabase start` (Supabase CLI 3.x, installed with `npm install`) starts the local database and auth stack from `supabase/config.toml`, with the API on `http://127.0.0.1:54321`. Auth e-mails (sign-up confirmation, magic link) are not really sent: the local mail catcher (`[local_smtp]` section) shows them at [http://127.0.0.1:54324](http://127.0.0.1:54324). To send the app's own e-mails there too, set `SMTP_HOST=127.0.0.1` and `SMTP_PORT=54325` in `.env.local`.
+
 ---
 
 ## Project structure
