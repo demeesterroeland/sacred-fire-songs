@@ -3675,6 +3675,14 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - Tests: tsc, lint (0 errors), Vitest 2742, BDD unit and seed (three new @seed scenarios in `docs/testing/playlist-rename.feature`), bats. Playwright runs in CI.
 - Found, not fixed: Supabase CLI 3.x refuses the `[inbucket]` block in `supabase/config.toml` (renamed `local_smtp`), so `npx supabase migration up` fails in a fresh checkout; the migration was applied with the 2.x CLI. Three older develop migrations were also missing in the local database and were applied with `--include-all`.
 
+## Session November 24, 2026 — #651: Supabase config for CLI 3.x
+
+- Cause: `package.json` pins the Supabase CLI at `^3.2.0`, which renamed the mail catcher section `[inbucket]` to `[local_smtp]` (and the catcher is Mailpit, `MAILPIT_URL` in `supabase status`). Compared the repo config with the `supabase init` template section by section: the only other change was `enable_signup` -> `enabled` under `[auth.email]` and `[auth.sms]` (CLI deprecation warnings, removed in v4). `[experimental.pgdelta]` is new in the template but optional.
+- `supabase/config.toml` migrated; ports unchanged (UI and API 54324, SMTP 54325), so `.env.example`, the E2E magic-link spec and `SMTP_*` settings keep working. Comment-only update in the spec.
+- Verified on the running local stack (not restarted): `supabase status` and `migration list` print no config warning or inbucket error. A test message sent to SMTP 54325 appeared in the catcher API on 54324 and was deleted again. `migration up` currently stops on `MigrationMissingLocalError` because the shared local database already holds migration 20261124150000 from another branch (#598); all migrations of develop are applied. Not repaired on purpose.
+- Docs: README gets a short "Local Supabase and mail catcher" section; development workflow 2.2, design doc 2.61.
+- Tests: new `supabaseConfig.test.ts` (fails on the old config).
+
 ## Session November 24, 2026 — #598: members suggest a song as a version of another song
 
 - Owner answers applied. The one change against the plan: a gatekeeper reviews and decides **every** suggestion, also on songs they own neither (like an admin); a direct link still needs ownership. Gatekeepers and admins review instead of suggesting; public songs only.

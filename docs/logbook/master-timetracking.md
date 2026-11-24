@@ -150,7 +150,6 @@
 | **November 12, 2026** | **Fix/UX (Epic 6.1, #485)**: sober colours group 1 — one neutral tag style, token-only tag editors, ratchet scans `lib/`, i18n, tests, docs. (estimate) | ~1.5 Hours | Completed |
 | **November 12, 2026** | **Fix/UX (Epic 6.1, #485)**: sober colours group 3 — Practice drawer and singer attribution dialog on tokens, one primary action, i18n, tests, docs. (estimate) | ~1.0 Hours | Completed |
 | **November 13, 2026** | **Feature/UX (Epic 6.1, #534)**: role badge per role on a profile page (view column, badge component, i18n, `@unit`/`@seed`/E2E tests, review round, docs). (estimate) | ~1.5 Hours | Completed |
-| **November 24, 2026** | **Feature/UX (Epic 6.2, #598)**: suggest a song as a version of another song: feature file and tests first, migration (table, RLS, SECURITY DEFINER functions, link core), server actions, suggest sheet, `/suggestions` review page, user-menu badge, bell items, 8-locale i18n, e2e spec, docs, two split-off sub-issues. (estimate) | ~5.0 Hours | Completed |
 | **Total** | **Development + AI Collaboration** | **~267.5 Hours** | |
 | **November 13, 2026** | **Fix/UI (#485 group 4)**: sober tokens in the header, user menu, notification bell, language picker, WickSelect and toasts; unused ThemeToggle/popover removed; tests, review fixes. (estimate) | ~1.5 Hours | Completed |
 | **November 13, 2026** | **Fix/i18n (Epic 6.1, #564 / #565)**: "Private" instead of "Draft" for songs that are not public and "No artist" for songs without an author, in 8 locales (messages, song meta, admin, legal text, `@unit`/E2E tests, docs). (estimate) | ~1.5 Hours | Completed |
@@ -166,4 +165,6 @@
 | **November 23, 2026** | **Design (Epic 6.2, #598)**: suggest a song as a version of another song: branch-target check, plan (data model, RLS, queue UX, notifications, audit, Gherkin, open questions), HTML mockup, draft PR. Nothing built. (estimate) | ~1.5 Hours | Completed |
 | **November 24, 2026** | **Fix/UI (#485)**: drop tag and category emojis in `TagPill`, `TagSelector`, `CategorySelector` and the song list data, unit test, docs (design doc 2.59, design tokens 1.14, home mockup). (estimate) | ~0.5 Hours | Completed |
 | **November 24, 2026** | **Chore (#573)**: setlist renamed to playlist in the schema (one migration, safety check), code, tests, seeds and docs; local database scan, schema script replay, new @seed scenarios. (estimate) | ~2.5 Hours | ✅ Completed |
-| **Total** | **Development + AI Collaboration** | **~288.5 Hours** | |
+| **November 24, 2026** | **Chore (#651)**: Supabase config migrated to the CLI 3.x schema (`[local_smtp]`, `enabled`), guard test, local verification, README and docs. (estimate) | ~0.75 Hours | Completed |
+| **November 24, 2026** | **Feature/UX (Epic 6.2, #598)**: suggest a song as a version of another song: feature file and tests first, migration (table, RLS, SECURITY DEFINER functions, link core), server actions, suggest sheet, `/suggestions` review page, user-menu badge, bell items, 8-locale i18n, e2e spec, docs, two split-off sub-issues. (estimate) | ~5.0 Hours | Completed |
+| **Total** | **Development + AI Collaboration** | **~289.25 Hours** | |
