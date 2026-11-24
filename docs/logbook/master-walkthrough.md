@@ -3682,3 +3682,19 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - Timing races: the Practice drawer slides in with a spring, and five specs clicked its Record tab before it was on screen; the new `openPracticeRecordTab` helper (`e2e/fixtures/songActions.ts`) waits until it has settled. `recording-meter:104` read the hover colour of Save/Discard because the pointer still sat where Start recording was; `profile-role-badge:37` saw the loading screen's brand `h1` next to the profile name.
 - One real app bug, filed as #664 and left visible in the test: `useModalFocus` focuses the Practice drawer one frame after it opens, but framer-motion may still have it at `visibility: hidden`, so focus stays on the opener (`ux-v2-a11y-audit.spec.ts:319`, `@smoke`, about 3 of 4 mobile runs).
 - Work was split over three Claude Sonnet subagents by spec file (one shared production server, a temporary untracked config without global teardown so parallel runs kept each other's fixtures).
+## Session November 24, 2026 — #651: Supabase config for CLI 3.x
+
+- Cause: `package.json` pins the Supabase CLI at `^3.2.0`, which renamed the mail catcher section `[inbucket]` to `[local_smtp]` (and the catcher is Mailpit, `MAILPIT_URL` in `supabase status`). Compared the repo config with the `supabase init` template section by section: the only other change was `enable_signup` -> `enabled` under `[auth.email]` and `[auth.sms]` (CLI deprecation warnings, removed in v4). `[experimental.pgdelta]` is new in the template but optional.
+- `supabase/config.toml` migrated; ports unchanged (UI and API 54324, SMTP 54325), so `.env.example`, the E2E magic-link spec and `SMTP_*` settings keep working. Comment-only update in the spec.
+- Verified on the running local stack (not restarted): `supabase status` and `migration list` print no config warning or inbucket error. A test message sent to SMTP 54325 appeared in the catcher API on 54324 and was deleted again. `migration up` currently stops on `MigrationMissingLocalError` because the shared local database already holds migration 20261124150000 from another branch (#598); all migrations of develop are applied. Not repaired on purpose.
+- Docs: README gets a short "Local Supabase and mail catcher" section; development workflow 2.2, design doc 2.61.
+- Tests: new `supabaseConfig.test.ts` (fails on the old config).
+
+## Session November 24, 2026 — #654: self-host ports no longer clash with the CLI dev stack
+
+- Cause: `docker-compose.yml` published 54321 (API), 54323 (Postgres) and 54324 (Studio), while the Supabase CLI dev stack (`supabase/config.toml`) uses 54321 for its API, 54323 for Studio and 54324 for the mail catcher. Running both on one machine failed with "port is already allocated", and one port had two meanings in the docs. Found in the review of #652.
+- Fix: the self-host stack moves to its own range, each port overridable: API `${SFS_API_PORT:-55321}`, Postgres `${SFS_DB_PORT:-55322}`, Studio `${SFS_STUDIO_PORT:-55323}`. The default `NEXT_PUBLIC_SUPABASE_URL` and `API_EXTERNAL_URL` follow 55321. Container-internal ports are unchanged.
+- Self-hosters who relied on the old defaults: set `SFS_API_PORT=54321` (plus the URL), `SFS_DB_PORT=54323` and `SFS_STUDIO_PORT=54324` in `.env` to keep them.
+- Docs: README port table (CLI stack vs. self-host stack), `.env.example`, development workflow 2.3, design doc 2.62.
+- Tests: `composePorts.test.ts` (failed on the old compose file); `docker compose config` validates the file and an override.
+

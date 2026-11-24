@@ -19,7 +19,7 @@ test.describe('Search Functionality E2E Tests', () => {
     // Spinner animations can be flaky under mobile CPU emulation, so skip on mobile viewports
     test.skip(!!isMobile, 'Skip animation checks under emulated mobile CPU');
 
-    const searchInput = page.locator('input[placeholder="Search 200+ songs"]');
+    const searchInput = page.locator('#app-navbar input[aria-label="Search songs"]');
     await searchInput.click();
     
     // Type query sequentially to trigger state cycles
@@ -52,7 +52,7 @@ test.describe('Search Functionality E2E Tests', () => {
     await expect(firstMeta).toBeVisible();
     const songAuthor = (await firstMeta.innerText()).split(' · ')[0].split(', ')[0].trim();
 
-    const searchInput = page.locator('input[placeholder="Search 200+ songs"]');
+    const searchInput = page.locator('#app-navbar input[aria-label="Search songs"]');
 
     // 2. Title Search: search using lowercase version of title
     await searchInput.click();

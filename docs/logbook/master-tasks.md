@@ -1681,3 +1681,20 @@
 - [x] Shared helper `openPracticeRecordTab` waits for the Practice drawer to finish sliding in (5 specs: "Element is outside of the viewport")
 - [x] App bug filed, not hidden: #664 (focus does not always move into the Practice drawer; `a11y-audit:319` `@smoke` flaky on mobile)
 - [ ] Owner merge; #544 stays open until #664 is fixed
+- [x] Follow-up: Supabase CLI 3.x rejects `[inbucket]` in `supabase/config.toml` (use `local_smtp`): done in chore #651
+
+## Session November 24, 2026 (Chore #651, Supabase CLI 3.x config)
+
+- [x] Compared `supabase/config.toml` with the `supabase init` template of the pinned CLI 3.2.0: `[inbucket]` -> `[local_smtp]` (ports 54324 / 54325 unchanged), `enable_signup` -> `enabled` under `[auth.email]` / `[auth.sms]` (two CLI deprecation warnings)
+- [x] Guard test `testing/unit/tests/supabaseConfig.test.ts` (red on the old config, green on the new)
+- [x] Docs: README (local Supabase and mail catcher), development workflow 2.2, design doc 2.61, `.env.example`, E2E spec comment
+- [x] `npx supabase status` and `migration list` parse the config without warnings; mail catcher receives a test message on SMTP 54325 and serves it on 54324
+- [ ] CI green, cross-review by claude-opus-5-5, owner merge
+
+## Session November 24, 2026 (Chore #654, self-host ports vs. CLI dev stack)
+
+- [x] Guard test `testing/unit/tests/composePorts.test.ts`: no host port of `docker-compose.yml` is also a port in `supabase/config.toml`; default Supabase URLs follow the API port (red on the old compose file)
+- [x] `docker-compose.yml`: API `${SFS_API_PORT:-55321}`, Postgres `${SFS_DB_PORT:-55322}`, Studio `${SFS_STUDIO_PORT:-55323}`; default `NEXT_PUBLIC_SUPABASE_URL` / `API_EXTERNAL_URL` on 55321; `docker compose config` valid, overrides work
+- [x] `.env.example`, README port table, development workflow 2.3, design doc 2.62
+- [ ] CI green, owner merge (owner asked to fix and merge into develop)
+

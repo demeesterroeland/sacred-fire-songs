@@ -85,6 +85,24 @@ npm run dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
+### Local Supabase and mail catcher
+
+`npx supabase start` (Supabase CLI 3.x, installed with `npm install`) starts the local database and auth stack from `supabase/config.toml`, with the API on `http://127.0.0.1:54321`. Auth e-mails (sign-up confirmation, magic link) are not really sent: the local mail catcher (`[local_smtp]` section) shows them at [http://127.0.0.1:54324](http://127.0.0.1:54324). To send the app's own e-mails there too, set `SMTP_HOST=127.0.0.1` and `SMTP_PORT=54325` in `.env.local`.
+
+### Ports: CLI dev stack vs. self-host compose
+
+The two stacks use separate host ports, so both can run on one machine (#654):
+
+| Service | Supabase CLI dev stack (`supabase/config.toml`) | Self-host stack (`docker-compose.yml`) |
+| :--- | :--- | :--- |
+| API | 54321 | 55321 (`SFS_API_PORT`) |
+| Postgres | 54322 | 55322 (`SFS_DB_PORT`) |
+| Studio | 54323 | 55323 (`SFS_STUDIO_PORT`) |
+| Mail catcher (UI / SMTP) | 54324 / 54325 | — (use your own SMTP) |
+| App | 3000 (`npm run dev`) | 3000 |
+
+When you change `SFS_API_PORT`, set the same port in `NEXT_PUBLIC_SUPABASE_URL` (and `API_EXTERNAL_URL`, if set).
+
 ---
 
 ## Project structure
