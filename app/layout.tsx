@@ -53,6 +53,8 @@ import SidebarOverlay from "@/components/common/SidebarOverlay";
 import GlobalSearchModal from "@/components/common/GlobalSearchModal";
 import ThemedToaster from "@/components/providers/ThemedToaster";
 import { SuggestionsSlot } from "@/components/search/SuggestionsSlot";
+import { SongCountProvider } from "@/context/SongCountContext";
+import { getPublicSongCount } from "@/lib/songs/serverQueries";
 
 // Inline script to prevent flash of wrong theme on load.
 // Reads the user's preference from localStorage and applies the dark class
@@ -82,7 +84,10 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
 
   const locale = await getServerLocale();
   const supabase = await createClient();
-  const { data: { user: sessionUser } } = await supabase.auth.getUser();
+  const [{ data: { user: sessionUser } }, publicSongCount] = await Promise.all([
+    supabase.auth.getUser(),
+    getPublicSongCount(),
+  ]);
   
   let initialUser: AuthUser | null = null;
   if (sessionUser) {
@@ -117,6 +122,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
         <ServiceWorkerRegistrar />
         <EnvironmentBanner />
         <LocaleProvider serverLocale={locale}>
+        <SongCountProvider count={publicSongCount}>
         <UserPreferencesProvider>
           <AudioProvider>
             <SidebarProvider>
@@ -153,6 +159,7 @@ export default async function RootLayout({ children }: Readonly<{ children: Reac
           </AudioProvider>
           <ThemedToaster />
         </UserPreferencesProvider>
+        </SongCountProvider>
         </LocaleProvider>
       </body>
     </html>
