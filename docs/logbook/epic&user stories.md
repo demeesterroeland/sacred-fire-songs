@@ -1,6 +1,6 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 2.30
+**Version:** 2.31
 **Status:** Living Document
 **Date:** Nov 24, 2026
 
@@ -129,6 +129,7 @@
 | **2.28** | Nov 23, 2026 | #639 (leftovers of the #599 sync): Gherkin aligned with the code for Stories 1.1.5 (guest draft banner, no join-our-circle modal), 1.1.6 (test path), 1.1.9 (bar hidden from `lg`, menu button and avatar), 1.2.1 (no dashboard, no infinite scroll), 1.3.3 (no back arrow; code fence closed so 1.3.5 renders), 2.3.2 (search options window, no Theme or Rhythm), 4.1.1 (New playlist field), 4.1.5 (Get Link in the menu, private playlists), 4.2.1 (footer per 4.2.3, 200-song limit without Premium) and the 6.1 rows #390 (six lyric steps, 15–28 px), #398 / #399 (My recordings), #403 (bell badge, no avatar badge) and #408 (three bottom items, `/explore` redirects to `/songs`). Rewritten issue Gherkin mirrored for Stories 3.1.3 (#140), 3.4.4 (#108), 4.5.1 (#112) and 4.6.2 (#245). Issue numbers added to the rows 3.4.2, 3.4.3, 3.4.5, 3.4.6, 3.6.1, 4.1.x, 4.2.x, 4.3.1 and 4.5.1; Epic 3.6 shows #257 as reopened and #275–#277 as not started; Epic 4.3 notes that `feat/offline-library` (#357) was stale (#606 is step 0). Not changed, waiting for the owner: the Roles & Permissions table, the 4.6.5 / 4.6.7 numbering in GitHub, the placement of #481 (see the PR description). #267, #356 and #266 are test-infrastructure chores (docs/testing, CI, test helpers), not stories, so they have no row here. The code fence of Story 1.3.3 is closed and the unclosed I18N block of Story 3.7.1 is closed, so Epics 2.1 to 3.7 render as text again. |
 | **2.29** | Nov 23, 2026 | #642 follow-up (owner answers): the Roles & Permissions Summary now matches the code. The database role enum is `admin`, `expert`, `member`, `musician` (legacy) and `gatekeeper`; `is_musician` is derived (`role IN ('musician','expert')`), not a profile setting. New Musician / Expert column; Transpose is for musician, expert and admin only (`canTranspose`), not for members or gatekeepers. Unbuilt rows marked "planned (#…)": flag songs (#106), edit any song's metadata (#107), merge duplicates (#108, partial through link-as-version #512), feature playlists (#109), Manage Users & Roles (view-only; #275–#277), Sheet Music / ABC (Story 2.1.2). Built: public-playlist curation (#197), linking songs you own (#512). Epic 3.5 note fixed (the "profile setting" idea is closed as not planned, Stories 3.5.1 and 3.5.2). Story 4.6.8 [Planned] added for #481 (Library › Shared); the GitHub issue is unchanged. #372 is titled Story 4.6.7 on GitHub; #267, #356 and #266 stay chores with no row. |
 | **2.30** | Nov 24, 2026 | #573: Epic 4.1 and the stories below say "playlist" instead of "setlist" (the schema, code and docs were renamed; the user-facing word did not change). The changelog rows above keep the old word. |
+| **2.31** | Nov 24, 2026 | Story 6.2.26 (#598, G1.5) implemented on `feat/598-suggest-version` (PR into `develop`): members suggest that a song is a version of another song, gatekeepers and admins review every suggestion (also on songs they own neither) and link or decline; queue at `/suggestions`, count badge on the user menu, bell item for the member; public songs only. The two other stories bundled in #598 are split off as sub-issues of #499: Story 6.2.30 (#655, contributors keep editing their own version) and Story 6.2.31 (#656, unlink my version). Acceptance criteria below; spec `docs/testing/ux-v3-suggest-song-link.feature`. |
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
 
@@ -1856,7 +1857,9 @@ GitHub epic **#498**. Many circles sing from printed songbooks: the same song ap
 | 6.2.23 | #547 | `G5.6` | C | **[Implemented, in `develop` via #585]** As a Guest, I want search to find a song by the title of its translation so that I find a song by the name I know in my language | #521 (G5.1); unblocks #542 |
 | 6.2.24 | #569 | `G5.7` | C | **[Implemented, in `develop` via #585]** As a Guest, I want to choose a language only in the Language filter so that the search options don't offer the same choice twice (excludes *Languages* from `TagSelector` and keeps legacy `?category=`/`?tag=`/`?tags=` language links working) | #522 (G5.2) |
 | 6.2.25 | #570 | `G5.8` | B | **[Implemented, in `develop` via #585]** As a Guest, I want the search window on every page to offer the Songbook and Language filters so that I can browse one book or one language from anywhere (`GlobalSearchModal` shows both selects lazily when open via `fn_search_filter_counts()`, respecting RLS and submitting `?songbook=<id>&language=<slug>`) | #522 |
-| 6.2.26 | #598 | `G1.5` | C | **[Planned, not started]** As a Member, I want to suggest that a song is a version of another song so that duplicates get merged by someone who may do so | #499 |
+| 6.2.26 | #598 | `G1.5` | C | **[Implemented on `feat/598-suggest-version`, PR into `develop`]** As a Member, I want to suggest that a song is a version of another song so that duplicates get merged by someone who may do so (⋮ menu → "Suggest as a version of…" with search and note; gatekeepers and admins review every suggestion at `/suggestions`, link or decline, and choose which song stays; the member gets a bell item; public songs only; spec `docs/testing/ux-v3-suggest-song-link.feature`) | #499 |
+| 6.2.30 | #655 | `G1.8` | B | **[Planned, not started]** As a Member whose song was linked as a version of another song, I want to keep editing my own version so that a merge does not take my work out of my hands (split off #598) | #499 |
+| 6.2.31 | #656 | `G1.9` | C | **[Planned, not started]** As a Member whose version sits in another song, I want to make my version its own song again so that I am not kept in a merge I do not agree with (split off #598) | #499 |
 
 **Story 6.2.2 acceptance criteria** (superseded by Story 6.1.40 / #586, owner decision Nov 13, 2026: Practice shows one availability dot for media or takes; kept for history; executable: `docs/testing/ux-v2-song-action-bar.feature` `@e2e`, with component coverage in `songActionBarComponent.test.tsx`):
 
@@ -2206,6 +2209,37 @@ Scenario: Note is collapsed until opened
 ```
 
 Also: a whitespace-only note counts as empty (hidden); switching version shows that version's note and hides the panel when it has none; paragraph breaks are kept and the note is plain text (never HTML); design intent (not yet asserted by an E2E spec): the collapsed panel keeps the first lyric line above the fold at 390 × 844.
+
+**Story 6.2.26 acceptance criteria** (executable: `docs/testing/ux-v3-suggest-song-link.feature`, `@unit`, `@seed` as the real database roles, `@e2e`):
+
+```gherkin
+Scenario: A member suggests a link
+  Given the public songs "Siento la medicina" and "Siento la medica"
+  When the member suggests "Siento la medica" as a version of "Siento la medicina"
+  Then an open suggestion is saved with the member as the suggester
+  And both songs are unchanged
+
+Scenario: A gatekeeper accepts a suggestion on songs they own neither
+  Given an open suggestion "Siento la medica" → "Siento la medicina" by a member
+  When the gatekeeper accepts the suggestion
+  Then "Siento la medicina" has the versions of both songs
+  And the suggestion is accepted with the gatekeeper as the reviewer
+  And the member is notified that the songs were linked
+
+Scenario: An admin declines a suggestion with a reason
+  Given an open suggestion "Pipe song 58" → "Pipe song 65" by a member
+  When the admin declines it with the reason "Different songs"
+  Then both songs are unchanged
+  And the member is notified that it was declined with the reason
+
+Scenario: Suggestions on a linked song are re-pointed
+  Given open suggestions "Siente la medicina nai" → "Siento la medica" and "Siento la medica" → "Siento la medicina"
+  When the admin links "Siento la medica" directly into "Siento la medicina"
+  Then the first suggestion now points at "Siento la medicina"
+  And no open suggestion points from or to a deleted song
+```
+
+Also: one open suggestion per pair in either direction, at most 10 open per member, a note and a reason of at most 280 characters, public songs only, gatekeepers and admins review instead of suggesting, the member withdraws, an admin reopens a declined suggestion, the reviewer can keep the other song; the count badge on the user menu shows what waits.
 
 **Story 6.2.9 acceptance criteria** (executable: `docs/testing/ux-v3-link-song-version.feature`, `@unit` and `@seed`):
 

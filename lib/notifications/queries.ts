@@ -4,7 +4,7 @@
  */
 import { createClient } from '@/lib/supabase/client';
 
-export type NotificationType = 'recording_shared';
+export type NotificationType = 'recording_shared' | 'link_suggestion_accepted' | 'link_suggestion_declined';
 
 export interface AppNotification {
   id: string;
@@ -15,6 +15,11 @@ export interface AppNotification {
     actor_name?: string;
     song_title?: string;
     recording_name?: string;
+    /** link_suggestion_*: titles and the reviewer's reason, a snapshot so the bell reads in the reader's locale. */
+    source_title?: string;
+    target_title?: string;
+    reviewer_name?: string;
+    reason?: string;
   };
   read_at: string | null;
   created_at: string;

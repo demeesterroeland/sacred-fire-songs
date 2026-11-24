@@ -2,7 +2,7 @@
 
 import { useRouter } from 'next/navigation';
 import { useQueryClient } from '@tanstack/react-query';
-import { Bell, Users } from 'lucide-react';
+import { Bell, GitMerge, Users } from 'lucide-react';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -18,6 +18,7 @@ import {
   type AppNotification,
 } from '@/lib/notifications/queries';
 import { recordingPermalink } from '@/lib/songs/recordingLink';
+import { isSuggestionNotification, suggestionNotificationText } from '@/lib/songs/linkSuggestion';
 
 function relativeTime(iso: string, localeTag: string): string {
   const seconds = Math.round((new Date(iso).getTime() - Date.now()) / 1000);
@@ -110,15 +111,24 @@ export function NotificationBell({ userId }: { userId: string }) {
                 className="flex items-start gap-3 px-4 py-3 rounded-none cursor-pointer focus:bg-surface-2"
               >
                 <span className="mt-0.5 p-1.5 rounded-full bg-surface-2 text-fg-muted shrink-0">
-                  <Users className="w-3.5 h-3.5" aria-hidden="true" />
+                  {isSuggestionNotification(n.type) ? (
+                    <GitMerge className="w-3.5 h-3.5" aria-hidden="true" />
+                  ) : (
+                    <Users className="w-3.5 h-3.5" aria-hidden="true" />
+                  )}
                 </span>
                 <span className="flex-1 min-w-0">
                   <span className={`block text-sm leading-snug ${n.read_at ? 'text-fg-muted' : 'font-semibold text-fg'}`}>
-                    {t('notifications.recordingShared', {
-                      actor: n.metadata.actor_name || t('user.unnamed'),
-                      recording: n.metadata.recording_name ?? '',
-                      song: n.metadata.song_title ?? '',
-                    })}
+                    {isSuggestionNotification(n.type)
+                      ? (() => {
+                          const text = suggestionNotificationText(n.type, n.metadata);
+                          return t(text.key, text.params);
+                        })()
+                      : t('notifications.recordingShared', {
+                          actor: n.metadata.actor_name || t('user.unnamed'),
+                          recording: n.metadata.recording_name ?? '',
+                          song: n.metadata.song_title ?? '',
+                        })}
                   </span>
                   <span className="block mt-0.5 text-xs text-fg-subtle">
                     {relativeTime(n.created_at, LOCALE_DATE_TAGS[locale])}

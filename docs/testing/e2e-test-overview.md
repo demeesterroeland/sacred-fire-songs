@@ -1,6 +1,6 @@
 # E2E Test Overview & Matrix: Sacred Fire Songs
 
-**Version:** 1.31
+**Version:** 1.32
 **Status:** Living Document
 **Date:** Nov 24, 2026
 **Tracking:** GH #142
@@ -41,6 +41,7 @@
 | **1.29** | Nov 23, 2026 | (#266, option A) `@e2e` scenarios in `docs/testing/*.feature` are documentation only; E2E runs through plain Playwright specs in `e2e/tests/` and `playwright-bdd` is not used. `song.feature` names the covering spec for each `@e2e` scenario. PL-11 (Duplicate playlist) feature status corrected to not implemented (#100). |
 | **1.30** | Nov 23, 2026 | #485 group 7: SONG-14 `ux-v2-sober-song-form.spec.ts` (member): axe colour contrast on the Add Song form with every section open, light and dark. |
 | **1.31** | Nov 24, 2026 | #573: the tables are `playlists` / `playlist_items` (were setlists); smoke teardown and seed queries use the new names; section 4.7 is titled Playlists. |
+| **1.32** | Nov 24, 2026 | Story 6.2.26 (#598): new spec `suggest-song-link.spec.ts` (a member suggests a song as a version of another song, an admin links from the suggestion on `/suggestions`, the old link opens the song that stays, the member has a bell item); row LIB-15. Fixture ids `SUGGEST_LINK_FIXTURE_IDS` removed by `global-teardown.ts`. Runs once (desktop project): the journey deletes the source song. |
 
 ---
 
@@ -174,6 +175,7 @@ Mobile emulation and per-role `storageState` matter here because the app is mobi
 | LIB-12 | New tab | Unviewed recent songs on `/library/new` (validation 4; guest gate) | last_seen tracking | M | ✅ | 🔲 | P2 | `library/new` |
 | LIB-13 | Home/Library guest access | Guest can reach Home & Library without login; `/explore` redirects to `/songs`, query kept (#574) | `ux-v2-bottom-bar.spec.ts`, `ux-v2-explore-redirect.spec.ts` | G | ✅ | ✅ | P2 | 1.2.3 |
 | LIB-14 | Songbooks | `/songbooks` lists books with song counts; `/songbooks/<id>` lists songs by page; source line links to the book; unknown id = not-found | book with only private songs; `#source-<id>` anchor | G/M | ✅ | 🔲 | P2 | `docs/testing/ux-v3-songbook-pages.feature` |
+| LIB-15 | Link suggestions | A member suggests "Suggest as a version of…"; admin and gatekeeper review every suggestion at `/suggestions` (preview, link or decline); the member gets a bell item; count badge on the user menu | `suggest-song-link.spec.ts` | M/A | ✅ | 🔲 | P2 | `docs/testing/ux-v3-suggest-song-link.feature` |
 
 ### 4.5 Song Viewer (Epic 1.3 / 2.1)
 

@@ -254,12 +254,6 @@ async function runAs(
   }
 }
 
-async function runAsOwner(sql: string, params: unknown[] = []) {
-  const db = await seedDb();
-  const { rows } = await db.query(sql, params);
-  return rows;
-}
-
 function song(world: object, title: string): string {
   const id = w(world).songs[title];
   assert.ok(id, `no song "${title}" in this scenario`);

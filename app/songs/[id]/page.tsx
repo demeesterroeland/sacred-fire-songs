@@ -43,6 +43,8 @@ import { EDIT_VERSION_PARAM, editSongHref } from '@/lib/songs/versionOrder';
 import { blocksVersionSwitch, linkedVersionChoice, resolveVersionIndex, versionSearch, versionShareUrl, type VersionChoice } from '@/lib/songs/versionSwitch';
 import { SongMenuSheet } from '@/components/song/SongMenuSheet';
 import { LinkSongSheet } from '@/components/song/LinkSongSheet';
+import { SuggestSongSheet } from '@/components/song/SuggestSongSheet';
+import { canSuggestLink } from '@/lib/songs/linkSuggestion';
 import { canLinkSong, fetchSongRedirect, songRedirectHref, type SongLinkSummary } from '@/lib/songs/linkSong';
 import { useScrolledPast } from '@/hooks/useScrolledPast';
 import { useReaderPrefs } from '@/lib/reader/useReaderPrefs';
@@ -82,6 +84,7 @@ export default function SongDetailPage() {
     const [isMenuOpen, setIsMenuOpen] = useState(false);
     // Story 6.2.9 (#512): admins, and gatekeepers on their own songs, link this song as a version of another song.
     const [isLinkOpen, setIsLinkOpen] = useState(false);
+    const [isSuggestOpen, setIsSuggestOpen] = useState(false);
     const router = useRouter();
     const phoneTitleRef = useRef<HTMLHeadingElement>(null);
     const phoneMenuButtonRef = useRef<HTMLButtonElement>(null);
@@ -828,6 +831,7 @@ export default function SongDetailPage() {
                         ? () => { setIsMenuOpen(false); void handleMakeSongPublic(); }
                         : undefined,
                     onLinkAsVersion: canLinkSong(user, song.owner_id) ? () => { setIsMenuOpen(false); setIsLinkOpen(true); } : undefined,
+                    onSuggestAsVersion: canSuggestLink(user, { isPublic: song.is_public === true }) ? () => { setIsMenuOpen(false); setIsSuggestOpen(true); } : undefined,
                 }}
                 speed={readerPrefs.speed}
                 onSpeed={(delta) => setReaderPrefs({ ...readerPrefs, speed: speedBy(readerPrefs.speed, delta) })}
@@ -849,6 +853,16 @@ export default function SongDetailPage() {
                     sourceId={id}
                     sourceTitle={song.title}
                     onLinked={handleLinked}
+                />
+            )}
+
+            {id && canSuggestLink(user, { isPublic: song.is_public === true }) && (
+                <SuggestSongSheet
+                    open={isSuggestOpen}
+                    onOpenChange={setIsSuggestOpen}
+                    sourceId={id}
+                    sourceTitle={song.title}
+                    onSent={() => { setIsSuggestOpen(false); toast.success(t('suggest.sent')); }}
                 />
             )}
 
