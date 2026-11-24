@@ -3721,3 +3721,14 @@ Nine more UX v2 stories landed on `feat/ux-v2`: a bottom bar Home · Search · L
 - Smaller: `fn_suggest_song_link` checks readability before "itself" / "already linked" (and says "already linked" only when the song it lives in is readable); the decline notification loss is documented as accepted (logged as WARNING); the pair text is the translation key `suggest.pair`.
 - Tests: six new @seed scenarios plus an outline (78 scenarios in the file), queue and schema-parity tests, one more Playwright test for the review badge (CI only).
 
+## Session November 24, 2026 — #598: gatekeepers suggest links too
+
+- Owner decision on the PR: a gatekeeper may suggest a link on songs they cannot link directly (they own both → they link directly; an admin never suggests). To keep a suggestion a peer review, a reviewer can never decide their own suggestion: the core and the decline function refuse it (42501), the queue lists it under "Mine" with Withdraw, and the badge does not count it. Another gatekeeper or an admin decides it.
+- New migration `20261124180000_gatekeepers_suggest_links.sql` (function bodies only; PR #658 was already merged); `db-schema.sql` v3.18; seed scenarios for the new rules; the menu shows "Suggest as a version of…" to a gatekeeper on a song of someone else and "Link as a version of…" on their own.
+
+## Session November 24, 2026 — #668 review fixes (Claude Opus review of PR #669)
+
+- A reviewer can no longer preview their own suggestion, and accept refuses it before any song check, so the reviewer hears the real reason. A direct link by the suggester (for example after becoming the owner of both songs) closes their own suggestion as `superseded`: nobody reviewed it, so it is not "accepted".
+- A gatekeeper on their own public song sees both "Link as a version of…" and "Suggest as a version of…" (the target is picked later; the database refuses an own–own pair). `canDecideSuggestion` and the review tab fail closed without a user id, and the review list checks the same rule a second time.
+- Tests: a second seeded gatekeeper decides another gatekeeper's suggestion; self-accept with the direction swapped and self-preview are refused; a gatekeeper who owns one of the two songs can suggest; the limit of ten applies to gatekeepers; schema parity covers the replaced functions.
+

@@ -171,4 +171,6 @@
 | **November 24, 2026** | **Fix/Review (Epic 6.2, #598)**: review fixes of PR #658 (visibility trigger, core guards, reopen lock and limit, queue limit, pair key, new @seed and e2e tests, docs). (estimate) | ~1.5 Hours | Completed |
 | **November 24, 2026** | **Test/E2E (#544)**: local Playwright baseline on develop (full desktop + mobile runs, layout-aware spec fixes, Practice drawer helper, fixtures, app bug #664 filed). (estimate) | ~2.0 Hours | Completed |
 | **November 24, 2026** | **Fix/A11y (#664)**: Practice drawer focus retry in `useModalFocus` (red unit test, hook fix, 10x E2E on mobile, docs). (estimate) | ~0.75 Hours | Completed |
-| **Total** | **Development + AI Collaboration** | **~294.25 Hours** | |
+| **November 24, 2026** | **Feature/UX (Epic 6.2, #598)**: gatekeepers suggest links too, a reviewer never decides their own suggestion (migration, helpers, UI, @seed and unit tests, docs); story for change proposals written up. (estimate) | ~1.0 Hours | Completed |
+| **November 24, 2026** | **Fix/Review (Epic 6.2, #668)**: review fixes of PR #669 (preview and accept guards, superseded own suggestion, both menu items, fail-closed helpers, new @seed scenarios, docs). (estimate) | ~0.75 Hours | Completed |
+| **Total** | **Development + AI Collaboration** | **~298.8 Hours** | |

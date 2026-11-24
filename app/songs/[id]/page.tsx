@@ -831,7 +831,7 @@ export default function SongDetailPage() {
                         ? () => { setIsMenuOpen(false); void handleMakeSongPublic(); }
                         : undefined,
                     onLinkAsVersion: canLinkSong(user, song.owner_id) ? () => { setIsMenuOpen(false); setIsLinkOpen(true); } : undefined,
-                    onSuggestAsVersion: canSuggestLink(user, { isPublic: song.is_public === true }) ? () => { setIsMenuOpen(false); setIsSuggestOpen(true); } : undefined,
+                    onSuggestAsVersion: canSuggestLink(user, { isPublic: song.is_public === true, ownerId: song.owner_id }) ? () => { setIsMenuOpen(false); setIsSuggestOpen(true); } : undefined,
                 }}
                 speed={readerPrefs.speed}
                 onSpeed={(delta) => setReaderPrefs({ ...readerPrefs, speed: speedBy(readerPrefs.speed, delta) })}
@@ -856,7 +856,7 @@ export default function SongDetailPage() {
                 />
             )}
 
-            {id && canSuggestLink(user, { isPublic: song.is_public === true }) && (
+            {id && canSuggestLink(user, { isPublic: song.is_public === true, ownerId: song.owner_id }) && (
                 <SuggestSongSheet
                     open={isSuggestOpen}
                     onOpenChange={setIsSuggestOpen}

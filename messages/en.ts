@@ -1218,6 +1218,7 @@ const en = {
   "suggest.error.reviewer": "You can link or review these songs yourself.",
   "suggest.error.notReviewer": "Only gatekeepers and admins can review suggestions.",
   "suggest.error.notAdmin": "Only admins can reopen suggestions.",
+  "suggest.error.ownSuggestion": "You cannot decide your own suggestion. Another gatekeeper or an admin does.",
   "suggest.error.notAllowed": "You can only change your own suggestions.",
   "suggest.error.self": "A song cannot be a version of itself.",
   "suggest.error.alreadyLinked": "This song is already linked to another song.",

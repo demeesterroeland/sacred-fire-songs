@@ -1,5 +1,5 @@
 # Sacred Fire Songs – Suggest a song as a version of another song
-# Version: 1.1 | Date: Nov 24, 2026
+# Version: 1.3 | Date: Nov 24, 2026
 #
 # Story 6.2.26 / G1.5 (#598): a member suggests "this song is a version of that song"; a
 # gatekeeper or admin reviews it and links (fn_link_song_as_version core) or declines.
@@ -17,6 +17,13 @@
 #   1.0 – Nov 24, 2026 – Initial scenarios (Story 6.2.26, #598). A gatekeeper reviews every
 #         suggestion, also on songs they own neither (owner answer 3); public songs only
 #         (answer 5); gatekeepers and admins review instead of suggesting (answer 4).
+#   1.3 – Nov 24, 2026 – Review fixes (Opus, PR #669): a gatekeeper on their own public song sees both "Link as a
+#         version of…" and "Suggest as a version of…" (the database refuses an own–own pair); a reviewer cannot
+#         preview their own suggestion; a direct link by the suggester supersedes their own suggestion;
+#         another gatekeeper decides; the limit of ten applies to gatekeepers.
+#   1.2 – Nov 24, 2026 – Owner decision (PR #658): gatekeepers suggest too, on songs they cannot link directly (not
+#         when they own both songs; never an admin); a reviewer never decides their own suggestion, and it is not
+#         counted in their badge.
 #   1.1 – Nov 24, 2026 – Review fixes (Opus): a song that goes private closes its open suggestions; a
 #         reopened suggestion counts against the limit of ten; the internal functions, the table and the badge
 #         are closed to the API roles; reviewers only preview; a decided suggestion cannot be withdrawn.
@@ -31,17 +38,18 @@ Feature: Members suggest linking a song as a version of another song
 
     @unit
     Scenario Outline: The song menu offers a suggestion by role
-      Given a signed-in "<role>" on a public song
+      Given a signed-in "<role>" on a public song <owner>
       Then the suggest action is <shown> in the song menu
 
       Examples:
-        | role       | shown     |
-        | member     | shown     |
-        | musician   | shown     |
-        | expert     | shown     |
-        | gatekeeper | not shown |
-        | admin      | not shown |
-        | guest      | not shown |
+        | role       | owner               | shown     |
+        | member     | of someone else     | shown     |
+        | musician   | of someone else     | shown     |
+        | expert     | of someone else     | shown     |
+        | gatekeeper | of someone else     | shown     |
+        | gatekeeper | they own            | shown     |
+        | admin      | of someone else     | not shown |
+        | guest      | of someone else     | not shown |
 
     @unit
     Scenario: A private song cannot be suggested
@@ -49,15 +57,16 @@ Feature: Members suggest linking a song as a version of another song
       Then the suggest action is not shown in the song menu
 
     @unit
-    Scenario Outline: Gatekeepers and admins review every suggestion, members do not
-      Given a signed-in "<role>" looking at an open suggestion by someone else
+    Scenario Outline: Gatekeepers and admins review every suggestion but their own
+      Given a signed-in "<role>" looking at an open suggestion by <by>
       Then the review actions are <shown>
 
       Examples:
-        | role       | shown     |
-        | admin      | shown     |
-        | gatekeeper | shown     |
-        | member     | not shown |
+        | role       | by           | shown     |
+        | admin      | someone else | shown     |
+        | gatekeeper | someone else | shown     |
+        | gatekeeper | themselves   | not shown |
+        | member     | someone else | not shown |
 
   Rule: The note and the reason are plain short text
 
@@ -189,14 +198,32 @@ Feature: Members suggest linking a song as a version of another song
       And no suggestion is saved
 
     @seed
-    Scenario Outline: A <role> reviews instead of suggesting
-      When the <role> suggests "Siento la medica" as a version of "Siento la medicina"
+    Scenario: An admin links or reviews instead of suggesting
+      When the admin suggests "Siento la medica" as a version of "Siento la medicina"
       Then it is refused with "You can link or review these songs yourself"
 
-      Examples:
-        | role       |
-        | admin      |
-        | gatekeeper |
+    @seed
+    Scenario: A gatekeeper suggests a link for songs they own neither
+      When the gatekeeper suggests "Siento la medica" as a version of "Siento la medicina"
+      Then an open suggestion "Siento la medica" → "Siento la medicina" is saved with the gatekeeper as the suggester
+
+    @seed
+    Scenario: A gatekeeper who owns both songs links directly instead
+      Given the gatekeeper's public songs "Gate one" and "Gate two"
+      When the gatekeeper suggests "Gate one" as a version of "Gate two"
+      Then it is refused with "You can link or review these songs yourself"
+
+    @seed
+    Scenario: A gatekeeper who owns only one of the two songs can suggest
+      Given the gatekeeper's public song "Gate one"
+      When the gatekeeper suggests "Gate one" as a version of "Siento la medicina"
+      Then an open suggestion "Gate one" → "Siento la medicina" is saved with the gatekeeper as the suggester
+
+    @seed
+    Scenario: A gatekeeper has at most ten open suggestions too
+      Given the gatekeeper has 10 open suggestions
+      When the gatekeeper suggests "Siento la medica" as a version of "Siento la medicina"
+      Then it is refused with "Too many open suggestions"
 
     @seed
     Scenario: A member has at most ten open suggestions
@@ -405,6 +432,53 @@ Feature: Members suggest linking a song as a version of another song
         | member |
         | expert |
 
+  Rule: A gatekeeper's suggestion is decided by someone else
+
+    Background:
+      Given the public songs "Siento la medicina" and "Siento la medica" of another member
+      And an open suggestion "Siento la medica" → "Siento la medicina" by the gatekeeper
+
+    @seed
+    Scenario: A gatekeeper cannot decide their own suggestion
+      When the gatekeeper accepts the suggestion
+      Then it is refused with "You cannot decide your own suggestion"
+      When the gatekeeper declines the suggestion without a reason
+      Then it is refused with "You cannot decide your own suggestion"
+      And both songs are unchanged
+
+    @seed
+    Scenario: Their own suggestion is not counted in their badge
+      Then the open count is 1 for the admin, 0 for the gatekeeper and 0 for the member
+
+    @seed
+    Scenario: An admin decides a gatekeeper's suggestion
+      When the admin accepts the suggestion
+      Then "Siento la medicina" has the versions of both songs
+      And the suggestion is accepted with the admin as the reviewer
+
+    @seed
+    Scenario: Another gatekeeper decides a gatekeeper's suggestion
+      Given a second gatekeeper exists
+      When the other gatekeeper accepts the suggestion
+      Then "Siento la medicina" has the versions of both songs
+      And the suggestion is accepted with the other gatekeeper as the reviewer
+
+    @seed
+    Scenario: A gatekeeper cannot accept their own suggestion with the direction swapped either
+      When the gatekeeper accepts the suggestion and keeps "Siento la medica"
+      Then it is refused with "You cannot decide your own suggestion"
+      And both songs are unchanged
+
+    @seed
+    Scenario: A gatekeeper cannot preview their own suggestion
+      When the gatekeeper previews the suggestion
+      Then it is refused with "You cannot decide your own suggestion"
+
+    @seed
+    Scenario: A gatekeeper withdraws their own suggestion
+      When the gatekeeper withdraws it
+      Then its status is "withdrawn"
+
   Rule: A link closes or re-points the open suggestions around it
 
     Background:
@@ -436,6 +510,14 @@ Feature: Members suggest linking a song as a version of another song
       Then the suggestion is accepted with the admin as the reviewer
       And the audit entry of the link points at the suggestion
       And the member is notified that the songs were linked
+
+    @seed
+    Scenario: A direct link by the suggester supersedes their own suggestion
+      Given an open suggestion "Siento la medica" → "Siento la medicina" by the gatekeeper
+      And the gatekeeper became the owner of both songs
+      When the gatekeeper links "Siento la medica" directly into "Siento la medicina"
+      Then the suggestion is superseded
+      And no open suggestion points from or to a deleted song
 
     @seed
     Scenario: Open suggestions starting from a linked song are superseded

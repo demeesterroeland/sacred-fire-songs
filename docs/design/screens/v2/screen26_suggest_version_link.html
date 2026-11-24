@@ -1,5 +1,5 @@
 <!--
-**Version:** 0.3
+**Version:** 0.5
 **Status:** Built (Story 6.2.26, #598)
 **Date:** Nov 24, 2026
 
@@ -7,6 +7,8 @@
 
 | Version | Date | Description of Changes |
 | ----- | ----- | ----- |
+| **0.5** | Nov 24, 2026 | A gatekeeper on their own public song sees both menu items (review of PR #669). |
+| **0.4** | Nov 24, 2026 | Gatekeepers suggest too (on songs they do not own); a reviewer never decides their own suggestion (it waits under Mine). |
 | **0.3** | Nov 24, 2026 | Owner answers applied: a gatekeeper reviews every suggestion (the queue note and the empty state no longer say "songs they own"); gatekeepers and admins review instead of suggesting; public songs only. |
 | **0.2** | Nov 23, 2026 | Review round (Claude Opus): 44 px targets for links, Segmented pattern (radiogroup, 44 px, underline) for the queue segments, `--line-strong` defined per theme, bell label matches the badge, preview lists categories and catalog keys, new screens: user menu with badge, reviewed list (Reopen, Closed), empty state. |
 | **0.1** | Nov 23, 2026 | First mockup: suggest sheet (pick, confirm), review queue, review sheet with link preview, member's own list, bell notification. Sober greys, one accent. Plan: `docs/plans/2026-11-23-598-version-suggestion.md`. |
@@ -167,7 +169,7 @@ button.row:hover { background: var(--surface-2); }
       <hr>
       <button role="menuitem" data-go="pick"><svg class="i" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1 1"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1-1"/></svg>Suggest as a version of…</button>
     </div>
-    <p class="spec" style="position:absolute;bottom:0;padding:0 var(--s-4)">A member (also a musician or expert) sees <em>Suggest as a version of…</em> on a public song. Admins, and gatekeepers on their own songs, see <em>Link as a version of…</em> instead; gatekeepers on other songs review at the queue. Never both.</p>
+    <p class="spec" style="position:absolute;bottom:0;padding:0 var(--s-4)">A member (also a musician, expert or gatekeeper) sees <em>Suggest as a version of…</em> on a public song. Admins see <em>Link as a version of…</em> instead. A gatekeeper on their own public song sees both: the database refuses a pair of two songs they own. A gatekeeper's own suggestion waits under <em>Mine</em>; another gatekeeper or an admin decides it.</p>
   </section>
 
   <!-- 2. Suggest sheet: pick -->

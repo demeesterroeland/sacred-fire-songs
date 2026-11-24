@@ -22,12 +22,19 @@ import {
 } from '../../../lib/songs/linkSuggestion';
 import { SEEDED_EMAILS, OTHER_MEMBER_ID } from './access-policies.steps';
 
-type Account = 'member' | 'expert' | 'admin' | 'gatekeeper';
-const EMAILS: Record<Account, string> = { ...SEEDED_EMAILS, expert: 'expert@sfs.example' } as Record<Account, string>;
+type Account = 'member' | 'expert' | 'admin' | 'gatekeeper' | 'gatekeeper2';
+const SECOND_GATEKEEPER_ID = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd3a0b02';
+const EMAILS: Record<Account, string> = {
+  ...SEEDED_EMAILS,
+  expert: 'expert@sfs.example',
+  gatekeeper2: 'other-gatekeeper@example.invalid',
+} as Record<Account, string>;
 
 interface SuggestWorld {
   role?: string | null;
   isPublic?: boolean;
+  ownsSong?: boolean;
+  suggestedByMe?: boolean;
   dbError?: { code: string; message: string };
   note?: NoteCheck;
   rows?: LinkSuggestion[];
@@ -57,24 +64,31 @@ const t = (key: string, params?: Record<string, string | number>) =>
 
 // ── @unit ───────────────────────────────────────────────────────────────────
 
-Given(/^a signed-in "([^"]+)" on a (public|private) song$/, function (role: string, visibility: string) {
+Given(/^a signed-in "([^"]+)" on a (public|private) song(?: (they own|of someone else))?$/, function (role: string, visibility: string, owner?: string) {
   const s = w(this);
   s.role = role === 'guest' ? null : role;
   s.isPublic = visibility === 'public';
+  s.ownsSong = owner === 'they own';
 });
 
 Then(/^the suggest action is (shown|not shown) in the song menu$/, function (shown: string) {
   const s = w(this);
   const user = s.role ? { id: 'me', role: s.role } : null;
-  assert.equal(canSuggestLink(user, { isPublic: !!s.isPublic }), shown === 'shown');
+  assert.equal(canSuggestLink(user, { isPublic: !!s.isPublic, ownerId: s.ownsSong ? 'me' : 'someone-else' }), shown === 'shown');
 });
 
-Given(/^a signed-in "([^"]+)" looking at an open suggestion by someone else$/, function (role: string) {
-  w(this).role = role;
+Given(/^a signed-in "([^"]+)" looking at an open suggestion by (someone else|themselves)$/, function (role: string, by: string) {
+  const s = w(this);
+  s.role = role;
+  s.suggestedByMe = by === 'themselves';
 });
 
 Then(/^the review actions are (shown|not shown)$/, function (shown: string) {
-  assert.equal(canDecideSuggestion({ id: 'me', role: w(this).role }, { status: 'open' }), shown === 'shown');
+  const s = w(this);
+  assert.equal(
+    canDecideSuggestion({ id: 'me', role: s.role }, { status: 'open', suggested_by: s.suggestedByMe ? 'me' : 'someone-else' }),
+    shown === 'shown'
+  );
 });
 
 When('the note {string} is checked', function (note: string) {
@@ -314,7 +328,10 @@ async function songExists(songId: string): Promise<boolean> {
   return rows.length > 0;
 }
 
-const accountOf = (text: string): Account => text.replace(/^the /, '') as Account;
+const accountOf = (text: string): Account => {
+  const name = text.replace(/^the /, '');
+  return name === 'other gatekeeper' ? 'gatekeeper2' : (name as Account);
+};
 
 // ── @seed: fixtures ─────────────────────────────────────────────────────────
 
@@ -328,6 +345,32 @@ Given('the public songs {string} and {string} of another member', async function
 Given('the public song {string} of another member', async function (title: string) {
   await ensureOtherMember();
   await insertSong(w(this), title, OTHER_MEMBER_ID, true);
+});
+
+Given('a second gatekeeper exists', async function () {
+  const db = await seedDb();
+  await db.query(`INSERT INTO auth.users (id, email) VALUES ($1, $2) ON CONFLICT (id) DO NOTHING`, [SECOND_GATEKEEPER_ID, EMAILS.gatekeeper2]);
+  await db.query(
+    `INSERT INTO public.profiles (id, email, role, full_name) VALUES ($1, $2, 'gatekeeper', 'Other Gatekeeper')
+     ON CONFLICT (id) DO UPDATE SET role = 'gatekeeper', full_name = 'Other Gatekeeper'`,
+    [SECOND_GATEKEEPER_ID, EMAILS.gatekeeper2]
+  );
+});
+
+Given('the gatekeeper became the owner of both songs', async function () {
+  const db = await seedDb();
+  await db.query('UPDATE public.compositions SET owner_id = $1 WHERE id = ANY($2)', [await accountId('gatekeeper'), Object.values(w(this).songs)]);
+});
+
+Given('the gatekeeper\'s public song {string}', async function (title: string) {
+  await insertSong(w(this), title, await accountId('gatekeeper'), true);
+});
+
+Given('the gatekeeper\'s public songs {string} and {string}', async function (a: string, b: string) {
+  const s = w(this);
+  const owner = await accountId('gatekeeper');
+  await insertSong(s, a, owner, true);
+  await insertSong(s, b, owner, true);
 });
 
 Given('the member\'s private song {string}', async function (title: string) {
@@ -351,7 +394,7 @@ Given(
 );
 
 Given(
-  /^an open suggestion "([^"]+)" → "([^"]+)" by (the member|the expert)$/,
+  /^an open suggestion "([^"]+)" → "([^"]+)" by (the member|the expert|the gatekeeper)$/,
   async function (source: string, target: string, who: string) {
     const s = w(this);
     await suggest(s, accountOf(who), source, target, source === 'Siento la medica' && target === 'Siento la medicina' ? 'Same song' : undefined);
@@ -359,10 +402,11 @@ Given(
   }
 );
 
-Given('the member has {int} open suggestions', async function (n: number) {
+Given(/^the (member|gatekeeper) has (\d+) open suggestions$/, async function (who: Account, count: string) {
+  const n = Number(count);
   const s = w(this);
   const db = await seedDb();
-  const member = await accountId('member');
+  const member = await accountId(who);
   await ensureOtherMember();
   const hub = await insertSong(s, 'Cap hub', OTHER_MEMBER_ID, true);
   for (let i = 0; i < n; i += 1) {
@@ -441,7 +485,8 @@ async function directLink(world: object, actor: Account, source: string, target:
   }
 }
 
-When(/^the (admin|gatekeeper|member|expert) accepts the suggestion(?: and keeps "([^"]+)")?$/, async function (who: Account, keeps?: string) {
+When(/^the (admin|gatekeeper|member|expert|other gatekeeper) accepts the suggestion(?: and keeps "([^"]+)")?$/, async function (whoName: string, keeps?: string) {
+  const who = accountOf(whoName);
   const s = w(this);
   const [row] = (await suggestionsOf()).filter((r) => r.id === s.current);
   const swap = !!keeps && keeps === row.source_title;
@@ -453,7 +498,8 @@ When(/^the (admin|gatekeeper|member|expert) accepts the suggestion(?: and keeps 
   }
 });
 
-When(/^the (admin|gatekeeper|member|expert) previews the suggestion$/, async function (who: Account) {
+When(/^the (admin|gatekeeper|member|expert|other gatekeeper) previews the suggestion$/, async function (whoName: string) {
+  const who = accountOf(whoName);
   const s = w(this);
   const result = await runAs(who, 'SELECT public.fn_preview_song_link_suggestion($1, false) AS result', [s.current], false);
   s.outcome = result.ok ? { ok: true, data: result.rows[0].result } : result;
@@ -461,8 +507,9 @@ When(/^the (admin|gatekeeper|member|expert) previews the suggestion$/, async fun
 });
 
 When(
-  /^the (admin|gatekeeper|member|expert) declines the suggestion (?:with the reason "([^"]+)"|with a reason of (\d+) characters|without a reason)$/,
-  async function (who: Account, reason?: string, length?: string) {
+  /^the (admin|gatekeeper|member|expert|other gatekeeper) declines the suggestion (?:with the reason "([^"]+)"|with a reason of (\d+) characters|without a reason)$/,
+  async function (whoName: string, reason?: string, length?: string) {
+    const who = accountOf(whoName);
     const s = w(this);
     const text = length ? 'x'.repeat(Number(length)) : (reason ?? null);
     const result = await runAs(who, 'SELECT public.fn_decline_song_link_suggestion($1, $2)', [s.current, text]);
@@ -470,13 +517,15 @@ When(
   }
 );
 
-When(/^the (admin|gatekeeper|member|expert) reopens the suggestion$/, async function (who: Account) {
+When(/^the (admin|gatekeeper|member|expert|other gatekeeper) reopens the suggestion$/, async function (whoName: string) {
+  const who = accountOf(whoName);
   const s = w(this);
   const result = await runAs(who, 'SELECT public.fn_reopen_song_link_suggestion($1)', [s.current]);
   s.outcome = result.ok ? { ok: true, data: null } : result;
 });
 
-When(/^the (admin|gatekeeper|member|expert) withdraws (?:the suggestion|it)$/, async function (who: Account) {
+When(/^the (admin|gatekeeper|member|expert|other gatekeeper) withdraws (?:the suggestion|it)$/, async function (whoName: string) {
+  const who = accountOf(whoName);
   const s = w(this);
   const result = await runAs(who, 'SELECT public.fn_withdraw_song_link_suggestion($1)', [s.current]);
   s.outcome = result.ok ? { ok: true, data: null } : result;
@@ -551,7 +600,7 @@ Then('both songs are unchanged', async function () {
 });
 
 Then(
-  /^an open suggestion "([^"]+)" → "([^"]+)" is saved with (the member|the expert) as the suggester$/,
+  /^an open suggestion "([^"]+)" → "([^"]+)" is saved with (the member|the expert|the gatekeeper) as the suggester$/,
   async function (source: string, target: string, who: string) {
     const rows = (await suggestionsOf([source])).filter((r) => r.source_title === source && r.target_title === target && r.status === 'open');
     assert.equal(rows.length, 1, `open suggestions for ${source} → ${target}: ${rows.length}`);
@@ -638,8 +687,9 @@ Then('the old link of {string} opens {string}', async function (oldTitle: string
 });
 
 Then(
-  /^the suggestion is accepted with the (admin|gatekeeper) as the reviewer$/,
-  async function (who: Account) {
+  /^the suggestion is accepted with the (admin|gatekeeper|other gatekeeper) as the reviewer$/,
+  async function (whoName: string) {
+    const who = accountOf(whoName);
     const [row] = (await suggestionsOf()).filter((r) => r.id === w(this).current);
     assert.equal(row.status, 'accepted');
     assert.equal(row.reviewed_by, await accountId(who));

@@ -1,6 +1,6 @@
 # Epics & User Stories: Sacred Fire Songs
 
-**Version:** 2.31
+**Version:** 2.33
 **Status:** Living Document
 **Date:** Nov 24, 2026
 
@@ -130,6 +130,8 @@
 | **2.29** | Nov 23, 2026 | #642 follow-up (owner answers): the Roles & Permissions Summary now matches the code. The database role enum is `admin`, `expert`, `member`, `musician` (legacy) and `gatekeeper`; `is_musician` is derived (`role IN ('musician','expert')`), not a profile setting. New Musician / Expert column; Transpose is for musician, expert and admin only (`canTranspose`), not for members or gatekeepers. Unbuilt rows marked "planned (#…)": flag songs (#106), edit any song's metadata (#107), merge duplicates (#108, partial through link-as-version #512), feature playlists (#109), Manage Users & Roles (view-only; #275–#277), Sheet Music / ABC (Story 2.1.2). Built: public-playlist curation (#197), linking songs you own (#512). Epic 3.5 note fixed (the "profile setting" idea is closed as not planned, Stories 3.5.1 and 3.5.2). Story 4.6.8 [Planned] added for #481 (Library › Shared); the GitHub issue is unchanged. #372 is titled Story 4.6.7 on GitHub; #267, #356 and #266 stay chores with no row. |
 | **2.30** | Nov 24, 2026 | #573: Epic 4.1 and the stories below say "playlist" instead of "setlist" (the schema, code and docs were renamed; the user-facing word did not change). The changelog rows above keep the old word. |
 | **2.31** | Nov 24, 2026 | Story 6.2.26 (#598, G1.5) implemented on `feat/598-suggest-version` (PR into `develop`): members suggest that a song is a version of another song, gatekeepers and admins review every suggestion (also on songs they own neither) and link or decline; queue at `/suggestions`, count badge on the user menu, bell item for the member; public songs only. The two other stories bundled in #598 are split off as sub-issues of #499: Story 6.2.30 (#655, contributors keep editing their own version) and Story 6.2.31 (#656, unlink my version). Acceptance criteria below; spec `docs/testing/ux-v3-suggest-song-link.feature`. |
+| **2.32** | Nov 24, 2026 | Story 6.2.33 (#668), follow-up of #598: gatekeepers suggest links too on songs they cannot link directly (admins never; a gatekeeper who owns both links directly), and a reviewer never decides their own suggestion. New Story 6.2.32 (#667, G1.10): gatekeepers (and, with tighter limits, members) propose changes to a song's details, decided by the owner, an admin or another gatekeeper; planned. |
+| **2.33** | Nov 24, 2026 | Review fixes of PR #669 (Story 6.2.33, #668): a gatekeeper on their own public song sees both the link and the suggest action; a reviewer cannot preview their own suggestion; a direct link by the suggester supersedes their own suggestion. |
 
 This document breaks down the project roadmap into actionable Epics and User Stories, following the Agile methodology. Acceptance Criteria are defined using **Gherkin syntax** (Given/When/Then).
 
@@ -1857,9 +1859,11 @@ GitHub epic **#498**. Many circles sing from printed songbooks: the same song ap
 | 6.2.23 | #547 | `G5.6` | C | **[Implemented, in `develop` via #585]** As a Guest, I want search to find a song by the title of its translation so that I find a song by the name I know in my language | #521 (G5.1); unblocks #542 |
 | 6.2.24 | #569 | `G5.7` | C | **[Implemented, in `develop` via #585]** As a Guest, I want to choose a language only in the Language filter so that the search options don't offer the same choice twice (excludes *Languages* from `TagSelector` and keeps legacy `?category=`/`?tag=`/`?tags=` language links working) | #522 (G5.2) |
 | 6.2.25 | #570 | `G5.8` | B | **[Implemented, in `develop` via #585]** As a Guest, I want the search window on every page to offer the Songbook and Language filters so that I can browse one book or one language from anywhere (`GlobalSearchModal` shows both selects lazily when open via `fn_search_filter_counts()`, respecting RLS and submitting `?songbook=<id>&language=<slug>`) | #522 |
-| 6.2.26 | #598 | `G1.5` | C | **[Implemented on `feat/598-suggest-version`, PR into `develop`]** As a Member, I want to suggest that a song is a version of another song so that duplicates get merged by someone who may do so (⋮ menu → "Suggest as a version of…" with search and note; gatekeepers and admins review every suggestion at `/suggestions`, link or decline, and choose which song stays; the member gets a bell item; public songs only; spec `docs/testing/ux-v3-suggest-song-link.feature`) | #499 |
+| 6.2.26 | #598 | `G1.5` | C | **[Implemented, in `develop` via #658]** As a Member, I want to suggest that a song is a version of another song so that duplicates get merged by someone who may do so (⋮ menu → "Suggest as a version of…" with search and note; gatekeepers and admins review every suggestion at `/suggestions`, link or decline, and choose which song stays; the member gets a bell item; public songs only; spec `docs/testing/ux-v3-suggest-song-link.feature`) | #499 |
 | 6.2.30 | #655 | `G1.8` | B | **[Planned, not started]** As a Member whose song was linked as a version of another song, I want to keep editing my own version so that a merge does not take my work out of my hands (split off #598) | #499 |
 | 6.2.31 | #656 | `G1.9` | C | **[Planned, not started]** As a Member whose version sits in another song, I want to make my version its own song again so that I am not kept in a merge I do not agree with (split off #598) | #499 |
+| 6.2.33 | #668 | `G1.11` | C | **[Implemented on `feat/668-gatekeeper-suggest-link`, PR into `develop`]** As a Gatekeeper, I want to suggest that a song is a version of another song when I cannot link them myself (not when I own both songs; admins never; a reviewer never decides their own suggestion; on my own public song I see both the link and the suggest action) | #499 |
+| 6.2.32 | #667 | `G1.10` | C | **[Planned, not started]** As a Gatekeeper, I want to propose a change to a song's details (title, aliases, authors, original artist) so that quality improves without editing songs I do not own; decided by the owner, an admin or another gatekeeper; members too with tighter limits | #498 |
 
 **Story 6.2.2 acceptance criteria** (superseded by Story 6.1.40 / #586, owner decision Nov 13, 2026: Practice shows one availability dot for media or takes; kept for history; executable: `docs/testing/ux-v2-song-action-bar.feature` `@e2e`, with component coverage in `songActionBarComponent.test.tsx`):
 
@@ -2239,7 +2243,7 @@ Scenario: Suggestions on a linked song are re-pointed
   And no open suggestion points from or to a deleted song
 ```
 
-Also: one open suggestion per pair in either direction, at most 10 open per member, a note and a reason of at most 280 characters, public songs only, gatekeepers and admins review instead of suggesting, the member withdraws, an admin reopens a declined suggestion, the reviewer can keep the other song; the count badge on the user menu shows what waits.
+Also: one open suggestion per pair in either direction, at most 10 open per member, a note and a reason of at most 280 characters, public songs only, gatekeepers suggest on songs they cannot link directly (admins never), a reviewer never decides their own suggestion, the member withdraws, an admin reopens a declined suggestion, the reviewer can keep the other song; the count badge on the user menu shows what waits.
 
 **Story 6.2.9 acceptance criteria** (executable: `docs/testing/ux-v3-link-song-version.feature`, `@unit` and `@seed`):
 
